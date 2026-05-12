@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import {
   handwryttenService,
   HandwryttenOrderRequest,
+  listHandwryttenFonts,
 } from "../services/handwrytten";
 
 const router = Router();
@@ -101,10 +102,22 @@ router.get("/admin/handwrytten/cards", async (req, res) => {
   }
 });
 
+// ─── Handwrytten: list fonts ──────────────────────────────────────────────────
+
+router.get("/admin/handwrytten/fonts", async (req, res) => {
+  try {
+    const fonts = await listHandwryttenFonts();
+    res.json({ fonts, mock: handwryttenService.isMock });
+  } catch (err) {
+    req.log.error({ err }, "listHandwryttenFonts failed");
+    res.status(500).json({ error: "Failed to fetch fonts" });
+  }
+});
+
 // ─── Handwrytten: create order ────────────────────────────────────────────────
 
 router.post("/admin/handwrytten/orders", async (req, res) => {
-  const { cardId, recipientAddress, message, handwritingStyleId, scheduledSendDate, senderName } = req.body;
+  const { cardId, recipientAddress, message, wishes, fontId } = req.body;
 
   if (!cardId || !recipientAddress || !message) {
     res.status(400).json({ error: "cardId, recipientAddress, and message are required" });
@@ -112,19 +125,39 @@ router.post("/admin/handwrytten/orders", async (req, res) => {
   }
 
   const addr = recipientAddress;
-  if (!addr.line1 || !addr.city || !addr.state || !addr.zip || !addr.name) {
-    res.status(400).json({ error: "Incomplete recipient address" });
+
+  // Accept either firstName/lastName OR a full `name` field (split on first space)
+  let firstName: string = addr.firstName ?? "";
+  let lastName: string = addr.lastName ?? "";
+  if (!firstName && !lastName && addr.name) {
+    const parts = String(addr.name).trim().split(/\s+/);
+    firstName = parts[0] ?? "";
+    lastName = parts.slice(1).join(" ");
+  }
+
+  // Accept either street1 OR legacy line1
+  const street1: string = addr.street1 ?? addr.line1 ?? "";
+
+  if (!street1 || !addr.city || !addr.state || !addr.zip) {
+    res.status(400).json({ error: "Incomplete recipient address (need street, city, state, zip)" });
     return;
   }
 
   try {
     const orderReq: HandwryttenOrderRequest = {
       cardId,
-      recipientAddress: addr,
       message,
-      handwritingStyleId,
-      scheduledSendDate,
-      senderName,
+      wishes: wishes ?? "",
+      fontId,
+      recipientAddress: {
+        firstName,
+        lastName,
+        street1,
+        street2: addr.street2 ?? addr.line2,
+        city: addr.city,
+        state: addr.state,
+        zip: addr.zip,
+      },
     };
 
     const result = await handwryttenService.createOrder(orderReq);

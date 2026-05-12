@@ -1,55 +1,93 @@
 /**
- * Handwrytten API Service
+ * Handwrytten API Service (official SDK)
  *
- * This is the isolated fulfillment provider layer. All Handwrytten interactions
- * go through this file only. Swap this file to change providers.
+ * Uses the `handwrytten` npm package — the official TypeScript SDK.
+ * Auth, base URL, and endpoint paths are all handled by the SDK internally.
  *
- * Environment variables required:
- *   HANDWRYTTEN_API_KEY   — API key from Handwrytten dashboard
- *   HANDWRYTTEN_BASE_URL  — Base URL (default: https://api.handwrytten.com/v1)
+ * Required env var:
+ *   HANDWRYTTEN_API_KEY — from https://app.handwrytten.com/integrations
  *
- * TODO: Fill in exact endpoint paths from https://app.handwrytten.com/api-docs
- * Mock mode is active when HANDWRYTTEN_API_KEY is not set.
+ * Required sender env vars (one of two options):
+ *   Option A — saved return address ID from your Handwrytten account:
+ *     HANDWRYTTEN_SENDER_ADDRESS_ID  (numeric ID)
+ *
+ *   Option B — inline sender address fields:
+ *     HANDWRYTTEN_SENDER_FIRST_NAME
+ *     HANDWRYTTEN_SENDER_LAST_NAME
+ *     HANDWRYTTEN_SENDER_STREET1
+ *     HANDWRYTTEN_SENDER_CITY
+ *     HANDWRYTTEN_SENDER_STATE
+ *     HANDWRYTTEN_SENDER_ZIP
+ *
+ * Optional:
+ *   HANDWRYTTEN_DEFAULT_FONT — font ID to use (default: first available from API)
  */
 
+import { Handwrytten } from "handwrytten";
 import { logger } from "../lib/logger";
 
-const BASE_URL = process.env["HANDWRYTTEN_BASE_URL"] ?? "https://api.handwrytten.com/v1";
 const API_KEY = process.env["HANDWRYTTEN_API_KEY"];
-
-const IS_MOCK = !API_KEY;
+export const IS_MOCK = !API_KEY;
 
 if (IS_MOCK) {
   logger.warn("HANDWRYTTEN_API_KEY not set — running in MOCK mode. No real cards will be sent.");
 }
 
+// ─── SDK client (only created when key is present) ────────────────────────────
+
+const hw = API_KEY ? new Handwrytten(API_KEY) : null;
+
+// ─── Sender address resolution ────────────────────────────────────────────────
+
+function getSender(): number | {
+  firstName: string; lastName: string;
+  street1: string; city: string; state: string; zip: string;
+} {
+  const savedId = process.env["HANDWRYTTEN_SENDER_ADDRESS_ID"];
+  if (savedId) return parseInt(savedId, 10);
+
+  const firstName = process.env["HANDWRYTTEN_SENDER_FIRST_NAME"];
+  const lastName = process.env["HANDWRYTTEN_SENDER_LAST_NAME"];
+  const street1 = process.env["HANDWRYTTEN_SENDER_STREET1"];
+  const city = process.env["HANDWRYTTEN_SENDER_CITY"];
+  const state = process.env["HANDWRYTTEN_SENDER_STATE"];
+  const zip = process.env["HANDWRYTTEN_SENDER_ZIP"];
+
+  if (!firstName || !lastName || !street1 || !city || !state || !zip) {
+    throw new Error(
+      "Sender address not configured. Set HANDWRYTTEN_SENDER_ADDRESS_ID or all HANDWRYTTEN_SENDER_* env vars."
+    );
+  }
+
+  return { firstName, lastName, street1, city, state, zip };
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface HandwryttenCard {
-  id: string;
+  id: string | number;
   name: string;
   category?: string;
   imageUrl?: string;
   price?: number;
 }
 
-export interface HandwryttenAddress {
-  name: string;
-  line1: string;
-  line2?: string;
+export interface HandwryttenRecipientAddress {
+  firstName: string;
+  lastName: string;
+  street1: string;
+  street2?: string;
   city: string;
   state: string;
   zip: string;
-  country?: string;
 }
 
 export interface HandwryttenOrderRequest {
-  cardId: string;
-  recipientAddress: HandwryttenAddress;
+  cardId: string | number;
+  recipientAddress: HandwryttenRecipientAddress;
   message: string;
-  handwritingStyleId?: string; // TODO: get available styles from Handwrytten
-  scheduledSendDate?: string; // ISO date — if supported by API
-  senderName?: string;
+  wishes?: string;       // closing/signature line — e.g. "With love, James"
+  fontId?: string;
 }
 
 export interface HandwryttenOrderResponse {
@@ -58,6 +96,7 @@ export interface HandwryttenOrderResponse {
   estimatedDelivery?: string;
   trackingUrl?: string;
   mock?: boolean;
+  raw?: unknown;
 }
 
 export interface HandwryttenOrderStatus {
@@ -69,27 +108,6 @@ export interface HandwryttenOrderStatus {
   mock?: boolean;
 }
 
-// ─── HTTP helper ──────────────────────────────────────────────────────────────
-
-async function hwFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const url = `${BASE_URL}${path}`;
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY}`,
-      ...(options?.headers ?? {}),
-    },
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Handwrytten API error ${res.status}: ${body}`);
-  }
-
-  return res.json() as Promise<T>;
-}
-
 // ─── Mock helpers ─────────────────────────────────────────────────────────────
 
 function mockOrderId() {
@@ -98,12 +116,24 @@ function mockOrderId() {
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
-/**
- * List available Handwrytten card designs.
- * TODO: Confirm endpoint path from Handwrytten docs (likely GET /cards)
- */
+/** Extract a human-readable card name from its image URL filename. */
+function nameFromImageUrl(url: string): string {
+  try {
+    const filename = decodeURIComponent(url.split("/").pop() ?? "");
+    // Strip timestamp prefix (digits_) and -Front/-Back suffix and extension
+    return filename
+      .replace(/^\d+_/, "")
+      .replace(/[-_](front|back|a2|5x7|landscape|portrait).*$/i, "")
+      .replace(/\.\w+$/, "")
+      .replace(/[-_]+/g, " ")
+      .trim();
+  } catch {
+    return "Card";
+  }
+}
+
 export async function listHandwryttenCards(category?: string): Promise<HandwryttenCard[]> {
-  if (IS_MOCK) {
+  if (IS_MOCK || !hw) {
     logger.info("MOCK: listHandwryttenCards");
     return [
       { id: "hw-4421", name: "Classic Botanical", category: "Birthday", price: 399 },
@@ -114,20 +144,43 @@ export async function listHandwryttenCards(category?: string): Promise<Handwrytt
     ];
   }
 
-  // TODO: Replace with actual Handwrytten endpoint
-  // GET /cards or GET /catalog
-  const query = category ? `?category=${encodeURIComponent(category)}` : "";
-  return hwFetch<HandwryttenCard[]>(`/cards${query}`);
+  const cards = await hw.cards.list();
+  return (cards as any[])
+    .filter((c: any) => !category || c.category === category)
+    .map((c: any) => {
+      const imageUrl: string = c.imageUrl ?? c.image_url ?? "";
+      return {
+        id: String(c.id),
+        name: c.name ?? c.title ?? nameFromImageUrl(imageUrl),
+        category: c.category ?? c.category_name ?? "General",
+        imageUrl,
+        price: c.price,
+      };
+    });
 }
 
-/**
- * Create a Handwrytten order.
- * TODO: Confirm payload structure from Handwrytten API docs
- */
+export async function listHandwryttenFonts(): Promise<{ id: string; name: string }[]> {
+  if (IS_MOCK || !hw) {
+    return [
+      { id: "hwDavid", name: "David (Natural)" },
+      { id: "hwMegan", name: "Megan (Casual)" },
+      { id: "hwJennifer", name: "Jennifer (Formal)" },
+    ];
+  }
+  const fonts = await hw.fonts.list();
+  return (fonts as any[]).map((f: any) => {
+    const id = String(f.id ?? f.name ?? "");
+    // SDK returns empty name — derive a readable label from the ID (e.g. "hwAmber" → "Amber")
+    const rawName = String(f.name ?? f.title ?? "").trim();
+    const label = rawName || id.replace(/^hw/i, "");
+    return { id, name: label };
+  });
+}
+
 export async function createHandwryttenOrder(
   req: HandwryttenOrderRequest
 ): Promise<HandwryttenOrderResponse> {
-  if (IS_MOCK) {
+  if (IS_MOCK || !hw) {
     const orderId = mockOrderId();
     logger.info({ orderId, ...req }, "MOCK: createHandwryttenOrder");
     return {
@@ -138,73 +191,109 @@ export async function createHandwryttenOrder(
     };
   }
 
-  // TODO: Replace with actual Handwrytten endpoint and payload shape
-  // POST /orders
-  return hwFetch<HandwryttenOrderResponse>("/orders", {
-    method: "POST",
-    body: JSON.stringify({
-      // TODO: Map these fields to actual Handwrytten API field names
-      card_id: req.cardId,
-      message: req.message,
-      handwriting_style_id: req.handwritingStyleId,
-      scheduled_date: req.scheduledSendDate,
-      recipient: {
-        name: req.recipientAddress.name,
-        address1: req.recipientAddress.line1,
-        address2: req.recipientAddress.line2,
-        city: req.recipientAddress.city,
-        state: req.recipientAddress.state,
-        zip: req.recipientAddress.zip,
-        country: req.recipientAddress.country ?? "US",
-      },
-    }),
-  });
+  const defaultFont = process.env["HANDWRYTTEN_DEFAULT_FONT"];
+
+  // Resolve font — use env override, passed fontId, or first available
+  let font = req.fontId ?? defaultFont;
+  if (!font) {
+    try {
+      const fonts = await hw.fonts.list();
+      font = fonts[0]?.id as string;
+    } catch {
+      font = "hwDavid"; // known working fallback
+    }
+  }
+
+  const sender = getSender();
+
+  const result = await hw.orders.send({
+    cardId: req.cardId as any,
+    font: font as any,
+    message: req.message,
+    wishes: req.wishes ?? "",
+    sender,
+    recipient: {
+      firstName: req.recipientAddress.firstName,
+      lastName: req.recipientAddress.lastName,
+      street1: req.recipientAddress.street1,
+      street2: req.recipientAddress.street2,
+      city: req.recipientAddress.city,
+      state: req.recipientAddress.state,
+      zip: req.recipientAddress.zip,
+    } as any,
+  }) as any;
+
+  logger.info({ result }, "Handwrytten order created (live)");
+
+  const orderId = String(result?.orderId ?? result?.order_id ?? result?.id ?? "unknown");
+  return {
+    orderId,
+    status: result?.status ?? "submitted",
+    estimatedDelivery: result?.estimatedDelivery ?? result?.estimated_delivery,
+    raw: result,
+    mock: false,
+  };
 }
 
-/**
- * Get the current status of a Handwrytten order.
- * TODO: Confirm endpoint from Handwrytten docs
- */
 export async function getHandwryttenOrderStatus(
   orderId: string
 ): Promise<HandwryttenOrderStatus> {
-  if (IS_MOCK) {
+  if (IS_MOCK || !hw) {
     logger.info({ orderId }, "MOCK: getHandwryttenOrderStatus");
     const mockStatuses = ["queued", "printing", "mailed"];
     return {
       orderId,
       status: mockStatuses[Math.floor(Math.random() * mockStatuses.length)],
-      trackingUrl: `https://tracking.handwrytten.com/${orderId}`,
+      trackingUrl: `https://app.handwrytten.com/orders/${orderId}`,
       mock: true,
     };
   }
 
-  // TODO: Replace with actual endpoint
-  // GET /orders/:id
-  return hwFetch<HandwryttenOrderStatus>(`/orders/${orderId}`);
+  // The SDK may not expose status/cancel — fall back to direct HTTP
+  const res = await fetch(`https://api.handwrytten.com/v2/orders/${orderId}`, {
+    headers: { Authorization: API_KEY! },
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Handwrytten status check failed ${res.status}: ${body}`);
+  }
+
+  const data = await res.json() as any;
+  return {
+    orderId,
+    status: data.status ?? data.order_status ?? "unknown",
+    mailedAt: data.mailedAt ?? data.mailed_at,
+    deliveredAt: data.deliveredAt ?? data.delivered_at,
+    trackingUrl: data.trackingUrl ?? data.tracking_url ?? `https://app.handwrytten.com/orders/${orderId}`,
+    mock: false,
+  };
 }
 
-/**
- * Cancel a Handwrytten order (if supported by their API).
- * TODO: Confirm endpoint and whether cancellation is allowed
- */
 export async function cancelHandwryttenOrder(
   orderId: string
 ): Promise<{ success: boolean; message?: string; mock?: boolean }> {
-  if (IS_MOCK) {
+  if (IS_MOCK || !hw) {
     logger.info({ orderId }, "MOCK: cancelHandwryttenOrder");
     return { success: true, message: "Order cancelled (mock)", mock: true };
   }
 
-  // TODO: Replace with actual endpoint
-  // DELETE /orders/:id or POST /orders/:id/cancel
-  return hwFetch<{ success: boolean; message?: string }>(`/orders/${orderId}/cancel`, {
+  const res = await fetch(`https://api.handwrytten.com/v2/orders/${orderId}/cancel`, {
     method: "POST",
+    headers: { Authorization: API_KEY!, "Content-Type": "application/json" },
   });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Handwrytten cancel failed ${res.status}: ${body}`);
+  }
+
+  return { success: true, mock: false };
 }
 
 export const handwryttenService = {
   listCards: listHandwryttenCards,
+  listFonts: listHandwryttenFonts,
   createOrder: createHandwryttenOrder,
   getOrderStatus: getHandwryttenOrderStatus,
   cancelOrder: cancelHandwryttenOrder,
