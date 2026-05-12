@@ -182,8 +182,8 @@ export default function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="py-12 px-6 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-        <div className="max-w-5xl mx-auto">
+      <section id="how-it-works" className="py-12 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <div className="max-w-7xl mx-auto">
           <img
             src="/how-it-works.png"
             alt="How it works: 5 steps from adding women in your life to getting reminded so you look like a legend"
