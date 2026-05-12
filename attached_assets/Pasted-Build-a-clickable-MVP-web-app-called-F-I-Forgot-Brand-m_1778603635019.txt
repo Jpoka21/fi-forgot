@@ -1,0 +1,198 @@
+Build a clickable MVP web app called F.I. Forgot.
+
+Brand meaning:
+The name implies “F, I forgot,” but stays funny and safe. Use the spelling F.I. Forgot throughout the app.
+
+Target customer:
+Men who forget important card giving dates for the women in their lives.
+
+Core positioning:
+A relationship disaster prevention service for husbands, boyfriends, sons, dads, and forgetful men.
+
+Brand promise:
+“Never forget the card again.”
+
+MVP goal:
+This is a clickable demo only. Do not build real payments, printing, mailing, SMS, or AI integrations yet. Use mock data and placeholder logic.
+
+Brand voice:
+Funny, self aware, masculine, warm, and trustworthy.
+
+Important recipient logic:
+The app is designed for men sending cards to women.
+Recipient types should include:
+Wife
+Girlfriend
+Mom
+Mother in law
+Daughter
+Grandmother
+Sister
+Other important woman
+
+Delivery logic:
+If the recipient is a wife or girlfriend, default delivery should be “Mail it to me so I can hand it to her.”
+If the recipient is mom, mother in law, grandmother, sister, daughter, or other, default delivery should be “Mail it directly to her.”
+Allow the user to change this.
+
+Landing page hero:
+Headline:
+“F.I. Forgot.”
+
+Subheadline:
+“Mother’s Day. Anniversaries. Birthdays. The dates you absolutely cannot screw up. We remember them, write the card, remind you before it ships, and help you look thoughtful on purpose.”
+
+Primary CTA:
+“Save Me From Myself”
+
+Secondary CTA:
+“See How It Works”
+
+Add a funny story section:
+“Dave had one job. Dave forgot Mother’s Day. This exists because Dave is not alone.”
+
+Build these pages:
+
+1. Landing Page
+Include:
+Hero
+How it works
+Founder story
+Pricing
+Testimonials
+FAQ
+
+Pricing:
+Basic, $9/month, up to 6 cards per year
+Family, $15/month, up to 12 cards per year
+Hero, $29/month, up to 24 cards per year
+
+2. Signup and Login
+Simple demo authentication.
+
+3. Dashboard
+Show:
+Upcoming cards
+Recipient profiles
+Holiday calendar
+Card statuses
+
+Statuses:
+Needs profile
+Card being drafted
+Ready for approval
+Approved
+Mailed to me
+Mailed to her
+Delivered
+Given
+
+Funny empty states:
+“No disasters scheduled yet.”
+“Add someone before future you ruins everything.”
+“Gas station cards are not a strategy.”
+
+4. Recipient Profile Page
+Fields:
+Recipient name
+Relationship
+Birthday
+Anniversary date if applicable
+Mother’s Day card needed, yes or no
+Valentine’s Day card needed, yes or no
+Christmas or Hanukkah card needed, yes or no
+Other custom dates
+Tone preference:
+Sweet
+Funny
+Romantic
+Simple
+Religious
+From the kids
+Apology style
+
+Personality notes
+Favorite memories
+Inside jokes
+Things to avoid
+How emotional should the card be from 1 to 5
+Delivery preference:
+Mail it to me
+Mail it directly to her
+
+5. Card Generator Page
+User selects:
+Recipient
+Holiday
+Tone
+Occasion
+
+Use mock AI card generation.
+Generate 3 versions:
+Sweet
+Funny
+Romantic
+
+Each version should have buttons:
+Approve
+Make warmer
+Make funnier
+Make shorter
+Make more emotional
+Rewrite
+
+6. Reminder Settings Page
+Reminder options:
+Text message
+Email
+Both
+
+Reminder timing:
+30 days before
+14 days before
+7 days before
+2 days before
+Day of
+
+Use UI only. No real messages.
+
+7. Admin Dashboard
+Show mock card orders:
+User
+Recipient
+Holiday
+Due date
+Delivery preference
+Card status
+Approved message
+Admin notes
+
+Allow status changes in the demo.
+
+Design:
+Modern, polished, funny, masculine but warm.
+Use deep navy, warm cream, soft red, gold accents, and white cards.
+Mobile friendly.
+Use rounded cards, clean spacing, bold CTAs, and playful microcopy.
+
+Microcopy examples:
+“Your future self owes us one.”
+“Relationship disaster prevention, automated.”
+“Approved by husbands. Suspected by wives.”
+“Dave walked so you could remember.”
+“Two weeks before panic, we tap you on the shoulder.”
+
+Seed demo data:
+Demo man user
+Sarah, wife
+Linda, mom
+Carol, mother in law
+
+Sample upcoming cards:
+Mother’s Day card for Sarah
+Birthday card for Linda
+Anniversary card for Sarah
+Valentine’s Day card for Sarah
+Mother’s Day card for Carol
+
+Make the app work end to end as a polished clickable demo.
