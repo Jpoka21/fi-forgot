@@ -1,5 +1,5 @@
-import { ComponentType } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
+import { Component, ComponentType, ReactNode } from "react";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,11 +19,47 @@ import BriefingPage from "@/pages/briefing";
 
 const queryClient = new QueryClient();
 
+// ── Error boundary ──────────────────────────────────────────────────────────
+interface ErrorBoundaryState { hasError: boolean; error: Error | null }
+
+class ErrorBoundary extends Component<{ children: ReactNode; fallback?: ReactNode }, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? (
+        <div style={{ padding: "2rem", fontFamily: "sans-serif", maxWidth: 480, margin: "4rem auto", textAlign: "center" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>⚠️</div>
+          <h2 style={{ color: "#071A33", marginBottom: "0.5rem" }}>Something went wrong</h2>
+          <p style={{ color: "#666", marginBottom: "1.5rem", fontSize: "0.875rem" }}>
+            {this.state.error?.message}
+          </p>
+          <button
+            onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
+            style={{ background: "#E23B2E", color: "#fff", border: "none", borderRadius: 8, padding: "0.625rem 1.5rem", fontWeight: 700, cursor: "pointer" }}>
+            Reload page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ── Route guards ────────────────────────────────────────────────────────────
 function ProtectedRoute({ component: Component }: { component: ComponentType }) {
   const { isLoggedIn, onboardingComplete } = useAuth();
   if (!isLoggedIn) return <Redirect to="/login" />;
   if (!onboardingComplete) return <Redirect to="/onboarding" />;
-  return <Component />;
+  return (
+    <ErrorBoundary>
+      <Component />
+    </ErrorBoundary>
+  );
 }
 
 function OnboardingRoute() {
@@ -33,6 +69,7 @@ function OnboardingRoute() {
   return <OnboardingPage />;
 }
 
+// ── Router ──────────────────────────────────────────────────────────────────
 function Router() {
   return (
     <Switch>
@@ -69,6 +106,7 @@ function Router() {
   );
 }
 
+// ── App root ────────────────────────────────────────────────────────────────
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
