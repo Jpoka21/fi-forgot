@@ -66,142 +66,36 @@ export interface CardOrder {
   deliveryPreference: DeliveryPreference;
 }
 
-const initialRecipients: Recipient[] = [
-  {
-    id: "1",
-    name: "Sarah",
-    relationship: "Wife",
-    birthday: "1988-06-15",
-    anniversaryDate: "2015-09-03",
-    needsMothersDay: true,
-    needsValentinesDay: true,
-    needsChristmasHanukkah: true,
-    customDates: [],
-    tonePreference: "Romantic",
-    personalityNotes: "Loves sunflowers, coffee, and long walks. Gets emotional at Hallmark commercials.",
-    favoriteMemories: "Our first trip to Italy, the morning after we got engaged, her 30th birthday surprise.",
-    insideJokes: "The 'spaghetti incident' of 2018. Never let her forget the plant named Gerald.",
-    thingsToAvoid: "Anything too cheesy. She'll roll her eyes at excessive rhyming.",
-    emotionalLevel: 4,
-    deliveryPreference: "Mail it to me",
-  },
-  {
-    id: "2",
-    name: "Linda",
-    relationship: "Mom",
-    birthday: "1958-03-22",
-    anniversaryDate: undefined,
-    needsMothersDay: true,
-    needsValentinesDay: false,
-    needsChristmasHanukkah: true,
-    customDates: [],
-    tonePreference: "Sweet",
-    personalityNotes: "Classic, loves gardening and church. Sentimental about family traditions.",
-    favoriteMemories: "Sunday dinners, teaching me to drive, her famous lasagna.",
-    insideJokes: "The time the cat knocked over the Christmas tree. Twice.",
-    thingsToAvoid: "Anything too modern or trendy. Keep it timeless.",
-    emotionalLevel: 3,
-    deliveryPreference: "Mail it directly to her",
-  },
-  {
-    id: "3",
-    name: "Carol",
-    relationship: "Mother in law",
-    birthday: "1960-11-08",
-    anniversaryDate: undefined,
-    needsMothersDay: true,
-    needsValentinesDay: false,
-    needsChristmasHanukkah: true,
-    customDates: [],
-    tonePreference: "Simple",
-    personalityNotes: "Warm but private. Appreciates effort more than grand gestures.",
-    favoriteMemories: "Watching Sarah grow up. Family holidays together.",
-    insideJokes: "Keep it professional — this is the mother-in-law.",
-    thingsToAvoid: "Anything too personal or that implies too much familiarity. Keep it warm but measured.",
-    emotionalLevel: 2,
-    deliveryPreference: "Mail it directly to her",
-  },
-];
-
-const initialCards: CardOrder[] = [
-  {
-    id: "c1",
-    recipientId: "1",
-    recipientName: "Sarah",
-    holiday: "Mother's Day",
-    dueDate: "2026-05-10",
-    status: "Ready for approval",
-    approvedMessage: undefined,
-    adminNotes: "Sweet tone, sunflower theme",
-    deliveryPreference: "Mail it to me",
-  },
-  {
-    id: "c2",
-    recipientId: "2",
-    recipientName: "Linda",
-    holiday: "Birthday",
-    dueDate: "2026-03-15",
-    status: "Card being drafted",
-    approvedMessage: undefined,
-    adminNotes: "Classic sweet message, no modern slang",
-    deliveryPreference: "Mail it directly to her",
-  },
-  {
-    id: "c3",
-    recipientId: "1",
-    recipientName: "Sarah",
-    holiday: "Anniversary",
-    dueDate: "2026-09-03",
-    status: "Needs profile",
-    approvedMessage: undefined,
-    adminNotes: "",
-    deliveryPreference: "Mail it to me",
-  },
-  {
-    id: "c4",
-    recipientId: "1",
-    recipientName: "Sarah",
-    holiday: "Valentine's Day",
-    dueDate: "2026-02-14",
-    status: "Approved",
-    approvedMessage:
-      "Sarah, every year with you feels like the first. You make ordinary days extraordinary. I love you more than I know how to say — so I paid professionals. Happy Valentine's Day.",
-    adminNotes: "Romantic, approved by user",
-    deliveryPreference: "Mail it to me",
-  },
-  {
-    id: "c5",
-    recipientId: "3",
-    recipientName: "Carol",
-    holiday: "Mother's Day",
-    dueDate: "2026-05-10",
-    status: "Mailed to her",
-    approvedMessage:
-      "Carol, thank you for raising the woman who makes my life better every single day. Happy Mother's Day.",
-    adminNotes: "Simple, on brand",
-    deliveryPreference: "Mail it directly to her",
-  },
-];
-
+const DATA_VERSION = "3";
 const STORAGE_KEY_RECIPIENTS = "fi_forgot_recipients";
 const STORAGE_KEY_CARDS = "fi_forgot_cards";
+const STORAGE_KEY_VERSION = "fi_forgot_data_version";
+
+function ensureDataVersion() {
+  const v = localStorage.getItem(STORAGE_KEY_VERSION);
+  if (v !== DATA_VERSION) {
+    localStorage.removeItem(STORAGE_KEY_RECIPIENTS);
+    localStorage.removeItem(STORAGE_KEY_CARDS);
+    localStorage.setItem(STORAGE_KEY_VERSION, DATA_VERSION);
+  }
+}
 
 function loadRecipients(): Recipient[] {
+  ensureDataVersion();
   try {
     const raw = localStorage.getItem(STORAGE_KEY_RECIPIENTS);
     if (raw) return JSON.parse(raw);
   } catch {}
-  localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(initialRecipients));
-  return initialRecipients;
+  return [];
 }
 
 function loadCards(): CardOrder[] {
+  ensureDataVersion();
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CARDS);
     if (raw) return JSON.parse(raw);
   } catch {}
-  localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(initialCards));
-  return initialCards;
+  return [];
 }
 
 export function getRecipients(): Recipient[] {
