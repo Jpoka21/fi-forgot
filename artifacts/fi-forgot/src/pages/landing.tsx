@@ -255,33 +255,19 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Right — Dave collage */}
-          <div className="relative flex flex-col items-center gap-4 py-4">
-            <div className="relative">
-              <ConfusedManIllustration />
-              <DoodleArrow className="absolute -right-8 top-4 rotate-[20deg]" />
-            </div>
-
-            {/* Sticky note — Dave */}
-            <div
-              className="relative w-full max-w-xs p-5 rounded shadow-lg"
-              style={{ background: GOLD, transform: "rotate(-2deg)", fontFamily: "'Caveat', cursive" }}
-            >
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-4 rounded-b-sm opacity-70" style={{ background: "#b8891e" }} />
-              <p className="text-lg font-bold text-[#1a1a1a] leading-snug">
-                Dave had one job.<br />Dave forgot Mother's Day.<br />This exists because Dave is not alone.
-              </p>
-              <p className="text-sm text-[#1a1a1a]/60 mt-2 italic">— The entire premise</p>
-            </div>
-
-            {/* Doodle callout */}
-            <div
-              className="relative px-4 py-2 rounded border-2 text-sm font-bold"
-              style={{ borderColor: RED, color: RED, fontFamily: "'Caveat', cursive", fontSize: "1rem", transform: "rotate(1.5deg)" }}
-            >
-              ⛽ Gas station cards are not a strategy.
-            </div>
-          </div>
+          {/* Right — Hero image (cropped to man + sticky note area) */}
+          <div
+            className="w-full rounded-2xl shadow-2xl"
+            role="img"
+            aria-label="Confused man holding flowers and a bad card — Dave had one job"
+            style={{
+              height: 460,
+              backgroundImage: "url('/hero.png')",
+              backgroundSize: "310% auto",
+              backgroundPosition: "right -100px",
+              backgroundRepeat: "no-repeat",
+            }}
+          />
         </div>
       </section>
 
