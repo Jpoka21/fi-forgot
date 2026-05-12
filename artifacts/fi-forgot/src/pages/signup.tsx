@@ -24,7 +24,7 @@ const perks = [
 ];
 
 export default function SignupPage() {
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const [, setLocation] = useLocation();
 
   const form = useForm<FormData>({
@@ -33,8 +33,8 @@ export default function SignupPage() {
   });
 
   function onSubmit(data: FormData) {
-    login(data.email);
-    setLocation("/dashboard");
+    signup(data.name, data.email);
+    setLocation("/onboarding");
   }
 
   return (

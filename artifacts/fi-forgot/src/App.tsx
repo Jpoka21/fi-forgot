@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import SignupPage from "@/pages/signup";
+import OnboardingPage from "@/pages/onboarding";
 import DashboardPage from "@/pages/dashboard";
 import RecipientsPage from "@/pages/recipients";
 import RecipientProfilePage from "@/pages/recipient-profile";
@@ -18,9 +19,17 @@ import AdminPage from "@/pages/admin";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ component: Component }: { component: ComponentType }) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, onboardingComplete } = useAuth();
   if (!isLoggedIn) return <Redirect to="/login" />;
+  if (!onboardingComplete) return <Redirect to="/onboarding" />;
   return <Component />;
+}
+
+function OnboardingRoute() {
+  const { isLoggedIn, onboardingComplete } = useAuth();
+  if (!isLoggedIn) return <Redirect to="/signup" />;
+  if (onboardingComplete) return <Redirect to="/dashboard" />;
+  return <OnboardingPage />;
 }
 
 function Router() {
@@ -29,6 +38,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/signup" component={SignupPage} />
+      <Route path="/onboarding" component={OnboardingRoute} />
       <Route path="/dashboard">
         <ProtectedRoute component={DashboardPage} />
       </Route>
