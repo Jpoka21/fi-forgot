@@ -2,168 +2,77 @@ import { Link } from "wouter";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const NAV = "#071A33";
 const CREAM = "#F8EEDC";
+const NAVY = "#071A33";
 const RED = "#E23B2E";
 const GOLD = "#D8A725";
-const NAVY = "#071A33";
+const BLACK = "#111111";
 
 const faqs = [
-  {
-    q: "Do I have to write the card myself?",
-    a: "Absolutely not. That's the whole point. You tell us about her — we handle the words. You handle the glory.",
-  },
-  {
-    q: "What if I want to review the card before it ships?",
-    a: "Every card goes through your approval queue first. You get to read it, tweak it, or rewrite it entirely. We just do the heavy lifting.",
-  },
-  {
-    q: "How far in advance do you remind me?",
-    a: "You choose: 30 days, 14 days, 7 days, 2 days, or the day of (not recommended, but no judgment). We recommend 14 days.",
-  },
-  {
-    q: "Can I mail the card directly to her?",
-    a: "Yes. For mom, mother-in-law, grandma — we default to mailing straight to her. For your wife or girlfriend, we mail it to you so you can hand it over like a hero.",
-  },
-  {
-    q: "What if the card is terrible?",
-    a: "It won't be. But if you hate it, request a rewrite as many times as you need. Dave didn't nail it on the first try either.",
-  },
-  {
-    q: "Is this a real subscription?",
-    a: "This is a clickable demo — no real charges yet. But yes, when we launch, monthly subscription. Consider it the cheapest relationship insurance on the market.",
-  },
+  { q: "Do I have to write the card myself?", a: "Absolutely not. That's the whole point. You tell us about her — we handle the words. You handle the glory." },
+  { q: "What if I want to review the card before it ships?", a: "Every card goes through your approval queue first. You get to read it, tweak it, or rewrite it entirely. We just do the heavy lifting." },
+  { q: "How far in advance do you remind me?", a: "You choose: 30 days, 14 days, 7 days, 2 days, or the day of (not recommended, but no judgment). We recommend 14 days." },
+  { q: "Can I mail the card directly to her?", a: "Yes. For mom, mother-in-law, grandma — we default to mailing straight to her. For your wife or girlfriend, we mail it to you so you can hand it over like a hero." },
+  { q: "What if the card is terrible?", a: "It won't be. But if you hate it, request a rewrite as many times as you need. Dave didn't nail it on the first try either." },
+  { q: "Is this a real subscription?", a: "This is a clickable demo — no real charges yet. But yes, when we launch, monthly subscription. Consider it the cheapest relationship insurance on the market." },
 ];
 
 const testimonials = [
-  {
-    name: "Marcus T.",
-    role: "Husband, 8 years",
-    quote: `My wife cried reading the Mother's Day card. I pretended I wrote every word. "F" I Forgot is keeping my marriage intact.`,
-    rotate: "-rotate-1",
-    bg: "bg-white",
-  },
-  {
-    name: "James R.",
-    role: "Son, perpetually forgetful",
-    quote: "I forgot my mom's birthday three years in a row. She thought I didn't care. Now she brags about what a thoughtful son I am. Life is good.",
-    rotate: "rotate-1",
-    bg: `bg-[${GOLD}]/20`,
-  },
-  {
-    name: "Derek M.",
-    role: "Boyfriend, 2 years",
-    quote: `My girlfriend thinks I'm way more emotionally available than I actually am. "F" I Forgot is doing the Lord's work.`,
-    rotate: "-rotate-1",
-    bg: "bg-white",
-  },
+  { name: "Marcus T.", role: "Husband, 8 years", quote: `My wife cried reading the Mother's Day card. I pretended I wrote every word. "F" I Forgot is keeping my marriage intact.` },
+  { name: "James R.", role: "Son, perpetually forgetful", quote: "I forgot my mom's birthday three years in a row. Now she brags about what a thoughtful son I am. Life is good." },
+  { name: "Derek M.", role: "Boyfriend, 2 years", quote: `My girlfriend thinks I'm way more emotionally available than I actually am. "F" I Forgot is doing the Lord's work.` },
 ];
 
 const steps = [
-  { num: "1", icon: "👩‍👩‍👧", label: "Add the important women in your life" },
-  { num: "2", icon: "💬", label: "Tell us what they like (and don't like)" },
-  { num: "3", icon: "✉️", label: "We create a custom card before the big day" },
-  { num: "4", icon: "✏️", label: "You approve it, edit it, or change the tone" },
-  { num: "5", icon: "🏆", label: "We remind you so you look like a legend" },
+  { num: "1", icon: "👩‍❤️‍👨", label: "Add the important women in your life." },
+  { num: "2", icon: "📋", label: "Tell us what they like (and don't like)." },
+  { num: "3", icon: "✉️", label: "We create a custom card before the big day." },
+  { num: "4", icon: "✏️", label: "You approve it, edit it, or change the tone." },
+  { num: "5", icon: "🔔", label: "We remind you so you look like a legend." },
 ];
 
 const plans = [
   {
-    name: "Basic",
-    price: "$9",
-    period: "/mo",
-    cards: "Up to 6 cards per year",
-    desc: "For the man with a manageable social calendar.",
-    highlight: false,
-    badge: null,
-    tagline: null,
+    name: "BASIC", price: "$9", period: "/month",
+    cards: "Up to 6 cards per year", highlight: false,
+    badge: null, icon: "👑",
+    perks: ["Perfect for getting started", "Birthday, Anniversary, and more"],
   },
   {
-    name: "Hero",
-    price: "$29",
-    period: "/mo",
-    cards: "Up to 24 cards per year",
-    desc: "For the man determined to never screw this up again.",
-    highlight: true,
-    badge: "Most Popular",
-    tagline: "Because legends never forget",
+    name: "FAMILY", price: "$15", period: "/month",
+    cards: "Up to 12 cards per year", highlight: false,
+    badge: null, icon: "⭐",
+    perks: ["More important people", "More dates we got your back on"],
   },
   {
-    name: "Family",
-    price: "$15",
-    period: "/mo",
-    cards: "Up to 12 cards per year",
-    desc: "For the man who married into a large family. You know who you are.",
-    highlight: false,
-    badge: null,
-    tagline: null,
+    name: "HERO", price: "$29", period: "/month",
+    cards: "Up to 24 cards per year", highlight: true,
+    badge: "MOST POPULAR", icon: "🏆",
+    perks: ["For the overachievers", "Because legends never forget"],
   },
 ];
 
-function ScribbleUnderline({ color = RED }: { color?: string }) {
+function RedScribble() {
   return (
-    <svg viewBox="0 0 200 12" className="w-full" style={{ marginTop: -4 }} fill="none">
-      <path
-        d="M2 8 C30 2, 60 12, 100 6 C140 0, 170 10, 198 5"
-        stroke={color}
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 320 14" className="w-full" style={{ marginTop: -6 }} fill="none">
+      <path d="M4 10 C50 2, 120 14, 200 7 C260 2, 295 11, 316 8" stroke={RED} strokeWidth="4" strokeLinecap="round" />
     </svg>
   );
 }
 
-function DoodleArrow({ className = "" }: { className?: string }) {
+function ArrowRight({ color = BLACK }: { color?: string }) {
   return (
-    <svg viewBox="0 0 60 40" className={`w-14 h-10 ${className}`} fill="none">
-      <path d="M5 35 C15 10, 40 5, 52 8" stroke={RED} strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M52 8 L44 4 M52 8 L50 16" stroke={RED} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 36 20" className="w-8 h-4" fill="none">
+      <path d="M2 10 L28 10 M20 3 L28 10 L20 17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function DoodleStar({ className = "", color = GOLD }: { className?: string; color?: string }) {
+function StepArrow() {
   return (
-    <svg viewBox="0 0 24 24" className={`w-6 h-6 ${className}`} fill={color}>
-      <polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" />
-    </svg>
-  );
-}
-
-function EnvelopeIllustration() {
-  return (
-    <svg viewBox="0 0 200 140" className="w-full max-w-[180px]" fill="none">
-      <rect x="10" y="30" width="180" height="100" rx="8" fill="#fff" stroke={NAVY} strokeWidth="3" />
-      <path d="M10 30 L100 90 L190 30" stroke={NAVY} strokeWidth="3" strokeLinejoin="round" />
-      <path d="M10 130 L70 80 M190 130 L130 80" stroke={NAVY} strokeWidth="2" strokeOpacity="0.3" />
-      <rect x="75" y="8" width="50" height="35" rx="4" fill={CREAM} stroke={RED} strokeWidth="2.5" />
-      <path d="M85 22 L115 22 M85 30 L105 30" stroke={RED} strokeWidth="2" strokeLinecap="round" />
-      <circle cx="160" cy="50" r="12" fill={RED} opacity="0.15" stroke={RED} strokeWidth="2" />
-      <text x="160" y="55" textAnchor="middle" fontSize="10" fill={RED} fontWeight="bold">❤</text>
-    </svg>
-  );
-}
-
-function ConfusedManIllustration() {
-  return (
-    <svg viewBox="0 0 200 220" className="w-full max-w-[180px]" fill="none">
-      <circle cx="100" cy="55" r="38" fill={CREAM} stroke={NAVY} strokeWidth="3" />
-      <circle cx="88" cy="50" r="4" fill={NAVY} />
-      <circle cx="112" cy="50" r="4" fill={NAVY} />
-      <path d="M88 72 Q100 65 112 72" stroke={NAVY} strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M82 38 Q88 30 96 36" stroke={NAVY} strokeWidth="2" strokeLinecap="round" />
-      <path d="M104 36 Q112 30 118 38" stroke={NAVY} strokeWidth="2" strokeLinecap="round" />
-      <path d="M75 45 L60 35" stroke={NAVY} strokeWidth="2" strokeLinecap="round" />
-      <text x="52" y="32" fontSize="13" fill={RED}>?</text>
-      <rect x="30" y="93" width="140" height="75" rx="10" fill={NAVY} />
-      <rect x="55" y="93" width="90" height="75" rx="10" fill="#1a3a5c" />
-      <rect x="70" y="168" width="20" height="40" rx="4" fill={NAVY} />
-      <rect x="110" y="168" width="20" height="40" rx="4" fill={NAVY} />
-      <rect x="30" y="100" width="35" height="15" rx="4" fill={CREAM} stroke={RED} strokeWidth="1.5" />
-      <text x="47" y="112" textAnchor="middle" fontSize="7" fill={RED}>card</text>
-      <path d="M145 105 Q160 90 165 110 Q160 95 145 105" stroke={RED} strokeWidth="2" fill="none" />
-      <circle cx="168" cy="112" r="6" fill={RED} opacity="0.3" />
-      <text x="168" y="116" textAnchor="middle" fontSize="8" fill={RED}>🌸</text>
+    <svg viewBox="0 0 40 24" className="w-8 h-5 flex-shrink-0" fill="none">
+      <path d="M2 12 C10 4, 28 4, 36 12" stroke={RED} strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M30 6 L36 12 L30 18" stroke={RED} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -172,269 +81,248 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: CREAM }}>
+    <div className="min-h-screen font-sans" style={{ background: CREAM, color: BLACK }}>
 
       {/* NAV */}
-      <nav className="sticky top-0 z-50 shadow-md" style={{ background: NAV }}>
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <LogoMark size="sm" />
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm text-white/60 hover:text-white transition-colors" data-testid="link-login">
-              Sign in
+      <nav className="sticky top-0 z-50 shadow-md" style={{ background: NAVY }}>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
+          {/* Logo */}
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
+            <span style={{ color: RED }}>"F"</span> I Forgot
+            <div style={{ height: 2, background: RED, marginTop: 1, borderRadius: 2 }} />
+          </div>
+
+          {/* Center links */}
+          <div className="hidden md:flex items-center gap-6">
+            {["How It Works", "Pricing", "Testimonials", "FAQ"].map((l) => (
+              <a key={l} href={`#${l.toLowerCase().replace(/ /g, "-")}`}
+                className="text-sm font-medium transition-colors hover:text-white"
+                style={{ color: "rgba(255,255,255,0.65)" }}>
+                {l}
+              </a>
+            ))}
+          </div>
+
+          {/* Right */}
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.6)" }} data-testid="link-login">
+              Sign In
             </Link>
-            <Link
-              href="/signup"
-              className="text-white text-sm font-bold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity"
-              style={{ background: RED }}
-              data-testid="link-get-started-nav"
-            >
-              Save Me From Myself
+            <Link href="/signup"
+              className="text-sm font-bold px-5 py-2.5 rounded-lg hover:opacity-90 transition-all"
+              style={{ background: RED, color: "#fff" }}
+              data-testid="link-get-started-nav">
+              SAVE ME FROM MYSELF
             </Link>
           </div>
         </div>
       </nav>
 
       {/* HERO */}
-      <section
-        className="text-white relative overflow-hidden"
-        style={{
-          backgroundImage: "url('/hero-bg.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center right",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: NAV,
-          minHeight: 560,
-        }}
-      >
-        {/* Left-side gradient so text stays readable over the image */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `linear-gradient(to right, ${NAV} 0%, ${NAV}EE 42%, ${NAV}88 58%, transparent 78%)`,
-          }}
-        />
+      <section style={{ background: CREAM }} className="overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-0 items-center min-h-[520px]">
 
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 flex items-center" style={{ minHeight: 560 }}>
-          <div className="max-w-xl">
-            <div
-              className="inline-block text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase"
-              style={{ background: `${RED}30`, color: RED, border: `1.5px solid ${RED}60` }}
-            >
-              Relationship disaster prevention
-            </div>
-
-            <h1
-              className="font-bold leading-none mb-2"
-              style={{ fontFamily: "'Caveat', cursive", fontSize: "clamp(4rem, 9vw, 6.5rem)", color: "#fff" }}
-            >
-              <span style={{ color: RED }}>&quot;F&quot;</span> I Forgot.
+          {/* Left text */}
+          <div className="py-16 pr-4">
+            {/* Main headline */}
+            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(5rem, 12vw, 9rem)", lineHeight: 0.9, color: BLACK, letterSpacing: "0.01em" }}>
+              <span style={{ color: RED }}>"F"</span> I FORGOT.
             </h1>
-            <div className="mb-6 -mt-2" style={{ maxWidth: 480 }}>
-              <ScribbleUnderline color={RED} />
+            <div style={{ maxWidth: 420 }}>
+              <RedScribble />
             </div>
 
-            <p className="text-xl font-bold text-white mb-2">
-              We remember the dates you forget.<br />
-              We write the card.<br />
-              You look like the hero.
-            </p>
-            <p className="text-white/55 text-sm mb-8">
+            <div className="mt-6 mb-3">
+              <p className="font-bold text-xl leading-snug" style={{ color: BLACK }}>
+                We remember the dates you forget.<br />
+                We write the card.<br />
+                You look like the{" "}
+                <span style={{ color: RED, textDecoration: "underline", textDecorationColor: RED, textDecorationThickness: 2 }}>hero.</span>
+              </p>
+            </div>
+            <p className="text-sm mb-8" style={{ color: "#555" }}>
               Mother's Day. Anniversaries. Birthdays.<br />
-              The dates you can't screw up, but probably will.
+              The dates you can't screw up (but probably will).
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link
-                href="/signup"
-                className="font-bold text-base px-7 py-3.5 rounded-xl hover:opacity-90 transition-all hover:scale-105 shadow-lg text-center"
-                style={{ background: RED, color: "#fff" }}
-                data-testid="link-cta-primary"
-              >
-                Save Me From Myself
+            <div className="flex flex-col sm:flex-row gap-3 items-start">
+              {/* Arrow doodle */}
+              <div className="hidden sm:flex items-center pt-3.5">
+                <ArrowRight />
+              </div>
+              <Link href="/signup"
+                className="font-bold text-sm px-6 py-3.5 rounded-lg hover:opacity-90 transition-all hover:scale-105 shadow-md text-center"
+                style={{ background: RED, color: "#fff", letterSpacing: "0.04em" }}
+                data-testid="link-cta-primary">
+                SAVE ME FROM MYSELF
               </Link>
-              <a
-                href="#how-it-works"
-                className="border text-white font-semibold text-base px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all text-center"
-                style={{ borderColor: "rgba(255,255,255,0.3)" }}
-                data-testid="link-how-it-works"
-              >
-                See How It Works
+              <a href="#how-it-works"
+                className="flex items-center gap-2 font-bold text-sm px-6 py-3.5 rounded-lg border-2 hover:bg-black/5 transition-all text-center"
+                style={{ borderColor: BLACK, color: BLACK }}
+                data-testid="link-how-it-works">
+                <span>▶</span> SEE HOW IT WORKS
               </a>
             </div>
 
-            <p className="mt-6 text-white/35 text-xs italic">
-              ✓ Approved by husbands. ✓ Suspected by wives.
+            <p className="mt-6 text-sm italic" style={{ color: "#888" }}>
+              ♡ Approved by husbands. Suspected by wives.
             </p>
+          </div>
+
+          {/* Right — hero image blends into cream background */}
+          <div className="relative flex items-end justify-center h-full" style={{ minHeight: 480 }}>
+            <img
+              src="/hero-ai.png"
+              alt="Confused man holding wilted flowers and a sad Mother's Day card"
+              className="w-full object-contain object-bottom"
+              style={{ maxHeight: 500, marginBottom: 0 }}
+            />
           </div>
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="py-20 px-6" style={{ background: CREAM }}>
+      <section id="how-it-works" className="py-16 px-6 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-1" style={{ color: NAVY, fontFamily: "'Caveat', cursive", fontSize: "2.8rem" }}>
-              How It Works
+            <h2 className="font-bold tracking-wide flex items-center justify-center gap-3"
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.4rem", color: BLACK }}>
+              <span style={{ color: RED }}>≥</span>
+              HOW IT WORKS
+              <span className="italic font-normal text-2xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "#555" }}>
+                (AKA: HOW YOU <u>DON'T</u> SCREW THIS UP)
+              </span>
+              <span style={{ color: RED }}>≤</span>
             </h2>
-            <p className="font-bold text-sm tracking-wide uppercase" style={{ color: RED }}>
-              AKA: How You Don't Screw This Up
-            </p>
-            <ScribbleUnderline color={GOLD} />
           </div>
 
-          {/* Steps */}
-          <div className="relative">
-            {/* Connecting line */}
-            <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-0.5 z-0" style={{ background: `${NAVY}20`, borderTop: `2.5px dashed ${NAVY}25` }} />
-
-            <div className="grid md:grid-cols-5 gap-6 relative z-10">
-              {steps.map((step, i) => (
-                <div key={i} className="flex flex-col items-center text-center gap-3">
-                  <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-md border-4 border-white relative"
-                    style={{ background: i === 4 ? RED : CREAM, boxShadow: "0 4px 12px rgba(7,26,51,0.12)" }}
-                  >
+          <div className="flex flex-col md:flex-row items-start justify-between gap-2">
+            {steps.map((step, i) => (
+              <div key={i} className="flex items-start md:flex-col gap-4 md:items-center flex-1">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl border-2 bg-white shadow-sm" style={{ borderColor: `${BLACK}15` }}>
                     {step.icon}
-                    <span
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white"
-                      style={{ background: i === 4 ? GOLD : NAVY, fontFamily: "'Caveat', cursive" }}
-                    >
-                      {step.num}
-                    </span>
                   </div>
-                  <p className="text-sm font-semibold leading-snug" style={{ color: NAVY }}>{step.label}</p>
-                  {i < steps.length - 1 && (
-                    <svg viewBox="0 0 30 14" className="hidden md:block absolute" style={{ display: "none" }} />
-                  )}
+                  <span className="font-bold text-base" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK }}>
+                    {step.num}.
+                  </span>
                 </div>
-              ))}
-            </div>
+                <p className="text-sm text-center leading-snug" style={{ color: "#444" }}>{step.label}</p>
+                {i < steps.length - 1 && (
+                  <div className="hidden md:flex justify-center mt-6 flex-shrink-0">
+                    <StepArrow />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-
-          <p className="text-center mt-10 text-sm italic" style={{ color: `${NAVY}80` }}>
-            Two weeks before panic, we tap you on the shoulder.
-          </p>
-        </div>
-      </section>
-
-      {/* FEATURES STRIP */}
-      <section style={{ background: NAV }} className="py-8 px-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { icon: "🔔", label: "Smart reminders" },
-            { icon: "📬", label: "Physical cards mailed" },
-            { icon: "✨", label: "AI-written, human-approved" },
-            { icon: "🛡️", label: "Relationship protection" },
-          ].map(({ icon, label }) => (
-            <div key={label} className="flex flex-col items-center gap-2 text-white/80">
-              <span className="text-2xl">{icon}</span>
-              <span className="text-sm font-medium">{label}</span>
-            </div>
-          ))}
         </div>
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="py-20 px-6 relative overflow-hidden" style={{ background: CREAM }}>
-        {/* Doodle bg elements */}
-        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
-          <DoodleStar className="absolute top-8 left-8 w-8 h-8 opacity-30" />
-          <DoodleStar className="absolute top-24 right-16 w-5 h-5 opacity-20" color={RED} />
-          <DoodleStar className="absolute bottom-16 left-1/4 w-6 h-6 opacity-20" />
-          <span className="absolute top-10 right-1/3 text-3xl opacity-10">♥</span>
-          <span className="absolute bottom-10 right-8 text-4xl opacity-10">⚠️</span>
-          <span className="absolute top-1/2 left-6 text-3xl opacity-10">📅</span>
-          <span className="absolute bottom-8 left-1/3 text-2xl opacity-15">→</span>
+      <section id="pricing" className="py-20 px-6 relative overflow-hidden" style={{ background: NAVY }}>
+        {/* Doodle background elements */}
+        <div className="absolute inset-0 pointer-events-none select-none" style={{ opacity: 0.07 }}>
+          {["⭐","💥","♥","⚡","★","⚠","📅","→","✦"].map((s, i) => (
+            <span key={i} className="absolute text-4xl text-white"
+              style={{ top: `${[8,70,20,55,85,35,65,15,80][i]}%`, left: `${[5,8,88,92,15,50,75,40,60][i]}%` }}>
+              {s}
+            </span>
+          ))}
         </div>
 
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-12">
-            <h2 className="font-bold mb-1" style={{ color: NAVY, fontFamily: "'Caveat', cursive", fontSize: "2.8rem" }}>
-              Choose Your Plan
+            <h2 className="font-bold" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3rem", color: GOLD, letterSpacing: "0.06em" }}>
+              ✦ CHOOSE YOUR PLAN ✦
             </h2>
-            <p className="text-sm" style={{ color: `${NAVY}80` }}>
-              Cheaper than flowers. Cheaper than therapy. Way cheaper than a gas station card.
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 items-center">
+          <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-2xl p-8 border-2 transition-all hover:shadow-xl ${plan.highlight ? "scale-105" : ""}`}
+              <div key={plan.name}
+                className="rounded-2xl p-8 relative"
                 style={{
-                  background: plan.highlight ? NAVY : "#fff",
-                  borderColor: plan.highlight ? RED : `${NAVY}15`,
-                  boxShadow: plan.highlight ? `0 8px 32px ${RED}30` : undefined,
+                  background: plan.highlight ? "#fff" : "rgba(255,255,255,0.07)",
+                  border: plan.highlight ? `2.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)",
+                  color: plan.highlight ? BLACK : "#fff",
                 }}
-                data-testid={`card-plan-${plan.name.toLowerCase()}`}
-              >
+                data-testid={`card-plan-${plan.name.toLowerCase()}`}>
+
                 {plan.badge && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: RED, color: "#fff" }}>
-                      {plan.badge}
-                    </span>
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-white"
+                    style={{ background: RED, letterSpacing: "0.08em" }}>
+                    {plan.badge}
                   </div>
                 )}
-                <div className="font-bold text-2xl mb-0.5" style={{ color: plan.highlight ? "#fff" : NAVY, fontFamily: "'Caveat', cursive" }}>
-                  {plan.name}
+
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">{plan.icon}</span>
+                  <span className="font-bold text-2xl" style={{ fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.06em" }}>
+                    {plan.name}
+                  </span>
                 </div>
-                {plan.tagline && (
-                  <p className="text-xs mb-3 italic" style={{ color: GOLD }}>{plan.tagline}</p>
-                )}
-                <div className="flex items-end gap-1 mb-3">
-                  <span className="text-4xl font-black" style={{ color: plan.highlight ? "#fff" : NAVY }}>{plan.price}</span>
-                  <span className="text-sm mb-1" style={{ color: plan.highlight ? "rgba(255,255,255,0.5)" : `${NAVY}60` }}>{plan.period}</span>
-                </div>
-                <div className="text-sm font-semibold mb-2" style={{ color: plan.highlight ? GOLD : RED }}>
+                <p className="text-sm mb-4" style={{ color: plan.highlight ? "#666" : "rgba(255,255,255,0.55)" }}>
                   {plan.cards}
-                </div>
-                <p className="text-sm leading-relaxed mb-6" style={{ color: plan.highlight ? "rgba(255,255,255,0.65)" : `${NAVY}80` }}>
-                  {plan.desc}
                 </p>
-                <Link
-                  href="/signup"
-                  className="block text-center font-bold py-3 rounded-xl transition-all hover:opacity-90 text-white"
-                  style={{ background: plan.highlight ? RED : NAVY }}
-                  data-testid={`link-plan-${plan.name.toLowerCase()}`}
-                >
-                  Get started
+
+                <div className="flex items-end gap-1 mb-6">
+                  <span className="font-black text-5xl">{plan.price}</span>
+                  <span className="mb-1.5 text-sm" style={{ color: plan.highlight ? "#888" : "rgba(255,255,255,0.5)" }}>
+                    {plan.period}
+                  </span>
+                </div>
+
+                <ul className="space-y-2 mb-8">
+                  {plan.perks.map((p) => (
+                    <li key={p} className="flex items-start gap-2 text-sm">
+                      <span style={{ color: plan.highlight ? RED : GOLD }}>✓</span>
+                      <span style={{ color: plan.highlight ? "#444" : "rgba(255,255,255,0.75)" }}>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link href="/signup"
+                  className="block text-center font-bold py-3 rounded-xl hover:opacity-90 transition-all"
+                  style={{ background: plan.highlight ? RED : "rgba(255,255,255,0.12)", color: "#fff", letterSpacing: "0.04em" }}
+                  data-testid={`link-plan-${plan.name.toLowerCase()}`}>
+                  GET STARTED
                 </Link>
               </div>
             ))}
           </div>
 
-          <p className="text-center mt-8 text-sm italic" style={{ color: `${NAVY}60` }}>
+          <p className="text-center mt-8 text-sm italic" style={{ color: "rgba(255,255,255,0.35)" }}>
             Your future self owes us one.
           </p>
         </div>
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="py-20 px-6" style={{ background: `${NAVY}08` }}>
+      <section id="testimonials" className="py-20 px-6" style={{ background: CREAM }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-bold mb-1" style={{ color: NAVY, fontFamily: "'Caveat', cursive", fontSize: "2.5rem" }}>
+            <h2 className="font-bold" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
               Men Who Survived
             </h2>
-            <p className="text-sm" style={{ color: `${NAVY}70` }}>Real stories. Changed names. Marriages still intact.</p>
+            <p className="text-sm mt-1" style={{ color: "#777" }}>Real stories. Changed names. Marriages still intact.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className={`p-6 rounded-xl shadow-sm border ${t.rotate}`}
-                style={{ background: "#fff", borderColor: `${NAVY}10` }}
-              >
+            {testimonials.map((t, i) => (
+              <div key={t.name}
+                className="p-6 rounded-xl shadow-sm border"
+                style={{
+                  background: "#fff",
+                  borderColor: `${BLACK}10`,
+                  transform: i % 2 === 0 ? "rotate(-0.8deg)" : "rotate(0.8deg)",
+                }}>
                 <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <DoodleStar key={i} className="w-4 h-4" color={GOLD} />
-                  ))}
+                  {[...Array(5)].map((_, j) => <span key={j} style={{ color: GOLD }}>★</span>)}
                 </div>
-                <p className="text-sm leading-relaxed mb-5 italic" style={{ color: `${NAVY}90` }}>"{t.quote}"</p>
+                <p className="text-sm leading-relaxed mb-5 italic" style={{ color: "#333" }}>"{t.quote}"</p>
                 <div>
-                  <div className="font-bold text-sm" style={{ color: NAVY }}>{t.name}</div>
-                  <div className="text-xs" style={{ color: `${NAVY}55` }}>{t.role}</div>
+                  <div className="font-bold text-sm" style={{ color: BLACK }}>{t.name}</div>
+                  <div className="text-xs" style={{ color: "#888" }}>{t.role}</div>
                 </div>
               </div>
             ))}
@@ -443,29 +331,28 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-20 px-6" style={{ background: CREAM }}>
+      <section id="faq" className="py-20 px-6" style={{ background: "#F0E6D0" }}>
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-bold mb-1" style={{ color: NAVY, fontFamily: "'Caveat', cursive", fontSize: "2.5rem" }}>
+            <h2 className="font-bold" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: BLACK }}>
               Questions from Men in the Wild
             </h2>
           </div>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <div key={i} className="rounded-xl border overflow-hidden" style={{ background: "#fff", borderColor: `${NAVY}12` }}>
+              <div key={i} className="rounded-xl border overflow-hidden bg-white" style={{ borderColor: `${BLACK}10` }}>
                 <button
-                  className="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-sm hover:opacity-80 transition-opacity"
-                  style={{ color: NAVY }}
+                  className="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-sm hover:bg-gray-50 transition-colors"
+                  style={{ color: BLACK }}
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  data-testid={`faq-toggle-${i}`}
-                >
+                  data-testid={`faq-toggle-${i}`}>
                   <span>{faq.q}</span>
                   {openFaq === i
-                    ? <ChevronUp size={16} style={{ color: RED }} />
-                    : <ChevronDown size={16} style={{ color: `${NAVY}50` }} />}
+                    ? <ChevronUp size={16} style={{ color: RED, flexShrink: 0 }} />
+                    : <ChevronDown size={16} style={{ color: "#aaa", flexShrink: 0 }} />}
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-5 text-sm leading-relaxed border-t pt-4" style={{ color: `${NAVY}75`, borderColor: `${NAVY}10` }}>
+                  <div className="px-6 pb-5 text-sm leading-relaxed border-t pt-4" style={{ color: "#555", borderColor: `${BLACK}08` }}>
                     {faq.a}
                   </div>
                 )}
@@ -478,59 +365,41 @@ export default function LandingPage() {
       {/* CTA BANNER */}
       <section className="py-16 px-6 text-white" style={{ background: RED }}>
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-bold text-4xl mb-3" style={{ fontFamily: "'Caveat', cursive" }}>
-            Stop winging it.
+          <h2 className="font-bold mb-3" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.5rem", letterSpacing: "0.04em" }}>
+            STOP WINGING IT.
           </h2>
-          <p className="text-lg text-white/80 mb-8">
+          <p className="text-lg mb-8" style={{ color: "rgba(255,255,255,0.85)" }}>
             Gas station cards are not a strategy.<br />
             Let us help you look like you planned all along.
           </p>
-          <Link
-            href="/signup"
-            className="inline-block font-bold text-lg px-10 py-4 rounded-xl hover:opacity-90 transition-all hover:scale-105"
-            style={{ background: "#fff", color: RED }}
-            data-testid="link-cta-bottom"
-          >
-            Save Me From Myself
+          <Link href="/signup"
+            className="inline-block font-bold text-base px-10 py-4 rounded-xl hover:opacity-90 transition-all hover:scale-105"
+            style={{ background: "#fff", color: RED, letterSpacing: "0.04em" }}
+            data-testid="link-cta-bottom">
+            SAVE ME FROM MYSELF
           </Link>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="py-10 px-6" style={{ background: NAV }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <LogoMark size="sm" />
+      <footer className="py-10 px-6" style={{ background: NAVY }}>
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.3rem", fontWeight: 700, color: "#fff" }}>
+            <span style={{ color: RED }}>"F"</span> I Forgot
+            <div style={{ height: 2, background: RED, marginTop: 1, borderRadius: 2 }} />
+          </div>
           <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.35)" }}>
             Relationship disaster prevention, automated.
           </p>
           <div className="flex gap-6">
-            <Link href="/login" className="text-sm hover:text-white transition-colors" style={{ color: "rgba(255,255,255,0.45)" }}>
-              Sign in
-            </Link>
-            <Link href="/signup" className="text-sm hover:text-white transition-colors" style={{ color: "rgba(255,255,255,0.45)" }}>
-              Get started
-            </Link>
+            {["How It Works", "Pricing", "Sign In"].map((l) => (
+              <a key={l} href="#" className="text-sm hover:text-white transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
+                {l}
+              </a>
+            ))}
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function LogoMark({ size = "sm" }: { size?: "sm" | "lg" }) {
-  const big = size === "lg";
-  return (
-    <div className="flex flex-col leading-none" style={{ fontFamily: "'Caveat', cursive" }}>
-      <span className={big ? "text-4xl font-bold" : "text-xl font-bold"}>
-        <span style={{ color: RED }}>&quot;F&quot;</span>
-        <span style={{ color: "#fff" }}> I Forgot</span>
-      </span>
-      {big && <ScribbleUnderline color={RED} />}
-      {!big && (
-        <svg viewBox="0 0 100 6" className="w-20" fill="none" style={{ marginTop: -2 }}>
-          <path d="M2 4 C20 1, 50 6, 80 3 C88 2, 95 4, 98 3" stroke={RED} strokeWidth="2.5" strokeLinecap="round" />
-        </svg>
-      )}
     </div>
   );
 }
