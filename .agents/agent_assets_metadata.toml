@@ -12,3 +12,9 @@ id = "p1240Gj9d-ohhjnUA-JJS"
 uri = "file://artifacts/fi-forgot/public/hero-bg.png"
 type = "image"
 title = "navy hero background man forgot mothers day"
+
+[[generated]]
+id = "FM1DQvu0JWU6yQPoguR9d"
+uri = "file://attached_assets/generated_images/photorealistic_photo_of_a_1bee.png"
+type = "image"
+title = "generated_image"
