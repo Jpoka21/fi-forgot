@@ -262,9 +262,10 @@ export default function LandingPage() {
             aria-label="Confused man holding flowers and a bad card — Dave had one job"
             style={{
               height: 460,
-              backgroundImage: "url('/hero.png')",
-              backgroundSize: "310% auto",
-              backgroundPosition: "right -100px",
+              backgroundImage: "url('/hero-ai.png')",
+              backgroundSize: "contain",
+              backgroundPosition: "center center",
+              backgroundColor: "#F8EEDC",
               backgroundRepeat: "no-repeat",
             }}
           />
