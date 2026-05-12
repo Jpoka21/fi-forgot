@@ -47,6 +47,7 @@ export interface Recipient {
   customDates: CustomDate[];
   tonePreference: Tone;
   personalityNotes: string;
+  kidsNames: string;
   favoriteMemories: string;
   insideJokes: string;
   thingsToAvoid: string;

@@ -44,6 +44,7 @@ const schema = z.object({
   needsChristmasHanukkah: z.boolean(),
   tonePreference: z.enum(TONES as [Tone, ...Tone[]]),
   personalityNotes: z.string(),
+  kidsNames: z.string(),
   favoriteMemories: z.string(),
   insideJokes: z.string(),
   thingsToAvoid: z.string(),
@@ -74,6 +75,7 @@ export default function RecipientProfilePage() {
           needsChristmasHanukkah: existing.needsChristmasHanukkah,
           tonePreference: existing.tonePreference,
           personalityNotes: existing.personalityNotes,
+          kidsNames: existing.kidsNames ?? "",
           favoriteMemories: existing.favoriteMemories,
           insideJokes: existing.insideJokes,
           thingsToAvoid: existing.thingsToAvoid,
@@ -90,6 +92,7 @@ export default function RecipientProfilePage() {
           needsChristmasHanukkah: false,
           tonePreference: "Sweet",
           personalityNotes: "",
+          kidsNames: "",
           favoriteMemories: "",
           insideJokes: "",
           thingsToAvoid: "",
@@ -112,6 +115,7 @@ export default function RecipientProfilePage() {
       ...data,
       birthday: data.birthday || undefined,
       anniversaryDate: data.anniversaryDate || undefined,
+      kidsNames: data.kidsNames ?? "",
       customDates: existing?.customDates ?? [],
     };
     saveRecipient(recipient);
@@ -302,12 +306,30 @@ export default function RecipientProfilePage() {
                     <FormLabel>Personality notes</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="What makes her laugh? What does she care about?"
+                        placeholder="What makes her laugh? What does she care about? How does she show love?"
                         rows={3}
                         data-testid="textarea-personality"
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="kidsNames"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Her children <span className="font-normal text-[hsl(221,20%,60%)]">(if she's a mom — names & ages)</span></FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Emma (8), Jake (5), Lily (2)"
+                        data-testid="input-kids-names"
+                        {...field}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-[hsl(221,20%,60%)]">This helps us write cards that speak to her as a mom — and know how long she's been one.</p>
                     <FormMessage />
                   </FormItem>
                 )}

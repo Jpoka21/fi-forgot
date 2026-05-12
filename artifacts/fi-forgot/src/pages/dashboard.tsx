@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import AppLayout from "@/components/layout/AppLayout";
 import { getCards, getRecipients, STATUS_COLORS, CardOrder, Recipient } from "@/lib/data";
-import { CalendarDays, Users, CreditCard, Clock, Plus } from "lucide-react";
+import { CalendarDays, Users, CreditCard, Clock, Plus, CheckCircle2, Sparkles } from "lucide-react";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -41,6 +41,10 @@ export default function DashboardPage() {
     (c) => !["Delivered", "Given"].includes(c.status)
   );
 
+  const awaitingApproval = cards.filter(
+    (c) => c.status === "Ready for approval"
+  );
+
   const today = new Date();
   const calendarDays = Array.from({ length: 35 }, (_, i) => {
     const d = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -62,34 +66,47 @@ export default function DashboardPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Upcoming cards" value={upcoming.length} icon={CreditCard} color="bg-[hsl(221,47%,20%)]" />
+          <StatCard label="Upcoming occasions" value={upcoming.length} icon={CreditCard} color="bg-[hsl(221,47%,20%)]" />
           <StatCard label="Recipients" value={recipients.length} icon={Users} color="bg-[hsl(46,65%,52%)]" />
-          <StatCard label="Need action" value={cards.filter(c => ["Needs profile","Ready for approval"].includes(c.status)).length} icon={Clock} color="bg-[hsl(6,64%,46%)]" />
+          <StatCard label="Awaiting your pick" value={awaitingApproval.length} icon={Clock} color="bg-[hsl(6,64%,46%)]" />
           <StatCard label="Approved" value={cards.filter(c => c.status === "Approved" || c.status === "Mailed to me" || c.status === "Mailed to her").length} icon={CalendarDays} color="bg-emerald-500" />
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
           {/* Upcoming cards */}
           <div className="md:col-span-2">
+
+            {/* Action needed banner */}
+            {awaitingApproval.length > 0 && (
+              <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4">
+                <CheckCircle2 size={22} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-semibold text-amber-900">
+                    {awaitingApproval.length === 1
+                      ? "1 card is ready for your review"
+                      : `${awaitingApproval.length} cards are ready for your review`}
+                  </div>
+                  <p className="text-sm text-amber-700 mt-0.5">
+                    We wrote 3 versions. Pick the one that sounds like you.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-serif text-xl font-bold text-[hsl(221,47%,20%)]">Upcoming Cards</h2>
-              <Link
-                href="/cards/generate"
-                className="flex items-center gap-1.5 text-sm font-semibold text-[hsl(6,64%,46%)] hover:underline"
-                data-testid="link-generate-card"
-              >
-                <Plus size={14} /> Generate card
-              </Link>
+              <h2 className="font-serif text-xl font-bold text-[hsl(221,47%,20%)]">Your Cards</h2>
             </div>
 
             {upcoming.length === 0 ? (
               <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-10 text-center">
-                <div className="text-4xl mb-3">&#128247;</div>
-                <p className="font-semibold text-[hsl(221,47%,20%)]">No disasters scheduled yet.</p>
-                <p className="text-sm text-[hsl(221,20%,50%)] mt-1">Add someone before future you ruins everything.</p>
+                <div className="text-4xl mb-3">📋</div>
+                <p className="font-semibold text-[hsl(221,47%,20%)]">Nothing in the pipeline yet.</p>
+                <p className="text-sm text-[hsl(221,20%,50%)] mt-1 mb-4">
+                  Add someone and we'll handle the rest — we'll send you 3 options to pick from before every occasion.
+                </p>
                 <Link
                   href="/recipients/new"
-                  className="inline-block mt-4 bg-[hsl(221,47%,20%)] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:opacity-90"
+                  className="inline-block mt-2 bg-[hsl(221,47%,20%)] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:opacity-90"
                   data-testid="link-add-recipient-empty"
                 >
                   Add a recipient
@@ -114,13 +131,9 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-3">
                       <StatusBadge status={card.status} />
                       {card.status === "Ready for approval" && (
-                        <Link
-                          href="/cards/generate"
-                          className="text-xs font-semibold text-[hsl(6,64%,46%)] hover:underline"
-                          data-testid={`link-approve-card-${card.id}`}
-                        >
-                          Review
-                        </Link>
+                        <span className="text-xs font-semibold text-[hsl(6,64%,46%)] bg-red-50 border border-red-100 px-2 py-1 rounded-lg">
+                          Pick yours →
+                        </span>
                       )}
                     </div>
                   </div>
@@ -173,7 +186,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Calendar */}
+          {/* Calendar + How it works */}
           <div>
             <h2 className="font-serif text-xl font-bold text-[hsl(221,47%,20%)] mb-4">
               {MONTHS[today.getMonth()]} {today.getFullYear()}
@@ -219,17 +232,24 @@ export default function DashboardPage() {
             </div>
 
             <div className="mt-4 bg-[hsl(221,47%,20%)] rounded-xl p-5 text-white">
-              <div className="font-serif font-bold text-lg mb-1">Need a card?</div>
-              <p className="text-white/60 text-sm mb-4">
-                Two weeks before panic, we tap you on the shoulder.
-              </p>
-              <Link
-                href="/cards/generate"
-                className="block text-center bg-[hsl(6,64%,46%)] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
-                data-testid="link-generate-card-sidebar"
-              >
-                Generate a card
-              </Link>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles size={16} className="text-[hsl(46,65%,52%)]" />
+                <div className="font-serif font-bold text-base">How it works</div>
+              </div>
+              <ul className="space-y-2.5 text-sm text-white/70">
+                <li className="flex items-start gap-2">
+                  <span className="text-[hsl(46,65%,52%)] font-bold mt-0.5">1.</span>
+                  You add your recipients and tell us about them.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[hsl(46,65%,52%)] font-bold mt-0.5">2.</span>
+                  Two weeks before each occasion, we write 3 versions of a card.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[hsl(46,65%,52%)] font-bold mt-0.5">3.</span>
+                  You pick the one that sounds like you. We send it.
+                </li>
+              </ul>
             </div>
           </div>
         </div>
