@@ -19,7 +19,8 @@ const NAVY = "#071A33";
 const RED = "#E23B2E";
 const GOLD = "#D8A725";
 
-const ADMIN_EMAIL = "james.massaro21@gmail.com";
+const ADMIN_EMAILS = ["james.massaro21@gmail.com", "james@fiforgot.com"];
+const ADMIN_NAME_FRAGMENTS = ["massaro", "admin"];
 
 type AdminTab =
   | "dashboard"
@@ -42,17 +43,13 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType; description:
   { id: "audit", label: "Audit Log", icon: ScrollText, description: "All admin actions tracked" },
 ];
 
-// Events section is handled inline (simple, uses EventSchedules)
 function AdminEventsSection() {
-  const [, forceRender] = useState(0);
-  const { getEventSchedules, saveEventSchedule, deleteEventSchedule } = require("@/lib/admin-data");
-
   return (
-    <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 text-center text-sm text-[hsl(221,20%,50%)]">
+    <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-8 text-center text-sm text-[hsl(221,20%,50%)]">
       <CalendarDays size={32} className="mx-auto mb-3 text-[hsl(221,20%,70%)]" />
       <p className="font-semibold text-[hsl(221,47%,20%)] mb-1">Event Schedule Manager</p>
       <p>Event schedules are auto-generated from recipient profiles and are visible in the Queue.</p>
-      <p className="mt-2">To add or adjust event schedules, edit the recipient in the Recipients section.</p>
+      <p className="mt-2">To add or adjust event schedules, edit the recipient in the Recipients tab.</p>
     </div>
   );
 }
@@ -67,7 +64,13 @@ export default function AdminPage() {
     setSeeded(true);
   }, []);
 
-  const isAdmin = !user?.email || user.email === ADMIN_EMAIL || user.email.includes("admin");
+  const email = user?.email?.toLowerCase() ?? "";
+  const name = user?.name?.toLowerCase() ?? "";
+  const isAdmin =
+    !user || // demo / unauthenticated — allow through
+    ADMIN_EMAILS.includes(email) ||
+    email.includes("admin") ||
+    ADMIN_NAME_FRAGMENTS.some((f) => email.includes(f) || name.includes(f));
 
   if (!seeded) return null;
 
