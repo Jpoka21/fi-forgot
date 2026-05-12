@@ -302,7 +302,7 @@ export default function DashboardPage() {
                               </div>
                             </div>
                             {r.autopilotMode === "full_autopilot" && (
-                              <Zap size={14} className="text-yellow-500" title="Full autopilot" />
+                              <Zap size={14} className="text-yellow-500" />
                             )}
                           </div>
                           <div className="flex flex-wrap gap-1 mt-2">

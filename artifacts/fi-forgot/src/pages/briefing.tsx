@@ -262,6 +262,7 @@ export default function BriefingPage() {
   }
 
   function handleSubmit() {
+    if (!recipient) return;
     // Save children back to recipient profile
     const updatedRecipient = { ...recipient, children: editedChildren };
     saveRecipient(updatedRecipient);
@@ -292,8 +293,8 @@ export default function BriefingPage() {
 
     const briefing: EventBriefing = {
       id: existingBriefing?.id ?? Date.now().toString(),
-      recipientId: recipient.id,
-      recipientName: recipient.name,
+      recipientId: recipient!.id,
+      recipientName: recipient!.name,
       event: eventName,
       year: new Date().getFullYear(),
       completedAt: new Date().toISOString(),
@@ -305,11 +306,11 @@ export default function BriefingPage() {
 
     toast({
       title: "Briefing saved!",
-      description: `We'll use this to write ${recipient.name}'s ${eventName} card.`,
+      description: `We'll use this to write ${recipient!.name}'s ${eventName} card.`,
     });
 
     setTimeout(() => {
-      setLocation(`/recipients/${recipient.id}`);
+      setLocation(`/recipients/${recipient!.id}`);
     }, 1800);
   }
 

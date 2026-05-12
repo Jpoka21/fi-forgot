@@ -1,0 +1,170 @@
+Build an admin backend for F I Forgot that manages automated card fulfillment through the Handwrytten API.
+
+Core concept:
+Our app is the brain. Handwrytten is only the fulfillment provider. The admin backend should let us organize customers, recipients, events, card templates, message history, send schedules, and fulfillment status.
+
+Add these admin sections:
+
+1. Customers
+Create a customer table with:
+- customer name
+- email
+- phone
+- subscription status
+- billing plan
+- created date
+- notes
+
+2. Recipients
+Each customer can have multiple recipients.
+Fields:
+- recipient name
+- relationship to customer
+- mailing address
+- birthday
+- anniversary date if applicable
+- preferred tone
+- notes
+- active or paused
+
+3. Events
+Each recipient can have one or more events.
+Fields:
+- event type, Birthday, Mother’s Day, Anniversary, Valentine’s Day, Christmas, Hanukkah, Thanksgiving, Just Because
+- event date
+- send lead time, default 7 days before
+- card category
+- tone
+- active or paused
+- last sent date
+- next scheduled send date
+
+4. Card Templates
+Create a card template manager for Handwrytten cards.
+Fields:
+- internal template name
+- Handwrytten card ID
+- event type
+- tone category
+- relationship category
+- image preview URL if available
+- active or inactive
+- priority weight
+- notes
+
+Add logic so the system can randomly choose from active templates that match:
+- event type
+- tone
+- relationship
+
+Also prevent the same recipient from receiving the same template twice in a row.
+
+5. Message Generator
+Add an admin screen where I can generate and approve AI messages before sending.
+Fields:
+- customer name
+- recipient name
+- relationship
+- event type
+- tone
+- custom notes
+- generated message
+- approved message
+- approval status
+
+For now, create placeholder AI generation logic if OpenAI is not connected yet. Make it easy to wire OpenAI later.
+
+6. Send Queue
+Create a send queue that shows every upcoming card.
+Columns:
+- customer
+- recipient
+- event type
+- event date
+- scheduled mail date
+- selected card template
+- message status
+- fulfillment status
+- Handwrytten order ID
+- error message if failed
+
+Statuses:
+- Draft
+- Needs Approval
+- Approved
+- Ready To Send
+- Sent To Handwrytten
+- Mailed
+- Failed
+- Cancelled
+
+7. Handwrytten API Integration
+Create a backend integration layer for Handwrytten.
+
+Use environment variables:
+HANDWRYTTEN_API_KEY
+HANDWRYTTEN_BASE_URL
+
+Do not hardcode API keys.
+
+Create functions:
+- listHandwryttenCards()
+- createHandwryttenOrder()
+- getHandwryttenOrderStatus()
+- cancelHandwryttenOrder() if supported
+
+Add clear TODO comments where exact Handwrytten endpoint details need to be filled in from their official API docs.
+
+When creating an order, send:
+- selected Handwrytten card ID
+- recipient name
+- recipient mailing address
+- message text
+- handwriting style if available
+- scheduled send date if supported
+
+8. Admin Actions
+On each queue item, add buttons:
+- Generate Message
+- Approve Message
+- Change Card
+- Preview Order
+- Send Test
+- Send To Handwrytten
+- Cancel
+
+9. Audit Log
+Track important actions:
+- message generated
+- message approved
+- card selected
+- order sent to Handwrytten
+- status updated
+- error returned
+- admin user and timestamp
+
+10. Safety Controls
+Before sending to Handwrytten, validate:
+- recipient address is complete
+- message is approved
+- card template has Handwrytten card ID
+- scheduled mail date exists
+- customer subscription is active
+- event is active
+
+Do not send anything automatically until it passes all validation.
+
+11. Dashboard
+Add an admin dashboard showing:
+- cards scheduled this week
+- cards needing approval
+- failed orders
+- upcoming birthdays
+- upcoming anniversaries
+- customers with paused subscriptions
+- total cards sent this month
+
+Important:
+Keep the code modular. The Handwrytten API should be isolated in its own service file so we can swap providers later if needed. Do not make Handwrytten the source of truth. Our app database is the source of truth.
+
+For now, build this as a working admin backend with mock Handwrytten API calls if real credentials are not available. Make the mock layer easy to replace with the real API.
