@@ -1,0 +1,400 @@
+You are updating the existing “F I Forgot” website.
+
+The current site already has branding and a fun sarcastic tone.
+Do NOT turn this into a corporate greeting card website.
+
+The goal is:
+A dependable emotional infrastructure company disguised as a funny brand.
+
+The user should feel:
+“This stupid funny website actually saved my ass.”
+
+The platform is NOT primarily about greeting cards.
+It is about removing mental load and automating important relationship moments.
+
+The entire experience should feel:
+
+effortless
+modern
+funny
+trustworthy
+low friction
+subscription based
+emotionally helpful underneath the humor
+
+Keep the existing fun personality and sarcastic branding.
+But underneath, the UX should feel extremely dependable and polished.
+
+Avoid:
+
+cheesy greeting card aesthetics
+political looking layouts
+Hallmark style visuals
+cluttered forms
+corporate SaaS design
+
+The UI should feel more like:
+
+a modern lifestyle app
+a funny assistant
+an emotional autopilot system
+
+Use:
+
+large clean typography
+bold but tasteful humor
+smooth transitions
+card based layouts
+warm modern colors
+soft shadows
+rounded corners
+mobile first design
+conversational onboarding
+
+IMPORTANT:
+Do NOT rebuild the app from scratch.
+Modify the existing project.
+Preserve the current branding direction and improve it.
+
+CORE PRODUCT CHANGE
+
+This is now a subscription based automated card sending platform.
+
+The user sets everything up ONCE.
+Then the platform automatically sends cards before important events.
+
+The key promise is:
+
+“Set it once. Never forget again.”
+
+Cards should automatically go out roughly 7 days before events.
+
+The platform should support:
+
+autopilot mode
+optional preview before mailing
+mailing directly to recipient
+mailing to the customer for hand delivery
+
+NEW HOMEPAGE POSITIONING
+
+Update homepage messaging.
+
+The site should no longer feel like:
+“Buy funny cards.”
+
+Instead it should feel like:
+“Outsource remembering important people.”
+
+Hero section ideas:
+
+Headline options:
+
+Never Forget Another Important Date Again
+Future You Already Handled It
+Because Remembering Dates Is Apparently Your Job
+The Relationship Subscription For Forgetful Humans
+Set It Once. Stay Out Of Trouble Forever.
+
+Subheadline examples:
+
+We automatically mail birthday, anniversary, holiday, and relationship cards before important dates.
+Stop scrambling for last minute cards.
+Your future self is officially covered.
+
+Primary CTA:
+
+Start My Setup
+Save My Relationship
+Put My Life On Autopilot
+
+Secondary CTA:
+
+See How It Works
+
+Add a section explaining:
+
+“How It Works”
+
+Add the people you care about
+Choose important occasions
+Pick your style
+We automatically send cards before the big day
+
+Add humorous microcopy throughout:
+
+“No more panic pharmacy cards.”
+“USPS delays should not ruin marriages.”
+“Because your wife remembers everything.”
+“Your mom deserves better than a gas station card.”
+
+NEW ONBOARDING FLOW
+
+Build a modern multi step onboarding flow.
+
+This should feel conversational and lightweight.
+One question per screen.
+Smooth transitions.
+Progress indicator at top.
+
+DO NOT show giant overwhelming forms.
+
+STEP 1 — WHO ARE WE HELPING YOU REMEMBER?
+
+Allow relationship profile creation.
+
+Relationship types:
+
+Wife / Girlfriend
+Husband / Boyfriend
+Mom
+Dad
+Son
+Daughter
+Grandmother
+Grandfather
+Friend
+Employee
+Client
+Other
+
+For each person collect:
+
+first name
+mailing address
+relationship type
+optional nickname
+
+Add ability to create multiple people.
+
+UI should feel extremely easy.
+Like adding profiles in Netflix or Spotify.
+
+STEP 2 — WHAT EVENTS MATTER?
+
+Allow selecting recurring events.
+
+Core recurring event types:
+
+Birthday
+Anniversary
+Valentine’s Day
+Mother’s Day
+Father’s Day
+Christmas
+Hanukkah
+Thanksgiving
+Easter
+New Year’s
+Wedding Anniversary
+Dating Anniversary
+Work Anniversary
+Pet Birthday
+
+Some events require custom dates.
+Some are automatic holidays.
+
+For birthdays and anniversaries:
+collect exact dates.
+
+For holidays:
+automatically calculate annually.
+
+Show a clean visual event selector.
+
+Example:
+
+Sarah
+☑ Birthday
+☑ Anniversary
+☑ Valentine’s Day
+☑ Mother’s Day
+☑ Christmas
+
+STEP 3 — CARD PERSONALITY
+
+This is extremely important.
+
+The platform should remember personality preferences.
+
+Question:
+“What kind of cards should we send?”
+
+Options:
+
+Funny / sarcastic
+Romantic
+Sweet
+Minimalist
+Elegant
+Slightly unhinged
+Family friendly
+Sentimental
+
+Then ask:
+“What should we avoid?”
+
+Options:
+
+Too mushy
+Religious references
+Profanity
+Cheesy jokes
+Overly emotional
+
+Store these preferences per relationship profile.
+
+STEP 4 — DELIVERY PREFERENCES
+
+Options:
+
+Mail directly to recipient
+Mail to me for hand delivery
+Text me before mailing
+Require approval before sending
+Full autopilot mode
+
+Explain that cards are mailed roughly 7 days early.
+
+Create a branded feature section called:
+
+“Panic Proof Mode”
+
+Description example:
+“Because USPS delays should not become relationship problems.”
+
+STEP 5 — SUBSCRIPTION MODEL
+
+Build pricing UI.
+
+Use a subscription style model.
+
+Suggested example plans:
+
+Basic Plan:
+
+$5/month
+up to 6 events/year
+
+Family Plan:
+
+$12/month
+unlimited family events
+
+Premium Plan:
+
+AI generated personalized messages
+premium card styles
+future gift integrations
+
+DO NOT integrate payments yet.
+Only build polished pricing UI and fake checkout flow.
+
+DASHBOARD EXPERIENCE
+
+Create a modern dashboard after onboarding.
+
+Dashboard sections:
+
+Upcoming Events
+
+show next cards scheduled
+show estimated mailing dates
+show recipient names
+
+Relationship Profiles
+
+editable profiles
+personality preferences
+event lists
+
+Subscription Status
+
+current plan
+billing placeholder
+
+Autopilot Status
+
+active/inactive
+
+Quick Stats
+
+“You’ve avoided 14 disasters this year.”
+“3 cards already scheduled.”
+“Your anniversary is handled.”
+
+DESIGN DIRECTION
+
+The site should visually feel:
+
+modern startup
+emotionally warm
+funny without becoming a joke
+masculine but approachable
+premium but playful
+
+DO NOT use:
+
+cheesy stock card graphics
+overly feminine greeting card styles
+cluttered gradients everywhere
+giant hearts all over the site
+
+Use:
+
+subtle humor
+smart typography
+clean spacing
+animated cards
+smooth onboarding transitions
+tasteful icons
+modern illustrations if needed
+
+The humor should feel:
+
+self aware
+slightly sarcastic
+relatable
+
+Think:
+“the emotional equivalent of Dollar Shave Club.”
+
+TECHNICAL REQUIREMENTS
+
+Maintain existing project structure.
+
+Do not remove existing branding.
+Evolve it.
+
+Use reusable components.
+
+Build onboarding as:
+
+modular
+scalable
+future ready
+
+Prepare internal data structures for:
+
+recurring events
+profile memory
+mailing preferences
+AI generated messages later
+future gift integration
+
+Create placeholder backend structures where necessary.
+
+No real payment processing yet.
+No real mail API yet.
+
+But architect the app cleanly so those integrations can be added later.
+
+IMPORTANT UX RULE
+
+The user should NEVER feel like they are shopping for cards.
+
+They should feel like:
+
+“I solved this problem permanently.”
+
+That emotional feeling is the entire business.

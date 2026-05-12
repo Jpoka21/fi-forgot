@@ -1,12 +1,22 @@
 export type Relationship =
   | "Wife"
   | "Girlfriend"
+  | "Husband"
+  | "Boyfriend"
   | "Mom"
+  | "Dad"
   | "Mother in law"
+  | "Father in law"
   | "Daughter"
+  | "Son"
   | "Grandmother"
+  | "Grandfather"
   | "Sister"
-  | "Other important woman";
+  | "Brother"
+  | "Friend"
+  | "Employee"
+  | "Client"
+  | "Other";
 
 export type Tone =
   | "Sweet"
@@ -18,6 +28,11 @@ export type Tone =
   | "Apology style";
 
 export type DeliveryPreference = "Mail it to me" | "Mail it directly to her";
+
+export type AutopilotMode =
+  | "full_autopilot"
+  | "preview_before_mailing"
+  | "require_approval";
 
 export type CardStatus =
   | "Needs profile"
@@ -42,8 +57,13 @@ export interface Recipient {
   birthday?: string;
   anniversaryDate?: string;
   needsMothersDay: boolean;
+  needsFathersDay: boolean;
   needsValentinesDay: boolean;
   needsChristmasHanukkah: boolean;
+  needsThanksgiving: boolean;
+  needsNewYears: boolean;
+  needsEaster: boolean;
+  selectedEvents: string[];
   customDates: CustomDate[];
   tonePreference: Tone;
   personalityNotes: string;
@@ -53,6 +73,7 @@ export interface Recipient {
   thingsToAvoid: string;
   emotionalLevel: number;
   deliveryPreference: DeliveryPreference;
+  autopilotMode: AutopilotMode;
 }
 
 export interface CardOrder {
@@ -67,7 +88,25 @@ export interface CardOrder {
   deliveryPreference: DeliveryPreference;
 }
 
-const DATA_VERSION = "3";
+export const HOLIDAYS = [
+  "Birthday",
+  "Anniversary",
+  "Mother's Day",
+  "Father's Day",
+  "Valentine's Day",
+  "Christmas",
+  "Hanukkah",
+  "Thanksgiving",
+  "Easter",
+  "New Year's",
+  "Graduation",
+  "Work Anniversary",
+  "Just Because",
+  "Get Well Soon",
+  "Congratulations",
+];
+
+const DATA_VERSION = "4";
 const STORAGE_KEY_RECIPIENTS = "fi_forgot_recipients";
 const STORAGE_KEY_CARDS = "fi_forgot_cards";
 const STORAGE_KEY_VERSION = "fi_forgot_data_version";
@@ -137,10 +176,40 @@ export function updateCard(card: CardOrder): void {
 }
 
 export function defaultDelivery(relationship: Relationship): DeliveryPreference {
-  if (relationship === "Wife" || relationship === "Girlfriend") {
+  if (["Wife", "Girlfriend", "Mom", "Mother in law", "Grandmother"].includes(relationship)) {
     return "Mail it to me";
   }
   return "Mail it directly to her";
+}
+
+export function suggestedEvents(relationship: Relationship): string[] {
+  switch (relationship) {
+    case "Wife":
+    case "Girlfriend":
+      return ["Birthday", "Anniversary", "Valentine's Day", "Christmas", "Mother's Day"];
+    case "Husband":
+    case "Boyfriend":
+      return ["Birthday", "Anniversary", "Valentine's Day", "Christmas", "Father's Day"];
+    case "Mom":
+    case "Mother in law":
+      return ["Birthday", "Mother's Day", "Christmas", "Thanksgiving"];
+    case "Dad":
+    case "Father in law":
+      return ["Birthday", "Father's Day", "Christmas", "Thanksgiving"];
+    case "Daughter":
+    case "Son":
+      return ["Birthday", "Graduation", "Christmas"];
+    case "Grandmother":
+    case "Grandfather":
+      return ["Birthday", "Christmas", "Thanksgiving"];
+    case "Friend":
+      return ["Birthday", "Just Because"];
+    case "Employee":
+    case "Client":
+      return ["Birthday", "Work Anniversary", "Congratulations"];
+    default:
+      return ["Birthday", "Christmas"];
+  }
 }
 
 export const STATUS_COLORS: Record<CardStatus, string> = {
@@ -168,12 +237,22 @@ export const ALL_STATUSES: CardStatus[] = [
 export const RELATIONSHIPS: Relationship[] = [
   "Wife",
   "Girlfriend",
+  "Husband",
+  "Boyfriend",
   "Mom",
+  "Dad",
   "Mother in law",
+  "Father in law",
   "Daughter",
+  "Son",
   "Grandmother",
+  "Grandfather",
   "Sister",
-  "Other important woman",
+  "Brother",
+  "Friend",
+  "Employee",
+  "Client",
+  "Other",
 ];
 
 export const TONES: Tone[] = [
@@ -185,3 +264,18 @@ export const TONES: Tone[] = [
   "From the kids",
   "Apology style",
 ];
+
+export const AUTOPILOT_LABELS: Record<AutopilotMode, { label: string; description: string }> = {
+  full_autopilot: {
+    label: "Full Autopilot",
+    description: "We write it, we send it. You do nothing.",
+  },
+  preview_before_mailing: {
+    label: "Preview Before Mailing",
+    description: "We write it and show you first. You approve with one tap.",
+  },
+  require_approval: {
+    label: "Require My Approval",
+    description: "Nothing ships without your sign-off. Control freak mode.",
+  },
+};

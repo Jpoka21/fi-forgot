@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference } from "./data";
+import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, AutopilotMode, suggestedEvents } from "./data";
 
 export interface OnboardingData {
   recipientName: string;
@@ -10,6 +10,8 @@ export interface OnboardingData {
   petName: string;
   yearsTogther: string;
   thingsToAvoid: string;
+  selectedEvents: string[];
+  autopilotMode: AutopilotMode;
 }
 
 interface AuthContextType {
@@ -65,17 +67,27 @@ const TONE_MAP: Record<string, Tone> = {
 const RELATIONSHIP_MAP: Record<string, Relationship> = {
   Wife: "Wife",
   Girlfriend: "Girlfriend",
+  Husband: "Husband",
+  Boyfriend: "Boyfriend",
   Mom: "Mom",
+  Dad: "Dad",
   "Mother-in-law": "Mother in law",
+  "Father-in-law": "Father in law",
   Grandma: "Grandmother",
+  Grandpa: "Grandfather",
   Sister: "Sister",
-  Other: "Other important woman",
+  Brother: "Brother",
+  Friend: "Friend",
+  Employee: "Employee",
+  Client: "Client",
+  Other: "Other",
 };
 
 function onboardingToRecipient(data: OnboardingData): Recipient {
-  const rel: Relationship = RELATIONSHIP_MAP[data.relationship] ?? "Other important woman";
-  const isMothersRelationship = ["Mom", "Mother-in-law", "Grandma"].includes(data.relationship);
-  const isPartner = ["Wife", "Girlfriend"].includes(data.relationship);
+  const rel: Relationship = RELATIONSHIP_MAP[data.relationship] ?? "Other";
+  const isPartner = ["Wife", "Girlfriend", "Husband", "Boyfriend"].includes(data.relationship);
+  const isMom = ["Mom", "Mother-in-law", "Grandma"].includes(data.relationship);
+  const isDad = ["Dad", "Father-in-law", "Grandpa"].includes(data.relationship);
 
   const personalityStr = data.personality.map((p) => PERSONALITY_LABELS[p] ?? p).join(", ");
   const interestsStr = data.interests.map((i) => INTEREST_LABELS[i] ?? i).join(", ");
@@ -86,25 +98,36 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     data.yearsTogther && `Together: ${data.yearsTogther}`,
   ].filter(Boolean);
 
-  const deliveryPreference: DeliveryPreference = isPartner
+  const deliveryPref: DeliveryPreference = isPartner || isMom
     ? "Mail it to me"
     : "Mail it directly to her";
+
+  const events = data.selectedEvents.length > 0
+    ? data.selectedEvents
+    : suggestedEvents(rel);
 
   return {
     id: Date.now().toString(),
     name: data.recipientName,
     relationship: rel,
-    needsMothersDay: isMothersRelationship,
-    needsValentinesDay: isPartner,
-    needsChristmasHanukkah: true,
+    needsMothersDay: isMom || events.includes("Mother's Day"),
+    needsFathersDay: isDad || events.includes("Father's Day"),
+    needsValentinesDay: isPartner || events.includes("Valentine's Day"),
+    needsChristmasHanukkah: events.includes("Christmas") || events.includes("Hanukkah"),
+    needsThanksgiving: events.includes("Thanksgiving"),
+    needsNewYears: events.includes("New Year's"),
+    needsEaster: events.includes("Easter"),
+    selectedEvents: events,
     customDates: [],
     tonePreference: TONE_MAP[data.tone] ?? "Sweet",
     personalityNotes: noteParts.join(" | "),
+    kidsNames: "",
     favoriteMemories: "",
     insideJokes: data.petName ? `Pet name: ${data.petName}` : "",
     thingsToAvoid: data.thingsToAvoid,
     emotionalLevel: 3,
-    deliveryPreference,
+    deliveryPreference: deliveryPref,
+    autopilotMode: data.autopilotMode ?? "preview_before_mailing",
   };
 }
 

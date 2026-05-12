@@ -5,12 +5,16 @@ import {
   getRecipient,
   saveRecipient,
   defaultDelivery,
+  suggestedEvents,
   RELATIONSHIPS,
   TONES,
+  HOLIDAYS,
+  AUTOPILOT_LABELS,
   Recipient,
   Relationship,
   Tone,
   DeliveryPreference,
+  AutopilotMode,
 } from "@/lib/data";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,14 +38,22 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Save } from "lucide-react";
 import { Link } from "wouter";
 
+const AUTOPILOT_MODES: AutopilotMode[] = ["full_autopilot", "preview_before_mailing", "require_approval"];
+
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   relationship: z.enum(RELATIONSHIPS as [Relationship, ...Relationship[]]),
   birthday: z.string().optional(),
   anniversaryDate: z.string().optional(),
   needsMothersDay: z.boolean(),
+  needsFathersDay: z.boolean(),
   needsValentinesDay: z.boolean(),
   needsChristmasHanukkah: z.boolean(),
+  needsThanksgiving: z.boolean(),
+  needsNewYears: z.boolean(),
+  needsEaster: z.boolean(),
+  selectedEvents: z.array(z.string()),
+  autopilotMode: z.enum(AUTOPILOT_MODES as [AutopilotMode, ...AutopilotMode[]]),
   tonePreference: z.enum(TONES as [Tone, ...Tone[]]),
   personalityNotes: z.string(),
   kidsNames: z.string(),
@@ -71,8 +83,14 @@ export default function RecipientProfilePage() {
           birthday: existing.birthday ?? "",
           anniversaryDate: existing.anniversaryDate ?? "",
           needsMothersDay: existing.needsMothersDay,
+          needsFathersDay: existing.needsFathersDay ?? false,
           needsValentinesDay: existing.needsValentinesDay,
           needsChristmasHanukkah: existing.needsChristmasHanukkah,
+          needsThanksgiving: existing.needsThanksgiving ?? false,
+          needsNewYears: existing.needsNewYears ?? false,
+          needsEaster: existing.needsEaster ?? false,
+          selectedEvents: existing.selectedEvents ?? [],
+          autopilotMode: existing.autopilotMode ?? "preview_before_mailing",
           tonePreference: existing.tonePreference,
           personalityNotes: existing.personalityNotes,
           kidsNames: existing.kidsNames ?? "",
@@ -88,8 +106,14 @@ export default function RecipientProfilePage() {
           birthday: "",
           anniversaryDate: "",
           needsMothersDay: false,
+          needsFathersDay: false,
           needsValentinesDay: false,
           needsChristmasHanukkah: false,
+          needsThanksgiving: false,
+          needsNewYears: false,
+          needsEaster: false,
+          selectedEvents: [],
+          autopilotMode: "preview_before_mailing" as AutopilotMode,
           tonePreference: "Sweet",
           personalityNotes: "",
           kidsNames: "",
@@ -108,6 +132,25 @@ export default function RecipientProfilePage() {
       form.setValue("deliveryPreference", defaultDelivery(watchRelationship));
     }
   }, [watchRelationship, isNew]);
+
+  const watchRelationshipForEvents = form.watch("relationship");
+  const watchSelectedEvents = form.watch("selectedEvents");
+
+  useEffect(() => {
+    if (isNew && watchRelationshipForEvents) {
+      const suggested = suggestedEvents(watchRelationshipForEvents as any);
+      form.setValue("selectedEvents", suggested);
+    }
+  }, [watchRelationshipForEvents, isNew]);
+
+  function toggleEvent(event: string) {
+    const current = form.getValues("selectedEvents");
+    if (current.includes(event)) {
+      form.setValue("selectedEvents", current.filter((e) => e !== event));
+    } else {
+      form.setValue("selectedEvents", [...current, event]);
+    }
+  }
 
   function onSubmit(data: FormData) {
     const recipient: Recipient = {
@@ -222,30 +265,81 @@ export default function RecipientProfilePage() {
 
             {/* Occasions */}
             <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm space-y-4">
-              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Card occasions</h2>
-              {[
-                { name: "needsMothersDay" as const, label: "Mother's Day card needed" },
-                { name: "needsValentinesDay" as const, label: "Valentine's Day card needed" },
-                { name: "needsChristmasHanukkah" as const, label: "Christmas or Hanukkah card needed" },
-              ].map(({ name, label }) => (
-                <FormField
-                  key={name}
-                  control={form.control}
-                  name={name}
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between">
-                      <FormLabel className="cursor-pointer">{label}</FormLabel>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          data-testid={`switch-${name}`}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              ))}
+              <div>
+                <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Occasions to cover</h2>
+                <p className="text-sm text-[hsl(221,20%,50%)] mt-1">We auto-selected based on relationship. Adjust freely.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {HOLIDAYS.map((h) => {
+                  const selected = watchSelectedEvents.includes(h);
+                  return (
+                    <button
+                      key={h}
+                      type="button"
+                      onClick={() => toggleEvent(h)}
+                      className="flex items-center gap-2 py-2.5 px-3 rounded-xl border-2 text-left transition-all"
+                      style={{
+                        borderColor: selected ? "hsl(6,64%,46%)" : "hsl(40,20%,80%)",
+                        background: selected ? "hsl(6,64%,96%)" : "#fff",
+                      }}
+                      data-testid={`toggle-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      <div
+                        className="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0"
+                        style={{
+                          borderColor: selected ? "hsl(6,64%,46%)" : "hsl(221,20%,70%)",
+                          background: selected ? "hsl(6,64%,46%)" : "transparent",
+                        }}
+                      >
+                        {selected && <span className="text-white text-xs leading-none">✓</span>}
+                      </div>
+                      <span className="text-sm font-medium" style={{ color: selected ? "hsl(6,64%,36%)" : "hsl(221,47%,20%)" }}>{h}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Autopilot Mode */}
+            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm">
+              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)] mb-1">Autopilot mode</h2>
+              <p className="text-sm text-[hsl(221,20%,50%)] mb-4">Choose how involved you want to be for this recipient.</p>
+              <FormField
+                control={form.control}
+                name="autopilotMode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="space-y-3">
+                        {(Object.keys(AUTOPILOT_LABELS) as AutopilotMode[]).map((mode) => {
+                          const { label, description } = AUTOPILOT_LABELS[mode];
+                          const selected = field.value === mode;
+                          return (
+                            <button
+                              key={mode}
+                              type="button"
+                              onClick={() => field.onChange(mode)}
+                              className="w-full flex items-center justify-between py-3.5 px-4 rounded-xl border-2 text-left transition-all"
+                              style={{
+                                borderColor: selected ? "hsl(221,47%,20%)" : "hsl(40,20%,80%)",
+                                background: selected ? "hsl(221,47%,97%)" : "#fff",
+                              }}
+                              data-testid={`btn-autopilot-${mode}`}
+                            >
+                              <div>
+                                <div className="font-semibold text-sm" style={{ color: "hsl(221,47%,20%)" }}>{label}</div>
+                                <div className="text-xs text-[hsl(221,20%,50%)] mt-0.5">{description}</div>
+                              </div>
+                              {selected && <span className="text-[hsl(221,47%,20%)] font-bold ml-3">✓</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Tone */}

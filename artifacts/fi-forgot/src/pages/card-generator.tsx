@@ -1,19 +1,8 @@
 import { useState, useEffect } from "react";
 import AppLayout from "@/components/layout/AppLayout";
-import { getRecipients, getCards, updateCard, Recipient, CardOrder, Tone } from "@/lib/data";
+import { getRecipients, getCards, updateCard, Recipient, CardOrder, Tone, HOLIDAYS } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, RefreshCw, Flame, Heart, Scissors, Smile, Sparkles, AlertCircle } from "lucide-react";
-
-const HOLIDAYS = [
-  "Birthday",
-  "Mother's Day",
-  "Anniversary",
-  "Valentine's Day",
-  "Christmas",
-  "Hanukkah",
-  "Thanksgiving",
-  "Just Because",
-];
 
 interface GeneratedCard {
   tone: Tone;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth, OnboardingData } from "@/lib/auth-context";
+import { suggestedEvents, HOLIDAYS, AutopilotMode, AUTOPILOT_LABELS } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
 const CREAM = "#F8EEDC";
@@ -8,7 +9,24 @@ const NAVY = "#071A33";
 const RED = "#E23B2E";
 const BLACK = "#111111";
 
-const RELATIONSHIPS = ["Wife", "Girlfriend", "Mom", "Mother-in-law", "Grandma", "Sister", "Other"];
+const RELATIONSHIPS = [
+  { id: "Wife", label: "Wife", emoji: "💍" },
+  { id: "Girlfriend", label: "Girlfriend", emoji: "❤️" },
+  { id: "Husband", label: "Husband", emoji: "💍" },
+  { id: "Boyfriend", label: "Boyfriend", emoji: "❤️" },
+  { id: "Mom", label: "Mom", emoji: "🌸" },
+  { id: "Dad", label: "Dad", emoji: "🏆" },
+  { id: "Mother-in-law", label: "Mother-in-law", emoji: "🌷" },
+  { id: "Father-in-law", label: "Father-in-law", emoji: "🤝" },
+  { id: "Grandma", label: "Grandma", emoji: "👵" },
+  { id: "Grandpa", label: "Grandpa", emoji: "👴" },
+  { id: "Sister", label: "Sister", emoji: "👯" },
+  { id: "Brother", label: "Brother", emoji: "🤜" },
+  { id: "Friend", label: "Friend", emoji: "🍻" },
+  { id: "Employee", label: "Employee", emoji: "💼" },
+  { id: "Client", label: "Client", emoji: "🤝" },
+  { id: "Other", label: "Other", emoji: "⭐" },
+];
 
 const PERSONALITIES = [
   { id: "sweet", label: "Sweet & sentimental", emoji: "🥰" },
@@ -34,18 +52,38 @@ const INTERESTS = [
 
 const TONES = [
   { id: "heartfelt", label: "Heartfelt & genuine", sub: "Real emotions, no cheese" },
-  { id: "funny", label: "Funny & lighthearted", sub: "Make her laugh first" },
-  { id: "short", label: "Short & sweet", sub: "She doesn't need a novel" },
+  { id: "funny", label: "Funny & lighthearted", sub: "Make them laugh first" },
+  { id: "short", label: "Short & sweet", sub: "Nobody needs a novel" },
   { id: "romantic", label: "Over the top romantic", sub: "Go big or go home" },
   { id: "mix", label: "Mix it up", sub: "Surprise me every time" },
 ];
 
+const AUTOPILOT_OPTIONS: { id: AutopilotMode; label: string; sub: string; badge?: string }[] = [
+  {
+    id: "full_autopilot",
+    label: "Full Autopilot",
+    sub: "We write it, we send it. You do absolutely nothing.",
+    badge: "RECOMMENDED",
+  },
+  {
+    id: "preview_before_mailing",
+    label: "Preview Before Mailing",
+    sub: "We write it and show you first. One tap to approve.",
+  },
+  {
+    id: "require_approval",
+    label: "Require My Approval",
+    sub: "Nothing ships without your sign-off. Control freak mode.",
+  },
+];
+
 const STEPS = [
-  "Who are we writing for?",
-  "What's she like?",
-  "What does she love?",
-  "What tone works for her?",
-  "One last thing",
+  "Who are we covering?",
+  "What are they like?",
+  "What do they love?",
+  "What tone lands with them?",
+  "Which occasions matter?",
+  "How should we handle it?",
 ];
 
 export default function OnboardingPage() {
@@ -63,12 +101,25 @@ export default function OnboardingPage() {
     petName: "",
     yearsTogther: "",
     thingsToAvoid: "",
+    selectedEvents: [],
+    autopilotMode: "preview_before_mailing",
   });
 
-  function toggleMulti(field: "personality" | "interests", val: string) {
+  const suggested = data.relationship
+    ? suggestedEvents(
+        ({ Wife: "Wife", Girlfriend: "Girlfriend", Husband: "Husband", Boyfriend: "Boyfriend",
+           Mom: "Mom", Dad: "Dad", "Mother-in-law": "Mother in law", "Father-in-law": "Father in law",
+           Grandma: "Grandmother", Grandpa: "Grandfather", Sister: "Sister", Brother: "Brother",
+           Friend: "Friend", Employee: "Employee", Client: "Client", Other: "Other" } as Record<string, any>)[data.relationship] ?? "Other"
+      )
+    : [];
+
+  function toggleMulti(field: "personality" | "interests" | "selectedEvents", val: string) {
     setData((d) => ({
       ...d,
-      [field]: d[field].includes(val) ? d[field].filter((x) => x !== val) : [...d[field], val],
+      [field]: d[field].includes(val)
+        ? (d[field] as string[]).filter((x) => x !== val)
+        : [...(d[field] as string[]), val],
     }));
   }
 
@@ -77,21 +128,26 @@ export default function OnboardingPage() {
     if (step === 1) return data.personality.length > 0;
     if (step === 2) return data.interests.length > 0;
     if (step === 3) return data.tone.length > 0;
+    if (step === 4) return data.selectedEvents.length > 0;
     return true;
   }
 
+  // Pre-fill suggested events when entering step 4
   function handleNext() {
+    if (step === 3 && data.selectedEvents.length === 0) {
+      setData((d) => ({ ...d, selectedEvents: suggested }));
+    }
     if (step < STEPS.length - 1) {
       setStep((s) => s + 1);
     } else {
       completeOnboarding(data);
-      toast({ title: "You're all set!", description: `We'll take it from here for ${data.recipientName}.` });
+      toast({ title: "You're all set!", description: `We'll handle everything for ${data.recipientName}.` });
       setLocation("/dashboard");
     }
   }
 
-  const progress = ((step) / (STEPS.length - 1)) * 100;
-  const isPartnerRelationship = ["Wife", "Girlfriend"].includes(data.relationship);
+  const progress = ((step + 1) / STEPS.length) * 100;
+  const isPartnerRelationship = ["Wife", "Girlfriend", "Husband", "Boyfriend"].includes(data.relationship);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: CREAM }}>
@@ -110,7 +166,7 @@ export default function OnboardingPage() {
       <div className="w-full h-1.5" style={{ background: `${BLACK}10` }}>
         <div
           className="h-full transition-all duration-500"
-          style={{ width: `${progress + (100 / (STEPS.length - 1))}%`, background: RED }}
+          style={{ width: `${progress}%`, background: RED }}
         />
       </div>
 
@@ -125,51 +181,61 @@ export default function OnboardingPage() {
             </p>
             {step === 0 && (
               <>
-                <h1 className="text-3xl font-bold mb-1" style={{ color: BLACK, fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem" }}>
-                  Let's meet her.
+                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
+                  Who are we covering?
                 </h1>
                 <p className="text-sm" style={{ color: "#666" }}>
-                  Tell us who we're writing for. This is your primary recipient — the one we really can't let you screw up.
+                  Tell us who you need us to remember. This is your first recipient — you can add more later.
                 </p>
               </>
             )}
             {step === 1 && (
               <>
                 <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
-                  What's {data.recipientName || "she"} like?
+                  What's {data.recipientName || "they"} like?
                 </h1>
                 <p className="text-sm" style={{ color: "#666" }}>
-                  Pick up to 2 that describe her best. This shapes the vibe of every card.
+                  Pick up to 2. This shapes the vibe of every card we write.
                 </p>
               </>
             )}
             {step === 2 && (
               <>
                 <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
-                  What does {data.recipientName || "she"} love?
+                  What do they love?
                 </h1>
                 <p className="text-sm" style={{ color: "#666" }}>
-                  Pick everything that fits. We'll weave these into the cards naturally.
+                  Pick everything that fits. We'll weave these in naturally.
                 </p>
               </>
             )}
             {step === 3 && (
               <>
                 <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
-                  What tone lands with her?
+                  What tone lands with them?
                 </h1>
                 <p className="text-sm" style={{ color: "#666" }}>
-                  We'll default to this style unless you tell us otherwise on a specific card.
+                  We'll default to this style for every card unless you say otherwise.
                 </p>
               </>
             )}
             {step === 4 && (
               <>
                 <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
-                  A little more detail.
+                  Which occasions matter?
                 </h1>
                 <p className="text-sm" style={{ color: "#666" }}>
-                  Optional — but the more you give us, the better the cards get.
+                  We pre-selected the obvious ones. Add or remove anything.
+                </p>
+              </>
+            )}
+            {step === 5 && (
+              <>
+                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
+                  How should we handle it?
+                </h1>
+                <p className="text-sm" style={{ color: "#666" }}>
+                  Choose how much you want to be involved. Spoiler: less is more.
                 </p>
               </>
             )}
@@ -179,32 +245,33 @@ export default function OnboardingPage() {
           {step === 0 && (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: BLACK }}>Her name</label>
+                <label className="block text-sm font-semibold mb-2" style={{ color: BLACK }}>Their name</label>
                 <input
                   className="w-full border-2 rounded-xl px-4 py-3 text-base font-medium outline-none focus:border-red-500 transition-colors"
                   style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
-                  placeholder="Sarah, Mom, Linda…"
+                  placeholder="Sarah, Mom, Mike, Dave…"
                   value={data.recipientName}
                   onChange={(e) => setData((d) => ({ ...d, recipientName: e.target.value }))}
                   data-testid="input-recipient-name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-3" style={{ color: BLACK }}>Your relationship to her</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <label className="block text-sm font-semibold mb-3" style={{ color: BLACK }}>Your relationship to them</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {RELATIONSHIPS.map((r) => (
                     <button
-                      key={r}
-                      onClick={() => setData((d) => ({ ...d, relationship: r }))}
-                      className="py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all"
+                      key={r.id}
+                      onClick={() => setData((d) => ({ ...d, relationship: r.id, selectedEvents: [] }))}
+                      className="py-3 px-3 rounded-xl border-2 text-sm font-semibold transition-all flex flex-col items-center gap-1"
                       style={{
-                        borderColor: data.relationship === r ? RED : `${BLACK}15`,
-                        background: data.relationship === r ? `${RED}12` : "#fff",
-                        color: data.relationship === r ? RED : "#444",
+                        borderColor: data.relationship === r.id ? RED : `${BLACK}15`,
+                        background: data.relationship === r.id ? `${RED}12` : "#fff",
+                        color: data.relationship === r.id ? RED : "#444",
                       }}
-                      data-testid={`btn-relationship-${r.toLowerCase().replace(/ /g, "-")}`}
+                      data-testid={`btn-relationship-${r.id.toLowerCase().replace(/ /g, "-")}`}
                     >
-                      {r}
+                      <span className="text-xl">{r.emoji}</span>
+                      <span style={{ fontSize: "0.75rem" }}>{r.label}</span>
                     </button>
                   ))}
                 </div>
@@ -290,56 +357,124 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 4 — Details */}
+          {/* Step 4 — Events */}
           {step === 4 && (
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: BLACK }}>
-                  Pet name or nickname <span className="font-normal text-gray-400">(optional)</span>
-                </label>
-                <input
-                  className="w-full border-2 rounded-xl px-4 py-3 text-base outline-none focus:border-red-500 transition-colors"
-                  style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
-                  placeholder="Babe, honey, mama bear…"
-                  value={data.petName}
-                  onChange={(e) => setData((d) => ({ ...d, petName: e.target.value }))}
-                  data-testid="input-pet-name"
-                />
+            <div>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {HOLIDAYS.map((h) => {
+                  const selected = data.selectedEvents.includes(h);
+                  const isSuggested = suggested.includes(h);
+                  return (
+                    <button
+                      key={h}
+                      onClick={() => toggleMulti("selectedEvents", h)}
+                      className="flex items-center gap-2 py-3 px-4 rounded-xl border-2 text-left transition-all"
+                      style={{
+                        borderColor: selected ? RED : `${BLACK}15`,
+                        background: selected ? `${RED}12` : "#fff",
+                      }}
+                      data-testid={`btn-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      <div
+                        className="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0"
+                        style={{
+                          borderColor: selected ? RED : `${BLACK}30`,
+                          background: selected ? RED : "transparent",
+                        }}
+                      >
+                        {selected && <span className="text-white text-xs leading-none">✓</span>}
+                      </div>
+                      <div>
+                        <span className="text-sm font-semibold" style={{ color: selected ? RED : "#333" }}>{h}</span>
+                        {isSuggested && !selected && (
+                          <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full" style={{ background: `${NAVY}12`, color: NAVY, fontSize: "0.65rem" }}>suggested</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-center" style={{ color: "#aaa" }}>
+                We pre-selected what makes sense for a {data.relationship}. Adjust freely.
+              </p>
+            </div>
+          )}
+
+          {/* Step 5 — Autopilot + Details */}
+          {step === 5 && (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                {AUTOPILOT_OPTIONS.map((opt) => {
+                  const selected = data.autopilotMode === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => setData((d) => ({ ...d, autopilotMode: opt.id }))}
+                      className="w-full flex items-center justify-between py-4 px-5 rounded-xl border-2 text-left transition-all"
+                      style={{
+                        borderColor: selected ? RED : `${BLACK}15`,
+                        background: selected ? `${RED}12` : "#fff",
+                      }}
+                      data-testid={`btn-autopilot-${opt.id}`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm" style={{ color: selected ? RED : BLACK }}>{opt.label}</span>
+                          {opt.badge && (
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: NAVY, color: "#fff", fontSize: "0.6rem" }}>{opt.badge}</span>
+                          )}
+                        </div>
+                        <div className="text-xs mt-0.5" style={{ color: "#888" }}>{opt.sub}</div>
+                      </div>
+                      {selected && <span style={{ color: RED, fontWeight: 700 }}>✓</span>}
+                    </button>
+                  );
+                })}
               </div>
 
-              {isPartnerRelationship && (
+              <div className="rounded-xl px-5 py-4 text-sm space-y-4" style={{ background: `${NAVY}06`, border: `1px solid ${NAVY}12` }}>
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: BLACK }}>
-                    How long have you two been together? <span className="font-normal text-gray-400">(optional)</span>
+                    Nickname or pet name <span className="font-normal text-gray-400">(optional)</span>
                   </label>
                   <input
-                    className="w-full border-2 rounded-xl px-4 py-3 text-base outline-none focus:border-red-500 transition-colors"
+                    className="w-full border-2 rounded-xl px-4 py-2.5 text-base outline-none focus:border-red-500 transition-colors"
                     style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
-                    placeholder="3 years, since college, married 8 years…"
-                    value={data.yearsTogther}
-                    onChange={(e) => setData((d) => ({ ...d, yearsTogther: e.target.value }))}
-                    data-testid="input-years-together"
+                    placeholder="Babe, honey, mama bear, big guy…"
+                    value={data.petName}
+                    onChange={(e) => setData((d) => ({ ...d, petName: e.target.value }))}
+                    data-testid="input-pet-name"
                   />
                 </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: BLACK }}>
-                  Anything we should NEVER put in a card? <span className="font-normal text-gray-400">(optional)</span>
-                </label>
-                <textarea
-                  className="w-full border-2 rounded-xl px-4 py-3 text-base outline-none focus:border-red-500 transition-colors resize-none"
-                  style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
-                  placeholder="Don't mention her age. No weight jokes. She hates the word 'blessed'."
-                  rows={3}
-                  value={data.thingsToAvoid}
-                  onChange={(e) => setData((d) => ({ ...d, thingsToAvoid: e.target.value }))}
-                  data-testid="input-things-to-avoid"
-                />
-              </div>
-
-              <div className="rounded-xl px-5 py-4 text-sm" style={{ background: `${NAVY}08`, color: "#555" }}>
-                ✓ That's all we need for now. You can update these any time from her profile, and we'll ask follow-up questions as specific holidays approach.
+                {isPartnerRelationship && (
+                  <div>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: BLACK }}>
+                      How long have you two been together? <span className="font-normal text-gray-400">(optional)</span>
+                    </label>
+                    <input
+                      className="w-full border-2 rounded-xl px-4 py-2.5 text-base outline-none focus:border-red-500 transition-colors"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
+                      placeholder="3 years, since college, married 8 years…"
+                      value={data.yearsTogther}
+                      onChange={(e) => setData((d) => ({ ...d, yearsTogther: e.target.value }))}
+                      data-testid="input-years-together"
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: BLACK }}>
+                    Anything we should NEVER put in a card? <span className="font-normal text-gray-400">(optional)</span>
+                  </label>
+                  <textarea
+                    className="w-full border-2 rounded-xl px-4 py-2.5 text-base outline-none focus:border-red-500 transition-colors resize-none"
+                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
+                    placeholder="Don't mention her age. No weight jokes. He hates the word 'blessed'."
+                    rows={2}
+                    value={data.thingsToAvoid}
+                    onChange={(e) => setData((d) => ({ ...d, thingsToAvoid: e.target.value }))}
+                    data-testid="input-things-to-avoid"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -367,12 +502,12 @@ export default function OnboardingPage() {
               }}
               data-testid="btn-onboarding-next"
             >
-              {step === STEPS.length - 1 ? "Let's go →" : "Next →"}
+              {step === STEPS.length - 1 ? "Put Me On Autopilot →" : "Next →"}
             </button>
           </div>
 
-          {/* Skip */}
-          {step === 4 && (
+          {/* Skip on last step */}
+          {step === STEPS.length - 1 && (
             <p className="text-center mt-4">
               <button
                 onClick={() => {
