@@ -195,29 +195,41 @@ export default function LandingPage() {
       </nav>
 
       {/* HERO */}
-      <section style={{ background: NAV }} className="text-white pt-16 pb-20 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
-          backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }} />
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
+      <section
+        className="text-white relative overflow-hidden"
+        style={{
+          backgroundImage: "url('/hero-bg.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center right",
+          backgroundRepeat: "no-repeat",
+          backgroundColor: NAV,
+          minHeight: 560,
+        }}
+      >
+        {/* Left-side gradient so text stays readable over the image */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `linear-gradient(to right, ${NAV} 0%, ${NAV}EE 42%, ${NAV}88 58%, transparent 78%)`,
+          }}
+        />
 
-          {/* Left */}
-          <div>
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 flex items-center" style={{ minHeight: 560 }}>
+          <div className="max-w-xl">
             <div
               className="inline-block text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase"
-              style={{ background: `${RED}25`, color: RED, border: `1.5px solid ${RED}50` }}
+              style={{ background: `${RED}30`, color: RED, border: `1.5px solid ${RED}60` }}
             >
               Relationship disaster prevention
             </div>
 
             <h1
               className="font-bold leading-none mb-2"
-              style={{ fontFamily: "'Caveat', cursive", fontSize: "clamp(4rem, 10vw, 7rem)", color: "#fff" }}
+              style={{ fontFamily: "'Caveat', cursive", fontSize: "clamp(4rem, 9vw, 6.5rem)", color: "#fff" }}
             >
               <span style={{ color: RED }}>&quot;F&quot;</span> I Forgot.
             </h1>
-            <div className="mb-6 -mt-2">
+            <div className="mb-6 -mt-2" style={{ maxWidth: 480 }}>
               <ScribbleUnderline color={RED} />
             </div>
 
@@ -254,21 +266,6 @@ export default function LandingPage() {
               ✓ Approved by husbands. ✓ Suspected by wives.
             </p>
           </div>
-
-          {/* Right — Hero image (cropped to man + sticky note area) */}
-          <div
-            className="w-full rounded-2xl shadow-2xl"
-            role="img"
-            aria-label="Confused man holding flowers and a bad card — Dave had one job"
-            style={{
-              height: 460,
-              backgroundImage: "url('/hero-ai.png')",
-              backgroundSize: "contain",
-              backgroundPosition: "center center",
-              backgroundColor: "#F8EEDC",
-              backgroundRepeat: "no-repeat",
-            }}
-          />
         </div>
       </section>
 
