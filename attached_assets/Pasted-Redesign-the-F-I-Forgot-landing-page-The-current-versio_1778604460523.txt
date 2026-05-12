@@ -1,0 +1,117 @@
+Redesign the F.I. Forgot landing page. The current version feels too serious and political. Make it feel funny, sarcastic, playful, and built for forgetful men.
+
+Keep the brand name:
+F.I. Forgot
+
+But visually style the logo like:
+“F” I Forgot
+Make the “F” red, in quotes, slightly messy or handwritten.
+Make “I Forgot” white or dark navy depending on background.
+Add a red underline under the logo.
+
+Overall design direction:
+Funny modern startup
+Hand drawn doodle energy
+Sarcastic men’s relationship survival brand
+Not corporate
+Not political
+Not luxury greeting card
+Not elegant serif heavy
+
+Use:
+Cream paper background
+Deep navy header
+Bold black handwritten style headlines
+Red accent marks
+Gold sticky note elements
+Doodle arrows
+Small sketch icons
+Scribble underlines
+Card and envelope illustrations
+A confused husband visual or placeholder illustration
+
+Hero section:
+Left side:
+Huge headline:
+“F” I Forgot.
+
+Under it:
+We remember the dates you forget.
+We write the card.
+You look like the hero.
+
+Small copy:
+Mother’s Day. Anniversaries. Birthdays.
+The dates you can’t screw up, but probably will.
+
+Buttons:
+Save Me From Myself
+See How It Works
+
+Small trust line:
+Approved by husbands. Suspected by wives.
+
+Right side:
+Create a funny hero collage area with:
+A confused man holding flowers and a bad card, use a placeholder illustration if needed
+A sticky note that says:
+Dave had one job.
+Dave forgot Mother’s Day.
+This exists because Dave is not alone.
+
+Another doodle callout:
+Gas station cards are not a strategy.
+
+Below hero:
+Create a “How It Works” section with this heading:
+How It Works
+AKA: How You Don’t Screw This Up
+
+Use 5 horizontal steps with doodle style icons:
+1. Add the important women in your life
+2. Tell us what they like, and don’t like
+3. We create a custom card before the big day
+4. You approve it, edit it, or change the tone
+5. We remind you so you look like a legend
+
+Pricing section:
+Heading:
+Choose Your Plan
+
+Use playful card style pricing boxes:
+Basic, $9/month, up to 6 cards per year
+Family, $15/month, up to 12 cards per year
+Hero, $29/month, up to 24 cards per year
+
+Make Hero plan visually highlighted with:
+Most Popular
+Because legends never forget
+
+Add subtle doodle background elements in pricing:
+stars
+arrows
+hearts
+warning signs
+calendar icons
+
+Font direction:
+Use a bold handwritten style font for big headlines if available.
+Use clean sans serif for normal text.
+Avoid formal serif fonts.
+Avoid political campaign style typography.
+
+Color palette:
+Deep navy: #071A33 or similar
+Cream: #F8EEDC
+Red: #E23B2E
+Gold: #D8A725
+Black: #111111
+White: #FFFFFF
+
+Important:
+Keep the site mobile responsive.
+Keep existing navigation links working.
+Keep existing CTA buttons working.
+Keep the rest of the app functionality unchanged.
+Only redesign the visual style and landing page sections.
+Make the page feel like a funny “relationship disaster prevention” product for men.
