@@ -133,7 +133,10 @@ const KEYS = {
   queue: "fif_admin_queue",
   audit: "fif_admin_audit",
   seeded: "fif_admin_seeded",
+  seedVersion: "fif_admin_seed_version",
 };
+
+const CURRENT_SEED_VERSION = "2"; // bump to wipe existing fake data
 
 function load<T>(key: string): T[] {
   try {
@@ -288,70 +291,16 @@ export function addAuditEntry(entry: AuditInput): void {
 
 export const getAuditEntries = () => load<AuditEntry>(KEYS.audit);
 
-// ─── Seed data ────────────────────────────────────────────────────────────────
+// ─── Init (clears stale data on version bump, seeds nothing) ──────────────────
 
 export function seedAdminDataIfNeeded(): void {
-  if (localStorage.getItem(KEYS.seeded)) return;
+  const storedVersion = localStorage.getItem(KEYS.seedVersion);
+  if (storedVersion === CURRENT_SEED_VERSION) return;
 
-  const customers: AdminCustomer[] = [
-    { id: "cust-1", name: "James Massaro", email: "james.massaro21@gmail.com", phone: "617-555-0101", subscriptionStatus: "active", billingPlan: "family", createdAt: "2025-01-15", notes: "Founder account — treat with love" },
-    { id: "cust-2", name: "Mike Thompson", email: "mike@example.com", phone: "603-555-0142", subscriptionStatus: "active", billingPlan: "standard", createdAt: "2025-02-01" },
-    { id: "cust-3", name: "Dave Kelley", email: "dave.k@example.com", phone: "781-555-0198", subscriptionStatus: "trial", billingPlan: "basic", createdAt: "2025-05-01", notes: "Trial ends June 1" },
-    { id: "cust-4", name: "Ryan Hartley", email: "ryan.h@example.com", subscriptionStatus: "paused", billingPlan: "standard", createdAt: "2024-11-10", notes: "Paused — credit card expired" },
-  ];
+  // Version mismatch — wipe all admin data so stale fake data doesn't persist
+  Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
 
-  const recipients: AdminRecipient[] = [
-    { id: "rec-1", customerId: "cust-1", name: "Sarah Massaro", relationship: "Wife", mailingAddress: { line1: "12 Maple St", city: "Boston", state: "MA", zip: "02101" }, birthday: "1990-03-22", anniversaryDate: "2018-06-15", preferredTone: "Funny", status: "active" },
-    { id: "rec-2", customerId: "cust-1", name: "Linda Massaro", relationship: "Mom", mailingAddress: { line1: "7 Oak Ave", city: "Waltham", state: "MA", zip: "02451" }, birthday: "1962-09-04", preferredTone: "Sweet", status: "active" },
-    { id: "rec-3", customerId: "cust-2", name: "Emily Thompson", relationship: "Wife", mailingAddress: { line1: "44 River Rd", city: "Nashua", state: "NH", zip: "03060" }, birthday: "1989-07-11", anniversaryDate: "2016-10-03", preferredTone: "Romantic", status: "active" },
-    { id: "rec-4", customerId: "cust-3", name: "Pam Kelley", relationship: "Wife", mailingAddress: { line1: "100 Elm St", city: "Newton", state: "MA", zip: "02458" }, birthday: "1991-12-25", preferredTone: "Sweet", status: "active" },
-  ];
-
-  const events: EventSchedule[] = [
-    { id: "evt-1", recipientId: "rec-1", customerId: "cust-1", eventType: "Anniversary", eventDate: "06-15", sendLeadDays: 7, tone: "Funny", status: "active", nextScheduledSend: "2026-06-08" },
-    { id: "evt-2", recipientId: "rec-1", customerId: "cust-1", eventType: "Birthday", eventDate: "03-22", sendLeadDays: 7, tone: "Funny", status: "active", nextScheduledSend: "2026-03-15" },
-    { id: "evt-3", recipientId: "rec-1", customerId: "cust-1", eventType: "Mother's Day", eventDate: "05-12", sendLeadDays: 7, tone: "Sweet", status: "active", lastSentDate: "2025-05-05", nextScheduledSend: "2026-05-05" },
-    { id: "evt-4", recipientId: "rec-2", customerId: "cust-1", eventType: "Mother's Day", eventDate: "05-12", sendLeadDays: 7, tone: "Sweet", status: "active", nextScheduledSend: "2026-05-05" },
-    { id: "evt-5", recipientId: "rec-3", customerId: "cust-2", eventType: "Birthday", eventDate: "07-11", sendLeadDays: 7, tone: "Romantic", status: "active", nextScheduledSend: "2026-07-04" },
-    { id: "evt-6", recipientId: "rec-3", customerId: "cust-2", eventType: "Valentine's Day", eventDate: "02-14", sendLeadDays: 7, tone: "Romantic", status: "active", lastSentDate: "2026-02-07", nextScheduledSend: "2027-02-07" },
-  ];
-
-  const templates: CardTemplate[] = [
-    { id: "tmpl-1", name: "Classic Botanical", handwryttenCardId: "hw-4421", eventTypes: ["Birthday", "Mother's Day", "Just Because"], toneCategories: ["Sweet", "Romantic"], relationshipCategories: ["Wife", "Girlfriend", "Mom", "Mother in law"], imagePreviewUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=200", active: true, priorityWeight: 8, notes: "Top performer — converts well", createdAt: "2024-10-01" },
-    { id: "tmpl-2", name: "Modern Minimal", handwryttenCardId: "hw-4422", eventTypes: [], toneCategories: [], relationshipCategories: [], active: true, priorityWeight: 6, notes: "Works for all events", createdAt: "2024-10-05" },
-    { id: "tmpl-3", name: "Anniversary Gold", handwryttenCardId: "hw-4423", eventTypes: ["Anniversary", "Valentine's Day"], toneCategories: ["Romantic", "Sweet"], relationshipCategories: ["Wife", "Girlfriend"], active: true, priorityWeight: 9, createdAt: "2024-11-01" },
-    { id: "tmpl-4", name: "Funny Script", handwryttenCardId: "hw-4424", eventTypes: ["Birthday", "Just Because"], toneCategories: ["Funny"], relationshipCategories: [], active: true, priorityWeight: 7, createdAt: "2024-11-15" },
-    { id: "tmpl-5", name: "Holiday Classic Red", handwryttenCardId: "hw-4425", eventTypes: ["Christmas", "Hanukkah", "Thanksgiving"], toneCategories: [], relationshipCategories: [], active: true, priorityWeight: 8, createdAt: "2024-12-01" },
-    { id: "tmpl-6", name: "Legacy Watercolor", handwryttenCardId: "hw-4410", eventTypes: ["Birthday"], toneCategories: ["Sweet"], relationshipCategories: [], imagePreviewUrl: "", active: false, priorityWeight: 3, notes: "Retired — low engagement", createdAt: "2024-08-01" },
-  ];
-
-  const messages: MessageDraft[] = [
-    { id: "msg-1", customerId: "cust-1", recipientId: "rec-1", customerName: "James Massaro", recipientName: "Sarah", relationship: "Wife", eventType: "Mother's Day", tone: "Sweet", customNotes: "She had a tough year — really showed up for the kids", generatedMessage: "Sarah — watching you be a mom is one of the things I'm most grateful for. You make it look effortless. The kids see it, I see it, and even the dog probably does. I love you more than I admit and more than this card can hold.", approvedMessage: "Sarah — watching you be a mom is one of the things I'm most grateful for. You make it look effortless. The kids see it, I see it, and even the dog probably does. I love you more than I admit and more than this card can hold.", approvalStatus: "approved", createdAt: "2026-05-01T09:00:00Z", updatedAt: "2026-05-02T11:30:00Z" },
-    { id: "msg-2", customerId: "cust-2", recipientId: "rec-3", customerName: "Mike Thompson", recipientName: "Emily", relationship: "Wife", eventType: "Birthday", tone: "Romantic", generatedMessage: "Emily — another year around the sun with you and somehow I'm still the lucky one. Happy birthday to the woman who makes our house feel like home.", approvalStatus: "pending", createdAt: "2026-05-10T14:00:00Z", updatedAt: "2026-05-10T14:00:00Z" },
-  ];
-
-  const queue: QueueItem[] = [
-    { id: "q-1", customerId: "cust-1", recipientId: "rec-1", customerName: "James Massaro", recipientName: "Sarah", eventType: "Mother's Day", eventDate: "2026-05-12", scheduledMailDate: "2026-05-05", cardTemplateId: "tmpl-1", messageDraftId: "msg-1", messageStatus: "approved", fulfillmentStatus: "Sent To Handwrytten", handwryttenOrderId: "HW-88821", createdAt: "2026-04-28T08:00:00Z", updatedAt: "2026-05-05T10:00:00Z" },
-    { id: "q-2", customerId: "cust-2", recipientId: "rec-3", customerName: "Mike Thompson", recipientName: "Emily", eventType: "Birthday", eventDate: "2026-07-11", scheduledMailDate: "2026-07-04", cardTemplateId: "tmpl-2", messageDraftId: "msg-2", messageStatus: "needs_approval", fulfillmentStatus: "Needs Approval", createdAt: "2026-05-08T12:00:00Z", updatedAt: "2026-05-08T12:00:00Z" },
-    { id: "q-3", customerId: "cust-1", recipientId: "rec-1", customerName: "James Massaro", recipientName: "Sarah", eventType: "Anniversary", eventDate: "2026-06-15", scheduledMailDate: "2026-06-08", cardTemplateId: "tmpl-3", messageStatus: "draft", fulfillmentStatus: "Draft", createdAt: "2026-05-01T09:00:00Z", updatedAt: "2026-05-01T09:00:00Z" },
-    { id: "q-4", customerId: "cust-3", recipientId: "rec-4", customerName: "Dave Kelley", recipientName: "Pam", eventType: "Birthday", eventDate: "2026-12-25", scheduledMailDate: "2026-12-18", messageStatus: "draft", fulfillmentStatus: "Draft", createdAt: "2026-05-10T00:00:00Z", updatedAt: "2026-05-10T00:00:00Z" },
-  ];
-
-  const audit: AuditEntry[] = [
-    { id: "a-1", action: "order_sent", entityType: "handwrytten", entityId: "q-1", description: "Order HW-88821 sent to Handwrytten for Sarah (Mother's Day)", adminUser: "admin", timestamp: "2026-05-05T10:00:00Z", metadata: { orderId: "HW-88821" } },
-    { id: "a-2", action: "message_approved", entityType: "message", entityId: "msg-1", description: "Message approved for Sarah (Mother's Day)", adminUser: "admin", timestamp: "2026-05-02T11:30:00Z" },
-    { id: "a-3", action: "message_generated", entityType: "message", entityId: "msg-2", description: "AI message generated for Emily (Birthday)", adminUser: "admin", timestamp: "2026-05-10T14:00:00Z" },
-  ];
-
-  customers.forEach((c) => save(KEYS.customers, customers));
-  recipients.forEach((r) => save(KEYS.recipients, recipients));
-  events.forEach((e) => save(KEYS.events, events));
-  templates.forEach((t) => save(KEYS.templates, templates));
-  messages.forEach((m) => save(KEYS.messages, messages));
-  queue.forEach((q) => save(KEYS.queue, queue));
-  save(KEYS.audit, audit);
-
-  localStorage.setItem(KEYS.seeded, "1");
+  localStorage.setItem(KEYS.seedVersion, CURRENT_SEED_VERSION);
 }
 
 // ─── Dashboard stats helpers ──────────────────────────────────────────────────
