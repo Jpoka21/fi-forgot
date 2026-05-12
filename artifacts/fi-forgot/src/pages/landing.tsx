@@ -182,40 +182,13 @@ export default function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="py-16 px-6 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-bold tracking-wide flex items-center justify-center gap-3"
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.4rem", color: BLACK }}>
-              <span style={{ color: RED }}>≥</span>
-              HOW IT WORKS
-              <span className="italic font-normal text-2xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "#555" }}>
-                (AKA: HOW YOU <u>DON'T</u> SCREW THIS UP)
-              </span>
-              <span style={{ color: RED }}>≤</span>
-            </h2>
-          </div>
-
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            {steps.map((step, i) => (
-              <div key={i} className="contents">
-                <div className="flex flex-col items-center gap-2 flex-1 max-w-[160px]">
-                  <div className="w-20 h-20 rounded-full overflow-hidden border-2 bg-white shadow-sm flex items-center justify-center" style={{ borderColor: `${BLACK}10` }}>
-                    <img src={step.icon} alt={`Step ${step.num}`} className="w-full h-full object-cover" />
-                  </div>
-                  <span className="font-bold" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: BLACK }}>
-                    {step.num}.
-                  </span>
-                  <p className="text-sm text-center leading-snug" style={{ color: "#444" }}>{step.label}</p>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="hidden md:flex flex-shrink-0 mb-10">
-                    <StepArrow />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+      <section id="how-it-works" className="py-12 px-6 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <div className="max-w-5xl mx-auto">
+          <img
+            src="/how-it-works.png"
+            alt="How it works: 5 steps from adding women in your life to getting reminded so you look like a legend"
+            className="w-full h-auto"
+          />
         </div>
       </section>
 
