@@ -34,7 +34,7 @@ export default function Sidebar() {
   const NavContent = () => (
     <div className="flex flex-col h-full">
       <div className="px-6 py-6 border-b border-sidebar-border">
-        <div className="text-xl font-serif font-bold text-[hsl(var(--sidebar-primary))]">F.I. Forgot</div>
+        <div className="text-xl font-serif font-bold text-[hsl(var(--sidebar-primary))]">&quot;F&quot; I Forgot</div>
         <div className="text-xs text-sidebar-foreground/60 mt-1">Relationship disaster prevention</div>
       </div>
 

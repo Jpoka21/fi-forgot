@@ -33,7 +33,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <div className="font-serif text-3xl font-bold text-[hsl(46,65%,52%)]">F.I. Forgot</div>
+            <div className="font-serif text-3xl font-bold text-[hsl(46,65%,52%)]">&quot;F&quot; I Forgot</div>
           </Link>
           <h1 className="font-serif text-2xl font-bold text-white mt-4 mb-2">Welcome back</h1>
           <p className="text-white/50 text-sm">You actually remembered to sign in. Impressive.</p>

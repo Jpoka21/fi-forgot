@@ -34,7 +34,7 @@ const testimonials = [
     name: "Marcus T.",
     role: "Husband, 8 years",
     quote:
-      "My wife cried reading the Mother's Day card. I pretended I wrote every word. F.I. Forgot is keeping my marriage intact.",
+      `My wife cried reading the Mother's Day card. I pretended I wrote every word. "F" I Forgot is keeping my marriage intact.`,
   },
   {
     name: "James R.",
@@ -46,7 +46,7 @@ const testimonials = [
     name: "Derek M.",
     role: "Boyfriend, 2 years",
     quote:
-      "My girlfriend thinks I'm way more emotionally available than I actually am. F.I. Forgot is doing the Lord's work.",
+      `My girlfriend thinks I'm way more emotionally available than I actually am. "F" I Forgot is doing the Lord's work.`,
   },
 ];
 
@@ -106,7 +106,7 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="sticky top-0 z-50 bg-[hsl(221,47%,20%)] shadow-md">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="font-serif font-bold text-xl text-[hsl(46,65%,52%)]">F.I. Forgot</div>
+          <div className="font-serif font-bold text-xl text-[hsl(46,65%,52%)]">&quot;F&quot; I Forgot</div>
           <div className="flex items-center gap-4">
             <Link
               href="/login"
@@ -133,7 +133,7 @@ export default function LandingPage() {
             Relationship disaster prevention, automated.
           </div>
           <h1 className="font-serif text-6xl md:text-8xl font-bold mb-6 leading-tight">
-            F.I. Forgot.
+            &quot;F&quot; I Forgot.
           </h1>
           <p className="text-xl md:text-2xl text-white/75 max-w-3xl mx-auto leading-relaxed mb-10">
             Mother's Day. Anniversaries. Birthdays. The dates you absolutely cannot screw up. We
@@ -383,7 +383,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="bg-[hsl(221,47%,20%)] py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="font-serif font-bold text-lg text-[hsl(46,65%,52%)]">F.I. Forgot</div>
+          <div className="font-serif font-bold text-lg text-[hsl(46,65%,52%)]">&quot;F&quot; I Forgot</div>
           <p className="text-white/40 text-sm italic">Relationship disaster prevention, automated.</p>
           <div className="flex gap-6">
             <Link href="/login" className="text-white/50 text-sm hover:text-white transition-colors">

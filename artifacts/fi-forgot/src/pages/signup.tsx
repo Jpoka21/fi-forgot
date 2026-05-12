@@ -43,7 +43,7 @@ export default function SignupPage() {
         {/* Left column */}
         <div className="text-white">
           <Link href="/" className="inline-block mb-8">
-            <div className="font-serif text-3xl font-bold text-[hsl(46,65%,52%)]">F.I. Forgot</div>
+            <div className="font-serif text-3xl font-bold text-[hsl(46,65%,52%)]">&quot;F&quot; I Forgot</div>
           </Link>
           <h1 className="font-serif text-4xl font-bold mb-4 leading-tight">
             Stop winging it.<br />Start looking good.
