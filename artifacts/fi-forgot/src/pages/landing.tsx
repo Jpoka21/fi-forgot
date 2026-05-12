@@ -24,11 +24,11 @@ const testimonials = [
 ];
 
 const steps = [
-  { num: "1", icon: "👩‍❤️‍👨", label: "Add the important women in your life." },
-  { num: "2", icon: "📋", label: "Tell us what they like (and don't like)." },
-  { num: "3", icon: "✉️", label: "We create a custom card before the big day." },
-  { num: "4", icon: "✏️", label: "You approve it, edit it, or change the tone." },
-  { num: "5", icon: "🔔", label: "We remind you so you look like a legend." },
+  { num: "1", icon: "/step1.png", label: "Add the important women in your life." },
+  { num: "2", icon: "/step2.png", label: "Tell us what they like (and don't like)." },
+  { num: "3", icon: "/step3.png", label: "We create a custom card before the big day." },
+  { num: "4", icon: "/step4.png", label: "You approve it, edit it, or change the tone." },
+  { num: "5", icon: "/step5.png", label: "We remind you so you look like a legend." },
 ];
 
 const plans = [
@@ -196,20 +196,20 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          <div className="flex flex-col md:flex-row items-start justify-between gap-2">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {steps.map((step, i) => (
-              <div key={i} className="flex items-start md:flex-col gap-4 md:items-center flex-1">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl border-2 bg-white shadow-sm" style={{ borderColor: `${BLACK}15` }}>
-                    {step.icon}
+              <div key={i} className="contents">
+                <div className="flex flex-col items-center gap-2 flex-1 max-w-[160px]">
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-2 bg-white shadow-sm flex items-center justify-center" style={{ borderColor: `${BLACK}10` }}>
+                    <img src={step.icon} alt={`Step ${step.num}`} className="w-full h-full object-cover" />
                   </div>
-                  <span className="font-bold text-base" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK }}>
+                  <span className="font-bold" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: BLACK }}>
                     {step.num}.
                   </span>
+                  <p className="text-sm text-center leading-snug" style={{ color: "#444" }}>{step.label}</p>
                 </div>
-                <p className="text-sm text-center leading-snug" style={{ color: "#444" }}>{step.label}</p>
                 {i < steps.length - 1 && (
-                  <div className="hidden md:flex justify-center mt-6 flex-shrink-0">
+                  <div className="hidden md:flex flex-shrink-0 mb-10">
                     <StepArrow />
                   </div>
                 )}
