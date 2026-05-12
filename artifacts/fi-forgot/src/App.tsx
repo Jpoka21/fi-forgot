@@ -15,6 +15,7 @@ import RecipientProfilePage from "@/pages/recipient-profile";
 import CardGeneratorPage from "@/pages/card-generator";
 import ReminderSettingsPage from "@/pages/reminder-settings";
 import AdminPage from "@/pages/admin";
+import BriefingPage from "@/pages/briefing";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,12 @@ function Router() {
       </Route>
       <Route path="/recipients/:id">
         <ProtectedRoute component={RecipientProfilePage} />
+      </Route>
+      <Route path="/briefings/:recipientId/:event">
+        <ProtectedRoute component={BriefingPage} />
+      </Route>
+      <Route path="/briefings/:recipientId/:event/:briefingId">
+        <ProtectedRoute component={BriefingPage} />
       </Route>
       <Route path="/cards/generate">
         <ProtectedRoute component={CardGeneratorPage} />

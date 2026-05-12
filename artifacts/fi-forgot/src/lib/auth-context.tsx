@@ -95,7 +95,6 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
   const noteParts = [
     personalityStr && `Personality: ${personalityStr}`,
     interestsStr && `Loves: ${interestsStr}`,
-    data.yearsTogther && `Together: ${data.yearsTogther}`,
   ].filter(Boolean);
 
   const deliveryPref: DeliveryPreference = isPartner || isMom
@@ -110,6 +109,8 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     id: Date.now().toString(),
     name: data.recipientName,
     relationship: rel,
+    children: [],
+    marriageDate: undefined,
     needsMothersDay: isMom || events.includes("Mother's Day"),
     needsFathersDay: isDad || events.includes("Father's Day"),
     needsValentinesDay: isPartner || events.includes("Valentine's Day"),
@@ -121,7 +122,6 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     customDates: [],
     tonePreference: TONE_MAP[data.tone] ?? "Sweet",
     personalityNotes: noteParts.join(" | "),
-    kidsNames: "",
     favoriteMemories: "",
     insideJokes: data.petName ? `Pet name: ${data.petName}` : "",
     thingsToAvoid: data.thingsToAvoid,
