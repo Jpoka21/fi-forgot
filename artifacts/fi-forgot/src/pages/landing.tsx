@@ -315,9 +315,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS — crisp inline component */}
-      <section id="how-it-works" className="py-10 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-        <HowItWorksBanner />
+      {/* HOW IT WORKS — banner */}
+      <section id="how-it-works" className="py-8 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <div className="max-w-5xl mx-auto">
+          <img src="/how-it-works-banner.png" alt="How It Works" className="w-full h-auto" />
+        </div>
       </section>
 
       {/* HOW IT WORKS — detailed steps */}
