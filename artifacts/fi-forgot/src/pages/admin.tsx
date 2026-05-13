@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/lib/auth-context";
-import { seedAdminDataIfNeeded } from "@/lib/admin-data";
+import { seedAdminDataIfNeeded, syncFromCustomerData, SyncResult } from "@/lib/admin-data";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import { AdminCustomers } from "./admin/AdminCustomers";
 import { AdminRecipients } from "./admin/AdminRecipients";
@@ -13,7 +13,7 @@ import { AdminBriefings } from "./admin/AdminBriefings";
 import {
   ShieldCheck, LayoutDashboard, Users, UserCheck,
   CalendarDays, CreditCard, MessageSquare, Send, ScrollText,
-  AlertTriangle, ClipboardList,
+  AlertTriangle, ClipboardList, RefreshCw,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -61,11 +61,25 @@ export default function AdminPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [seeded, setSeeded] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState<SyncResult | null>(null);
 
   useEffect(() => {
     seedAdminDataIfNeeded();
+    // Auto-sync customer data every time admin loads
+    const result = syncFromCustomerData();
+    setLastSync(result);
     setSeeded(true);
   }, []);
+
+  function handleManualSync() {
+    setSyncing(true);
+    setTimeout(() => {
+      const result = syncFromCustomerData();
+      setLastSync(result);
+      setSyncing(false);
+    }, 300);
+  }
 
   const email = user?.email?.toLowerCase() ?? "";
   const name = user?.name?.toLowerCase() ?? "";
@@ -134,9 +148,26 @@ export default function AdminPage() {
                 </p>
               </div>
             </div>
-            <div className="text-xs text-[hsl(221,20%,60%)] hidden md:block text-right">
-              <div className="font-semibold text-[hsl(221,47%,20%)]">{activeTabInfo.label}</div>
-              <div>{activeTabInfo.description}</div>
+            <div className="flex items-center gap-3">
+              {lastSync && (lastSync.newCustomers > 0 || lastSync.newRecipients > 0) && (
+                <span className="text-xs px-2 py-1 rounded-full font-semibold text-white" style={{ background: "#10b981" }}>
+                  ✓ Synced {lastSync.newRecipients} new recipient{lastSync.newRecipients !== 1 ? "s" : ""}
+                </span>
+              )}
+              <button
+                onClick={handleManualSync}
+                disabled={syncing}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border hover:bg-gray-50 disabled:opacity-50 transition-all"
+                style={{ borderColor: "hsl(40,20%,80%)", color: "hsl(221,20%,50%)" }}
+                title="Sync customer accounts and recipients into admin"
+              >
+                <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
+                {syncing ? "Syncing…" : "Sync"}
+              </button>
+              <div className="text-xs text-[hsl(221,20%,60%)] hidden md:block text-right">
+                <div className="font-semibold text-[hsl(221,47%,20%)]">{activeTabInfo.label}</div>
+                <div>{activeTabInfo.description}</div>
+              </div>
             </div>
           </div>
         </div>

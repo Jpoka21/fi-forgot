@@ -306,6 +306,124 @@ export function addAuditEntry(entry: AuditInput): void {
 
 export const getAuditEntries = () => load<AuditEntry>(KEYS.audit);
 
+// ─── Sync from customer-side localStorage ────────────────────────────────────
+//
+// Customer data lives under "fi_forgot_*" keys; admin data lives under
+// "fif_admin_*" keys. This function bridges the gap — it reads the
+// customer account and recipients and upserts matching admin records.
+// Existing admin-only fields (mailing address, interests, notes, etc.)
+// are preserved — customer data only fills in what's missing.
+
+export interface SyncResult {
+  newCustomers: number;
+  newRecipients: number;
+  updatedRecipients: number;
+}
+
+export function syncFromCustomerData(): SyncResult {
+  let newCustomers = 0;
+  let newRecipients = 0;
+  let updatedRecipients = 0;
+
+  try {
+    const userRaw = localStorage.getItem("fi_forgot_user");
+    if (!userRaw) return { newCustomers, newRecipients, updatedRecipients };
+
+    const user = JSON.parse(userRaw) as {
+      name?: string;
+      email?: string;
+      plan?: string;
+      createdAt?: string;
+    };
+
+    const email = (user.email ?? "").toLowerCase();
+    const customerId = `csync_${email.replace(/[^a-z0-9]/g, "_")}`;
+
+    // Upsert the customer record
+    const existingCustomer = getCustomer(customerId);
+    const adminCustomer: AdminCustomer = {
+      id: customerId,
+      name: user.name ?? "Customer",
+      email,
+      subscriptionStatus: existingCustomer?.subscriptionStatus ?? "active",
+      billingPlan: existingCustomer?.billingPlan ?? "basic",
+      createdAt: user.createdAt ?? new Date().toISOString(),
+      notes: existingCustomer?.notes ?? "Synced from customer account",
+    };
+    upsert(KEYS.customers, adminCustomer);
+    if (!existingCustomer) newCustomers++;
+
+    // Sync recipients
+    const recipRaw = localStorage.getItem("fi_forgot_recipients");
+    if (!recipRaw) return { newCustomers, newRecipients, updatedRecipients };
+
+    const customerRecips = JSON.parse(recipRaw) as Array<{
+      id: string;
+      name: string;
+      relationship: string;
+      birthday?: string;
+      anniversaryDate?: string;
+      marriageDate?: string;
+      tonePreference?: string;
+      personalityNotes?: string;
+      favoriteMemories?: string;
+      insideJokes?: string;
+      thingsToAvoid?: string;
+      emotionalLevel?: number;
+      children?: Array<{ id: string; name: string; gender: string; birthdate?: string }>;
+    }>;
+
+    for (const r of customerRecips) {
+      const existing = getAdminRecipient(r.id);
+
+      const kidsNames =
+        r.children?.map((c) => c.name).filter(Boolean).join(", ") ||
+        existing?.kidsNames;
+
+      let yearsTogther: string | undefined = existing?.yearsTogther;
+      if (r.marriageDate && !yearsTogther) {
+        const yrs = Math.floor(
+          (Date.now() - new Date(r.marriageDate).getTime()) / (365.25 * 86400000)
+        );
+        if (yrs > 0) yearsTogther = `${yrs} year${yrs !== 1 ? "s" : ""}`;
+      }
+
+      const adminRecipient: AdminRecipient = {
+        // Spread existing so admin-only fields are preserved
+        ...(existing ?? {}),
+        id: r.id,
+        customerId,
+        name: r.name,
+        relationship: r.relationship,
+        mailingAddress: existing?.mailingAddress ?? { line1: "", city: "", state: "", zip: "" },
+        birthday: r.birthday ?? existing?.birthday,
+        anniversaryDate: r.anniversaryDate ?? r.marriageDate ?? existing?.anniversaryDate,
+        preferredTone: r.tonePreference ?? existing?.preferredTone,
+        status: existing?.status ?? "active",
+        // AI profile — prefer what admin has already filled in, then fall back to customer data
+        personalityNotes: existing?.personalityNotes || r.personalityNotes,
+        favoriteMemories: existing?.favoriteMemories || r.favoriteMemories,
+        insideJokes: existing?.insideJokes || r.insideJokes,
+        thingsToAvoid: existing?.thingsToAvoid || r.thingsToAvoid,
+        emotionalLevel: existing?.emotionalLevel ?? r.emotionalLevel,
+        kidsNames,
+        yearsTogther,
+        notes: existing?.notes,
+        interests: existing?.interests,
+        petName: existing?.petName,
+      };
+
+      upsert(KEYS.recipients, adminRecipient);
+      if (!existing) newRecipients++;
+      else updatedRecipients++;
+    }
+  } catch {
+    // Don't break the admin if customer data is corrupt
+  }
+
+  return { newCustomers, newRecipients, updatedRecipients };
+}
+
 // ─── Init (clears stale data on version bump, seeds nothing) ──────────────────
 
 export function seedAdminDataIfNeeded(): void {
