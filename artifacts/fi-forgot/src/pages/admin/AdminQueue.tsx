@@ -4,6 +4,7 @@ import {
   getQueueItems, saveQueueItem, deleteQueueItem, updateQueueStatus,
   getCardTemplates, getMessageDrafts, getAdminRecipient, getCustomer,
   validateQueueItem, addAuditEntry, getAdminRecipients, saveMessageDraft,
+  autoApproveWithGenericMessage, getGenericMessage,
 } from "@/lib/admin-data";
 import {
   Plus, Wand2, CheckCircle2, Send, XCircle, RefreshCw,
@@ -496,6 +497,8 @@ export function AdminQueue() {
         ) : filtered.map((item) => {
           const isExpanded = expanded === item.id;
           const msg = item.messageDraftId ? messageMap[item.messageDraftId] : null;
+          const todayStr = new Date().toISOString().split("T")[0];
+          const isOverdue = item.fulfillmentStatus === "Awaiting Customer Approval" && item.scheduledMailDate <= todayStr;
           const templateName = item.aiCardId
             ? (item.aiCardName ?? "AI Selected")
             : item.cardTemplateId
@@ -521,6 +524,11 @@ export function AdminQueue() {
                     {item.fulfillmentStatus === "Failed" && (
                       <span className="text-xs text-red-600 font-semibold flex items-center gap-1">
                         <AlertTriangle size={11} /> {item.errorMessage}
+                      </span>
+                    )}
+                    {isOverdue && (
+                      <span className="text-xs text-red-700 font-bold bg-red-100 border border-red-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <AlertTriangle size={10} /> Deadline passed — never approved
                       </span>
                     )}
                   </div>
@@ -562,10 +570,21 @@ export function AdminQueue() {
                       <Send size={11} /> Send for Customer Review
                     </button>
                   )}
-                  {item.fulfillmentStatus === "Awaiting Customer Approval" && (
+                  {item.fulfillmentStatus === "Awaiting Customer Approval" && !isOverdue && (
                     <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-50 text-violet-600 border border-violet-200">
                       <Loader2 size={11} className="animate-spin" /> Awaiting customer…
                     </span>
+                  )}
+                  {isOverdue && (
+                    <button
+                      onClick={() => {
+                        if (!confirm(`Send a generic card for ${item.eventType}?\n\n"${getGenericMessage(item.eventType)}"\n\nThis replaces the custom message and marks the card ready to send.`)) return;
+                        autoApproveWithGenericMessage(item.id);
+                        refresh();
+                      }}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-red-100 text-red-800 hover:bg-red-200 transition-all border border-red-200">
+                      <Send size={11} /> Send Generic Card
+                    </button>
                   )}
                   {item.fulfillmentStatus === "Customer Changes Requested" && (
                     <button onClick={() => { generateMessage(item); setExpanded(item.id); }}

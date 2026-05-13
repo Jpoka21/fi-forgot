@@ -123,10 +123,13 @@ router.post("/admin/resolve-customer-approval", async (req, res) => {
 /**
  * Exported for use in the cron job.
  * Finds all unresolved pending approvals where last reminder was >24h ago,
- * sends reminder emails, and updates lastReminderSentAt.
+ * sends reminder emails (or final-warning if mail date is tomorrow),
+ * and skips items whose scheduled mail date has already passed.
  */
 export async function sendPendingReminderEmails(appBaseUrl: string): Promise<void> {
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
 
   const pending = await db
     .select()
@@ -138,6 +141,18 @@ export async function sendPendingReminderEmails(appBaseUrl: string): Promise<voi
   logger.info({ total: pending.length, due: due.length }, "Checking approval reminders");
 
   for (const item of due) {
+    // Stop emailing once the mail date has passed — admin handles it from here
+    if (item.scheduledMailDate <= todayStr) {
+      logger.info({ id: item.id, scheduledMailDate: item.scheduledMailDate }, "Mail date passed — skipping reminder");
+      continue;
+    }
+
+    // Detect "final warning": mail date is tomorrow
+    const mailDate = new Date(item.scheduledMailDate);
+    const msUntilMail = mailDate.getTime() - now.getTime();
+    const hoursUntilMail = msUntilMail / (1000 * 60 * 60);
+    const isFinalWarning = hoursUntilMail > 0 && hoursUntilMail <= 48;
+
     try {
       await sendApprovalReminderEmail({
         customerEmail: item.customerEmail,
@@ -148,6 +163,7 @@ export async function sendPendingReminderEmails(appBaseUrl: string): Promise<voi
         messageText: item.messageText,
         dashboardUrl: `${appBaseUrl}/dashboard`,
         isFirstSend: false,
+        isFinalWarning,
       });
 
       await db

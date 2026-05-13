@@ -271,6 +271,69 @@ export function getCustomerPendingApprovals(customerEmail: string): Array<QueueI
   }
 }
 
+// ─── Generic fallback messages (used when customer never approves) ─────────────
+// These are intentionally fact-free so they can never be wrong.
+const GENERIC_MESSAGES: Record<string, string> = {
+  "Birthday":       "Wishing you a very happy birthday! Hope your special day is filled with everything that makes you smile.",
+  "Mother's Day":   "Happy Mother's Day! Thank you for all that you do and all that you are.",
+  "Father's Day":   "Happy Father's Day! Hope your day is a great one — you deserve it.",
+  "Anniversary":    "Happy Anniversary! Here's to many more wonderful years together.",
+  "Valentine's Day":"Happy Valentine's Day! Thinking of you today and always.",
+  "Christmas":      "Wishing you a wonderful Christmas filled with joy, warmth, and good company.",
+  "Hanukkah":       "Happy Hanukkah! Wishing you and your family a joyful holiday season.",
+  "Thanksgiving":   "Happy Thanksgiving! Wishing you a warm and wonderful day with the people who matter most.",
+  "Easter":         "Happy Easter! Wishing you a bright and joyful day.",
+  "New Year's":     "Happy New Year! Here's to a wonderful year ahead — all the best to you.",
+};
+
+export function getGenericMessage(eventType: string): string {
+  return GENERIC_MESSAGES[eventType] ?? "Thinking of you and wishing you all the best. Hope everything is going great!";
+}
+
+/** Auto-approve a queue item with a generic safe message (deadline fallback). */
+export function autoApproveWithGenericMessage(queueItemId: string): void {
+  const all = getQueueItems();
+  const idx = all.findIndex((q) => q.id === queueItemId);
+  if (idx < 0) return;
+  const item = all[idx];
+
+  const genericText = getGenericMessage(item.eventType);
+  const draftId = `msg_generic_${queueItemId}_${Date.now()}`;
+  const draft: MessageDraft = {
+    id:              draftId,
+    customerId:      item.customerId,
+    recipientId:     item.recipientId,
+    customerName:    item.customerName,
+    recipientName:   item.recipientName,
+    relationship:    "",
+    eventType:       item.eventType,
+    tone:            "generic fallback",
+    generatedMessage: genericText,
+    approvedMessage:  genericText,
+    approvalStatus:  "approved",
+    createdAt:       new Date().toISOString(),
+    updatedAt:       new Date().toISOString(),
+  };
+  upsert(KEYS.messages, draft);
+
+  all[idx] = {
+    ...item,
+    messageDraftId:   draftId,
+    messageStatus:    "approved",
+    fulfillmentStatus: "Customer Approved",
+    updatedAt:        new Date().toISOString(),
+  };
+  save(KEYS.queue, all);
+
+  addAuditEntry({
+    action: "generic_message_applied",
+    entityType: "queue",
+    entityId: queueItemId,
+    description: `Generic fallback message applied for ${item.recipientName} (${item.eventType}) — customer never approved`,
+    adminUser: "admin",
+  });
+}
+
 /** Customer approves a pending card — marks it Customer Approved */
 export function customerApproveCard(queueItemId: string): void {
   updateQueueStatus(queueItemId, "Customer Approved");

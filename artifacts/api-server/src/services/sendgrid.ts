@@ -48,6 +48,7 @@ export async function sendApprovalReminderEmail(opts: {
   messageText: string;
   dashboardUrl: string;
   isFirstSend: boolean;
+  isFinalWarning?: boolean;
 }): Promise<void> {
   const { apiKey, fromEmail } = await getCredentials();
   sgMail.setApiKey(apiKey);
@@ -55,7 +56,9 @@ export async function sendApprovalReminderEmail(opts: {
   const firstName = opts.customerName.split(" ")[0];
   const subject = opts.isFirstSend
     ? `Your ${opts.eventType} card for ${opts.recipientName} is ready — take a look`
-    : `Reminder: your ${opts.eventType} card for ${opts.recipientName} still needs your OK`;
+    : opts.isFinalWarning
+      ? `Last chance: your ${opts.eventType} card for ${opts.recipientName} goes out tomorrow`
+      : `Reminder: your ${opts.eventType} card for ${opts.recipientName} still needs your OK`;
 
   const html = `
 <!DOCTYPE html>
@@ -88,8 +91,9 @@ export async function sendApprovalReminderEmail(opts: {
               Hey ${firstName},
             </p>
             <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.6;font-family:Arial,sans-serif;">
-              We wrote the ${opts.eventType} card for <strong>${opts.recipientName}</strong> and it's ready for your eyes.
-              We need your green light before we mail it — it goes out <strong>${opts.scheduledMailDate}</strong>.
+              ${opts.isFinalWarning
+                ? `This is your last chance. The ${opts.eventType} card for <strong>${opts.recipientName}</strong> goes out <strong>tomorrow, ${opts.scheduledMailDate}</strong>. If you don't approve today, we'll send a safe generic message instead — no personal details, no mistakes, but also none of your personality.`
+                : `We wrote the ${opts.eventType} card for <strong>${opts.recipientName}</strong> and it's ready for your eyes. We need your green light before we mail it — it goes out <strong>${opts.scheduledMailDate}</strong>.`}
             </p>
 
             <!-- Card preview -->
