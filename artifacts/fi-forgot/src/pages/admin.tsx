@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/lib/auth-context";
 import { seedAdminDataIfNeeded, syncFromCustomerData, SyncResult } from "@/lib/admin-data";
+import { runAutopilot } from "@/lib/automation";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import { AdminCustomers } from "./admin/AdminCustomers";
 import { AdminRecipients } from "./admin/AdminRecipients";
@@ -54,6 +55,7 @@ export default function AdminPage() {
   const [seeded, setSeeded] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<SyncResult | null>(null);
+  const [autopilotStatus, setAutopilotStatus] = useState<string | null>(null);
 
   useEffect(() => {
     seedAdminDataIfNeeded();
@@ -61,6 +63,15 @@ export default function AdminPage() {
     const result = syncFromCustomerData();
     setLastSync(result);
     setSeeded(true);
+
+    // Run autopilot: create queue items + send emails for events 21 days out
+    runAutopilot().then((r) => {
+      if (r.processed > 0) {
+        setAutopilotStatus(
+          `Autopilot: queued ${r.processed} card${r.processed !== 1 ? "s" : ""} and sent review email${r.processed !== 1 ? "s" : ""}`
+        );
+      }
+    }).catch(() => { /* non-blocking */ });
   }, []);
 
   function handleManualSync() {
@@ -140,6 +151,11 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {autopilotStatus && (
+                <span className="text-xs px-2 py-1 rounded-full font-semibold text-white" style={{ background: "#7c3aed" }}>
+                  ⚡ {autopilotStatus}
+                </span>
+              )}
               {lastSync && (lastSync.newCustomers > 0 || lastSync.newRecipients > 0) && (
                 <span className="text-xs px-2 py-1 rounded-full font-semibold text-white" style={{ background: "#10b981" }}>
                   ✓ Synced {lastSync.newRecipients} new recipient{lastSync.newRecipients !== 1 ? "s" : ""}
