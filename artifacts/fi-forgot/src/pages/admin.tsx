@@ -10,6 +10,7 @@ import { AdminMessages } from "./admin/AdminMessages";
 import { AdminQueue } from "./admin/AdminQueue";
 import { AdminAudit } from "./admin/AdminAudit";
 import { AdminBriefings } from "./admin/AdminBriefings";
+import { AdminEvents } from "./admin/AdminEvents";
 import {
   ShieldCheck, LayoutDashboard, Users, UserCheck,
   CalendarDays, CreditCard, MessageSquare, Send, ScrollText,
@@ -46,16 +47,6 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType; description:
   { id: "audit", label: "Audit Log", icon: ScrollText, description: "All admin actions tracked" },
 ];
 
-function AdminEventsSection() {
-  return (
-    <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-8 text-center text-sm text-[hsl(221,20%,50%)]">
-      <CalendarDays size={32} className="mx-auto mb-3 text-[hsl(221,20%,70%)]" />
-      <p className="font-semibold text-[hsl(221,47%,20%)] mb-1">Event Schedule Manager</p>
-      <p>Event schedules are auto-generated from recipient profiles and are visible in the Queue.</p>
-      <p className="mt-2">To add or adjust event schedules, edit the recipient in the Recipients tab.</p>
-    </div>
-  );
-}
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -110,7 +101,7 @@ export default function AdminPage() {
       case "dashboard": return <AdminDashboard onNavigate={(tab) => setActiveTab(tab as AdminTab)} />;
       case "customers": return <AdminCustomers />;
       case "recipients": return <AdminRecipients />;
-      case "events": return <AdminEventsSection />;
+      case "events": return <AdminEvents />;
       case "templates": return <AdminTemplates />;
       case "messages": return <AdminMessages />;
       case "queue": return <AdminQueue />;

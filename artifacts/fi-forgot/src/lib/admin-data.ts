@@ -45,6 +45,7 @@ export interface AdminRecipient {
   preferredTone?: string;
   notes?: string;
   status: RecipientStatus;
+  selectedEvents?: string[]; // synced from customer — which occasions this recipient gets cards for
   // AI profile fields — used when generating card messages
   interests?: string[];
   personalityNotes?: string;
@@ -371,6 +372,7 @@ export function syncFromCustomerData(): SyncResult {
       thingsToAvoid?: string;
       emotionalLevel?: number;
       mailingAddress?: { line1: string; line2?: string; city: string; state: string; zip: string };
+      selectedEvents?: string[];
       children?: Array<{ id: string; name: string; gender: string; birthdate?: string }>;
     }>;
 
@@ -416,6 +418,7 @@ export function syncFromCustomerData(): SyncResult {
         emotionalLevel: existing?.emotionalLevel ?? r.emotionalLevel,
         kidsNames,
         yearsTogther,
+        selectedEvents: r.selectedEvents ?? existing?.selectedEvents,
         notes: existing?.notes,
         interests: existing?.interests,
         petName: existing?.petName,
