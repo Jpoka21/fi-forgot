@@ -7,7 +7,7 @@ import {
 } from "@/lib/admin-data";
 import {
   Plus, Wand2, CheckCircle2, Send, XCircle, RefreshCw,
-  Loader2, AlertTriangle, Eye, X, Trash2, Tag,
+  Loader2, AlertTriangle, Eye, X, Trash2, Tag, Sparkles, ImageOff,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -151,7 +151,15 @@ export function AdminQueue() {
   const [addOpen, setAddOpen] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
   const [checkingStatus, setCheckingStatus] = useState<string | null>(null);
-  const [recipientMap, setRecipientMap] = useState<Record<string, { interests?: string[]; personalityNotes?: string; thingsToAvoid?: string }>>({});
+  const [recipientMap, setRecipientMap] = useState<Record<string, { interests?: string[]; personalityNotes?: string; thingsToAvoid?: string; relationship?: string }>>({});
+  const [aiSuggestions, setAiSuggestions] = useState<Record<string, {
+    loading?: boolean;
+    cardId?: string;
+    cardName?: string;
+    imageUrl?: string;
+    reason?: string;
+    error?: string;
+  }>>({});
 
   useEffect(() => {
     setItems(getQueueItems().sort((a, b) => new Date(a.scheduledMailDate).getTime() - new Date(b.scheduledMailDate).getTime()));
@@ -161,6 +169,7 @@ export function AdminQueue() {
       interests: r.interests,
       personalityNotes: r.personalityNotes,
       thingsToAvoid: r.thingsToAvoid,
+      relationship: r.relationship,
     }]));
     setRecipientMap(rmap);
   }, []);
@@ -186,6 +195,55 @@ export function AdminQueue() {
     refresh();
   }
 
+  async function suggestCard(item: QueueItem) {
+    const rp = recipientMap[item.recipientId];
+    setAiSuggestions((prev) => ({ ...prev, [item.id]: { loading: true } }));
+    try {
+      const res = await fetch("/api/admin/suggest-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventType: item.eventType,
+          recipientName: item.recipientName,
+          interests: rp?.interests ?? [],
+          relationship: rp?.relationship ?? "",
+          personalityNotes: rp?.personalityNotes ?? "",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      setAiSuggestions((prev) => ({
+        ...prev,
+        [item.id]: {
+          loading: false,
+          cardId: data.cardId,
+          cardName: data.cardName,
+          imageUrl: data.imageUrl,
+          reason: data.reason,
+        },
+      }));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setAiSuggestions((prev) => ({ ...prev, [item.id]: { loading: false, error: msg } }));
+    }
+  }
+
+  function useAiCard(item: QueueItem) {
+    const suggestion = aiSuggestions[item.id];
+    if (!suggestion?.cardId) return;
+    const updated: QueueItem = {
+      ...item,
+      aiCardId: suggestion.cardId,
+      aiCardName: suggestion.cardName,
+      aiCardImageUrl: suggestion.imageUrl,
+      aiCardReason: suggestion.reason,
+      updatedAt: new Date().toISOString(),
+    };
+    saveQueueItem(updated);
+    refresh();
+    setAiSuggestions((prev) => ({ ...prev, [item.id]: {} }));
+  }
+
   async function sendToHandwrytten(item: QueueItem) {
     const { valid, errors } = validateQueueItem(item);
     if (!valid) {
@@ -201,11 +259,14 @@ export function AdminQueue() {
       const message = item.messageDraftId ? messages.find((m) => m.id === item.messageDraftId) : null;
       const template = item.cardTemplateId ? templates.find((t) => t.id === item.cardTemplateId) : null;
 
+      // Prefer AI-selected card, then fall back to template card
+      const resolvedCardId = item.aiCardId ?? template?.handwryttenCardId ?? "hw-default";
+
       const res = await fetch("/api/admin/handwrytten/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cardId: template?.handwryttenCardId ?? "hw-default",
+          cardId: resolvedCardId,
           message: message?.approvedMessage ?? "",
           recipientAddress: {
             name: item.recipientName,
@@ -309,7 +370,12 @@ export function AdminQueue() {
         ) : filtered.map((item) => {
           const isExpanded = expanded === item.id;
           const msg = item.messageDraftId ? messageMap[item.messageDraftId] : null;
-          const templateName = item.cardTemplateId ? (templateMap[item.cardTemplateId] ?? "Unknown") : "None selected";
+          const templateName = item.aiCardId
+            ? (item.aiCardName ?? "AI Selected")
+            : item.cardTemplateId
+            ? (templateMap[item.cardTemplateId] ?? "Unknown")
+            : "None selected";
+          const aiSug = aiSuggestions[item.id];
           const isSending = sending === item.id;
           const isCheckingStatus = checkingStatus === item.id;
 
@@ -392,26 +458,122 @@ export function AdminQueue() {
                   {/* Validation */}
                   <ValidationBadge item={item} />
 
-                  {/* Recipient interests — shown so admin picks matching card */}
-                  {item.recipientId && (() => {
-                    const rp = recipientMap[item.recipientId];
-                    if (!rp) return null;
+                  {/* AI Card Selection Panel */}
+                  {(() => {
+                    const rp = item.recipientId ? recipientMap[item.recipientId] : null;
                     return (
-                      <div className="rounded-xl border p-3 space-y-1.5" style={{ background: "#fffbf0", borderColor: `${GOLD}40` }}>
-                        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
-                          <Tag size={10} className="inline mr-1" />Recipient Profile — pick a matching card
-                        </p>
-                        {rp.interests?.length ? (
-                          <div className="flex flex-wrap gap-1.5">
-                            {rp.interests.map((i) => (
-                              <span key={i} className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">{i}</span>
-                            ))}
+                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: `${GOLD}50` }}>
+                        {/* Header row */}
+                        <div className="flex items-center justify-between px-3 py-2" style={{ background: `${GOLD}18` }}>
+                          <div className="flex items-center gap-2">
+                            <Sparkles size={13} style={{ color: GOLD }} />
+                            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
+                              AI Card Selection
+                            </span>
+                            {item.aiCardId && (
+                              <span className="text-xs px-2 py-0.5 rounded-full font-semibold text-white" style={{ background: GOLD }}>
+                                Saved
+                              </span>
+                            )}
                           </div>
-                        ) : (
-                          <p className="text-xs text-amber-600 italic">No interests on file — add them in Recipients to improve card matching</p>
-                        )}
-                        {rp.personalityNotes && <p className="text-xs text-[hsl(221,20%,45%)]"><span className="font-semibold">Personality:</span> {rp.personalityNotes}</p>}
-                        {rp.thingsToAvoid && <p className="text-xs text-red-600"><span className="font-semibold">Avoid:</span> {rp.thingsToAvoid}</p>}
+                          <button
+                            onClick={() => suggestCard(item)}
+                            disabled={aiSug?.loading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white hover:opacity-90 disabled:opacity-50 transition-all"
+                            style={{ background: NAVY }}>
+                            {aiSug?.loading
+                              ? <><Loader2 size={11} className="animate-spin" /> Picking card...</>
+                              : <><Sparkles size={11} /> {item.aiCardId ? "Re-pick Card" : "AI Pick Card"}</>}
+                          </button>
+                        </div>
+
+                        <div className="p-3 space-y-3" style={{ background: "#fffbf4" }}>
+                          {/* Already-saved AI card */}
+                          {item.aiCardId && !aiSug?.cardId && (
+                            <div className="flex gap-3 items-start">
+                              {item.aiCardImageUrl ? (
+                                <img
+                                  src={item.aiCardImageUrl}
+                                  alt={item.aiCardName}
+                                  className="w-20 h-14 object-cover rounded-lg border flex-shrink-0"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                />
+                              ) : (
+                                <div className="w-20 h-14 rounded-lg border bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                  <ImageOff size={16} className="text-gray-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-[hsl(221,47%,20%)]">{item.aiCardName}</p>
+                                {item.aiCardReason && <p className="text-xs text-[hsl(221,20%,50%)] italic mt-0.5">{item.aiCardReason}</p>}
+                                <p className="text-xs text-teal-600 font-semibold mt-1">Will be used on send</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Fresh AI suggestion (not yet saved) */}
+                          {aiSug?.cardId && (
+                            <div className="flex gap-3 items-start">
+                              {aiSug.imageUrl ? (
+                                <img
+                                  src={aiSug.imageUrl}
+                                  alt={aiSug.cardName}
+                                  className="w-20 h-14 object-cover rounded-lg border-2 flex-shrink-0"
+                                  style={{ borderColor: GOLD }}
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                />
+                              ) : (
+                                <div className="w-20 h-14 rounded-lg border bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                  <ImageOff size={16} className="text-gray-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-[hsl(221,47%,20%)]">{aiSug.cardName}</p>
+                                {aiSug.reason && <p className="text-xs text-[hsl(221,20%,50%)] italic mt-0.5">{aiSug.reason}</p>}
+                                <div className="flex gap-2 mt-2">
+                                  <button
+                                    onClick={() => useAiCard(item)}
+                                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white hover:opacity-90"
+                                    style={{ background: "#10b981" }}>
+                                    <CheckCircle2 size={11} /> Use This Card
+                                  </button>
+                                  <button
+                                    onClick={() => suggestCard(item)}
+                                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                    <RefreshCw size={11} /> Try Again
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Error state */}
+                          {aiSug?.error && !aiSug.loading && (
+                            <p className="text-xs text-red-600 flex items-center gap-1">
+                              <AlertTriangle size={11} /> {aiSug.error}
+                            </p>
+                          )}
+
+                          {/* Recipient interests context */}
+                          {rp && (
+                            <div className="border-t pt-2.5 space-y-1.5" style={{ borderColor: `${GOLD}30` }}>
+                              <p className="text-xs font-semibold text-[hsl(221,20%,55%)] flex items-center gap-1">
+                                <Tag size={10} /> Recipient context used for card selection
+                              </p>
+                              {rp.interests?.length ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {rp.interests.map((i) => (
+                                    <span key={i} className="px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-800 border border-amber-200">{i}</span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-amber-600 italic">No interests on file — add in Recipients for better AI picks</p>
+                              )}
+                              {rp.personalityNotes && <p className="text-xs text-[hsl(221,20%,45%)]"><span className="font-semibold">Personality:</span> {rp.personalityNotes}</p>}
+                              {rp.thingsToAvoid && <p className="text-xs text-red-600"><span className="font-semibold">Avoid:</span> {rp.thingsToAvoid}</p>}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   })()}

@@ -119,6 +119,11 @@ export interface QueueItem {
   errorMessage?: string;
   createdAt: string;
   updatedAt: string;
+  // AI-selected card (bypasses templates — set by suggest-card endpoint)
+  aiCardId?: string;
+  aiCardName?: string;
+  aiCardImageUrl?: string;
+  aiCardReason?: string;
 }
 
 export interface AuditEntry {

@@ -96,6 +96,122 @@ Keep it to 3–6 sentences. Personal, specific, and sounds like a real person wr
   }
 });
 
+// ─── AI card suggestion ───────────────────────────────────────────────────────
+
+router.post("/admin/suggest-card", async (req, res) => {
+  const {
+    eventType = "",
+    interests = [] as string[],
+    relationship = "",
+    personalityNotes = "",
+    recipientName = "",
+  } = req.body;
+
+  // 1. Fetch the full card catalog
+  let allCards: { id: string; name: string; imageUrl?: string; category?: string }[] = [];
+  try {
+    allCards = await handwryttenService.listCards() as typeof allCards;
+  } catch (err) {
+    req.log.error({ err }, "suggest-card: failed to fetch cards");
+    res.status(500).json({ error: "Could not fetch Handwrytten cards" });
+    return;
+  }
+
+  // 2. Score cards — keyword match on event + interests → pick best 40
+  const eventKeywords: string[] = [];
+  const et = String(eventType).toLowerCase();
+  if (et.includes("birthday")) eventKeywords.push("birthday", "bday", "celebrate");
+  if (et.includes("anniversary")) eventKeywords.push("anniversary", "love", "together");
+  if (et.includes("mother")) eventKeywords.push("mom", "mother", "mama");
+  if (et.includes("valentine")) eventKeywords.push("valentine", "love", "heart", "romance");
+  if (et.includes("christmas") || et.includes("holiday")) eventKeywords.push("christmas", "holiday", "season");
+  if (et.includes("thanksgiving")) eventKeywords.push("thanks", "gratitude", "thankful");
+  if (et.includes("father")) eventKeywords.push("dad", "father");
+  if (et.includes("congratulations")) eventKeywords.push("congrats", "achievement", "celebrate");
+  if (eventKeywords.length === 0) eventKeywords.push("greeting", "general", "occasion");
+
+  const interestKeywords: string[] = [];
+  const iArr = (interests as string[]).map((s) => s.toLowerCase());
+  if (iArr.some((i) => i.includes("travel"))) interestKeywords.push("travel", "adventure", "explore", "world", "journey");
+  if (iArr.some((i) => i.includes("food"))) interestKeywords.push("food", "cooking", "chef", "kitchen", "garden");
+  if (iArr.some((i) => i.includes("fitness"))) interestKeywords.push("sport", "active", "health", "run");
+  if (iArr.some((i) => i.includes("nature"))) interestKeywords.push("floral", "flower", "garden", "botanical", "nature", "leaf");
+  if (iArr.some((i) => i.includes("music"))) interestKeywords.push("music", "melody", "song");
+  if (iArr.some((i) => i.includes("animals") || i.includes("pets"))) interestKeywords.push("animal", "pet", "dog", "cat");
+  if (iArr.some((i) => i.includes("movies") || i.includes("tv"))) interestKeywords.push("cinema", "film", "star");
+  if (iArr.some((i) => i.includes("fashion"))) interestKeywords.push("fashion", "style", "elegant", "chic");
+  if (iArr.some((i) => i.includes("reading") || i.includes("learning"))) interestKeywords.push("book", "read", "classic", "literary");
+  if (iArr.some((i) => i.includes("family"))) interestKeywords.push("family", "home", "warmth");
+
+  function scoreCard(card: { name: string; category?: string }) {
+    const text = `${card.name} ${card.category ?? ""}`.toLowerCase();
+    let score = 0;
+    for (const kw of eventKeywords) if (text.includes(kw)) score += 2;
+    for (const kw of interestKeywords) if (text.includes(kw)) score += 3;
+    return score;
+  }
+
+  const scored = allCards
+    .map((c) => ({ ...c, score: scoreCard(c) }))
+    .sort((a, b) => b.score - a.score);
+
+  // Take top 40 (prioritise scored > 0, then fill with random if needed)
+  const topCards = scored.slice(0, 40);
+
+  // 3. Build compact card list for GPT
+  const cardList = topCards.map((c) => `${c.id}: ${c.name}`).join("\n");
+
+  const systemPrompt = `You are a card selection assistant for "F" I Forgot — a concierge card service. Your job is to pick the single best Handwrytten card from the provided list for the given event and recipient.
+
+Return ONLY valid JSON in exactly this format:
+{ "cardId": "<exact id from list>", "reason": "<one sentence why this card fits>" }`;
+
+  const userPrompt = `Pick the best card for:
+- Recipient: ${recipientName}
+- Event: ${eventType}
+- Relationship: ${relationship}
+- Interests: ${(interests as string[]).join(", ") || "not specified"}
+- Personality: ${personalityNotes || "not specified"}
+
+Available cards (id: name):
+${cardList}
+
+Pick the card that best matches the event type first, then secondarily reflects her interests and personality. Return only the JSON.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.1",
+      max_completion_tokens: 200,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content ?? "";
+    let parsed: { cardId: string; reason: string };
+    try {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+    } catch {
+      req.log.error({ raw }, "suggest-card: failed to parse GPT JSON");
+      res.status(500).json({ error: "Failed to parse AI response" });
+      return;
+    }
+
+    const card = allCards.find((c) => String(c.id) === String(parsed.cardId));
+    res.json({
+      cardId: parsed.cardId,
+      cardName: card?.name ?? parsed.cardId,
+      imageUrl: card?.imageUrl ?? "",
+      reason: parsed.reason,
+    });
+  } catch (err) {
+    req.log.error({ err }, "suggest-card: OpenAI failed");
+    res.status(500).json({ error: "AI card selection failed" });
+  }
+});
+
 // ─── Handwrytten: list cards ──────────────────────────────────────────────────
 
 router.get("/admin/handwrytten/cards", async (req, res) => {
