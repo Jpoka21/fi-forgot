@@ -207,6 +207,13 @@ export function AdminQueue() {
     const rp = recipientMap[item.recipientId];
     setGenerating(item.id);
     try {
+      // Collect the last 3 approved card texts for this recipient so AI avoids repeating themes
+      const allMessages = getMessageDrafts();
+      const previousMessages = allMessages
+        .filter((m) => m.recipientId === item.recipientId && m.approvalStatus === "approved" && m.approvedMessage)
+        .slice(-3)
+        .map((m) => m.approvedMessage as string);
+
       const res = await fetch("/api/admin/generate-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -220,6 +227,7 @@ export function AdminQueue() {
           personalityNotes: rp?.personalityNotes ?? "",
           interests:       rp?.interests ?? [],
           thingsToAvoid:   rp?.thingsToAvoid ?? "",
+          previousMessages,
         }),
       });
       const data = await res.json();

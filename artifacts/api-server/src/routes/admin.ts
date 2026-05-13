@@ -33,6 +33,7 @@ router.post("/admin/generate-message", async (req, res) => {
     interests = [] as string[],
     petName,
     emotionalLevel,
+    previousMessages = [] as string[], // recent approved card texts for this recipient
   } = req.body;
 
   // The name that prints on the card signature — "James", "Dad", etc.
@@ -56,19 +57,30 @@ router.post("/admin/generate-message", async (req, res) => {
   if (customNotes) contextLines.push(`Admin notes: ${customNotes}`);
   if (thingsToAvoid) contextLines.push(`NEVER include: ${thingsToAvoid}`);
 
+  const prevMsgs = (previousMessages as string[]).filter(Boolean);
+  if (prevMsgs.length > 0) {
+    contextLines.push(
+      `PREVIOUS CARDS ALREADY SENT (do not repeat the same themes, angles, or specific details used in these):\n${prevMsgs.map((m, i) => `  Card ${i + 1}: "${m}"`).join("\n")}`
+    );
+  }
+
   const context = contextLines.length > 0
     ? `Context:\n${contextLines.join("\n")}`
     : "";
 
-  const systemPrompt = `You are a professional greeting card writer for "F" I Forgot — a concierge card service. You write personalized, genuine cards for busy men who care but forget. Cards sound like the sender wrote them — specific, real, never generic. 
+  const systemPrompt = `You are a professional greeting card writer for "F" I Forgot — a concierge card service. You write personalized, genuine cards for busy men who care but forget. Cards sound like the sender wrote them — specific, real, never generic.
 
-Rules: Never open with relationship duration. Never use greeting card clichés. Always sign with exactly the name provided — never add a last name or change it.`;
+CRITICAL RULES — violating any of these is a failure:
+1. NEVER invent or assume any facts about the recipient. Only reference details explicitly provided in the context. If you don't know something (family size, personality, hobbies, life situations), do NOT mention it.
+2. NEVER use the same theme, angle, or specific detail that appears in previous cards for this recipient. If Greek roots was used before, find a completely different angle.
+3. Never open with relationship duration. Never use greeting card clichés ("wishing you all the best", "on your special day", etc.).
+4. Sign with exactly the name provided — never add a last name or change it.`;
 
   const userPrompt = `Write a ${tone} ${eventType} card from ${signatureName} to ${recipientName}. Sign it exactly as "${signatureName}" — nothing more.
 
 ${context}
 
-Keep it to 3–6 sentences. Personal, specific, and sounds like a real person wrote it. Return only the card text, no quotes, no labels.`;
+Keep it to 3–6 sentences. Personal, specific, grounded only in the facts provided. Return only the card text, no quotes, no labels.`;
 
   const usesMockAI = !process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
 
