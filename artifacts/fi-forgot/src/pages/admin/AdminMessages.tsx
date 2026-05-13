@@ -4,7 +4,7 @@ import {
   getMessageDrafts, saveMessageDraft, deleteMessageDraft,
   getCustomers, getAdminRecipients,
 } from "@/lib/admin-data";
-import { Plus, Wand2, CheckCircle2, XCircle, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { Plus, Wand2, CheckCircle2, XCircle, Pencil, Trash2, X, Loader2, Tag } from "lucide-react";
 
 const NAVY = "#071A33";
 const RED = "#E23B2E";
@@ -18,6 +18,19 @@ const APPROVAL_COLORS: Record<ApprovalStatus, string> = {
 
 const EVENT_TYPES = ["Birthday","Anniversary","Mother's Day","Father's Day","Valentine's Day","Christmas","Thanksgiving","Just Because","Congratulations"];
 const TONES = ["Sweet","Funny","Romantic","Simple"];
+
+function InterestChips({ interests }: { interests: string[] }) {
+  if (!interests?.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {interests.map((i) => (
+        <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+          <Tag size={9} /> {i}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 function MessageModal({
   draft, customers, recipients, onSave, onClose,
@@ -46,20 +59,28 @@ function MessageModal({
   );
   const [generating, setGenerating] = useState(false);
   const [editingApproved, setEditingApproved] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<AdminRecipient | null>(
+    draft?.recipientId ? recipients.find((r) => r.id === draft.recipientId) ?? null : null
+  );
 
   function handleCustomerChange(customerId: string) {
     const c = customers.find((c) => c.id === customerId);
     setForm({ ...form, customerId, customerName: c?.name ?? "" });
+    setSelectedRecipient(null);
   }
 
   function handleRecipientChange(recipientId: string) {
     const r = recipients.find((r) => r.id === recipientId);
-    if (r) setForm({ ...form, recipientId, recipientName: r.name, relationship: r.relationship, tone: r.preferredTone ?? form.tone });
+    if (r) {
+      setSelectedRecipient(r);
+      setForm({ ...form, recipientId, recipientName: r.name, relationship: r.relationship, tone: r.preferredTone ?? form.tone });
+    }
   }
 
   async function generateMessage() {
     setGenerating(true);
     try {
+      const r = selectedRecipient;
       const res = await fetch("/api/admin/generate-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,6 +91,17 @@ function MessageModal({
           eventType: form.eventType,
           tone: form.tone,
           customNotes: form.customNotes,
+          // Full recipient profile — powers personalization
+          interests: r?.interests ?? [],
+          personalityNotes: r?.personalityNotes ?? "",
+          kidsNames: r?.kidsNames ?? "",
+          insideJokes: r?.insideJokes ?? "",
+          petName: r?.petName ?? "",
+          favoriteMemories: r?.favoriteMemories ?? "",
+          thingsToAvoid: r?.thingsToAvoid ?? "",
+          emotionalLevel: r?.emotionalLevel,
+          yearsMarried: r?.yearsTogther ?? "",
+          children: r?.kidsNames ?? "",
         }),
       });
       const data = await res.json();
@@ -140,6 +172,25 @@ function MessageModal({
               </select>
             </div>
           </div>
+
+          {/* Recipient profile summary — shows what AI will use */}
+          {selectedRecipient && (
+            <div className="rounded-xl border p-3 space-y-1.5" style={{ background: "#fffbf0", borderColor: `${GOLD}40` }}>
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>AI Context — {selectedRecipient.name}</p>
+              {selectedRecipient.interests?.length ? (
+                <div>
+                  <span className="text-xs text-[hsl(221,20%,55%)]">Interests: </span>
+                  <InterestChips interests={selectedRecipient.interests} />
+                </div>
+              ) : (
+                <p className="text-xs text-amber-600 italic">⚠ No interests on file — add them in Recipients to improve AI output</p>
+              )}
+              {selectedRecipient.personalityNotes && <p className="text-xs text-[hsl(221,20%,45%)]"><span className="font-semibold">Personality:</span> {selectedRecipient.personalityNotes}</p>}
+              {selectedRecipient.kidsNames && <p className="text-xs text-[hsl(221,20%,45%)]"><span className="font-semibold">Kids:</span> {selectedRecipient.kidsNames}</p>}
+              {selectedRecipient.insideJokes && <p className="text-xs text-[hsl(221,20%,45%)]"><span className="font-semibold">Inside refs:</span> {selectedRecipient.insideJokes}</p>}
+              {selectedRecipient.thingsToAvoid && <p className="text-xs text-red-600"><span className="font-semibold">Avoid:</span> {selectedRecipient.thingsToAvoid}</p>}
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Custom Notes (optional)</label>

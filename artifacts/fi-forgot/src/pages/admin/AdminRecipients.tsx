@@ -3,10 +3,11 @@ import {
   AdminRecipient, AdminCustomer, MailingAddress,
   getAdminRecipients, getCustomers, saveAdminRecipient, deleteAdminRecipient,
 } from "@/lib/admin-data";
-import { Plus, Pencil, Trash2, X, MapPin } from "lucide-react";
+import { Plus, Pencil, Trash2, X, MapPin, Tag } from "lucide-react";
 
 const NAVY = "#071A33";
 const RED = "#E23B2E";
+const GOLD = "#D8A725";
 
 const RELATIONSHIPS = ["Wife","Girlfriend","Mom","Mother in law","Grandmother","Daughter","Sister","Friend","Employee","Client","Other"];
 const TONES = ["Sweet","Funny","Romantic","Simple","Religious","From the kids"];
@@ -14,6 +15,39 @@ const TONES = ["Sweet","Funny","Romantic","Simple","Religious","From the kids"];
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 
 const emptyAddress = (): MailingAddress => ({ line1: "", line2: "", city: "", state: "MA", zip: "" });
+
+const ALL_INTERESTS = [
+  { value: "Family & kids",       emoji: "👨‍👩‍👧" },
+  { value: "Travel & adventure",  emoji: "✈️" },
+  { value: "Food & cooking",      emoji: "🍳" },
+  { value: "Reading & learning",  emoji: "📚" },
+  { value: "Fitness & health",    emoji: "🏃‍♀️" },
+  { value: "Music & arts",        emoji: "🎵" },
+  { value: "Animals & pets",      emoji: "🐾" },
+  { value: "Nature & outdoors",   emoji: "🌲" },
+  { value: "Movies & TV",         emoji: "🎬" },
+  { value: "Fashion & style",     emoji: "👗" },
+];
+
+function InterestToggle({ selected, onChange }: { selected: string[]; onChange: (v: string[]) => void }) {
+  function toggle(val: string) {
+    onChange(selected.includes(val) ? selected.filter((s) => s !== val) : [...selected, val]);
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      {ALL_INTERESTS.map(({ value, emoji }) => {
+        const on = selected.includes(value);
+        return (
+          <button key={value} type="button" onClick={() => toggle(value)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${on ? "text-white border-transparent" : "bg-white border-gray-200 text-gray-600 hover:border-amber-400"}`}
+            style={{ background: on ? GOLD : undefined, borderColor: on ? GOLD : undefined }}>
+            <span>{emoji}</span> {value}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function RecipientModal({
   recipient, customers, onSave, onClose,
@@ -36,6 +70,15 @@ function RecipientModal({
       preferredTone: "Sweet",
       notes: "",
       status: "active",
+      interests: [],
+      personalityNotes: "",
+      kidsNames: "",
+      insideJokes: "",
+      petName: "",
+      favoriteMemories: "",
+      thingsToAvoid: "",
+      emotionalLevel: 3,
+      yearsTogther: "",
     }
   );
 
@@ -45,7 +88,7 @@ function RecipientModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl my-8">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8">
         <div className="flex items-center justify-between px-6 py-4 border-b border-[hsl(40,20%,88%)]">
           <h3 className="font-serif font-bold text-xl text-[hsl(221,47%,20%)]">
             {isNew ? "Add Recipient" : "Edit Recipient"}
@@ -53,7 +96,8 @@ function RecipientModal({
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X size={16} /></button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-5 overflow-y-auto max-h-[80vh]">
+          {/* Basic info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Customer *</label>
@@ -106,21 +150,101 @@ function RecipientModal({
               placeholder="Address line 2 (optional)" value={form.mailingAddress.line2 ?? ""}
               onChange={(e) => setAddr({ line2: e.target.value })} />
             <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-1">
-                <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
-                  placeholder="City" value={form.mailingAddress.city}
-                  onChange={(e) => setAddr({ city: e.target.value })} />
+              <input className="col-span-1 border rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
+                placeholder="City" value={form.mailingAddress.city}
+                onChange={(e) => setAddr({ city: e.target.value })} />
+              <select className="border rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
+                value={form.mailingAddress.state} onChange={(e) => setAddr({ state: e.target.value })}>
+                {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <input className="border rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
+                placeholder="ZIP" value={form.mailingAddress.zip}
+                onChange={(e) => setAddr({ zip: e.target.value })} />
+            </div>
+          </div>
+
+          {/* AI profile — used for card personalization */}
+          <div className="border rounded-xl p-4 space-y-4" style={{ background: "#fffbf0", borderColor: `${GOLD}50` }}>
+            <div className="flex items-center gap-2">
+              <Tag size={14} style={{ color: GOLD }} />
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>AI Card Profile</span>
+              <span className="text-xs text-[hsl(221,20%,55%)]">— used when generating card messages</span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-2">Her Interests</label>
+              <InterestToggle
+                selected={form.interests ?? []}
+                onChange={(interests) => setForm({ ...form, interests })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Personality</label>
+                <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-amber-400"
+                  placeholder="Funny, loves big gestures, sentimental..."
+                  value={form.personalityNotes ?? ""}
+                  onChange={(e) => setForm({ ...form, personalityNotes: e.target.value })} />
               </div>
               <div>
-                <select className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
-                  value={form.mailingAddress.state} onChange={(e) => setAddr({ state: e.target.value })}>
-                  {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Years Together / Together Since</label>
+                <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-amber-400"
+                  placeholder="12 years / since 2013..."
+                  value={form.yearsTogther ?? ""}
+                  onChange={(e) => setForm({ ...form, yearsTogther: e.target.value })} />
               </div>
               <div>
-                <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
-                  placeholder="ZIP" value={form.mailingAddress.zip}
-                  onChange={(e) => setAddr({ zip: e.target.value })} />
+                <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Kids' Names & Ages</label>
+                <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-amber-400"
+                  placeholder="Emma (8), Jake (5)..."
+                  value={form.kidsNames ?? ""}
+                  onChange={(e) => setForm({ ...form, kidsNames: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Pet Name / Nickname</label>
+                <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-amber-400"
+                  placeholder="Babe, Shortstack..."
+                  value={form.petName ?? ""}
+                  onChange={(e) => setForm({ ...form, petName: e.target.value })} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Inside Jokes / References</label>
+              <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-amber-400"
+                placeholder="That time in Italy, the running joke about her coffee obsession..."
+                value={form.insideJokes ?? ""}
+                onChange={(e) => setForm({ ...form, insideJokes: e.target.value })} />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Favorite Memories</label>
+              <textarea rows={2} className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-amber-400 resize-none"
+                placeholder="Our honeymoon in Portugal, when she got promoted last year..."
+                value={form.favoriteMemories ?? ""}
+                onChange={(e) => setForm({ ...form, favoriteMemories: e.target.value })} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">Things to Avoid</label>
+                <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-amber-400"
+                  placeholder="Don't mention her mother, no sports stuff..."
+                  value={form.thingsToAvoid ?? ""}
+                  onChange={(e) => setForm({ ...form, thingsToAvoid: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[hsl(221,20%,50%)] mb-1">
+                  Emotional Depth <span className="text-[hsl(221,20%,65%)]">({form.emotionalLevel ?? 3}/5)</span>
+                </label>
+                <input type="range" min={1} max={5} step={1}
+                  className="w-full mt-2"
+                  value={form.emotionalLevel ?? 3}
+                  onChange={(e) => setForm({ ...form, emotionalLevel: Number(e.target.value) })} />
+                <div className="flex justify-between text-xs text-[hsl(221,20%,60%)] mt-0.5">
+                  <span>Brief</span><span>Sweeping</span>
+                </div>
               </div>
             </div>
           </div>
@@ -219,6 +343,7 @@ export function AdminRecipients() {
               <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider">Recipient</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider">Customer</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider">Mailing Address</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider">Interests</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider">Birthday</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider">Tone</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider">Status</th>
@@ -227,7 +352,7 @@ export function AdminRecipients() {
           </thead>
           <tbody className="divide-y divide-[hsl(40,20%,92%)]">
             {filtered.length === 0 ? (
-              <tr><td colSpan={7} className="px-5 py-8 text-center text-sm text-[hsl(221,20%,55%)]">No recipients found.</td></tr>
+              <tr><td colSpan={8} className="px-5 py-8 text-center text-sm text-[hsl(221,20%,55%)]">No recipients found.</td></tr>
             ) : filtered.map((r) => {
               const addr = r.mailingAddress;
               const addressStr = [addr.line1, addr.city, addr.state, addr.zip].filter(Boolean).join(", ");
@@ -245,6 +370,24 @@ export function AdminRecipients() {
                         {addressStr || <span className="italic text-red-400">Address missing</span>}
                       </span>
                     </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    {r.interests?.length ? (
+                      <div className="flex flex-wrap gap-1 max-w-[180px]">
+                        {r.interests.slice(0, 3).map((i) => (
+                          <span key={i} className="px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                            {i}
+                          </span>
+                        ))}
+                        {r.interests.length > 3 && (
+                          <span className="px-1.5 py-0.5 rounded-full text-xs text-[hsl(221,20%,55%)]">
+                            +{r.interests.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[hsl(221,20%,65%)] italic">None set</span>
+                    )}
                   </td>
                   <td className="px-5 py-4 text-xs text-[hsl(221,20%,55%)]">{r.birthday ?? "—"}</td>
                   <td className="px-5 py-4 text-xs text-[hsl(221,20%,55%)]">{r.preferredTone ?? "—"}</td>

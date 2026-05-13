@@ -45,6 +45,16 @@ export interface AdminRecipient {
   preferredTone?: string;
   notes?: string;
   status: RecipientStatus;
+  // AI profile fields — used when generating card messages
+  interests?: string[];
+  personalityNotes?: string;
+  kidsNames?: string;
+  insideJokes?: string;
+  petName?: string;
+  favoriteMemories?: string;
+  thingsToAvoid?: string;
+  emotionalLevel?: number;
+  yearsTogther?: string;
 }
 
 export interface EventSchedule {

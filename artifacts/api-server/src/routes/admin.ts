@@ -29,6 +29,9 @@ router.post("/admin/generate-message", async (req, res) => {
     thingsToAvoid,
     children,
     yearsMarried,
+    interests = [] as string[],
+    petName,
+    emotionalLevel,
   } = req.body;
 
   if (!recipientName || !eventType) {
@@ -39,10 +42,13 @@ router.post("/admin/generate-message", async (req, res) => {
   const contextLines: string[] = [];
   if (relationship) contextLines.push(`Relationship: ${relationship}`);
   if (personalityNotes) contextLines.push(`Personality: ${personalityNotes}`);
+  if ((interests as string[]).length > 0) contextLines.push(`Her interests & passions: ${(interests as string[]).join(", ")} — weave these naturally when relevant`);
   if (children) contextLines.push(`Her children: ${children}`);
   if (yearsMarried) contextLines.push(`Years married (background only, do not state): ${yearsMarried}`);
   if (favoriteMemories) contextLines.push(`Shared memories: ${favoriteMemories}`);
   if (insideJokes) contextLines.push(`Inside references: ${insideJokes}`);
+  if (petName) contextLines.push(`Pet name / nickname: "${petName}"`);
+  if (emotionalLevel) contextLines.push(`Emotional depth (1=brief, 5=sweeping): ${emotionalLevel}`);
   if (customNotes) contextLines.push(`Admin notes: ${customNotes}`);
   if (thingsToAvoid) contextLines.push(`NEVER include: ${thingsToAvoid}`);
 

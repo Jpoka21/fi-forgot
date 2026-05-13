@@ -3,11 +3,11 @@ import {
   QueueItem, QueueStatus, CardTemplate, MessageDraft,
   getQueueItems, saveQueueItem, deleteQueueItem, updateQueueStatus,
   getCardTemplates, getMessageDrafts, getAdminRecipient, getCustomer,
-  validateQueueItem, addAuditEntry,
+  validateQueueItem, addAuditEntry, getAdminRecipients,
 } from "@/lib/admin-data";
 import {
   Plus, Wand2, CheckCircle2, Send, XCircle, RefreshCw,
-  Loader2, AlertTriangle, Eye, X, Trash2,
+  Loader2, AlertTriangle, Eye, X, Trash2, Tag,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -151,11 +151,18 @@ export function AdminQueue() {
   const [addOpen, setAddOpen] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
   const [checkingStatus, setCheckingStatus] = useState<string | null>(null);
+  const [recipientMap, setRecipientMap] = useState<Record<string, { interests?: string[]; personalityNotes?: string; thingsToAvoid?: string }>>({});
 
   useEffect(() => {
     setItems(getQueueItems().sort((a, b) => new Date(a.scheduledMailDate).getTime() - new Date(b.scheduledMailDate).getTime()));
     setTemplates(getCardTemplates());
     setMessages(getMessageDrafts());
+    const rmap = Object.fromEntries(getAdminRecipients().map((r) => [r.id, {
+      interests: r.interests,
+      personalityNotes: r.personalityNotes,
+      thingsToAvoid: r.thingsToAvoid,
+    }]));
+    setRecipientMap(rmap);
   }, []);
 
   function refresh() {
@@ -384,6 +391,30 @@ export function AdminQueue() {
                 <div className="border-t border-[hsl(40,20%,90%)] px-5 py-4 space-y-4" style={{ background: "#fafafa" }}>
                   {/* Validation */}
                   <ValidationBadge item={item} />
+
+                  {/* Recipient interests — shown so admin picks matching card */}
+                  {item.recipientId && (() => {
+                    const rp = recipientMap[item.recipientId];
+                    if (!rp) return null;
+                    return (
+                      <div className="rounded-xl border p-3 space-y-1.5" style={{ background: "#fffbf0", borderColor: `${GOLD}40` }}>
+                        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
+                          <Tag size={10} className="inline mr-1" />Recipient Profile — pick a matching card
+                        </p>
+                        {rp.interests?.length ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {rp.interests.map((i) => (
+                              <span key={i} className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">{i}</span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-amber-600 italic">No interests on file — add them in Recipients to improve card matching</p>
+                        )}
+                        {rp.personalityNotes && <p className="text-xs text-[hsl(221,20%,45%)]"><span className="font-semibold">Personality:</span> {rp.personalityNotes}</p>}
+                        {rp.thingsToAvoid && <p className="text-xs text-red-600"><span className="font-semibold">Avoid:</span> {rp.thingsToAvoid}</p>}
+                      </div>
+                    );
+                  })()}
 
                   {/* Message preview */}
                   {msg && (
