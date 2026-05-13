@@ -6,11 +6,12 @@ import {
   STATUS_COLORS, CardOrder, Recipient, AUTOPILOT_LABELS, getAge,
 } from "@/lib/data";
 import {
-  getCustomerPendingApprovals, customerApproveCard, customerRequestChanges,
+  getCustomerPendingApprovals, customerApproveCard,
+  updateDraftApprovedMessage,
   QueueItem, MessageDraft,
 } from "@/lib/admin-data";
 import { useAuth } from "@/lib/auth-context";
-import { CalendarDays, Users, Zap, CheckCircle2, Plus, ShieldCheck, Clock, ClipboardList, ThumbsUp, MessageSquare, X } from "lucide-react";
+import { CalendarDays, Users, Zap, CheckCircle2, Plus, ShieldCheck, Clock, ClipboardList, ThumbsUp, Sparkles, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
 const NAVY = "#071A33";
 const RED = "#E23B2E";
@@ -93,8 +94,10 @@ export default function DashboardPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [upcomingBriefings, setUpcomingBriefings] = useState<UpcomingBriefing[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
-  const [changeNotes, setChangeNotes] = useState<Record<string, string>>({});
-  const [showChangeInput, setShowChangeInput] = useState<string | null>(null);
+  const [refinedMessages, setRefinedMessages] = useState<Record<string, string>>({});
+  const [refinePrompt, setRefinePrompt] = useState<Record<string, string>>({});
+  const [refiningId, setRefiningId] = useState<string | null>(null);
+  const [refineOpen, setRefineOpen] = useState<string | null>(null);
   const { user } = useAuth();
 
   function reloadApprovals() {
@@ -191,101 +194,193 @@ export default function DashboardPage() {
               </h2>
             </div>
             <div className="space-y-4">
-              {pendingApprovals.map((item) => (
-                <div key={item.id} className="bg-white rounded-xl border-2 shadow-sm overflow-hidden" style={{ borderColor: "#7c3aed40" }}>
-                  {/* Header */}
-                  <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3" style={{ background: "#f5f3ff" }}>
-                    <div>
-                      <div className="font-bold text-[hsl(221,47%,20%)] text-base">
-                        {item.eventType} card for {item.recipientName}
-                      </div>
-                      <div className="text-xs text-[hsl(221,20%,50%)] mt-0.5">
-                        Mailing {item.scheduledMailDate} · Review and approve so we can mail it
-                      </div>
-                    </div>
-                    <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: "#7c3aed" }}>
-                      Needs your OK
-                    </span>
-                  </div>
+              {pendingApprovals.map((item) => {
+                const originalMessage = item.message
+                  ? (item.message.approvedMessage ?? item.message.generatedMessage ?? "")
+                  : "";
+                const currentMessage = refinedMessages[item.id] ?? originalMessage;
+                const isRefining = refiningId === item.id;
+                const isRefineOpen = refineOpen === item.id;
 
-                  {/* Message */}
-                  {item.message ? (
-                    <div className="px-5 py-4">
-                      <div className="text-xs font-semibold text-[hsl(221,20%,50%)] uppercase tracking-wide mb-2">Card Message</div>
-                      <div className="bg-[#F8EEDC] rounded-lg px-4 py-3 text-sm text-[hsl(221,47%,20%)] leading-relaxed font-serif whitespace-pre-wrap border border-[hsl(40,40%,80%)]">
-                        {item.message.approvedMessage ?? item.message.generatedMessage}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="px-5 py-4 text-sm text-[hsl(221,20%,50%)] italic">Message not available yet — check back soon.</div>
-                  )}
+                async function handleApprove() {
+                  if (item.message?.id && refinedMessages[item.id]) {
+                    updateDraftApprovedMessage(item.message.id, refinedMessages[item.id]);
+                  }
+                  customerApproveCard(item.id);
+                  reloadApprovals();
+                  try {
+                    await fetch("/api/admin/resolve-customer-approval", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ queueItemId: item.id }),
+                    });
+                  } catch { /* non-blocking */ }
+                }
 
-                  {/* Actions */}
-                  {showChangeInput === item.id ? (
-                    <div className="px-5 pb-4 space-y-2">
-                      <label className="text-xs font-semibold text-[hsl(221,20%,50%)] uppercase tracking-wide">What would you like changed?</label>
-                      <textarea
-                        rows={3}
-                        value={changeNotes[item.id] ?? ""}
-                        onChange={(e) => setChangeNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                        placeholder="e.g. Make it funnier, mention the camping trip last summer, don't mention age…"
-                        className="w-full border border-[hsl(40,30%,80%)] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2"
-                        style={{ "--tw-ring-color": "#7c3aed" } as React.CSSProperties}
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={async () => {
-                            const notes = changeNotes[item.id]?.trim();
-                            if (!notes) return;
-                            customerRequestChanges(item.id, notes);
-                            setShowChangeInput(null);
-                            reloadApprovals();
-                            try {
-                              await fetch("/api/admin/resolve-customer-approval", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ queueItemId: item.id }),
-                              });
-                            } catch { /* non-blocking */ }
-                          }}
-                          className="flex-1 text-sm font-bold py-2 rounded-lg hover:opacity-90 transition-all text-white"
-                          style={{ background: "#D8A725" }}>
-                          Submit Changes
-                        </button>
-                        <button
-                          onClick={() => setShowChangeInput(null)}
-                          className="px-4 text-sm font-semibold py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
-                          <X size={14} />
-                        </button>
+                async function handleRefine(prompt: string) {
+                  if (!prompt.trim() || isRefining) return;
+                  setRefiningId(item.id);
+                  try {
+                    const res = await fetch("/api/admin/refine-message", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        currentMessage,
+                        refinementPrompt: prompt,
+                        recipientName: item.recipientName,
+                        eventType: item.eventType,
+                        senderName: item.message?.approvedMessage?.split("—").pop()?.trim() ?? "",
+                      }),
+                    });
+                    if (res.ok) {
+                      const { message } = await res.json() as { message: string };
+                      setRefinedMessages((prev) => ({ ...prev, [item.id]: message }));
+                    }
+                  } catch { /* non-blocking */ } finally {
+                    setRefiningId(null);
+                    setRefinePrompt((prev) => ({ ...prev, [item.id]: "" }));
+                  }
+                }
+
+                const QUICK_PROMPTS = [
+                  { label: "✂️ Shorter", prompt: "Make it shorter — cut it to 2–3 sentences max." },
+                  { label: "😄 Funnier", prompt: "Add a bit more humor and lightness while keeping it genuine." },
+                  { label: "❤️ More heartfelt", prompt: "Make it deeper and more emotionally sincere." },
+                  { label: "✍️ More specific", prompt: "Make it feel more specific and personal to this person." },
+                  { label: "🌟 More casual", prompt: "Make the tone more casual and relaxed, less formal." },
+                ];
+
+                return (
+                  <div key={item.id} className="bg-white rounded-xl border-2 shadow-sm overflow-hidden" style={{ borderColor: "#7c3aed40" }}>
+                    {/* Header */}
+                    <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3" style={{ background: "#f5f3ff" }}>
+                      <div>
+                        <div className="font-bold text-[hsl(221,47%,20%)] text-base">
+                          {item.eventType} card for {item.recipientName}
+                        </div>
+                        <div className="text-xs text-[hsl(221,20%,50%)] mt-0.5">
+                          Mailing {item.scheduledMailDate} · Review and approve so we can mail it
+                        </div>
                       </div>
+                      <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: "#7c3aed" }}>
+                        Needs your OK
+                      </span>
                     </div>
-                  ) : (
-                    <div className="px-5 pb-4 flex gap-2">
+
+                    {/* Message preview */}
+                    {originalMessage ? (
+                      <div className="px-5 py-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-xs font-semibold text-[hsl(221,20%,50%)] uppercase tracking-wide">Card Message</div>
+                          {refinedMessages[item.id] && (
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: "#7c3aed" }}>
+                              ✨ AI refined
+                            </span>
+                          )}
+                        </div>
+                        <div className="relative">
+                          <div className={`bg-[#F8EEDC] rounded-lg px-4 py-3 text-sm text-[hsl(221,47%,20%)] leading-relaxed font-serif whitespace-pre-wrap border border-[hsl(40,40%,80%)] transition-opacity ${isRefining ? "opacity-40" : "opacity-100"}`}>
+                            {currentMessage}
+                          </div>
+                          {isRefining && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-lg shadow-sm text-sm font-semibold" style={{ color: "#7c3aed" }}>
+                                <Loader2 size={15} className="animate-spin" />
+                                Rewriting…
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="px-5 py-4 text-sm text-[hsl(221,20%,50%)] italic">Message not available yet — check back soon.</div>
+                    )}
+
+                    {/* Primary CTA */}
+                    <div className="px-5 pb-3">
                       <button
-                        onClick={async () => {
-                          customerApproveCard(item.id);
-                          reloadApprovals();
-                          try {
-                            await fetch("/api/admin/resolve-customer-approval", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ queueItemId: item.id }),
-                            });
-                          } catch { /* non-blocking */ }
-                        }}
-                        className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-lg text-white hover:opacity-90 transition-all"
-                        style={{ background: "#071A33" }}>
+                        onClick={handleApprove}
+                        disabled={isRefining}
+                        className="w-full flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-lg text-white hover:opacity-90 disabled:opacity-50 transition-all"
+                        style={{ background: NAVY }}>
                         <ThumbsUp size={14} /> Looks great — send it!
                       </button>
-                      <button
-                        onClick={() => setShowChangeInput(item.id)}
-                        className="flex items-center gap-1.5 px-4 text-sm font-semibold py-2.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-all">
-                        <MessageSquare size={14} /> Request changes
-                      </button>
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {/* Tweak with AI — toggle */}
+                    {originalMessage && (
+                      <div className="px-5 pb-4">
+                        <button
+                          onClick={() => setRefineOpen(isRefineOpen ? null : item.id)}
+                          className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg border transition-all hover:bg-purple-50"
+                          style={{ borderColor: "#7c3aed40", color: "#7c3aed" }}>
+                          <Sparkles size={13} />
+                          Want to tweak it with AI?
+                          {isRefineOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        </button>
+
+                        {isRefineOpen && (
+                          <div className="mt-3 space-y-3">
+                            {/* Quick prompt buttons */}
+                            <div>
+                              <div className="text-xs text-[hsl(221,20%,55%)] mb-2 font-medium">Quick options</div>
+                              <div className="flex flex-wrap gap-2">
+                                {QUICK_PROMPTS.map(({ label, prompt }) => (
+                                  <button
+                                    key={label}
+                                    onClick={() => handleRefine(prompt)}
+                                    disabled={isRefining}
+                                    className="text-xs font-semibold px-3 py-1.5 rounded-full border hover:bg-purple-50 disabled:opacity-50 transition-all"
+                                    style={{ borderColor: "#7c3aed60", color: "#7c3aed", background: "#faf5ff" }}>
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-px bg-[hsl(40,20%,88%)]" />
+                              <span className="text-xs text-[hsl(221,20%,60%)]">or write your own</span>
+                              <div className="flex-1 h-px bg-[hsl(40,20%,88%)]" />
+                            </div>
+
+                            {/* Custom prompt */}
+                            <div className="flex gap-2">
+                              <textarea
+                                rows={2}
+                                value={refinePrompt[item.id] ?? ""}
+                                onChange={(e) => setRefinePrompt((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                                placeholder="e.g. Mention the camping trip, add something about her garden, skip the age reference…"
+                                disabled={isRefining}
+                                className="flex-1 border border-[hsl(40,30%,80%)] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 disabled:opacity-50"
+                                style={{ "--tw-ring-color": "#7c3aed" } as React.CSSProperties}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleRefine(refinePrompt[item.id] ?? "");
+                                  }
+                                }}
+                              />
+                              <button
+                                onClick={() => handleRefine(refinePrompt[item.id] ?? "")}
+                                disabled={isRefining || !(refinePrompt[item.id] ?? "").trim()}
+                                className="self-end flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold text-white disabled:opacity-40 transition-all hover:opacity-90"
+                                style={{ background: "#7c3aed" }}>
+                                {isRefining ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                                Rewrite
+                              </button>
+                            </div>
+                            <p className="text-xs text-[hsl(221,20%,60%)]">
+                              Hit "Rewrite" as many times as you want — when it looks right, click "Looks great — send it!" above.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

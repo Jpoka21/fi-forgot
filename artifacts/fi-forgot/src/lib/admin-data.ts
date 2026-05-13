@@ -339,6 +339,15 @@ export function customerApproveCard(queueItemId: string): void {
   updateQueueStatus(queueItemId, "Customer Approved");
 }
 
+/** Update the approved message on a MessageDraft (used when customer refines via AI) */
+export function updateDraftApprovedMessage(draftId: string, message: string): void {
+  const all = getMessageDrafts();
+  const idx = all.findIndex((m) => m.id === draftId);
+  if (idx < 0) return;
+  all[idx] = { ...all[idx], approvedMessage: message, updatedAt: new Date().toISOString() };
+  save(KEYS.messages, all);
+}
+
 /** Customer requests changes — stores their notes and moves back to draft */
 export function customerRequestChanges(queueItemId: string, notes: string): void {
   const all = getQueueItems();

@@ -228,6 +228,65 @@ Pick the card that best matches the event type first, then secondarily reflects 
   }
 });
 
+// ─── Customer: refine message ─────────────────────────────────────────────────
+
+router.post("/admin/refine-message", async (req, res) => {
+  const {
+    currentMessage = "",
+    refinementPrompt = "",
+    recipientName = "",
+    eventType = "",
+    senderName = "",
+  } = req.body as Record<string, string>;
+
+  if (!currentMessage || !refinementPrompt) {
+    res.status(400).json({ error: "currentMessage and refinementPrompt are required" });
+    return;
+  }
+
+  const usesMockAI = !process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  if (usesMockAI) {
+    req.log.info("MOCK: refine-message (no API key configured)");
+    res.json({ message: currentMessage, mock: true });
+    return;
+  }
+
+  const systemPrompt = `You are refining a handwritten card message for "F" I Forgot — a concierge card service.
+The customer has reviewed the AI-generated message and wants a specific change.
+
+RULES:
+1. Apply the customer's requested change precisely.
+2. Do NOT add any new facts, names, or details that aren't already in the original message.
+3. Preserve the warm, genuine, personal tone.
+4. Keep the same sign-off name as the original.
+5. Return ONLY the revised card text — no labels, no quotes, no explanation.`;
+
+  const userPrompt = `Original card message:
+"${currentMessage}"
+
+Customer's requested change: "${refinementPrompt}"
+
+Recipient: ${recipientName} | Event: ${eventType} | Signed by: ${senderName}
+
+Rewrite the message applying exactly what the customer asked for.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.1",
+      max_completion_tokens: 400,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    });
+    const message = completion.choices[0]?.message?.content?.trim() ?? currentMessage;
+    res.json({ message, mock: false });
+  } catch (err) {
+    req.log.error({ err }, "refine-message: OpenAI failed");
+    res.status(500).json({ error: "Message refinement failed" });
+  }
+});
+
 // ─── Handwrytten: list cards ──────────────────────────────────────────────────
 
 router.get("/admin/handwrytten/cards", async (req, res) => {
