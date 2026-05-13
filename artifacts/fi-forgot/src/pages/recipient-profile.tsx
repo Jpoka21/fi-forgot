@@ -73,6 +73,7 @@ const schema = z.object({
   selectedEvents: z.array(z.string()),
   autopilotMode: z.enum(AUTOPILOT_MODES as [AutopilotMode, ...AutopilotMode[]]),
   tonePreference: z.enum(TONES as [Tone, ...Tone[]]),
+  senderName: z.string().optional(),
   personalityNotes: z.string(),
   favoriteMemories: z.string(),
   insideJokes: z.string(),
@@ -562,6 +563,21 @@ export default function RecipientProfilePage() {
                   <div className="flex justify-between text-xs text-[hsl(221,20%,60%)] mt-1">
                     <span>Dignified nod</span><span>Full waterworks</span>
                   </div>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="senderName" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>How does {form.watch("name") || "this person"} refer to you?</FormLabel>
+                  <FormControl>
+                    <input
+                      className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[hsl(221,47%,40%)]"
+                      placeholder="e.g. James, Dad, Babe, Uncle Jim — this is how your card will be signed"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-[hsl(221,20%,55%)] mt-0.5">This is the exact name that will appear on the card signature — not your account name.</p>
                   <FormMessage />
                 </FormItem>
               )} />

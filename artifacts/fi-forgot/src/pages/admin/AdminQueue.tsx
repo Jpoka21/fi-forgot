@@ -151,7 +151,7 @@ export function AdminQueue() {
   const [addOpen, setAddOpen] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
   const [checkingStatus, setCheckingStatus] = useState<string | null>(null);
-  const [recipientMap, setRecipientMap] = useState<Record<string, { interests?: string[]; personalityNotes?: string; thingsToAvoid?: string; relationship?: string }>>({});
+  const [recipientMap, setRecipientMap] = useState<Record<string, { interests?: string[]; personalityNotes?: string; thingsToAvoid?: string; relationship?: string; senderName?: string }>>({});
   const [aiSuggestions, setAiSuggestions] = useState<Record<string, {
     loading?: boolean;
     cardId?: string;
@@ -172,6 +172,7 @@ export function AdminQueue() {
       personalityNotes: r.personalityNotes,
       thingsToAvoid: r.thingsToAvoid,
       relationship: r.relationship,
+      senderName: r.senderName,
     }]));
     setRecipientMap(rmap);
   }, []);
@@ -212,6 +213,7 @@ export function AdminQueue() {
         body: JSON.stringify({
           recipientName:   item.recipientName,
           customerName:    item.customerName,
+          senderName:      rp?.senderName ?? "",
           relationship:    rp?.relationship ?? "",
           eventType:       item.eventType,
           tone:            "warm and genuine",

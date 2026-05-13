@@ -47,6 +47,7 @@ export interface AdminRecipient {
   status: RecipientStatus;
   selectedEvents?: string[]; // synced from customer — which occasions this recipient gets cards for
   // AI profile fields — used when generating card messages
+  senderName?: string; // How this recipient addresses the sender — "James", "Dad", etc.
   interests?: string[];
   personalityNotes?: string;
   kidsNames?: string;
@@ -372,6 +373,7 @@ export function syncFromCustomerData(): SyncResult {
       thingsToAvoid?: string;
       emotionalLevel?: number;
       mailingAddress?: { line1: string; line2?: string; city: string; state: string; zip: string };
+      senderName?: string;
       selectedEvents?: string[];
       children?: Array<{ id: string; name: string; gender: string; birthdate?: string }>;
     }>;
@@ -411,6 +413,7 @@ export function syncFromCustomerData(): SyncResult {
         preferredTone: r.tonePreference ?? existing?.preferredTone,
         status: existing?.status ?? "active",
         // AI profile — prefer what admin has already filled in, then fall back to customer data
+        senderName: r.senderName || existing?.senderName,
         personalityNotes: existing?.personalityNotes || r.personalityNotes,
         favoriteMemories: existing?.favoriteMemories || r.favoriteMemories,
         insideJokes: existing?.insideJokes || r.insideJokes,

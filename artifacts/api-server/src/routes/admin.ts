@@ -19,6 +19,7 @@ router.post("/admin/generate-message", async (req, res) => {
   const {
     recipientName,
     customerName,
+    senderName,
     relationship,
     eventType,
     tone,
@@ -33,6 +34,9 @@ router.post("/admin/generate-message", async (req, res) => {
     petName,
     emotionalLevel,
   } = req.body;
+
+  // The name that prints on the card signature — "James", "Dad", etc.
+  const signatureName: string = (senderName as string | undefined)?.trim() || (customerName as string | undefined) || "Your sender";
 
   if (!recipientName || !eventType) {
     res.status(400).json({ error: "recipientName and eventType are required" });
@@ -58,9 +62,9 @@ router.post("/admin/generate-message", async (req, res) => {
 
   const systemPrompt = `You are a professional greeting card writer for "F" I Forgot — a concierge card service. You write personalized, genuine cards for busy men who care but forget. Cards sound like the sender wrote them — specific, real, never generic. 
 
-Rules: Never open with relationship duration. Never use greeting card clichés. Sign as the customer's name.`;
+Rules: Never open with relationship duration. Never use greeting card clichés. Always sign with exactly the name provided — never add a last name or change it.`;
 
-  const userPrompt = `Write a ${tone} ${eventType} card from ${customerName} to ${recipientName}.
+  const userPrompt = `Write a ${tone} ${eventType} card from ${signatureName} to ${recipientName}. Sign it exactly as "${signatureName}" — nothing more.
 
 ${context}
 
@@ -71,7 +75,7 @@ Keep it to 3–6 sentences. Personal, specific, and sounds like a real person wr
   if (usesMockAI) {
     // Placeholder response for when OpenAI is not connected
     const mock = `${recipientName} — ${eventType === "Mother's Day" ? "watching you be a mom is one of the privileges of my life" : eventType === "Birthday" ? "another year and you somehow keep getting better" : eventType === "Anniversary" ? "I'd pick you again in every version of this life" : "I don't say this enough, but I mean it every time"
-      }. ${customNotes ? `${customNotes}. ` : ""}You make everything better, and I don't take that for granted. — ${customerName}`;
+      }. ${customNotes ? `${customNotes}. ` : ""}You make everything better, and I don't take that for granted. — ${signatureName}`;
 
     req.log.info("MOCK: AI message generation (no API key configured)");
     res.json({ message: mock, mock: true });

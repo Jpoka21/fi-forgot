@@ -111,6 +111,7 @@ export interface Recipient {
   needsEaster: boolean;
   selectedEvents: string[];
   customDates: CustomDate[];
+  senderName?: string; // How this recipient knows the sender — "James", "Dad", "Uncle Jim"
   tonePreference: Tone;
   personalityNotes: string;
   favoriteMemories: string;
