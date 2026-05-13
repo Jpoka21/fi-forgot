@@ -104,6 +104,216 @@ const howItWorksSteps = [
   },
 ];
 
+// ─── SVG Icons (hand-drawn line art style) ──────────────────────────────────
+
+function IconWoman() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      {/* hair */}
+      <path d="M22 36 C18 24, 20 14, 40 12 C60 14, 62 24, 58 36" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round"/>
+      <path d="M22 36 C20 48, 22 56, 26 60" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round"/>
+      <path d="M58 36 C60 48, 58 56, 54 60" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round"/>
+      {/* face */}
+      <ellipse cx="40" cy="36" rx="17" ry="20" stroke={NAVY} strokeWidth="2.2"/>
+      {/* eyes */}
+      <ellipse cx="33" cy="33" rx="3" ry="3.5" fill={NAVY}/>
+      <ellipse cx="47" cy="33" rx="3" ry="3.5" fill={NAVY}/>
+      <circle cx="34.5" cy="31.5" r="1" fill="white"/>
+      <circle cx="48.5" cy="31.5" r="1" fill="white"/>
+      {/* smile */}
+      <path d="M33 43 Q40 49 47 43" stroke={NAVY} strokeWidth="2" strokeLinecap="round" fill="none"/>
+      {/* hearts */}
+      <path d="M13 22 C13 19, 16 18, 17.5 20.5 C19 18, 22 19, 22 22 C22 25, 17.5 28, 17.5 28 C17.5 28, 13 25, 13 22Z" fill={RED}/>
+      <path d="M57 15 C57 13, 59.5 12.2, 60.5 14 C61.5 12.2, 64 13, 64 15 C64 17.5, 60.5 20, 60.5 20 C60.5 20, 57 17.5, 57 15Z" fill={RED}/>
+    </svg>
+  );
+}
+
+function IconClipboard() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      {/* board */}
+      <rect x="16" y="16" width="48" height="56" rx="4" stroke={NAVY} strokeWidth="2.2"/>
+      {/* clip */}
+      <rect x="30" y="10" width="20" height="12" rx="4" stroke={NAVY} strokeWidth="2.2" fill={CREAM}/>
+      {/* lines */}
+      <line x1="26" y1="34" x2="54" y2="34" stroke={NAVY} strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="26" y1="44" x2="54" y2="44" stroke={NAVY} strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="26" y1="54" x2="46" y2="54" stroke={NAVY} strokeWidth="1.8" strokeLinecap="round"/>
+      {/* checkboxes */}
+      <rect x="20" y="30" width="6" height="6" rx="1" stroke={NAVY} strokeWidth="1.8"/>
+      <path d="M21.5 33 L23 34.5 L26.5 31" stroke={RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="20" y="40" width="6" height="6" rx="1" stroke={NAVY} strokeWidth="1.8"/>
+      <path d="M21.5 43 L23 44.5 L26.5 41" stroke={RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* heart */}
+      <path d="M46 60 C46 57.5, 49 56.8, 50.5 58.8 C52 56.8, 55 57.5, 55 60 C55 63, 50.5 66, 50.5 66 C50.5 66, 46 63, 46 60Z" fill={RED}/>
+    </svg>
+  );
+}
+
+function IconEnvelope() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      {/* envelope body */}
+      <rect x="10" y="22" width="60" height="42" rx="4" stroke={NAVY} strokeWidth="2.2"/>
+      {/* flap */}
+      <path d="M10 26 L40 46 L70 26" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* heart on flap */}
+      <path d="M32 30 C32 26.5, 36 25.5, 38 28.5 C40 25.5, 44 26.5, 44 30 C44 34.5, 38 38, 38 38 C38 38, 32 34.5, 32 30Z" fill={RED}/>
+      {/* small hearts floating */}
+      <path d="M56 14 C56 12.5, 58 12, 59 13.5 C60 12, 62 12.5, 62 14 C62 16, 59 18, 59 18 C59 18, 56 16, 56 14Z" fill={RED} opacity="0.7"/>
+      <path d="M62 20 C62 19, 63.5 18.7, 64 19.7 C64.5 18.7, 66 19, 66 20 C66 21.5, 64 23, 64 23 C64 23, 62 21.5, 62 20Z" fill={RED} opacity="0.5"/>
+    </svg>
+  );
+}
+
+function IconPencil() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      {/* pencil body */}
+      <rect x="34" y="10" width="14" height="50" rx="3" stroke={NAVY} strokeWidth="2.2" transform="rotate(15 41 35)"/>
+      {/* pencil tip */}
+      <path d="M52 62 L44 70 L56 68Z" fill={NAVY}/>
+      <path d="M48 66 L44 70 L56 68 L52 62" stroke={NAVY} strokeWidth="1.5" strokeLinejoin="round"/>
+      {/* pencil eraser */}
+      <rect x="35" y="10" width="12" height="8" rx="2" fill={RED} stroke={NAVY} strokeWidth="1.8" transform="rotate(15 41 14)"/>
+      {/* writing lines */}
+      <line x1="14" y1="60" x2="38" y2="60" stroke={NAVY} strokeWidth="2" strokeLinecap="round"/>
+      <line x1="14" y1="67" x2="34" y2="67" stroke={NAVY} strokeWidth="2" strokeLinecap="round"/>
+      <line x1="14" y1="74" x2="28" y2="74" stroke={NAVY} strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconBell() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      {/* bell body */}
+      <path d="M40 12 C27 12, 20 22, 20 36 L20 54 L60 54 L60 36 C60 22, 53 12, 40 12Z" stroke={NAVY} strokeWidth="2.2" fill="none"/>
+      {/* bell bottom */}
+      <path d="M16 54 L64 54" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round"/>
+      {/* clapper */}
+      <circle cx="40" cy="62" r="5" stroke={NAVY} strokeWidth="2.2"/>
+      {/* handle */}
+      <path d="M37 12 Q40 8, 43 12" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round"/>
+      {/* sparkle lines */}
+      <line x1="64" y1="22" x2="70" y2="16" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round"/>
+      <line x1="67" y1="30" x2="74" y2="28" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round"/>
+      <line x1="62" y1="14" x2="65" y2="8" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round"/>
+      <line x1="16" y1="22" x2="10" y2="16" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round"/>
+      <line x1="13" y1="30" x2="6" y2="28" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+const HW_STEPS = [
+  { num: 1, icon: <IconWoman />, label: "Add the important\nwomen in your life." },
+  { num: 2, icon: <IconClipboard />, label: "Tell us what they\nlike (and don't like)." },
+  { num: 3, icon: <IconEnvelope />, label: "We create a custom\ncard before the big day." },
+  { num: 4, icon: <IconPencil />, label: "You approve it, edit it,\nor change the tone." },
+  { num: 5, icon: <IconBell />, label: "We remind you so\nyou look like a legend." },
+];
+
+function DecorativeArrow({ flip = false }: { flip?: boolean }) {
+  return (
+    <svg viewBox="0 0 48 20" className="inline-block" style={{ width: 36, height: 16, transform: flip ? "scaleX(-1)" : undefined }} fill="none">
+      <path d="M2 10 Q12 4, 24 10 Q36 16, 46 10" stroke={NAVY} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M38 5 L46 10 L38 15" stroke={NAVY} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="42" y1="4" x2="46" y2="4" stroke={NAVY} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="44" y1="16" x2="46" y2="16" stroke={NAVY} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function StepArrow() {
+  return (
+    <div className="flex items-center justify-center flex-shrink-0" style={{ width: 32 }}>
+      <svg viewBox="0 0 32 20" fill="none" style={{ width: 28, height: 18 }}>
+        <path d="M2 10 L24 10" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round"/>
+        <path d="M17 4 L24 10 L17 16" stroke={NAVY} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </div>
+  );
+}
+
+function HowItWorksBanner() {
+  return (
+    <div className="max-w-5xl mx-auto rounded-2xl px-6 py-8" style={{ background: CREAM }}>
+      {/* Title */}
+      <div className="flex items-center justify-center gap-3 mb-8">
+        <DecorativeArrow flip />
+        <h2 className="text-center leading-tight" style={{
+          fontFamily: "'Georgia', serif",
+          fontSize: "clamp(0.95rem, 2vw, 1.25rem)",
+          fontWeight: 700,
+          color: NAVY,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          whiteSpace: "nowrap",
+        }}>
+          How It Works{" "}
+          <span style={{ fontWeight: 400, letterSpacing: "0.02em" }}>
+            (aka: how you{" "}
+            <span style={{ textDecoration: "underline", textDecorationColor: RED, textDecorationThickness: 2 }}>
+              DON'T
+            </span>
+            {" "}screw this up)
+          </span>
+        </h2>
+        <DecorativeArrow />
+      </div>
+
+      {/* Steps row */}
+      <div className="flex items-start justify-between gap-0">
+        {HW_STEPS.map((step, i) => (
+          <div key={step.num} className="flex items-start flex-1 min-w-0">
+            {/* Step */}
+            <div className="flex flex-col items-center text-center flex-1 min-w-0 px-1">
+              {/* Icon */}
+              <div style={{ width: "clamp(52px, 10vw, 72px)", height: "clamp(52px, 10vw, 72px)", flexShrink: 0 }}>
+                {step.icon}
+              </div>
+              {/* Number + label */}
+              <div className="mt-2">
+                <span style={{
+                  fontFamily: "'Georgia', serif",
+                  fontSize: "clamp(0.7rem, 1.4vw, 0.85rem)",
+                  fontWeight: 700,
+                  color: RED,
+                  marginRight: 4,
+                }}>
+                  {step.num}.
+                </span>
+                <span style={{
+                  fontSize: "clamp(0.6rem, 1.2vw, 0.78rem)",
+                  color: NAVY,
+                  fontWeight: 500,
+                  lineHeight: 1.4,
+                  display: "inline",
+                }}>
+                  {step.label.split("\n").map((line, j) => (
+                    <span key={j}>
+                      {j > 0 && <br />}
+                      {line}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            </div>
+
+            {/* Arrow between steps */}
+            {i < HW_STEPS.length - 1 && (
+              <div className="flex items-start pt-5 flex-shrink-0">
+                <StepArrow />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -207,15 +417,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS — image strip */}
-      <section id="how-it-works" className="py-12 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-        <div className="max-w-7xl mx-auto">
-          <img
-            src="/how-it-works.png"
-            alt="How it works"
-            className="w-full h-auto"
-          />
-        </div>
+      {/* HOW IT WORKS — crisp inline component */}
+      <section id="how-it-works" className="py-10 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <HowItWorksBanner />
       </section>
 
       {/* HOW IT WORKS — detailed steps */}
