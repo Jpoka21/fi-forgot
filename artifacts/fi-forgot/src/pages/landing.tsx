@@ -207,54 +207,35 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section id="how-it-works" className="py-16 px-6 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-        <div className="max-w-6xl mx-auto">
-          {/* Title */}
-          <div className="text-center mb-10">
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 4vw, 3rem)", color: BLACK, letterSpacing: "0.04em" }}>
-              HOW IT WORKS{" "}
-              <span style={{ fontFamily: "'Caveat', cursive", fontSize: "clamp(1rem, 2.5vw, 1.5rem)", color: RED, fontWeight: 700, letterSpacing: 0 }}>
-                (aka: how you don't screw this up)
-              </span>
+      {/* HOW IT WORKS — image strip */}
+      <section id="how-it-works" className="py-12 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <div className="max-w-7xl mx-auto">
+          <img
+            src="/how-it-works.png"
+            alt="How it works"
+            className="w-full h-auto"
+          />
+        </div>
+      </section>
+
+      {/* HOW IT WORKS — detailed steps */}
+      <section className="py-20 px-6" style={{ background: "#fff" }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
+              How The Autopilot Works
             </h2>
+            <p className="text-sm mt-2" style={{ color: "#777" }}>Four steps. Done once. Works forever.</p>
           </div>
-
-          {/* ChatGPT icon strip — clipped to show only the icons row.
-              Image is 936×147px. Zones: title ~28% top, icons ~45% mid, labels ~27% bot.
-              At 110% container width: rendered height ≈ 110% × (147/936) ≈ 17.3vw (at full width).
-              We use margin-top in vw to skip the title, and overflow:hidden on a fixed-height
-              container to clip the bottom labels. */}
-          <div style={{ overflow: "hidden", height: "5.2vw", maxHeight: 76 }}>
-            <img
-              src="/how-it-works.png"
-              alt="How it works icons"
-              style={{
-                width: "110%",
-                height: "auto",
-                marginLeft: "-5%",
-                marginTop: "-4.7vw",
-                display: "block",
-              }}
-            />
-          </div>
-
-          {/* HTML text — 5 columns aligned under each icon */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px", marginTop: "16px" }}>
-            {[
-              { num: "1.", label: "Add the important women in your life." },
-              { num: "2.", label: "Tell us what they like (and don't like)." },
-              { num: "3.", label: "We create a custom card before the big day." },
-              { num: "4.", label: "You approve it, edit it, or change the tone." },
-              { num: "5.", label: "We remind you so you look like a legend." },
-            ].map((step, i) => (
-              <div key={i} style={{ textAlign: "center", padding: "0 4px" }}>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: RED, marginBottom: 4 }}>
-                  {step.num}
+          <div className="grid md:grid-cols-2 gap-6">
+            {howItWorksSteps.map((s) => (
+              <div key={s.num} className="rounded-2xl p-7 border" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+                <div className="text-5xl font-black mb-3" style={{ fontFamily: "'Bebas Neue', cursive", color: `${BLACK}12`, lineHeight: 1 }}>
+                  {s.num}
                 </div>
-                <p style={{ fontSize: "0.82rem", fontWeight: 600, color: BLACK, lineHeight: 1.4 }}>
-                  {step.label}
-                </p>
+                <h3 className="font-bold text-lg mb-2" style={{ color: BLACK }}>{s.title}</h3>
+                <p className="text-sm mb-3" style={{ color: "#555" }}>{s.body}</p>
+                <p className="text-xs font-bold italic" style={{ color: RED }}>{s.note}</p>
               </div>
             ))}
           </div>
