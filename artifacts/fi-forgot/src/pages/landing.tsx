@@ -211,7 +211,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-16 px-6 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
         <div className="max-w-6xl mx-auto">
           {/* Title */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 4vw, 3rem)", color: BLACK, letterSpacing: "0.04em" }}>
               HOW IT WORKS{" "}
               <span style={{ fontFamily: "'Caveat', cursive", fontSize: "clamp(1rem, 2.5vw, 1.5rem)", color: RED, fontWeight: 700, letterSpacing: 0 }}>
@@ -220,44 +220,41 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          {/* Steps */}
-          <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-2">
+          {/* ChatGPT icon strip — clipped to show only the icons row.
+              Image is 936×147px. Zones: title ~28% top, icons ~45% mid, labels ~27% bot.
+              At 110% container width: rendered height ≈ 110% × (147/936) ≈ 17.3vw (at full width).
+              We use margin-top in vw to skip the title, and overflow:hidden on a fixed-height
+              container to clip the bottom labels. */}
+          <div style={{ overflow: "hidden", height: "5.2vw", maxHeight: 76 }}>
+            <img
+              src="/how-it-works.png"
+              alt="How it works icons"
+              style={{
+                width: "110%",
+                height: "auto",
+                marginLeft: "-5%",
+                marginTop: "-4.7vw",
+                display: "block",
+              }}
+            />
+          </div>
+
+          {/* HTML text — 5 columns aligned under each icon */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px", marginTop: "16px" }}>
             {[
-              { img: "/step1.png", num: "1.", label: "Add the important\nwomen in your life." },
-              { img: "/step2.png", num: "2.", label: "Tell us what they\nlike (and don't like)." },
-              { img: "/step3.png", num: "3.", label: "We create a custom\ncard before the big day." },
-              { img: "/step4.png", num: "4.", label: "You approve it, edit it,\nor change the tone." },
-              { img: "/step5.png", num: "5.", label: "We remind you so\nyou look like a legend." },
-            ].map((step, i, arr) => (
-              <div key={i} className="flex flex-row md:flex-col items-center md:items-center gap-3 md:gap-0 flex-1">
-                {/* Icon */}
-                <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 120, height: 120 }}>
-                  <img
-                    src={step.img}
-                    alt={`Step ${i + 1}`}
-                    style={{ width: 110, height: 110, objectFit: "contain" }}
-                  />
+              { num: "1.", label: "Add the important women in your life." },
+              { num: "2.", label: "Tell us what they like (and don't like)." },
+              { num: "3.", label: "We create a custom card before the big day." },
+              { num: "4.", label: "You approve it, edit it, or change the tone." },
+              { num: "5.", label: "We remind you so you look like a legend." },
+            ].map((step, i) => (
+              <div key={i} style={{ textAlign: "center", padding: "0 4px" }}>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: RED, marginBottom: 4 }}>
+                  {step.num}
                 </div>
-
-                {/* Text */}
-                <div className="md:text-center mt-0 md:mt-4">
-                  <div className="font-black text-sm mb-1" style={{ color: RED, fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem" }}>
-                    {step.num}
-                  </div>
-                  <p className="text-sm font-semibold leading-snug whitespace-pre-line" style={{ color: BLACK }}>
-                    {step.label}
-                  </p>
-                </div>
-
-                {/* Arrow between steps (desktop only) */}
-                {i < arr.length - 1 && (
-                  <div className="hidden md:flex items-center justify-center self-start mt-10 -mr-3 -ml-3 z-10 flex-shrink-0" style={{ width: 32 }}>
-                    <svg width="28" height="18" viewBox="0 0 28 18" fill="none">
-                      <path d="M2 9 Q14 2 26 9 Q14 16 2 9Z" fill={`${BLACK}18`} />
-                      <path d="M20 4l6 5-6 5" stroke={BLACK} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/>
-                    </svg>
-                  </div>
-                )}
+                <p style={{ fontSize: "0.82rem", fontWeight: 600, color: BLACK, lineHeight: 1.4 }}>
+                  {step.label}
+                </p>
               </div>
             ))}
           </div>
