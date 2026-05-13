@@ -48,3 +48,9 @@ id = "s5K_ZYgROQrQe3O42HfwO"
 uri = "file://attached_assets/generated_images/simple_illustrated_icon_on_a9f0.png"
 type = "image"
 title = "generated_image"
+
+[[generated]]
+id = "Bdd2-sge8iue2oBC4b8yE"
+uri = "file://artifacts/fi-forgot/public/how-it-works.png"
+type = "image"
+title = "how it works infographic"
