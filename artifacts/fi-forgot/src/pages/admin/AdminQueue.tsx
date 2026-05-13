@@ -402,6 +402,15 @@ export function AdminQueue() {
                     <span>Event: {item.eventDate}</span>
                     <span>Mail by: <strong className="text-[hsl(221,47%,30%)]">{item.scheduledMailDate}</strong></span>
                     <span>Template: {templateName}</span>
+                    {item.aiCardId ? (
+                      <span className="flex items-center gap-1 font-bold" style={{ color: GOLD }}>
+                        <Sparkles size={10} /> AI card ready — expand to view
+                      </span>
+                    ) : item.fulfillmentStatus === "Draft" ? (
+                      <span className="flex items-center gap-1 font-semibold text-amber-600">
+                        <Sparkles size={10} /> No card picked — expand &amp; click AI Pick Card
+                      </span>
+                    ) : null}
                     {item.handwryttenOrderId && <span style={{ color: "#10b981" }}>HW: {item.handwryttenOrderId}</span>}
                   </div>
                 </div>
