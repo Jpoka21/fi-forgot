@@ -9,10 +9,11 @@ import { AdminTemplates } from "./admin/AdminTemplates";
 import { AdminMessages } from "./admin/AdminMessages";
 import { AdminQueue } from "./admin/AdminQueue";
 import { AdminAudit } from "./admin/AdminAudit";
+import { AdminBriefings } from "./admin/AdminBriefings";
 import {
   ShieldCheck, LayoutDashboard, Users, UserCheck,
   CalendarDays, CreditCard, MessageSquare, Send, ScrollText,
-  AlertTriangle,
+  AlertTriangle, ClipboardList,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -30,6 +31,7 @@ type AdminTab =
   | "templates"
   | "messages"
   | "queue"
+  | "briefings"
   | "audit";
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType; description: string }[] = [
@@ -40,6 +42,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType; description:
   { id: "templates", label: "Templates", icon: CreditCard, description: "Handwrytten card catalog" },
   { id: "messages", label: "Messages", icon: MessageSquare, description: "AI drafts and approvals" },
   { id: "queue", label: "Queue", icon: Send, description: "Fulfillment and Handwrytten orders" },
+  { id: "briefings", label: "Briefings", icon: ClipboardList, description: "Pre-event customer answers" },
   { id: "audit", label: "Audit Log", icon: ScrollText, description: "All admin actions tracked" },
 ];
 
@@ -97,6 +100,7 @@ export default function AdminPage() {
       case "templates": return <AdminTemplates />;
       case "messages": return <AdminMessages />;
       case "queue": return <AdminQueue />;
+      case "briefings": return <AdminBriefings />;
       case "audit": return <AdminAudit />;
     }
   }
