@@ -207,35 +207,57 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS — image strip */}
-      <section id="how-it-works" className="py-12 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-        <div className="max-w-7xl mx-auto">
-          <img
-            src="/how-it-works.png"
-            alt="How it works"
-            className="w-full h-auto"
-          />
-        </div>
-      </section>
-
-      {/* HOW IT WORKS — detailed steps */}
-      <section className="py-20 px-6" style={{ background: "#fff" }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK }}>
-              How The Autopilot Works
+      {/* HOW IT WORKS */}
+      <section id="how-it-works" className="py-16 px-6 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <div className="max-w-6xl mx-auto">
+          {/* Title */}
+          <div className="text-center mb-12">
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 4vw, 3rem)", color: BLACK, letterSpacing: "0.04em" }}>
+              HOW IT WORKS{" "}
+              <span style={{ fontFamily: "'Caveat', cursive", fontSize: "clamp(1rem, 2.5vw, 1.5rem)", color: RED, fontWeight: 700, letterSpacing: 0 }}>
+                (aka: how you don't screw this up)
+              </span>
             </h2>
-            <p className="text-sm mt-2" style={{ color: "#777" }}>Four steps. Done once. Works forever.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
-            {howItWorksSteps.map((s) => (
-              <div key={s.num} className="rounded-2xl p-7 border" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-                <div className="text-5xl font-black mb-3" style={{ fontFamily: "'Bebas Neue', cursive", color: `${BLACK}12`, lineHeight: 1 }}>
-                  {s.num}
+
+          {/* Steps */}
+          <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-2">
+            {[
+              { img: "/step1.png", num: "1.", label: "Add the important\nwomen in your life." },
+              { img: "/step2.png", num: "2.", label: "Tell us what they\nlike (and don't like)." },
+              { img: "/step3.png", num: "3.", label: "We create a custom\ncard before the big day." },
+              { img: "/step4.png", num: "4.", label: "You approve it, edit it,\nor change the tone." },
+              { img: "/step5.png", num: "5.", label: "We remind you so\nyou look like a legend." },
+            ].map((step, i, arr) => (
+              <div key={i} className="flex flex-row md:flex-col items-center md:items-center gap-3 md:gap-0 flex-1">
+                {/* Icon */}
+                <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 120, height: 120 }}>
+                  <img
+                    src={step.img}
+                    alt={`Step ${i + 1}`}
+                    style={{ width: 110, height: 110, objectFit: "contain" }}
+                  />
                 </div>
-                <h3 className="font-bold text-lg mb-2" style={{ color: BLACK }}>{s.title}</h3>
-                <p className="text-sm mb-3" style={{ color: "#555" }}>{s.body}</p>
-                <p className="text-xs font-bold italic" style={{ color: RED }}>{s.note}</p>
+
+                {/* Text */}
+                <div className="md:text-center mt-0 md:mt-4">
+                  <div className="font-black text-sm mb-1" style={{ color: RED, fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem" }}>
+                    {step.num}
+                  </div>
+                  <p className="text-sm font-semibold leading-snug whitespace-pre-line" style={{ color: BLACK }}>
+                    {step.label}
+                  </p>
+                </div>
+
+                {/* Arrow between steps (desktop only) */}
+                {i < arr.length - 1 && (
+                  <div className="hidden md:flex items-center justify-center self-start mt-10 -mr-3 -ml-3 z-10 flex-shrink-0" style={{ width: 32 }}>
+                    <svg width="28" height="18" viewBox="0 0 28 18" fill="none">
+                      <path d="M2 9 Q14 2 26 9 Q14 16 2 9Z" fill={`${BLACK}18`} />
+                      <path d="M20 4l6 5-6 5" stroke={BLACK} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/>
+                    </svg>
+                  </div>
+                )}
               </div>
             ))}
           </div>
