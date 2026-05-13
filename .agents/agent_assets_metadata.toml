@@ -54,3 +54,33 @@ id = "Bdd2-sge8iue2oBC4b8yE"
 uri = "file://artifacts/fi-forgot/public/how-it-works.png"
 type = "image"
 title = "how it works infographic"
+
+[[generated]]
+id = "3nDuz8uqEJBlJasOouSS0"
+uri = "file://artifacts/fi-forgot/public/icon-woman.png"
+type = "image"
+title = "woman icon"
+
+[[generated]]
+id = "U7d5VeKn-A_JLtrJVkqrP"
+uri = "file://artifacts/fi-forgot/public/icon-clipboard.png"
+type = "image"
+title = "clipboard checklist icon"
+
+[[generated]]
+id = "psxobiXah7LrC6e6DHgOv"
+uri = "file://artifacts/fi-forgot/public/icon-envelope.png"
+type = "image"
+title = "envelope heart icon"
+
+[[generated]]
+id = "9JBO3blvw8NPl06n2oCYG"
+uri = "file://artifacts/fi-forgot/public/icon-pencil.png"
+type = "image"
+title = "pencil editing icon"
+
+[[generated]]
+id = "uUyYGVyJYrdl1v7BupgO-"
+uri = "file://artifacts/fi-forgot/public/icon-bell.png"
+type = "image"
+title = "ringing bell icon"
