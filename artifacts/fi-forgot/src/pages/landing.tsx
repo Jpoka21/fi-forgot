@@ -77,32 +77,6 @@ function ArrowRight({ color = BLACK }: { color?: string }) {
   );
 }
 
-function SwooshLeft() {
-  return (
-    <svg viewBox="0 0 48 20" className="flex-shrink-0" style={{ width: 36, height: 16 }} fill="none">
-      <path d="M46 10 C35 3, 18 14, 2 10" stroke={BLACK} strokeWidth="2" strokeLinecap="round" />
-      <path d="M8 4 L2 10 L8 16" stroke={BLACK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function SwooshRight() {
-  return (
-    <svg viewBox="0 0 48 20" className="flex-shrink-0" style={{ width: 36, height: 16 }} fill="none">
-      <path d="M2 10 C13 3, 30 14, 46 10" stroke={BLACK} strokeWidth="2" strokeLinecap="round" />
-      <path d="M40 4 L46 10 L40 16" stroke={BLACK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-const HOW_IT_WORKS_STEPS = [
-  { num: "1", icon: "👩", label: "Add the important women in your life." },
-  { num: "2", icon: "📋", label: "Tell us what they like (and don't like)." },
-  { num: "3", icon: "✉️", label: "We create a custom card before the big day." },
-  { num: "4", icon: "✏️", label: "You approve it, edit it, or change the tone." },
-  { num: "5", icon: "🔔", label: "We remind you so you look like a legend." },
-];
-
 const howItWorksSteps = [
   {
     num: "01",
@@ -233,68 +207,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS — coded strip */}
-      <section id="how-it-works" className="py-14 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}12` }}>
-        <div className="max-w-5xl mx-auto">
-
-          {/* Title row */}
-          <div className="flex items-center justify-center gap-3 mb-10">
-            <SwooshLeft />
-            <h2 className="text-center leading-tight" style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(1.1rem, 3vw, 1.6rem)",
-              color: BLACK,
-              letterSpacing: "0.04em",
-              whiteSpace: "nowrap",
-            }}>
-              HOW IT WORKS{" "}
-              <span style={{ fontFamily: "inherit", fontWeight: "inherit", fontSize: "inherit", color: "#555" }}>
-                (AKA: HOW YOU{" "}
-                <span style={{ color: BLACK, textDecoration: "underline", textDecorationColor: RED, textDecorationThickness: 3 }}>DON'T</span>
-                {" "}SCREW THIS UP)
-              </span>
-            </h2>
-            <SwooshRight />
-          </div>
-
-          {/* 5 steps */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            {HOW_IT_WORKS_STEPS.map((step, i) => (
-              <div key={step.num} className="flex flex-row sm:flex-col items-center sm:items-center gap-3 sm:gap-0" style={{ flex: "0 0 auto" }}>
-                {/* Step card */}
-                <div className="flex flex-col items-center text-center gap-2" style={{ maxWidth: 130 }}>
-                  {/* Icon circle */}
-                  <div className="w-20 h-20 rounded-full flex items-center justify-center border-2 flex-shrink-0"
-                    style={{ background: "#fff", borderColor: `${BLACK}20`, borderStyle: "dashed" }}>
-                    <span style={{ fontSize: "2rem", lineHeight: 1 }}>{step.icon}</span>
-                  </div>
-                  {/* Number + description */}
-                  <p className="text-xs font-medium leading-snug" style={{ color: BLACK, maxWidth: 110 }}>
-                    <span style={{ color: RED, fontFamily: "'Bebas Neue', cursive", fontSize: "1rem" }}>
-                      {step.num}.{" "}
-                    </span>
-                    {step.label}
-                  </p>
-                </div>
-                {/* Arrow after (hidden on last, shown inline on mobile between items) */}
-                {i < HOW_IT_WORKS_STEPS.length - 1 && (
-                  <div className="hidden sm:flex absolute" style={{ position: "static" }}>
-                    {/* Arrow is rendered as a sibling below */}
-                  </div>
-                )}
-              </div>
-            )).reduce<React.ReactNode[]>((acc, el, i) => {
-              acc.push(el);
-              if (i < HOW_IT_WORKS_STEPS.length - 1) {
-                acc.push(
-                  <div key={`arrow-${i}`} className="hidden sm:block flex-shrink-0" style={{ color: "#aaa", fontSize: "1.4rem" }}>
-                    →
-                  </div>
-                );
-              }
-              return acc;
-            }, [])}
-          </div>
+      {/* HOW IT WORKS — image strip */}
+      <section id="how-it-works" className="py-12 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <div className="max-w-7xl mx-auto">
+          <img
+            src="/how-it-works.png"
+            alt="How it works"
+            className="w-full h-auto"
+          />
         </div>
       </section>
 
