@@ -18,6 +18,9 @@ const STATUS_COLORS: Record<QueueStatus, string> = {
   "Draft": "bg-gray-100 text-gray-700",
   "Needs Approval": "bg-amber-100 text-amber-800",
   "Approved": "bg-blue-100 text-blue-800",
+  "Awaiting Customer Approval": "bg-violet-100 text-violet-800",
+  "Customer Changes Requested": "bg-orange-100 text-orange-800",
+  "Customer Approved": "bg-emerald-100 text-emerald-800",
   "Ready To Send": "bg-purple-100 text-purple-800",
   "Sent To Handwrytten": "bg-teal-100 text-teal-800",
   "Mailed": "bg-green-100 text-green-800",
@@ -26,8 +29,9 @@ const STATUS_COLORS: Record<QueueStatus, string> = {
 };
 
 const ALL_STATUSES: QueueStatus[] = [
-  "Draft","Needs Approval","Approved","Ready To Send",
-  "Sent To Handwrytten","Mailed","Failed","Cancelled",
+  "Draft","Needs Approval","Approved",
+  "Awaiting Customer Approval","Customer Changes Requested","Customer Approved",
+  "Ready To Send","Sent To Handwrytten","Mailed","Failed","Cancelled",
 ];
 
 function ValidationBadge({ item }: { item: QueueItem }) {
@@ -521,10 +525,28 @@ export function AdminQueue() {
                   {item.fulfillmentStatus === "Needs Approval" && item.messageDraftId && (
                     <button onClick={() => { approveMessage(item, item.messageDraftId!); }}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-green-100 text-green-800 hover:bg-green-200 transition-all">
-                      <CheckCircle2 size={11} /> Approve
+                      <CheckCircle2 size={11} /> Approve Message
                     </button>
                   )}
-                  {["Approved","Ready To Send"].includes(item.fulfillmentStatus) && (
+                  {item.fulfillmentStatus === "Approved" && (
+                    <button onClick={() => changeStatus(item, "Awaiting Customer Approval")}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-violet-100 text-violet-800 hover:bg-violet-200 transition-all">
+                      <Send size={11} /> Send for Customer Review
+                    </button>
+                  )}
+                  {item.fulfillmentStatus === "Awaiting Customer Approval" && (
+                    <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-50 text-violet-600 border border-violet-200">
+                      <Loader2 size={11} className="animate-spin" /> Awaiting customer…
+                    </span>
+                  )}
+                  {item.fulfillmentStatus === "Customer Changes Requested" && (
+                    <button onClick={() => { generateMessage(item); setExpanded(item.id); }}
+                      disabled={generating === item.id}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-orange-100 text-orange-800 hover:bg-orange-200 disabled:opacity-50 transition-all">
+                      {generating === item.id ? <><Loader2 size={11} className="animate-spin" /> Regenerating...</> : <><Wand2 size={11} /> Regenerate</>}
+                    </button>
+                  )}
+                  {["Customer Approved","Ready To Send"].includes(item.fulfillmentStatus) && (
                     <button
                       onClick={() => sendToHandwrytten(item)}
                       disabled={isSending}
@@ -559,6 +581,16 @@ export function AdminQueue() {
 
               {isExpanded && (
                 <div className="border-t border-[hsl(40,20%,90%)] px-5 py-4 space-y-4" style={{ background: "#fafafa" }}>
+                  {/* Customer Notes (when changes were requested) */}
+                  {item.fulfillmentStatus === "Customer Changes Requested" && item.customerNotes && (
+                    <div className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-xs font-bold uppercase tracking-wide text-orange-700">Customer Feedback</span>
+                      </div>
+                      <p className="text-sm text-orange-900 italic">"{item.customerNotes}"</p>
+                    </div>
+                  )}
+
                   {/* Validation */}
                   <ValidationBadge item={item} />
 

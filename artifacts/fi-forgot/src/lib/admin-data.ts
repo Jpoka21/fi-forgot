@@ -9,6 +9,9 @@ export type QueueStatus =
   | "Draft"
   | "Needs Approval"
   | "Approved"
+  | "Awaiting Customer Approval"
+  | "Customer Changes Requested"
+  | "Customer Approved"
   | "Ready To Send"
   | "Sent To Handwrytten"
   | "Mailed"
@@ -119,6 +122,7 @@ export interface QueueItem {
   fulfillmentStatus: QueueStatus;
   handwryttenOrderId?: string;
   errorMessage?: string;
+  customerNotes?: string;   // feedback left by customer when requesting changes
   createdAt: string;
   updatedAt: string;
   // AI-selected card (bypasses templates — set by suggest-card endpoint)
@@ -249,6 +253,37 @@ export const getQueueItems = () => load<QueueItem>(KEYS.queue);
 export const getQueueItem = (id: string) => getQueueItems().find((q) => q.id === id);
 export const saveQueueItem = (q: QueueItem) => { upsert(KEYS.queue, q); };
 export const deleteQueueItem = (id: string) => save(KEYS.queue, getQueueItems().filter((q) => q.id !== id));
+
+/** Called from the customer-facing app — find queue items awaiting this customer's approval */
+export function getCustomerPendingApprovals(customerEmail: string): Array<QueueItem & { message?: MessageDraft }> {
+  try {
+    const customerId = `csync_${customerEmail.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
+    const items = getQueueItems().filter(
+      (q) => q.customerId === customerId && q.fulfillmentStatus === "Awaiting Customer Approval"
+    );
+    const messages = getMessageDrafts();
+    return items.map((q) => ({
+      ...q,
+      message: q.messageDraftId ? messages.find((m) => m.id === q.messageDraftId) : undefined,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/** Customer approves a pending card — marks it Customer Approved */
+export function customerApproveCard(queueItemId: string): void {
+  updateQueueStatus(queueItemId, "Customer Approved");
+}
+
+/** Customer requests changes — stores their notes and moves back to draft */
+export function customerRequestChanges(queueItemId: string, notes: string): void {
+  const all = getQueueItems();
+  const idx = all.findIndex((q) => q.id === queueItemId);
+  if (idx < 0) return;
+  all[idx] = { ...all[idx], fulfillmentStatus: "Customer Changes Requested", customerNotes: notes, updatedAt: new Date().toISOString() };
+  save(KEYS.queue, all);
+}
 
 export function updateQueueStatus(id: string, status: QueueStatus, meta?: Partial<QueueItem>): void {
   const all = getQueueItems();

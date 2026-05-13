@@ -5,8 +5,12 @@ import {
   getCards, getRecipients, getBriefingsForRecipient,
   STATUS_COLORS, CardOrder, Recipient, AUTOPILOT_LABELS, getAge,
 } from "@/lib/data";
+import {
+  getCustomerPendingApprovals, customerApproveCard, customerRequestChanges,
+  QueueItem, MessageDraft,
+} from "@/lib/admin-data";
 import { useAuth } from "@/lib/auth-context";
-import { CalendarDays, Users, Zap, CheckCircle2, Plus, ShieldCheck, Clock, ClipboardList } from "lucide-react";
+import { CalendarDays, Users, Zap, CheckCircle2, Plus, ShieldCheck, Clock, ClipboardList, ThumbsUp, MessageSquare, X } from "lucide-react";
 
 const NAVY = "#071A33";
 const RED = "#E23B2E";
@@ -82,17 +86,27 @@ function StatCard({ label, value, icon: Icon, color, sub }: { label: string; val
   );
 }
 
+type PendingApproval = QueueItem & { message?: MessageDraft };
+
 export default function DashboardPage() {
   const [cards, setCards] = useState<CardOrder[]>([]);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [upcomingBriefings, setUpcomingBriefings] = useState<UpcomingBriefing[]>([]);
+  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
+  const [changeNotes, setChangeNotes] = useState<Record<string, string>>({});
+  const [showChangeInput, setShowChangeInput] = useState<string | null>(null);
   const { user } = useAuth();
+
+  function reloadApprovals() {
+    if (user?.email) setPendingApprovals(getCustomerPendingApprovals(user.email));
+  }
 
   useEffect(() => {
     const rs = getRecipients();
     const cs = getCards();
     setCards(cs);
     setRecipients(rs);
+    reloadApprovals();
 
     // Compute upcoming briefings needed (events within 45 days, not briefed this year)
     const thisYear = new Date().getFullYear();
@@ -164,6 +178,98 @@ export default function DashboardPage() {
                 Settings
               </button>
             </Link>
+          </div>
+        )}
+
+        {/* ── Pending Customer Approvals ─────────────────────────────────── */}
+        {pendingApprovals.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <ThumbsUp size={18} style={{ color: "#7c3aed" }} />
+              <h2 className="font-serif text-lg font-bold" style={{ color: "#7c3aed" }}>
+                {pendingApprovals.length === 1 ? "1 card needs your approval" : `${pendingApprovals.length} cards need your approval`}
+              </h2>
+            </div>
+            <div className="space-y-4">
+              {pendingApprovals.map((item) => (
+                <div key={item.id} className="bg-white rounded-xl border-2 shadow-sm overflow-hidden" style={{ borderColor: "#7c3aed40" }}>
+                  {/* Header */}
+                  <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3" style={{ background: "#f5f3ff" }}>
+                    <div>
+                      <div className="font-bold text-[hsl(221,47%,20%)] text-base">
+                        {item.eventType} card for {item.recipientName}
+                      </div>
+                      <div className="text-xs text-[hsl(221,20%,50%)] mt-0.5">
+                        Mailing {item.scheduledMailDate} · Review and approve so we can mail it
+                      </div>
+                    </div>
+                    <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: "#7c3aed" }}>
+                      Needs your OK
+                    </span>
+                  </div>
+
+                  {/* Message */}
+                  {item.message ? (
+                    <div className="px-5 py-4">
+                      <div className="text-xs font-semibold text-[hsl(221,20%,50%)] uppercase tracking-wide mb-2">Card Message</div>
+                      <div className="bg-[#F8EEDC] rounded-lg px-4 py-3 text-sm text-[hsl(221,47%,20%)] leading-relaxed font-serif whitespace-pre-wrap border border-[hsl(40,40%,80%)]">
+                        {item.message.approvedMessage ?? item.message.generatedMessage}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="px-5 py-4 text-sm text-[hsl(221,20%,50%)] italic">Message not available yet — check back soon.</div>
+                  )}
+
+                  {/* Actions */}
+                  {showChangeInput === item.id ? (
+                    <div className="px-5 pb-4 space-y-2">
+                      <label className="text-xs font-semibold text-[hsl(221,20%,50%)] uppercase tracking-wide">What would you like changed?</label>
+                      <textarea
+                        rows={3}
+                        value={changeNotes[item.id] ?? ""}
+                        onChange={(e) => setChangeNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                        placeholder="e.g. Make it funnier, mention the camping trip last summer, don't mention age…"
+                        className="w-full border border-[hsl(40,30%,80%)] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2"
+                        style={{ "--tw-ring-color": "#7c3aed" } as React.CSSProperties}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            const notes = changeNotes[item.id]?.trim();
+                            if (!notes) return;
+                            customerRequestChanges(item.id, notes);
+                            setShowChangeInput(null);
+                            reloadApprovals();
+                          }}
+                          className="flex-1 text-sm font-bold py-2 rounded-lg hover:opacity-90 transition-all text-white"
+                          style={{ background: "#D8A725" }}>
+                          Submit Changes
+                        </button>
+                        <button
+                          onClick={() => setShowChangeInput(null)}
+                          className="px-4 text-sm font-semibold py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="px-5 pb-4 flex gap-2">
+                      <button
+                        onClick={() => { customerApproveCard(item.id); reloadApprovals(); }}
+                        className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-lg text-white hover:opacity-90 transition-all"
+                        style={{ background: "#071A33" }}>
+                        <ThumbsUp size={14} /> Looks great — send it!
+                      </button>
+                      <button
+                        onClick={() => setShowChangeInput(item.id)}
+                        className="flex items-center gap-1.5 px-4 text-sm font-semibold py-2.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-all">
+                        <MessageSquare size={14} /> Request changes
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
