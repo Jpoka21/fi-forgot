@@ -207,6 +207,34 @@ export function AdminQueue() {
     refresh();
   }
 
+  async function sendForCustomerReview(item: QueueItem) {
+    changeStatus(item, "Awaiting Customer Approval");
+
+    try {
+      const customer = getCustomer(item.customerId);
+      if (!customer?.email) return;
+
+      const draft = messages.find((m) => m.id === item.messageDraftId);
+      const messageText = draft?.approvedMessage ?? draft?.generatedMessage ?? "";
+
+      await fetch("/api/admin/request-customer-approval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          queueItemId: item.id,
+          customerEmail: customer.email,
+          customerName: item.customerName,
+          recipientName: item.recipientName,
+          eventType: item.eventType,
+          scheduledMailDate: item.scheduledMailDate,
+          messageText,
+        }),
+      });
+    } catch {
+      // Non-blocking — status already changed in localStorage
+    }
+  }
+
   async function generateMessage(item: QueueItem) {
     const rp = recipientMap[item.recipientId];
     setGenerating(item.id);
@@ -529,7 +557,7 @@ export function AdminQueue() {
                     </button>
                   )}
                   {item.fulfillmentStatus === "Approved" && (
-                    <button onClick={() => changeStatus(item, "Awaiting Customer Approval")}
+                    <button onClick={() => sendForCustomerReview(item)}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-violet-100 text-violet-800 hover:bg-violet-200 transition-all">
                       <Send size={11} /> Send for Customer Review
                     </button>

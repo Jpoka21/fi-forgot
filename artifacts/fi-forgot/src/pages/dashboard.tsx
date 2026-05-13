@@ -234,12 +234,19 @@ export default function DashboardPage() {
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             const notes = changeNotes[item.id]?.trim();
                             if (!notes) return;
                             customerRequestChanges(item.id, notes);
                             setShowChangeInput(null);
                             reloadApprovals();
+                            try {
+                              await fetch("/api/admin/resolve-customer-approval", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ queueItemId: item.id }),
+                              });
+                            } catch { /* non-blocking */ }
                           }}
                           className="flex-1 text-sm font-bold py-2 rounded-lg hover:opacity-90 transition-all text-white"
                           style={{ background: "#D8A725" }}>
@@ -255,7 +262,17 @@ export default function DashboardPage() {
                   ) : (
                     <div className="px-5 pb-4 flex gap-2">
                       <button
-                        onClick={() => { customerApproveCard(item.id); reloadApprovals(); }}
+                        onClick={async () => {
+                          customerApproveCard(item.id);
+                          reloadApprovals();
+                          try {
+                            await fetch("/api/admin/resolve-customer-approval", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ queueItemId: item.id }),
+                            });
+                          } catch { /* non-blocking */ }
+                        }}
                         className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-lg text-white hover:opacity-90 transition-all"
                         style={{ background: "#071A33" }}>
                         <ThumbsUp size={14} /> Looks great — send it!
