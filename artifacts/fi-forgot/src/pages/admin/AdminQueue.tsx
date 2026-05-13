@@ -3,7 +3,7 @@ import {
   QueueItem, QueueStatus, CardTemplate, MessageDraft,
   getQueueItems, saveQueueItem, deleteQueueItem, updateQueueStatus,
   getCardTemplates, getMessageDrafts, getAdminRecipient, getCustomer,
-  validateQueueItem, addAuditEntry, getAdminRecipients,
+  validateQueueItem, addAuditEntry, getAdminRecipients, saveMessageDraft,
 } from "@/lib/admin-data";
 import {
   Plus, Wand2, CheckCircle2, Send, XCircle, RefreshCw,
@@ -160,6 +160,8 @@ export function AdminQueue() {
     reason?: string;
     error?: string;
   }>>({});
+  const [generating, setGenerating] = useState<string | null>(null);
+  const [editingMessage, setEditingMessage] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setItems(getQueueItems().sort((a, b) => new Date(a.scheduledMailDate).getTime() - new Date(b.scheduledMailDate).getTime()));
@@ -190,9 +192,91 @@ export function AdminQueue() {
     refresh();
   }
 
+  function refreshAll() {
+    setItems(getQueueItems().sort((a, b) => new Date(a.scheduledMailDate).getTime() - new Date(b.scheduledMailDate).getTime()));
+    setMessages(getMessageDrafts());
+  }
+
   function changeStatus(item: QueueItem, status: QueueStatus) {
     updateQueueStatus(item.id, status);
     refresh();
+  }
+
+  async function generateMessage(item: QueueItem) {
+    const rp = recipientMap[item.recipientId];
+    setGenerating(item.id);
+    try {
+      const res = await fetch("/api/admin/generate-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientName:   item.recipientName,
+          customerName:    item.customerName,
+          relationship:    rp?.relationship ?? "",
+          eventType:       item.eventType,
+          tone:            "warm and genuine",
+          personalityNotes: rp?.personalityNotes ?? "",
+          interests:       rp?.interests ?? [],
+          thingsToAvoid:   rp?.thingsToAvoid ?? "",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Generation failed");
+
+      const draftId = `msg_${item.id}_${Date.now()}`;
+      const draft: MessageDraft = {
+        id:              draftId,
+        customerId:      item.customerId,
+        recipientId:     item.recipientId,
+        customerName:    item.customerName,
+        recipientName:   item.recipientName,
+        relationship:    rp?.relationship ?? "",
+        eventType:       item.eventType,
+        tone:            "warm and genuine",
+        generatedMessage: data.message,
+        approvalStatus:  "pending",
+        createdAt:       new Date().toISOString(),
+        updatedAt:       new Date().toISOString(),
+      };
+      saveMessageDraft(draft);
+
+      const updated: QueueItem = {
+        ...item,
+        messageDraftId:   draftId,
+        messageStatus:    "needs_approval",
+        fulfillmentStatus: "Needs Approval",
+        updatedAt:        new Date().toISOString(),
+      };
+      saveQueueItem(updated);
+      setEditingMessage((prev) => ({ ...prev, [draftId]: data.message }));
+      refreshAll();
+      setExpanded(item.id);
+    } catch (err: unknown) {
+      alert("Message generation failed: " + (err instanceof Error ? err.message : "Unknown error"));
+    } finally {
+      setGenerating(null);
+    }
+  }
+
+  function approveMessage(item: QueueItem, draftId: string) {
+    const text = editingMessage[draftId];
+    const existing = messages.find((m) => m.id === draftId);
+    if (!existing) return;
+    const approved: MessageDraft = {
+      ...existing,
+      approvedMessage: text ?? existing.generatedMessage ?? "",
+      approvalStatus: "approved",
+      updatedAt: new Date().toISOString(),
+    };
+    saveMessageDraft(approved);
+    const updated: QueueItem = {
+      ...item,
+      messageStatus: "approved",
+      fulfillmentStatus: "Approved",
+      updatedAt: new Date().toISOString(),
+    };
+    saveQueueItem(updated);
+    refreshAll();
   }
 
   async function suggestCard(item: QueueItem) {
@@ -417,14 +501,15 @@ export function AdminQueue() {
 
                 {/* Action buttons */}
                 <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
-                  {item.fulfillmentStatus === "Draft" && (
-                    <button onClick={() => changeStatus(item, "Needs Approval")}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all">
-                      <Wand2 size={11} /> Generate
+                  {(item.fulfillmentStatus === "Draft" || item.fulfillmentStatus === "Needs Approval") && !item.messageDraftId && (
+                    <button onClick={() => { generateMessage(item); setExpanded(item.id); }}
+                      disabled={generating === item.id}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 disabled:opacity-50 transition-all">
+                      {generating === item.id ? <><Loader2 size={11} className="animate-spin" /> Generating...</> : <><Wand2 size={11} /> Generate Message</>}
                     </button>
                   )}
-                  {item.fulfillmentStatus === "Needs Approval" && (
-                    <button onClick={() => changeStatus(item, "Approved")}
+                  {item.fulfillmentStatus === "Needs Approval" && item.messageDraftId && (
+                    <button onClick={() => { approveMessage(item, item.messageDraftId!); }}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-green-100 text-green-800 hover:bg-green-200 transition-all">
                       <CheckCircle2 size={11} /> Approve
                     </button>
@@ -587,19 +672,65 @@ export function AdminQueue() {
                     );
                   })()}
 
-                  {/* Message preview */}
-                  {msg && (
-                    <div>
-                      <div className="text-xs font-bold text-[hsl(221,47%,20%)] mb-1 uppercase tracking-wider">Message</div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${msg.approvalStatus === "approved" ? "bg-green-100 text-green-800" : msg.approvalStatus === "rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}`}>
-                          {msg.approvalStatus}
-                        </span>
-                        <span className="text-xs text-[hsl(221,20%,55%)]">{msg.tone} · {msg.eventType}</span>
+                  {/* Message panel */}
+                  {msg ? (
+                    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "hsl(221,30%,85%)" }}>
+                      <div className="flex items-center justify-between px-3 py-2 border-b" style={{ background: "hsl(221,30%,96%)", borderColor: "hsl(221,30%,88%)" }}>
+                        <div className="flex items-center gap-2">
+                          <Wand2 size={13} style={{ color: NAVY }} />
+                          <span className="text-xs font-bold uppercase tracking-wider" style={{ color: NAVY }}>Card Message</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${msg.approvalStatus === "approved" ? "bg-green-100 text-green-800" : msg.approvalStatus === "rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}`}>
+                            {msg.approvalStatus}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {msg.approvalStatus !== "approved" && (
+                            <button
+                              onClick={() => generateMessage(item)}
+                              disabled={generating === item.id}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-all">
+                              {generating === item.id ? <><Loader2 size={10} className="animate-spin" /> Regenerating...</> : <>↻ Regenerate</>}
+                            </button>
+                          )}
+                          {msg.approvalStatus !== "approved" && (
+                            <button
+                              onClick={() => approveMessage(item, msg.id)}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white hover:opacity-90 transition-all"
+                              style={{ background: "#16a34a" }}>
+                              <CheckCircle2 size={11} /> Approve &amp; Lock
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-sm text-[hsl(221,20%,40%)] italic leading-relaxed">
-                        "{msg.approvedMessage ?? msg.generatedMessage ?? "No message yet"}"
-                      </p>
+                      <div className="p-3" style={{ background: "#fffbf4" }}>
+                        {msg.approvalStatus === "approved" ? (
+                          <p className="text-sm leading-relaxed text-[hsl(221,20%,30%)] italic">"{msg.approvedMessage}"</p>
+                        ) : (
+                          <>
+                            <textarea
+                              value={editingMessage[msg.id] ?? msg.generatedMessage ?? ""}
+                              onChange={(e) => setEditingMessage((prev) => ({ ...prev, [msg.id]: e.target.value }))}
+                              rows={5}
+                              className="w-full text-sm leading-relaxed text-[hsl(221,20%,30%)] border border-gray-200 rounded-lg p-3 bg-white resize-y outline-none focus:border-blue-400 transition-colors font-serif"
+                              placeholder="Message will appear here after generation..."
+                            />
+                            <p className="text-xs text-[hsl(221,20%,55%)] mt-1.5">Edit freely, then click Approve &amp; Lock to finalize. This exact text will print on the card.</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center">
+                      <Wand2 size={20} className="mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm font-semibold text-gray-500">No message yet</p>
+                      <p className="text-xs text-gray-400 mt-0.5 mb-3">Click Generate Message to have AI write a personalized card message</p>
+                      <button
+                        onClick={() => generateMessage(item)}
+                        disabled={generating === item.id}
+                        className="flex items-center gap-1.5 mx-auto px-4 py-2 rounded-lg text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-all"
+                        style={{ background: NAVY }}>
+                        {generating === item.id ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Wand2 size={13} /> Generate Message</>}
+                      </button>
                     </div>
                   )}
 
