@@ -45,8 +45,6 @@ export interface AdminRecipient {
   preferredTone?: string;
   notes?: string;
   status: RecipientStatus;
-  // Contact
-  recipientEmail?: string; // for sending personality questionnaires
   // AI profile fields — used when generating card messages
   interests?: string[];
   personalityNotes?: string;
@@ -372,7 +370,6 @@ export function syncFromCustomerData(): SyncResult {
       insideJokes?: string;
       thingsToAvoid?: string;
       emotionalLevel?: number;
-      recipientEmail?: string;
       mailingAddress?: { line1: string; line2?: string; city: string; state: string; zip: string };
       children?: Array<{ id: string; name: string; gender: string; birthdate?: string }>;
     }>;
@@ -411,7 +408,6 @@ export function syncFromCustomerData(): SyncResult {
         anniversaryDate: r.anniversaryDate ?? r.marriageDate ?? existing?.anniversaryDate,
         preferredTone: r.tonePreference ?? existing?.preferredTone,
         status: existing?.status ?? "active",
-        recipientEmail: r.recipientEmail || existing?.recipientEmail,
         // AI profile — prefer what admin has already filled in, then fall back to customer data
         personalityNotes: existing?.personalityNotes || r.personalityNotes,
         favoriteMemories: existing?.favoriteMemories || r.favoriteMemories,

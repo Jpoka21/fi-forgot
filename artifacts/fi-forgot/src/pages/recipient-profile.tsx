@@ -79,7 +79,6 @@ const schema = z.object({
   thingsToAvoid: z.string(),
   emotionalLevel: z.number().min(1).max(5),
   deliveryPreference: z.enum(["Mail it to me", "Mail it directly to her"] as [DeliveryPreference, DeliveryPreference]),
-  recipientEmail: z.string().optional(),
   mailingAddress: addressSchema,
 });
 
@@ -308,7 +307,6 @@ export default function RecipientProfilePage() {
           thingsToAvoid: existing.thingsToAvoid,
           emotionalLevel: existing.emotionalLevel,
           deliveryPreference: existing.deliveryPreference,
-          recipientEmail: existing.recipientEmail ?? "",
           mailingAddress: existing.mailingAddress ?? blankAddress,
         }
       : {
@@ -333,7 +331,6 @@ export default function RecipientProfilePage() {
           thingsToAvoid: "",
           emotionalLevel: 3,
           deliveryPreference: "Mail it to me",
-          recipientEmail: "",
           mailingAddress: blankAddress,
         },
   });
@@ -371,7 +368,6 @@ export default function RecipientProfilePage() {
       marriageDate: data.marriageDate || undefined,
       children,
       customDates: existing?.customDates ?? [],
-      recipientEmail: data.recipientEmail || undefined,
       mailingAddress: hasAddress ? (addr as RecipientAddress) : undefined,
     };
     saveRecipient(recipient);
@@ -665,23 +661,6 @@ export default function RecipientProfilePage() {
                 )} />
               </div>
 
-              {/* Email */}
-              <div className="pt-2 border-t border-[hsl(40,20%,90%)]">
-                <FormField control={form.control} name="recipientEmail" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Their email address <span className="font-normal text-[hsl(221,20%,65%)]">(optional)</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="sarah@email.com" data-testid="input-recipient-email" {...field} />
-                    </FormControl>
-                    <p className="text-xs text-[hsl(221,20%,60%)] mt-1">
-                      We can send them a short personality quiz — more info means better cards, and they'll never know you had help.
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
             </div>
 
             {/* Delivery */}

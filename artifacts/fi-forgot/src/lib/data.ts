@@ -121,7 +121,6 @@ export interface Recipient {
   autopilotMode: AutopilotMode;
   // Contact & delivery
   mailingAddress?: RecipientAddress; // where to send physical cards
-  recipientEmail?: string; // for sending personality questionnaires
 }
 
 export interface CardOrder {
