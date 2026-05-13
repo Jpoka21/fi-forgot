@@ -1,0 +1,87 @@
+Update the F I Forgot dashboard to feel more branded, funny, modern, and less like a plain SaaS admin panel.
+
+Important: do not generate AI artwork, stock photos, cartoon characters, or random illustrations. Use only CSS, layout, icons, gradients, emoji sparingly, and clean placeholder areas where custom art can be added later.
+
+Keep the current dashboard structure, but improve the visual personality.
+
+Design direction:
+The app should feel like “relationship disaster prevention software” with a funny, premium, masculine tone. Think mission control meets relationship autopilot. It should not feel corporate, political, medical, or like accounting software.
+
+Make these changes:
+
+1. Replace the plain beige background with a subtle modern gradient.
+Use warm off white, soft blue gray, and very light cream tones.
+
+2. Add a large top hero status card under the greeting.
+Text:
+Relationship Autopilot: Armed
+Subtext:
+No panic flowers. No gas station cards. No couch sleeping.
+Add a small status pill:
+Crisis level: Low
+
+3. Make the hero card visually stronger with:
+rounded corners
+soft shadow
+subtle border
+navy gradient or light gradient
+small accent glow
+no background image
+
+4. Improve the stat cards.
+Make them slightly larger, more rounded, with better shadows and clearer labels.
+Use distinct accent colors:
+Upcoming cards, navy
+Recipients covered, gold
+Disasters avoided, green
+Awaiting approval, muted gray or blue
+
+5. Rewrite empty state copy to match the brand.
+For the Your Cards empty state:
+Title:
+Autopilot needs a target.
+Body:
+Add your first recipient before you’re standing in CVS at 9:47 PM pretending you planned this.
+Button:
+Add first recipient
+
+For the Recipients empty state:
+Text:
+No recipients yet. That is how disasters begin.
+
+6. Add one fun dashboard widget called “Relationship Risk Meter.”
+Place it in the right column near the calendar.
+It should show:
+Current risk: Low
+Reason: No upcoming card emergencies detected.
+Use a horizontal risk bar with green, yellow, red sections.
+Do not use a chart library.
+
+7. Add a small “Days Since Last Disaster” card.
+Show:
+13
+days since last relationship emergency
+Make it funny but clean.
+
+8. Improve the sidebar.
+Keep the navy sidebar, but make the active item feel more polished with a soft gold glow.
+Add a small status at the bottom:
+Autopilot online
+green dot
+
+9. Use better spacing and hierarchy.
+Make the greeting and section titles stronger.
+Increase padding inside cards.
+Make the dashboard feel less empty even when there is no data.
+
+10. Add hover effects to cards and buttons.
+Cards should lift slightly.
+Buttons should feel more premium.
+
+11. Do not add fake people, fake cartoons, random generated graphics, or background photos.
+If an illustration area is needed, add a clean placeholder div with the label:
+Custom brand illustration goes here
+
+12. Make sure everything remains responsive on desktop, tablet, and mobile.
+
+After updating, check all dashboard sections for visual consistency and make sure the app still works exactly as before.

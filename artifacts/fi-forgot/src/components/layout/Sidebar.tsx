@@ -3,15 +3,18 @@ import { useAuth } from "@/lib/auth-context";
 import {
   LayoutDashboard,
   Users,
-  CreditCard,
   Bell,
   ShieldCheck,
   LogOut,
   Menu,
   X,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+
+const NAVY = "#071A33";
+const GOLD = "#D8A725";
+const RED = "#E23B2E";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -31,13 +34,17 @@ export default function Sidebar() {
   }
 
   const NavContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="px-6 py-6 border-b border-sidebar-border">
-        <div className="text-xl font-serif font-bold text-[hsl(var(--sidebar-primary))]">&quot;F&quot; I Forgot</div>
-        <div className="text-xs text-sidebar-foreground/60 mt-1">Relationship disaster prevention</div>
+    <div className="flex flex-col h-full" style={{ background: NAVY }}>
+      {/* Brand */}
+      <div className="px-6 py-6 border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className="text-xl font-serif font-bold text-white">&quot;F&quot; I Forgot</div>
+        <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+          Relationship disaster prevention
+        </div>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-1" data-testid="sidebar-nav">
+      {/* Nav items */}
+      <nav className="flex-1 px-3 py-5 space-y-0.5" data-testid="sidebar-nav">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = location === href || location.startsWith(href + "/");
           return (
@@ -46,33 +53,67 @@ export default function Sidebar() {
               href={href}
               onClick={() => setMobileOpen(false)}
               data-testid={`nav-link-${label.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                active
-                  ? "bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              }`}
             >
-              <Icon size={18} />
-              {label}
+              <div
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${active ? "" : "hover:bg-white/5"}`}
+                style={
+                  active
+                    ? {
+                        background: "rgba(216,167,37,0.15)",
+                        color: GOLD,
+                        boxShadow: "0 0 0 1px rgba(216,167,37,0.3), inset 0 0 12px rgba(216,167,37,0.05)",
+                      }
+                    : { color: "rgba(255,255,255,0.6)" }
+                }
+              >
+                <Icon size={17} />
+                {label}
+                {active && (
+                  <span
+                    className="ml-auto w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ background: GOLD }}
+                  />
+                )}
+              </div>
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t border-sidebar-border">
-        <div className="flex items-center gap-3 mb-4 px-2">
-          <div className="w-9 h-9 rounded-full bg-[hsl(var(--sidebar-primary))] flex items-center justify-center text-[hsl(var(--sidebar-primary-foreground))] font-bold text-sm">
+      {/* Autopilot status */}
+      <div className="px-5 pb-3">
+        <div
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+          style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)" }}
+        >
+          <Zap size={12} style={{ color: GOLD }} />
+          <span>Autopilot</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-green-400 font-semibold">online</span>
+          </div>
+        </div>
+      </div>
+
+      {/* User + sign out */}
+      <div className="px-3 py-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className="flex items-center gap-3 mb-3 px-2">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+            style={{ background: "rgba(216,167,37,0.3)", border: "1.5px solid rgba(216,167,37,0.5)" }}
+          >
             {user?.name?.charAt(0) ?? "M"}
           </div>
-          <div>
-            <div className="text-sm font-semibold text-sidebar-foreground">{user?.name ?? "Mike Thompson"}</div>
-            <div className="text-xs text-sidebar-foreground/50">Family plan</div>
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-white truncate">{user?.name ?? "Mike Thompson"}</div>
+            <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Family plan</div>
           </div>
         </div>
         <button
           onClick={handleLogout}
           data-testid="button-logout"
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
+          className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm transition-all hover:bg-white/5"
+          style={{ color: "rgba(255,255,255,0.45)" }}
         >
           <LogOut size={16} />
           Sign out
@@ -85,7 +126,8 @@ export default function Sidebar() {
     <>
       {/* Mobile toggle */}
       <button
-        className="fixed top-4 left-4 z-50 md:hidden bg-[hsl(var(--sidebar))] text-sidebar-foreground p-2 rounded-lg shadow-lg"
+        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-xl shadow-lg text-white"
+        style={{ background: NAVY }}
         onClick={() => setMobileOpen(!mobileOpen)}
         data-testid="button-mobile-menu"
       >
@@ -95,22 +137,21 @@ export default function Sidebar() {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Mobile drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[hsl(var(--sidebar))] transform transition-transform md:hidden ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform md:hidden`}
+        style={{ transform: mobileOpen ? "translateX(0)" : "translateX(-100%)" }}
       >
         <NavContent />
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden md:flex flex-col w-64 min-h-screen bg-[hsl(var(--sidebar))] flex-shrink-0">
+      <div className="hidden md:flex flex-col w-64 min-h-screen flex-shrink-0">
         <NavContent />
       </div>
     </>
