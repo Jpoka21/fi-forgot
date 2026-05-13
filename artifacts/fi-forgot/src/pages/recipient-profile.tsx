@@ -15,6 +15,7 @@ import {
   getAge,
   getYearsTogether,
   Recipient,
+  RecipientAddress,
   Relationship,
   Tone,
   DeliveryPreference,
@@ -48,6 +49,14 @@ const GENDER_OPTIONS = [
   { id: "nonbinary", label: "Non-binary", emoji: "🧒" },
 ] as const;
 
+const addressSchema = z.object({
+  line1: z.string(),
+  line2: z.string().optional(),
+  city: z.string(),
+  state: z.string(),
+  zip: z.string(),
+});
+
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   relationship: z.enum(RELATIONSHIPS as [Relationship, ...Relationship[]]),
@@ -70,6 +79,8 @@ const schema = z.object({
   thingsToAvoid: z.string(),
   emotionalLevel: z.number().min(1).max(5),
   deliveryPreference: z.enum(["Mail it to me", "Mail it directly to her"] as [DeliveryPreference, DeliveryPreference]),
+  recipientEmail: z.string().optional(),
+  mailingAddress: addressSchema,
 });
 
 type FormData = z.infer<typeof schema>;
@@ -270,6 +281,8 @@ export default function RecipientProfilePage() {
     if (existing?.children) setChildren(existing.children);
   }, []);
 
+  const blankAddress = { line1: "", line2: "", city: "", state: "", zip: "" };
+
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: existing
@@ -295,6 +308,8 @@ export default function RecipientProfilePage() {
           thingsToAvoid: existing.thingsToAvoid,
           emotionalLevel: existing.emotionalLevel,
           deliveryPreference: existing.deliveryPreference,
+          recipientEmail: existing.recipientEmail ?? "",
+          mailingAddress: existing.mailingAddress ?? blankAddress,
         }
       : {
           name: "",
@@ -318,6 +333,8 @@ export default function RecipientProfilePage() {
           thingsToAvoid: "",
           emotionalLevel: 3,
           deliveryPreference: "Mail it to me",
+          recipientEmail: "",
+          mailingAddress: blankAddress,
         },
   });
 
@@ -344,6 +361,8 @@ export default function RecipientProfilePage() {
   }
 
   function onSubmit(data: FormData) {
+    const addr = data.mailingAddress;
+    const hasAddress = addr.line1.trim() || addr.city.trim();
     const recipient: Recipient = {
       id: isNew ? Date.now().toString() : params.id,
       ...data,
@@ -352,6 +371,8 @@ export default function RecipientProfilePage() {
       marriageDate: data.marriageDate || undefined,
       children,
       customDates: existing?.customDates ?? [],
+      recipientEmail: data.recipientEmail || undefined,
+      mailingAddress: hasAddress ? (addr as RecipientAddress) : undefined,
     };
     saveRecipient(recipient);
     setSaved(true);
@@ -584,6 +605,83 @@ export default function RecipientProfilePage() {
                   <FormMessage />
                 </FormItem>
               )} />
+            </div>
+
+            {/* Mailing address + email */}
+            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm space-y-5">
+              <div>
+                <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Where to send cards</h2>
+                <p className="text-sm text-[hsl(221,20%,50%)] mt-1">
+                  We need this to mail physical cards. You can also have cards sent to your own address instead.
+                </p>
+              </div>
+
+              {/* Street */}
+              <FormField control={form.control} name="mailingAddress.line1" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Street address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="123 Main St" data-testid="input-address-line1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="mailingAddress.line2" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apt / Suite <span className="font-normal text-[hsl(221,20%,65%)]">(optional)</span></FormLabel>
+                  <FormControl>
+                    <Input placeholder="Apt 4B" data-testid="input-address-line2" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <FormField control={form.control} name="mailingAddress.city" render={({ field }) => (
+                  <FormItem className="sm:col-span-1">
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Springfield" data-testid="input-address-city" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="mailingAddress.state" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input placeholder="IL" maxLength={2} className="uppercase" data-testid="input-address-state" {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="mailingAddress.zip" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ZIP</FormLabel>
+                    <FormControl>
+                      <Input placeholder="62701" maxLength={10} data-testid="input-address-zip" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+
+              {/* Email */}
+              <div className="pt-2 border-t border-[hsl(40,20%,90%)]">
+                <FormField control={form.control} name="recipientEmail" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Their email address <span className="font-normal text-[hsl(221,20%,65%)]">(optional)</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="sarah@email.com" data-testid="input-recipient-email" {...field} />
+                    </FormControl>
+                    <p className="text-xs text-[hsl(221,20%,60%)] mt-1">
+                      We can send them a short personality quiz — more info means better cards, and they'll never know you had help.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
             </div>
 
             {/* Delivery */}

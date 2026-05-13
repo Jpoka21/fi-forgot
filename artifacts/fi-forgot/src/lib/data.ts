@@ -86,6 +86,14 @@ export interface CustomDate {
   date: string;
 }
 
+export interface RecipientAddress {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  zip: string;
+}
+
 export interface Recipient {
   id: string;
   name: string;
@@ -111,6 +119,9 @@ export interface Recipient {
   emotionalLevel: number;
   deliveryPreference: DeliveryPreference;
   autopilotMode: AutopilotMode;
+  // Contact & delivery
+  mailingAddress?: RecipientAddress; // where to send physical cards
+  recipientEmail?: string; // for sending personality questionnaires
 }
 
 export interface CardOrder {
