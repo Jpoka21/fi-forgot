@@ -316,9 +316,9 @@ export default function LandingPage() {
       </section>
 
       {/* HOW IT WORKS — banner */}
-      <section id="how-it-works" className="py-8 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
-        <div className="max-w-5xl mx-auto">
-          <img src="/how-it-works-banner.png" alt="How It Works" className="w-full h-auto" />
+      <section id="how-it-works" className="py-6 px-4 border-t-2" style={{ background: CREAM, borderColor: `${BLACK}10` }}>
+        <div className="max-w-7xl mx-auto">
+          <img src="/how-it-works-banner.png" alt="How It Works" className="w-full h-auto" style={{ mixBlendMode: "multiply" }} />
         </div>
       </section>
 
