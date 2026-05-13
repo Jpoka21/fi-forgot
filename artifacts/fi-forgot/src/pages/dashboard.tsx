@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth-context";
 import {
   CalendarDays, Users, Zap, CheckCircle2, Plus, ShieldCheck,
   Clock, ClipboardList, ThumbsUp, Sparkles, Loader2,
-  ChevronDown, ChevronUp, AlertTriangle,
+  ChevronDown, ChevronUp, AlertTriangle, Layers,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -102,6 +102,56 @@ function StatCard({
   );
 }
 
+/**
+ * IllustrationPlaceholder — a styled container for future branded SVG art.
+ * Replace the inner content with a real <img> or <svg> when artwork is ready.
+ * The outer wrapper dimensions and border-radius are preserved so the layout
+ * never needs to change — just swap the children.
+ */
+function IllustrationPlaceholder({
+  size = "md",
+  gradient = "gold",
+}: {
+  size?: "sm" | "md" | "lg";
+  gradient?: "gold" | "navy" | "subtle";
+}) {
+  const dims: Record<string, string> = {
+    sm: "h-16 w-20",
+    md: "h-24 w-28",
+    lg: "h-36 w-44",
+  };
+  const gradients: Record<string, string> = {
+    gold:   "linear-gradient(135deg, rgba(216,167,37,0.14) 0%, rgba(7,26,51,0.07) 100%)",
+    navy:   "linear-gradient(135deg, rgba(7,26,51,0.18) 0%, rgba(216,167,37,0.06) 100%)",
+    subtle: "linear-gradient(135deg, rgba(216,167,37,0.07) 0%, rgba(180,190,210,0.10) 100%)",
+  };
+  const borders: Record<string, string> = {
+    gold:   "rgba(216,167,37,0.35)",
+    navy:   "rgba(7,26,51,0.2)",
+    subtle: "rgba(180,190,210,0.4)",
+  };
+
+  return (
+    /* ── Replace everything inside this div with your SVG illustration ── */
+    <div
+      className={`${dims[size]} rounded-2xl flex flex-col items-center justify-center gap-1.5 flex-shrink-0 select-none`}
+      style={{
+        background: gradients[gradient],
+        border: `1.5px dashed ${borders[gradient]}`,
+      }}
+      aria-hidden="true"
+    >
+      <Layers size={16} style={{ color: borders[gradient], opacity: 0.8 }} />
+      <span
+        className="text-center leading-tight font-medium"
+        style={{ fontSize: "8px", color: "rgba(7,26,51,0.35)", maxWidth: "80px" }}
+      >
+        Custom illustration area
+      </span>
+    </div>
+  );
+}
+
 function RiskMeter({ level }: { level: "low" | "medium" | "high" }) {
   const pct = level === "low" ? 15 : level === "medium" ? 52 : 82;
   const color = level === "low" ? "#22c55e" : level === "medium" ? "#f59e0b" : RED;
@@ -114,37 +164,44 @@ function RiskMeter({ level }: { level: "low" | "medium" | "high" }) {
       : "Cards overdue. Panic flowers incoming.";
 
   return (
-    <div className="bg-white rounded-2xl border p-5 shadow-sm" style={{ borderColor: "hsl(40,20%,87%)" }}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="font-serif font-bold text-sm" style={{ color: NAVY }}>Relationship Risk Meter</div>
-        <span
-          className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
-          style={{ background: color }}
-        >
-          {label}
-        </span>
+    <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: "hsl(40,20%,87%)" }}>
+      {/* Illustration band — swap for branded SVG art */}
+      <div
+        className="w-full flex items-center justify-center py-5"
+        style={{ background: "linear-gradient(135deg, hsl(40,50%,96%) 0%, hsl(221,30%,95%) 100%)" }}
+      >
+        <IllustrationPlaceholder size="sm" gradient="subtle" />
       </div>
-      <div className="relative h-3 rounded-full overflow-hidden mb-2" style={{ background: "hsl(40,20%,90%)" }}>
-        <div
-          className="absolute inset-y-0 left-0 flex"
-          style={{ width: "100%" }}
-        >
-          <div className="h-full flex-1" style={{ background: "#22c55e", opacity: 0.25 }} />
-          <div className="h-full flex-1" style={{ background: "#f59e0b", opacity: 0.25 }} />
-          <div className="h-full flex-1" style={{ background: RED, opacity: 0.25 }} />
+
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-serif font-bold text-sm" style={{ color: NAVY }}>Relationship Risk Meter</div>
+          <span
+            className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
+            style={{ background: color }}
+          >
+            {label}
+          </span>
         </div>
-        <div
-          className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: color }}
-        />
+        <div className="relative h-3 rounded-full overflow-hidden mb-2" style={{ background: "hsl(40,20%,90%)" }}>
+          <div className="absolute inset-y-0 left-0 flex" style={{ width: "100%" }}>
+            <div className="h-full flex-1" style={{ background: "#22c55e", opacity: 0.25 }} />
+            <div className="h-full flex-1" style={{ background: "#f59e0b", opacity: 0.25 }} />
+            <div className="h-full flex-1" style={{ background: RED, opacity: 0.25 }} />
+          </div>
+          <div
+            className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
+            style={{ width: `${pct}%`, background: color }}
+          />
+        </div>
+        <div className="flex justify-between text-xs mb-3" style={{ color: "hsl(221,20%,60%)" }}>
+          <span>Safe</span>
+          <span>Danger Zone</span>
+        </div>
+        <p className="text-xs" style={{ color: "hsl(221,20%,55%)" }}>
+          Current risk: <span className="font-semibold" style={{ color }}>{label}</span> — {reason}
+        </p>
       </div>
-      <div className="flex justify-between text-xs mb-3" style={{ color: "hsl(221,20%,60%)" }}>
-        <span>Safe</span>
-        <span>Danger Zone</span>
-      </div>
-      <p className="text-xs" style={{ color: "hsl(221,20%,55%)" }}>
-        Current risk: <span className="font-semibold" style={{ color }}>{label}</span> — {reason}
-      </p>
     </div>
   );
 }
@@ -264,30 +321,32 @@ export default function DashboardPage() {
               style={{ background: GOLD, filter: "blur(40px)" }}
             />
             <div className="relative flex items-center justify-between gap-4">
-              <div className="flex items-center gap-5">
+              <div className="flex items-center gap-5 flex-1 min-w-0">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: "rgba(216,167,37,0.18)", border: "1px solid rgba(216,167,37,0.3)" }}
                 >
                   <Zap size={22} style={{ color: GOLD }} />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <div className="font-serif text-xl font-bold text-white leading-snug">
                     Relationship Autopilot: Armed
                   </div>
                   <div className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>
                     No panic flowers. No gas station cards. No couch sleeping.
                   </div>
+                  <div
+                    className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-bold"
+                    style={{ background: "rgba(34,197,94,0.18)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                    Crisis level: Low
+                  </div>
                 </div>
               </div>
-              <div className="flex-shrink-0">
-                <div
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-                  style={{ background: "rgba(34,197,94,0.18)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-                  Crisis level: Low
-                </div>
+              {/* Illustration placeholder — swap children for branded SVG art */}
+              <div className="hidden sm:block flex-shrink-0">
+                <IllustrationPlaceholder size="lg" gradient="gold" />
               </div>
             </div>
             {primaryAutopilot && (
@@ -582,29 +641,37 @@ export default function DashboardPage() {
 
               {upcoming.length === 0 ? (
                 <div
-                  className="bg-white rounded-2xl border p-10 text-center shadow-sm"
+                  className="bg-white rounded-2xl border shadow-sm overflow-hidden"
                   style={{ borderColor: "hsl(40,20%,87%)" }}
                 >
-                  <div className="text-4xl mb-3">🎯</div>
-                  <p className="font-bold text-lg mb-1" style={{ color: NAVY }}>
-                    {recipients.length === 0 ? "Autopilot needs a target." : "Nothing scheduled yet — we'll get to work."}
-                  </p>
-                  <p className="text-sm mb-5" style={{ color: "hsl(221,20%,52%)" }}>
-                    {recipients.length === 0
-                      ? "Add your first recipient before you're standing in CVS at 9:47 PM pretending you planned this."
-                      : "Cards will appear here as occasions approach."}
-                  </p>
-                  {recipients.length === 0 && (
-                    <Link href="/recipients/new">
-                      <button
-                        className="text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                        style={{ background: NAVY }}
-                        data-testid="link-add-recipient-empty"
-                      >
-                        Add first recipient
-                      </button>
-                    </Link>
-                  )}
+                  {/* Illustration band — swap the placeholder for branded art */}
+                  <div
+                    className="w-full flex items-center justify-center py-8"
+                    style={{ background: "linear-gradient(135deg, hsl(40,50%,96%) 0%, hsl(221,30%,95%) 100%)" }}
+                  >
+                    <IllustrationPlaceholder size="lg" gradient="subtle" />
+                  </div>
+                  <div className="px-8 pb-8 pt-5 text-center">
+                    <p className="font-bold text-lg mb-1" style={{ color: NAVY }}>
+                      {recipients.length === 0 ? "Autopilot needs a target." : "Nothing scheduled yet — we'll get to work."}
+                    </p>
+                    <p className="text-sm mb-5" style={{ color: "hsl(221,20%,52%)" }}>
+                      {recipients.length === 0
+                        ? "Add your first recipient before you're standing in CVS at 9:47 PM pretending you planned this."
+                        : "Cards will appear here as occasions approach."}
+                    </p>
+                    {recipients.length === 0 && (
+                      <Link href="/recipients/new">
+                        <button
+                          className="text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                          style={{ background: NAVY }}
+                          data-testid="link-add-recipient-empty"
+                        >
+                          Add first recipient
+                        </button>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -650,12 +717,20 @@ export default function DashboardPage() {
 
                 {recipients.length === 0 ? (
                   <div
-                    className="bg-white rounded-2xl border p-8 text-center shadow-sm"
+                    className="bg-white rounded-2xl border shadow-sm overflow-hidden"
                     style={{ borderColor: "hsl(40,20%,87%)" }}
                   >
-                    <AlertTriangle size={24} className="mx-auto mb-2" style={{ color: "hsl(40,60%,60%)" }} />
-                    <p className="font-semibold" style={{ color: NAVY }}>No recipients yet.</p>
-                    <p className="text-sm mt-1" style={{ color: "hsl(221,20%,52%)" }}>That is how disasters begin.</p>
+                    {/* Illustration band — swap for branded art */}
+                    <div
+                      className="w-full flex items-center justify-center py-6"
+                      style={{ background: "linear-gradient(135deg, hsl(40,50%,96%) 0%, hsl(221,30%,95%) 100%)" }}
+                    >
+                      <IllustrationPlaceholder size="md" gradient="subtle" />
+                    </div>
+                    <div className="px-6 pb-6 pt-4 text-center">
+                      <p className="font-semibold" style={{ color: NAVY }}>No recipients yet.</p>
+                      <p className="text-sm mt-1" style={{ color: "hsl(221,20%,52%)" }}>That is how disasters begin.</p>
+                    </div>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-3">
