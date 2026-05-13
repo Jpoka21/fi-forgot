@@ -15,7 +15,7 @@ import { AdminEvents } from "./admin/AdminEvents";
 import {
   ShieldCheck, LayoutDashboard, Users, UserCheck,
   CalendarDays, CreditCard, MessageSquare, Send, ScrollText,
-  AlertTriangle, ClipboardList, RefreshCw,
+  AlertTriangle, ClipboardList, RefreshCw, Trash2,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -56,6 +56,30 @@ export default function AdminPage() {
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<SyncResult | null>(null);
   const [autopilotStatus, setAutopilotStatus] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  async function handleResetAllData() {
+    if (!confirmReset) { setConfirmReset(true); return; }
+    setResetting(true);
+    try {
+      // 1. Wipe Postgres pending_approvals
+      await fetch("/api/admin/reset-all-data", { method: "POST" });
+      // 2. Wipe all localStorage keys
+      const keysToWipe = [
+        "fif_admin_customers", "fif_admin_recipients", "fif_admin_events",
+        "fif_admin_templates", "fif_admin_messages", "fif_admin_queue",
+        "fif_admin_audit", "fif_admin_seeded", "fif_admin_seed_version",
+        "fi_forgot_user", "fi_forgot_recipients", "fi_forgot_cards",
+        "fi_forgot_briefings",
+      ];
+      keysToWipe.forEach((k) => localStorage.removeItem(k));
+      window.location.reload();
+    } catch {
+      setResetting(false);
+      setConfirmReset(false);
+    }
+  }
 
   useEffect(() => {
     seedAdminDataIfNeeded();
@@ -171,6 +195,36 @@ export default function AdminPage() {
                 <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
                 {syncing ? "Syncing…" : "Sync"}
               </button>
+              {confirmReset ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-red-600">Wipe everything?</span>
+                  <button
+                    onClick={handleResetAllData}
+                    disabled={resetting}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white disabled:opacity-50 transition-all"
+                    style={{ background: RED }}
+                  >
+                    {resetting ? "Wiping…" : "Yes, wipe it all"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmReset(false)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border hover:bg-gray-50 transition-all"
+                    style={{ borderColor: "hsl(40,20%,80%)", color: "hsl(221,20%,50%)" }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleResetAllData}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border hover:bg-red-50 transition-all"
+                  style={{ borderColor: "#fca5a5", color: "#dc2626" }}
+                  title="Wipe all customer and admin data and start fresh"
+                >
+                  <Trash2 size={12} />
+                  Reset Data
+                </button>
+              )}
               <div className="text-xs text-[hsl(221,20%,60%)] hidden md:block text-right">
                 <div className="font-semibold text-[hsl(221,47%,20%)]">{activeTabInfo.label}</div>
                 <div>{activeTabInfo.description}</div>

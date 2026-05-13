@@ -176,4 +176,19 @@ export async function sendPendingReminderEmails(appBaseUrl: string): Promise<voi
   }
 }
 
+/**
+ * POST /api/admin/reset-all-data
+ * Truncates the pending_approvals table so a full data reset can be done from the admin panel.
+ */
+router.post("/admin/reset-all-data", async (_req, res) => {
+  try {
+    await db.delete(pendingApprovalsTable);
+    logger.info("Admin reset: pending_approvals table cleared");
+    res.json({ ok: true });
+  } catch (err) {
+    logger.error({ err }, "Admin reset: failed to clear pending_approvals");
+    res.status(500).json({ error: "Failed to clear database" });
+  }
+});
+
 export default router;
