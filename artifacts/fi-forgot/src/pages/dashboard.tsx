@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth-context";
 import {
   CalendarDays, Users, Zap, CheckCircle2, Plus, ShieldCheck,
   Clock, ClipboardList, ThumbsUp, Sparkles, Loader2,
-  ChevronDown, ChevronUp, AlertTriangle, Layers,
+  ChevronDown, ChevronUp, AlertTriangle, Layers, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 const NAVY  = "#071A33";
@@ -59,6 +59,34 @@ function daysUntilEvent(event: string, recipient: Recipient): number | null {
     let next = new Date(year, fixed.month - 1, fixed.day);
     if (next < today) next = new Date(year + 1, fixed.month - 1, fixed.day);
     return Math.ceil((next.getTime() - today.getTime()) / 86400000);
+  }
+
+  return null;
+}
+
+function getEventDate(event: string, recipient: Recipient): string | null {
+  const now = new Date();
+  const year = now.getFullYear();
+
+  if (event === "Birthday" && recipient.birthday) {
+    const [, m, d] = recipient.birthday.split("-").map(Number);
+    let next = new Date(year, m - 1, d);
+    if (next < now) next = new Date(year + 1, m - 1, d);
+    return next.toISOString().split("T")[0];
+  }
+
+  if (event === "Anniversary" && recipient.marriageDate) {
+    const [, m, d] = recipient.marriageDate.split("-").map(Number);
+    let next = new Date(year, m - 1, d);
+    if (next < now) next = new Date(year + 1, m - 1, d);
+    return next.toISOString().split("T")[0];
+  }
+
+  const fixed = HOLIDAY_DATES[event];
+  if (fixed) {
+    let next = new Date(year, fixed.month - 1, fixed.day);
+    if (next < now) next = new Date(year + 1, fixed.month - 1, fixed.day);
+    return next.toISOString().split("T")[0];
   }
 
   return null;
@@ -234,12 +262,25 @@ export default function DashboardPage() {
     : "low";
 
   const today = new Date();
+  const [calMonth, setCalMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
+
   const calendarDays = Array.from({ length: 35 }, (_, i) => {
-    const d = new Date(today.getFullYear(), today.getMonth(), 1);
+    const d = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1);
     d.setDate(d.getDate() - d.getDay() + i);
     return d;
   });
-  const cardDates = new Set(cards.map((c) => c.dueDate));
+
+  // All event dates across every recipient
+  const allEventDates = new Set<string>();
+  for (const r of recipients) {
+    for (const event of r.selectedEvents ?? []) {
+      const date = getEventDate(event, r);
+      if (date) allEventDates.add(date);
+    }
+  }
+  // Also mark card due dates
+  const cardDueDates = new Set(cards.map((c) => c.dueDate));
+  for (const d of cardDueDates) allEventDates.add(d);
 
   return (
     <AppLayout>
@@ -735,9 +776,34 @@ export default function DashboardPage() {
 
               {/* Calendar */}
               <div>
-                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: BLACK, marginBottom: 12 }}>
-                  {MONTHS[today.getMonth()]} {today.getFullYear()}
-                </h2>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: BLACK }}>
+                    {MONTHS[calMonth.getMonth()]} {calMonth.getFullYear()}
+                  </h2>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-70"
+                      style={{ background: `${BLACK}08` }}
+                    >
+                      <ChevronLeft size={14} style={{ color: BLACK }} />
+                    </button>
+                    <button
+                      onClick={() => setCalMonth(new Date(today.getFullYear(), today.getMonth(), 1))}
+                      className="px-2 h-7 rounded-lg text-xs font-semibold transition-all hover:opacity-70"
+                      style={{ background: `${BLACK}08`, color: GRAY }}
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-70"
+                      style={{ background: `${BLACK}08` }}
+                    >
+                      <ChevronRight size={14} style={{ color: BLACK }} />
+                    </button>
+                  </div>
+                </div>
                 <div className="rounded-2xl p-5" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
                   <div className="grid grid-cols-7 gap-1 text-center mb-2">
                     {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d) => (
@@ -747,22 +813,23 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-7 gap-1">
                     {calendarDays.map((d, i) => {
                       const iso = d.toISOString().split("T")[0];
-                      const hasCard = cardDates.has(iso);
+                      const hasEvent = allEventDates.has(iso);
                       const isToday = iso === today.toISOString().split("T")[0];
-                      const isCurrentMonth = d.getMonth() === today.getMonth();
+                      const isCalMonth = d.getMonth() === calMonth.getMonth();
                       return (
                         <div
                           key={i}
                           className="aspect-square flex items-center justify-center rounded-lg text-xs relative"
                           style={{
-                            background: isToday ? RED : "transparent",
-                            color: isToday ? "#fff" : isCurrentMonth ? BLACK : `${BLACK}40`,
-                            fontWeight: isToday ? 700 : undefined,
+                            background: isToday ? RED : hasEvent && isCalMonth ? `${RED}10` : "transparent",
+                            color: isToday ? "#fff" : isCalMonth ? BLACK : `${BLACK}35`,
+                            fontWeight: isToday || (hasEvent && isCalMonth) ? 700 : undefined,
+                            border: hasEvent && isCalMonth && !isToday ? `1.5px solid ${RED}35` : undefined,
                           }}
                           data-testid={`calendar-day-${iso}`}
                         >
                           {d.getDate()}
-                          {hasCard && (
+                          {hasEvent && isCalMonth && !isToday && (
                             <span
                               className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
                               style={{ background: RED }}
@@ -774,7 +841,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="mt-4 pt-4 border-t flex items-center gap-2 text-xs" style={{ borderColor: `${BLACK}10`, color: GRAY }}>
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RED }} />
-                    Card due
+                    Occasion / card date
                   </div>
                 </div>
               </div>
