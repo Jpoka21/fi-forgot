@@ -69,7 +69,6 @@ const examples = [
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Base styles for image hit zones — rendered as <a href> tags for guaranteed browser navigation
   const zone = (extra: React.CSSProperties): React.CSSProperties => ({
     position: "absolute",
     zIndex: 20,
@@ -108,14 +107,14 @@ export default function LandingPage() {
           href="/signup" style={zone({ top:"0.5%", right:"0.5%", width:"16%", height:"5.5%" })} />
 
         {/* ── Hero "START NOW" — hit zone over the left red button ────────── */}
-        {/* Image button sits at ~59–68% vertically, left 1–27%             */}
+        {/* Debug showed 59% was too low — button is at ~52–58%            */}
         <a aria-label="Start Now" data-testid="link-cta-hitzone"
-          href="/signup" style={zone({ top:"59%", left:"1%", width:"27%", height:"10%" })} />
+          href="/signup" style={zone({ top:"52%", left:"1%", width:"27%", height:"7%" })} />
 
         {/* ── Banner "START NOW" — hit zone over the banner button ────────── */}
-        {/* Banner button sits at ~70–82% vertically, right 64–99%          */}
+        {/* Debug showed 70% was too low — banner button is at ~60–70%     */}
         <a aria-label="Start Now" data-testid="link-cta-banner"
-          href="/signup" style={zone({ top:"70%", left:"63%", width:"35%", height:"12%" })} />
+          href="/signup" style={zone({ top:"60%", left:"64%", width:"34%", height:"11%" })} />
       </section>
 
       {/* ── Real CTA strip — immediately below the hero image ──────────── */}
