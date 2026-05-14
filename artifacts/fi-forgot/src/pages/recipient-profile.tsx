@@ -30,21 +30,24 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, Plus, Trash2, ClipboardList, Pencil } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays } from "lucide-react";
 
-const NAVY = "#071A33";
-const RED = "#E23B2E";
+const RED   = "#E23B2E";
 const BLACK = "#111111";
+const BEIGE = "#F2E6D3";
+const GRAY  = "#6B6B6B";
 
-const PREVIEW_DAYS_LIST = [3, 7, 14, 30] as const;
+// Events that require a specific date to be meaningful on the calendar
+const DATE_SENSITIVE = new Set([
+  "Birthday", "Anniversary", "Work Anniversary", "Graduation", "Just Because",
+]);
+
 const GENDER_OPTIONS = [
-  { id: "boy", label: "Boy", emoji: "👦" },
-  { id: "girl", label: "Girl", emoji: "👧" },
+  { id: "boy",       label: "Boy",       emoji: "👦" },
+  { id: "girl",      label: "Girl",      emoji: "👧" },
   { id: "nonbinary", label: "Non-binary", emoji: "🧒" },
 ] as const;
 
@@ -59,9 +62,8 @@ const addressSchema = z.object({
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   relationship: z.enum(RELATIONSHIPS as [Relationship, ...Relationship[]]),
-  birthday: z.string().optional(),
-  anniversaryDate: z.string().optional(),
-  marriageDate: z.string().optional(),
+  // eventDates holds per-event dates keyed by event name
+  eventDates: z.record(z.string(), z.string()),
   needsMothersDay: z.boolean(),
   needsFathersDay: z.boolean(),
   needsValentinesDay: z.boolean(),
@@ -84,6 +86,22 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+function sectionHeading(text: string) {
+  return (
+    <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.06em", color: BLACK }}>
+      {text}
+    </h2>
+  );
+}
+
+function SectionCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl p-6 space-y-4" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+      {children}
+    </div>
+  );
+}
+
 function ChildrenManager({ children, onChange }: { children: Child[]; onChange: (c: Child[]) => void }) {
   function addChild() {
     onChange([...children, { id: Date.now().toString(), name: "", gender: "boy", birthdate: "" }]);
@@ -98,21 +116,21 @@ function ChildrenManager({ children, onChange }: { children: Child[]; onChange: 
   return (
     <div className="space-y-3">
       {children.map((child, idx) => (
-        <div key={child.id} className="rounded-xl border-2 p-4 space-y-3" style={{ borderColor: `${BLACK}15`, background: "#fafafa" }}>
+        <div key={child.id} className="rounded-xl border-2 p-4 space-y-3" style={{ borderColor: `${BLACK}12`, background: BEIGE }}>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold text-[hsl(221,47%,20%)]">Child {idx + 1}</span>
+            <span className="text-sm font-bold" style={{ color: BLACK }}>Child {idx + 1}</span>
             <button type="button" onClick={() => remove(child.id)} className="p-1 rounded-lg hover:bg-red-50 transition-colors">
               <Trash2 size={14} style={{ color: RED }} />
             </button>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold mb-1 text-[hsl(221,20%,50%)]">Name</label>
+              <label className="block text-xs font-semibold mb-1" style={{ color: GRAY }}>Name</label>
               <Input placeholder="Emma" value={child.name} onChange={(e) => update(child.id, { name: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1 text-[hsl(221,20%,50%)]">
-                Birthdate <span className="font-normal text-gray-400">(auto-age)</span>
+              <label className="block text-xs font-semibold mb-1" style={{ color: GRAY }}>
+                Birthdate <span className="font-normal opacity-60">(auto-age)</span>
               </label>
               <Input type="date" value={child.birthdate ?? ""} onChange={(e) => update(child.id, { birthdate: e.target.value })} />
             </div>
@@ -120,14 +138,13 @@ function ChildrenManager({ children, onChange }: { children: Child[]; onChange: 
           <div className="flex gap-2">
             {GENDER_OPTIONS.map((g) => (
               <button
-                key={g.id}
-                type="button"
+                key={g.id} type="button"
                 onClick={() => update(child.id, { gender: g.id as Child["gender"] })}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all"
                 style={{
                   borderColor: child.gender === g.id ? RED : `${BLACK}20`,
                   background: child.gender === g.id ? `${RED}12` : "#fff",
-                  color: child.gender === g.id ? RED : "#666",
+                  color: child.gender === g.id ? RED : GRAY,
                 }}
               >
                 {g.emoji} {g.label}
@@ -135,17 +152,16 @@ function ChildrenManager({ children, onChange }: { children: Child[]; onChange: 
             ))}
           </div>
           {child.birthdate && (
-            <p className="text-xs text-[hsl(221,20%,60%)] italic">
+            <p className="text-xs italic" style={{ color: GRAY }}>
               Current age: {getAge(child.birthdate)} — updates automatically each birthday.
             </p>
           )}
         </div>
       ))}
       <button
-        type="button"
-        onClick={addChild}
+        type="button" onClick={addChild}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed text-sm font-semibold hover:bg-gray-50 transition-all"
-        style={{ borderColor: `${BLACK}20`, color: "#999" }}
+        style={{ borderColor: `${BLACK}20`, color: GRAY }}
       >
         <Plus size={14} /> Add a child
       </button>
@@ -158,9 +174,11 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    setBriefings(getBriefingsForRecipient(recipientId).sort(
-      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-    ));
+    setBriefings(
+      getBriefingsForRecipient(recipientId).sort(
+        (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+      )
+    );
   }, [recipientId]);
 
   function handleDelete(id: string) {
@@ -169,20 +187,18 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
   }
 
   return (
-    <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
+    <SectionCard>
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Briefing History</h2>
-          <p className="text-sm text-[hsl(221,20%,50%)]">
-            Every answer we've ever collected — editable anytime.
-          </p>
+          {sectionHeading("Briefing History")}
+          <p className="text-xs mt-0.5" style={{ color: GRAY }}>Every answer we've collected — editable anytime.</p>
         </div>
         <div className="flex flex-wrap gap-1">
           {selectedEvents.map((e) => (
             <Link key={e} href={`/briefings/${recipientId}/${encodeURIComponent(e)}`}>
               <button
                 className="text-xs font-bold px-2.5 py-1 rounded-full text-white hover:opacity-80 transition-all"
-                style={{ background: NAVY }}
+                style={{ background: RED }}
                 data-testid={`btn-new-briefing-${e.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 + {e}
@@ -193,69 +209,58 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
       </div>
 
       {briefings.length === 0 ? (
-        <div className="rounded-xl p-6 text-center" style={{ background: `${NAVY}05`, border: `1px dashed ${BLACK}20` }}>
-          <ClipboardList size={24} className="mx-auto mb-2 text-[hsl(221,20%,60%)]" />
-          <p className="text-sm text-[hsl(221,20%,50%)]">No briefings yet.</p>
-          <p className="text-xs text-[hsl(221,20%,60%)] mt-1">
+        <div className="rounded-xl p-5 text-center" style={{ background: BEIGE, border: `1px dashed ${BLACK}20` }}>
+          <ClipboardList size={22} className="mx-auto mb-2" style={{ color: GRAY }} />
+          <p className="text-sm" style={{ color: GRAY }}>No briefings yet.</p>
+          <p className="text-xs mt-1 opacity-60" style={{ color: GRAY }}>
             Complete a briefing before each event and we'll build a history here.
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {briefings.map((b) => (
-            <div
-              key={b.id}
-              className="rounded-xl border border-[hsl(40,20%,85%)] overflow-hidden"
-            >
+            <div key={b.id} className="rounded-xl border overflow-hidden" style={{ borderColor: `${BLACK}15` }}>
               <button
                 className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition-colors"
                 onClick={() => setExpanded(expanded === b.id ? null : b.id)}
               >
                 <div>
-                  <span
-                    className="text-xs font-bold px-2 py-0.5 rounded-full mr-2"
-                    style={{ background: `${NAVY}12`, color: NAVY }}
-                  >
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full mr-2" style={{ background: `${RED}12`, color: RED }}>
                     {b.event}
                   </span>
-                  <span className="text-xs text-[hsl(221,20%,55%)]">{b.year}</span>
-                  <span className="text-xs text-[hsl(221,20%,65%)] ml-2">
+                  <span className="text-xs" style={{ color: GRAY }}>{b.year}</span>
+                  <span className="text-xs ml-2 opacity-60" style={{ color: GRAY }}>
                     · {new Date(b.completedAt).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Link href={`/briefings/${recipientId}/${encodeURIComponent(b.event)}/${b.id}`}>
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
-                      title="Edit"
-                    >
-                      <Pencil size={13} style={{ color: "#888" }} />
+                    <button onClick={(e) => e.stopPropagation()} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Edit">
+                      <Pencil size={13} style={{ color: GRAY }} />
                     </button>
                   </Link>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(b.id); }}
-                    className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                    title="Delete"
+                    className="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete"
                   >
                     <Trash2 size={13} style={{ color: "#ccc" }} />
                   </button>
-                  <span className="text-xs text-[hsl(221,20%,60%)]">{expanded === b.id ? "▲" : "▼"}</span>
+                  <span className="text-xs" style={{ color: GRAY }}>{expanded === b.id ? "▲" : "▼"}</span>
                 </div>
               </button>
 
               {expanded === b.id && b.answers.length > 0 && (
-                <div className="border-t border-[hsl(40,20%,88%)] px-4 py-4 space-y-3" style={{ background: "#fafafa" }}>
+                <div className="border-t px-4 py-4 space-y-3" style={{ borderColor: `${BLACK}10`, background: BEIGE }}>
                   {b.answers.map((a) => (
                     <div key={a.questionKey}>
-                      <div className="text-xs font-bold text-[hsl(221,47%,30%)] mb-0.5">{a.question}</div>
-                      <div className="text-sm text-[hsl(221,20%,40%)] whitespace-pre-wrap">{a.answer || "—"}</div>
+                      <div className="text-xs font-bold mb-0.5" style={{ color: BLACK }}>{a.question}</div>
+                      <div className="text-sm whitespace-pre-wrap" style={{ color: GRAY }}>{a.answer || "—"}</div>
                     </div>
                   ))}
                 </div>
               )}
               {expanded === b.id && b.answers.length === 0 && (
-                <div className="border-t border-[hsl(40,20%,88%)] px-4 py-4 text-sm text-[hsl(221,20%,60%)]" style={{ background: "#fafafa" }}>
+                <div className="border-t px-4 py-4 text-sm" style={{ borderColor: `${BLACK}10`, color: GRAY, background: BEIGE }}>
                   No answers recorded.
                 </div>
               )}
@@ -263,7 +268,7 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
           ))}
         </div>
       )}
-    </div>
+    </SectionCard>
   );
 }
 
@@ -275,6 +280,19 @@ export default function RecipientProfilePage() {
   const [children, setChildren] = useState<Child[]>([]);
 
   const existing = isNew ? undefined : getRecipient(params.id);
+
+  // Build initial eventDates from existing recipient fields
+  function buildInitialEventDates(r?: Recipient): Record<string, string> {
+    if (!r) return {};
+    const dates: Record<string, string> = {};
+    if (r.birthday) dates["Birthday"] = r.birthday;
+    if (r.anniversaryDate) dates["Anniversary"] = r.anniversaryDate;
+    else if (r.marriageDate) dates["Anniversary"] = r.marriageDate;
+    for (const cd of r.customDates ?? []) {
+      if (cd.label && cd.date) dates[cd.label] = cd.date;
+    }
+    return dates;
+  }
 
   useEffect(() => {
     if (existing?.children) setChildren(existing.children);
@@ -288,9 +306,7 @@ export default function RecipientProfilePage() {
       ? {
           name: existing.name,
           relationship: existing.relationship,
-          birthday: existing.birthday ?? "",
-          anniversaryDate: existing.anniversaryDate ?? "",
-          marriageDate: existing.marriageDate ?? "",
+          eventDates: buildInitialEventDates(existing),
           needsMothersDay: existing.needsMothersDay,
           needsFathersDay: existing.needsFathersDay ?? false,
           needsValentinesDay: existing.needsValentinesDay,
@@ -301,6 +317,7 @@ export default function RecipientProfilePage() {
           selectedEvents: existing.selectedEvents ?? [],
           previewDays: ([14, 21, 30].includes(existing.previewDays ?? 14) ? existing.previewDays : 14) as 14 | 21 | 30,
           tonePreference: existing.tonePreference,
+          senderName: existing.senderName ?? "",
           personalityNotes: existing.personalityNotes,
           favoriteMemories: existing.favoriteMemories,
           insideJokes: existing.insideJokes,
@@ -312,9 +329,7 @@ export default function RecipientProfilePage() {
       : {
           name: "",
           relationship: "Wife",
-          birthday: "",
-          anniversaryDate: "",
-          marriageDate: "",
+          eventDates: {},
           needsMothersDay: false,
           needsFathersDay: false,
           needsValentinesDay: false,
@@ -325,6 +340,7 @@ export default function RecipientProfilePage() {
           selectedEvents: [],
           previewDays: 14 as 14 | 21 | 30,
           tonePreference: "Sweet",
+          senderName: "",
           personalityNotes: "",
           favoriteMemories: "",
           insideJokes: "",
@@ -337,7 +353,7 @@ export default function RecipientProfilePage() {
 
   const watchRelationship = form.watch("relationship");
   const watchSelectedEvents = form.watch("selectedEvents");
-  const watchMarriageDate = form.watch("marriageDate");
+  const watchEventDates = form.watch("eventDates");
 
   useEffect(() => {
     if (isNew) form.setValue("deliveryPreference", defaultDelivery(watchRelationship));
@@ -353,21 +369,57 @@ export default function RecipientProfilePage() {
     const current = form.getValues("selectedEvents");
     form.setValue(
       "selectedEvents",
-      current.includes(event) ? current.filter((e) => e !== event) : [...current, event]
+      current.includes(event) ? current.filter((e) => e !== event) : [...current, event],
+      { shouldDirty: true }
     );
+  }
+
+  function setEventDate(event: string, date: string) {
+    const current = form.getValues("eventDates");
+    form.setValue("eventDates", { ...current, [event]: date }, { shouldDirty: true });
   }
 
   function onSubmit(data: FormData) {
     const addr = data.mailingAddress;
     const hasAddress = addr.line1.trim() || addr.city.trim();
+
+    const ed = data.eventDates;
+
+    // Build customDates array for non-standard date-sensitive events
+    const CUSTOM_DATE_KEYS = ["Work Anniversary", "Graduation", "Just Because"];
+    const customDates = CUSTOM_DATE_KEYS
+      .filter((k) => ed[k])
+      .map((k) => ({ id: k.toLowerCase().replace(/\s+/g, "-"), label: k, date: ed[k] }));
+
+    const anniversaryDate = ed["Anniversary"] || undefined;
+
     const recipient: Recipient = {
       id: isNew ? Date.now().toString() : params.id,
-      ...data,
-      birthday: data.birthday || undefined,
-      anniversaryDate: data.anniversaryDate || undefined,
-      marriageDate: data.marriageDate || undefined,
+      name: data.name,
+      relationship: data.relationship,
+      birthday: ed["Birthday"] || undefined,
+      anniversaryDate,
+      // Keep marriageDate in sync for years-together calculation
+      marriageDate: anniversaryDate ?? existing?.marriageDate,
       children,
-      customDates: existing?.customDates ?? [],
+      customDates,
+      needsMothersDay: data.needsMothersDay,
+      needsFathersDay: data.needsFathersDay,
+      needsValentinesDay: data.needsValentinesDay,
+      needsChristmasHanukkah: data.needsChristmasHanukkah,
+      needsThanksgiving: data.needsThanksgiving,
+      needsNewYears: data.needsNewYears,
+      needsEaster: data.needsEaster,
+      selectedEvents: data.selectedEvents,
+      previewDays: data.previewDays,
+      tonePreference: data.tonePreference,
+      senderName: data.senderName,
+      personalityNotes: data.personalityNotes,
+      favoriteMemories: data.favoriteMemories,
+      insideJokes: data.insideJokes,
+      thingsToAvoid: data.thingsToAvoid,
+      emotionalLevel: data.emotionalLevel,
+      deliveryPreference: data.deliveryPreference,
       mailingAddress: hasAddress ? (addr as RecipientAddress) : undefined,
     };
     saveRecipient(recipient);
@@ -375,358 +427,406 @@ export default function RecipientProfilePage() {
     setTimeout(() => setLocation("/recipients"), 1200);
   }
 
-  const yearsMarried = watchMarriageDate ? getYearsTogether(watchMarriageDate) : null;
+  // Years together from the anniversary date (for display)
+  const anniversaryDateVal = watchEventDates?.["Anniversary"] ?? "";
+  const yearsMarried = anniversaryDateVal ? getYearsTogether(anniversaryDateVal) : null;
 
   return (
     <AppLayout>
-      <div className="p-6 md:p-8 max-w-3xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/recipients">
-            <button className="p-2 text-[hsl(221,20%,60%)] hover:text-[hsl(221,47%,20%)] hover:bg-[hsl(40,20%,90%)] rounded-lg transition-colors" data-testid="button-back-recipients">
-              <ArrowLeft size={18} />
-            </button>
-          </Link>
-          <div>
-            <h1 className="font-serif text-2xl font-bold text-[hsl(221,47%,20%)]">
-              {isNew ? "Add recipient" : `Edit ${existing?.name ?? "recipient"}`}
-            </h1>
-            <p className="text-sm text-[hsl(221,20%,50%)]">
-              {isNew ? "The more we know, the better the cards get." : "Keep this profile current — we use everything you give us."}
-            </p>
+      <div className="min-h-screen pb-16" style={{ background: BEIGE }}>
+        <div className="p-6 md:p-8 max-w-3xl mx-auto">
+
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <Link href="/recipients">
+              <button
+                className="p-2 rounded-xl hover:bg-white/50 transition-colors"
+                style={{ color: GRAY }}
+                data-testid="button-back-recipients"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            </Link>
+            <div>
+              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>
+                {isNew ? "Add Recipient" : `Edit ${existing?.name ?? "Recipient"}`}
+              </h1>
+              <p className="text-sm mt-0.5" style={{ color: GRAY }}>
+                {isNew ? "The more we know, the better the cards get." : "Keep this profile current — we use everything you give us."}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {saved && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-800 rounded-xl px-5 py-3 text-sm font-semibold">
-            Saved. Redirecting...
-          </div>
-        )}
+          {saved && (
+            <div className="mb-5 rounded-xl px-5 py-3 text-sm font-semibold" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#166534" }}>
+              Saved. Redirecting…
+            </div>
+          )}
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
-            {/* Basic info */}
-            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm space-y-5">
-              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Basic information</h2>
-              <div className="grid sm:grid-cols-2 gap-5">
-                <FormField control={form.control} name="name" render={({ field }) => (
+              {/* Basic info */}
+              <SectionCard>
+                {sectionHeading("Basic Information")}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="name" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl><Input placeholder="Sarah" data-testid="input-recipient-name" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="relationship" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Relationship</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-relationship"><SelectValue /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {RELATIONSHIPS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="senderName" render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>How does she know you as? <span className="font-normal opacity-60 text-xs">(optional)</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="Dad, Uncle Jim, James…" data-testid="input-sender-name" {...field} />
+                      </FormControl>
+                      <p className="text-xs" style={{ color: GRAY }}>This goes on the card signature.</p>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+              </SectionCard>
+
+              {/* Children */}
+              <SectionCard>
+                <div>
+                  {sectionHeading("Children")}
+                  <p className="text-xs mt-0.5" style={{ color: GRAY }}>
+                    Add birthdates and we'll always know the right age. Never update this manually again.
+                  </p>
+                </div>
+                <ChildrenManager children={children} onChange={setChildren} />
+              </SectionCard>
+
+              {/* Occasions to cover */}
+              <SectionCard>
+                <div>
+                  {sectionHeading("Occasions to Cover")}
+                  <p className="text-xs mt-0.5" style={{ color: GRAY }}>
+                    Auto-selected based on relationship. Adjust freely. <strong>Date-sensitive events show a date field</strong> — fill it in so we can put them on your calendar.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {HOLIDAYS.map((h) => {
+                    const selected = watchSelectedEvents.includes(h);
+                    const needsDate = DATE_SENSITIVE.has(h);
+                    const currentDate = watchEventDates?.[h] ?? "";
+
+                    // Compute years for Anniversary display
+                    const yearsLabel =
+                      h === "Anniversary" && currentDate
+                        ? (() => {
+                            try {
+                              const y = getYearsTogether(currentDate);
+                              return y > 0 ? `${y} yr${y !== 1 ? "s" : ""}` : null;
+                            } catch { return null; }
+                          })()
+                        : null;
+
+                    return (
+                      <div key={h}>
+                        <button
+                          type="button"
+                          onClick={() => toggleEvent(h)}
+                          className="w-full flex items-center gap-2 py-2.5 px-3 rounded-xl border-2 text-left transition-all"
+                          style={{
+                            borderColor: selected ? RED : `${BLACK}15`,
+                            background: selected ? `${RED}10` : "#fff",
+                            borderBottomLeftRadius: selected && needsDate ? "0" : undefined,
+                            borderBottomRightRadius: selected && needsDate ? "0" : undefined,
+                          }}
+                          data-testid={`toggle-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
+                        >
+                          <div
+                            className="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0"
+                            style={{ borderColor: selected ? RED : `${BLACK}25`, background: selected ? RED : "transparent" }}
+                          >
+                            {selected && <span className="text-white text-xs leading-none">✓</span>}
+                          </div>
+                          <span className="text-sm font-medium flex-1" style={{ color: selected ? RED : BLACK }}>{h}</span>
+                          {needsDate && (
+                            <CalendarDays size={13} style={{ color: selected ? RED : `${BLACK}30`, flexShrink: 0 }} />
+                          )}
+                          {yearsLabel && (
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white flex-shrink-0" style={{ background: RED }}>
+                              {yearsLabel}
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Inline date picker for date-sensitive events */}
+                        {selected && needsDate && (
+                          <div
+                            className="px-3 pb-3 pt-2 rounded-b-xl border-2 border-t-0"
+                            style={{ borderColor: RED, background: `${RED}06` }}
+                          >
+                            <label className="block text-xs font-semibold mb-1.5" style={{ color: RED }}>
+                              {h === "Birthday" ? "Birthday date" :
+                               h === "Anniversary" ? "Anniversary date" :
+                               h === "Work Anniversary" ? "Work anniversary date" :
+                               h === "Graduation" ? "Graduation date" :
+                               "Date for this occasion"}
+                            </label>
+                            <input
+                              type="date"
+                              value={currentDate}
+                              onChange={(e) => setEventDate(h, e.target.value)}
+                              className="w-full rounded-lg border px-3 py-1.5 text-sm focus:outline-none focus:ring-2"
+                              style={{
+                                borderColor: `${RED}40`,
+                                background: "#fff",
+                                color: BLACK,
+                              }}
+                              data-testid={`input-date-${h.toLowerCase().replace(/\s+/g, "-")}`}
+                            />
+                            {!currentDate && (
+                              <p className="text-xs mt-1.5" style={{ color: RED, opacity: 0.7 }}>
+                                ⚠ No date set — this event won't appear on your calendar until you add one.
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </SectionCard>
+
+              {/* Preview timing */}
+              <SectionCard>
+                {sectionHeading("Preview Email Timing")}
+                <p className="text-xs" style={{ color: GRAY }}>How far ahead should we email you the card draft for approval?</p>
+                <FormField control={form.control} name="previewDays" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl><Input placeholder="Sarah" data-testid="input-recipient-name" {...field} /></FormControl>
+                    <FormControl>
+                      <div className="space-y-2">
+                        {PREVIEW_DAYS_OPTIONS.map((opt) => {
+                          const selected = field.value === opt.days;
+                          return (
+                            <button
+                              key={opt.days} type="button"
+                              onClick={() => field.onChange(opt.days)}
+                              className="w-full flex items-center justify-between py-3 px-4 rounded-xl border-2 text-left transition-all"
+                              style={{
+                                borderColor: selected ? RED : `${BLACK}15`,
+                                background: selected ? `${RED}08` : "#fff",
+                              }}
+                              data-testid={`btn-preview-days-${opt.days}`}
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-sm" style={{ color: BLACK }}>{opt.label}</span>
+                                  {opt.badge && (
+                                    <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{ background: RED, fontSize: "0.6rem" }}>{opt.badge}</span>
+                                  )}
+                                </div>
+                                <div className="text-xs mt-0.5" style={{ color: GRAY }}>{opt.description}</div>
+                              </div>
+                              <div
+                                className="w-4 h-4 rounded-full border-2 ml-4 flex-shrink-0"
+                                style={{ borderColor: selected ? RED : `${BLACK}25`, background: selected ? RED : "transparent" }}
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="relationship" render={({ field }) => (
+              </SectionCard>
+
+              {/* Delivery preference */}
+              <SectionCard>
+                {sectionHeading("Card Delivery")}
+                <FormField control={form.control} name="deliveryPreference" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Relationship</FormLabel>
+                    <FormControl>
+                      <div className="space-y-2">
+                        {(["Mail it to me", "Mail it directly to her"] as DeliveryPreference[]).map((opt) => {
+                          const selected = field.value === opt;
+                          return (
+                            <button
+                              key={opt} type="button"
+                              onClick={() => field.onChange(opt)}
+                              className="w-full flex items-center gap-3 py-3 px-4 rounded-xl border-2 text-left transition-all"
+                              style={{
+                                borderColor: selected ? RED : `${BLACK}15`,
+                                background: selected ? `${RED}08` : "#fff",
+                              }}
+                            >
+                              <div
+                                className="w-4 h-4 rounded-full border-2 flex-shrink-0"
+                                style={{ borderColor: selected ? RED : `${BLACK}25`, background: selected ? RED : "transparent" }}
+                              />
+                              <div>
+                                <div className="text-sm font-semibold" style={{ color: BLACK }}>{opt}</div>
+                                <div className="text-xs" style={{ color: GRAY }}>
+                                  {opt === "Mail it to me" ? "We send it to you — you hand it over. Maximum control." : "Straight to her door. Maximum autopilot."}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )} />
+              </SectionCard>
+
+              {/* Mailing address */}
+              <SectionCard>
+                {sectionHeading("Mailing Address")}
+                <p className="text-xs" style={{ color: GRAY }}>Where should the card be mailed?</p>
+                <div className="space-y-3">
+                  <FormField control={form.control} name="mailingAddress.line1" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Street address</FormLabel>
+                      <FormControl><Input placeholder="123 Main St" data-testid="input-address-line1" {...field} /></FormControl>
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="mailingAddress.line2" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Apt / Suite <span className="font-normal opacity-60 text-xs">(optional)</span></FormLabel>
+                      <FormControl><Input placeholder="Apt 4B" data-testid="input-address-line2" {...field} /></FormControl>
+                    </FormItem>
+                  )} />
+                  <div className="grid grid-cols-3 gap-3">
+                    <FormField control={form.control} name="mailingAddress.city" render={({ field }) => (
+                      <FormItem className="col-span-1">
+                        <FormLabel>City</FormLabel>
+                        <FormControl><Input placeholder="Chicago" data-testid="input-address-city" {...field} /></FormControl>
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="mailingAddress.state" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State</FormLabel>
+                        <FormControl><Input placeholder="IL" maxLength={2} data-testid="input-address-state" {...field} /></FormControl>
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="mailingAddress.zip" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Zip</FormLabel>
+                        <FormControl><Input placeholder="60601" data-testid="input-address-zip" {...field} /></FormControl>
+                      </FormItem>
+                    )} />
+                  </div>
+                </div>
+              </SectionCard>
+
+              {/* Personality / tone */}
+              <SectionCard>
+                {sectionHeading("Writing Style & Personality")}
+                <p className="text-xs mb-4" style={{ color: GRAY }}>The more detail you give us, the more the card sounds like it came from you.</p>
+
+                <FormField control={form.control} name="tonePreference" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tone</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid="select-relationship"><SelectValue /></SelectTrigger>
+                        <SelectTrigger data-testid="select-tone"><SelectValue /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {RELATIONSHIPS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                        {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="birthday" render={({ field }) => (
+
+                <FormField control={form.control} name="emotionalLevel" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Birthday</FormLabel>
-                    <FormControl><Input type="date" data-testid="input-birthday" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="marriageDate" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Marriage / anniversary date
-                      {yearsMarried !== null && yearsMarried > 0 && (
-                        <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{ background: NAVY }}>
-                          {yearsMarried} yr{yearsMarried !== 1 ? "s" : ""}
-                        </span>
-                      )}
-                    </FormLabel>
+                    <FormLabel>Emotional dial — {field.value === 1 ? "Pure comedy" : field.value === 5 ? "Full cryfest" : "Balanced"}</FormLabel>
                     <FormControl>
-                      <Input type="date" data-testid="input-marriage-date" {...field} />
+                      <Slider
+                        min={1} max={5} step={1}
+                        value={[field.value]}
+                        onValueChange={([v]) => field.onChange(v)}
+                        data-testid="slider-emotional-level"
+                      />
                     </FormControl>
-                    <p className="text-xs text-[hsl(221,20%,60%)]">
-                      We use this to auto-calculate years together — no need to update it manually.
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
-            </div>
-
-            {/* Children */}
-            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm space-y-4">
-              <div>
-                <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Children</h2>
-                <p className="text-sm text-[hsl(221,20%,50%)] mt-1">
-                  Add birthdates and we'll always know the right age. Never update this manually again.
-                </p>
-              </div>
-              <ChildrenManager children={children} onChange={setChildren} />
-            </div>
-
-            {/* Occasions */}
-            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm space-y-4">
-              <div>
-                <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Occasions to cover</h2>
-                <p className="text-sm text-[hsl(221,20%,50%)] mt-1">Auto-selected based on relationship. Adjust freely.</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {HOLIDAYS.map((h) => {
-                  const selected = watchSelectedEvents.includes(h);
-                  return (
-                    <button
-                      key={h}
-                      type="button"
-                      onClick={() => toggleEvent(h)}
-                      className="flex items-center gap-2 py-2.5 px-3 rounded-xl border-2 text-left transition-all"
-                      style={{
-                        borderColor: selected ? RED : `${BLACK}15`,
-                        background: selected ? `${RED}10` : "#fff",
-                      }}
-                      data-testid={`toggle-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      <div className="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0"
-                        style={{ borderColor: selected ? RED : `${BLACK}25`, background: selected ? RED : "transparent" }}>
-                        {selected && <span className="text-white text-xs leading-none">✓</span>}
-                      </div>
-                      <span className="text-sm font-medium" style={{ color: selected ? RED : "hsl(221,47%,20%)" }}>{h}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Preview timing */}
-            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)] mb-1">Preview email timing</h2>
-              <p className="text-sm text-[hsl(221,20%,50%)] mb-4">How far ahead should we email you the card draft for approval?</p>
-              <FormField control={form.control} name="previewDays" render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="space-y-3">
-                      {PREVIEW_DAYS_OPTIONS.map((opt) => {
-                        const selected = field.value === opt.days;
-                        return (
-                          <button key={opt.days} type="button" onClick={() => field.onChange(opt.days)}
-                            className="w-full flex items-center justify-between py-3.5 px-4 rounded-xl border-2 text-left transition-all"
-                            style={{
-                              borderColor: selected ? NAVY : `${BLACK}15`,
-                              background: selected ? "hsl(221,47%,97%)" : "#fff",
-                            }}
-                            data-testid={`btn-preview-days-${opt.days}`}>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-sm text-[hsl(221,47%,20%)]">{opt.label}</span>
-                                {opt.badge && (
-                                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: NAVY, color: "#fff", fontSize: "0.6rem" }}>{opt.badge}</span>
-                                )}
-                              </div>
-                              <div className="text-xs text-[hsl(221,20%,50%)] mt-0.5">{opt.description}</div>
-                            </div>
-                            {selected && <span className="text-[hsl(221,47%,20%)] font-bold ml-3">✓</span>}
-                          </button>
-                        );
-                      })}
+                    <div className="flex justify-between text-xs mt-1" style={{ color: GRAY }}>
+                      <span>Pure comedy</span><span>Full cryfest</span>
                     </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-            </div>
-
-            {/* Card personality */}
-            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm space-y-5">
-              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Card personality</h2>
-              <FormField control={form.control} name="tonePreference" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tone preference</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-tone"><SelectValue /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="emotionalLevel" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>How emotional? ({field.value}/5)</FormLabel>
-                  <FormControl>
-                    <Slider min={1} max={5} step={1} value={[field.value]} onValueChange={([v]) => field.onChange(v)} className="mt-2" data-testid="slider-emotional-level" />
-                  </FormControl>
-                  <div className="flex justify-between text-xs text-[hsl(221,20%,60%)] mt-1">
-                    <span>Dignified nod</span><span>Full waterworks</span>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="senderName" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>How does {form.watch("name") || "this person"} refer to you?</FormLabel>
-                  <FormControl>
-                    <input
-                      className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[hsl(221,47%,40%)]"
-                      placeholder="e.g. James, Dad, Babe, Uncle Jim — this is how your card will be signed"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <p className="text-xs text-[hsl(221,20%,55%)] mt-0.5">This is the exact name that will appear on the card signature — not your account name.</p>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="personalityNotes" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Personality notes</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="What makes them laugh? What do they care about? How do they show love?" rows={3} data-testid="textarea-personality" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="favoriteMemories" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Favorite memories together</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Trips, milestones, inside moments..." rows={3} data-testid="textarea-memories" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="insideJokes" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Inside jokes or references</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Things only you two would get..." rows={2} data-testid="textarea-jokes" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="thingsToAvoid" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Things to avoid</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Topics, phrases, or references that won't land well..." rows={2} data-testid="textarea-avoid" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-            </div>
-
-            {/* Mailing address + email */}
-            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm space-y-5">
-              <div>
-                <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)]">Where to send cards</h2>
-                <p className="text-sm text-[hsl(221,20%,50%)] mt-1">
-                  We need this to mail physical cards. You can also have cards sent to your own address instead.
-                </p>
-              </div>
-
-              {/* Street */}
-              <FormField control={form.control} name="mailingAddress.line1" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Street address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="123 Main St" data-testid="input-address-line1" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="mailingAddress.line2" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Apt / Suite <span className="font-normal text-[hsl(221,20%,65%)]">(optional)</span></FormLabel>
-                  <FormControl>
-                    <Input placeholder="Apt 4B" data-testid="input-address-line2" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <FormField control={form.control} name="mailingAddress.city" render={({ field }) => (
-                  <FormItem className="sm:col-span-1">
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Springfield" data-testid="input-address-city" {...field} />
-                    </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="mailingAddress.state" render={({ field }) => (
+
+                <FormField control={form.control} name="personalityNotes" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>State</FormLabel>
+                    <FormLabel>What's she like?</FormLabel>
                     <FormControl>
-                      <Input placeholder="IL" maxLength={2} className="uppercase" data-testid="input-address-state" {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
+                      <Textarea rows={3} placeholder="Describe her personality, what makes her laugh, what she values…" data-testid="input-personality-notes" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="mailingAddress.zip" render={({ field }) => (
+
+                <FormField control={form.control} name="favoriteMemories" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ZIP</FormLabel>
+                    <FormLabel>Favorite memories or stories</FormLabel>
                     <FormControl>
-                      <Input placeholder="62701" maxLength={10} data-testid="input-address-zip" {...field} />
+                      <Textarea rows={3} placeholder="The trip to Italy, that one concert, the time she…" data-testid="input-favorite-memories" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )} />
-              </div>
 
+                <FormField control={form.control} name="insideJokes" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Inside jokes</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} placeholder="Things only the two of you would get…" data-testid="input-inside-jokes" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="thingsToAvoid" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Things to avoid</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} placeholder="Don't mention her age, avoid the word 'blessed', she hates sappy…" data-testid="input-things-to-avoid" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+              </SectionCard>
+
+              {/* Save */}
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-2xl text-white font-bold text-base hover:opacity-90 transition-all"
+                style={{ background: RED, fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em" }}
+                data-testid="button-save-recipient"
+              >
+                {isNew ? "Save Recipient" : "Save Changes"}
+              </button>
+            </form>
+          </Form>
+
+          {/* Briefing history (existing recipients only) */}
+          {!isNew && existing && (
+            <div className="mt-5">
+              <BriefingHistoryPanel
+                recipientId={params.id}
+                selectedEvents={watchSelectedEvents}
+              />
             </div>
-
-            {/* Delivery */}
-            <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)] mb-4">Delivery preference</h2>
-              <FormField control={form.control} name="deliveryPreference" render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <RadioGroup value={field.value} onValueChange={field.onChange} className="space-y-3" data-testid="radio-delivery">
-                      <div className="flex items-center space-x-3 p-4 border rounded-lg border-[hsl(40,20%,85%)] hover:bg-[hsl(40,20%,97%)] cursor-pointer">
-                        <RadioGroupItem value="Mail it to me" id="mail-me" data-testid="radio-mail-to-me" />
-                        <Label htmlFor="mail-me" className="cursor-pointer">
-                          <div className="font-semibold text-[hsl(221,47%,20%)]">Mail it to me</div>
-                          <div className="text-sm text-[hsl(221,20%,50%)]">So you can hand it over like a hero.</div>
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-3 p-4 border rounded-lg border-[hsl(40,20%,85%)] hover:bg-[hsl(40,20%,97%)] cursor-pointer">
-                        <RadioGroupItem value="Mail it directly to her" id="mail-her" data-testid="radio-mail-to-her" />
-                        <Label htmlFor="mail-her" className="cursor-pointer">
-                          <div className="font-semibold text-[hsl(221,47%,20%)]">Mail it directly to them</div>
-                          <div className="text-sm text-[hsl(221,20%,50%)]">They get it straight from us. You get the credit.</div>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-            </div>
-
-            <Button type="submit"
-              className="w-full bg-[hsl(6,64%,46%)] hover:bg-[hsl(6,64%,40%)] text-white font-bold py-4 text-base rounded-xl flex items-center justify-center gap-2"
-              data-testid="button-save-recipient">
-              <Save size={18} /> Save recipient
-            </Button>
-          </form>
-        </Form>
-
-        {/* Briefing history — only for existing recipients */}
-        {!isNew && (
-          <div className="mt-8">
-            <BriefingHistoryPanel
-              recipientId={params.id}
-              selectedEvents={watchSelectedEvents}
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </AppLayout>
   );
