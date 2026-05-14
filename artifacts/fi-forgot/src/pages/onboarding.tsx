@@ -163,11 +163,34 @@ export default function OnboardingPage() {
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-1.5" style={{ background: `${BLACK}10` }}>
-        <div
-          className="h-full transition-all duration-500"
-          style={{ width: `${progress}%`, background: RED }}
-        />
+      <div className="w-full px-8 py-3" style={{ background: "#fff", borderBottom: `1px solid ${BLACK}10` }}>
+        <div className="flex items-center gap-1.5">
+          {STEPS.map((label, i) => (
+            <div key={i} className="flex-1 flex flex-col gap-1">
+              <div
+                className="h-2 rounded-full transition-all duration-500"
+                style={{
+                  background: i <= step ? RED : `${BLACK}15`,
+                }}
+              />
+              <span
+                className="text-center hidden sm:block"
+                style={{
+                  fontSize: "0.6rem",
+                  fontWeight: i === step ? 700 : 400,
+                  color: i <= step ? RED : `${BLACK}40`,
+                  letterSpacing: "0.03em",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  textTransform: "uppercase",
+                }}
+              >
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Content */}
