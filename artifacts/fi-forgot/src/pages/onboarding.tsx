@@ -73,7 +73,7 @@ export default function OnboardingPage() {
   const { toast } = useToast();
 
   const [step, setStep] = useState(0);
-  const DATE_SENSITIVE = ["Birthday", "Anniversary", "Work Anniversary", "Graduation"];
+  const DATE_SENSITIVE = ["Birthday", "Anniversary", "Work Anniversary", "Graduation", "Just Because"];
 
   const [data, setData] = useState<OnboardingData>({
     recipientName: "",
@@ -407,7 +407,7 @@ export default function OnboardingPage() {
                         {needsDate && selected && (
                           <div style={{ padding: "12px 14px", border: `2px solid ${RED}`, borderTop: "none", borderRadius: "0 0 0.75rem 0.75rem", background: `${RED}08` }}>
                             <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em", color: RED }}>
-                              {h === "Birthday" ? "Their birthday" : h === "Anniversary" ? "Anniversary date" : h === "Work Anniversary" ? "Work start date" : "Date"}
+                              {h === "Birthday" ? "Their birthday" : h === "Anniversary" ? "Anniversary date" : h === "Work Anniversary" ? "Work start date" : h === "Just Because" ? "When should we send it?" : "Date"}
                             </label>
                             <input
                               type="date"
