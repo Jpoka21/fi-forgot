@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { B, BrandLogo, CircleStamp, StickyNote, RectStamp } from "@/components/brand";
+import { B } from "@/components/brand";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -61,23 +61,23 @@ export default function SignupPage() {
         SEND IT
       </div>
 
-      <div className="w-full max-w-5xl relative z-10">
-        <div className="grid md:grid-cols-2 gap-10 items-start">
+      <div className="w-full max-w-6xl relative z-10">
+        <div className="grid md:grid-cols-2 gap-12 items-start">
 
           {/* ── Left: Brand pitch ──────────────────────────────────────────── */}
           <div className="pt-2">
-            <Link href="/" className="inline-block mb-8">
-              <img src="/logo.png" alt="F* I Forgot" style={{ height: 64, width: "auto" }} />
+            <Link href="/" className="inline-block mb-10">
+              <img src="/logo.png" alt="F* I Forgot" style={{ height: 80, width: "auto" }} />
             </Link>
 
             <h1
               style={{
                 fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(2.2rem, 5vw, 3.6rem)",
+                fontSize: "clamp(2.75rem, 6.25vw, 4.5rem)",
                 letterSpacing: "0.04em",
                 color: B.black,
                 lineHeight: 1,
-                marginBottom: 12,
+                marginBottom: 15,
               }}
             >
               Stop Winging It.<br />
@@ -86,11 +86,11 @@ export default function SignupPage() {
 
             <p
               style={{
-                fontSize: "1rem",
+                fontSize: "1.25rem",
                 color: B.gray,
                 lineHeight: 1.7,
-                marginBottom: 28,
-                maxWidth: 400,
+                marginBottom: 35,
+                maxWidth: 500,
               }}
             >
               Join the men who stopped relying on last-minute gas station runs
@@ -98,20 +98,20 @@ export default function SignupPage() {
               the actual thinking.
             </p>
 
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-4 mb-10">
               {perks.map((p) => (
                 <li key={p.text} className="flex items-start gap-3">
                   <span
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 30,
+                      height: 30,
                       borderRadius: "50%",
                       background: B.red,
                       color: B.white,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "0.7rem",
+                      fontSize: "0.875rem",
                       fontWeight: 900,
                       flexShrink: 0,
                       marginTop: 1,
@@ -119,16 +119,16 @@ export default function SignupPage() {
                   >
                     {p.icon}
                   </span>
-                  <span style={{ fontSize: "0.9rem", color: "#333", lineHeight: 1.5 }}>{p.text}</span>
+                  <span style={{ fontSize: "1.125rem", color: "#333", lineHeight: 1.5 }}>{p.text}</span>
                 </li>
               ))}
             </ul>
 
             {/* Stamps decorations */}
             <div className="flex items-end gap-4 flex-wrap">
-              <img src="/stamp-disaster-averted.png" alt="Disaster Averted" style={{ height: 90, width: "auto" }} />
-              <img src="/stamp-date-locked-in.png" alt="Important Date Locked In" style={{ height: 90, width: "auto" }} />
-              <img src="/sticky-note.png" alt="Your future self owes us one." style={{ height: 165, width: "auto", transform: "rotate(-3deg)" }} />
+              <img src="/stamp-disaster-averted.png" alt="Disaster Averted" style={{ height: 112, width: "auto" }} />
+              <img src="/stamp-date-locked-in.png" alt="Important Date Locked In" style={{ height: 112, width: "auto" }} />
+              <img src="/sticky-note.png" alt="You forgot again, didn't you?" style={{ height: 206, width: "auto", transform: "rotate(-3deg)" }} />
             </div>
           </div>
 
@@ -140,16 +140,16 @@ export default function SignupPage() {
                 background: B.white,
                 border: `1.5px solid ${B.black}12`,
                 borderTop: `4px solid ${B.red}`,
-                padding: "clamp(24px, 5vw, 36px)",
+                padding: "clamp(30px, 6.25vw, 45px)",
               }}
             >
               <h2
                 style={{
                   fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "1.8rem",
+                  fontSize: "2.25rem",
                   letterSpacing: "0.06em",
                   color: B.black,
-                  marginBottom: 20,
+                  marginBottom: 25,
                   textTransform: "uppercase",
                 }}
               >
@@ -157,7 +157,7 @@ export default function SignupPage() {
               </h2>
 
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   {[
                     { name: "name" as const,     type: "text",     placeholder: "Mike Thompson",     label: "Your Name" },
                     { name: "email" as const,    type: "email",    placeholder: "you@example.com",   label: "Email" },
@@ -172,7 +172,7 @@ export default function SignupPage() {
                           <FormLabel
                             style={{
                               fontFamily: "'Bebas Neue', cursive",
-                              fontSize: "0.78rem",
+                              fontSize: "0.975rem",
                               letterSpacing: "0.14em",
                               color: B.black,
                               textTransform: "uppercase",
@@ -185,7 +185,7 @@ export default function SignupPage() {
                               type={type}
                               placeholder={placeholder}
                               data-testid={`input-${name}`}
-                              style={{ borderColor: `${B.black}22`, background: B.beige }}
+                              style={{ borderColor: `${B.black}22`, background: B.beige, fontSize: "1.05rem", padding: "10px 14px" }}
                               {...field}
                             />
                           </FormControl>
@@ -197,16 +197,17 @@ export default function SignupPage() {
 
                   <button
                     type="submit"
-                    className="w-full py-3 rounded-md font-bold transition-all hover:opacity-90 active:translate-y-0.5"
+                    className="w-full rounded-md font-bold transition-all hover:opacity-90 active:translate-y-0.5"
                     style={{
                       background: B.red,
                       color: B.white,
                       fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "1rem",
+                      fontSize: "1.25rem",
                       letterSpacing: "0.16em",
                       textTransform: "uppercase",
                       border: "none",
                       cursor: "pointer",
+                      padding: "15px 0",
                       boxShadow: `0 3px 0 ${B.redDark}, 0 6px 16px ${B.red}30`,
                     }}
                     data-testid="button-signup-submit"
@@ -217,14 +218,14 @@ export default function SignupPage() {
               </Form>
 
               <p
-                className="mt-4 text-center italic"
-                style={{ color: B.black, fontFamily: "'Caveat', cursive", fontSize: "1.05rem" }}
+                className="mt-5 text-center italic"
+                style={{ color: B.black, fontFamily: "'Caveat', cursive", fontSize: "1.3rem" }}
               >
                 By signing up, you agree that forgetting her birthday is not an option.
               </p>
 
-              <div className="mt-4 text-center">
-                <p className="text-sm" style={{ color: B.gray }}>
+              <div className="mt-5 text-center">
+                <p style={{ fontSize: "1rem", color: B.gray }}>
                   Already have an account?{" "}
                   <Link
                     href="/login"
@@ -237,9 +238,9 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Stamp badges below form */}
-            <div className="mt-4 flex items-center justify-between px-1 flex-wrap gap-3">
-              <img src="/stamp-disaster-avoided.png" alt="Another Disaster Avoided" style={{ height: 88, width: "auto", transform: "rotate(-1deg)" }} />
+            {/* Stamp badge below form */}
+            <div className="mt-5 flex items-center px-1">
+              <img src="/stamp-disaster-avoided.png" alt="Another Disaster Avoided" style={{ height: 110, width: "auto", transform: "rotate(-1deg)" }} />
             </div>
           </div>
         </div>
