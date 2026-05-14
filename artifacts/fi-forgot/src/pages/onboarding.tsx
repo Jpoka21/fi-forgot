@@ -424,7 +424,7 @@ export default function OnboardingPage() {
                 {/* Live plan indicator */}
                 {(() => {
                   const count = data.selectedEvents.length;
-                  const plan = count <= 5
+                  const plan = count <= 6
                     ? { name: "Bare Minimum", price: "$5/mo", color: "#6B6B6B" }
                     : count <= 12
                     ? { name: "Domestic Peacekeeper", price: "$15/mo", color: "#D32F2F" }
