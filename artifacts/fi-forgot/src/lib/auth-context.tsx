@@ -11,6 +11,7 @@ export interface OnboardingData {
   yearsTogther: string;
   thingsToAvoid: string;
   selectedEvents: string[];
+  eventDates: Record<string, string>;
   autopilotMode: AutopilotMode;
 }
 
@@ -105,12 +106,21 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     ? data.selectedEvents
     : suggestedEvents(rel);
 
+  const eventDates = data.eventDates ?? {};
+  const customDates: { id: string; label: string; date: string }[] = [];
+  if (eventDates["Work Anniversary"])
+    customDates.push({ id: "work-anniversary", label: "Work Anniversary", date: eventDates["Work Anniversary"] });
+  if (eventDates["Graduation"])
+    customDates.push({ id: "graduation", label: "Graduation", date: eventDates["Graduation"] });
+
   return {
     id: Date.now().toString(),
     name: data.recipientName,
     relationship: rel,
     children: [],
     marriageDate: undefined,
+    birthday: eventDates["Birthday"] || undefined,
+    anniversaryDate: eventDates["Anniversary"] || undefined,
     needsMothersDay: isMom || events.includes("Mother's Day"),
     needsFathersDay: isDad || events.includes("Father's Day"),
     needsValentinesDay: isPartner || events.includes("Valentine's Day"),
@@ -119,7 +129,7 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     needsNewYears: events.includes("New Year's"),
     needsEaster: events.includes("Easter"),
     selectedEvents: events,
-    customDates: [],
+    customDates,
     tonePreference: TONE_MAP[data.tone] ?? "Sweet",
     personalityNotes: noteParts.join(" | "),
     favoriteMemories: "",

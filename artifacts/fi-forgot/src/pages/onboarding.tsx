@@ -92,6 +92,8 @@ export default function OnboardingPage() {
   const { toast } = useToast();
 
   const [step, setStep] = useState(0);
+  const DATE_SENSITIVE = ["Birthday", "Anniversary", "Work Anniversary", "Graduation"];
+
   const [data, setData] = useState<OnboardingData>({
     recipientName: "",
     relationship: "",
@@ -102,6 +104,7 @@ export default function OnboardingPage() {
     yearsTogther: "",
     thingsToAvoid: "",
     selectedEvents: [],
+    eventDates: {},
     autopilotMode: "preview_before_mailing",
   });
 
@@ -387,33 +390,68 @@ export default function OnboardingPage() {
                 {HOLIDAYS.map((h) => {
                   const selected = data.selectedEvents.includes(h);
                   const isSuggested = suggested.includes(h);
+                  const needsDate = DATE_SENSITIVE.includes(h);
+                  const dateVal = data.eventDates[h] ?? "";
                   return (
-                    <button
-                      key={h}
-                      onClick={() => toggleMulti("selectedEvents", h)}
-                      className="flex items-center gap-2 py-3 px-4 rounded-xl border-2 text-left transition-all"
-                      style={{
-                        borderColor: selected ? RED : `${BLACK}15`,
-                        background: selected ? `${RED}12` : "#fff",
-                      }}
-                      data-testid={`btn-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      <div
-                        className="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0"
-                        style={{
-                          borderColor: selected ? RED : `${BLACK}30`,
-                          background: selected ? RED : "transparent",
+                    <div key={h} className={needsDate && selected ? "col-span-2" : ""}>
+                      <button
+                        onClick={() => {
+                          toggleMulti("selectedEvents", h);
+                          if (selected) {
+                            setData((d) => {
+                              const next = { ...d.eventDates };
+                              delete next[h];
+                              return { ...d, eventDates: next };
+                            });
+                          }
                         }}
+                        className="w-full flex items-center gap-2 py-3 px-4 rounded-xl border-2 text-left transition-all"
+                        style={{
+                          borderColor: selected ? RED : `${BLACK}15`,
+                          background: selected ? `${RED}12` : "#fff",
+                          borderRadius: needsDate && selected ? "0.75rem 0.75rem 0 0" : "0.75rem",
+                        }}
+                        data-testid={`btn-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
                       >
-                        {selected && <span className="text-white text-xs leading-none">✓</span>}
-                      </div>
-                      <div>
-                        <span className="text-sm font-semibold" style={{ color: selected ? RED : "#333" }}>{h}</span>
-                        {isSuggested && !selected && (
-                          <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full" style={{ background: `${NAVY}12`, color: NAVY, fontSize: "0.65rem" }}>suggested</span>
-                        )}
-                      </div>
-                    </button>
+                        <div
+                          className="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0"
+                          style={{
+                            borderColor: selected ? RED : `${BLACK}30`,
+                            background: selected ? RED : "transparent",
+                          }}
+                        >
+                          {selected && <span className="text-white text-xs leading-none">✓</span>}
+                        </div>
+                        <div>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : "#333" }}>{h}</span>
+                          {isSuggested && !selected && (
+                            <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full" style={{ background: `${NAVY}12`, color: NAVY, fontSize: "0.65rem" }}>suggested</span>
+                          )}
+                        </div>
+                      </button>
+                      {needsDate && selected && (
+                        <div
+                          className="px-4 py-3 border-2 border-t-0"
+                          style={{ borderColor: RED, borderRadius: "0 0 0.75rem 0.75rem", background: `${RED}08` }}
+                        >
+                          <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: RED }}>
+                            {h === "Birthday" ? "Their birthday" : h === "Anniversary" ? "Anniversary date" : h === "Work Anniversary" ? "Work start date" : "Date"}
+                          </label>
+                          <input
+                            type="date"
+                            value={dateVal}
+                            onChange={(e) => setData((d) => ({ ...d, eventDates: { ...d.eventDates, [h]: e.target.value } }))}
+                            className="w-full rounded-lg border px-3 py-2 text-sm"
+                            style={{ borderColor: `${RED}40`, background: "#fff", color: BLACK }}
+                          />
+                          {!dateVal && (
+                            <p className="text-xs mt-1.5" style={{ color: `${BLACK}60` }}>
+                              Optional — you can always add this later in the profile.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
