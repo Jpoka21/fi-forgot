@@ -709,29 +709,29 @@ export function suggestedEvents(relationship: Relationship): string[] {
   switch (relationship) {
     case "Wife":
     case "Girlfriend":
-      return ["Birthday", "Anniversary", "Valentine's Day", "Christmas", "Mother's Day"];
+      return ["Birthday", "Anniversary", "Valentine's Day", "Christmas", "Mother's Day", "Just Because"];
     case "Husband":
     case "Boyfriend":
-      return ["Birthday", "Anniversary", "Valentine's Day", "Christmas", "Father's Day"];
+      return ["Birthday", "Anniversary", "Valentine's Day", "Christmas", "Father's Day", "Just Because"];
     case "Mom":
     case "Mother in law":
-      return ["Birthday", "Mother's Day", "Christmas", "Thanksgiving"];
+      return ["Birthday", "Mother's Day", "Christmas", "Thanksgiving", "Just Because"];
     case "Dad":
     case "Father in law":
-      return ["Birthday", "Father's Day", "Christmas", "Thanksgiving"];
+      return ["Birthday", "Father's Day", "Christmas", "Thanksgiving", "Just Because"];
     case "Daughter":
     case "Son":
-      return ["Birthday", "Graduation", "Christmas"];
+      return ["Birthday", "Graduation", "Christmas", "Just Because"];
     case "Grandmother":
     case "Grandfather":
-      return ["Birthday", "Christmas", "Thanksgiving"];
+      return ["Birthday", "Christmas", "Thanksgiving", "Just Because"];
     case "Friend":
       return ["Birthday", "Just Because"];
     case "Employee":
     case "Client":
       return ["Birthday", "Work Anniversary", "Congratulations"];
     default:
-      return ["Birthday", "Christmas"];
+      return ["Birthday", "Christmas", "Just Because"];
   }
 }
 

@@ -436,6 +436,29 @@ export default function OnboardingPage() {
                   );
                 })}
               </div>
+              {/* Live plan indicator */}
+              {(() => {
+                const count = data.selectedEvents.length;
+                const plan =
+                  count <= 5
+                    ? { name: "Bare Minimum", price: "$5/mo", color: "#6B6B6B" }
+                    : count <= 12
+                    ? { name: "Domestic Peacekeeper", price: "$15/mo", color: "#D32F2F" }
+                    : { name: "Legend Status", price: "$29/mo", color: "#B8860B" };
+                return (
+                  <div
+                    className="flex items-center justify-between px-4 py-3 rounded-xl mt-2"
+                    style={{ background: `${plan.color}10`, border: `1px solid ${plan.color}30` }}
+                  >
+                    <span className="text-xs font-semibold" style={{ color: plan.color }}>
+                      {count} occasion{count !== 1 ? "s" : ""} selected
+                    </span>
+                    <span className="text-xs font-bold" style={{ color: plan.color }}>
+                      {plan.name} · {plan.price}
+                    </span>
+                  </div>
+                );
+              })()}
               <p className="text-xs text-center" style={{ color: "#aaa" }}>
                 We pre-selected what makes sense for a {data.relationship}. Adjust freely.
               </p>
