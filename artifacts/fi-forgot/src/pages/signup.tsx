@@ -126,8 +126,8 @@ export default function SignupPage() {
 
             {/* Stamps decorations */}
             <div className="flex items-end gap-4 flex-wrap">
-              <CircleStamp type="crisis" size={72} />
-              <CircleStamp type="deployed" size={72} />
+              <img src="/stamp-disaster-averted.png" alt="Disaster Averted" style={{ height: 90, width: "auto" }} />
+              <img src="/stamp-date-locked-in.png" alt="Important Date Locked In" style={{ height: 90, width: "auto" }} />
               <img src="/sticky-note.png" alt="Your future self owes us one." style={{ height: 165, width: "auto", transform: "rotate(-3deg)" }} />
             </div>
           </div>
