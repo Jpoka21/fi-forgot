@@ -580,9 +580,9 @@ export const TONES: Tone[] = [
 ];
 
 export const PREVIEW_DAYS_OPTIONS: { days: PreviewDays; label: string; description: string; badge?: string }[] = [
-  { days: 14, label: "14 days before", description: "You get 5 days to approve before we nudge you. Ghost the reminder and we auto-approve. Card ships.", badge: "RECOMMENDED" },
-  { days: 21, label: "21 days before", description: "Nearly two weeks to decide. One reminder if you go quiet, then we handle it." },
-  { days: 30, label: "30 days before", description: "A month of runway. If you haven't responded in 3 weeks we auto-approve and move on." },
+  { days: 14, label: "14 days before", description: "Draft hits your inbox 14 days out. We ping you every day after that. Act on it or don't — we ship the card either way.", badge: "RECOMMENDED" },
+  { days: 21, label: "21 days before", description: "Three weeks of daily reminders before we pull the trigger. More runway, same result." },
+  { days: 30, label: "30 days before", description: "A whole month of daily pings. If you still haven't touched it, we handle it. No excuses accepted." },
 ];
 
 // ─── Storage ─────────────────────────────────────────────────────────────────

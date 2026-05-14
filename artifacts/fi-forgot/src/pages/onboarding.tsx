@@ -145,7 +145,7 @@ export default function OnboardingPage() {
     2: "Pick everything that fits. We'll weave these in naturally.",
     3: "We'll default to this style for every card unless you say otherwise.",
     4: "We pre-selected the obvious ones. Add or remove anything.",
-    5: "We email you a draft before the occasion. Approve it, change it, or kill it. No answer after a reminder? We auto-approve and Handwrytten handles the rest.",
+    5: "We send you a card draft and ping you every day until you do something about it. Run out the clock and we approve it ourselves. Card goes out no matter what.",
   };
 
   return (
