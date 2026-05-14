@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -68,19 +68,13 @@ const examples = [
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [, navigate] = useLocation();
 
-  // Hard navigation — bypasses any routing context issues
-  const goSignup = () => { window.location.href = "/signup"; };
-  const goLogin  = () => { window.location.href = "/login"; };
-  const goAnchor = (id: string) => () => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-
-  // Hit-zone style — rgba(0,0,0,0.001) instead of transparent so the
-  // browser treats it as a real surface and fires pointer events on it.
+  // Base styles for image hit zones — rendered as <a href> tags for guaranteed browser navigation
   const zone = (extra: React.CSSProperties): React.CSSProperties => ({
     position: "absolute",
     zIndex: 20,
     cursor: "pointer",
+    display: "block",
     background: "rgba(0,0,0,0.001)",
     ...extra,
   });
@@ -101,27 +95,27 @@ export default function LandingPage() {
           draggable={false}
         />
 
-        {/* ── Nav link zones ─────────────────────────────────────────────── */}
-        <div role="button" aria-label="Sign in"      onClick={goLogin}                    style={zone({ top:"1%", right:"17%", width:"7%",  height:"4%" })} />
-        <div role="button" aria-label="How it works" onClick={goAnchor("how-it-works")}   style={zone({ top:"1%", left:"22%",  width:"8%",  height:"4%" })} />
-        <div role="button" aria-label="Plans"        onClick={goAnchor("pricing")}        style={zone({ top:"1%", left:"31%",  width:"5%",  height:"4%" })} />
-        <div role="button" aria-label="Examples"     onClick={goAnchor("examples")}       style={zone({ top:"1%", left:"37%",  width:"7%",  height:"4%" })} />
-        <div role="button" aria-label="Reviews"      onClick={goAnchor("reviews")}        style={zone({ top:"1%", left:"45%",  width:"7%",  height:"4%" })} />
-        <div role="button" aria-label="FAQ"          onClick={goAnchor("faq")}            style={zone({ top:"1%", left:"53%",  width:"5%",  height:"4%" })} />
+        {/* ── Nav link zones — plain <a> tags, no JS required ──────────── */}
+        <a aria-label="Sign in"      href="/login"          style={zone({ top:"1%", right:"17%", width:"7%",  height:"4%" })} />
+        <a aria-label="How it works" href="#how-it-works"   style={zone({ top:"1%", left:"22%",  width:"8%",  height:"4%" })} />
+        <a aria-label="Plans"        href="#pricing"        style={zone({ top:"1%", left:"31%",  width:"5%",  height:"4%" })} />
+        <a aria-label="Examples"     href="#examples"       style={zone({ top:"1%", left:"37%",  width:"7%",  height:"4%" })} />
+        <a aria-label="Reviews"      href="#reviews"        style={zone({ top:"1%", left:"45%",  width:"7%",  height:"4%" })} />
+        <a aria-label="FAQ"          href="#faq"            style={zone({ top:"1%", left:"53%",  width:"5%",  height:"4%" })} />
 
         {/* Nav CTA — red "START EARNING BROWNIE POINTS" button top-right */}
-        <div role="button" aria-label="Start earning brownie points" data-testid="link-get-started-nav"
-          onClick={goSignup} style={zone({ top:"0.5%", right:"0.5%", width:"16%", height:"5.5%" })} />
+        <a aria-label="Start earning brownie points" data-testid="link-get-started-nav"
+          href="/signup" style={zone({ top:"0.5%", right:"0.5%", width:"16%", height:"5.5%" })} />
 
-        {/* ── Hero "START NOW" — large hit zone over the red button ───────── */}
-        {/* Image button sits at ~61–70% vertically, left 2–30%              */}
-        <div role="button" aria-label="Start Now" data-testid="link-cta-hitzone"
-          onClick={goSignup} style={zone({ top:"61%", left:"2%", width:"30%", height:"10%" })} />
+        {/* ── Hero "START NOW" — hit zone over the left red button ────────── */}
+        {/* Image button sits at ~59–68% vertically, left 1–27%             */}
+        <a aria-label="Start Now" data-testid="link-cta-hitzone"
+          href="/signup" style={zone({ top:"59%", left:"1%", width:"27%", height:"10%" })} />
 
-        {/* ── Banner "START NOW" — hit zone over the beige-section button ─── */}
-        {/* Banner button sits at ~76–83% vertically, right side             */}
-        <div role="button" aria-label="Start Now" data-testid="link-cta-banner"
-          onClick={goSignup} style={zone({ top:"76%", right:"2%", width:"25%", height:"7%" })} />
+        {/* ── Banner "START NOW" — hit zone over the banner button ────────── */}
+        {/* Banner button sits at ~70–82% vertically, right 64–99%          */}
+        <a aria-label="Start Now" data-testid="link-cta-banner"
+          href="/signup" style={zone({ top:"70%", left:"63%", width:"35%", height:"12%" })} />
       </section>
 
       {/* ── Real CTA strip — immediately below the hero image ──────────── */}
@@ -135,7 +129,7 @@ export default function LandingPage() {
         gap: "clamp(10px, 2.5vw, 24px)",
         flexWrap: "wrap",
       }}>
-        <Link
+        <a
           href="/signup"
           data-testid="link-cta-primary"
           style={{
@@ -156,7 +150,7 @@ export default function LandingPage() {
           }}
         >
           START EARNING BROWNIE POINTS
-        </Link>
+        </a>
         <a
           href="#how-it-works"
           data-testid="link-how-it-works"
