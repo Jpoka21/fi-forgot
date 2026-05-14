@@ -64,29 +64,44 @@ function daysUntilEvent(event: string, recipient: Recipient): number | null {
   return null;
 }
 
+/** Format a local Date as YYYY-MM-DD without UTC conversion drift */
+function localDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function getEventDate(event: string, recipient: Recipient): string | null {
   const now = new Date();
   const year = now.getFullYear();
 
-  if (event === "Birthday" && recipient.birthday) {
-    const [, m, d] = recipient.birthday.split("-").map(Number);
+  // Helper: given a stored ISO date string (any year), return next occurrence
+  function nextOccurrence(stored: string): string {
+    const parts = stored.split("-").map(Number);
+    const m = parts[1];
+    const d = parts[2];
     let next = new Date(year, m - 1, d);
     if (next < now) next = new Date(year + 1, m - 1, d);
-    return next.toISOString().split("T")[0];
+    return localDateStr(next);
   }
 
-  if (event === "Anniversary" && recipient.marriageDate) {
-    const [, m, d] = recipient.marriageDate.split("-").map(Number);
-    let next = new Date(year, m - 1, d);
-    if (next < now) next = new Date(year + 1, m - 1, d);
-    return next.toISOString().split("T")[0];
+  if (event === "Birthday" && recipient.birthday)
+    return nextOccurrence(recipient.birthday);
+
+  // Anniversary may come from anniversaryDate (onboarding) or marriageDate (manual edit)
+  if (event === "Anniversary") {
+    const src = recipient.anniversaryDate ?? recipient.marriageDate;
+    if (src) return nextOccurrence(src);
   }
 
+  // Custom dates: Work Anniversary, Graduation, Just Because, etc.
+  const custom = recipient.customDates?.find((c) => c.label === event);
+  if (custom?.date) return nextOccurrence(custom.date);
+
+  // Fixed holidays
   const fixed = HOLIDAY_DATES[event];
   if (fixed) {
     let next = new Date(year, fixed.month - 1, fixed.day);
     if (next < now) next = new Date(year + 1, fixed.month - 1, fixed.day);
-    return next.toISOString().split("T")[0];
+    return localDateStr(next);
   }
 
   return null;
@@ -812,9 +827,9 @@ export default function DashboardPage() {
                   </div>
                   <div className="grid grid-cols-7 gap-1">
                     {calendarDays.map((d, i) => {
-                      const iso = d.toISOString().split("T")[0];
+                      const iso = localDateStr(d);
                       const hasEvent = allEventDates.has(iso);
-                      const isToday = iso === today.toISOString().split("T")[0];
+                      const isToday = iso === localDateStr(today);
                       const isCalMonth = d.getMonth() === calMonth.getMonth();
                       return (
                         <div
