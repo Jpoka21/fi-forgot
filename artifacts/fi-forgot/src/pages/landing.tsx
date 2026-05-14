@@ -76,6 +76,29 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
+      {/* ── Mobile-only nav (image nav is too small to tap on phones) ─────── */}
+      <nav className="md:hidden flex items-center justify-between sticky top-0 z-50"
+        style={{ background: B.black, padding: "10px 16px", borderBottom: `2px solid ${B.red}` }}>
+        <div>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", fontWeight: 700, lineHeight: 1 }}>
+            <span style={{ color: B.red }}>"F"</span>
+            <span style={{ color: "#fff" }}> I Forgot</span>
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.55rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.4)", marginTop: 1 }}>
+            RELATIONSHIP DAMAGE CONTROL
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <a href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.7)", textDecoration: "none", padding: "6px 10px" }}>
+            SIGN IN
+          </a>
+          <a href="/signup" data-testid="link-mobile-nav-cta"
+            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", padding: "8px 14px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
+            START NOW
+          </a>
+        </div>
+      </nav>
+
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* HERO — Full-bleed image: nav + hero + how-it-works + social proof  */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
@@ -113,6 +136,25 @@ export default function LandingPage() {
         <a aria-label="Start earning brownie points" data-testid="link-cta-bottom"
           href="/signup" style={zone({ top:"94%", right:"1%", width:"36%", height:"5%" })} />
       </section>
+
+      {/* ── Mobile CTA strip — real tappable buttons below the image ─────── */}
+      <div className="md:hidden flex flex-col gap-3"
+        style={{ background: B.black, padding: "20px 16px" }}>
+        <a href="/signup"
+          style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.14em", padding: "16px", borderRadius: 4, textDecoration: "none", boxShadow: `0 4px 20px ${B.red}55` }}>
+          START EARNING BROWNIE POINTS
+        </a>
+        <div className="flex gap-3">
+          <a href="#pricing"
+            style={{ flex: 1, display: "block", textAlign: "center", border: `2px solid rgba(255,255,255,0.3)`, color: "rgba(255,255,255,0.85)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.12em", padding: "12px", borderRadius: 4, textDecoration: "none" }}>
+            SEE PLANS
+          </a>
+          <a href="#faq"
+            style={{ flex: 1, display: "block", textAlign: "center", border: `2px solid rgba(255,255,255,0.3)`, color: "rgba(255,255,255,0.85)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.12em", padding: "12px", borderRadius: 4, textDecoration: "none" }}>
+            FAQ
+          </a>
+        </div>
+      </div>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section
