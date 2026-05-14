@@ -112,6 +112,8 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     customDates.push({ id: "work-anniversary", label: "Work Anniversary", date: eventDates["Work Anniversary"] });
   if (eventDates["Graduation"])
     customDates.push({ id: "graduation", label: "Graduation", date: eventDates["Graduation"] });
+  if (eventDates["Just Because"])
+    customDates.push({ id: "just-because", label: "Just Because", date: eventDates["Just Because"] });
 
   return {
     id: Date.now().toString(),

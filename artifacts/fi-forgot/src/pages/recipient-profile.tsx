@@ -296,6 +296,11 @@ export default function RecipientProfilePage() {
 
   useEffect(() => {
     if (existing?.children) setChildren(existing.children);
+    // react-hook-form doesn't always hydrate nested Record<> from defaultValues
+    // when a zodResolver is present — force-set after mount
+    if (existing) {
+      form.setValue("eventDates", buildInitialEventDates(existing));
+    }
   }, []);
 
   const blankAddress = { line1: "", line2: "", city: "", state: "", zip: "" };
