@@ -29,10 +29,7 @@ export type Tone =
 
 export type DeliveryPreference = "Mail it to me" | "Mail it directly to her";
 
-export type AutopilotMode =
-  | "full_autopilot"
-  | "preview_before_mailing"
-  | "require_approval";
+export type PreviewDays = 3 | 7 | 14 | 30;
 
 export type CardStatus =
   | "Needs profile"
@@ -119,7 +116,7 @@ export interface Recipient {
   thingsToAvoid: string;
   emotionalLevel: number;
   deliveryPreference: DeliveryPreference;
-  autopilotMode: AutopilotMode;
+  previewDays: PreviewDays;
   // Contact & delivery
   mailingAddress?: RecipientAddress; // where to send physical cards
 }
@@ -582,20 +579,12 @@ export const TONES: Tone[] = [
   "Religious", "From the kids", "Apology style",
 ];
 
-export const AUTOPILOT_LABELS: Record<AutopilotMode, { label: string; description: string }> = {
-  full_autopilot: {
-    label: "Full Autopilot",
-    description: "We write it, we send it. You do nothing.",
-  },
-  preview_before_mailing: {
-    label: "Preview Before Mailing",
-    description: "We write it and show you first. You approve with one tap.",
-  },
-  require_approval: {
-    label: "Require My Approval",
-    description: "Nothing ships without your sign-off. Control freak mode.",
-  },
-};
+export const PREVIEW_DAYS_OPTIONS: { days: PreviewDays; label: string; description: string; badge?: string }[] = [
+  { days: 3,  label: "3 days before",  description: "Cutting it close. We like it." },
+  { days: 7,  label: "7 days before",  description: "Sweet spot. Enough time, not too early.", badge: "RECOMMENDED" },
+  { days: 14, label: "14 days before", description: "Smart. Gives you time to pair it with a gift." },
+  { days: 30, label: "30 days before", description: "Maximum lead time. You're a planner." },
+];
 
 // ─── Storage ─────────────────────────────────────────────────────────────────
 

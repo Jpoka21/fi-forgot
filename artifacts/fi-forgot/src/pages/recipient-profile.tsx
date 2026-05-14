@@ -11,7 +11,7 @@ import {
   RELATIONSHIPS,
   TONES,
   HOLIDAYS,
-  AUTOPILOT_LABELS,
+  PREVIEW_DAYS_OPTIONS,
   getAge,
   getYearsTogether,
   Recipient,
@@ -19,7 +19,6 @@ import {
   Relationship,
   Tone,
   DeliveryPreference,
-  AutopilotMode,
   Child,
   EventBriefing,
 } from "@/lib/data";
@@ -42,7 +41,7 @@ const NAVY = "#071A33";
 const RED = "#E23B2E";
 const BLACK = "#111111";
 
-const AUTOPILOT_MODES: AutopilotMode[] = ["full_autopilot", "preview_before_mailing", "require_approval"];
+const PREVIEW_DAYS_LIST = [3, 7, 14, 30] as const;
 const GENDER_OPTIONS = [
   { id: "boy", label: "Boy", emoji: "👦" },
   { id: "girl", label: "Girl", emoji: "👧" },
@@ -71,7 +70,7 @@ const schema = z.object({
   needsNewYears: z.boolean(),
   needsEaster: z.boolean(),
   selectedEvents: z.array(z.string()),
-  autopilotMode: z.enum(AUTOPILOT_MODES as [AutopilotMode, ...AutopilotMode[]]),
+  previewDays: z.union([z.literal(3), z.literal(7), z.literal(14), z.literal(30)]),
   tonePreference: z.enum(TONES as [Tone, ...Tone[]]),
   senderName: z.string().optional(),
   personalityNotes: z.string(),
@@ -300,7 +299,7 @@ export default function RecipientProfilePage() {
           needsNewYears: existing.needsNewYears ?? false,
           needsEaster: existing.needsEaster ?? false,
           selectedEvents: existing.selectedEvents ?? [],
-          autopilotMode: existing.autopilotMode ?? "preview_before_mailing",
+          previewDays: (existing.previewDays ?? 7) as 3 | 7 | 14 | 30,
           tonePreference: existing.tonePreference,
           personalityNotes: existing.personalityNotes,
           favoriteMemories: existing.favoriteMemories,
@@ -324,7 +323,7 @@ export default function RecipientProfilePage() {
           needsNewYears: false,
           needsEaster: false,
           selectedEvents: [],
-          autopilotMode: "preview_before_mailing" as AutopilotMode,
+          previewDays: 7 as 3 | 7 | 14 | 30,
           tonePreference: "Sweet",
           personalityNotes: "",
           favoriteMemories: "",
@@ -503,28 +502,32 @@ export default function RecipientProfilePage() {
               </div>
             </div>
 
-            {/* Autopilot mode */}
+            {/* Preview timing */}
             <div className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)] mb-1">Autopilot mode</h2>
-              <p className="text-sm text-[hsl(221,20%,50%)] mb-4">How involved do you want to be for this recipient?</p>
-              <FormField control={form.control} name="autopilotMode" render={({ field }) => (
+              <h2 className="font-serif text-lg font-bold text-[hsl(221,47%,20%)] mb-1">Preview email timing</h2>
+              <p className="text-sm text-[hsl(221,20%,50%)] mb-4">How far ahead should we email you the card draft for approval?</p>
+              <FormField control={form.control} name="previewDays" render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <div className="space-y-3">
-                      {(Object.keys(AUTOPILOT_LABELS) as AutopilotMode[]).map((mode) => {
-                        const { label, description } = AUTOPILOT_LABELS[mode];
-                        const selected = field.value === mode;
+                      {PREVIEW_DAYS_OPTIONS.map((opt) => {
+                        const selected = field.value === opt.days;
                         return (
-                          <button key={mode} type="button" onClick={() => field.onChange(mode)}
+                          <button key={opt.days} type="button" onClick={() => field.onChange(opt.days)}
                             className="w-full flex items-center justify-between py-3.5 px-4 rounded-xl border-2 text-left transition-all"
                             style={{
                               borderColor: selected ? NAVY : `${BLACK}15`,
                               background: selected ? "hsl(221,47%,97%)" : "#fff",
                             }}
-                            data-testid={`btn-autopilot-${mode}`}>
-                            <div>
-                              <div className="font-semibold text-sm text-[hsl(221,47%,20%)]">{label}</div>
-                              <div className="text-xs text-[hsl(221,20%,50%)] mt-0.5">{description}</div>
+                            data-testid={`btn-preview-days-${opt.days}`}>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-sm text-[hsl(221,47%,20%)]">{opt.label}</span>
+                                {opt.badge && (
+                                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: NAVY, color: "#fff", fontSize: "0.6rem" }}>{opt.badge}</span>
+                                )}
+                              </div>
+                              <div className="text-xs text-[hsl(221,20%,50%)] mt-0.5">{opt.description}</div>
                             </div>
                             {selected && <span className="text-[hsl(221,47%,20%)] font-bold ml-3">✓</span>}
                           </button>

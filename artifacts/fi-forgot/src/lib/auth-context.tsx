@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, AutopilotMode, suggestedEvents } from "./data";
+import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents } from "./data";
 
 export interface OnboardingData {
   recipientName: string;
@@ -12,7 +12,7 @@ export interface OnboardingData {
   thingsToAvoid: string;
   selectedEvents: string[];
   eventDates: Record<string, string>;
-  autopilotMode: AutopilotMode;
+  previewDays: PreviewDays;
 }
 
 interface AuthContextType {
@@ -137,7 +137,7 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     thingsToAvoid: data.thingsToAvoid,
     emotionalLevel: 3,
     deliveryPreference: deliveryPref,
-    autopilotMode: data.autopilotMode ?? "preview_before_mailing",
+    previewDays: data.previewDays ?? 7,
   };
 }
 

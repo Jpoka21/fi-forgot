@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth, OnboardingData } from "@/lib/auth-context";
-import { suggestedEvents, HOLIDAYS, AutopilotMode, AUTOPILOT_LABELS } from "@/lib/data";
+import { suggestedEvents, HOLIDAYS, PreviewDays, PREVIEW_DAYS_OPTIONS } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
 const CREAM = "#F8EEDC";
@@ -58,32 +58,13 @@ const TONES = [
   { id: "mix", label: "Mix it up", sub: "Surprise me every time" },
 ];
 
-const AUTOPILOT_OPTIONS: { id: AutopilotMode; label: string; sub: string; badge?: string }[] = [
-  {
-    id: "full_autopilot",
-    label: "Full Autopilot",
-    sub: "We write it, we send it. You do absolutely nothing.",
-    badge: "RECOMMENDED",
-  },
-  {
-    id: "preview_before_mailing",
-    label: "Preview Before Mailing",
-    sub: "We write it and show you first. One tap to approve.",
-  },
-  {
-    id: "require_approval",
-    label: "Require My Approval",
-    sub: "Nothing ships without your sign-off. Control freak mode.",
-  },
-];
-
 const STEPS = [
   "Who are we covering?",
   "What are they like?",
   "What do they love?",
   "What tone lands with them?",
   "Which occasions matter?",
-  "How should we handle it?",
+  "When should we give you a heads up?",
 ];
 
 export default function OnboardingPage() {
@@ -105,7 +86,7 @@ export default function OnboardingPage() {
     thingsToAvoid: "",
     selectedEvents: [],
     eventDates: {},
-    autopilotMode: "preview_before_mailing",
+    previewDays: 7,
   });
 
   const suggested = data.relationship
@@ -461,22 +442,25 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 5 — Autopilot + Details */}
+          {/* Step 5 — Preview timing + Details */}
           {step === 5 && (
             <div className="space-y-6">
               <div className="space-y-3">
-                {AUTOPILOT_OPTIONS.map((opt) => {
-                  const selected = data.autopilotMode === opt.id;
+                <p className="text-sm" style={{ color: "#555" }}>
+                  We'll email you a draft of the card so you can approve it, tweak it, or tell us to scrap it. How far ahead do you want that email?
+                </p>
+                {PREVIEW_DAYS_OPTIONS.map((opt) => {
+                  const selected = data.previewDays === opt.days;
                   return (
                     <button
-                      key={opt.id}
-                      onClick={() => setData((d) => ({ ...d, autopilotMode: opt.id }))}
+                      key={opt.days}
+                      onClick={() => setData((d) => ({ ...d, previewDays: opt.days as PreviewDays }))}
                       className="w-full flex items-center justify-between py-4 px-5 rounded-xl border-2 text-left transition-all"
                       style={{
                         borderColor: selected ? RED : `${BLACK}15`,
                         background: selected ? `${RED}12` : "#fff",
                       }}
-                      data-testid={`btn-autopilot-${opt.id}`}
+                      data-testid={`btn-preview-days-${opt.days}`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -485,7 +469,7 @@ export default function OnboardingPage() {
                             <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: NAVY, color: "#fff", fontSize: "0.6rem" }}>{opt.badge}</span>
                           )}
                         </div>
-                        <div className="text-xs mt-0.5" style={{ color: "#888" }}>{opt.sub}</div>
+                        <div className="text-xs mt-0.5" style={{ color: "#888" }}>{opt.description}</div>
                       </div>
                       {selected && <span style={{ color: RED, fontWeight: 700 }}>✓</span>}
                     </button>

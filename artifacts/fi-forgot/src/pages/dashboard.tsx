@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import AppLayout from "@/components/layout/AppLayout";
 import {
   getCards, getRecipients, getBriefingsForRecipient,
-  STATUS_COLORS, CardOrder, Recipient, AUTOPILOT_LABELS, getAge,
+  STATUS_COLORS, CardOrder, Recipient, getAge,
 } from "@/lib/data";
 import {
   getCustomerPendingApprovals, customerApproveCard,
@@ -267,7 +267,7 @@ export default function DashboardPage() {
   const upcoming = cards.filter((c) => !["Delivered", "Given"].includes(c.status));
   const awaitingApproval = cards.filter((c) => c.status === "Ready for approval");
   const disastersAvoided = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
-  const primaryAutopilot = recipients[0]?.autopilotMode ?? null;
+  const primaryPreviewDays = recipients[0]?.previewDays ?? null;
   const briefingsNeeded = upcomingBriefings.filter((b) => !b.briefingDoneThisYear);
 
   // Risk level computation
@@ -349,12 +349,12 @@ export default function DashboardPage() {
                 <IllustrationPlaceholder size="lg" gradient="gold" />
               </div>
             </div>
-            {primaryAutopilot && (
+            {primaryPreviewDays && (
               <div className="mt-4 pt-4 border-t flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
                 <div className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  Mode: <span className="text-white font-semibold">{AUTOPILOT_LABELS[primaryAutopilot].label}</span>
+                  Preview email: <span className="text-white font-semibold">{primaryPreviewDays} days before</span>
                   <span className="ml-2" style={{ color: "rgba(255,255,255,0.35)" }}>·</span>
-                  <span className="ml-2" style={{ color: "rgba(255,255,255,0.45)" }}>{AUTOPILOT_LABELS[primaryAutopilot].description}</span>
+                  <span className="ml-2" style={{ color: "rgba(255,255,255,0.45)" }}>You approve every card before it ships</span>
                 </div>
                 <Link href="/settings/reminders">
                   <button
@@ -758,7 +758,7 @@ export default function DashboardPage() {
                                   {childCount > 0 && ` · ${childCount} kid${childCount !== 1 ? "s" : ""}`}
                                 </div>
                               </div>
-                              {r.autopilotMode === "full_autopilot" && (
+                              {r.previewDays && (
                                 <Zap size={14} className="text-yellow-500 flex-shrink-0" />
                               )}
                             </div>
