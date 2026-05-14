@@ -68,7 +68,7 @@ const STEPS = [
 ];
 
 export default function OnboardingPage() {
-  const { completeOnboarding, user } = useAuth();
+  const { completeOnboarding } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -131,35 +131,56 @@ export default function OnboardingPage() {
 
   const isPartnerRelationship = ["Wife", "Girlfriend", "Husband", "Boyfriend"].includes(data.relationship);
 
+  const stepTitles: Record<number, string> = {
+    0: "Who are we covering?",
+    1: `What's ${data.recipientName || "they"} like?`,
+    2: "What do they love?",
+    3: "What tone lands with them?",
+    4: "Which occasions matter?",
+    5: "When should we give you a heads up?",
+  };
+  const stepDescs: Record<number, string> = {
+    0: "Tell us who you need us to remember. This is your first recipient — you can add more later.",
+    1: "Pick up to 2. This shapes the vibe of every card we write.",
+    2: "Pick everything that fits. We'll weave these in naturally.",
+    3: "We'll default to this style for every card unless you say otherwise.",
+    4: "We pre-selected the obvious ones. Add or remove anything.",
+    5: "We'll email you a draft so you can approve, tweak, or scrap it.",
+  };
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: CREAM }}>
-      {/* Top bar */}
-      <div className="w-full flex items-center justify-between border-b" style={{ padding: "28px 44px", borderColor: `${BLACK}10`, background: "#fff" }}>
-        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.96rem", fontWeight: 700, color: NAVY }}>
+    // Full-viewport container — no page scroll
+    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", background: CREAM }}>
+
+      {/* ── Top bar ──────────────────────────────────────────────────────── */}
+      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 32px", background: "#fff", borderBottom: `1px solid ${BLACK}10` }}>
+        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.75rem", fontWeight: 700, color: NAVY }}>
           <span style={{ color: RED }}>"F"</span> I Forgot
           <div style={{ height: 2, background: RED, marginTop: 1, borderRadius: 2 }} />
         </div>
-        <div style={{ fontSize: "1.2rem", fontWeight: 500, color: "#888" }}>
+        <div style={{ fontSize: "1rem", fontWeight: 500, color: "#888" }}>
           Step {step + 1} of {STEPS.length}
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div style={{ background: "#fff", borderBottom: `1px solid ${BLACK}10`, padding: "17px 44px" }}>
-        <div className="flex items-center gap-2">
+      {/* ── Progress bar ─────────────────────────────────────────────────── */}
+      <div style={{ flexShrink: 0, background: "#fff", borderBottom: `1px solid ${BLACK}10`, padding: "10px 32px" }}>
+        <div style={{ display: "flex", gap: 8 }}>
           {STEPS.map((label, i) => (
-            <div key={i} className="flex-1 flex flex-col gap-1">
+            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
               <div
-                className="rounded-full transition-all duration-500"
                 style={{
-                  height: 11,
+                  height: 9,
+                  borderRadius: 999,
                   background: i <= step ? RED : `${BLACK}15`,
+                  transition: "background 0.4s",
                 }}
               />
               <span
-                className="text-center hidden sm:block"
                 style={{
-                  fontSize: "0.84rem",
+                  display: "block",
+                  textAlign: "center",
+                  fontSize: "0.72rem",
                   fontWeight: i === step ? 700 : 400,
                   color: i <= step ? RED : `${BLACK}40`,
                   letterSpacing: "0.03em",
@@ -176,431 +197,378 @@ export default function OnboardingPage() {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex items-start justify-center px-4" style={{ paddingTop: 56, paddingBottom: 56 }}>
-        <div className="w-full" style={{ maxWidth: 700 }}>
+      {/* ── Main content area — fills remaining height ────────────────────── */}
+      <div style={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", padding: "0 16px", overflow: "hidden" }}>
+        <div style={{ width: "100%", maxWidth: 700, display: "flex", flexDirection: "column", height: "100%", padding: "20px 0 16px" }}>
 
           {/* Step header */}
-          <div style={{ marginBottom: 44 }}>
-            <p style={{ fontSize: "1.2rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 11, color: RED }}>
+          <div style={{ flexShrink: 0, marginBottom: 18 }}>
+            <p style={{ fontSize: "1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6, color: RED }}>
               Step {step + 1} — {STEPS[step]}
             </p>
-            {step === 0 && (
-              <>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.92rem", color: BLACK }}>
-                  Who are we covering?
-                </h1>
-                <p style={{ fontSize: "1.2rem", color: "#666" }}>
-                  Tell us who you need us to remember. This is your first recipient — you can add more later.
-                </p>
-              </>
-            )}
-            {step === 1 && (
-              <>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.92rem", color: BLACK }}>
-                  What's {data.recipientName || "they"} like?
-                </h1>
-                <p style={{ fontSize: "1.2rem", color: "#666" }}>
-                  Pick up to 2. This shapes the vibe of every card we write.
-                </p>
-              </>
-            )}
-            {step === 2 && (
-              <>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.92rem", color: BLACK }}>
-                  What do they love?
-                </h1>
-                <p style={{ fontSize: "1.2rem", color: "#666" }}>
-                  Pick everything that fits. We'll weave these in naturally.
-                </p>
-              </>
-            )}
-            {step === 3 && (
-              <>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.92rem", color: BLACK }}>
-                  What tone lands with them?
-                </h1>
-                <p style={{ fontSize: "1.2rem", color: "#666" }}>
-                  We'll default to this style for every card unless you say otherwise.
-                </p>
-              </>
-            )}
-            {step === 4 && (
-              <>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.92rem", color: BLACK }}>
-                  Which occasions matter?
-                </h1>
-                <p style={{ fontSize: "1.2rem", color: "#666" }}>
-                  We pre-selected the obvious ones. Add or remove anything.
-                </p>
-              </>
-            )}
-            {step === 5 && (
-              <>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.92rem", color: BLACK }}>
-                  When should we give you a heads up?
-                </h1>
-                <p style={{ fontSize: "1.2rem", color: "#666" }}>
-                  Choose how much you want to be involved. Spoiler: less is more.
-                </p>
-              </>
-            )}
+            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3rem", color: BLACK, lineHeight: 1, margin: 0 }}>
+              {stepTitles[step]}
+            </h1>
+            <p style={{ fontSize: "1rem", color: "#666", marginTop: 6, marginBottom: 0 }}>
+              {stepDescs[step]}
+            </p>
           </div>
 
-          {/* Step 0 — Who */}
-          {step === 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-              <div>
-                <label style={{ display: "block", fontSize: "1.2rem", fontWeight: 600, marginBottom: 11, color: BLACK }}>Their name</label>
-                <input
-                  className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                  style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.26rem", padding: "17px 22px", fontWeight: 500 }}
-                  placeholder="Sarah, Mom, Mike, Dave…"
-                  value={data.recipientName}
-                  onChange={(e) => setData((d) => ({ ...d, recipientName: e.target.value }))}
-                  data-testid="input-recipient-name"
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "1.2rem", fontWeight: 600, marginBottom: 17, color: BLACK }}>Your relationship to them</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {RELATIONSHIPS.map((r) => (
-                    <button
-                      key={r.id}
-                      onClick={() => setData((d) => ({ ...d, relationship: r.id, selectedEvents: [] }))}
-                      className="rounded-xl border-2 transition-all flex flex-col items-center"
-                      style={{
-                        padding: "17px 14px",
-                        borderColor: data.relationship === r.id ? RED : `${BLACK}15`,
-                        background: data.relationship === r.id ? `${RED}12` : "#fff",
-                        color: data.relationship === r.id ? RED : "#444",
-                        gap: 6,
-                      }}
-                      data-testid={`btn-relationship-${r.id.toLowerCase().replace(/ /g, "-")}`}
-                    >
-                      <span style={{ fontSize: "1.75rem" }}>{r.emoji}</span>
-                      <span style={{ fontSize: "1.05rem", fontWeight: 600 }}>{r.label}</span>
-                    </button>
-                  ))}
+          {/* Step content — fills remaining space, scrolls internally only if needed */}
+          <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+
+            {/* Step 0 — Who */}
+            {step === 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "1.1rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>Their name</label>
+                  <input
+                    className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
+                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.2rem", padding: "13px 18px", fontWeight: 500 }}
+                    placeholder="Sarah, Mom, Mike, Dave…"
+                    value={data.recipientName}
+                    onChange={(e) => setData((d) => ({ ...d, recipientName: e.target.value }))}
+                    data-testid="input-recipient-name"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "1.1rem", fontWeight: 600, marginBottom: 10, color: BLACK }}>Your relationship to them</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                    {RELATIONSHIPS.map((r) => (
+                      <button
+                        key={r.id}
+                        onClick={() => setData((d) => ({ ...d, relationship: r.id, selectedEvents: [] }))}
+                        style={{
+                          padding: "12px 8px",
+                          borderRadius: 12,
+                          border: `2px solid ${data.relationship === r.id ? RED : `${BLACK}15`}`,
+                          background: data.relationship === r.id ? `${RED}12` : "#fff",
+                          color: data.relationship === r.id ? RED : "#444",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 4,
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
+                        data-testid={`btn-relationship-${r.id.toLowerCase().replace(/ /g, "-")}`}
+                      >
+                        <span style={{ fontSize: "1.5rem" }}>{r.emoji}</span>
+                        <span style={{ fontSize: "0.9rem", fontWeight: 600 }}>{r.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 1 — Personality */}
-          {step === 1 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {PERSONALITIES.map((p) => {
-                const selected = data.personality.includes(p.id);
-                const maxed = data.personality.length >= 2 && !selected;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => !maxed && toggleMulti("personality", p.id)}
-                    className="flex items-center rounded-xl border-2 text-left transition-all"
-                    style={{
-                      gap: 17,
-                      padding: "22px 28px",
-                      borderColor: selected ? RED : `${BLACK}15`,
-                      background: selected ? `${RED}12` : "#fff",
-                      opacity: maxed ? 0.4 : 1,
-                      cursor: maxed ? "not-allowed" : "pointer",
-                    }}
-                    data-testid={`btn-personality-${p.id}`}
-                  >
-                    <span style={{ fontSize: "2.1rem" }}>{p.emoji}</span>
-                    <span style={{ fontSize: "1.2rem", fontWeight: 600, color: selected ? RED : "#444" }}>{p.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Step 2 — Interests */}
-          {step === 2 && (
-            <div className="grid grid-cols-2 gap-4">
-              {INTERESTS.map((item) => {
-                const selected = data.interests.includes(item.id);
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => toggleMulti("interests", item.id)}
-                    className="flex items-center rounded-xl border-2 text-left transition-all"
-                    style={{
-                      gap: 17,
-                      padding: "17px 22px",
-                      borderColor: selected ? RED : `${BLACK}15`,
-                      background: selected ? `${RED}12` : "#fff",
-                    }}
-                    data-testid={`btn-interest-${item.id}`}
-                  >
-                    <span style={{ fontSize: "1.75rem" }}>{item.emoji}</span>
-                    <span style={{ fontSize: "1.2rem", fontWeight: 600, color: selected ? RED : "#444" }}>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Step 3 — Tone */}
-          {step === 3 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 17 }}>
-              {TONES.map((t) => {
-                const selected = data.tone === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setData((d) => ({ ...d, tone: t.id }))}
-                    className="w-full flex items-center justify-between rounded-xl border-2 text-left transition-all"
-                    style={{
-                      padding: "22px 28px",
-                      borderColor: selected ? RED : `${BLACK}15`,
-                      background: selected ? `${RED}12` : "#fff",
-                    }}
-                    data-testid={`btn-tone-${t.id}`}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: "1.2rem", color: selected ? RED : BLACK }}>{t.label}</div>
-                      <div style={{ fontSize: "0.98rem", marginTop: 4, color: "#888" }}>{t.sub}</div>
-                    </div>
-                    {selected && <span style={{ color: RED, fontWeight: 700, fontSize: "1.2rem" }}>✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Step 4 — Events */}
-          {step === 4 && (
-            <div>
-              <div className="grid grid-cols-2 gap-3" style={{ marginBottom: 22 }}>
-                {HOLIDAYS.map((h) => {
-                  const selected = data.selectedEvents.includes(h);
-                  const isSuggested = suggested.includes(h);
-                  const needsDate = DATE_SENSITIVE.includes(h);
-                  const dateVal = data.eventDates[h] ?? "";
+            {/* Step 1 — Personality */}
+            {step === 1 && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {PERSONALITIES.map((p) => {
+                  const selected = data.personality.includes(p.id);
+                  const maxed = data.personality.length >= 2 && !selected;
                   return (
-                    <div key={h} className={needsDate && selected ? "col-span-2" : ""}>
-                      <button
-                        onClick={() => {
-                          toggleMulti("selectedEvents", h);
-                          if (selected) {
-                            setData((d) => {
-                              const next = { ...d.eventDates };
-                              delete next[h];
-                              return { ...d, eventDates: next };
-                            });
-                          }
-                        }}
-                        className="w-full flex items-center text-left transition-all"
-                        style={{
-                          gap: 11,
-                          padding: "17px 22px",
-                          borderRadius: needsDate && selected ? "0.75rem 0.75rem 0 0" : "0.75rem",
-                          border: `2px solid ${selected ? RED : `${BLACK}15`}`,
-                          background: selected ? `${RED}12` : "#fff",
-                        }}
-                        data-testid={`btn-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
-                      >
-                        <div
-                          className="rounded flex items-center justify-center flex-shrink-0"
-                          style={{
-                            width: 22,
-                            height: 22,
-                            border: `2px solid ${selected ? RED : `${BLACK}30`}`,
-                            background: selected ? RED : "transparent",
-                          }}
-                        >
-                          {selected && <span style={{ color: "#fff", fontSize: "0.8rem", lineHeight: 1 }}>✓</span>}
-                        </div>
-                        <div>
-                          <span style={{ fontSize: "1.2rem", fontWeight: 600, color: selected ? RED : "#333" }}>{h}</span>
-                          {isSuggested && !selected && (
-                            <span style={{ marginLeft: 8, fontSize: "0.91rem", padding: "2px 8px", borderRadius: 999, background: `${NAVY}12`, color: NAVY }}>suggested</span>
-                          )}
-                        </div>
-                      </button>
-                      {needsDate && selected && (
-                        <div
-                          style={{ padding: "17px 22px", border: `2px solid ${RED}`, borderTop: "none", borderRadius: "0 0 0.75rem 0.75rem", background: `${RED}08` }}
-                        >
-                          <label style={{ display: "block", fontSize: "0.98rem", fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em", color: RED }}>
-                            {h === "Birthday" ? "Their birthday" : h === "Anniversary" ? "Anniversary date" : h === "Work Anniversary" ? "Work start date" : "Date"}
-                          </label>
-                          <input
-                            type="date"
-                            value={dateVal}
-                            onChange={(e) => setData((d) => ({ ...d, eventDates: { ...d.eventDates, [h]: e.target.value } }))}
-                            className="w-full rounded-lg border"
-                            style={{ padding: "11px 17px", fontSize: "1.1rem", borderColor: `${RED}40`, background: "#fff", color: BLACK }}
-                          />
-                          {!dateVal && (
-                            <p style={{ fontSize: "0.98rem", marginTop: 8, color: `${BLACK}60` }}>
-                              Optional — you can always add this later in the profile.
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <button
+                      key={p.id}
+                      onClick={() => !maxed && toggleMulti("personality", p.id)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        padding: "18px 22px",
+                        borderRadius: 12,
+                        border: `2px solid ${selected ? RED : `${BLACK}15`}`,
+                        background: selected ? `${RED}12` : "#fff",
+                        opacity: maxed ? 0.4 : 1,
+                        cursor: maxed ? "not-allowed" : "pointer",
+                        transition: "all 0.15s",
+                      }}
+                      data-testid={`btn-personality-${p.id}`}
+                    >
+                      <span style={{ fontSize: "2rem" }}>{p.emoji}</span>
+                      <span style={{ fontSize: "1.1rem", fontWeight: 600, color: selected ? RED : "#444" }}>{p.label}</span>
+                    </button>
                   );
                 })}
               </div>
-              {/* Live plan indicator */}
-              {(() => {
-                const count = data.selectedEvents.length;
-                const plan =
-                  count <= 5
+            )}
+
+            {/* Step 2 — Interests */}
+            {step === 2 && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {INTERESTS.map((item) => {
+                  const selected = data.interests.includes(item.id);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => toggleMulti("interests", item.id)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: "14px 18px",
+                        borderRadius: 12,
+                        border: `2px solid ${selected ? RED : `${BLACK}15`}`,
+                        background: selected ? `${RED}12` : "#fff",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                      data-testid={`btn-interest-${item.id}`}
+                    >
+                      <span style={{ fontSize: "1.6rem" }}>{item.emoji}</span>
+                      <span style={{ fontSize: "1.1rem", fontWeight: 600, color: selected ? RED : "#444" }}>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Step 3 — Tone */}
+            {step === 3 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {TONES.map((t) => {
+                  const selected = data.tone === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setData((d) => ({ ...d, tone: t.id }))}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "16px 22px",
+                        borderRadius: 12,
+                        border: `2px solid ${selected ? RED : `${BLACK}15`}`,
+                        background: selected ? `${RED}12` : "#fff",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                      data-testid={`btn-tone-${t.id}`}
+                    >
+                      <div style={{ textAlign: "left" }}>
+                        <div style={{ fontWeight: 700, fontSize: "1.1rem", color: selected ? RED : BLACK }}>{t.label}</div>
+                        <div style={{ fontSize: "0.9rem", marginTop: 2, color: "#888" }}>{t.sub}</div>
+                      </div>
+                      {selected && <span style={{ color: RED, fontWeight: 700, fontSize: "1.1rem" }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Step 4 — Events */}
+            {step === 4 && (
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+                  {HOLIDAYS.map((h) => {
+                    const selected = data.selectedEvents.includes(h);
+                    const isSuggested = suggested.includes(h);
+                    const needsDate = DATE_SENSITIVE.includes(h);
+                    const dateVal = data.eventDates[h] ?? "";
+                    const spanFull = needsDate && selected;
+                    return (
+                      <div key={h} style={spanFull ? { gridColumn: "1 / -1" } : {}}>
+                        <button
+                          onClick={() => {
+                            toggleMulti("selectedEvents", h);
+                            if (selected) {
+                              setData((d) => {
+                                const next = { ...d.eventDates };
+                                delete next[h];
+                                return { ...d, eventDates: next };
+                              });
+                            }
+                          }}
+                          style={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "10px 14px",
+                            borderRadius: spanFull && selected ? "0.75rem 0.75rem 0 0" : "0.75rem",
+                            border: `2px solid ${selected ? RED : `${BLACK}15`}`,
+                            background: selected ? `${RED}12` : "#fff",
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                          }}
+                          data-testid={`btn-event-${h.toLowerCase().replace(/\s+/g, "-")}`}
+                        >
+                          <div style={{ width: 18, height: 18, flexShrink: 0, borderRadius: 4, border: `2px solid ${selected ? RED : `${BLACK}30`}`, background: selected ? RED : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {selected && <span style={{ color: "#fff", fontSize: "0.7rem", lineHeight: 1 }}>✓</span>}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ fontSize: "1.05rem", fontWeight: 600, color: selected ? RED : "#333" }}>{h}</span>
+                            {isSuggested && !selected && (
+                              <span style={{ fontSize: "0.72rem", padding: "1px 7px", borderRadius: 999, background: `${NAVY}12`, color: NAVY }}>suggested</span>
+                            )}
+                          </div>
+                        </button>
+                        {needsDate && selected && (
+                          <div style={{ padding: "12px 14px", border: `2px solid ${RED}`, borderTop: "none", borderRadius: "0 0 0.75rem 0.75rem", background: `${RED}08` }}>
+                            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em", color: RED }}>
+                              {h === "Birthday" ? "Their birthday" : h === "Anniversary" ? "Anniversary date" : h === "Work Anniversary" ? "Work start date" : "Date"}
+                            </label>
+                            <input
+                              type="date"
+                              value={dateVal}
+                              onChange={(e) => setData((d) => ({ ...d, eventDates: { ...d.eventDates, [h]: e.target.value } }))}
+                              style={{ width: "100%", borderRadius: 8, border: `1px solid ${RED}40`, padding: "8px 12px", fontSize: "1rem", background: "#fff", color: BLACK }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Live plan indicator */}
+                {(() => {
+                  const count = data.selectedEvents.length;
+                  const plan = count <= 5
                     ? { name: "Bare Minimum", price: "$5/mo", color: "#6B6B6B" }
                     : count <= 12
                     ? { name: "Domestic Peacekeeper", price: "$15/mo", color: "#D32F2F" }
                     : { name: "Legend Status", price: "$29/mo", color: "#B8860B" };
-                return (
-                  <div
-                    className="flex items-center justify-between rounded-xl"
-                    style={{ padding: "17px 22px", marginTop: 11, background: `${plan.color}10`, border: `1px solid ${plan.color}30` }}
-                  >
-                    <span style={{ fontSize: "1.05rem", fontWeight: 600, color: plan.color }}>
-                      {count} occasion{count !== 1 ? "s" : ""} selected
-                    </span>
-                    <span style={{ fontSize: "1.05rem", fontWeight: 700, color: plan.color }}>
-                      {plan.name} · {plan.price}
-                    </span>
-                  </div>
-                );
-              })()}
-              <p style={{ fontSize: "1.05rem", textAlign: "center", color: "#aaa", marginTop: 11 }}>
-                We pre-selected what makes sense for a {data.relationship}. Adjust freely.
-              </p>
-            </div>
-          )}
-
-          {/* Step 5 — Preview timing + Details */}
-          {step === 5 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 34 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 17 }}>
-                <p style={{ fontSize: "1.2rem", color: "#555" }}>
-                  We'll email you a draft of the card so you can approve it, tweak it, or tell us to scrap it. How far ahead do you want that email?
-                </p>
-                {PREVIEW_DAYS_OPTIONS.map((opt) => {
-                  const selected = data.previewDays === opt.days;
                   return (
-                    <button
-                      key={opt.days}
-                      onClick={() => setData((d) => ({ ...d, previewDays: opt.days as PreviewDays }))}
-                      className="w-full flex items-center justify-between rounded-xl border-2 text-left transition-all"
-                      style={{
-                        padding: "22px 28px",
-                        borderColor: selected ? RED : `${BLACK}15`,
-                        background: selected ? `${RED}12` : "#fff",
-                      }}
-                      data-testid={`btn-preview-days-${opt.days}`}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span style={{ fontWeight: 700, fontSize: "1.2rem", color: selected ? RED : BLACK }}>{opt.label}</span>
-                          {opt.badge && (
-                            <span style={{ fontWeight: 700, padding: "3px 10px", borderRadius: 999, background: NAVY, color: "#fff", fontSize: "0.84rem" }}>{opt.badge}</span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: "0.98rem", marginTop: 4, color: "#888" }}>{opt.description}</div>
-                      </div>
-                      {selected && <span style={{ color: RED, fontWeight: 700, fontSize: "1.2rem" }}>✓</span>}
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 12, background: `${plan.color}10`, border: `1px solid ${plan.color}30` }}>
+                      <span style={{ fontSize: "0.95rem", fontWeight: 600, color: plan.color }}>{count} occasion{count !== 1 ? "s" : ""} selected</span>
+                      <span style={{ fontSize: "0.95rem", fontWeight: 700, color: plan.color }}>{plan.name} · {plan.price}</span>
+                    </div>
                   );
-                })}
+                })()}
+                <p style={{ fontSize: "0.9rem", textAlign: "center", color: "#aaa", marginTop: 8 }}>
+                  We pre-selected what makes sense for a {data.relationship}. Adjust freely.
+                </p>
               </div>
+            )}
 
-              <div className="rounded-xl" style={{ padding: "28px", background: `${NAVY}06`, border: `1px solid ${NAVY}12`, display: "flex", flexDirection: "column", gap: 22 }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "1.2rem", fontWeight: 600, marginBottom: 11, color: BLACK }}>
-                    Nickname or pet name <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
-                  </label>
-                  <input
-                    className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.26rem", padding: "14px 22px" }}
-                    placeholder="Babe, honey, mama bear, big guy…"
-                    value={data.petName}
-                    onChange={(e) => setData((d) => ({ ...d, petName: e.target.value }))}
-                    data-testid="input-pet-name"
-                  />
+            {/* Step 5 — Preview timing + Details */}
+            {step === 5 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {PREVIEW_DAYS_OPTIONS.map((opt) => {
+                    const selected = data.previewDays === opt.days;
+                    return (
+                      <button
+                        key={opt.days}
+                        onClick={() => setData((d) => ({ ...d, previewDays: opt.days as PreviewDays }))}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "14px 20px",
+                          borderRadius: 12,
+                          border: `2px solid ${selected ? RED : `${BLACK}15`}`,
+                          background: selected ? `${RED}12` : "#fff",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
+                        data-testid={`btn-preview-days-${opt.days}`}
+                      >
+                        <div style={{ flex: 1, textAlign: "left" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontWeight: 700, fontSize: "1.1rem", color: selected ? RED : BLACK }}>{opt.label}</span>
+                            {opt.badge && (
+                              <span style={{ fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: NAVY, color: "#fff", fontSize: "0.72rem" }}>{opt.badge}</span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: "0.88rem", marginTop: 2, color: "#888" }}>{opt.description}</div>
+                        </div>
+                        {selected && <span style={{ color: RED, fontWeight: 700, fontSize: "1.1rem" }}>✓</span>}
+                      </button>
+                    );
+                  })}
                 </div>
-                {isPartnerRelationship && (
+                <div style={{ borderRadius: 12, padding: "18px 20px", background: `${NAVY}06`, border: `1px solid ${NAVY}12`, display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "1.2rem", fontWeight: 600, marginBottom: 11, color: BLACK }}>
-                      How long have you two been together? <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                    <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
+                      Nickname or pet name <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
                     </label>
                     <input
                       className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.26rem", padding: "14px 22px" }}
-                      placeholder="3 years, since college, married 8 years…"
-                      value={data.yearsTogther}
-                      onChange={(e) => setData((d) => ({ ...d, yearsTogther: e.target.value }))}
-                      data-testid="input-years-together"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.1rem", padding: "11px 16px" }}
+                      placeholder="Babe, honey, mama bear, big guy…"
+                      value={data.petName}
+                      onChange={(e) => setData((d) => ({ ...d, petName: e.target.value }))}
+                      data-testid="input-pet-name"
                     />
                   </div>
-                )}
-                <div>
-                  <label style={{ display: "block", fontSize: "1.2rem", fontWeight: 600, marginBottom: 11, color: BLACK }}>
-                    Anything we should NEVER put in a card? <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
-                  </label>
-                  <textarea
-                    className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors resize-none"
-                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.26rem", padding: "14px 22px" }}
-                    placeholder="Don't mention her age. No weight jokes. He hates the word 'blessed'."
-                    rows={3}
-                    value={data.thingsToAvoid}
-                    onChange={(e) => setData((d) => ({ ...d, thingsToAvoid: e.target.value }))}
-                    data-testid="input-things-to-avoid"
-                  />
+                  {isPartnerRelationship && (
+                    <div>
+                      <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
+                        How long have you two been together? <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                      </label>
+                      <input
+                        className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
+                        style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.1rem", padding: "11px 16px" }}
+                        placeholder="3 years, since college, married 8 years…"
+                        value={data.yearsTogther}
+                        onChange={(e) => setData((d) => ({ ...d, yearsTogther: e.target.value }))}
+                        data-testid="input-years-together"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
+                      Anything we should NEVER put in a card? <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                    </label>
+                    <textarea
+                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors resize-none"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.1rem", padding: "11px 16px" }}
+                      placeholder="Don't mention her age. No weight jokes. He hates the word 'blessed'."
+                      rows={2}
+                      value={data.thingsToAvoid}
+                      onChange={(e) => setData((d) => ({ ...d, thingsToAvoid: e.target.value }))}
+                      data-testid="input-things-to-avoid"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between" style={{ marginTop: 56 }}>
+          {/* ── Navigation — always pinned to bottom ─────────────────────── */}
+          <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 14 }}>
             {step > 0 ? (
               <button
                 onClick={() => setStep((s) => s - 1)}
-                className="rounded-xl border-2 hover:bg-black/5 transition-all"
-                style={{ fontSize: "1.2rem", fontWeight: 600, padding: "17px 28px", borderColor: `${BLACK}20`, color: "#666" }}
+                style={{ fontSize: "1.1rem", fontWeight: 600, padding: "13px 24px", borderRadius: 12, border: `2px solid ${BLACK}20`, color: "#666", background: "transparent", cursor: "pointer" }}
               >
                 ← Back
               </button>
             ) : <div />}
 
-            <button
-              onClick={handleNext}
-              disabled={!canAdvance()}
-              className="font-bold rounded-xl transition-all hover:scale-105"
-              style={{
-                fontSize: "1.2rem",
-                padding: "19px 44px",
-                background: canAdvance() ? RED : `${BLACK}20`,
-                color: canAdvance() ? "#fff" : "#999",
-                cursor: canAdvance() ? "pointer" : "not-allowed",
-              }}
-              data-testid="btn-onboarding-next"
-            >
-              {step === STEPS.length - 1 ? "Put Me On Autopilot →" : "Next →"}
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+              <button
+                onClick={handleNext}
+                disabled={!canAdvance()}
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  padding: "15px 40px",
+                  borderRadius: 12,
+                  border: "none",
+                  background: canAdvance() ? RED : `${BLACK}20`,
+                  color: canAdvance() ? "#fff" : "#999",
+                  cursor: canAdvance() ? "pointer" : "not-allowed",
+                  transition: "all 0.15s",
+                }}
+                data-testid="btn-onboarding-next"
+              >
+                {step === STEPS.length - 1 ? "Put Me On Autopilot →" : "Next →"}
+              </button>
+              {step === STEPS.length - 1 && (
+                <button
+                  onClick={() => { completeOnboarding(data); setLocation("/dashboard"); }}
+                  style={{ fontSize: "0.9rem", textDecoration: "underline", color: "#aaa", background: "none", border: "none", cursor: "pointer" }}
+                  data-testid="btn-skip-onboarding"
+                >
+                  Skip for now
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Skip on last step */}
-          {step === STEPS.length - 1 && (
-            <p style={{ textAlign: "center", marginTop: 22 }}>
-              <button
-                onClick={() => {
-                  completeOnboarding(data);
-                  setLocation("/dashboard");
-                }}
-                style={{ fontSize: "1.05rem", textDecoration: "underline", color: "#aaa" }}
-                data-testid="btn-skip-onboarding"
-              >
-                Skip for now
-              </button>
-            </p>
-          )}
         </div>
       </div>
     </div>
