@@ -1,0 +1,79 @@
+Update the pricing section to improve profitability, clarify value, and better match the humorous “F I Forgot” brand tone.
+
+Use the uploaded screenshot as the starting layout and keep the same general visual style, spacing, colors, and card layout. Keep the beige background, bold typography, and red accent color.
+
+Replace the current plans with these updated plans and features:
+
+SECTION TITLE:
+“Choose Your Survival Plan”
+
+SUBTITLE:
+“Because forgetting once was funny. Repeatedly forgetting becomes a lifestyle.”
+
+PLAN 1:
+Title: “Bare Minimum”
+Price: “$5/month”
+
+Description:
+“For the guy trying not to screw this up.”
+
+Features:
+• 6 cards per year
+• 1 recipient
+• Birthday + anniversary coverage
+• AI written messages
+• We print and mail them for you
+
+Button text:
+“START SAVING YOURSELF”
+
+PLAN 2:
+Title: “Domestic Peacekeeper”
+Price: “$15/month”
+
+Badge above card:
+“MOST POPULAR”
+
+Description:
+“For wives, moms, kids, and damage control.”
+
+Features:
+• 18 cards per year
+• Up to 5 recipients
+• All major occasions covered
+• Full autopilot mode
+• Personalized AI messages
+
+Button text:
+“KEEP THE PEACE”
+
+PLAN 3:
+Title: “Legend Status”
+Price: “$29/month”
+
+Description:
+“For the man determined to never sleep on the couch again.”
+
+Features:
+• 40 cards per year
+• Unlimited recipients
+• Premium card styles
+• Gift add ons
+• Emergency save mode
+• Concierge reminders
+
+Button text:
+“BECOME A LEGEND”
+
+IMPORTANT DESIGN INSTRUCTIONS:
+• Keep the cards clean and premium looking
+• Make the center plan visually stand out slightly more than the others
+• Remove the phrase “Your future self owes us one”
+• Add a tiny humorous disclaimer at the bottom:
+“No relationships were guaranteed in the making of this subscription.”
+• Make the buttons feel larger and more clickable
+• Improve spacing and readability on mobile
+• Keep the tone funny but premium, similar to Dollar Shave Club branding
+• Make sure all text is crisp and easy to read
+• Avoid clutter and keep strong visual hierarchy
+• Do not redesign the entire page, evolve the current version into a cleaner and more strategic pricing section

@@ -32,22 +32,25 @@ const testimonials = [
 
 const plans = [
   {
-    name: "BASIC", price: "$5", period: "/month",
-    description: "For the man covering the essentials.",
+    name: "BARE MINIMUM", price: "$5", period: "/month",
+    description: "For the guy trying not to screw this up.",
     highlight: false, badge: null,
-    perks: ["Up to 6 cards per year", "Birthday, Anniversary, holidays", "Autopilot or preview mode", "Cards mailed for you"],
+    btn: "START SAVING YOURSELF",
+    perks: ["6 cards per year", "1 recipient", "Birthday + anniversary coverage", "AI written messages", "We print and mail them for you"],
   },
   {
-    name: "FAMILY", price: "$12", period: "/month",
-    description: "Wife, mom, mother-in-law — all covered.",
+    name: "DOMESTIC PEACEKEEPER", price: "$15", period: "/month",
+    description: "For wives, moms, kids, and damage control.",
     highlight: true, badge: "MOST POPULAR",
-    perks: ["Unlimited cards per year", "Unlimited recipients", "All occasions covered", "Full autopilot mode", "Priority card writing"],
+    btn: "KEEP THE PEACE",
+    perks: ["18 cards per year", "Up to 5 recipients", "All major occasions covered", "Full autopilot mode", "Personalized AI messages"],
   },
   {
-    name: "HERO", price: "$29", period: "/month",
-    description: "For the overachiever who wants it all.",
+    name: "LEGEND STATUS", price: "$29", period: "/month",
+    description: "For the man determined to never sleep on the couch again.",
     highlight: false, badge: null,
-    perks: ["Everything in Family", "AI-personalized messages", "Premium card styles", "Gift add-ons (coming soon)", "The legend tier"],
+    btn: "BECOME A LEGEND",
+    perks: ["40 cards per year", "Unlimited recipients", "Premium card styles", "Gift add-ons", "Emergency save mode", "Concierge reminders"],
   },
 ];
 
@@ -229,8 +232,8 @@ export default function LandingPage() {
         </div>
 
         <div style={{ maxWidth: 960, margin: "0 auto", position: "relative", zIndex: 1 }}>
-          <SectionHeading sub="Cancel anytime. Your relationships, however, are non-refundable.">
-            ✦ Choose Your Plan ✦
+          <SectionHeading sub="Because forgetting once was funny. Repeatedly forgetting becomes a lifestyle.">
+            ✦ Choose Your Survival Plan ✦
           </SectionHeading>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -279,18 +282,18 @@ export default function LandingPage() {
                 <BrandButton
                   href="/signup"
                   variant={plan.highlight ? "primary" : "outline"}
-                  size="md"
+                  size="lg"
                   className="w-full justify-center"
                   testId={`link-plan-${plan.name.toLowerCase()}`}
                 >
-                  Get Started
+                  {plan.btn}
                 </BrandButton>
               </div>
             ))}
           </div>
 
-          <p className="text-center mt-8 text-sm italic" style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>
-            Your future self owes us one.
+          <p className="text-center mt-8 italic" style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>
+            No relationships were guaranteed in the making of this subscription.
           </p>
         </div>
       </section>
