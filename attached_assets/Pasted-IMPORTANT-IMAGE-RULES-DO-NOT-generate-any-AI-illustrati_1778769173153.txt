@@ -1,0 +1,227 @@
+IMPORTANT IMAGE RULES
+
+DO NOT generate any AI illustrations, stock graphics, cartoon art, or replacement hero images.
+
+DO NOT use Replit generated graphics for branding.
+
+ALL imagery should use placeholder containers only.
+
+The system should:
+1. Preserve existing manually supplied images
+2. Create clean image placeholders where future campaign images will go
+3. Focus ONLY on layout, spacing, typography, responsiveness, and brand styling
+
+For all future hero or campaign images:
+use external manually curated assets only.
+
+Do not auto generate people, scenes, cartoons, or ad graphics.
+
+--------------------------------------------------
+BRAND REFINEMENT UPDATE FOR “F” I FORGOT
+--------------------------------------------------
+
+We are no longer designing this like a startup website.
+
+We are designing this like a premium viral internet brand similar to:
+Dollar Shave Club
+Liquid Death
+Manscaped
+Cards Against Humanity
+
+The site should feel:
+minimal
+confident
+funny
+clean
+premium
+slightly vintage
+masculine
+shareable
+
+IMPORTANT:
+The current homepage has too many visual elements competing for attention.
+We are simplifying and tightening the brand identity.
+
+--------------------------------------------------
+GLOBAL DESIGN RULES
+--------------------------------------------------
+
+1. Reduce visual clutter everywhere
+2. Remove unnecessary stamps, arrows, speech bubbles, and overlays
+3. Use MORE whitespace
+4. Make everything feel intentional and premium
+5. Keep humor dry and confident, not chaotic
+6. The site should feel like a real ad campaign, not an AI collage
+7. Add subtle paper grain texture to backgrounds
+8. Add very subtle imperfections for a tactile printed feel
+9. Keep the beige / black / red color palette
+10. DO NOT use gradients or glossy startup effects
+
+--------------------------------------------------
+TYPOGRAPHY SYSTEM
+--------------------------------------------------
+
+Use ONLY:
+1 headline font
+1 body font
+1 handwritten accent font maximum
+
+Current problem:
+Too many font personalities are fighting each other.
+
+New font structure:
+
+HEADLINES:
+Bold condensed premium font similar to:
+Bebas Neue
+Oswald
+Anton
+
+BODY:
+Clean modern sans serif:
+Inter
+Manrope
+DM Sans
+
+ACCENT:
+One subtle handwritten marker style only when necessary
+
+Remove extra decorative typography.
+
+--------------------------------------------------
+HERO SECTION COMPLETE REDESIGN
+--------------------------------------------------
+
+The current hero image is too busy.
+
+We want:
+ONE strong visual joke.
+ONE emotional reaction.
+ONE clean message.
+
+Replace the current right side image area with a cleaner campaign style layout placeholder only.
+
+DO NOT generate any new artwork.
+
+Instead:
+Create a premium image frame/container where manually supplied campaign artwork will later be inserted.
+
+The container should:
+feel cinematic
+have subtle shadowing
+look like a premium ad placement
+maintain correct aspect ratio
+scale beautifully on mobile
+
+Inside the placeholder use minimal temporary text only:
+“Campaign Image Placeholder”
+
+No stock art.
+No AI graphics.
+No cartoons.
+
+--------------------------------------------------
+HERO LAYOUT
+--------------------------------------------------
+
+LEFT SIDE:
+Keep strong clean copy.
+
+Headline:
+“F” I FORGOT.
+
+Subheadline:
+Set it once.
+We automatically send cards before every important date.
+
+Keep CTA buttons.
+
+Add more whitespace around text.
+
+Make spacing feel premium.
+
+--------------------------------------------------
+NAVBAR REFINEMENT
+--------------------------------------------------
+
+Current navbar feels too corporate.
+
+Rename nav items with more personality.
+
+Examples:
+How It Works → How This Saves You
+Pricing → Damage Control Plans
+Testimonials → Saved Relationships
+
+Do NOT make it cringe or over the top.
+Keep it subtle and clever.
+
+--------------------------------------------------
+SOCIAL PROOF SECTION
+--------------------------------------------------
+
+Add a thin scrolling ticker or small cards underneath hero.
+
+Examples:
+“Mike from Dallas avoided sleeping on the couch.”
+“Anniversary crisis prevented in Chicago.”
+“Dave remembered Mother’s Day with 14 minutes to spare.”
+
+This should feel humorous and believable.
+
+--------------------------------------------------
+CARD PREVIEW SECTION
+--------------------------------------------------
+
+Add a premium section showing example card placeholders.
+
+DO NOT generate cards.
+
+Instead:
+Create beautiful premium card mockup frames/placeholders where real card artwork can later be inserted manually.
+
+These placeholders should:
+look elegant
+look printable
+feel premium
+have subtle shadows
+have realistic proportions
+
+No cartoon card graphics.
+
+--------------------------------------------------
+ANIMATION RULES
+--------------------------------------------------
+
+Keep animations subtle.
+
+Use:
+soft fades
+slight hover movement
+gentle motion
+
+DO NOT:
+bounce
+spin
+flash
+over animate
+
+--------------------------------------------------
+MOBILE EXPERIENCE
+--------------------------------------------------
+
+Mobile should feel like a premium ad landing page.
+
+Large readable typography.
+Strong spacing.
+Clear CTA immediately visible.
+
+--------------------------------------------------
+FINAL GOAL
+--------------------------------------------------
+
+The site should feel like:
+“someone spent millions branding this”
+
+NOT:
+“someone made this in one night with AI”

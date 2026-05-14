@@ -1,22 +1,20 @@
 import { Link } from "wouter";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import {
-  B,
-  BrandLogo,
-  BrandButton,
-  CircleStamp,
-  RectStamp,
-  StickyNote,
-  SectionDivider,
-  IconCard,
-  CtaBanner,
-  TaglineBar,
-  WarningBadge,
-  SectionHeading,
-} from "@/components/brand";
+import { B, BrandLogo, BrandButton } from "@/components/brand";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
+
+const tickerItems = [
+  "Mike from Dallas avoided sleeping on the couch.",
+  "Anniversary crisis averted — Chicago, IL.",
+  "Dave remembered Mother's Day. With 14 minutes to spare.",
+  "Tom's wife thinks he's grown emotionally. He hasn't. We have.",
+  "Kevin sent flowers. He doesn't remember ordering them. That's the point.",
+  "Mark survived Valentine's Day for the third consecutive year.",
+  "Brian's anniversary card arrived before Brian remembered the anniversary.",
+  "Josh in Austin: 'She cried. In a good way.'",
+];
 
 const faqs = [
   { q: "Do I have to write the card myself?", a: "Absolutely not. That's literally the whole point. You tell us about them once, we handle the words forever. You handle the glory." },
@@ -54,101 +52,161 @@ const plans = [
   },
 ];
 
-const howItWorksSteps = [
-  { num: "01", title: "Add the people that matter", body: "Name, relationship, birthday, occasions. Takes 3 minutes. One time ever.", note: "No more panic pharmacy runs." },
-  { num: "02", title: "Tell us their personality", body: "Funny? Sentimental? Hates cheesy stuff? We remember everything so cards actually sound personal.", note: "Because your wife remembers everything." },
-  { num: "03", title: "Pick your autopilot mode", body: "Full autopilot, preview before mailing, or require your approval. You decide how hands-off to be.", note: "USPS delays should not ruin marriages." },
-  { num: "04", title: "We handle everything else", body: "Cards are written, addressed, and mailed ~7 days before every event. You get the credit.", note: "Your future self is already covered." },
+const steps = [
+  { num: "01", title: "Add the people that matter", body: "Name, relationship, birthday, occasions. Takes three minutes. Done once. That's it." },
+  { num: "02", title: "Tell us who they are", body: "Funny? Sentimental? Hates cheesy cards? We remember so every card actually sounds like you wrote it." },
+  { num: "03", title: "Choose how hands-off to be", body: "Full autopilot, preview before it ships, or approve everything. Your call." },
+  { num: "04", title: "We handle everything else", body: "Cards written, addressed, mailed 7 days early. You get the credit. Every time." },
 ];
 
-const HW_STEPS = [
-  { num: 1, icon: "/icon-woman.png",     label: "Add the important\nwomen in your life." },
-  { num: 2, icon: "/icon-clipboard.png", label: "Tell us what they\nlike (and don't like)." },
-  { num: 3, icon: "/icon-envelope.png",  label: "We create a custom\ncard before the big day." },
-  { num: 4, icon: "/icon-pencil.png",    label: "You approve it, edit it,\nor change the tone." },
-  { num: 5, icon: "/icon-bell.png",      label: "We remind you so\nyou look like a legend." },
+const cardPreviews = [
+  { label: "Birthday", note: "Arrives 7 days before. Every year." },
+  { label: "Anniversary", note: "AI-written. Hand-addressed. Real stamp." },
+  { label: "Mother's Day", note: "Never miss it again. Ever." },
 ];
 
-// ─── Small helpers ─────────────────────────────────────────────────────────────
+// ─── Nav link names ────────────────────────────────────────────────────────────
+const navLinks = [
+  { label: "How This Saves You", href: "#how-it-works" },
+  { label: "Damage Control Plans", href: "#pricing" },
+  { label: "Saved Relationships", href: "#testimonials" },
+  { label: "FAQ", href: "#faq" },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function RedScribble() {
   return (
-    <svg viewBox="0 0 320 14" className="w-full" style={{ marginTop: -6 }} fill="none">
-      <path d="M4 10 C50 2, 120 14, 200 7 C260 2, 295 11, 316 8" stroke={B.red} strokeWidth="4" strokeLinecap="round" />
+    <svg viewBox="0 0 320 14" className="w-full" style={{ marginTop: -4 }} fill="none">
+      <path d="M4 10 C50 2, 120 14, 200 7 C260 2, 295 11, 316 8" stroke={B.red} strokeWidth="3.5" strokeLinecap="round" />
     </svg>
   );
 }
 
-function StepArrow() {
+// Campaign image placeholder — cinematic frame for manually supplied artwork
+function CampaignPlaceholder() {
   return (
-    <div className="flex items-center justify-center flex-shrink-0" style={{ width: 32 }}>
-      <svg viewBox="0 0 32 20" fill="none" style={{ width: 28, height: 18 }}>
-        <path d="M2 10 L24 10" stroke={B.black} strokeWidth="2.2" strokeLinecap="round" opacity={0.35} />
-        <path d="M17 4 L24 10 L17 16" stroke={B.black} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" opacity={0.35} />
-      </svg>
+    <div
+      style={{
+        width: "100%",
+        aspectRatio: "4 / 5",
+        background: B.beigeD,
+        border: `1px solid rgba(0,0,0,0.1)`,
+        borderRadius: 3,
+        boxShadow: "0 32px 64px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.07)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Red top accent stripe */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: B.red }} />
+
+      {/* Film crop marks */}
+      {[
+        { top: 18, left: 18, borderTop: true, borderLeft: true },
+        { top: 18, right: 18, borderTop: true, borderRight: true },
+        { bottom: 18, left: 18, borderBottom: true, borderLeft: true },
+        { bottom: 18, right: 18, borderBottom: true, borderRight: true },
+      ].map((pos, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            width: 20,
+            height: 20,
+            top: pos.top,
+            left: pos.left,
+            right: (pos as { right?: number }).right,
+            bottom: (pos as { bottom?: number }).bottom,
+            borderTop: pos.borderTop ? `1.5px solid ${B.red}50` : undefined,
+            borderLeft: pos.borderLeft ? `1.5px solid ${B.red}50` : undefined,
+            borderRight: (pos as { borderRight?: boolean }).borderRight ? `1.5px solid ${B.red}50` : undefined,
+            borderBottom: (pos as { borderBottom?: boolean }).borderBottom ? `1.5px solid ${B.red}50` : undefined,
+          }}
+        />
+      ))}
+
+      {/* Placeholder label */}
+      <p
+        style={{
+          fontFamily: "'Bebas Neue', cursive",
+          fontSize: "0.6rem",
+          letterSpacing: "0.22em",
+          color: "rgba(0,0,0,0.2)",
+          textAlign: "center",
+          lineHeight: 2,
+        }}
+      >
+        CAMPAIGN IMAGE
+      </p>
     </div>
   );
 }
 
-function DecorativeArrow({ flip = false }: { flip?: boolean }) {
+// Premium card mockup placeholder — portrait, print proportions
+function CardPlaceholder({ label, note }: { label: string; note: string }) {
   return (
-    <svg viewBox="0 0 48 20" className="inline-block" style={{ width: 36, height: 16, transform: flip ? "scaleX(-1)" : undefined }} fill="none">
-      <path d="M2 10 Q12 4, 24 10 Q36 16, 46 10" stroke={B.black} strokeWidth="2" strokeLinecap="round" opacity={0.3} />
-      <path d="M38 5 L46 10 L38 15" stroke={B.black} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity={0.3} />
-    </svg>
-  );
-}
+    <div className="flex flex-col items-center gap-4">
+      <div
+        className="fi-card-preview"
+        style={{
+          width: "100%",
+          aspectRatio: "5 / 7",
+          background: B.white,
+          border: `1px solid rgba(0,0,0,0.08)`,
+          borderRadius: 2,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Red left accent stripe */}
+        <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: B.red, opacity: 0.7 }} />
 
-function HowItWorksBanner() {
-  return (
-    <div className="max-w-5xl mx-auto rounded-xl px-6 py-8" style={{ background: B.beigeD }}>
-      <div className="flex items-center justify-center gap-3 mb-8">
-        <DecorativeArrow flip />
-        <h2
-          className="text-center leading-tight"
+        {/* Subtle paper grain */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")",
+            pointerEvents: "none",
+          }}
+        />
+
+        <p
           style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(0.95rem, 2vw, 1.25rem)",
-            letterSpacing: "0.1em",
-            color: B.black,
-            whiteSpace: "nowrap",
+            fontSize: "0.58rem",
+            letterSpacing: "0.2em",
+            color: "rgba(0,0,0,0.18)",
+            textAlign: "center",
           }}
         >
-          How It Works{" "}
-          <span style={{ fontWeight: 400, letterSpacing: "0.06em", fontFamily: "'Caveat', cursive", fontSize: "1.1em" }}>
-            (aka: how you{" "}
-            <span style={{ textDecoration: "underline", textDecorationColor: B.red, textDecorationThickness: 2 }}>
-              DON'T
-            </span>
-            {" "}screw this up)
-          </span>
-        </h2>
-        <DecorativeArrow />
+          CARD PLACEHOLDER
+        </p>
       </div>
 
-      <div className="flex items-start justify-between gap-0">
-        {HW_STEPS.map((step, i) => (
-          <div key={step.num} className="flex items-start flex-1 min-w-0">
-            <div className="flex flex-col items-center text-center flex-1 min-w-0 px-1">
-              <div style={{ width: "clamp(48px, 9vw, 76px)", height: "clamp(48px, 9vw, 76px)", flexShrink: 0 }}>
-                <img src={step.icon} alt="" className="w-full h-full object-contain" />
-              </div>
-              <div className="mt-2">
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.65rem, 1.3vw, 0.8rem)", color: B.red, marginRight: 3 }}>
-                  {step.num}.
-                </span>
-                <span style={{ fontSize: "clamp(0.58rem, 1.1vw, 0.75rem)", color: B.black, fontWeight: 500, lineHeight: 1.4, display: "inline" }}>
-                  {step.label.split("\n").map((line, j) => (
-                    <span key={j}>{j > 0 && <br />}{line}</span>
-                  ))}
-                </span>
-              </div>
-            </div>
-            {i < HW_STEPS.length - 1 && (
-              <div className="flex items-start pt-5 flex-shrink-0"><StepArrow /></div>
-            )}
-          </div>
-        ))}
+      {/* Label below the card */}
+      <div className="text-center">
+        <div
+          style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "0.85rem",
+            letterSpacing: "0.12em",
+            color: B.black,
+          }}
+        >
+          {label}
+        </div>
+        <div style={{ fontSize: "0.72rem", color: B.gray, marginTop: 2 }}>{note}</div>
       </div>
     </div>
   );
@@ -173,17 +231,16 @@ export default function LandingPage() {
           Mobile  selector: .nav-logo-mobile   (height: 44px)
           noFilter removes the SVG displacement filter that caused fuzziness.
         */}
-        <div className="max-w-7xl mx-auto px-5 h-[76px] flex items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-6 h-[76px] flex items-center justify-between gap-6">
           <Link href="/" className="flex-shrink-0">
-            {/* Desktop logo — 58px tall, crisp (no stamp filter) */}
-            {/* height/width are on the wrapper; display is controlled by Tailwind only */}
+            {/* Desktop logo — 58px, crisp */}
             <div
               className="nav-logo-desktop hidden sm:flex items-center"
               style={{ height: 58, width: "auto" }}
             >
               <BrandLogo size="md" variant="stamp" inverted noFilter />
             </div>
-            {/* Mobile logo — 44px tall, crisp */}
+            {/* Mobile logo — 44px, crisp */}
             <div
               className="nav-logo-mobile sm:hidden flex items-center"
               style={{ height: 44, width: "auto" }}
@@ -192,32 +249,32 @@ export default function LandingPage() {
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-7">
-            {["How It Works", "Pricing", "Testimonials", "FAQ"].map((l) => (
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks.map((l) => (
               <a
-                key={l}
-                href={`#${l.toLowerCase().replace(/ /g, "-")}`}
+                key={l.label}
+                href={l.href}
                 className="transition-colors hover:text-white"
                 style={{
                   fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "0.82rem",
-                  letterSpacing: "0.14em",
-                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "0.78rem",
+                  letterSpacing: "0.12em",
+                  color: "rgba(255,255,255,0.48)",
                 }}
               >
-                {l}
+                {l.label}
               </a>
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Link
               href="/login"
               style={{
                 fontFamily: "'Bebas Neue', cursive",
-                fontSize: "0.8rem",
+                fontSize: "0.78rem",
                 letterSpacing: "0.12em",
-                color: "rgba(255,255,255,0.45)",
+                color: "rgba(255,255,255,0.4)",
                 transition: "color 0.15s",
               }}
               data-testid="link-login"
@@ -232,57 +289,68 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section style={{ background: B.beige }} className="overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-0 items-center min-h-[520px]">
+      <section style={{ background: B.beige }}>
+        <div className="max-w-7xl mx-auto px-6 py-20 md:py-28 flex flex-col md:flex-row items-center gap-12 md:gap-16">
 
-          <div className="py-16 pr-4">
-            {/* Autopilot badge */}
-            <div className="mb-5">
-              <WarningBadge variant="neutral" label="Relationship Autopilot — Set It Once" size="md" />
-            </div>
+          {/* Left — copy */}
+          <div className="flex-1 min-w-0">
+            <p
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.72rem",
+                letterSpacing: "0.2em",
+                color: B.red,
+                marginBottom: 20,
+              }}
+            >
+              ● Relationship Autopilot — Set It Once
+            </p>
 
             <h1
               style={{
                 fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(4rem, 10vw, 8rem)",
-                lineHeight: 0.9,
+                fontSize: "clamp(4.5rem, 11vw, 9rem)",
+                lineHeight: 0.88,
                 color: B.black,
                 letterSpacing: "0.01em",
               }}
             >
-              <span style={{ color: B.red }}>"F"</span> I FORGOT.
+              <span style={{ color: B.red }}>"F"</span> I<br />FORGOT.
             </h1>
-            <div style={{ maxWidth: 420 }}>
+            <div style={{ maxWidth: 380 }}>
               <RedScribble />
             </div>
 
-            <div className="mt-6 mb-3">
-              <p className="font-bold text-xl leading-snug" style={{ color: B.black }}>
-                Set it up once.<br />
-                We automatically send cards<br />
-                before every important date.
-              </p>
-            </div>
-            <p className="text-sm mb-8" style={{ color: B.gray }}>
-              Birthdays. Anniversaries. Mother's Day. Valentine's Day.<br />
-              <span style={{ color: B.red, fontWeight: 600 }}>Never scramble for a card again.</span>
+            <p
+              className="mt-8 leading-relaxed"
+              style={{ fontSize: "1.1rem", color: B.black, fontWeight: 600, maxWidth: 400 }}
+            >
+              Set it up once.<br />
+              We automatically send cards<br />
+              before every important date.
+            </p>
+            <p
+              className="mt-3"
+              style={{ fontSize: "0.9rem", color: B.gray, maxWidth: 400, lineHeight: 1.7 }}
+            >
+              Birthdays. Anniversaries. Mother's Day. Valentine's Day.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 items-start flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-3 items-start mt-10">
               <BrandButton href="/signup" variant="primary" size="lg" testId="link-cta-primary">
                 Put My Life On Autopilot
               </BrandButton>
               <a
                 href="#how-it-works"
-                className="flex items-center gap-2 hover:opacity-80 transition-all"
+                className="flex items-center gap-2 hover:opacity-75 transition-opacity"
                 style={{
                   fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "0.82rem",
+                  fontSize: "0.8rem",
                   letterSpacing: "0.14em",
                   color: B.black,
                   padding: "15px 24px",
-                  border: `2.5px solid ${B.black}`,
-                  borderRadius: 5,
+                  border: `2px solid ${B.black}`,
+                  borderRadius: 4,
                   textDecoration: "none",
                 }}
                 data-testid="link-how-it-works"
@@ -291,235 +359,324 @@ export default function LandingPage() {
               </a>
             </div>
 
-            <div className="mt-8 flex items-center gap-4 flex-wrap">
-              <p
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontSize: "1rem",
-                  color: B.gray,
-                  fontStyle: "italic",
-                }}
-              >
-                ♡ Approved by husbands. Suspected by wives.
-              </p>
-              <RectStamp size="sm" rotate={-3}>Approved by Husbands™</RectStamp>
-            </div>
-          </div>
-
-          {/* Hero image */}
-          <div className="relative flex items-end justify-center h-full" style={{ minHeight: 480 }}>
-            {/* Stamp badge overlay */}
-            <div className="absolute top-8 right-4 z-10">
-              <CircleStamp type="crisis" size={90} />
-            </div>
-            <img
-              src="/hero-ai.png"
-              alt="Confused man holding wilted flowers and a sad card"
-              className="w-full object-contain object-bottom"
-              style={{ maxHeight: 500, marginBottom: 0 }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS BANNER ────────────────────────────────────────────── */}
-      <section
-        id="how-it-works"
-        className="py-6 px-4"
-        style={{ background: B.beige, borderTop: `2px solid ${B.black}08` }}
-      >
-        <div className="max-w-7xl mx-auto">
-          <img
-            src="/how-it-works-banner.png"
-            alt="How It Works"
-            className="w-full h-auto"
-            style={{ mixBlendMode: "multiply" }}
-          />
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS STEPS ─────────────────────────────────────────────── */}
-      <section className="py-20 px-6" style={{ background: B.white }}>
-        <div className="max-w-5xl mx-auto">
-          <SectionHeading sub="Four steps. Done once. Works forever.">
-            How The Autopilot Works
-          </SectionHeading>
-
-          <div className="grid md:grid-cols-2 gap-5">
-            {howItWorksSteps.map((s) => (
-              <IconCard
-                key={s.num}
-                num={s.num}
-                title={s.title}
-                body={s.body}
-                note={s.note}
-              />
-            ))}
-          </div>
-
-          {/* Stamp row */}
-          <div className="mt-12 flex items-center justify-center gap-6 flex-wrap opacity-80">
-            <CircleStamp type="crisis" size={72} />
-            <CircleStamp type="deployed" size={72} />
-            <CircleStamp type="saved" size={72} />
-          </div>
-        </div>
-      </section>
-
-      {/* ── PANIC PROOF MODE ───────────────────────────────────────────────── */}
-      <section
-        className="py-20 px-6"
-        style={{ background: B.black }}
-      >
-        <div className="max-w-4xl mx-auto">
-          <div
-            className="rounded-xl p-10 md:p-14 relative overflow-hidden"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: `1.5px solid rgba(255,255,255,0.1)`,
-              borderTop: `3px solid ${B.red}`,
-            }}
-          >
-            {/* Watermark */}
-            <div
-              aria-hidden="true"
+            <p
+              className="mt-8"
               style={{
-                position: "absolute",
-                top: "50%",
-                right: -20,
-                transform: "translateY(-50%) rotate(-8deg)",
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "10rem",
-                color: B.red,
-                opacity: 0.04,
-                lineHeight: 1,
-                pointerEvents: "none",
-                userSelect: "none",
+                fontFamily: "'Caveat', cursive",
+                fontSize: "1rem",
+                color: B.gray,
+                fontStyle: "italic",
               }}
             >
-              PANIC
-            </div>
+              ♡ Approved by husbands. Suspected by wives.
+            </p>
+          </div>
 
-            <div className="mb-5">
-              <RectStamp color={B.red} size="sm">🛡 Panic Proof Mode</RectStamp>
-            </div>
+          {/* Right — campaign image placeholder */}
+          <div className="hidden md:block flex-shrink-0" style={{ width: 400 }}>
+            <CampaignPlaceholder />
+          </div>
+        </div>
+      </section>
 
+      {/* ── PROOF TICKER ──────────────────────────────────────────────────── */}
+      <div
+        style={{
+          borderTop: `1px solid ${B.black}12`,
+          borderBottom: `1px solid ${B.black}12`,
+          background: B.white,
+          overflow: "hidden",
+          padding: "14px 0",
+        }}
+      >
+        <div className="fi-ticker-track" style={{ display: "flex", whiteSpace: "nowrap", width: "max-content" }}>
+          {[...tickerItems, ...tickerItems].map((item, i) => (
+            <span
+              key={i}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 32,
+                paddingRight: 56,
+                fontSize: "0.8rem",
+                color: B.gray,
+                letterSpacing: "0.02em",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 5,
+                  height: 5,
+                  borderRadius: "50%",
+                  background: B.red,
+                  flexShrink: 0,
+                  verticalAlign: "middle",
+                  marginRight: 16,
+                }}
+              />
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── HOW IT WORKS ──────────────────────────────────────────────────── */}
+      <section id="how-it-works" className="py-28 px-6" style={{ background: B.beige }}>
+        <div className="max-w-5xl mx-auto">
+
+          <div className="mb-16">
+            <p
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.7rem",
+                letterSpacing: "0.22em",
+                color: B.red,
+                marginBottom: 12,
+              }}
+            >
+              How This Saves You
+            </p>
             <h2
               style={{
                 fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                color: B.white,
-                lineHeight: 1.05,
-                letterSpacing: "0.04em",
-                marginBottom: 16,
+                fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
+                color: B.black,
+                lineHeight: 1,
+                letterSpacing: "0.02em",
               }}
             >
-              Because USPS Delays Should<br />Not Ruin Marriages.
+              Four Steps.<br />Done Once.<br />Works Forever.
             </h2>
+          </div>
 
-            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.95rem", marginBottom: 36, maxWidth: 520, lineHeight: 1.7 }}>
-              Cards go out 7 days early. Always. That's our buffer against shipping delays,
-              your forgetfulness, and the general chaos of being a human with responsibilities.
-            </p>
-
-            <div className="grid sm:grid-cols-3 gap-4">
-              {[
-                { icon: "🤖", title: "Full Autopilot",     body: "We write it. We send it. You take the credit. Zero effort required." },
-                { icon: "👀", title: "Preview First",       body: "We write it and show you before it ships. One tap to approve." },
-                { icon: "✍️", title: "Require Approval",   body: "Nothing ships without your sign-off. For the control freaks among us." },
-              ].map((opt) => (
-                <div
-                  key={opt.title}
-                  className="rounded-xl p-5"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+          <div className="grid md:grid-cols-2 gap-x-16 gap-y-14">
+            {steps.map((s) => (
+              <div key={s.num} className="fi-step flex gap-6 items-start">
+                <span
+                  className="fi-step-num flex-shrink-0"
+                  style={{
+                    fontFamily: "'Bebas Neue', cursive",
+                    fontSize: "3.5rem",
+                    lineHeight: 1,
+                    color: `${B.black}18`,
+                    transition: "color 0.2s ease",
+                    letterSpacing: "0.02em",
+                    width: 64,
+                    display: "block",
+                    textAlign: "right",
+                  }}
                 >
-                  <div style={{ fontSize: "1.5rem", marginBottom: 10 }}>{opt.icon}</div>
-                  <div
+                  {s.num}
+                </span>
+                <div>
+                  <h3
                     style={{
                       fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "0.9rem",
-                      letterSpacing: "0.1em",
-                      color: B.white,
-                      marginBottom: 6,
+                      fontSize: "1.15rem",
+                      letterSpacing: "0.08em",
+                      color: B.black,
+                      marginBottom: 8,
                     }}
                   >
-                    {opt.title}
-                  </div>
-                  <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
-                    {opt.body}
-                  </div>
+                    {s.title}
+                  </h3>
+                  <p style={{ fontSize: "0.9rem", color: B.gray, lineHeight: 1.75 }}>{s.body}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── AUTOPILOT MODES (dark) ─────────────────────────────────────────── */}
+      <section className="py-28 px-6" style={{ background: B.black }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-12">
+            <p
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.7rem",
+                letterSpacing: "0.22em",
+                color: B.red,
+                marginBottom: 12,
+              }}
+            >
+              Because USPS Delays Should Not Ruin Marriages
+            </p>
+            <h2
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "clamp(2.2rem, 4.5vw, 3.2rem)",
+                color: B.white,
+                lineHeight: 1.05,
+                letterSpacing: "0.03em",
+              }}
+            >
+              Cards Go Out<br />7 Days Early. Always.
+            </h2>
+            <p
+              style={{
+                fontSize: "0.9rem",
+                color: "rgba(255,255,255,0.45)",
+                marginTop: 16,
+                maxWidth: 460,
+                lineHeight: 1.8,
+              }}
+            >
+              Our buffer against shipping delays, your forgetfulness,
+              and the general chaos of being a human with responsibilities.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-4 mt-12">
+            {[
+              { label: "Full Autopilot",    body: "We write it. We send it. You take the credit." },
+              { label: "Preview First",     body: "We write it and show you before it ships. One tap." },
+              { label: "Require Approval",  body: "Nothing ships without your sign-off. For control freaks." },
+            ].map((opt) => (
+              <div
+                key={opt.label}
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 4,
+                  padding: "28px 24px",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Bebas Neue', cursive",
+                    fontSize: "1rem",
+                    letterSpacing: "0.1em",
+                    color: B.white,
+                    marginBottom: 10,
+                  }}
+                >
+                  {opt.label}
+                </div>
+                <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.42)", lineHeight: 1.7 }}>
+                  {opt.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CARD PREVIEWS ─────────────────────────────────────────────────── */}
+      <section className="py-28 px-6" style={{ background: B.beige }}>
+        <div className="max-w-4xl mx-auto">
+
+          <div className="mb-16">
+            <p
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.7rem",
+                letterSpacing: "0.22em",
+                color: B.red,
+                marginBottom: 12,
+              }}
+            >
+              Real Cards. Real Stamps. Real Mail.
+            </p>
+            <h2
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
+                color: B.black,
+                lineHeight: 1,
+                letterSpacing: "0.02em",
+              }}
+            >
+              Not an Email.<br />An Actual Card.
+            </h2>
+            <p
+              style={{
+                fontSize: "0.9rem",
+                color: B.gray,
+                marginTop: 16,
+                maxWidth: 420,
+                lineHeight: 1.8,
+              }}
+            >
+              Written by AI. Reviewed by you. Hand-addressed and mailed with a real stamp.
+              Because a text message is not a card.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-6 md:gap-10">
+            {cardPreviews.map((c) => (
+              <CardPlaceholder key={c.label} label={c.label} note={c.note} />
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── PRICING ────────────────────────────────────────────────────────── */}
-      <section id="pricing" className="py-20 px-6 relative overflow-hidden" style={{ background: B.beige }}>
-        {/* Faint background stamps */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%) rotate(-6deg)",
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "22vw",
-            color: B.red,
-            opacity: 0.025,
-            lineHeight: 1,
-            pointerEvents: "none",
-            userSelect: "none",
-            whiteSpace: "nowrap",
-          }}
-        >
-          CHOOSE
-        </div>
+      <section id="pricing" className="py-28 px-6" style={{ background: B.white }}>
+        <div className="max-w-5xl mx-auto">
 
-        <div className="max-w-5xl mx-auto relative z-10">
-          <SectionHeading sub="Cancel anytime. Your relationships, however, are non-refundable.">
-            ✦ Choose Your Plan ✦
-          </SectionHeading>
+          <div className="mb-16">
+            <p
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.7rem",
+                letterSpacing: "0.22em",
+                color: B.red,
+                marginBottom: 12,
+              }}
+            >
+              Damage Control Plans
+            </p>
+            <h2
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
+                color: B.black,
+                lineHeight: 1,
+                letterSpacing: "0.02em",
+              }}
+            >
+              Cancel Anytime.<br />Your Relationships,<br />However, Are Not.
+            </h2>
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className="rounded-xl p-8 relative flex flex-col"
+                className="rounded p-8 relative flex flex-col"
                 style={{
-                  background: plan.highlight ? B.white : B.beigeD,
-                  border: plan.highlight ? `2.5px solid ${B.red}` : `1.5px solid ${B.black}14`,
-                  boxShadow: plan.highlight ? `0 8px 32px ${B.red}20` : "none",
+                  background: plan.highlight ? B.white : B.beige,
+                  border: plan.highlight ? `2px solid ${B.red}` : `1px solid ${B.black}14`,
+                  boxShadow: plan.highlight ? `0 4px 24px ${B.red}18` : "none",
                 }}
                 data-testid={`card-plan-${plan.name.toLowerCase()}`}
               >
                 {plan.badge && (
-                  <div
-                    className="absolute -top-3.5 left-1/2 -translate-x-1/2"
-                    style={{ filter: "url(#fi-stamp)" }}
-                  >
-                    <div
+                  <div className="absolute -top-3 left-6">
+                    <span
                       style={{
-                        padding: "2px 12px",
+                        display: "inline-block",
+                        padding: "2px 10px",
                         background: B.red,
                         color: B.white,
                         fontFamily: "'Bebas Neue', cursive",
-                        fontSize: "0.7rem",
-                        letterSpacing: "0.16em",
+                        fontSize: "0.65rem",
+                        letterSpacing: "0.14em",
                         borderRadius: 2,
                       }}
                     >
                       {plan.badge}
-                    </div>
+                    </span>
                   </div>
                 )}
 
                 <div
                   style={{
                     fontFamily: "'Bebas Neue', cursive",
-                    fontSize: "1.5rem",
+                    fontSize: "1.4rem",
                     letterSpacing: "0.1em",
                     color: B.black,
                     marginBottom: 4,
@@ -527,27 +684,29 @@ export default function LandingPage() {
                 >
                   {plan.name}
                 </div>
-                <p className="text-sm mb-4" style={{ color: B.gray }}>{plan.description}</p>
+                <p style={{ fontSize: "0.82rem", color: B.gray, marginBottom: 20, lineHeight: 1.5 }}>
+                  {plan.description}
+                </p>
 
                 <div className="flex items-end gap-1 mb-6">
                   <span
                     style={{
                       fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "3.5rem",
+                      fontSize: "3.2rem",
                       color: B.black,
                       lineHeight: 1,
                     }}
                   >
                     {plan.price}
                   </span>
-                  <span className="mb-1.5 text-sm" style={{ color: B.gray }}>{plan.period}</span>
+                  <span style={{ marginBottom: 5, fontSize: "0.8rem", color: B.gray }}>{plan.period}</span>
                 </div>
 
-                <ul className="space-y-2 mb-8 flex-1">
+                <ul className="space-y-2.5 mb-8 flex-1">
                   {plan.perks.map((p) => (
-                    <li key={p} className="flex items-start gap-2 text-sm">
-                      <span style={{ color: B.red, fontWeight: 900 }}>✓</span>
-                      <span style={{ color: "#444" }}>{p}</span>
+                    <li key={p} className="flex items-start gap-2.5 text-sm">
+                      <span style={{ color: B.red, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>✓</span>
+                      <span style={{ color: "#444", fontSize: "0.83rem", lineHeight: 1.5 }}>{p}</span>
                     </li>
                   ))}
                 </ul>
@@ -566,8 +725,13 @@ export default function LandingPage() {
           </div>
 
           <p
-            className="text-center mt-8 text-sm italic"
-            style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}
+            className="text-center mt-10"
+            style={{
+              fontFamily: "'Caveat', cursive",
+              fontSize: "1rem",
+              color: B.gray,
+              fontStyle: "italic",
+            }}
           >
             Your future self owes us one.
           </p>
@@ -575,32 +739,64 @@ export default function LandingPage() {
       </section>
 
       {/* ── TESTIMONIALS ───────────────────────────────────────────────────── */}
-      <section id="testimonials" className="py-20 px-6" style={{ background: B.white }}>
+      <section id="testimonials" className="py-28 px-6" style={{ background: B.beige }}>
         <div className="max-w-5xl mx-auto">
-          <SectionHeading sub="Real stories. Changed names. Marriages still intact.">
-            Men Who Survived
-          </SectionHeading>
+
+          <div className="mb-16">
+            <p
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.7rem",
+                letterSpacing: "0.22em",
+                color: B.red,
+                marginBottom: 12,
+              }}
+            >
+              Saved Relationships
+            </p>
+            <h2
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
+                color: B.black,
+                lineHeight: 1,
+                letterSpacing: "0.02em",
+              }}
+            >
+              Men Who Survived.
+            </h2>
+            <p style={{ fontSize: "0.85rem", color: B.gray, marginTop: 12 }}>
+              Real stories. Changed names. Marriages still intact.
+            </p>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
               <div
                 key={t.name}
-                className="p-6 rounded-sm shadow-md"
                 style={{
-                  background: B.beige,
-                  border: `1.5px solid ${B.black}10`,
-                  transform: i % 2 === 0 ? "rotate(-0.8deg)" : "rotate(0.8deg)",
+                  background: B.white,
+                  border: `1px solid ${B.black}0c`,
                   borderTop: `3px solid ${B.red}`,
+                  borderRadius: 2,
+                  padding: "28px 24px",
+                  transform: i === 1 ? "rotate(0.4deg)" : i === 0 ? "rotate(-0.5deg)" : "rotate(0.3deg)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                 }}
               >
-                <div className="flex gap-0.5 mb-3">
+                <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => (
-                    <span key={j} style={{ color: B.red }}>★</span>
+                    <span key={j} style={{ color: B.red, fontSize: "0.75rem" }}>★</span>
                   ))}
                 </div>
                 <p
-                  className="text-sm leading-relaxed mb-5"
-                  style={{ color: "#333", fontFamily: "'Caveat', cursive", fontSize: "1.05rem" }}
+                  style={{
+                    fontFamily: "'Caveat', cursive",
+                    fontSize: "1.05rem",
+                    color: "#333",
+                    lineHeight: 1.6,
+                    marginBottom: 20,
+                  }}
                 >
                   "{t.quote}"
                 </p>
@@ -608,57 +804,84 @@ export default function LandingPage() {
                   <div
                     style={{
                       fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "0.9rem",
+                      fontSize: "0.85rem",
                       letterSpacing: "0.1em",
                       color: B.black,
                     }}
                   >
                     {t.name}
                   </div>
-                  <div style={{ fontSize: "0.75rem", color: B.gray }}>{t.role}</div>
+                  <div style={{ fontSize: "0.72rem", color: B.gray, marginTop: 2 }}>{t.role}</div>
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Sticky notes row */}
-          <div className="mt-12 flex items-center justify-center gap-8 flex-wrap">
-            <StickyNote rotate={-3}>Don't Forget<br /><span style={{ fontSize: "0.85rem" }}>(Again)</span></StickyNote>
-            <StickyNote rotate={2}>Approved by<br /><span style={{ fontSize: "0.85rem" }}>Husbands™</span></StickyNote>
-            <StickyNote rotate={-1}>Set it once.<br /><span style={{ fontSize: "0.85rem" }}>Take credit forever.</span></StickyNote>
           </div>
         </div>
       </section>
 
       {/* ── FAQ ────────────────────────────────────────────────────────────── */}
-      <section id="faq" className="py-20 px-6" style={{ background: B.beigeD }}>
+      <section id="faq" className="py-28 px-6" style={{ background: B.white }}>
         <div className="max-w-3xl mx-auto">
-          <SectionHeading>Questions from Men in the Wild</SectionHeading>
 
-          <SectionDivider label="Frequently Asked" />
+          <div className="mb-14">
+            <p
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.7rem",
+                letterSpacing: "0.22em",
+                color: B.red,
+                marginBottom: 12,
+              }}
+            >
+              FAQ
+            </p>
+            <h2
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)",
+                color: B.black,
+                lineHeight: 1,
+                letterSpacing: "0.02em",
+              }}
+            >
+              Questions from<br />Men in the Wild.
+            </h2>
+          </div>
 
-          <div className="space-y-3 mt-8">
+          <div className="space-y-2">
             {faqs.map((faq, i) => (
               <div
                 key={i}
-                className="rounded-sm overflow-hidden bg-white"
-                style={{ border: `1.5px solid ${B.black}10` }}
+                style={{
+                  background: B.beige,
+                  border: `1px solid ${B.black}0c`,
+                  borderRadius: 2,
+                  overflow: "hidden",
+                }}
               >
                 <button
-                  className="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-sm hover:bg-gray-50 transition-colors"
-                  style={{ color: B.black }}
+                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-opacity-80 transition-colors"
+                  style={{ color: B.black, background: "transparent" }}
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   data-testid={`faq-toggle-${i}`}
                 >
-                  <span style={{ fontSize: "0.9rem" }}>{faq.q}</span>
+                  <span style={{ fontSize: "0.9rem", fontWeight: 600, lineHeight: 1.5, paddingRight: 16 }}>
+                    {faq.q}
+                  </span>
                   {openFaq === i
-                    ? <ChevronUp size={16} style={{ color: B.red, flexShrink: 0 }} />
-                    : <ChevronDown size={16} style={{ color: "#aaa", flexShrink: 0 }} />}
+                    ? <ChevronUp size={15} style={{ color: B.red, flexShrink: 0 }} />
+                    : <ChevronDown size={15} style={{ color: "#bbb", flexShrink: 0 }} />}
                 </button>
                 {openFaq === i && (
                   <div
-                    className="px-6 pb-5 text-sm leading-relaxed border-t pt-4"
-                    style={{ color: "#555", borderColor: `${B.black}08` }}
+                    style={{
+                      padding: "0 24px 20px",
+                      fontSize: "0.875rem",
+                      color: "#555",
+                      lineHeight: 1.8,
+                      borderTop: `1px solid ${B.black}08`,
+                      paddingTop: 16,
+                    }}
                   >
                     {faq.a}
                   </div>
@@ -669,51 +892,106 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA BANNER ─────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6" style={{ background: B.beige }}>
-        <div className="max-w-4xl mx-auto">
-          <CtaBanner
-            headline="SET IT ONCE. STAY OUT OF TROUBLE FOREVER."
-            sub="No more last-minute scrambles. No more pharmacy cards. No more couch sleeping."
-            primaryLabel="Put My Life On Autopilot"
-            primaryHref="/signup"
-            secondaryLabel="See How It Works"
-            secondaryHref="#how-it-works"
-          />
+      {/* ── CTA ────────────────────────────────────────────────────────────── */}
+      <section className="py-28 px-6" style={{ background: B.black }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <h2
+            style={{
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(2.8rem, 6vw, 5rem)",
+              color: B.white,
+              lineHeight: 0.95,
+              letterSpacing: "0.02em",
+              marginBottom: 24,
+            }}
+          >
+            Set It Once.<br />
+            <span style={{ color: B.red }}>Stay Out Of Trouble</span><br />
+            Forever.
+          </h2>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              color: "rgba(255,255,255,0.42)",
+              marginBottom: 36,
+              lineHeight: 1.8,
+            }}
+          >
+            No more last-minute scrambles. No more pharmacy cards.<br />
+            No more sleeping on the couch.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <BrandButton href="/signup" variant="primary" size="lg" testId="link-cta-footer">
+              Put My Life On Autopilot
+            </BrandButton>
+            <a
+              href="#how-it-works"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.8rem",
+                letterSpacing: "0.14em",
+                color: "rgba(255,255,255,0.5)",
+                padding: "15px 24px",
+                border: "1.5px solid rgba(255,255,255,0.15)",
+                borderRadius: 4,
+                textDecoration: "none",
+                transition: "color 0.15s, border-color 0.15s",
+              }}
+            >
+              How This Works
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* ── TAGLINE BAR ────────────────────────────────────────────────────── */}
-      <TaglineBar />
-
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="py-10 px-6" style={{ background: B.black }}>
+      <footer className="py-10 px-6" style={{ background: B.black, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <BrandLogo size="sm" variant="compact" inverted />
 
           <p
-            className="text-sm italic text-center"
-            style={{ color: "rgba(255,255,255,0.3)", fontFamily: "'Caveat', cursive", fontSize: "0.95rem" }}
+            style={{
+              fontSize: "0.78rem",
+              color: "rgba(255,255,255,0.25)",
+              fontFamily: "'Caveat', cursive",
+              fontStyle: "italic",
+            }}
           >
             Relationship autopilot. Set it once. Never forget again.
           </p>
 
-          <div className="flex gap-6 flex-wrap justify-center">
-            {["How It Works", "Pricing", "Sign In"].map((l) => (
+          <div className="flex gap-6">
+            {navLinks.map((l) => (
               <a
-                key={l}
-                href="#"
-                className="transition-colors hover:text-white"
+                key={l.label}
+                href={l.href}
                 style={{
                   fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "0.75rem",
+                  fontSize: "0.7rem",
                   letterSpacing: "0.14em",
-                  color: "rgba(255,255,255,0.35)",
+                  color: "rgba(255,255,255,0.28)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
                 }}
               >
-                {l}
+                {l.label.split(" ")[0]}
               </a>
             ))}
+            <Link
+              href="/login"
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "0.7rem",
+                letterSpacing: "0.14em",
+                color: "rgba(255,255,255,0.28)",
+                textDecoration: "none",
+              }}
+            >
+              Sign In
+            </Link>
           </div>
         </div>
       </footer>
