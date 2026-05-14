@@ -67,7 +67,7 @@ export default function SignupPage() {
           {/* ── Left: Brand pitch ──────────────────────────────────────────── */}
           <div className="pt-2">
             <Link href="/" className="inline-block mb-8">
-              <BrandLogo size="md" variant="stamp" />
+              <img src="/logo.png" alt="F* I Forgot" style={{ height: 64, width: "auto" }} />
             </Link>
 
             <h1

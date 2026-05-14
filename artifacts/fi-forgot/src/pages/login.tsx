@@ -75,7 +75,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <BrandLogo size="md" variant="stamp" />
+            <img src="/logo.png" alt="F* I Forgot" style={{ height: 64, width: "auto" }} />
           </Link>
           <div className="mt-5 flex flex-col items-center gap-1">
             <h1
