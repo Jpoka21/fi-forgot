@@ -3,16 +3,13 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   B,
-  BrandLogo,
   BrandButton,
   CircleStamp,
-  RectStamp,
   StickyNote,
   SectionDivider,
   IconCard,
   CtaBanner,
   TaglineBar,
-  WarningBadge,
   SectionHeading,
 } from "@/components/brand";
 
@@ -55,106 +52,19 @@ const plans = [
 ];
 
 const howItWorksSteps = [
-  { num: "01", title: "Add the people that matter", body: "Name, relationship, birthday, occasions. Takes 3 minutes. One time ever.", note: "No more panic pharmacy runs." },
-  { num: "02", title: "Tell us their personality", body: "Funny? Sentimental? Hates cheesy stuff? We remember everything so cards actually sound personal.", note: "Because your wife remembers everything." },
-  { num: "03", title: "Pick your autopilot mode", body: "Full autopilot, preview before mailing, or require your approval. You decide how hands-off to be.", note: "USPS delays should not ruin marriages." },
-  { num: "04", title: "We handle everything else", body: "Cards are written, addressed, and mailed ~7 days before every event. You get the credit.", note: "Your future self is already covered." },
+  { num: "01", title: "Add the people that matter", body: "Name, relationship, birthday, occasions. Takes 3 minutes. One time ever.", note: "No more panic pharmacy runs.", icon: "📋" },
+  { num: "02", title: "Tell us their personality", body: "Funny? Sentimental? Hates cheesy stuff? We remember everything so cards actually sound personal.", note: "Because your wife remembers everything.", icon: "🔍" },
+  { num: "03", title: "Pick your autopilot mode", body: "Full autopilot, preview before mailing, or require your approval. You decide how hands-off to be.", note: "USPS delays should not ruin marriages.", icon: "✉️" },
+  { num: "04", title: "We handle everything else", body: "Cards are written, addressed, and mailed ~7 days before every event. You get the credit.", note: "Your future self is already covered.", icon: "♥️" },
 ];
 
-const HW_STEPS = [
-  { num: 1, icon: "/icon-woman.png",     label: "Add the important\nwomen in your life." },
-  { num: 2, icon: "/icon-clipboard.png", label: "Tell us what they\nlike (and don't like)." },
-  { num: 3, icon: "/icon-envelope.png",  label: "We create a custom\ncard before the big day." },
-  { num: 4, icon: "/icon-pencil.png",    label: "You approve it, edit it,\nor change the tone." },
-  { num: 5, icon: "/icon-bell.png",      label: "We remind you so\nyou look like a legend." },
+const examples = [
+  { occasion: "Anniversary", recipient: "Wife, 7 years", preview: `"Every year I'm amazed you still put up with me. Honestly, I'm more impressed by you than I was on day one. Happy Anniversary — I'm the luckiest idiot alive."` },
+  { occasion: "Mother's Day", recipient: "Mom", preview: `"You raised a son who never remembers anything — and somehow turned that into a compliment. Happy Mother's Day. I learned stubbornness from the best."` },
+  { occasion: "Birthday", recipient: "Girlfriend", preview: `"Happy Birthday to the person who tolerates my 47 excuses for being late, my inability to plan, and my optimism that things will somehow work out. They usually do. Because of you."` },
 ];
 
-// ─── Small helpers ─────────────────────────────────────────────────────────────
-
-function RedScribble() {
-  return (
-    <svg viewBox="0 0 320 14" className="w-full" style={{ marginTop: -6 }} fill="none">
-      <path d="M4 10 C50 2, 120 14, 200 7 C260 2, 295 11, 316 8" stroke={B.red} strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function StepArrow() {
-  return (
-    <div className="flex items-center justify-center flex-shrink-0" style={{ width: 32 }}>
-      <svg viewBox="0 0 32 20" fill="none" style={{ width: 28, height: 18 }}>
-        <path d="M2 10 L24 10" stroke={B.black} strokeWidth="2.2" strokeLinecap="round" opacity={0.35} />
-        <path d="M17 4 L24 10 L17 16" stroke={B.black} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" opacity={0.35} />
-      </svg>
-    </div>
-  );
-}
-
-function DecorativeArrow({ flip = false }: { flip?: boolean }) {
-  return (
-    <svg viewBox="0 0 48 20" className="inline-block" style={{ width: 36, height: 16, transform: flip ? "scaleX(-1)" : undefined }} fill="none">
-      <path d="M2 10 Q12 4, 24 10 Q36 16, 46 10" stroke={B.black} strokeWidth="2" strokeLinecap="round" opacity={0.3} />
-      <path d="M38 5 L46 10 L38 15" stroke={B.black} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity={0.3} />
-    </svg>
-  );
-}
-
-function HowItWorksBanner() {
-  return (
-    <div className="max-w-5xl mx-auto rounded-xl px-6 py-8" style={{ background: B.beigeD }}>
-      <div className="flex items-center justify-center gap-3 mb-8">
-        <DecorativeArrow flip />
-        <h2
-          className="text-center leading-tight"
-          style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(0.95rem, 2vw, 1.25rem)",
-            letterSpacing: "0.1em",
-            color: B.black,
-            whiteSpace: "nowrap",
-          }}
-        >
-          How It Works{" "}
-          <span style={{ fontWeight: 400, letterSpacing: "0.06em", fontFamily: "'Caveat', cursive", fontSize: "1.1em" }}>
-            (aka: how you{" "}
-            <span style={{ textDecoration: "underline", textDecorationColor: B.red, textDecorationThickness: 2 }}>
-              DON'T
-            </span>
-            {" "}screw this up)
-          </span>
-        </h2>
-        <DecorativeArrow />
-      </div>
-
-      <div className="flex items-start justify-between gap-0">
-        {HW_STEPS.map((step, i) => (
-          <div key={step.num} className="flex items-start flex-1 min-w-0">
-            <div className="flex flex-col items-center text-center flex-1 min-w-0 px-1">
-              <div style={{ width: "clamp(48px, 9vw, 76px)", height: "clamp(48px, 9vw, 76px)", flexShrink: 0 }}>
-                <img src={step.icon} alt="" className="w-full h-full object-contain" />
-              </div>
-              <div className="mt-2">
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.65rem, 1.3vw, 0.8rem)", color: B.red, marginRight: 3 }}>
-                  {step.num}.
-                </span>
-                <span style={{ fontSize: "clamp(0.58rem, 1.1vw, 0.75rem)", color: B.black, fontWeight: 500, lineHeight: 1.4, display: "inline" }}>
-                  {step.label.split("\n").map((line, j) => (
-                    <span key={j}>{j > 0 && <br />}{line}</span>
-                  ))}
-                </span>
-              </div>
-            </div>
-            {i < HW_STEPS.length - 1 && (
-              <div className="flex items-start pt-5 flex-shrink-0"><StepArrow /></div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Landing Page ─────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -162,167 +72,181 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
-      {/* ── NAV ───────────────────────────────────────────────────────────── */}
-      <nav
-        className="sticky top-0 z-50"
-        style={{ background: B.black, borderBottom: `2px solid ${B.red}` }}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* HERO — Cover Page image is the complete hero.                      */}
+      {/* Only real interactive elements are overlaid on top.               */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      <section
+        className="relative w-full"
+        style={{ maxWidth: 900, margin: "0 auto" }}
+        aria-label="Hero"
       >
-        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between gap-6">
-          <Link href="/" className="flex-shrink-0">
-            <BrandLogo size="sm" variant="stamp" inverted />
+        {/* The cover page image — preserves all artwork exactly */}
+        <img
+          src="/cover-page.png"
+          alt="F* I Forgot — You focus on life. We remember everything."
+          className="w-full block"
+          style={{ height: "auto", display: "block" }}
+          draggable={false}
+        />
+
+        {/* ── Nav overlay — makes the top-right nav CTA real & clickable ── */}
+        {/* Sits over the image's nav bar (top ~5.2% of image height)        */}
+        <div
+          className="absolute top-0 left-0 right-0 flex items-center justify-end"
+          style={{
+            height: "5.2%",
+            padding: "0 2.5%",
+            gap: "1.5%",
+          }}
+          aria-label="Navigation"
+        >
+          <Link
+            href="/login"
+            style={{
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.55rem, 1.5vw, 0.8rem)",
+              letterSpacing: "0.1em",
+              color: "transparent",   /* transparent — lets image text show, click still works */
+              textDecoration: "none",
+              padding: "1% 2%",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+            data-testid="link-login"
+          >
+            Sign In
+          </Link>
+          {/* Real clickable button — positioned over the image's red nav CTA */}
+          <Link
+            href="/signup"
+            style={{
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.5rem, 1.4vw, 0.75rem)",
+              letterSpacing: "0.1em",
+              background: B.red,
+              color: B.white,
+              padding: "1% 2%",
+              borderRadius: 3,
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+              opacity: 0,              /* invisible — real image button is visible underneath */
+              cursor: "pointer",
+              display: "block",
+            }}
+            data-testid="link-get-started-nav"
+            aria-label="Start Earning Brownie Points"
+          >
+            Start Earning Brownie Points
+          </Link>
+        </div>
+
+        {/* ── Main CTA buttons — overlaid at the "START NOW" button area ── */}
+        {/* Positioned at ~68.5% from top, left-aligned, matching image layout */}
+        <div
+          className="absolute flex flex-col sm:flex-row items-start sm:items-center"
+          style={{
+            top: "68.5%",
+            left: "3.5%",
+            gap: "clamp(4px, 1.2vw, 10px)",
+          }}
+          aria-label="Call to action"
+        >
+          {/* Primary CTA — "Start Earning Brownie Points" (overlays image's START NOW) */}
+          <Link
+            href="/signup"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: B.black,
+              color: B.white,
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.55rem, 2.1vw, 1.1rem)",
+              letterSpacing: "0.12em",
+              padding: "clamp(4px, 1.4vw, 12px) clamp(8px, 3vw, 28px)",
+              borderRadius: 3,
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+              opacity: 0,             /* invisible — image's button shows through, this handles click */
+              cursor: "pointer",
+            }}
+            data-testid="link-cta-primary"
+            aria-label="Start Earning Brownie Points — sign up"
+          >
+            Start Earning Brownie Points
           </Link>
 
-          <div className="hidden md:flex items-center gap-7">
-            {["How It Works", "Pricing", "Testimonials", "FAQ"].map((l) => (
-              <a
-                key={l}
-                href={`#${l.toLowerCase().replace(/ /g, "-")}`}
-                className="transition-colors hover:text-white"
-                style={{
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "0.82rem",
-                  letterSpacing: "0.14em",
-                  color: "rgba(255,255,255,0.5)",
-                }}
-              >
-                {l}
-              </a>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              style={{
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "0.8rem",
-                letterSpacing: "0.12em",
-                color: "rgba(255,255,255,0.45)",
-                transition: "color 0.15s",
-              }}
-              data-testid="link-login"
-            >
-              Sign In
-            </Link>
-            <BrandButton href="/signup" variant="primary" size="sm" testId="link-get-started-nav">
-              Put Me On Autopilot
-            </BrandButton>
-          </div>
+          {/* Secondary CTA — "See How It Works" */}
+          <a
+            href="#how-it-works"
+            style={{
+              display: "none",        /* hidden — arrow in image serves this role visually */
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.5rem, 1.8vw, 0.9rem)",
+              letterSpacing: "0.12em",
+              color: B.black,
+              textDecoration: "none",
+              cursor: "pointer",
+            }}
+            data-testid="link-how-it-works"
+          >
+            See How It Works
+          </a>
         </div>
-      </nav>
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section style={{ background: B.beige }} className="overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-0 items-center min-h-[520px]">
+        {/* ── Banner CTA — overlays the "STOP FORGETTING" section's START NOW ── */}
+        {/* Positioned at ~78.5% from top, right side                             */}
+        <Link
+          href="/signup"
+          style={{
+            position: "absolute",
+            top: "78.5%",
+            right: "3%",
+            width: "20%",
+            height: "3.8%",
+            background: "transparent",
+            cursor: "pointer",
+            borderRadius: 3,
+            display: "block",
+          }}
+          aria-label="Start Now"
+          data-testid="link-cta-banner"
+        />
 
-          <div className="py-16 pr-4">
-            {/* Autopilot badge */}
-            <div className="mb-5">
-              <WarningBadge variant="neutral" label="Relationship Autopilot — Set It Once" size="md" />
-            </div>
-
-            <h1
-              style={{
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(4rem, 10vw, 8rem)",
-                lineHeight: 0.9,
-                color: B.black,
-                letterSpacing: "0.01em",
-              }}
-            >
-              <span style={{ color: B.red }}>"F"</span> I FORGOT.
-            </h1>
-            <div style={{ maxWidth: 420 }}>
-              <RedScribble />
-            </div>
-
-            <div className="mt-6 mb-3">
-              <p className="font-bold text-xl leading-snug" style={{ color: B.black }}>
-                Set it up once.<br />
-                We automatically send cards<br />
-                before every important date.
-              </p>
-            </div>
-            <p className="text-sm mb-8" style={{ color: B.gray }}>
-              Birthdays. Anniversaries. Mother's Day. Valentine's Day.<br />
-              <span style={{ color: B.red, fontWeight: 600 }}>Never scramble for a card again.</span>
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 items-start flex-wrap">
-              <BrandButton href="/signup" variant="primary" size="lg" testId="link-cta-primary">
-                Put My Life On Autopilot
-              </BrandButton>
-              <a
-                href="#how-it-works"
-                className="flex items-center gap-2 hover:opacity-80 transition-all"
-                style={{
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "0.82rem",
-                  letterSpacing: "0.14em",
-                  color: B.black,
-                  padding: "15px 24px",
-                  border: `2.5px solid ${B.black}`,
-                  borderRadius: 5,
-                  textDecoration: "none",
-                }}
-                data-testid="link-how-it-works"
-              >
-                ▶ See How It Works
-              </a>
-            </div>
-
-            <div className="mt-8 flex items-center gap-4 flex-wrap">
-              <p
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontSize: "1rem",
-                  color: B.gray,
-                  fontStyle: "italic",
-                }}
-              >
-                ♡ Approved by husbands. Suspected by wives.
-              </p>
-              <RectStamp size="sm" rotate={-3}>Approved by Husbands™</RectStamp>
-            </div>
-          </div>
-
-          {/* Hero image */}
-          <div className="relative flex items-end justify-center h-full" style={{ minHeight: 480 }}>
-            {/* Stamp badge overlay */}
-            <div className="absolute top-8 right-4 z-10">
-              <CircleStamp type="crisis" size={90} />
-            </div>
-            <img
-              src="/hero-ai.png"
-              alt="Confused man holding wilted flowers and a sad card"
-              className="w-full object-contain object-bottom"
-              style={{ maxHeight: 500, marginBottom: 0 }}
-            />
-          </div>
-        </div>
+        {/* ── Clickable zones for How It Works nav items in the image ── */}
+        {["how-it-works", "pricing", "examples", "reviews"].map((id, i) => (
+          <a
+            key={id}
+            href={`#${id}`}
+            style={{
+              position: "absolute",
+              top: "2%",
+              left: `${18 + i * 9}%`,
+              width: "8%",
+              height: "3%",
+              background: "transparent",
+              cursor: "pointer",
+              display: "block",
+            }}
+            aria-label={id.replace("-", " ")}
+          />
+        ))}
       </section>
 
-      {/* ── HOW IT WORKS BANNER ────────────────────────────────────────────── */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* REAL SECTIONS — below the hero image                              */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
       <section
         id="how-it-works"
-        className="py-6 px-4"
-        style={{ background: B.beige, borderTop: `2px solid ${B.black}08` }}
+        className="py-20 px-6"
+        style={{ background: B.white }}
       >
-        <div className="max-w-7xl mx-auto">
-          <img
-            src="/how-it-works-banner.png"
-            alt="How It Works"
-            className="w-full h-auto"
-            style={{ mixBlendMode: "multiply" }}
-          />
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS STEPS ─────────────────────────────────────────────── */}
-      <section className="py-20 px-6" style={{ background: B.white }}>
-        <div className="max-w-5xl mx-auto">
-          <SectionHeading sub="Four steps. Done once. Works forever.">
-            How The Autopilot Works
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+          <SectionHeading sub="We handle it all. You get the credit.">
+            How It Works
           </SectionHeading>
 
           <div className="grid md:grid-cols-2 gap-5">
@@ -330,6 +254,7 @@ export default function LandingPage() {
               <IconCard
                 key={s.num}
                 num={s.num}
+                icon={s.icon}
                 title={s.title}
                 body={s.body}
                 note={s.note}
@@ -337,128 +262,34 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Stamp row */}
-          <div className="mt-12 flex items-center justify-center gap-6 flex-wrap opacity-80">
-            <CircleStamp type="crisis" size={72} />
+          <div className="mt-14 flex items-center justify-center gap-6 flex-wrap opacity-75">
+            <CircleStamp type="crisis"   size={72} />
             <CircleStamp type="deployed" size={72} />
-            <CircleStamp type="saved" size={72} />
+            <CircleStamp type="saved"    size={72} />
           </div>
         </div>
       </section>
 
-      {/* ── PANIC PROOF MODE ───────────────────────────────────────────────── */}
+      {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section
-        className="py-20 px-6"
-        style={{ background: B.black }}
+        id="pricing"
+        className="py-20 px-6 relative overflow-hidden"
+        style={{ background: B.beige }}
       >
-        <div className="max-w-4xl mx-auto">
-          <div
-            className="rounded-xl p-10 md:p-14 relative overflow-hidden"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: `1.5px solid rgba(255,255,255,0.1)`,
-              borderTop: `3px solid ${B.red}`,
-            }}
-          >
-            {/* Watermark */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                top: "50%",
-                right: -20,
-                transform: "translateY(-50%) rotate(-8deg)",
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "10rem",
-                color: B.red,
-                opacity: 0.04,
-                lineHeight: 1,
-                pointerEvents: "none",
-                userSelect: "none",
-              }}
-            >
-              PANIC
-            </div>
-
-            <div className="mb-5">
-              <RectStamp color={B.red} size="sm">🛡 Panic Proof Mode</RectStamp>
-            </div>
-
-            <h2
-              style={{
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                color: B.white,
-                lineHeight: 1.05,
-                letterSpacing: "0.04em",
-                marginBottom: 16,
-              }}
-            >
-              Because USPS Delays Should<br />Not Ruin Marriages.
-            </h2>
-
-            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.95rem", marginBottom: 36, maxWidth: 520, lineHeight: 1.7 }}>
-              Cards go out 7 days early. Always. That's our buffer against shipping delays,
-              your forgetfulness, and the general chaos of being a human with responsibilities.
-            </p>
-
-            <div className="grid sm:grid-cols-3 gap-4">
-              {[
-                { icon: "🤖", title: "Full Autopilot",     body: "We write it. We send it. You take the credit. Zero effort required." },
-                { icon: "👀", title: "Preview First",       body: "We write it and show you before it ships. One tap to approve." },
-                { icon: "✍️", title: "Require Approval",   body: "Nothing ships without your sign-off. For the control freaks among us." },
-              ].map((opt) => (
-                <div
-                  key={opt.title}
-                  className="rounded-xl p-5"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
-                >
-                  <div style={{ fontSize: "1.5rem", marginBottom: 10 }}>{opt.icon}</div>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "0.9rem",
-                      letterSpacing: "0.1em",
-                      color: B.white,
-                      marginBottom: 6,
-                    }}
-                  >
-                    {opt.title}
-                  </div>
-                  <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
-                    {opt.body}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── PRICING ────────────────────────────────────────────────────────── */}
-      <section id="pricing" className="py-20 px-6 relative overflow-hidden" style={{ background: B.beige }}>
-        {/* Faint background stamps */}
         <div
           aria-hidden="true"
           style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%) rotate(-6deg)",
+            position: "absolute", top: "50%", left: "50%",
+            transform: "translate(-50%, -50%) rotate(-5deg)",
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "22vw",
-            color: B.red,
-            opacity: 0.025,
-            lineHeight: 1,
-            pointerEvents: "none",
-            userSelect: "none",
-            whiteSpace: "nowrap",
+            fontSize: "20vw", color: B.red, opacity: 0.025,
+            lineHeight: 1, pointerEvents: "none", userSelect: "none", whiteSpace: "nowrap",
           }}
         >
-          CHOOSE
+          PLANS
         </div>
 
-        <div className="max-w-5xl mx-auto relative z-10">
+        <div style={{ maxWidth: 960, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <SectionHeading sub="Cancel anytime. Your relationships, however, are non-refundable.">
             ✦ Choose Your Plan ✦
           </SectionHeading>
@@ -467,7 +298,7 @@ export default function LandingPage() {
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className="rounded-xl p-8 relative flex flex-col"
+                className="rounded-sm p-8 relative flex flex-col"
                 style={{
                   background: plan.highlight ? B.white : B.beigeD,
                   border: plan.highlight ? `2.5px solid ${B.red}` : `1.5px solid ${B.black}14`,
@@ -478,51 +309,26 @@ export default function LandingPage() {
                 {plan.badge && (
                   <div
                     className="absolute -top-3.5 left-1/2 -translate-x-1/2"
-                    style={{ filter: "url(#fi-stamp)" }}
+                    style={{
+                      padding: "2px 14px",
+                      background: B.red, color: B.white,
+                      fontFamily: "'Bebas Neue', cursive",
+                      fontSize: "0.68rem", letterSpacing: "0.16em",
+                      borderRadius: 2, whiteSpace: "nowrap",
+                      filter: "url(#fi-stamp)",
+                    }}
                   >
-                    <div
-                      style={{
-                        padding: "2px 12px",
-                        background: B.red,
-                        color: B.white,
-                        fontFamily: "'Bebas Neue', cursive",
-                        fontSize: "0.7rem",
-                        letterSpacing: "0.16em",
-                        borderRadius: 2,
-                      }}
-                    >
-                      {plan.badge}
-                    </div>
+                    {plan.badge}
                   </div>
                 )}
-
-                <div
-                  style={{
-                    fontFamily: "'Bebas Neue', cursive",
-                    fontSize: "1.5rem",
-                    letterSpacing: "0.1em",
-                    color: B.black,
-                    marginBottom: 4,
-                  }}
-                >
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.1em", color: B.black, marginBottom: 4 }}>
                   {plan.name}
                 </div>
                 <p className="text-sm mb-4" style={{ color: B.gray }}>{plan.description}</p>
-
                 <div className="flex items-end gap-1 mb-6">
-                  <span
-                    style={{
-                      fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "3.5rem",
-                      color: B.black,
-                      lineHeight: 1,
-                    }}
-                  >
-                    {plan.price}
-                  </span>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.5rem", color: B.black, lineHeight: 1 }}>{plan.price}</span>
                   <span className="mb-1.5 text-sm" style={{ color: B.gray }}>{plan.period}</span>
                 </div>
-
                 <ul className="space-y-2 mb-8 flex-1">
                   {plan.perks.map((p) => (
                     <li key={p} className="flex items-start gap-2 text-sm">
@@ -531,7 +337,6 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-
                 <BrandButton
                   href="/signup"
                   variant={plan.highlight ? "primary" : "outline"}
@@ -545,18 +350,56 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <p
-            className="text-center mt-8 text-sm italic"
-            style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}
-          >
+          <p className="text-center mt-8 text-sm italic" style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>
             Your future self owes us one.
           </p>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ───────────────────────────────────────────────────── */}
-      <section id="testimonials" className="py-20 px-6" style={{ background: B.white }}>
-        <div className="max-w-5xl mx-auto">
+      {/* ── EXAMPLES ─────────────────────────────────────────────────────── */}
+      <section id="examples" className="py-20 px-6" style={{ background: B.black }}>
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+          <SectionHeading sub="AI-written. Sounds completely human. They'll never know." inverted>
+            What the Cards Sound Like
+          </SectionHeading>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {examples.map((ex) => (
+              <div
+                key={ex.occasion}
+                className="p-7 rounded-sm"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: `1.5px solid rgba(255,255,255,0.1)`,
+                  borderTop: `3px solid ${B.red}`,
+                }}
+              >
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.18em", color: B.red, marginBottom: 6 }}>
+                  {ex.occasion} · {ex.recipient}
+                </div>
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.7 }}>
+                  {ex.preview}
+                </p>
+                <div className="mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.7rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
+                    AI-written · Personally signed
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <BrandButton href="/signup" variant="primary" size="lg">
+              Start Earning Brownie Points
+            </BrandButton>
+          </div>
+        </div>
+      </section>
+
+      {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
+      <section id="reviews" className="py-20 px-6" style={{ background: B.white }}>
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
           <SectionHeading sub="Real stories. Changed names. Marriages still intact.">
             Men Who Survived
           </SectionHeading>
@@ -565,54 +408,39 @@ export default function LandingPage() {
             {testimonials.map((t, i) => (
               <div
                 key={t.name}
-                className="p-6 rounded-sm shadow-md"
+                className="p-7 rounded-sm shadow-md"
                 style={{
                   background: B.beige,
                   border: `1.5px solid ${B.black}10`,
-                  transform: i % 2 === 0 ? "rotate(-0.8deg)" : "rotate(0.8deg)",
                   borderTop: `3px solid ${B.red}`,
+                  transform: i % 2 === 0 ? "rotate(-0.7deg)" : "rotate(0.7deg)",
                 }}
               >
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => (
-                    <span key={j} style={{ color: B.red }}>★</span>
-                  ))}
+                <div className="flex gap-0.5 mb-4">
+                  {[...Array(5)].map((_, j) => <span key={j} style={{ color: B.red }}>★</span>)}
                 </div>
-                <p
-                  className="text-sm leading-relaxed mb-5"
-                  style={{ color: "#333", fontFamily: "'Caveat', cursive", fontSize: "1.05rem" }}
-                >
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: "#333", lineHeight: 1.7, marginBottom: 20 }}>
                   "{t.quote}"
                 </p>
                 <div>
-                  <div
-                    style={{
-                      fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "0.9rem",
-                      letterSpacing: "0.1em",
-                      color: B.black,
-                    }}
-                  >
-                    {t.name}
-                  </div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.black }}>{t.name}</div>
                   <div style={{ fontSize: "0.75rem", color: B.gray }}>{t.role}</div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Sticky notes row */}
           <div className="mt-12 flex items-center justify-center gap-8 flex-wrap">
             <StickyNote rotate={-3}>Don't Forget<br /><span style={{ fontSize: "0.85rem" }}>(Again)</span></StickyNote>
-            <StickyNote rotate={2}>Approved by<br /><span style={{ fontSize: "0.85rem" }}>Husbands™</span></StickyNote>
-            <StickyNote rotate={-1}>Set it once.<br /><span style={{ fontSize: "0.85rem" }}>Take credit forever.</span></StickyNote>
+            <StickyNote rotate={2}>Set it once.<br /><span style={{ fontSize: "0.85rem" }}>Take credit forever.</span></StickyNote>
+            <StickyNote rotate={-1}>Approved by<br /><span style={{ fontSize: "0.85rem" }}>Husbands™</span></StickyNote>
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ────────────────────────────────────────────────────────────── */}
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
       <section id="faq" className="py-20 px-6" style={{ background: B.beigeD }}>
-        <div className="max-w-3xl mx-auto">
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <SectionHeading>Questions from Men in the Wild</SectionHeading>
 
           <SectionDivider label="Frequently Asked" />
@@ -625,21 +453,18 @@ export default function LandingPage() {
                 style={{ border: `1.5px solid ${B.black}10` }}
               >
                 <button
-                  className="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-sm hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-gray-50 transition-colors"
                   style={{ color: B.black }}
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   data-testid={`faq-toggle-${i}`}
                 >
-                  <span style={{ fontSize: "0.9rem" }}>{faq.q}</span>
+                  <span style={{ fontWeight: 600, fontSize: "0.9rem", textAlign: "left" }}>{faq.q}</span>
                   {openFaq === i
                     ? <ChevronUp size={16} style={{ color: B.red, flexShrink: 0 }} />
                     : <ChevronDown size={16} style={{ color: "#aaa", flexShrink: 0 }} />}
                 </button>
                 {openFaq === i && (
-                  <div
-                    className="px-6 pb-5 text-sm leading-relaxed border-t pt-4"
-                    style={{ color: "#555", borderColor: `${B.black}08` }}
-                  >
+                  <div className="px-6 pb-5 text-sm leading-relaxed border-t pt-4" style={{ color: "#555", borderColor: `${B.black}08` }}>
                     {faq.a}
                   </div>
                 )}
@@ -649,13 +474,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA BANNER ─────────────────────────────────────────────────────── */}
+      {/* ── FINAL CTA ────────────────────────────────────────────────────── */}
       <section className="py-16 px-6" style={{ background: B.beige }}>
-        <div className="max-w-4xl mx-auto">
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <CtaBanner
-            headline="SET IT ONCE. STAY OUT OF TROUBLE FOREVER."
-            sub="No more last-minute scrambles. No more pharmacy cards. No more couch sleeping."
-            primaryLabel="Put My Life On Autopilot"
+            headline="GOOD RELATIONSHIPS DON'T HAPPEN BY ACCIDENT."
+            sub="We remember. We write. We send. You get the credit."
+            primaryLabel="Start Earning Brownie Points"
             primaryHref="/signup"
             secondaryLabel="See How It Works"
             secondaryHref="#how-it-works"
@@ -663,35 +488,36 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TAGLINE BAR ────────────────────────────────────────────────────── */}
+      {/* ── TAGLINE BAR ──────────────────────────────────────────────────── */}
       <TaglineBar />
 
-      {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <footer className="py-10 px-6" style={{ background: B.black }}>
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <BrandLogo size="sm" variant="compact" inverted />
+        <div style={{ maxWidth: 1100, margin: "0 auto" }} className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.08em", color: B.red, lineHeight: 1 }}>
+            F* I FORGOT
+            <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.7rem", color: "rgba(255,255,255,0.3)", fontWeight: 400, letterSpacing: "0.04em", marginTop: 2 }}>
+              Relationship Damage Control
+            </div>
+          </div>
 
-          <p
-            className="text-sm italic text-center"
-            style={{ color: "rgba(255,255,255,0.3)", fontFamily: "'Caveat', cursive", fontSize: "0.95rem" }}
-          >
-            Relationship autopilot. Set it once. Never forget again.
+          <p className="text-sm italic text-center" style={{ color: "rgba(255,255,255,0.3)", fontFamily: "'Caveat', cursive", fontSize: "0.95rem" }}>
+            Set it once. Never forget again.
           </p>
 
           <div className="flex gap-6 flex-wrap justify-center">
-            {["How It Works", "Pricing", "Sign In"].map((l) => (
+            {[
+              { label: "How It Works", href: "#how-it-works" },
+              { label: "Pricing",      href: "#pricing" },
+              { label: "Sign In",      href: "/login" },
+            ].map((l) => (
               <a
-                key={l}
-                href="#"
+                key={l.label}
+                href={l.href}
                 className="transition-colors hover:text-white"
-                style={{
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.14em",
-                  color: "rgba(255,255,255,0.35)",
-                }}
+                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
               >
-                {l}
+                {l.label}
               </a>
             ))}
           </div>
