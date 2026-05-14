@@ -220,8 +220,8 @@ export default function SignupPage() {
               </Form>
 
               <p
-                className="mt-4 text-xs text-center italic"
-                style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "0.9rem" }}
+                className="mt-4 text-center italic"
+                style={{ color: B.black, fontFamily: "'Caveat', cursive", fontSize: "1.05rem" }}
               >
                 By signing up, you agree that forgetting her birthday is not an option.
               </p>
