@@ -95,173 +95,19 @@ const howItWorksSteps = [
 
 function RedUnderline() {
   return (
-    <svg viewBox="0 0 360 12" fill="none" style={{ width: "100%", maxWidth: 440, display: "block", marginTop: 6 }}>
-      <path d="M4 8 C60 2, 150 12, 240 6 C295 2, 340 10, 356 7" stroke={B.red} strokeWidth="4" strokeLinecap="round" />
+    <svg viewBox="0 0 360 12" fill="none" style={{ width: "100%", maxWidth: 360, display: "block", marginTop: 4 }}>
+      <path d="M4 8 C60 2, 150 12, 240 6 C295 2, 340 10, 356 7" stroke={B.red} strokeWidth="3.5" strokeLinecap="round" />
     </svg>
   );
 }
 
 function StepArrow() {
   return (
-    <div className="flex items-center justify-center flex-shrink-0" style={{ width: 32 }}>
+    <div className="flex items-center justify-center flex-shrink-0" style={{ width: 28 }}>
       <svg viewBox="0 0 28 16" fill="none" style={{ width: 24, height: 14 }}>
         <path d="M2 8 L20 8" stroke={B.black} strokeWidth="2" strokeLinecap="round" opacity={0.3} />
         <path d="M14 3 L20 8 L14 13" stroke={B.black} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity={0.3} />
       </svg>
-    </div>
-  );
-}
-
-// ─── Dog house illustration ────────────────────────────────────────────────────
-
-const CHECKLIST_ITEMS = [
-  "Birthday",
-  "Anniversary",
-  "Mother's Day",
-  "Valentine's Day",
-  "Christmas",
-  "Just Because",
-];
-
-function DogHouseIllustration() {
-  return (
-    <div className="relative w-full flex flex-col items-center" style={{ paddingTop: 16, paddingBottom: 8 }}>
-
-      {/* Floating "card sent" notification */}
-      <div
-        className="absolute -top-2 right-0 z-20 flex items-center gap-2 shadow-lg"
-        style={{
-          background: "#fff",
-          border: `2px solid ${B.red}`,
-          borderRadius: 10,
-          padding: "8px 14px",
-          transform: "rotate(2deg)",
-          maxWidth: 220,
-        }}
-      >
-        <span style={{ fontSize: "1.2rem" }}>✉️</span>
-        <div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.1em", color: B.red }}>
-            CARD ON ITS WAY
-          </div>
-          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.85rem", color: "#444" }}>
-            "Happy Anniversary, babe!"
-          </div>
-        </div>
-      </div>
-
-      {/* Main card */}
-      <div
-        className="w-full rounded-2xl overflow-hidden shadow-2xl"
-        style={{ border: `2px solid ${B.black}12`, maxWidth: 460 }}
-      >
-        {/* Red header */}
-        <div
-          className="flex items-center justify-between px-5 py-3"
-          style={{ background: B.red }}
-        >
-          <span
-            style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "0.9rem",
-              letterSpacing: "0.15em",
-              color: "#fff",
-            }}
-          >
-            RELATIONSHIP DAMAGE CONTROL
-          </span>
-          <span style={{ background: "rgba(255,255,255,0.2)", borderRadius: 4, padding: "1px 8px", fontSize: "0.65rem", color: "#fff", fontWeight: 700, letterSpacing: "0.1em" }}>
-            ACTIVE
-          </span>
-        </div>
-
-        {/* Dog house scene */}
-        <div
-          className="flex items-center justify-center"
-          style={{ background: "#FFFDF5", padding: "28px 24px 12px", borderBottom: `1.5px solid ${B.black}08` }}
-        >
-          <svg viewBox="0 0 320 200" style={{ width: "100%", maxWidth: 340, height: "auto" }}>
-            {/* Grass */}
-            <rect x="0" y="158" width="320" height="42" fill="#DCFCE7" rx="4" />
-
-            {/* House body */}
-            <rect x="70" y="88" width="150" height="110" fill="#FFFDF5" stroke={B.black} strokeWidth="3" rx="3" />
-
-            {/* Roof left slope */}
-            <polygon points="55,92 145,30 145,92" fill={B.red} />
-            <polygon points="55,92 145,30 145,92" fill="none" stroke={B.black} strokeWidth="3" />
-
-            {/* Roof right slope */}
-            <polygon points="145,30 235,92 145,92" fill="#B71C1C" />
-            <polygon points="145,30 235,92 145,92" fill="none" stroke={B.black} strokeWidth="3" />
-
-            {/* Ridge cap */}
-            <ellipse cx="145" cy="30" rx="8" ry="6" fill={B.black} />
-
-            {/* Door arch */}
-            <path d="M110,198 L110,148 Q110,118 145,118 Q180,118 180,148 L180,198 Z" fill={B.black} />
-
-            {/* DAVE name plate */}
-            <rect x="100" y="100" width="90" height="28" rx="4" fill="#FFF9E8" stroke={B.black} strokeWidth="2" />
-            <text x="145" y="120" textAnchor="middle" fontFamily="Bebas Neue, cursive" fontSize="18" fill={B.red} letterSpacing="4">DAVE</text>
-
-            {/* Bad boy bowl */}
-            <ellipse cx="50" cy="178" rx="30" ry="12" fill={B.red} />
-            <text x="50" y="183" textAnchor="middle" fontSize="9" fill="white" fontWeight="bold" fontFamily="sans-serif">BAD BOY 🐾</text>
-
-            {/* Cardboard sign leaning on house */}
-            <rect x="218" y="128" width="88" height="60" rx="4" fill="#F5DEB3" stroke={B.black} strokeWidth="2" transform="rotate(6 262 158)" />
-            <text x="262" y="148" textAnchor="middle" fontSize="9" fill="#555" fontFamily="Caveat, cursive" transform="rotate(6 262 158)">In here</text>
-            <text x="262" y="161" textAnchor="middle" fontSize="9" fill="#555" fontFamily="Caveat, cursive" transform="rotate(6 262 158)">because I</text>
-            <text x="262" y="175" textAnchor="middle" fontSize="11" fill={B.red} fontFamily="Caveat, cursive" fontWeight="bold" transform="rotate(6 262 158)">forgot.</text>
-          </svg>
-        </div>
-
-        {/* Checklist */}
-        <div style={{ background: "#fff", padding: "18px 24px 22px" }}>
-          <div
-            className="flex items-center gap-2 mb-4"
-            style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "0.88rem",
-              letterSpacing: "0.14em",
-              color: B.black,
-            }}
-          >
-            <span style={{ color: B.red, fontSize: "1rem" }}>📋</span>
-            YOUR AUTOPILOT COVERS:
-          </div>
-          <div className="grid grid-cols-2 gap-y-2 gap-x-4">
-            {CHECKLIST_ITEMS.map((item) => (
-              <div key={item} className="flex items-center gap-2">
-                <div
-                  className="flex-shrink-0 flex items-center justify-center rounded-full"
-                  style={{ width: 20, height: 20, background: B.red }}
-                >
-                  <span style={{ color: "#fff", fontSize: "0.65rem", fontWeight: 900 }}>✓</span>
-                </div>
-                <span style={{ fontSize: "0.9rem", fontWeight: 600, color: B.black }}>
-                  {item}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Caption */}
-      <div
-        className="mt-5 text-center px-2"
-        style={{
-          fontFamily: "'Bebas Neue', cursive",
-          fontSize: "0.82rem",
-          letterSpacing: "0.2em",
-          color: B.red,
-          opacity: 0.85,
-        }}
-      >
-        YOUR PERSONAL RELATIONSHIP DAMAGE CONTROL SYSTEM
-      </div>
     </div>
   );
 }
@@ -371,88 +217,69 @@ export default function LandingPage() {
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section style={{ background: "#fff" }}>
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
 
           {/* Left column */}
-          <div className="py-14 md:py-20">
-            {/* Eyebrow label */}
-            <div
-              className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full"
-              style={{ background: `${B.red}12`, border: `1.5px solid ${B.red}30` }}
-            >
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: B.red, display: "inline-block" }} />
-              <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.08em", color: B.red, textTransform: "uppercase" }}>
-                Relationship Autopilot
-              </span>
-            </div>
-
+          <div className="py-12 md:py-16">
             {/* Main headline */}
             <h1
               style={{
                 fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(3.2rem, 8vw, 6.5rem)",
-                lineHeight: 0.93,
+                fontSize: "clamp(3rem, 8vw, 6rem)",
+                lineHeight: 0.95,
                 color: B.black,
                 letterSpacing: "0.01em",
                 marginBottom: 8,
               }}
             >
               YOU FOCUS<br />
-              ON LIFE.
-            </h1>
-            <h1
-              style={{
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(3.2rem, 8vw, 6.5rem)",
-                lineHeight: 0.93,
-                color: B.red,
-                letterSpacing: "0.01em",
-                marginBottom: 8,
-              }}
-            >
-              WE REMEMBER<br />
-              EVERYTHING.
+              ON LIFE.<br />
+              <span style={{ color: B.red }}>WE REMEMBER</span><br />
+              <span style={{ color: B.red }}>EVERYTHING.</span>
             </h1>
             <RedUnderline />
 
             <p
-              className="mt-7 mb-9"
+              className="mt-6 mb-8"
               style={{
-                fontSize: "1.15rem",
-                lineHeight: 1.75,
+                fontSize: "1rem",
+                lineHeight: 1.7,
                 color: "#333",
-                maxWidth: 500,
-                fontWeight: 400,
+                maxWidth: 480,
               }}
             >
-              We remember the birthdays, anniversaries, holidays, and moments you
-              forgot were coming. Then we pick the card, write the message, and
-              send it on time.
+              We make sure you <span style={{ textDecoration: "underline", fontWeight: 700 }}>never</span> miss
+              an important date so you don't end up in the dog house.
             </p>
 
             {/* 4 feature blocks */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-5 mb-10" style={{ maxWidth: 520 }}>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-5 mb-10" style={{ maxWidth: 500 }}>
               {HERO_FEATURES.map((feat) => (
                 <div key={feat.title} className="flex items-start gap-3">
                   <div
-                    className="flex-shrink-0 flex items-center justify-center rounded-lg"
-                    style={{ width: 44, height: 44, background: `${B.red}12`, border: `1.5px solid ${B.red}25`, flexShrink: 0 }}
+                    className="flex-shrink-0 flex items-center justify-center rounded"
+                    style={{
+                      width: 38,
+                      height: 38,
+                      background: `${B.red}12`,
+                      border: `1.5px solid ${B.red}30`,
+                    }}
                   >
-                    <feat.icon size={21} color={B.red} strokeWidth={1.8} />
+                    <feat.icon size={18} color={B.red} strokeWidth={2} />
                   </div>
                   <div>
                     <div
                       style={{
                         fontFamily: "'Bebas Neue', cursive",
-                        fontSize: "0.95rem",
+                        fontSize: "0.82rem",
                         letterSpacing: "0.12em",
                         color: B.black,
-                        marginBottom: 3,
+                        marginBottom: 2,
                       }}
                     >
                       {feat.title}
                     </div>
-                    <div style={{ fontSize: "0.85rem", color: "#555", lineHeight: 1.55 }}>
+                    <div style={{ fontSize: "0.75rem", color: "#666", lineHeight: 1.5 }}>
                       {feat.body}
                     </div>
                   </div>
@@ -464,35 +291,48 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <a
                 href="/signup"
-                className="inline-flex items-center justify-center transition-all hover:opacity-90 active:scale-[0.98]"
+                className="inline-flex items-center justify-center transition-opacity hover:opacity-90"
                 style={{
                   background: B.red,
                   color: "#fff",
                   fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "1.25rem",
+                  fontSize: "1.15rem",
                   letterSpacing: "0.14em",
-                  padding: "18px 44px",
-                  borderRadius: 8,
+                  padding: "16px 40px",
+                  borderRadius: 6,
                   textDecoration: "none",
                   whiteSpace: "nowrap",
-                  boxShadow: `0 4px 24px ${B.red}40`,
                 }}
                 data-testid="link-cta-primary"
               >
-                Start Earning Brownie Points
+                Start Now
               </a>
+              <div
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: "1rem",
+                  color: B.gray,
+                  lineHeight: 1.5,
+                  paddingTop: 6,
+                }}
+              >
+                <span style={{ fontStyle: "italic" }}>→ It takes 2 minutes.</span><br />
+                <span style={{ fontStyle: "italic" }}>Saves relationships.</span>
+              </div>
             </div>
-            <p
-              className="mt-3"
-              style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: B.gray, fontStyle: "italic" }}
-            >
-              Set it once. We handle the guilt forever.
-            </p>
           </div>
 
-          {/* Right column — CSS dog house illustration */}
-          <div className="py-10 md:py-16 flex items-center justify-center">
-            <DogHouseIllustration />
+          {/* Right column — doghouse hero image */}
+          <div
+            className="relative flex items-stretch justify-center"
+            style={{ minHeight: 480 }}
+          >
+            <img
+              src="/doghouse-hero.png"
+              alt="Man sitting in dog house with sign: In here because I forgot."
+              className="w-full h-full object-contain object-bottom"
+              style={{ maxHeight: 620, width: "100%" }}
+            />
           </div>
         </div>
       </section>
@@ -577,36 +417,35 @@ export default function LandingPage() {
               <div key={step.num} className="flex items-start flex-1 min-w-0">
                 <div className="flex flex-col items-center text-center flex-1 min-w-0 px-2">
                   <div
-                    className="flex items-center justify-center rounded-full mb-4"
+                    className="flex items-center justify-center rounded-full mb-3"
                     style={{
-                      width: 80,
-                      height: 80,
+                      width: 64,
+                      height: 64,
                       background: `${B.red}10`,
-                      border: `2.5px solid ${B.red}35`,
+                      border: `2px solid ${B.red}30`,
                       flexShrink: 0,
                     }}
                   >
-                    <step.icon size={34} color={B.red} strokeWidth={1.6} />
+                    <step.icon size={26} color={B.red} strokeWidth={1.8} />
                   </div>
                   <div
                     style={{
                       fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "1.05rem",
+                      fontSize: "0.9rem",
                       letterSpacing: "0.1em",
                       color: B.black,
-                      marginBottom: 5,
-                      lineHeight: 1.1,
+                      marginBottom: 4,
                     }}
                   >
                     <span style={{ color: B.red, marginRight: 3 }}>{step.num}.</span>
                     {step.label}
                   </div>
-                  <div style={{ fontSize: "0.875rem", color: B.gray, lineHeight: 1.55 }}>
+                  <div style={{ fontSize: "0.75rem", color: B.gray, lineHeight: 1.5 }}>
                     {step.sub}
                   </div>
                 </div>
                 {i < HOW_STEPS.length - 1 && (
-                  <div className="hidden sm:flex items-start pt-7 flex-shrink-0">
+                  <div className="hidden sm:flex items-start pt-5 flex-shrink-0">
                     <StepArrow />
                   </div>
                 )}
