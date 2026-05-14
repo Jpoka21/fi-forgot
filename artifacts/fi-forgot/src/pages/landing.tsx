@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -68,6 +68,20 @@ const examples = [
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [, navigate] = useLocation();
+
+  // Reliable programmatic navigation — used by every hit zone
+  const goSignup = () => navigate("/signup");
+  const goLogin  = () => navigate("/login");
+
+  // Reusable transparent hit-zone style
+  const zone = (extra: React.CSSProperties): React.CSSProperties => ({
+    position: "absolute",
+    zIndex: 20,
+    cursor: "pointer",
+    background: "transparent",
+    ...extra,
+  });
 
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
@@ -77,7 +91,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
 
-        {/* The image — pointer-events off so overlays always win clicks */}
+        {/* Image — pointer-events disabled so every overlay wins every click */}
         <img
           src="/cover-page.png"
           alt="F* I Forgot — You focus on life. We remember everything."
@@ -85,33 +99,27 @@ export default function LandingPage() {
           draggable={false}
         />
 
-        {/* ─────────────────────────────────────────────────────────────────
-            ALL overlays use zIndex: 10 and pointerEvents: "auto" so they
-            always sit above the image and reliably capture clicks.
-        ───────────────────────────────────────────────────────────────── */}
+        {/* ── Nav link zones ─────────────────────────────────────────────── */}
+        <div role="button" aria-label="Sign in"      onClick={goLogin}              style={zone({ top:"1%", right:"17%", width:"7%",  height:"4%" })} />
+        <div role="button" aria-label="How it works" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior:"smooth" })} style={zone({ top:"1%", left:"22%", width:"8%", height:"4%" })} />
+        <div role="button" aria-label="Plans"        onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior:"smooth" })}      style={zone({ top:"1%", left:"31%", width:"5%", height:"4%" })} />
+        <div role="button" aria-label="Examples"     onClick={() => document.getElementById("examples")?.scrollIntoView({ behavior:"smooth" })}     style={zone({ top:"1%", left:"37%", width:"7%", height:"4%" })} />
+        <div role="button" aria-label="Reviews"      onClick={() => document.getElementById("reviews")?.scrollIntoView({ behavior:"smooth" })}      style={zone({ top:"1%", left:"45%", width:"7%", height:"4%" })} />
+        <div role="button" aria-label="FAQ"          onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior:"smooth" })}           style={zone({ top:"1%", left:"53%", width:"5%", height:"4%" })} />
 
-        {/* Nav: transparent click zones over the image's nav links */}
-        <a href="/login"        style={{ position:"absolute", zIndex:10, top:"1%",   right:"17%", width:"7%",  height:"3.5%", cursor:"pointer" }} aria-label="Sign in" />
-        <a href="#how-it-works" style={{ position:"absolute", zIndex:10, top:"1%",   left:"22%",  width:"8%",  height:"3.5%", cursor:"pointer" }} aria-label="How it works" />
-        <a href="#pricing"      style={{ position:"absolute", zIndex:10, top:"1%",   left:"31%",  width:"5%",  height:"3.5%", cursor:"pointer" }} aria-label="Plans" />
-        <a href="#examples"     style={{ position:"absolute", zIndex:10, top:"1%",   left:"37%",  width:"7%",  height:"3.5%", cursor:"pointer" }} aria-label="Examples" />
-        <a href="#reviews"      style={{ position:"absolute", zIndex:10, top:"1%",   left:"45%",  width:"7%",  height:"3.5%", cursor:"pointer" }} aria-label="Reviews" />
-        <a href="#faq"          style={{ position:"absolute", zIndex:10, top:"1%",   left:"53%",  width:"5%",  height:"3.5%", cursor:"pointer" }} aria-label="FAQ" />
+        {/* Nav CTA — red "START EARNING BROWNIE POINTS" button top-right */}
+        <div role="button" aria-label="Start earning brownie points" data-testid="link-get-started-nav"
+          onClick={goSignup} style={zone({ top:"0.5%", right:"0.5%", width:"16%", height:"5.5%" })} />
 
-        {/* Nav CTA — red "START EARNING BROWNIE POINTS" top-right */}
-        <Link href="/signup" data-testid="link-get-started-nav"
-          style={{ position:"absolute", zIndex:10, top:"0.5%", right:"0.5%", width:"16%", height:"5.5%", cursor:"pointer" }}
-          aria-label="Start earning brownie points" />
+        {/* ── Hero "START NOW" — large hit zone over the red button ───────── */}
+        {/* Image button sits at ~61–70% vertically, left 2–30%              */}
+        <div role="button" aria-label="Start Now" data-testid="link-cta-hitzone"
+          onClick={goSignup} style={zone({ top:"61%", left:"2%", width:"30%", height:"10%" })} />
 
-        {/* ── Main hero "START NOW" button — transparent hit zone ───────── */}
-        {/* Covers the red START NOW button in the image at ~61–68% vertical */}
-        <Link href="/signup" data-testid="link-cta-hitzone" aria-label="Start Now"
-          style={{ position:"absolute", zIndex:10, top:"61%", left:"2%", width:"27%", height:"8%", cursor:"pointer" }} />
-
-        {/* ── Banner "START NOW" — transparent hit zone ──────────────────── */}
-        {/* Covers the red START NOW button in the beige banner at ~76–82%   */}
-        <Link href="/signup" data-testid="link-cta-banner" aria-label="Start Now"
-          style={{ position:"absolute", zIndex:10, top:"76%", right:"2%", width:"24%", height:"6%", cursor:"pointer" }} />
+        {/* ── Banner "START NOW" — hit zone over the beige-section button ─── */}
+        {/* Banner button sits at ~76–83% vertically, right side             */}
+        <div role="button" aria-label="Start Now" data-testid="link-cta-banner"
+          onClick={goSignup} style={zone({ top:"76%", right:"2%", width:"25%", height:"7%" })} />
       </section>
 
       {/* ── Real CTA strip — immediately below the hero image ──────────── */}
