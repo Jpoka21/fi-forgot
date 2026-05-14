@@ -17,9 +17,12 @@ import {
   ChevronDown, ChevronUp, AlertTriangle, Layers,
 } from "lucide-react";
 
-const NAVY = "#071A33";
-const RED = "#E23B2E";
-const GOLD = "#D8A725";
+const NAVY  = "#071A33";
+const RED   = "#E23B2E";
+const BLACK = "#111111";
+const BEIGE = "#F2E6D3";
+const GRAY  = "#6B6B6B";
+
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
@@ -77,75 +80,45 @@ function StatusBadge({ status }: { status: CardOrder["status"] }) {
 }
 
 function StatCard({
-  label, value, icon: Icon, accentColor, sub, textColor,
+  label, value, icon: Icon, accentColor, sub,
 }: {
   label: string; value: string | number; icon: React.ElementType;
-  accentColor: string; sub?: string; textColor?: string;
+  accentColor: string; sub?: string;
 }) {
   return (
     <div
-      className="bg-white rounded-2xl p-5 border shadow-sm flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
-      style={{ borderColor: "hsl(40,20%,87%)" }}
+      className="rounded-2xl p-5 flex items-center gap-4 transition-all hover:-translate-y-0.5"
+      style={{ background: "#fff", border: `1.5px solid ${BLACK}18`, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
     >
       <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: accentColor + "18" }}
+        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: `${accentColor}15` }}
       >
-        <Icon size={22} style={{ color: accentColor }} />
+        <Icon size={20} style={{ color: accentColor }} />
       </div>
       <div>
-        <div className="text-2xl font-serif font-bold" style={{ color: textColor ?? NAVY }}>{value}</div>
-        <div className="text-xs text-[hsl(221,20%,52%)] mt-0.5">{label}</div>
-        {sub && <div className="text-xs font-semibold mt-0.5" style={{ color: accentColor }}>{sub}</div>}
+        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: BLACK, lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 2 }}>{label}</div>
+        {sub && <div style={{ fontSize: "0.7rem", fontWeight: 700, marginTop: 2, color: accentColor }}>{sub}</div>}
       </div>
     </div>
   );
 }
 
-/**
- * IllustrationPlaceholder — a styled container for future branded SVG art.
- * Replace the inner content with a real <img> or <svg> when artwork is ready.
- * The outer wrapper dimensions and border-radius are preserved so the layout
- * never needs to change — just swap the children.
- */
 function IllustrationPlaceholder({
   size = "md",
-  gradient = "gold",
 }: {
   size?: "sm" | "md" | "lg";
-  gradient?: "gold" | "navy" | "subtle";
 }) {
-  const dims: Record<string, string> = {
-    sm: "h-16 w-20",
-    md: "h-24 w-28",
-    lg: "h-36 w-44",
-  };
-  const gradients: Record<string, string> = {
-    gold:   "linear-gradient(135deg, rgba(216,167,37,0.14) 0%, rgba(7,26,51,0.07) 100%)",
-    navy:   "linear-gradient(135deg, rgba(7,26,51,0.18) 0%, rgba(216,167,37,0.06) 100%)",
-    subtle: "linear-gradient(135deg, rgba(216,167,37,0.07) 0%, rgba(180,190,210,0.10) 100%)",
-  };
-  const borders: Record<string, string> = {
-    gold:   "rgba(216,167,37,0.35)",
-    navy:   "rgba(7,26,51,0.2)",
-    subtle: "rgba(180,190,210,0.4)",
-  };
-
+  const dims: Record<string, string> = { sm: "h-16 w-20", md: "h-24 w-28", lg: "h-36 w-44" };
   return (
-    /* ── Replace everything inside this div with your SVG illustration ── */
     <div
       className={`${dims[size]} rounded-2xl flex flex-col items-center justify-center gap-1.5 flex-shrink-0 select-none`}
-      style={{
-        background: gradients[gradient],
-        border: `1.5px dashed ${borders[gradient]}`,
-      }}
+      style={{ background: `${RED}08`, border: `1.5px dashed ${RED}30` }}
       aria-hidden="true"
     >
-      <Layers size={16} style={{ color: borders[gradient], opacity: 0.8 }} />
-      <span
-        className="text-center leading-tight font-medium"
-        style={{ fontSize: "8px", color: "rgba(7,26,51,0.35)", maxWidth: "80px" }}
-      >
+      <Layers size={16} style={{ color: `${RED}50` }} />
+      <span style={{ fontSize: "8px", color: `${BLACK}40`, maxWidth: "80px", textAlign: "center", lineHeight: 1.3, fontWeight: 500 }}>
         Custom illustration area
       </span>
     </div>
@@ -157,48 +130,35 @@ function RiskMeter({ level }: { level: "low" | "medium" | "high" }) {
   const color = level === "low" ? "#22c55e" : level === "medium" ? "#f59e0b" : RED;
   const label = level === "low" ? "Low" : level === "medium" ? "Medium" : "High";
   const reason =
-    level === "low"
-      ? "No upcoming card emergencies detected."
-      : level === "medium"
-      ? "A few events coming up — stay alert."
-      : "Cards overdue. Panic flowers incoming.";
+    level === "low"   ? "No upcoming card emergencies detected."
+    : level === "medium" ? "A few events coming up — stay alert."
+    : "Cards overdue. Panic flowers incoming.";
 
   return (
-    <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: "hsl(40,20%,87%)" }}>
-      {/* Illustration band — swap for branded SVG art */}
-      <div
-        className="w-full flex items-center justify-center py-5"
-        style={{ background: "linear-gradient(135deg, hsl(40,50%,96%) 0%, hsl(221,30%,95%) 100%)" }}
-      >
-        <IllustrationPlaceholder size="sm" gradient="subtle" />
+    <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1.5px solid ${BLACK}18`, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+      <div className="w-full flex items-center justify-center py-5" style={{ background: BEIGE }}>
+        <IllustrationPlaceholder size="sm" />
       </div>
-
       <div className="p-5">
         <div className="flex items-center justify-between mb-3">
-          <div className="font-serif font-bold text-sm" style={{ color: NAVY }}>Relationship Risk Meter</div>
-          <span
-            className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
-            style={{ background: color }}
-          >
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.05em", color: BLACK }}>Relationship Risk Meter</div>
+          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: color }}>
             {label}
           </span>
         </div>
-        <div className="relative h-3 rounded-full overflow-hidden mb-2" style={{ background: "hsl(40,20%,90%)" }}>
+        <div className="relative h-3 rounded-full overflow-hidden mb-2" style={{ background: `${BLACK}12` }}>
           <div className="absolute inset-y-0 left-0 flex" style={{ width: "100%" }}>
-            <div className="h-full flex-1" style={{ background: "#22c55e", opacity: 0.25 }} />
-            <div className="h-full flex-1" style={{ background: "#f59e0b", opacity: 0.25 }} />
-            <div className="h-full flex-1" style={{ background: RED, opacity: 0.25 }} />
+            <div className="h-full flex-1" style={{ background: "#22c55e", opacity: 0.2 }} />
+            <div className="h-full flex-1" style={{ background: "#f59e0b", opacity: 0.2 }} />
+            <div className="h-full flex-1" style={{ background: RED, opacity: 0.2 }} />
           </div>
-          <div
-            className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
-            style={{ width: `${pct}%`, background: color }}
-          />
+          <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
         </div>
-        <div className="flex justify-between text-xs mb-3" style={{ color: "hsl(221,20%,60%)" }}>
+        <div className="flex justify-between text-xs mb-3" style={{ color: GRAY }}>
           <span>Safe</span>
           <span>Danger Zone</span>
         </div>
-        <p className="text-xs" style={{ color: "hsl(221,20%,55%)" }}>
+        <p className="text-xs" style={{ color: GRAY }}>
           Current risk: <span className="font-semibold" style={{ color }}>{label}</span> — {reason}
         </p>
       </div>
@@ -208,15 +168,12 @@ function RiskMeter({ level }: { level: "low" | "medium" | "high" }) {
 
 function DisasterCounter() {
   return (
-    <div
-      className="rounded-2xl border p-5 shadow-sm text-center"
-      style={{ background: NAVY, borderColor: NAVY }}
-    >
-      <div className="text-5xl font-serif font-bold text-white mb-1">13</div>
-      <div className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
+    <div className="rounded-2xl p-5 text-center" style={{ background: BLACK }}>
+      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.5rem", color: "#fff", lineHeight: 1 }}>13</div>
+      <div className="text-xs font-semibold mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
         days since last relationship emergency
       </div>
-      <div className="mt-2 text-xs" style={{ color: GOLD }}>
+      <div className="mt-2 text-xs font-semibold" style={{ color: RED }}>
         Keep it up. You're doing great.
       </div>
     </div>
@@ -254,9 +211,7 @@ export default function DashboardPage() {
         const days = daysUntilEvent(event, r);
         if (days === null || days > 45 || days < 0) continue;
         const briefings = getBriefingsForRecipient(r.id);
-        const briefingDoneThisYear = briefings.some(
-          (b) => b.event === event && b.year === thisYear
-        );
+        const briefingDoneThisYear = briefings.some((b) => b.event === event && b.year === thisYear);
         pending.push({ recipient: r, event, daysAway: days, briefingDoneThisYear });
       }
     }
@@ -270,7 +225,6 @@ export default function DashboardPage() {
   const primaryPreviewDays = recipients[0]?.previewDays ?? null;
   const briefingsNeeded = upcomingBriefings.filter((b) => !b.briefingDoneThisYear);
 
-  // Risk level computation
   const minDaysToEvent = upcomingBriefings.length > 0
     ? Math.min(...upcomingBriefings.map((b) => b.daysAway))
     : 999;
@@ -289,50 +243,48 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div
-        className="min-h-screen"
-        style={{ background: "linear-gradient(150deg, #f8f5f0 0%, #edf1f7 55%, #f4efe8 100%)" }}
-      >
+      <div className="min-h-screen" style={{ background: BEIGE }}>
         <div className="p-6 md:p-8 max-w-6xl mx-auto">
 
-          {/* ── Greeting ───────────────────────────────────────────────── */}
+          {/* ── Greeting ─────────────────────────────────────────────────── */}
           <div className="mb-6">
-            <h1 className="font-serif text-3xl font-bold" style={{ color: NAVY }}>
+            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK, lineHeight: 1 }}>
               {user?.name ? `Hey, ${user.name.split(" ")[0]}.` : "Dashboard"}
             </h1>
-            <p className="mt-1 text-sm" style={{ color: "hsl(221,20%,52%)" }}>
+            <p className="mt-1" style={{ fontSize: "1rem", color: GRAY }}>
               {recipients.length > 0
                 ? "Your relationship autopilot is running. Nothing to panic about."
                 : "Set up your first recipient and you'll never panic-buy flowers again."}
             </p>
           </div>
 
-          {/* ── Hero status card ────────────────────────────────────────── */}
+          {/* ── Hero status card ─────────────────────────────────────────── */}
           <div
-            className="relative rounded-2xl px-7 py-6 mb-6 overflow-hidden shadow-lg"
+            className="relative rounded-2xl px-7 py-6 mb-6 overflow-hidden"
             style={{
-              background: `linear-gradient(125deg, ${NAVY} 0%, #0f2d55 60%, #122a4a 100%)`,
-              border: `1px solid rgba(216,167,37,0.25)`,
+              background: `linear-gradient(125deg, ${BLACK} 0%, #1a1a1a 60%, #111 100%)`,
+              border: `1px solid ${RED}30`,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
             }}
           >
-            {/* subtle glow accent */}
+            {/* Red glow accent */}
             <div
-              className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-10 pointer-events-none"
-              style={{ background: GOLD, filter: "blur(40px)" }}
+              className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-15 pointer-events-none"
+              style={{ background: RED, filter: "blur(40px)" }}
             />
             <div className="relative flex items-center justify-between gap-4">
               <div className="flex items-center gap-5 flex-1 min-w-0">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(216,167,37,0.18)", border: "1px solid rgba(216,167,37,0.3)" }}
+                  style={{ background: `${RED}20`, border: `1px solid ${RED}40` }}
                 >
-                  <Zap size={22} style={{ color: GOLD }} />
+                  <Zap size={22} style={{ color: RED }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-serif text-xl font-bold text-white leading-snug">
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.05em", color: "#fff", lineHeight: 1.1 }}>
                     Relationship Autopilot: Armed
                   </div>
-                  <div className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  <div className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>
                     No panic flowers. No gas station cards. No couch sleeping.
                   </div>
                   <div
@@ -344,22 +296,21 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-              {/* Illustration placeholder — swap children for branded SVG art */}
               <div className="hidden sm:block flex-shrink-0">
-                <IllustrationPlaceholder size="lg" gradient="gold" />
+                <IllustrationPlaceholder size="lg" />
               </div>
             </div>
             {primaryPreviewDays && (
-              <div className="mt-4 pt-4 border-t flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
-                <div className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  Preview email: <span className="text-white font-semibold">{primaryPreviewDays} days before</span>
-                  <span className="ml-2" style={{ color: "rgba(255,255,255,0.35)" }}>·</span>
-                  <span className="ml-2" style={{ color: "rgba(255,255,255,0.45)" }}>You approve every card before it ships</span>
+              <div className="mt-4 pt-4 border-t flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                <div className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  First heads-up: <span className="text-white font-semibold">{primaryPreviewDays} days before</span>
+                  <span className="ml-2 mr-2" style={{ color: "rgba(255,255,255,0.25)" }}>·</span>
+                  <span style={{ color: "rgba(255,255,255,0.4)" }}>Daily reminders until you act or we do</span>
                 </div>
                 <Link href="/settings/reminders">
                   <button
                     className="text-xs font-semibold px-3 py-1 rounded-lg transition-all hover:opacity-80"
-                    style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
+                    style={{ background: `${RED}20`, color: "rgba(255,255,255,0.7)", border: `1px solid ${RED}30` }}
                   >
                     Settings
                   </button>
@@ -368,12 +319,12 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* ── Pending Customer Approvals ───────────────────────────────── */}
+          {/* ── Pending Customer Approvals ────────────────────────────────── */}
           {pendingApprovals.length > 0 && (
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
-                <ThumbsUp size={18} style={{ color: "#7c3aed" }} />
-                <h2 className="font-serif text-lg font-bold" style={{ color: "#7c3aed" }}>
+                <ThumbsUp size={18} style={{ color: RED }} />
+                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: RED }}>
                   {pendingApprovals.length === 1 ? "1 card needs your approval" : `${pendingApprovals.length} cards need your approval`}
                 </h2>
               </div>
@@ -437,17 +388,17 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-white rounded-2xl border-2 shadow-sm overflow-hidden"
-                      style={{ borderColor: "#7c3aed40" }}
+                      className="rounded-2xl border-2 overflow-hidden"
+                      style={{ background: "#fff", borderColor: `${RED}35`, boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}
                     >
-                      <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3" style={{ background: "#f5f3ff" }}>
+                      <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3" style={{ background: `${RED}08` }}>
                         <div>
-                          <div className="font-bold text-base" style={{ color: NAVY }}>{item.eventType} card for {item.recipientName}</div>
-                          <div className="text-xs mt-0.5" style={{ color: "hsl(221,20%,50%)" }}>
+                          <div style={{ fontWeight: 700, fontSize: "1rem", color: BLACK }}>{item.eventType} card for {item.recipientName}</div>
+                          <div className="text-xs mt-0.5" style={{ color: GRAY }}>
                             Mailing {item.scheduledMailDate} · Review and approve so we can mail it
                           </div>
                         </div>
-                        <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: "#7c3aed" }}>
+                        <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: RED }}>
                           Needs your OK
                         </span>
                       </div>
@@ -455,18 +406,21 @@ export default function DashboardPage() {
                       {originalMessage ? (
                         <div className="px-5 py-4">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: "hsl(221,20%,50%)" }}>Card Message</div>
+                            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: GRAY }}>Card Message</div>
                             {refinedMessages[item.id] && (
-                              <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: "#7c3aed" }}>✨ AI refined</span>
+                              <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: RED }}>✨ AI refined</span>
                             )}
                           </div>
                           <div className="relative">
-                            <div className={`bg-[#F8EEDC] rounded-xl px-4 py-3 text-sm leading-relaxed font-serif whitespace-pre-wrap border transition-opacity ${isRefining ? "opacity-40" : "opacity-100"}`} style={{ color: NAVY, borderColor: "hsl(40,40%,80%)" }}>
+                            <div
+                              className={`rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap border transition-opacity ${isRefining ? "opacity-40" : "opacity-100"}`}
+                              style={{ background: BEIGE, color: BLACK, borderColor: `${BLACK}18`, fontFamily: "'Caveat', cursive", fontSize: "1.05rem" }}
+                            >
                               {currentMessage}
                             </div>
                             {isRefining && (
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-lg shadow-sm text-sm font-semibold" style={{ color: "#7c3aed" }}>
+                                <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-lg shadow-sm text-sm font-semibold" style={{ color: RED }}>
                                   <Loader2 size={15} className="animate-spin" /> Rewriting…
                                 </div>
                               </div>
@@ -474,7 +428,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="px-5 py-4 text-sm italic" style={{ color: "hsl(221,20%,50%)" }}>Message not available yet — check back soon.</div>
+                        <div className="px-5 py-4 text-sm italic" style={{ color: GRAY }}>Message not available yet — check back soon.</div>
                       )}
 
                       <div className="px-5 pb-3">
@@ -482,7 +436,7 @@ export default function DashboardPage() {
                           onClick={handleApprove}
                           disabled={isRefining}
                           className="w-full flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-xl text-white hover:opacity-90 disabled:opacity-50 transition-all"
-                          style={{ background: NAVY }}
+                          style={{ background: RED }}
                         >
                           <ThumbsUp size={14} /> Looks great — send it!
                         </button>
@@ -492,8 +446,8 @@ export default function DashboardPage() {
                         <div className="px-5 pb-4">
                           <button
                             onClick={() => setRefineOpen(isRefineOpen ? null : item.id)}
-                            className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl border transition-all hover:bg-purple-50"
-                            style={{ borderColor: "#7c3aed40", color: "#7c3aed" }}
+                            className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl border transition-all"
+                            style={{ borderColor: `${BLACK}18`, color: GRAY }}
                           >
                             <Sparkles size={13} />
                             Want to tweak it with AI?
@@ -503,15 +457,15 @@ export default function DashboardPage() {
                           {isRefineOpen && (
                             <div className="mt-3 space-y-3">
                               <div>
-                                <div className="text-xs font-medium mb-2" style={{ color: "hsl(221,20%,55%)" }}>Quick options</div>
+                                <div className="text-xs font-medium mb-2" style={{ color: GRAY }}>Quick options</div>
                                 <div className="flex flex-wrap gap-2">
                                   {QUICK_PROMPTS.map(({ label, prompt }) => (
                                     <button
                                       key={label}
                                       onClick={() => handleRefine(prompt)}
                                       disabled={isRefining}
-                                      className="text-xs font-semibold px-3 py-1.5 rounded-full border hover:bg-purple-50 disabled:opacity-50 transition-all"
-                                      style={{ borderColor: "#7c3aed60", color: "#7c3aed", background: "#faf5ff" }}
+                                      className="text-xs font-semibold px-3 py-1.5 rounded-full border hover:opacity-80 disabled:opacity-50 transition-all"
+                                      style={{ borderColor: `${RED}40`, color: RED, background: `${RED}08` }}
                                     >
                                       {label}
                                     </button>
@@ -519,9 +473,9 @@ export default function DashboardPage() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className="flex-1 h-px bg-[hsl(40,20%,88%)]" />
-                                <span className="text-xs" style={{ color: "hsl(221,20%,60%)" }}>or write your own</span>
-                                <div className="flex-1 h-px bg-[hsl(40,20%,88%)]" />
+                                <div className="flex-1 h-px" style={{ background: `${BLACK}12` }} />
+                                <span className="text-xs" style={{ color: GRAY }}>or write your own</span>
+                                <div className="flex-1 h-px" style={{ background: `${BLACK}12` }} />
                               </div>
                               <div className="flex gap-2">
                                 <textarea
@@ -530,8 +484,8 @@ export default function DashboardPage() {
                                   onChange={(e) => setRefinePrompt((prev) => ({ ...prev, [item.id]: e.target.value }))}
                                   placeholder="e.g. Mention the camping trip, add something about her garden, skip the age reference…"
                                   disabled={isRefining}
-                                  className="flex-1 border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 disabled:opacity-50"
-                                  style={{ borderColor: "hsl(40,30%,80%)", "--tw-ring-color": "#7c3aed" } as React.CSSProperties}
+                                  className="flex-1 border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none disabled:opacity-50"
+                                  style={{ borderColor: `${BLACK}18` }}
                                   onKeyDown={(e) => {
                                     if (e.key === "Enter" && !e.shiftKey) {
                                       e.preventDefault();
@@ -543,13 +497,13 @@ export default function DashboardPage() {
                                   onClick={() => handleRefine(refinePrompt[item.id] ?? "")}
                                   disabled={isRefining || !(refinePrompt[item.id] ?? "").trim()}
                                   className="self-end flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-40 transition-all hover:opacity-90"
-                                  style={{ background: "#7c3aed" }}
+                                  style={{ background: RED }}
                                 >
                                   {isRefining ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                                   Rewrite
                                 </button>
                               </div>
-                              <p className="text-xs" style={{ color: "hsl(221,20%,60%)" }}>
+                              <p className="text-xs" style={{ color: GRAY }}>
                                 Hit "Rewrite" as many times as you want — when it looks right, click "Looks great — send it!" above.
                               </p>
                             </div>
@@ -563,19 +517,19 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── Briefings banner ────────────────────────────────────────── */}
+          {/* ── Briefings banner ──────────────────────────────────────────── */}
           {briefingsNeeded.length > 0 && (
             <div
               className="mb-6 rounded-2xl border-2 p-5"
-              style={{ background: `${GOLD}12`, borderColor: `${GOLD}40` }}
+              style={{ background: `${RED}08`, borderColor: `${RED}30` }}
             >
               <div className="flex items-start gap-3">
-                <ClipboardList size={20} className="mt-0.5 flex-shrink-0" style={{ color: GOLD }} />
+                <ClipboardList size={20} className="mt-0.5 flex-shrink-0" style={{ color: RED }} />
                 <div className="flex-1">
-                  <div className="font-bold text-sm" style={{ color: NAVY }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK }}>
                     {briefingsNeeded.length === 1 ? "1 event briefing coming up" : `${briefingsNeeded.length} event briefings coming up`}
                   </div>
-                  <p className="text-xs mt-0.5 mb-3" style={{ color: "hsl(221,20%,50%)" }}>
+                  <p className="text-xs mt-0.5 mb-3" style={{ color: GRAY }}>
                     Answer a few questions so we write the best possible card.
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -583,11 +537,11 @@ export default function DashboardPage() {
                       <Link key={`${b.recipient.id}-${b.event}`} href={`/briefings/${b.recipient.id}/${encodeURIComponent(b.event)}`}>
                         <button
                           className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full hover:opacity-80 transition-all"
-                          style={{ background: NAVY, color: "#fff" }}
+                          style={{ background: RED, color: "#fff" }}
                           data-testid={`btn-briefing-${b.event.toLowerCase().replace(/\s+/g, "-")}`}
                         >
                           {b.event} · {b.recipient.name}
-                          <span style={{ opacity: 0.6 }}>{b.daysAway}d away</span>
+                          <span style={{ opacity: 0.65 }}>{b.daysAway}d away</span>
                         </button>
                       </Link>
                     ))}
@@ -597,10 +551,10 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── Stat cards ──────────────────────────────────────────────── */}
+          {/* ── Stat cards ────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <StatCard label="Upcoming cards"    value={upcoming.length}        icon={CalendarDays} accentColor={NAVY} />
-            <StatCard label="Recipients covered" value={recipients.length}      icon={Users}        accentColor={GOLD} />
+            <StatCard label="Upcoming cards"     value={upcoming.length}       icon={CalendarDays} accentColor={BLACK} />
+            <StatCard label="Recipients covered"  value={recipients.length}     icon={Users}        accentColor={RED} />
             <StatCard
               label="Disasters avoided"
               value={disastersAvoided}
@@ -612,50 +566,43 @@ export default function DashboardPage() {
               label="Awaiting approval"
               value={awaitingApproval.length}
               icon={Clock}
-              accentColor={awaitingApproval.length > 0 ? RED : "hsl(221,20%,65%)"}
+              accentColor={awaitingApproval.length > 0 ? RED : GRAY}
             />
           </div>
 
-          {/* ── Main grid ───────────────────────────────────────────────── */}
+          {/* ── Main grid ─────────────────────────────────────────────────── */}
           <div className="grid md:grid-cols-3 gap-6">
 
             {/* Left column */}
             <div className="md:col-span-2">
 
               {awaitingApproval.length > 0 && (
-                <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
-                  <CheckCircle2 size={22} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="mb-6 rounded-2xl p-5 flex items-start gap-4" style={{ background: `${RED}08`, border: `1.5px solid ${RED}30` }}>
+                  <CheckCircle2 size={22} className="mt-0.5 flex-shrink-0" style={{ color: RED }} />
                   <div>
-                    <div className="font-semibold text-amber-900">
+                    <div style={{ fontWeight: 700, color: BLACK }}>
                       {awaitingApproval.length === 1 ? "1 card" : `${awaitingApproval.length} cards`} ready for review
                     </div>
-                    <p className="text-sm text-amber-700 mt-0.5">We wrote 3 versions. Pick the one that sounds like you.</p>
+                    <p className="text-sm mt-0.5" style={{ color: GRAY }}>We wrote 3 versions. Pick the one that sounds like you.</p>
                   </div>
                 </div>
               )}
 
               {/* Cards section */}
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-serif text-xl font-bold" style={{ color: NAVY }}>Your Cards</h2>
+                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.05em", color: BLACK }}>Your Cards</h2>
               </div>
 
               {upcoming.length === 0 ? (
-                <div
-                  className="bg-white rounded-2xl border shadow-sm overflow-hidden"
-                  style={{ borderColor: "hsl(40,20%,87%)" }}
-                >
-                  {/* Illustration band — swap the placeholder for branded art */}
-                  <div
-                    className="w-full flex items-center justify-center py-8"
-                    style={{ background: "linear-gradient(135deg, hsl(40,50%,96%) 0%, hsl(221,30%,95%) 100%)" }}
-                  >
-                    <IllustrationPlaceholder size="lg" gradient="subtle" />
+                <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+                  <div className="w-full flex items-center justify-center py-8" style={{ background: BEIGE }}>
+                    <IllustrationPlaceholder size="lg" />
                   </div>
                   <div className="px-8 pb-8 pt-5 text-center">
-                    <p className="font-bold text-lg mb-1" style={{ color: NAVY }}>
+                    <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 4 }}>
                       {recipients.length === 0 ? "Autopilot needs a target." : "Nothing scheduled yet — we'll get to work."}
                     </p>
-                    <p className="text-sm mb-5" style={{ color: "hsl(221,20%,52%)" }}>
+                    <p className="text-sm mb-5" style={{ color: GRAY }}>
                       {recipients.length === 0
                         ? "Add your first recipient before you're standing in CVS at 9:47 PM pretending you planned this."
                         : "Cards will appear here as occasions approach."}
@@ -663,8 +610,8 @@ export default function DashboardPage() {
                     {recipients.length === 0 && (
                       <Link href="/recipients/new">
                         <button
-                          className="text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                          style={{ background: NAVY }}
+                          className="text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all"
+                          style={{ background: RED }}
                           data-testid="link-add-recipient-empty"
                         >
                           Add first recipient
@@ -678,20 +625,20 @@ export default function DashboardPage() {
                   {upcoming.map((card) => (
                     <div
                       key={card.id}
-                      className="bg-white rounded-2xl border p-5 flex items-center justify-between shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
-                      style={{ borderColor: "hsl(40,20%,87%)" }}
+                      className="rounded-2xl p-5 flex items-center justify-between transition-all hover:-translate-y-0.5"
+                      style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}
                       data-testid={`card-order-${card.id}`}
                     >
                       <div>
-                        <div className="font-semibold" style={{ color: NAVY }}>{card.holiday} card for {card.recipientName}</div>
-                        <div className="text-sm mt-0.5" style={{ color: "hsl(221,20%,52%)" }}>Due {card.dueDate} · {card.deliveryPreference}</div>
+                        <div style={{ fontWeight: 600, color: BLACK }}>{card.holiday} card for {card.recipientName}</div>
+                        <div className="text-sm mt-0.5" style={{ color: GRAY }}>Due {card.dueDate} · {card.deliveryPreference}</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <StatusBadge status={card.status} />
                         {card.status === "Ready for approval" && (
                           <span
                             className="text-xs font-semibold px-2 py-1 rounded-lg"
-                            style={{ color: RED, background: "#fff1f0", border: `1px solid #fecaca` }}
+                            style={{ color: RED, background: `${RED}10`, border: `1px solid ${RED}25` }}
                           >Pick yours →</span>
                         )}
                       </div>
@@ -703,7 +650,7 @@ export default function DashboardPage() {
               {/* Recipients section */}
               <div className="mt-8">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-serif text-xl font-bold" style={{ color: NAVY }}>Recipients</h2>
+                  <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.05em", color: BLACK }}>Recipients</h2>
                   <Link href="/recipients/new">
                     <button
                       className="flex items-center gap-1.5 text-sm font-semibold hover:underline transition-all"
@@ -716,20 +663,13 @@ export default function DashboardPage() {
                 </div>
 
                 {recipients.length === 0 ? (
-                  <div
-                    className="bg-white rounded-2xl border shadow-sm overflow-hidden"
-                    style={{ borderColor: "hsl(40,20%,87%)" }}
-                  >
-                    {/* Illustration band — swap for branded art */}
-                    <div
-                      className="w-full flex items-center justify-center py-6"
-                      style={{ background: "linear-gradient(135deg, hsl(40,50%,96%) 0%, hsl(221,30%,95%) 100%)" }}
-                    >
-                      <IllustrationPlaceholder size="md" gradient="subtle" />
+                  <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+                    <div className="w-full flex items-center justify-center py-6" style={{ background: BEIGE }}>
+                      <IllustrationPlaceholder size="md" />
                     </div>
                     <div className="px-6 pb-6 pt-4 text-center">
-                      <p className="font-semibold" style={{ color: NAVY }}>No recipients yet.</p>
-                      <p className="text-sm mt-1" style={{ color: "hsl(221,20%,52%)" }}>That is how disasters begin.</p>
+                      <p style={{ fontWeight: 600, color: BLACK }}>No recipients yet.</p>
+                      <p className="text-sm mt-1" style={{ color: GRAY }}>That is how disasters begin.</p>
                     </div>
                   </div>
                 ) : (
@@ -740,26 +680,26 @@ export default function DashboardPage() {
                       return (
                         <Link key={r.id} href={`/recipients/${r.id}`} data-testid={`card-recipient-${r.id}`}>
                           <div
-                            className="bg-white rounded-2xl border p-5 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer shadow-sm"
-                            style={{ borderColor: "hsl(40,20%,87%)" }}
+                            className="rounded-2xl p-5 hover:-translate-y-0.5 transition-all cursor-pointer"
+                            style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}
                           >
                             <div className="flex items-center gap-3 mb-2">
                               <div
                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                                style={{ background: NAVY }}
+                                style={{ background: RED, fontFamily: "'Bebas Neue', cursive", fontSize: "1rem" }}
                               >
                                 {r.name.charAt(0)}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="font-semibold truncate" style={{ color: NAVY }}>{r.name}</div>
-                                <div className="text-xs" style={{ color: "hsl(221,20%,52%)" }}>
+                                <div style={{ fontWeight: 600, color: BLACK }} className="truncate">{r.name}</div>
+                                <div className="text-xs" style={{ color: GRAY }}>
                                   {r.relationship}
                                   {yearsMarried !== null && yearsMarried > 0 && ` · ${yearsMarried} yrs`}
                                   {childCount > 0 && ` · ${childCount} kid${childCount !== 1 ? "s" : ""}`}
                                 </div>
                               </div>
                               {r.previewDays && (
-                                <Zap size={14} className="text-yellow-500 flex-shrink-0" />
+                                <Zap size={14} style={{ color: RED, flexShrink: 0 }} />
                               )}
                             </div>
                             <div className="flex flex-wrap gap-1 mt-2">
@@ -767,7 +707,7 @@ export default function DashboardPage() {
                                 <span
                                   key={e}
                                   className="text-xs px-2 py-0.5 rounded-full"
-                                  style={{ background: "hsl(40,50%,92%)", color: "hsl(221,47%,30%)" }}
+                                  style={{ background: `${RED}10`, color: RED, fontWeight: 600 }}
                                 >
                                   {e}
                                 </span>
@@ -775,7 +715,7 @@ export default function DashboardPage() {
                               {(r.selectedEvents ?? []).length > 4 && (
                                 <span
                                   className="text-xs px-2 py-0.5 rounded-full"
-                                  style={{ background: "hsl(40,50%,92%)", color: "hsl(221,47%,30%)" }}
+                                  style={{ background: `${BLACK}08`, color: GRAY }}
                                 >
                                   +{(r.selectedEvents ?? []).length - 4} more
                                 </span>
@@ -795,16 +735,13 @@ export default function DashboardPage() {
 
               {/* Calendar */}
               <div>
-                <h2 className="font-serif text-lg font-bold mb-3" style={{ color: NAVY }}>
+                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: BLACK, marginBottom: 12 }}>
                   {MONTHS[today.getMonth()]} {today.getFullYear()}
                 </h2>
-                <div
-                  className="bg-white rounded-2xl border p-5 shadow-sm"
-                  style={{ borderColor: "hsl(40,20%,87%)" }}
-                >
+                <div className="rounded-2xl p-5" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
                   <div className="grid grid-cols-7 gap-1 text-center mb-2">
                     {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d) => (
-                      <div key={d} className="text-xs font-semibold" style={{ color: "hsl(221,20%,60%)" }}>{d}</div>
+                      <div key={d} className="text-xs font-semibold" style={{ color: GRAY }}>{d}</div>
                     ))}
                   </div>
                   <div className="grid grid-cols-7 gap-1">
@@ -818,8 +755,8 @@ export default function DashboardPage() {
                           key={i}
                           className="aspect-square flex items-center justify-center rounded-lg text-xs relative"
                           style={{
-                            background: isToday ? NAVY : "transparent",
-                            color: isToday ? "#fff" : isCurrentMonth ? NAVY : "hsl(221,20%,72%)",
+                            background: isToday ? RED : "transparent",
+                            color: isToday ? "#fff" : isCurrentMonth ? BLACK : `${BLACK}40`,
                             fontWeight: isToday ? 700 : undefined,
                           }}
                           data-testid={`calendar-day-${iso}`}
@@ -835,7 +772,7 @@ export default function DashboardPage() {
                       );
                     })}
                   </div>
-                  <div className="mt-4 pt-4 border-t flex items-center gap-2 text-xs" style={{ borderColor: "hsl(40,20%,88%)", color: "hsl(221,20%,52%)" }}>
+                  <div className="mt-4 pt-4 border-t flex items-center gap-2 text-xs" style={{ borderColor: `${BLACK}10`, color: GRAY }}>
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RED }} />
                     Card due
                   </div>
@@ -849,20 +786,17 @@ export default function DashboardPage() {
               <DisasterCounter />
 
               {/* Plan status */}
-              <div
-                className="rounded-2xl p-5 border shadow-sm bg-white"
-                style={{ borderColor: "hsl(40,20%,87%)" }}
-              >
+              <div className="rounded-2xl p-5" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="font-serif font-bold" style={{ color: NAVY }}>Your Plan</div>
-                  <span className="text-xs font-bold px-2 py-1 rounded-full text-white" style={{ background: NAVY }}>BASIC</span>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.05em", color: BLACK }}>Your Plan</div>
+                  <span className="text-xs font-bold px-2 py-1 rounded-full text-white" style={{ background: BLACK }}>BASIC</span>
                 </div>
-                <p className="text-xs mb-3" style={{ color: "hsl(221,20%,52%)" }}>
+                <p className="text-xs mb-3" style={{ color: GRAY }}>
                   Up to 6 cards/year · {recipients.length} recipient{recipients.length !== 1 ? "s" : ""} active
                 </p>
                 <Link href="/signup">
                   <button
-                    className="block w-full text-center text-xs font-bold py-2 rounded-xl hover:opacity-90 transition-all text-white hover:-translate-y-0.5 hover:shadow-sm"
+                    className="block w-full text-center text-xs font-bold py-2 rounded-xl hover:opacity-90 transition-all text-white"
                     style={{ background: RED }}
                   >
                     Upgrade Plan
@@ -871,20 +805,20 @@ export default function DashboardPage() {
               </div>
 
               {/* Autopilot summary */}
-              <div className="rounded-2xl p-5 shadow-sm" style={{ background: NAVY }}>
-                <div className="font-serif font-bold text-white mb-3 text-sm">Autopilot Summary</div>
-                <div className="space-y-2 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
+              <div className="rounded-2xl p-5" style={{ background: BLACK }}>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.05em", color: "#fff", marginBottom: 12 }}>Autopilot Summary</div>
+                <div className="space-y-2 text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
                   <div className="flex justify-between">
                     <span>Recipients</span>
-                    <span className="text-white font-bold">{recipients.length}</span>
+                    <span className="font-bold" style={{ color: "#fff" }}>{recipients.length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Events covered</span>
-                    <span className="text-white font-bold">{disastersAvoided}</span>
+                    <span className="font-bold" style={{ color: "#fff" }}>{disastersAvoided}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Briefings needed</span>
-                    <span className="font-bold" style={{ color: briefingsNeeded.length > 0 ? GOLD : "rgba(255,255,255,0.55)" }}>
+                    <span className="font-bold" style={{ color: briefingsNeeded.length > 0 ? RED : "rgba(255,255,255,0.5)" }}>
                       {briefingsNeeded.length}
                     </span>
                   </div>
