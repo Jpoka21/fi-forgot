@@ -13,6 +13,9 @@ export interface OnboardingData {
   selectedEvents: string[];
   eventDates: Record<string, string>;
   previewDays: PreviewDays;
+  emotionalLevel?: number;
+  favoriteMemories?: string;
+  insideJokes?: string;
   deliveryPreference?: "Mail it to me" | "Mail it directly to her";
   mailingAddress?: {
     line1: string;
@@ -142,10 +145,13 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     customDates,
     tonePreference: TONE_MAP[data.tone] ?? "Sweet",
     personalityNotes: noteParts.join(" | "),
-    favoriteMemories: "",
-    insideJokes: data.petName ? `Pet name: ${data.petName}` : "",
+    favoriteMemories: data.favoriteMemories ?? "",
+    insideJokes: [
+      data.insideJokes ?? "",
+      data.petName ? `Pet name: ${data.petName}` : "",
+    ].filter(Boolean).join(" | "),
     thingsToAvoid: data.thingsToAvoid,
-    emotionalLevel: 3,
+    emotionalLevel: data.emotionalLevel ?? 3,
     deliveryPreference: data.deliveryPreference ?? deliveryPref,
     mailingAddress: data.mailingAddress?.line1?.trim()
       ? (data.mailingAddress as import("./data").RecipientAddress)

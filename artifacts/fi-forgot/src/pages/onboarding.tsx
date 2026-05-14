@@ -88,6 +88,9 @@ export default function OnboardingPage() {
     selectedEvents: [],
     eventDates: {},
     previewDays: 14,
+    emotionalLevel: 3,
+    favoriteMemories: "",
+    insideJokes: "",
     deliveryPreference: undefined,
     mailingAddress: { line1: "", line2: "", city: "", state: "", zip: "" },
   });
@@ -513,6 +516,58 @@ export default function OnboardingPage() {
                       />
                     </div>
                   )}
+                  <div>
+                    <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
+                      Emotional dial <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                    </label>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      <input
+                        type="range" min={1} max={5} step={1}
+                        value={data.emotionalLevel ?? 3}
+                        onChange={(e) => setData((d) => ({ ...d, emotionalLevel: Number(e.target.value) }))}
+                        style={{ width: "100%", accentColor: RED }}
+                        data-testid="input-emotional-dial"
+                      />
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#888" }}>
+                        <span>Pure comedy</span>
+                        <span style={{ fontWeight: 600, color: RED }}>
+                          {["", "Pure comedy", "Mostly fun", "Balanced", "Mostly heartfelt", "Full cryfest"][(data.emotionalLevel ?? 3)]}
+                        </span>
+                        <span>Full cryfest</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
+                      Favorite memories or stories <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                    </label>
+                    <textarea
+                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors resize-none"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.1rem", padding: "11px 16px" }}
+                      placeholder="The trip to Italy, that one concert, the time she…"
+                      rows={2}
+                      value={data.favoriteMemories}
+                      onChange={(e) => setData((d) => ({ ...d, favoriteMemories: e.target.value }))}
+                      data-testid="input-favorite-memories"
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
+                      Inside jokes <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                    </label>
+                    <textarea
+                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors resize-none"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1.1rem", padding: "11px 16px" }}
+                      placeholder="Things only the two of you would get…"
+                      rows={2}
+                      value={data.insideJokes}
+                      onChange={(e) => setData((d) => ({ ...d, insideJokes: e.target.value }))}
+                      data-testid="input-inside-jokes"
+                    />
+                  </div>
+
                   <div>
                     <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
                       Anything we should NEVER put in a card? <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
