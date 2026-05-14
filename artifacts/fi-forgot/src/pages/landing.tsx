@@ -77,97 +77,98 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
 
-        {/* The cover page image — full width, no constraints */}
+        {/* The image — pointer-events off so overlays always win clicks */}
         <img
           src="/cover-page.png"
           alt="F* I Forgot — You focus on life. We remember everything."
-          style={{ width: "100%", height: "auto", display: "block" }}
+          style={{ width: "100%", height: "auto", display: "block", pointerEvents: "none", userSelect: "none" }}
           draggable={false}
         />
 
-        {/* ── Transparent clickable zones for the image's nav links ── */}
-        <a href="/login"        style={{ position: "absolute", top: "1%", right: "17%", width: "7%",  height: "3.5%", display: "block", cursor: "pointer" }} aria-label="Sign in" />
-        <a href="#how-it-works" style={{ position: "absolute", top: "1%", left:  "22%", width: "8%",  height: "3.5%", display: "block", cursor: "pointer" }} aria-label="How it works" />
-        <a href="#pricing"      style={{ position: "absolute", top: "1%", left:  "31%", width: "5%",  height: "3.5%", display: "block", cursor: "pointer" }} aria-label="Plans" />
-        <a href="#examples"     style={{ position: "absolute", top: "1%", left:  "37%", width: "7%",  height: "3.5%", display: "block", cursor: "pointer" }} aria-label="Examples" />
-        <a href="#reviews"      style={{ position: "absolute", top: "1%", left:  "45%", width: "7%",  height: "3.5%", display: "block", cursor: "pointer" }} aria-label="Reviews" />
-        <a href="#faq"          style={{ position: "absolute", top: "1%", left:  "53%", width: "5%",  height: "3.5%", display: "block", cursor: "pointer" }} aria-label="FAQ" />
+        {/* ─────────────────────────────────────────────────────────────────
+            ALL overlays use zIndex: 10 and pointerEvents: "auto" so they
+            always sit above the image and reliably capture clicks.
+        ───────────────────────────────────────────────────────────────── */}
 
-        {/* ── Nav "START EARNING BROWNIE POINTS" — invisible overlay (image shows) ── */}
-        <Link href="/signup" style={{ position: "absolute", top: "0.5%", right: "0.5%", width: "16%", height: "5%", display: "block", cursor: "pointer" }} aria-label="Start earning brownie points" data-testid="link-get-started-nav" />
+        {/* Nav: transparent click zones over the image's nav links */}
+        <a href="/login"        style={{ position:"absolute", zIndex:10, top:"1%",   right:"17%", width:"7%",  height:"3.5%", cursor:"pointer" }} aria-label="Sign in" />
+        <a href="#how-it-works" style={{ position:"absolute", zIndex:10, top:"1%",   left:"22%",  width:"8%",  height:"3.5%", cursor:"pointer" }} aria-label="How it works" />
+        <a href="#pricing"      style={{ position:"absolute", zIndex:10, top:"1%",   left:"31%",  width:"5%",  height:"3.5%", cursor:"pointer" }} aria-label="Plans" />
+        <a href="#examples"     style={{ position:"absolute", zIndex:10, top:"1%",   left:"37%",  width:"7%",  height:"3.5%", cursor:"pointer" }} aria-label="Examples" />
+        <a href="#reviews"      style={{ position:"absolute", zIndex:10, top:"1%",   left:"45%",  width:"7%",  height:"3.5%", cursor:"pointer" }} aria-label="Reviews" />
+        <a href="#faq"          style={{ position:"absolute", zIndex:10, top:"1%",   left:"53%",  width:"5%",  height:"3.5%", cursor:"pointer" }} aria-label="FAQ" />
 
-        {/* ── Main hero CTA buttons ─────────────────────────────────────── */}
-        {/* Visible buttons rendered over the image's "START NOW" area       */}
-        {/* Image button is at ~68.5% vertical, left-aligned ~3.5%          */}
-        <div
-          style={{
-            position: "absolute",
-            top: "68.5%",
-            left: "3.5%",
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: "clamp(6px, 1.5vw, 16px)",
-            flexWrap: "wrap",
-          }}
-        >
-          {/* Primary — overlays and replaces the image's "START NOW" button */}
-          <Link
-            href="/signup"
-            data-testid="link-cta-primary"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: B.black,
-              color: "#fff",
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(0.7rem, 2.3vw, 1.5rem)",
-              letterSpacing: "0.1em",
-              padding: "clamp(6px, 1.5vw, 14px) clamp(14px, 4vw, 44px)",
-              borderRadius: 4,
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-              cursor: "pointer",
-            }}
-          >
-            START EARNING BROWNIE POINTS
-          </Link>
+        {/* Nav CTA — red "START EARNING BROWNIE POINTS" top-right */}
+        <Link href="/signup" data-testid="link-get-started-nav"
+          style={{ position:"absolute", zIndex:10, top:"0.5%", right:"0.5%", width:"16%", height:"5.5%", cursor:"pointer" }}
+          aria-label="Start earning brownie points" />
 
-          {/* Secondary — "SEE HOW IT WORKS" */}
-          <a
-            href="#how-it-works"
-            data-testid="link-how-it-works"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.4em",
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(0.6rem, 1.7vw, 1.1rem)",
-              letterSpacing: "0.1em",
-              color: B.black,
-              background: "rgba(255,255,255,0.82)",
-              border: `2px solid ${B.black}`,
-              padding: "clamp(5px, 1.3vw, 12px) clamp(10px, 2.8vw, 32px)",
-              borderRadius: 4,
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-              cursor: "pointer",
-            }}
-          >
-            ▶ SEE HOW IT WORKS
-          </a>
-        </div>
+        {/* ── Main hero "START NOW" button — transparent hit zone ───────── */}
+        {/* Covers the red START NOW button in the image at ~61–68% vertical */}
+        <Link href="/signup" data-testid="link-cta-hitzone" aria-label="Start Now"
+          style={{ position:"absolute", zIndex:10, top:"61%", left:"2%", width:"27%", height:"8%", cursor:"pointer" }} />
 
-        {/* ── Banner "START NOW" — invisible overlay (image shows the button) ── */}
+        {/* ── Banner "START NOW" — transparent hit zone ──────────────────── */}
+        {/* Covers the red START NOW button in the beige banner at ~76–82%   */}
+        <Link href="/signup" data-testid="link-cta-banner" aria-label="Start Now"
+          style={{ position:"absolute", zIndex:10, top:"76%", right:"2%", width:"24%", height:"6%", cursor:"pointer" }} />
+      </section>
+
+      {/* ── Real CTA strip — immediately below the hero image ──────────── */}
+      {/* These are unmistakably real, always visible, always clickable.    */}
+      <div style={{
+        background: B.black,
+        padding: "clamp(18px, 3vw, 32px) 5%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "clamp(10px, 2.5vw, 24px)",
+        flexWrap: "wrap",
+      }}>
         <Link
           href="/signup"
-          data-testid="link-cta-banner"
-          aria-label="Start Now"
-          style={{ position: "absolute", top: "78%", right: "2%", width: "21%", height: "4.5%", display: "block", cursor: "pointer" }}
-        />
-      </section>
+          data-testid="link-cta-primary"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: B.red,
+            color: "#fff",
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(1rem, 2.5vw, 1.6rem)",
+            letterSpacing: "0.12em",
+            padding: "clamp(12px, 1.8vw, 20px) clamp(24px, 5vw, 64px)",
+            borderRadius: 4,
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+            boxShadow: "0 4px 24px rgba(211,47,47,0.45)",
+            cursor: "pointer",
+          }}
+        >
+          START EARNING BROWNIE POINTS
+        </Link>
+        <a
+          href="#how-it-works"
+          data-testid="link-how-it-works"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5em",
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(0.85rem, 1.8vw, 1.2rem)",
+            letterSpacing: "0.12em",
+            color: "rgba(255,255,255,0.85)",
+            border: "2px solid rgba(255,255,255,0.35)",
+            padding: "clamp(10px, 1.6vw, 18px) clamp(18px, 3.5vw, 44px)",
+            borderRadius: 4,
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+            cursor: "pointer",
+          }}
+        >
+          ▶ SEE HOW IT WORKS
+        </a>
+      </div>
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* REAL SECTIONS — below the hero image                              */}
