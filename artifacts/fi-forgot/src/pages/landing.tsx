@@ -186,7 +186,7 @@ export default function LandingPage() {
         className="py-20 px-6"
         style={{ background: B.white }}
       >
-        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <SectionHeading sub="We handle it all. You get the credit.">
             How It Works
           </SectionHeading>
@@ -231,7 +231,7 @@ export default function LandingPage() {
           PLANS
         </div>
 
-        <div style={{ maxWidth: 960, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <SectionHeading sub="Because forgetting once was funny. Repeatedly forgetting becomes a lifestyle.">
             ✦ Choose Your Survival Plan ✦
           </SectionHeading>
@@ -300,7 +300,7 @@ export default function LandingPage() {
 
       {/* ── EXAMPLES ─────────────────────────────────────────────────────── */}
       <section id="examples" className="py-20 px-6" style={{ background: B.black }}>
-        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <SectionHeading sub="AI-written. Sounds completely human. They'll never know." inverted>
             What the Cards Sound Like
           </SectionHeading>
@@ -341,7 +341,7 @@ export default function LandingPage() {
 
       {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
       <section id="reviews" className="py-20 px-6" style={{ background: B.white }}>
-        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <SectionHeading sub="Real stories. Changed names. Marriages still intact.">
             Men Who Survived
           </SectionHeading>
@@ -382,7 +382,7 @@ export default function LandingPage() {
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
       <section id="faq" className="py-20 px-6" style={{ background: B.beigeD }}>
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <SectionHeading>Questions from Men in the Wild</SectionHeading>
 
           <SectionDivider label="Frequently Asked" />
@@ -418,7 +418,7 @@ export default function LandingPage() {
 
       {/* ── FINAL CTA ────────────────────────────────────────────────────── */}
       <section className="py-16 px-6" style={{ background: B.beige }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <CtaBanner
             headline="GOOD RELATIONSHIPS DON'T HAPPEN BY ACCIDENT."
             sub="We remember. We write. We send. You get the credit."
@@ -435,7 +435,7 @@ export default function LandingPage() {
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <footer className="py-10 px-6" style={{ background: B.black }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }} className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div style={{ maxWidth: 1400, margin: "0 auto" }} className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.08em", color: B.red, lineHeight: 1 }}>
             F* I FORGOT
             <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.7rem", color: "rgba(255,255,255,0.3)", fontWeight: 400, letterSpacing: "0.04em", marginTop: 2 }}>
