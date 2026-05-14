@@ -167,9 +167,29 @@ export default function LandingPage() {
         className="sticky top-0 z-50"
         style={{ background: B.black, borderBottom: `2px solid ${B.red}` }}
       >
-        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between gap-6">
+        {/*
+          Logo CSS lives in landing.tsx — <nav> > <div> > <Link> > the two logo wrappers.
+          Desktop selector: .nav-logo-desktop  (height: 58px)
+          Mobile  selector: .nav-logo-mobile   (height: 44px)
+          noFilter removes the SVG displacement filter that caused fuzziness.
+        */}
+        <div className="max-w-7xl mx-auto px-5 h-[76px] flex items-center justify-between gap-6">
           <Link href="/" className="flex-shrink-0">
-            <BrandLogo size="sm" variant="stamp" inverted />
+            {/* Desktop logo — 58px tall, crisp (no stamp filter) */}
+            {/* height/width are on the wrapper; display is controlled by Tailwind only */}
+            <div
+              className="nav-logo-desktop hidden sm:flex items-center"
+              style={{ height: 58, width: "auto" }}
+            >
+              <BrandLogo size="md" variant="stamp" inverted noFilter />
+            </div>
+            {/* Mobile logo — 44px tall, crisp */}
+            <div
+              className="nav-logo-mobile sm:hidden flex items-center"
+              style={{ height: 44, width: "auto" }}
+            >
+              <BrandLogo size="sm" variant="stamp" inverted noFilter />
+            </div>
           </Link>
 
           <div className="hidden md:flex items-center gap-7">

@@ -80,10 +80,13 @@ export function BrandLogo({
   size = "md",
   variant = "stamp",
   inverted = false,
+  noFilter = false,
 }: {
   size?: "sm" | "md" | "lg";
   variant?: "stamp" | "inline" | "compact";
   inverted?: boolean;
+  /** Remove the stamp distress SVG filter — use in navbars where crispness matters */
+  noFilter?: boolean;
 }) {
   const col = inverted ? B.white : B.red;
   const sub = inverted ? "rgba(255,255,255,0.65)" : B.black;
@@ -139,7 +142,7 @@ export function BrandLogo({
     );
   }
 
-  // stamp variant — bordered rectangle with distress filter
+  // stamp variant — bordered rectangle with optional distress filter
   return (
     <div
       style={{
@@ -149,10 +152,10 @@ export function BrandLogo({
         padding: cfg.pad,
         border: `${cfg.bw} solid ${bdr}`,
         borderRadius: 5,
-        filter: "url(#fi-stamp)",
+        filter: noFilter ? undefined : "url(#fi-stamp)",
         lineHeight: 1,
         gap: cfg.gap,
-        opacity: 0.92,
+        opacity: noFilter ? 1 : 0.92,
       }}
     >
       <span
