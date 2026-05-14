@@ -4,10 +4,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   B,
   BrandButton,
-  CircleStamp,
   StickyNote,
   SectionDivider,
-  IconCard,
   CtaBanner,
   TaglineBar,
   SectionHeading,
@@ -54,12 +52,6 @@ const plans = [
   },
 ];
 
-const howItWorksSteps = [
-  { num: "01", title: "Add the people that matter", body: "Name, relationship, birthday, occasions. Takes 3 minutes. One time ever.", note: "No more panic pharmacy runs.", icon: "📋" },
-  { num: "02", title: "Tell us their personality", body: "Funny? Sentimental? Hates cheesy stuff? We remember everything so cards actually sound personal.", note: "Because your wife remembers everything.", icon: "🔍" },
-  { num: "03", title: "Pick your autopilot mode", body: "Full autopilot, preview before mailing, or require your approval. You decide how hands-off to be.", note: "USPS delays should not ruin marriages.", icon: "✉️" },
-  { num: "04", title: "We handle everything else", body: "Cards are written, addressed, and mailed ~7 days before every event. You get the credit.", note: "Your future self is already covered.", icon: "♥️" },
-];
 
 const examples = [
   { occasion: "Anniversary", recipient: "Wife, 7 years", preview: `"Every year I'm amazed you still put up with me. Honestly, I'm more impressed by you than I was on day one. Happy Anniversary — I'm the luckiest idiot alive."` },
@@ -85,9 +77,9 @@ export default function LandingPage() {
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* HERO — Cover Page image is the complete hero. Full bleed.         */}
+      {/* HERO — Full-bleed image: nav + hero + how-it-works + social proof  */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
+      <section id="how-it-works" className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
 
         {/* Image — pointer-events disabled so every overlay wins every click */}
         <img
@@ -97,119 +89,29 @@ export default function LandingPage() {
           draggable={false}
         />
 
-        {/* ── Nav link zones — plain <a> tags, no JS required ──────────── */}
-        <a aria-label="Sign in"      href="/login"          style={zone({ top:"1%", right:"17%", width:"7%",  height:"4%" })} />
-        <a aria-label="How it works" href="#how-it-works"   style={zone({ top:"1%", left:"22%",  width:"8%",  height:"4%" })} />
-        <a aria-label="Plans"        href="#pricing"        style={zone({ top:"1%", left:"31%",  width:"5%",  height:"4%" })} />
-        <a aria-label="Examples"     href="#examples"       style={zone({ top:"1%", left:"37%",  width:"7%",  height:"4%" })} />
-        <a aria-label="Reviews"      href="#reviews"        style={zone({ top:"1%", left:"45%",  width:"7%",  height:"4%" })} />
-        <a aria-label="FAQ"          href="#faq"            style={zone({ top:"1%", left:"53%",  width:"5%",  height:"4%" })} />
+        {/* ── Nav link zones ─────────────────────────────────────────────── */}
+        <a aria-label="How it works" href="#how-it-works" style={zone({ top:"1%",   left:"22%", width:"10%", height:"3.5%" })} />
+        <a aria-label="Plans"        href="#pricing"      style={zone({ top:"1%",   left:"32%", width:"6%",  height:"3.5%" })} />
+        <a aria-label="Examples"     href="#examples"     style={zone({ top:"1%",   left:"38%", width:"9%",  height:"3.5%" })} />
+        <a aria-label="Reviews"      href="#reviews"      style={zone({ top:"1%",   left:"47%", width:"8%",  height:"3.5%" })} />
+        <a aria-label="FAQ"          href="#faq"          style={zone({ top:"1%",   left:"55%", width:"5%",  height:"3.5%" })} />
+        <a aria-label="Sign in"      href="/login"        style={zone({ top:"1%",   left:"60%", width:"8%",  height:"3.5%" })} />
 
-        {/* Nav CTA — red "START EARNING BROWNIE POINTS" button top-right */}
+        {/* Nav CTA — "START EARNING BROWNIE POINTS" red button top-right */}
         <a aria-label="Start earning brownie points" data-testid="link-get-started-nav"
-          href="/signup" style={zone({ top:"0.5%", right:"0.5%", width:"16%", height:"5.5%" })} />
+          href="/signup" style={zone({ top:"0.3%", right:"0%", width:"22%", height:"5%" })} />
 
-        {/* ── Hero "START NOW" — hit zone over the left red button ────────── */}
-        {/* Debug showed 59% was too low — button is at ~52–58%            */}
+        {/* Hero "START NOW" — large red button lower-left of hero */}
         <a aria-label="Start Now" data-testid="link-cta-hitzone"
-          href="/signup" style={zone({ top:"52%", left:"1%", width:"27%", height:"7%" })} />
+          href="/signup" style={zone({ top:"62%", left:"1%", width:"28%", height:"4.5%" })} />
 
-        {/* ── Banner "START NOW" — hit zone over the banner button ────────── */}
-        {/* Debug showed 70% was too low — banner button is at ~60–70%     */}
+        {/* "STOP FORGETTING" banner — "START NOW" button on the right */}
         <a aria-label="Start Now" data-testid="link-cta-banner"
-          href="/signup" style={zone({ top:"60%", left:"64%", width:"34%", height:"11%" })} />
-      </section>
+          href="/signup" style={zone({ top:"68.5%", right:"1%", width:"28%", height:"5%" })} />
 
-      {/* ── Real CTA strip — immediately below the hero image ──────────── */}
-      {/* These are unmistakably real, always visible, always clickable.    */}
-      <div style={{
-        background: B.black,
-        padding: "clamp(18px, 3vw, 32px) 5%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "clamp(10px, 2.5vw, 24px)",
-        flexWrap: "wrap",
-      }}>
-        <a
-          href="/signup"
-          data-testid="link-cta-primary"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: B.red,
-            color: "#fff",
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(1rem, 2.5vw, 1.6rem)",
-            letterSpacing: "0.12em",
-            padding: "clamp(12px, 1.8vw, 20px) clamp(24px, 5vw, 64px)",
-            borderRadius: 4,
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-            boxShadow: "0 4px 24px rgba(211,47,47,0.45)",
-            cursor: "pointer",
-          }}
-        >
-          START EARNING BROWNIE POINTS
-        </a>
-        <a
-          href="#how-it-works"
-          data-testid="link-how-it-works"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.5em",
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(0.85rem, 1.8vw, 1.2rem)",
-            letterSpacing: "0.12em",
-            color: "rgba(255,255,255,0.85)",
-            border: "2px solid rgba(255,255,255,0.35)",
-            padding: "clamp(10px, 1.6vw, 18px) clamp(18px, 3.5vw, 44px)",
-            borderRadius: 4,
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-            cursor: "pointer",
-          }}
-        >
-          ▶ SEE HOW IT WORKS
-        </a>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* REAL SECTIONS — below the hero image                              */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-
-      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section
-        id="how-it-works"
-        className="py-20 px-6"
-        style={{ background: B.white }}
-      >
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <SectionHeading sub="We handle it all. You get the credit.">
-            How It Works
-          </SectionHeading>
-
-          <div className="grid md:grid-cols-2 gap-5">
-            {howItWorksSteps.map((s) => (
-              <IconCard
-                key={s.num}
-                num={s.num}
-                icon={s.icon}
-                title={s.title}
-                body={s.body}
-                note={s.note}
-              />
-            ))}
-          </div>
-
-          <div className="mt-14 flex items-center justify-center gap-6 flex-wrap opacity-75">
-            <CircleStamp type="crisis"   size={72} />
-            <CircleStamp type="deployed" size={72} />
-            <CircleStamp type="saved"    size={72} />
-          </div>
-        </div>
+        {/* Bottom banner — "START EARNING BROWNIE POINTS" right button */}
+        <a aria-label="Start earning brownie points" data-testid="link-cta-bottom"
+          href="/signup" style={zone({ top:"94%", right:"1%", width:"36%", height:"5%" })} />
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
