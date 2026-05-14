@@ -241,8 +241,8 @@ export default function SignupPage() {
             <div className="mt-4 flex items-center justify-between px-1 flex-wrap gap-3">
               <img src="/stamp-disaster-avoided.png" alt="Another Disaster Avoided" style={{ height: 88, width: "auto", transform: "rotate(-1deg)" }} />
               <p
-                className="text-xs italic"
-                style={{ color: `${B.black}35`, fontFamily: "'Caveat', cursive", fontSize: "0.9rem" }}
+                className="italic"
+                style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}
               >
                 Demo mode — no real account created.
               </p>

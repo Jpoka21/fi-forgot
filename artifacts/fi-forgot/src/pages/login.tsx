@@ -219,8 +219,8 @@ export default function LoginPage() {
         </div>
 
         <p
-          className="text-center text-xs mt-6 italic"
-          style={{ color: `${B.black}35`, fontFamily: "'Caveat', cursive", fontSize: "0.9rem" }}
+          className="text-center mt-6 italic"
+          style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}
         >
           Demo mode — any email and password will work.
         </p>
