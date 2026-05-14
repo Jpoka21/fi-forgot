@@ -70,16 +70,18 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [, navigate] = useLocation();
 
-  // Reliable programmatic navigation — used by every hit zone
-  const goSignup = () => navigate("/signup");
-  const goLogin  = () => navigate("/login");
+  // Hard navigation — bypasses any routing context issues
+  const goSignup = () => { window.location.href = "/signup"; };
+  const goLogin  = () => { window.location.href = "/login"; };
+  const goAnchor = (id: string) => () => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
-  // Reusable transparent hit-zone style
+  // Hit-zone style — rgba(0,0,0,0.001) instead of transparent so the
+  // browser treats it as a real surface and fires pointer events on it.
   const zone = (extra: React.CSSProperties): React.CSSProperties => ({
     position: "absolute",
     zIndex: 20,
     cursor: "pointer",
-    background: "transparent",
+    background: "rgba(0,0,0,0.001)",
     ...extra,
   });
 
@@ -100,12 +102,12 @@ export default function LandingPage() {
         />
 
         {/* ── Nav link zones ─────────────────────────────────────────────── */}
-        <div role="button" aria-label="Sign in"      onClick={goLogin}              style={zone({ top:"1%", right:"17%", width:"7%",  height:"4%" })} />
-        <div role="button" aria-label="How it works" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior:"smooth" })} style={zone({ top:"1%", left:"22%", width:"8%", height:"4%" })} />
-        <div role="button" aria-label="Plans"        onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior:"smooth" })}      style={zone({ top:"1%", left:"31%", width:"5%", height:"4%" })} />
-        <div role="button" aria-label="Examples"     onClick={() => document.getElementById("examples")?.scrollIntoView({ behavior:"smooth" })}     style={zone({ top:"1%", left:"37%", width:"7%", height:"4%" })} />
-        <div role="button" aria-label="Reviews"      onClick={() => document.getElementById("reviews")?.scrollIntoView({ behavior:"smooth" })}      style={zone({ top:"1%", left:"45%", width:"7%", height:"4%" })} />
-        <div role="button" aria-label="FAQ"          onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior:"smooth" })}           style={zone({ top:"1%", left:"53%", width:"5%", height:"4%" })} />
+        <div role="button" aria-label="Sign in"      onClick={goLogin}                    style={zone({ top:"1%", right:"17%", width:"7%",  height:"4%" })} />
+        <div role="button" aria-label="How it works" onClick={goAnchor("how-it-works")}   style={zone({ top:"1%", left:"22%",  width:"8%",  height:"4%" })} />
+        <div role="button" aria-label="Plans"        onClick={goAnchor("pricing")}        style={zone({ top:"1%", left:"31%",  width:"5%",  height:"4%" })} />
+        <div role="button" aria-label="Examples"     onClick={goAnchor("examples")}       style={zone({ top:"1%", left:"37%",  width:"7%",  height:"4%" })} />
+        <div role="button" aria-label="Reviews"      onClick={goAnchor("reviews")}        style={zone({ top:"1%", left:"45%",  width:"7%",  height:"4%" })} />
+        <div role="button" aria-label="FAQ"          onClick={goAnchor("faq")}            style={zone({ top:"1%", left:"53%",  width:"5%",  height:"4%" })} />
 
         {/* Nav CTA — red "START EARNING BROWNIE POINTS" button top-right */}
         <div role="button" aria-label="Start earning brownie points" data-testid="link-get-started-nav"
