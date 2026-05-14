@@ -62,22 +62,22 @@ export default function SignupPage() {
       </div>
 
       <div className="w-full max-w-7xl relative z-10">
-        <div className="grid md:grid-cols-2 gap-16 items-start">
+        <div className="grid md:grid-cols-2 gap-14 items-start">
 
           {/* ── Left: Brand pitch ──────────────────────────────────────────── */}
           <div className="pt-2">
-            <Link href="/" className="inline-block mb-12">
-              <img src="/logo.png" alt="F* I Forgot" style={{ height: 100, width: "auto" }} />
+            <Link href="/" className="inline-block mb-10">
+              <img src="/logo.png" alt="F* I Forgot" style={{ height: 90, width: "auto" }} />
             </Link>
 
             <h1
               style={{
                 fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(3.4rem, 7.8vw, 5.6rem)",
+                fontSize: "clamp(3.06rem, 7vw, 5rem)",
                 letterSpacing: "0.04em",
                 color: B.black,
                 lineHeight: 1,
-                marginBottom: 19,
+                marginBottom: 17,
               }}
             >
               Stop Winging It.<br />
@@ -86,11 +86,11 @@ export default function SignupPage() {
 
             <p
               style={{
-                fontSize: "1.5625rem",
+                fontSize: "1.4rem",
                 color: B.gray,
                 lineHeight: 1.7,
-                marginBottom: 44,
-                maxWidth: 625,
+                marginBottom: 40,
+                maxWidth: 562,
               }}
             >
               Join the men who stopped relying on last-minute gas station runs
@@ -98,20 +98,20 @@ export default function SignupPage() {
               the actual thinking.
             </p>
 
-            <ul className="space-y-5 mb-12">
+            <ul className="space-y-4 mb-10">
               {perks.map((p) => (
                 <li key={p.text} className="flex items-start gap-4">
                   <span
                     style={{
-                      width: 38,
-                      height: 38,
+                      width: 34,
+                      height: 34,
                       borderRadius: "50%",
                       background: B.red,
                       color: B.white,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "1.1rem",
+                      fontSize: "1rem",
                       fontWeight: 900,
                       flexShrink: 0,
                       marginTop: 1,
@@ -119,16 +119,16 @@ export default function SignupPage() {
                   >
                     {p.icon}
                   </span>
-                  <span style={{ fontSize: "1.4rem", color: "#333", lineHeight: 1.5 }}>{p.text}</span>
+                  <span style={{ fontSize: "1.26rem", color: "#333", lineHeight: 1.5 }}>{p.text}</span>
                 </li>
               ))}
             </ul>
 
             {/* Stamps decorations */}
             <div className="flex items-end gap-5 flex-wrap">
-              <img src="/stamp-disaster-averted.png" alt="Disaster Averted" style={{ height: 140, width: "auto" }} />
-              <img src="/stamp-date-locked-in.png" alt="Important Date Locked In" style={{ height: 140, width: "auto" }} />
-              <img src="/sticky-note.png" alt="You forgot again, didn't you?" style={{ height: 258, width: "auto", transform: "rotate(-3deg)" }} />
+              <img src="/stamp-disaster-averted.png" alt="Disaster Averted" style={{ height: 126, width: "auto" }} />
+              <img src="/stamp-date-locked-in.png" alt="Important Date Locked In" style={{ height: 126, width: "auto" }} />
+              <img src="/sticky-note.png" alt="You forgot again, didn't you?" style={{ height: 232, width: "auto", transform: "rotate(-3deg)" }} />
             </div>
           </div>
 
@@ -140,16 +140,16 @@ export default function SignupPage() {
                 background: B.white,
                 border: `1.5px solid ${B.black}12`,
                 borderTop: `4px solid ${B.red}`,
-                padding: "clamp(38px, 7.8vw, 56px)",
+                padding: "clamp(34px, 7vw, 50px)",
               }}
             >
               <h2
                 style={{
                   fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "2.8rem",
+                  fontSize: "2.52rem",
                   letterSpacing: "0.06em",
                   color: B.black,
-                  marginBottom: 31,
+                  marginBottom: 28,
                   textTransform: "uppercase",
                 }}
               >
@@ -157,11 +157,11 @@ export default function SignupPage() {
               </h2>
 
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-7">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   {[
-                    { name: "name" as const,     type: "text",     placeholder: "Mike Thompson",     label: "Your Name" },
-                    { name: "email" as const,    type: "email",    placeholder: "you@example.com",   label: "Email" },
-                    { name: "password" as const, type: "password", placeholder: "••••••••",          label: "Password" },
+                    { name: "name" as const,     type: "text",     placeholder: "Mike Thompson",   label: "Your Name" },
+                    { name: "email" as const,    type: "email",    placeholder: "you@example.com", label: "Email" },
+                    { name: "password" as const, type: "password", placeholder: "••••••••",        label: "Password" },
                   ].map(({ name, type, placeholder, label }) => (
                     <FormField
                       key={name}
@@ -172,7 +172,7 @@ export default function SignupPage() {
                           <FormLabel
                             style={{
                               fontFamily: "'Bebas Neue', cursive",
-                              fontSize: "1.22rem",
+                              fontSize: "1.1rem",
                               letterSpacing: "0.14em",
                               color: B.black,
                               textTransform: "uppercase",
@@ -188,8 +188,8 @@ export default function SignupPage() {
                               style={{
                                 borderColor: `${B.black}22`,
                                 background: B.beige,
-                                fontSize: "1.3rem",
-                                padding: "13px 18px",
+                                fontSize: "1.17rem",
+                                padding: "12px 16px",
                                 height: "auto",
                               }}
                               {...field}
@@ -208,12 +208,12 @@ export default function SignupPage() {
                       background: B.red,
                       color: B.white,
                       fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "1.5625rem",
+                      fontSize: "1.4rem",
                       letterSpacing: "0.16em",
                       textTransform: "uppercase",
                       border: "none",
                       cursor: "pointer",
-                      padding: "19px 0",
+                      padding: "17px 0",
                       boxShadow: `0 3px 0 ${B.redDark}, 0 6px 16px ${B.red}30`,
                     }}
                     data-testid="button-signup-submit"
@@ -224,14 +224,14 @@ export default function SignupPage() {
               </Form>
 
               <p
-                className="mt-6 text-center italic"
-                style={{ color: B.black, fontFamily: "'Caveat', cursive", fontSize: "1.625rem" }}
+                className="mt-5 text-center italic"
+                style={{ color: B.black, fontFamily: "'Caveat', cursive", fontSize: "1.46rem" }}
               >
                 By signing up, you agree that forgetting her birthday is not an option.
               </p>
 
-              <div className="mt-6 text-center">
-                <p style={{ fontSize: "1.25rem", color: B.gray }}>
+              <div className="mt-5 text-center">
+                <p style={{ fontSize: "1.125rem", color: B.gray }}>
                   Already have an account?{" "}
                   <Link
                     href="/login"
@@ -245,8 +245,8 @@ export default function SignupPage() {
             </div>
 
             {/* Stamp badge below form */}
-            <div className="mt-6 flex items-center px-1">
-              <img src="/stamp-disaster-avoided.png" alt="Another Disaster Avoided" style={{ height: 138, width: "auto", transform: "rotate(-1deg)" }} />
+            <div className="mt-5 flex items-center px-1">
+              <img src="/stamp-disaster-avoided.png" alt="Another Disaster Avoided" style={{ height: 124, width: "auto", transform: "rotate(-1deg)" }} />
             </div>
           </div>
         </div>
