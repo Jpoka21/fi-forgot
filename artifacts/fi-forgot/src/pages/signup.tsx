@@ -128,10 +128,7 @@ export default function SignupPage() {
             <div className="flex items-end gap-4 flex-wrap">
               <CircleStamp type="crisis" size={72} />
               <CircleStamp type="deployed" size={72} />
-              <StickyNote rotate={-3}>
-                Your future self<br />
-                <span style={{ fontSize: "0.85rem" }}>owes us one.</span>
-              </StickyNote>
+              <img src="/sticky-note.png" alt="Your future self owes us one." style={{ height: 110, width: "auto", transform: "rotate(-3deg)" }} />
             </div>
           </div>
 
