@@ -13,6 +13,14 @@ export interface OnboardingData {
   selectedEvents: string[];
   eventDates: Record<string, string>;
   previewDays: PreviewDays;
+  deliveryPreference?: "Mail it to me" | "Mail it directly to her";
+  mailingAddress?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
 }
 
 interface AuthContextType {
@@ -138,7 +146,10 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     insideJokes: data.petName ? `Pet name: ${data.petName}` : "",
     thingsToAvoid: data.thingsToAvoid,
     emotionalLevel: 3,
-    deliveryPreference: deliveryPref,
+    deliveryPreference: data.deliveryPreference ?? deliveryPref,
+    mailingAddress: data.mailingAddress?.line1?.trim()
+      ? (data.mailingAddress as import("./data").RecipientAddress)
+      : undefined,
     previewDays: data.previewDays ?? 14,
   };
 }

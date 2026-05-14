@@ -65,6 +65,7 @@ const STEPS = [
   "What tone lands with them?",
   "Which occasions matter?",
   "When should we give you a heads up?",
+  "Where do we send it?",
 ];
 
 export default function OnboardingPage() {
@@ -87,6 +88,8 @@ export default function OnboardingPage() {
     selectedEvents: [],
     eventDates: {},
     previewDays: 14,
+    deliveryPreference: undefined,
+    mailingAddress: { line1: "", line2: "", city: "", state: "", zip: "" },
   });
 
   const suggested = data.relationship
@@ -138,6 +141,7 @@ export default function OnboardingPage() {
     3: "What tone lands with them?",
     4: "Which occasions matter?",
     5: "When should we give you a heads up?",
+    6: "Where do we send it?",
   };
   const stepDescs: Record<number, string> = {
     0: "Tell us who you need us to remember. This is your first recipient — you can add more later.",
@@ -146,6 +150,7 @@ export default function OnboardingPage() {
     3: "We'll default to this style for every card unless you say otherwise.",
     4: "We pre-selected the obvious ones. Add or remove anything.",
     5: "We send you a card draft and ping you every day until you do something about it. Run out the clock and we approve it ourselves. Card goes out no matter what.",
+    6: "We need a mailing address so the card can actually land somewhere. You can change this any time.",
   };
 
   return (
@@ -520,6 +525,94 @@ export default function OnboardingPage() {
                       value={data.thingsToAvoid}
                       onChange={(e) => setData((d) => ({ ...d, thingsToAvoid: e.target.value }))}
                       data-testid="input-things-to-avoid"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 6 — Mailing address */}
+            {step === 6 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {/* Delivery preference */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {(["Mail it to me", "Mail it directly to her"] as const).map((pref) => {
+                    const selected = data.deliveryPreference === pref;
+                    const sub = pref === "Mail it to me"
+                      ? "We send it to you first. You hand it off."
+                      : "Straight to their door. Maximum autopilot.";
+                    return (
+                      <button
+                        key={pref}
+                        onClick={() => setData((d) => ({ ...d, deliveryPreference: pref }))}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "14px 20px", borderRadius: 12,
+                          border: `2px solid ${selected ? RED : `${BLACK}15`}`,
+                          background: selected ? `${RED}12` : "#fff",
+                          cursor: "pointer", transition: "all 0.15s", textAlign: "left",
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: "1.05rem", color: selected ? RED : BLACK }}>{pref}</div>
+                          <div style={{ fontSize: "0.88rem", marginTop: 2, color: "#888" }}>{sub}</div>
+                        </div>
+                        {selected && <span style={{ color: RED, fontWeight: 700, fontSize: "1.1rem" }}>✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Address fields */}
+                <div style={{ borderRadius: 12, padding: "18px 20px", background: `${NAVY}06`, border: `1px solid ${NAVY}12`, display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ fontSize: "0.95rem", fontWeight: 600, color: BLACK, marginBottom: 2 }}>
+                    {data.deliveryPreference === "Mail it directly to her"
+                      ? `${data.recipientName || "Their"}'s mailing address`
+                      : "Your mailing address"}&nbsp;
+                    <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                  </div>
+
+                  <input
+                    className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
+                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                    placeholder="Street address"
+                    value={data.mailingAddress?.line1 ?? ""}
+                    onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, line1: e.target.value } }))}
+                    data-testid="input-address-line1"
+                  />
+                  <input
+                    className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
+                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                    placeholder="Apt / Suite (optional)"
+                    value={data.mailingAddress?.line2 ?? ""}
+                    onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, line2: e.target.value } }))}
+                  />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 100px", gap: 10 }}>
+                    <input
+                      className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                      placeholder="City"
+                      value={data.mailingAddress?.city ?? ""}
+                      onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, city: e.target.value } }))}
+                      data-testid="input-address-city"
+                    />
+                    <input
+                      className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                      placeholder="State"
+                      maxLength={2}
+                      value={data.mailingAddress?.state ?? ""}
+                      onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, state: e.target.value.toUpperCase() } }))}
+                      data-testid="input-address-state"
+                    />
+                    <input
+                      className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
+                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                      placeholder="Zip"
+                      maxLength={10}
+                      value={data.mailingAddress?.zip ?? ""}
+                      onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, zip: e.target.value } }))}
+                      data-testid="input-address-zip"
                     />
                   </div>
                 </div>
