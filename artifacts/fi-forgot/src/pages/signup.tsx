@@ -5,8 +5,7 @@ import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CheckCircle2 } from "lucide-react";
+import { B, BrandLogo, CircleStamp, StickyNote, RectStamp } from "@/components/brand";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -17,10 +16,10 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const perks = [
-  "Cards written, mailed, and delivered on time",
-  "Reminders before panic sets in",
-  "Approval flow so you're always in control",
-  "Cancel any time — no judgment",
+  { icon: "✉", text: "Cards written, mailed, and delivered on time" },
+  { icon: "⏰", text: "Reminders before panic sets in" },
+  { icon: "✓", text: "Approval flow so you're always in control" },
+  { icon: "♥", text: "Cancel any time — no judgment" },
 ];
 
 export default function SignupPage() {
@@ -38,114 +37,220 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(221,47%,20%)] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-4xl grid md:grid-cols-2 gap-10 items-center">
-        {/* Left column */}
-        <div className="text-white">
-          <Link href="/" className="inline-block mb-8">
-            <div className="font-serif text-3xl font-bold text-[hsl(46,65%,52%)]">&quot;F&quot; I Forgot</div>
-          </Link>
-          <h1 className="font-serif text-4xl font-bold mb-4 leading-tight">
-            Stop winging it.<br />Start looking good.
-          </h1>
-          <p className="text-white/60 text-lg mb-8 leading-relaxed">
-            Join the men who stopped relying on last-minute gas station runs and started looking
-            genuinely thoughtful — without doing any of the actual thinking.
-          </p>
-          <ul className="space-y-3">
-            {perks.map((p) => (
-              <li key={p} className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-[hsl(46,65%,52%)] mt-0.5 shrink-0" />
-                <span className="text-white/75 text-sm">{p}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-8 text-white/30 text-sm italic">
-            Your future self owes us one.
-          </p>
-        </div>
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden"
+      style={{ background: B.beige }}
+    >
+      {/* Background watermark */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: "5%",
+          right: "-3%",
+          fontFamily: "'Bebas Neue', cursive",
+          fontSize: "20vw",
+          color: B.red,
+          opacity: 0.025,
+          lineHeight: 1,
+          pointerEvents: "none",
+          userSelect: "none",
+          transform: "rotate(8deg)",
+        }}
+      >
+        SEND IT
+      </div>
 
-        {/* Right column */}
-        <div>
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <h2 className="font-serif text-2xl font-bold text-[hsl(221,47%,20%)] mb-6">
-              Create your account
-            </h2>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Mike Thompson" data-testid="input-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="you@example.com"
-                          data-testid="input-email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          data-testid="input-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  className="w-full bg-[hsl(6,64%,46%)] hover:bg-[hsl(6,64%,40%)] text-white font-bold py-3 rounded-xl text-base"
-                  data-testid="button-signup-submit"
-                >
-                  Save Me From Myself
-                </Button>
-              </form>
-            </Form>
-            <p className="mt-4 text-xs text-[hsl(221,20%,60%)] text-center">
-              By signing up, you agree that forgetting her birthday is not an option.
+      <div className="w-full max-w-5xl relative z-10">
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+
+          {/* ── Left: Brand pitch ──────────────────────────────────────────── */}
+          <div className="pt-2">
+            <Link href="/" className="inline-block mb-8">
+              <BrandLogo size="md" variant="stamp" />
+            </Link>
+
+            <h1
+              style={{
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "clamp(2.2rem, 5vw, 3.6rem)",
+                letterSpacing: "0.04em",
+                color: B.black,
+                lineHeight: 1,
+                marginBottom: 12,
+              }}
+            >
+              Stop Winging It.<br />
+              <span style={{ color: B.red }}>Start Looking Good.</span>
+            </h1>
+
+            <p
+              style={{
+                fontSize: "1rem",
+                color: B.gray,
+                lineHeight: 1.7,
+                marginBottom: 28,
+                maxWidth: 400,
+              }}
+            >
+              Join the men who stopped relying on last-minute gas station runs
+              and started looking genuinely thoughtful — without doing any of
+              the actual thinking.
             </p>
-            <div className="mt-4 text-center">
-              <p className="text-sm text-[hsl(221,20%,50%)]">
-                Already have an account?{" "}
-                <Link href="/login" className="text-[hsl(221,47%,30%)] font-semibold hover:underline" data-testid="link-goto-login">
-                  Sign in
-                </Link>
+
+            <ul className="space-y-3 mb-8">
+              {perks.map((p) => (
+                <li key={p.text} className="flex items-start gap-3">
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      background: B.red,
+                      color: B.white,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.7rem",
+                      fontWeight: 900,
+                      flexShrink: 0,
+                      marginTop: 1,
+                    }}
+                  >
+                    {p.icon}
+                  </span>
+                  <span style={{ fontSize: "0.9rem", color: "#333", lineHeight: 1.5 }}>{p.text}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Stamps decorations */}
+            <div className="flex items-end gap-4 flex-wrap">
+              <CircleStamp type="crisis" size={72} />
+              <CircleStamp type="deployed" size={72} />
+              <StickyNote rotate={-3}>
+                Your future self<br />
+                <span style={{ fontSize: "0.85rem" }}>owes us one.</span>
+              </StickyNote>
+            </div>
+          </div>
+
+          {/* ── Right: Form ────────────────────────────────────────────────── */}
+          <div>
+            <div
+              className="rounded-md shadow-lg"
+              style={{
+                background: B.white,
+                border: `1.5px solid ${B.black}12`,
+                borderTop: `4px solid ${B.red}`,
+                padding: "clamp(24px, 5vw, 36px)",
+              }}
+            >
+              <h2
+                style={{
+                  fontFamily: "'Bebas Neue', cursive",
+                  fontSize: "1.8rem",
+                  letterSpacing: "0.06em",
+                  color: B.black,
+                  marginBottom: 20,
+                  textTransform: "uppercase",
+                }}
+              >
+                Create Your Account
+              </h2>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  {[
+                    { name: "name" as const,     type: "text",     placeholder: "Mike Thompson",     label: "Your Name" },
+                    { name: "email" as const,    type: "email",    placeholder: "you@example.com",   label: "Email" },
+                    { name: "password" as const, type: "password", placeholder: "••••••••",          label: "Password" },
+                  ].map(({ name, type, placeholder, label }) => (
+                    <FormField
+                      key={name}
+                      control={form.control}
+                      name={name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel
+                            style={{
+                              fontFamily: "'Bebas Neue', cursive",
+                              fontSize: "0.78rem",
+                              letterSpacing: "0.14em",
+                              color: B.black,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {label}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type={type}
+                              placeholder={placeholder}
+                              data-testid={`input-${name}`}
+                              style={{ borderColor: `${B.black}22`, background: B.beige }}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-md font-bold transition-all hover:opacity-90 active:translate-y-0.5"
+                    style={{
+                      background: B.red,
+                      color: B.white,
+                      fontFamily: "'Bebas Neue', cursive",
+                      fontSize: "1rem",
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      border: "none",
+                      cursor: "pointer",
+                      boxShadow: `0 3px 0 ${B.redDark}, 0 6px 16px ${B.red}30`,
+                    }}
+                    data-testid="button-signup-submit"
+                  >
+                    Save Me From Myself
+                  </button>
+                </form>
+              </Form>
+
+              <p
+                className="mt-4 text-xs text-center italic"
+                style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "0.9rem" }}
+              >
+                By signing up, you agree that forgetting her birthday is not an option.
+              </p>
+
+              <div className="mt-4 text-center">
+                <p className="text-sm" style={{ color: B.gray }}>
+                  Already have an account?{" "}
+                  <Link
+                    href="/login"
+                    style={{ color: B.red, fontWeight: 700, textDecoration: "underline" }}
+                    data-testid="link-goto-login"
+                  >
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            {/* Stamp badges below form */}
+            <div className="mt-4 flex items-center justify-between px-1 flex-wrap gap-3">
+              <RectStamp size="sm" rotate={-1}>Another Disaster Avoided</RectStamp>
+              <p
+                className="text-xs italic"
+                style={{ color: `${B.black}35`, fontFamily: "'Caveat', cursive", fontSize: "0.9rem" }}
+              >
+                Demo mode — no real account created.
               </p>
             </div>
           </div>
-          <p className="text-center text-white/30 text-xs mt-4 italic">
-            Demo mode — no real account is created.
-          </p>
         </div>
       </div>
     </div>
