@@ -86,7 +86,7 @@ export default function OnboardingPage() {
     thingsToAvoid: "",
     selectedEvents: [],
     eventDates: {},
-    previewDays: 7,
+    previewDays: 14,
   });
 
   const suggested = data.relationship

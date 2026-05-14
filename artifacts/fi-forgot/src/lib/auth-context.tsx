@@ -137,7 +137,7 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
     thingsToAvoid: data.thingsToAvoid,
     emotionalLevel: 3,
     deliveryPreference: deliveryPref,
-    previewDays: data.previewDays ?? 7,
+    previewDays: data.previewDays ?? 14,
   };
 }
 

@@ -29,7 +29,7 @@ export type Tone =
 
 export type DeliveryPreference = "Mail it to me" | "Mail it directly to her";
 
-export type PreviewDays = 3 | 7 | 14 | 30;
+export type PreviewDays = 10 | 14 | 21 | 30;
 
 export type CardStatus =
   | "Needs profile"
@@ -580,10 +580,10 @@ export const TONES: Tone[] = [
 ];
 
 export const PREVIEW_DAYS_OPTIONS: { days: PreviewDays; label: string; description: string; badge?: string }[] = [
-  { days: 3,  label: "3 days before",  description: "Cutting it close. We like it." },
-  { days: 7,  label: "7 days before",  description: "Sweet spot. Enough time, not too early.", badge: "RECOMMENDED" },
-  { days: 14, label: "14 days before", description: "Smart. Gives you time to pair it with a gift." },
-  { days: 30, label: "30 days before", description: "Maximum lead time. You're a planner." },
+  { days: 10, label: "10 days before", description: "Tight but doable. Approve fast and we'll make it." },
+  { days: 14, label: "14 days before", description: "Sweet spot. Enough runway for you and the post office.", badge: "RECOMMENDED" },
+  { days: 21, label: "21 days before", description: "Comfortable. Good if you travel or go MIA." },
+  { days: 30, label: "30 days before", description: "Maximum lead time. You're a planner. We respect it." },
 ];
 
 // ─── Storage ─────────────────────────────────────────────────────────────────
