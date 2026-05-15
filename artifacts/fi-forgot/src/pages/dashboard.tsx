@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import AppLayout from "@/components/layout/AppLayout";
 import {
@@ -285,17 +285,42 @@ export default function DashboardPage() {
     return d;
   });
 
-  // All event dates across every recipient
-  const allEventDates = new Set<string>();
-  for (const r of recipients) {
-    for (const event of r.selectedEvents ?? []) {
-      const date = getEventDate(event, r);
-      if (date) allEventDates.add(date);
+  // All event dates for the VIEWED calendar year so every occasion appears
+  // regardless of whether it has already passed this year.
+  const allEventDates = useMemo(() => {
+    const viewYear = calMonth.getFullYear();
+    const dates = new Set<string>();
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const isoFor = (y: number, m: number, d: number) => `${y}-${pad(m)}-${pad(d)}`;
+
+    for (const r of recipients) {
+      for (const event of r.selectedEvents ?? []) {
+        if (event === "Birthday" && r.birthday) {
+          const [, m, d] = r.birthday.split("-").map(Number);
+          dates.add(isoFor(viewYear, m, d));
+        }
+        if (event === "Anniversary") {
+          const src = r.anniversaryDate ?? r.marriageDate;
+          if (src) {
+            const [, m, d] = src.split("-").map(Number);
+            dates.add(isoFor(viewYear, m, d));
+          }
+        }
+        const custom = r.customDates?.find((c) => c.label === event);
+        if (custom?.date) {
+          const [, m, d] = custom.date.split("-").map(Number);
+          dates.add(isoFor(viewYear, m, d));
+        }
+        const fixed = HOLIDAY_DATES[event];
+        if (fixed) dates.add(isoFor(viewYear, fixed.month, fixed.day));
+      }
     }
-  }
-  // Also mark card due dates
-  const cardDueDates = new Set(cards.map((c) => c.dueDate));
-  for (const d of cardDueDates) allEventDates.add(d);
+    // Card due dates are absolute — add as-is
+    for (const c of cards) dates.add(c.dueDate);
+
+    return dates;
+  }, [recipients, cards, calMonth]);
 
   return (
     <AppLayout>
