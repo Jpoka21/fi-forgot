@@ -145,34 +145,20 @@ export default function LandingPage() {
       </div>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ background: B.white, padding: "72px 24px" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <SectionHeading sub="We handle it all. You get the credit.">✦ HOW IT WORKS ✦</SectionHeading>
-          <div className="flex flex-col md:flex-row items-start gap-0 mt-10">
-            {[
-              { n: "1", title: "TELL US",      body: "Who, what, and when.",                              icon: "📋" },
-              { n: "2", title: "WE FIND",      body: "We pick the perfect card for the occasion.",        icon: "🔍" },
-              { n: "3", title: "WE WRITE",     body: "We write a personal message just for them.",        icon: "✍️" },
-              { n: "4", title: "WE SEND",      body: "We mail it on time, every time.",                   icon: "📬" },
-              { n: "5", title: "YOU GET CREDIT", body: "They think you remembered.",                      icon: "❤️" },
-            ].map((step, i, arr) => (
-              <div key={step.n} className="flex md:flex-col items-center md:items-center flex-1 gap-4 md:gap-2 pb-6 md:pb-0">
-                <div className="flex md:flex-col items-center gap-2 md:gap-0 flex-1">
-                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: B.beige, border: `2px solid ${B.red}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", flexShrink: 0 }}>
-                    {step.icon}
-                  </div>
-                  {i < arr.length - 1 && (
-                    <div className="hidden md:block" style={{ height: 2, flex: 1, background: `${B.red}30`, margin: "0 -1px", alignSelf: "center" }} />
-                  )}
-                </div>
-                <div className="md:text-center mt-0 md:mt-4">
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.65rem", letterSpacing: "0.18em", color: B.red, marginBottom: 2 }}>STEP {step.n}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.08em", color: B.black, marginBottom: 4 }}>{step.title}</div>
-                  <p style={{ fontSize: "0.78rem", color: B.gray, lineHeight: 1.5 }}>{step.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      <section id="how-it-works" style={{ background: B.beige, lineHeight: 0 }}>
+        {/* Desktop: single wide image */}
+        <img
+          className="hidden md:block"
+          src="/how-it-works.png"
+          alt="How it works: We remember, We pick the card, We write it for you, We send it on time, You get credit"
+          style={{ width: "100%", height: "auto", display: "block" }}
+        />
+        {/* Mobile: individual step images stacked */}
+        <div className="md:hidden flex flex-col">
+          {[1,2,3,4,5].map(n => (
+            <img key={n} src={`/hiw-${n}.png`} alt={`Step ${n}`}
+              style={{ width: "100%", height: "auto", display: "block" }} />
+          ))}
         </div>
       </section>
 
