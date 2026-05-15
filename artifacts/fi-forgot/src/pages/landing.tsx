@@ -112,135 +112,17 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
-      <section aria-label="Hero" style={{ background: B.black, position: "relative", overflow: "hidden", lineHeight: 0 }}>
-        {/* Background photo */}
+      <section aria-label="Hero" style={{ background: B.black, lineHeight: 0 }}>
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           style={{ width: "100%", height: "auto", display: "block" }}
         />
-
-        {/* Cinematic gradient — darkens left side only, fades to transparent mid-image */}
-        <div
-          className="hidden md:block"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.72) 28%, rgba(0,0,0,0.32) 50%, transparent 66%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Desktop text overlay — left column, vertically centered */}
-        <div
-          className="hidden md:flex"
-          style={{
-            position: "absolute",
-            inset: 0,
-            alignItems: "flex-start",
-            paddingTop: "7%",
-            paddingLeft: "4.5%",
-            paddingRight: "50%",
-            lineHeight: "normal",
-          }}
-        >
-          <div>
-            <h1 style={{ margin: 0, padding: 0 }}>
-              <span style={{
-                display: "block",
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(2.6rem, 5.2vw, 5.6rem)",
-                fontWeight: 700,
-                color: "#ffffff",
-                letterSpacing: "0.02em",
-                lineHeight: 1.0,
-                textShadow: "0 2px 10px rgba(0,0,0,0.35)",
-              }}>
-                YOU FOCUS ON LIFE.
-              </span>
-              <span style={{
-                display: "block",
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(2.6rem, 5.2vw, 5.6rem)",
-                fontWeight: 700,
-                color: B.red,
-                letterSpacing: "0.02em",
-                lineHeight: 1.0,
-                textShadow: "0 2px 14px rgba(0,0,0,0.45)",
-              }}>
-                WE REMEMBER<br />EVERYTHING.
-              </span>
-            </h1>
-
-            {/* Divider line */}
-            <div style={{ marginTop: "1.4rem", display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ flex: 1, height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
-              <span style={{ color: B.red, fontSize: "0.9rem" }}>♥</span>
-              <div style={{ flex: 1, height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
-            </div>
-
-            <p style={{
-              marginTop: "1.2rem",
-              marginBottom: "2rem",
-              fontFamily: "'Inter', sans-serif",
-              fontSize: "clamp(0.82rem, 1.3vw, 1.0rem)",
-              color: "rgba(255,255,255,0.82)",
-              lineHeight: 1.6,
-              textShadow: "0 1px 6px rgba(0,0,0,0.55)",
-              maxWidth: "36ch",
-            }}>
-              We make sure you never miss an important date<br />
-              so you don't end up in the dog house.
-            </p>
-
-            <a
-              href="/signup"
-              data-testid="link-cta-hitzone"
-              style={{
-                display: "inline-block",
-                background: B.red,
-                color: "#fff",
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(0.85rem, 1.45vw, 1.08rem)",
-                letterSpacing: "0.1em",
-                padding: "16px 34px",
-                borderRadius: "7px",
-                textDecoration: "none",
-                boxShadow: "0 4px 22px rgba(226,59,46,0.45)",
-                transition: "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
-              }}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.transform = "translateY(-2px) scale(1.03)";
-                el.style.boxShadow = "0 8px 32px rgba(226,59,46,0.65)";
-                el.style.background = "#c8312a";
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.transform = "translateY(0) scale(1)";
-                el.style.boxShadow = "0 4px 22px rgba(226,59,46,0.45)";
-                el.style.background = B.red;
-              }}
-            >
-              AUTOMATE BEING THOUGHTFUL →
-            </a>
-          </div>
-        </div>
-
-        {/* Mobile: text block below the photo */}
-        <div className="md:hidden" style={{ background: B.black, padding: "28px 20px 26px", lineHeight: "normal" }}>
-          <h1 style={{ margin: "0 0 2px", fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: "#fff", lineHeight: 1.0, letterSpacing: "0.02em" }}>
-            YOU FOCUS ON LIFE.
-          </h1>
-          <h1 style={{ margin: "0 0 14px", fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: B.red, lineHeight: 1.0, letterSpacing: "0.02em" }}>
-            WE REMEMBER EVERYTHING.
-          </h1>
-          <p style={{ color: "rgba(255,255,255,0.75)", fontFamily: "'Inter', sans-serif", fontSize: "0.9rem", lineHeight: 1.55, marginBottom: "22px" }}>
-            We make sure you never miss an important date so you don't end up in the dog house.
-          </p>
-          <a href="/signup" data-testid="link-cta-hitzone-mobile"
-            style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em", padding: "18px 16px", borderRadius: "7px", textDecoration: "none", boxShadow: "0 4px 18px rgba(226,59,46,0.4)" }}>
-            AUTOMATE BEING THOUGHTFUL →
+        {/* CTA below hero on mobile */}
+        <div className="md:hidden" style={{ background: B.black, padding: "20px 16px", lineHeight: "normal" }}>
+          <a href="/signup" data-testid="link-cta-hitzone"
+            style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.12em", padding: "16px", borderRadius: 3, textDecoration: "none" }}>
+            START NOW — IT TAKES 2 MINUTES
           </a>
         </div>
       </section>
