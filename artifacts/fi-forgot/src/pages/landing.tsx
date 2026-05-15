@@ -204,7 +204,7 @@ export default function LandingPage() {
           className="hidden md:block"
           src="/how-it-works.png"
           alt="How it works: We remember, We pick the card, We write it for you, We send it on time, You get credit"
-          style={{ width: "100%", height: "auto", display: "block", marginTop: "-13%", marginBottom: "-13%" }}
+          style={{ width: "100%", height: "auto", marginTop: "-13%", marginBottom: "-13%" }}
         />
         {/* Mobile: individual step images stacked, trim top/bottom whitespace per card */}
         <div className="md:hidden flex flex-col" style={{ overflow: "hidden" }}>
