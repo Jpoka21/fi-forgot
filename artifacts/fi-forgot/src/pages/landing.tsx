@@ -128,19 +128,19 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ background: B.beige, lineHeight: 0 }}>
-        {/* Desktop: single wide image */}
+      <section id="how-it-works" style={{ background: B.beige, lineHeight: 0, overflow: "hidden" }}>
+        {/* Desktop: negative margins clip the built-in whitespace in the image */}
         <img
           className="hidden md:block"
           src="/how-it-works.png"
           alt="How it works: We remember, We pick the card, We write it for you, We send it on time, You get credit"
-          style={{ width: "100%", height: "auto", display: "block" }}
+          style={{ width: "100%", height: "auto", display: "block", marginTop: "-13%", marginBottom: "-13%" }}
         />
-        {/* Mobile: individual step images stacked */}
-        <div className="md:hidden flex flex-col">
+        {/* Mobile: individual step images stacked, trim top/bottom whitespace per card */}
+        <div className="md:hidden flex flex-col" style={{ overflow: "hidden" }}>
           {[1,2,3,4,5].map(n => (
             <img key={n} src={`/hiw-${n}.png`} alt={`Step ${n}`}
-              style={{ width: "100%", height: "auto", display: "block" }} />
+              style={{ width: "100%", height: "auto", display: "block", marginTop: "-6%", marginBottom: "-6%" }} />
           ))}
         </div>
       </section>
