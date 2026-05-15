@@ -64,98 +64,188 @@ const examples = [
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const zone = (extra: React.CSSProperties): React.CSSProperties => ({
-    position: "absolute",
-    zIndex: 20,
-    cursor: "pointer",
-    display: "block",
-    background: "rgba(0,0,0,0.001)",
-    ...extra,
-  });
-
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
-      {/* ── Mobile-only nav (image nav is too small to tap on phones) ─────── */}
-      <nav className="md:hidden flex items-center justify-between sticky top-0 z-50"
-        style={{ background: B.black, padding: "10px 16px", borderBottom: `2px solid ${B.red}` }}>
-        <div>
-          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", fontWeight: 700, lineHeight: 1 }}>
+      {/* ── NAV ──────────────────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 flex items-center justify-between"
+        style={{ background: B.black, padding: "10px 24px", borderBottom: `2px solid ${B.red}` }}>
+        <a href="/" style={{ textDecoration: "none" }}>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.5rem", fontWeight: 700, lineHeight: 1 }}>
             <span style={{ color: B.red }}>"F"</span>
             <span style={{ color: "#fff" }}> I Forgot</span>
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.55rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.4)", marginTop: 1 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.5rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", marginTop: 1 }}>
             RELATIONSHIP DAMAGE CONTROL
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <a href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.7)", textDecoration: "none", padding: "6px 10px" }}>
+        </a>
+        <div className="hidden md:flex items-center gap-6">
+          {[
+            { label: "HOW IT WORKS", href: "#how-it-works" },
+            { label: "PLANS",        href: "#pricing" },
+            { label: "EXAMPLES",     href: "#examples" },
+            { label: "REVIEWS",      href: "#reviews" },
+            { label: "FAQ",          href: "#faq" },
+          ].map(l => (
+            <a key={l.label} href={l.href}
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.65)", textDecoration: "none" }}>
+              {l.label}
+            </a>
+          ))}
+          <a href="/login"
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.65)", textDecoration: "none" }}>
             SIGN IN
           </a>
-          <a href="/signup" data-testid="link-mobile-nav-cta"
-            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", padding: "8px 14px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
-            START NOW
+        </div>
+        <div className="flex items-center gap-2">
+          <a className="md:hidden" href="/login"
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.7)", textDecoration: "none", padding: "6px 10px" }}>
+            SIGN IN
+          </a>
+          <a href="/signup" data-testid="link-get-started-nav"
+            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", padding: "9px 16px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
+            <span className="hidden md:inline">START EARNING BROWNIE POINTS</span>
+            <span className="md:hidden">START NOW</span>
           </a>
         </div>
       </nav>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* HERO — Full-bleed image: nav + hero + how-it-works + social proof  */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section id="how-it-works" className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
+      <section aria-label="Hero" style={{ background: B.beige }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "60px 24px 48px" }}
+          className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
 
-        {/* On mobile: scaled up 2× so the image is taller than the screen   */}
-        {/* and the user scrolls through it. Desktop stays 100% wide.        */}
-        <div className="overflow-hidden">
-          <img
-            src="/cover-page.png"
-            alt="F* I Forgot — You focus on life. We remember everything."
-            className="w-[160%] md:w-full md:ml-0"
-            style={{ height: "auto", display: "block", pointerEvents: "none", userSelect: "none" }}
-            draggable={false}
-          />
+          {/* Left: headline + subtext + icon strip + CTA */}
+          <div className="flex-1">
+            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(3rem, 8vw, 6rem)", lineHeight: 0.95, color: B.black, marginBottom: 16 }}>
+              YOU FOCUS<br />
+              ON LIFE.<br />
+              <span style={{ color: B.red }}>WE REMEMBER<br />EVERYTHING.</span>
+            </h1>
+            <div style={{ width: 48, height: 3, background: B.red, marginBottom: 20 }} />
+            <p style={{ fontSize: "1.05rem", color: "#444", lineHeight: 1.65, maxWidth: 420, marginBottom: 36 }}>
+              We make sure you <u>never</u> miss an important date so you don't end up in the dog house.
+            </p>
+
+            {/* Icon strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+              {[
+                { icon: "🗓️", title: "WE REMEMBER",      body: "We track birthdays, anniversaries, holidays and more." },
+                { icon: "💌", title: "WE PICK THE CARD", body: "We find the perfect card for every occasion." },
+                { icon: "✍️", title: "WE WRITE IT",      body: "A personal message so you get all the credit." },
+                { icon: "📬", title: "WE SEND IT",       body: "Arrives on time, every time. Like clockwork." },
+              ].map(s => (
+                <div key={s.title}>
+                  <div style={{ fontSize: "1.4rem", marginBottom: 6 }}>{s.icon}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.7rem", letterSpacing: "0.14em", color: B.red, marginBottom: 4 }}>{s.title}</div>
+                  <p style={{ fontSize: "0.75rem", color: B.gray, lineHeight: 1.5 }}>{s.body}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-4 flex-wrap">
+              <a href="/signup" data-testid="link-cta-hitzone"
+                style={{ display: "inline-block", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.1em", padding: "16px 32px", borderRadius: 3, textDecoration: "none", boxShadow: `0 6px 24px ${B.red}40` }}>
+                START NOW
+              </a>
+              <span style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: B.gray }}>
+                → It takes 2 minutes. Saves relationships.
+              </span>
+            </div>
+          </div>
+
+          {/* Right: dark card mockup */}
+          <div className="flex-shrink-0 w-full md:w-[420px]">
+            <div style={{ background: B.black, borderRadius: 6, padding: "36px 32px", position: "relative", boxShadow: `0 24px 64px rgba(0,0,0,0.25)` }}>
+              <div style={{ position: "absolute", top: -12, left: 24, background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.7rem", letterSpacing: "0.18em", padding: "4px 14px", borderRadius: 2 }}>
+                DAVE HAD ONE JOB.
+              </div>
+              <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "rgba(255,255,255,0.9)", lineHeight: 1.75, marginTop: 12 }}>
+                Happy Anniversary, love.<br /><br />
+                Thanks for being my favorite person to come home to. I appreciate you more than I say out loud.<br /><br />
+                Love you,<br />
+                — Dave ♥
+              </div>
+              <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.65rem", letterSpacing: "0.16em", color: "rgba(255,255,255,0.3)" }}>
+                F* I FORGOT · DAMAGE CONTROL DELIVERED
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {["REAL CARDS.", "REAL HANDWRITTEN MESSAGES.", "REAL RESULTS."].map(t => (
+                  <div key={t} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 3, padding: "8px 6px", textAlign: "center", fontFamily: "'Bebas Neue', cursive", fontSize: "0.6rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>
+                    {t}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* ── Nav link zones ─────────────────────────────────────────────── */}
-        <a aria-label="How it works" href="#how-it-works" style={zone({ top:"1%",   left:"22%", width:"10%", height:"3.5%" })} />
-        <a aria-label="Plans"        href="#pricing"      style={zone({ top:"1%",   left:"32%", width:"6%",  height:"3.5%" })} />
-        <a aria-label="Examples"     href="#examples"     style={zone({ top:"1%",   left:"38%", width:"9%",  height:"3.5%" })} />
-        <a aria-label="Reviews"      href="#reviews"      style={zone({ top:"1%",   left:"47%", width:"8%",  height:"3.5%" })} />
-        <a aria-label="FAQ"          href="#faq"          style={zone({ top:"1%",   left:"55%", width:"5%",  height:"3.5%" })} />
-        <a aria-label="Sign in"      href="/login"        style={zone({ top:"1%",   left:"60%", width:"8%",  height:"3.5%" })} />
-
-        {/* Nav CTA — "START EARNING BROWNIE POINTS" red button top-right */}
-        <a aria-label="Start earning brownie points" data-testid="link-get-started-nav"
-          href="/signup" style={zone({ top:"0.3%", right:"0%", width:"22%", height:"5%" })} />
-
-        {/* Hero "START NOW" — large red button lower-left of hero */}
-        <a aria-label="Start Now" data-testid="link-cta-hitzone"
-          href="/signup" style={zone({ top:"62%", left:"1%", width:"28%", height:"4.5%" })} />
-
-        {/* "STOP FORGETTING" banner — "START NOW" button on the right */}
-        <a aria-label="Start Now" data-testid="link-cta-banner"
-          href="/signup" style={zone({ top:"68.5%", right:"1%", width:"28%", height:"5%" })} />
-
-        {/* Bottom banner — "START EARNING BROWNIE POINTS" right button */}
-        <a aria-label="Start earning brownie points" data-testid="link-cta-bottom"
-          href="/signup" style={zone({ top:"94%", right:"1%", width:"36%", height:"5%" })} />
       </section>
 
-      {/* ── Mobile CTA strip — real tappable buttons below the image ─────── */}
-      <div className="md:hidden flex flex-col gap-3"
-        style={{ background: B.black, padding: "20px 16px" }}>
-        <a href="/signup"
-          style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.14em", padding: "16px", borderRadius: 4, textDecoration: "none", boxShadow: `0 4px 20px ${B.red}55` }}>
-          START EARNING BROWNIE POINTS
-        </a>
-        <div className="flex gap-3">
-          <a href="#pricing"
-            style={{ flex: 1, display: "block", textAlign: "center", border: `2px solid rgba(255,255,255,0.3)`, color: "rgba(255,255,255,0.85)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.12em", padding: "12px", borderRadius: 4, textDecoration: "none" }}>
-            SEE PLANS
+      {/* ── STOP FORGETTING BANNER ───────────────────────────────────────── */}
+      <div style={{ background: B.beige, borderTop: `2px solid ${B.black}10`, borderBottom: `2px solid ${B.black}10`, padding: "18px 24px" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }} className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <span style={{ color: B.red, fontSize: "1.3rem" }}>♥</span>
+            <div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em", color: B.black }}>STOP FORGETTING.</div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: B.red }}>START EARNING BROWNIE POINTS.</div>
+            </div>
+          </div>
+          <a href="/signup" data-testid="link-cta-banner"
+            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.12em", padding: "12px 24px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
+            START NOW
           </a>
-          <a href="#faq"
-            style={{ flex: 1, display: "block", textAlign: "center", border: `2px solid rgba(255,255,255,0.3)`, color: "rgba(255,255,255,0.85)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.12em", padding: "12px", borderRadius: 4, textDecoration: "none" }}>
-            FAQ
+        </div>
+      </div>
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
+      <section id="how-it-works" style={{ background: B.white, padding: "72px 24px" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+          <SectionHeading sub="We handle it all. You get the credit.">✦ HOW IT WORKS ✦</SectionHeading>
+          <div className="flex flex-col md:flex-row items-start gap-0 mt-10">
+            {[
+              { n: "1", title: "TELL US",      body: "Who, what, and when.",                              icon: "📋" },
+              { n: "2", title: "WE FIND",      body: "We pick the perfect card for the occasion.",        icon: "🔍" },
+              { n: "3", title: "WE WRITE",     body: "We write a personal message just for them.",        icon: "✍️" },
+              { n: "4", title: "WE SEND",      body: "We mail it on time, every time.",                   icon: "📬" },
+              { n: "5", title: "YOU GET CREDIT", body: "They think you remembered.",                      icon: "❤️" },
+            ].map((step, i, arr) => (
+              <div key={step.n} className="flex md:flex-col items-center md:items-center flex-1 gap-4 md:gap-2 pb-6 md:pb-0">
+                <div className="flex md:flex-col items-center gap-2 md:gap-0 flex-1">
+                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: B.beige, border: `2px solid ${B.red}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", flexShrink: 0 }}>
+                    {step.icon}
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="hidden md:block" style={{ height: 2, flex: 1, background: `${B.red}30`, margin: "0 -1px", alignSelf: "center" }} />
+                  )}
+                </div>
+                <div className="md:text-center mt-0 md:mt-4">
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.65rem", letterSpacing: "0.18em", color: B.red, marginBottom: 2 }}>STEP {step.n}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.08em", color: B.black, marginBottom: 4 }}>{step.title}</div>
+                  <p style={{ fontSize: "0.78rem", color: B.gray, lineHeight: 1.5 }}>{step.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SOCIAL PROOF BAR ─────────────────────────────────────────────── */}
+      <div style={{ background: B.black, padding: "20px 24px" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }} className="flex flex-wrap items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <span style={{ color: B.red }}>★★★★★</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>4.9/5 FROM 2,000+ REVIEWS</span>
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>
+            TRUSTED BY 100,000+ FORGETFUL HUMANS
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>
+            HELPING RELATIONSHIPS SINCE DAY ONE
+          </div>
+          <a href="/signup" data-testid="link-cta-bottom"
+            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", padding: "10px 20px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
+            START EARNING BROWNIE POINTS
           </a>
         </div>
       </div>
