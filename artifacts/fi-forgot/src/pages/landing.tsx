@@ -121,8 +121,8 @@ export default function LandingPage() {
         <img
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
-          className="md:hidden w-full h-full object-cover object-top"
-          style={{ display: "block" }}
+          className="md:hidden w-full h-full object-cover"
+          style={{ display: "block", objectPosition: "62% top" }}
         />
         {/* Desktop landscape hero */}
         <img
@@ -132,16 +132,65 @@ export default function LandingPage() {
           style={{ display: "block", height: "auto" }}
         />
 
-        {/* Text overlay — top left on all screen sizes */}
-        <div className="flex flex-col w-[58%] md:w-[42%] top-[18%] md:top-[4%]" style={{
-          position: "absolute", left: "3%",
+        {/* Mobile gradient overlay — left-side darkening so text is readable */}
+        <div className="md:hidden" style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.42) 35%, rgba(0,0,0,0.08) 68%, rgba(0,0,0,0) 100%)",
+        }} />
+
+        {/* Mobile text overlay */}
+        <div className="md:hidden flex flex-col" style={{
+          position: "absolute", left: 22, top: 95, maxWidth: 330,
+          lineHeight: "normal", gap: 0, zIndex: 2,
+        }}>
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(34px, 8.8vw, 48px)",
+            color: "#ffffff",
+            letterSpacing: "-0.02em",
+            lineHeight: 0.95,
+            textShadow: "0 3px 18px rgba(0,0,0,0.65)",
+          }}>
+            YOU FOCUS ON LIFE.
+          </div>
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(34px, 8.8vw, 48px)",
+            color: B.red,
+            letterSpacing: "-0.02em",
+            lineHeight: 0.95,
+            textShadow: "0 3px 18px rgba(0,0,0,0.65)",
+            marginTop: "0.05em",
+          }}>
+            WE REMEMBER EVERYTHING.
+          </div>
+          <a href="/signup" data-testid="link-cta-hitzone"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 10,
+              marginTop: 18, alignSelf: "flex-start",
+              background: "#c82127", color: "#fff",
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "1rem",
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              padding: "15px 20px",
+              borderRadius: 8,
+              textDecoration: "none",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+            }}>
+            FIX MY FORGETTING →
+          </a>
+        </div>
+
+        {/* Desktop text overlay */}
+        <div className="hidden md:flex flex-col w-[42%]" style={{
+          position: "absolute", top: "4%", left: "3%",
           lineHeight: "normal", gap: 0,
         }}>
-          {/* Headline line 1 */}
           <div
-            className="text-[7vw] md:text-[clamp(2.2rem,5vw,5rem)]"
             style={{
               fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(2.2rem,5vw,5rem)",
               color: "#f0ece4",
               letterSpacing: "0.03em",
               lineHeight: 1,
@@ -150,12 +199,10 @@ export default function LandingPage() {
             }}>
             YOU FOCUS ON LIFE.
           </div>
-
-          {/* Headline lines 2–3 */}
           <div
-            className="text-[9vw] md:text-[clamp(2.8rem,6.5vw,6.5rem)]"
             style={{
               fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(2.8rem,6.5vw,6.5rem)",
               color: B.red,
               letterSpacing: "0.02em",
               lineHeight: 0.95,
@@ -165,16 +212,12 @@ export default function LandingPage() {
             }}>
             WE REMEMBER EVERYTHING.
           </div>
-
-          {/* Divider — desktop only */}
-          <div className="hidden md:flex" style={{ alignItems: "center", gap: 8, margin: "0.5em 0 0.4em" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0.5em 0 0.4em" }}>
             <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
             <span style={{ color: B.red, fontSize: "0.9rem", lineHeight: 1 }}>♥</span>
             <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
           </div>
-
-          {/* Subtext — desktop only */}
-          <p className="hidden md:block" style={{
+          <p style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: "clamp(0.95rem, 1.5vw, 1.3rem)",
             fontWeight: 700,
@@ -187,14 +230,12 @@ export default function LandingPage() {
             We make sure you <span style={{ textDecoration: "underline" }}>never</span> miss an important date<br />
             so you don't end up in the dog house.
           </p>
-
-          {/* CTA button */}
           <a href="/signup" data-testid="link-cta-hitzone"
-            className="text-[3vw] md:text-[clamp(0.9rem,1.5vw,1.3rem)]"
             style={{
               display: "inline-block", marginTop: "0.5em", alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.9rem,1.5vw,1.3rem)",
               letterSpacing: "0.1em",
               padding: "0.5em 1em",
               borderRadius: 4,
