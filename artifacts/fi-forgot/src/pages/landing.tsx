@@ -132,12 +132,6 @@ export default function LandingPage() {
           style={{ display: "block", height: "auto" }}
         />
 
-        {/* Mobile gradient overlay — left-side darkening so text is readable */}
-        <div className="md:hidden" style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.42) 35%, rgba(0,0,0,0.08) 68%, rgba(0,0,0,0) 100%)",
-        }} />
-
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
           position: "absolute", left: 22, top: 95, maxWidth: 330,
