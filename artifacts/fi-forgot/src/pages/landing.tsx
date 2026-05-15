@@ -169,7 +169,7 @@ export default function LandingPage() {
             textShadow: "1px 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6)",
             letterSpacing: "0.01em",
           }}>
-            We make sure you <span style={{ textDecoration: "underline", color: B.beige }}>never</span> miss an important date<br />
+            We make sure you <span style={{ textDecoration: "underline" }}>never</span> miss an important date<br />
             so you don't end up in the dog house.
           </p>
 
