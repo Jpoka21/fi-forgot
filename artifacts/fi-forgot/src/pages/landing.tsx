@@ -117,11 +117,19 @@ export default function LandingPage() {
         className="h-[calc(100svh-4rem)] md:h-auto"
         style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
+        {/* Mobile portrait hero */}
+        <img
+          src="/hero-mobile.png"
+          alt="F* I Forgot — You focus on life. We remember everything."
+          className="md:hidden w-full h-full object-cover object-top"
+          style={{ display: "block" }}
+        />
+        {/* Desktop landscape hero */}
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
-          className="w-full h-full md:h-auto object-cover md:object-none"
-          style={{ display: "block", objectPosition: "40% center" }}
+          className="hidden md:block w-full"
+          style={{ display: "block", height: "auto" }}
         />
 
         {/* Text overlay — top left on all screen sizes */}
