@@ -69,115 +69,59 @@ export default function LandingPage() {
 
       {/* ── NAV ──────────────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 flex items-center justify-between"
-        style={{ background: B.black, padding: "10px 24px", borderBottom: `2px solid ${B.red}` }}>
-        <a href="/" style={{ textDecoration: "none" }}>
-          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.5rem", fontWeight: 700, lineHeight: 1 }}>
-            <span style={{ color: B.red }}>"F"</span>
-            <span style={{ color: "#fff" }}> I Forgot</span>
+        style={{ background: B.beige, padding: "12px 28px", borderBottom: `1px solid ${B.black}15` }}>
+        <a href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column", lineHeight: 1 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", fontWeight: 900, letterSpacing: "0.02em", color: B.black, lineHeight: 1 }}>
+            <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>
+            {" "}I FORGOT
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.5rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", marginTop: 1 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.5rem", letterSpacing: "0.22em", color: B.gray, marginTop: 1 }}>
             RELATIONSHIP DAMAGE CONTROL
           </div>
         </a>
-        <div className="hidden md:flex items-center gap-6">
+
+        <div className="hidden md:flex items-center gap-7">
           {[
             { label: "HOW IT WORKS", href: "#how-it-works" },
             { label: "PLANS",        href: "#pricing" },
             { label: "EXAMPLES",     href: "#examples" },
             { label: "REVIEWS",      href: "#reviews" },
             { label: "FAQ",          href: "#faq" },
+            { label: "SIGN IN",      href: "/login" },
           ].map(l => (
             <a key={l.label} href={l.href}
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.65)", textDecoration: "none" }}>
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.12em", color: B.black, textDecoration: "none", opacity: 0.8 }}>
               {l.label}
             </a>
           ))}
-          <a href="/login"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.65)", textDecoration: "none" }}>
-            SIGN IN
-          </a>
         </div>
+
         <div className="flex items-center gap-2">
           <a className="md:hidden" href="/login"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.7)", textDecoration: "none", padding: "6px 10px" }}>
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", color: B.black, textDecoration: "none", padding: "6px 8px", opacity: 0.7 }}>
             SIGN IN
           </a>
           <a href="/signup" data-testid="link-get-started-nav"
-            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", padding: "9px 16px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
-            <span className="hidden md:inline">START EARNING BROWNIE POINTS</span>
+            style={{ background: "#8B1A1A", color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", padding: "10px 18px", borderRadius: 4, textDecoration: "none", whiteSpace: "nowrap", lineHeight: 1.25, textAlign: "center" }}>
+            <span className="hidden md:inline">START EARNING<br />BROWNIE POINTS</span>
             <span className="md:hidden">START NOW</span>
           </a>
         </div>
       </nav>
 
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section aria-label="Hero" style={{ background: B.beige }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "60px 24px 48px" }}
-          className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
-
-          {/* Left: headline + subtext + icon strip + CTA */}
-          <div className="flex-1">
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(3rem, 8vw, 6rem)", lineHeight: 0.95, color: B.black, marginBottom: 16 }}>
-              YOU FOCUS<br />
-              ON LIFE.<br />
-              <span style={{ color: B.red }}>WE REMEMBER<br />EVERYTHING.</span>
-            </h1>
-            <div style={{ width: 48, height: 3, background: B.red, marginBottom: 20 }} />
-            <p style={{ fontSize: "1.05rem", color: "#444", lineHeight: 1.65, maxWidth: 420, marginBottom: 36 }}>
-              We make sure you <u>never</u> miss an important date so you don't end up in the dog house.
-            </p>
-
-            {/* Icon strip */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-              {[
-                { icon: "🗓️", title: "WE REMEMBER",      body: "We track birthdays, anniversaries, holidays and more." },
-                { icon: "💌", title: "WE PICK THE CARD", body: "We find the perfect card for every occasion." },
-                { icon: "✍️", title: "WE WRITE IT",      body: "A personal message so you get all the credit." },
-                { icon: "📬", title: "WE SEND IT",       body: "Arrives on time, every time. Like clockwork." },
-              ].map(s => (
-                <div key={s.title}>
-                  <div style={{ fontSize: "1.4rem", marginBottom: 6 }}>{s.icon}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.7rem", letterSpacing: "0.14em", color: B.red, marginBottom: 4 }}>{s.title}</div>
-                  <p style={{ fontSize: "0.75rem", color: B.gray, lineHeight: 1.5 }}>{s.body}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4 flex-wrap">
-              <a href="/signup" data-testid="link-cta-hitzone"
-                style={{ display: "inline-block", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.1em", padding: "16px 32px", borderRadius: 3, textDecoration: "none", boxShadow: `0 6px 24px ${B.red}40` }}>
-                START NOW
-              </a>
-              <span style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: B.gray }}>
-                → It takes 2 minutes. Saves relationships.
-              </span>
-            </div>
-          </div>
-
-          {/* Right: dark card mockup */}
-          <div className="flex-shrink-0 w-full md:w-[420px]">
-            <div style={{ background: B.black, borderRadius: 6, padding: "36px 32px", position: "relative", boxShadow: `0 24px 64px rgba(0,0,0,0.25)` }}>
-              <div style={{ position: "absolute", top: -12, left: 24, background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.7rem", letterSpacing: "0.18em", padding: "4px 14px", borderRadius: 2 }}>
-                DAVE HAD ONE JOB.
-              </div>
-              <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "rgba(255,255,255,0.9)", lineHeight: 1.75, marginTop: 12 }}>
-                Happy Anniversary, love.<br /><br />
-                Thanks for being my favorite person to come home to. I appreciate you more than I say out loud.<br /><br />
-                Love you,<br />
-                — Dave ♥
-              </div>
-              <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.65rem", letterSpacing: "0.16em", color: "rgba(255,255,255,0.3)" }}>
-                F* I FORGOT · DAMAGE CONTROL DELIVERED
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {["REAL CARDS.", "REAL HANDWRITTEN MESSAGES.", "REAL RESULTS."].map(t => (
-                  <div key={t} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 3, padding: "8px 6px", textAlign: "center", fontFamily: "'Bebas Neue', cursive", fontSize: "0.6rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>
-                    {t}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
+      <section aria-label="Hero" style={{ background: B.black, lineHeight: 0 }}>
+        <img
+          src="/hero.png"
+          alt="F* I Forgot — You focus on life. We remember everything."
+          style={{ width: "100%", height: "auto", display: "block" }}
+        />
+        {/* CTA below hero on mobile */}
+        <div className="md:hidden" style={{ background: B.black, padding: "20px 16px", lineHeight: "normal" }}>
+          <a href="/signup" data-testid="link-cta-hitzone"
+            style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.12em", padding: "16px", borderRadius: 3, textDecoration: "none" }}>
+            START NOW — IT TAKES 2 MINUTES
+          </a>
         </div>
       </section>
 
