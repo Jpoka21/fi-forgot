@@ -69,18 +69,18 @@ export default function LandingPage() {
 
       {/* ── NAV ──────────────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 flex items-center justify-between"
-        style={{ background: B.beige, padding: "12px 28px", borderBottom: `1px solid ${B.black}15` }}>
+        style={{ background: B.beige, padding: "16px 32px", borderBottom: `1px solid ${B.black}18` }}>
         <a href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column", lineHeight: 1 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", fontWeight: 900, letterSpacing: "0.02em", color: B.black, lineHeight: 1 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", fontWeight: 900, letterSpacing: "0.01em", color: B.black, lineHeight: 0.95 }}>
             <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>
             {" "}I FORGOT
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.5rem", letterSpacing: "0.22em", color: B.gray, marginTop: 1 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.6rem", letterSpacing: "0.25em", color: B.gray, marginTop: 3 }}>
             RELATIONSHIP DAMAGE CONTROL
           </div>
         </a>
 
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden md:flex items-center gap-8">
           {[
             { label: "HOW IT WORKS", href: "#how-it-works" },
             { label: "PLANS",        href: "#pricing" },
@@ -90,19 +90,19 @@ export default function LandingPage() {
             { label: "SIGN IN",      href: "/login" },
           ].map(l => (
             <a key={l.label} href={l.href}
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.12em", color: B.black, textDecoration: "none", opacity: 0.8 }}>
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", fontWeight: 700 }}>
               {l.label}
             </a>
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <a className="md:hidden" href="/login"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", color: B.black, textDecoration: "none", padding: "6px 8px", opacity: 0.7 }}>
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "6px 8px" }}>
             SIGN IN
           </a>
           <a href="/signup" data-testid="link-get-started-nav"
-            style={{ background: "#8B1A1A", color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", padding: "10px 18px", borderRadius: 4, textDecoration: "none", whiteSpace: "nowrap", lineHeight: 1.25, textAlign: "center" }}>
+            style={{ background: "#8B1A1A", color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 6, textDecoration: "none", whiteSpace: "nowrap", lineHeight: 1.2, textAlign: "center" }}>
             <span className="hidden md:inline">START EARNING<br />BROWNIE POINTS</span>
             <span className="md:hidden">START NOW</span>
           </a>
