@@ -146,20 +146,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── STOP FORGETTING BANNER ───────────────────────────────────────── */}
-      <div style={{ background: B.beige, borderTop: `2px solid ${B.black}10`, borderBottom: `2px solid ${B.black}10`, padding: "18px 24px" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }} className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <span style={{ color: B.red, fontSize: "1.3rem" }}>♥</span>
-            <div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em", color: B.black }}>STOP FORGETTING.</div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: B.red }}>START EARNING BROWNIE POINTS.</div>
-            </div>
-          </div>
-          <a href="/signup" data-testid="link-cta-banner"
-            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.12em", padding: "12px 24px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
-            START NOW
-          </a>
-        </div>
+      <div style={{ position: "relative", lineHeight: 0 }}>
+        <img src="/stop-forgetting.png" alt="Stop Forgetting. Start Earning Brownie Points."
+          style={{ width: "100%", height: "auto", display: "block" }} />
+        <a href="/signup" data-testid="link-cta-banner"
+          style={{ position: "absolute", top: "10%", right: "2%", width: "18%", height: "80%", display: "block", cursor: "pointer" }} />
       </div>
 
       {/* ── SOCIAL PROOF BAR ─────────────────────────────────────────────── */}
