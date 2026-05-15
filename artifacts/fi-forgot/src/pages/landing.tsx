@@ -161,13 +161,15 @@ export default function LandingPage() {
           {/* Subtext */}
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(0.75rem, 1.2vw, 1.05rem)",
-            color: "rgba(255,255,255,0.88)",
+            fontSize: "clamp(0.95rem, 1.5vw, 1.3rem)",
+            fontWeight: 700,
+            color: "#ffffff",
             lineHeight: 1.5,
             margin: 0,
-            textShadow: "1px 1px 3px rgba(0,0,0,0.7)",
+            textShadow: "1px 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6)",
+            letterSpacing: "0.01em",
           }}>
-            We make sure you <span style={{ textDecoration: "underline" }}>never</span> miss an important date<br />
+            We make sure you <span style={{ textDecoration: "underline", color: B.beige }}>never</span> miss an important date<br />
             so you don't end up in the dog house.
           </p>
 
