@@ -114,13 +114,14 @@ export default function LandingPage() {
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
-        className="min-h-[100svh] md:min-h-0"
-        style={{ background: B.black, lineHeight: 0, position: "relative" }}
+        className="h-[calc(100svh-4rem)] md:h-auto"
+        style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
-          style={{ width: "100%", height: "auto", display: "block" }}
+          className="w-full h-full md:h-auto object-cover md:object-none"
+          style={{ display: "block", objectPosition: "40% center" }}
         />
 
         {/* Text overlay — top left on all screen sizes */}
