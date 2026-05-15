@@ -137,7 +137,8 @@ export default function LandingPage() {
           style={{
             position: "absolute",
             inset: 0,
-            alignItems: "center",
+            alignItems: "flex-start",
+            paddingTop: "7%",
             paddingLeft: "4.5%",
             paddingRight: "50%",
             lineHeight: "normal",
