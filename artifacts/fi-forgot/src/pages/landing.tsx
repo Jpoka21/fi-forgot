@@ -119,9 +119,9 @@ export default function LandingPage() {
           style={{ width: "100%", height: "auto", display: "block" }}
         />
 
-        {/* Desktop text overlay — top left */}
-        <div className="hidden md:flex flex-col" style={{
-          position: "absolute", top: "6%", left: "3%", width: "42%",
+        {/* Text overlay — top left on all screen sizes */}
+        <div className="flex flex-col w-[62%] md:w-[42%]" style={{
+          position: "absolute", top: "4%", left: "3%",
           lineHeight: "normal", gap: 0,
         }}>
           {/* Headline line 1 */}
@@ -190,22 +190,6 @@ export default function LandingPage() {
           </a>
         </div>
 
-        {/* Mobile: stacked below image */}
-        <div className="md:hidden" style={{ background: B.black, padding: "20px 16px", lineHeight: "normal" }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: "#f0ece4", letterSpacing: "0.03em", lineHeight: 1 }}>
-            YOU FOCUS ON LIFE.
-          </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: B.red, letterSpacing: "0.02em", lineHeight: 0.95, marginTop: "0.1em" }}>
-            WE REMEMBER EVERYTHING.
-          </div>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.9rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.5, margin: "12px 0 16px" }}>
-            We make sure you <span style={{ textDecoration: "underline" }}>never</span> miss an important date so you don't end up in the dog house.
-          </p>
-          <a href="/signup" data-testid="link-cta-hitzone-mobile"
-            style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.12em", padding: "16px", borderRadius: 3, textDecoration: "none" }}>
-            AUTOMATE BEING THOUGHTFUL →
-          </a>
-        </div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
