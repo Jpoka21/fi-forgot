@@ -112,11 +112,27 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
-      <section aria-label="Hero" style={{ background: B.black, lineHeight: 0 }}>
+      <section aria-label="Hero" style={{ background: B.black, lineHeight: 0, position: "relative" }}>
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           style={{ width: "100%", height: "auto", display: "block" }}
+        />
+        {/* CTA text overlay — top-left, black bg made invisible via screen blend */}
+        <img
+          src="/hero-cta.png"
+          alt=""
+          aria-hidden="true"
+          className="hidden md:block"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "55%",
+            height: "auto",
+            mixBlendMode: "screen",
+            pointerEvents: "none",
+          }}
         />
         {/* CTA below hero on mobile */}
         <div className="md:hidden" style={{ background: B.black, padding: "20px 16px", lineHeight: "normal" }}>
