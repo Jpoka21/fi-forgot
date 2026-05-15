@@ -133,8 +133,8 @@ export default function LandingPage() {
         />
 
         {/* Text overlay — top left on all screen sizes */}
-        <div className="flex flex-col w-[58%] md:w-[42%]" style={{
-          position: "absolute", top: "4%", left: "3%",
+        <div className="flex flex-col w-[58%] md:w-[42%] top-[18%] md:top-[4%]" style={{
+          position: "absolute", left: "3%",
           lineHeight: "normal", gap: 0,
         }}>
           {/* Headline line 1 */}
