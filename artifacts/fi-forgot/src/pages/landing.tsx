@@ -153,25 +153,6 @@ export default function LandingPage() {
           style={{ position: "absolute", top: "10%", right: "2%", width: "18%", height: "80%", display: "block", cursor: "pointer" }} />
       </div>
 
-      {/* ── SOCIAL PROOF BAR ─────────────────────────────────────────────── */}
-      <div style={{ background: B.black, padding: "20px 24px" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }} className="flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <span style={{ color: B.red }}>★★★★★</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>4.9/5 FROM 2,000+ REVIEWS</span>
-          </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>
-            TRUSTED BY 100,000+ FORGETFUL HUMANS
-          </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)" }}>
-            HELPING RELATIONSHIPS SINCE DAY ONE
-          </div>
-          <a href="/signup" data-testid="link-cta-bottom"
-            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", padding: "10px 20px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
-            START EARNING BROWNIE POINTS
-          </a>
-        </div>
-      </div>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section
