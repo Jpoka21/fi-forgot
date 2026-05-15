@@ -67,44 +67,46 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
-      {/* ── NAV ──────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 flex items-center justify-between"
-        style={{ background: B.beige, padding: "16px 32px", borderBottom: `1px solid ${B.black}18` }}>
-        <a href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column", lineHeight: 1 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", fontWeight: 900, letterSpacing: "0.01em", color: B.black, lineHeight: 0.95 }}>
-            <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>
-            {" "}I FORGOT
+      {/* ── NAV IMAGE with clickable overlay zones ───────────────────────── */}
+      <nav className="sticky top-0 z-50 hidden md:block" style={{ position: "sticky", top: 0, zIndex: 50 }}>
+        <div style={{ position: "relative", lineHeight: 0 }}>
+          <img src="/nav.png" alt="F* I Forgot navigation"
+            style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
+            draggable={false}
+          />
+          {/* Logo / home */}
+          <a aria-label="Home" href="/"                style={{ position:"absolute", top:"0%", left:"0%",   width:"21%", height:"100%", display:"block", cursor:"pointer" }} />
+          {/* Nav links */}
+          <a aria-label="How it works" href="#how-it-works" style={{ position:"absolute", top:"0%", left:"22%",  width:"11%", height:"100%", display:"block", cursor:"pointer" }} />
+          <a aria-label="Plans"        href="#pricing"      style={{ position:"absolute", top:"0%", left:"33%",  width:"7%",  height:"100%", display:"block", cursor:"pointer" }} />
+          <a aria-label="Examples"     href="#examples"     style={{ position:"absolute", top:"0%", left:"40%",  width:"9%",  height:"100%", display:"block", cursor:"pointer" }} />
+          <a aria-label="Reviews"      href="#reviews"      style={{ position:"absolute", top:"0%", left:"49%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
+          <a aria-label="FAQ"          href="#faq"          style={{ position:"absolute", top:"0%", left:"57%",  width:"5%",  height:"100%", display:"block", cursor:"pointer" }} />
+          <a aria-label="Sign in"      href="/login"        style={{ position:"absolute", top:"0%", left:"62%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
+          {/* CTA button */}
+          <a aria-label="Start earning brownie points" href="/signup" data-testid="link-get-started-nav"
+            style={{ position:"absolute", top:"0%", right:"0%", width:"22%", height:"100%", display:"block", cursor:"pointer" }} />
+        </div>
+      </nav>
+
+      {/* ── Mobile nav (image doesn't work at small sizes) ────────────────── */}
+      <nav className="md:hidden sticky top-0 z-50 flex items-center justify-between"
+        style={{ background: B.beige, padding: "10px 16px", borderBottom: `1px solid ${B.black}15` }}>
+        <a href="/" style={{ textDecoration: "none" }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", fontWeight: 900, color: B.black, lineHeight: 0.95 }}>
+            <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>{" "}I FORGOT
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.6rem", letterSpacing: "0.25em", color: B.gray, marginTop: 3 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.45rem", letterSpacing: "0.2em", color: B.gray, marginTop: 2 }}>
             RELATIONSHIP DAMAGE CONTROL
           </div>
         </a>
-
-        <div className="hidden md:flex items-center gap-8">
-          {[
-            { label: "HOW IT WORKS", href: "#how-it-works" },
-            { label: "PLANS",        href: "#pricing" },
-            { label: "EXAMPLES",     href: "#examples" },
-            { label: "REVIEWS",      href: "#reviews" },
-            { label: "FAQ",          href: "#faq" },
-            { label: "SIGN IN",      href: "/login" },
-          ].map(l => (
-            <a key={l.label} href={l.href}
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", fontWeight: 700 }}>
-              {l.label}
-            </a>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <a className="md:hidden" href="/login"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "6px 8px" }}>
+        <div className="flex items-center gap-2">
+          <a href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "6px 8px" }}>
             SIGN IN
           </a>
-          <a href="/signup" data-testid="link-get-started-nav"
-            style={{ background: "#8B1A1A", color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 6, textDecoration: "none", whiteSpace: "nowrap", lineHeight: 1.2, textAlign: "center" }}>
-            <span className="hidden md:inline">START EARNING<br />BROWNIE POINTS</span>
-            <span className="md:hidden">START NOW</span>
+          <a href="/signup" data-testid="link-mobile-nav-cta"
+            style={{ background: "#8B1A1A", color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.08em", padding: "9px 14px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, textAlign: "center" }}>
+            START NOW
           </a>
         </div>
       </nav>
