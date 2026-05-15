@@ -285,42 +285,52 @@ export default function DashboardPage() {
     return d;
   });
 
-  // All event dates for the VIEWED calendar year so every occasion appears
-  // regardless of whether it has already passed this year.
-  const allEventDates = useMemo(() => {
+  // Map of ISO date → list of {label, recipientId, recipientName} for the viewed year
+  const eventsByDate = useMemo(() => {
     const viewYear = calMonth.getFullYear();
-    const dates = new Set<string>();
+    const map = new Map<string, Array<{ label: string; recipientId: string; recipientName: string }>>();
 
     const pad = (n: number) => String(n).padStart(2, "0");
     const isoFor = (y: number, m: number, d: number) => `${y}-${pad(m)}-${pad(d)}`;
+    const addEntry = (iso: string, label: string, r: Recipient) => {
+      const list = map.get(iso) ?? [];
+      if (!list.find(e => e.label === label && e.recipientId === r.id))
+        list.push({ label, recipientId: r.id, recipientName: r.name });
+      map.set(iso, list);
+    };
 
     for (const r of recipients) {
       for (const event of r.selectedEvents ?? []) {
         if (event === "Birthday" && r.birthday) {
           const [, m, d] = r.birthday.split("-").map(Number);
-          dates.add(isoFor(viewYear, m, d));
+          addEntry(isoFor(viewYear, m, d), `${r.name}'s Birthday`, r);
         }
         if (event === "Anniversary") {
           const src = r.anniversaryDate ?? r.marriageDate;
           if (src) {
             const [, m, d] = src.split("-").map(Number);
-            dates.add(isoFor(viewYear, m, d));
+            addEntry(isoFor(viewYear, m, d), `${r.name}'s Anniversary`, r);
           }
         }
         const custom = r.customDates?.find((c) => c.label === event);
         if (custom?.date) {
           const [, m, d] = custom.date.split("-").map(Number);
-          dates.add(isoFor(viewYear, m, d));
+          addEntry(isoFor(viewYear, m, d), `${r.name} – ${event}`, r);
         }
         const fixed = HOLIDAY_DATES[event];
-        if (fixed) dates.add(isoFor(viewYear, fixed.month, fixed.day));
+        if (fixed) addEntry(isoFor(viewYear, fixed.month, fixed.day), event, r);
       }
     }
-    // Card due dates are absolute — add as-is
-    for (const c of cards) dates.add(c.dueDate);
+    // Card due dates
+    for (const c of cards) {
+      const r = recipients.find(r => r.id === c.recipientId);
+      addEntry(c.dueDate, `${r?.name ?? "Card"} – ${c.holiday}`, r ?? { id: "", name: "Card" } as Recipient);
+    }
 
-    return dates;
+    return map;
   }, [recipients, cards, calMonth]);
+
+  const [hoveredDay, setHoveredDay] = useState<string | null>(null);
 
   return (
     <AppLayout>
@@ -850,23 +860,33 @@ export default function DashboardPage() {
                       <div key={d} className="text-xs font-semibold" style={{ color: GRAY }}>{d}</div>
                     ))}
                   </div>
-                  <div className="grid grid-cols-7 gap-1">
+                  <div className="grid grid-cols-7 gap-1" style={{ overflow: "visible" }}>
                     {calendarDays.map((d, i) => {
                       const iso = localDateStr(d);
-                      const hasEvent = allEventDates.has(iso);
+                      const events = eventsByDate.get(iso) ?? [];
+                      const hasEvent = events.length > 0;
                       const isToday = iso === localDateStr(today);
                       const isCalMonth = d.getMonth() === calMonth.getMonth();
+                      const isHovered = hoveredDay === iso;
+                      // position popover above for last two rows, below otherwise
+                      const row = Math.floor(i / 7);
+                      const popoverTop = row >= 3 ? undefined : "100%";
+                      const popoverBottom = row >= 3 ? "100%" : undefined;
                       return (
                         <div
                           key={i}
-                          className="aspect-square flex items-center justify-center rounded-lg text-xs relative"
+                          className="aspect-square flex items-center justify-center rounded-lg text-xs relative cursor-default"
                           style={{
-                            background: isToday ? RED : hasEvent && isCalMonth ? `${RED}10` : "transparent",
+                            background: isToday ? RED : hasEvent && isCalMonth ? `${RED}12` : "transparent",
                             color: isToday ? "#fff" : isCalMonth ? BLACK : `${BLACK}35`,
                             fontWeight: isToday || (hasEvent && isCalMonth) ? 700 : undefined,
-                            border: hasEvent && isCalMonth && !isToday ? `1.5px solid ${RED}35` : undefined,
+                            border: hasEvent && isCalMonth && !isToday ? `1.5px solid ${RED}40` : undefined,
+                            cursor: hasEvent && isCalMonth ? "pointer" : "default",
+                            zIndex: isHovered ? 10 : undefined,
                           }}
                           data-testid={`calendar-day-${iso}`}
+                          onMouseEnter={() => hasEvent && isCalMonth && setHoveredDay(iso)}
+                          onMouseLeave={() => setHoveredDay(null)}
                         >
                           {d.getDate()}
                           {hasEvent && isCalMonth && !isToday && (
@@ -875,13 +895,52 @@ export default function DashboardPage() {
                               style={{ background: RED }}
                             />
                           )}
+
+                          {/* Hover popover */}
+                          {isHovered && hasEvent && isCalMonth && (
+                            <div
+                              className="absolute left-1/2 -translate-x-1/2"
+                              style={{
+                                top: popoverTop,
+                                bottom: popoverBottom,
+                                marginTop: popoverTop ? 6 : undefined,
+                                marginBottom: popoverBottom ? 6 : undefined,
+                                zIndex: 50,
+                                background: "#fff",
+                                border: `1.5px solid ${BLACK}15`,
+                                borderRadius: 10,
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.13)",
+                                minWidth: 160,
+                                maxWidth: 220,
+                                padding: "10px 12px",
+                                pointerEvents: "auto",
+                              }}
+                              onMouseEnter={() => setHoveredDay(iso)}
+                              onMouseLeave={() => setHoveredDay(null)}
+                            >
+                              <div style={{ fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.07em", color: GRAY, marginBottom: 6 }}>
+                                {new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase()}
+                              </div>
+                              {events.map((ev, ei) => (
+                                <Link
+                                  key={ei}
+                                  href={ev.recipientId ? `/recipients/${ev.recipientId}` : "#"}
+                                  style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none", padding: "4px 0", borderBottom: ei < events.length - 1 ? `1px solid ${BLACK}08` : undefined }}
+                                >
+                                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: RED, flexShrink: 0 }} />
+                                  <span style={{ fontSize: "0.75rem", color: BLACK, fontWeight: 600, lineHeight: 1.3 }}>{ev.label}</span>
+                                  <span style={{ marginLeft: "auto", fontSize: "0.65rem", color: RED, fontWeight: 700, whiteSpace: "nowrap" }}>Edit →</span>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                   <div className="mt-4 pt-4 border-t flex items-center gap-2 text-xs" style={{ borderColor: `${BLACK}10`, color: GRAY }}>
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RED }} />
-                    Occasion / card date
+                    Hover an occasion to view &amp; edit
                   </div>
                 </div>
               </div>
