@@ -76,62 +76,57 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* HEADER NAV                                                         */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <header style={{ background: B.beige, borderBottom: `1px solid ${B.black}18` }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "center", height: 80 }}>
-
-          {/* Logo */}
-          <a href="/" style={{ textDecoration: "none", marginRight: 48, flexShrink: 0 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: B.red, fontStyle: "italic", lineHeight: 1 }}>F*</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: B.black, lineHeight: 1 }}> I FORGOT</span>
-            </div>
-            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "0.55rem", letterSpacing: "0.22em", color: B.black, opacity: 0.5, marginTop: 1, textTransform: "uppercase" }}>
-              Relationship Damage Control
-            </div>
+      {/* ── Mobile-only nav (image nav is too small to tap on phones) ─────── */}
+      <nav className="md:hidden flex items-center justify-between sticky top-0 z-50"
+        style={{ background: B.black, padding: "10px 16px", borderBottom: `2px solid ${B.red}` }}>
+        <div>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", fontWeight: 700, lineHeight: 1 }}>
+            <span style={{ color: B.red }}>"F"</span>
+            <span style={{ color: "#fff" }}> I Forgot</span>
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.55rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.4)", marginTop: 1 }}>
+            RELATIONSHIP DAMAGE CONTROL
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <a href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.7)", textDecoration: "none", padding: "6px 10px" }}>
+            SIGN IN
           </a>
-
-          {/* Nav links */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 36, flex: 1 }}>
-            {[
-              { label: "HOW IT WORKS", href: "#how-it-works" },
-              { label: "PLANS",        href: "#pricing" },
-              { label: "EXAMPLES",     href: "#examples" },
-              { label: "REVIEWS",      href: "#reviews" },
-              { label: "FAQ",          href: "#faq" },
-              { label: "SIGN IN",      href: "/login" },
-            ].map(({ label, href }) => (
-              <a key={label} href={href}
-                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", whiteSpace: "nowrap", opacity: 0.85 }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "0.85")}
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
-
-          {/* CTA button */}
-          <a href="/signup" data-testid="link-get-started-nav"
-            style={{ flexShrink: 0, background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", padding: "14px 24px", borderRadius: 6, textDecoration: "none", lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>
-            START EARNING<br />BROWNIE POINTS
+          <a href="/signup" data-testid="link-mobile-nav-cta"
+            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.12em", padding: "8px 14px", borderRadius: 3, textDecoration: "none", whiteSpace: "nowrap" }}>
+            START NOW
           </a>
         </div>
-      </header>
+      </nav>
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* HERO — Full-bleed image                                            */}
+      {/* HERO — Full-bleed image: nav + hero + how-it-works + social proof  */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       <section id="how-it-works" className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
 
-        <img
-          src="/cover-page.png"
-          alt="F* I Forgot — You focus on life. We remember everything."
-          style={{ width: "100%", height: "auto", display: "block", pointerEvents: "none", userSelect: "none" }}
-          draggable={false}
-        />
+        {/* On mobile: scaled up 2× so the image is taller than the screen   */}
+        {/* and the user scrolls through it. Desktop stays 100% wide.        */}
+        <div className="overflow-hidden">
+          <img
+            src="/cover-page.png"
+            alt="F* I Forgot — You focus on life. We remember everything."
+            className="w-[160%] md:w-full md:ml-0"
+            style={{ height: "auto", display: "block", pointerEvents: "none", userSelect: "none" }}
+            draggable={false}
+          />
+        </div>
+
+        {/* ── Nav link zones ─────────────────────────────────────────────── */}
+        <a aria-label="How it works" href="#how-it-works" style={zone({ top:"1%",   left:"22%", width:"10%", height:"3.5%" })} />
+        <a aria-label="Plans"        href="#pricing"      style={zone({ top:"1%",   left:"32%", width:"6%",  height:"3.5%" })} />
+        <a aria-label="Examples"     href="#examples"     style={zone({ top:"1%",   left:"38%", width:"9%",  height:"3.5%" })} />
+        <a aria-label="Reviews"      href="#reviews"      style={zone({ top:"1%",   left:"47%", width:"8%",  height:"3.5%" })} />
+        <a aria-label="FAQ"          href="#faq"          style={zone({ top:"1%",   left:"55%", width:"5%",  height:"3.5%" })} />
+        <a aria-label="Sign in"      href="/login"        style={zone({ top:"1%",   left:"60%", width:"8%",  height:"3.5%" })} />
+
+        {/* Nav CTA — "START EARNING BROWNIE POINTS" red button top-right */}
+        <a aria-label="Start earning brownie points" data-testid="link-get-started-nav"
+          href="/signup" style={zone({ top:"0.3%", right:"0%", width:"22%", height:"5%" })} />
 
         {/* Hero "START NOW" — large red button lower-left of hero */}
         <a aria-label="Start Now" data-testid="link-cta-hitzone"
@@ -146,6 +141,24 @@ export default function LandingPage() {
           href="/signup" style={zone({ top:"94%", right:"1%", width:"36%", height:"5%" })} />
       </section>
 
+      {/* ── Mobile CTA strip — real tappable buttons below the image ─────── */}
+      <div className="md:hidden flex flex-col gap-3"
+        style={{ background: B.black, padding: "20px 16px" }}>
+        <a href="/signup"
+          style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.14em", padding: "16px", borderRadius: 4, textDecoration: "none", boxShadow: `0 4px 20px ${B.red}55` }}>
+          START EARNING BROWNIE POINTS
+        </a>
+        <div className="flex gap-3">
+          <a href="#pricing"
+            style={{ flex: 1, display: "block", textAlign: "center", border: `2px solid rgba(255,255,255,0.3)`, color: "rgba(255,255,255,0.85)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.12em", padding: "12px", borderRadius: 4, textDecoration: "none" }}>
+            SEE PLANS
+          </a>
+          <a href="#faq"
+            style={{ flex: 1, display: "block", textAlign: "center", border: `2px solid rgba(255,255,255,0.3)`, color: "rgba(255,255,255,0.85)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.12em", padding: "12px", borderRadius: 4, textDecoration: "none" }}>
+            FAQ
+          </a>
+        </div>
+      </div>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section
