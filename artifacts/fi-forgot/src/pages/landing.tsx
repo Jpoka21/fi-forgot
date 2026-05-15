@@ -120,46 +120,48 @@ export default function LandingPage() {
         />
 
         {/* Text overlay — top left on all screen sizes */}
-        <div className="flex flex-col w-[62%] md:w-[42%]" style={{
+        <div className="flex flex-col w-[58%] md:w-[42%]" style={{
           position: "absolute", top: "4%", left: "3%",
           lineHeight: "normal", gap: 0,
         }}>
           {/* Headline line 1 */}
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2.2rem, 5vw, 5rem)",
-            color: "#f0ece4",
-            letterSpacing: "0.03em",
-            lineHeight: 1,
-            textShadow: "2px 2px 0 #00000088, -1px -1px 0 #00000044",
-            WebkitTextStroke: "1px rgba(0,0,0,0.3)",
-          }}>
+          <div
+            className="text-[7vw] md:text-[clamp(2.2rem,5vw,5rem)]"
+            style={{
+              fontFamily: "'Bebas Neue', cursive",
+              color: "#f0ece4",
+              letterSpacing: "0.03em",
+              lineHeight: 1,
+              textShadow: "2px 2px 0 #00000088, -1px -1px 0 #00000044",
+              WebkitTextStroke: "1px rgba(0,0,0,0.3)",
+            }}>
             YOU FOCUS ON LIFE.
           </div>
 
           {/* Headline lines 2–3 */}
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2.8rem, 6.5vw, 6.5rem)",
-            color: B.red,
-            letterSpacing: "0.02em",
-            lineHeight: 0.95,
-            textShadow: "2px 3px 0 #00000066",
-            WebkitTextStroke: "1px rgba(0,0,0,0.25)",
-            marginTop: "0.15em",
-          }}>
+          <div
+            className="text-[9vw] md:text-[clamp(2.8rem,6.5vw,6.5rem)]"
+            style={{
+              fontFamily: "'Bebas Neue', cursive",
+              color: B.red,
+              letterSpacing: "0.02em",
+              lineHeight: 0.95,
+              textShadow: "2px 3px 0 #00000066",
+              WebkitTextStroke: "1px rgba(0,0,0,0.25)",
+              marginTop: "0.1em",
+            }}>
             WE REMEMBER EVERYTHING.
           </div>
 
-          {/* Divider */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0.5em 0 0.4em" }}>
+          {/* Divider — desktop only */}
+          <div className="hidden md:flex" style={{ alignItems: "center", gap: 8, margin: "0.5em 0 0.4em" }}>
             <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
             <span style={{ color: B.red, fontSize: "0.9rem", lineHeight: 1 }}>♥</span>
             <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
           </div>
 
-          {/* Subtext */}
-          <p style={{
+          {/* Subtext — desktop only */}
+          <p className="hidden md:block" style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: "clamp(0.95rem, 1.5vw, 1.3rem)",
             fontWeight: 700,
@@ -175,13 +177,13 @@ export default function LandingPage() {
 
           {/* CTA button */}
           <a href="/signup" data-testid="link-cta-hitzone"
+            className="text-[3vw] md:text-[clamp(0.9rem,1.5vw,1.3rem)]"
             style={{
-              display: "inline-block", marginTop: "1em", alignSelf: "flex-start",
+              display: "inline-block", marginTop: "0.5em", alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(0.9rem, 1.5vw, 1.3rem)",
               letterSpacing: "0.1em",
-              padding: "0.6em 1.4em",
+              padding: "0.5em 1em",
               borderRadius: 4,
               textDecoration: "none",
               boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.45)`,
