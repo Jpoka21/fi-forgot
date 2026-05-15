@@ -114,6 +114,7 @@ export default function LandingPage() {
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
+        className="min-h-[100svh] md:min-h-0"
         style={{ background: B.black, lineHeight: 0, position: "relative" }}
       >
         <img
