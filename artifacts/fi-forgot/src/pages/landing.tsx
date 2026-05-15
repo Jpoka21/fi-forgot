@@ -104,13 +104,17 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════ */}
       <section id="how-it-works" className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
 
-        {/* Image — pointer-events disabled so every overlay wins every click */}
-        <img
-          src="/cover-page.png"
-          alt="F* I Forgot — You focus on life. We remember everything."
-          style={{ width: "100%", height: "auto", display: "block", pointerEvents: "none", userSelect: "none" }}
-          draggable={false}
-        />
+        {/* On mobile: scaled up 2× so the image is taller than the screen   */}
+        {/* and the user scrolls through it. Desktop stays 100% wide.        */}
+        <div className="overflow-hidden">
+          <img
+            src="/cover-page.png"
+            alt="F* I Forgot — You focus on life. We remember everything."
+            className="w-[160%] md:w-full md:ml-0"
+            style={{ height: "auto", display: "block", pointerEvents: "none", userSelect: "none" }}
+            draggable={false}
+          />
+        </div>
 
         {/* ── Nav link zones ─────────────────────────────────────────────── */}
         <a aria-label="How it works" href="#how-it-works" style={zone({ top:"1%",   left:"22%", width:"10%", height:"3.5%" })} />
