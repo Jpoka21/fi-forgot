@@ -77,7 +77,52 @@ export default function LandingPage() {
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* HERO — Full-bleed image: nav + hero + how-it-works + social proof  */}
+      {/* HEADER NAV                                                         */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      <header style={{ background: B.beige, borderBottom: `1px solid ${B.black}18` }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "center", height: 80 }}>
+
+          {/* Logo */}
+          <a href="/" style={{ textDecoration: "none", marginRight: 48, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: B.red, fontStyle: "italic", lineHeight: 1 }}>F*</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: B.black, lineHeight: 1 }}> I FORGOT</span>
+            </div>
+            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "0.55rem", letterSpacing: "0.22em", color: B.black, opacity: 0.5, marginTop: 1, textTransform: "uppercase" }}>
+              Relationship Damage Control
+            </div>
+          </a>
+
+          {/* Nav links */}
+          <nav style={{ display: "flex", alignItems: "center", gap: 36, flex: 1 }}>
+            {[
+              { label: "HOW IT WORKS", href: "#how-it-works" },
+              { label: "PLANS",        href: "#pricing" },
+              { label: "EXAMPLES",     href: "#examples" },
+              { label: "REVIEWS",      href: "#reviews" },
+              { label: "FAQ",          href: "#faq" },
+              { label: "SIGN IN",      href: "/login" },
+            ].map(({ label, href }) => (
+              <a key={label} href={href}
+                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", whiteSpace: "nowrap", opacity: 0.85 }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0.85")}
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+
+          {/* CTA button */}
+          <a href="/signup" data-testid="link-get-started-nav"
+            style={{ flexShrink: 0, background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", padding: "14px 24px", borderRadius: 6, textDecoration: "none", lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>
+            START EARNING<br />BROWNIE POINTS
+          </a>
+        </div>
+      </header>
+
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* HERO — Full-bleed image                                            */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       <section id="how-it-works" className="relative w-full" aria-label="Hero" style={{ background: "#fff" }}>
 
@@ -87,18 +132,6 @@ export default function LandingPage() {
           style={{ width: "100%", height: "auto", display: "block", pointerEvents: "none", userSelect: "none" }}
           draggable={false}
         />
-
-        {/* ── Nav link zones ─────────────────────────────────────────────── */}
-        <a aria-label="How it works" href="#how-it-works" style={zone({ top:"1%",   left:"22%", width:"10%", height:"3.5%" })} />
-        <a aria-label="Plans"        href="#pricing"      style={zone({ top:"1%",   left:"32%", width:"6%",  height:"3.5%" })} />
-        <a aria-label="Examples"     href="#examples"     style={zone({ top:"1%",   left:"38%", width:"9%",  height:"3.5%" })} />
-        <a aria-label="Reviews"      href="#reviews"      style={zone({ top:"1%",   left:"47%", width:"8%",  height:"3.5%" })} />
-        <a aria-label="FAQ"          href="#faq"          style={zone({ top:"1%",   left:"55%", width:"5%",  height:"3.5%" })} />
-        <a aria-label="Sign in"      href="/login"        style={zone({ top:"1%",   left:"60%", width:"8%",  height:"3.5%" })} />
-
-        {/* Nav CTA — "START EARNING BROWNIE POINTS" red button top-right */}
-        <a aria-label="Start earning brownie points" data-testid="link-get-started-nav"
-          href="/signup" style={zone({ top:"0.3%", right:"0%", width:"22%", height:"5%" })} />
 
         {/* Hero "START NOW" — large red button lower-left of hero */}
         <a aria-label="Start Now" data-testid="link-cta-hitzone"
