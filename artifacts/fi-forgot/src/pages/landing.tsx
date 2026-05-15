@@ -112,17 +112,96 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
-      <section aria-label="Hero" style={{ background: B.black, lineHeight: 0 }}>
+      <section aria-label="Hero" style={{ background: B.black, lineHeight: 0, position: "relative" }}>
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           style={{ width: "100%", height: "auto", display: "block" }}
         />
-        {/* CTA below hero on mobile */}
-        <div className="md:hidden" style={{ background: B.black, padding: "20px 16px", lineHeight: "normal" }}>
+
+        {/* Desktop text overlay — top left */}
+        <div className="hidden md:flex flex-col" style={{
+          position: "absolute", top: "6%", left: "3%", width: "42%",
+          lineHeight: "normal", gap: 0,
+        }}>
+          {/* Headline line 1 */}
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(2.2rem, 5vw, 5rem)",
+            color: "#f0ece4",
+            letterSpacing: "0.03em",
+            lineHeight: 1,
+            textShadow: "2px 2px 0 #00000088, -1px -1px 0 #00000044",
+            WebkitTextStroke: "1px rgba(0,0,0,0.3)",
+          }}>
+            YOU FOCUS ON LIFE.
+          </div>
+
+          {/* Headline lines 2–3 */}
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(2.8rem, 6.5vw, 6.5rem)",
+            color: B.red,
+            letterSpacing: "0.02em",
+            lineHeight: 0.95,
+            textShadow: "2px 3px 0 #00000066",
+            WebkitTextStroke: "1px rgba(0,0,0,0.25)",
+            marginTop: "0.15em",
+          }}>
+            WE REMEMBER EVERYTHING.
+          </div>
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0.5em 0 0.4em" }}>
+            <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
+            <span style={{ color: B.red, fontSize: "0.9rem", lineHeight: 1 }}>♥</span>
+            <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
+          </div>
+
+          {/* Subtext */}
+          <p style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: "clamp(0.75rem, 1.2vw, 1.05rem)",
+            color: "rgba(255,255,255,0.88)",
+            lineHeight: 1.5,
+            margin: 0,
+            textShadow: "1px 1px 3px rgba(0,0,0,0.7)",
+          }}>
+            We make sure you <span style={{ textDecoration: "underline" }}>never</span> miss an important date<br />
+            so you don't end up in the dog house.
+          </p>
+
+          {/* CTA button */}
           <a href="/signup" data-testid="link-cta-hitzone"
+            style={{
+              display: "inline-block", marginTop: "1em", alignSelf: "flex-start",
+              background: B.red, color: "#fff",
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.9rem, 1.5vw, 1.3rem)",
+              letterSpacing: "0.1em",
+              padding: "0.6em 1.4em",
+              borderRadius: 4,
+              textDecoration: "none",
+              boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.45)`,
+            }}>
+            AUTOMATE BEING THOUGHTFUL →
+          </a>
+        </div>
+
+        {/* Mobile: stacked below image */}
+        <div className="md:hidden" style={{ background: B.black, padding: "20px 16px", lineHeight: "normal" }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: "#f0ece4", letterSpacing: "0.03em", lineHeight: 1 }}>
+            YOU FOCUS ON LIFE.
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: B.red, letterSpacing: "0.02em", lineHeight: 0.95, marginTop: "0.1em" }}>
+            WE REMEMBER EVERYTHING.
+          </div>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.9rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.5, margin: "12px 0 16px" }}>
+            We make sure you <span style={{ textDecoration: "underline" }}>never</span> miss an important date so you don't end up in the dog house.
+          </p>
+          <a href="/signup" data-testid="link-cta-hitzone-mobile"
             style={{ display: "block", textAlign: "center", background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.12em", padding: "16px", borderRadius: 3, textDecoration: "none" }}>
-            START NOW — IT TAKES 2 MINUTES
+            AUTOMATE BEING THOUGHTFUL →
           </a>
         </div>
       </section>
