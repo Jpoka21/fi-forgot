@@ -152,7 +152,7 @@ function FloatingTryButton() {
         el.style.boxShadow = "0 4px 20px rgba(226,59,46,0.45)";
       }}
     >
-      Try it free →
+      Demo for Free →
     </a>
   );
 }

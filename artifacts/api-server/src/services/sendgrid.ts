@@ -157,19 +157,18 @@ function escapeHtml(str: string): string {
 
 export async function sendDemoEmail(opts: {
   email: string;
-  recipientType: string;
-  occasionType: string;
-  vibe: string;
-  messageText: string;
-  card: { bgColor: string; titleColor: string; accentColor: string; title: string; seriesLabel: string };
-  cardWhy: string;
+  recipientName: string;
+  relationship: string;
   appUrl: string;
-  marketingConsent: boolean;
 }): Promise<void> {
   const { apiKey, fromEmail } = await getCredentials();
   sgMail.setApiKey(apiKey);
 
-  const subject = `Demo: Your ${opts.occasionType} card for ${opts.recipientType} is ready. Approve it or fix it.`;
+  const editUrl = `${opts.appUrl}/signup?demo=true&recipientName=${encodeURIComponent(opts.recipientName)}&relationship=${encodeURIComponent(opts.relationship)}`;
+
+  const sampleMessage = `Dear ${escapeHtml(opts.recipientName)},\n\nI just wanted to take a moment to say how much you mean to me. Life moves quickly, and sometimes we don&#x27;t say the important things often enough. You&#x27;ve made a real difference in my life, and I&#x27;m grateful for the memories, support, laughter, and moments we&#x27;ve shared.\n\nThis card is just a sample so you can see how everything works. You can edit this message, change the tone, make it more personal, choose a different design, regenerate the wording, approve it, or start over completely.\n\n&mdash; [Your Name]`;
+
+  const subject = `Your sample card for ${opts.recipientName} is ready`;
 
   const html = `<!DOCTYPE html>
 <html>
@@ -184,85 +183,52 @@ export async function sendDemoEmail(opts: {
     <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;letter-spacing:1px;text-transform:uppercase;font-family:Arial,sans-serif;">Relationship Damage Control</div>
   </td></tr>
 
-  <tr><td style="background:#E23B2E;padding:10px 32px;text-align:center;">
-    <span style="font-size:11px;font-weight:bold;color:#ffffff;letter-spacing:1.5px;text-transform:uppercase;font-family:Arial,sans-serif;">
-      &#9888; DEMO &mdash; No card will be printed, purchased, mailed, or sent to anyone.
-    </span>
+  <tr><td style="background:#E23B2E;padding:8px 32px;text-align:center;">
+    <span style="font-size:11px;font-weight:bold;color:#ffffff;letter-spacing:1px;text-transform:uppercase;font-family:Arial,sans-serif;">SAMPLE CARD &mdash; Nothing is printed or mailed</span>
   </td></tr>
 
   <tr><td style="background:#ffffff;padding:32px;border-left:1px solid #e8dcc8;border-right:1px solid #e8dcc8;">
 
-    <p style="margin:0 0 6px;font-size:16px;color:#111111;font-weight:bold;font-family:Arial,sans-serif;">Hey,</p>
-    <p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.6;font-family:Arial,sans-serif;">
-      F.I. Forgot caught this one before you became Dave.<br>Your sample card is ready. This is exactly how it works before anything gets mailed.
+    <p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.7;font-family:Arial,sans-serif;">
+      Hi,<br><br>
+      We created a sample card for <strong style="color:#111;">${escapeHtml(opts.recipientName)}</strong>, your ${escapeHtml(opts.relationship.toLowerCase())}, so you can see how this works.
     </p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F2E6D3;border-radius:8px;margin-bottom:24px;border:1px solid #d9cdb8;">
-      <tr><td style="padding:18px 22px;">
-        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:bold;font-family:Arial,sans-serif;">Your Fake Emergency</div>
-        <table cellpadding="0" cellspacing="0">
-          <tr><td style="font-size:13px;color:#6B6B6B;padding:3px 16px 3px 0;white-space:nowrap;font-family:Arial,sans-serif;">Recipient</td><td style="font-size:13px;color:#111111;font-weight:600;font-family:Arial,sans-serif;">${escapeHtml(opts.recipientType)}</td></tr>
-          <tr><td style="font-size:13px;color:#6B6B6B;padding:3px 16px 3px 0;white-space:nowrap;font-family:Arial,sans-serif;">Occasion</td><td style="font-size:13px;color:#111111;font-weight:600;font-family:Arial,sans-serif;">${escapeHtml(opts.occasionType)}</td></tr>
-          <tr><td style="font-size:13px;color:#6B6B6B;padding:3px 16px 3px 0;white-space:nowrap;font-family:Arial,sans-serif;">Vibe</td><td style="font-size:13px;color:#111111;font-weight:600;font-family:Arial,sans-serif;">${escapeHtml(opts.vibe)}</td></tr>
-          <tr><td style="font-size:13px;color:#6B6B6B;padding:3px 16px 3px 0;white-space:nowrap;font-family:Arial,sans-serif;">Status</td><td style="font-size:13px;color:#E23B2E;font-weight:600;font-family:Arial,sans-serif;">Demo &mdash; not mailed, not real, very educational.</td></tr>
-        </table>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f3eb;border-radius:8px;margin-bottom:8px;border:1px solid #e0d5c0;">
+      <tr><td style="padding:28px 28px 20px;text-align:center;">
+        <div style="font-size:10px;color:#c4966a;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;font-weight:bold;font-family:Arial,sans-serif;">SAMPLE CARD</div>
+        <div style="font-size:19px;color:#3d2b1f;font-weight:bold;line-height:1.2;font-family:Georgia,serif;margin-bottom:20px;">The &#x27;I Actually Remembered&#x27; Card</div>
+        <div style="font-size:15px;color:#3d2b1f;line-height:1.9;white-space:pre-line;font-family:Georgia,serif;text-align:left;">${sampleMessage}</div>
       </td></tr>
     </table>
+    <p style="font-size:11px;color:#b0a090;text-align:center;margin:0 0 28px;font-family:Arial,sans-serif;">This is a sample. You can change the message, design, tone, or start over.</p>
 
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-weight:bold;font-family:Arial,sans-serif;">Card We Picked</div>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-      <tr><td style="background:${opts.card.bgColor};border-radius:8px;padding:28px 24px;text-align:center;">
-        <div style="font-size:10px;color:${opts.card.accentColor};text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;font-weight:bold;font-family:Arial,sans-serif;">${escapeHtml(opts.card.seriesLabel)}</div>
-        <div style="font-size:20px;color:${opts.card.titleColor};font-weight:bold;line-height:1.2;font-family:Georgia,serif;margin-bottom:14px;">${escapeHtml(opts.card.title)}</div>
-        <span style="display:inline-block;border:1px solid ${opts.card.accentColor};border-radius:3px;padding:3px 10px;font-size:10px;color:${opts.card.accentColor};letter-spacing:1px;font-family:Arial,sans-serif;">DEMO CARD</span>
-      </td></tr>
-    </table>
-    <div style="font-size:13px;color:#6B6B6B;line-height:1.5;padding-top:10px;border-top:1px solid #f0e8d8;font-family:Arial,sans-serif;margin-bottom:22px;">
-      <strong style="color:#111111;">Why this card:</strong> ${escapeHtml(opts.cardWhy)}
-    </div>
-
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-weight:bold;font-family:Arial,sans-serif;">Message We Wrote</div>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-      <tr><td style="background:#F2E6D3;border-radius:8px;border:1px solid #d9cdb8;padding:22px 24px;font-size:15px;color:#111111;line-height:1.8;white-space:pre-wrap;font-family:Georgia,serif;">${escapeHtml(opts.messageText)}</td></tr>
-    </table>
-
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;font-weight:bold;font-family:Arial,sans-serif;">Your Move</div>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
-      <tr><td><a href="${opts.appUrl}/signup?demo=true&action=approve" style="display:block;background:#111111;color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;padding:14px 20px;border-radius:6px;text-decoration:none;text-align:center;">&#10003;&nbsp; Approve Card &mdash; Send It</a></td></tr>
-    </table>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
-      <tr>
-        <td style="width:49%;padding-right:4px;"><a href="${opts.appUrl}/signup?demo=true&action=edit-message" style="display:block;background:#f5f5f5;color:#111111;font-family:Arial,sans-serif;font-size:13px;font-weight:600;padding:12px 8px;border-radius:6px;text-decoration:none;text-align:center;border:1px solid #e0e0e0;">&#9999; Edit Message</a></td>
-        <td style="width:49%;padding-left:4px;"><a href="${opts.appUrl}/signup?demo=true&action=change-card" style="display:block;background:#f5f5f5;color:#111111;font-family:Arial,sans-serif;font-size:13px;font-weight:600;padding:12px 8px;border-radius:6px;text-decoration:none;text-align:center;border:1px solid #e0e0e0;">&#127183; Change Card Style</a></td>
-      </tr>
-    </table>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-      <tr><td><a href="${opts.appUrl}/signup?demo=true&action=questions" style="display:block;background:#f5f5f5;color:#111111;font-family:Arial,sans-serif;font-size:13px;font-weight:600;padding:12px;border-radius:6px;text-decoration:none;text-align:center;border:1px solid #e0e0e0;">&#128172; Answer a Few Extra Questions</a></td></tr>
+      <tr><td align="center">
+        <a href="${editUrl}" style="display:inline-block;background:#111111;color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;padding:16px 36px;border-radius:6px;text-decoration:none;letter-spacing:0.3px;">Edit This Sample Card &rarr;</a>
+      </td></tr>
     </table>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f8f6;border-radius:8px;margin-bottom:24px;">
-      <tr><td style="padding:18px 22px;">
-        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:bold;font-family:Arial,sans-serif;">How This Works in Real Life</div>
-        <table cellpadding="0" cellspacing="0">
-          <tr><td style="padding:3px 12px 3px 0;font-size:12px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">1.</td><td style="padding:3px 0;font-size:13px;color:#444;font-family:Arial,sans-serif;">We remember the date.</td></tr>
-          <tr><td style="padding:3px 12px 3px 0;font-size:12px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">2.</td><td style="padding:3px 0;font-size:13px;color:#444;font-family:Arial,sans-serif;">We pick the card.</td></tr>
-          <tr><td style="padding:3px 12px 3px 0;font-size:12px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">3.</td><td style="padding:3px 0;font-size:13px;color:#444;font-family:Arial,sans-serif;">We write the message.</td></tr>
-          <tr><td style="padding:3px 12px 3px 0;font-size:12px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">4.</td><td style="padding:3px 0;font-size:13px;color:#444;font-family:Arial,sans-serif;">You approve it or fix it.</td></tr>
-          <tr><td style="padding:3px 12px 3px 0;font-size:12px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">5.</td><td style="padding:3px 0;font-size:13px;color:#444;font-family:Arial,sans-serif;">Then we mail it. Before Dave ruins everything.</td></tr>
-        </table>
+      <tr><td style="padding:20px 24px;">
+        <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-weight:bold;font-family:Arial,sans-serif;">This is just a demo</div>
+        <p style="margin:0;font-size:13px;color:#555;line-height:1.7;font-family:Arial,sans-serif;">
+          This demo is simple on purpose. The real version asks a few more questions to get to know your recipient — their personality, the occasion, and your relationship. We use those answers to choose the right card from hundreds of options in our inventory and write a message that actually sounds like you.
+        </p>
       </td></tr>
     </table>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-      <tr><td align="center"><a href="${opts.appUrl}/signup" style="display:inline-block;background:#E23B2E;color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;padding:14px 36px;border-radius:6px;text-decoration:none;letter-spacing:0.5px;">Start the Real Thing &rarr;</a></td></tr>
+      <tr><td align="center">
+        <a href="${opts.appUrl}/signup" style="display:inline-block;background:#E23B2E;color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;padding:14px 32px;border-radius:6px;text-decoration:none;">Ready to make a real card? Sign up &rarr;</a>
+      </td></tr>
     </table>
-    <p style="text-align:center;font-size:12px;color:#999;margin:0;font-family:Arial,sans-serif;line-height:1.5;">No actual moms, wives, girlfriends, anniversaries, or dinner reservations were harmed in this demo.</p>
+    <p style="text-align:center;font-size:12px;color:#aaa;margin:0;font-family:Arial,sans-serif;line-height:1.5;">Nothing in this demo is printed, purchased, or mailed to anyone.</p>
 
   </td></tr>
 
-  <tr><td style="background:#F2E6D3;padding:18px 32px;border-radius:0 0 10px 10px;border:1px solid #e8dcc8;border-top:none;">
-    <p style="margin:0 0 6px;font-size:11px;color:#999;text-align:center;font-family:Arial,sans-serif;font-weight:bold;">&#9888; THIS IS A DEMO. No card will be printed, purchased, mailed, or sent to anyone.</p>
-    <p style="margin:0;font-size:11px;color:#aaa;text-align:center;font-family:Arial,sans-serif;">${opts.marketingConsent ? "You opted in to receive occasional marketing emails from F.I. Forgot." : "You only asked for this demo email. We won&#x27;t contact you again unless you sign up."}</p>
+  <tr><td style="background:#F2E6D3;padding:16px 32px;border-radius:0 0 10px 10px;border:1px solid #e8dcc8;border-top:none;">
+    <p style="margin:0;font-size:11px;color:#aaa;text-align:center;font-family:Arial,sans-serif;">You asked for this demo email. We won&#x27;t contact you again unless you sign up.</p>
   </td></tr>
 
 </table>
@@ -271,45 +237,34 @@ export async function sendDemoEmail(opts: {
 </body>
 </html>`.trim();
 
-  const text = `F.I. FORGOT — DEMO EMAIL
-========================
-THIS IS A DEMO. No card will be printed, purchased, mailed, or sent to anyone.
+  const plainMessage = `Dear ${opts.recipientName},\n\nI just wanted to take a moment to say how much you mean to me. Life moves quickly, and sometimes we don't say the important things often enough. You've made a real difference in my life, and I'm grateful for the memories, support, laughter, and moments we've shared.\n\nThis card is just a sample so you can see how everything works. You can edit this message, change the tone, make it more personal, choose a different design, regenerate the wording, approve it, or start over completely.\n\n— [Your Name]`;
 
-Hey,
+  const text = `F.I. FORGOT — SAMPLE CARD DEMO
+================================
+Nothing in this demo is printed, purchased, or mailed to anyone.
 
-F.I. Forgot caught this one before you became Dave.
-Your sample card is ready. This is exactly how it works before anything gets mailed.
+Hi,
 
-YOUR FAKE EMERGENCY:
-- Recipient: ${opts.recipientType}
-- Occasion: ${opts.occasionType}
-- Vibe: ${opts.vibe}
-- Status: Demo — not mailed, not real, very educational.
-
-CARD WE PICKED: ${opts.card.title}
-Why this card: ${opts.cardWhy}
-
-MESSAGE WE WROTE:
-${opts.messageText}
-
-YOUR MOVE:
-- Approve Card: ${opts.appUrl}/signup?demo=true&action=approve
-- Edit Message: ${opts.appUrl}/signup?demo=true&action=edit-message
-- Change Card Style: ${opts.appUrl}/signup?demo=true&action=change-card
-- Answer Extra Questions: ${opts.appUrl}/signup?demo=true&action=questions
-
-HOW THIS WORKS IN REAL LIFE:
-1. We remember the date.
-2. We pick the card.
-3. We write the message.
-4. You approve it or fix it.
-5. Then we mail it. Before Dave ruins everything.
-
-Start the real thing: ${opts.appUrl}/signup
+We created a sample card for ${opts.recipientName}, your ${opts.relationship.toLowerCase()}, so you can see how this works.
 
 ---
-THIS IS A DEMO. No card will be printed, purchased, mailed, or sent to anyone.
-${opts.marketingConsent ? "You opted in to receive occasional marketing emails from F.I. Forgot." : "You only asked for this demo email. We won't contact you again unless you sign up."}`;
+SAMPLE CARD: The 'I Actually Remembered' Card
+---
+
+${plainMessage}
+
+---
+
+Edit this sample card: ${editUrl}
+
+THIS IS JUST A DEMO
+The real version asks a few more questions to get to know your recipient — their personality, the occasion, and your relationship. We use those answers to choose the right card from hundreds of options and write a message that actually sounds like you.
+
+Ready to make a real card? Sign up: ${opts.appUrl}/signup
+
+---
+Nothing in this demo is printed, purchased, or mailed to anyone.
+You asked for this demo email. We won't contact you again unless you sign up.`;
 
   await sgMail.send({
     to: opts.email,
@@ -319,5 +274,5 @@ ${opts.marketingConsent ? "You opted in to receive occasional marketing emails f
     text,
   });
 
-  logger.info({ to: opts.email, recipientType: opts.recipientType, occasionType: opts.occasionType }, "Demo email sent");
+  logger.info({ to: opts.email, recipientName: opts.recipientName, relationship: opts.relationship }, "Demo email sent");
 }

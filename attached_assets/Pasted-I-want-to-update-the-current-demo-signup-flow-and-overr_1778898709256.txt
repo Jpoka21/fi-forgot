@@ -1,0 +1,143 @@
+I want to update the current demo/signup flow and override the earlier version that asked users a lot of questions.
+
+Please remove or replace the previous long-question demo flow. Do not ask users all the detailed card/message questions at the beginning anymore. If those questions were previously added to the main page, remove them from the main page or hide them until the real signup/personalization flow.
+
+The new goal is to make the demo simpler, faster, and easier for users to understand.
+
+Keep the main page simple.
+
+Change the hovering CTA button text from:
+
+Try for Free
+
+to:
+
+Demo for Free
+
+When the user clicks Demo for Free, take them to a simple demo page/form.
+
+The demo page should only ask for three things:
+
+1. Email address
+2. Recipient’s name
+3. Relationship to the recipient
+
+Do not ask any other personalization questions before the demo.
+
+The button on the demo form should say:
+
+Send Me the Demo
+
+The purpose of this flow is not to fully customize the card yet. The purpose is to let the user quickly experience how the product works.
+
+After they submit the form, create/send/show a demo experience using the same sample card and sample message for everyone, but lightly personalize it using the recipient’s name and relationship.
+
+For example:
+
+We created a sample card for Sarah, your sister, so you can see how this works.
+
+The demo card and message should be made up. It should not require the user to answer more questions first.
+
+The demo should feel polished, emotional, and high quality, but it should be clear that it is only a sample.
+
+Important: The demo email must explain, in simple and easy-to-understand language, that this is just a demo. It should also explain that the real version asks more questions to get to know the recipient better. Those answers help us choose the perfect card from hundreds of cards in our inventory and create the right message for that specific person and relationship.
+
+After the user receives or opens the demo, they should be able to edit the sample using all the existing tools we already have, including editing the message, changing the design, regenerating the wording, personalizing it more, approving/accepting it, or starting from scratch.
+
+Once they have experienced the editor and the demo card, then we can sell them on actually signing up, saving, sending, printing, or completing a real card.
+
+Please make sure the old long-question flow does not appear before the demo. The only pre-demo questions should be email address, recipient’s name, and relationship.
+
+Suggested main page hovering button:
+
+Demo for Free
+
+Suggested demo page headline:
+
+See how it works.
+
+Suggested demo page subtext:
+
+Enter your email and who the card is for. We’ll send you a sample card you can edit.
+
+Demo form fields:
+
+Email Address
+Recipient’s Name
+Relationship
+
+The relationship field can be a dropdown with these options:
+
+Spouse / Partner
+Parent
+Child
+Sibling
+Friend
+Coworker
+Other
+
+Demo form button:
+
+Send Me the Demo
+
+After submit confirmation message:
+
+Check your inbox — we just sent you a sample card you can edit.
+
+Demo email subject:
+
+Your sample card for [Recipient Name] is ready
+
+Demo email body:
+
+Hi,
+
+We created a sample card for [Recipient Name], your [Relationship], so you can see how this works.
+
+This is just a demo, so we kept it simple. In the real version, we ask a few more questions to get to know your recipient better. We use those answers to help choose the perfect card from hundreds of cards in our inventory and create a message that feels right for that person and your relationship with them.
+
+For now, you can open this sample card and try the editing tools. You can change the message, adjust the tone, personalize the wording, choose a different design, regenerate the message, approve it, or start from scratch.
+
+When you are ready to make a real card, you can sign up and we’ll guide you through the full personalized version.
+
+Demo email button:
+
+Edit This Sample Card
+
+When the user clicks the email button, open the editor with a polished sample card already loaded.
+
+The sample card should use the recipient’s name and should be flexible enough to work for any relationship.
+
+Example demo card message:
+
+Dear [Recipient Name],
+
+I just wanted to take a moment to say how much you mean to me. Life moves quickly, and sometimes we do not say the important things often enough. You have made a real difference in my life, and I am grateful for the memories, support, laughter, and moments we have shared.
+
+This card is just a sample so you can see how everything works. You can edit this message, change the tone, make it more personal, choose a different design, regenerate the wording, approve it, or start over completely.
+
+After the user edits or approves the sample, show a soft signup/sales message:
+
+Ready to make your real card? Create your account to save, send, or print it.
+
+Also include a simple explanation somewhere in the demo/editor experience, such as:
+
+This demo is simple on purpose. The real version asks a few more questions so we can better understand your recipient, choose the right card from hundreds of options, and create a more personal message.
+
+Do not remove the existing editing tools. The demo should connect to the existing editor/tools wherever possible.
+
+Final desired flow:
+
+Main page has simple content and a hovering button that says Demo for Free.
+User clicks Demo for Free.
+User goes to a simple demo form.
+Form only asks for email address, recipient’s name, and relationship.
+User clicks Send Me the Demo.
+User receives or sees a demo email/card.
+The demo explains that this is only a sample and that the real version is more personalized.
+User clicks Edit This Sample Card.
+User lands in the editor with a sample card already loaded.
+User can try the existing tools.
+After they experience the editor, invite them to sign up to create their real personalized card.
+
+This new flow should override the previous prompt and previous setup that asked too many questions before the user could see the demo.

@@ -1,16 +1,13 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const demoLeadsTable = pgTable("demo_leads", {
   id: text("id").primaryKey(),
   email: text("email").notNull(),
-  recipientType: text("recipient_type").notNull(),
-  occasionType: text("occasion_type").notNull(),
-  vibe: text("vibe").notNull(),
-  personalDetail: text("personal_detail"),
-  marketingConsent: boolean("marketing_consent").notNull().default(false),
-  source: text("source").notNull().default("send_yourself_the_save"),
+  recipientName: text("recipient_name").notNull(),
+  relationship: text("relationship").notNull(),
+  source: text("source").notNull().default("demo_for_free"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastDemoEmailSentAt: timestamp("last_demo_email_sent_at"),

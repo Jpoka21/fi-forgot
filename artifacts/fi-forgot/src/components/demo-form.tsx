@@ -1,62 +1,55 @@
 import { useState } from "react";
 import { B } from "@/components/brand";
 
-const RECIPIENT_OPTIONS = ["Mom","Wife","Girlfriend","Fiancée","Dad","Husband","Boyfriend","Grandmother","Mother-in-law","Sister","Daughter","Friend","Other"];
-const OCCASION_OPTIONS = ["Birthday","Anniversary","Mother's Day","Valentine's Day","Thank You","Apology","Just Because","Congratulations","I'm in trouble and need a card"];
-const VIBE_OPTIONS = ["Funny","Sweet","Romantic","Heartfelt","Classy","Apologetic","Please don't make me sleep outside"];
+const RELATIONSHIP_OPTIONS = [
+  "Spouse / Partner",
+  "Parent",
+  "Child",
+  "Sibling",
+  "Friend",
+  "Coworker",
+  "Other",
+];
 
 type Status = "idle" | "loading" | "success" | "error";
 
 const fieldLabel: React.CSSProperties = {
   display: "block",
   fontFamily: "'Bebas Neue', cursive",
-  fontSize: "0.85rem",
-  letterSpacing: "0.1em",
+  fontSize: "0.8rem",
+  letterSpacing: "0.12em",
   color: B.red,
   marginBottom: 6,
-};
-
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  background: "#262626",
-  color: "#f0ece4",
-  border: "1px solid #3a3a3a",
-  borderRadius: 6,
-  padding: "12px 14px",
-  fontSize: "0.95rem",
-  fontFamily: "'Inter', Arial, sans-serif",
-  appearance: "none" as const,
-  cursor: "pointer",
-  outline: "none",
+  textTransform: "uppercase",
 };
 
 const inputStyle: React.CSSProperties = {
-  ...selectStyle,
-  cursor: "text",
+  width: "100%",
+  background: "#1e1e1e",
+  color: "#f0ece4",
+  border: "1px solid #333",
+  borderRadius: 6,
+  padding: "13px 14px",
+  fontSize: "1rem",
+  fontFamily: "'Inter', Arial, sans-serif",
+  outline: "none",
+  boxSizing: "border-box",
 };
 
 export function DemoFormSection() {
-  const [form, setForm] = useState({
-    recipientType: "",
-    occasionType: "",
-    vibe: "",
-    personalDetail: "",
-    email: "",
-    marketingConsent: false,
-    website: "",
-  });
+  const [form, setForm] = useState({ email: "", recipientName: "", relationship: "", website: "" });
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  function set(field: string, value: string | boolean) {
+  function set(field: string, value: string) {
     setForm(f => ({ ...f, [field]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.recipientType || !form.occasionType || !form.vibe) {
+    if (!form.email || !form.recipientName || !form.relationship) {
       setStatus("error");
-      setErrorMsg("Dave skipped a step. Don't be Dave.");
+      setErrorMsg("Please fill in all three fields.");
       return;
     }
     setStatus("loading");
@@ -66,133 +59,72 @@ export function DemoFormSection() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          recipientType: form.recipientType,
-          occasionType: form.occasionType,
-          vibe: form.vibe,
-          personalDetail: form.personalDetail || null,
           email: form.email,
-          marketingConsent: form.marketingConsent,
+          recipientName: form.recipientName,
+          relationship: form.relationship,
           honeypot: form.website,
         }),
       });
       const data = await res.json() as { message?: string };
       if (!res.ok) {
         setStatus("error");
-        setErrorMsg(data.message ?? "Something broke. Probably Dave. Try again in a minute.");
+        setErrorMsg(data.message ?? "Something went wrong. Try again in a minute.");
         return;
       }
       setStatus("success");
     } catch {
       setStatus("error");
-      setErrorMsg("Something broke. Probably Dave. Try again in a minute.");
+      setErrorMsg("Something went wrong. Try again in a minute.");
     }
   }
 
   return (
-    <section
-      id="send-yourself-the-save"
-      style={{ background: B.black, padding: "80px 24px" }}
-    >
-      <div style={{ maxWidth: 660, margin: "0 auto" }}>
-
-        {/* Section tag */}
-        <div style={{
-          fontFamily: "'Bebas Neue', cursive",
-          fontSize: "0.8rem",
-          letterSpacing: "0.2em",
-          color: B.red,
-          marginBottom: 12,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-        }}>
-          <span style={{ flex: 1, maxWidth: 48, height: 1, background: B.red, display: "inline-block" }} />
-          SEND YOURSELF THE SAVE
-          <span style={{ flex: 1, maxWidth: 48, height: 1, background: B.red, display: "inline-block" }} />
-        </div>
+    <section style={{ background: B.black, padding: "72px 24px 80px" }}>
+      <div style={{ maxWidth: 520, margin: "0 auto" }}>
 
         {/* Headline */}
-        <h2 style={{
+        <h1 style={{
           fontFamily: "'Bebas Neue', cursive",
-          fontSize: "clamp(2.4rem, 6vw, 4rem)",
+          fontSize: "clamp(2.6rem, 7vw, 4rem)",
           color: "#ffffff",
           letterSpacing: "0.02em",
           lineHeight: 0.95,
-          margin: "0 0 16px",
+          margin: "0 0 14px",
         }}>
-          Try the Email That Saves Your Ass
-        </h2>
+          See how it works.
+        </h1>
 
-        {/* Subheadline */}
+        {/* Subtext */}
         <p style={{
           fontFamily: "'Inter', Arial, sans-serif",
-          fontSize: "1.05rem",
-          color: B.gray,
-          margin: "0 0 12px",
-          lineHeight: 1.5,
-        }}>
-          Let's fake-save you before you need the real thing.
-        </p>
-
-        {/* Body copy */}
-        <p style={{
-          fontFamily: "'Inter', Arial, sans-serif",
-          fontSize: "0.95rem",
+          fontSize: "1rem",
           color: "rgba(255,255,255,0.6)",
-          margin: "0 0 32px",
+          margin: "0 0 36px",
           lineHeight: 1.6,
         }}>
-          Answer a few quick questions and we'll send you a sample F.I. Forgot approval email.
-          You'll see the card we picked, the message we wrote, and how you can approve it or fix it
-          before anything gets mailed.
+          Enter your email and who the card is for. We'll send you a sample card you can edit.
         </p>
 
-        {/* Form card */}
         {status === "success" ? (
-          <div style={{
-            background: "#1a1a1a",
-            borderRadius: 12,
-            padding: "48px 36px",
-            textAlign: "center",
-            border: "1px solid #2e2e2e",
-          }}>
-            <div style={{ fontSize: "2.5rem", marginBottom: 16 }}>📬</div>
-            <div style={{
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <div style={{ fontSize: "2.5rem", marginBottom: 18 }}>📬</div>
+            <p style={{
               fontFamily: "'Bebas Neue', cursive",
               fontSize: "1.8rem",
               color: "#ffffff",
               letterSpacing: "0.05em",
-              marginBottom: 12,
+              margin: "0 0 12px",
             }}>
               Check your inbox.
-            </div>
+            </p>
             <p style={{
               fontFamily: "'Inter', Arial, sans-serif",
               fontSize: "0.95rem",
-              color: "rgba(255,255,255,0.65)",
+              color: "rgba(255,255,255,0.55)",
               lineHeight: 1.6,
-              margin: "0 0 10px",
-            }}>
-              We just sent you a fake emergency.
-            </p>
-            <p style={{
-              fontFamily: "'Inter', Arial, sans-serif",
-              fontSize: "0.9rem",
-              color: B.gray,
-              lineHeight: 1.5,
-              margin: "0 0 8px",
-            }}>
-              Open it to see how F.I. Forgot picks the card, writes the message, and lets you approve
-              or change everything before anything gets mailed.
-            </p>
-            <p style={{
-              fontFamily: "'Inter', Arial, sans-serif",
-              fontSize: "0.8rem",
-              color: "#555",
               margin: 0,
-              lineHeight: 1.5,
             }}>
-              No actual moms, wives, girlfriends, anniversaries, or dinner reservations were harmed in this demo.
+              We just sent you a sample card you can edit.
             </p>
           </div>
         ) : (
@@ -208,136 +140,57 @@ export function DemoFormSection() {
               autoComplete="off"
             />
 
-            <div style={{
-              background: "#1a1a1a",
-              borderRadius: 12,
-              padding: "32px",
-              border: "1px solid #2e2e2e",
-              display: "flex",
-              flexDirection: "column",
-              gap: 20,
-            }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
-              {/* Field 1 */}
+              {/* Email */}
               <div>
-                <label htmlFor="recipientType" style={fieldLabel}>
-                  Who are we saving you from disappointing?
-                </label>
-                <div style={{ position: "relative" }}>
-                  <select
-                    id="recipientType"
-                    value={form.recipientType}
-                    onChange={e => set("recipientType", e.target.value)}
-                    required
-                    style={selectStyle}
-                  >
-                    <option value="">Select someone…</option>
-                    {RECIPIENT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                  <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#666", pointerEvents: "none" }}>▾</span>
-                </div>
-              </div>
-
-              {/* Field 2 */}
-              <div>
-                <label htmlFor="occasionType" style={fieldLabel}>
-                  What are we pretending you remembered?
-                </label>
-                <div style={{ position: "relative" }}>
-                  <select
-                    id="occasionType"
-                    value={form.occasionType}
-                    onChange={e => set("occasionType", e.target.value)}
-                    required
-                    style={selectStyle}
-                  >
-                    <option value="">Select an occasion…</option>
-                    {OCCASION_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                  <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#666", pointerEvents: "none" }}>▾</span>
-                </div>
-              </div>
-
-              {/* Field 3 */}
-              <div>
-                <label htmlFor="vibe" style={fieldLabel}>
-                  What vibe keeps you alive?
-                </label>
-                <div style={{ position: "relative" }}>
-                  <select
-                    id="vibe"
-                    value={form.vibe}
-                    onChange={e => set("vibe", e.target.value)}
-                    required
-                    style={selectStyle}
-                  >
-                    <option value="">Select a vibe…</option>
-                    {VIBE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                  <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#666", pointerEvents: "none" }}>▾</span>
-                </div>
-              </div>
-
-              {/* Field 4 — optional */}
-              <div>
-                <label htmlFor="personalDetail" style={{ ...fieldLabel, display: "flex", alignItems: "center", gap: 8 }}>
-                  Got one detail we can weaponize?
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", color: "#555", fontWeight: 400, letterSpacing: 0, textTransform: "none" }}>optional</span>
-                </label>
-                <textarea
-                  id="personalDetail"
-                  value={form.personalDetail}
-                  onChange={e => set("personalDetail", e.target.value)}
-                  rows={2}
-                  maxLength={500}
-                  placeholder="Inside joke, nickname, recent trip, favorite memory, or thing you forgot last year…"
-                  style={{
-                    ...inputStyle,
-                    resize: "vertical",
-                    minHeight: 64,
-                    lineHeight: 1.5,
-                  }}
-                />
-              </div>
-
-              {/* Field 5 — email */}
-              <div>
-                <label htmlFor="email" style={fieldLabel}>
-                  Where should we send the fake emergency?
-                </label>
+                <label htmlFor="demo-email" style={fieldLabel}>Email Address</label>
                 <input
-                  id="email"
+                  id="demo-email"
                   type="email"
                   value={form.email}
                   onChange={e => set("email", e.target.value)}
                   required
-                  placeholder="Your email address"
+                  placeholder="you@example.com"
                   style={inputStyle}
                 />
               </div>
 
-              {/* Field 6 — marketing consent */}
-              <label style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 10,
-                cursor: "pointer",
-              }}>
+              {/* Recipient Name */}
+              <div>
+                <label htmlFor="demo-name" style={fieldLabel}>Recipient's Name</label>
                 <input
-                  type="checkbox"
-                  checked={form.marketingConsent}
-                  onChange={e => set("marketingConsent", e.target.checked)}
-                  style={{ marginTop: 3, accentColor: B.red, flexShrink: 0, width: 16, height: 16 }}
+                  id="demo-name"
+                  type="text"
+                  value={form.recipientName}
+                  onChange={e => set("recipientName", e.target.value)}
+                  required
+                  placeholder="Sarah"
+                  maxLength={100}
+                  style={inputStyle}
                 />
-                <span style={{
-                  fontFamily: "'Inter', Arial, sans-serif",
-                  fontSize: "0.85rem",
-                  color: "rgba(255,255,255,0.55)",
-                  lineHeight: 1.5,
-                }}>
-                  Also send me occasional reminders, offers, and relationship-saving propaganda.
-                </span>
-              </label>
+              </div>
+
+              {/* Relationship */}
+              <div>
+                <label htmlFor="demo-relationship" style={fieldLabel}>Relationship</label>
+                <div style={{ position: "relative" }}>
+                  <select
+                    id="demo-relationship"
+                    value={form.relationship}
+                    onChange={e => set("relationship", e.target.value)}
+                    required
+                    style={{ ...inputStyle, appearance: "none", cursor: "pointer", paddingRight: 36 }}
+                  >
+                    <option value="">Select a relationship…</option>
+                    {RELATIONSHIP_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <span style={{
+                    position: "absolute", right: 12, top: "50%",
+                    transform: "translateY(-50%)", color: "#555", pointerEvents: "none",
+                  }}>▾</span>
+                </div>
+              </div>
 
               {/* Error */}
               {status === "error" && errorMsg && (
@@ -349,7 +202,6 @@ export function DemoFormSection() {
                   fontFamily: "'Inter', Arial, sans-serif",
                   fontSize: "0.9rem",
                   color: "#ff7b70",
-                  lineHeight: 1.4,
                 }}>
                   {errorMsg}
                 </div>
@@ -370,40 +222,25 @@ export function DemoFormSection() {
                   border: "none",
                   cursor: status === "loading" ? "not-allowed" : "pointer",
                   width: "100%",
-                  transition: "background 0.15s",
+                  marginTop: 4,
                 }}
               >
-                {status === "loading" ? "Sending your fake emergency…" : "Send Me the Save"}
+                {status === "loading" ? "Sending your demo…" : "Send Me the Demo"}
               </button>
 
-              {/* Disclaimer under button */}
               <p style={{
                 fontFamily: "'Inter', Arial, sans-serif",
                 fontSize: "0.75rem",
-                color: "#4a4a4a",
+                color: "#444",
                 textAlign: "center",
                 lineHeight: 1.5,
                 margin: 0,
               }}>
-                This is a demo. No card will be printed, purchased, mailed, or sent to anyone.
-                No girlfriend will be alerted. No mother-in-law will be notified. Dave remains the only casualty.
+                This is a sample card only. Nothing gets printed or mailed.
               </p>
             </div>
           </form>
         )}
-
-        {/* Trust line */}
-        <p style={{
-          fontFamily: "'Inter', Arial, sans-serif",
-          fontSize: "0.8rem",
-          color: "#444",
-          textAlign: "center",
-          lineHeight: 1.5,
-          margin: "16px 0 0",
-        }}>
-          We'll send the demo email you asked for. Marketing emails are optional. Being Dave is also optional.
-        </p>
-
       </div>
     </section>
   );
