@@ -110,11 +110,13 @@ function Router() {
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
+const HIDE_TRY_BUTTON_ON = ["/try", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings"];
+
 function FloatingTryButton() {
-  const { isLoggedIn } = useAuth();
   const [location] = useLocation();
 
-  if (isLoggedIn || location === "/try") return null;
+  const hide = HIDE_TRY_BUTTON_ON.some(p => location === p || location.startsWith(p + "/"));
+  if (hide) return null;
 
   return (
     <a
