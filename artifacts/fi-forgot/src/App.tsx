@@ -121,7 +121,7 @@ function FloatingTryButton() {
       href="/try"
       style={{
         position: "fixed",
-        bottom: "calc(max(28px, env(safe-area-inset-bottom, 0px) + 16px))",
+        bottom: "max(28px, calc(env(safe-area-inset-bottom, 0px) + 16px))",
         right: 20,
         zIndex: 1000,
         background: "#E23B2E",
