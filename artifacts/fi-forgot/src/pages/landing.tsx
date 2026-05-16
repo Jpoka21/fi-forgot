@@ -10,6 +10,7 @@ import {
   TaglineBar,
   SectionHeading,
 } from "@/components/brand";
+import { DemoFormSection } from "@/components/demo-form";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -259,6 +260,9 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* ── SEND YOURSELF THE SAVE ───────────────────────────────────────── */}
+      <DemoFormSection />
 
       {/* ── STOP FORGETTING BANNER ───────────────────────────────────────── */}
       <div style={{ position: "relative", lineHeight: 0 }}>

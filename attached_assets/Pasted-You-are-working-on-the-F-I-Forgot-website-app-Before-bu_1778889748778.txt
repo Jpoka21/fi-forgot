@@ -1,0 +1,836 @@
+You are working on the F.I. Forgot website/app.
+
+Before building anything, inspect the current codebase and follow the existing stack, routing, styling, component patterns, database setup, email setup, and exact brand spelling already used in the project.
+
+Important brand spelling rule:
+Do not change the brand spelling globally. If the site currently uses “F.I. Forgot,” keep that. If it uses “F‑I Forgot,” keep that. Use the existing spelling everywhere.
+
+Build a new homepage lead-capture/demo feature called:
+
+“Send Yourself the Save”
+
+This feature should teach visitors how F.I. Forgot works by letting them answer a few quick questions, enter their email address, and receive a realistic sample approval email.
+
+The demo email should feel like the real approval email they would get when their scheduled card is ready. It should show that F.I. Forgot can:
+
+* Remember the occasion.
+* Pick the right card.
+* Write the message.
+* Ask a few follow-up questions if needed.
+* Let the user approve it, edit it, change the card style, or answer extra questions before anything gets mailed.
+
+The goal:
+Instead of explaining the product with boring copy, let the visitor experience the product. They answer a few quick questions, receive a demo email, see the selected card, see the written message, and understand how they can approve, edit, change the card, or answer extra questions before anything gets mailed.
+
+This should kill two birds with one stone:
+
+1. Capture their email as a lead.
+2. Show them exactly how F.I. Forgot works.
+
+Very important:
+This is only a demo. No real card should be created, purchased, printed, mailed, scheduled, charged, or sent to fulfillment.
+
+Brand voice:
+The copy and UI should feel like F.I. Forgot:
+
+* Funny
+* Smart
+* Slightly sarcastic
+* Masculine but modern
+* Warm underneath the jokes
+* Premium chaos
+* Relationship-disaster prevention
+* Polished enough to trust
+* Funny like “Don’t be Dave,” not cheesy or corporate
+
+Use Dave as part of the brand language where appropriate.
+
+Dave is the guy who forgot Mother’s Day. Dave had one job. F.I. Forgot helps users not be Dave.
+
+Avoid generic SaaS language like:
+
+* “Streamline your workflow”
+* “Enhance your experience”
+* “Unlock productivity”
+* “Optimize your greeting card journey”
+
+Use language more like:
+
+* “Try the email that saves your ass.”
+* “Send yourself a fake emergency.”
+* “See what happens before we mail the card.”
+* “No actual moms, wives, girlfriends, anniversaries, or dinner reservations were harmed.”
+* “Don’t be Dave.”
+* “Premium chaos, handled.”
+
+Core brand idea to work in subtly:
+
+“YOU FOCUS ON LIFE. WE REMEMBER EVERYTHING.”
+
+Do not overuse this line, but make sure the demo supports that idea.
+
+Homepage section requirements:
+
+Add a visually prominent section to the homepage. It should feel like part of the existing brand, not a random newsletter block.
+
+Section label:
+“SEND YOURSELF THE SAVE”
+
+Headline:
+“Try the Email That Saves Your Ass”
+
+Subheadline:
+“Let’s fake-save you before you need the real thing.”
+
+Body copy:
+“Answer a few quick questions and we’ll send you a sample F.I. Forgot approval email. You’ll see the card we picked, the message we wrote, and how you can approve it or fix it before anything gets mailed.”
+
+Supporting copy:
+“Pick who you almost disappointed, what you almost forgot, and the vibe that keeps you alive.”
+
+The section should contain a short demo form.
+
+Form field 1:
+
+Label:
+“Who are we saving you from disappointing?”
+
+Options:
+
+* Mom
+* Wife
+* Girlfriend
+* Fiancée
+* Dad
+* Husband
+* Boyfriend
+* Grandmother
+* Mother-in-law
+* Sister
+* Daughter
+* Friend
+* Other
+
+Form field 2:
+
+Label:
+“What are we pretending you remembered?”
+
+Options:
+
+* Birthday
+* Anniversary
+* Mother’s Day
+* Valentine’s Day
+* Thank You
+* Apology
+* Just Because
+* Congratulations
+* I’m in trouble and need a card
+
+Form field 3:
+
+Label:
+“What vibe keeps you alive?”
+
+Options:
+
+* Funny
+* Sweet
+* Romantic
+* Heartfelt
+* Classy
+* Apologetic
+* Please don’t make me sleep outside
+
+Form field 4:
+
+Optional text field.
+
+Label:
+“Got one detail we can weaponize?”
+
+Placeholder:
+“Inside joke, nickname, recent trip, favorite memory, or thing you forgot last year…”
+
+This field is optional. It should make the demo email feel more personal, but it should not block submission.
+
+Form field 5:
+
+Email field.
+
+Label:
+“Where should we send the fake emergency?”
+
+Placeholder:
+“Your email address”
+
+Form field 6:
+
+Marketing consent checkbox.
+
+Label:
+“Also send me occasional reminders, offers, and relationship-saving propaganda.”
+
+Important:
+Do not treat marketing consent as true unless the user checks this box.
+
+CTA button:
+“Send Me the Save”
+
+Small text under the form:
+“This is a demo. No card will be printed, purchased, mailed, or sent to anyone. No girlfriend will be alerted. No mother-in-law will be notified. Dave remains the only casualty.”
+
+Trust line:
+“We’ll send the demo email you asked for. Marketing emails are optional. Being Dave is also optional.”
+
+Form behavior:
+
+When the user submits the form:
+
+* Validate all required fields.
+* Validate the email address.
+* Include accessible labels for all fields.
+* Show a loading state on the CTA.
+* Disable the button while submitting.
+* Include a hidden honeypot field to reduce bot submissions.
+* Submit to POST /api/demo-email.
+* Show a success state after successful submission.
+* Show friendly branded error messages if something fails.
+
+Success message:
+“Check your inbox. We just sent you a fake emergency.”
+
+Success supporting copy:
+“Open it to see how F.I. Forgot picks the card, writes the message, and lets you approve or change everything before anything gets mailed.”
+
+Optional extra success copy:
+“No actual moms, wives, girlfriends, anniversaries, or dinner reservations were harmed in this demo.”
+
+Error messages:
+
+Invalid email:
+“That email looks a little too Dave. Try again.”
+
+Missing required field:
+“Dave skipped a step. Don’t be Dave.”
+
+Server error:
+“Something broke. Probably Dave. Try again in a minute.”
+
+Duplicate/recent submission:
+“We already sent you the demo. Check your inbox before Dave checks his excuses.”
+
+Backend endpoint:
+
+Create:
+
+POST /api/demo-email
+
+The endpoint should accept:
+
+* recipientType
+* occasionType
+* vibe
+* personalDetail
+* email
+* marketingConsent
+* honeypot
+
+Server-side requirements:
+
+* Validate all required fields.
+* Validate email.
+* Sanitize personalDetail.
+* Escape user-provided text before rendering it in HTML emails or pages.
+* If honeypot is filled, return a generic success response and do not send email.
+* Prevent obvious spam.
+* Allow only one demo email per email address within a reasonable time window, such as 24 hours, if possible.
+* Store the lead/demo request if the app already has a database.
+* If adding a database table is too risky or the app does not currently use a database, skip database changes for now and log/store only as appropriate for the current app.
+
+Demo lead fields, if database exists:
+
+* id
+* email
+* recipientType
+* occasionType
+* vibe
+* personalDetail
+* marketingConsent
+* source = send_yourself_the_save
+* createdAt
+* updatedAt
+* lastDemoEmailSentAt
+* demoEmailSendCount
+
+Very important real workflow instruction:
+
+This demo email should mirror the real F.I. Forgot card approval experience as closely as possible.
+
+If the app already has any of the following, reuse the existing patterns/components wherever safe:
+
+* Real card workflow logic
+* AI card-selection logic
+* AI message-generation logic
+* Card preview components
+* Approval email templates
+* Card approval routes
+* Card style selection components
+* Existing reminder/card data models
+
+Do not create a totally separate fake experience if the real components can be safely reused in demo mode.
+
+The demo should show the visitor the same core experience they would get for a real scheduled card:
+
+* F.I. Forgot remembers the occasion.
+* The system chooses an appropriate card.
+* The system drafts a message.
+* The user gets an email before anything is mailed.
+* The user can approve it, edit it, change the card style, or answer extra questions.
+* Nothing is sent until the user approves.
+
+This should feel like a real preview of the product, not a generic newsletter email.
+
+Demo mode safety rules:
+
+* Do not create a real card order.
+* Do not charge the user.
+* Do not purchase postage.
+* Do not send anything to print.
+* Do not mail anything.
+* Do not trigger the real fulfillment workflow.
+* Do not trigger the real reminder workflow.
+* Do not require the visitor to log in.
+* Clearly label the experience as a demo.
+* Use demo/sandbox mode for any reused real-card logic.
+* If there is any risk that reused logic might trigger real fulfillment, do not call that logic directly. Use a safe mocked demo version instead.
+
+AI/card-selection behavior:
+
+If the existing real AI/card-selection system can be safely run in demo mode, use it to generate the demo card selection and message using the form values.
+
+If the existing real AI/card-selection system is not currently wired up, unavailable, or unsafe to call from this flow:
+
+* Create a realistic mocked version that visually and verbally represents the same process.
+* Do not pretend a real card was purchased, printed, mailed, or sent.
+* Use deterministic demo data and hardcoded examples when needed.
+
+The demo generation should use:
+
+* recipientType
+* occasionType
+* vibe
+* personalDetail, if provided
+
+Example:
+
+If recipientType = Mom, occasionType = Birthday, vibe = Funny, and personalDetail includes “she always says I never call enough,” generate a message that lightly references calling more.
+
+Example generated message:
+“Mom, Happy Birthday. I know I don’t call as much as I should, which you have very subtly mentioned only 400 times. But I hope you know how much I love you and appreciate everything you’ve done for me. You deserve the best day.”
+
+If no personalDetail is provided, generate a strong generic-but-personal message based on the selected relationship, occasion, and vibe.
+
+Card preview behavior:
+
+The demo approval email should include a selected card preview.
+
+If real card images/designs/components already exist:
+
+* Use the existing card preview component or card asset system in demo mode.
+
+If no card assets exist:
+
+* Create a clean mocked card preview component.
+* It can be a styled card with a simple title, visual treatment, occasion, and vibe.
+* It should look polished enough to explain the product.
+
+The demo email should include:
+
+1. Selected card preview
+
+Show the card that F.I. Forgot picked.
+
+Use copy like:
+“Card Dave would not have picked in time.”
+
+Or:
+“Picked because it fits the occasion, relationship, and vibe — without giving gas-station-card energy.”
+
+2. Why we picked it
+
+Include a short explanation based on the selected inputs.
+
+Example:
+“Why this card:
+It’s warm, funny, and safe for a mom birthday. It says ‘I love you’ without making it sound like you panicked in aisle seven.”
+
+3. Written message
+
+Include the generated or mocked message.
+
+4. Approval actions
+
+The email should have clear buttons:
+
+* Approve Card
+* Edit Message
+* Change Card Style
+* Answer a Few Extra Questions
+
+5. Real workflow language
+
+The email should clearly explain:
+
+“Here’s how this works in real life:
+We remember the date.
+We pick the card.
+We write the message.
+You approve it or fix it.
+Then we mail it before Dave ruins everything.”
+
+6. Demo disclaimer
+
+Include this near the top and bottom:
+
+“This is a demo. No card will be printed, purchased, mailed, or sent to anyone.”
+
+Email sending:
+
+Use the existing email provider if the app already has one.
+
+If no email provider exists, add simple support for Resend using:
+
+* RESEND_API_KEY
+* FROM_EMAIL
+* APP_BASE_URL
+
+If email sending is not configured in development:
+
+* Log the full email payload to the console.
+* Return success so the feature can still be tested locally.
+* Do not crash the app.
+
+Send both:
+
+* HTML email
+* Plain-text fallback
+
+Demo email requirements:
+
+From name:
+F.I. Forgot
+
+Subject:
+“Demo: Your card is ready. Approve it or fix it.”
+
+Preheader:
+“See how F.I. Forgot saves you before you become Dave.”
+
+Email intro:
+
+“Hey,
+
+F.I. Forgot caught this before you became Dave.
+
+Your sample card is ready for review.
+
+This is a demo. No card will be printed, purchased, mailed, or sent to anyone.”
+
+Then show:
+
+“Your fake emergency:
+
+Recipient: {{recipientType}}
+Occasion: {{occasionType}}
+Vibe: {{vibe}}
+Status: Demo mode — not mailed, not real, very educational.”
+
+Then show:
+
+“Card we picked:”
+
+Display the selected card preview or mocked card preview.
+
+The card preview should include:
+
+* Occasion
+* Recipient
+* Vibe
+* A fake card title
+
+Example card title:
+“Card Dave Would Not Have Picked In Time”
+
+Then show:
+
+“Why we picked it:”
+
+Generate a simple explanation from the selected values.
+
+Example:
+“It fits the occasion, keeps the tone {{vibe}}, and avoids gas-station-card energy.”
+
+Then show:
+
+“Suggested message:”
+
+Display the generated or mocked card message.
+
+Then show:
+
+“Now pick your move:”
+
+Add four clear email buttons:
+
+1. Approve Card
+    Links to:
+    /demo/approve
+2. Edit Message
+    Links to:
+    /demo/edit
+3. Change Card Style
+    Links to:
+    /demo/card-style
+4. Answer a Few Extra Questions
+    Links to:
+    /demo/questions
+
+For this version, it is okay if the demo pages use safe default demo data instead of tokenized personalized data. Do not overcomplicate this unless the project already has a simple token/session pattern.
+
+Under the buttons, include:
+
+“This is only a demo, so we’re not mailing anything. But this is exactly the kind of save F.I. Forgot gives you before the real thing goes out.”
+
+Then include:
+
+“Here’s how this works in real life:
+We remember the date.
+We pick the card.
+We write the message.
+You approve it or fix it.
+Then we mail it before Dave ruins everything.”
+
+Footer:
+
+“You received this because you requested a demo from F.I. Forgot.”
+
+Also mention:
+“Marketing emails are only sent if you opted in.”
+
+Email design:
+
+* Mobile responsive
+* Clean HTML
+* Inline styles where needed for email compatibility
+* Branded but not overcomplicated
+* Buttons should be obvious and easy to tap
+* Tone should be funny but trustworthy
+* Make the approval actions impossible to miss
+
+Demo routes:
+
+Create four simple demo pages/routes. These pages should not require login.
+
+Route 1:
+
+/demo/approve
+
+Page label:
+“DEMO APPROVAL”
+
+Headline:
+“Approved.”
+
+Body:
+“In real life, this is where we’d send the card off to be written, printed, stamped, and mailed. You would now look thoughtful without panic-buying a card at CVS.”
+
+Dave line:
+“Dave would have remembered at 11:47 PM. You would already be done.”
+
+Demo disclaimer:
+“This demo did not mail anything. Dave is still the only thing getting roasted.”
+
+CTA:
+“Build My First Real Save”
+
+CTA should link to the signup, onboarding, pricing, or main conversion flow. If no clear flow exists, link to the homepage section or primary CTA currently used on the site.
+
+Route 2:
+
+/demo/edit
+
+Page label:
+“DEMO EDIT”
+
+Headline:
+“Make It Sound More Like You”
+
+Body:
+“Want it funnier, sweeter, shorter, or less like you suddenly became a poet? That’s the point. We tee it up. You approve it or fix it.”
+
+Show a card preview and a textarea prefilled with this default message:
+
+“Mom, Happy Birthday. I know I don’t say it enough, but I appreciate everything you’ve done for me. You’ve always been there, even when I was being impossible, which was apparently often. Love you.”
+
+Add quick action buttons:
+
+* Make it funnier
+* Make it more heartfelt
+* Make it shorter
+* Make it sound less guilty
+* Rewrite it completely
+
+When clicked, each button should update the textarea with a hardcoded demo rewrite.
+
+Do not call live AI for this MVP unless the existing AI system already supports safe demo mode.
+
+Example rewrites:
+
+Make it funnier:
+“Happy Birthday. Thanks for raising me into the mostly functioning adult I am today. I know that was not always a smooth project. I love you, I appreciate you, and yes, I should probably call more.”
+
+Make it more heartfelt:
+“Happy Birthday. I’m so grateful for your love, patience, and support. You’ve shaped my life in more ways than I can explain, and I hope today reminds you how loved and appreciated you are.”
+
+Make it shorter:
+“Happy Birthday. I love you, I appreciate you, and I’m lucky to have you.”
+
+Make it sound less guilty:
+“Happy Birthday. I hope today makes you feel as loved and appreciated as you deserve. Thank you for always being there for me.”
+
+Rewrite it completely:
+“You’ve given me more love, patience, advice, and second chances than anyone deserves. I’m grateful for you every day, even when I forget to say it out loud. Happy Birthday.”
+
+Below the editor, show:
+“That’s the whole point. You’re not locked in. We tee it up. You approve or adjust.”
+
+CTA:
+“Let F.I. Forgot Handle My Cards”
+
+Route 3:
+
+/demo/card-style
+
+Page label:
+“DEMO CARD STYLE”
+
+Headline:
+“Not the Right Vibe? Change the Card.”
+
+Body:
+“F.I. Forgot picks the card for you, but you’re not stuck with it. If the card feels too sweet, too boring, too romantic, or too much like something Dave bought next to a lottery machine, you can change it before anything gets mailed.”
+
+Show the currently selected demo card.
+
+Add alternate style buttons:
+
+* Make it funnier
+* Make it classier
+* Make it more heartfelt
+* Make it less cheesy
+* Show me safer options
+
+When clicked, update the card preview with a hardcoded alternate card style.
+
+For each alternate card, show a short “why this works” line.
+
+Examples:
+
+Funny:
+“Adds some personality without turning the whole thing into a roast.”
+
+Classier:
+“Cleaner, warmer, and less likely to look like Dave found it near the beef jerky.”
+
+More heartfelt:
+“Leans sincere without making it sound like you hired a poet during a crisis.”
+
+Less cheesy:
+“Keeps the love. Deletes the cringe.”
+
+Safer options:
+“Reliable, warm, and unlikely to start a family group chat debate.”
+
+Below the options, show:
+“We pick the card. You get final say. That’s the whole save.”
+
+CTA:
+“Start Remembering Everything”
+
+Route 4:
+
+/demo/questions
+
+Page label:
+“DEMO QUESTIONS”
+
+Headline:
+“Sometimes We Need a Little More Ammunition”
+
+Body:
+“Sometimes we ask a few quick questions so the card sounds personal instead of like a robot with commitment issues.”
+
+Create a short demo form with:
+
+Relationship options:
+
+* Wife
+* Girlfriend
+* Mom
+* Mother-in-law
+* Sister
+* Daughter
+* Grandmother
+* Friend
+* Other
+
+Tone options:
+
+* Funny
+* Sweet
+* Romantic
+* Apologetic
+* Please don’t make me sleep outside
+
+Text field placeholder:
+“Inside joke, recent trip, nickname, favorite memory, or thing you forgot last year.”
+
+Submit button:
+“Show Me How This Helps”
+
+After submit, show:
+
+“Perfect. In the real product, we’d use this to make the card feel personal without making you write the whole thing.”
+
+Supporting copy:
+“You give us the ammo. We write the card. You get the credit. Dave gets nervous.”
+
+CTA:
+“Build My First Real Save”
+
+Do not ask for the actual date in this homepage demo.
+
+Reason:
+The demo should stay fast and fun. Asking for a real date makes it feel like full onboarding.
+
+Instead, after the demo, the conversion CTA should move them into the real flow where they can add the actual date.
+
+Use language like:
+“Want us to actually remember the date next time?”
+
+Visual/design direction:
+
+Use the existing design system. Do not introduce an unrelated design library unless the project already uses it.
+
+The section and demo pages should feel:
+
+* Bold
+* Clean
+* Slightly chaotic
+* Premium
+* Funny
+* Trustworthy
+* Easy to understand in five seconds
+
+Design notes:
+
+* Use strong typography.
+* Use rounded cards/buttons if consistent with the existing site.
+* Make the email capture section visually important, not an afterthought.
+* Keep the layout mobile-friendly.
+* Make the form easy to use on phones.
+* Avoid clutter.
+* Humor should support clarity, not hide the product explanation.
+* The demo should feel like a product experience, not a newsletter signup.
+
+Analytics/tracking:
+
+If analytics already exist, track these events:
+
+* demo_email_section_viewed
+* demo_email_submitted
+* demo_email_success
+* demo_email_error
+* demo_email_duplicate
+* demo_approve_clicked
+* demo_edit_clicked
+* demo_card_style_clicked
+* demo_questions_clicked
+* demo_conversion_cta_clicked
+* demo_questions_submitted
+* demo_edit_rewrite_clicked
+* demo_card_style_changed
+
+Include useful event properties when available:
+
+* recipientType
+* occasionType
+* vibe
+* hasPersonalDetail
+* marketingConsent
+
+If analytics do not exist, do not add a heavy analytics package. Console logging in development is acceptable.
+
+Compliance/trust:
+
+Make sure the feature clearly communicates:
+
+* They are requesting a demo email.
+* No real card will be mailed.
+* No real card will be printed.
+* No real card will be purchased.
+* No real reminder will be scheduled.
+* Marketing emails are optional.
+* Marketing consent must be stored.
+* The demo email should not be misleading.
+* The form should not silently subscribe users to marketing.
+* User-provided personalDetail should be sanitized and escaped.
+
+Testing/checks:
+
+After implementation, verify:
+
+* The homepage still renders.
+* The form validates required fields.
+* Invalid emails are rejected.
+* Valid submissions work.
+* Honeypot submissions do not send emails.
+* Duplicate/recent submissions are handled if duplicate handling was implemented.
+* Marketing consent is stored correctly if storage exists.
+* The endpoint does not create a real card/order/reminder.
+* The endpoint does not trigger any fulfillment workflow.
+* The demo email payload includes selected recipientType, occasionType, vibe, and personalDetail where applicable.
+* All four demo routes render.
+* The edit demo buttons update the sample message.
+* The card-style demo buttons update the card preview.
+* The app builds or runs without runtime errors.
+
+Important implementation guardrails:
+
+* Do not break existing homepage sections.
+* Do not remove existing CTAs.
+* Do not change global branding unless needed for consistency.
+* Do not create a real card/order/reminder from this demo.
+* Do not require login for demo pages.
+* Do not add unnecessary packages.
+* Keep the implementation simple and production-ready.
+* Reuse existing real card approval components when safe.
+* Use safe mocked demo versions when real components could trigger fulfillment.
+* Clearly separate demo mode from real production card sending.
+
+Deliverables:
+
+After implementation, summarize:
+
+* Files changed
+* New components created
+* New routes added
+* New API endpoint added
+* Database changes, if any
+* Email provider changes, if any
+* Environment variables needed
+* How to test locally
+* Any assumptions made
+* Whether the real AI/card-selection flow was reused or mocked for safety
