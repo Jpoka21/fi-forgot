@@ -17,6 +17,7 @@ import CardGeneratorPage from "@/pages/card-generator";
 import ReminderSettingsPage from "@/pages/reminder-settings";
 import AdminPage from "@/pages/admin";
 import BriefingPage from "@/pages/briefing";
+import TryPage from "@/pages/try";
 
 const queryClient = new QueryClient();
 
@@ -102,8 +103,55 @@ function Router() {
       <Route path="/admin">
         <ProtectedRoute component={AdminPage} />
       </Route>
+      <Route path="/try" component={TryPage} />
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+// ── Floating "Try it free" button ───────────────────────────────────────────
+function FloatingTryButton() {
+  const { isLoggedIn } = useAuth();
+  const [location] = useLocation();
+
+  if (isLoggedIn || location === "/try") return null;
+
+  return (
+    <a
+      href="/try"
+      style={{
+        position: "fixed",
+        bottom: 28,
+        right: 28,
+        zIndex: 1000,
+        background: "#E23B2E",
+        color: "#ffffff",
+        fontFamily: "'Bebas Neue', cursive",
+        fontSize: "1rem",
+        letterSpacing: "0.12em",
+        padding: "14px 22px",
+        borderRadius: 6,
+        textDecoration: "none",
+        boxShadow: "0 4px 20px rgba(226,59,46,0.45)",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        whiteSpace: "nowrap",
+        transition: "transform 0.15s, box-shadow 0.15s",
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget;
+        el.style.transform = "translateY(-2px)";
+        el.style.boxShadow = "0 6px 26px rgba(226,59,46,0.6)";
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget;
+        el.style.transform = "translateY(0)";
+        el.style.boxShadow = "0 4px 20px rgba(226,59,46,0.45)";
+      }}
+    >
+      Try it free →
+    </a>
   );
 }
 
@@ -117,6 +165,7 @@ function App() {
           <StampDistressFilter />
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <Router />
+            <FloatingTryButton />
           </WouterRouter>
           <Toaster />
         </TooltipProvider>
