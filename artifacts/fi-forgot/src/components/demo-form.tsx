@@ -164,10 +164,22 @@ export function DemoFormSection() {
               fontSize: "0.95rem",
               color: "rgba(255,255,255,0.55)",
               lineHeight: 1.6,
-              margin: 0,
+              margin: "0 0 16px",
             }}>
               We sent you a personalized sample card and broke down exactly how we made it.
             </p>
+            <div style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 8,
+              padding: "12px 16px",
+              fontFamily: "'Inter', Arial, sans-serif",
+              fontSize: "0.85rem",
+              color: "rgba(255,255,255,0.5)",
+              lineHeight: 1.5,
+            }}>
+              ⚠️ Don't see it? Check your <strong style={{ color: "rgba(255,255,255,0.75)" }}>spam or promotions folder</strong> — it probably landed there.
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
@@ -182,6 +194,15 @@ export function DemoFormSection() {
                 <input id="demo-email" type="email" value={form.email}
                   onChange={e => set("email", e.target.value)}
                   required placeholder="you@example.com" style={inputStyle} />
+                <p style={{
+                  fontFamily: "'Inter', Arial, sans-serif",
+                  fontSize: "0.75rem",
+                  color: "#666",
+                  margin: "7px 0 0",
+                  lineHeight: 1.5,
+                }}>
+                  ⚠️ Heads up — this will likely land in your spam folder. Check there first.
+                </p>
               </div>
 
               <div>
