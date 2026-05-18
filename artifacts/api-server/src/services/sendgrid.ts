@@ -625,10 +625,6 @@ export async function sendDemoEmail(opts: {
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
       <tr><td align="center" style="padding:6px 0 4px;">
-        ${cardImageUrl
-          ? `<a href="${cardImageUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;display:block;margin-bottom:6px;">📷 View card design in browser &rarr;</a>`
-          : ``
-        }
         <a href="${editUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;">Don't love this card? Pick a different design &rarr;</a>
       </td></tr>
     </table>
