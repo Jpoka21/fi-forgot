@@ -565,10 +565,9 @@ export async function sendDemoEmail(opts: {
   const checkinHtml = mockCheckinQuestions(opts.occasion, opts.personality, opts.recipientName);
   const editUrl = `${opts.appUrl}/signup?demo=true&recipientName=${encodeURIComponent(opts.recipientName)}&relationship=${encodeURIComponent(opts.relationship)}&occasion=${encodeURIComponent(opts.occasion)}`;
   const rawCardImageUrl = await fetchCardImageForOccasion(opts.occasion);
-  // Proxy the image through our server so email clients can load it without auth
-  const cardImageUrl = rawCardImageUrl
-    ? `${opts.appUrl}/api/card-proxy?url=${encodeURIComponent(rawCardImageUrl)}`
-    : null;
+  // Use the CloudFront URL directly — it's public, no auth needed, and email
+  // clients handle well-known CDN domains far better than an unknown proxy.
+  const cardImageUrl = rawCardImageUrl ?? null;
 
   const subject = `Your ${opts.occasion.toLowerCase()} card for ${opts.recipientName} is ready`;
   const occasionLabel = opts.occasion.replace("Upcoming ", "").toLowerCase();
@@ -616,7 +615,7 @@ export async function sendDemoEmail(opts: {
     <!-- Card image block -->
     <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:8px;margin-bottom:6px;border:1px solid #e0d4c0;overflow:hidden;">
       ${cardImageUrl
-        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="${cardImageUrl}" width="100%" style="display:block;width:100%;object-fit:cover;border-radius:7px 7px 0 0;" alt="Card design" /></td></tr>`
+        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="${cardImageUrl}" width="100%" style="display:block;width:100%;border-radius:7px 7px 0 0;" alt="Card design — tap 'Load images' if this appears blank" /></td></tr>`
         : `<tr><td style="background:${card.bgColor};padding:40px;text-align:center;border-radius:7px 7px 0 0;"><div style="font-size:32px;color:${card.accentColor};font-family:Georgia,serif;">✉</div></td></tr>`
       }
       <tr><td style="background:${card.bgColor};padding:16px 20px 14px;">
@@ -625,7 +624,11 @@ export async function sendDemoEmail(opts: {
       </td></tr>
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-      <tr><td align="center">
+      <tr><td align="center" style="padding:6px 0 4px;">
+        ${cardImageUrl
+          ? `<a href="${cardImageUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;display:block;margin-bottom:6px;">📷 View card design in browser &rarr;</a>`
+          : ``
+        }
         <a href="${editUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;">Don't love this card? Pick a different design &rarr;</a>
       </td></tr>
     </table>
