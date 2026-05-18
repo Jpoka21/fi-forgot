@@ -34,14 +34,14 @@ const plans = [
     description: "For the guy trying not to screw this up.",
     highlight: false, badge: null,
     btn: "START SAVING YOURSELF",
-    perks: ["6 cards per year", "1 recipient", "Birthday + anniversary coverage", "AI written messages", "We print and mail them for you"],
+    perks: ["6 cards per year", "1 recipient", "Birthday + anniversary coverage", "Personally written messages", "We print and mail them for you"],
   },
   {
     name: "DOMESTIC PEACEKEEPER", price: "$15", period: "/month",
     description: "For wives, moms, kids, and damage control.",
     highlight: true, badge: "MOST POPULAR",
     btn: "KEEP THE PEACE",
-    perks: ["18 cards per year", "Up to 5 recipients", "All major occasions covered", "Full autopilot mode", "Personalized AI messages"],
+    perks: ["18 cards per year", "Up to 5 recipients", "All major occasions covered", "Full autopilot mode", "Personalized, heartfelt messages"],
   },
   {
     name: "LEGEND STATUS", price: "$29", period: "/month",
@@ -446,7 +446,7 @@ export default function LandingPage() {
       {/* ── EXAMPLES ─────────────────────────────────────────────────────── */}
       <section id="examples" className="py-20 px-6" style={{ background: B.black }}>
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <SectionHeading sub="AI-written. Sounds completely human. They'll never know." inverted>
+          <SectionHeading sub="Written for them. Sounds completely you. They'll never know." inverted>
             What the Cards Sound Like
           </SectionHeading>
 
@@ -469,7 +469,7 @@ export default function LandingPage() {
                 </p>
                 <div className="mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
                   <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.7rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
-                    AI-written · Personally signed
+                    Written for you · Personally signed
                   </span>
                 </div>
               </div>
