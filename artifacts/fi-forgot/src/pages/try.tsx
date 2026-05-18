@@ -1,16 +1,9 @@
-import { useEffect } from "react";
-import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth-context";
 import { B } from "@/components/brand";
 import { DemoFormSection } from "@/components/demo-form";
 
 export default function TryPage() {
-  const { isLoggedIn } = useAuth();
-  const [, navigate] = useLocation();
-
-  useEffect(() => {
-    if (isLoggedIn) navigate("/dashboard");
-  }, [isLoggedIn, navigate]);
+  // Demo is available to everyone — don't redirect logged-in users away.
+  // They may want to see the demo even if they already have an account.
 
   return (
     <div style={{ background: B.black, minHeight: "100svh" }}>
