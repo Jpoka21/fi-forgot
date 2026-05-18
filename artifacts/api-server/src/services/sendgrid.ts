@@ -2,6 +2,7 @@
 // Keeping file named sendgrid.ts to avoid changing imports elsewhere
 import { Resend } from "resend";
 import { logger } from "../lib/logger";
+import { listHandwryttenCards } from "./handwrytten";
 
 function getResend(): Resend {
   const apiKey = process.env["RESEND_API_KEY"];
@@ -182,6 +183,24 @@ function mockCheckinQuestions(occasion: string, personality: string, name: strin
     </div>`;
 }
 
+// ─── Handwrytten card image lookup ────────────────────────────────────────────
+
+async function fetchCardImageForOccasion(occasion: string): Promise<string | null> {
+  try {
+    const category = occasion.includes("Birthday") ? "Birthday"
+      : occasion.includes("Anniversary") ? "Anniversary"
+      : occasion.includes("Holiday") ? "Holiday"
+      : occasion.includes("Thank") ? "Thank You"
+      : undefined;
+    const cards = await listHandwryttenCards(category);
+    const withImage = cards.filter(c => c.imageUrl);
+    return withImage[0]?.imageUrl ?? null;
+  } catch (err) {
+    logger.warn({ err }, "Could not fetch Handwrytten card image for demo email");
+    return null;
+  }
+}
+
 // ─── Approval reminder email ──────────────────────────────────────────────────
 
 export async function sendApprovalReminderEmail(opts: {
@@ -271,6 +290,7 @@ export async function sendDemoEmail(opts: {
   const message = writeMessage(opts.recipientName, opts.relationship, opts.occasion, opts.personality);
   const checkinHtml = mockCheckinQuestions(opts.occasion, opts.personality, opts.recipientName);
   const editUrl = `${opts.appUrl}/signup?demo=true&recipientName=${encodeURIComponent(opts.recipientName)}&relationship=${encodeURIComponent(opts.relationship)}&occasion=${encodeURIComponent(opts.occasion)}`;
+  const cardImageUrl = await fetchCardImageForOccasion(opts.occasion);
 
   const subject = `Your ${opts.occasion.toLowerCase()} card for ${opts.recipientName} is ready`;
   const occasionLabel = opts.occasion.replace("Upcoming ", "").toLowerCase();
@@ -298,15 +318,25 @@ export async function sendDemoEmail(opts: {
   <tr><td style="background:#ffffff;padding:32px;border-left:1px solid #e8dcc8;border-right:1px solid #e8dcc8;">
 
     <!-- Intro -->
-    <p style="margin:0 0 6px;font-size:15px;color:#444;line-height:1.7;font-family:Arial,sans-serif;">
+    <p style="margin:0 0 18px;font-size:15px;color:#444;line-height:1.7;font-family:Arial,sans-serif;">
       Hi,<br><br>
       Based on what you told us, we built a sample ${occasionLabel} card for <strong style="color:#111;">${escapeHtml(opts.recipientName)}</strong>, your ${escapeHtml(opts.relationship.toLowerCase())}. Here's exactly what we made — and how we made it.
     </p>
 
+    <!-- Demo context note -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr><td style="background:#f8f3eb;border-left:3px solid #c4966a;border-radius:0 6px 6px 0;padding:14px 18px;">
+        <p style="margin:0;font-size:13px;color:#555;line-height:1.6;font-family:Arial,sans-serif;">
+          <strong style="color:#111;">Quick note:</strong> Those 5 questions were just to get the demo started. When you sign up, we collect a lot more — mailing address, key dates, gift history, and deeper preferences — so every card we send is even more dialed in.
+        </p>
+      </td></tr>
+    </table>
+
     <!-- ── SECTION 1: The Card ── -->
     <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">① The Card We Chose</div>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:${card.bgColor};border-radius:8px;margin-bottom:8px;border:1px solid ${card.borderColor};">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:${card.bgColor};border-radius:8px;margin-bottom:8px;border:1px solid ${card.borderColor};overflow:hidden;">
+      ${cardImageUrl ? `<tr><td style="padding:0;line-height:0;"><img src="${cardImageUrl}" width="100%" style="display:block;width:100%;max-height:300px;object-fit:cover;border-radius:7px 7px 0 0;" alt="Card design" /></td></tr>` : ""}
       <tr><td style="padding:28px 28px 24px;">
         <div style="font-size:10px;color:${card.accentColor};text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;font-weight:bold;font-family:Arial,sans-serif;">${card.seriesLabel}</div>
         <div style="font-size:18px;color:${card.titleColor};font-weight:bold;line-height:1.25;font-family:Georgia,serif;margin-bottom:20px;">${card.title}</div>
