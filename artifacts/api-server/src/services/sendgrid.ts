@@ -37,7 +37,13 @@ type CardConfig = {
 
 function pickCard(occasion: string, personality: string, relationship: string): CardConfig {
   const isFunny = personality.includes("Funny");
-  const isSpouse = relationship.includes("Spouse") || relationship.includes("Partner");
+  const isSpouse = relationship === "Spouse / Partner";
+  const isParentRel = relationship === "Parent";   // sender → their parent
+  const isChildRel  = relationship === "Child";    // sender → their child
+  const isSibling   = relationship === "Sibling";
+  const isFriend    = relationship === "Friend";
+  const isCoworker  = relationship === "Coworker";
+  const isRomantic  = isSpouse;
 
   if (occasion === "Birthday") {
     if (isFunny) return {
@@ -64,17 +70,30 @@ function pickCard(occasion: string, personality: string, relationship: string): 
   }
 
   if (occasion === "Anniversary") {
-    if (isFunny) return {
+    if (isRomantic && isFunny) return {
       bgColor: "#2d1b2e", titleColor: "#f0d4e8", accentColor: "#c4966a",
       borderColor: "#4a2d4a", seriesLabel: "ANNIVERSARY COLLECTION",
       title: "The &#x27;Still Here, Still Choosing You&#x27; Card",
-      whyChosen: `You described your ${relationship.toLowerCase()} as ${personality.toLowerCase()} — so we balanced the romance with a little self-awareness. Anniversaries don't have to be serious to be meaningful.`,
+      whyChosen: `We balanced the romance with a little self-awareness. Anniversaries don't have to be serious to be meaningful — and this card proves it.`,
     };
-    return {
+    if (isRomantic) return {
       bgColor: "#1a0a0f", titleColor: "#f2d4d7", accentColor: "#c4966a",
       borderColor: "#3d1a24", seriesLabel: "ANNIVERSARY COLLECTION",
       title: "The &#x27;I&#x27;d Do It All Again&#x27; Card",
       whyChosen: `For a ${personality.split(" ")[0].toLowerCase()} ${relationship.toLowerCase()} on an anniversary, we went deep instead of decorative. This card says something real.`,
+    };
+    // Friend, sibling, or other non-romantic anniversaries
+    if (isFunny) return {
+      bgColor: "#1a1f2e", titleColor: "#e0e8f8", accentColor: "#6a9fd8",
+      borderColor: "#2d3a52", seriesLabel: "MILESTONE COLLECTION",
+      title: "The &#x27;Another Year. Still the Right Call.&#x27; Card",
+      whyChosen: `Non-romantic anniversaries are underserved by the card industry. We picked something that marks the milestone without reaching for romance — honest and warm instead.`,
+    };
+    return {
+      bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
+      borderColor: "#e0d5c0", seriesLabel: "MILESTONE COLLECTION",
+      title: "The &#x27;Some Things Just Get Better the Longer They Last&#x27; Card",
+      whyChosen: `The best anniversary cards work for any relationship — they mark time without being sentimental about it. This one lands for a ${relationship.toLowerCase()} without feeling like it was written for someone else.`,
     };
   }
 
@@ -106,17 +125,25 @@ function pickCard(occasion: string, personality: string, relationship: string): 
       title: "The &#x27;Watching You With Our Kids Is One of My Favorite Things&#x27; Card",
       whyChosen: `A Mother's Day card from a spouse lands differently than one from a child. This one focuses on what you see every day — which is more specific, more personal, and more meaningful.`,
     };
-    if (isFunny) return {
+    // Child sending to their own parent
+    if (isParentRel && isFunny) return {
       bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
       borderColor: "#e0d5c0", seriesLabel: "MOTHER'S DAY COLLECTION",
       title: "The &#x27;You Raised Me, So This Is Your Fault&#x27; Card",
       whyChosen: `Mother's Day cards are notoriously saccharine. A little humor with real heart lands better than a poem. We went warm and funny — which respects her more than a generic "World's Best Mom."`,
     };
-    return {
+    if (isParentRel) return {
       bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
       borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
       title: "The &#x27;Everything I Know About Showing Up, I Learned From You&#x27; Card",
       whyChosen: `The best Mother's Day cards give credit, not just gratitude. This one names what she actually did — not just that she's "special."`,
+    };
+    // Friend, sibling, coworker — sending to someone who happens to be a mom
+    return {
+      bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
+      borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
+      title: `The &#x27;You Make It Look Effortless. It Clearly Isn&#x27;t.&#x27; Card`,
+      whyChosen: `The best Mother's Day cards acknowledge the work, not just the role. For a ${relationship.toLowerCase()}, we went with admiration over sentimentality — which is more honest and lands better.`,
     };
   }
 
@@ -133,17 +160,25 @@ function pickCard(occasion: string, personality: string, relationship: string): 
       title: "The &#x27;Watching You Be a Dad Is Something I&#x27;m Grateful For Every Day&#x27; Card",
       whyChosen: `When a spouse sends a Father's Day card, the most meaningful thing they can say is what they observe. This card speaks to that — no clichés, just what's real.`,
     };
-    if (isFunny) return {
+    // Child sending to their own parent
+    if (isParentRel && isFunny) return {
       bgColor: "#111827", titleColor: "#f9fafb", accentColor: "#6a9fd8",
       borderColor: "#374151", seriesLabel: "FATHER'S DAY COLLECTION",
       title: "The &#x27;You Taught Me Everything. Mostly by Example. Sometimes the Wrong Kind.&#x27; Card",
       whyChosen: `Dads appreciate directness and humor. Sentimental Father's Day cards often miss — this one lands because it's honest and specific rather than generic and flowery.`,
     };
-    return {
+    if (isParentRel) return {
       bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
       borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
       title: "The &#x27;You Showed Up. That&#x27;s the Whole Thing.&#x27; Card",
       whyChosen: `The most meaningful thing you can tell a father is that his presence counted. We skipped the clichés and wrote something that actually says it.`,
+    };
+    // Friend, sibling, coworker — sending to someone who is a dad
+    return {
+      bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
+      borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
+      title: "The &#x27;What You Do for the People Around You Matters More Than You Know&#x27; Card",
+      whyChosen: `For a ${relationship.toLowerCase()} sending a Father's Day card, admiration lands better than sentiment. We picked something that acknowledges the role without making it feel like a Hallmark script.`,
     };
   }
 
@@ -215,9 +250,14 @@ function pickCard(occasion: string, personality: string, relationship: string): 
 function writeMessage(name: string, relationship: string, occasion: string, personality: string): string {
   const isFunny = personality.includes("Funny");
   const isSentimental = personality.includes("Sentimental") || personality.includes("Warm");
-  const isSpouse = relationship.includes("Spouse") || relationship.includes("Partner");
-  const isParent = relationship.includes("Parent");
-  const isFriend = relationship.includes("Friend");
+  const isSpouse   = relationship === "Spouse / Partner";
+  const isParentRel = relationship === "Parent";   // sender → their parent
+  const isChildRel  = relationship === "Child";    // sender → their child
+  const isSibling   = relationship === "Sibling";
+  const isFriend    = relationship === "Friend";
+  const isCoworker  = relationship === "Coworker";
+  // legacy alias used in birthday block
+  const isParent = isParentRel;
 
   if (occasion === "Birthday") {
     if (isFunny && isSpouse) return `Dear ${name},\n\nHappy birthday. You're older now.\n\nI'm choosing not to elaborate. The fact that I remembered should count for something.\n\nLove,\n[Your Name]`;
@@ -236,8 +276,12 @@ function writeMessage(name: string, relationship: string, occasion: string, pers
 
   if (occasion === "Anniversary") {
     if (isFunny && isSpouse) return `Dear ${name},\n\nAnother year. Still haven't figured out how to get rid of you.\n\nHappy anniversary. (I mean that in the best possible way.)\n\nLove,\n[Your Name]`;
-    if (isFunny) return `Dear ${name},\n\nHappy anniversary. Against all odds and reasonable expectations, here we are.\n\nChoosing you again. Obviously.\n\n[Your Name]`;
     if (isSpouse) return `Dear ${name},\n\nI don't mark anniversaries with big gestures. I mark them by thinking: I'd choose this again.\n\nHappy anniversary.\n\nLove,\n[Your Name]`;
+    // Friend anniversary / friendiversary
+    if (isFriend && isFunny) return `Dear ${name},\n\nAnother year of you in my life. Somehow it keeps being the right call.\n\nHappy friendiversary.\n\n[Your Name]`;
+    if (isFriend) return `Dear ${name},\n\nNot everyone gets to count a friendship in years. I'm glad I get to count this one.\n\nHappy anniversary.\n\n[Your Name]`;
+    // Professional or sibling / other
+    if (isFunny) return `Dear ${name},\n\nAnother year. Still going strong. That's saying something.\n\nHappy anniversary.\n\n[Your Name]`;
     return `Dear ${name},\n\nSome things just get better the longer they last. You're one of them.\n\nHappy anniversary.\n\n[Your Name]`;
   }
 
@@ -249,21 +293,35 @@ function writeMessage(name: string, relationship: string, occasion: string, pers
   }
 
   if (occasion === "Mother's Day") {
+    // Spouse sending to partner who is a mother
     if (isSpouse) {
       if (isFunny) return `Dear ${name},\n\nEvery day I watch you be a mom to our kids and think: they have no idea how lucky they are.\n\n(I do, though.)\n\nHappy Mother's Day.\n\nLove,\n[Your Name]`;
       return `Dear ${name},\n\nWatching you with our kids is one of the best things I get to do. You make it look easy — and I know it isn't.\n\nHappy Mother's Day. You deserve today.\n\nLove,\n[Your Name]`;
     }
-    if (isFunny) return `Dear ${name},\n\nYou raised me. Whatever I turned out to be — that's on you.\n\nHappy Mother's Day. I mean that as a compliment.\n\n[Your Name]`;
-    return `Dear ${name},\n\nEverything I know about showing up for the people I love, I learned from watching you.\n\nHappy Mother's Day.\n\n[Your Name]`;
+    // Child sending to their own parent
+    if (isParentRel) {
+      if (isFunny) return `Dear ${name},\n\nYou raised me. Whatever I turned out to be — that's on you.\n\nHappy Mother's Day. I mean that as a compliment.\n\n[Your Name]`;
+      return `Dear ${name},\n\nEverything I know about showing up for the people I love, I learned from watching you.\n\nHappy Mother's Day.\n\n[Your Name]`;
+    }
+    // Friend, sibling, child-rel, coworker — sending to someone who is a mom
+    if (isFunny) return `Dear ${name},\n\nYou make motherhood look effortless. Anyone paying attention knows it clearly isn't.\n\nHappy Mother's Day.\n\n[Your Name]`;
+    return `Dear ${name},\n\nHappy Mother's Day to someone who shows up for the people around her in a way that genuinely matters.\n\n[Your Name]`;
   }
 
   if (occasion === "Father's Day") {
+    // Spouse sending to partner who is a father
     if (isSpouse) {
       if (isFunny) return `Dear ${name},\n\nOur kids are lucky to have you. Even when you're explaining things they didn't ask about.\n\nHappy Father's Day.\n\nLove,\n[Your Name]`;
       return `Dear ${name},\n\nWatching you be a dad to our kids is something I'm genuinely grateful for. Every day.\n\nHappy Father's Day.\n\nLove,\n[Your Name]`;
     }
-    if (isFunny) return `Dear ${name},\n\nYou taught me a lot. Some of it on purpose.\n\nHappy Father's Day.\n\n[Your Name]`;
-    return `Dear ${name},\n\nYou showed up. Consistently. That's the whole thing — and I don't take it for granted.\n\nHappy Father's Day.\n\n[Your Name]`;
+    // Child sending to their own parent
+    if (isParentRel) {
+      if (isFunny) return `Dear ${name},\n\nYou taught me a lot. Some of it on purpose.\n\nHappy Father's Day.\n\n[Your Name]`;
+      return `Dear ${name},\n\nYou showed up. Consistently. That's the whole thing — and I don't take it for granted.\n\nHappy Father's Day.\n\n[Your Name]`;
+    }
+    // Friend, sibling, coworker — sending to someone who is a dad
+    if (isFunny) return `Dear ${name},\n\nHappy Father's Day to someone who makes the whole thing look more manageable than it has any right to be.\n\n[Your Name]`;
+    return `Dear ${name},\n\nHappy Father's Day. What you do for the people around you matters more than you probably know.\n\n[Your Name]`;
   }
 
   if (occasion === "Christmas") {
