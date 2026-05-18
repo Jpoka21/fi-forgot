@@ -121,38 +121,47 @@ function FloatingTryButton() {
   return (
     <a
       href="/try"
+      className="fi-try-btn"
       style={{
         position: "fixed",
-        bottom: "max(28px, calc(env(safe-area-inset-bottom, 0px) + 16px))",
+        bottom: "max(28px, calc(env(safe-area-inset-bottom, 0px) + 18px))",
         right: 20,
         zIndex: 1000,
         background: "#E23B2E",
         color: "#ffffff",
-        fontFamily: "'Bebas Neue', cursive",
-        fontSize: "1rem",
-        letterSpacing: "0.12em",
-        padding: "14px 22px",
-        borderRadius: 6,
         textDecoration: "none",
-        boxShadow: "0 4px 20px rgba(226,59,46,0.45)",
+        borderRadius: 50,
+        padding: "14px 26px 12px",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
-        gap: 8,
+        gap: 1,
         whiteSpace: "nowrap",
-        transition: "transform 0.15s, box-shadow 0.15s",
-      }}
-      onMouseEnter={e => {
-        const el = e.currentTarget;
-        el.style.transform = "translateY(-2px)";
-        el.style.boxShadow = "0 6px 26px rgba(226,59,46,0.6)";
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget;
-        el.style.transform = "translateY(0)";
-        el.style.boxShadow = "0 4px 20px rgba(226,59,46,0.45)";
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        cursor: "pointer",
       }}
     >
-      Demo for Free →
+      <span style={{
+        fontFamily: "'Bebas Neue', cursive",
+        fontSize: "1.25rem",
+        letterSpacing: "0.14em",
+        lineHeight: 1,
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+      }}>
+        ✉ DEMO FOR FREE
+      </span>
+      <span style={{
+        fontSize: "0.6rem",
+        letterSpacing: "0.1em",
+        opacity: 0.82,
+        fontFamily: "'Inter', sans-serif",
+        textTransform: "uppercase",
+        lineHeight: 1,
+      }}>
+        takes 2 min · no card needed
+      </span>
     </a>
   );
 }
