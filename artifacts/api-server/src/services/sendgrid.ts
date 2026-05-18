@@ -335,15 +335,37 @@ export async function sendDemoEmail(opts: {
     <!-- ── SECTION 1: The Card ── -->
     <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">① The Card We Chose</div>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:${card.bgColor};border-radius:8px;margin-bottom:8px;border:1px solid ${card.borderColor};overflow:hidden;">
-      ${cardImageUrl ? `<tr><td style="padding:0;line-height:0;"><img src="${cardImageUrl}" width="100%" style="display:block;width:100%;max-height:300px;object-fit:cover;border-radius:7px 7px 0 0;" alt="Card design" /></td></tr>` : ""}
-      <tr><td style="padding:28px 28px 24px;">
-        <div style="font-size:10px;color:${card.accentColor};text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;font-weight:bold;font-family:Arial,sans-serif;">${card.seriesLabel}</div>
-        <div style="font-size:18px;color:${card.titleColor};font-weight:bold;line-height:1.25;font-family:Georgia,serif;margin-bottom:20px;">${card.title}</div>
-        <div style="font-size:14px;color:${card.titleColor};line-height:1.9;white-space:pre-line;font-family:Georgia,serif;opacity:0.9;">${escapeHtml(message)}</div>
+    <!-- Card image block -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:8px;margin-bottom:6px;border:1px solid #e0d4c0;overflow:hidden;">
+      ${cardImageUrl
+        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="${cardImageUrl}" width="100%" style="display:block;width:100%;object-fit:cover;border-radius:7px 7px 0 0;" alt="Card design" /></td></tr>`
+        : `<tr><td style="background:${card.bgColor};padding:40px;text-align:center;border-radius:7px 7px 0 0;"><div style="font-size:32px;color:${card.accentColor};font-family:Georgia,serif;">✉</div></td></tr>`
+      }
+      <tr><td style="background:${card.bgColor};padding:16px 20px 14px;">
+        <div style="font-size:9px;color:${card.accentColor};text-transform:uppercase;letter-spacing:2px;font-weight:bold;font-family:Arial,sans-serif;margin-bottom:4px;">${card.seriesLabel}</div>
+        <div style="font-size:15px;color:${card.titleColor};font-weight:bold;line-height:1.25;font-family:Georgia,serif;">${card.title}</div>
       </td></tr>
     </table>
-    <p style="font-size:11px;color:#b0a090;text-align:center;margin:0 0 6px;font-family:Arial,sans-serif;">This is a sample. The real card is a physical card, printed and mailed.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+      <tr><td align="center">
+        <a href="${editUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;">Don't love this card? Pick a different design &rarr;</a>
+      </td></tr>
+    </table>
+
+    <!-- Message inside the card -->
+    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;font-weight:bold;font-family:Arial,sans-serif;">What we'll write inside the card</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
+      <tr><td style="background:#fffdf8;border:1px solid #e0d4c0;border-radius:8px;padding:24px 28px;border-left:4px solid #c4966a;">
+        <div style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;margin-bottom:14px;font-weight:bold;">Handwritten inside the card</div>
+        <div style="font-size:15px;color:#1a1a1a;line-height:2;white-space:pre-line;font-family:Georgia,serif;">${escapeHtml(message)}</div>
+      </td></tr>
+    </table>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
+      <tr><td align="center">
+        <a href="${editUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;">Want a different message? Edit the text or tell us what to change &rarr;</a>
+      </td></tr>
+    </table>
+    <p style="font-size:11px;color:#b0a090;text-align:center;margin:0 0 6px;font-family:Arial,sans-serif;">The real card is printed on thick card stock and mailed in a hand-addressed envelope.</p>
 
     <!-- ── SECTION 2: Why We Chose This ── -->
     <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">② Why We Chose This</div>
@@ -370,13 +392,6 @@ export async function sendDemoEmail(opts: {
       </td></tr>
     </table>
     <p style="font-size:11px;color:#b0a090;margin:6px 0 0;font-family:Arial,sans-serif;">We have hundreds of cards. We choose based on the person, the occasion, and what we know about your relationship.</p>
-
-    <!-- Edit CTA -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
-      <tr><td align="center">
-        <a href="${editUrl}" style="display:inline-block;background:#111111;color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;padding:16px 36px;border-radius:6px;text-decoration:none;">Edit This Sample Card &rarr;</a>
-      </td></tr>
-    </table>
 
     <!-- ── SECTION 3: You're Always in Control ── -->
     <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">③ You&#x27;re Always in Control</div>
