@@ -14,7 +14,7 @@ function getAppUrl(req: import("express").Request): string {
 }
 
 const VALID_RELATIONSHIPS = ["Spouse / Partner","Parent","Child","Sibling","Friend","Coworker","Other"];
-const VALID_OCCASIONS = ["Upcoming Birthday","Anniversary","Just Because","Holiday / Christmas","Thank You","Thinking of You"];
+const VALID_OCCASIONS = ["Birthday","Anniversary","Mother's Day","Father's Day","Valentine's Day","Christmas","Hanukkah","Thanksgiving","Easter","New Year's","Graduation","Work Anniversary","Just Because","Get Well Soon","Congratulations"];
 const VALID_PERSONALITIES = ["Sentimental & Heartfelt","Funny & Witty","Warm & Nurturing","Down-to-Earth & Practical"];
 
 router.post("/demo-email", async (req, res) => {

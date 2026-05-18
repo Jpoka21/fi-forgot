@@ -39,7 +39,7 @@ function pickCard(occasion: string, personality: string, relationship: string): 
   const isFunny = personality.includes("Funny");
   const isSpouse = relationship.includes("Spouse") || relationship.includes("Partner");
 
-  if (occasion.includes("Birthday")) {
+  if (occasion === "Birthday") {
     if (isFunny) return {
       bgColor: "#111827", titleColor: "#f9fafb", accentColor: "#E23B2E",
       borderColor: "#374151", seriesLabel: "BIRTHDAY COLLECTION",
@@ -54,7 +54,16 @@ function pickCard(occasion: string, personality: string, relationship: string): 
     };
   }
 
-  if (occasion.includes("Anniversary")) {
+  if (occasion === "Work Anniversary") {
+    return {
+      bgColor: "#1a1f2e", titleColor: "#e0e8f8", accentColor: "#6a9fd8",
+      borderColor: "#2d3a52", seriesLabel: "MILESTONE COLLECTION",
+      title: "The &#x27;Look How Far You&#x27;ve Come&#x27; Card",
+      whyChosen: `Work anniversaries are easy to forget and meaningful to receive. We picked something that acknowledges the milestone without being corporate — because nobody wants to feel like their job sent them a card.`,
+    };
+  }
+
+  if (occasion === "Anniversary") {
     if (isFunny) return {
       bgColor: "#2d1b2e", titleColor: "#f0d4e8", accentColor: "#c4966a",
       borderColor: "#4a2d4a", seriesLabel: "ANNIVERSARY COLLECTION",
@@ -69,31 +78,100 @@ function pickCard(occasion: string, personality: string, relationship: string): 
     };
   }
 
-  if (occasion.includes("Thank")) {
+  if (occasion === "Valentine's Day") {
+    if (isFunny) return {
+      bgColor: "#2e0a10", titleColor: "#ffd6d8", accentColor: "#E23B2E",
+      borderColor: "#4a1a20", seriesLabel: "VALENTINE'S COLLECTION",
+      title: "The &#x27;I Like You More Than Most People&#x27; Card",
+      whyChosen: `Valentine's cards are either over-the-top or painfully generic. For a ${personality.toLowerCase()} ${relationship.toLowerCase()}, we went with something that means it without performing it.`,
+    };
     return {
-      bgColor: "#f0f4f0", titleColor: "#1a2e1a", accentColor: "#5a8a5a",
-      borderColor: "#d4e8d4", seriesLabel: "GRATITUDE COLLECTION",
-      title: "The &#x27;You Didn&#x27;t Have To, But You Did&#x27; Card",
-      whyChosen: `Thank you cards fail when they feel obligatory. We picked this one because it acknowledges the choice they made — not just the act. That specificity is what makes it land.`,
+      bgColor: "#1a0508", titleColor: "#fce4e6", accentColor: "#e88a90",
+      borderColor: "#3d1015", seriesLabel: "VALENTINE'S COLLECTION",
+      title: "The &#x27;You&#x27;re the Reason I Get It&#x27; Card",
+      whyChosen: `Valentine's Day works best when it's personal, not performative. We avoided the roses-are-red territory and picked something that actually says something.`,
     };
   }
 
-  if (occasion.includes("Holiday")) {
+  if (occasion === "Mother's Day") {
+    if (isFunny) return {
+      bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
+      borderColor: "#e0d5c0", seriesLabel: "MOTHER'S DAY COLLECTION",
+      title: "The &#x27;You Raised Me, So This Is Your Fault&#x27; Card",
+      whyChosen: `Mother's Day cards are notoriously saccharine. A little humor with real heart lands better than a poem. We went warm and funny — which respects her more than a generic "World's Best Mom."`,
+    };
+    return {
+      bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
+      borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
+      title: "The &#x27;Everything I Know About Showing Up, I Learned From You&#x27; Card",
+      whyChosen: `The best Mother's Day cards give credit, not just gratitude. This one names what she actually did — not just that she's "special."`,
+    };
+  }
+
+  if (occasion === "Father's Day") {
+    if (isFunny) return {
+      bgColor: "#111827", titleColor: "#f9fafb", accentColor: "#6a9fd8",
+      borderColor: "#374151", seriesLabel: "FATHER'S DAY COLLECTION",
+      title: "The &#x27;You Taught Me Everything. Mostly by Example. Sometimes the Wrong Kind.&#x27; Card",
+      whyChosen: `Dads appreciate directness and humor. Sentimental Father's Day cards often miss — this one lands because it's honest and specific rather than generic and flowery.`,
+    };
+    return {
+      bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
+      borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
+      title: "The &#x27;You Showed Up. That&#x27;s the Whole Thing.&#x27; Card",
+      whyChosen: `The most meaningful thing you can tell a father is that his presence counted. We skipped the clichés and wrote something that actually says it.`,
+    };
+  }
+
+  if (occasion === "Christmas" || occasion === "Hanukkah" || occasion === "Thanksgiving" || occasion === "Easter" || occasion === "New Year's") {
     if (isFunny) return {
       bgColor: "#1a2e1a", titleColor: "#d4edda", accentColor: "#6abf69",
-      borderColor: "#2d4a2d", seriesLabel: "HOLIDAY COLLECTION",
-      title: "The &#x27;Happy Whatever You&#x27;re Celebrating&#x27; Card",
-      whyChosen: `Holiday cards are notoriously generic. For a ${personality.toLowerCase()} ${relationship.toLowerCase()}, we chose something that pokes fun at the season without losing the warmth.`,
+      borderColor: "#2d4a2d", seriesLabel: `${occasion.toUpperCase()} COLLECTION`,
+      title: "The &#x27;This Season, I Actually Remembered You&#x27; Card",
+      whyChosen: `Holiday cards are notoriously generic. For a ${personality.toLowerCase()} ${relationship.toLowerCase()}, we chose something with a little self-awareness that makes it feel personal instead of broadcast.`,
     };
     return {
       bgColor: "#0f1f0f", titleColor: "#c8e6c8", accentColor: "#81c784",
-      borderColor: "#1a3a1a", seriesLabel: "HOLIDAY COLLECTION",
+      borderColor: "#1a3a1a", seriesLabel: `${occasion.toUpperCase()} COLLECTION`,
       title: "The &#x27;This Season, Especially You&#x27; Card",
       whyChosen: `Holiday cards work best when they single someone out instead of broadcasting to everyone. For your ${relationship.toLowerCase()}, we made this one feel personal even in a crowded season.`,
     };
   }
 
-  // Just Because / Thinking of You — default
+  if (occasion === "Graduation") {
+    return {
+      bgColor: "#1a1f0a", titleColor: "#e8f4c8", accentColor: "#a0c84a",
+      borderColor: "#2d3a14", seriesLabel: "MILESTONE COLLECTION",
+      title: "The &#x27;You Did the Hard Part. Now the Real Stuff Starts.&#x27; Card",
+      whyChosen: `Graduation cards are either too celebratory or too advice-heavy. We picked something that acknowledges the accomplishment while looking forward — honest and encouraging without being preachy.`,
+    };
+  }
+
+  if (occasion === "Get Well Soon") {
+    return {
+      bgColor: "#f0f8ff", titleColor: "#1a2e3d", accentColor: "#5a9abf",
+      borderColor: "#d4e8f4", seriesLabel: "CARE COLLECTION",
+      title: "The &#x27;Just Thinking About You&#x27; Card",
+      whyChosen: `Get well cards often feel obligatory. We picked something warm and human — the kind of card that says "I actually thought about you today" rather than "I'm checking a box."`,
+    };
+  }
+
+  if (occasion === "Congratulations") {
+    if (isFunny) return {
+      bgColor: "#1f1a00", titleColor: "#fef3c7", accentColor: "#d4a020",
+      borderColor: "#3d3400", seriesLabel: "MILESTONE COLLECTION",
+      title: "The &#x27;I Knew You Would. I Just Didn&#x27;t Say It Out Loud.&#x27; Card",
+      whyChosen: `Congratulations cards land better when they feel like they come from a person, not a Hallmark aisle. We went specific and honest — which is what makes it memorable.`,
+    };
+    return {
+      bgColor: "#0a1a0a", titleColor: "#d4f4d4", accentColor: "#4abf4a",
+      borderColor: "#143d14", seriesLabel: "MILESTONE COLLECTION",
+      title: "The &#x27;You Earned This. All of It.&#x27; Card",
+      whyChosen: `The best congratulations cards give credit where it's actually due. We skipped the confetti-and-balloons tone and wrote something that feels earned.`,
+    };
+  }
+
+  // Just Because — default
   if (isFunny) return {
     bgColor: "#1e2d1e", titleColor: "#d4edda", accentColor: "#6abf69",
     borderColor: "#2d4a2d", seriesLabel: "JUST BECAUSE COLLECTION",
@@ -117,7 +195,7 @@ function writeMessage(name: string, relationship: string, occasion: string, pers
   const isParent = relationship.includes("Parent");
   const isFriend = relationship.includes("Friend");
 
-  if (occasion.includes("Birthday")) {
+  if (occasion === "Birthday") {
     if (isFunny && isSpouse) return `Dear ${name},\n\nHappy birthday. You're older now.\n\nI'm choosing not to elaborate. The fact that I remembered should count for something.\n\nLove,\n[Your Name]`;
     if (isFunny && isFriend) return `Dear ${name},\n\nAnother year. Another reason to remind you that you keep somehow getting better while the rest of us are just getting older.\n\nHappy birthday. Don't do the math.\n\n[Your Name]`;
     if (isFunny) return `Dear ${name},\n\nHappy birthday. You've officially been on this earth long enough that I felt the need to acknowledge it in writing.\n\nThat's how you know it's serious.\n\n[Your Name]`;
@@ -127,24 +205,74 @@ function writeMessage(name: string, relationship: string, occasion: string, pers
     return `Dear ${name},\n\nHappy birthday. Wishing you a year that matches the kind of person you are — which means it's going to be a good one.\n\n[Your Name]`;
   }
 
-  if (occasion.includes("Anniversary")) {
+  if (occasion === "Work Anniversary") {
+    if (isFunny) return `Dear ${name},\n\nAnother year. You're still here. That means something — even if it's mostly stubbornness.\n\nCongratulations on the milestone. Genuinely.\n\n[Your Name]`;
+    return `Dear ${name},\n\nWork anniversaries don't always get the recognition they deserve. This one does.\n\nCongratulations — and thank you for everything you bring.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Anniversary") {
     if (isFunny && isSpouse) return `Dear ${name},\n\nAnother year. Still haven't figured out how to get rid of you.\n\nHappy anniversary. (I mean that in the best possible way.)\n\nLove,\n[Your Name]`;
     if (isFunny) return `Dear ${name},\n\nHappy anniversary. Against all odds and reasonable expectations, here we are.\n\nChoosing you again. Obviously.\n\n[Your Name]`;
     if (isSpouse) return `Dear ${name},\n\nI don't mark anniversaries with big gestures. I mark them by thinking: I'd choose this again.\n\nHappy anniversary.\n\nLove,\n[Your Name]`;
     return `Dear ${name},\n\nSome things just get better the longer they last. You're one of them.\n\nHappy anniversary.\n\n[Your Name]`;
   }
 
-  if (occasion.includes("Thank")) {
-    if (isFunny) return `Dear ${name},\n\nYou didn't have to do what you did. And yet. Here we are.\n\nThank you. I owe you one. (Or several.)\n\n[Your Name]`;
-    return `Dear ${name},\n\nYou didn't have to do what you did — but that's exactly the kind of person you are.\n\nThank you. Really.\n\n[Your Name]`;
+  if (occasion === "Valentine's Day") {
+    if (isFunny && isSpouse) return `Dear ${name},\n\nValentine's Day. The one day a year I'm legally required to say nice things.\n\nFor the record: I'd say them anyway.\n\nLove,\n[Your Name]`;
+    if (isFunny) return `Dear ${name},\n\nI like you more than most people. That's not faint praise — most people are a lot.\n\nHappy Valentine's Day.\n\n[Your Name]`;
+    if (isSpouse) return `Dear ${name},\n\nI don't need a holiday to feel this. But I'm glad there's one — because it gives me an excuse to say it out loud.\n\nHappy Valentine's Day.\n\nLove,\n[Your Name]`;
+    return `Dear ${name},\n\nThis time of year always makes me think about the people I'm glad are in my life. You're at the top of that list.\n\nHappy Valentine's Day.\n\n[Your Name]`;
   }
 
-  if (occasion.includes("Holiday")) {
-    if (isFunny) return `Dear ${name},\n\nHappy holidays. May your season be everything you deserve — which, in your case, means excellent.\n\n[Your Name]`;
-    return `Dear ${name},\n\nThis time of year always makes me think about the people who make my life better just by being in it.\n\nYou're one of them.\n\nHappy holidays.\n\n[Your Name]`;
+  if (occasion === "Mother's Day") {
+    if (isFunny) return `Dear ${name},\n\nYou raised me. Whatever I turned out to be — that's on you.\n\nHappy Mother's Day. I mean that as a compliment.\n\n[Your Name]`;
+    return `Dear ${name},\n\nEverything I know about showing up for the people I love, I learned from watching you.\n\nHappy Mother's Day.\n\n[Your Name]`;
   }
 
-  // Just Because / Thinking of You
+  if (occasion === "Father's Day") {
+    if (isFunny) return `Dear ${name},\n\nYou taught me a lot. Some of it on purpose.\n\nHappy Father's Day.\n\n[Your Name]`;
+    return `Dear ${name},\n\nYou showed up. Consistently. That's the whole thing — and I don't take it for granted.\n\nHappy Father's Day.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Christmas") {
+    if (isFunny) return `Dear ${name},\n\nHappy Christmas. I got you a card. I almost forgot. You're welcome.\n\n[Your Name]`;
+    return `Dear ${name},\n\nThis season always makes me think about the people who make my life better just by being in it.\n\nYou're one of them. Merry Christmas.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Hanukkah") {
+    return `Dear ${name},\n\nWishing you a Hanukkah full of warmth, light, and all the things worth celebrating.\n\nHappy Hanukkah.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Thanksgiving") {
+    if (isFunny) return `Dear ${name},\n\nThanksgiving: the one day a year we admit out loud that things are good.\n\nI'm glad you're one of the reasons they are.\n\n[Your Name]`;
+    return `Dear ${name},\n\nI don't say this enough — but I'm genuinely grateful for you.\n\nHappy Thanksgiving.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Easter") {
+    return `Dear ${name},\n\nHappy Easter. Wishing you a great day with the people you love.\n\n[Your Name]`;
+  }
+
+  if (occasion === "New Year's") {
+    if (isFunny) return `Dear ${name},\n\nNew year. Fresh start. Same us — which, honestly, I think is great.\n\nHappy New Year.\n\n[Your Name]`;
+    return `Dear ${name},\n\nHere's to a new year — and to you being in it.\n\nHappy New Year.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Graduation") {
+    if (isFunny) return `Dear ${name},\n\nYou did it. All those years of effort and it turns out you were capable of finishing things.\n\nCongratulations. I always knew.\n\n[Your Name]`;
+    return `Dear ${name},\n\nYou earned this — every bit of it. This is just the beginning of what you're going to do.\n\nCongratulations.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Get Well Soon") {
+    if (isFunny) return `Dear ${name},\n\nBeing sick is the worst. Feel better soon — the world is noticeably worse when you're out of commission.\n\n[Your Name]`;
+    return `Dear ${name},\n\nJust wanted you to know I'm thinking about you. Take care of yourself — and let people take care of you too.\n\n[Your Name]`;
+  }
+
+  if (occasion === "Congratulations") {
+    if (isFunny) return `Dear ${name},\n\nI knew you'd do it. I just didn't say it out loud because I didn't want to jinx it.\n\nCongratulations. Genuinely.\n\n[Your Name]`;
+    return `Dear ${name},\n\nYou earned this. Not luck, not timing — you.\n\nCongratulations.\n\n[Your Name]`;
+  }
+
+  // Just Because
   if (isFunny) return `Dear ${name},\n\nNo occasion. No reason. Just thought of you and figured you should know.\n\n(You're welcome.)\n\n[Your Name]`;
   if (isSentimental) return `Dear ${name},\n\nNo special occasion. I just found myself thinking about you and decided that was worth saying.\n\nHope you're doing well.\n\n[Your Name]`;
   return `Dear ${name},\n\nWanted you to know you were on my mind.\n\nHope this finds you well.\n\n[Your Name]`;
@@ -153,30 +281,69 @@ function writeMessage(name: string, relationship: string, occasion: string, pers
 // ─── Mock pre-occasion questions ──────────────────────────────────────────────
 
 function mockCheckinQuestions(occasion: string, personality: string, name: string): string {
-  if (occasion.includes("Birthday")) return `
+  const n = escapeHtml(name);
+  const toneLabel = personality.includes("Funny") ? "funny" : "heartfelt";
+
+  if (occasion === "Birthday") return `
     <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
       Hey,<br><br>
-      <strong>${escapeHtml(name)}'s birthday is coming up in 2 weeks.</strong> Before we write the card, just two quick things:<br><br>
+      <strong>${n}'s birthday is coming up in 2 weeks.</strong> Before we write the card, just two quick things:<br><br>
       <strong style="color:#111;">1. Anything significant happen this year worth mentioning?</strong><br>
       <span style="color:#666;">(New job, a trip together, something they accomplished, a tough stretch they got through, etc.)</span><br><br>
-      <strong style="color:#111;">2. Last year you went ${personality.includes("Funny") ? "funny" : "heartfelt"} — want to switch it up or stick with it?</strong><br><br>
+      <strong style="color:#111;">2. Last year you went ${toneLabel} — want to switch it up or stick with it?</strong><br><br>
       Hit reply with a sentence or two. We'll take it from there.
     </div>`;
 
-  if (occasion.includes("Anniversary")) return `
+  if (occasion === "Anniversary" || occasion === "Work Anniversary") return `
     <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
       Hey,<br><br>
-      <strong>Your anniversary with ${escapeHtml(name)} is 2 weeks away.</strong> Two quick questions before we write the card:<br><br>
+      <strong>${occasion === "Work Anniversary" ? `${n}'s work anniversary` : `Your anniversary with ${n}`} is 2 weeks away.</strong> Two quick questions before we write the card:<br><br>
       <strong style="color:#111;">1. Anything you want to reference from this past year?</strong><br>
-      <span style="color:#666;">(A trip, a challenge you navigated together, a milestone, a running joke, anything.)</span><br><br>
-      <strong style="color:#111;">2. Tone check — sentimental, playful, or somewhere in the middle?</strong><br><br>
+      <span style="color:#666;">(A milestone, a challenge they navigated, something that stands out.)</span><br><br>
+      <strong style="color:#111;">2. Tone check — warm and sincere, or a little more lighthearted?</strong><br><br>
       One or two sentences is plenty. We'll handle the rest.
+    </div>`;
+
+  if (occasion === "Mother's Day" || occasion === "Father's Day") return `
+    <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
+      Hey,<br><br>
+      <strong>${occasion} is 2 weeks away.</strong> Quick question before we write ${n}'s card:<br><br>
+      <strong style="color:#111;">Is there anything from this past year you want the card to reference?</strong><br>
+      <span style="color:#666;">(A visit, something they helped with, a moment that stands out — even something small.)</span><br><br>
+      One line is enough. We'll build the rest around it.
+    </div>`;
+
+  if (occasion === "Valentine's Day") return `
+    <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
+      Hey,<br><br>
+      <strong>Valentine's Day is 2 weeks away.</strong> Before we write the card for ${n}:<br><br>
+      <strong style="color:#111;">Anything specific you want this one to say — or a memory from the past year to mention?</strong><br>
+      <span style="color:#666;">(Even one detail makes it feel personal instead of generic.)</span><br><br>
+      Hit reply with whatever comes to mind.
+    </div>`;
+
+  if (occasion === "Graduation") return `
+    <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
+      Hey,<br><br>
+      <strong>${n}'s graduation is coming up.</strong> One quick thing:<br><br>
+      <strong style="color:#111;">What did they graduate from, and is there anything you want the card to acknowledge specifically?</strong><br>
+      <span style="color:#666;">(Their major, what they're doing next, how hard they worked — anything.)</span><br><br>
+      A sentence or two is all we need.
+    </div>`;
+
+  if (occasion === "Christmas" || occasion === "Hanukkah" || occasion === "Thanksgiving" || occasion === "Easter" || occasion === "New Year's") return `
+    <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
+      Hey,<br><br>
+      <strong>${occasion} is 2 weeks away.</strong> Quick question before we write ${n}'s card:<br><br>
+      <strong style="color:#111;">Is there anything from this year you'd want the card to mention — or should we keep it warm and general?</strong><br>
+      <span style="color:#666;">(A shared memory, something they're going through, a running joke — anything makes it feel more personal.)</span><br><br>
+      Hit reply with whatever comes to mind. We'll make it work.
     </div>`;
 
   return `
     <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
       Hey,<br><br>
-      <strong>We're getting ${escapeHtml(name)}'s card ready.</strong> One quick thing before we write it:<br><br>
+      <strong>We're getting ${n}'s card ready.</strong> One quick thing before we write it:<br><br>
       <strong style="color:#111;">Is there anything specific you want this card to say or reference?</strong><br>
       <span style="color:#666;">(Even one detail — a shared moment, something they're going through, anything that makes it feel personal.)</span><br><br>
       Hit reply with whatever comes to mind. We'll make it work.

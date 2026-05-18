@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { B } from "@/components/brand";
+import { HOLIDAYS } from "@/lib/data";
 
 const RELATIONSHIP_OPTIONS = [
   "Spouse / Partner",
@@ -11,14 +12,7 @@ const RELATIONSHIP_OPTIONS = [
   "Other",
 ];
 
-const OCCASION_OPTIONS = [
-  "Upcoming Birthday",
-  "Anniversary",
-  "Just Because",
-  "Holiday / Christmas",
-  "Thank You",
-  "Thinking of You",
-];
+const OCCASION_OPTIONS = HOLIDAYS;
 
 const PERSONALITY_OPTIONS = [
   "Sentimental & Heartfelt",
