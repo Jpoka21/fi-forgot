@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { and, eq, gt } from "drizzle-orm";
 import { db, demoLeadsTable } from "@workspace/db";
 import { sendDemoEmail } from "../services/sendgrid";
 import { logger } from "../lib/logger";
@@ -46,21 +45,6 @@ router.post("/demo-email", async (req, res) => {
   const safeOccasion = VALID_OCCASIONS.includes(occasion) ? occasion : "Just Because";
   const safePersonality = VALID_PERSONALITIES.includes(personality) ? personality : "Warm & Nurturing";
   const normalizedEmail = email.toLowerCase().trim();
-
-  try {
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const existing = await db
-      .select({ id: demoLeadsTable.id })
-      .from(demoLeadsTable)
-      .where(and(eq(demoLeadsTable.email, normalizedEmail), gt(demoLeadsTable.createdAt, oneDayAgo)))
-      .limit(1);
-    if (existing.length > 0) {
-      res.status(429).json({ error: "duplicate", message: "We already sent you a demo. Check your inbox." });
-      return;
-    }
-  } catch (err) {
-    req.log.warn({ err }, "Rate limit check failed, proceeding");
-  }
 
   const appUrl = getAppUrl(req);
 
