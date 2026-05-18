@@ -122,14 +122,14 @@ export default function LandingPage() {
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="md:hidden w-full h-full object-cover"
-          style={{ display: "block", objectPosition: "62% top" }}
+          style={{ objectPosition: "62% top" }}
         />
         {/* Desktop landscape hero */}
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="hidden md:block w-full"
-          style={{ display: "block", height: "auto" }}
+          style={{ height: "auto" }}
         />
 
         {/* Mobile text overlay */}
