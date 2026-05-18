@@ -1,0 +1,58 @@
+Improve ONLY the mobile version of the homepage hero section.
+
+Do not change the desktop version.
+
+The current mobile hero feels too cluttered and crowded. The goal is to create a cleaner, more cinematic mobile experience that instantly explains the product while preserving the funny emotional branding.
+
+MOBILE HERO REQUIREMENTS:
+
+Keep:
+• Dave in the doghouse
+• The greeting card visuals
+• The overall humor and branding
+• The existing color palette
+• The CTA button
+• The navigation/menu
+
+Use this text hierarchy on mobile:
+
+Main headline:
+GREETING CARDS
+ON AUTOPILOT.
+
+Supporting slogan:
+You focus on life. We remember everything.
+
+Supporting paragraph:
+We choose, write, and mail real greeting cards for birthdays, anniversaries, holidays, and every important moment.
+
+MOBILE LAYOUT INSTRUCTIONS:
+
+• Make the headline much smaller than desktop while still bold and readable
+• Keep the headline to 2 lines maximum
+• Reduce spacing between text blocks
+• Position text only on the darker left side of the image
+• Do not allow text to overlap Dave’s face or the doghouse sign
+• Reduce overall hero height so users see more of the page immediately
+• Move the CTA button slightly higher on the screen
+• Add breathing room around the CTA button
+• Shrink the bottom greeting card row on mobile
+• Allow the bottom cards to partially fade/crop if needed
+• Prioritize keeping Dave clearly visible
+• Keep the hero visually balanced instead of text-heavy
+• Reduce excessive margins and padding
+• Ensure all text remains readable on small screens
+• Make the layout feel like a clean movie poster instead of a squeezed desktop page
+
+NAVIGATION ON MOBILE:
+
+• Use a clean mobile hamburger menu
+• Keep the “Start Earning Brownie Points” CTA visible and responsive
+• Prevent navigation from taking too much vertical space
+
+IMPORTANT:
+The mobile version should immediately communicate:
+“This service automatically sends greeting cards for you.”
+
+Do not mention AI anywhere.
+Do not redesign the desktop version.

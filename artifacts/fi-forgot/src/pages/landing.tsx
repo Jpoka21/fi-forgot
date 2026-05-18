@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import {
   B,
   BrandButton,
@@ -63,6 +63,7 @@ const examples = [
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
@@ -89,40 +90,68 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Mobile nav (image doesn't work at small sizes) ────────────────── */}
-      <nav className="md:hidden sticky top-0 z-50 flex items-center justify-between"
-        style={{ background: B.beige, padding: "10px 16px", borderBottom: `1px solid ${B.black}15` }}>
-        <a href="/" style={{ textDecoration: "none" }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", fontWeight: 900, color: B.black, lineHeight: 0.95 }}>
-            <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>{" "}I FORGOT
-          </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.45rem", letterSpacing: "0.2em", color: B.gray, marginTop: 2 }}>
-            RELATIONSHIP DAMAGE CONTROL
-          </div>
-        </a>
-        <div className="flex items-center gap-2">
-          <a href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "6px 8px" }}>
-            SIGN IN
+      {/* ── Mobile nav ────────────────────────────────────────────────────── */}
+      <nav className="md:hidden sticky top-0 z-50"
+        style={{ background: B.beige, borderBottom: `1px solid ${B.black}18` }}>
+        <div className="flex items-center justify-between" style={{ padding: "8px 16px" }}>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: B.black, lineHeight: 0.95 }}>
+              <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>{" "}I FORGOT
+            </div>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.42rem", letterSpacing: "0.2em", color: B.gray, marginTop: 1 }}>
+              RELATIONSHIP DAMAGE CONTROL
+            </div>
           </a>
-          <a href="/signup" data-testid="link-mobile-nav-cta"
-            style={{ background: "#8B1A1A", color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.08em", padding: "9px 14px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, textAlign: "center" }}>
-            START NOW
-          </a>
+          <div className="flex items-center gap-2">
+            <a href="/signup" data-testid="link-mobile-nav-cta"
+              style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.08em", padding: "8px 13px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+              START NOW
+            </a>
+            <button
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              style={{ background: "none", border: "none", padding: "6px 4px", cursor: "pointer", color: B.black, display: "flex", alignItems: "center" }}>
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
+        {menuOpen && (
+          <div style={{ background: B.beige, borderTop: `1px solid ${B.black}12`, padding: "8px 0 12px" }}>
+            {[
+              { label: "How It Works", href: "#how-it-works" },
+              { label: "Plans", href: "#pricing" },
+              { label: "Examples", href: "#examples" },
+              { label: "Reviews", href: "#reviews" },
+              { label: "FAQ", href: "#faq" },
+            ].map(link => (
+              <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
+                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: B.black, padding: "9px 20px", textDecoration: "none" }}>
+                {link.label}
+              </a>
+            ))}
+            <div style={{ borderTop: `1px solid ${B.black}12`, margin: "8px 20px 0", paddingTop: 8 }}>
+              <a href="/login"
+                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
+                SIGN IN
+              </a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
-        className="h-[calc(100svh-4rem)] md:h-auto"
-        style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
+        className="md:h-auto"
+        style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden",
+          height: "clamp(420px, 72svh, 600px)" }}
       >
         {/* Mobile portrait hero */}
         <img
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="md:hidden w-full h-full object-cover"
-          style={{ objectPosition: "62% top" }}
+          style={{ objectPosition: "65% top" }}
         />
         {/* Desktop landscape hero */}
         <img
@@ -134,64 +163,76 @@ export default function LandingPage() {
 
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 18, top: 72, maxWidth: "58vw",
+          position: "absolute", left: 16, top: 52, maxWidth: "54vw",
           lineHeight: "normal", zIndex: 2,
         }}>
+          {/* Headline */}
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(28px, 7vw, 38px)",
+            fontSize: "clamp(26px, 6.5vw, 34px)",
             color: "#ffffff",
-            letterSpacing: "0em",
-            lineHeight: 0.97,
-            textShadow: "0 2px 14px rgba(0,0,0,0.8)",
+            letterSpacing: "0.01em",
+            lineHeight: 0.96,
+            textShadow: "0 2px 16px rgba(0,0,0,0.85)",
           }}>
             GREETING CARDS
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(28px, 7vw, 38px)",
+            fontSize: "clamp(26px, 6.5vw, 34px)",
             color: B.red,
-            letterSpacing: "0em",
-            lineHeight: 0.97,
-            textShadow: "0 2px 14px rgba(0,0,0,0.7)",
-            marginTop: "0.08em",
+            letterSpacing: "0.01em",
+            lineHeight: 0.96,
+            textShadow: "0 2px 14px rgba(0,0,0,0.75)",
+            marginTop: "0.1em",
           }}>
             ON AUTOPILOT.
           </div>
+
+          {/* Thin divider */}
+          <div style={{ width: 32, height: 2, background: B.red, borderRadius: 1, marginTop: 10 }} />
+
+          {/* Slogan */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(11px, 3vw, 14px)",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.85)",
-            lineHeight: 1.4,
-            textShadow: "0 1px 8px rgba(0,0,0,0.85)",
-            marginTop: "0.6em",
+            fontSize: "clamp(10.5px, 2.8vw, 13px)",
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.92)",
+            lineHeight: 1.45,
+            textShadow: "0 1px 10px rgba(0,0,0,0.9)",
+            marginTop: 8,
+            letterSpacing: "0.01em",
           }}>
             You focus on life.<br />We remember everything.
           </div>
+
+          {/* Supporting paragraph */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(10px, 2.6vw, 13px)",
+            fontSize: "clamp(9.5px, 2.4vw, 11.5px)",
             fontWeight: 400,
-            color: "rgba(255,255,255,0.7)",
-            lineHeight: 1.45,
-            textShadow: "0 1px 8px rgba(0,0,0,0.85)",
-            marginTop: "0.5em",
+            color: "rgba(255,255,255,0.68)",
+            lineHeight: 1.5,
+            textShadow: "0 1px 8px rgba(0,0,0,0.9)",
+            marginTop: 6,
           }}>
-            Real cards chosen, written,<br />and mailed for you.
+            We choose, write, and mail real<br />greeting cards for birthdays,<br />
+            anniversaries, and every important moment.
           </div>
+
+          {/* CTA */}
           <a href="/signup" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
               marginTop: 14, alignSelf: "flex-start",
-              background: "#c82127", color: "#fff",
+              background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(11px, 3vw, 14px)",
-              letterSpacing: "0.07em",
-              padding: "10px 14px",
-              borderRadius: 6,
+              fontSize: "clamp(10px, 2.8vw, 13px)",
+              letterSpacing: "0.08em",
+              padding: "9px 14px",
+              borderRadius: 5,
               textDecoration: "none",
-              boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
               whiteSpace: "nowrap",
             }}>
             AUTOMATE BEING THOUGHTFUL →
