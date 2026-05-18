@@ -5,6 +5,7 @@ import editCardRouter from "./edit-card";
 import adminRouter from "./admin";
 import approvalRouter from "./approval";
 import demoEmailRouter from "./demo-email";
+import cardProxyRouter from "./card-proxy";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(editCardRouter);
 router.use(adminRouter);
 router.use(approvalRouter);
 router.use(demoEmailRouter);
+router.use(cardProxyRouter);
 
 export default router;

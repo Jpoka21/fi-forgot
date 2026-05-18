@@ -354,14 +354,29 @@ function mockCheckinQuestions(occasion: string, personality: string, name: strin
 
 async function fetchCardImageForOccasion(occasion: string): Promise<string | null> {
   try {
-    const category = occasion.includes("Birthday") ? "Birthday"
-      : occasion.includes("Anniversary") ? "Anniversary"
-      : occasion.includes("Holiday") ? "Holiday"
-      : occasion.includes("Thank") ? "Thank You"
+    const category =
+      occasion === "Birthday" ? "Birthday"
+      : occasion === "Work Anniversary" ? "Work Anniversary"
+      : occasion === "Anniversary" ? "Anniversary"
+      : occasion === "Valentine's Day" ? "Valentine"
+      : occasion === "Mother's Day" ? "Mother"
+      : occasion === "Father's Day" ? "Father"
+      : occasion === "Christmas" || occasion === "Hanukkah" || occasion === "Thanksgiving" || occasion === "Easter" || occasion === "New Year's" ? "Holiday"
+      : occasion === "Graduation" ? "Graduation"
+      : occasion === "Get Well Soon" ? "Get Well"
+      : occasion === "Congratulations" ? "Congratulations"
       : undefined;
     const cards = await listHandwryttenCards(category);
-    const withImage = cards.filter(c => c.imageUrl);
-    return withImage[0]?.imageUrl ?? null;
+    // Fall back to any occasion if the specific category returned nothing with an image
+    const withImage = cards.filter(c => c.imageUrl && c.imageUrl.startsWith("http"));
+    if (withImage.length > 0) return withImage[0]!.imageUrl!;
+    // Try without category filter
+    if (category) {
+      const all = await listHandwryttenCards();
+      const anyWithImage = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http"));
+      return anyWithImage[0]?.imageUrl ?? null;
+    }
+    return null;
   } catch (err) {
     logger.warn({ err }, "Could not fetch Handwrytten card image for demo email");
     return null;
@@ -457,7 +472,11 @@ export async function sendDemoEmail(opts: {
   const message = writeMessage(opts.recipientName, opts.relationship, opts.occasion, opts.personality);
   const checkinHtml = mockCheckinQuestions(opts.occasion, opts.personality, opts.recipientName);
   const editUrl = `${opts.appUrl}/signup?demo=true&recipientName=${encodeURIComponent(opts.recipientName)}&relationship=${encodeURIComponent(opts.relationship)}&occasion=${encodeURIComponent(opts.occasion)}`;
-  const cardImageUrl = await fetchCardImageForOccasion(opts.occasion);
+  const rawCardImageUrl = await fetchCardImageForOccasion(opts.occasion);
+  // Proxy the image through our server so email clients can load it without auth
+  const cardImageUrl = rawCardImageUrl
+    ? `${opts.appUrl}/api/card-proxy?url=${encodeURIComponent(rawCardImageUrl)}`
+    : null;
 
   const subject = `Your ${opts.occasion.toLowerCase()} card for ${opts.recipientName} is ready`;
   const occasionLabel = opts.occasion.replace("Upcoming ", "").toLowerCase();
