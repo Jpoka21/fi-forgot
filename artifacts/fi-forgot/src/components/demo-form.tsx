@@ -11,6 +11,22 @@ const RELATIONSHIP_OPTIONS = [
   "Other",
 ];
 
+const OCCASION_OPTIONS = [
+  "Upcoming Birthday",
+  "Anniversary",
+  "Just Because",
+  "Holiday / Christmas",
+  "Thank You",
+  "Thinking of You",
+];
+
+const PERSONALITY_OPTIONS = [
+  "Sentimental & Heartfelt",
+  "Funny & Witty",
+  "Warm & Nurturing",
+  "Down-to-Earth & Practical",
+];
+
 type Status = "idle" | "loading" | "success" | "error";
 
 const fieldLabel: React.CSSProperties = {
@@ -36,8 +52,36 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  appearance: "none",
+  cursor: "pointer",
+  paddingRight: 36,
+};
+
+function SelectField({ id, label, value, onChange, options, placeholder }: {
+  id: string; label: string; value: string;
+  onChange: (v: string) => void; options: string[]; placeholder: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} style={fieldLabel}>{label}</label>
+      <div style={{ position: "relative" }}>
+        <select id={id} value={value} onChange={e => onChange(e.target.value)} required style={selectStyle}>
+          <option value="">{placeholder}</option>
+          {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#555", pointerEvents: "none" }}>▾</span>
+      </div>
+    </div>
+  );
+}
+
 export function DemoFormSection() {
-  const [form, setForm] = useState({ email: "", recipientName: "", relationship: "", website: "" });
+  const [form, setForm] = useState({
+    email: "", recipientName: "", relationship: "",
+    occasion: "", personality: "", website: "",
+  });
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -47,9 +91,9 @@ export function DemoFormSection() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.email || !form.recipientName || !form.relationship) {
+    if (!form.email || !form.recipientName || !form.relationship || !form.occasion || !form.personality) {
       setStatus("error");
-      setErrorMsg("Please fill in all three fields.");
+      setErrorMsg("Please fill in all fields.");
       return;
     }
     setStatus("loading");
@@ -62,6 +106,8 @@ export function DemoFormSection() {
           email: form.email,
           recipientName: form.recipientName,
           relationship: form.relationship,
+          occasion: form.occasion,
+          personality: form.personality,
           honeypot: form.website,
         }),
       });
@@ -82,7 +128,6 @@ export function DemoFormSection() {
     <section style={{ background: B.black, padding: "72px 24px 80px" }}>
       <div style={{ maxWidth: 520, margin: "0 auto" }}>
 
-        {/* Headline */}
         <h1 style={{
           fontFamily: "'Bebas Neue', cursive",
           fontSize: "clamp(2.6rem, 7vw, 4rem)",
@@ -94,7 +139,6 @@ export function DemoFormSection() {
           See how it works.
         </h1>
 
-        {/* Subtext */}
         <p style={{
           fontFamily: "'Inter', Arial, sans-serif",
           fontSize: "1rem",
@@ -102,7 +146,7 @@ export function DemoFormSection() {
           margin: "0 0 36px",
           lineHeight: 1.6,
         }}>
-          Enter your email and who the card is for. We'll send you a sample card you can edit.
+          Tell us about one person you want to remember. We'll send you a fully personalized sample card — and show you exactly how we built it.
         </p>
 
         {status === "success" ? (
@@ -114,9 +158,7 @@ export function DemoFormSection() {
               color: "#ffffff",
               letterSpacing: "0.05em",
               margin: "0 0 12px",
-            }}>
-              Check your inbox.
-            </p>
+            }}>Check your inbox.</p>
             <p style={{
               fontFamily: "'Inter', Arial, sans-serif",
               fontSize: "0.95rem",
@@ -124,108 +166,67 @@ export function DemoFormSection() {
               lineHeight: 1.6,
               margin: 0,
             }}>
-              We just sent you a sample card you can edit.
+              We sent you a personalized sample card and broke down exactly how we made it.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
-            {/* Honeypot */}
-            <input
-              type="text"
-              name="website"
-              value={form.website}
+            <input type="text" name="website" value={form.website}
               onChange={e => set("website", e.target.value)}
-              style={{ display: "none" }}
-              tabIndex={-1}
-              autoComplete="off"
-            />
+              style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
 
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
-              {/* Email */}
               <div>
-                <label htmlFor="demo-email" style={fieldLabel}>Email Address</label>
-                <input
-                  id="demo-email"
-                  type="email"
-                  value={form.email}
+                <label htmlFor="demo-email" style={fieldLabel}>Your Email Address</label>
+                <input id="demo-email" type="email" value={form.email}
                   onChange={e => set("email", e.target.value)}
-                  required
-                  placeholder="you@example.com"
-                  style={inputStyle}
-                />
+                  required placeholder="you@example.com" style={inputStyle} />
               </div>
 
-              {/* Recipient Name */}
               <div>
-                <label htmlFor="demo-name" style={fieldLabel}>Recipient's Name</label>
-                <input
-                  id="demo-name"
-                  type="text"
-                  value={form.recipientName}
+                <label htmlFor="demo-name" style={fieldLabel}>Recipient's First Name</label>
+                <input id="demo-name" type="text" value={form.recipientName}
                   onChange={e => set("recipientName", e.target.value)}
-                  required
-                  placeholder="Sarah"
-                  maxLength={100}
-                  style={inputStyle}
-                />
+                  required placeholder="Sarah" maxLength={100} style={inputStyle} />
               </div>
 
-              {/* Relationship */}
-              <div>
-                <label htmlFor="demo-relationship" style={fieldLabel}>Relationship</label>
-                <div style={{ position: "relative" }}>
-                  <select
-                    id="demo-relationship"
-                    value={form.relationship}
-                    onChange={e => set("relationship", e.target.value)}
-                    required
-                    style={{ ...inputStyle, appearance: "none", cursor: "pointer", paddingRight: 36 }}
-                  >
-                    <option value="">Select a relationship…</option>
-                    {RELATIONSHIP_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                  <span style={{
-                    position: "absolute", right: 12, top: "50%",
-                    transform: "translateY(-50%)", color: "#555", pointerEvents: "none",
-                  }}>▾</span>
-                </div>
-              </div>
+              <SelectField id="demo-relationship" label="Your Relationship to Them"
+                value={form.relationship} onChange={v => set("relationship", v)}
+                options={RELATIONSHIP_OPTIONS} placeholder="Select a relationship…" />
 
-              {/* Error */}
+              <SelectField id="demo-occasion" label="Upcoming Occasion"
+                value={form.occasion} onChange={v => set("occasion", v)}
+                options={OCCASION_OPTIONS} placeholder="Select an occasion…" />
+
+              <SelectField id="demo-personality" label="How Would You Describe Them?"
+                value={form.personality} onChange={v => set("personality", v)}
+                options={PERSONALITY_OPTIONS} placeholder="Choose their personality…" />
+
               {status === "error" && errorMsg && (
                 <div style={{
-                  background: "rgba(226,59,46,0.12)",
-                  border: "1px solid rgba(226,59,46,0.3)",
-                  borderRadius: 6,
-                  padding: "10px 14px",
-                  fontFamily: "'Inter', Arial, sans-serif",
-                  fontSize: "0.9rem",
-                  color: "#ff7b70",
+                  background: "rgba(226,59,46,0.12)", border: "1px solid rgba(226,59,46,0.3)",
+                  borderRadius: 6, padding: "10px 14px",
+                  fontFamily: "'Inter', Arial, sans-serif", fontSize: "0.9rem", color: "#ff7b70",
                 }}>
                   {errorMsg}
                 </div>
               )}
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={status === "loading"}
-                style={{
-                  background: status === "loading" ? "#a02a20" : B.red,
-                  color: "#ffffff",
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "1.1rem",
-                  letterSpacing: "0.1em",
-                  padding: "16px 24px",
-                  borderRadius: 6,
-                  border: "none",
-                  cursor: status === "loading" ? "not-allowed" : "pointer",
-                  width: "100%",
-                  marginTop: 4,
-                }}
-              >
-                {status === "loading" ? "Sending your demo…" : "Send Me the Demo"}
+              <button type="submit" disabled={status === "loading"} style={{
+                background: status === "loading" ? "#a02a20" : B.red,
+                color: "#ffffff",
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "1.1rem",
+                letterSpacing: "0.1em",
+                padding: "16px 24px",
+                borderRadius: 6,
+                border: "none",
+                cursor: status === "loading" ? "not-allowed" : "pointer",
+                width: "100%",
+                marginTop: 4,
+              }}>
+                {status === "loading" ? "Building your sample card…" : "Build My Sample Card"}
               </button>
 
               <p style={{

@@ -14,28 +14,20 @@ function getAppUrl(req: import("express").Request): string {
   return `${req.protocol}://${req.get("host")}`;
 }
 
-const VALID_RELATIONSHIPS = [
-  "Spouse / Partner",
-  "Parent",
-  "Child",
-  "Sibling",
-  "Friend",
-  "Coworker",
-  "Other",
-];
+const VALID_RELATIONSHIPS = ["Spouse / Partner","Parent","Child","Sibling","Friend","Coworker","Other"];
+const VALID_OCCASIONS = ["Upcoming Birthday","Anniversary","Just Because","Holiday / Christmas","Thank You","Thinking of You"];
+const VALID_PERSONALITIES = ["Sentimental & Heartfelt","Funny & Witty","Warm & Nurturing","Down-to-Earth & Practical"];
 
 router.post("/demo-email", async (req, res) => {
-  const { email, recipientName, relationship, honeypot } = req.body as {
-    email?: string;
-    recipientName?: string;
-    relationship?: string;
-    honeypot?: string;
+  const { email, recipientName, relationship, occasion, personality, honeypot } = req.body as {
+    email?: string; recipientName?: string; relationship?: string;
+    occasion?: string; personality?: string; honeypot?: string;
   };
 
   if (honeypot) { res.json({ success: true }); return; }
 
-  if (!email || !recipientName || !relationship) {
-    res.status(400).json({ error: "missing_fields", message: "Please fill in all three fields." });
+  if (!email || !recipientName || !relationship || !occasion || !personality) {
+    res.status(400).json({ error: "missing_fields", message: "Please fill in all fields." });
     return;
   }
 
@@ -45,13 +37,15 @@ router.post("/demo-email", async (req, res) => {
   }
 
   const safeName = String(recipientName).replace(/<[^>]*>/g, "").trim().slice(0, 100);
-  const safeRelationship = VALID_RELATIONSHIPS.includes(relationship) ? relationship : "Friend";
-  const normalizedEmail = email.toLowerCase().trim();
-
   if (!safeName) {
     res.status(400).json({ error: "missing_fields", message: "Please enter the recipient's name." });
     return;
   }
+
+  const safeRelationship = VALID_RELATIONSHIPS.includes(relationship) ? relationship : "Friend";
+  const safeOccasion = VALID_OCCASIONS.includes(occasion) ? occasion : "Just Because";
+  const safePersonality = VALID_PERSONALITIES.includes(personality) ? personality : "Warm & Nurturing";
+  const normalizedEmail = email.toLowerCase().trim();
 
   try {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -75,6 +69,8 @@ router.post("/demo-email", async (req, res) => {
       email: normalizedEmail,
       recipientName: safeName,
       relationship: safeRelationship,
+      occasion: safeOccasion,
+      personality: safePersonality,
       appUrl,
     });
   } catch (err) {
@@ -90,6 +86,8 @@ router.post("/demo-email", async (req, res) => {
       email: normalizedEmail,
       recipientName: safeName,
       relationship: safeRelationship,
+      occasion: safeOccasion,
+      personality: safePersonality,
       lastDemoEmailSentAt: new Date(),
       demoEmailSendCount: 1,
     });
@@ -97,7 +95,7 @@ router.post("/demo-email", async (req, res) => {
     req.log.warn({ err }, "Failed to store demo lead — email was still sent");
   }
 
-  logger.info({ email: normalizedEmail, recipientName: safeName, relationship: safeRelationship }, "Demo email sent");
+  logger.info({ email: normalizedEmail, recipientName: safeName, occasion: safeOccasion }, "Demo email sent");
   res.json({ success: true });
 });
 

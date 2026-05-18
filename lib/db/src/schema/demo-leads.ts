@@ -7,6 +7,8 @@ export const demoLeadsTable = pgTable("demo_leads", {
   email: text("email").notNull(),
   recipientName: text("recipient_name").notNull(),
   relationship: text("relationship").notNull(),
+  occasion: text("occasion"),
+  personality: text("personality"),
   source: text("source").notNull().default("demo_for_free"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
