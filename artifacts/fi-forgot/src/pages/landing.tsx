@@ -134,29 +134,40 @@ export default function LandingPage() {
 
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 22, top: 95, maxWidth: 330,
+          position: "absolute", left: 22, top: 80, maxWidth: 340,
           lineHeight: "normal", gap: 0, zIndex: 2,
         }}>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(34px, 8.8vw, 48px)",
+            fontSize: "clamp(36px, 9.5vw, 52px)",
             color: "#ffffff",
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.01em",
             lineHeight: 0.95,
-            textShadow: "0 3px 18px rgba(0,0,0,0.65)",
+            textShadow: "0 3px 18px rgba(0,0,0,0.75)",
           }}>
-            YOU FOCUS ON LIFE.
+            AUTOMATIC GREETING CARDS
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(34px, 8.8vw, 48px)",
+            fontSize: "clamp(36px, 9.5vw, 52px)",
             color: B.red,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.01em",
             lineHeight: 0.95,
             textShadow: "0 3px 18px rgba(0,0,0,0.65)",
-            marginTop: "0.05em",
+            marginTop: "0.04em",
           }}>
-            WE REMEMBER EVERYTHING.
+            FOR EVERY IMPORTANT DATE.
+          </div>
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(16px, 4vw, 22px)",
+            color: "rgba(255,255,255,0.88)",
+            letterSpacing: "0.04em",
+            lineHeight: 1.15,
+            textShadow: "0 2px 10px rgba(0,0,0,0.7)",
+            marginTop: "0.5em",
+          }}>
+            You focus on life. We remember everything.
           </div>
           <a href="/signup" data-testid="link-cta-hitzone"
             style={{
@@ -172,61 +183,69 @@ export default function LandingPage() {
               textDecoration: "none",
               boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
             }}>
-            FIX MY FORGETTING →
+            AUTOMATE BEING THOUGHTFUL →
           </a>
         </div>
 
         {/* Desktop text overlay */}
-        <div className="hidden md:flex flex-col w-[42%]" style={{
+        <div className="hidden md:flex flex-col w-[46%]" style={{
           position: "absolute", top: "4%", left: "3%",
           lineHeight: "normal", gap: 0,
         }}>
           <div
             style={{
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(2.2rem,5vw,5rem)",
-              color: "#f0ece4",
-              letterSpacing: "0.03em",
-              lineHeight: 1,
-              textShadow: "2px 2px 0 #00000088, -1px -1px 0 #00000044",
-              WebkitTextStroke: "1px rgba(0,0,0,0.3)",
+              fontSize: "clamp(3rem, 7vw, 7rem)",
+              color: "#ffffff",
+              letterSpacing: "0.01em",
+              lineHeight: 0.95,
+              textShadow: "2px 3px 0 #00000088, -1px -1px 0 #00000044",
             }}>
-            YOU FOCUS ON LIFE.
+            AUTOMATIC GREETING CARDS
           </div>
           <div
             style={{
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(2.8rem,6.5vw,6.5rem)",
+              fontSize: "clamp(3rem, 7vw, 7rem)",
               color: B.red,
-              letterSpacing: "0.02em",
+              letterSpacing: "0.01em",
               lineHeight: 0.95,
               textShadow: "2px 3px 0 #00000066",
-              WebkitTextStroke: "1px rgba(0,0,0,0.25)",
-              marginTop: "0.1em",
+              marginTop: "0.04em",
             }}>
-            WE REMEMBER EVERYTHING.
+            FOR EVERY IMPORTANT DATE.
+          </div>
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(1.2rem, 2.2vw, 2.2rem)",
+            color: "rgba(255,255,255,0.9)",
+            letterSpacing: "0.05em",
+            lineHeight: 1.2,
+            textShadow: "1px 1px 8px rgba(0,0,0,0.8)",
+            margin: "0.45em 0 0",
+          }}>
+            You focus on life. We remember everything.
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0.5em 0 0.4em" }}>
-            <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
+            <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.4)", borderRadius: 1 }} />
             <span style={{ color: B.red, fontSize: "0.9rem", lineHeight: 1 }}>♥</span>
-            <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.55)", borderRadius: 1 }} />
+            <div style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.4)", borderRadius: 1 }} />
           </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(0.95rem, 1.5vw, 1.3rem)",
-            fontWeight: 700,
-            color: "#ffffff",
-            lineHeight: 1.5,
+            fontSize: "clamp(0.85rem, 1.3vw, 1.15rem)",
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.88)",
+            lineHeight: 1.55,
             margin: 0,
             textShadow: "1px 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6)",
-            letterSpacing: "0.01em",
           }}>
-            We make sure you <span style={{ textDecoration: "underline" }}>never</span> miss an important date<br />
-            so you don't end up in the dog house.
+            We choose, write, and mail real greeting cards for birthdays,<br />
+            anniversaries, holidays, and every important moment.
           </p>
           <a href="/signup" data-testid="link-cta-hitzone"
             style={{
-              display: "inline-block", marginTop: "0.5em", alignSelf: "flex-start",
+              display: "inline-block", marginTop: "0.6em", alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
               fontSize: "clamp(0.9rem,1.5vw,1.3rem)",
@@ -238,6 +257,24 @@ export default function LandingPage() {
             }}>
             AUTOMATE BEING THOUGHTFUL →
           </a>
+        </div>
+
+        {/* Bottom label — "Real cards, automatically sent for you" */}
+        <div className="hidden md:flex" style={{
+          position: "absolute", bottom: "3%", left: "3%",
+          alignItems: "center", gap: 8, zIndex: 2,
+        }}>
+          <div style={{ width: 28, height: 2, background: B.red, borderRadius: 1 }} />
+          <span style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(0.75rem, 1.1vw, 1rem)",
+            letterSpacing: "0.18em",
+            color: "rgba(255,255,255,0.75)",
+            textShadow: "0 1px 6px rgba(0,0,0,0.7)",
+          }}>
+            REAL CARDS, AUTOMATICALLY SENT FOR YOU
+          </span>
+          <div style={{ width: 28, height: 2, background: B.red, borderRadius: 1 }} />
         </div>
 
       </section>
