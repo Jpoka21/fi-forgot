@@ -103,9 +103,9 @@ export default function LandingPage() {
             </div>
           </a>
           <div className="flex items-center gap-2">
-            <a href="/signup" data-testid="link-mobile-nav-cta"
+            <a href="/try" data-testid="link-mobile-nav-cta"
               style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.08em", padding: "8px 13px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-              START NOW
+              DEMO FOR FREE
             </a>
             <button
               onClick={() => setMenuOpen(o => !o)}
