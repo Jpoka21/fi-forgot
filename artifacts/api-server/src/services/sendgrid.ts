@@ -565,9 +565,22 @@ export async function sendDemoEmail(opts: {
   const checkinHtml = mockCheckinQuestions(opts.occasion, opts.personality, opts.recipientName);
   const editUrl = `${opts.appUrl}/signup?demo=true&recipientName=${encodeURIComponent(opts.recipientName)}&relationship=${encodeURIComponent(opts.relationship)}&occasion=${encodeURIComponent(opts.occasion)}`;
   const rawCardImageUrl = await fetchCardImageForOccasion(opts.occasion);
-  // Use the CloudFront URL directly — it's public, no auth needed, and email
-  // clients handle well-known CDN domains far better than an unknown proxy.
-  const cardImageUrl = rawCardImageUrl ?? null;
+  // Fetch the image server-side and embed it as an inline CID attachment so
+  // email clients never need to load an external URL (which they silently block).
+  let cardImageBuffer: Buffer | null = null;
+  let cardImageMime = "image/jpeg";
+  if (rawCardImageUrl) {
+    try {
+      const imgRes = await fetch(rawCardImageUrl);
+      if (imgRes.ok) {
+        cardImageBuffer = Buffer.from(await imgRes.arrayBuffer());
+        const ct = imgRes.headers.get("content-type");
+        if (ct) cardImageMime = ct.split(";")[0].trim();
+      }
+    } catch {
+      // Image fetch failed — email will render the fallback colour block instead.
+    }
+  }
 
   const subject = `Your ${opts.occasion.toLowerCase()} card for ${opts.recipientName} is ready`;
   const occasionLabel = opts.occasion.replace("Upcoming ", "").toLowerCase();
@@ -614,8 +627,8 @@ export async function sendDemoEmail(opts: {
 
     <!-- Card image block -->
     <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:8px;margin-bottom:6px;border:1px solid #e0d4c0;overflow:hidden;">
-      ${cardImageUrl
-        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="${cardImageUrl}" width="100%" style="display:block;width:100%;border-radius:7px 7px 0 0;" alt="Card design — tap 'Load images' if this appears blank" /></td></tr>`
+      ${cardImageBuffer
+        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="cid:card-image" width="100%" style="display:block;width:100%;border-radius:7px 7px 0 0;" alt="Your card design" /></td></tr>`
         : `<tr><td style="background:${card.bgColor};padding:40px;text-align:center;border-radius:7px 7px 0 0;"><div style="font-size:32px;color:${card.accentColor};font-family:Georgia,serif;">✉</div></td></tr>`
       }
       <tr><td style="background:${card.bgColor};padding:16px 20px 14px;">
@@ -825,8 +838,23 @@ export async function sendDemoEmail(opts: {
     from: `F*I Forgot <${fromEmail}>`,
     subject,
     html,
+    ...(cardImageBuffer
+      ? {
+          attachments: [
+            {
+              filename: "card.jpg",
+              content: cardImageBuffer,
+              contentType: cardImageMime,
+              headers: {
+                "Content-ID": "<card-image>",
+                "Content-Disposition": "inline",
+              },
+            },
+          ],
+        }
+      : {}),
   });
 
   if (error) throw new Error(`Resend error: ${error.message}`);
-  logger.info({ to: opts.email, recipientName: opts.recipientName, occasion: opts.occasion }, "Demo email sent via Resend");
+  logger.info({ to: opts.email, recipientName: opts.recipientName, occasion: opts.occasion, hasCardImage: !!cardImageBuffer }, "Demo email sent via Resend");
 }
