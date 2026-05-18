@@ -161,6 +161,13 @@ export default function LandingPage() {
           style={{ height: "auto" }}
         />
 
+        {/* Mobile — left-side dark gradient to ensure text readability */}
+        <div className="md:hidden" style={{
+          position: "absolute", inset: 0, zIndex: 1,
+          background: "linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 55%, transparent 80%)",
+          pointerEvents: "none",
+        }} />
+
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
           position: "absolute", left: 16, top: 52, maxWidth: "54vw",
@@ -209,15 +216,14 @@ export default function LandingPage() {
           {/* Supporting paragraph */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(9.5px, 2.4vw, 11.5px)",
-            fontWeight: 400,
-            color: "rgba(255,255,255,0.68)",
-            lineHeight: 1.5,
+            fontSize: "clamp(12px, 3.2vw, 15px)",
+            fontWeight: 500,
+            color: "rgba(255,255,255,0.82)",
+            lineHeight: 1.65,
             textShadow: "0 1px 8px rgba(0,0,0,0.9)",
-            marginTop: 6,
+            marginTop: 8,
           }}>
-            We choose, write, and mail real<br />greeting cards for birthdays,<br />
-            anniversaries, and every important moment.
+            We choose, write, and mail real<br />greeting cards automatically.
           </div>
 
           {/* CTA */}
