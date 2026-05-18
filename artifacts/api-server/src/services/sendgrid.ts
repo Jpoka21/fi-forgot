@@ -94,6 +94,18 @@ function pickCard(occasion: string, personality: string, relationship: string): 
   }
 
   if (occasion === "Mother's Day") {
+    if (isSpouse && isFunny) return {
+      bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
+      borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
+      title: "The &#x27;Our Kids Have No Idea How Lucky They Are (But I Do)&#x27; Card",
+      whyChosen: `When a spouse sends a Mother's Day card, the angle is completely different — it's about what you witness every day, not what was done for you. This card hits that note perfectly.`,
+    };
+    if (isSpouse) return {
+      bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
+      borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
+      title: "The &#x27;Watching You With Our Kids Is One of My Favorite Things&#x27; Card",
+      whyChosen: `A Mother's Day card from a spouse lands differently than one from a child. This one focuses on what you see every day — which is more specific, more personal, and more meaningful.`,
+    };
     if (isFunny) return {
       bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
       borderColor: "#e0d5c0", seriesLabel: "MOTHER'S DAY COLLECTION",
@@ -109,6 +121,18 @@ function pickCard(occasion: string, personality: string, relationship: string): 
   }
 
   if (occasion === "Father's Day") {
+    if (isSpouse && isFunny) return {
+      bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
+      borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
+      title: "The &#x27;Our Kids Are Lucky to Have You (Even When You&#x27;re Explaining Things)&#x27; Card",
+      whyChosen: `A Father's Day card from a spouse is about what you witness — not what was done for you. This card captures that angle with warmth and a little humor.`,
+    };
+    if (isSpouse) return {
+      bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
+      borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
+      title: "The &#x27;Watching You Be a Dad Is Something I&#x27;m Grateful For Every Day&#x27; Card",
+      whyChosen: `When a spouse sends a Father's Day card, the most meaningful thing they can say is what they observe. This card speaks to that — no clichés, just what's real.`,
+    };
     if (isFunny) return {
       bgColor: "#111827", titleColor: "#f9fafb", accentColor: "#6a9fd8",
       borderColor: "#374151", seriesLabel: "FATHER'S DAY COLLECTION",
@@ -225,11 +249,19 @@ function writeMessage(name: string, relationship: string, occasion: string, pers
   }
 
   if (occasion === "Mother's Day") {
+    if (isSpouse) {
+      if (isFunny) return `Dear ${name},\n\nEvery day I watch you be a mom to our kids and think: they have no idea how lucky they are.\n\n(I do, though.)\n\nHappy Mother's Day.\n\nLove,\n[Your Name]`;
+      return `Dear ${name},\n\nWatching you with our kids is one of the best things I get to do. You make it look easy — and I know it isn't.\n\nHappy Mother's Day. You deserve today.\n\nLove,\n[Your Name]`;
+    }
     if (isFunny) return `Dear ${name},\n\nYou raised me. Whatever I turned out to be — that's on you.\n\nHappy Mother's Day. I mean that as a compliment.\n\n[Your Name]`;
     return `Dear ${name},\n\nEverything I know about showing up for the people I love, I learned from watching you.\n\nHappy Mother's Day.\n\n[Your Name]`;
   }
 
   if (occasion === "Father's Day") {
+    if (isSpouse) {
+      if (isFunny) return `Dear ${name},\n\nOur kids are lucky to have you. Even when you're explaining things they didn't ask about.\n\nHappy Father's Day.\n\nLove,\n[Your Name]`;
+      return `Dear ${name},\n\nWatching you be a dad to our kids is something I'm genuinely grateful for. Every day.\n\nHappy Father's Day.\n\nLove,\n[Your Name]`;
+    }
     if (isFunny) return `Dear ${name},\n\nYou taught me a lot. Some of it on purpose.\n\nHappy Father's Day.\n\n[Your Name]`;
     return `Dear ${name},\n\nYou showed up. Consistently. That's the whole thing — and I don't take it for granted.\n\nHappy Father's Day.\n\n[Your Name]`;
   }
@@ -304,14 +336,18 @@ function mockCheckinQuestions(occasion: string, personality: string, name: strin
       One or two sentences is plenty. We'll handle the rest.
     </div>`;
 
-  if (occasion === "Mother's Day" || occasion === "Father's Day") return `
+  if (occasion === "Mother's Day" || occasion === "Father's Day") {
+    const isSpouseCheckin = personality.includes("Spouse") || personality.includes("Partner") || false;
+    // personality doesn't carry relationship — use a broader check via the name context
+    return `
     <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
       Hey,<br><br>
       <strong>${occasion} is 2 weeks away.</strong> Quick question before we write ${n}'s card:<br><br>
-      <strong style="color:#111;">Is there anything from this past year you want the card to reference?</strong><br>
-      <span style="color:#666;">(A visit, something they helped with, a moment that stands out — even something small.)</span><br><br>
+      <strong style="color:#111;">Is there a specific moment or thing from this past year you want the card to reference?</strong><br>
+      <span style="color:#666;">(Something you witnessed or experienced together — even one detail makes it feel personal.)</span><br><br>
       One line is enough. We'll build the rest around it.
     </div>`;
+  }
 
   if (occasion === "Valentine's Day") return `
     <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
