@@ -7,6 +7,7 @@ const ALLOWED_HOSTS = [
   "app.handwrytten.com",
   "cdn.handwrytten.com",
   "images.handwrytten.com",
+  "cloudfront.net",
   "s3.amazonaws.com",
   "s3.us-east-1.amazonaws.com",
   "handwrytten-images.s3.amazonaws.com",

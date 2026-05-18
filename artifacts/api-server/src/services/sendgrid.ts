@@ -395,8 +395,6 @@ function mockCheckinQuestions(occasion: string, personality: string, name: strin
     </div>`;
 
   if (occasion === "Mother's Day" || occasion === "Father's Day") {
-    const isSpouseCheckin = personality.includes("Spouse") || personality.includes("Partner") || false;
-    // personality doesn't carry relationship — use a broader check via the name context
     return `
     <div style="font-size:13px;color:#333;line-height:1.8;font-family:Arial,sans-serif;">
       Hey,<br><br>
