@@ -565,18 +565,24 @@ export async function sendDemoEmail(opts: {
   const checkinHtml = mockCheckinQuestions(opts.occasion, opts.personality, opts.recipientName);
   const editUrl = `${opts.appUrl}/signup?demo=true&recipientName=${encodeURIComponent(opts.recipientName)}&relationship=${encodeURIComponent(opts.relationship)}&occasion=${encodeURIComponent(opts.occasion)}`;
   const rawCardImageUrl = await fetchCardImageForOccasion(opts.occasion);
-  // Fetch image server-side and embed as a base64 data URI in the HTML.
-  // This is the most reliable approach — the image lives inside the email body,
-  // no external URLs for email clients to block, no CID MIME complexity.
-  // Works in Apple Mail, iOS Mail, Gmail web, and Outlook 365.
-  let cardImageDataUri: string | null = null;
+  // Fetch the card image server-side, store it in our own in-memory store,
+  // and embed a URL on our own domain in the email. This avoids:
+  //   - external URL blocking by email clients (CloudFront direct)
+  //   - Resend stripping data URIs from HTML
+  //   - CID attachment complexity
+  // Email clients load /api/card-image/:id from our public server — no auth, no redirects.
+  let cardImageSrc: string | null = null;
   if (rawCardImageUrl) {
     try {
-      const imgRes = await fetch(rawCardImageUrl);
+      const imgRes = await fetch(rawCardImageUrl, {
+        headers: { "User-Agent": "FIForgot-Demo-Mailer/1.0" },
+      });
       if (imgRes.ok) {
         const mime = (imgRes.headers.get("content-type") ?? "image/jpeg").split(";")[0].trim();
-        const b64 = Buffer.from(await imgRes.arrayBuffer()).toString("base64");
-        cardImageDataUri = `data:${mime};base64,${b64}`;
+        const buf = Buffer.from(await imgRes.arrayBuffer());
+        const { storeCardImage } = await import("./card-image-store.js");
+        const imageId = storeCardImage(buf, mime);
+        cardImageSrc = `${opts.appUrl}/api/card-image/${imageId}`;
       }
     } catch {
       // Image fetch failed — email will render the fallback colour block instead.
@@ -628,8 +634,8 @@ export async function sendDemoEmail(opts: {
 
     <!-- Card image block -->
     <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:8px;margin-bottom:6px;border:1px solid #e0d4c0;overflow:hidden;">
-      ${cardImageDataUri
-        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="${cardImageDataUri}" width="100%" style="display:block;width:100%;border-radius:7px 7px 0 0;" alt="Your card design" /></td></tr>`
+      ${cardImageSrc
+        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="${cardImageSrc}" width="100%" style="display:block;width:100%;border-radius:7px 7px 0 0;" alt="Your card design" /></td></tr>`
         : `<tr><td style="background:${card.bgColor};padding:40px;text-align:center;border-radius:7px 7px 0 0;"><div style="font-size:32px;color:${card.accentColor};font-family:Georgia,serif;">✉</div></td></tr>`
       }
       <tr><td style="background:${card.bgColor};padding:16px 20px 14px;">
@@ -842,5 +848,5 @@ export async function sendDemoEmail(opts: {
   });
 
   if (error) throw new Error(`Resend error: ${error.message}`);
-  logger.info({ to: opts.email, recipientName: opts.recipientName, occasion: opts.occasion, hasCardImage: !!cardImageDataUri }, "Demo email sent via Resend");
+  logger.info({ to: opts.email, recipientName: opts.recipientName, occasion: opts.occasion, hasCardImage: !!cardImageSrc, cardImageSrc }, "Demo email sent via Resend");
 }
