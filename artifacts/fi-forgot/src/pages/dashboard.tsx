@@ -123,15 +123,20 @@ function StatusBadge({ status }: { status: CardOrder["status"] }) {
 }
 
 function StatCard({
-  label, value, icon: Icon, accentColor, sub,
+  label, value, icon: Icon, accentColor, sub, href,
 }: {
   label: string; value: string | number; icon: React.ElementType;
-  accentColor: string; sub?: string;
+  accentColor: string; sub?: string; href?: string;
 }) {
-  return (
+  const inner = (
     <div
       className="rounded-2xl p-5 flex items-center gap-4 transition-all hover:-translate-y-0.5"
-      style={{ background: "#fff", border: `1.5px solid ${BLACK}18`, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+      style={{
+        background: "#fff", border: `1.5px solid ${BLACK}18`,
+        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+        cursor: href ? "pointer" : "default",
+        textDecoration: "none",
+      }}
     >
       <div
         className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -146,6 +151,8 @@ function StatCard({
       </div>
     </div>
   );
+  if (href) return <Link href={href} style={{ textDecoration: "none" }}>{inner}</Link>;
+  return inner;
 }
 
 function IllustrationPlaceholder({
@@ -265,6 +272,21 @@ export default function DashboardPage() {
   const upcoming = cards.filter((c) => !["Delivered", "Given"].includes(c.status));
   const awaitingApproval = cards.filter((c) => c.status === "Ready for approval");
   const disastersAvoided = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+
+  const upcomingEventCount = useMemo(() => {
+    const today = new Date();
+    const cutoff = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+    let count = 0;
+    for (const r of recipients) {
+      for (const event of r.selectedEvents ?? []) {
+        const dateStr = getEventDate(event, r);
+        if (!dateStr) continue;
+        const d = new Date(dateStr);
+        if (d >= today && d <= cutoff) count++;
+      }
+    }
+    return count;
+  }, [recipients]);
   const primaryPreviewDays = recipients[0]?.previewDays ?? null;
   const briefingsNeeded = upcomingBriefings.filter((b) => !b.briefingDoneThisYear);
 
@@ -412,7 +434,7 @@ export default function DashboardPage() {
 
           {/* ── Pending Customer Approvals ────────────────────────────────── */}
           {pendingApprovals.length > 0 && (
-            <div className="mb-6">
+            <div id="approvals" className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <ThumbsUp size={18} style={{ color: RED }} />
                 <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: RED }}>
@@ -644,7 +666,13 @@ export default function DashboardPage() {
 
           {/* ── Stat cards ────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <StatCard label="Upcoming cards"     value={upcoming.length}       icon={CalendarDays} accentColor={BLACK} />
+            <StatCard
+              label="Upcoming cards"
+              value={upcomingEventCount}
+              icon={CalendarDays}
+              accentColor={BLACK}
+              sub={upcomingEventCount > 0 ? "in next 90 days" : undefined}
+            />
             <StatCard label="Recipients covered"  value={recipients.length}     icon={Users}        accentColor={RED} />
             <StatCard
               label="Disasters avoided"
@@ -655,9 +683,11 @@ export default function DashboardPage() {
             />
             <StatCard
               label="Awaiting approval"
-              value={awaitingApproval.length}
+              value={awaitingApproval.length + pendingApprovals.length}
               icon={Clock}
-              accentColor={awaitingApproval.length > 0 ? RED : GRAY}
+              accentColor={(awaitingApproval.length + pendingApprovals.length) > 0 ? RED : GRAY}
+              href={(awaitingApproval.length + pendingApprovals.length) > 0 ? "#approvals" : undefined}
+              sub={(awaitingApproval.length + pendingApprovals.length) > 0 ? "tap to review" : undefined}
             />
           </div>
 
