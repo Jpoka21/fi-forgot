@@ -116,6 +116,7 @@ function Router() {
       </Route>
       <Route path="/try" component={TryPage} />
       <Route path="/demo/:id" component={DemoPreviewPage} />
+      <Route path="/personal" component={LandingPage} />
       <Route path="/business" component={BusinessPage} />
       <Route path="/business-onboarding" component={BusinessOnboardingRoute} />
       <Route component={NotFound} />

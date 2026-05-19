@@ -1,0 +1,159 @@
+Update the homepage and routing so the site supports two separate experiences: Personal and Business.
+
+Important context:
+We are not creating two separate products. This is one website, one brand, and one card sending engine, but with two different user experiences after the visitor chooses their path.
+
+Keep the Dave in the Doghouse brand, humor, colors, and emotional style. Do not make the business side feel corporate or like CRM software.
+
+DESKTOP HOMEPAGE
+
+Update the desktop hero so it communicates one simple umbrella idea:
+
+Headline:
+Real greeting cards on autopilot.
+
+Subheadline:
+We choose, write, and mail thoughtful cards automatically so important people never feel forgotten.
+
+Under the hero copy, show two clear route cards or buttons:
+
+Personal
+Never forget the people you love.
+
+Business
+Stay personal with clients automatically.
+
+The hero should not feel like two separate companies. It should feel like one emotional platform with two paths.
+
+Personal can be slightly more playful and emotional.
+Business should be clean, professional, and relationship focused.
+
+MOBILE HOMEPAGE
+
+Do not show two large route cards inside the mobile hero. It takes up too much space.
+
+On mobile, use this layout:
+
+1. Hero image first
+2. Headline:
+Real greeting cards on autopilot.
+3. Short subheadline:
+We choose, write, and mail thoughtful cards automatically.
+4. One primary CTA button:
+Get Started
+5. Below it, small route links:
+Personal | Business
+
+When someone taps Get Started on mobile, take them to a simple path selection screen or section:
+
+Title:
+Who are you sending cards for?
+
+Option 1:
+Personal
+Never forget the people you love.
+
+Option 2:
+Business
+Stay personal with clients automatically.
+
+ROUTING
+
+Create separate routes or sections:
+
+/personal
+/business
+
+Personal should lead to the existing consumer style experience.
+
+Business should lead to a new business focused page or section.
+
+BUSINESS PAGE CONTENT
+
+Headline:
+Stay personal with clients automatically.
+
+Subheadline:
+Dave helps businesses remember birthdays, anniversaries, thank you moments, referrals, and client milestones with real greeting cards that feel personal, not corporate.
+
+Add example use cases:
+
+Realtors
+Remember closing anniversaries, birthdays, referrals, and past clients.
+
+Insurance Agents
+Stay in touch before renewals, after referrals, and on important dates.
+
+Financial Advisors
+Send thoughtful milestone cards without sounding like a mass email.
+
+Dentists and Local Businesses
+Thank customers, remember birthdays, and keep relationships warm.
+
+BUSINESS ONBOARDING PREVIEW
+
+Add a simple preview section called:
+Start with 5 important clients.
+
+Show these steps:
+
+Step 1:
+Who are you sending cards to?
+Options:
+Clients
+Customers
+Employees
+Leads
+Other
+
+Step 2:
+How should the card be signed?
+Examples:
+Dave
+Dave at ABC Realty
+The ABC Realty Team
+Sarah | Smith Insurance
+
+Step 3:
+What should Dave remember?
+Options:
+Birthdays
+Closing anniversaries
+Customer anniversaries
+Thank you cards
+Referral thank you cards
+Holidays
+Custom dates
+
+Step 4:
+Add a memory
+Example note:
+Helped them buy 123 Main Street. It was their first home and they loved the backyard.
+
+Helper text:
+Dave can turn simple notes into thoughtful card ideas later.
+
+BUSINESS LOGIC MESSAGING
+
+Add a section called:
+Smart, but not reckless.
+
+Text:
+Low risk cards like birthdays, holidays, thank you notes, and home anniversaries can be sent automatically. Sensitive cards, like sympathy or illness related messages, can be reviewed before mailing.
+
+Add another section called:
+AI recommends. You stay in control.
+
+Text:
+Dave can recommend the card and message, but you can approve, edit, or override it before anything goes out.
+
+IMPORTANT DESIGN RULES
+
+Do not remove the current personal version.
+Do not make the homepage cluttered.
+Do not overuse the word AI.
+Use “real greeting cards,” “thoughtful cards,” and “relationship maintenance.”
+Avoid corporate buzzwords like enterprise, pipeline, workflow, or CRM.
+Keep Dave in the Doghouse as the brand mascot.
+The business side should feel like Dave grew up a little, not like a different company.
+Make all mobile sections stacked, clean, and easy to tap.

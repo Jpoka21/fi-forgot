@@ -191,23 +191,22 @@ export default function LandingPage() {
 
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 16, top: 52, maxWidth: "54vw",
+          position: "absolute", left: 16, top: 46, maxWidth: "58vw",
           lineHeight: "normal", zIndex: 2,
         }}>
-          {/* Headline */}
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 6.5vw, 34px)",
+            fontSize: "clamp(24px, 6vw, 32px)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.96,
             textShadow: "0 2px 16px rgba(0,0,0,0.85)",
           }}>
-            GREETING CARDS
+            REAL GREETING CARDS
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 6.5vw, 34px)",
+            fontSize: "clamp(24px, 6vw, 32px)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.96,
@@ -217,73 +216,70 @@ export default function LandingPage() {
             ON AUTOPILOT.
           </div>
 
-          {/* Thin divider */}
-          <div style={{ width: 32, height: 2, background: B.red, borderRadius: 1, marginTop: 10 }} />
+          <div style={{ width: 32, height: 2, background: B.red, borderRadius: 1, marginTop: 9 }} />
 
-          {/* Slogan */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(10.5px, 2.8vw, 13px)",
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.92)",
-            lineHeight: 1.45,
-            textShadow: "0 1px 10px rgba(0,0,0,0.9)",
-            marginTop: 8,
-            letterSpacing: "0.01em",
-          }}>
-            You focus on life.<br />We remember everything.
-          </div>
-
-          {/* Supporting paragraph */}
-          <div style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(12px, 3.2vw, 15px)",
+            fontSize: "clamp(11px, 2.9vw, 13px)",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.82)",
-            lineHeight: 1.65,
+            color: "rgba(255,255,255,0.88)",
+            lineHeight: 1.5,
             textShadow: "0 1px 8px rgba(0,0,0,0.9)",
             marginTop: 8,
           }}>
-            We choose, write, and mail real<br />greeting cards automatically.
+            We choose, write, and mail thoughtful<br />cards automatically.
           </div>
 
-          {/* CTA */}
-          <Link href="/signup" data-testid="link-cta-hitzone"
+          <a href="#choose-path" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
-              marginTop: 22, alignSelf: "flex-start",
+              marginTop: 18, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(13px, 3.64vw, 17px)",
+              fontSize: "clamp(13px, 3.5vw, 16px)",
               letterSpacing: "0.08em",
-              padding: "12px 18px",
+              padding: "11px 18px",
               borderRadius: 5,
               textDecoration: "none",
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
               whiteSpace: "nowrap",
             }}>
-            AUTOMATE BEING THOUGHTFUL →
-          </Link>
+            GET STARTED →
+          </a>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+            <a href="#how-it-works" style={{
+              fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(11px, 2.8vw, 13px)",
+              letterSpacing: "0.1em", color: "rgba(255,255,255,0.7)",
+              textDecoration: "none", textShadow: "0 1px 6px rgba(0,0,0,0.8)",
+            }}>PERSONAL</a>
+            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>·</span>
+            <Link href="/business" style={{
+              fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(11px, 2.8vw, 13px)",
+              letterSpacing: "0.1em", color: "rgba(255,255,255,0.7)",
+              textDecoration: "none", textShadow: "0 1px 6px rgba(0,0,0,0.8)",
+            }}>BUSINESS</Link>
+          </div>
         </div>
 
         {/* Desktop text overlay */}
         <div className="hidden md:flex flex-col" style={{
-          position: "absolute", top: "6%", left: "3.5%", width: "40%",
+          position: "absolute", top: "5%", left: "3.5%", width: "43%",
           lineHeight: "normal",
         }}>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2.6rem, 5.8vw, 5.8rem)",
+            fontSize: "clamp(2rem, 4vw, 4rem)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.95,
             textShadow: "2px 3px 0 #00000088, -1px -1px 0 #00000033",
           }}>
-            GREETING CARDS
+            REAL GREETING CARDS
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2.6rem, 5.8vw, 5.8rem)",
+            fontSize: "clamp(2rem, 4vw, 4rem)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.95,
@@ -292,43 +288,75 @@ export default function LandingPage() {
           }}>
             ON AUTOPILOT.
           </div>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(1rem, 1.8vw, 1.75rem)",
-            color: "rgba(255,255,255,0.88)",
-            letterSpacing: "0.04em",
-            lineHeight: 1.25,
-            textShadow: "1px 1px 8px rgba(0,0,0,0.75)",
-            marginTop: "0.65em",
-          }}>
-            You focus on life. We remember everything.
-          </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(0.8rem, 1.1vw, 1rem)",
+            fontSize: "clamp(0.75rem, 1vw, 0.95rem)",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.75)",
+            color: "rgba(255,255,255,0.72)",
             lineHeight: 1.6,
-            margin: "0.6em 0 0",
+            margin: "0.7em 0 0",
             textShadow: "1px 1px 6px rgba(0,0,0,0.85)",
+            maxWidth: "90%",
           }}>
-            We choose, write, and mail real greeting cards for birthdays,
-            anniversaries, holidays, and every important moment.
+            We choose, write, and mail thoughtful cards automatically so important people never feel forgotten.
           </p>
-          <Link href="/signup" data-testid="link-cta-hitzone"
-            style={{
-              display: "inline-block", marginTop: "1em", alignSelf: "flex-start",
-              background: B.red, color: "#fff",
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(0.85rem, 1.3vw, 1.2rem)",
-              letterSpacing: "0.1em",
-              padding: "0.55em 1.1em",
-              borderRadius: 4,
-              textDecoration: "none",
-              boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.4)`,
-            }}>
-            AUTOMATE BEING THOUGHTFUL →
-          </Link>
+
+          {/* Two path cards */}
+          <div className="flex gap-3" style={{ marginTop: "1em" }} data-testid="link-cta-hitzone">
+            <a
+              href="#how-it-works"
+              style={{
+                flex: 1,
+                background: "rgba(255,255,255,0.12)",
+                border: "1.5px solid rgba(255,255,255,0.22)",
+                backdropFilter: "blur(6px)",
+                borderRadius: 6,
+                padding: "clamp(8px,1.2vw,14px) clamp(10px,1.4vw,16px)",
+                textDecoration: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                transition: "background 0.2s",
+              }}
+            >
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.8rem, 1.1vw, 1rem)", letterSpacing: "0.14em", color: "#fff" }}>
+                PERSONAL
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.65rem, 0.85vw, 0.8rem)", color: "rgba(255,255,255,0.62)", lineHeight: 1.4 }}>
+                Never forget the people you love.
+              </div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.65rem, 0.8vw, 0.75rem)", letterSpacing: "0.1em", color: B.red, marginTop: 4 }}>
+                GET STARTED →
+              </div>
+            </a>
+
+            <Link
+              href="/business"
+              style={{
+                flex: 1,
+                background: "rgba(226,59,46,0.18)",
+                border: `1.5px solid ${B.red}55`,
+                backdropFilter: "blur(6px)",
+                borderRadius: 6,
+                padding: "clamp(8px,1.2vw,14px) clamp(10px,1.4vw,16px)",
+                textDecoration: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                transition: "background 0.2s",
+              }}
+            >
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.8rem, 1.1vw, 1rem)", letterSpacing: "0.14em", color: "#fff" }}>
+                BUSINESS
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.65rem, 0.85vw, 0.8rem)", color: "rgba(255,255,255,0.62)", lineHeight: 1.4 }}>
+                Stay personal with clients automatically.
+              </div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.65rem, 0.8vw, 0.75rem)", letterSpacing: "0.1em", color: B.red, marginTop: 4 }}>
+                LEARN MORE →
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* Bottom label — desktop only */}
@@ -378,43 +406,70 @@ export default function LandingPage() {
       </div>
 
 
-      {/* ── FOR BUSINESS TEASER ──────────────────────────────────────────── */}
-      <section className="py-14 px-6" style={{ background: B.white, borderTop: `1px solid ${B.black}08` }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }} className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-          <div className="flex-1">
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.2em", color: B.red, marginBottom: 8 }}>
-              ALSO FOR BUSINESS
+      {/* ── CHOOSE YOUR PATH ─────────────────────────────────────────────── */}
+      <section id="choose-path" className="py-14 px-6" style={{ background: B.white }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div className="text-center mb-8">
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: B.red, marginBottom: 8 }}>
+              ONE PLATFORM. TWO PATHS.
             </div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", color: B.black, lineHeight: 1, letterSpacing: "0.02em", marginBottom: 12 }}>
-              Also built for businesses that never want clients to feel forgotten.
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", color: B.black, lineHeight: 1, letterSpacing: "0.02em" }}>
+              Who are you sending cards for?
             </h2>
-            <p style={{ fontSize: "0.95rem", color: B.gray, lineHeight: 1.7, maxWidth: 480 }}>
-              Send real greeting cards automatically for client birthdays, home anniversaries, thank you notes, referrals, holidays, and other relationship moments.
-            </p>
           </div>
-          <div className="flex-shrink-0 flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-auto">
-            <div className="flex flex-wrap gap-2 mb-1">
-              {["Realtors", "Insurance Agents", "Financial Advisors", "Local Businesses"].map((v) => (
-                <span
-                  key={v}
-                  style={{
-                    background: B.beige,
-                    border: `1.5px solid ${B.black}10`,
-                    borderRadius: 4,
-                    padding: "4px 10px",
-                    fontSize: "0.78rem",
-                    fontWeight: 600,
-                    color: B.black,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {v}
-                </span>
-              ))}
-            </div>
-            <BrandButton href="/business" variant="primary" size="lg">
-              Use for Business →
-            </BrandButton>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Personal */}
+            <a
+              href="#how-it-works"
+              style={{
+                display: "block",
+                background: B.beige,
+                border: `2px solid ${B.black}12`,
+                borderTop: `4px solid ${B.black}`,
+                borderRadius: 6,
+                padding: "clamp(24px, 4vw, 36px)",
+                textDecoration: "none",
+                transition: "box-shadow 0.2s",
+              }}
+            >
+              <div style={{ fontSize: "2rem", marginBottom: 10 }}>💌</div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.08em", color: B.black, marginBottom: 6 }}>
+                PERSONAL
+              </div>
+              <p style={{ fontSize: "0.95rem", color: B.gray, lineHeight: 1.65, marginBottom: 16 }}>
+                Never forget the people you love. We handle birthdays, anniversaries, and every moment that matters — for your wife, mom, kids, and friends.
+              </p>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.12em", color: B.black }}>
+                SEE HOW IT WORKS →
+              </div>
+            </a>
+
+            {/* Business */}
+            <Link
+              href="/business"
+              style={{
+                display: "block",
+                background: B.beige,
+                border: `2px solid ${B.red}30`,
+                borderTop: `4px solid ${B.red}`,
+                borderRadius: 6,
+                padding: "clamp(24px, 4vw, 36px)",
+                textDecoration: "none",
+                transition: "box-shadow 0.2s",
+              }}
+            >
+              <div style={{ fontSize: "2rem", marginBottom: 10 }}>🤝</div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.08em", color: B.black, marginBottom: 6 }}>
+                BUSINESS
+              </div>
+              <p style={{ fontSize: "0.95rem", color: B.gray, lineHeight: 1.65, marginBottom: 16 }}>
+                Stay personal with clients automatically. Real cards for birthdays, closing anniversaries, referral thank-yous, and every relationship moment.
+              </p>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.12em", color: B.red }}>
+                FOR BUSINESS →
+              </div>
+            </Link>
           </div>
         </div>
       </section>
