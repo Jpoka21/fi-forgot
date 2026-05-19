@@ -20,7 +20,7 @@ function escapeHtml(str: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;");
+    .replace(/'/g, "'");
 }
 
 // ─── Card selection ──────────────────────────────────────────────────────────
@@ -49,13 +49,13 @@ export function pickCard(occasion: string, personality: string, relationship: st
     if (isFunny) return {
       bgColor: "#111827", titleColor: "#f9fafb", accentColor: "#E23B2E",
       borderColor: "#374151", seriesLabel: "BIRTHDAY COLLECTION",
-      title: "The &#x27;Happy Birthday, You&#x27;re Still My Favorite&#x27; Card",
+      title: "The 'Happy Birthday, You're Still My Favorite' Card",
       whyChosen: `${personality.split(" ")[0]} people respond to humor over sentimentality — so we went dry and warm instead of flowery. This card gets a laugh without sacrificing the heart behind it.`,
     };
     return {
       bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
       borderColor: "#e0d5c0", seriesLabel: "BIRTHDAY COLLECTION",
-      title: "The &#x27;You Deserve to Feel This Celebrated&#x27; Card",
+      title: "The 'You Deserve to Feel This Celebrated' Card",
       whyChosen: `For a ${personality.split(" ")[0].toLowerCase()} ${relationship.toLowerCase()}, we pulled from our warm birthday collection and avoided the generic "have a great day" territory entirely. This one lands.`,
     };
   }
@@ -64,7 +64,7 @@ export function pickCard(occasion: string, personality: string, relationship: st
     return {
       bgColor: "#1a1f2e", titleColor: "#e0e8f8", accentColor: "#6a9fd8",
       borderColor: "#2d3a52", seriesLabel: "MILESTONE COLLECTION",
-      title: "The &#x27;Look How Far You&#x27;ve Come&#x27; Card",
+      title: "The 'Look How Far You've Come' Card",
       whyChosen: `Work anniversaries are easy to forget and meaningful to receive. We picked something that acknowledges the milestone without being corporate — because nobody wants to feel like their job sent them a card.`,
     };
   }
@@ -73,26 +73,26 @@ export function pickCard(occasion: string, personality: string, relationship: st
     if (isRomantic && isFunny) return {
       bgColor: "#2d1b2e", titleColor: "#f0d4e8", accentColor: "#c4966a",
       borderColor: "#4a2d4a", seriesLabel: "ANNIVERSARY COLLECTION",
-      title: "The &#x27;Still Here, Still Choosing You&#x27; Card",
+      title: "The 'Still Here, Still Choosing You' Card",
       whyChosen: `We balanced the romance with a little self-awareness. Anniversaries don't have to be serious to be meaningful — and this card proves it.`,
     };
     if (isRomantic) return {
       bgColor: "#1a0a0f", titleColor: "#f2d4d7", accentColor: "#c4966a",
       borderColor: "#3d1a24", seriesLabel: "ANNIVERSARY COLLECTION",
-      title: "The &#x27;I&#x27;d Do It All Again&#x27; Card",
+      title: "The 'I'd Do It All Again' Card",
       whyChosen: `For a ${personality.split(" ")[0].toLowerCase()} ${relationship.toLowerCase()} on an anniversary, we went deep instead of decorative. This card says something real.`,
     };
     // Friend, sibling, or other non-romantic anniversaries
     if (isFunny) return {
       bgColor: "#1a1f2e", titleColor: "#e0e8f8", accentColor: "#6a9fd8",
       borderColor: "#2d3a52", seriesLabel: "MILESTONE COLLECTION",
-      title: "The &#x27;Another Year. Still the Right Call.&#x27; Card",
+      title: "The 'Another Year. Still the Right Call.' Card",
       whyChosen: `Non-romantic anniversaries are underserved by the card industry. We picked something that marks the milestone without reaching for romance — honest and warm instead.`,
     };
     return {
       bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
       borderColor: "#e0d5c0", seriesLabel: "MILESTONE COLLECTION",
-      title: "The &#x27;Some Things Just Get Better the Longer They Last&#x27; Card",
+      title: "The 'Some Things Just Get Better the Longer They Last' Card",
       whyChosen: `The best anniversary cards work for any relationship — they mark time without being sentimental about it. This one lands for a ${relationship.toLowerCase()} without feeling like it was written for someone else.`,
     };
   }
@@ -101,13 +101,13 @@ export function pickCard(occasion: string, personality: string, relationship: st
     if (isFunny) return {
       bgColor: "#2e0a10", titleColor: "#ffd6d8", accentColor: "#E23B2E",
       borderColor: "#4a1a20", seriesLabel: "VALENTINE'S COLLECTION",
-      title: "The &#x27;I Like You More Than Most People&#x27; Card",
+      title: "The 'I Like You More Than Most People' Card",
       whyChosen: `Valentine's cards are either over-the-top or painfully generic. For a ${personality.toLowerCase()} ${relationship.toLowerCase()}, we went with something that means it without performing it.`,
     };
     return {
       bgColor: "#1a0508", titleColor: "#fce4e6", accentColor: "#e88a90",
       borderColor: "#3d1015", seriesLabel: "VALENTINE'S COLLECTION",
-      title: "The &#x27;You&#x27;re the Reason I Get It&#x27; Card",
+      title: "The 'You're the Reason I Get It' Card",
       whyChosen: `Valentine's Day works best when it's personal, not performative. We avoided the roses-are-red territory and picked something that actually says something.`,
     };
   }
@@ -116,33 +116,33 @@ export function pickCard(occasion: string, personality: string, relationship: st
     if (isSpouse && isFunny) return {
       bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
       borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
-      title: "The &#x27;Our Kids Have No Idea How Lucky They Are (But I Do)&#x27; Card",
+      title: "The 'Our Kids Have No Idea How Lucky They Are (But I Do)' Card",
       whyChosen: `When a spouse sends a Mother's Day card, the angle is completely different — it's about what you witness every day, not what was done for you. This card hits that note perfectly.`,
     };
     if (isSpouse) return {
       bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
       borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
-      title: "The &#x27;Watching You With Our Kids Is One of My Favorite Things&#x27; Card",
+      title: "The 'Watching You With Our Kids Is One of My Favorite Things' Card",
       whyChosen: `A Mother's Day card from a spouse lands differently than one from a child. This one focuses on what you see every day — which is more specific, more personal, and more meaningful.`,
     };
     // Child sending to their own parent
     if (isParentRel && isFunny) return {
       bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
       borderColor: "#e0d5c0", seriesLabel: "MOTHER'S DAY COLLECTION",
-      title: "The &#x27;You Raised Me, So This Is Your Fault&#x27; Card",
+      title: "The 'You Raised Me, So This Is Your Fault' Card",
       whyChosen: `Mother's Day cards are notoriously saccharine. A little humor with real heart lands better than a poem. We went warm and funny — which respects her more than a generic "World's Best Mom."`,
     };
     if (isParentRel) return {
       bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
       borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
-      title: "The &#x27;Everything I Know About Showing Up, I Learned From You&#x27; Card",
+      title: "The 'Everything I Know About Showing Up, I Learned From You' Card",
       whyChosen: `The best Mother's Day cards give credit, not just gratitude. This one names what she actually did — not just that she's "special."`,
     };
     // Friend, sibling, coworker — sending to someone who happens to be a mom
     return {
       bgColor: "#fdf4f8", titleColor: "#3d1a2a", accentColor: "#c46a8a",
       borderColor: "#f0d8e4", seriesLabel: "MOTHER'S DAY COLLECTION",
-      title: `The &#x27;You Make It Look Effortless. It Clearly Isn&#x27;t.&#x27; Card`,
+      title: `The 'You Make It Look Effortless. It Clearly Isn't.' Card`,
       whyChosen: `The best Mother's Day cards acknowledge the work, not just the role. For a ${relationship.toLowerCase()}, we went with admiration over sentimentality — which is more honest and lands better.`,
     };
   }
@@ -151,33 +151,33 @@ export function pickCard(occasion: string, personality: string, relationship: st
     if (isSpouse && isFunny) return {
       bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
       borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
-      title: "The &#x27;Our Kids Are Lucky to Have You (Even When You&#x27;re Explaining Things)&#x27; Card",
+      title: "The 'Our Kids Are Lucky to Have You (Even When You're Explaining Things)' Card",
       whyChosen: `A Father's Day card from a spouse is about what you witness — not what was done for you. This card captures that angle with warmth and a little humor.`,
     };
     if (isSpouse) return {
       bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
       borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
-      title: "The &#x27;Watching You Be a Dad Is Something I&#x27;m Grateful For Every Day&#x27; Card",
+      title: "The 'Watching You Be a Dad Is Something I'm Grateful For Every Day' Card",
       whyChosen: `When a spouse sends a Father's Day card, the most meaningful thing they can say is what they observe. This card speaks to that — no clichés, just what's real.`,
     };
     // Child sending to their own parent
     if (isParentRel && isFunny) return {
       bgColor: "#111827", titleColor: "#f9fafb", accentColor: "#6a9fd8",
       borderColor: "#374151", seriesLabel: "FATHER'S DAY COLLECTION",
-      title: "The &#x27;You Taught Me Everything. Mostly by Example. Sometimes the Wrong Kind.&#x27; Card",
+      title: "The 'You Taught Me Everything. Mostly by Example. Sometimes the Wrong Kind.' Card",
       whyChosen: `Dads appreciate directness and humor. Sentimental Father's Day cards often miss — this one lands because it's honest and specific rather than generic and flowery.`,
     };
     if (isParentRel) return {
       bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
       borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
-      title: "The &#x27;You Showed Up. That&#x27;s the Whole Thing.&#x27; Card",
+      title: "The 'You Showed Up. That's the Whole Thing.' Card",
       whyChosen: `The most meaningful thing you can tell a father is that his presence counted. We skipped the clichés and wrote something that actually says it.`,
     };
     // Friend, sibling, coworker — sending to someone who is a dad
     return {
       bgColor: "#0d1b2a", titleColor: "#d4e4f4", accentColor: "#6a9fd8",
       borderColor: "#1a2d42", seriesLabel: "FATHER'S DAY COLLECTION",
-      title: "The &#x27;What You Do for the People Around You Matters More Than You Know&#x27; Card",
+      title: "The 'What You Do for the People Around You Matters More Than You Know' Card",
       whyChosen: `For a ${relationship.toLowerCase()} sending a Father's Day card, admiration lands better than sentiment. We picked something that acknowledges the role without making it feel like a Hallmark script.`,
     };
   }
@@ -186,13 +186,13 @@ export function pickCard(occasion: string, personality: string, relationship: st
     if (isFunny) return {
       bgColor: "#1a2e1a", titleColor: "#d4edda", accentColor: "#6abf69",
       borderColor: "#2d4a2d", seriesLabel: `${occasion.toUpperCase()} COLLECTION`,
-      title: "The &#x27;This Season, I Actually Remembered You&#x27; Card",
+      title: "The 'This Season, I Actually Remembered You' Card",
       whyChosen: `Holiday cards are notoriously generic. For a ${personality.toLowerCase()} ${relationship.toLowerCase()}, we chose something with a little self-awareness that makes it feel personal instead of broadcast.`,
     };
     return {
       bgColor: "#0f1f0f", titleColor: "#c8e6c8", accentColor: "#81c784",
       borderColor: "#1a3a1a", seriesLabel: `${occasion.toUpperCase()} COLLECTION`,
-      title: "The &#x27;This Season, Especially You&#x27; Card",
+      title: "The 'This Season, Especially You' Card",
       whyChosen: `Holiday cards work best when they single someone out instead of broadcasting to everyone. For your ${relationship.toLowerCase()}, we made this one feel personal even in a crowded season.`,
     };
   }
@@ -201,7 +201,7 @@ export function pickCard(occasion: string, personality: string, relationship: st
     return {
       bgColor: "#1a1f0a", titleColor: "#e8f4c8", accentColor: "#a0c84a",
       borderColor: "#2d3a14", seriesLabel: "MILESTONE COLLECTION",
-      title: "The &#x27;You Did the Hard Part. Now the Real Stuff Starts.&#x27; Card",
+      title: "The 'You Did the Hard Part. Now the Real Stuff Starts.' Card",
       whyChosen: `Graduation cards are either too celebratory or too advice-heavy. We picked something that acknowledges the accomplishment while looking forward — honest and encouraging without being preachy.`,
     };
   }
@@ -210,7 +210,7 @@ export function pickCard(occasion: string, personality: string, relationship: st
     return {
       bgColor: "#f0f8ff", titleColor: "#1a2e3d", accentColor: "#5a9abf",
       borderColor: "#d4e8f4", seriesLabel: "CARE COLLECTION",
-      title: "The &#x27;Just Thinking About You&#x27; Card",
+      title: "The 'Just Thinking About You' Card",
       whyChosen: `Get well cards often feel obligatory. We picked something warm and human — the kind of card that says "I actually thought about you today" rather than "I'm checking a box."`,
     };
   }
@@ -219,13 +219,13 @@ export function pickCard(occasion: string, personality: string, relationship: st
     if (isFunny) return {
       bgColor: "#1f1a00", titleColor: "#fef3c7", accentColor: "#d4a020",
       borderColor: "#3d3400", seriesLabel: "MILESTONE COLLECTION",
-      title: "The &#x27;I Knew You Would. I Just Didn&#x27;t Say It Out Loud.&#x27; Card",
+      title: "The 'I Knew You Would. I Just Didn't Say It Out Loud.' Card",
       whyChosen: `Congratulations cards land better when they feel like they come from a person, not a Hallmark aisle. We went specific and honest — which is what makes it memorable.`,
     };
     return {
       bgColor: "#0a1a0a", titleColor: "#d4f4d4", accentColor: "#4abf4a",
       borderColor: "#143d14", seriesLabel: "MILESTONE COLLECTION",
-      title: "The &#x27;You Earned This. All of It.&#x27; Card",
+      title: "The 'You Earned This. All of It.' Card",
       whyChosen: `The best congratulations cards give credit where it's actually due. We skipped the confetti-and-balloons tone and wrote something that feels earned.`,
     };
   }
@@ -234,13 +234,13 @@ export function pickCard(occasion: string, personality: string, relationship: st
   if (isFunny) return {
     bgColor: "#1e2d1e", titleColor: "#d4edda", accentColor: "#6abf69",
     borderColor: "#2d4a2d", seriesLabel: "JUST BECAUSE COLLECTION",
-    title: "The &#x27;No Reason, Just Wanted You to Know&#x27; Card",
+    title: "The 'No Reason, Just Wanted You to Know' Card",
     whyChosen: `"Just because" cards are the hardest to pull off without feeling random. For a ${personality.toLowerCase()} ${relationship.toLowerCase()}, we went light and genuine — no occasion needed.`,
   };
   return {
     bgColor: "#f5ede0", titleColor: "#3d2b1f", accentColor: "#c4966a",
     borderColor: "#e0d5c0", seriesLabel: "JUST BECAUSE COLLECTION",
-    title: "The &#x27;I Was Thinking About You&#x27; Card",
+    title: "The 'I Was Thinking About You' Card",
     whyChosen: `Sometimes the most meaningful card has no occasion at all. For your ${relationship.toLowerCase()}, we chose something that feels intentional — not like you just remembered to send something.`,
   };
 }
