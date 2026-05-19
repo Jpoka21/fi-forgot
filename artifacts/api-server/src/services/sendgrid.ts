@@ -8,7 +8,15 @@ import {
   hasCachedClassification,
   getCachedClassification,
   warmClassificationCache,
+  startPeriodicRescan,
 } from "./card-classifier";
+
+// Start the 24-hour rescan cycle on module load.
+// Waits 60 s after startup before the first scan so the server is fully settled.
+startPeriodicRescan(async () => {
+  const all = await listHandwryttenCards();
+  return all.filter(c => c.imageUrl && c.imageUrl.startsWith("http") && isSafeCard(c));
+});
 
 function getResend(): Resend {
   const apiKey = process.env["RESEND_API_KEY"];

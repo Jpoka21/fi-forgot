@@ -150,45 +150,99 @@ export function hasCachedClassification(imageUrl: string): boolean {
   return cache.has(imageUrl);
 }
 
-let warmupRunning = false;
+const STALE_AFTER_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const RESCAN_INTERVAL_MS = 24 * 60 * 60 * 1000;   // 24 hours
 
-export async function warmClassificationCache(
-  cards: Array<{ imageUrl?: string | null }>
-): Promise<void> {
-  if (warmupRunning) return;
-  warmupRunning = true;
+let scanRunning = false;
 
-  const uncached = cards.filter(
-    c => c.imageUrl && c.imageUrl.startsWith("http") && !cache.has(c.imageUrl)
+async function runScan(cards: Array<{ imageUrl?: string | null }>, reason: string): Promise<void> {
+  if (scanRunning) return;
+  scanRunning = true;
+
+  const now = Date.now();
+  const activeUrls = new Set(
+    cards.filter(c => c.imageUrl?.startsWith("http")).map(c => c.imageUrl!)
   );
 
-  if (uncached.length === 0) {
-    logger.info("card-classifier: all cards already classified");
-    warmupRunning = false;
+  // ── 1. Prune removed cards ─────────────────────────────────────────────────
+  let pruned = 0;
+  for (const url of cache.keys()) {
+    if (!activeUrls.has(url)) {
+      cache.delete(url);
+      pruned++;
+    }
+  }
+  if (pruned > 0) {
+    logger.info({ pruned }, "card-classifier: pruned removed cards from cache");
+    scheduleSave();
+  }
+
+  // ── 2. Find cards that need (re-)classification ────────────────────────────
+  const toProcess = [...activeUrls].filter(url => {
+    const cached = cache.get(url);
+    return !cached || now - cached.classifiedAt > STALE_AFTER_MS;
+  });
+
+  if (toProcess.length === 0) {
+    logger.info({ reason }, "card-classifier: catalog up-to-date, nothing to classify");
+    scanRunning = false;
     return;
   }
 
-  logger.info({ total: uncached.length }, "card-classifier: starting background warmup");
+  logger.info({ total: toProcess.length, reason }, "card-classifier: scan started");
 
   const CONCURRENCY = 3;
   let i = 0;
 
   async function worker(): Promise<void> {
-    while (i < uncached.length) {
-      const card = uncached[i++];
-      if (!card.imageUrl) continue;
-      await classifyCard(card.imageUrl);
+    while (i < toProcess.length) {
+      const url = toProcess[i++];
+      // Force re-classification by removing from cache first (for stale entries)
+      if (cache.has(url)) cache.delete(url);
+      await classifyCard(url);
       await new Promise(r => setTimeout(r, 200));
     }
   }
 
   try {
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-    logger.info({ classified: uncached.length }, "card-classifier: warmup complete");
+    logger.info({ classified: toProcess.length, reason }, "card-classifier: scan complete");
   } catch (err) {
-    logger.warn({ err }, "card-classifier: warmup encountered errors");
+    logger.warn({ err }, "card-classifier: scan encountered errors");
   }
-  warmupRunning = false;
+  scanRunning = false;
+}
+
+/** Fire-and-forget: classify any uncached cards now, then schedule a full rescan every 24 h. */
+export function warmClassificationCache(cards: Array<{ imageUrl?: string | null }>): void {
+  void runScan(cards, "warmup");
+}
+
+let rescanTimer: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Call once on startup with a function that fetches the live card catalog.
+ * Runs a full rescan immediately, then every 24 h — picking up new cards,
+ * pruning removed ones, and refreshing any classification older than 30 days.
+ */
+export function startPeriodicRescan(
+  fetchCards: () => Promise<Array<{ imageUrl?: string | null }>>
+): void {
+  if (rescanTimer) return; // already scheduled
+
+  async function runWithFetch(reason: string) {
+    try {
+      const cards = await fetchCards();
+      await runScan(cards, reason);
+    } catch (err) {
+      logger.warn({ err }, "card-classifier: periodic rescan failed to fetch cards");
+    }
+  }
+
+  // First rescan runs after 60 s (let the server settle) then every 24 h
+  setTimeout(() => void runWithFetch("scheduled-initial"), 60_000);
+  rescanTimer = setInterval(() => void runWithFetch("scheduled-24h"), RESCAN_INTERVAL_MS);
+  logger.info("card-classifier: periodic rescan scheduled (every 24 h)");
 }
 
 loadCache();
