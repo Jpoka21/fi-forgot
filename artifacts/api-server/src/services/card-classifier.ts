@@ -150,8 +150,10 @@ export function hasCachedClassification(imageUrl: string): boolean {
   return cache.has(imageUrl);
 }
 
-const STALE_AFTER_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-const RESCAN_INTERVAL_MS = 24 * 60 * 60 * 1000;   // 24 hours
+// Cards are physical products — their images don't change, so 90 days is plenty.
+// Weekly scan is frequent enough to pick up any new cards Handwrytten adds.
+const STALE_AFTER_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
+const RESCAN_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days (weekly)
 
 let scanRunning = false;
 
