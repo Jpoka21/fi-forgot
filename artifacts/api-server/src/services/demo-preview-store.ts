@@ -19,6 +19,7 @@ export interface DemoPreviewData {
   };
   message: string;
   cardImageUrl: string | null;
+  cardImageUrls: string[];
   checkinHtml: string;
   createdAt: number;
   expiresAt: number;

@@ -20,10 +20,11 @@ interface DemoPreview {
   card: CardInfo;
   message: string;
   cardImageUrl: string | null;
+  cardImageUrls: string[];
   checkinHtml: string;
 }
 
-const label: React.CSSProperties = {
+const sectionLabel: React.CSSProperties = {
   fontSize: "0.65rem",
   color: "#888",
   textTransform: "uppercase",
@@ -36,7 +37,7 @@ const label: React.CSSProperties = {
   display: "block",
 };
 
-const card: React.CSSProperties = {
+const cardBox: React.CSSProperties = {
   background: "#fff",
   borderRadius: 10,
   border: "1px solid #e0d4c0",
@@ -54,11 +55,22 @@ export default function DemoPreviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showCardPicker, setShowCardPicker] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(false);
+  const [messageText, setMessageText] = useState("");
+
   useEffect(() => {
     if (!id) { setError(true); setLoading(false); return; }
     fetch(`/api/demo-preview/${id}`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(d => { setData(d as DemoPreview); setLoading(false); })
+      .then(d => {
+        const preview = d as DemoPreview;
+        setData(preview);
+        setSelectedImage(preview.cardImageUrl);
+        setMessageText(preview.message);
+        setLoading(false);
+      })
       .catch(() => { setError(true); setLoading(false); });
   }, [id]);
 
@@ -80,8 +92,9 @@ export default function DemoPreviewPage() {
     </div>
   );
 
-  const { card: cardData, message, cardImageUrl, checkinHtml, recipientName, relationship, occasion, personality } = data;
+  const { card: cardData, checkinHtml, recipientName, relationship, occasion, personality } = data;
   const occasionLabel = occasion.replace("Upcoming ", "").toLowerCase();
+  const allImages = data.cardImageUrls ?? (selectedImage ? [selectedImage] : []);
 
   return (
     <div style={{ background: "#F2E6D3", minHeight: "100svh" }}>
@@ -107,7 +120,7 @@ export default function DemoPreviewPage() {
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "28px 16px 80px" }}>
 
         {/* Intro */}
-        <div style={{ ...card, ...cardPad, marginBottom: 14 }}>
+        <div style={{ ...cardBox, ...cardPad, marginBottom: 14 }}>
           <p style={{ margin: "0 0 14px", fontSize: "0.95rem", color: "#444", lineHeight: 1.7, fontFamily: "'Inter', sans-serif" }}>
             Based on what you told us, we built a sample {occasionLabel} card for{" "}
             <strong style={{ color: "#111" }}>{recipientName}</strong>, your {relationship.toLowerCase()}. Here's exactly what we made — and how we made it.
@@ -120,13 +133,14 @@ export default function DemoPreviewPage() {
         </div>
 
         {/* The Card */}
-        <div style={card}>
+        <div style={cardBox}>
           <div style={{ padding: "16px 22px 0" }}>
-            <span style={label}>① The Card We Chose</span>
+            <span style={sectionLabel}>① The Card We Chose</span>
           </div>
-          {cardImageUrl ? (
+
+          {selectedImage ? (
             <img
-              src={cardImageUrl}
+              src={selectedImage}
               alt="Card design"
               style={{ display: "block", width: "100%", lineHeight: 0 }}
             />
@@ -135,6 +149,7 @@ export default function DemoPreviewPage() {
               <div style={{ fontSize: "3rem", color: cardData.accentColor }}>✉</div>
             </div>
           )}
+
           <div style={{ background: cardData.bgColor, padding: "16px 22px" }}>
             <div style={{ fontSize: "0.6rem", color: cardData.accentColor, textTransform: "uppercase", letterSpacing: "2px", fontWeight: "bold", fontFamily: "'Inter', sans-serif", marginBottom: 4 }}>
               {cardData.seriesLabel}
@@ -143,18 +158,122 @@ export default function DemoPreviewPage() {
               {cardData.title}
             </div>
           </div>
+
+          {/* Change card button */}
+          {allImages.length > 1 && (
+            <div style={{ padding: "12px 22px", borderTop: "1px solid #f0e8d8" }}>
+              <button
+                onClick={() => setShowCardPicker(p => !p)}
+                style={{
+                  background: "none",
+                  border: "1px solid #c4966a",
+                  borderRadius: 6,
+                  padding: "8px 16px",
+                  fontSize: "0.72rem",
+                  fontFamily: "'Inter', sans-serif",
+                  color: "#7a5c3a",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  letterSpacing: "0.03em",
+                }}
+              >
+                {showCardPicker ? "Hide options" : `Browse ${allImages.length - 1} other card${allImages.length > 2 ? "s" : ""} →`}
+              </button>
+            </div>
+          )}
+
+          {/* Card picker grid */}
+          {showCardPicker && (
+            <div style={{ padding: "0 22px 18px" }}>
+              <p style={{ margin: "0 0 10px", fontSize: "0.72rem", color: "#888", fontFamily: "'Inter', sans-serif" }}>
+                Tap a card to swap it in:
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                {allImages.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setSelectedImage(url); setShowCardPicker(false); }}
+                    style={{
+                      padding: 0,
+                      border: url === selectedImage ? `3px solid ${B.red}` : "3px solid transparent",
+                      borderRadius: 6,
+                      overflow: "hidden",
+                      cursor: "pointer",
+                      background: "none",
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt={`Card option ${i + 1}`}
+                      style={{ display: "block", width: "100%", aspectRatio: "3/4", objectFit: "cover" }}
+                    />
+                    {url === selectedImage && (
+                      <div style={{
+                        position: "absolute", top: 4, right: 4,
+                        background: B.red, color: "#fff", borderRadius: "50%",
+                        width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "0.65rem", fontWeight: "bold",
+                      }}>✓</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* The Message */}
-        <div style={{ ...card, ...cardPad }}>
-          <span style={label}>What we'll write inside the card</span>
+        <div style={{ ...cardBox, ...cardPad }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 14, marginBottom: 14, borderBottom: "2px solid #f0e8d8" }}>
+            <span style={{ ...sectionLabel, paddingBottom: 0, marginBottom: 0, borderBottom: "none" }}>What we'll write inside the card</span>
+            <button
+              onClick={() => setEditingMessage(e => !e)}
+              style={{
+                background: "none",
+                border: "1px solid #c4966a",
+                borderRadius: 6,
+                padding: "5px 12px",
+                fontSize: "0.68rem",
+                fontFamily: "'Inter', sans-serif",
+                color: "#7a5c3a",
+                fontWeight: 600,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {editingMessage ? "Done editing" : "Edit message"}
+            </button>
+          </div>
+
           <div style={{ background: "#fffdf8", border: "1px solid #e0d4c0", borderLeft: "4px solid #c4966a", borderRadius: "0 8px 8px 0", padding: "18px 22px" }}>
             <div style={{ fontSize: "0.65rem", color: "#888", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'Inter', sans-serif", marginBottom: 10, fontWeight: "bold" }}>
               Handwritten inside the card
             </div>
-            <div style={{ fontSize: "0.95rem", color: "#1a1a1a", lineHeight: 2, whiteSpace: "pre-line", fontFamily: "Georgia, serif" }}>
-              {message}
-            </div>
+            {editingMessage ? (
+              <textarea
+                value={messageText}
+                onChange={e => setMessageText(e.target.value)}
+                style={{
+                  width: "100%",
+                  minHeight: 160,
+                  fontSize: "0.95rem",
+                  color: "#1a1a1a",
+                  lineHeight: 2,
+                  fontFamily: "Georgia, serif",
+                  border: "1px solid #c4966a",
+                  borderRadius: 6,
+                  padding: "10px 12px",
+                  background: "#fff",
+                  resize: "vertical",
+                  boxSizing: "border-box",
+                }}
+              />
+            ) : (
+              <div style={{ fontSize: "0.95rem", color: "#1a1a1a", lineHeight: 2, whiteSpace: "pre-line", fontFamily: "Georgia, serif" }}>
+                {messageText}
+              </div>
+            )}
           </div>
           <p style={{ margin: "10px 0 0", fontSize: "0.7rem", color: "#b0a090", fontFamily: "'Inter', sans-serif", textAlign: "center" }}>
             The real card is printed on thick card stock and mailed in a hand-addressed envelope.
@@ -162,8 +281,8 @@ export default function DemoPreviewPage() {
         </div>
 
         {/* Why We Chose This */}
-        <div style={{ ...card, ...cardPad }}>
-          <span style={label}>② Why We Chose This</span>
+        <div style={{ ...cardBox, ...cardPad }}>
+          <span style={sectionLabel}>② Why We Chose This</span>
           <div style={{ background: "#f8f3eb", borderRadius: 8, border: "1px solid #e8dcc8", padding: "16px 18px" }}>
             <table style={{ marginBottom: 10, borderCollapse: "collapse" }}>
               <tbody>
@@ -182,8 +301,8 @@ export default function DemoPreviewPage() {
         </div>
 
         {/* Pre-occasion check-in */}
-        <div style={{ ...card, ...cardPad }}>
-          <span style={label}>③ We Reach Out Before the Date</span>
+        <div style={{ ...cardBox, ...cardPad }}>
+          <span style={sectionLabel}>③ We Reach Out Before the Date</span>
           <p style={{ margin: "0 0 12px", fontSize: "0.8rem", color: "#555", lineHeight: 1.7, fontFamily: "'Inter', sans-serif" }}>
             Two weeks before each occasion, you'll get a short email with 2 targeted questions — so the card always feels current, not like a copy-paste from last year.
           </p>

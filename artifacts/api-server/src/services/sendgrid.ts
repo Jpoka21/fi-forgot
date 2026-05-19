@@ -444,35 +444,49 @@ export function mockCheckinQuestions(occasion: string, personality: string, name
 
 // ─── Handwrytten card image lookup ────────────────────────────────────────────
 
-export async function fetchCardImageForOccasion(occasion: string): Promise<string | null> {
+const OCCASION_KEYWORDS: Record<string, string[]> = {
+  "Birthday":         ["birthday", "bday", "candle", "cake", "blow out", "balloons of joy", "birthday bloom", "birthday wish", "classy birthday", "birthday candle"],
+  "Anniversary":      ["anniversary", "years together", "a slice of forever", "built with love", "love story", "forever"],
+  "Valentine's Day":  ["valentine", "sweetheart", "romance", "cupid", "xoxo"],
+  "Mother's Day":     ["mother", "mom", "mama", "mum", "garden of love", "bloom, baby"],
+  "Father's Day":     ["father", "dad", "papa", "daddio", "daddy", "built for dad", "best dad", "awesome dad", "cheerio daddio", "best dog dad"],
+  "Christmas":        ["christmas", "merry", "santa", "reindeer", "mistletoe", "noel", "december", "holiday cheer", "winter wonder"],
+  "Hanukkah":         ["hanukkah", "chanukah", "dreidel", "menorah"],
+  "Thanksgiving":     ["thanksgiving", "thankful", "grateful", "harvest", "pumpkin", "turkey", "fall", "autumn", "cloud nine grateful", "blooming thanks", "botanical thanks", "grateful"],
+  "Easter":           ["easter", "easter bunny", "buzzing for spring", "april showers", "spring bloom"],
+  "New Year's":       ["new year", "nye", "resolution", "2026", "2025"],
+  "Graduation":       ["graduate", "graduation", "diploma", "cap, gown", "cap it off", "class act", "block party graduation", "congrats diploma", "con-grad", "climbing to new heights", "chevron of success"],
+  "Work Anniversary": ["work anniversary", "dedication", "contributions", "career", "another year of", "celebrate.*year", "anniversary.*work", "years of", "amazing employee", "best employee", "celebrate.*dedication", "building success", "collaborate and celebrate", "commemorating"],
+  "Get Well Soon":    ["get well", "feel better", "recovery", "healing", "brighter days", "across the rainbow"],
+  "Congratulations":  ["congrats", "congratulation", "success", "achievement", "bravo", "applause", "celebrate"],
+  "Just Because":     ["thinking of you", "just because", "hello", "hi there", "miss you", "thank you", "merci", "thanks"],
+};
+
+function cardMatchesOccasion(cardName: string, occasion: string): boolean {
+  const name = cardName.toLowerCase();
+  const keywords = OCCASION_KEYWORDS[occasion] ?? [];
+  return keywords.some(kw => name.includes(kw));
+}
+
+export async function fetchMultipleCardImagesForOccasion(occasion: string, limit = 6): Promise<string[]> {
   try {
-    const category =
-      occasion === "Birthday" ? "Birthday"
-      : occasion === "Work Anniversary" ? "Work Anniversary"
-      : occasion === "Anniversary" ? "Anniversary"
-      : occasion === "Valentine's Day" ? "Valentine"
-      : occasion === "Mother's Day" ? "Mother"
-      : occasion === "Father's Day" ? "Father"
-      : occasion === "Christmas" || occasion === "Hanukkah" || occasion === "Thanksgiving" || occasion === "Easter" || occasion === "New Year's" ? "Holiday"
-      : occasion === "Graduation" ? "Graduation"
-      : occasion === "Get Well Soon" ? "Get Well"
-      : occasion === "Congratulations" ? "Congratulations"
-      : undefined;
-    const cards = await listHandwryttenCards(category);
-    // Fall back to any occasion if the specific category returned nothing with an image
-    const withImage = cards.filter(c => c.imageUrl && c.imageUrl.startsWith("http"));
-    if (withImage.length > 0) return withImage[0]!.imageUrl!;
-    // Try without category filter
-    if (category) {
-      const all = await listHandwryttenCards();
-      const anyWithImage = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http"));
-      return anyWithImage[0]?.imageUrl ?? null;
-    }
-    return null;
+    const all = await listHandwryttenCards();
+    const withImage = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http"));
+    const matched = withImage.filter(c => cardMatchesOccasion(String(c.name), occasion));
+    if (matched.length > 0) return matched.slice(0, limit).map(c => c.imageUrl!);
+    // If nothing matched, return a safe general set — skip obvious wedding/baby cards
+    const skipWords = ["wedding", "bride", "groom", "baby", "newborn", "baptism", "pet", "dog", "cat", "rainbow bridge"];
+    const safe = withImage.filter(c => !skipWords.some(w => String(c.name).toLowerCase().includes(w)));
+    return safe.slice(0, limit).map(c => c.imageUrl!);
   } catch (err) {
-    logger.warn({ err }, "Could not fetch Handwrytten card image for demo email");
-    return null;
+    logger.warn({ err }, "Could not fetch Handwrytten card images for demo preview");
+    return [];
   }
+}
+
+export async function fetchCardImageForOccasion(occasion: string): Promise<string | null> {
+  const urls = await fetchMultipleCardImagesForOccasion(occasion, 1);
+  return urls[0] ?? null;
 }
 
 // ─── Approval reminder email ──────────────────────────────────────────────────

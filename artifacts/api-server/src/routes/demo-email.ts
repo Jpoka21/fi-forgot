@@ -5,7 +5,7 @@ import {
   pickCard,
   writeMessage,
   mockCheckinQuestions,
-  fetchCardImageForOccasion,
+  fetchMultipleCardImagesForOccasion,
 } from "../services/sendgrid";
 import { storeDemoPreview } from "../services/demo-preview-store";
 import { logger } from "../lib/logger";
@@ -58,7 +58,8 @@ router.post("/demo-email", async (req, res) => {
   const card = pickCard(safeOccasion, safePersonality, safeRelationship);
   const message = writeMessage(safeName, safeRelationship, safeOccasion, safePersonality);
   const checkinHtml = mockCheckinQuestions(safeOccasion, safePersonality, safeName);
-  const cardImageUrl = await fetchCardImageForOccasion(safeOccasion);
+  const cardImageUrls = await fetchMultipleCardImagesForOccasion(safeOccasion, 6);
+  const cardImageUrl = cardImageUrls[0] ?? null;
 
   // Store preview and build its URL (7-day TTL in memory)
   const previewId = storeDemoPreview({
@@ -69,6 +70,7 @@ router.post("/demo-email", async (req, res) => {
     card,
     message,
     cardImageUrl,
+    cardImageUrls,
     checkinHtml,
   });
   const previewUrl = `${appUrl}/demo/${previewId}`;
