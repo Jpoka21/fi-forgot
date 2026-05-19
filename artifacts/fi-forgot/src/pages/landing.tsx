@@ -226,7 +226,7 @@ export default function LandingPage() {
           </div>
 
           {/* CTA */}
-          <a href="/try" data-testid="link-cta-hitzone"
+          <a href="/signup" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
               marginTop: 22, alignSelf: "flex-start",
@@ -293,7 +293,7 @@ export default function LandingPage() {
             We choose, write, and mail real greeting cards for birthdays,
             anniversaries, holidays, and every important moment.
           </p>
-          <a href="/try" data-testid="link-cta-hitzone"
+          <a href="/signup" data-testid="link-cta-hitzone"
             style={{
               display: "inline-block", marginTop: "1em", alignSelf: "flex-start",
               background: B.red, color: "#fff",
