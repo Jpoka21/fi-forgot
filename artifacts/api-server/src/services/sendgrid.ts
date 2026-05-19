@@ -447,7 +447,9 @@ export function mockCheckinQuestions(occasion: string, personality: string, name
 const OCCASION_KEYWORDS: Record<string, string[]> = {
   "Birthday":         ["birthday", "bday", "candle", "cake", "blow out", "balloons of joy", "birthday bloom", "birthday wish", "classy birthday", "birthday candle"],
   "Anniversary":      ["anniversary", "a slice of forever", "happy anniversary", "marking the milestone"],
-  "Valentine's Day":  ["valentine", "sweetheart", "romance", "cupid", "xoxo", "doodles of love", "dose of love", "fully charged with love", "laced up for love", "love that never fades", "flowers, love"],
+  // Removed risky "love …" product-name phrases: "dose of love" → Get Well card, "fully charged with love" → Father's Day card,
+  // "love that never fades" → pet memorial card. Only keep unambiguous Valentine's-specific terms.
+  "Valentine's Day":  ["valentine", "sweetheart", "romance", "cupid", "xoxo", "doodles of love", "laced up for love", "be mine", "forever yours"],
   "Mother's Day":     ["mother", "mom", "mama", "mum", "bloom, baby"],
   "Father's Day":     ["father", "dad", "papa", "daddio", "daddy", "built for dad", "best dad", "awesome dad", "cheerio daddio"],
   "Christmas":        ["christmas", "merry", "santa", "reindeer", "mistletoe", "noel", "december", "holiday cheer", "winter wonder", "365 days of cozy", "gather together"],
@@ -462,10 +464,34 @@ const OCCASION_KEYWORDS: Record<string, string[]> = {
   "Just Because":     ["thinking of you", "just because", "miss you", "thank you", "merci", "thanks", "black & cream", "botanical thanks", "blooming thanks", "kraft thank you", "stacked thanks"],
 };
 
-function cardMatchesOccasion(cardName: string, occasion: string): boolean {
+// Cards containing these terms should NEVER appear for the given occasion, even if they match a keyword.
+// Prevents Father's/Mother's Day cards from bleeding into Valentine's Day when they share a "love" word,
+// or Get Well cards bleeding in when names contain romantic-sounding phrases.
+const OCCASION_ANTI_KEYWORDS: Record<string, string[]> = {
+  "Valentine's Day": [
+    "father", "dad", "papa", "daddio", "daddy",
+    "mother", "mom", "mama",
+    "get well", "feel better", "dose of love", "fully charged",
+  ],
+  "Birthday": ["father", "dad", "papa", "mother", "mom", "mama", "valentine", "get well", "feel better"],
+  "Anniversary": ["father", "dad", "papa", "mother", "mom", "mama", "get well", "feel better"],
+  "Christmas": ["get well", "feel better", "valentine", "sympathy"],
+  "Thanksgiving": ["get well", "feel better", "valentine"],
+};
+
+function cardMatchesOccasion(cardName: string, occasion: string, imageUrl?: string): boolean {
   const name = cardName.toLowerCase();
+  // Also scan the image filename — Handwrytten sometimes uses generic product names
+  // but the filename reveals the true category (e.g. "colorful_fathers_day_front.png")
+  const imageFile = imageUrl
+    ? decodeURIComponent(imageUrl.split("/").pop() ?? "").toLowerCase().replace(/\.[^.]+$/, "").replace(/[_-]/g, " ")
+    : "";
+  const searchText = `${name} ${imageFile}`;
+  // Reject before positive match — a card with "dad" in name or filename is never a Valentine's card
+  const antiKeywords = OCCASION_ANTI_KEYWORDS[occasion] ?? [];
+  if (antiKeywords.some(kw => searchText.includes(kw))) return false;
   const keywords = OCCASION_KEYWORDS[occasion] ?? [];
-  return keywords.some(kw => name.includes(kw));
+  return keywords.some(kw => searchText.includes(kw));
 }
 
 const SKIP_NAME_WORDS = [
@@ -476,7 +502,7 @@ const SKIP_NAME_WORDS = [
   "funeral", "sympathy", "condolence", "remembering", "forever in our hearts", "forever in your heart",
   "beyond the rainbow",
 ];
-const SKIP_IMAGE_WORDS = ["wedding", "bride", "groom", "dress", "tux", "baby", "newborn", "pet", "sympathy"];
+const SKIP_IMAGE_WORDS = ["wedding", "bride", "groom", "dress", "tux", "baby", "newborn", "pet", "sympathy", "paw"];
 
 function isSafeCard(c: { name: string; imageUrl?: string }): boolean {
   const name = String(c.name).toLowerCase();
@@ -534,7 +560,7 @@ export async function fetchMultipleCardImagesForOccasion(occasion: string, limit
     const all = await listHandwryttenCards();
     // Safety filter runs first — no wedding/baby/sympathy cards ever
     const safe = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http") && isSafeCard(c));
-    const matched = safe.filter(c => cardMatchesOccasion(String(c.name), occasion));
+    const matched = safe.filter(c => cardMatchesOccasion(String(c.name), occasion, c.imageUrl));
     // Apply relationship filter to avoid cards addressed to "dad/mom" when it's not a parent
     const relFiltered = filterByRelationship(matched, occasion, relationship);
     // Return relationship-filtered matches, or all occasion matches if no filter applied, or 1 safe neutral card
