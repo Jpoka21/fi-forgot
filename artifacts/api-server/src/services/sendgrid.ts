@@ -528,9 +528,10 @@ const SKIP_NAME_WORDS = [
   "pet", "dog ", "cat ", "rainbow bridge", "best dog",
   "funeral", "sympathy", "condolence", "remembering", "forever in our hearts", "forever in your heart",
   "beyond the rainbow",
-  "invitation", "invite", "you're invited", "join us for",
+  "invitation", "invite", "you're invited", "join us for", "join us",
+  "birthday party", "party invitation",
 ];
-const SKIP_IMAGE_WORDS = ["wedding", "bride", "groom", "dress", "tux", "baby", "newborn", "pet", "sympathy", "paw", "invit"];
+const SKIP_IMAGE_WORDS = ["wedding", "bride", "groom", "dress", "tux", "baby", "newborn", "pet", "sympathy", "paw", "invit", "birthday_party", "join_us"];
 
 function isSafeCard(c: { name: string; imageUrl?: string }): boolean {
   const name = String(c.name).toLowerCase();

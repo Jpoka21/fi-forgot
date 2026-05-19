@@ -197,7 +197,7 @@ export default function DemoPreviewPage() {
               <button
                 onClick={() => setShowCardPicker(p => !p)}
                 style={{
-                  background: showCardPicker ? "#5a3e28" : "#c4966a",
+                  background: showCardPicker ? "#9e1a14" : B.red,
                   border: "none",
                   borderRadius: 8,
                   padding: "11px 20px",
@@ -208,7 +208,7 @@ export default function DemoPreviewPage() {
                   cursor: "pointer",
                   letterSpacing: "0.02em",
                   width: "100%",
-                  boxShadow: "0 2px 6px rgba(196,150,106,0.3)",
+                  boxShadow: "0 2px 6px rgba(226,59,46,0.35)",
                 }}
               >
                 {showCardPicker ? "Hide options" : `Browse ${allImages.length - 1} other card${allImages.length > 2 ? "s" : ""} →`}
@@ -264,7 +264,7 @@ export default function DemoPreviewPage() {
             <button
               onClick={() => setEditingMessage(e => !e)}
               style={{
-                background: editingMessage ? B.black : "#c4966a",
+                background: editingMessage ? B.black : B.red,
                 border: "none",
                 borderRadius: 8,
                 padding: "8px 16px",
@@ -274,7 +274,7 @@ export default function DemoPreviewPage() {
                 fontWeight: 700,
                 cursor: "pointer",
                 whiteSpace: "nowrap",
-                boxShadow: "0 2px 6px rgba(196,150,106,0.3)",
+                boxShadow: "0 2px 6px rgba(226,59,46,0.35)",
               }}
             >
               {editingMessage ? "Done" : "Edit message"}

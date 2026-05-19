@@ -69,10 +69,15 @@ function detectMediaType(buf: Buffer): "image/jpeg" | "image/png" | "image/gif" 
   return "image/jpeg";
 }
 
+const MAX_IMAGE_BYTES = 4.5 * 1024 * 1024; // Claude's hard limit is 5 MB; leave headroom
+
 async function fetchImageAsBase64(url: string): Promise<{ data: string; mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp" }> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Image fetch failed: ${res.status} ${url}`);
   const buffer = Buffer.from(await res.arrayBuffer());
+  if (buffer.byteLength > MAX_IMAGE_BYTES) {
+    throw new Error(`Image too large for AI classification: ${buffer.byteLength} bytes (${url})`);
+  }
   const mediaType = detectMediaType(buffer);
   return { data: buffer.toString("base64"), mediaType };
 }
