@@ -142,9 +142,8 @@ export default function LandingPage() {
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
-        className="md:h-auto"
-        style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden",
-          height: "clamp(420px, 72svh, 600px)" }}
+        className="h-[clamp(420px,72svh,600px)] md:h-auto"
+        style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
         {/* Mobile portrait hero */}
         <img
