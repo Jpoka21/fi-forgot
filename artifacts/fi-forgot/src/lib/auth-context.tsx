@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents } from "./data";
+import type { Plan } from "./plan";
 
 export interface OnboardingData {
   recipientName: string;
@@ -29,11 +30,12 @@ export interface OnboardingData {
 interface AuthContextType {
   isLoggedIn: boolean;
   onboardingComplete: boolean;
-  user: { name: string; email: string } | null;
+  user: { name: string; email: string; plan?: Plan } | null;
   login: (email: string, name?: string) => void;
   signup: (name: string, email: string) => void;
   completeOnboarding: (data: OnboardingData) => void;
   logout: () => void;
+  upgradePlan: (plan: Plan) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -44,6 +46,7 @@ const AuthContext = createContext<AuthContextType>({
   signup: () => {},
   completeOnboarding: () => {},
   logout: () => {},
+  upgradePlan: () => {},
 });
 
 const PERSONALITY_LABELS: Record<string, string> = {
@@ -176,7 +179,7 @@ function clearAllUserData() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(true);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string; plan?: Plan } | null>(null);
 
   useEffect(() => {
     const version = localStorage.getItem("fi_forgot_storage_version");
@@ -233,8 +236,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("fi_forgot_onboarding");
   }
 
+  function upgradePlan(plan: Plan) {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, plan };
+      localStorage.setItem("fi_forgot_user", JSON.stringify(updated));
+      return updated;
+    });
+  }
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, onboardingComplete, user, login, signup, completeOnboarding, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, onboardingComplete, user, login, signup, completeOnboarding, logout, upgradePlan }}>
       {children}
     </AuthContext.Provider>
   );

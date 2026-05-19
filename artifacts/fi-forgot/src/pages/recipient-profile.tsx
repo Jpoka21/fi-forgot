@@ -3,6 +3,7 @@ import { useLocation, useParams, Link } from "wouter";
 import AppLayout from "@/components/layout/AppLayout";
 import {
   getRecipient,
+  getRecipients,
   saveRecipient,
   defaultDelivery,
   suggestedEvents,
@@ -23,6 +24,8 @@ import {
   Child,
   EventBriefing,
 } from "@/lib/data";
+import { useAuth } from "@/lib/auth-context";
+import { PLANS, Plan, canActivateRecipient } from "@/lib/plan";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,7 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap } from "lucide-react";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -279,8 +282,15 @@ export default function RecipientProfilePage() {
   const isNew = params.id === "new";
   const [saved, setSaved] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const { user, upgradePlan } = useAuth();
+
+  const plan = (user?.plan ?? "basic") as Plan;
+  const allRecipients = getRecipients();
+  const activeCount = allRecipients.filter((r) => r.active !== false).length;
 
   const existing = isNew ? undefined : getRecipient(params.id);
+  const isInactive = !isNew && existing?.active === false;
 
   // Build initial eventDates from existing recipient fields
   function buildInitialEventDates(r?: Recipient): Record<string, string> {
@@ -408,10 +418,16 @@ export default function RecipientProfilePage() {
 
     const anniversaryDate = ed["Anniversary"] || undefined;
 
+    // Determine active status: new recipients are active only if under plan limit
+    const shouldBeActive = isNew
+      ? canActivateRecipient(plan, activeCount)
+      : (existing?.active !== false); // preserve existing active state
+
     const recipient: Recipient = {
       id: isNew ? Date.now().toString() : params.id,
       name: data.name,
       relationship: data.relationship,
+      active: shouldBeActive,
       birthday: ed["Birthday"] || undefined,
       anniversaryDate,
       // Keep marriageDate in sync for years-together calculation
@@ -439,7 +455,11 @@ export default function RecipientProfilePage() {
     };
     saveRecipient(recipient);
     setSaved(true);
-    setTimeout(() => setLocation("/recipients"), 1200);
+    if (!shouldBeActive) {
+      setTimeout(() => setLocation("/recipients"), 1600);
+    } else {
+      setTimeout(() => setLocation("/recipients"), 1200);
+    }
   }
 
   // Years together from the anniversary date (for display)
@@ -472,9 +492,37 @@ export default function RecipientProfilePage() {
             </div>
           </div>
 
+          {/* Paused banner */}
+          {isInactive && !saved && (
+            <div
+              className="mb-5 rounded-xl px-5 py-4 flex items-start gap-3"
+              style={{ background: `${RED}08`, border: `1.5px solid ${RED}25` }}
+            >
+              <Lock size={18} className="flex-shrink-0 mt-0.5" style={{ color: RED }} />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold" style={{ color: BLACK }}>
+                  Autopilot is paused for {existing?.name}
+                </div>
+                <p className="text-xs mt-0.5" style={{ color: GRAY }}>
+                  You've reached your plan's recipient limit. Upgrade to activate cards for this person.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUpgradeOpen(true)}
+                className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-80 flex items-center gap-1.5"
+                style={{ background: RED, color: "#fff" }}
+              >
+                <Zap size={11} /> Upgrade
+              </button>
+            </div>
+          )}
+
           {saved && (
             <div className="mb-5 rounded-xl px-5 py-3 text-sm font-semibold" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#166534" }}>
-              Saved. Redirecting…
+              {existing?.active === false || (!isNew && !canActivateRecipient(plan, activeCount - 1))
+                ? "Saved! Upgrade your plan to activate autopilot."
+                : "Saved. Redirecting…"}
             </div>
           )}
 
@@ -843,6 +891,125 @@ export default function RecipientProfilePage() {
           )}
         </div>
       </div>
+
+      {/* Upgrade modal */}
+      {upgradeOpen && (
+        <ProfileUpgradeModal
+          currentPlan={plan}
+          recipientName={existing?.name}
+          onUpgrade={(newPlan) => {
+            upgradePlan(newPlan);
+            // Mark this recipient as active now that the plan covers it
+            if (existing) {
+              saveRecipient({ ...existing, active: true });
+            }
+            setUpgradeOpen(false);
+            // Reload to reflect change
+            window.location.reload();
+          }}
+          onClose={() => setUpgradeOpen(false)}
+        />
+      )}
     </AppLayout>
+  );
+}
+
+function ProfileUpgradeModal({
+  currentPlan,
+  recipientName,
+  onUpgrade,
+  onClose,
+}: {
+  currentPlan: Plan;
+  recipientName?: string;
+  onUpgrade: (plan: Plan) => void;
+  onClose: () => void;
+}) {
+  const orderedPlans: Plan[] = ["basic", "standard", "premium"];
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.55)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto" style={{ background: "#fff" }}>
+        <div className="p-6">
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.05em", color: BLACK, lineHeight: 1 }}>
+                Upgrade to Activate
+              </h2>
+              <p className="text-sm mt-1.5" style={{ color: GRAY }}>
+                {recipientName
+                  ? `You've hit your recipient limit. Upgrade to send cards for ${recipientName}.`
+                  : "Upgrade your plan to activate autopilot for more recipients."}
+              </p>
+            </div>
+            <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 text-xl font-bold leading-none ml-4 flex-shrink-0">×</button>
+          </div>
+
+          <div className="space-y-3 mt-5">
+            {orderedPlans.map((key) => {
+              const config = PLANS[key];
+              const isCurrent = key === currentPlan;
+              const isUpgrade = orderedPlans.indexOf(key) > orderedPlans.indexOf(currentPlan);
+
+              return (
+                <div
+                  key={key}
+                  className="rounded-xl p-4 border-2 transition-all"
+                  style={{
+                    borderColor: isCurrent ? `${BLACK}20` : isUpgrade ? `${RED}25` : `${BLACK}08`,
+                    background: isCurrent ? BEIGE : "#fafafa",
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK }}>
+                          {config.label}
+                        </span>
+                        {isCurrent && (
+                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${BLACK}10`, color: GRAY }}>
+                            Current plan
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs mt-0.5 mb-2" style={{ color: GRAY }}>{config.tagline}</div>
+                      <ul className="space-y-0.5">
+                        {config.perks.map((perk) => (
+                          <li key={perk} className="text-xs flex items-center gap-1.5" style={{ color: BLACK }}>
+                            <span style={{ color: RED, fontWeight: 700 }}>✓</span> {perk}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: BLACK, lineHeight: 1 }}>
+                        {config.price}
+                      </span>
+                      {!isCurrent && (
+                        <button
+                          onClick={() => onUpgrade(key)}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 whitespace-nowrap"
+                          style={{ background: isUpgrade ? RED : `${BLACK}10`, color: isUpgrade ? "#fff" : GRAY }}
+                        >
+                          {isUpgrade ? "Upgrade" : "Downgrade"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="text-xs text-center mt-4" style={{ color: `${GRAY}80` }}>
+            No relationships were guaranteed in the making of this subscription.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
