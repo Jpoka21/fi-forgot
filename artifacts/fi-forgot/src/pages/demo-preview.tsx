@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
 import { useParams } from "wouter";
 import { B } from "@/components/brand";
 
@@ -62,6 +62,67 @@ export default function DemoPreviewPage() {
   const [refining, setRefining] = useState(false);
   const [refineError, setRefineError] = useState("");
   const [customInstruction, setCustomInstruction] = useState("");
+
+  const messageCardRef = useRef<HTMLDivElement>(null);
+  const annotationRef = useRef<HTMLDivElement>(null);
+
+  interface ArrowGeo {
+    svgTop: number; svgLeft: number; svgW: number; svgH: number; path: string;
+  }
+  const [arrowGeo, setArrowGeo] = useState<ArrowGeo | null>(null);
+
+  const computeArrow = useCallback(() => {
+    const msgEl = messageCardRef.current;
+    const annEl = annotationRef.current;
+    if (!msgEl || !annEl) return;
+
+    const msgRect = msgEl.getBoundingClientRect();
+    const annRect = annEl.getBoundingClientRect();
+
+    // Head: right-center of the message body text area (~38% down the card)
+    const headAbsX = msgRect.right - 28;
+    const headAbsY = msgRect.top + msgRect.height * 0.38;
+
+    // Tail: right edge of the annotation callout, vertically centered
+    const tailAbsX = annRect.right - 24;
+    const tailAbsY = annRect.top + annRect.height * 0.5;
+
+    // Convert to coords relative to annEl (annotation wrapper's top-left)
+    const headX = headAbsX - annRect.left;
+    const headY = headAbsY - annRect.top;   // negative — above the wrapper
+    const tailX = tailAbsX - annRect.left;
+    const tailY = tailAbsY - annRect.top;
+
+    // SVG bounding box with padding
+    const pad = 14;
+    const svgLeft = Math.min(headX, tailX) - pad;
+    const svgTop  = Math.min(headY, tailY) - pad;
+    const svgW    = Math.max(headX, tailX) - svgLeft + pad;
+    const svgH    = Math.max(headY, tailY) - svgTop  + pad;
+
+    // Path coords in SVG-local space
+    const lHeadX = headX - svgLeft;
+    const lHeadY = headY - svgTop;
+    const lTailX = tailX - svgLeft;
+    const lTailY = tailY - svgTop;
+
+    // Cubic bezier — control points give a nice S-curve from right side up-right
+    const cp1X = lTailX + 20;
+    const cp1Y = lTailY - (lTailY - lHeadY) * 0.25;
+    const cp2X = lHeadX + 30;
+    const cp2Y = lHeadY + (lTailY - lHeadY) * 0.25;
+
+    setArrowGeo({
+      svgTop, svgLeft, svgW, svgH,
+      path: `M ${lTailX},${lTailY} C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${lHeadX},${lHeadY}`,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    computeArrow();
+    window.addEventListener("resize", computeArrow);
+    return () => window.removeEventListener("resize", computeArrow);
+  }, [computeArrow, messageText]);
 
   useEffect(() => {
     if (!id) { setError(true); setLoading(false); return; }
@@ -258,7 +319,7 @@ export default function DemoPreviewPage() {
         </div>
 
         {/* The Message */}
-        <div style={{ ...cardBox, ...cardPad }}>
+        <div ref={messageCardRef} style={{ ...cardBox, ...cardPad }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 14, marginBottom: 14, borderBottom: "2px solid #f0e8d8" }}>
             <span style={{ ...sectionLabel, paddingBottom: 0, marginBottom: 0, borderBottom: "none" }}>What we'll write inside the card</span>
             <button
@@ -405,29 +466,38 @@ export default function DemoPreviewPage() {
         </div>
 
         {/* Annotation callout — lives OUTSIDE the overflow:hidden card so the arrow can overlap freely */}
-        <div style={{ position: "relative", marginTop: 0, marginBottom: 8, paddingTop: 12 }}>
-          {/* SVG arrow: absolutely positioned, extends UP into the message card above */}
-          <svg
-            width="320" height="88" viewBox="0 0 320 88"
-            style={{ position: "absolute", top: -72, left: 0, pointerEvents: "none", zIndex: 10, overflow: "visible" }}
-            aria-hidden="true"
-          >
-            <defs>
-              <marker id="fi-arrowhead" markerWidth="9" markerHeight="9"
-                refX="1" refY="4.5" orient="auto">
-                <polygon points="0 0, 9 4.5, 0 9" fill="#cc1c1c" />
-              </marker>
-            </defs>
-            {/* Tail near bottom-left (callout), head sweeps up to top-right (into the card) */}
-            <path
-              d="M 38,84 C 55,52 200,18 288,6"
-              fill="none"
-              stroke="#cc1c1c"
-              strokeWidth="3.2"
-              strokeLinecap="round"
-              markerEnd="url(#fi-arrowhead)"
-            />
-          </svg>
+        <div ref={annotationRef} style={{ position: "relative", marginTop: 0, marginBottom: 8, paddingTop: 12 }}>
+          {/* Dynamic SVG arrow — geometry computed from actual DOM positions */}
+          {arrowGeo && (
+            <svg
+              width={arrowGeo.svgW}
+              height={arrowGeo.svgH}
+              style={{
+                position: "absolute",
+                top: arrowGeo.svgTop,
+                left: arrowGeo.svgLeft,
+                pointerEvents: "none",
+                zIndex: 10,
+                overflow: "visible",
+              }}
+              aria-hidden="true"
+            >
+              <defs>
+                <marker id="fi-arrowhead" markerWidth="9" markerHeight="9"
+                  refX="9" refY="4.5" orient="auto">
+                  <polygon points="0 0, 9 4.5, 0 9" fill="#cc1c1c" />
+                </marker>
+              </defs>
+              <path
+                d={arrowGeo.path}
+                fill="none"
+                stroke="#cc1c1c"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+                markerEnd="url(#fi-arrowhead)"
+              />
+            </svg>
+          )}
 
           {/* Callout box */}
           <div style={{
