@@ -468,15 +468,28 @@ function cardMatchesOccasion(cardName: string, occasion: string): boolean {
   return keywords.some(kw => name.includes(kw));
 }
 
+const SKIP_WORDS = [
+  "wedding", "bride", "groom", "love story", "happy couple", "marriage", "bridal",
+  "baby", "newborn", "baptism", "baby rattle", "baby steps",
+  "pet", "dog", "cat", "rainbow bridge",
+  "funeral", "sympathy", "condolence",
+  "dress and tux", "dress%20and%20tux", "wedding%20dress",
+];
+
+function isSafeCard(c: { name: string; imageUrl?: string }): boolean {
+  const name = String(c.name).toLowerCase();
+  const imageFile = decodeURIComponent(String(c.imageUrl ?? "").split("/").pop() ?? "").toLowerCase();
+  return !SKIP_WORDS.some(w => name.includes(w) || imageFile.includes(w));
+}
+
 export async function fetchMultipleCardImagesForOccasion(occasion: string, limit = 6): Promise<string[]> {
   try {
     const all = await listHandwryttenCards();
     const withImage = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http"));
     const matched = withImage.filter(c => cardMatchesOccasion(String(c.name), occasion));
     if (matched.length > 0) return matched.slice(0, limit).map(c => c.imageUrl!);
-    // If nothing matched, return a safe general set — skip obvious wedding/baby cards
-    const skipWords = ["wedding", "bride", "groom", "baby", "newborn", "baptism", "pet", "dog", "cat", "rainbow bridge"];
-    const safe = withImage.filter(c => !skipWords.some(w => String(c.name).toLowerCase().includes(w)));
+    // No keyword match — return safe general cards (no wedding/baby/pet-specific imagery)
+    const safe = withImage.filter(isSafeCard);
     return safe.slice(0, limit).map(c => c.imageUrl!);
   } catch (err) {
     logger.warn({ err }, "Could not fetch Handwrytten card images for demo preview");
