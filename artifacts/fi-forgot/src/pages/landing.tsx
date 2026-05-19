@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "wouter";
 import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import {
   B,
@@ -76,16 +77,16 @@ export default function LandingPage() {
             draggable={false}
           />
           {/* Logo / home */}
-          <a aria-label="Home" href="/"                style={{ position:"absolute", top:"0%", left:"0%",   width:"21%", height:"100%", display:"block", cursor:"pointer" }} />
+          <Link aria-label="Home" href="/"                style={{ position:"absolute", top:"0%", left:"0%",   width:"21%", height:"100%", display:"block", cursor:"pointer" }} />
           {/* Nav links */}
           <a aria-label="How it works" href="#how-it-works" style={{ position:"absolute", top:"0%", left:"22%",  width:"11%", height:"100%", display:"block", cursor:"pointer" }} />
           <a aria-label="Plans"        href="#pricing"      style={{ position:"absolute", top:"0%", left:"33%",  width:"7%",  height:"100%", display:"block", cursor:"pointer" }} />
           <a aria-label="Examples"     href="#examples"     style={{ position:"absolute", top:"0%", left:"40%",  width:"9%",  height:"100%", display:"block", cursor:"pointer" }} />
           <a aria-label="Reviews"      href="#reviews"      style={{ position:"absolute", top:"0%", left:"49%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
           <a aria-label="FAQ"          href="#faq"          style={{ position:"absolute", top:"0%", left:"57%",  width:"5%",  height:"100%", display:"block", cursor:"pointer" }} />
-          <a aria-label="Sign in"      href="/login"        style={{ position:"absolute", top:"0%", left:"62%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
+          <Link aria-label="Sign in"      href="/login"        style={{ position:"absolute", top:"0%", left:"62%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
           {/* CTA button */}
-          <a aria-label="Start earning brownie points" href="/signup" data-testid="link-get-started-nav"
+          <Link aria-label="Start earning brownie points" href="/signup" data-testid="link-get-started-nav"
             style={{ position:"absolute", top:"0%", right:"0%", width:"22%", height:"100%", display:"block", cursor:"pointer" }} />
         </div>
       </nav>
@@ -94,19 +95,19 @@ export default function LandingPage() {
       <nav className="md:hidden sticky top-0 z-50"
         style={{ background: B.beige, borderBottom: `1px solid ${B.black}18` }}>
         <div className="flex items-center justify-between" style={{ padding: "8px 16px" }}>
-          <a href="/" style={{ textDecoration: "none" }}>
+          <Link href="/" style={{ textDecoration: "none" }}>
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: B.black, lineHeight: 0.95 }}>
               <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>{" "}I FORGOT
             </div>
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.42rem", letterSpacing: "0.2em", color: B.gray, marginTop: 1 }}>
               RELATIONSHIP DAMAGE CONTROL
             </div>
-          </a>
+          </Link>
           <div className="flex items-center gap-2">
-            <a href="/try" data-testid="link-mobile-nav-cta"
+            <Link href="/try" data-testid="link-mobile-nav-cta"
               style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.08em", padding: "8px 13px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
               DEMO FOR FREE
-            </a>
+            </Link>
             <button
               onClick={() => setMenuOpen(o => !o)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -130,10 +131,10 @@ export default function LandingPage() {
               </a>
             ))}
             <div style={{ borderTop: `1px solid ${B.black}12`, margin: "8px 20px 0", paddingTop: 8 }}>
-              <a href="/login"
+              <Link href="/login"
                 style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
                 SIGN IN
-              </a>
+              </Link>
             </div>
           </div>
         )}
@@ -226,7 +227,7 @@ export default function LandingPage() {
           </div>
 
           {/* CTA */}
-          <a href="/signup" data-testid="link-cta-hitzone"
+          <Link href="/signup" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
               marginTop: 22, alignSelf: "flex-start",
@@ -241,7 +242,7 @@ export default function LandingPage() {
               whiteSpace: "nowrap",
             }}>
             AUTOMATE BEING THOUGHTFUL →
-          </a>
+          </Link>
         </div>
 
         {/* Desktop text overlay */}
@@ -293,7 +294,7 @@ export default function LandingPage() {
             We choose, write, and mail real greeting cards for birthdays,
             anniversaries, holidays, and every important moment.
           </p>
-          <a href="/signup" data-testid="link-cta-hitzone"
+          <Link href="/signup" data-testid="link-cta-hitzone"
             style={{
               display: "inline-block", marginTop: "1em", alignSelf: "flex-start",
               background: B.red, color: "#fff",
@@ -306,7 +307,7 @@ export default function LandingPage() {
               boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.4)`,
             }}>
             AUTOMATE BEING THOUGHTFUL →
-          </a>
+          </Link>
         </div>
 
         {/* Bottom label — desktop only */}
@@ -351,7 +352,7 @@ export default function LandingPage() {
       <div style={{ position: "relative", lineHeight: 0 }}>
         <img src="/stop-forgetting.png" alt="Stop Forgetting. Start Earning Brownie Points."
           style={{ width: "100%", height: "auto", display: "block" }} />
-        <a href="/signup" data-testid="link-cta-banner"
+        <Link href="/signup" data-testid="link-cta-banner"
           style={{ position: "absolute", top: "10%", right: "2%", width: "18%", height: "80%", display: "block", cursor: "pointer" }} />
       </div>
 
