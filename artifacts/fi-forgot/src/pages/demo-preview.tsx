@@ -407,21 +407,21 @@ export default function DemoPreviewPage() {
             {/* Curved SVG arrow — tail near callout, head pointing into the card above */}
             <svg
               width="90" height="52" viewBox="0 0 90 52"
-              style={{ display: "block", marginLeft: 28, marginBottom: -2 }}
+              style={{ display: "block", marginLeft: 8, marginBottom: -2 }}
               aria-hidden="true"
             >
               <defs>
-                <marker id="fi-arrowhead" markerWidth="7" markerHeight="7"
-                  refX="0" refY="3.5" orient="auto">
-                  <polygon points="0 0, 7 3.5, 0 7" fill="#b8730a" />
+                <marker id="fi-arrowhead" markerWidth="8" markerHeight="8"
+                  refX="0" refY="4" orient="auto">
+                  <polygon points="0 0, 8 4, 0 8" fill="#cc1c1c" />
                 </marker>
               </defs>
-              {/* Bezier curve from bottom-right sweeping up to top-left */}
+              {/* Bezier curve from bottom-left sweeping up to top-right */}
               <path
-                d="M 72,48 C 68,28 32,16 8,5"
+                d="M 14,48 C 18,26 60,14 80,5"
                 fill="none"
-                stroke="#b8730a"
-                strokeWidth="2.2"
+                stroke="#cc1c1c"
+                strokeWidth="3"
                 strokeLinecap="round"
                 markerEnd="url(#fi-arrowhead)"
               />
