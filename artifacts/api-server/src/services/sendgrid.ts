@@ -487,21 +487,23 @@ function isSafeCard(c: { name: string; imageUrl?: string }): boolean {
   );
 }
 
-// For Father's/Mother's Day cards addressed TO a parent figure — only appropriate when recipient IS a parent
-const OCCASION_PARENT_TERMS: Record<string, string[]> = {
-  "Father's Day": ["dad", "daddy", "papa", "daddio", "father"],
-  "Mother's Day": ["mom", "mama", "mother", "mum", "mommy"],
+// Cards phrased as "to MY dad/mom" — only appropriate when the recipient IS the sender's parent.
+// Generic occasion cards ("Classic Father's Day", "Grilliant Dad") are fine for any relationship
+// because the sibling/friend/coworker IS a dad/mom themselves.
+const DIRECT_PARENT_CARD_PHRASES: Record<string, string[]> = {
+  "Father's Day": ["best dad ever", "dear dad", "best dog dad", "cheerio daddio", "built for dad", "to my dad"],
+  "Mother's Day": ["best mom ever", "dear mom", "to my mom", "best dog mom", "world's best mom"],
 };
 
 const DIRECT_PARENT_RELATIONSHIPS = ["Parent"];
 
 function filterByRelationship(cards: HandwryttenCard[], occasion: string, relationship: string): HandwryttenCard[] {
-  const parentTerms = OCCASION_PARENT_TERMS[occasion];
-  if (!parentTerms) return cards;
+  const exclusions = DIRECT_PARENT_CARD_PHRASES[occasion];
+  if (!exclusions) return cards;
   if (DIRECT_PARENT_RELATIONSHIPS.includes(relationship)) return cards;
-  // For siblings, friends, coworkers, etc. — exclude cards with "dad/mom/papa" on them since the card
-  // would be addressed TO their dad/mom, not to a sibling/friend who happens to be a parent
-  return cards.filter(c => !parentTerms.some(term => String(c.name).toLowerCase().includes(term)));
+  // For siblings, friends, coworkers, etc. — exclude cards explicitly addressed to "my dad/mom"
+  // but keep generic Father's/Mother's Day cards (the recipient IS a dad/mom themselves)
+  return cards.filter(c => !exclusions.some(phrase => String(c.name).toLowerCase().includes(phrase)));
 }
 
 export async function fetchMultipleCardImagesForOccasion(occasion: string, limit = 6, relationship = ""): Promise<string[]> {
@@ -514,7 +516,7 @@ export async function fetchMultipleCardImagesForOccasion(occasion: string, limit
     const relFiltered = filterByRelationship(matched, occasion, relationship);
     // Return relationship-filtered matches, or all occasion matches if no filter applied, or 1 safe neutral card
     if (relFiltered.length > 0) return relFiltered.slice(0, limit).map(c => c.imageUrl!);
-    if (matched.length > 0 && !OCCASION_PARENT_TERMS[occasion]) return matched.slice(0, limit).map(c => c.imageUrl!);
+    if (matched.length > 0 && !DIRECT_PARENT_CARD_PHRASES[occasion]) return matched.slice(0, limit).map(c => c.imageUrl!);
     // Either all cards were filtered by relationship (e.g. Father's Day for sibling), or no keyword match at all
     // → return 1 safe neutral card so no confusing/unrelated alternatives show in the picker
     return safe.slice(0, 1).map(c => c.imageUrl!);
