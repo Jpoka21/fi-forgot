@@ -17,6 +17,7 @@ interface DemoPreview {
   relationship: string;
   occasion: string;
   personality: string;
+  ageRange?: string;
   card: CardInfo;
   message: string;
   cardImageUrl: string | null;
@@ -154,6 +155,7 @@ export default function DemoPreviewPage() {
           relationship: data.relationship,
           occasion: data.occasion,
           personality: data.personality,
+          ageRange: data.ageRange,
         }),
       });
       const json = await r.json() as { message?: string; error?: string };
@@ -185,7 +187,7 @@ export default function DemoPreviewPage() {
     </div>
   );
 
-  const { card: cardData, checkinHtml, recipientName, relationship, occasion, personality } = data;
+  const { card: cardData, checkinHtml, recipientName, relationship, occasion, personality, ageRange } = data;
   const occasionLabel = occasion.replace("Upcoming ", "").toLowerCase();
   const allImages = data.cardImageUrls ?? (selectedImage ? [selectedImage] : []);
 

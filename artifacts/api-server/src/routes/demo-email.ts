@@ -26,9 +26,9 @@ const VALID_OCCASIONS = ["Birthday","Anniversary","Mother's Day","Father's Day",
 const VALID_PERSONALITIES = ["Sentimental & Heartfelt","Funny & Witty","Warm & Nurturing","Down-to-Earth & Practical"];
 
 router.post("/demo-email", async (req, res) => {
-  const { email, recipientName, relationship, occasion, personality, honeypot } = req.body as {
+  const { email, recipientName, relationship, occasion, personality, ageRange, honeypot } = req.body as {
     email?: string; recipientName?: string; relationship?: string;
-    occasion?: string; personality?: string; honeypot?: string;
+    occasion?: string; personality?: string; ageRange?: string; honeypot?: string;
   };
 
   if (honeypot) { res.json({ success: true }); return; }
@@ -56,8 +56,10 @@ router.post("/demo-email", async (req, res) => {
   const appUrl = getAppUrl(req);
 
   // Compute all preview data up front — AI message + cards run in parallel
+  const safeAgeRange = typeof ageRange === "string" ? ageRange.trim().slice(0, 60) : undefined;
+
   const [aiMessage, cardImageUrls] = await Promise.all([
-    generateMessageWithAI(safeName, safeRelationship, safeOccasion, safePersonality),
+    generateMessageWithAI(safeName, safeRelationship, safeOccasion, safePersonality, safeAgeRange),
     fetchMultipleCardImagesForOccasion(safeOccasion, 6, safeRelationship),
   ]);
   const card = pickCard(safeOccasion, safePersonality, safeRelationship);
@@ -73,6 +75,7 @@ router.post("/demo-email", async (req, res) => {
     relationship: safeRelationship,
     occasion: safeOccasion,
     personality: safePersonality,
+    ageRange: safeAgeRange,
     card,
     message,
     cardImageUrl,

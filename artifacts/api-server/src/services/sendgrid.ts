@@ -26,6 +26,7 @@ export async function generateMessageWithAI(
   relationship: string,
   occasion: string,
   personality: string,
+  ageRange?: string,
 ): Promise<string | null> {
   try {
     const toneGuide =
@@ -34,9 +35,23 @@ export async function generateMessageWithAI(
       personality.includes("Warm") ? "warm and nurturing — caring and sincere" :
       "down-to-earth and straightforward — genuine without being flowery";
 
+    const ageGuide = ageRange
+      ? (() => {
+          if (ageRange.includes("under 12") || ageRange.includes("Young child"))
+            return "\nRecipient age: a young child (under 12). Use simple, warm language they can understand and appreciate. Focus on love, fun, and excitement. Avoid complex emotions or adult humor.";
+          if (ageRange.includes("Teen") || ageRange.includes("13"))
+            return "\nRecipient age: a teenager (13–17). Keep it real and relatable — don't be preachy or overly sentimental. Light humor is welcome. Acknowledge their perspective, not just your feelings.";
+          if (ageRange.includes("Young adult") || ageRange.includes("18"))
+            return "\nRecipient age: a young adult (18–25). Treat them as an equal. Celebrate their independence and growth. Can be heartfelt or funny — avoid sounding parental or condescending.";
+          if (ageRange.includes("Adult") || ageRange.includes("26"))
+            return "\nRecipient age: an adult (26+). Write one adult to another — reflective, proud, equal. Can be sentimental, funny, or both. Zero condescension.";
+          return "";
+        })()
+      : "";
+
     const prompt = `Write a short handwritten card message from someone to their ${relationship.toLowerCase()} named ${name} for ${occasion}.
 
-Tone: ${toneGuide}
+Tone: ${toneGuide}${ageGuide}
 Length: 3–5 sentences max. No filler. No generic phrases like "hope this finds you well."
 Format: Start with "Dear ${name}," and end with "[Your Name]". Add a blank line between the greeting, body, and sign-off.
 Do not mention the service, apps, or technology. Write as if the sender wrote it themselves.

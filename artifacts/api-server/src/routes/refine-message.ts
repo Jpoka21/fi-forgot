@@ -17,7 +17,7 @@ const QUICK_ACTIONS: Record<string, string> = {
 };
 
 router.post("/demo-preview/refine-message", async (req, res) => {
-  const { message, instruction, action, recipientName, relationship, occasion, personality } = req.body as {
+  const { message, instruction, action, recipientName, relationship, occasion, personality, ageRange } = req.body as {
     message?: string;
     instruction?: string;
     action?: string;
@@ -25,6 +25,7 @@ router.post("/demo-preview/refine-message", async (req, res) => {
     relationship?: string;
     occasion?: string;
     personality?: string;
+    ageRange?: string;
   };
 
   if (!message || (!instruction && !action)) {
@@ -36,13 +37,15 @@ router.post("/demo-preview/refine-message", async (req, res) => {
     ? (QUICK_ACTIONS[action] ?? `Rewrite this message to be more ${action}.`)
     : instruction!;
 
+  const ageContext = ageRange ? `\n- Recipient age range: ${ageRange}` : "";
+
   const systemPrompt = `You are a professional greeting card message writer. You rewrite card messages based on user instructions while preserving the core intent.
 
 Context:
 - Recipient: ${recipientName ?? "the recipient"}
 - Relationship: ${relationship ?? "friend"}
 - Occasion: ${occasion ?? "a special occasion"}
-- Personality style: ${personality ?? "warm and nurturing"}
+- Personality style: ${personality ?? "warm and nurturing"}${ageContext}
 
 Rules:
 - Keep "[Your Name]" at the end as the sign-off placeholder

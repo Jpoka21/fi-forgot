@@ -12,6 +12,15 @@ const RELATIONSHIP_OPTIONS = [
   "Other",
 ];
 
+const AGE_RANGE_OPTIONS = [
+  "Young child (under 12)",
+  "Teenager (13–17)",
+  "Young adult (18–25)",
+  "Adult (26+)",
+];
+
+const AGE_RANGE_RELATIONSHIPS = ["Child", "Parent", "Sibling"];
+
 // Father's Day / Mother's Day only make sense when the recipient is a parent figure
 // For the demo form, "Parent" covers Mom/Dad and "Spouse / Partner" covers Wife/Husband
 const FATHERS_DAY_DEMO_RELS = ["Parent", "Spouse / Partner"];
@@ -85,20 +94,26 @@ function SelectField({ id, label, value, onChange, options, placeholder }: {
 export function DemoFormSection() {
   const [form, setForm] = useState({
     email: "", recipientName: "", relationship: "",
-    occasion: "", personality: "", website: "",
+    occasion: "", personality: "", ageRange: "", website: "",
   });
+  const showAgeRange = AGE_RANGE_RELATIONSHIPS.includes(form.relationship);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
 
   const occasionOptions = availableDemoOccasions(form.relationship);
 
-  // Clear occasion whenever relationship changes and current occasion is no longer valid
+  // Clear occasion (and ageRange) whenever relationship changes and current values are no longer valid
   useEffect(() => {
+    const updates: Partial<typeof form> = {};
     if (form.occasion && !availableDemoOccasions(form.relationship).includes(form.occasion)) {
-      setForm(f => ({ ...f, occasion: "" }));
+      updates.occasion = "";
     }
-  }, [form.relationship]);
+    if (form.ageRange && !AGE_RANGE_RELATIONSHIPS.includes(form.relationship)) {
+      updates.ageRange = "";
+    }
+    if (Object.keys(updates).length) setForm(f => ({ ...f, ...updates }));
+  }, [form.relationship]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function set(field: string, value: string) {
     setForm(f => ({ ...f, [field]: value }));
@@ -123,6 +138,7 @@ export function DemoFormSection() {
           relationship: form.relationship,
           occasion: form.occasion,
           personality: form.personality,
+          ageRange: form.ageRange || undefined,
           honeypot: form.website,
         }),
       });
@@ -257,6 +273,23 @@ export function DemoFormSection() {
               <SelectField id="demo-relationship" label="Your Relationship to Them"
                 value={form.relationship} onChange={v => set("relationship", v)}
                 options={RELATIONSHIP_OPTIONS} placeholder="Select a relationship…" />
+
+              {showAgeRange && (
+                <div>
+                  <SelectField id="demo-age-range" label={`How old is ${form.recipientName || "them"}?`}
+                    value={form.ageRange} onChange={v => set("ageRange", v)}
+                    options={AGE_RANGE_OPTIONS} placeholder="Select an age range…" />
+                  <p style={{
+                    fontFamily: "'Inter', Arial, sans-serif",
+                    fontSize: "0.75rem",
+                    color: "#555",
+                    margin: "7px 0 0",
+                    lineHeight: 1.5,
+                  }}>
+                    Age changes everything — the AI writes very differently for a 6-year-old vs. a 32-year-old.
+                  </p>
+                </div>
+              )}
 
               <SelectField id="demo-occasion" label="Upcoming Occasion"
                 value={form.occasion} onChange={v => set("occasion", v)}

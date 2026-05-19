@@ -8,6 +8,7 @@ export interface DemoPreviewData {
   relationship: string;
   occasion: string;
   personality: string;
+  ageRange?: string;
   card: {
     bgColor: string;
     titleColor: string;
