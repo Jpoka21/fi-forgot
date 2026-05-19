@@ -1,6 +1,8 @@
-import fs from "fs";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import { eq } from "drizzle-orm";
+import { db } from "@workspace/db";
+import { cardClassificationsTable } from "@workspace/db/schema";
 import { logger } from "../lib/logger";
 
 const anthropic = new Anthropic({
@@ -13,7 +15,6 @@ const openai = new OpenAI({
   apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ?? "placeholder",
 });
 
-const CACHE_PATH = "/tmp/fi-forgot-card-classifications.json";
 
 const VALID_OCCASIONS = [
   "Birthday", "Anniversary", "Valentine's Day", "Mother's Day", "Father's Day",
@@ -45,41 +46,64 @@ export interface CardClassification {
 
 const cache = new Map<string, CardClassification>();
 
-function loadCache() {
+async function loadCache() {
   try {
-    if (fs.existsSync(CACHE_PATH)) {
-      const raw = fs.readFileSync(CACHE_PATH, "utf-8");
-      const parsed = JSON.parse(raw) as Record<string, CardClassification>;
-      for (const [url, cls] of Object.entries(parsed)) {
-        cache.set(url, cls);
-      }
-      logger.info({ count: cache.size }, "card-classifier: loaded cache from disk");
+    const rows = await db.select().from(cardClassificationsTable);
+    for (const row of rows) {
+      cache.set(row.imageUrl, {
+        occasions: row.occasions,
+        confirmedOccasions: row.confirmedOccasions,
+        keywords: row.keywords,
+        claudeKeywords: row.claudeKeywords,
+        gptKeywords: row.gptKeywords,
+        skip: row.skip,
+        classifiedAt: row.classifiedAt,
+        models: row.models,
+      });
     }
+    logger.info({ count: cache.size }, "card-classifier: loaded cache from database");
   } catch (err) {
-    logger.warn({ err }, "card-classifier: failed to load cache, starting fresh");
+    logger.warn({ err }, "card-classifier: failed to load cache from database, starting fresh");
   }
 }
 
-function saveCache() {
+async function saveEntry(imageUrl: string, cls: CardClassification) {
   try {
-    const obj: Record<string, CardClassification> = {};
-    for (const [url, cls] of cache.entries()) {
-      obj[url] = cls;
-    }
-    fs.writeFileSync(CACHE_PATH, JSON.stringify(obj), "utf-8");
+    await db.insert(cardClassificationsTable).values({
+      imageUrl,
+      occasions: cls.occasions,
+      confirmedOccasions: cls.confirmedOccasions,
+      keywords: cls.keywords,
+      claudeKeywords: cls.claudeKeywords,
+      gptKeywords: cls.gptKeywords,
+      skip: cls.skip,
+      classifiedAt: cls.classifiedAt,
+      models: cls.models,
+    }).onConflictDoUpdate({
+      target: cardClassificationsTable.imageUrl,
+      set: {
+        occasions: cls.occasions,
+        confirmedOccasions: cls.confirmedOccasions,
+        keywords: cls.keywords,
+        claudeKeywords: cls.claudeKeywords,
+        gptKeywords: cls.gptKeywords,
+        skip: cls.skip,
+        classifiedAt: cls.classifiedAt,
+        models: cls.models,
+      },
+    });
   } catch (err) {
-    logger.warn({ err }, "card-classifier: failed to save cache");
+    logger.warn({ err, imageUrl }, "card-classifier: failed to persist entry to database");
   }
 }
 
-let savePending = false;
-function scheduleSave() {
-  if (savePending) return;
-  savePending = true;
-  setTimeout(() => {
-    savePending = false;
-    saveCache();
-  }, 2000);
+async function deleteEntry(imageUrl: string) {
+  try {
+    await db.delete(cardClassificationsTable)
+      .where(eq(cardClassificationsTable.imageUrl, imageUrl));
+  } catch (err) {
+    logger.warn({ err, imageUrl }, "card-classifier: failed to delete entry from database");
+  }
 }
 
 function detectMediaType(buf: Buffer): "image/jpeg" | "image/png" | "image/gif" | "image/webp" {
@@ -254,7 +278,7 @@ export async function classifyCard(imageUrl: string): Promise<CardClassification
     }, "card-classifier: classified");
 
     cache.set(imageUrl, result);
-    scheduleSave();
+    void saveEntry(imageUrl, result);
     return result;
   } catch (err) {
     logger.warn({ err, imageUrl }, "card-classifier: failed to classify card, skipping");
@@ -264,6 +288,7 @@ export async function classifyCard(imageUrl: string): Promise<CardClassification
       classifiedAt: Date.now(), models: [],
     };
     cache.set(imageUrl, fallback);
+    void saveEntry(imageUrl, fallback);
     return fallback;
   }
 }
@@ -359,11 +384,14 @@ async function runScan(cards: Array<{ imageUrl?: string | null }>, reason: strin
 
   let pruned = 0;
   for (const url of cache.keys()) {
-    if (!activeUrls.has(url)) { cache.delete(url); pruned++; }
+    if (!activeUrls.has(url)) {
+      cache.delete(url);
+      void deleteEntry(url);
+      pruned++;
+    }
   }
   if (pruned > 0) {
     logger.info({ pruned }, "card-classifier: pruned removed cards from cache");
-    scheduleSave();
   }
 
   const toProcess = [...activeUrls].filter(url => {
@@ -436,4 +464,4 @@ export function startPeriodicRescan(
   logger.info("card-classifier: dual-model periodic rescan scheduled (Claude + GPT, every 7 days)");
 }
 
-loadCache();
+void loadCache();
