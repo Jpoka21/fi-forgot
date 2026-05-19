@@ -598,15 +598,28 @@ export async function fetchMultipleCardImagesForOccasion(occasion: string, limit
     const cachedCards = safe.filter(c => hasCachedClassification(c.imageUrl!));
     const uncachedCards = safe.filter(c => !hasCachedClassification(c.imageUrl!));
 
-    // AI-classified cards that are appropriate for this occasion, not flagged as skip,
-    // and not excluded by name/filename anti-keywords (catches work cards with heart imagery etc.)
-    const aiMatched = cachedCards.filter(c => {
+    // AI-classified cards — prefer cards where BOTH models agreed (confirmedOccasions),
+    // fall back to cards where at least one model tagged the occasion.
+    // Anti-keyword guard runs on both tiers.
+    const aiConfirmed: typeof safe = [];
+    const aiSingle: typeof safe = [];
+
+    for (const c of cachedCards) {
       const cls = getCachedClassification(c.imageUrl!);
-      if (!cls || cls.skip || !cls.occasions.includes(occasion)) return false;
-      // Apply anti-keyword guard on the card name + filename (don't require positive keyword match —
-      // the AI already confirmed the occasion; we only need to block obvious misfits like work cards)
-      return !hasAntiKeyword(String(c.name), occasion, c.imageUrl);
-    });
+      if (!cls || cls.skip) continue;
+      if (hasAntiKeyword(String(c.name), occasion, c.imageUrl)) continue;
+      const confirmed = "confirmedOccasions" in cls
+        ? (cls as { confirmedOccasions: string[] }).confirmedOccasions
+        : [];
+      if (confirmed.includes(occasion)) {
+        aiConfirmed.push(c);
+      } else if (cls.occasions.includes(occasion)) {
+        aiSingle.push(c);
+      }
+    }
+
+    // Confirmed (both agreed) cards come first, single-model matches fill remaining slots
+    const aiMatched = [...aiConfirmed, ...aiSingle];
 
     // ── Fallback path: keyword matching for cards the AI hasn't seen yet ──────
     const keywordMatched = uncachedCards.filter(c =>
