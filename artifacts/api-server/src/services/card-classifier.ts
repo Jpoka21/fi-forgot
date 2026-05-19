@@ -276,6 +276,71 @@ export function hasCachedClassification(imageUrl: string): boolean {
   return cache.has(imageUrl);
 }
 
+export interface ClassificationStats {
+  totalEntries: number;
+  skipped: number;
+  classified: number;
+  dualModel: number;
+  singleModel: number;
+  byOccasion: Array<{
+    occasion: string;
+    total: number;
+    confirmed: number;
+  }>;
+  uniqueKeywords: number;
+  topKeywords: Array<{ keyword: string; count: number }>;
+  scanInProgress: boolean;
+}
+
+export function getClassificationStats(): ClassificationStats {
+  const entries = Array.from(cache.values());
+  const skipped = entries.filter(e => e.skip).length;
+  const classified = entries.filter(e => !e.skip);
+  const dualModel = classified.filter(e => (e.models?.length ?? 0) >= 2).length;
+  const singleModel = classified.filter(e => (e.models?.length ?? 0) === 1).length;
+
+  const occasionTotals: Record<string, number> = {};
+  const confirmedTotals: Record<string, number> = {};
+  const keywordCounts: Record<string, number> = {};
+
+  for (const e of classified) {
+    for (const occ of (e.occasions ?? [])) {
+      occasionTotals[occ] = (occasionTotals[occ] ?? 0) + 1;
+    }
+    for (const occ of (e.confirmedOccasions ?? [])) {
+      confirmedTotals[occ] = (confirmedTotals[occ] ?? 0) + 1;
+    }
+    for (const kw of (e.keywords ?? [])) {
+      keywordCounts[kw] = (keywordCounts[kw] ?? 0) + 1;
+    }
+  }
+
+  const byOccasion = Object.entries(occasionTotals)
+    .map(([occasion, total]) => ({ occasion, total, confirmed: confirmedTotals[occasion] ?? 0 }))
+    .sort((a, b) => b.total - a.total);
+
+  const topKeywords = Object.entries(keywordCounts)
+    .map(([keyword, count]) => ({ keyword, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 30);
+
+  return {
+    totalEntries: entries.length,
+    skipped,
+    classified: classified.length,
+    dualModel,
+    singleModel,
+    byOccasion,
+    uniqueKeywords: Object.keys(keywordCounts).length,
+    topKeywords,
+    scanInProgress: isScanInProgress(),
+  };
+}
+
+let _scanInProgress = false;
+export function setScanInProgress(v: boolean) { _scanInProgress = v; }
+export function isScanInProgress() { return _scanInProgress; }
+
 // ── Periodic rescan ────────────────────────────────────────────────────────────
 
 const STALE_AFTER_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
@@ -328,13 +393,16 @@ async function runScan(cards: Array<{ imageUrl?: string | null }>, reason: strin
     }
   }
 
+  setScanInProgress(true);
   try {
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     logger.info({ classified: toProcess.length, reason }, "card-classifier: scan complete");
   } catch (err) {
     logger.warn({ err }, "card-classifier: scan encountered errors");
+  } finally {
+    setScanInProgress(false);
+    scanRunning = false;
   }
-  scanRunning = false;
 }
 
 /** Fire-and-forget: classify any uncached cards now. */

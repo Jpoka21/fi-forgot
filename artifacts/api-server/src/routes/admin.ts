@@ -5,6 +5,7 @@ import {
   HandwryttenOrderRequest,
   listHandwryttenFonts,
 } from "../services/handwrytten";
+import { getClassificationStats } from "../services/card-classifier";
 
 const router = Router();
 
@@ -389,6 +390,10 @@ router.post("/admin/handwrytten/orders/:orderId/cancel", async (req, res) => {
     req.log.error({ err }, "cancelHandwryttenOrder failed");
     res.status(500).json({ error: "Failed to cancel order" });
   }
+});
+
+router.get("/admin/card-classifications", (_req, res) => {
+  res.json(getClassificationStats());
 });
 
 export default router;
