@@ -273,20 +273,33 @@ export default function DashboardPage() {
   const awaitingApproval = cards.filter((c) => c.status === "Ready for approval");
   const disastersAvoided = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
 
-  const upcomingEventCount = useMemo(() => {
+  const allUpcomingEvents = useMemo(() => {
     const today = new Date();
     const cutoff = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
-    let count = 0;
+    const thisYear = today.getFullYear();
+    const result: Array<{
+      recipient: Recipient;
+      event: string;
+      daysAway: number;
+      dateStr: string;
+      briefingDone: boolean;
+    }> = [];
     for (const r of recipients) {
+      const briefings = getBriefingsForRecipient(r.id);
       for (const event of r.selectedEvents ?? []) {
         const dateStr = getEventDate(event, r);
         if (!dateStr) continue;
         const d = new Date(dateStr);
-        if (d >= today && d <= cutoff) count++;
+        if (d < today || d > cutoff) continue;
+        const daysAway = Math.ceil((d.getTime() - today.getTime()) / 86400000);
+        const briefingDone = briefings.some((b) => b.event === event && b.year === thisYear);
+        result.push({ recipient: r, event, daysAway, dateStr, briefingDone });
       }
     }
-    return count;
+    result.sort((a, b) => a.daysAway - b.daysAway);
+    return result;
   }, [recipients]);
+  const upcomingEventCount = allUpcomingEvents.length;
   const primaryPreviewDays = recipients[0]?.previewDays ?? null;
   const briefingsNeeded = upcomingBriefings.filter((b) => !b.briefingDoneThisYear);
 
@@ -672,6 +685,7 @@ export default function DashboardPage() {
               icon={CalendarDays}
               accentColor={BLACK}
               sub={upcomingEventCount > 0 ? "in next 90 days" : undefined}
+              href={upcomingEventCount > 0 ? "#upcoming-cards" : undefined}
             />
             <StatCard label="Recipients covered"  value={recipients.length}     icon={Users}        accentColor={RED} />
             <StatCard
@@ -690,6 +704,76 @@ export default function DashboardPage() {
               sub={(awaitingApproval.length + pendingApprovals.length) > 0 ? "tap to review" : undefined}
             />
           </div>
+
+          {/* ── Upcoming Cards Section ────────────────────────────────────── */}
+          {allUpcomingEvents.length > 0 && (
+            <div id="upcoming-cards" className="mb-8">
+              <div className="flex items-center justify-between mb-1">
+                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.05em", color: BLACK }}>
+                  Upcoming Cards
+                </h2>
+                <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: `${BLACK}10`, color: GRAY }}>
+                  Next 90 days
+                </span>
+              </div>
+              <p className="text-sm mb-4" style={{ color: GRAY }}>
+                Answer a couple of quick questions now so we can write the most personal card — or skip it and we'll email you when it gets close.
+              </p>
+              <div className="space-y-3">
+                {allUpcomingEvents.map((ev) => (
+                  <div
+                    key={`${ev.recipient.id}-${ev.event}`}
+                    className="rounded-2xl p-4 flex items-center justify-between gap-4"
+                    style={{
+                      background: "#fff",
+                      border: `1.5px solid ${ev.briefingDone ? "#22c55e30" : `${BLACK}12`}`,
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold"
+                        style={{ background: ev.briefingDone ? "#22c55e18" : `${RED}12`, color: ev.briefingDone ? "#16a34a" : RED }}
+                      >
+                        {ev.daysAway}d
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold truncate" style={{ fontSize: "0.9rem", color: BLACK }}>
+                          {ev.event}
+                          <span className="font-normal ml-1" style={{ color: GRAY }}>for {ev.recipient.name}</span>
+                        </div>
+                        <div className="text-xs mt-0.5 flex items-center gap-2" style={{ color: GRAY }}>
+                          <span>{new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          {ev.briefingDone && (
+                            <span className="font-semibold" style={{ color: "#16a34a" }}>✓ Briefing done</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
+                        <button
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-80 whitespace-nowrap"
+                          style={{
+                            background: ev.briefingDone ? `${BLACK}08` : RED,
+                            color: ev.briefingDone ? GRAY : "#fff",
+                            border: ev.briefingDone ? `1px solid ${BLACK}15` : "none",
+                          }}
+                        >
+                          {ev.briefingDone ? "Update answers" : "Answer now"}
+                        </button>
+                      </Link>
+                      {!ev.briefingDone && (
+                        <span className="text-xs" style={{ color: `${GRAY}99` }}>
+                          or we'll email you {ev.daysAway <= 14 ? "soon" : "when it's close"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ── Main grid ─────────────────────────────────────────────────── */}
           <div className="grid md:grid-cols-3 gap-6">
