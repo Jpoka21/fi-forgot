@@ -402,51 +402,52 @@ export default function DemoPreviewPage() {
             </div>
           )}
 
-          {/* Annotation callout with curved arrow pointing up at message */}
-          <div style={{ margin: "8px 0 6px", position: "relative" }}>
-            {/* Curved SVG arrow — tail near callout, head pointing into the card above */}
-            <svg
-              width="90" height="52" viewBox="0 0 90 52"
-              style={{ display: "block", marginLeft: 8, marginBottom: -2 }}
-              aria-hidden="true"
-            >
-              <defs>
-                <marker id="fi-arrowhead" markerWidth="8" markerHeight="8"
-                  refX="0" refY="4" orient="auto">
-                  <polygon points="0 0, 8 4, 0 8" fill="#cc1c1c" />
-                </marker>
-              </defs>
-              {/* Bezier curve from bottom-left sweeping up to top-right */}
-              <path
-                d="M 14,48 C 18,26 60,14 80,5"
-                fill="none"
-                stroke="#cc1c1c"
-                strokeWidth="3"
-                strokeLinecap="round"
-                markerEnd="url(#fi-arrowhead)"
-              />
-            </svg>
+        </div>
 
-            {/* Callout box */}
-            <div style={{
-              background: "#fffcf4",
-              border: "1.5px solid #c8860a",
-              borderRadius: 12,
-              padding: "13px 16px",
-              display: "flex",
-              gap: 11,
-              alignItems: "flex-start",
-              boxShadow: "0 3px 12px rgba(180,110,0,0.13)",
-            }}>
-              <span style={{ fontSize: "1.2rem", lineHeight: 1, flexShrink: 0, marginTop: 2 }}>✨</span>
-              <div>
-                <p style={{ margin: "0 0 4px", fontSize: "0.9rem", fontWeight: 700, color: "#3d2700", fontFamily: "'Inter', sans-serif", lineHeight: 1.3 }}>
-                  This gets even better when you sign up.
-                </p>
-                <p style={{ margin: 0, fontSize: "0.8rem", lineHeight: 1.55, color: "#6b4410", fontFamily: "'Inter', sans-serif" }}>
-                  We ask about your recipient — their personality, what makes them laugh, your history together — so every word feels like it genuinely came from you.
-                </p>
-              </div>
+        {/* Annotation callout — lives OUTSIDE the overflow:hidden card so the arrow can overlap freely */}
+        <div style={{ position: "relative", marginTop: 0, marginBottom: 8, paddingTop: 12 }}>
+          {/* SVG arrow: absolutely positioned, extends UP into the message card above */}
+          <svg
+            width="320" height="88" viewBox="0 0 320 88"
+            style={{ position: "absolute", top: -72, left: 0, pointerEvents: "none", zIndex: 10, overflow: "visible" }}
+            aria-hidden="true"
+          >
+            <defs>
+              <marker id="fi-arrowhead" markerWidth="9" markerHeight="9"
+                refX="1" refY="4.5" orient="auto">
+                <polygon points="0 0, 9 4.5, 0 9" fill="#cc1c1c" />
+              </marker>
+            </defs>
+            {/* Tail near bottom-left (callout), head sweeps up to top-right (into the card) */}
+            <path
+              d="M 38,84 C 55,52 200,18 288,6"
+              fill="none"
+              stroke="#cc1c1c"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              markerEnd="url(#fi-arrowhead)"
+            />
+          </svg>
+
+          {/* Callout box */}
+          <div style={{
+            background: "#fffcf4",
+            border: "1.5px solid #c8860a",
+            borderRadius: 12,
+            padding: "13px 16px",
+            display: "flex",
+            gap: 11,
+            alignItems: "flex-start",
+            boxShadow: "0 3px 12px rgba(180,110,0,0.13)",
+          }}>
+            <span style={{ fontSize: "1.2rem", lineHeight: 1, flexShrink: 0, marginTop: 2 }}>✨</span>
+            <div>
+              <p style={{ margin: "0 0 4px", fontSize: "0.9rem", fontWeight: 700, color: "#3d2700", fontFamily: "'Inter', sans-serif", lineHeight: 1.3 }}>
+                This gets even better when you sign up.
+              </p>
+              <p style={{ margin: 0, fontSize: "0.8rem", lineHeight: 1.55, color: "#6b4410", fontFamily: "'Inter', sans-serif" }}>
+                We ask about your recipient — their personality, what makes them laugh, your history together — so every word feels like it genuinely came from you.
+              </p>
             </div>
           </div>
 
