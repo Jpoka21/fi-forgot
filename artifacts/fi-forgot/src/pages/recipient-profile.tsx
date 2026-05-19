@@ -6,6 +6,7 @@ import {
   saveRecipient,
   defaultDelivery,
   suggestedEvents,
+  availableHolidays,
   getBriefingsForRecipient,
   deleteBriefing,
   RELATIONSHIPS,
@@ -367,6 +368,15 @@ export default function RecipientProfilePage() {
   useEffect(() => {
     if (isNew && watchRelationship) {
       form.setValue("selectedEvents", suggestedEvents(watchRelationship as any));
+    } else if (!isNew && watchRelationship) {
+      // When relationship changes on an existing recipient, strip any events that
+      // are no longer valid (e.g. Father's Day if relationship changes to Sister)
+      const allowed = availableHolidays(watchRelationship);
+      const current = form.getValues("selectedEvents");
+      const cleaned = current.filter((e: string) => allowed.includes(e));
+      if (cleaned.length !== current.length) {
+        form.setValue("selectedEvents", cleaned);
+      }
     }
   }, [watchRelationship, isNew]);
 
@@ -529,7 +539,7 @@ export default function RecipientProfilePage() {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {HOLIDAYS.map((h) => {
+                  {availableHolidays(watchRelationship).map((h) => {
                     const selected = watchSelectedEvents.includes(h);
                     const needsDate = DATE_SENSITIVE.has(h);
                     const currentDate = watchEventDates?.[h] ?? "";

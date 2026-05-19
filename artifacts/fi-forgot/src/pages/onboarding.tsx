@@ -28,6 +28,18 @@ const RELATIONSHIPS = [
   { id: "Other", label: "Other", emoji: "⭐" },
 ];
 
+// Onboarding relationship IDs where Father's/Mother's Day makes sense
+const FATHERS_DAY_ONBOARDING_RELS = ["Dad", "Father-in-law", "Husband", "Boyfriend", "Grandpa"];
+const MOTHERS_DAY_ONBOARDING_RELS = ["Mom", "Mother-in-law", "Wife", "Girlfriend", "Grandma"];
+
+function availableOnboardingHolidays(relationship: string): string[] {
+  return HOLIDAYS.filter(h => {
+    if (h === "Father's Day" && !FATHERS_DAY_ONBOARDING_RELS.includes(relationship)) return false;
+    if (h === "Mother's Day" && !MOTHERS_DAY_ONBOARDING_RELS.includes(relationship)) return false;
+    return true;
+  });
+}
+
 const PERSONALITIES = [
   { id: "sweet", label: "Sweet & sentimental", emoji: "🥰" },
   { id: "funny", label: "Funny & sarcastic", emoji: "😂" },
@@ -369,7 +381,7 @@ export default function OnboardingPage() {
             {step === 4 && (
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
-                  {HOLIDAYS.map((h) => {
+                  {availableOnboardingHolidays(data.relationship).map((h) => {
                     const selected = data.selectedEvents.includes(h);
                     const isSuggested = suggested.includes(h);
                     const needsDate = DATE_SENSITIVE.includes(h);

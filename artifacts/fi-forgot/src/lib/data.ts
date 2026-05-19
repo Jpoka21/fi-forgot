@@ -567,6 +567,29 @@ export const HOLIDAYS = [
   "Congratulations",
 ];
 
+// Relationships where the recipient IS a father figure — Father's Day appropriate
+export const FATHERS_DAY_RELATIONSHIPS: Relationship[] = [
+  "Dad", "Father in law", "Husband", "Boyfriend", "Grandfather",
+];
+
+// Relationships where the recipient IS a mother figure — Mother's Day appropriate
+export const MOTHERS_DAY_RELATIONSHIPS: Relationship[] = [
+  "Mom", "Mother in law", "Wife", "Girlfriend", "Grandmother",
+];
+
+/**
+ * Returns the subset of HOLIDAYS that make sense for this relationship.
+ * Father's Day is only offered when the recipient is a dad/grandfather/partner.
+ * Mother's Day is only offered when the recipient is a mom/grandmother/partner.
+ */
+export function availableHolidays(relationship: Relationship | string): string[] {
+  return HOLIDAYS.filter(h => {
+    if (h === "Father's Day" && !FATHERS_DAY_RELATIONSHIPS.includes(relationship as Relationship)) return false;
+    if (h === "Mother's Day" && !MOTHERS_DAY_RELATIONSHIPS.includes(relationship as Relationship)) return false;
+    return true;
+  });
+}
+
 export const RELATIONSHIPS: Relationship[] = [
   "Wife", "Girlfriend", "Husband", "Boyfriend",
   "Mom", "Dad", "Mother in law", "Father in law",

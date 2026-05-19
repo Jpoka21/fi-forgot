@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { B } from "@/components/brand";
 import { HOLIDAYS } from "@/lib/data";
 
@@ -12,7 +12,18 @@ const RELATIONSHIP_OPTIONS = [
   "Other",
 ];
 
-const OCCASION_OPTIONS = HOLIDAYS;
+// Father's Day / Mother's Day only make sense when the recipient is a parent figure
+// For the demo form, "Parent" covers Mom/Dad and "Spouse / Partner" covers Wife/Husband
+const FATHERS_DAY_DEMO_RELS = ["Parent", "Spouse / Partner"];
+const MOTHERS_DAY_DEMO_RELS = ["Parent", "Spouse / Partner"];
+
+function availableDemoOccasions(relationship: string): string[] {
+  return HOLIDAYS.filter(h => {
+    if (h === "Father's Day" && !FATHERS_DAY_DEMO_RELS.includes(relationship)) return false;
+    if (h === "Mother's Day" && !MOTHERS_DAY_DEMO_RELS.includes(relationship)) return false;
+    return true;
+  });
+}
 
 const PERSONALITY_OPTIONS = [
   "Sentimental & Heartfelt",
@@ -79,6 +90,15 @@ export function DemoFormSection() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
+
+  const occasionOptions = availableDemoOccasions(form.relationship);
+
+  // Clear occasion whenever relationship changes and current occasion is no longer valid
+  useEffect(() => {
+    if (form.occasion && !availableDemoOccasions(form.relationship).includes(form.occasion)) {
+      setForm(f => ({ ...f, occasion: "" }));
+    }
+  }, [form.relationship]);
 
   function set(field: string, value: string) {
     setForm(f => ({ ...f, [field]: value }));
@@ -240,7 +260,7 @@ export function DemoFormSection() {
 
               <SelectField id="demo-occasion" label="Upcoming Occasion"
                 value={form.occasion} onChange={v => set("occasion", v)}
-                options={OCCASION_OPTIONS} placeholder="Select an occasion…" />
+                options={occasionOptions} placeholder="Select an occasion…" />
 
               <SelectField id="demo-personality" label="How Would You Describe Them?"
                 value={form.personality} onChange={v => set("personality", v)}
