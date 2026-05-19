@@ -54,9 +54,9 @@ const plans = [
 
 
 const examples = [
-  { occasion: "Anniversary", recipient: "Wife, 7 years", preview: `"Every year I'm amazed you still put up with me. Honestly, I'm more impressed by you than I was on day one. Happy Anniversary — I'm the luckiest idiot alive."` },
-  { occasion: "Mother's Day", recipient: "Mom", preview: `"You raised a son who never remembers anything — and somehow turned that into a compliment. Happy Mother's Day. I learned stubbornness from the best."` },
-  { occasion: "Birthday", recipient: "Girlfriend", preview: `"Happy Birthday to the person who tolerates my 47 excuses for being late, my inability to plan, and my optimism that things will somehow work out. They usually do. Because of you."` },
+  { occasion: "Birthday", recipient: "Dad", preview: `"You never made a big deal out of much, and somehow that taught me everything. Happy Birthday, Dad. I don't say it enough — but I mean it every time I do."` },
+  { occasion: "Anniversary", recipient: "Wife, 12 years", preview: `"Twelve years in and I still reach for your hand without thinking. That probably says more than anything I could write in a card. Happy Anniversary."` },
+  { occasion: "Just Because", recipient: "Best Friend", preview: `"No occasion. No reason. Just thought you should know that you're one of the few people I'd actually call if something went wrong. That's rare. Don't make it weird."` },
 ];
 
 // ─── Landing Page ─────────────────────────────────────────────────────────────
@@ -464,7 +464,7 @@ export default function LandingPage() {
                 <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.18em", color: B.red, marginBottom: 6 }}>
                   {ex.occasion} · {ex.recipient}
                 </div>
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.7 }}>
+                <p style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "rgba(255,255,255,0.85)", lineHeight: 1.75 }}>
                   {ex.preview}
                 </p>
                 <div className="mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
