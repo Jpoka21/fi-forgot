@@ -18,6 +18,7 @@ import ReminderSettingsPage from "@/pages/reminder-settings";
 import AdminPage from "@/pages/admin";
 import BriefingPage from "@/pages/briefing";
 import TryPage from "@/pages/try";
+import DemoPreviewPage from "@/pages/demo-preview";
 
 const queryClient = new QueryClient();
 
@@ -104,13 +105,14 @@ function Router() {
         <ProtectedRoute component={AdminPage} />
       </Route>
       <Route path="/try" component={TryPage} />
+      <Route path="/demo/:id" component={DemoPreviewPage} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings"];
+const HIDE_TRY_BUTTON_ON = ["/try", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings"];
 
 function FloatingTryButton() {
   const [location] = useLocation();

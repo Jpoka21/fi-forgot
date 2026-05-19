@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { db, demoLeadsTable } from "@workspace/db";
-import { sendDemoEmail } from "../services/sendgrid";
+import {
+  sendDemoEmail,
+  pickCard,
+  writeMessage,
+  mockCheckinQuestions,
+  fetchCardImageForOccasion,
+} from "../services/sendgrid";
+import { storeDemoPreview } from "../services/demo-preview-store";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -45,18 +52,29 @@ router.post("/demo-email", async (req, res) => {
   const safeOccasion = VALID_OCCASIONS.includes(occasion) ? occasion : "Just Because";
   const safePersonality = VALID_PERSONALITIES.includes(personality) ? personality : "Warm & Nurturing";
   const normalizedEmail = email.toLowerCase().trim();
-
   const appUrl = getAppUrl(req);
 
+  // Compute all preview data up front
+  const card = pickCard(safeOccasion, safePersonality, safeRelationship);
+  const message = writeMessage(safeName, safeRelationship, safeOccasion, safePersonality);
+  const checkinHtml = mockCheckinQuestions(safeOccasion, safePersonality, safeName);
+  const cardImageUrl = await fetchCardImageForOccasion(safeOccasion);
+
+  // Store preview and build its URL (7-day TTL in memory)
+  const previewId = storeDemoPreview({
+    recipientName: safeName,
+    relationship: safeRelationship,
+    occasion: safeOccasion,
+    personality: safePersonality,
+    card,
+    message,
+    cardImageUrl,
+    checkinHtml,
+  });
+  const previewUrl = `${appUrl}/demo/${previewId}`;
+
   try {
-    await sendDemoEmail({
-      email: normalizedEmail,
-      recipientName: safeName,
-      relationship: safeRelationship,
-      occasion: safeOccasion,
-      personality: safePersonality,
-      appUrl,
-    });
+    await sendDemoEmail({ email: normalizedEmail, recipientName: safeName, occasion: safeOccasion, previewUrl });
   } catch (err) {
     req.log.error({ err }, "Demo email send failed");
     res.status(500).json({ error: "send_failed", message: "Something went wrong sending the demo. Try again in a minute." });
@@ -79,8 +97,8 @@ router.post("/demo-email", async (req, res) => {
     req.log.warn({ err }, "Failed to store demo lead — email was still sent");
   }
 
-  logger.info({ email: normalizedEmail, recipientName: safeName, occasion: safeOccasion }, "Demo email sent");
-  res.json({ success: true });
+  logger.info({ email: normalizedEmail, recipientName: safeName, occasion: safeOccasion, previewId }, "Demo email sent");
+  res.json({ success: true, previewId, previewUrl });
 });
 
 export default router;

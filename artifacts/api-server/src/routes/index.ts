@@ -7,6 +7,7 @@ import approvalRouter from "./approval";
 import demoEmailRouter from "./demo-email";
 import cardProxyRouter from "./card-proxy";
 import cardImageRouter from "./card-image";
+import demoPreviewRouter from "./demo-preview";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(approvalRouter);
 router.use(demoEmailRouter);
 router.use(cardProxyRouter);
 router.use(cardImageRouter);
+router.use(demoPreviewRouter);
 
 export default router;

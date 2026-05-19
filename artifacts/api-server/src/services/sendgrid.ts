@@ -35,7 +35,7 @@ type CardConfig = {
   whyChosen: string;
 };
 
-function pickCard(occasion: string, personality: string, relationship: string): CardConfig {
+export function pickCard(occasion: string, personality: string, relationship: string): CardConfig {
   const isFunny = personality.includes("Funny");
   const isSpouse = relationship === "Spouse / Partner";
   const isParentRel = relationship === "Parent";   // sender → their parent
@@ -247,7 +247,7 @@ function pickCard(occasion: string, personality: string, relationship: string): 
 
 // ─── Message generation ───────────────────────────────────────────────────────
 
-function writeMessage(name: string, relationship: string, occasion: string, personality: string): string {
+export function writeMessage(name: string, relationship: string, occasion: string, personality: string): string {
   const isFunny = personality.includes("Funny");
   const isSentimental = personality.includes("Sentimental") || personality.includes("Warm");
   const isSpouse   = relationship === "Spouse / Partner";
@@ -370,7 +370,7 @@ function writeMessage(name: string, relationship: string, occasion: string, pers
 
 // ─── Mock pre-occasion questions ──────────────────────────────────────────────
 
-function mockCheckinQuestions(occasion: string, personality: string, name: string): string {
+export function mockCheckinQuestions(occasion: string, personality: string, name: string): string {
   const n = escapeHtml(name);
   const toneLabel = personality.includes("Funny") ? "funny" : "heartfelt";
 
@@ -444,7 +444,7 @@ function mockCheckinQuestions(occasion: string, personality: string, name: strin
 
 // ─── Handwrytten card image lookup ────────────────────────────────────────────
 
-async function fetchCardImageForOccasion(occasion: string): Promise<string | null> {
+export async function fetchCardImageForOccasion(occasion: string): Promise<string | null> {
   try {
     const category =
       occasion === "Birthday" ? "Birthday"
@@ -552,42 +552,11 @@ export async function sendApprovalReminderEmail(opts: {
 export async function sendDemoEmail(opts: {
   email: string;
   recipientName: string;
-  relationship: string;
   occasion: string;
-  personality: string;
-  appUrl: string;
+  previewUrl: string;
 }): Promise<void> {
   const resend = getResend();
   const fromEmail = getFromEmail();
-
-  const card = pickCard(opts.occasion, opts.personality, opts.relationship);
-  const message = writeMessage(opts.recipientName, opts.relationship, opts.occasion, opts.personality);
-  const checkinHtml = mockCheckinQuestions(opts.occasion, opts.personality, opts.recipientName);
-  const editUrl = `${opts.appUrl}/signup?demo=true&recipientName=${encodeURIComponent(opts.recipientName)}&relationship=${encodeURIComponent(opts.relationship)}&occasion=${encodeURIComponent(opts.occasion)}`;
-  const rawCardImageUrl = await fetchCardImageForOccasion(opts.occasion);
-  // Fetch the card image server-side, store it in our own in-memory store,
-  // and embed a URL on our own domain in the email. This avoids:
-  //   - external URL blocking by email clients (CloudFront direct)
-  //   - Resend stripping data URIs from HTML
-  //   - CID attachment complexity
-  // Email clients load /api/card-image/:id from our public server — no auth, no redirects.
-  let cardImageSrc: string | null = null;
-  if (rawCardImageUrl) {
-    try {
-      const imgRes = await fetch(rawCardImageUrl, {
-        headers: { "User-Agent": "FIForgot-Demo-Mailer/1.0" },
-      });
-      if (imgRes.ok) {
-        const mime = (imgRes.headers.get("content-type") ?? "image/jpeg").split(";")[0].trim();
-        const buf = Buffer.from(await imgRes.arrayBuffer());
-        const { storeCardImage } = await import("./card-image-store.js");
-        const imageId = storeCardImage(buf, mime);
-        cardImageSrc = `${opts.appUrl}/api/card-image/${imageId}`;
-      }
-    } catch {
-      // Image fetch failed — email will render the fallback colour block instead.
-    }
-  }
 
   const subject = `Your ${opts.occasion.toLowerCase()} card for ${opts.recipientName} is ready`;
   const occasionLabel = opts.occasion.replace("Upcoming ", "").toLowerCase();
@@ -600,238 +569,37 @@ export async function sendDemoEmail(opts: {
 <tr><td align="center">
 <table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;">
 
-  <!-- Header -->
   <tr><td style="background:#111111;padding:24px 32px;border-radius:10px 10px 0 0;">
     <div style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:2px;font-family:Arial Black,Arial,sans-serif;">F*I FORGOT</div>
     <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;letter-spacing:1px;text-transform:uppercase;font-family:Arial,sans-serif;">Relationship Damage Control</div>
   </td></tr>
 
-  <!-- Demo banner -->
   <tr><td style="background:#E23B2E;padding:8px 32px;text-align:center;">
     <span style="font-size:11px;font-weight:bold;color:#ffffff;letter-spacing:1px;text-transform:uppercase;font-family:Arial,sans-serif;">SAMPLE CARD &mdash; Nothing is printed or mailed</span>
   </td></tr>
 
-  <!-- Body -->
-  <tr><td style="background:#ffffff;padding:32px;border-left:1px solid #e8dcc8;border-right:1px solid #e8dcc8;">
-
-    <!-- Intro -->
-    <p style="margin:0 0 18px;font-size:15px;color:#444;line-height:1.7;font-family:Arial,sans-serif;">
-      Hi,<br><br>
-      Based on what you told us, we built a sample ${occasionLabel} card for <strong style="color:#111;">${escapeHtml(opts.recipientName)}</strong>, your ${escapeHtml(opts.relationship.toLowerCase())}. Here's exactly what we made — and how we made it.
+  <tr><td style="background:#ffffff;padding:40px 32px;border-left:1px solid #e8dcc8;border-right:1px solid #e8dcc8;">
+    <p style="margin:0 0 14px;font-size:16px;color:#222;line-height:1.6;font-family:Arial,sans-serif;">
+      We built a personalized ${escapeHtml(occasionLabel)} card for <strong>${escapeHtml(opts.recipientName)}</strong>.
     </p>
-
-    <!-- Demo context note -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-      <tr><td style="background:#f8f3eb;border-left:3px solid #c4966a;border-radius:0 6px 6px 0;padding:14px 18px;">
-        <p style="margin:0;font-size:13px;color:#555;line-height:1.6;font-family:Arial,sans-serif;">
-          <strong style="color:#111;">Quick note:</strong> Those 5 questions were just to get the demo started. When you sign up, we collect a lot more — mailing address, key dates, gift history, and deeper preferences — so every card we send is even more dialed in.
-        </p>
-      </td></tr>
-    </table>
-
-    <!-- ── SECTION 1: The Card ── -->
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">① The Card We Chose</div>
-
-    <!-- Card image block -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:8px;margin-bottom:6px;border:1px solid #e0d4c0;overflow:hidden;">
-      ${cardImageSrc
-        ? `<tr><td style="padding:0;line-height:0;background:#f0e8d8;"><img src="${cardImageSrc}" width="100%" style="display:block;width:100%;border-radius:7px 7px 0 0;" alt="Your card design" /></td></tr>`
-        : `<tr><td style="background:${card.bgColor};padding:40px;text-align:center;border-radius:7px 7px 0 0;"><div style="font-size:32px;color:${card.accentColor};font-family:Georgia,serif;">✉</div></td></tr>`
-      }
-      <tr><td style="background:${card.bgColor};padding:16px 20px 14px;">
-        <div style="font-size:9px;color:${card.accentColor};text-transform:uppercase;letter-spacing:2px;font-weight:bold;font-family:Arial,sans-serif;margin-bottom:4px;">${card.seriesLabel}</div>
-        <div style="font-size:15px;color:${card.titleColor};font-weight:bold;line-height:1.25;font-family:Georgia,serif;">${card.title}</div>
-      </td></tr>
-    </table>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-      <tr><td align="center" style="padding:6px 0 4px;">
-        <a href="${editUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;">Don't love this card? Pick a different design &rarr;</a>
-      </td></tr>
-    </table>
-
-    <!-- Message inside the card -->
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;font-weight:bold;font-family:Arial,sans-serif;">What we'll write inside the card</div>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
-      <tr><td style="background:#fffdf8;border:1px solid #e0d4c0;border-radius:8px;padding:24px 28px;border-left:4px solid #c4966a;">
-        <div style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;margin-bottom:14px;font-weight:bold;">Handwritten inside the card</div>
-        <div style="font-size:15px;color:#1a1a1a;line-height:2;white-space:pre-line;font-family:Georgia,serif;">${escapeHtml(message)}</div>
-      </td></tr>
-    </table>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
-      <tr><td align="center">
-        <a href="${editUrl}" style="font-size:12px;color:#E23B2E;font-family:Arial,sans-serif;text-decoration:underline;">Want a different message? Edit the text or tell us what to change &rarr;</a>
-      </td></tr>
-    </table>
-    <p style="font-size:11px;color:#b0a090;text-align:center;margin:0 0 6px;font-family:Arial,sans-serif;">The real card is printed on thick card stock and mailed in a hand-addressed envelope.</p>
-
-    <!-- ── SECTION 2: Why We Chose This ── -->
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">② Why We Chose This</div>
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
-      <tr><td style="background:#f8f3eb;border-radius:8px;border:1px solid #e8dcc8;padding:20px 24px;">
-        <table cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
-          <tr>
-            <td style="font-size:12px;color:#888;padding:3px 16px 3px 0;white-space:nowrap;font-family:Arial,sans-serif;">Recipient</td>
-            <td style="font-size:13px;color:#111;font-weight:600;font-family:Arial,sans-serif;">${escapeHtml(opts.recipientName)} &mdash; ${escapeHtml(opts.relationship)}</td>
-          </tr>
-          <tr>
-            <td style="font-size:12px;color:#888;padding:3px 16px 3px 0;white-space:nowrap;font-family:Arial,sans-serif;">Occasion</td>
-            <td style="font-size:13px;color:#111;font-weight:600;font-family:Arial,sans-serif;">${escapeHtml(opts.occasion)}</td>
-          </tr>
-          <tr>
-            <td style="font-size:12px;color:#888;padding:3px 16px 3px 0;white-space:nowrap;font-family:Arial,sans-serif;">Personality</td>
-            <td style="font-size:13px;color:#111;font-weight:600;font-family:Arial,sans-serif;">${escapeHtml(opts.personality)}</td>
-          </tr>
-        </table>
-        <p style="margin:0;font-size:13px;color:#555;line-height:1.7;font-family:Arial,sans-serif;border-top:1px solid #e8dcc8;padding-top:14px;">
-          <strong style="color:#111;">Our reasoning:</strong> ${card.whyChosen}
-        </p>
-      </td></tr>
-    </table>
-    <p style="font-size:11px;color:#b0a090;margin:6px 0 0;font-family:Arial,sans-serif;">We have hundreds of cards. We choose based on the person, the occasion, and what we know about your relationship.</p>
-
-    <!-- ── SECTION 3: You're Always in Control ── -->
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">③ You&#x27;re Always in Control</div>
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
-      <tr><td style="background:#f8f8f6;border-radius:8px;border:1px solid #e8e8e8;padding:20px 24px;">
-        <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.7;font-family:Arial,sans-serif;">
-          Before any real card goes out, you get an approval email. You can:
-        </p>
-        <table cellpadding="0" cellspacing="0">
-          <tr><td style="padding:4px 14px 4px 0;font-size:13px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">&#10003;</td><td style="padding:4px 0;font-size:13px;color:#333;font-family:Arial,sans-serif;">Approve it and walk away — takes 10 seconds</td></tr>
-          <tr><td style="padding:4px 14px 4px 0;font-size:13px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">&#10003;</td><td style="padding:4px 0;font-size:13px;color:#333;font-family:Arial,sans-serif;">Edit the message yourself</td></tr>
-          <tr><td style="padding:4px 14px 4px 0;font-size:13px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">&#10003;</td><td style="padding:4px 0;font-size:13px;color:#333;font-family:Arial,sans-serif;">Tell us what to change — we&#x27;ll rewrite it</td></tr>
-          <tr><td style="padding:4px 14px 4px 0;font-size:13px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">&#10003;</td><td style="padding:4px 0;font-size:13px;color:#333;font-family:Arial,sans-serif;">Swap the card design entirely</td></tr>
-          <tr><td style="padding:4px 14px 4px 0;font-size:13px;color:#E23B2E;font-weight:bold;font-family:Arial,sans-serif;white-space:nowrap;">&#10003;</td><td style="padding:4px 0;font-size:13px;color:#333;font-family:Arial,sans-serif;">Regenerate the whole message from scratch</td></tr>
-        </table>
-        <p style="margin:14px 0 0;font-size:13px;color:#555;line-height:1.7;font-family:Arial,sans-serif;border-top:1px solid #e8e8e8;padding-top:14px;">
-          Nothing gets printed or mailed without your OK. You get reminders until you approve, and you can always postpone or cancel.
-        </p>
-      </td></tr>
-    </table>
-
-    <!-- ── SECTION 4: The Pre-Occasion Check-In ── -->
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">④ We Reach Out Before the Date</div>
-
-    <p style="margin:0 0 12px;font-size:13px;color:#555;line-height:1.7;font-family:Arial,sans-serif;">
-      Two weeks before each occasion, you&#x27;ll get a short email from us with 2 targeted questions — so the card always feels current, not like a copy-paste from last year. Here&#x27;s what that looks like:
+    <p style="margin:0 0 28px;font-size:14px;color:#555;line-height:1.7;font-family:Arial,sans-serif;">
+      Click below to see the card we chose, the message we'd write inside, and exactly how we built it.
     </p>
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
-      <tr><td style="background:#f8f8f6;border-radius:8px;border:2px dashed #ddd;padding:18px 22px;">
-        <div style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:bold;font-family:Arial,sans-serif;">&#9993; What you&#x27;d receive 2 weeks before ${escapeHtml(opts.recipientName)}&#x27;s ${occasionLabel}</div>
-        <div style="background:#ffffff;border-radius:6px;padding:18px 20px;border:1px solid #e8e8e8;">
-          <div style="font-size:11px;color:#999;margin-bottom:4px;font-family:Arial,sans-serif;">From: F*I Forgot &lt;hello@fiforgot.com&gt;</div>
-          <div style="font-size:12px;color:#555;font-weight:600;margin-bottom:14px;font-family:Arial,sans-serif;border-bottom:1px solid #f0f0f0;padding-bottom:10px;">Subject: ${escapeHtml(opts.recipientName)}&#x27;s ${occasionLabel} is in 2 weeks — quick question</div>
-          ${checkinHtml}
-        </div>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td align="center" style="padding-bottom:32px;">
+        <a href="${opts.previewUrl}" style="display:inline-block;background:#E23B2E;color:#ffffff;font-family:Arial Black,Arial,sans-serif;font-size:15px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;padding:18px 44px;border-radius:6px;">
+          SEE YOUR CARD &rarr;
+        </a>
       </td></tr>
     </table>
-    <p style="font-size:11px;color:#b0a090;margin:6px 0 0;font-family:Arial,sans-serif;">Those 2 answers are all we need. We handle everything else.</p>
-
-    <!-- ── SECTION 5: The Longer You're a Member ── -->
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">⑤ The Longer You&#x27;re a Member, the Better the Cards</div>
-
-    <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.7;font-family:Arial,sans-serif;">
-      Every card we send, every reply you give us, every detail you mention — we remember it. Here&#x27;s how ${escapeHtml(opts.recipientName)}&#x27;s profile grows over time:
-    </p>
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
-      <tr><td style="border-radius:8px;border:1px solid #e8e8e8;overflow:hidden;">
-
-        <!-- Month 1 -->
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="background:#f8f8f6;padding:16px 22px;border-bottom:1px solid #e8e8e8;">
-            <div style="font-size:10px;color:#E23B2E;text-transform:uppercase;letter-spacing:1.5px;font-weight:bold;font-family:Arial,sans-serif;margin-bottom:8px;">Month 1 &mdash; What we know now</div>
-            <table cellpadding="0" cellspacing="0">
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Recipient</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">${escapeHtml(opts.recipientName)} &mdash; ${escapeHtml(opts.relationship)}</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Personality</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">${escapeHtml(opts.personality)}</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Occasion</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">${escapeHtml(opts.occasion)} tracked</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Cards sent</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">1</td></tr>
-            </table>
-          </td></tr>
-
-          <!-- Month 6 -->
-          <tr><td style="background:#f0f4f8;padding:16px 22px;border-bottom:1px solid #e8e8e8;">
-            <div style="font-size:10px;color:#E23B2E;text-transform:uppercase;letter-spacing:1.5px;font-weight:bold;font-family:Arial,sans-serif;margin-bottom:8px;">Month 6 &mdash; Building the picture</div>
-            <table cellpadding="0" cellspacing="0">
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Card style</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">Prefers warm tones, not overly formal</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Tone that works</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">${opts.personality.includes("Funny") ? "Dry humor lands best, avoid cheesy" : "Genuine over poetic, specific over general"}</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Personal detail</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">You mentioned they recently changed jobs</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Cards sent</td><td style="font-size:12px;color:#333;font-family:Arial,sans-serif;">4 &mdash; 3 approved as-is, 1 edited</td></tr>
-            </table>
-          </td></tr>
-
-          <!-- Year 1+ -->
-          <tr><td style="background:#111111;padding:16px 22px;">
-            <div style="font-size:10px;color:#E23B2E;text-transform:uppercase;letter-spacing:1.5px;font-weight:bold;font-family:Arial,sans-serif;margin-bottom:8px;">Year 1+ &mdash; We know them</div>
-            <table cellpadding="0" cellspacing="0">
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">References</td><td style="font-size:12px;color:#aaa;font-family:Arial,sans-serif;">The camping trip, the promotion, the hard year</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Pattern</td><td style="font-size:12px;color:#aaa;font-family:Arial,sans-serif;">Cards approved faster when they&#x27;re specific</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;font-size:12px;color:#888;font-family:Arial,sans-serif;white-space:nowrap;">Result</td><td style="font-size:12px;color:#ffffff;font-family:Arial,sans-serif;font-weight:600;">Every card sounds like you wrote it. Because in a way, you did.</td></tr>
-            </table>
-          </td></tr>
-
-        </table>
-      </td></tr>
-    </table>
-
-    <!-- ── SECTION 6: How It Works ── -->
-    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin:28px 0 10px;font-weight:bold;font-family:Arial,sans-serif;border-top:2px solid #f0e8d8;padding-top:20px;">⑥ How a Real Card Gets Made</div>
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
-      <tr><td style="background:#f8f8f6;border-radius:8px;border:1px solid #e8e8e8;padding:20px 24px;">
-        <table cellpadding="0" cellspacing="0" style="width:100%;">
-          <tr><td style="padding:6px 0;vertical-align:top;">
-            <table cellpadding="0" cellspacing="0"><tr>
-              <td style="font-size:13px;color:#E23B2E;font-weight:bold;padding-right:12px;white-space:nowrap;font-family:Arial,sans-serif;vertical-align:top;">1.</td>
-              <td style="font-size:13px;color:#333;font-family:Arial,sans-serif;line-height:1.6;"><strong style="color:#111;">We remember the date</strong> — before you do. You set it once, we track it forever.</td>
-            </tr></table>
-          </td></tr>
-          <tr><td style="padding:6px 0;vertical-align:top;">
-            <table cellpadding="0" cellspacing="0"><tr>
-              <td style="font-size:13px;color:#E23B2E;font-weight:bold;padding-right:12px;white-space:nowrap;font-family:Arial,sans-serif;vertical-align:top;">2.</td>
-              <td style="font-size:13px;color:#333;font-family:Arial,sans-serif;line-height:1.6;"><strong style="color:#111;">We ask 2 quick questions</strong> — two weeks before the date. Targeted, fast, no forms.</td>
-            </tr></table>
-          </td></tr>
-          <tr><td style="padding:6px 0;vertical-align:top;">
-            <table cellpadding="0" cellspacing="0"><tr>
-              <td style="font-size:13px;color:#E23B2E;font-weight:bold;padding-right:12px;white-space:nowrap;font-family:Arial,sans-serif;vertical-align:top;">3.</td>
-              <td style="font-size:13px;color:#333;font-family:Arial,sans-serif;line-height:1.6;"><strong style="color:#111;">We pick the card</strong> — from hundreds of options, based on the person and the occasion.</td>
-            </tr></table>
-          </td></tr>
-          <tr><td style="padding:6px 0;vertical-align:top;">
-            <table cellpadding="0" cellspacing="0"><tr>
-              <td style="font-size:13px;color:#E23B2E;font-weight:bold;padding-right:12px;white-space:nowrap;font-family:Arial,sans-serif;vertical-align:top;">4.</td>
-              <td style="font-size:13px;color:#333;font-family:Arial,sans-serif;line-height:1.6;"><strong style="color:#111;">We write the message</strong> — personalized to your relationship, their personality, and your history together.</td>
-            </tr></table>
-          </td></tr>
-          <tr><td style="padding:6px 0;vertical-align:top;">
-            <table cellpadding="0" cellspacing="0"><tr>
-              <td style="font-size:13px;color:#E23B2E;font-weight:bold;padding-right:12px;white-space:nowrap;font-family:Arial,sans-serif;vertical-align:top;">5.</td>
-              <td style="font-size:13px;color:#333;font-family:Arial,sans-serif;line-height:1.6;"><strong style="color:#111;">You approve in 2 minutes</strong> — or edit, or tell us what to change. Then we print and mail it. Done.</td>
-            </tr></table>
-          </td></tr>
-        </table>
-      </td></tr>
-    </table>
-
-    <!-- Final CTA -->
-    <div style="margin:32px 0 8px;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td align="center">
-          <a href="${opts.appUrl}/signup" style="display:inline-block;background:#E23B2E;color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;padding:16px 40px;border-radius:6px;text-decoration:none;letter-spacing:0.3px;">Start the Real Thing &rarr;</a>
-        </td></tr>
-      </table>
-    </div>
-    <p style="text-align:center;font-size:12px;color:#aaa;margin:8px 0 0;font-family:Arial,sans-serif;">Nothing in this demo is printed, purchased, or mailed to anyone.</p>
-
+    <p style="margin:0;font-size:12px;color:#aaa;line-height:1.6;text-align:center;font-family:Arial,sans-serif;">Nothing in this demo is printed, purchased, or mailed to anyone.</p>
   </td></tr>
 
-  <!-- Footer -->
-  <tr><td style="background:#F2E6D3;padding:16px 32px;border-radius:0 0 10px 10px;border:1px solid #e8dcc8;border-top:none;">
-    <p style="margin:0;font-size:11px;color:#aaa;text-align:center;font-family:Arial,sans-serif;">You asked for this demo. We won&#x27;t contact you again unless you sign up.</p>
+  <tr><td style="background:#111111;padding:20px 32px;border-radius:0 0 10px 10px;text-align:center;">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;line-height:1.6;font-family:Arial,sans-serif;">
+      F*I Forgot &mdash; Relationship Damage Control<br>
+      Landing in spam? Check your spam/promotions folder.
+    </p>
   </td></tr>
 
 </table>
@@ -848,5 +616,5 @@ export async function sendDemoEmail(opts: {
   });
 
   if (error) throw new Error(`Resend error: ${error.message}`);
-  logger.info({ to: opts.email, recipientName: opts.recipientName, occasion: opts.occasion, hasCardImage: !!cardImageSrc, cardImageSrc }, "Demo email sent via Resend");
+  logger.info({ to: opts.email, recipientName: opts.recipientName, occasion: opts.occasion }, "Demo email sent via Resend");
 }

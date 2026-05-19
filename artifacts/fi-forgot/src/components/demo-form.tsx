@@ -78,6 +78,7 @@ export function DemoFormSection() {
   });
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("");
 
   function set(field: string, value: string) {
     setForm(f => ({ ...f, [field]: value }));
@@ -105,12 +106,13 @@ export function DemoFormSection() {
           honeypot: form.website,
         }),
       });
-      const data = await res.json() as { message?: string };
+      const data = await res.json() as { message?: string; previewUrl?: string };
       if (!res.ok) {
         setStatus("error");
         setErrorMsg(data.message ?? "Something went wrong. Try again in a minute.");
         return;
       }
+      if (data.previewUrl) setPreviewUrl(data.previewUrl);
       setStatus("success");
     } catch {
       setStatus("error");
@@ -174,6 +176,32 @@ export function DemoFormSection() {
             }}>
               ⚠️ Don't see it? Check your <strong style={{ color: "rgba(255,255,255,0.75)" }}>spam or promotions folder</strong> — it probably landed there.
             </div>
+            {previewUrl && (
+              <div style={{ marginTop: 20 }}>
+                <p style={{
+                  fontFamily: "'Inter', Arial, sans-serif",
+                  fontSize: "0.8rem",
+                  color: "rgba(255,255,255,0.5)",
+                  margin: "0 0 10px",
+                }}>
+                  Or skip the inbox — view your card now:
+                </p>
+                <a href={previewUrl} style={{
+                  display: "block",
+                  background: "#E23B2E",
+                  color: "#fff",
+                  fontFamily: "'Bebas Neue', cursive",
+                  fontSize: "1rem",
+                  letterSpacing: "0.12em",
+                  padding: "13px 20px",
+                  borderRadius: 6,
+                  textDecoration: "none",
+                  textAlign: "center",
+                }}>
+                  VIEW YOUR CARD PREVIEW →
+                </a>
+              </div>
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
