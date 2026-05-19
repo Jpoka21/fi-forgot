@@ -173,7 +173,7 @@ export default function OnboardingPage() {
     <div style={{ height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", background: CREAM }}>
 
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 32px", background: "#fff", borderBottom: `1px solid ${BLACK}10` }}>
+      <div className="flex items-center justify-between px-4 md:px-8" style={{ flexShrink: 0, paddingTop: 14, paddingBottom: 14, background: "#fff", borderBottom: `1px solid ${BLACK}10` }}>
         <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.75rem", fontWeight: 700, color: NAVY }}>
           <span style={{ color: RED }}>"F"</span> I Forgot
           <div style={{ height: 2, background: RED, marginTop: 1, borderRadius: 2 }} />
@@ -184,8 +184,9 @@ export default function OnboardingPage() {
       </div>
 
       {/* ── Progress bar ─────────────────────────────────────────────────── */}
-      <div style={{ flexShrink: 0, background: "#fff", borderBottom: `1px solid ${BLACK}10`, padding: "10px 32px" }}>
-        <div style={{ display: "flex", gap: 8 }}>
+      <div className="px-4 md:px-8" style={{ flexShrink: 0, background: "#fff", borderBottom: `1px solid ${BLACK}10`, paddingTop: 10, paddingBottom: 10 }}>
+        {/* Segment bars — always visible */}
+        <div style={{ display: "flex", gap: 6 }}>
           {STEPS.map((label, i) => (
             <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
               <div
@@ -196,9 +197,10 @@ export default function OnboardingPage() {
                   transition: "background 0.4s",
                 }}
               />
+              {/* Step labels — desktop only */}
               <span
+                className="hidden md:block"
                 style={{
-                  display: "block",
                   textAlign: "center",
                   fontSize: "0.72rem",
                   fontWeight: i === step ? 700 : 400,
@@ -214,6 +216,15 @@ export default function OnboardingPage() {
               </span>
             </div>
           ))}
+        </div>
+        {/* Mobile-only: current step name below the bars */}
+        <div className="flex items-center justify-between mt-1.5 md:hidden">
+          <span style={{ fontSize: "0.72rem", fontWeight: 700, color: RED, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            {STEPS[step]}
+          </span>
+          <span style={{ fontSize: "0.72rem", color: `${BLACK}50`, letterSpacing: "0.03em" }}>
+            {STEPS.filter((_, i) => i > step).length} step{STEPS.filter((_, i) => i > step).length !== 1 ? "s" : ""} left
+          </span>
         </div>
       </div>
 
