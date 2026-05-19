@@ -3,6 +3,12 @@
 import { Resend } from "resend";
 import { logger } from "../lib/logger";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
+import {
+  classifyCard,
+  hasCachedClassification,
+  getCachedClassification,
+  warmClassificationCache,
+} from "./card-classifier";
 
 function getResend(): Resend {
   const apiKey = process.env["RESEND_API_KEY"];
@@ -472,6 +478,9 @@ const OCCASION_ANTI_KEYWORDS: Record<string, string[]> = {
     "father", "dad", "papa", "daddio", "daddy",
     "mother", "mom", "mama",
     "get well", "feel better", "dose of love", "fully charged",
+    // Work/professional cards must never show for a romantic occasion
+    "working with you", "client", "employee", "colleague", "coworker",
+    "boss", "team", "business partner", "we heart working",
   ],
   "Birthday": ["father", "dad", "papa", "mother", "mom", "mama", "valentine", "get well", "feel better"],
   "Anniversary": ["father", "dad", "papa", "mother", "mom", "mama", "get well", "feel better"],
@@ -479,14 +488,24 @@ const OCCASION_ANTI_KEYWORDS: Record<string, string[]> = {
   "Thanksgiving": ["get well", "feel better", "valentine"],
 };
 
-function cardMatchesOccasion(cardName: string, occasion: string, imageUrl?: string): boolean {
+function cardSearchText(cardName: string, imageUrl?: string): string {
   const name = cardName.toLowerCase();
-  // Also scan the image filename — Handwrytten sometimes uses generic product names
-  // but the filename reveals the true category (e.g. "colorful_fathers_day_front.png")
   const imageFile = imageUrl
     ? decodeURIComponent(imageUrl.split("/").pop() ?? "").toLowerCase().replace(/\.[^.]+$/, "").replace(/[_-]/g, " ")
     : "";
-  const searchText = `${name} ${imageFile}`;
+  return `${name} ${imageFile}`;
+}
+
+/** Returns true if the card name/filename triggers an occasion anti-keyword (must be rejected). */
+function hasAntiKeyword(cardName: string, occasion: string, imageUrl?: string): boolean {
+  const searchText = cardSearchText(cardName, imageUrl);
+  const antiKeywords = OCCASION_ANTI_KEYWORDS[occasion] ?? [];
+  return antiKeywords.some(kw => searchText.includes(kw));
+}
+
+/** Returns true if the card name/filename matches positive keywords AND has no anti-keywords. */
+function cardMatchesOccasion(cardName: string, occasion: string, imageUrl?: string): boolean {
+  const searchText = cardSearchText(cardName, imageUrl);
   // Reject before positive match — a card with "dad" in name or filename is never a Valentine's card
   const antiKeywords = OCCASION_ANTI_KEYWORDS[occasion] ?? [];
   if (antiKeywords.some(kw => searchText.includes(kw))) return false;
@@ -558,16 +577,66 @@ function filterByRelationship(cards: HandwryttenCard[], occasion: string, relati
 export async function fetchMultipleCardImagesForOccasion(occasion: string, limit = 6, relationship = ""): Promise<string[]> {
   try {
     const all = await listHandwryttenCards();
-    // Safety filter runs first — no wedding/baby/sympathy cards ever
+    // Safety filter runs first — no wedding/baby/sympathy/paw cards ever
     const safe = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http") && isSafeCard(c));
-    const matched = safe.filter(c => cardMatchesOccasion(String(c.name), occasion, c.imageUrl));
-    // Apply relationship filter to avoid cards addressed to "dad/mom" when it's not a parent
+
+    // Kick off background classification of any cards not yet in the AI cache.
+    // This is fire-and-forget — results land in the cache over the next ~1-2 min.
+    void warmClassificationCache(safe);
+
+    // ── Primary path: AI-classified cards ────────────────────────────────────
+    const cachedCards = safe.filter(c => hasCachedClassification(c.imageUrl!));
+    const uncachedCards = safe.filter(c => !hasCachedClassification(c.imageUrl!));
+
+    // AI-classified cards that are appropriate for this occasion, not flagged as skip,
+    // and not excluded by name/filename anti-keywords (catches work cards with heart imagery etc.)
+    const aiMatched = cachedCards.filter(c => {
+      const cls = getCachedClassification(c.imageUrl!);
+      if (!cls || cls.skip || !cls.occasions.includes(occasion)) return false;
+      // Apply anti-keyword guard on the card name + filename (don't require positive keyword match —
+      // the AI already confirmed the occasion; we only need to block obvious misfits like work cards)
+      return !hasAntiKeyword(String(c.name), occasion, c.imageUrl);
+    });
+
+    // ── Fallback path: keyword matching for cards the AI hasn't seen yet ──────
+    const keywordMatched = uncachedCards.filter(c =>
+      cardMatchesOccasion(String(c.name), occasion, c.imageUrl)
+    );
+
+    // Merge — AI results take priority; keyword matches fill in remaining slots
+    const merged = [...aiMatched, ...keywordMatched];
+
+    // If the cache is cold and keyword matching also returned nothing, try to
+    // classify a handful of uncached candidates right now (blocking, max 5).
+    let matched = merged;
+    if (matched.length === 0 && uncachedCards.length > 0) {
+      const sample = uncachedCards.slice(0, 20);
+      await Promise.all(sample.map(c => classifyCard(c.imageUrl!)));
+      const nowCached = sample.filter(c => {
+        const cls = getCachedClassification(c.imageUrl!);
+        return cls && !cls.skip && cls.occasions.includes(occasion);
+      });
+      matched = nowCached;
+    }
+
+    // ── Occasion-specific fallbacks ────────────────────────────────────────────
+    // If we still have no matches, widen the net using closely-related occasions.
+    // Valentine's Day → also accept Anniversary cards (romantic by nature)
+    if (matched.length === 0 && occasion === "Valentine's Day") {
+      const anniversaryCards = cachedCards.filter(c => {
+        const cls = getCachedClassification(c.imageUrl!);
+        return cls && !cls.skip && cls.occasions.includes("Anniversary");
+      });
+      if (anniversaryCards.length > 0) matched = anniversaryCards;
+    }
+
+    // Apply relationship filter (avoids "dad/mom" named cards for non-parents)
     const relFiltered = filterByRelationship(matched, occasion, relationship);
-    // Return relationship-filtered matches, or all occasion matches if no filter applied, or 1 safe neutral card
+
     if (relFiltered.length > 0) return relFiltered.slice(0, limit).map(c => c.imageUrl!);
     if (matched.length > 0 && !DIRECT_PARENT_CARD_PHRASES[occasion]) return matched.slice(0, limit).map(c => c.imageUrl!);
-    // Either all cards were filtered by relationship (e.g. Father's Day for sibling), or no keyword match at all
-    // → return 1 safe neutral card so no confusing/unrelated alternatives show in the picker
+
+    // Last resort — return 1 safe neutral card so the preview isn't broken
     return safe.slice(0, 1).map(c => c.imageUrl!);
   } catch (err) {
     logger.warn({ err }, "Could not fetch Handwrytten card images for demo preview");
