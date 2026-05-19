@@ -197,16 +197,18 @@ export default function DemoPreviewPage() {
               <button
                 onClick={() => setShowCardPicker(p => !p)}
                 style={{
-                  background: "none",
-                  border: "1px solid #c4966a",
-                  borderRadius: 6,
-                  padding: "8px 16px",
-                  fontSize: "0.72rem",
+                  background: showCardPicker ? "#5a3e28" : "#c4966a",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "11px 20px",
+                  fontSize: "0.82rem",
                   fontFamily: "'Inter', sans-serif",
-                  color: "#7a5c3a",
-                  fontWeight: 600,
+                  color: "#fff",
+                  fontWeight: 700,
                   cursor: "pointer",
-                  letterSpacing: "0.03em",
+                  letterSpacing: "0.02em",
+                  width: "100%",
+                  boxShadow: "0 2px 6px rgba(196,150,106,0.3)",
                 }}
               >
                 {showCardPicker ? "Hide options" : `Browse ${allImages.length - 1} other card${allImages.length > 2 ? "s" : ""} →`}
@@ -262,16 +264,17 @@ export default function DemoPreviewPage() {
             <button
               onClick={() => setEditingMessage(e => !e)}
               style={{
-                background: editingMessage ? B.black : "none",
-                border: `1px solid ${editingMessage ? B.black : "#c4966a"}`,
-                borderRadius: 6,
-                padding: "5px 12px",
-                fontSize: "0.68rem",
+                background: editingMessage ? B.black : "#c4966a",
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 16px",
+                fontSize: "0.78rem",
                 fontFamily: "'Inter', sans-serif",
-                color: editingMessage ? "#fff" : "#7a5c3a",
-                fontWeight: 600,
+                color: "#fff",
+                fontWeight: 700,
                 cursor: "pointer",
                 whiteSpace: "nowrap",
+                boxShadow: "0 2px 6px rgba(196,150,106,0.3)",
               }}
             >
               {editingMessage ? "Done" : "Edit message"}
