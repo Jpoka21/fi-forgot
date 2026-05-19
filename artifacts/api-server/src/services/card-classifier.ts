@@ -126,7 +126,7 @@ CHRISTMAS / HANUKKAH / THANKSGIVING / EASTER / NEW YEAR'S — only if the card h
 
 A champagne/cheers card → Congratulations, Anniversary, New Year's. NOT Birthday unless it also has birthday candles/cake/text.
 
-Mark "skip": true ONLY for: weddings (rings/bride/groom), newborn/baby, pet memorial/loss, funeral/sympathy for death.
+Mark "skip": true for ANY of: weddings (rings/bride/groom), newborn/baby, pet memorial/loss, funeral/sympathy for death, OR party invitations (cards that say "You're Invited", "Join Us For", "Birthday Party Invitation", or are clearly designed as an event invite rather than a personal greeting card).
 
 Return ONLY valid JSON. No explanation, no markdown.`,
             },
