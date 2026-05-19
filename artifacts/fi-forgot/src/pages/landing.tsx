@@ -15,7 +15,7 @@ import {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const faqs = [
-  { q: "How does it know what to write?", a: "You tell us about each person once — their personality, what makes them laugh, your history together, and any details worth mentioning. Before each occasion, we send you two quick questions to keep it current. The AI uses all of that to write something specific to them, not a template that could've been sent to anyone." },
+  { q: "How does it know what to write?", a: "You tell us about each person once — their personality, what makes them laugh, your history together, and any details worth mentioning. Before each occasion, we send you two quick questions to keep it current. We use all of that to write something specific to them, not a template that could've been sent to anyone." },
   { q: "Is the card actually mailed, or is it digital?", a: "Real card. Printed on thick card stock, in a hand-addressed envelope, with a real stamp. Your recipient gets something in the mail — not an email, not a notification. Something they'll actually hold." },
   { q: "Will they know it wasn't written by me?", a: "They won't. Every message is written in your voice, for that specific person, for that specific moment. No generic phrases, no 'hope this finds you well.' If you've ever gotten a card that felt like it was meant for you — that's what we're going for." },
   { q: "What if I want to review it before it goes out?", a: "You choose your level of involvement: Full Autopilot (we handle everything), Preview First (we show you the message before mailing), or Require Approval (nothing ships without your sign-off). Most people start on Preview and switch to Autopilot once they trust it." },
