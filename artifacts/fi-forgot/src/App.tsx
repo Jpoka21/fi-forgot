@@ -20,6 +20,7 @@ import BriefingPage from "@/pages/briefing";
 import TryPage from "@/pages/try";
 import DemoPreviewPage from "@/pages/demo-preview";
 import BusinessPage from "@/pages/business";
+import BusinessOnboardingPage from "@/pages/business-onboarding";
 
 const queryClient = new QueryClient();
 
@@ -70,7 +71,15 @@ function OnboardingRoute() {
   const { isLoggedIn, onboardingComplete } = useAuth();
   if (!isLoggedIn) return <Redirect to="/signup" />;
   if (onboardingComplete) return <Redirect to="/dashboard" />;
+  if (sessionStorage.getItem("onboardingRef") === "business") return <Redirect to="/business-onboarding" />;
   return <OnboardingPage />;
+}
+
+function BusinessOnboardingRoute() {
+  const { isLoggedIn, onboardingComplete } = useAuth();
+  if (!isLoggedIn) return <Redirect to="/signup?ref=business" />;
+  if (onboardingComplete) return <Redirect to="/dashboard" />;
+  return <BusinessOnboardingPage />;
 }
 
 // ── Router ──────────────────────────────────────────────────────────────────
@@ -108,6 +117,7 @@ function Router() {
       <Route path="/try" component={TryPage} />
       <Route path="/demo/:id" component={DemoPreviewPage} />
       <Route path="/business" component={BusinessPage} />
+      <Route path="/business-onboarding" component={BusinessOnboardingRoute} />
       <Route component={NotFound} />
     </Switch>
   );

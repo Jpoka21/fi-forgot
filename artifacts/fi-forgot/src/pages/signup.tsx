@@ -33,7 +33,13 @@ export default function SignupPage() {
 
   function onSubmit(data: FormData) {
     signup(data.name, data.email);
-    setLocation("/onboarding");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("ref") === "business") {
+      sessionStorage.setItem("onboardingRef", "business");
+      setLocation("/business-onboarding");
+    } else {
+      setLocation("/onboarding");
+    }
   }
 
   return (

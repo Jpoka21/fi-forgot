@@ -216,7 +216,7 @@ export default function BusinessPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/signup"
+              href="/signup?ref=business"
               style={{
                 background: B.red,
                 color: "#fff",
@@ -475,7 +475,7 @@ export default function BusinessPage() {
             headline="YOUR CLIENTS REMEMBER WHO REMEMBERED THEM."
             sub="Start with 5 clients. It takes less than 5 minutes. We'll handle the rest."
             primaryLabel="Start with 5 Important Clients"
-            primaryHref="/signup"
+            primaryHref="/signup?ref=business"
             secondaryLabel="See the personal version"
             secondaryHref="/"
           />
