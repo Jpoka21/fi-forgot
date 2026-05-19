@@ -160,12 +160,32 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
   };
 }
 
+const STORAGE_VERSION = "2";
+const ALL_STORAGE_KEYS = [
+  "fi_forgot_user",
+  "fi_forgot_onboarding",
+  "fi_forgot_recipients",
+  "fi_forgot_cards",
+  "fi_forgot_briefings",
+];
+
+function clearAllUserData() {
+  ALL_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(true);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
+    const version = localStorage.getItem("fi_forgot_storage_version");
+    if (version !== STORAGE_VERSION) {
+      clearAllUserData();
+      localStorage.setItem("fi_forgot_storage_version", STORAGE_VERSION);
+      return;
+    }
+
     const stored = localStorage.getItem("fi_forgot_user");
     if (stored) {
       try {
