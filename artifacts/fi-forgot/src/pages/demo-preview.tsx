@@ -59,6 +59,9 @@ export default function DemoPreviewPage() {
   const [showCardPicker, setShowCardPicker] = useState(false);
   const [editingMessage, setEditingMessage] = useState(false);
   const [messageText, setMessageText] = useState("");
+  const [refining, setRefining] = useState(false);
+  const [refineError, setRefineError] = useState("");
+  const [customInstruction, setCustomInstruction] = useState("");
 
   useEffect(() => {
     if (!id) { setError(true); setLoading(false); return; }
@@ -73,6 +76,35 @@ export default function DemoPreviewPage() {
       })
       .catch(() => { setError(true); setLoading(false); });
   }, [id]);
+
+  async function refineMessage(action?: string, instruction?: string) {
+    if (!data) return;
+    setRefining(true);
+    setRefineError("");
+    try {
+      const r = await fetch("/api/demo-preview/refine-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: messageText,
+          action,
+          instruction,
+          recipientName: data.recipientName,
+          relationship: data.relationship,
+          occasion: data.occasion,
+          personality: data.personality,
+        }),
+      });
+      const json = await r.json() as { message?: string; error?: string };
+      if (!r.ok) throw new Error(json.error ?? "ai_error");
+      if (json.message) setMessageText(json.message);
+      setCustomInstruction("");
+    } catch {
+      setRefineError("Couldn't refine right now — try again in a moment.");
+    } finally {
+      setRefining(false);
+    }
+  }
 
   if (loading) return (
     <div style={{ background: B.black, minHeight: "100svh", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -230,19 +262,19 @@ export default function DemoPreviewPage() {
             <button
               onClick={() => setEditingMessage(e => !e)}
               style={{
-                background: "none",
-                border: "1px solid #c4966a",
+                background: editingMessage ? B.black : "none",
+                border: `1px solid ${editingMessage ? B.black : "#c4966a"}`,
                 borderRadius: 6,
                 padding: "5px 12px",
                 fontSize: "0.68rem",
                 fontFamily: "'Inter', sans-serif",
-                color: "#7a5c3a",
+                color: editingMessage ? "#fff" : "#7a5c3a",
                 fontWeight: 600,
                 cursor: "pointer",
                 whiteSpace: "nowrap",
               }}
             >
-              {editingMessage ? "Done editing" : "Edit message"}
+              {editingMessage ? "Done" : "Edit message"}
             </button>
           </div>
 
@@ -254,6 +286,7 @@ export default function DemoPreviewPage() {
               <textarea
                 value={messageText}
                 onChange={e => setMessageText(e.target.value)}
+                disabled={refining}
                 style={{
                   width: "100%",
                   minHeight: 160,
@@ -264,9 +297,10 @@ export default function DemoPreviewPage() {
                   border: "1px solid #c4966a",
                   borderRadius: 6,
                   padding: "10px 12px",
-                  background: "#fff",
+                  background: refining ? "#f8f3eb" : "#fff",
                   resize: "vertical",
                   boxSizing: "border-box",
+                  opacity: refining ? 0.6 : 1,
                 }}
               />
             ) : (
@@ -275,6 +309,96 @@ export default function DemoPreviewPage() {
               </div>
             )}
           </div>
+
+          {/* AI editing tools — shown when editing */}
+          {editingMessage && (
+            <div style={{ marginTop: 14, background: "#f8f3eb", borderRadius: 8, border: "1px solid #e8dcc8", padding: "14px 16px" }}>
+              <div style={{ fontSize: "0.62rem", color: "#888", textTransform: "uppercase", letterSpacing: "1.5px", fontWeight: "bold", fontFamily: "'Inter', sans-serif", marginBottom: 10 }}>
+                ✦ AI editing tools
+              </div>
+
+              {/* Quick action buttons */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                {([
+                  { action: "funnier",  label: "😄 Make it funnier" },
+                  { action: "sweeter",  label: "🥹 Make it sweeter" },
+                  { action: "shorter",  label: "✂️ Make it shorter" },
+                  { action: "formal",   label: "💼 More professional" },
+                  { action: "personal", label: "💬 More personal" },
+                ] as { action: string; label: string }[]).map(({ action, label }) => (
+                  <button
+                    key={action}
+                    onClick={() => refineMessage(action)}
+                    disabled={refining}
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #d4b896",
+                      borderRadius: 20,
+                      padding: "6px 12px",
+                      fontSize: "0.72rem",
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#5a3e28",
+                      fontWeight: 500,
+                      cursor: refining ? "not-allowed" : "pointer",
+                      opacity: refining ? 0.5 : 1,
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom instruction box */}
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  type="text"
+                  value={customInstruction}
+                  onChange={e => setCustomInstruction(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && customInstruction.trim()) refineMessage(undefined, customInstruction.trim()); }}
+                  placeholder="Or type your own... e.g. mention fishing, add a joke about his cooking"
+                  disabled={refining}
+                  style={{
+                    flex: 1,
+                    fontSize: "0.78rem",
+                    fontFamily: "'Inter', sans-serif",
+                    padding: "8px 12px",
+                    border: "1px solid #d4b896",
+                    borderRadius: 6,
+                    background: "#fff",
+                    color: "#333",
+                    outline: "none",
+                    minWidth: 0,
+                  }}
+                />
+                <button
+                  onClick={() => { if (customInstruction.trim()) refineMessage(undefined, customInstruction.trim()); }}
+                  disabled={refining || !customInstruction.trim()}
+                  style={{
+                    background: B.red,
+                    border: "none",
+                    borderRadius: 6,
+                    padding: "8px 14px",
+                    fontSize: "0.72rem",
+                    fontFamily: "'Bebas Neue', cursive",
+                    letterSpacing: "0.08em",
+                    color: "#fff",
+                    cursor: refining || !customInstruction.trim() ? "not-allowed" : "pointer",
+                    opacity: refining || !customInstruction.trim() ? 0.5 : 1,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {refining ? "Working…" : "Apply"}
+                </button>
+              </div>
+
+              {refineError && (
+                <p style={{ margin: "8px 0 0", fontSize: "0.72rem", color: B.red, fontFamily: "'Inter', sans-serif" }}>
+                  {refineError}
+                </p>
+              )}
+            </div>
+          )}
+
           <p style={{ margin: "10px 0 0", fontSize: "0.7rem", color: "#b0a090", fontFamily: "'Inter', sans-serif", textAlign: "center" }}>
             The real card is printed on thick card stock and mailed in a hand-addressed envelope.
           </p>

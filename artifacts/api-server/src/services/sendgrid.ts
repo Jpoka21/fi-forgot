@@ -2,7 +2,7 @@
 // Keeping file named sendgrid.ts to avoid changing imports elsewhere
 import { Resend } from "resend";
 import { logger } from "../lib/logger";
-import { listHandwryttenCards } from "./handwrytten";
+import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
 
 function getResend(): Resend {
   const apiKey = process.env["RESEND_API_KEY"];
@@ -487,14 +487,36 @@ function isSafeCard(c: { name: string; imageUrl?: string }): boolean {
   );
 }
 
-export async function fetchMultipleCardImagesForOccasion(occasion: string, limit = 6): Promise<string[]> {
+// For Father's/Mother's Day cards addressed TO a parent figure — only appropriate when recipient IS a parent
+const OCCASION_PARENT_TERMS: Record<string, string[]> = {
+  "Father's Day": ["dad", "daddy", "papa", "daddio", "father"],
+  "Mother's Day": ["mom", "mama", "mother", "mum", "mommy"],
+};
+
+const DIRECT_PARENT_RELATIONSHIPS = ["Parent"];
+
+function filterByRelationship(cards: HandwryttenCard[], occasion: string, relationship: string): HandwryttenCard[] {
+  const parentTerms = OCCASION_PARENT_TERMS[occasion];
+  if (!parentTerms) return cards;
+  if (DIRECT_PARENT_RELATIONSHIPS.includes(relationship)) return cards;
+  // For siblings, friends, coworkers, etc. — exclude cards with "dad/mom/papa" on them since the card
+  // would be addressed TO their dad/mom, not to a sibling/friend who happens to be a parent
+  return cards.filter(c => !parentTerms.some(term => String(c.name).toLowerCase().includes(term)));
+}
+
+export async function fetchMultipleCardImagesForOccasion(occasion: string, limit = 6, relationship = ""): Promise<string[]> {
   try {
     const all = await listHandwryttenCards();
     // Safety filter runs first — no wedding/baby/sympathy cards ever
     const safe = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http") && isSafeCard(c));
     const matched = safe.filter(c => cardMatchesOccasion(String(c.name), occasion));
-    if (matched.length > 0) return matched.slice(0, limit).map(c => c.imageUrl!);
-    // No keyword match — return just 1 safe neutral card (no confusing picker alternatives)
+    // Apply relationship filter to avoid cards addressed to "dad/mom" when it's not a parent
+    const relFiltered = filterByRelationship(matched, occasion, relationship);
+    // Return relationship-filtered matches, or all occasion matches if no filter applied, or 1 safe neutral card
+    if (relFiltered.length > 0) return relFiltered.slice(0, limit).map(c => c.imageUrl!);
+    if (matched.length > 0 && !OCCASION_PARENT_TERMS[occasion]) return matched.slice(0, limit).map(c => c.imageUrl!);
+    // Either all cards were filtered by relationship (e.g. Father's Day for sibling), or no keyword match at all
+    // → return 1 safe neutral card so no confusing/unrelated alternatives show in the picker
     return safe.slice(0, 1).map(c => c.imageUrl!);
   } catch (err) {
     logger.warn({ err }, "Could not fetch Handwrytten card images for demo preview");
