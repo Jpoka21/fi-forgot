@@ -151,14 +151,14 @@ export default function LandingPage() {
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="md:hidden w-full h-full object-cover"
-          style={{ objectPosition: "65% top" }}
+          style={{ objectPosition: "65% top", filter: "brightness(1.45)" }}
         />
         {/* Desktop landscape hero */}
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="hidden md:block w-full"
-          style={{ height: "auto" }}
+          style={{ height: "auto", filter: "brightness(1.45)" }}
         />
 
         {/* Mobile — left-side dark gradient to ensure text readability */}
