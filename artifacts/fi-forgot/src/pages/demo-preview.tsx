@@ -402,6 +402,45 @@ export default function DemoPreviewPage() {
             </div>
           )}
 
+          {/* Personalization upsell bubble */}
+          <div style={{
+            margin: "14px 0 4px",
+            background: "#fff8f0",
+            border: "1.5px solid #e8c99a",
+            borderRadius: 12,
+            padding: "10px 14px",
+            position: "relative",
+            display: "flex",
+            gap: 10,
+            alignItems: "flex-start",
+          }}>
+            {/* speech-bubble pointer */}
+            <div style={{
+              position: "absolute",
+              top: -9,
+              left: 22,
+              width: 0,
+              height: 0,
+              borderLeft: "8px solid transparent",
+              borderRight: "8px solid transparent",
+              borderBottom: "9px solid #e8c99a",
+            }} />
+            <div style={{
+              position: "absolute",
+              top: -7,
+              left: 23,
+              width: 0,
+              height: 0,
+              borderLeft: "7px solid transparent",
+              borderRight: "7px solid transparent",
+              borderBottom: "8px solid #fff8f0",
+            }} />
+            <span style={{ fontSize: "1rem", lineHeight: 1, flexShrink: 0, marginTop: 1 }}>✨</span>
+            <p style={{ margin: 0, fontSize: "0.73rem", lineHeight: 1.5, color: "#7a5c38", fontFamily: "'Inter', sans-serif" }}>
+              <strong style={{ color: "#5a3e28" }}>This gets even better when you sign up.</strong> We ask questions about your recipient — their personality, what makes them laugh, your history together — so every message feels like it genuinely came from you.
+            </p>
+          </div>
+
           <p style={{ margin: "10px 0 0", fontSize: "0.7rem", color: "#b0a090", fontFamily: "'Inter', sans-serif", textAlign: "center" }}>
             The real card is printed on thick card stock and mailed in a hand-addressed envelope.
           </p>
