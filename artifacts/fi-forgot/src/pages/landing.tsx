@@ -85,23 +85,6 @@ export default function LandingPage() {
           <a aria-label="Reviews"      href="#reviews"      style={{ position:"absolute", top:"0%", left:"49%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
           <a aria-label="FAQ"          href="#faq"          style={{ position:"absolute", top:"0%", left:"57%",  width:"5%",  height:"100%", display:"block", cursor:"pointer" }} />
           <Link aria-label="Sign in"      href="/login"        style={{ position:"absolute", top:"0%", left:"62%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
-          {/* For Business — visible text link in the gap between Sign In and the CTA button */}
-          <Link
-            href="/business"
-            aria-label="For Business"
-            style={{
-              position: "absolute", top: "0%", left: "70%", width: "8%", height: "100%",
-              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(0.55rem, 0.9vw, 0.82rem)",
-              letterSpacing: "0.12em",
-              color: B.red,
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-            }}
-          >
-            FOR BUSINESS
-          </Link>
           {/* CTA button */}
           <Link aria-label="Start earning brownie points" href="/signup" data-testid="link-get-started-nav"
             style={{ position:"absolute", top:"0%", right:"0%", width:"22%", height:"100%", display:"block", cursor:"pointer" }} />
@@ -148,10 +131,6 @@ export default function LandingPage() {
               </a>
             ))}
             <div style={{ borderTop: `1px solid ${B.black}12`, margin: "8px 20px 0", paddingTop: 8 }}>
-              <Link href="/business" onClick={() => setMenuOpen(false)}
-                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "6px 0" }}>
-                FOR BUSINESS →
-              </Link>
               <Link href="/login"
                 style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
                 SIGN IN
@@ -191,22 +170,23 @@ export default function LandingPage() {
 
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 16, top: 46, maxWidth: "58vw",
+          position: "absolute", left: 16, top: 52, maxWidth: "54vw",
           lineHeight: "normal", zIndex: 2,
         }}>
+          {/* Headline */}
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(24px, 6vw, 32px)",
+            fontSize: "clamp(26px, 6.5vw, 34px)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.96,
             textShadow: "0 2px 16px rgba(0,0,0,0.85)",
           }}>
-            REAL GREETING CARDS
+            GREETING CARDS
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(24px, 6vw, 32px)",
+            fontSize: "clamp(26px, 6.5vw, 34px)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.96,
@@ -216,70 +196,73 @@ export default function LandingPage() {
             ON AUTOPILOT.
           </div>
 
-          <div style={{ width: 32, height: 2, background: B.red, borderRadius: 1, marginTop: 9 }} />
+          {/* Thin divider */}
+          <div style={{ width: 32, height: 2, background: B.red, borderRadius: 1, marginTop: 10 }} />
 
+          {/* Slogan */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(11px, 2.9vw, 13px)",
+            fontSize: "clamp(10.5px, 2.8vw, 13px)",
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.92)",
+            lineHeight: 1.45,
+            textShadow: "0 1px 10px rgba(0,0,0,0.9)",
+            marginTop: 8,
+            letterSpacing: "0.01em",
+          }}>
+            You focus on life.<br />We remember everything.
+          </div>
+
+          {/* Supporting paragraph */}
+          <div style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: "clamp(12px, 3.2vw, 15px)",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.88)",
-            lineHeight: 1.5,
+            color: "rgba(255,255,255,0.82)",
+            lineHeight: 1.65,
             textShadow: "0 1px 8px rgba(0,0,0,0.9)",
             marginTop: 8,
           }}>
-            We choose, write, and mail thoughtful<br />cards automatically.
+            We choose, write, and mail real<br />greeting cards automatically.
           </div>
 
-          <a href="#choose-path" data-testid="link-cta-hitzone"
+          {/* CTA */}
+          <Link href="/signup" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
-              marginTop: 18, alignSelf: "flex-start",
+              marginTop: 22, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(13px, 3.5vw, 16px)",
+              fontSize: "clamp(13px, 3.64vw, 17px)",
               letterSpacing: "0.08em",
-              padding: "11px 18px",
+              padding: "12px 18px",
               borderRadius: 5,
               textDecoration: "none",
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
               whiteSpace: "nowrap",
             }}>
-            GET STARTED →
-          </a>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
-            <a href="#how-it-works" style={{
-              fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(11px, 2.8vw, 13px)",
-              letterSpacing: "0.1em", color: "rgba(255,255,255,0.7)",
-              textDecoration: "none", textShadow: "0 1px 6px rgba(0,0,0,0.8)",
-            }}>PERSONAL</a>
-            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>·</span>
-            <Link href="/business" style={{
-              fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(11px, 2.8vw, 13px)",
-              letterSpacing: "0.1em", color: "rgba(255,255,255,0.7)",
-              textDecoration: "none", textShadow: "0 1px 6px rgba(0,0,0,0.8)",
-            }}>BUSINESS</Link>
-          </div>
+            AUTOMATE BEING THOUGHTFUL →
+          </Link>
         </div>
 
         {/* Desktop text overlay */}
         <div className="hidden md:flex flex-col" style={{
-          position: "absolute", top: "5%", left: "3.5%", width: "43%",
+          position: "absolute", top: "6%", left: "3.5%", width: "40%",
           lineHeight: "normal",
         }}>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2rem, 4vw, 4rem)",
+            fontSize: "clamp(2.6rem, 5.8vw, 5.8rem)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.95,
             textShadow: "2px 3px 0 #00000088, -1px -1px 0 #00000033",
           }}>
-            REAL GREETING CARDS
+            GREETING CARDS
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2rem, 4vw, 4rem)",
+            fontSize: "clamp(2.6rem, 5.8vw, 5.8rem)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.95,
@@ -288,75 +271,43 @@ export default function LandingPage() {
           }}>
             ON AUTOPILOT.
           </div>
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(1rem, 1.8vw, 1.75rem)",
+            color: "rgba(255,255,255,0.88)",
+            letterSpacing: "0.04em",
+            lineHeight: 1.25,
+            textShadow: "1px 1px 8px rgba(0,0,0,0.75)",
+            marginTop: "0.65em",
+          }}>
+            You focus on life. We remember everything.
+          </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(0.75rem, 1vw, 0.95rem)",
+            fontSize: "clamp(0.8rem, 1.1vw, 1rem)",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.72)",
+            color: "rgba(255,255,255,0.75)",
             lineHeight: 1.6,
-            margin: "0.7em 0 0",
+            margin: "0.6em 0 0",
             textShadow: "1px 1px 6px rgba(0,0,0,0.85)",
-            maxWidth: "90%",
           }}>
-            We choose, write, and mail thoughtful cards automatically so important people never feel forgotten.
+            We choose, write, and mail real greeting cards for birthdays,
+            anniversaries, holidays, and every important moment.
           </p>
-
-          {/* Two path cards */}
-          <div className="flex gap-3" style={{ marginTop: "1em" }} data-testid="link-cta-hitzone">
-            <a
-              href="#how-it-works"
-              style={{
-                flex: 1,
-                background: "rgba(255,255,255,0.12)",
-                border: "1.5px solid rgba(255,255,255,0.22)",
-                backdropFilter: "blur(6px)",
-                borderRadius: 6,
-                padding: "clamp(8px,1.2vw,14px) clamp(10px,1.4vw,16px)",
-                textDecoration: "none",
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-                transition: "background 0.2s",
-              }}
-            >
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.8rem, 1.1vw, 1rem)", letterSpacing: "0.14em", color: "#fff" }}>
-                PERSONAL
-              </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.65rem, 0.85vw, 0.8rem)", color: "rgba(255,255,255,0.62)", lineHeight: 1.4 }}>
-                Never forget the people you love.
-              </div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.65rem, 0.8vw, 0.75rem)", letterSpacing: "0.1em", color: B.red, marginTop: 4 }}>
-                GET STARTED →
-              </div>
-            </a>
-
-            <Link
-              href="/business"
-              style={{
-                flex: 1,
-                background: "rgba(226,59,46,0.18)",
-                border: `1.5px solid ${B.red}55`,
-                backdropFilter: "blur(6px)",
-                borderRadius: 6,
-                padding: "clamp(8px,1.2vw,14px) clamp(10px,1.4vw,16px)",
-                textDecoration: "none",
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-                transition: "background 0.2s",
-              }}
-            >
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.8rem, 1.1vw, 1rem)", letterSpacing: "0.14em", color: "#fff" }}>
-                BUSINESS
-              </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.65rem, 0.85vw, 0.8rem)", color: "rgba(255,255,255,0.62)", lineHeight: 1.4 }}>
-                Stay personal with clients automatically.
-              </div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.65rem, 0.8vw, 0.75rem)", letterSpacing: "0.1em", color: B.red, marginTop: 4 }}>
-                LEARN MORE →
-              </div>
-            </Link>
-          </div>
+          <Link href="/signup" data-testid="link-cta-hitzone"
+            style={{
+              display: "inline-block", marginTop: "1em", alignSelf: "flex-start",
+              background: B.red, color: "#fff",
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.85rem, 1.3vw, 1.2rem)",
+              letterSpacing: "0.1em",
+              padding: "0.55em 1.1em",
+              borderRadius: 4,
+              textDecoration: "none",
+              boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.4)`,
+            }}>
+            AUTOMATE BEING THOUGHTFUL →
+          </Link>
         </div>
 
         {/* Bottom label — desktop only */}
@@ -405,74 +356,6 @@ export default function LandingPage() {
           style={{ position: "absolute", top: "10%", right: "2%", width: "18%", height: "80%", display: "block", cursor: "pointer" }} />
       </div>
 
-
-      {/* ── CHOOSE YOUR PATH ─────────────────────────────────────────────── */}
-      <section id="choose-path" className="py-14 px-6" style={{ background: B.white }}>
-        <div style={{ maxWidth: 860, margin: "0 auto" }}>
-          <div className="text-center mb-8">
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: B.red, marginBottom: 8 }}>
-              ONE PLATFORM. TWO PATHS.
-            </div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", color: B.black, lineHeight: 1, letterSpacing: "0.02em" }}>
-              Who are you sending cards for?
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-5">
-            {/* Personal */}
-            <a
-              href="#how-it-works"
-              style={{
-                display: "block",
-                background: B.beige,
-                border: `2px solid ${B.black}12`,
-                borderTop: `4px solid ${B.black}`,
-                borderRadius: 6,
-                padding: "clamp(24px, 4vw, 36px)",
-                textDecoration: "none",
-                transition: "box-shadow 0.2s",
-              }}
-            >
-              <div style={{ fontSize: "2rem", marginBottom: 10 }}>💌</div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.08em", color: B.black, marginBottom: 6 }}>
-                PERSONAL
-              </div>
-              <p style={{ fontSize: "0.95rem", color: B.gray, lineHeight: 1.65, marginBottom: 16 }}>
-                Never forget the people you love. We handle birthdays, anniversaries, and every moment that matters — for your wife, mom, kids, and friends.
-              </p>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.12em", color: B.black }}>
-                SEE HOW IT WORKS →
-              </div>
-            </a>
-
-            {/* Business */}
-            <Link
-              href="/business"
-              style={{
-                display: "block",
-                background: B.beige,
-                border: `2px solid ${B.red}30`,
-                borderTop: `4px solid ${B.red}`,
-                borderRadius: 6,
-                padding: "clamp(24px, 4vw, 36px)",
-                textDecoration: "none",
-                transition: "box-shadow 0.2s",
-              }}
-            >
-              <div style={{ fontSize: "2rem", marginBottom: 10 }}>🤝</div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.08em", color: B.black, marginBottom: 6 }}>
-                BUSINESS
-              </div>
-              <p style={{ fontSize: "0.95rem", color: B.gray, lineHeight: 1.65, marginBottom: 16 }}>
-                Stay personal with clients automatically. Real cards for birthdays, closing anniversaries, referral thank-yous, and every relationship moment.
-              </p>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.12em", color: B.red }}>
-                FOR BUSINESS →
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section
