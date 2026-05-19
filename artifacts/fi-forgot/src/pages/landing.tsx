@@ -30,7 +30,7 @@ const testimonials = [
 
 const plans = [
   {
-    name: "BARE MINIMUM", price: "$5", period: "/month",
+    name: "BARE MINIMUM", price: "$6", period: "/month",
     description: "For the guy trying not to screw this up.",
     highlight: false, badge: null,
     btn: "START SAVING YOURSELF",
@@ -402,7 +402,6 @@ export default function LandingPage() {
                       fontFamily: "'Bebas Neue', cursive",
                       fontSize: "0.68rem", letterSpacing: "0.16em",
                       borderRadius: 2, whiteSpace: "nowrap",
-                      filter: "url(#fi-stamp)",
                     }}
                   >
                     {plan.badge}
