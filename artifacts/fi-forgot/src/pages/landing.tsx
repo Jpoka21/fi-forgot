@@ -230,7 +230,7 @@ export default function LandingPage() {
           <a href="/try" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
-              marginTop: 14, alignSelf: "flex-start",
+              marginTop: 22, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
               fontSize: "clamp(13px, 3.64vw, 17px)",
