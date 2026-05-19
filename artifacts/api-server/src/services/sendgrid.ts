@@ -446,20 +446,20 @@ export function mockCheckinQuestions(occasion: string, personality: string, name
 
 const OCCASION_KEYWORDS: Record<string, string[]> = {
   "Birthday":         ["birthday", "bday", "candle", "cake", "blow out", "balloons of joy", "birthday bloom", "birthday wish", "classy birthday", "birthday candle"],
-  "Anniversary":      ["anniversary", "years together", "a slice of forever", "built with love", "love story", "forever"],
-  "Valentine's Day":  ["valentine", "sweetheart", "romance", "cupid", "xoxo"],
-  "Mother's Day":     ["mother", "mom", "mama", "mum", "garden of love", "bloom, baby"],
-  "Father's Day":     ["father", "dad", "papa", "daddio", "daddy", "built for dad", "best dad", "awesome dad", "cheerio daddio", "best dog dad"],
-  "Christmas":        ["christmas", "merry", "santa", "reindeer", "mistletoe", "noel", "december", "holiday cheer", "winter wonder"],
+  "Anniversary":      ["anniversary", "a slice of forever", "happy anniversary", "marking the milestone"],
+  "Valentine's Day":  ["valentine", "sweetheart", "romance", "cupid", "xoxo", "doodles of love", "dose of love", "fully charged with love", "laced up for love", "love that never fades", "flowers, love"],
+  "Mother's Day":     ["mother", "mom", "mama", "mum", "bloom, baby"],
+  "Father's Day":     ["father", "dad", "papa", "daddio", "daddy", "built for dad", "best dad", "awesome dad", "cheerio daddio"],
+  "Christmas":        ["christmas", "merry", "santa", "reindeer", "mistletoe", "noel", "december", "holiday cheer", "winter wonder", "365 days of cozy", "gather together"],
   "Hanukkah":         ["hanukkah", "chanukah", "dreidel", "menorah"],
-  "Thanksgiving":     ["thanksgiving", "thankful", "grateful", "harvest", "pumpkin", "turkey", "fall", "autumn", "cloud nine grateful", "blooming thanks", "botanical thanks", "grateful"],
-  "Easter":           ["easter", "easter bunny", "buzzing for spring", "april showers", "spring bloom"],
-  "New Year's":       ["new year", "nye", "resolution", "2026", "2025"],
-  "Graduation":       ["graduate", "graduation", "diploma", "cap, gown", "cap it off", "class act", "block party graduation", "congrats diploma", "con-grad", "climbing to new heights", "chevron of success"],
-  "Work Anniversary": ["work anniversary", "dedication", "contributions", "career", "another year of", "celebrate.*year", "anniversary.*work", "years of", "amazing employee", "best employee", "celebrate.*dedication", "building success", "collaborate and celebrate", "commemorating"],
-  "Get Well Soon":    ["get well", "feel better", "recovery", "healing", "brighter days", "across the rainbow"],
-  "Congratulations":  ["congrats", "congratulation", "success", "achievement", "bravo", "applause", "celebrate"],
-  "Just Because":     ["thinking of you", "just because", "hello", "hi there", "miss you", "thank you", "merci", "thanks"],
+  "Thanksgiving":     ["thanksgiving", "thankful", "grateful", "harvest", "pumpkin", "turkey", "gather together", "cloud nine grateful", "blooming thanks", "botanical thanks", "forever grateful"],
+  "Easter":           ["easter", "buzzing for spring", "april showers"],
+  "New Year's":       ["new year", "nye", "resolution", "2026", "2025", "workiversary cheers"],
+  "Graduation":       ["graduate", "graduation", "diploma", "cap it off", "class act", "block party graduation", "congrats diploma", "con-grad", "climbing to new heights", "chevron of success"],
+  "Work Anniversary": ["another year of", "amazing employee", "best employee", "building success", "collaborate and celebrate", "commemorating", "celebrating your", "work anniversary", "workiversary", "thanks for an amazing year", "thank you for all your hard work", "5 star review"],
+  "Get Well Soon":    ["get well", "feel better", "recovery", "healing", "brighter days"],
+  "Congratulations":  ["congrats", "congratulation", "bravo", "applause worthy", "time to celebrate", "sweet slice of celebration"],
+  "Just Because":     ["thinking of you", "just because", "miss you", "thank you", "merci", "thanks", "black & cream", "botanical thanks", "blooming thanks", "kraft thank you", "stacked thanks"],
 };
 
 function cardMatchesOccasion(cardName: string, occasion: string): boolean {
@@ -468,29 +468,34 @@ function cardMatchesOccasion(cardName: string, occasion: string): boolean {
   return keywords.some(kw => name.includes(kw));
 }
 
-const SKIP_WORDS = [
+const SKIP_NAME_WORDS = [
   "wedding", "bride", "groom", "love story", "happy couple", "marriage", "bridal",
-  "baby", "newborn", "baptism", "baby rattle", "baby steps",
-  "pet", "dog", "cat", "rainbow bridge",
-  "funeral", "sympathy", "condolence",
-  "dress and tux", "dress%20and%20tux", "wedding%20dress",
+  "save the date", "shower",
+  "baby", "newborn", "baptism", "baby rattle", "baby steps", "baby's first",
+  "pet", "dog ", "cat ", "rainbow bridge", "best dog",
+  "funeral", "sympathy", "condolence", "remembering", "forever in our hearts", "forever in your heart",
+  "beyond the rainbow",
 ];
+const SKIP_IMAGE_WORDS = ["wedding", "bride", "groom", "dress", "tux", "baby", "newborn", "pet", "sympathy"];
 
 function isSafeCard(c: { name: string; imageUrl?: string }): boolean {
   const name = String(c.name).toLowerCase();
   const imageFile = decodeURIComponent(String(c.imageUrl ?? "").split("/").pop() ?? "").toLowerCase();
-  return !SKIP_WORDS.some(w => name.includes(w) || imageFile.includes(w));
+  return (
+    !SKIP_NAME_WORDS.some(w => name.includes(w)) &&
+    !SKIP_IMAGE_WORDS.some(w => imageFile.includes(w))
+  );
 }
 
 export async function fetchMultipleCardImagesForOccasion(occasion: string, limit = 6): Promise<string[]> {
   try {
     const all = await listHandwryttenCards();
-    const withImage = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http"));
-    const matched = withImage.filter(c => cardMatchesOccasion(String(c.name), occasion));
+    // Safety filter runs first — no wedding/baby/sympathy cards ever
+    const safe = all.filter(c => c.imageUrl && c.imageUrl.startsWith("http") && isSafeCard(c));
+    const matched = safe.filter(c => cardMatchesOccasion(String(c.name), occasion));
     if (matched.length > 0) return matched.slice(0, limit).map(c => c.imageUrl!);
-    // No keyword match — return safe general cards (no wedding/baby/pet-specific imagery)
-    const safe = withImage.filter(isSafeCard);
-    return safe.slice(0, limit).map(c => c.imageUrl!);
+    // No keyword match — return just 1 safe neutral card (no confusing picker alternatives)
+    return safe.slice(0, 1).map(c => c.imageUrl!);
   } catch (err) {
     logger.warn({ err }, "Could not fetch Handwrytten card images for demo preview");
     return [];
