@@ -410,14 +410,14 @@ async function runScan(cards: Array<{ imageUrl?: string | null }>, reason: strin
 
   logger.info({ total: toProcess.length, reason }, "card-classifier: scan started (Claude + GPT)");
 
-  const CONCURRENCY = 3;
+  const CONCURRENCY = 8;
   let i = 0;
   async function worker(): Promise<void> {
     while (i < toProcess.length) {
       const url = toProcess[i++];
       if (cache.has(url)) cache.delete(url);
       await classifyCard(url);
-      await new Promise(r => setTimeout(r, 300)); // slightly longer gap for two API calls per card
+      await new Promise(r => setTimeout(r, 100));
     }
   }
 
