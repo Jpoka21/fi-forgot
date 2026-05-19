@@ -80,9 +80,9 @@ export default function DemoPreviewPage() {
     const msgRect = msgEl.getBoundingClientRect();
     const annRect = annEl.getBoundingClientRect();
 
-    // Head: right-center of the message body text area (~38% down the card)
-    const headAbsX = msgRect.right - 28;
-    const headAbsY = msgRect.top + msgRect.height * 0.38;
+    // Head: bottom-right of the inner message text box — where the sign-off lives
+    const headAbsX = msgRect.right - 36;
+    const headAbsY = msgRect.bottom - 40;
 
     // Tail: right edge of the annotation callout, vertically centered
     const tailAbsX = annRect.right - 24;
@@ -321,7 +321,7 @@ export default function DemoPreviewPage() {
         </div>
 
         {/* The Message */}
-        <div ref={messageCardRef} style={{ ...cardBox, ...cardPad }}>
+        <div style={{ ...cardBox, ...cardPad }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 14, marginBottom: 14, borderBottom: "2px solid #f0e8d8" }}>
             <span style={{ ...sectionLabel, paddingBottom: 0, marginBottom: 0, borderBottom: "none" }}>What we'll write inside the card</span>
             <button
@@ -344,7 +344,7 @@ export default function DemoPreviewPage() {
             </button>
           </div>
 
-          <div style={{ background: "#fffdf8", border: "1px solid #e0d4c0", borderLeft: "4px solid #c4966a", borderRadius: "0 8px 8px 0", padding: "18px 22px" }}>
+          <div ref={messageCardRef} style={{ background: "#fffdf8", border: "1px solid #e0d4c0", borderLeft: "4px solid #c4966a", borderRadius: "0 8px 8px 0", padding: "18px 22px" }}>
             <div style={{ fontSize: "0.65rem", color: "#888", textTransform: "uppercase", letterSpacing: "1px", fontFamily: "'Inter', sans-serif", marginBottom: 10, fontWeight: "bold" }}>
               Handwritten inside the card
             </div>
