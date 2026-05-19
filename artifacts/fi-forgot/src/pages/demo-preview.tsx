@@ -402,42 +402,45 @@ export default function DemoPreviewPage() {
             </div>
           )}
 
-          {/* Personalization upsell bubble */}
+          {/* Personalization upsell callout */}
           <div style={{
-            margin: "14px 0 4px",
-            background: "#fff8f0",
-            border: "1.5px solid #e8c99a",
-            borderRadius: 12,
-            padding: "10px 14px",
+            margin: "16px 0 6px",
+            background: "linear-gradient(135deg, #fffbf5 0%, #fff4e6 100%)",
+            border: "2px solid #c8860a",
+            borderLeft: "5px solid #c8860a",
+            borderRadius: 10,
+            padding: "14px 16px",
             position: "relative",
             display: "flex",
-            gap: 10,
+            gap: 12,
             alignItems: "flex-start",
+            boxShadow: "0 2px 8px rgba(200,134,10,0.12)",
           }}>
             {/* speech-bubble pointer */}
             <div style={{
               position: "absolute",
-              top: -9,
-              left: 22,
+              top: -10,
+              left: 24,
               width: 0,
               height: 0,
-              borderLeft: "8px solid transparent",
-              borderRight: "8px solid transparent",
-              borderBottom: "9px solid #e8c99a",
+              borderLeft: "9px solid transparent",
+              borderRight: "9px solid transparent",
+              borderBottom: "10px solid #c8860a",
             }} />
             <div style={{
               position: "absolute",
               top: -7,
-              left: 23,
+              left: 26,
               width: 0,
               height: 0,
               borderLeft: "7px solid transparent",
               borderRight: "7px solid transparent",
-              borderBottom: "8px solid #fff8f0",
+              borderBottom: "8px solid #fffbf5",
             }} />
-            <span style={{ fontSize: "1rem", lineHeight: 1, flexShrink: 0, marginTop: 1 }}>✨</span>
-            <p style={{ margin: 0, fontSize: "0.73rem", lineHeight: 1.5, color: "#7a5c38", fontFamily: "'Inter', sans-serif" }}>
-              <strong style={{ color: "#5a3e28" }}>This gets even better when you sign up.</strong> We ask questions about your recipient — their personality, what makes them laugh, your history together — so every message feels like it genuinely came from you.
+            <span style={{ fontSize: "1.3rem", lineHeight: 1, flexShrink: 0, marginTop: 2 }}>✨</span>
+            <p style={{ margin: 0, fontSize: "0.82rem", lineHeight: 1.55, color: "#5a3c0a", fontFamily: "'Inter', sans-serif" }}>
+              <strong style={{ fontSize: "0.88rem", color: "#3d2800", display: "block", marginBottom: 3 }}>This gets even better when you sign up.</strong>
+              We ask about your recipient — their personality, what makes them laugh, your history together — so every word feels like it genuinely came from you.
             </p>
           </div>
 
