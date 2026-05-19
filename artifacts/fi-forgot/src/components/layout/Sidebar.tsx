@@ -48,7 +48,6 @@ export default function Sidebar() {
             padding: "4px 8px",
             border: `2px solid ${B.red}`,
             borderRadius: 4,
-            filter: "url(#fi-stamp)",
             lineHeight: 1,
             opacity: 0.92,
             gap: 1,
