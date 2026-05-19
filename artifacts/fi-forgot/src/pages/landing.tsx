@@ -570,7 +570,7 @@ export default function LandingPage() {
             primaryLabel="Start Earning Brownie Points"
             primaryHref="/signup"
             secondaryLabel="See How It Works"
-            secondaryHref="#how-it-works"
+            secondaryHref="/try"
           />
         </div>
       </section>
