@@ -4,6 +4,7 @@ import {
   sendDemoEmail,
   pickCard,
   writeMessage,
+  generateMessageWithAI,
   mockCheckinQuestions,
   fetchMultipleCardImagesForOccasion,
 } from "../services/sendgrid";
@@ -54,12 +55,17 @@ router.post("/demo-email", async (req, res) => {
   const normalizedEmail = email.toLowerCase().trim();
   const appUrl = getAppUrl(req);
 
-  // Compute all preview data up front
+  // Compute all preview data up front — AI message + cards run in parallel
+  const [aiMessage, cardImageUrls] = await Promise.all([
+    generateMessageWithAI(safeName, safeRelationship, safeOccasion, safePersonality),
+    fetchMultipleCardImagesForOccasion(safeOccasion, 6, safeRelationship),
+  ]);
   const card = pickCard(safeOccasion, safePersonality, safeRelationship);
-  const message = writeMessage(safeName, safeRelationship, safeOccasion, safePersonality);
+  // Use AI message if generated, fall back to template
+  const message = aiMessage ?? writeMessage(safeName, safeRelationship, safeOccasion, safePersonality);
   const checkinHtml = mockCheckinQuestions(safeOccasion, safePersonality, safeName);
-  const cardImageUrls = await fetchMultipleCardImagesForOccasion(safeOccasion, 6, safeRelationship);
   const cardImageUrl = cardImageUrls[0] ?? null;
+  req.log.info({ aiGenerated: !!aiMessage }, "demo-email: message source");
 
   // Store preview and build its URL (7-day TTL in memory)
   const previewId = storeDemoPreview({

@@ -1,6 +1,7 @@
 // Email service — using Resend (RESEND_API_KEY secret)
 // Keeping file named sendgrid.ts to avoid changing imports elsewhere
 import { Resend } from "resend";
+import OpenAI from "openai";
 import { logger } from "../lib/logger";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
 import {
@@ -10,6 +11,52 @@ import {
   warmClassificationCache,
   startPeriodicRescan,
 } from "./card-classifier";
+
+const openai = new OpenAI({
+  baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
+  apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ?? "placeholder",
+});
+
+/**
+ * Generate a unique handwritten card message using GPT.
+ * Returns null on any failure so the caller can fall back to a template.
+ */
+export async function generateMessageWithAI(
+  name: string,
+  relationship: string,
+  occasion: string,
+  personality: string,
+): Promise<string | null> {
+  try {
+    const toneGuide =
+      personality.includes("Funny") ? "witty and gently humorous — warm but with a light comedic edge" :
+      personality.includes("Sentimental") ? "sentimental and heartfelt — genuine, not cheesy" :
+      personality.includes("Warm") ? "warm and nurturing — caring and sincere" :
+      "down-to-earth and straightforward — genuine without being flowery";
+
+    const prompt = `Write a short handwritten card message from someone to their ${relationship.toLowerCase()} named ${name} for ${occasion}.
+
+Tone: ${toneGuide}
+Length: 3–5 sentences max. No filler. No generic phrases like "hope this finds you well."
+Format: Start with "Dear ${name}," and end with "[Your Name]". Add a blank line between the greeting, body, and sign-off.
+Do not mention the service, apps, or technology. Write as if the sender wrote it themselves.
+Make it feel personal and specific to a ${relationship.toLowerCase()} relationship. Vary the structure so it doesn't sound like every other card.`;
+
+    const resp = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_completion_tokens: 300,
+      temperature: 1.1,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const text = resp.choices[0]?.message?.content?.trim();
+    if (!text) return null;
+    return text;
+  } catch (err) {
+    logger.warn({ err }, "generateMessageWithAI: GPT call failed, using template fallback");
+    return null;
+  }
+}
 
 // Start the 24-hour rescan cycle on module load.
 // Waits 60 s after startup before the first scan so the server is fully settled.
@@ -274,13 +321,61 @@ export function writeMessage(name: string, relationship: string, occasion: strin
   const isParent = isParentRel;
 
   if (occasion === "Birthday") {
-    if (isFunny && isSpouse) return `Dear ${name},\n\nHappy birthday. You're older now.\n\nI'm choosing not to elaborate. The fact that I remembered should count for something.\n\nLove,\n[Your Name]`;
-    if (isFunny && isFriend) return `Dear ${name},\n\nAnother year. Another reason to remind you that you keep somehow getting better while the rest of us are just getting older.\n\nHappy birthday. Don't do the math.\n\n[Your Name]`;
-    if (isFunny) return `Dear ${name},\n\nHappy birthday. You've officially been on this earth long enough that I felt the need to acknowledge it in writing.\n\nThat's how you know it's serious.\n\n[Your Name]`;
-    if (isSentimental && isSpouse) return `Dear ${name},\n\nYour birthday is one of those days that makes me stop and think about how lucky I am. Not in a greeting-card way — genuinely lucky.\n\nI hope this year gives you back everything you pour into the people around you.\n\nLove,\n[Your Name]`;
-    if (isSentimental && isParent) return `Dear ${name},\n\nI don't say this enough — but everything I know about showing up for the people I love, I learned from watching you.\n\nHappy birthday.\n\n[Your Name]`;
-    if (isSentimental && isFriend) return `Dear ${name},\n\nNot everyone gets to have a person like you in their corner. I'm lucky I do.\n\nHappy birthday.\n\n[Your Name]`;
-    return `Dear ${name},\n\nHappy birthday. Wishing you a year that matches the kind of person you are — which means it's going to be a good one.\n\n[Your Name]`;
+    const variants: Record<string, string[]> = {
+      funny_spouse: [
+        `Dear ${name},\n\nHappy birthday. You're older now.\n\nI'm choosing not to elaborate. The fact that I remembered should count for something.\n\nLove,\n[Your Name]`,
+        `Dear ${name},\n\nAnother year older. Somehow you're still the most interesting person in the room.\n\nDon't tell anyone I said that.\n\nLove,\n[Your Name]`,
+      ],
+      funny_sibling: [
+        `Dear ${name},\n\nHappy birthday. You've been my sibling for your entire life and I'm still not sure how I feel about that.\n\n(Kidding. Mostly.)\n\n[Your Name]`,
+        `Dear ${name},\n\nCongratulations on surviving another year of being related to me.\n\nYou're welcome.\n\n[Your Name]`,
+        `Dear ${name},\n\nI would say you're my favorite sibling, but the bar isn't exactly competitive.\n\nHappy birthday. I mean it.\n\n[Your Name]`,
+      ],
+      funny_friend: [
+        `Dear ${name},\n\nAnother year. Another reason to remind you that you keep somehow getting better while the rest of us are just getting older.\n\nHappy birthday. Don't do the math.\n\n[Your Name]`,
+        `Dear ${name},\n\nI tried to think of something profound to say about your birthday. I came up empty. You're older. Still great.\n\nThat's all I've got.\n\n[Your Name]`,
+      ],
+      funny_child: [
+        `Dear ${name},\n\nHappy birthday. I take full credit for how well you turned out.\n\nYou're welcome.\n\n[Your Name]`,
+        `Dear ${name},\n\nEvery year I watch you grow into someone I'd genuinely choose to know even if I wasn't your parent.\n\nThat's the highest compliment I know how to give.\n\nHappy birthday.\n\n[Your Name]`,
+      ],
+      funny_other: [
+        `Dear ${name},\n\nHappy birthday. You've officially been on this earth long enough that I felt the need to acknowledge it in writing.\n\nThat's how you know it's serious.\n\n[Your Name]`,
+      ],
+      sentimental_spouse: [
+        `Dear ${name},\n\nYour birthday is one of those days that makes me stop and think about how lucky I am. Not in a greeting-card way — genuinely lucky.\n\nI hope this year gives you back everything you pour into the people around you.\n\nLove,\n[Your Name]`,
+        `Dear ${name},\n\nI don't need a reason to think about how glad I am you're in my life. But your birthday is a good one.\n\nHappy birthday.\n\nLove,\n[Your Name]`,
+      ],
+      sentimental_sibling: [
+        `Dear ${name},\n\nGrowing up with you is something I don't think about enough. I should.\n\nHappy birthday. Glad you're my sibling.\n\n[Your Name]`,
+        `Dear ${name},\n\nYou've been around for my whole life — and honestly, I can't imagine it any other way.\n\nHappy birthday.\n\n[Your Name]`,
+        `Dear ${name},\n\nNot everyone gets a sibling worth keeping. I got lucky.\n\nHappy birthday.\n\n[Your Name]`,
+      ],
+      sentimental_parent: [
+        `Dear ${name},\n\nI don't say this enough — but everything I know about showing up for the people I love, I learned from watching you.\n\nHappy birthday.\n\n[Your Name]`,
+        `Dear ${name},\n\nYour birthday always reminds me how much I've taken for granted over the years — and how glad I am you're still here.\n\nHappy birthday.\n\n[Your Name]`,
+      ],
+      sentimental_friend: [
+        `Dear ${name},\n\nNot everyone gets to have a person like you in their corner. I'm lucky I do.\n\nHappy birthday.\n\n[Your Name]`,
+        `Dear ${name},\n\nSome friendships just hold. Yours is one of them.\n\nHappy birthday.\n\n[Your Name]`,
+      ],
+      default: [
+        `Dear ${name},\n\nHappy birthday. Wishing you a year that matches the kind of person you are — which means it's going to be a good one.\n\n[Your Name]`,
+        `Dear ${name},\n\nBirthdays are a good excuse to say what you don't always say out loud: I'm glad you're in my life.\n\nHappy birthday.\n\n[Your Name]`,
+        `Dear ${name},\n\nHope today gives you a little bit of what you give everyone else all year.\n\nHappy birthday.\n\n[Your Name]`,
+      ],
+    };
+    const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)]!;
+    if (isFunny && isSpouse) return pick(variants["funny_spouse"]!);
+    if (isFunny && isSibling) return pick(variants["funny_sibling"]!);
+    if (isFunny && isFriend) return pick(variants["funny_friend"]!);
+    if (isFunny && isChildRel) return pick(variants["funny_child"]!);
+    if (isFunny) return pick(variants["funny_other"]!);
+    if (isSentimental && isSpouse) return pick(variants["sentimental_spouse"]!);
+    if (isSentimental && isSibling) return pick(variants["sentimental_sibling"]!);
+    if (isSentimental && isParent) return pick(variants["sentimental_parent"]!);
+    if (isSentimental && isFriend) return pick(variants["sentimental_friend"]!);
+    return pick(variants["default"]!);
   }
 
   if (occasion === "Work Anniversary") {
