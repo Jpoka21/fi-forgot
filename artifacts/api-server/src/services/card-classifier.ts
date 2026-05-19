@@ -103,14 +103,30 @@ Return a JSON object with exactly two fields:
 - "skip": true if this card is primarily for weddings, newborns/babies, pet loss/memorial, funerals, or bereavement — these should never be sent; false otherwise
 
 Classification rules:
-- Be GENEROUS — a card can belong to multiple occasions if it could reasonably work.
-- Mark as "Valentine's Day" if the card has ANY of: hearts, romantic imagery, love birds, a couple, "I love you" text, pink/red roses as the main motif, Cupid, hugging figures, or a romantic message. Do NOT require the word "Valentine" to be present.
-- Mark as "Anniversary" if the card has romantic imagery between two people, milestone celebration, long-lasting love themes.
-- Mark as "Just Because" if it's a general warm/friendly card that doesn't fit a specific occasion.
-- Mark as "Birthday" if it has candles, cake, "birthday" text, confetti, or a celebration feel.
-- A champagne/cheers card works for: Birthday, Congratulations, Anniversary, New Year's — but NOT Valentine's Day unless it also has hearts/love imagery.
-- A floral/nature card with soft pinks/reds and no specific messaging → Valentine's Day AND Just Because AND Birthday are all valid.
-- Mark "skip": true ONLY for: weddings (rings, bride/groom), newborn/baby, pet memorial/loss, funeral/sympathy for a person's death.
+
+BIRTHDAY — be STRICT. Only tag as "Birthday" if the card has explicit birthday imagery: birthday candles, birthday cake, "Happy Birthday" text, party hats, balloons in a festive/party context, or "bday". A floral card or spring nature card with NO birthday text or imagery is NOT a birthday card, even if it feels celebratory. When in doubt, do NOT tag as Birthday.
+
+VALENTINE'S DAY — mark if the card has ANY of: hearts, romantic imagery, love birds, a couple together, "I love you" text, red/pink roses as the primary subject, Cupid, or a clearly romantic message. Do NOT require the word "Valentine". A spring flower photo with no romantic context is NOT a Valentine's card.
+
+ANNIVERSARY — mark if it has romantic couple imagery, milestone numbers (25th, 50th), long-lasting love themes, or "happy anniversary" text.
+
+JUST BECAUSE — use this as the catch-all for warm, friendly, or general cards that don't fit a specific occasion. Floral/botanical cards, nature photography, and general "thinking of you" cards go here. Be generous with this tag.
+
+MOTHER'S DAY — mark if it explicitly references mom, mother, or has "for mom" type messaging. Floral cards alone do NOT qualify.
+
+CONGRATULATIONS — mark for achievement cards, "well done", diplomas, ribbons, trophies, or explicit congratulations text. General floral cards are NOT congratulations cards.
+
+GRADUATION — only if there are caps/gowns, diplomas, "congrats grad" text, or clear academic achievement imagery.
+
+WORK ANNIVERSARY — only if it references years of service, employee appreciation, or workplace milestones.
+
+GET WELL SOON — only with explicit get-well imagery or text (medicine, healing, "feel better").
+
+CHRISTMAS / HANUKKAH / THANKSGIVING / EASTER / NEW YEAR'S — only if the card has clear holiday-specific imagery or text for that holiday.
+
+A champagne/cheers card → Congratulations, Anniversary, New Year's. NOT Birthday unless it also has birthday candles/cake/text.
+
+Mark "skip": true ONLY for: weddings (rings/bride/groom), newborn/baby, pet memorial/loss, funeral/sympathy for death.
 
 Return ONLY valid JSON. No explanation, no markdown.`,
             },
@@ -215,7 +231,7 @@ async function runScan(cards: Array<{ imageUrl?: string | null }>, reason: strin
   scanRunning = false;
 }
 
-/** Fire-and-forget: classify any uncached cards now, then schedule a full rescan every 24 h. */
+/** Fire-and-forget: classify any uncached cards now. */
 export function warmClassificationCache(cards: Array<{ imageUrl?: string | null }>): void {
   void runScan(cards, "warmup");
 }
@@ -224,8 +240,8 @@ let rescanTimer: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Call once on startup with a function that fetches the live card catalog.
- * Runs a full rescan immediately, then every 24 h — picking up new cards,
- * pruning removed ones, and refreshing any classification older than 30 days.
+ * Runs an initial rescan after 60 s, then weekly — picking up new cards,
+ * pruning removed ones, and refreshing any classification older than 90 days.
  */
 export function startPeriodicRescan(
   fetchCards: () => Promise<Array<{ imageUrl?: string | null }>>
@@ -241,10 +257,10 @@ export function startPeriodicRescan(
     }
   }
 
-  // First rescan runs after 60 s (let the server settle) then every 24 h
+  // First rescan runs after 60 s (let the server settle) then weekly
   setTimeout(() => void runWithFetch("scheduled-initial"), 60_000);
-  rescanTimer = setInterval(() => void runWithFetch("scheduled-24h"), RESCAN_INTERVAL_MS);
-  logger.info("card-classifier: periodic rescan scheduled (every 24 h)");
+  rescanTimer = setInterval(() => void runWithFetch("scheduled-weekly"), RESCAN_INTERVAL_MS);
+  logger.info("card-classifier: periodic rescan scheduled (every 7 days)");
 }
 
 loadCache();
