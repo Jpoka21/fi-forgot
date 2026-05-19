@@ -1,0 +1,118 @@
+Update the website to add a lightly separated “For Business” experience while keeping the same Dave in the Doghouse brand, humor, colors, and emotional style.
+
+Important: Do not rebuild the whole site. Add this as an expansion of the current product.
+
+Goal:
+The site should now clearly show that the same greeting card automation works for both individuals and businesses.
+
+Add a navigation link:
+“For Business”
+
+Add a small homepage section below the hero or early on the page:
+Title:
+“Also built for businesses that never want clients to feel forgotten.”
+
+Text:
+“Send real greeting cards automatically for client birthdays, home anniversaries, thank you notes, referrals, holidays, and other relationship moments.”
+
+Add a CTA button:
+“Use for Business”
+
+This button should scroll or link to a new For Business section/page.
+
+Create a “For Business” page or section with this positioning:
+
+Headline:
+“Stay personal with clients automatically.”
+
+Subheadline:
+“Dave helps businesses remember birthdays, anniversaries, thank you moments, and client milestones with real greeting cards that feel personal, not corporate.”
+
+Keep the tone warm, funny, and human. Do not make it feel like corporate CRM software.
+
+Add example business use cases:
+1. Realtors
+“Remember closing anniversaries, birthdays, referrals, and past clients.”
+
+2. Insurance Agents
+“Stay in touch before renewals, after referrals, and on important dates.”
+
+3. Financial Advisors
+“Send thoughtful milestone cards without sounding like a mass email.”
+
+4. Dentists and Local Businesses
+“Thank customers, remember birthdays, and keep relationships warm.”
+
+Add a simple business onboarding preview with these steps:
+
+Step 1:
+“Who are you sending cards to?”
+Options:
+Clients
+Customers
+Employees
+Leads
+Other
+
+Step 2:
+“How should the card be signed?”
+Examples:
+Dave
+Dave at ABC Realty
+The ABC Realty Team
+Sarah | Smith Insurance
+
+Step 3:
+“What should Dave remember?”
+Options:
+Birthdays
+Closing anniversaries
+Customer anniversaries
+Thank you cards
+Referral thank you cards
+Holidays
+Custom dates
+
+Step 4:
+“Add a memory”
+Small note field example:
+“Helped them buy 123 Main Street. It was their first home and they loved the backyard.”
+
+Add helper text:
+“Dave can turn simple notes into thoughtful card ideas later.”
+
+Add a section called:
+“Smart, but not reckless.”
+
+Explain the hybrid sending model:
+“Low risk cards like birthdays, holidays, thank you notes, and home anniversaries can be sent automatically. Sensitive cards, like sympathy or illness related messages, can be reviewed before mailing.”
+
+Add a section called:
+“AI recommends. You stay in control.”
+
+Text:
+“Dave can recommend the card and message, but you can approve, edit, or override it before anything goes out.”
+
+Add a business CTA:
+“Start with 5 important clients”
+
+This should feel easy and lightweight, not like importing an entire CRM.
+
+Important design instructions:
+Use the same Dave in the Doghouse visual style.
+Do not remove the personal version.
+Do not overuse the word AI.
+Use “real greeting cards” and “relationship maintenance” language.
+Avoid corporate buzzwords like enterprise, pipeline, workflow, or CRM.
+Make the business section feel like an extension of the same funny emotional brand.
+
+Mobile:
+Make sure the For Business page or section is clean on mobile.
+Use stacked cards.
+Keep text short.
+Make CTA buttons easy to tap.
+Do not clutter the mobile hero.
+
+Final result:
+The site should still feel like Dave in the Doghouse, but now visitors should understand it works for:
+family, friends, clients, customers, and business relationships.

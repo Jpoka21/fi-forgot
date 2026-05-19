@@ -19,6 +19,7 @@ import AdminPage from "@/pages/admin";
 import BriefingPage from "@/pages/briefing";
 import TryPage from "@/pages/try";
 import DemoPreviewPage from "@/pages/demo-preview";
+import BusinessPage from "@/pages/business";
 
 const queryClient = new QueryClient();
 
@@ -106,6 +107,7 @@ function Router() {
       </Route>
       <Route path="/try" component={TryPage} />
       <Route path="/demo/:id" component={DemoPreviewPage} />
+      <Route path="/business" component={BusinessPage} />
       <Route component={NotFound} />
     </Switch>
   );

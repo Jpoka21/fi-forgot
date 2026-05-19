@@ -85,6 +85,23 @@ export default function LandingPage() {
           <a aria-label="Reviews"      href="#reviews"      style={{ position:"absolute", top:"0%", left:"49%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
           <a aria-label="FAQ"          href="#faq"          style={{ position:"absolute", top:"0%", left:"57%",  width:"5%",  height:"100%", display:"block", cursor:"pointer" }} />
           <Link aria-label="Sign in"      href="/login"        style={{ position:"absolute", top:"0%", left:"62%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
+          {/* For Business — visible text link in the gap between Sign In and the CTA button */}
+          <Link
+            href="/business"
+            aria-label="For Business"
+            style={{
+              position: "absolute", top: "0%", left: "70%", width: "8%", height: "100%",
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(0.55rem, 0.9vw, 0.82rem)",
+              letterSpacing: "0.12em",
+              color: B.red,
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            FOR BUSINESS
+          </Link>
           {/* CTA button */}
           <Link aria-label="Start earning brownie points" href="/signup" data-testid="link-get-started-nav"
             style={{ position:"absolute", top:"0%", right:"0%", width:"22%", height:"100%", display:"block", cursor:"pointer" }} />
@@ -131,6 +148,10 @@ export default function LandingPage() {
               </a>
             ))}
             <div style={{ borderTop: `1px solid ${B.black}12`, margin: "8px 20px 0", paddingTop: 8 }}>
+              <Link href="/business" onClick={() => setMenuOpen(false)}
+                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "6px 0" }}>
+                FOR BUSINESS →
+              </Link>
               <Link href="/login"
                 style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
                 SIGN IN
@@ -356,6 +377,47 @@ export default function LandingPage() {
           style={{ position: "absolute", top: "10%", right: "2%", width: "18%", height: "80%", display: "block", cursor: "pointer" }} />
       </div>
 
+
+      {/* ── FOR BUSINESS TEASER ──────────────────────────────────────────── */}
+      <section className="py-14 px-6" style={{ background: B.white, borderTop: `1px solid ${B.black}08` }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }} className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
+          <div className="flex-1">
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.2em", color: B.red, marginBottom: 8 }}>
+              ALSO FOR BUSINESS
+            </div>
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", color: B.black, lineHeight: 1, letterSpacing: "0.02em", marginBottom: 12 }}>
+              Also built for businesses that never want clients to feel forgotten.
+            </h2>
+            <p style={{ fontSize: "0.95rem", color: B.gray, lineHeight: 1.7, maxWidth: 480 }}>
+              Send real greeting cards automatically for client birthdays, home anniversaries, thank you notes, referrals, holidays, and other relationship moments.
+            </p>
+          </div>
+          <div className="flex-shrink-0 flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-auto">
+            <div className="flex flex-wrap gap-2 mb-1">
+              {["Realtors", "Insurance Agents", "Financial Advisors", "Local Businesses"].map((v) => (
+                <span
+                  key={v}
+                  style={{
+                    background: B.beige,
+                    border: `1.5px solid ${B.black}10`,
+                    borderRadius: 4,
+                    padding: "4px 10px",
+                    fontSize: "0.78rem",
+                    fontWeight: 600,
+                    color: B.black,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {v}
+                </span>
+              ))}
+            </div>
+            <BrandButton href="/business" variant="primary" size="lg">
+              Use for Business →
+            </BrandButton>
+          </div>
+        </div>
+      </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section
