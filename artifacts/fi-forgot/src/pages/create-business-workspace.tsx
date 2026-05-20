@@ -122,10 +122,16 @@ export default function CreateBusinessWorkspacePage() {
               </button>
             </form>
 
-            <div style={{ marginTop: 20, textAlign: "center" }}>
+            <div style={{ marginTop: 20, textAlign: "center", display: "flex", flexDirection: "column", gap: 8 }}>
               <Link href="/dashboard" style={{ color: "#94a3b8", fontSize: "0.85rem", textDecoration: "underline" }}>
                 ← Back to personal dashboard
               </Link>
+              <button
+                onClick={() => { logout(); setLocation("/business/signup"); }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#cbd5e1", fontSize: "0.82rem", textDecoration: "underline", padding: 0 }}
+              >
+                Not {user?.name?.split(" ")[0]}? Sign out and create a new account
+              </button>
             </div>
           </div>
         </div>

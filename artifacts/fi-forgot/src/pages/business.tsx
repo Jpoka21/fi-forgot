@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -10,6 +11,16 @@ const GRAY  = "#8A8A8A";
 
 export default function BusinessPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isLoggedIn, user, workspaces, logout } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const hasBusiness = workspaces.some(w => w.type === "business");
+  const ctaHref = isLoggedIn
+    ? (hasBusiness ? "/business/dashboard" : "/business/create-workspace")
+    : "/business/signup";
+  const ctaLabel = isLoggedIn
+    ? (hasBusiness ? "MY DASHBOARD" : "SET UP BUSINESS")
+    : "START REMEMBERING CLIENTS";
 
   return (
     <div className="min-h-screen font-sans" style={{ background: NAVY, color: "#fff" }}>
@@ -34,21 +45,29 @@ export default function BusinessPage() {
 
         {/* Nav links */}
         <div className="flex items-center gap-7">
-          {[
-            { label: "Personal", href: "/" },
-          ].map(l => (
-            <Link key={l.href} href={l.href}
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
-              {l.label}
-            </Link>
-          ))}
-          <Link href="/login"
+          <Link href="/"
             style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
-            SIGN IN
+            Personal
           </Link>
-          <Link href="/business/signup"
+          {isLoggedIn ? (
+            <>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.5)" }}>
+                {user?.name}
+              </span>
+              <button onClick={() => { logout(); setLocation("/business"); }}
+                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", background: "none", border: "none", cursor: "pointer" }}>
+                SIGN OUT
+              </button>
+            </>
+          ) : (
+            <Link href="/login"
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
+              SIGN IN
+            </Link>
+          )}
+          <Link href={ctaHref}
             style={{ background: RED, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", padding: "13px 28px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-            START REMEMBERING CLIENTS
+            {ctaLabel}
           </Link>
         </div>
       </nav>
@@ -66,9 +85,9 @@ export default function BusinessPage() {
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/business/signup"
+            <Link href={ctaHref}
               style={{ background: RED, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.65rem", letterSpacing: "0.08em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-              GET STARTED
+              {isLoggedIn ? (hasBusiness ? "DASHBOARD" : "SET UP") : "GET STARTED"}
             </Link>
             <button
               onClick={() => setMenuOpen(o => !o)}
@@ -84,10 +103,22 @@ export default function BusinessPage() {
               style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>
               ← PERSONAL SITE
             </Link>
-            <Link href="/login" onClick={() => setMenuOpen(false)}
-              style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>
-              SIGN IN
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <span style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", padding: "9px 20px" }}>
+                  {user?.name}
+                </span>
+                <button onClick={() => { logout(); setMenuOpen(false); setLocation("/business"); }}
+                  style={{ display: "block", width: "100%", textAlign: "left", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", background: "none", border: "none", cursor: "pointer" }}>
+                  SIGN OUT
+                </button>
+              </>
+            ) : (
+              <Link href="/login" onClick={() => setMenuOpen(false)}
+                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>
+                SIGN IN
+              </Link>
+            )}
           </div>
         )}
       </nav>
