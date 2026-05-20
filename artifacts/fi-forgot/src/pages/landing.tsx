@@ -204,7 +204,7 @@ export default function LandingPage() {
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="md:hidden w-full"
-          style={{ height: "auto", display: "block", filter: "brightness(1.45)" }}
+          style={{ height: "auto", filter: "brightness(1.45)" }}
         />
         {/* Desktop landscape hero */}
         <img
