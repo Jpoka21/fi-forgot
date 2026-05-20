@@ -722,7 +722,7 @@ export default function BusinessDemoPage() {
               fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em",
               padding: "17px 28px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, marginBottom: 12,
             }}>
-              START REMEMBERING CLIENTS →
+              START REMEMBERING CLIENTS — SIGN UP NOW →
             </Link>
             <Link href="/business" style={{
               display: "block", textAlign: "center",
