@@ -13,6 +13,14 @@ export default function BusinessPage() {
 
   return (
     <div className="min-h-screen font-sans" style={{ background: NAVY, color: "#fff" }}>
+      <style>{`
+        .biz-desktop-hero { display: block; }
+        .biz-mobile-hero  { display: none;  }
+        @media (max-width: 767px) {
+          .biz-desktop-hero { display: none;  }
+          .biz-mobile-hero  { display: block; }
+        }
+      `}</style>
 
       {/* ── Desktop nav ─────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 hidden md:flex items-center justify-between"
@@ -87,7 +95,7 @@ export default function BusinessPage() {
       {/* ── HERO ────────────────────────────────────────────────────────── */}
 
       {/* Desktop hero */}
-      <section className="relative hidden md:block" style={{ lineHeight: 0, overflow: "hidden" }}>
+      <section className="biz-desktop-hero" style={{ position: "relative", lineHeight: 0, overflow: "hidden" }}>
         <img
           src="/hero-business.png"
           alt="F* I Forgot for Business"
@@ -172,7 +180,7 @@ export default function BusinessPage() {
       </section>
 
       {/* Mobile hero — full image, text panel below */}
-      <section className="md:hidden" style={{ lineHeight: 0 }}>
+      <section className="biz-mobile-hero" style={{ lineHeight: 0 }}>
         {/* Full portrait image, nothing cropped */}
         <img
           src="/hero-business-mobile.png"
