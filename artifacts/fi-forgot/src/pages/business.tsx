@@ -24,12 +24,12 @@ export default function BusinessPage() {
 
       {/* ── Desktop nav ─────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 hidden md:flex items-center justify-between"
-        style={{ background: "#0a1f3d", borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 40px", height: 58 }}>
+        style={{ background: "#0a1f3d", borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 40px", height: 96 }}>
         {/* Logo */}
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.55rem", color: RED, fontStyle: "italic", marginRight: 4 }}>F*</span>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.55rem", color: "#fff", letterSpacing: "0.05em" }}>I FORGOT</span>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.5rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.45)", marginLeft: 8, alignSelf: "flex-end", paddingBottom: 4 }}>BUSINESS</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: RED, fontStyle: "italic", marginRight: 6 }}>F*</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: "#fff", letterSpacing: "0.05em" }}>I FORGOT</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.45)", marginLeft: 10, alignSelf: "flex-end", paddingBottom: 6 }}>BUSINESS</span>
         </Link>
 
         {/* Nav links */}
@@ -38,16 +38,16 @@ export default function BusinessPage() {
             { label: "Personal", href: "/" },
           ].map(l => (
             <Link key={l.href} href={l.href}
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
               {l.label}
             </Link>
           ))}
           <Link href="/login"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
             SIGN IN
           </Link>
           <Link href="/signup"
-            style={{ background: RED, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.1em", padding: "9px 20px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+            style={{ background: RED, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", padding: "13px 28px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
             START REMEMBERING CLIENTS
           </Link>
         </div>
