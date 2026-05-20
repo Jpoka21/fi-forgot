@@ -162,7 +162,7 @@ export default function BusinessPage() {
                 padding: "14px 28px", borderRadius: 4,
                 textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap",
               }}>
-              SEE SAMPLE CARDS →
+              SEE HOW IT WORKS →
             </Link>
             <Link href="/business-demo"
               style={{
@@ -237,7 +237,7 @@ export default function BusinessPage() {
                 textDecoration: "none", lineHeight: 1.2,
                 textAlign: "center", display: "block",
               }}>
-              SEE SAMPLE CARDS →
+              SEE HOW IT WORKS →
             </Link>
             <Link href="/business-demo"
               style={{
