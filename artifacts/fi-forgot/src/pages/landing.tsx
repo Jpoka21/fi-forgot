@@ -124,9 +124,9 @@ export default function LandingPage() {
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/try" data-testid="link-mobile-nav-cta"
-              style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.08em", padding: "8px 13px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-              DEMO FOR FREE
+            <Link href="/signup" data-testid="link-mobile-nav-cta"
+              style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.64rem", letterSpacing: "0.07em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+              START EARNING BROWNIE POINTS
             </Link>
             <button
               onClick={() => setMenuOpen(o => !o)}
@@ -136,6 +136,34 @@ export default function LandingPage() {
             </button>
           </div>
         </div>
+
+        {/* Scrollable nav links row — always visible on mobile */}
+        <div style={{ overflowX: "auto", borderTop: `1px solid ${B.black}10`, scrollbarWidth: "none" }}
+          className="hide-scrollbar">
+          <div style={{ display: "flex", gap: 0, padding: "0 4px", minWidth: "max-content" }}>
+            {[
+              { label: "How It Works", href: "#how-it-works" },
+              { label: "Plans", href: "#pricing" },
+              { label: "Examples", href: "#examples" },
+              { label: "Reviews", href: "#reviews" },
+              { label: "FAQ", href: "#faq" },
+            ].map(link => (
+              <a key={link.href} href={link.href}
+                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.1em", color: B.black, padding: "7px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
+                {link.label}
+              </a>
+            ))}
+            <Link href="/business"
+              style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.1em", color: B.red, padding: "7px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
+              For Business
+            </Link>
+            <Link href="/login"
+              style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.1em", color: B.gray, padding: "7px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
+              Sign In
+            </Link>
+          </div>
+        </div>
+
         {menuOpen && (
           <div style={{ background: B.beige, borderTop: `1px solid ${B.black}12`, padding: "8px 0 12px" }}>
             {[
