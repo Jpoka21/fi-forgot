@@ -89,25 +89,57 @@ export default function LandingPage() {
         </Link>
       </div>
 
-      {/* ── NAV IMAGE with clickable overlay zones ───────────────────────── */}
-      <nav className="sticky z-50 hidden md:block" style={{ top: 33, zIndex: 50 }}>
-        <div style={{ position: "relative", lineHeight: 0 }}>
-          <img src="/nav.png" alt="F* I Forgot navigation"
-            style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
-            draggable={false}
-          />
-          {/* Logo / home */}
-          <Link aria-label="Home" href="/"                style={{ position:"absolute", top:"0%", left:"0%",   width:"21%", height:"100%", display:"block", cursor:"pointer" }} />
-          {/* Nav links */}
-          <a aria-label="How it works" href="#how-it-works" style={{ position:"absolute", top:"0%", left:"22%",  width:"11%", height:"100%", display:"block", cursor:"pointer" }} />
-          <a aria-label="Plans"        href="#pricing"      style={{ position:"absolute", top:"0%", left:"33%",  width:"7%",  height:"100%", display:"block", cursor:"pointer" }} />
-          <a aria-label="Examples"     href="#examples"     style={{ position:"absolute", top:"0%", left:"40%",  width:"9%",  height:"100%", display:"block", cursor:"pointer" }} />
-          <a aria-label="Reviews"      href="#reviews"      style={{ position:"absolute", top:"0%", left:"49%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
-          <a aria-label="FAQ"          href="#faq"          style={{ position:"absolute", top:"0%", left:"57%",  width:"5%",  height:"100%", display:"block", cursor:"pointer" }} />
-          <Link aria-label="Sign in"      href="/login"        style={{ position:"absolute", top:"0%", left:"62%",  width:"8%",  height:"100%", display:"block", cursor:"pointer" }} />
-          {/* CTA button */}
-          <Link aria-label="Start earning brownie points" href="/signup" data-testid="link-get-started-nav"
-            style={{ position:"absolute", top:"0%", right:"0%", width:"22%", height:"100%", display:"block", cursor:"pointer" }} />
+      {/* ── Desktop nav ──────────────────────────────────────────────────── */}
+      <nav className="hidden md:flex" style={{
+        position: "sticky", top: 33, zIndex: 50,
+        background: B.beige,
+        borderBottom: `1px solid ${B.black}1A`,
+        alignItems: "center",
+        padding: "0 28px 0 20px",
+        height: 72,
+        gap: 0,
+      }}>
+        {/* Logo */}
+        <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column", marginRight: 32, flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.1rem", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.1rem", color: B.black, letterSpacing: "0.04em", marginLeft: 5 }}>I FORGOT</span>
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.42rem", letterSpacing: "0.22em", color: B.gray, marginTop: -2 }}>
+            RELATIONSHIP DAMAGE CONTROL
+          </div>
+        </Link>
+
+        {/* Nav links */}
+        <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
+          {[
+            { label: "HOW IT WORKS", href: "#how-it-works" },
+            { label: "PLANS",        href: "#pricing" },
+            { label: "EXAMPLES",     href: "#examples" },
+            { label: "REVIEWS",      href: "#reviews" },
+            { label: "FAQ",          href: "#faq" },
+          ].map(link => (
+            <a key={link.href} href={link.href}
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "0 14px", whiteSpace: "nowrap", opacity: 0.85 }}>
+              {link.label}
+            </a>
+          ))}
+          <Link href="/business"
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "0 14px", whiteSpace: "nowrap" }}>
+            FOR BUSINESS
+          </Link>
+        </div>
+
+        {/* Right side: Sign in + CTA */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+          <Link href="/login"
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", opacity: 0.75, whiteSpace: "nowrap" }}>
+            SIGN IN
+          </Link>
+          <Link href="/signup" data-testid="link-get-started-nav"
+            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em", padding: "12px 18px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
+            START EARNING<br />BROWNIE POINTS
+          </Link>
         </div>
       </nav>
 
