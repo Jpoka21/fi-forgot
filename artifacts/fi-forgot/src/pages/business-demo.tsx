@@ -132,22 +132,34 @@ function getCardMessage(a: Answers): string {
   const tone = a.tone || "Professional";
   const rel  = a.relationshipCategory || "client";
 
-  if (rel === "VIP Client") {
-    if (evt === "holiday")
-      return "Clients like you are the reason our business exists. Wishing you and your family the most wonderful holiday season — we sincerely appreciate the relationship and continued trust.";
-    if (evt === "birthday")
-      return "Wishing you a very happy birthday. It's a privilege to work with clients like you, and we hope this year brings everything you deserve.";
-    return "It's an honor to be part of your journey. We sincerely appreciate your continued trust and loyalty — clients like you are the reason we love what we do.";
-  }
-
-  if (rel === "Referral Partner") {
+  // Referral-specific always wins
+  if (evt === "referral" || rel === "Referral Partner")
     return "We just wanted to say thank you — your trust in referring us means more than we can express. We look forward to continuing to make you proud.";
+
+  // Home anniversary — always mention the closing milestone
+  if (evt === "home-anniversary") {
+    if (rel === "VIP Client" || tone === "Luxury / High End")
+      return "It's hard to believe it's already been a year since you closed on your home. We wanted to take a moment to say congratulations on this milestone and thank you for the trust you placed in us. It was truly a privilege.";
+    if (tone === "Casual" || tone === "Friendly")
+      return "Happy home anniversary! Can you believe it's already been a year since you got the keys? We hope you've been loving every moment of it — thank you for letting us be part of that day.";
+    if (tone === "Warm Professional")
+      return "One year ago you closed on your home, and we still feel proud to have been part of that moment. We hope it's brought you everything you hoped for. Thank you again for trusting us.";
+    return "We wanted to reach out and wish you a happy home anniversary. One year since closing — we hope you've enjoyed every moment. Thank you for trusting us with such an important milestone.";
   }
 
-  if (evt === "referral")
-    return "Thank you so much for the referral. It means a great deal to us, and we'll make sure to take excellent care of them.";
+  // Client anniversary
+  if (evt === "anniversary") {
+    if (rel === "VIP Client" || tone === "Luxury / High End")
+      return "Marking this milestone, we want to express our sincere gratitude for your continued trust. It has been a genuine privilege to work with you, and we look forward to many more years together.";
+    if (tone === "Warm Professional")
+      return "Can you believe it's already been a year? We just wanted to take a moment to say how much we appreciate the relationship and the trust you've placed in us.";
+    return "We're marking this anniversary to say thank you — for your trust, your business, and the relationship we've built together. We truly appreciate it.";
+  }
 
+  // Birthday
   if (evt === "birthday") {
+    if (rel === "VIP Client")
+      return "Wishing you a very happy birthday. It's a privilege to work with clients like you, and we hope this year brings everything you deserve.";
     if (tone === "Casual")
       return "Hope you have an awesome birthday! Thanks for being part of our business — means a lot to us.";
     if (tone === "Warm Professional")
@@ -157,7 +169,10 @@ function getCardMessage(a: Answers): string {
     return "Wishing you a very happy birthday. Thank you for being a valued part of our business — we truly appreciate you.";
   }
 
+  // Holiday
   if (evt === "holiday") {
+    if (rel === "VIP Client")
+      return "Clients like you are the reason our business exists. Wishing you and your family the most wonderful holiday season — we sincerely appreciate the relationship and continued trust.";
     if (tone === "Casual")
       return "Hope you have an awesome holiday season! Thanks again for being part of our business — we really appreciate it.";
     if (tone === "Warm Professional")
@@ -167,14 +182,6 @@ function getCardMessage(a: Answers): string {
     if (tone === "Friendly")
       return "Happy holidays! It's been a great year and we're so grateful to have clients like you. Here's to a wonderful season ahead.";
     return "Wishing you a wonderful holiday season and continued success in the new year. Thank you again for being part of our business.";
-  }
-
-  if (evt === "anniversary" || evt === "home-anniversary") {
-    if (tone === "Warm Professional")
-      return "Can you believe it's already been a year? We just wanted to take a moment to say how much we appreciate the relationship and the trust you've placed in us.";
-    if (tone === "Luxury / High End")
-      return "Marking this milestone, we want to express our sincere gratitude for your continued trust. It has been a privilege every step of the way.";
-    return "We're marking this anniversary to say thank you — for your trust, your business, and the relationship we've built together. We truly appreciate it.";
   }
 
   return "Thank you for being a valued part of our business. We appreciate the relationship and hope everything is going great.";
