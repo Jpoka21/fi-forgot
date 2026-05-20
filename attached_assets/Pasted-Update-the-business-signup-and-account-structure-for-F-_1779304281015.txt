@@ -1,0 +1,81 @@
+Update the business signup and account structure for F* I Forgot.
+
+We need one shared login system, but separate personal and business workspaces.
+
+Do not create separate login accounts for personal and business.
+
+Rules:
+
+1. A user account should be the main login identity.
+   Example:
+   email
+   password
+   full name
+
+2. A user can have one or more workspaces.
+   Workspace types:
+   personal
+   business
+
+3. Personal and business dashboards must stay separate.
+   Same login, different dashboards.
+
+4. If a new user signs up from the business signup page:
+   Create the user account.
+   Then create their first business workspace.
+   Save business name and business type on the business workspace, not only on the user.
+
+5. If an existing personal user clicks “Start remembering clients” or signs in from the business page:
+   Do not make them create a second account.
+   After login, send them to a “Create your business workspace” page.
+   Ask for:
+   business name
+   business type
+   optional business address, if easy
+   Then create a business workspace tied to their existing user account.
+
+6. If a user has both personal and business workspaces:
+   Show a workspace switcher after login or in the dashboard header.
+   Options:
+   Personal
+   Business Name
+
+7. Business signup page changes:
+   Keep the current design.
+   Keep fields:
+   Full Name
+   Business Name
+   Email
+   Password
+   Business Type
+   Start Remembering Clients
+   But make sure business name gets saved to the business workspace.
+
+8. Dashboard routing:
+   personal workspace goes to personal dashboard
+   business workspace goes to business dashboard
+
+9. Add a simple database structure if needed:
+   users table:
+   id
+   full_name
+   email
+   password_hash
+   created_at
+
+   workspaces table:
+   id
+   user_id
+   type
+   name
+   business_type
+   business_address
+   created_at
+
+10. Make sure existing users without a business workspace can add one later from the business page.
+
+Goal:
+One email and password per person.
+Separate personal and business experiences.
+No duplicate accounts.
+Business name belongs to the business workspace.

@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Menu, X } from "lucide-react";
 
 const NAVY = "#0D1B35";
 const RED = "#C8102E";
@@ -35,6 +36,7 @@ function generateId() {
 export default function BusinessSignupPage() {
   const [, setLocation] = useLocation();
   const [submitting, setSubmitting] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -94,28 +96,57 @@ export default function BusinessSignupPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f1f5f9", display: "flex", flexDirection: "column" }}>
-      {/* Top nav */}
-      <header style={{
-        background: NAVY, padding: "0 32px", height: 60,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
-        <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{
-            fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem",
-            color: WHITE, letterSpacing: "0.05em",
-          }}>
-            <span style={{ color: RED }}>F*</span>I FORGOT
-          </span>
-          <span style={{
-            fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em",
-            color: "rgba(255,255,255,0.45)", textTransform: "uppercase", paddingBottom: 2,
-          }}>FOR BUSINESS</span>
+      <style>{`
+        .biz-su-desktop-nav { display: flex; }
+        .biz-su-mobile-nav  { display: none; }
+        @media (max-width: 767px) {
+          .biz-su-desktop-nav { display: none; }
+          .biz-su-mobile-nav  { display: block; }
+        }
+      `}</style>
+
+      {/* ── Desktop nav ── */}
+      <nav className="biz-su-desktop-nav sticky top-0 z-50 items-center justify-between"
+        style={{ background: "#0a1f3d", borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 40px", height: 96 }}>
+        <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: RED, fontStyle: "italic", marginRight: 6 }}>F*</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: WHITE, letterSpacing: "0.05em" }}>I FORGOT</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.45)", marginLeft: 10, alignSelf: "flex-end", paddingBottom: 6 }}>BUSINESS</span>
         </Link>
-        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem", margin: 0 }}>
-          Already have an account?{" "}
-          <Link href="/login" style={{ color: "rgba(255,255,255,0.85)", textDecoration: "underline" }}>Sign in</Link>
-        </p>
-      </header>
+        <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+          <Link href="/" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>Personal</Link>
+          <Link href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>SIGN IN</Link>
+        </div>
+      </nav>
+
+      {/* ── Mobile nav ── */}
+      <nav className="biz-su-mobile-nav sticky top-0 z-50"
+        style={{ background: "#0a1f3d", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px" }}>
+          <Link href="/business" style={{ textDecoration: "none" }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: WHITE, lineHeight: 0.95 }}>
+              <span style={{ color: RED, fontStyle: "italic" }}>F*</span>{" "}I FORGOT
+            </div>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.38rem", letterSpacing: "0.2em", color: "rgba(255,255,255,0.4)", marginTop: 1 }}>BUSINESS</div>
+          </Link>
+          <button onClick={() => setMenuOpen(o => !o)} aria-label="Menu"
+            style={{ background: "none", border: "none", padding: "6px 4px", cursor: "pointer", color: WHITE, display: "flex", alignItems: "center" }}>
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+        {menuOpen && (
+          <div style={{ background: "#0a1f3d", borderTop: "1px solid rgba(255,255,255,0.08)", padding: "8px 0 12px" }}>
+            <Link href="/" onClick={() => setMenuOpen(false)}
+              style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>
+              ← PERSONAL SITE
+            </Link>
+            <Link href="/login" onClick={() => setMenuOpen(false)}
+              style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>
+              SIGN IN
+            </Link>
+          </div>
+        )}
+      </nav>
 
       {/* Main */}
       <main style={{
