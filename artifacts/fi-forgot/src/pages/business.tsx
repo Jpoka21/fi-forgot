@@ -171,73 +171,61 @@ export default function BusinessPage() {
         </div>
       </section>
 
-      {/* Mobile hero — text overlaid on image */}
-      <section className="md:hidden" style={{ position: "relative", lineHeight: 0 }}>
-        {/* Full portrait image */}
+      {/* Mobile hero — full image, text panel below */}
+      <section className="md:hidden" style={{ lineHeight: 0 }}>
+        {/* Full portrait image, nothing cropped */}
         <img
           src="/hero-business-mobile.png"
           alt="F* I Forgot for Business"
-          style={{ width: "100%", height: "auto", display: "block", filter: "brightness(0.7)" }}
+          style={{ width: "100%", height: "auto", display: "block" }}
         />
 
-        {/* Bottom gradient — fades image into overlay text area */}
+        {/* Text panel below the image */}
         <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: "58%",
-          background: "linear-gradient(to bottom, transparent 0%, rgba(7,26,51,0.72) 30%, rgba(7,26,51,0.97) 65%, #071A33 100%)",
-          pointerEvents: "none",
-        }} />
-
-        {/* Text overlaid at the bottom */}
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          padding: "0 20px 28px",
+          background: "#0c2040",
+          padding: "28px 20px 36px",
           lineHeight: "normal",
-          zIndex: 2,
         }}>
-          {/* Eyebrow */}
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "0.65rem",
+            fontSize: "0.68rem",
             letterSpacing: "0.22em",
             color: RED,
-            marginBottom: 7,
+            marginBottom: 8,
           }}>
             F* I FORGOT · FOR BUSINESS
           </div>
 
-          {/* Headline */}
           <h1 style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(1.7rem, 7.5vw, 2.3rem)",
+            fontSize: "clamp(2rem, 8vw, 2.6rem)",
             lineHeight: 1.0,
             color: "#ffffff",
             letterSpacing: "0.02em",
-            marginBottom: 10,
+            marginBottom: 14,
           }}>
             WHEN YOUR BUSINESS FORGETS,{" "}
             <span style={{ color: RED }}>CLIENTS REMEMBER.</span>
           </h1>
 
-          {/* Subheadline */}
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "0.82rem",
-            color: "rgba(255,255,255,0.68)",
-            lineHeight: 1.55,
-            marginBottom: 18,
+            fontSize: "0.92rem",
+            color: "rgba(255,255,255,0.72)",
+            lineHeight: 1.65,
+            marginBottom: 22,
           }}>
             Automatically send real greeting cards to clients, customers,
             and referral partners — so relationships don't go cold.
           </p>
 
-          {/* CTAs */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <Link href="/signup"
               style={{
                 background: RED, color: "#fff",
                 fontFamily: "'Bebas Neue', cursive",
-                fontSize: "0.88rem", letterSpacing: "0.1em",
-                padding: "13px 20px", borderRadius: 4,
+                fontSize: "0.95rem", letterSpacing: "0.1em",
+                padding: "14px 20px", borderRadius: 4,
                 textDecoration: "none", lineHeight: 1.2,
                 textAlign: "center", display: "block",
               }}>
