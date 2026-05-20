@@ -154,7 +154,7 @@ export default function BusinessPage() {
 
           {/* CTAs */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link href="/signup"
+            <Link href="/business-demo"
               style={{
                 background: RED, color: "#fff",
                 fontFamily: "'Bebas Neue', cursive",
@@ -162,9 +162,9 @@ export default function BusinessPage() {
                 padding: "14px 28px", borderRadius: 4,
                 textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap",
               }}>
-              START REMEMBERING CLIENTS →
+              DEMO FOR FREE →
             </Link>
-            <a href="#how-it-works"
+            <Link href="/business-demo"
               style={{
                 background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.85)",
                 fontFamily: "'Bebas Neue', cursive",
@@ -174,7 +174,7 @@ export default function BusinessPage() {
                 border: "1px solid rgba(255,255,255,0.2)",
               }}>
               SEE HOW IT WORKS
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -228,7 +228,7 @@ export default function BusinessPage() {
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <Link href="/signup"
+            <Link href="/business-demo"
               style={{
                 background: RED, color: "#fff",
                 fontFamily: "'Bebas Neue', cursive",
@@ -237,9 +237,9 @@ export default function BusinessPage() {
                 textDecoration: "none", lineHeight: 1.2,
                 textAlign: "center", display: "block",
               }}>
-              START REMEMBERING CLIENTS →
+              DEMO FOR FREE →
             </Link>
-            <a href="#how-it-works"
+            <Link href="/business-demo"
               style={{
                 background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)",
                 fontFamily: "'Bebas Neue', cursive",
@@ -250,7 +250,7 @@ export default function BusinessPage() {
                 border: "1px solid rgba(255,255,255,0.15)",
               }}>
               SEE HOW IT WORKS
-            </a>
+            </Link>
           </div>
         </div>
       </section>

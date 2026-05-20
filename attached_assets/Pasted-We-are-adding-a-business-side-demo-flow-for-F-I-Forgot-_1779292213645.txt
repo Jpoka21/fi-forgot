@@ -1,0 +1,179 @@
+We are adding a business side demo flow for F* I Forgot.
+
+Goal:
+When a visitor clicks the business hero CTA, do NOT send them to login or signup first. Send them to a free demo flow that explains the business product and asks a few lightweight questions before signup.
+
+Important:
+The personal side and business side must stay separate.
+Do not change the personal demo flow.
+Do not change the personal homepage.
+Only update the business side.
+
+Changes to make:
+
+1. Update the business hero CTA
+Find the business page hero button that currently says:
+“Start Remembering Clients”
+
+Change the click destination so it routes to a new business demo page:
+`/business-demo`
+
+Change button text to:
+“Demo For Free”
+
+Keep the same visual style as the current red CTA button.
+
+If there is a secondary button that says “See How It Works,” route that to the same `/business-demo` page for now.
+
+2. Create a new route/page
+Create a new page at:
+`/business-demo`
+
+This page should feel like the business version of the product, not the personal version.
+
+Tone:
+Professional, slightly funny, simple, bold, and brand consistent.
+
+Header eyebrow:
+F* I FORGOT · FOR BUSINESS
+
+Main headline:
+See how many client relationships are quietly going cold.
+
+Subheadline:
+Answer a few quick questions and we’ll show how F* I Forgot helps your business remember clients, customers, and referral partners before they drift away.
+
+3. Build the demo as a multi step question flow
+Use one question per screen with a progress indicator.
+
+Question 1:
+“What type of business do you run?”
+
+Options:
+Real Estate Agent
+Mortgage Broker
+Insurance Agent
+Financial Advisor
+Attorney
+Contractor
+Medical / Wellness
+Other
+
+Question 2:
+“Who is someone your business should probably stay in touch with?”
+
+Fields:
+Client or contact first name
+Relationship type
+
+Relationship type options:
+Past Client
+Current Client
+Referral Partner
+Prospect
+Vendor
+Other
+
+Question 3:
+“When was the last time you reached out?”
+
+Options:
+This week
+This month
+A few months ago
+Over six months ago
+I honestly don’t remember
+
+Question 4:
+“What usually happens with relationships like this?”
+
+Options:
+We forget to follow up
+We only reach out when we need something
+We send random texts
+We mean to send cards but don’t
+Nothing happens
+
+Question 5:
+“How many relationships like this does your business have?”
+
+Options:
+Under 25
+25 to 100
+100 to 500
+500 plus
+
+4. After the questions, show a results/demo screen
+The results screen should feel like the payoff.
+
+Headline:
+Here’s what F* I Forgot would do for this relationship.
+
+Use the contact first name from the form if provided.
+
+Show 4 cards or timeline steps:
+
+Step 1:
+Relationship added
+“{Name} is saved as a {Relationship Type}.”
+
+Step 2:
+Smart reminders created
+“We track birthdays, follow ups, holidays, anniversaries, and business appropriate touchpoints.”
+
+Step 3:
+Card and message suggested
+“We help choose a real greeting card and message that feels thoughtful without feeling weird.”
+
+Step 4:
+Card mailed automatically
+“Your business stays remembered without another sticky note, spreadsheet, or forgotten follow up.”
+
+5. Add a small business style example card preview
+Show a simple preview box with:
+
+Front label:
+Sample Client Card
+
+Message:
+“Hi {Name}, just wanted to say thank you for being part of our business. We appreciate the relationship and hope everything is going great.”
+
+Below the message:
+Real card. Real mail. Remembered at the right time.
+
+6. Add final CTA buttons
+Primary red button:
+“Start Remembering Clients”
+
+This button should route to the existing business signup flow or signup page.
+
+Secondary outline button:
+“Back to Business Page”
+
+This button should route to `/business`.
+
+7. Important UX requirements
+Make the page mobile friendly.
+Each question should fit comfortably on a phone screen.
+Use large buttons for answer choices.
+Allow back and next navigation.
+Do not require signup before completing the demo.
+Do not ask for email in this first version.
+Do not store this demo data permanently yet unless the current app already has a safe demo state pattern.
+Use local component state only.
+
+8. Visual design
+Use the existing F* I Forgot colors:
+dark navy background
+red CTA buttons
+white text
+subtle card panels
+business professional style
+
+Make it feel connected to the current business hero page.
+
+9. Final check
+After implementing:
+Clicking “Demo For Free” from the business page should open `/business-demo`.
+The visitor should be able to complete all questions without logging in.
+Only after the final results screen should they be asked to start/signup.

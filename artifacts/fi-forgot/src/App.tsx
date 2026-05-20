@@ -20,6 +20,7 @@ import BriefingPage from "@/pages/briefing";
 import TryPage from "@/pages/try";
 import DemoPreviewPage from "@/pages/demo-preview";
 import BusinessPage from "@/pages/business";
+import BusinessDemoPage from "@/pages/business-demo";
 
 const queryClient = new QueryClient();
 
@@ -108,13 +109,14 @@ function Router() {
       <Route path="/try" component={TryPage} />
       <Route path="/demo/:id" component={DemoPreviewPage} />
       <Route path="/business" component={BusinessPage} />
+      <Route path="/business-demo" component={BusinessDemoPage} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business"];
+const HIDE_TRY_BUTTON_ON = ["/try", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo"];
 
 function FloatingTryButton() {
   const [location] = useLocation();
