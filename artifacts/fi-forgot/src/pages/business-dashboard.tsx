@@ -44,6 +44,112 @@ const ACTIVITY = [
   { icon: "✓", text: "Holiday cards queued for 42 clients", time: "3 days ago" },
 ];
 
+// ── Account Menu ─────────────────────────────────────────────────────────────
+
+interface AccountMenuProps {
+  user: { name: string; email: string } | null;
+  onLogout: () => void;
+}
+
+function AccountMenu({ user, onLogout }: AccountMenuProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const initial = user?.name?.charAt(0).toUpperCase() ?? "?";
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: 34, height: 34, borderRadius: "50%",
+          background: open ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.15)",
+          border: "2px solid rgba(255,255,255,0.2)",
+          color: WHITE, cursor: "pointer",
+          fontSize: "0.82rem", fontWeight: 700,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "background 0.15s",
+        }}
+      >
+        {initial}
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 8px)", right: 0,
+          background: WHITE, borderRadius: 12, minWidth: 220,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          zIndex: 200, overflow: "hidden",
+        }}>
+          {/* Account info */}
+          <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid #f1f5f9" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: NAVY, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem", fontWeight: 700, flexShrink: 0 }}>
+                {initial}
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: 700, color: NAVY }}>{user?.name}</p>
+                <p style={{ margin: 0, fontSize: "0.78rem", color: "#94a3b8" }}>{user?.email}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Menu items */}
+          {[
+            { icon: "⚙️", label: "Account Settings", action: () => alert("Account settings coming soon!") },
+            { icon: "💳", label: "Billing & Plan", action: () => alert("Billing coming soon!") },
+            { icon: "🔔", label: "Notifications", action: () => alert("Notifications coming soon!") },
+            { icon: "❓", label: "Help & Support", action: () => window.open("mailto:support@fiforgot.com") },
+          ].map(item => (
+            <button
+              key={item.label}
+              onClick={() => { item.action(); setOpen(false); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10,
+                width: "100%", padding: "10px 16px",
+                background: "none", border: "none", cursor: "pointer",
+                textAlign: "left", fontSize: "0.88rem", color: "#334155",
+                transition: "background 0.1s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#f8fafc")}
+              onMouseLeave={e => (e.currentTarget.style.background = "none")}
+            >
+              <span style={{ fontSize: "1rem", width: 20, textAlign: "center" }}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+
+          {/* Sign out */}
+          <div style={{ borderTop: "1px solid #f1f5f9", padding: "6px 0" }}>
+            <button
+              onClick={() => { setOpen(false); onLogout(); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10,
+                width: "100%", padding: "10px 16px",
+                background: "none", border: "none", cursor: "pointer",
+                textAlign: "left", fontSize: "0.88rem", color: RED, fontWeight: 600,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}
+              onMouseLeave={e => (e.currentTarget.style.background = "none")}
+            >
+              <span style={{ fontSize: "1rem", width: 20, textAlign: "center" }}>🚪</span>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Workspace Switcher ────────────────────────────────────────────────────────
 
 function WorkspaceSwitcher() {
@@ -376,15 +482,7 @@ export default function BusinessDashboardPage() {
           </button>
 
           {/* User menu */}
-          <div style={{ position: "relative" }}>
-            <button
-              onClick={() => { logout(); setLocation("/business"); }}
-              title="Sign out"
-              style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", color: WHITE, cursor: "pointer", fontSize: "0.78rem", fontWeight: 700 }}
-            >
-              {user?.name?.charAt(0).toUpperCase() ?? "?"}
-            </button>
-          </div>
+          <AccountMenu user={user} onLogout={() => { logout(); setLocation("/business"); }} />
         </div>
       </header>
 
