@@ -143,15 +143,15 @@ export default function LandingPage() {
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
-        className="h-[clamp(420px,72svh,600px)] md:h-auto"
+        className="md:h-auto"
         style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
         {/* Mobile portrait hero */}
         <img
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
-          className="md:hidden w-full h-full object-cover"
-          style={{ objectPosition: "65% top", filter: "brightness(1.45)" }}
+          className="md:hidden w-full"
+          style={{ height: "auto", display: "block", filter: "brightness(1.45)" }}
         />
         {/* Desktop landscape hero */}
         <img
