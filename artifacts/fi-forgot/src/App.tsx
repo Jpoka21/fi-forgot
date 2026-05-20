@@ -156,7 +156,7 @@ function FloatingTryButton() {
         alignItems: "center",
         gap: 7,
       }}>
-        ✉ DEMO FOR FREE
+        ✉ SEE HOW IT WORKS
       </span>
       <span style={{
         fontSize: "0.6rem",
