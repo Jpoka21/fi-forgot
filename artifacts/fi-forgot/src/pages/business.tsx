@@ -164,7 +164,7 @@ export default function BusinessPage() {
               }}>
               SEE HOW IT WORKS — FOR FREE →
             </Link>
-            <Link href="/business-demo"
+            <Link href="/business/sample-cards"
               style={{
                 background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.85)",
                 fontFamily: "'Bebas Neue', cursive",
@@ -239,7 +239,7 @@ export default function BusinessPage() {
               }}>
               SEE HOW IT WORKS — FOR FREE →
             </Link>
-            <Link href="/business-demo"
+            <Link href="/business/sample-cards"
               style={{
                 background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)",
                 fontFamily: "'Bebas Neue', cursive",

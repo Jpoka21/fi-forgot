@@ -10,6 +10,7 @@ import cardImageRouter from "./card-image";
 import demoPreviewRouter from "./demo-preview";
 import refineMessageRouter from "./refine-message";
 import businessCardMessageRouter from "./business-card-message";
+import sampleCardsRouter from "./sample-cards";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(cardImageRouter);
 router.use(demoPreviewRouter);
 router.use(refineMessageRouter);
 router.use(businessCardMessageRouter);
+router.use(sampleCardsRouter);
 
 export default router;
