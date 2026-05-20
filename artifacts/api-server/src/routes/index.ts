@@ -11,6 +11,7 @@ import demoPreviewRouter from "./demo-preview";
 import refineMessageRouter from "./refine-message";
 import businessCardMessageRouter from "./business-card-message";
 import sampleCardsRouter from "./sample-cards";
+import businessClientsRouter from "./business-clients";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(demoPreviewRouter);
 router.use(refineMessageRouter);
 router.use(businessCardMessageRouter);
 router.use(sampleCardsRouter);
+router.use(businessClientsRouter);
 
 export default router;

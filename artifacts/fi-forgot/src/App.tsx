@@ -22,6 +22,8 @@ import DemoPreviewPage from "@/pages/demo-preview";
 import BusinessPage from "@/pages/business";
 import BusinessDemoPage from "@/pages/business-demo";
 import SampleCardsPage from "@/pages/sample-cards";
+import BusinessSignupPage from "@/pages/business-signup";
+import BusinessDashboardPage from "@/pages/business-dashboard";
 
 const queryClient = new QueryClient();
 
@@ -112,6 +114,8 @@ function Router() {
       <Route path="/business" component={BusinessPage} />
       <Route path="/business-demo" component={BusinessDemoPage} />
       <Route path="/business/sample-cards" component={SampleCardsPage} />
+      <Route path="/business/signup" component={BusinessSignupPage} />
+      <Route path="/business/dashboard" component={BusinessDashboardPage} />
       <Route component={NotFound} />
     </Switch>
   );

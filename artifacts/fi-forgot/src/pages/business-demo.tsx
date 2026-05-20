@@ -716,7 +716,7 @@ export default function BusinessDemoPage() {
               </p>
             </div>
 
-            <Link href="/signup" style={{
+            <Link href="/business/signup" style={{
               display: "block", textAlign: "center",
               background: RED, color: "#fff",
               fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em",

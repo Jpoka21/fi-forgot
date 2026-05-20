@@ -413,7 +413,7 @@ export default function SampleCardsPage() {
             F* I Forgot handles the cards. You focus on the relationships.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/signup" style={{
+            <Link href="/business/signup" style={{
               display: "inline-block", textDecoration: "none",
               background: RED, color: "#fff",
               fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em",

@@ -1,0 +1,250 @@
+Build the new authenticated business onboarding flow for the “Start Remembering Clients” button.
+
+IMPORTANT:
+This is NOT the same flow as the “See How It Works” demo.
+
+The demo flow remains untouched and still uses one question per page.
+
+This new flow is the REAL business product experience and should feel like a modern CRM/dashboard built for speed and bulk client management.
+
+---
+
+## FLOW OVERVIEW
+
+1. User clicks:
+   “Start Remembering Clients”
+
+2. User is taken to:
+   Sign Up / Create Account page
+
+Fields:
+
+* Full Name
+* Business Name
+* Email
+* Password
+
+Optional dropdown:
+“What type of business are you?”
+Options:
+
+* Real Estate
+* Mortgage
+* Insurance
+* Financial Advisor
+* Attorney
+* Medical
+* Other
+
+3. After signup/login:
+   Redirect user to the new Business Dashboard.
+
+---
+
+## DASHBOARD GOAL
+
+This page should feel like:
+Airtable + Mailchimp + CRM
+
+NOT a quiz or wizard.
+
+The user should immediately understand:
+“I can organize and automate thoughtful client relationships here.”
+
+Modern, clean, premium UI.
+
+---
+
+## LAYOUT
+
+TOP HEADER:
+Left side:
+
+* Logo
+* “Your Clients”
+
+Right side:
+
+* Search bar
+* * Add Client button
+* Import CSV button
+
+---
+
+## MAIN CONTENT
+
+CENTER:
+Create a responsive client table/grid.
+
+Columns:
+
+* Name
+* Relationship
+* Birthday
+* Last Card
+* Automations
+* Tags
+
+Populate with 3 realistic sample clients initially for visual polish.
+
+Example:
+John Smith
+Buyer
+May 14
+Christmas 2025
+ON
+Golf, Kids
+
+Sarah Johnson
+Seller
+Aug 3
+Birthday 2025
+ON
+Luxury
+
+Michael Davis
+Past Client
+Dec 20
+Holiday 2025
+OFF
+Investor
+
+---
+
+## RIGHT SIDE PANEL OR MODAL
+
+When user clicks:
+
+* Add Client
+
+Open a modern slide out panel from the right side.
+DO NOT navigate away from dashboard.
+
+---
+
+## ADD CLIENT FORM
+
+SECTION: Basic Information
+
+* Full Name
+* Company
+* Address
+* Email
+* Phone
+
+SECTION: Important Dates
+
+* Birthday
+* Home Purchase Anniversary
+* Client Since Date
+
+Button:
+
+* Add Custom Event
+
+SECTION: Relationship Notes
+
+* Kids Names
+* Pets
+* Interests
+* Notes
+
+SECTION: Automation Settings
+Checkboxes:
+
+* Birthday Cards
+* Holiday Cards
+* Anniversary Cards
+* Require Approval Before Sending
+
+---
+
+## IMPORTANT UX RULES
+
+1. Only Full Name should be required.
+   Everything else optional.
+
+2. Use progressive disclosure:
+   Initially only show:
+
+* Name
+* Birthday
+* Address
+
+Then show:
+“Add More Details”
+
+When clicked:
+Expand the advanced sections.
+
+3. Make this feel FAST and EASY.
+   This is not a long questionnaire.
+
+4. Businesses should feel like they can add many clients quickly.
+
+---
+
+## RECENT ACTIVITY SECTION
+
+Below the client table create a small section called:
+“Recently Remembered”
+
+Add realistic fake activity examples:
+✓ Birthday card sent to John Smith
+✓ Anniversary card scheduled for Sarah Johnson
+✓ Holiday cards queued for 42 clients
+
+This section should make the platform feel alive.
+
+---
+
+## STYLE
+
+* Modern SaaS dashboard aesthetic
+* White background
+* Soft shadows
+* Rounded corners
+* Minimal clutter
+* Responsive for mobile and desktop
+
+Mobile:
+
+* Stack sections vertically
+* Table becomes cards
+* Add Client button remains sticky/floating if possible
+
+---
+
+## DATABASE
+
+Create client schema/database model for:
+
+* basic info
+* dates
+* notes
+* tags
+* automation settings
+
+Support:
+
+* create
+* edit
+* delete
+
+Prepare structure for future CSV imports and automation logic.
+
+---
+
+## IMPORTANT
+
+Do NOT build:
+
+* AI writing
+* card generation
+* approval workflows
+* Handwrytten API logic
+
+yet.
+
+This phase is ONLY:
+client relationship memory management.

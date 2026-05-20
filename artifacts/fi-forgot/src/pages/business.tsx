@@ -46,7 +46,7 @@ export default function BusinessPage() {
             style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
             SIGN IN
           </Link>
-          <Link href="/signup"
+          <Link href="/business/signup"
             style={{ background: RED, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", padding: "13px 28px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
             START REMEMBERING CLIENTS
           </Link>
@@ -66,7 +66,7 @@ export default function BusinessPage() {
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/signup"
+            <Link href="/business/signup"
               style={{ background: RED, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.65rem", letterSpacing: "0.08em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
               GET STARTED
             </Link>
