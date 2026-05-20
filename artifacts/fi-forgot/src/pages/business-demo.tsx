@@ -49,9 +49,8 @@ function canAdvanceStep(step: number, a: Answers): boolean {
   if (step === 1) return a.relationships.length > 0;
   if (step === 2) return a.moments.length > 0;
   if (step === 3) {
-    if (needsBirthdayQ(a)     && !a.birthdayCollection) return false;
-    if (needsAnniversaryQ(a)  && !a.anniversaryType)    return false;
-    if (needsHomePurchaseQ(a) && !a.homePurchaseDate)    return false;
+    if (needsBirthdayQ(a)    && !a.birthdayCollection) return false;
+    if (needsAnniversaryQ(a) && !a.anniversaryType)    return false;
     return true;
   }
   if (step === 4) return !!a.handsOff;
@@ -327,12 +326,12 @@ export default function BusinessDemoPage() {
                 {needsHomePurchaseQ(a) && (
                   <div style={{ background: DARKER, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "20px", marginBottom: 16 }}>
                     <SectionTag>Home Purchase Anniversaries</SectionTag>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", color: "#fff", marginBottom: 14 }}>
-                      What date would you use?
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", color: "#fff", marginBottom: 8 }}>
+                      We use the home closing date.
                     </div>
-                    {["Home Closing Date","Contract Date","Move-In Date"].map(opt => (
-                      <SmallRadio key={opt} label={opt} selected={a.homePurchaseDate === opt} onClick={() => set("homePurchaseDate", opt)} />
-                    ))}
+                    <p style={{ fontSize: "0.87rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.6, margin: 0 }}>
+                      Cards are automatically scheduled each year based on the closing date you enter for each client.
+                    </p>
                   </div>
                 )}
 
