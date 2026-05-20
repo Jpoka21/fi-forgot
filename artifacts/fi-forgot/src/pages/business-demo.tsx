@@ -358,13 +358,13 @@ export default function BusinessDemoPage() {
     <div style={{ minHeight: "100vh", background: NAVY, color: "#fff", fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
-      <nav style={{ background: DARK, borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 24px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ background: DARK, borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 40px", height: 96, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.45rem", color: RED, fontStyle: "italic", marginRight: 3 }}>F*</span>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.45rem", color: "#fff", letterSpacing: "0.05em" }}>I FORGOT</span>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.44rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.38)", marginLeft: 7, alignSelf: "flex-end", paddingBottom: 3 }}>BUSINESS</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: RED, fontStyle: "italic", marginRight: 6 }}>F*</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: "#fff", letterSpacing: "0.05em" }}>I FORGOT</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.45)", marginLeft: 10, alignSelf: "flex-end", paddingBottom: 6 }}>BUSINESS</span>
         </Link>
-        <Link href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>SIGN IN</Link>
+        <Link href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>SIGN IN</Link>
       </nav>
 
       {/* ── Page content ────────────────────────────────────────────────────── */}
