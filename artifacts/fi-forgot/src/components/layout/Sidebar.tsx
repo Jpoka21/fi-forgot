@@ -12,6 +12,8 @@ import {
 import { useState } from "react";
 import { B, CircleStamp } from "@/components/brand";
 
+const BUSINESS_NAVY = "#0a1f3d";
+
 const navItems = [
   { href: "/dashboard",          label: "Dashboard",  icon: LayoutDashboard },
   { href: "/recipients",         label: "Recipients", icon: Users },
@@ -21,8 +23,21 @@ const navItems = [
 
 export default function Sidebar() {
   const [location, setLocation] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, workspaces, switchWorkspace } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const hasBusiness = workspaces.some(w => w.type === "business");
+  const businessWorkspace = workspaces.find(w => w.type === "business");
+
+  function goToBusiness() {
+    if (businessWorkspace) {
+      switchWorkspace(businessWorkspace.id);
+      setMobileOpen(false);
+      setLocation("/business/dashboard");
+    } else {
+      setLocation("/business/create-workspace");
+    }
+  }
 
   function handleLogout() {
     logout();
@@ -140,6 +155,34 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* ── Workspace toggle ───────────────────────────────────────────────── */}
+      {(hasBusiness || true) && (
+        <div className="mx-3 mb-2">
+          <p style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: 6, paddingLeft: 4 }}>
+            Workspace
+          </p>
+          <div style={{ display: "flex", background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3, gap: 2 }}>
+            {/* Personal pill — always active here */}
+            <div style={{ flex: 1, padding: "7px 8px", borderRadius: 6, background: B.red, textAlign: "center", cursor: "default" }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.1em", color: "#fff" }}>
+                Personal
+              </span>
+            </div>
+            {/* Business pill */}
+            <button
+              onClick={goToBusiness}
+              style={{ flex: 1, padding: "7px 8px", borderRadius: 6, background: "transparent", border: "none", textAlign: "center", cursor: "pointer", transition: "background 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+            >
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.4)" }}>
+                {businessWorkspace ? businessWorkspace.name.split(" ")[0] : "Business"}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Autopilot status ───────────────────────────────────────────────── */}
       <div

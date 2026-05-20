@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 
@@ -19,14 +19,14 @@ export default function CreateBusinessWorkspacePage() {
   const [submitting, setSubmitting] = useState(false);
   const [nameErr, setNameErr] = useState("");
 
-  if (!isLoggedIn) { setLocation("/business/signup"); return null; }
+  useEffect(() => {
+    if (!isLoggedIn) { setLocation("/business/signup"); return; }
+    const existingBiz = workspaces.find(w => w.type === "business");
+    if (existingBiz) { switchWorkspace(existingBiz.id); setLocation("/business/dashboard"); }
+  }, [isLoggedIn, workspaces]);
 
-  const existingBiz = workspaces.find(w => w.type === "business");
-  if (existingBiz) {
-    switchWorkspace(existingBiz.id);
-    setLocation("/business/dashboard");
-    return null;
-  }
+  if (!isLoggedIn) return null;
+  if (workspaces.find(w => w.type === "business")) return null;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

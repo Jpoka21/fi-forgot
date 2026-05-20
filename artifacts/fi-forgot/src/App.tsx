@@ -23,6 +23,7 @@ import BusinessPage from "@/pages/business";
 import BusinessDemoPage from "@/pages/business-demo";
 import SampleCardsPage from "@/pages/sample-cards";
 import BusinessSignupPage from "@/pages/business-signup";
+import BusinessLoginPage from "@/pages/business-login";
 import BusinessDashboardPage from "@/pages/business-dashboard";
 import CreateBusinessWorkspacePage from "@/pages/create-business-workspace";
 
@@ -116,6 +117,7 @@ function Router() {
       <Route path="/business-demo" component={BusinessDemoPage} />
       <Route path="/business/sample-cards" component={SampleCardsPage} />
       <Route path="/business/signup" component={BusinessSignupPage} />
+      <Route path="/business/login" component={BusinessLoginPage} />
       <Route path="/business/create-workspace" component={CreateBusinessWorkspacePage} />
       <Route path="/business/dashboard" component={BusinessDashboardPage} />
       <Route component={NotFound} />

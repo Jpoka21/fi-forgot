@@ -150,85 +150,42 @@ function AccountMenu({ user, onLogout }: AccountMenuProps) {
   );
 }
 
-// ── Workspace Switcher ────────────────────────────────────────────────────────
+// ── Workspace Toggle Pill ─────────────────────────────────────────────────────
 
-function WorkspaceSwitcher() {
-  const { workspaces, activeWorkspace, switchWorkspace } = useAuth();
+function WorkspaceToggle() {
+  const { workspaces, switchWorkspace } = useAuth();
   const [, setLocation] = useLocation();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+  const personalWorkspace = workspaces.find(w => w.type === "personal");
+
+  function goToPersonal() {
+    if (personalWorkspace) {
+      switchWorkspace(personalWorkspace.id);
+      setLocation("/dashboard");
+    } else {
+      setLocation("/dashboard");
     }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  if (workspaces.length <= 1) return null;
-
-  function handleSelect(id: string, type: string) {
-    switchWorkspace(id);
-    setOpen(false);
-    setLocation(type === "business" ? "/business/dashboard" : "/dashboard");
   }
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
+    <div style={{ display: "flex", background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: 3, gap: 2 }}>
+      {/* Personal pill */}
       <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display: "flex", alignItems: "center", gap: 8,
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          borderRadius: 8, padding: "6px 12px",
-          color: WHITE, cursor: "pointer", fontSize: "0.85rem",
-        }}
+        onClick={goToPersonal}
+        style={{ padding: "6px 14px", borderRadius: 6, background: "transparent", border: "none", cursor: "pointer", transition: "background 0.15s" }}
+        onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
       >
-        <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ade80", flexShrink: 0 }} />
-        <span style={{ fontWeight: 600 }}>{activeWorkspace?.name ?? "Workspace"}</span>
-        <span style={{ opacity: 0.5, fontSize: "0.7rem" }}>▼</span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.45)" }}>
+          Personal
+        </span>
       </button>
-
-      {open && (
-        <div style={{
-          position: "absolute", top: "calc(100% + 6px)", right: 0,
-          background: WHITE, borderRadius: 10, minWidth: 200,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-          zIndex: 200, overflow: "hidden",
-        }}>
-          <p style={{ margin: 0, padding: "10px 14px 6px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#94a3b8" }}>Switch Workspace</p>
-          {workspaces.map(ws => (
-            <button key={ws.id} onClick={() => handleSelect(ws.id, ws.type)} style={{
-              display: "flex", alignItems: "center", gap: 10,
-              width: "100%", padding: "10px 14px",
-              background: ws.id === activeWorkspace?.id ? "#f1f5f9" : "transparent",
-              border: "none", cursor: "pointer", textAlign: "left",
-            }}>
-              <span style={{
-                width: 28, height: 28, borderRadius: 6, flexShrink: 0,
-                background: ws.type === "business" ? NAVY : "#e0e7ff",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "0.7rem", fontWeight: 700,
-                color: ws.type === "business" ? WHITE : "#6366f1",
-              }}>
-                {ws.type === "business" ? "B" : "P"}
-              </span>
-              <div>
-                <p style={{ margin: 0, fontSize: "0.88rem", fontWeight: 600, color: NAVY }}>{ws.name}</p>
-                <p style={{ margin: 0, fontSize: "0.74rem", color: "#94a3b8", textTransform: "capitalize" }}>{ws.type}</p>
-              </div>
-              {ws.id === activeWorkspace?.id && <span style={{ marginLeft: "auto", color: "#4ade80", fontSize: "0.8rem" }}>✓</span>}
-            </button>
-          ))}
-          <div style={{ borderTop: "1px solid #f1f5f9", padding: "8px 14px" }}>
-            <Link href="/business/create-workspace" style={{ fontSize: "0.82rem", color: RED, fontWeight: 600, textDecoration: "none" }}>
-              + Add Business Workspace
-            </Link>
-          </div>
-        </div>
-      )}
+      {/* Business pill — active */}
+      <div style={{ padding: "6px 14px", borderRadius: 6, background: RED, cursor: "default" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: WHITE }}>
+          Business
+        </span>
+      </div>
     </div>
   );
 }
@@ -466,8 +423,8 @@ export default function BusinessDashboardPage() {
               style={{ paddingLeft: 30, paddingRight: 12, paddingTop: 7, paddingBottom: 7, borderRadius: 8, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.08)", color: WHITE, fontSize: "0.88rem", outline: "none", width: 180 }} />
           </div>
 
-          {/* Workspace Switcher */}
-          <WorkspaceSwitcher />
+          {/* Workspace Toggle */}
+          <WorkspaceToggle />
 
           {/* Import CSV */}
           <button onClick={() => alert("CSV import coming soon!")}

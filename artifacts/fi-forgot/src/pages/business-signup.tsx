@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,18 +35,15 @@ export default function BusinessSignupPage() {
     defaultValues: { name: "", businessName: "", email: "", password: "", businessType: "" },
   });
 
-  // Already logged in: if they have a business workspace, go to dashboard.
-  // Otherwise, send to create-workspace.
-  if (isLoggedIn) {
-    const hasBusiness = workspaces.some(w => w.type === "business");
-    if (hasBusiness) {
-      setLocation("/business/dashboard");
-      return null;
-    } else {
-      setLocation("/business/create-workspace");
-      return null;
+  // Already logged in: redirect to the right place
+  useEffect(() => {
+    if (isLoggedIn) {
+      const hasBusiness = workspaces.some(w => w.type === "business");
+      setLocation(hasBusiness ? "/business/dashboard" : "/business/create-workspace");
     }
-  }
+  }, [isLoggedIn, workspaces]);
+
+  if (isLoggedIn) return null;
 
   function onSubmit(data: FormData) {
     setSubmitting(true);
@@ -180,7 +177,7 @@ export default function BusinessSignupPage() {
             <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid #f1f5f9", textAlign: "center" }}>
               <p style={{ color: "#64748b", fontSize: "0.88rem" }}>
                 Already have an account?{" "}
-                <Link href="/login" style={{ color: RED, fontWeight: 600, textDecoration: "underline" }}>Sign in</Link>
+                <Link href="/business/login" style={{ color: RED, fontWeight: 600, textDecoration: "underline" }}>Sign in</Link>
               </p>
             </div>
           </div>

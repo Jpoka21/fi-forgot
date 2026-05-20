@@ -60,7 +60,7 @@ export default function BusinessPage() {
               </button>
             </>
           ) : (
-            <Link href="/login"
+            <Link href="/business/login"
               style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
               SIGN IN
             </Link>
