@@ -105,7 +105,7 @@ export default function LandingPage() {
             <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
             <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: B.black, letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: B.gray, marginTop: -2 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: B.gray, marginTop: -2, fontWeight: 900 }}>
             RELATIONSHIP DAMAGE CONTROL
           </div>
         </Link>
