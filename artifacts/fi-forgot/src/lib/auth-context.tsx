@@ -27,26 +27,44 @@ export interface OnboardingData {
   };
 }
 
+export interface Workspace {
+  id: string;
+  type: "personal" | "business";
+  name: string;
+  businessType?: string;
+  businessId?: string;
+}
+
 interface AuthContextType {
   isLoggedIn: boolean;
   onboardingComplete: boolean;
   user: { name: string; email: string; plan?: Plan } | null;
+  workspaces: Workspace[];
+  activeWorkspace: Workspace | null;
   login: (email: string, name?: string) => void;
   signup: (name: string, email: string) => void;
+  businessSignup: (name: string, email: string, businessName: string, businessType: string) => void;
   completeOnboarding: (data: OnboardingData) => void;
   logout: () => void;
   upgradePlan: (plan: Plan) => void;
+  switchWorkspace: (id: string) => void;
+  createBusinessWorkspace: (businessName: string, businessType: string) => Workspace;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
   onboardingComplete: true,
   user: null,
+  workspaces: [],
+  activeWorkspace: null,
   login: () => {},
   signup: () => {},
+  businessSignup: () => {},
   completeOnboarding: () => {},
   logout: () => {},
   upgradePlan: () => {},
+  switchWorkspace: () => {},
+  createBusinessWorkspace: () => ({ id: "", type: "business", name: "" }),
 });
 
 const PERSONALITY_LABELS: Record<string, string> = {
@@ -176,10 +194,46 @@ function clearAllUserData() {
   ALL_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
 }
 
+function loadWorkspaces(): Workspace[] {
+  try {
+    const raw = localStorage.getItem("fi_forgot_workspaces");
+    if (!raw) return [];
+    return JSON.parse(raw) as Workspace[];
+  } catch { return []; }
+}
+
+function saveWorkspaces(ws: Workspace[]) {
+  localStorage.setItem("fi_forgot_workspaces", JSON.stringify(ws));
+}
+
+function loadActiveWorkspaceId(): string | null {
+  return localStorage.getItem("fi_forgot_active_workspace");
+}
+
+function saveActiveWorkspaceId(id: string) {
+  localStorage.setItem("fi_forgot_active_workspace", id);
+}
+
+function makePersonalWorkspace(): Workspace {
+  return { id: crypto.randomUUID(), type: "personal", name: "Personal" };
+}
+
+function makeBusinessWorkspace(businessName: string, businessType: string): Workspace {
+  return {
+    id: crypto.randomUUID(),
+    type: "business",
+    name: businessName,
+    businessType,
+    businessId: crypto.randomUUID(),
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(true);
   const [user, setUser] = useState<{ name: string; email: string; plan?: Plan } | null>(null);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
 
   useEffect(() => {
     const version = localStorage.getItem("fi_forgot_storage_version");
@@ -197,6 +251,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoggedIn(true);
         const ob = localStorage.getItem("fi_forgot_onboarding");
         setOnboardingComplete(!!ob);
+
+        const ws = loadWorkspaces();
+        setWorkspaces(ws);
+        const activeId = loadActiveWorkspaceId();
+        const active = ws.find(w => w.id === activeId) ?? ws[0] ?? null;
+        setActiveWorkspace(active);
+      } catch {}
+    }
+
+    // Migrate old fi_forgot_business data into workspaces
+    const oldBiz = localStorage.getItem("fi_forgot_business");
+    if (oldBiz) {
+      try {
+        const biz = JSON.parse(oldBiz);
+        const ws = loadWorkspaces();
+        const alreadyMigrated = ws.some(w => w.type === "business");
+        if (!alreadyMigrated && biz.businessId) {
+          const bizWorkspace: Workspace = {
+            id: crypto.randomUUID(),
+            type: "business",
+            name: biz.businessName || "My Business",
+            businessType: biz.businessType || "",
+            businessId: biz.businessId,
+          };
+          const updated = [...ws, bizWorkspace];
+          saveWorkspaces(updated);
+          setWorkspaces(updated);
+        }
       } catch {}
     }
   }, []);
@@ -208,6 +290,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoggedIn(true);
     setOnboardingComplete(true);
     localStorage.setItem("fi_forgot_user", JSON.stringify(u));
+
+    // Ensure a personal workspace exists
+    let ws = loadWorkspaces();
+    if (ws.length === 0) {
+      const personal = makePersonalWorkspace();
+      ws = [personal];
+      saveWorkspaces(ws);
+    }
+    setWorkspaces(ws);
+    const activeId = loadActiveWorkspaceId();
+    const active = ws.find(w => w.id === activeId) ?? ws[0] ?? null;
+    setActiveWorkspace(active);
+    if (active) saveActiveWorkspaceId(active.id);
   }
 
   function signup(name: string, email: string) {
@@ -217,6 +312,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setOnboardingComplete(false);
     localStorage.setItem("fi_forgot_user", JSON.stringify(u));
     localStorage.removeItem("fi_forgot_onboarding");
+
+    // Create personal workspace
+    const personal = makePersonalWorkspace();
+    const ws = [personal];
+    saveWorkspaces(ws);
+    saveActiveWorkspaceId(personal.id);
+    setWorkspaces(ws);
+    setActiveWorkspace(personal);
+  }
+
+  function businessSignup(name: string, email: string, businessName: string, businessType: string) {
+    const u = { name, email };
+    setUser(u);
+    setIsLoggedIn(true);
+    setOnboardingComplete(true);
+    localStorage.setItem("fi_forgot_user", JSON.stringify(u));
+
+    // Create personal + business workspaces
+    const personal = makePersonalWorkspace();
+    const business = makeBusinessWorkspace(businessName, businessType);
+    const ws = [personal, business];
+    saveWorkspaces(ws);
+    saveActiveWorkspaceId(business.id);
+    setWorkspaces(ws);
+    setActiveWorkspace(business);
+  }
+
+  function createBusinessWorkspace(businessName: string, businessType: string): Workspace {
+    const business = makeBusinessWorkspace(businessName, businessType);
+    const ws = [...loadWorkspaces(), business];
+    saveWorkspaces(ws);
+    saveActiveWorkspaceId(business.id);
+    setWorkspaces(ws);
+    setActiveWorkspace(business);
+    return business;
+  }
+
+  function switchWorkspace(id: string) {
+    const ws = workspaces.find(w => w.id === id) ?? null;
+    setActiveWorkspace(ws);
+    if (ws) saveActiveWorkspaceId(ws.id);
   }
 
   function completeOnboarding(data: OnboardingData) {
@@ -232,8 +368,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setIsLoggedIn(false);
     setOnboardingComplete(true);
+    setWorkspaces([]);
+    setActiveWorkspace(null);
     localStorage.removeItem("fi_forgot_user");
     localStorage.removeItem("fi_forgot_onboarding");
+    localStorage.removeItem("fi_forgot_workspaces");
+    localStorage.removeItem("fi_forgot_active_workspace");
+    localStorage.removeItem("fi_forgot_business");
   }
 
   function upgradePlan(plan: Plan) {
@@ -246,7 +387,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, onboardingComplete, user, login, signup, completeOnboarding, logout, upgradePlan }}>
+    <AuthContext.Provider value={{
+      isLoggedIn, onboardingComplete, user,
+      workspaces, activeWorkspace,
+      login, signup, businessSignup, completeOnboarding, logout, upgradePlan,
+      switchWorkspace, createBusinessWorkspace,
+    }}>
       {children}
     </AuthContext.Provider>
   );

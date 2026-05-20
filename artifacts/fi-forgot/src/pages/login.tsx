@@ -25,7 +25,20 @@ export default function LoginPage() {
 
   function onSubmit(data: FormData) {
     login(data.email);
-    setLocation("/dashboard");
+    // Route based on active workspace type
+    try {
+      const raw = localStorage.getItem("fi_forgot_workspaces");
+      const ws = raw ? JSON.parse(raw) : [];
+      const activeId = localStorage.getItem("fi_forgot_active_workspace");
+      const active = ws.find((w: { id: string; type: string }) => w.id === activeId) ?? ws[0];
+      if (active?.type === "business") {
+        setLocation("/business/dashboard");
+      } else {
+        setLocation("/dashboard");
+      }
+    } catch {
+      setLocation("/dashboard");
+    }
   }
 
   return (

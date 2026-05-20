@@ -4,9 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
-const NAVY = "#0D1B35";
-const RED = "#C8102E";
+const RED = "#E23B2E";
 const WHITE = "#FFFFFF";
 
 const schema = z.object({
@@ -20,79 +20,54 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const BUSINESS_TYPES = [
-  "Real Estate",
-  "Mortgage",
-  "Insurance",
-  "Financial Advisor",
-  "Attorney",
-  "Medical",
-  "Other",
+  "Real Estate", "Mortgage", "Insurance",
+  "Financial Advisor", "Attorney", "Medical", "Other",
 ];
 
-function generateId() {
-  return crypto.randomUUID();
-}
-
 export default function BusinessSignupPage() {
+  const { isLoggedIn, workspaces, businessSignup, createBusinessWorkspace } = useAuth();
   const [, setLocation] = useLocation();
   const [submitting, setSubmitting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const form = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { name: "", businessName: "", email: "", password: "", businessType: "" },
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = form;
+  // Already logged in: if they have a business workspace, go to dashboard.
+  // Otherwise, send to create-workspace.
+  if (isLoggedIn) {
+    const hasBusiness = workspaces.some(w => w.type === "business");
+    if (hasBusiness) {
+      setLocation("/business/dashboard");
+      return null;
+    } else {
+      setLocation("/business/create-workspace");
+      return null;
+    }
+  }
 
   function onSubmit(data: FormData) {
     setSubmitting(true);
-    const businessId = generateId();
-    const profile = {
-      businessId,
-      name: data.name,
-      businessName: data.businessName,
-      email: data.email,
-      businessType: data.businessType || "",
-    };
-    localStorage.setItem("fi_forgot_business", JSON.stringify(profile));
+    businessSignup(data.name, data.email, data.businessName, data.businessType || "");
     setLocation("/business/dashboard");
   }
 
   const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "11px 14px",
-    fontSize: "1rem",
-    border: "1.5px solid #e2e8f0",
-    borderRadius: 8,
-    outline: "none",
-    background: "#f8fafc",
-    color: "#1a202c",
-    boxSizing: "border-box",
-    transition: "border-color 0.15s",
+    width: "100%", padding: "11px 14px", fontSize: "1rem",
+    border: "1.5px solid #e2e8f0", borderRadius: 8,
+    outline: "none", background: "#f8fafc", color: "#1a202c",
+    boxSizing: "border-box", transition: "border-color 0.15s",
   };
 
   const labelStyle: React.CSSProperties = {
-    display: "block",
-    fontSize: "0.78rem",
-    fontWeight: 600,
-    letterSpacing: "0.07em",
-    textTransform: "uppercase",
-    color: "#64748b",
-    marginBottom: 6,
+    display: "block", fontSize: "0.78rem", fontWeight: 600,
+    letterSpacing: "0.07em", textTransform: "uppercase",
+    color: "#64748b", marginBottom: 6,
   };
 
-  const fieldStyle: React.CSSProperties = { marginBottom: 18 };
-
-  const errStyle: React.CSSProperties = {
-    fontSize: "0.8rem",
-    color: RED,
-    marginTop: 4,
-  };
+  const errStyle: React.CSSProperties = { fontSize: "0.8rem", color: RED, marginTop: 4 };
 
   return (
     <div style={{ minHeight: "100vh", background: "#f1f5f9", display: "flex", flexDirection: "column" }}>
@@ -136,149 +111,64 @@ export default function BusinessSignupPage() {
         </div>
         {menuOpen && (
           <div style={{ background: "#0a1f3d", borderTop: "1px solid rgba(255,255,255,0.08)", padding: "8px 0 12px" }}>
-            <Link href="/" onClick={() => setMenuOpen(false)}
-              style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>
-              ← PERSONAL SITE
-            </Link>
-            <Link href="/login" onClick={() => setMenuOpen(false)}
-              style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>
-              SIGN IN
-            </Link>
+            <Link href="/" onClick={() => setMenuOpen(false)} style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>← PERSONAL SITE</Link>
+            <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.6)", padding: "9px 20px", textDecoration: "none" }}>SIGN IN</Link>
           </div>
         )}
       </nav>
 
-      {/* Main */}
-      <main style={{
-        flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "48px 20px",
-      }}>
-        <div style={{ width: "100%", maxWidth: 940, display: "flex", gap: 60, alignItems: "flex-start" }}>
-
-          {/* Left: pitch */}
-          <div style={{ flex: 1, minWidth: 0, display: "none" }} className="biz-signup-left">
-            <h1 style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(2.4rem, 4vw, 3.6rem)",
-              color: NAVY, lineHeight: 1.08, marginBottom: 20,
-            }}>
-              Your Clients Will<br />
-              <span style={{ color: RED }}>Never Feel Forgotten.</span>
-            </h1>
-            <p style={{ fontSize: "1.1rem", color: "#475569", lineHeight: 1.7, marginBottom: 32 }}>
-              F* I Forgot automatically sends real handwritten cards to your clients
-              at the right moment — birthdays, anniversaries, holidays — so you stay
-              top of mind without lifting a finger.
-            </p>
-            {[
-              "Real handwritten cards — not printed labels",
-              "Automatically mailed at exactly the right time",
-              "Optional approval before anything ships",
-              "Built for real estate, mortgage, insurance & more",
-            ].map(item => (
-              <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
-                <span style={{
-                  width: 22, height: 22, borderRadius: "50%", background: RED,
-                  color: WHITE, display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "0.7rem", fontWeight: 900, flexShrink: 0, marginTop: 2,
-                }}>✓</span>
-                <span style={{ color: "#334155", fontSize: "1rem", lineHeight: 1.5 }}>{item}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Right: form card */}
-          <div style={{
-            flex: "0 0 460px", maxWidth: "100%",
-            background: WHITE, borderRadius: 16,
-            boxShadow: "0 4px 32px rgba(0,0,0,0.10)",
-            padding: "40px 40px 36px",
-          }}>
+      {/* ── Main ── */}
+      <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 20px" }}>
+        <div style={{ width: "100%", maxWidth: 460 }}>
+          <div style={{ background: WHITE, borderRadius: 16, boxShadow: "0 4px 32px rgba(0,0,0,0.10)", padding: "40px 40px 36px" }}>
             <div style={{ marginBottom: 28 }}>
-              <h2 style={{
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "2rem", letterSpacing: "0.05em",
-                color: NAVY, margin: 0, lineHeight: 1,
-              }}>
+              <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", letterSpacing: "0.05em", color: "#0D1B35", margin: 0, lineHeight: 1 }}>
                 Create Your Account
               </h2>
-              <p style={{ color: "#64748b", fontSize: "0.92rem", marginTop: 6 }}>
-                Free to start — no credit card required.
-              </p>
+              <p style={{ color: "#64748b", fontSize: "0.92rem", marginTop: 6 }}>Free to start — no credit card required.</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-                <div style={fieldStyle}>
+                <div style={{ marginBottom: 18 }}>
                   <label style={labelStyle}>Full Name *</label>
-                  <input
-                    {...register("name")}
-                    placeholder="Jane Smith"
-                    style={inputStyle}
-                    autoFocus
-                  />
+                  <input {...register("name")} placeholder="Jane Smith" style={inputStyle} autoFocus />
                   {errors.name && <p style={errStyle}>{errors.name.message}</p>}
                 </div>
-                <div style={fieldStyle}>
+                <div style={{ marginBottom: 18 }}>
                   <label style={labelStyle}>Business Name *</label>
-                  <input
-                    {...register("businessName")}
-                    placeholder="Smith Realty Group"
-                    style={inputStyle}
-                  />
+                  <input {...register("businessName")} placeholder="Smith Realty Group" style={inputStyle} />
                   {errors.businessName && <p style={errStyle}>{errors.businessName.message}</p>}
                 </div>
               </div>
 
-              <div style={fieldStyle}>
+              <div style={{ marginBottom: 18 }}>
                 <label style={labelStyle}>Email *</label>
-                <input
-                  {...register("email")}
-                  type="email"
-                  placeholder="jane@smithrealty.com"
-                  style={inputStyle}
-                />
+                <input {...register("email")} type="email" placeholder="jane@smithrealty.com" style={inputStyle} />
                 {errors.email && <p style={errStyle}>{errors.email.message}</p>}
               </div>
 
-              <div style={fieldStyle}>
+              <div style={{ marginBottom: 18 }}>
                 <label style={labelStyle}>Password *</label>
-                <input
-                  {...register("password")}
-                  type="password"
-                  placeholder="••••••••"
-                  style={inputStyle}
-                />
+                <input {...register("password")} type="password" placeholder="••••••••" style={inputStyle} />
                 {errors.password && <p style={errStyle}>{errors.password.message}</p>}
               </div>
 
-              <div style={fieldStyle}>
+              <div style={{ marginBottom: 18 }}>
                 <label style={labelStyle}>What type of business? <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional)</span></label>
-                <select
-                  {...register("businessType")}
-                  style={{ ...inputStyle, cursor: "pointer" }}
-                >
+                <select {...register("businessType")} style={{ ...inputStyle, cursor: "pointer" }}>
                   <option value="">Select one…</option>
-                  {BUSINESS_TYPES.map(t => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
+                  {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{
-                  width: "100%", padding: "14px",
-                  background: submitting ? "#94a3b8" : RED,
-                  color: WHITE, border: "none", borderRadius: 8,
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: "1.15rem", letterSpacing: "0.1em",
-                  cursor: submitting ? "not-allowed" : "pointer",
-                  transition: "background 0.15s",
-                  marginTop: 4,
-                }}
-              >
+              <button type="submit" disabled={submitting} style={{
+                width: "100%", padding: "14px",
+                background: submitting ? "#94a3b8" : RED,
+                color: WHITE, border: "none", borderRadius: 8,
+                fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", letterSpacing: "0.1em",
+                cursor: submitting ? "not-allowed" : "pointer", marginTop: 4,
+              }}>
                 {submitting ? "CREATING ACCOUNT…" : "START REMEMBERING CLIENTS →"}
               </button>
             </form>
@@ -287,16 +177,10 @@ export default function BusinessSignupPage() {
               By signing up, you agree to our terms of service.
             </p>
 
-            <div style={{
-              marginTop: 20, paddingTop: 20,
-              borderTop: "1px solid #f1f5f9",
-              textAlign: "center",
-            }}>
+            <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid #f1f5f9", textAlign: "center" }}>
               <p style={{ color: "#64748b", fontSize: "0.88rem" }}>
                 Already have an account?{" "}
-                <Link href="/login" style={{ color: RED, fontWeight: 600, textDecoration: "underline" }}>
-                  Sign in
-                </Link>
+                <Link href="/login" style={{ color: RED, fontWeight: 600, textDecoration: "underline" }}>Sign in</Link>
               </p>
             </div>
           </div>
