@@ -105,7 +105,7 @@ function CardTile({ card, onPreview }: { card: SampleCard; onPreview: (card: Sam
         </p>
         <div style={{ display: "flex", gap: 8, marginTop: "auto", paddingTop: 6 }}>
           <button onClick={() => onPreview(card)} style={{
-            flex: 1, padding: "9px 0", borderRadius: 5,
+            width: "100%", padding: "9px 0", borderRadius: 5,
             background: RED, border: "none", color: "#fff",
             fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.1em",
             cursor: "pointer", transition: "opacity 0.15s",
@@ -115,15 +115,6 @@ function CardTile({ card, onPreview }: { card: SampleCard; onPreview: (card: Sam
           >
             PREVIEW CARD
           </button>
-          <Link href="/business-demo" style={{
-            flex: 1, padding: "9px 0", borderRadius: 5, textAlign: "center",
-            background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)",
-            color: "rgba(255,255,255,0.7)",
-            fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.1em",
-            textDecoration: "none", lineHeight: "normal", display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            USE THIS STYLE
-          </Link>
         </div>
       </div>
     </div>
@@ -277,15 +268,6 @@ function PreviewModal({ card, onClose }: { card: SampleCard; onClose: () => void
             ↺ REGENERATE SAMPLE MESSAGE
           </button>
 
-          {/* CTA */}
-          <Link href="/business-demo" style={{
-            display: "block", textAlign: "center", textDecoration: "none",
-            background: RED, color: "#fff",
-            fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em",
-            padding: "14px", borderRadius: 5,
-          }}>
-            USE THIS STYLE — SEE HOW IT WORKS →
-          </Link>
         </div>
       </div>
     </div>
