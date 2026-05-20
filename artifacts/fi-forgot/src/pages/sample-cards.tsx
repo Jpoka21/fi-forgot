@@ -419,7 +419,7 @@ export default function SampleCardsPage() {
               fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em",
               padding: "15px 30px", borderRadius: 4,
             }}>
-              START REMEMBERING CLIENTS →
+              START REMEMBERING CLIENTS — SIGN UP NOW →
             </Link>
             <Link href="/business-demo" style={{
               display: "inline-block", textDecoration: "none",
