@@ -1,0 +1,319 @@
+We are simplifying and rebuilding the BUSINESS DEMO FLOW for F* I Forgot.
+
+IMPORTANT:
+The current business demo flow and previous prompts drifted too far into CRM and follow up software territory.
+
+This is NOT a follow up automation platform.
+
+F* I Forgot for Business is about:
+REAL GREETING CARDS FOR IMPORTANT CLIENT EVENTS ON AUTOPILOT.
+
+We are simplifying the business experience dramatically.
+
+The business version should feel:
+- simple
+- scalable
+- thoughtful
+- lightweight
+- easy for businesses with hundreds of clients
+
+NOT:
+- emotionally heavy
+- complex workflows
+- constant card editing
+- deep CRM automation
+
+-----------------------------------
+1. REMOVE THE OLD BUSINESS DEMO LOGIC
+-----------------------------------
+
+Remove or replace all previous business demo concepts involving:
+- clients drifting cold
+- relationship strategies
+- follow up detection
+- relationship health scoring
+- client retention scoring
+- “warm reconnection”
+- emotional follow up logic
+- business relationship intelligence dashboards
+- referral opportunity detection
+- sales pipeline style concepts
+
+This product is about remembering important occasions through real cards.
+
+-----------------------------------
+2. CORE BUSINESS CONCEPT
+-----------------------------------
+
+The business side should revolve around:
+
+“Set your relationship rules once and we automatically remember important moments for your clients.”
+
+The emphasis should be:
+- birthdays
+- holiday cards
+- anniversaries
+- appreciation moments
+
+NOT:
+manual follow up management.
+
+-----------------------------------
+3. REBUILD THE BUSINESS DEMO QUESTIONS
+-----------------------------------
+
+The `/business-demo` flow should now ask:
+
+-----------------------------------
+QUESTION 1
+-----------------------------------
+
+“What type of business do you run?”
+
+Options:
+- Real Estate
+- Mortgage
+- Insurance
+- Financial Services
+- Legal
+- Medical / Wellness
+- Contractor / Home Services
+- Other
+
+-----------------------------------
+QUESTION 2
+-----------------------------------
+
+“What relationships matter to your business?”
+
+Checkboxes:
+- Clients
+- Past Clients
+- Referral Partners
+- VIP Customers
+
+Allow multiple selections.
+
+-----------------------------------
+QUESTION 3
+-----------------------------------
+
+“What moments should we remember automatically?”
+
+IMPORTANT:
+Keep this VERY SIMPLE.
+
+Checkboxes:
+- Birthdays
+- Holiday / Christmas Cards
+- Client Anniversaries
+- Home Purchase Anniversaries
+- Referral Thank You Cards
+
+IMPORTANT LOGIC:
+Only show “Home Purchase Anniversaries” if the user selected:
+- Real Estate
+- Mortgage
+
+Referral Thank You Cards should visually display:
+“Recommended for quick approval instead of full autopilot.”
+
+-----------------------------------
+QUESTION 4
+-----------------------------------
+
+Ask for event dates ONLY when needed.
+
+IMPORTANT:
+Some events already have dates built in.
+Others require user supplied dates.
+
+Use the following logic:
+
+Birthdays:
+Show:
+“How would you like to collect birthdays?”
+
+Options:
+- We’ll add them manually
+- Import from spreadsheet / CRM later
+
+Do NOT ask for actual birthdays during the demo.
+
+Holiday / Christmas Cards:
+Do NOT ask for dates.
+These are built in automatically.
+
+Client Anniversaries:
+Ask:
+“What anniversary date would you track?”
+
+Examples shown:
+- Closing Date
+- Signup Date
+- First Purchase Date
+- Policy Start Date
+
+Then show a simple sample date picker.
+
+Home Purchase Anniversaries:
+Ask:
+“What date would you use?”
+
+Example:
+Home closing date.
+
+Then show a sample date picker.
+
+Referral Thank You Cards:
+Do NOT ask for a date.
+Instead show:
+“Cards are triggered manually after receiving a referral.”
+
+-----------------------------------
+QUESTION 5
+-----------------------------------
+
+“How hands off do you want this to be?”
+
+Options:
+
+OPTION 1:
+Full Autopilot
+Description:
+“We choose, write, and mail cards automatically.”
+
+OPTION 2:
+Quick Weekly Approvals
+Description:
+“Approve upcoming cards in one quick review.”
+
+Visually highlight:
+Quick Weekly Approvals
+
+This should feel like the recommended business option.
+
+-----------------------------------
+4. REBUILD THE FINAL RESULTS SCREEN
+-----------------------------------
+
+The final screen should feel SIMPLE and POWERFUL.
+
+NOT complicated.
+
+Header:
+Here’s what your business would automate.
+
+Subheadline:
+F* I Forgot automatically remembers important client moments and mails real greeting cards for your business.
+
+-----------------------------------
+5. SHOW UPCOMING EVENT EXAMPLES
+-----------------------------------
+
+Create a clean dashboard style section titled:
+
+Upcoming Client Moments
+
+Show examples based on the selected events.
+
+Examples:
+
+🎂 Bob M. birthday card scheduled  
+🎄 Holiday cards queued for December  
+🏡 Home anniversary card approaching  
+🤝 Referral thank you card awaiting approval  
+
+This should feel:
+- lightweight
+- scalable
+- easy to manage
+
+-----------------------------------
+6. SHOW ONE CARD PREVIEW
+-----------------------------------
+
+Show ONLY ONE example card preview.
+
+Do NOT imply the user must edit dozens of cards manually.
+
+Card title:
+Suggested Holiday Card
+
+Small explanation:
+“We selected this style based on your business tone and selected event types.”
+
+Example message:
+“Wishing you and your family a wonderful holiday season. Thank you again for being part of our business.”
+
+Below the card preview add:
+
+✓ Real handwritten style cards  
+✓ Automatically mailed  
+✓ Optional approvals before sending  
+
+-----------------------------------
+7. REMOVE COMPLEX BUSINESS LANGUAGE
+-----------------------------------
+
+Avoid wording like:
+- relationship intelligence
+- relationship strategy
+- client retention engine
+- emotional AI
+- relationship scoring
+- follow up automation
+
+Instead use:
+- remembered moments
+- important occasions
+- thoughtful client relationships
+- automatic greeting cards
+- stay top of mind
+
+-----------------------------------
+8. FINAL CTA SECTION
+-----------------------------------
+
+Headline:
+Never forget another client birthday or holiday card again.
+
+Subheadline:
+F* I Forgot helps businesses stay thoughtful automatically with real greeting cards sent at the right time.
+
+Primary red button:
+Start Remembering Clients
+
+Secondary button:
+Back to Business Page
+
+-----------------------------------
+9. IMPORTANT UX RULES
+-----------------------------------
+
+The business version should feel:
+- easier than the personal version
+- lower friction
+- scalable for hundreds of clients
+- fast to configure
+- safe to automate
+
+The business owner should feel:
+“I could realistically turn this on for my entire client database.”
+
+NOT:
+“I need to manage hundreds of emotional cards manually.”
+
+-----------------------------------
+10. MOBILE OPTIMIZATION
+-----------------------------------
+
+Ensure all business demo screens are highly optimized for mobile:
+- stacked layouts
+- large touch targets
+- readable spacing
+- no clutter
+- simple progression
+- smooth transitions
+
+Keep the visual design consistent with the current business homepage aesthetic.
