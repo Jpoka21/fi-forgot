@@ -1,0 +1,263 @@
+We are refining the BUSINESS DEMO EXPERIENCE for F* I Forgot.
+
+IMPORTANT:
+The personal side and business side are intentionally different.
+
+The personal side uses deep emotional personalization.
+
+The business side should feel:
+- professional
+- scalable
+- appropriately personal
+- intelligent without being creepy
+- easy to automate for hundreds of clients
+
+We do NOT want businesses answering deeply personal questions about clients.
+
+However, the current business demo feels too generic because it lacks enough business context to explain WHY a card was selected.
+
+We are fixing that.
+
+-----------------------------------
+1. KEEP THE CURRENT SIMPLE BUSINESS EVENT STRUCTURE
+-----------------------------------
+
+Continue using the simplified business event model:
+- Birthdays
+- Holiday / Christmas Cards
+- Client Anniversaries
+- Home Purchase Anniversaries
+- Referral Thank You Cards
+
+Do NOT reintroduce:
+- sympathy cards
+- new baby cards
+- emotional life event automation
+- CRM style follow up logic
+
+Keep the business side lightweight and scalable.
+
+-----------------------------------
+2. ADD NEW BUSINESS CONTEXT QUESTIONS
+-----------------------------------
+
+After the event selection step, add lightweight business context questions.
+
+These questions should help personalize:
+- card style
+- wording
+- message tone
+- card selection reasoning
+
+WITHOUT becoming deeply personal.
+
+-----------------------------------
+QUESTION:
+“What tone fits your business?”
+
+Options:
+- Professional
+- Friendly
+- Warm Professional
+- Luxury / High End
+- Casual
+
+This selection should affect:
+- card design
+- message wording
+- preview explanation
+
+-----------------------------------
+QUESTION:
+“What type of relationship is this?”
+
+Options:
+- First Time Client
+- Repeat Client
+- VIP Client
+- Referral Partner
+
+This should affect:
+- appreciation level
+- warmth of wording
+- card explanation
+
+-----------------------------------
+QUESTION:
+“How long has this relationship existed?”
+
+Options:
+- New Relationship
+- 1 to 3 Years
+- Long Term Relationship
+
+This should subtly influence:
+- message tone
+- appreciation wording
+- explanation text
+
+-----------------------------------
+3. IMPROVE THE FINAL CARD PREVIEW SECTION
+-----------------------------------
+
+The business side MUST still show:
+- the card selected
+- the message selected
+- WHY the system chose it
+
+This is important because this is where the product feels intelligent.
+
+The current “Suggested Holiday Card” section feels too generic.
+
+Replace it with a smarter explanation.
+
+-----------------------------------
+4. ADD A “WHY THIS CARD WAS CHOSEN” SECTION
+-----------------------------------
+
+Above the card preview add:
+
+Headline:
+Why we selected this card
+
+Then dynamically generate explanation text based on the demo answers.
+
+Examples:
+
+Example 1:
+“We selected a warm professional holiday card because you chose a long term client relationship and a warm business tone.”
+
+Example 2:
+“We selected a clean professional birthday card because this relationship type works best with thoughtful but business appropriate messaging.”
+
+Example 3:
+“Referral partners often respond best to appreciation focused cards with a more personal tone.”
+
+This should feel:
+- intelligent
+- believable
+- scalable
+- business appropriate
+
+NOT:
+overly emotional or creepy.
+
+-----------------------------------
+5. IMPROVE THE CARD PREVIEW HEADER
+-----------------------------------
+
+Instead of:
+“Suggested Holiday Card”
+
+Use dynamic titles such as:
+- Warm Professional Holiday Card
+- Professional Birthday Card
+- Client Appreciation Anniversary Card
+- Referral Thank You Card
+
+These should change based on:
+- selected event
+- tone
+- relationship type
+
+-----------------------------------
+6. IMPROVE THE SAMPLE MESSAGE LOGIC
+-----------------------------------
+
+Generate better sample messages based on the selected tone and relationship type.
+
+Examples:
+
+PROFESSIONAL:
+“Wishing you a wonderful holiday season and continued success in the new year. Thank you again for being part of our business.”
+
+WARM PROFESSIONAL:
+“Wishing you and your family a wonderful holiday season. We truly appreciate your continued trust over the years.”
+
+CASUAL:
+“Hope you have an awesome holiday season. Thanks again for being part of our business.”
+
+VIP CLIENT:
+“Clients like you are the reason our business exists. We sincerely appreciate the relationship and continued trust.”
+
+The wording should feel:
+- polished
+- safe for business use
+- realistic
+- scalable
+
+Do NOT make the messages overly emotional.
+
+-----------------------------------
+7. KEEP THE BUSINESS SIDE LIGHTWEIGHT
+-----------------------------------
+
+IMPORTANT:
+Do NOT make the business side feel like:
+- writing emotional cards manually
+- deep personalization
+- remembering hobbies or life stories
+- editing 100 cards individually
+
+The business side should feel like:
+“Thoughtful client relationships on autopilot.”
+
+The personalization should come from:
+- relationship category
+- business tone
+- event type
+- relationship age
+
+NOT:
+deep personal memories.
+
+-----------------------------------
+8. UPDATE THE FINAL RESULTS PAGE LAYOUT
+-----------------------------------
+
+The final results page should now include:
+
+SECTION 1:
+Upcoming Client Moments
+
+SECTION 2:
+Why We Selected This Card
+
+SECTION 3:
+Dynamic Card Preview + Message
+
+SECTION 4:
+Automation Features
+✓ Real handwritten style cards
+✓ Automatically mailed
+✓ Optional approvals before sending
+
+SECTION 5:
+CTA section
+
+-----------------------------------
+9. VISUAL DESIGN
+-----------------------------------
+
+Maintain the current F* I Forgot business aesthetic:
+- dark navy background
+- red accent colors
+- bold white typography
+- premium business feel
+- clean card panels
+- subtle borders
+
+The new explanation section should feel polished and premium.
+
+-----------------------------------
+10. MOBILE OPTIMIZATION
+-----------------------------------
+
+Ensure:
+- explanation text wraps cleanly
+- card preview remains readable
+- sections stack vertically
+- buttons remain large and tappable
+- no horizontal scrolling
+
+The business demo should feel excellent on mobile.
