@@ -69,8 +69,28 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
+      {/* ── FOR BUSINESS announcement bar ────────────────────────────────── */}
+      <div className="hidden md:flex" style={{
+        background: B.black, color: "#fff",
+        padding: "7px 20px",
+        justifyContent: "center", alignItems: "center", gap: 12,
+        position: "sticky", top: 0, zIndex: 51,
+      }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: "rgba(255,255,255,0.7)", letterSpacing: "0.02em" }}>
+          Using F* I Forgot for your business?
+        </span>
+        <Link href="/business" style={{
+          fontFamily: "'Bebas Neue', cursive",
+          fontSize: "0.72rem", letterSpacing: "0.14em",
+          color: B.red, textDecoration: "none",
+          border: `1px solid ${B.red}`, padding: "3px 10px", borderRadius: 3,
+        }}>
+          SEE THE BUSINESS PLAN →
+        </Link>
+      </div>
+
       {/* ── NAV IMAGE with clickable overlay zones ───────────────────────── */}
-      <nav className="sticky top-0 z-50 hidden md:block" style={{ position: "sticky", top: 0, zIndex: 50 }}>
+      <nav className="sticky z-50 hidden md:block" style={{ top: 33, zIndex: 50 }}>
         <div style={{ position: "relative", lineHeight: 0 }}>
           <img src="/nav.png" alt="F* I Forgot navigation"
             style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
@@ -131,6 +151,11 @@ export default function LandingPage() {
               </a>
             ))}
             <div style={{ borderTop: `1px solid ${B.black}12`, margin: "8px 20px 0", paddingTop: 8 }}>
+              <Link href="/business" onClick={() => setMenuOpen(false)}
+                style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "8px 0" }}>
+                FOR BUSINESS
+                <span style={{ fontSize: "0.55rem", letterSpacing: "0.15em", background: B.red, color: "#fff", padding: "2px 6px", borderRadius: 2 }}>NEW</span>
+              </Link>
               <Link href="/login"
                 style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
                 SIGN IN
