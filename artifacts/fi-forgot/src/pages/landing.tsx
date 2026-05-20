@@ -100,12 +100,12 @@ export default function LandingPage() {
         gap: 0,
       }}>
         {/* Logo */}
-        <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column", marginRight: 32, flexShrink: 0 }}>
+        <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column", marginRight: 36, flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.1rem", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.1rem", color: B.black, letterSpacing: "0.04em", marginLeft: 5 }}>I FORGOT</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: B.black, letterSpacing: "0.04em", marginLeft: 6 }}>I FORGOT</span>
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.42rem", letterSpacing: "0.22em", color: B.gray, marginTop: -2 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.52rem", letterSpacing: "0.22em", color: B.gray, marginTop: -2 }}>
             RELATIONSHIP DAMAGE CONTROL
           </div>
         </Link>
@@ -120,24 +120,24 @@ export default function LandingPage() {
             { label: "FAQ",          href: "#faq" },
           ].map(link => (
             <a key={link.href} href={link.href}
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "0 14px", whiteSpace: "nowrap", opacity: 0.85 }}>
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "0 16px", whiteSpace: "nowrap", opacity: 0.85 }}>
               {link.label}
             </a>
           ))}
           <Link href="/business"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "0 14px", whiteSpace: "nowrap" }}>
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "0 16px", whiteSpace: "nowrap" }}>
             FOR BUSINESS
           </Link>
         </div>
 
         {/* Right side: Sign in + CTA */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18, flexShrink: 0 }}>
           <Link href="/login"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", opacity: 0.75, whiteSpace: "nowrap" }}>
+            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", opacity: 0.75, whiteSpace: "nowrap" }}>
             SIGN IN
           </Link>
           <Link href="/signup" data-testid="link-get-started-nav"
-            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em", padding: "12px 18px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
+            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.08em", padding: "13px 20px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
             START EARNING<br />BROWNIE POINTS
           </Link>
         </div>
