@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 
 const RED    = "#E23B2E";
@@ -15,6 +15,7 @@ type Answers = {
   moments: string[];
   birthdayCollection: string;
   anniversaryType: string;
+  eventDate: string;
   tone: string;
   relationshipCategory: string;
   relationshipLength: string;
@@ -27,6 +28,7 @@ const EMPTY: Answers = {
   moments: [],
   birthdayCollection: "",
   anniversaryType: "",
+  eventDate: "",
   tone: "",
   relationshipCategory: "",
   relationshipLength: "",
@@ -312,6 +314,8 @@ function QuestionLabel({ children }: { children: React.ReactNode }) {
 export default function BusinessDemoPage() {
   const [step, setStep] = useState(0);
   const [a, setA] = useState<Answers>(EMPTY);
+  const [aiMessage, setAiMessage]   = useState<string>("");
+  const [aiLoading, setAiLoading]   = useState(false);
 
   const set = <K extends keyof Answers>(key: K, val: Answers[K]) =>
     setA((prev) => ({ ...prev, [key]: val }));
@@ -322,6 +326,30 @@ export default function BusinessDemoPage() {
   const showHomePurchase = REAL_ESTATE_BIZ.includes(a.businessType);
   const canAdvance = canAdvanceStep(step, a);
   const isResults  = step === TOTAL_STEPS;
+
+  useEffect(() => {
+    if (!isResults) return;
+    setAiMessage("");
+    setAiLoading(true);
+    fetch("/api/business-card-message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessType: a.businessType,
+        tone: a.tone,
+        relationshipCategory: a.relationshipCategory,
+        relationshipLength: a.relationshipLength,
+        moments: a.moments,
+        eventDate: a.eventDate || undefined,
+      }),
+    })
+      .then((r) => r.json())
+      .then((data: { message?: string }) => {
+        setAiMessage(data.message ?? "");
+      })
+      .catch(() => setAiMessage(""))
+      .finally(() => setAiLoading(false));
+  }, [isResults]);
 
   const next = () => { if (canAdvance) setStep((s) => s + 1); };
   const back = () => setStep((s) => Math.max(0, s - 1));
@@ -449,11 +477,25 @@ export default function BusinessDemoPage() {
                   <div style={{ background: DARKER, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "20px", marginBottom: 16 }}>
                     <SectionTag>Home Purchase Anniversaries</SectionTag>
                     <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", color: "#fff", marginBottom: 8 }}>
-                      We use the home closing date.
+                      When did your client close on their home?
                     </div>
-                    <p style={{ fontSize: "0.87rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.6, margin: 0 }}>
-                      Cards are automatically scheduled each year based on the closing date you enter for each client.
+                    <p style={{ fontSize: "0.83rem", color: "rgba(255,255,255,0.42)", marginBottom: 12, lineHeight: 1.5 }}>
+                      We'll use this to calculate the anniversary and personalize the card message.
                     </p>
+                    <input
+                      type="date"
+                      value={a.eventDate}
+                      onChange={e => set("eventDate", e.target.value)}
+                      max={new Date().toISOString().split("T")[0]}
+                      style={{
+                        width: "100%", boxSizing: "border-box",
+                        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.18)",
+                        borderRadius: 6, padding: "11px 14px",
+                        color: a.eventDate ? "#fff" : "rgba(255,255,255,0.35)",
+                        fontSize: "0.95rem", fontFamily: "'Inter', sans-serif",
+                        outline: "none", colorScheme: "dark",
+                      }}
+                    />
                   </div>
                 )}
 
@@ -621,13 +663,27 @@ export default function BusinessDemoPage() {
             {/* ── SECTION 3: Card Preview ──────────────────────────────────── */}
             <div style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "24px", marginBottom: 16 }}>
               <SectionTag>Suggested Card & Message</SectionTag>
-              <div style={{ background: "#fff", borderRadius: 8, padding: "22px 20px" }}>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.54rem", letterSpacing: "0.22em", color: "#ccc", marginBottom: 12 }}>
-                  SAMPLE CARD — AUTOMATICALLY GENERATED
+              <div style={{ background: "#fff", borderRadius: 8, padding: "22px 20px", minHeight: 110 }}>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.54rem", letterSpacing: "0.22em", color: "#bbb", marginBottom: 12 }}>
+                  SAMPLE CARD — AI GENERATED
                 </div>
-                <p style={{ fontFamily: "'Georgia', serif", fontSize: "0.97rem", color: "#222", lineHeight: 1.75, marginBottom: 0, fontStyle: "italic" }}>
-                  "{getCardMessage(a)}"
-                </p>
+                {aiLoading ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
+                      border: "2.5px solid #E23B2E", borderTopColor: "transparent",
+                      animation: "spin 0.7s linear infinite",
+                    }} />
+                    <span style={{ fontSize: "0.88rem", color: "#999", fontStyle: "italic" }}>
+                      Writing your card message…
+                    </span>
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  </div>
+                ) : (
+                  <p style={{ fontFamily: "'Georgia', serif", fontSize: "0.97rem", color: "#222", lineHeight: 1.75, marginBottom: 0, fontStyle: "italic" }}>
+                    "{aiMessage || getCardMessage(a)}"
+                  </p>
+                )}
               </div>
             </div>
 
