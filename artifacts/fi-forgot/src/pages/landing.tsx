@@ -69,29 +69,9 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
 
-      {/* ── FOR BUSINESS announcement bar ────────────────────────────────── */}
-      <div className="hidden md:flex" style={{
-        background: B.black, color: "#fff",
-        padding: "7px 20px",
-        justifyContent: "center", alignItems: "center", gap: 12,
-        position: "sticky", top: 0, zIndex: 51,
-      }}>
-        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: "rgba(255,255,255,0.7)", letterSpacing: "0.02em" }}>
-          Using F* I Forgot for your business?
-        </span>
-        <Link href="/business" style={{
-          fontFamily: "'Bebas Neue', cursive",
-          fontSize: "0.72rem", letterSpacing: "0.14em",
-          color: B.red, textDecoration: "none",
-          border: `1px solid ${B.red}`, padding: "3px 10px", borderRadius: 3,
-        }}>
-          SEE THE BUSINESS PLAN →
-        </Link>
-      </div>
-
       {/* ── Desktop nav ──────────────────────────────────────────────────── */}
       <nav className="hidden md:flex" style={{
-        position: "sticky", top: 33, zIndex: 50,
+        position: "sticky", top: 0, zIndex: 50,
         background: B.beige,
         borderBottom: `1px solid ${B.black}1A`,
         alignItems: "center",
