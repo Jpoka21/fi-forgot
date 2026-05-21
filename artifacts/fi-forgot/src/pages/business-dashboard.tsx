@@ -352,10 +352,10 @@ interface ClientRow {
 }
 
 interface BizSettings {
-  bizType:      string;
-  bizTypeOther: string;
-
-  tone:         string;
+  bizType:       string;
+  bizTypeOther:  string;
+  tone:          string;
+  cardSignature: string;
 }
 
 function newRow(businessId: string): ClientRow {
@@ -399,7 +399,7 @@ const SETTINGS_KEY = "fi_biz_settings";
 function loadSettings(): BizSettings {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
-  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional" }; }
+  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "" }; }
 }
 
 function saveSettings(s: BizSettings) {
@@ -518,9 +518,10 @@ export default function BusinessDashboardPage() {
 
   // Settings
   const stored = loadSettings();
-  const [bizType,      setBizType]      = useState<string>(stored.bizType      ?? "");
-  const [bizTypeOther, setBizTypeOther] = useState<string>(stored.bizTypeOther ?? "");
-  const [tone,     setTone]     = useState<string>(stored.tone     ?? "Warm Professional");
+  const [bizType,       setBizType]       = useState<string>(stored.bizType       ?? "");
+  const [bizTypeOther,  setBizTypeOther]  = useState<string>(stored.bizTypeOther  ?? "");
+  const [tone,          setTone]          = useState<string>(stored.tone          ?? "Warm Professional");
+  const [cardSignature, setCardSignature] = useState<string>(stored.cardSignature ?? "");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Rows
@@ -559,8 +560,8 @@ export default function BusinessDashboardPage() {
 
   // Persist settings
   useEffect(() => {
-    saveSettings({ bizType, bizTypeOther, tone });
-  }, [bizType, bizTypeOther, tone]);
+    saveSettings({ bizType, bizTypeOther, tone, cardSignature });
+  }, [bizType, bizTypeOther, tone, cardSignature]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -733,6 +734,25 @@ export default function BusinessDashboardPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Card Signature */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Card Signature</div>
+              <input
+                value={cardSignature}
+                onChange={e => setCardSignature(e.target.value)}
+                placeholder="e.g. With gratitude, The Smith Team"
+                style={{
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)",
+                  borderRadius: 6, color: WHITE, padding: "7px 10px",
+                  fontSize: "0.82rem", outline: "none", width: 280,
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              />
+              <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.3)", fontFamily: "'Inter', sans-serif" }}>
+                We'll close every card with this signature.
+              </div>
             </div>
 
             {/* Tone */}

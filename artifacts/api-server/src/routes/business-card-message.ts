@@ -26,6 +26,7 @@ router.post("/business-card-message", async (req, res) => {
     relationshipLength,
     moments,
     eventDate,
+    cardSignature,
   } = req.body as {
     businessType: string;
     tone: string;
@@ -33,6 +34,7 @@ router.post("/business-card-message", async (req, res) => {
     relationshipLength: string;
     moments: string[];
     eventDate?: string;
+    cardSignature?: string;
   };
 
   const primaryMoment = moments?.includes("Holiday / Christmas Cards")   ? "holiday"
@@ -65,7 +67,8 @@ Write a single, short greeting card message (2–4 sentences max). Rules:
 - For referrals: express genuine gratitude
 - No fake emojis, no corporate buzzwords, no "we are pleased to"
 - Write in first-person plural ("we") 
-- Output ONLY the message text. No quotes, no labels, no explanations.`;
+- Output ONLY the message text. No quotes, no labels, no explanations.
+${cardSignature ? `- End the message with exactly this signature on a new line: "${cardSignature}"` : "- Do not include a signature or sign-off."}`;
 
   try {
     const completion = await openai.chat.completions.create({
