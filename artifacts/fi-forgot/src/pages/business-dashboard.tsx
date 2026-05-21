@@ -349,9 +349,10 @@ interface ClientRow {
 }
 
 interface BizSettings {
-  bizType:   string;
-  moments:   string[];
-  tone:      string;
+  bizType:      string;
+  bizTypeOther: string;
+  moments:      string[];
+  tone:         string;
 }
 
 function newRow(businessId: string): ClientRow {
@@ -395,7 +396,7 @@ const SETTINGS_KEY = "fi_biz_settings";
 function loadSettings(): BizSettings {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
-  } catch { return { bizType: "", moments: ["birthday", "holiday"], tone: "Warm Professional" }; }
+  } catch { return { bizType: "", bizTypeOther: "", moments: ["birthday", "holiday"], tone: "Warm Professional" }; }
 }
 
 function saveSettings(s: BizSettings) {
@@ -514,7 +515,8 @@ export default function BusinessDashboardPage() {
 
   // Settings
   const stored = loadSettings();
-  const [bizType,  setBizType]  = useState<string>(stored.bizType  ?? "");
+  const [bizType,      setBizType]      = useState<string>(stored.bizType      ?? "");
+  const [bizTypeOther, setBizTypeOther] = useState<string>(stored.bizTypeOther ?? "");
   const [moments,  setMoments]  = useState<string[]>(stored.moments ?? ["birthday", "holiday"]);
   const [tone,     setTone]     = useState<string>(stored.tone     ?? "Warm Professional");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -555,8 +557,8 @@ export default function BusinessDashboardPage() {
 
   // Persist settings
   useEffect(() => {
-    saveSettings({ bizType, moments, tone });
-  }, [bizType, moments, tone]);
+    saveSettings({ bizType, bizTypeOther, moments, tone });
+  }, [bizType, bizTypeOther, moments, tone]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -690,13 +692,45 @@ export default function BusinessDashboardPage() {
         {settingsOpen && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, paddingBottom: 18 }}>
             {/* Business Type */}
-            <div>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>Business Type</div>
-              <select value={bizType} onChange={e => setBizType(e.target.value)}
-                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6, color: WHITE, padding: "7px 28px 7px 10px", fontSize: "0.85rem", appearance: "none", cursor: "pointer", outline: "none" }}>
-                <option value="">Select…</option>
-                {BIZ_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Business Type</div>
+              <div style={{ position: "relative", display: "inline-block" }}>
+                <select
+                  value={bizType}
+                  onChange={e => { setBizType(e.target.value); if (e.target.value !== "Other") setBizTypeOther(""); }}
+                  style={{
+                    background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)",
+                    borderRadius: 6, color: WHITE, padding: "7px 30px 7px 10px",
+                    fontSize: "0.85rem", appearance: "none", cursor: "pointer", outline: "none",
+                    minWidth: 180,
+                  }}
+                >
+                  <option value="" style={{ background: NAVY, color: WHITE }}>Select…</option>
+                  {BIZ_TYPES.map(t => <option key={t} value={t} style={{ background: NAVY, color: WHITE }}>{t}</option>)}
+                </select>
+                <span style={{
+                  position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)",
+                  pointerEvents: "none", color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", lineHeight: 1,
+                }}>▾</span>
+              </div>
+              {bizType === "Other" && (
+                <div style={{ position: "relative" }}>
+                  <input
+                    value={bizTypeOther}
+                    onChange={e => setBizTypeOther(e.target.value)}
+                    placeholder="Describe your business so the AI can personalise cards…"
+                    style={{
+                      background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)",
+                      borderRadius: 6, color: WHITE, padding: "7px 10px",
+                      fontSize: "0.82rem", outline: "none", width: 300,
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  />
+                  <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.3)", marginTop: 4, fontFamily: "'Inter', sans-serif" }}>
+                    The AI will use this description when writing your cards.
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Moments to track */}
