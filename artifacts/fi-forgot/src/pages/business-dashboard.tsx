@@ -1043,7 +1043,7 @@ export default function BusinessDashboardPage() {
             onClick={e => e.stopPropagation()}
             style={{
               background: "#fff", borderRadius: 14, padding: "28px 28px 20px",
-              width: 620, maxWidth: "95vw", maxHeight: "80vh",
+              width: 760, maxWidth: "95vw", maxHeight: "88vh",
               display: "flex", flexDirection: "column", gap: 16,
               boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
             }}
@@ -1058,7 +1058,7 @@ export default function BusinessDashboardPage() {
             {fontsLoading ? (
               <div style={{ textAlign: "center", padding: "32px 0", color: "#94a3b8", fontFamily: "'Inter', sans-serif" }}>Loading styles…</div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, overflowY: "auto", paddingRight: 4 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, overflowY: "auto", paddingRight: 4 }}>
                 {hwFonts.map(font => {
                   const selected = cardFont === font.id;
                   return (
@@ -1084,7 +1084,7 @@ export default function BusinessDashboardPage() {
                         <img
                           src={font.previewUrl}
                           alt={`${font.name} handwriting sample`}
-                          style={{ width: "100%", height: 70, objectFit: "contain", objectPosition: "left center" }}
+                          style={{ width: "100%", height: 160, objectFit: "contain", objectPosition: "center center" }}
                           onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; (e.currentTarget.nextSibling as HTMLElement).style.display = "block"; }}
                         />
                       ) : null}
