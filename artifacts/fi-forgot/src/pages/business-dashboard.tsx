@@ -177,9 +177,9 @@ function InfoTooltip({ text }: { text: string }) {
 // ── Events Picker ─────────────────────────────────────────────────────────────
 
 const EVENT_DEFS = [
-  { key: "autoBirthday",   icon: "🎂", label: "Birthday"              },
-  { key: "autoHoliday",    icon: "🎄", label: "Holiday"               },
-  { key: "autoAnniversary",icon: "📅", label: "Special Anniversary"   },
+  { key: "autoBirthday",   icon: "🎂", label: "Birthday",        tooltip: null },
+  { key: "autoHoliday",    icon: "🎁", label: "Happy Holidays",  tooltip: "Sends one card covering Christmas, Hanukkah & New Year's — a general 'Happy Holidays' message that works for everyone." },
+  { key: "autoAnniversary",icon: "📅", label: "Special Anniversary", tooltip: null },
 ];
 
 type EventsPickerRow = {
@@ -313,6 +313,7 @@ function EventsPicker({ row, onUpdate, onSave }: {
                 <span style={{ opacity: active ? 1 : 0.35, fontSize: "0.85rem" }}>{e.icon}</span>
                 {e.label}
               </button>
+              {e.tooltip && <InfoTooltip text={e.tooltip} />}
               {isAnniv && active && (
                 <AnnivDetail row={row} onUpdate={onUpdate} onSave={onSave} />
               )}
