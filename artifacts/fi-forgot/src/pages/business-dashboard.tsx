@@ -558,8 +558,7 @@ export default function BusinessDashboardPage() {
   const [automationMode, setAutomationMode] = useState<"auto" | "approval">(stored.automationMode ?? "approval");
   const [fontPickerOpen,  setFontPickerOpen]  = useState(false);
   const [activeSection,   setActiveSection]   = useState<"recipients" | "upcoming">("upcoming");
-  const [triggering,      setTriggering]      = useState(false);
-  const [triggerMsg,      setTriggerMsg]      = useState<string | null>(null);
+  const [cardGenState,    setCardGenState]    = useState<Record<string, "generating" | "done" | "error">>({});
   const [hwFonts,       setHwFonts]      = useState<HwFont[]>([]);
   const [fontsLoading,  setFontsLoading]  = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -714,32 +713,24 @@ export default function BusinessDashboardPage() {
 
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
 
-  async function generateCards() {
+  async function generateCardFor(cardKey: string, clientRowId: string) {
     if (!businessId) return;
-    setTriggering(true);
-    setTriggerMsg(null);
+    setCardGenState(s => ({ ...s, [cardKey]: "generating" }));
     try {
       const res = await fetch("/api/business-cards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessId }),
+        body: JSON.stringify({ businessId, clientId: clientRowId }),
       });
       if (res.ok) {
-        const body = await res.json() as { queued?: number; skipped?: number };
-        const n = body.queued ?? 0;
-        if (n === 0) {
-          setTriggerMsg("All cards already generated — check your inbox for any pending approvals");
-        } else {
-          setTriggerMsg(`✓ ${n} card${n !== 1 ? "s" : ""} generated — check your inbox to approve`);
-        }
+        setCardGenState(s => ({ ...s, [cardKey]: "done" }));
       } else {
-        setTriggerMsg("Something went wrong — make sure your notify email is set in Settings");
+        setCardGenState(s => ({ ...s, [cardKey]: "error" }));
+        setTimeout(() => setCardGenState(s => { const n = { ...s }; delete n[cardKey]; return n; }), 6000);
       }
     } catch {
-      setTriggerMsg("Network error — try again");
-    } finally {
-      setTriggering(false);
-      setTimeout(() => setTriggerMsg(null), 10000);
+      setCardGenState(s => ({ ...s, [cardKey]: "error" }));
+      setTimeout(() => setCardGenState(s => { const n = { ...s }; delete n[cardKey]; return n; }), 6000);
     }
   }
 
@@ -1122,20 +1113,6 @@ export default function BusinessDashboardPage() {
 
         <div style={{ flex: 1 }} />
 
-        {triggerMsg && (
-          <span style={{ fontSize: "0.78rem", color: triggerMsg.startsWith("✓") ? "#15803d" : "#b45309", fontWeight: 600, background: triggerMsg.startsWith("✓") ? "#f0fdf4" : "#fffbeb", border: `1px solid ${triggerMsg.startsWith("✓") ? "#86efac" : "#fcd34d"}`, borderRadius: 6, padding: "4px 10px" }}>
-            {triggerMsg}
-          </span>
-        )}
-
-        <button
-          onClick={generateCards}
-          disabled={triggering}
-          title="Generate AI card messages for all upcoming events across all recipients"
-          style={{ padding: "7px 16px", borderRadius: 8, background: triggering ? "#e2e8f0" : NAVY, border: "none", color: triggering ? "#94a3b8" : WHITE, fontSize: "0.8rem", fontWeight: 600, cursor: triggering ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 7, whiteSpace: "nowrap" }}>
-          {triggering ? "⏳ Generating…" : "✨ Generate Cards"}
-        </button>
-
         {dirtyCount > 0 && (
           <button onClick={saveAll} disabled={saving}
             style={{ padding: "8px 20px", borderRadius: 8, background: saving ? "#94a3b8" : RED, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", cursor: saving ? "not-allowed" : "pointer" }}>
@@ -1235,6 +1212,25 @@ export default function BusinessDashboardPage() {
                       </span>
                     )}
                   </div>
+
+                  {/* Per-card Generate button */}
+                  {(() => {
+                    const gs = cardGenState[card.key];
+                    if (gs === "done") return (
+                      <span style={{ fontSize: "0.72rem", color: "#15803d", fontWeight: 700, whiteSpace: "nowrap" }}>✓ Generated</span>
+                    );
+                    if (gs === "error") return (
+                      <span style={{ fontSize: "0.72rem", color: "#b91c1c", fontWeight: 700, whiteSpace: "nowrap" }}>✗ Failed</span>
+                    );
+                    return (
+                      <button
+                        onClick={() => generateCardFor(card.key, card.clientRowId)}
+                        disabled={gs === "generating"}
+                        style={{ padding: "5px 13px", borderRadius: 8, background: gs === "generating" ? "#e2e8f0" : NAVY, border: "none", color: gs === "generating" ? "#94a3b8" : WHITE, fontSize: "0.74rem", fontWeight: 700, cursor: gs === "generating" ? "not-allowed" : "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+                        {gs === "generating" ? "⏳ Generating…" : "✨ Generate"}
+                      </button>
+                    );
+                  })()}
                 </div>
               );
             })

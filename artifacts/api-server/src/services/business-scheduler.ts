@@ -103,7 +103,7 @@ async function pickCardId(eventType: string): Promise<string | number> {
 
 export async function runBusinessScheduler(
   appBaseUrl: string,
-  opts?: { forceBusinessId?: string; force?: boolean },
+  opts?: { forceBusinessId?: string; force?: boolean; forceClientId?: string },
 ): Promise<{ queued: number; skipped: number }> {
   const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
   const today    = toISODate(new Date());
@@ -130,7 +130,10 @@ export async function runBusinessScheduler(
     const cardSignature = settings?.cardSignature ?? "";
     const cardFont      = settings?.cardFont ?? "";
 
-    const bizClients = clients.filter(c => c.businessId === businessId);
+    const bizClients = clients.filter(c =>
+      c.businessId === businessId &&
+      (!opts?.forceClientId || c.id === opts.forceClientId)
+    );
 
     for (const client of bizClients) {
       if (!client.fullName) continue;
