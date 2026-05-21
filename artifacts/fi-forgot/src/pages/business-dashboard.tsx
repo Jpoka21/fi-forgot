@@ -753,7 +753,8 @@ export default function BusinessDashboardPage() {
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
 
   async function generateCardFor(cardKey: string, clientRowId: string) {
-    if (!businessId) {
+    const effectiveBizId = businessId || rows.find(r => r._rowId === clientRowId)?.businessId || "";
+    if (!effectiveBizId) {
       setCardGenState(s => ({ ...s, [cardKey]: "error" }));
       setTimeout(() => setCardGenState(s => { const n = { ...s }; delete n[cardKey]; return n; }), 6000);
       return;
@@ -763,7 +764,7 @@ export default function BusinessDashboardPage() {
       const res = await fetch("/api/business-cards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessId, clientId: clientRowId }),
+        body: JSON.stringify({ businessId: effectiveBizId, clientId: clientRowId }),
       });
       if (res.ok) {
         setCardGenState(s => ({ ...s, [cardKey]: "done" }));
