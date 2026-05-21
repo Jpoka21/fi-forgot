@@ -221,12 +221,16 @@ function makePersonalWorkspace(): Workspace {
 }
 
 function makeBusinessWorkspace(businessName: string, businessType: string): Workspace {
+  const businessId = crypto.randomUUID();
+  // Write a durable anchor that is NEVER cleared — survives logout, storage version bumps, etc.
+  // Used to repair a workspace that somehow loses its businessId.
+  try { localStorage.setItem("fi_forgot_biz_id_anchor", businessId); } catch { /* ignore */ }
   return {
     id: crypto.randomUUID(),
     type: "business",
     name: businessName,
     businessType,
-    businessId: crypto.randomUUID(),
+    businessId,
   };
 }
 
@@ -255,32 +259,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setOnboardingComplete(!!ob);
 
         let ws = loadWorkspaces();
-        // Repair: fi_forgot_business is the canonical source of truth for businessId
-        // (never wiped by clearAllUserData). Always sync it into the business workspace
-        // so a lost or incorrectly-minted businessId gets corrected on every load.
-        try {
-          const oldBiz = localStorage.getItem("fi_forgot_business");
-          if (oldBiz) {
-            const biz = JSON.parse(oldBiz) as { businessId?: string };
-            if (biz.businessId) {
-              const synced = ws.map(w =>
-                (w.type === "business" && w.businessId !== biz.businessId)
-                  ? { ...w, businessId: biz.businessId! }
-                  : w
-              );
-              if (synced.some((w, i) => w.businessId !== ws[i]?.businessId)) {
-                saveWorkspaces(synced);
-                ws = synced;
-              }
-            }
+        // Fallback: if any business workspace is missing a businessId, check the durable anchor
+        // key (set when the workspace is first created, never cleared) before minting a new UUID.
+        const repaired = ws.map(w => {
+          if (w.type === "business" && !w.businessId) {
+            let recovered: string | undefined;
+            try {
+              recovered = localStorage.getItem("fi_forgot_biz_id_anchor") ??
+                          (JSON.parse(localStorage.getItem("fi_forgot_business") ?? "null") as { businessId?: string } | null)?.businessId ??
+                          undefined;
+            } catch { /* ignore */ }
+            return { ...w, businessId: recovered ?? crypto.randomUUID() };
           }
-        } catch { /* ignore */ }
-        // Fallback: if no fi_forgot_business exists, mint a new UUID for any workspace missing one
-        const repaired = ws.map(w =>
-          (w.type === "business" && !w.businessId)
-            ? { ...w, businessId: crypto.randomUUID() }
-            : w
-        );
+          return w;
+        });
         if (repaired.some((w, i) => w.businessId !== ws[i]?.businessId)) {
           saveWorkspaces(repaired);
           ws = repaired;
