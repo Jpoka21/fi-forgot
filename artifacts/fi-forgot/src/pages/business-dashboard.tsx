@@ -12,7 +12,7 @@ const BIZ_TYPES = [
   "Legal", "Medical / Wellness", "Contractor / Home Services", "Other",
 ];
 const RELATIONSHIP_OPTS = [
-  "Client", "Past Client", "Referral Partner", "VIP Customer", "Other",
+  "Client", "Referral Partner", "VIP Customer", "Other",
 ];
 
 const ALL_MOMENTS = [
@@ -339,6 +339,7 @@ interface ClientRow {
   fullName: string;
   company:  string;
   relationship: string;
+  relationshipOther: string;
   birthday: string;
   clientSince: string;
   autoBirthday:   boolean;
@@ -366,7 +367,7 @@ function newRow(businessId: string): ClientRow {
   return {
     _rowId: `row-${Date.now()}-${Math.random()}`,
     businessId,
-    fullName: "", company: "", relationship: "", birthday: "",
+    fullName: "", company: "", relationship: "", relationshipOther: "", birthday: "",
     clientSince: "",
     autoBirthday: true, autoHoliday: true, autoAnniversary: false,
     anniversaryDate: "", anniversaryNote: "", tone: "", requireApproval: false,
@@ -383,6 +384,7 @@ function rowFromClient(c: Record<string, unknown>, businessId: string): ClientRo
     fullName: String(c.fullName ?? ""),
     company:  String(c.company ?? ""),
     relationship: String(c.relationship ?? ""),
+    relationshipOther: String(c.relationshipOther ?? ""),
     birthday: String(c.birthday ?? ""),
     clientSince: String(c.clientSince ?? ""),
     autoBirthday:   Boolean(c.autoBirthday   ?? true),
@@ -598,7 +600,10 @@ export default function BusinessDashboardPage() {
         body: JSON.stringify({
           businessId: row.businessId, fullName: row.fullName,
           company: row.company || undefined,
-          relationship: row.relationship || undefined,
+          relationship: row.relationship === "Other" && row.relationshipOther
+            ? `Other (${row.relationshipOther})`
+            : row.relationship || undefined,
+          relationshipOther: row.relationshipOther || undefined,
           birthday: row.birthday || undefined,
           clientSince: row.clientSince || undefined,
           autoBirthday: row.autoBirthday, autoHoliday: row.autoHoliday,
@@ -877,12 +882,22 @@ export default function BusinessDashboardPage() {
 
                     {/* Relationship */}
                     <td style={TD}>
-                      <select value={row.relationship} onChange={e => { updateRow(row._rowId, { relationship: e.target.value }); }}
+                      <select value={row.relationship}
+                        onChange={e => { updateRow(row._rowId, { relationship: e.target.value, relationshipOther: "" }); }}
                         onBlur={() => saveRow(row)}
                         style={{ ...cellSelect, color: row.relationship ? "#1e293b" : "#94a3b8" }}>
                         <option value="">Type…</option>
                         {RELATIONSHIP_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
+                      {row.relationship === "Other" && (
+                        <input
+                          value={row.relationshipOther}
+                          onChange={e => updateRow(row._rowId, { relationshipOther: e.target.value })}
+                          onBlur={() => saveRow(row)}
+                          placeholder="Describe…"
+                          style={{ ...cellInput, marginTop: 3, fontSize: "0.75rem", color: row.relationshipOther ? "#1e293b" : "#94a3b8" }}
+                        />
+                      )}
                     </td>
 
                     {/* Birthday */}
