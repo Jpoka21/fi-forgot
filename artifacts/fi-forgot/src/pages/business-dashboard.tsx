@@ -278,47 +278,62 @@ function EventsPicker({ row, onUpdate, onSave }: {
   }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-      {/* Count badge */}
-      <span style={{
-        fontSize: "0.65rem", fontWeight: 700, minWidth: 26, textAlign: "center",
-        background: activeCount > 0 ? "#dcfce7" : "#f1f5f9",
-        color: activeCount > 0 ? "#15803d" : "#94a3b8",
-        borderRadius: 10, padding: "1px 5px",
-        fontFamily: "'Inter', sans-serif", flexShrink: 0,
-      }}>
-        {activeCount}/{EVENT_DEFS.length}
-      </span>
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+        {/* Count badge */}
+        <span style={{
+          fontSize: "0.65rem", fontWeight: 700, minWidth: 26, textAlign: "center",
+          background: activeCount > 0 ? "#dcfce7" : "#f1f5f9",
+          color: activeCount > 0 ? "#15803d" : "#94a3b8",
+          borderRadius: 10, padding: "1px 5px",
+          fontFamily: "'Inter', sans-serif", flexShrink: 0,
+        }}>
+          {activeCount}/{EVENT_DEFS.length}
+        </span>
 
-      {EVENT_DEFS.map(e => {
-        const active = (row as Record<string, boolean>)[e.key];
-        const isAnniv = e.key === "autoAnniversary";
-        return (
-          <div key={e.key} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
-            <button
-              onClick={() => toggle(e.key)}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 3,
-                background: active ? "#f0fdf4" : "#f8fafc",
-                border: `1px solid ${active ? "#bbf7d0" : "#e2e8f0"}`,
-                borderRadius: 10, padding: "2px 8px",
-                fontSize: "0.7rem",
-                color: active ? "#15803d" : "#c4cdd8",
-                cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                transition: "all 0.12s", fontWeight: active ? 600 : 400,
-              }}
-              onMouseEnter={el => { (el.currentTarget as HTMLElement).style.borderColor = active ? "#86efac" : "#cbd5e1"; }}
-              onMouseLeave={el => { (el.currentTarget as HTMLElement).style.borderColor = active ? "#bbf7d0" : "#e2e8f0"; }}
-            >
-              <span style={{ opacity: active ? 1 : 0.35, fontSize: "0.85rem" }}>{e.icon}</span>
-              {e.label}
-            </button>
-            {isAnniv && active && (
-              <AnnivDetail row={row} onUpdate={onUpdate} onSave={onSave} />
-            )}
-          </div>
-        );
-      })}
+        {EVENT_DEFS.map(e => {
+          const active = (row as Record<string, boolean>)[e.key];
+          const isAnniv = e.key === "autoAnniversary";
+          return (
+            <div key={e.key} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+              <button
+                onClick={() => toggle(e.key)}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 3,
+                  background: active ? "#f0fdf4" : "#f8fafc",
+                  border: `1px solid ${active ? "#bbf7d0" : "#e2e8f0"}`,
+                  borderRadius: 10, padding: "2px 8px",
+                  fontSize: "0.7rem",
+                  color: active ? "#15803d" : "#c4cdd8",
+                  cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                  transition: "all 0.12s", fontWeight: active ? 600 : 400,
+                }}
+                onMouseEnter={el => { (el.currentTarget as HTMLElement).style.borderColor = active ? "#86efac" : "#cbd5e1"; }}
+                onMouseLeave={el => { (el.currentTarget as HTMLElement).style.borderColor = active ? "#bbf7d0" : "#e2e8f0"; }}
+              >
+                <span style={{ opacity: active ? 1 : 0.35, fontSize: "0.85rem" }}>{e.icon}</span>
+                {e.label}
+              </button>
+              {isAnniv && active && (
+                <AnnivDetail row={row} onUpdate={onUpdate} onSave={onSave} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Always-visible anniversary hint */}
+      {row.autoAnniversary && (
+        <div style={{
+          fontSize: "0.67rem", color: "#64748b", fontFamily: "'Inter', sans-serif",
+          lineHeight: 1.4, paddingLeft: 2,
+        }}>
+          We will reference this when writing the card.{" "}
+          <strong style={{ color: "#475569" }}>
+            Not a wedding anniversary — think home closing, deal anniversary, 1-year client milestone, or any meaningful business date.
+          </strong>
+        </div>
+      )}
     </div>
   );
 }
@@ -813,10 +828,7 @@ export default function BusinessDashboardPage() {
                   Client Since
                   <InfoTooltip text="We use this to send a card on their client anniversary — celebrating how long they've worked with you." />
                 </th>
-                <th style={TH}>
-                  Send Cards For
-                  <InfoTooltip text="Pick which occasions you'd like us to automatically send a card for this person. You can override per-client here even if a moment is on globally." />
-                </th>
+                <th style={TH}>Send Cards For</th>
                 <th style={TH}>
                   Tone
                   <InfoTooltip text="Override the global tone for this person. Leave blank to use your account default." />
