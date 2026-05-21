@@ -420,7 +420,7 @@ function rowFromClient(c: Record<string, unknown>, businessId: string): ClientRo
   return {
     _rowId: String(c.id ?? Math.random()),
     id: c.id as string | undefined,
-    businessId,
+    businessId: String(c.businessId ?? businessId),
     fullName: String(c.fullName ?? ""),
     company:  String(c.company ?? ""),
     relationship: String(c.relationship ?? ""),
@@ -648,6 +648,14 @@ export default function BusinessDashboardPage() {
 
   function updateRow(rowId: string, patch: Partial<ClientRow>) {
     setRows(prev => prev.map(r => r._rowId === rowId ? { ...r, ...patch, _dirty: true, _saved: false } : r));
+  }
+
+  function saveRowById(rowId: string) {
+    setRows(prev => {
+      const current = prev.find(r => r._rowId === rowId);
+      if (current) void saveRow(current);
+      return prev;
+    });
   }
 
   function addRow() {
@@ -1395,7 +1403,7 @@ export default function BusinessDashboardPage() {
                       <EventsPicker
                         row={row}
                         onUpdate={patch => updateRow(row._rowId, patch)}
-                        onSave={() => saveRow(row)}
+                        onSave={() => saveRowById(row._rowId)}
                       />
                     </td>
 
