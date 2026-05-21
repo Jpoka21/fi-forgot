@@ -361,6 +361,8 @@ interface BizSettings {
   cardFont:       string;
   notifyTiming:   string[];
   notifyChannel:  string;
+  notifyEmail:    string;
+  notifyPhone:    string;
 }
 
 function newRow(businessId: string): ClientRow {
@@ -402,7 +404,7 @@ const SETTINGS_KEY = "fi_biz_settings";
 function loadSettings(): BizSettings {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
-  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "", cardFont: "", notifyTiming: ["14 days before"], notifyChannel: "email" }; }
+  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "", cardFont: "", notifyTiming: ["14 days before"], notifyChannel: "email", notifyEmail: "", notifyPhone: "" }; }
 }
 
 function saveSettings(s: BizSettings) {
@@ -528,6 +530,8 @@ export default function BusinessDashboardPage() {
   const [cardFont,       setCardFont]      = useState<string>(stored.cardFont       ?? "");
   const [notifyTiming,   setNotifyTiming]  = useState<string[]>(stored.notifyTiming  ?? ["14 days before"]);
   const [notifyChannel,  setNotifyChannel] = useState<string>(stored.notifyChannel  ?? "email");
+  const [notifyEmail,    setNotifyEmail]   = useState<string>(stored.notifyEmail    ?? "");
+  const [notifyPhone,    setNotifyPhone]   = useState<string>(stored.notifyPhone    ?? "");
   const [fontPickerOpen, setFontPickerOpen] = useState(false);
   const [hwFonts,       setHwFonts]      = useState<HwFont[]>([]);
   const [fontsLoading,  setFontsLoading]  = useState(false);
@@ -569,8 +573,8 @@ export default function BusinessDashboardPage() {
 
   // Persist settings
   useEffect(() => {
-    saveSettings({ bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel });
-  }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel]);
+    saveSettings({ bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone });
+  }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -812,11 +816,14 @@ export default function BusinessDashboardPage() {
 
             {/* Notification Timing */}
             <div>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>
-                Notify Me Before Cards Go Out
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>
+                Notify Me Before the Card Is Mailed
+              </div>
+              <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.3)", marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
+                Cards are mailed ~7 days before the occasion to ensure delivery. These intervals are before the card leaves — not before the occasion itself.
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {(["Day of", "2 days before", "7 days before", "14 days before", "30 days before"] as const).map(opt => {
+                {(["Same day it mails", "2 days before it mails", "7 days before it mails", "14 days before it mails", "30 days before it mails"] as const).map(opt => {
                   const active = notifyTiming.includes(opt);
                   return (
                     <button key={opt} type="button" onClick={() => {
@@ -850,6 +857,47 @@ export default function BusinessDashboardPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Contact Info for Notifications */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                Where to Reach You
+              </div>
+              {(notifyChannel === "email" || notifyChannel === "both") && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.45)", fontFamily: "'Inter', sans-serif" }}>Email address</label>
+                  <input
+                    type="email"
+                    value={notifyEmail}
+                    onChange={e => setNotifyEmail(e.target.value)}
+                    placeholder="you@yourcompany.com"
+                    style={{
+                      background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)",
+                      borderRadius: 6, color: WHITE, padding: "7px 10px",
+                      fontSize: "0.82rem", outline: "none", width: 280,
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  />
+                </div>
+              )}
+              {(notifyChannel === "text" || notifyChannel === "both") && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.45)", fontFamily: "'Inter', sans-serif" }}>Mobile number</label>
+                  <input
+                    type="tel"
+                    value={notifyPhone}
+                    onChange={e => setNotifyPhone(e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                    style={{
+                      background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)",
+                      borderRadius: 6, color: WHITE, padding: "7px 10px",
+                      fontSize: "0.82rem", outline: "none", width: 280,
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
