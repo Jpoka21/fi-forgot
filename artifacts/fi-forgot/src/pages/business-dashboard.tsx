@@ -1059,8 +1059,9 @@ export default function BusinessDashboardPage() {
               <div style={{ textAlign: "center", padding: "32px 0", color: "#94a3b8", fontFamily: "'Inter', sans-serif" }}>Loading styles…</div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, overflowY: "auto", paddingRight: 4 }}>
-                {hwFonts.map(font => {
+                {hwFonts.map((font, idx) => {
                   const selected = cardFont === font.id;
+                  const isDefault = idx === 0;
                   return (
                     <button
                       key={font.id}
@@ -1076,9 +1077,10 @@ export default function BusinessDashboardPage() {
                       onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLElement).style.borderColor = "#cbd5e1"; }}
                       onMouseLeave={e => { if (!selected) (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0"; }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ fontWeight: 700, fontSize: "0.88rem", color: NAVY, fontFamily: "'Inter', sans-serif" }}>{font.name}</span>
-                        {selected && <span style={{ fontSize: "0.72rem", background: RED, color: "#fff", borderRadius: 20, padding: "2px 8px", fontFamily: "'Inter', sans-serif" }}>Selected</span>}
+                        {isDefault && <span style={{ fontSize: "0.68rem", background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0", borderRadius: 20, padding: "1px 7px", fontFamily: "'Inter', sans-serif" }}>Default</span>}
+                        {selected && <span style={{ fontSize: "0.68rem", background: RED, color: "#fff", borderRadius: 20, padding: "1px 7px", fontFamily: "'Inter', sans-serif" }}>Selected</span>}
                       </div>
                       {font.previewUrl ? (
                         <img
