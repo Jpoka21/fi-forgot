@@ -73,61 +73,80 @@ function MonthDayYearPicker({ value, onChange, onBlur }: {
   onChange: (v: string) => void;
   onBlur: () => void;
 }) {
-  // value format: "YYYY-MM-DD"
-  const parts = (value ?? "").split("-");
-  const yearVal  = parts.length === 3 ? (parts[0] ?? "") : "";
-  const monthIdx = parts.length === 3 ? parseInt(parts[1] ?? "0") - 1 : -1;
-  const month    = monthIdx >= 0 && monthIdx < 12 ? (MONTHS[monthIdx] ?? "") : "";
-  const day      = parts.length === 3 ? (parseInt(parts[2] ?? "0") || "") : "";
+  // value format: "YYYY-MM-DD" — use internal state so partial selections don't reset
+  function parse(v: string) {
+    const p = (v ?? "").split("-");
+    if (p.length === 3) {
+      const mi = parseInt(p[1] ?? "0") - 1;
+      return {
+        month: mi >= 0 && mi < 12 ? (MONTHS[mi] ?? "") : "",
+        day:   String(parseInt(p[2] ?? "0") || ""),
+        year:  p[0] ?? "",
+      };
+    }
+    return { month: "", day: "", year: "" };
+  }
 
-  const sel: React.CSSProperties = {
-    border: "none", background: "transparent", fontSize: "0.85rem",
-    color: "#1e293b", outline: "none", cursor: "pointer",
-    fontFamily: "'Inter', sans-serif", padding: "1px 2px",
-    appearance: "none" as const,
-  };
+  const init = parse(value);
+  const [month, setMonth] = useState(init.month);
+  const [day,   setDay]   = useState(init.day);
+  const [year,  setYear]  = useState(init.year);
 
-  function emit(m: string, d: string | number, y: string) {
+  // Sync if parent resets the value externally
+  useEffect(() => {
+    const p = parse(value);
+    setMonth(p.month); setDay(p.day); setYear(p.year);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  function commit(m: string, d: string, y: string) {
     if (m && d && y) {
       const mi = MONTHS.indexOf(m) + 1;
-      onChange(`${y}-${String(mi).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
-    } else {
-      onChange("");
+      onChange(`${y}-${String(mi).padStart(2, "0")}-${d.padStart(2, "0")}`);
     }
+    // don't call onChange("") on partial — keep local state until complete
   }
+
+  const sel: React.CSSProperties = {
+    border: "1px solid #e2e8f0", borderRadius: 6, background: "#f8fafc",
+    fontSize: "0.85rem", color: "#1e293b", outline: "none", cursor: "pointer",
+    fontFamily: "'Inter', sans-serif", padding: "4px 6px",
+  };
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => currentYear - i);
-  const daysInMonth = month ? new Date(Number(yearVal) || currentYear, MONTHS.indexOf(month) + 1, 0).getDate() : 31;
+  const daysInMonth = month
+    ? new Date(Number(year) || currentYear, MONTHS.indexOf(month) + 1, 0).getDate()
+    : 31;
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
       <select
         value={month}
-        onChange={e => emit(e.target.value, day, yearVal)}
+        onChange={e => { setMonth(e.target.value); commit(e.target.value, day, year); }}
         onBlur={onBlur}
-        style={{ ...sel, width: 46, color: month ? "#1e293b" : "#94a3b8" }}
+        style={{ ...sel, color: month ? "#1e293b" : "#94a3b8" }}
       >
-        <option value="">Mon</option>
+        <option value="">Month</option>
         {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
       </select>
       <select
-        value={String(day)}
-        onChange={e => emit(month, e.target.value, yearVal)}
+        value={day}
+        onChange={e => { setDay(e.target.value); commit(month, e.target.value, year); }}
         onBlur={onBlur}
-        style={{ ...sel, width: 36, color: day ? "#1e293b" : "#94a3b8" }}
+        style={{ ...sel, width: 60, color: day ? "#1e293b" : "#94a3b8" }}
       >
-        <option value="">DD</option>
+        <option value="">Day</option>
         {days.map(d => <option key={d} value={String(d)}>{d}</option>)}
       </select>
       <select
-        value={yearVal}
-        onChange={e => emit(month, day, e.target.value)}
+        value={year}
+        onChange={e => { setYear(e.target.value); commit(month, day, e.target.value); }}
         onBlur={onBlur}
-        style={{ ...sel, width: 50, color: yearVal ? "#1e293b" : "#94a3b8" }}
+        style={{ ...sel, width: 72, color: year ? "#1e293b" : "#94a3b8" }}
       >
-        <option value="">YYYY</option>
+        <option value="">Year</option>
         {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
       </select>
     </div>
