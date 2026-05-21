@@ -1,147 +1,144 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 
-const NAVY = "#0D1B35";
-const RED = "#E23B2E";
-const WHITE = "#FFFFFF";
+const NAVY   = "#0D1B35";
+const DARK   = "#0a1f3d";
+const RED    = "#E23B2E";
+const WHITE  = "#FFFFFF";
 
-interface Client {
-  id: string;
+const BIZ_TYPES = [
+  "Real Estate", "Mortgage", "Insurance", "Financial Services",
+  "Legal", "Medical / Wellness", "Contractor / Home Services", "Other",
+];
+const REAL_ESTATE_TYPES = ["Real Estate", "Mortgage"];
+
+const RELATIONSHIP_OPTS = [
+  "Client", "Past Client", "Referral Partner", "VIP Customer", "Other",
+];
+
+const ALL_MOMENTS = [
+  { key: "birthday",     label: "Birthdays",      icon: "🎂" },
+  { key: "holiday",      label: "Holiday Cards",   icon: "🎄" },
+  { key: "anniversary",  label: "Anniversaries",   icon: "📅" },
+  { key: "homePurchase", label: "Home Purchase",   icon: "🏡" },
+  { key: "referral",     label: "Referral Thanks", icon: "🤝" },
+];
+
+const TONE_OPTS = ["Warm Professional", "Professional", "Friendly", "Casual", "Luxury / High End"];
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface ClientRow {
+  _rowId:   string;
+  id?:      string;
   businessId: string;
   fullName: string;
-  company?: string | null;
-  address?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  birthday?: string | null;
-  homePurchaseAnniversary?: string | null;
-  clientSince?: string | null;
-  customEvents?: string | null;
-  kidsNames?: string | null;
-  pets?: string | null;
-  interests?: string | null;
-  notes?: string | null;
-  tags?: string | null;
-  relationship?: string | null;
-  autoBirthday?: boolean;
-  autoHoliday?: boolean;
-  autoAnniversary?: boolean;
-  requireApproval?: boolean;
-  automationsOn?: boolean;
-  lastCardSent?: string | null;
+  company:  string;
+  relationship: string;
+  birthday: string;
+  homePurchaseAnniversary: string;
+  clientSince: string;
+  autoBirthday:   boolean;
+  autoHoliday:    boolean;
+  autoAnniversary: boolean;
+  requireApproval: boolean;
+  notes: string;
+  _dirty: boolean;
+  _saving: boolean;
+  _saved:  boolean;
+  _isNew:  boolean;
 }
 
-const SAMPLE_CLIENTS: Client[] = [
-  { id: "sample-1", businessId: "", fullName: "John Smith", relationship: "Buyer", birthday: "May 14", lastCardSent: "Christmas 2025", automationsOn: true, tags: "Golf, Kids" },
-  { id: "sample-2", businessId: "", fullName: "Sarah Johnson", relationship: "Seller", birthday: "Aug 3", lastCardSent: "Birthday 2025", automationsOn: true, tags: "Luxury" },
-  { id: "sample-3", businessId: "", fullName: "Michael Davis", relationship: "Past Client", birthday: "Dec 20", lastCardSent: "Holiday 2025", automationsOn: false, tags: "Investor" },
-];
-
-const ACTIVITY = [
-  { icon: "✓", text: "Birthday card sent to John Smith", time: "2 hours ago" },
-  { icon: "✓", text: "Anniversary card scheduled for Sarah Johnson", time: "Yesterday" },
-  { icon: "✓", text: "Holiday cards queued for 42 clients", time: "3 days ago" },
-];
-
-// ── Account Menu ─────────────────────────────────────────────────────────────
-
-interface AccountMenuProps {
-  user: { name: string; email: string } | null;
-  onLogout: () => void;
+interface BizSettings {
+  bizType:   string;
+  moments:   string[];
+  tone:      string;
 }
 
-function AccountMenu({ user, onLogout }: AccountMenuProps) {
+function newRow(businessId: string): ClientRow {
+  return {
+    _rowId: `row-${Date.now()}-${Math.random()}`,
+    businessId,
+    fullName: "", company: "", relationship: "", birthday: "",
+    homePurchaseAnniversary: "", clientSince: "",
+    autoBirthday: true, autoHoliday: true, autoAnniversary: false, requireApproval: false,
+    notes: "",
+    _dirty: false, _saving: false, _saved: false, _isNew: true,
+  };
+}
+
+function rowFromClient(c: Record<string, unknown>, businessId: string): ClientRow {
+  return {
+    _rowId: String(c.id ?? Math.random()),
+    id: c.id as string | undefined,
+    businessId,
+    fullName: String(c.fullName ?? ""),
+    company:  String(c.company ?? ""),
+    relationship: String(c.relationship ?? ""),
+    birthday: String(c.birthday ?? ""),
+    homePurchaseAnniversary: String(c.homePurchaseAnniversary ?? ""),
+    clientSince: String(c.clientSince ?? ""),
+    autoBirthday:   Boolean(c.autoBirthday   ?? true),
+    autoHoliday:    Boolean(c.autoHoliday    ?? true),
+    autoAnniversary: Boolean(c.autoAnniversary ?? false),
+    requireApproval: Boolean(c.requireApproval ?? false),
+    notes: String(c.notes ?? ""),
+    _dirty: false, _saving: false, _saved: true, _isNew: false,
+  };
+}
+
+const SETTINGS_KEY = "fi_biz_settings";
+
+function loadSettings(): BizSettings {
+  try {
+    return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
+  } catch { return { bizType: "", moments: ["birthday", "holiday"], tone: "Warm Professional" }; }
+}
+
+function saveSettings(s: BizSettings) {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function AccountMenu({ user, onLogout }: { user: { name: string; email: string } | null; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
   }, []);
-
   const initial = user?.name?.charAt(0).toUpperCase() ?? "?";
-
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: 34, height: 34, borderRadius: "50%",
-          background: open ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.15)",
-          border: "2px solid rgba(255,255,255,0.2)",
-          color: WHITE, cursor: "pointer",
-          fontSize: "0.82rem", fontWeight: 700,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          transition: "background 0.15s",
-        }}
-      >
+      <button onClick={() => setOpen(o => !o)} style={{ width: 36, height: 36, borderRadius: "50%", background: open ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.2)", color: WHITE, cursor: "pointer", fontSize: "0.85rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {initial}
       </button>
-
       {open && (
-        <div style={{
-          position: "absolute", top: "calc(100% + 8px)", right: 0,
-          background: WHITE, borderRadius: 12, minWidth: 220,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-          zIndex: 200, overflow: "hidden",
-        }}>
-          {/* Account info */}
+        <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: WHITE, borderRadius: 12, minWidth: 220, boxShadow: "0 8px 32px rgba(0,0,0,0.18)", zIndex: 200 }}>
           <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid #f1f5f9" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: "50%", background: NAVY, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem", fontWeight: 700, flexShrink: 0 }}>
-                {initial}
-              </div>
-              <div>
-                <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: 700, color: NAVY }}>{user?.name}</p>
-                <p style={{ margin: 0, fontSize: "0.78rem", color: "#94a3b8" }}>{user?.email}</p>
-              </div>
-            </div>
+            <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: 700, color: NAVY }}>{user?.name}</p>
+            <p style={{ margin: 0, fontSize: "0.78rem", color: "#94a3b8" }}>{user?.email}</p>
           </div>
-
-          {/* Menu items */}
           {[
-            { icon: "⚙️", label: "Account Settings", action: () => alert("Account settings coming soon!") },
-            { icon: "💳", label: "Billing & Plan", action: () => alert("Billing coming soon!") },
-            { icon: "🔔", label: "Notifications", action: () => alert("Notifications coming soon!") },
-            { icon: "❓", label: "Help & Support", action: () => window.open("mailto:support@fiforgot.com") },
+            { icon: "⚙️", label: "Account Settings", action: () => alert("Coming soon") },
+            { icon: "💳", label: "Billing & Plan",   action: () => alert("Coming soon") },
           ].map(item => (
-            <button
-              key={item.label}
-              onClick={() => { item.action(); setOpen(false); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 10,
-                width: "100%", padding: "10px 16px",
-                background: "none", border: "none", cursor: "pointer",
-                textAlign: "left", fontSize: "0.88rem", color: "#334155",
-                transition: "background 0.1s",
-              }}
+            <button key={item.label} onClick={() => { item.action(); setOpen(false); }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", fontSize: "0.88rem", color: "#334155" }}
               onMouseEnter={e => (e.currentTarget.style.background = "#f8fafc")}
-              onMouseLeave={e => (e.currentTarget.style.background = "none")}
-            >
-              <span style={{ fontSize: "1rem", width: 20, textAlign: "center" }}>{item.icon}</span>
-              {item.label}
+              onMouseLeave={e => (e.currentTarget.style.background = "none")}>
+              <span style={{ width: 20, textAlign: "center" }}>{item.icon}</span>{item.label}
             </button>
           ))}
-
-          {/* Sign out */}
-          <div style={{ borderTop: "1px solid #f1f5f9", padding: "6px 0" }}>
-            <button
-              onClick={() => { setOpen(false); onLogout(); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 10,
-                width: "100%", padding: "10px 16px",
-                background: "none", border: "none", cursor: "pointer",
-                textAlign: "left", fontSize: "0.88rem", color: RED, fontWeight: 600,
-              }}
+          <div style={{ borderTop: "1px solid #f1f5f9" }}>
+            <button onClick={() => { setOpen(false); onLogout(); }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", fontSize: "0.88rem", color: RED, fontWeight: 600 }}
               onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}
-              onMouseLeave={e => (e.currentTarget.style.background = "none")}
-            >
-              <span style={{ fontSize: "1rem", width: 20, textAlign: "center" }}>🚪</span>
-              Sign Out
+              onMouseLeave={e => (e.currentTarget.style.background = "none")}>
+              <span style={{ width: 20, textAlign: "center" }}>🚪</span>Sign Out
             </button>
           </div>
         </div>
@@ -150,259 +147,211 @@ function AccountMenu({ user, onLogout }: AccountMenuProps) {
   );
 }
 
-// ── Workspace Toggle Pill ─────────────────────────────────────────────────────
-
 function WorkspaceToggle() {
   const { workspaces, switchWorkspace } = useAuth();
   const [, setLocation] = useLocation();
-
-  const personalWorkspace = workspaces.find(w => w.type === "personal");
-
-  function goToPersonal() {
-    if (personalWorkspace) {
-      switchWorkspace(personalWorkspace.id);
-      setLocation("/dashboard");
-    } else {
-      setLocation("/dashboard");
-    }
+  const personal = workspaces.find(w => w.type === "personal");
+  function goPersonal() {
+    if (personal) { switchWorkspace(personal.id); setLocation("/dashboard"); }
+    else setLocation("/dashboard");
   }
-
   return (
     <div style={{ display: "flex", background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: 3, gap: 2 }}>
-      {/* Personal pill */}
-      <button
-        onClick={goToPersonal}
-        style={{ padding: "6px 14px", borderRadius: 6, background: "transparent", border: "none", cursor: "pointer", transition: "background 0.15s" }}
+      <button onClick={goPersonal}
+        style={{ padding: "6px 14px", borderRadius: 6, background: "transparent", border: "none", cursor: "pointer" }}
         onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
-        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-      >
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.45)" }}>
-          Personal
-        </span>
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.45)" }}>Personal</span>
       </button>
-      {/* Business pill — active */}
-      <div style={{ padding: "6px 14px", borderRadius: 6, background: RED, cursor: "default" }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: WHITE }}>
-          Business
-        </span>
+      <div style={{ padding: "6px 14px", borderRadius: 6, background: RED }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: WHITE }}>Business</span>
       </div>
     </div>
   );
 }
 
-// ── Add Client Panel ──────────────────────────────────────────────────────────
+// ── Inline Cell Inputs ────────────────────────────────────────────────────────
 
-interface AddClientPanelProps {
-  open: boolean;
-  onClose: () => void;
-  onSaved: (client: Client) => void;
-  businessId: string;
-}
+const cellInput: React.CSSProperties = {
+  width: "100%", border: "none", background: "transparent",
+  fontSize: "0.88rem", color: "#1e293b", outline: "none",
+  fontFamily: "'Inter', sans-serif", padding: "2px 0",
+};
 
-function AddClientPanel({ open, onClose, onSaved, businessId }: AddClientPanelProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [customEvents, setCustomEvents] = useState<string[]>([]);
-  const formRef = useRef<HTMLFormElement>(null);
+const cellSelect: React.CSSProperties = {
+  ...cellInput, cursor: "pointer", appearance: "none" as const,
+};
 
-  useEffect(() => { if (!open) { setExpanded(false); setCustomEvents([]); } }, [open]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!formRef.current) return;
-    const fd = new FormData(formRef.current);
-    const payload: Record<string, unknown> = { businessId };
-    fd.forEach((v, k) => { if (v) payload[k] = String(v); });
-    if (customEvents.length) payload.customEvents = customEvents.join(", ");
-
-    setSaving(true);
-    try {
-      const res = await fetch(`/api/business-clients`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        const { client } = await res.json();
-        onSaved(client);
-        formRef.current?.reset();
-        onClose();
-      }
-    } finally { setSaving(false); }
-  }
-
-  function addCustomEvent() {
-    const name = window.prompt("Event name (e.g. Work Anniversary, Pet Birthday):");
-    if (name?.trim()) setCustomEvents(prev => [...prev, name.trim()]);
-  }
-
-  const inp = (name: string, label: string, placeholder?: string, type = "text") => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: "block", fontSize: "0.74rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#64748b", marginBottom: 5 }}>{label}</label>
-      <input name={name} type={type} placeholder={placeholder}
-        style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e2e8f0", borderRadius: 7, fontSize: "0.95rem", background: "#f8fafc", boxSizing: "border-box" as const }} />
-    </div>
-  );
-
-  const chk = (name: string, label: string, defaultChecked = true) => (
-    <label style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, cursor: "pointer", fontSize: "0.92rem", color: "#334155" }}>
-      <input type="checkbox" name={name} defaultChecked={defaultChecked} style={{ width: 16, height: 16, accentColor: RED }} />
-      {label}
-    </label>
-  );
-
-  const sec = (t: string) => (
-    <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#94a3b8", margin: "24px 0 14px", borderTop: "1px solid #f1f5f9", paddingTop: 18 }}>{t}</p>
-  );
-
+function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <>
-      {open && <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 99 }} />}
-      <div style={{
-        position: "fixed", top: 0, right: 0, bottom: 0,
-        width: "min(480px, 100vw)", background: WHITE,
-        boxShadow: "-8px 0 40px rgba(0,0,0,0.18)", zIndex: 100,
-        transform: open ? "translateX(0)" : "translateX(100%)",
-        transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
-        display: "flex", flexDirection: "column",
-      }}>
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid #f1f5f9", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 700, color: NAVY }}>Add New Client</h2>
-            <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8", marginTop: 2 }}>Only Full Name is required</p>
-          </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.4rem", color: "#94a3b8", lineHeight: 1, padding: 4 }}>×</button>
-        </div>
-
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px 24px" }}>
-          <form ref={formRef} onSubmit={handleSubmit} id="add-client-form">
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: "block", fontSize: "0.74rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#64748b", marginBottom: 5 }}>Full Name *</label>
-              <input name="fullName" required placeholder="Jane Doe" autoFocus
-                style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e2e8f0", borderRadius: 7, fontSize: "0.95rem", background: "#f8fafc", boxSizing: "border-box" as const }} />
-            </div>
-            {inp("birthday", "Birthday", "e.g. May 14")}
-            {inp("address", "Address", "123 Main St, Austin TX 78701")}
-
-            {!expanded && (
-              <button type="button" onClick={() => setExpanded(true)} style={{ width: "100%", padding: "10px", marginTop: 8, background: "#f8fafc", border: "1.5px dashed #cbd5e1", borderRadius: 8, color: "#475569", fontSize: "0.88rem", cursor: "pointer", fontWeight: 600 }}>
-                + Add More Details
-              </button>
-            )}
-
-            {expanded && (
-              <>
-                {sec("Basic Information")}
-                {inp("company", "Company", "Smith Realty")}
-                {inp("email", "Email", "jane@example.com", "email")}
-                {inp("phone", "Phone", "(555) 555-5555", "tel")}
-                {inp("relationship", "Relationship", "Buyer / Seller / Past Client")}
-
-                {sec("Important Dates")}
-                {inp("homePurchaseAnniversary", "Home Purchase Anniversary", "e.g. June 2023")}
-                {inp("clientSince", "Client Since", "e.g. 2021")}
-
-                {customEvents.map((ev, i) => (
-                  <div key={i} style={{ marginBottom: 14 }}>
-                    <label style={{ display: "block", fontSize: "0.74rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#64748b", marginBottom: 5 }}>{ev}</label>
-                    <input placeholder="Date" style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e2e8f0", borderRadius: 7, fontSize: "0.95rem", background: "#f8fafc", boxSizing: "border-box" as const }} />
-                  </div>
-                ))}
-                <button type="button" onClick={addCustomEvent} style={{ padding: "7px 14px", marginBottom: 8, background: "none", border: "1.5px dashed #cbd5e1", borderRadius: 6, color: "#64748b", fontSize: "0.82rem", cursor: "pointer", fontWeight: 600 }}>
-                  + Add Custom Event
-                </button>
-
-                {sec("Relationship Notes")}
-                {inp("kidsNames", "Kids' Names", "Emma, Liam")}
-                {inp("pets", "Pets", "Max (golden retriever)")}
-                {inp("interests", "Interests", "Golf, Travel, Wine")}
-                {inp("tags", "Tags", "VIP, Referral Source")}
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontSize: "0.74rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#64748b", marginBottom: 5 }}>Notes</label>
-                  <textarea name="notes" rows={3} placeholder="Anything else worth remembering…"
-                    style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e2e8f0", borderRadius: 7, fontSize: "0.95rem", background: "#f8fafc", boxSizing: "border-box" as const, resize: "vertical" }} />
-                </div>
-
-                {sec("Automation Settings")}
-                {chk("autoBirthday", "Birthday Cards")}
-                {chk("autoHoliday", "Holiday Cards")}
-                {chk("autoAnniversary", "Anniversary Cards", false)}
-                {chk("requireApproval", "Require Approval Before Sending")}
-              </>
-            )}
-          </form>
-        </div>
-
-        <div style={{ padding: "16px 24px", borderTop: "1px solid #f1f5f9", background: WHITE, display: "flex", gap: 10, flexShrink: 0 }}>
-          <button type="button" onClick={onClose} style={{ flex: 1, padding: "11px", background: "#f1f5f9", border: "none", borderRadius: 8, color: "#475569", fontSize: "0.9rem", fontWeight: 600, cursor: "pointer" }}>Cancel</button>
-          <button type="submit" form="add-client-form" disabled={saving} style={{ flex: 2, padding: "11px", background: saving ? "#94a3b8" : RED, border: "none", borderRadius: 8, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", cursor: saving ? "not-allowed" : "pointer" }}>
-            {saving ? "SAVING…" : "ADD CLIENT"}
-          </button>
-        </div>
-      </div>
-    </>
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      style={{
+        width: 36, height: 20, borderRadius: 10,
+        background: checked ? RED : "#e2e8f0",
+        border: "none", cursor: "pointer", position: "relative",
+        transition: "background 0.15s", flexShrink: 0,
+      }}
+    >
+      <span style={{
+        position: "absolute", top: 2,
+        left: checked ? 18 : 2,
+        width: 16, height: 16, borderRadius: "50%", background: WHITE,
+        transition: "left 0.15s",
+      }} />
+    </button>
   );
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
+// ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function BusinessDashboardPage() {
   const { isLoggedIn, user, activeWorkspace, workspaces, logout } = useAuth();
   const [, setLocation] = useLocation();
-  const [clients, setClients] = useState<Client[]>(SAMPLE_CLIENTS);
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [search, setSearch] = useState("");
+
+  // Settings
+  const stored = loadSettings();
+  const [bizType,  setBizType]  = useState<string>(stored.bizType  ?? "");
+  const [moments,  setMoments]  = useState<string[]>(stored.moments ?? ["birthday", "holiday"]);
+  const [tone,     setTone]     = useState<string>(stored.tone     ?? "Warm Professional");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Rows
+  const [rows,    setRows]    = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search,  setSearch]  = useState("");
+  const [saving,  setSaving]  = useState(false);
+
+  const businessId = activeWorkspace?.businessId ?? "";
+  const isRealEstate = REAL_ESTATE_TYPES.includes(bizType);
+  const showHomePurchase = isRealEstate && moments.includes("homePurchase");
 
   // Auth guard
   useEffect(() => {
     if (!isLoggedIn) { setLocation("/business/signup"); return; }
     if (!activeWorkspace) return;
     if (activeWorkspace.type !== "business") {
-      // If they have a business workspace, switch to it
       const biz = workspaces.find(w => w.type === "business");
-      if (!biz) { setLocation("/business/create-workspace"); return; }
+      if (!biz) setLocation("/business/create-workspace");
     }
   }, [isLoggedIn, activeWorkspace]);
 
-  // Load clients from API
+  // Load clients
   useEffect(() => {
-    const bizId = activeWorkspace?.businessId;
-    if (!bizId) { setLoading(false); return; }
-    fetch(`/api/business-clients?businessId=${encodeURIComponent(bizId)}`)
+    if (!businessId) { setLoading(false); return; }
+    fetch(`/api/business-clients?businessId=${encodeURIComponent(businessId)}`)
       .then(r => r.json())
-      .then(data => { if (data.clients?.length > 0) setClients(data.clients); })
-      .catch(() => {})
+      .then((data: { clients?: Record<string, unknown>[] }) => {
+        if (data.clients?.length) {
+          setRows(data.clients.map(c => rowFromClient(c, businessId)));
+        } else {
+          setRows([newRow(businessId)]);
+        }
+      })
+      .catch(() => setRows([newRow(businessId)]))
       .finally(() => setLoading(false));
-  }, [activeWorkspace?.businessId]);
+  }, [businessId]);
 
-  function handleClientSaved(client: Client) {
-    setClients(prev => [...prev.filter(c => !c.id.startsWith("sample-")), client]);
+  // Persist settings
+  useEffect(() => {
+    saveSettings({ bizType, moments, tone });
+  }, [bizType, moments, tone]);
+
+  // ── Row helpers ────────────────────────────────────────────────────────────
+
+  function updateRow(rowId: string, patch: Partial<ClientRow>) {
+    setRows(prev => prev.map(r => r._rowId === rowId ? { ...r, ...patch, _dirty: true, _saved: false } : r));
   }
 
-  const businessWorkspace = workspaces.find(w => w.type === "business") ?? activeWorkspace;
-  const filtered = clients.filter(c =>
-    !search ||
-    c.fullName.toLowerCase().includes(search.toLowerCase()) ||
-    (c.tags || "").toLowerCase().includes(search.toLowerCase()) ||
-    (c.relationship || "").toLowerCase().includes(search.toLowerCase())
+  function addRow() {
+    setRows(prev => [...prev, newRow(businessId)]);
+    // Focus the new row's first cell after render
+    setTimeout(() => {
+      const inputs = document.querySelectorAll<HTMLInputElement>("[data-row-name]");
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }, 50);
+  }
+
+  function deleteRow(rowId: string) {
+    setRows(prev => prev.filter(r => r._rowId !== rowId));
+  }
+
+  async function saveRow(row: ClientRow) {
+    if (!row._dirty && !row._isNew) return;
+    if (!row.fullName.trim()) return;
+    setRows(prev => prev.map(r => r._rowId === row._rowId ? { ...r, _saving: true } : r));
+    try {
+      const method = row.id ? "PUT" : "POST";
+      const url = row.id ? `/api/business-clients/${row.id}` : "/api/business-clients";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessId: row.businessId, fullName: row.fullName,
+          company: row.company || undefined,
+          relationship: row.relationship || undefined,
+          birthday: row.birthday || undefined,
+          homePurchaseAnniversary: row.homePurchaseAnniversary || undefined,
+          clientSince: row.clientSince || undefined,
+          autoBirthday: row.autoBirthday, autoHoliday: row.autoHoliday,
+          autoAnniversary: row.autoAnniversary, requireApproval: row.requireApproval,
+          notes: row.notes || undefined,
+        }),
+      });
+      if (res.ok) {
+        const body = await res.json() as { client?: { id?: string } };
+        const savedId = body.client?.id;
+        setRows(prev => prev.map(r => r._rowId === row._rowId
+          ? { ...r, id: savedId ?? r.id, _dirty: false, _saving: false, _saved: true, _isNew: false }
+          : r));
+      } else {
+        setRows(prev => prev.map(r => r._rowId === row._rowId ? { ...r, _saving: false } : r));
+      }
+    } catch {
+      setRows(prev => prev.map(r => r._rowId === row._rowId ? { ...r, _saving: false } : r));
+    }
+  }
+
+  async function saveAll() {
+    setSaving(true);
+    const dirty = rows.filter(r => r._dirty || r._isNew).filter(r => r.fullName.trim());
+    await Promise.all(dirty.map(saveRow));
+    setSaving(false);
+  }
+
+  const toggleMoment = (key: string) =>
+    setMoments(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+
+  const filtered = rows.filter(r =>
+    !search || r.fullName.toLowerCase().includes(search.toLowerCase()) ||
+    r.relationship.toLowerCase().includes(search.toLowerCase()) ||
+    r.company.toLowerCase().includes(search.toLowerCase())
   );
 
-  const cell: React.CSSProperties = { padding: "14px 16px", borderBottom: "1px solid #f1f5f9", fontSize: "0.92rem", color: "#334155", verticalAlign: "middle" };
-  const th: React.CSSProperties = { padding: "10px 16px", textAlign: "left", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94a3b8", borderBottom: "2px solid #f1f5f9", whiteSpace: "nowrap" };
+  const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
+
+  // ── Cell styles ────────────────────────────────────────────────────────────
+  const TH: React.CSSProperties = {
+    padding: "10px 10px", textAlign: "left",
+    fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+    textTransform: "uppercase", color: "#94a3b8",
+    borderBottom: "2px solid #e2e8f0", whiteSpace: "nowrap",
+    background: "#f8fafc", position: "sticky", top: 0, zIndex: 5,
+  };
+  const TD: React.CSSProperties = {
+    padding: "7px 10px", borderBottom: "1px solid #f1f5f9",
+    verticalAlign: "middle",
+  };
+  const FOCUS_RING = "1px solid #cbd5e1";
 
   if (!isLoggedIn) return null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#f1f5f9", display: "flex", flexDirection: "column", fontFamily: "'Inter', sans-serif" }}>
 
-      {/* ── Header ── */}
-      <header style={{
-        background: NAVY, padding: "0 24px", height: 96,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        position: "sticky", top: 0, zIndex: 50,
-        boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-      }}>
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      <header style={{ background: NAVY, padding: "0 28px", height: 96, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50, boxShadow: "0 2px 12px rgba(0,0,0,0.15)", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: RED, fontStyle: "italic", marginRight: 6 }}>F*</span>
@@ -410,157 +359,281 @@ export default function BusinessDashboardPage() {
             <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.45)", marginLeft: 10, alignSelf: "flex-end", paddingBottom: 6 }}>BUSINESS</span>
           </Link>
           <div style={{ width: 1, height: 32, background: "rgba(255,255,255,0.12)" }} />
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.75)" }}>
-            YOUR CLIENTS
-          </span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.6)" }}>YOUR CLIENTS</span>
         </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* Search */}
-          <div style={{ position: "relative" }}>
-            <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "0.85rem" }}>🔍</span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients…"
-              style={{ paddingLeft: 30, paddingRight: 12, paddingTop: 7, paddingBottom: 7, borderRadius: 8, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.08)", color: WHITE, fontSize: "0.88rem", outline: "none", width: 180 }} />
-          </div>
-
-          {/* Workspace Toggle */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <WorkspaceToggle />
-
-          {/* Import CSV */}
-          <button onClick={() => alert("CSV import coming soon!")}
-            style={{ padding: "7px 14px", borderRadius: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.8)", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>
-            Import CSV
-          </button>
-
-          {/* Add Client */}
-          <button onClick={() => setPanelOpen(true)}
-            style={{ padding: "7px 16px", borderRadius: 8, background: RED, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", cursor: "pointer" }}>
-            + ADD CLIENT
-          </button>
-
-          {/* User menu */}
           <AccountMenu user={user} onLogout={() => { logout(); setLocation("/business"); }} />
         </div>
       </header>
 
-      {/* ── Content ── */}
-      <main style={{ flex: 1, padding: "28px 28px 48px", maxWidth: 1200, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
+      {/* ── Settings Strip ──────────────────────────────────────────────────── */}
+      <div style={{ background: DARK, borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 28px", flexShrink: 0 }}>
+        <button
+          onClick={() => setSettingsOpen(o => !o)}
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}
+        >
+          <span style={{ fontSize: "0.9rem" }}>⚙️</span>
+          Business Settings
+          <span style={{ fontSize: "0.65rem", opacity: 0.6, marginLeft: 2 }}>{settingsOpen ? "▲" : "▼"}</span>
+          {bizType && (
+            <span style={{ background: "rgba(255,255,255,0.1)", borderRadius: 4, padding: "2px 8px", fontSize: "0.68rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.55)", marginLeft: 6 }}>
+              {bizType}
+            </span>
+          )}
+        </button>
 
-        {/* Sub-header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: "1.3rem", fontWeight: 700, color: NAVY }}>
-              {businessWorkspace?.name ?? "My Business"}
-              {businessWorkspace?.businessType && (
-                <span style={{ marginLeft: 10, fontSize: "0.78rem", fontWeight: 500, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  {businessWorkspace.businessType}
-                </span>
-              )}
-            </h1>
-            <p style={{ margin: "3px 0 0", fontSize: "0.85rem", color: "#94a3b8" }}>
-              {filtered.length} client{filtered.length !== 1 ? "s" : ""} {search ? "found" : "total"}
-            </p>
-          </div>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 20, background: "#dcfce7", color: "#16a34a", fontSize: "0.78rem", fontWeight: 700, letterSpacing: "0.04em" }}>
-            ● AUTOMATIONS ACTIVE
-          </span>
-        </div>
-
-        {/* Client table */}
-        <div style={{ background: WHITE, borderRadius: 14, boxShadow: "0 1px 8px rgba(0,0,0,0.06)", overflow: "hidden", marginBottom: 28 }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "#f8fafc" }}>
-                  <th style={th}>Name</th>
-                  <th style={th}>Relationship</th>
-                  <th style={th}>Birthday</th>
-                  <th style={th}>Last Card</th>
-                  <th style={th}>Automations</th>
-                  <th style={th}>Tags</th>
-                  <th style={{ ...th, width: 40 }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 && (
-                  <tr><td colSpan={7} style={{ ...cell, textAlign: "center", color: "#94a3b8", padding: "48px 16px" }}>
-                    {search ? "No clients match your search." : "No clients yet. Click + Add Client to get started."}
-                  </td></tr>
-                )}
-                {filtered.map(c => (
-                  <tr key={c.id}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#fafbff")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                    <td style={cell}>
-                      <div style={{ fontWeight: 600, color: NAVY }}>{c.fullName}</div>
-                      {c.email && <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>{c.email}</div>}
-                    </td>
-                    <td style={cell}>
-                      <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: 20, background: "#f1f5f9", fontSize: "0.78rem", fontWeight: 600, color: "#475569" }}>
-                        {c.relationship || "—"}
-                      </span>
-                    </td>
-                    <td style={{ ...cell, color: "#475569" }}>{c.birthday || "—"}</td>
-                    <td style={{ ...cell, color: "#475569" }}>{c.lastCardSent || "—"}</td>
-                    <td style={cell}>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, fontSize: "0.78rem", fontWeight: 700, background: c.automationsOn !== false ? "#dcfce7" : "#f1f5f9", color: c.automationsOn !== false ? "#16a34a" : "#94a3b8" }}>
-                        {c.automationsOn !== false ? "● ON" : "○ OFF"}
-                      </span>
-                    </td>
-                    <td style={cell}>
-                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                        {(c.tags || "").split(",").filter(Boolean).map(tag => (
-                          <span key={tag} style={{ display: "inline-block", padding: "2px 8px", borderRadius: 12, background: "#eff6ff", color: "#3b82f6", fontSize: "0.75rem", fontWeight: 500 }}>{tag.trim()}</span>
-                        ))}
-                        {!c.tags && <span style={{ color: "#e2e8f0" }}>—</span>}
-                      </div>
-                    </td>
-                    <td style={{ ...cell, textAlign: "center" }}>
-                      <button style={{ background: "none", border: "none", cursor: "pointer", color: "#cbd5e1", fontSize: "1.1rem", padding: 4 }} title="More options">⋯</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Sample clients notice */}
-        {clients.every(c => c.id.startsWith("sample-")) && (
-          <div style={{ background: "#eff6ff", borderRadius: 10, padding: "16px 20px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: "1.2rem" }}>💡</span>
-              <p style={{ margin: 0, fontSize: "0.9rem", color: "#1d4ed8" }}>
-                <strong>These are sample clients</strong> — add your real clients to get started.
-              </p>
+        {settingsOpen && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 32, paddingBottom: 18 }}>
+            {/* Business Type */}
+            <div>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>Business Type</div>
+              <select value={bizType} onChange={e => setBizType(e.target.value)}
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6, color: WHITE, padding: "7px 28px 7px 10px", fontSize: "0.85rem", appearance: "none", cursor: "pointer", outline: "none" }}>
+                <option value="">Select…</option>
+                {BIZ_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
             </div>
-            <button onClick={() => setPanelOpen(true)} style={{ padding: "8px 18px", borderRadius: 8, background: RED, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.08em", cursor: "pointer", flexShrink: 0 }}>
-              ADD YOUR FIRST CLIENT
-            </button>
+
+            {/* Moments to track */}
+            <div>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>Moments to Track</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {ALL_MOMENTS.filter(m => m.key !== "homePurchase" || isRealEstate).map(m => (
+                  <button key={m.key} type="button" onClick={() => toggleMoment(m.key)}
+                    style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, border: moments.includes(m.key) ? `1.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)", background: moments.includes(m.key) ? `${RED}22` : "rgba(255,255,255,0.05)", color: moments.includes(m.key) ? "#fff" : "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer", transition: "all 0.12s" }}>
+                    {m.icon} {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tone */}
+            <div>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>Default Tone</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {TONE_OPTS.map(t => (
+                  <button key={t} type="button" onClick={() => setTone(t)}
+                    style={{ padding: "5px 12px", borderRadius: 20, border: tone === t ? `1.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)", background: tone === t ? `${RED}22` : "rgba(255,255,255,0.05)", color: tone === t ? "#fff" : "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer", transition: "all 0.12s" }}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
+      </div>
 
-        {/* Recently Remembered */}
-        <div style={{ background: WHITE, borderRadius: 14, boxShadow: "0 1px 8px rgba(0,0,0,0.06)", padding: "22px 24px" }}>
-          <h2 style={{ margin: "0 0 16px", fontSize: "0.92rem", fontWeight: 700, color: NAVY, letterSpacing: "0.04em", textTransform: "uppercase" }}>Recently Remembered</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {ACTIVITY.map((a, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "10px 14px", borderRadius: 10, background: "#f8fafc" }}>
-                <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#dcfce7", color: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 900, flexShrink: 0 }}>{a.icon}</span>
-                <p style={{ margin: 0, fontSize: "0.9rem", color: "#334155", flex: 1 }}>{a.text}</p>
-                <span style={{ fontSize: "0.78rem", color: "#cbd5e1", flexShrink: 0, marginTop: 1 }}>{a.time}</span>
-              </div>
-            ))}
-          </div>
+      {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
+      <div style={{ background: WHITE, borderBottom: "1px solid #e2e8f0", padding: "12px 28px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+        {/* Search */}
+        <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
+          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "0.85rem" }}>🔍</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients…"
+            style={{ width: "100%", paddingLeft: 30, paddingRight: 12, paddingTop: 8, paddingBottom: 8, border: "1.5px solid #e2e8f0", borderRadius: 8, fontSize: "0.88rem", background: "#f8fafc", outline: "none", boxSizing: "border-box" }}
+            onFocus={e => (e.currentTarget.style.borderColor = "#94a3b8")}
+            onBlur={e => (e.currentTarget.style.borderColor = "#e2e8f0")} />
         </div>
-      </main>
 
-      <AddClientPanel
-        open={panelOpen}
-        onClose={() => setPanelOpen(false)}
-        onSaved={handleClientSaved}
-        businessId={activeWorkspace?.businessId ?? ""}
-      />
+        <span style={{ fontSize: "0.82rem", color: "#94a3b8", marginLeft: 4 }}>
+          {rows.filter(r => r.fullName.trim()).length} client{rows.filter(r => r.fullName.trim()).length !== 1 ? "s" : ""}
+        </span>
+
+        <div style={{ flex: 1 }} />
+
+        {dirtyCount > 0 && (
+          <button onClick={saveAll} disabled={saving}
+            style={{ padding: "8px 20px", borderRadius: 8, background: saving ? "#94a3b8" : RED, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", cursor: saving ? "not-allowed" : "pointer" }}>
+            {saving ? "SAVING…" : `SAVE ALL (${dirtyCount})`}
+          </button>
+        )}
+
+        <button onClick={addRow}
+          style={{ padding: "8px 18px", borderRadius: 8, background: NAVY, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+          + ADD ROW
+        </button>
+      </div>
+
+      {/* ── Spreadsheet ─────────────────────────────────────────────────────── */}
+      <div style={{ flex: 1, overflowX: "auto", overflowY: "auto", background: WHITE }}>
+        {loading ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200, color: "#94a3b8", fontSize: "0.9rem" }}>
+            Loading clients…
+          </div>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", minWidth: 900 }}>
+            <colgroup>
+              <col style={{ width: 28 }} />   {/* status dot */}
+              <col style={{ width: 180 }} />  {/* name */}
+              <col style={{ width: 130 }} />  {/* company */}
+              <col style={{ width: 140 }} />  {/* relationship */}
+              <col style={{ width: 110 }} />  {/* birthday */}
+              {showHomePurchase && <col style={{ width: 120 }} />}
+              <col style={{ width: 100 }} />  {/* client since */}
+              {moments.includes("birthday")    && <col style={{ width: 68 }} />}
+              {moments.includes("holiday")     && <col style={{ width: 68 }} />}
+              {moments.includes("anniversary") && <col style={{ width: 68 }} />}
+              <col style={{ width: 76 }} />  {/* approval */}
+              <col />                           {/* notes */}
+              <col style={{ width: 34 }} />   {/* delete */}
+            </colgroup>
+
+            <thead>
+              <tr>
+                <th style={TH} />
+                <th style={TH}>Full Name</th>
+                <th style={TH}>Company</th>
+                <th style={TH}>Relationship</th>
+                <th style={TH}>Birthday</th>
+                {showHomePurchase && <th style={TH}>Home Purchase</th>}
+                <th style={TH}>Client Since</th>
+                {moments.includes("birthday")    && <th style={{ ...TH, textAlign: "center" }}>🎂 Auto</th>}
+                {moments.includes("holiday")     && <th style={{ ...TH, textAlign: "center" }}>🎄 Auto</th>}
+                {moments.includes("anniversary") && <th style={{ ...TH, textAlign: "center" }}>📅 Auto</th>}
+                <th style={{ ...TH, textAlign: "center" }}>Approval</th>
+                <th style={TH}>Notes / Tags</th>
+                <th style={TH} />
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.map((row, idx) => {
+                const isUnsaved = row._dirty || row._isNew;
+                const rowBg = isUnsaved ? "#fffbf0" : idx % 2 === 0 ? WHITE : "#fafafa";
+                return (
+                  <tr key={row._rowId}
+                    style={{ background: rowBg, transition: "background 0.1s" }}
+                    onMouseEnter={e => { if (!isUnsaved) (e.currentTarget as HTMLElement).style.background = "#f8fafc"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = rowBg; }}>
+
+                    {/* Status dot */}
+                    <td style={{ ...TD, paddingLeft: 14, paddingRight: 4 }}>
+                      {row._saving ? (
+                        <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#f59e0b", animation: "pulse 1s infinite" }} />
+                      ) : row._saved && !row._dirty ? (
+                        <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} title="Saved" />
+                      ) : (
+                        <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#f59e0b" }} title="Unsaved changes" />
+                      )}
+                    </td>
+
+                    {/* Full Name */}
+                    <td style={TD}>
+                      <input
+                        data-row-name
+                        value={row.fullName}
+                        placeholder="Full Name"
+                        onChange={e => updateRow(row._rowId, { fullName: e.target.value })}
+                        onBlur={() => saveRow(row)}
+                        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addRow(); } }}
+                        style={{ ...cellInput, fontWeight: row.fullName ? 600 : 400, color: row.fullName ? "#0f172a" : "#94a3b8" }}
+                        onFocus={e => (e.currentTarget.parentElement!.style.outline = FOCUS_RING)}
+                        onBlurCapture={e => (e.currentTarget.parentElement!.style.outline = "none")}
+                      />
+                    </td>
+
+                    {/* Company */}
+                    <td style={TD}>
+                      <input value={row.company} placeholder="Company" onChange={e => updateRow(row._rowId, { company: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.company ? "#1e293b" : "#94a3b8" }} />
+                    </td>
+
+                    {/* Relationship */}
+                    <td style={TD}>
+                      <select value={row.relationship} onChange={e => { updateRow(row._rowId, { relationship: e.target.value }); }}
+                        onBlur={() => saveRow(row)}
+                        style={{ ...cellSelect, color: row.relationship ? "#1e293b" : "#94a3b8" }}>
+                        <option value="">Type…</option>
+                        {RELATIONSHIP_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </td>
+
+                    {/* Birthday */}
+                    <td style={TD}>
+                      <input value={row.birthday} placeholder="e.g. May 14" onChange={e => updateRow(row._rowId, { birthday: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.birthday ? "#1e293b" : "#94a3b8" }} />
+                    </td>
+
+                    {/* Home Purchase */}
+                    {showHomePurchase && (
+                      <td style={TD}>
+                        <input value={row.homePurchaseAnniversary} placeholder="e.g. Jun 2022" onChange={e => updateRow(row._rowId, { homePurchaseAnniversary: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.homePurchaseAnniversary ? "#1e293b" : "#94a3b8" }} />
+                      </td>
+                    )}
+
+                    {/* Client Since */}
+                    <td style={TD}>
+                      <input value={row.clientSince} placeholder="e.g. 2021" onChange={e => updateRow(row._rowId, { clientSince: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.clientSince ? "#1e293b" : "#94a3b8" }} />
+                    </td>
+
+                    {/* Birthday Auto */}
+                    {moments.includes("birthday") && (
+                      <td style={{ ...TD, textAlign: "center" }}>
+                        <Toggle checked={row.autoBirthday} onChange={v => { updateRow(row._rowId, { autoBirthday: v }); }} />
+                      </td>
+                    )}
+
+                    {/* Holiday Auto */}
+                    {moments.includes("holiday") && (
+                      <td style={{ ...TD, textAlign: "center" }}>
+                        <Toggle checked={row.autoHoliday} onChange={v => { updateRow(row._rowId, { autoHoliday: v }); }} />
+                      </td>
+                    )}
+
+                    {/* Anniversary Auto */}
+                    {moments.includes("anniversary") && (
+                      <td style={{ ...TD, textAlign: "center" }}>
+                        <Toggle checked={row.autoAnniversary} onChange={v => { updateRow(row._rowId, { autoAnniversary: v }); }} />
+                      </td>
+                    )}
+
+                    {/* Require Approval */}
+                    <td style={{ ...TD, textAlign: "center" }}>
+                      <Toggle checked={row.requireApproval} onChange={v => { updateRow(row._rowId, { requireApproval: v }); }} />
+                    </td>
+
+                    {/* Notes */}
+                    <td style={TD}>
+                      <input value={row.notes} placeholder="Golf, 2 kids, referral source…" onChange={e => updateRow(row._rowId, { notes: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.notes ? "#1e293b" : "#94a3b8" }} />
+                    </td>
+
+                    {/* Delete */}
+                    <td style={{ ...TD, textAlign: "center", paddingRight: 14 }}>
+                      <button onClick={() => deleteRow(row._rowId)}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "#cbd5e1", fontSize: "1rem", lineHeight: 1, padding: "2px 4px", borderRadius: 4 }}
+                        onMouseEnter={e => (e.currentTarget.style.color = RED)}
+                        onMouseLeave={e => (e.currentTarget.style.color = "#cbd5e1")}>
+                        ×
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+
+        {/* ── Add Row footer ── */}
+        <div style={{ padding: "12px 28px", borderTop: "1px solid #f1f5f9" }}>
+          <button onClick={addRow}
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", background: "none", border: "1.5px dashed #cbd5e1", borderRadius: 8, color: "#64748b", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", transition: "all 0.12s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = NAVY; e.currentTarget.style.color = NAVY; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#64748b"; }}>
+            + Add Row
+          </button>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{ background: "#f8fafc", borderTop: "1px solid #e2e8f0", padding: "8px 28px", display: "flex", gap: 20, alignItems: "center", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.72rem", color: "#94a3b8" }}>
+          <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} /> Saved
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.72rem", color: "#94a3b8" }}>
+          <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#f59e0b" }} /> Unsaved — tab out of a cell to save automatically
+        </div>
+        <div style={{ flex: 1 }} />
+        <div style={{ fontSize: "0.72rem", color: "#cbd5e1" }}>Press Enter to add a new row · Tab to move between cells</div>
+      </div>
+
     </div>
   );
 }
