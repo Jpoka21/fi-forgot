@@ -15,6 +15,7 @@ import businessClientsRouter from "./business-clients";
 import businessSettingsRouter from "./business-settings";
 import handwryttenFontsRouter from "./handwrytten-fonts";
 import businessApprovalRouter from "./business-approval";
+import businessSchedulerTriggerRouter from "./business-scheduler-trigger";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(businessClientsRouter);
 router.use(businessSettingsRouter);
 router.use(handwryttenFontsRouter);
 router.use(businessApprovalRouter);
+router.use(businessSchedulerTriggerRouter);
 
 export default router;

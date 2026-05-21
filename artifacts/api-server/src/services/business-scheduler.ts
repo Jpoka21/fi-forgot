@@ -101,10 +101,16 @@ async function pickCardId(eventType: string): Promise<string | number> {
   } catch { return "hw-4421"; }
 }
 
-export async function runBusinessScheduler(appBaseUrl: string): Promise<void> {
+export async function runBusinessScheduler(
+  appBaseUrl: string,
+  opts?: { forceBusinessId?: string },
+): Promise<void> {
   const today    = toISODate(new Date());
   const clients  = await db.select().from(businessClientsTable);
-  const bizIds   = [...new Set(clients.map(c => c.businessId))];
+  const allBizIds = [...new Set(clients.map(c => c.businessId))];
+  const bizIds   = opts?.forceBusinessId
+    ? allBizIds.filter(id => id === opts.forceBusinessId)
+    : allBizIds;
 
   for (const businessId of bizIds) {
     const [settings] = await db

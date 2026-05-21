@@ -558,6 +558,8 @@ export default function BusinessDashboardPage() {
   const [automationMode, setAutomationMode] = useState<"auto" | "approval">(stored.automationMode ?? "approval");
   const [fontPickerOpen,  setFontPickerOpen]  = useState(false);
   const [activeSection,   setActiveSection]   = useState<"recipients" | "upcoming">("upcoming");
+  const [triggering,      setTriggering]      = useState(false);
+  const [triggerMsg,      setTriggerMsg]      = useState<string | null>(null);
   const [hwFonts,       setHwFonts]      = useState<HwFont[]>([]);
   const [fontsLoading,  setFontsLoading]  = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -629,7 +631,7 @@ export default function BusinessDashboardPage() {
     if (!row.fullName.trim()) return;
     setRows(prev => prev.map(r => r._rowId === row._rowId ? { ...r, _saving: true } : r));
     try {
-      const method = row.id ? "PUT" : "POST";
+      const method = row.id ? "PATCH" : "POST";
       const url = row.id ? `/api/business-clients/${row.id}` : "/api/business-clients";
       const res = await fetch(url, {
         method,
@@ -711,6 +713,29 @@ export default function BusinessDashboardPage() {
     });
 
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
+
+  async function triggerScheduler() {
+    if (!businessId) return;
+    setTriggering(true);
+    setTriggerMsg(null);
+    try {
+      const res = await fetch("/api/business-scheduler/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId }),
+      });
+      if (res.ok) {
+        setTriggerMsg("✓ Scheduler ran — check your inbox for an approval email");
+      } else {
+        setTriggerMsg("Something went wrong — check that your notify email is set in Settings");
+      }
+    } catch {
+      setTriggerMsg("Network error — try again");
+    } finally {
+      setTriggering(false);
+      setTimeout(() => setTriggerMsg(null), 7000);
+    }
+  }
 
   interface UpcomingCard {
     key: string;
@@ -1091,6 +1116,20 @@ export default function BusinessDashboardPage() {
 
         <div style={{ flex: 1 }} />
 
+        {triggerMsg && (
+          <span style={{ fontSize: "0.78rem", color: triggerMsg.startsWith("✓") ? "#15803d" : "#b45309", fontWeight: 600, background: triggerMsg.startsWith("✓") ? "#f0fdf4" : "#fffbeb", border: `1px solid ${triggerMsg.startsWith("✓") ? "#86efac" : "#fcd34d"}`, borderRadius: 6, padding: "4px 10px" }}>
+            {triggerMsg}
+          </span>
+        )}
+
+        <button
+          onClick={triggerScheduler}
+          disabled={triggering}
+          title="Manually run the scheduler now — useful for testing"
+          style={{ padding: "7px 14px", borderRadius: 8, background: triggering ? "#e2e8f0" : "#f1f5f9", border: "1.5px solid #cbd5e1", color: triggering ? "#94a3b8" : "#475569", fontSize: "0.78rem", fontWeight: 600, cursor: triggering ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
+          {triggering ? "⏳ Running…" : "▶ Run Scheduler Now"}
+        </button>
+
         {dirtyCount > 0 && (
           <button onClick={saveAll} disabled={saving}
             style={{ padding: "8px 20px", borderRadius: 8, background: saving ? "#94a3b8" : RED, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", cursor: saving ? "not-allowed" : "pointer" }}>
@@ -1199,7 +1238,6 @@ export default function BusinessDashboardPage() {
 
       {/* ── Spreadsheet ─────────────────────────────────────────────────────── */}
       {activeSection === "recipients" && (
-      <>
       <div style={{ flex: 1, overflowX: "auto", overflowY: "auto", background: WHITE }}>
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200, color: "#94a3b8", fontSize: "0.9rem" }}>
@@ -1373,8 +1411,9 @@ export default function BusinessDashboardPage() {
           </button>
         </div>
       </div>
+      )}
 
-      {/* Legend */}
+      {activeSection === "recipients" && (
       <div style={{ background: "#f8fafc", borderTop: "1px solid #e2e8f0", padding: "8px 28px", display: "flex", gap: 20, alignItems: "center", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.72rem", color: "#94a3b8" }}>
           <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} /> Saved
@@ -1385,7 +1424,6 @@ export default function BusinessDashboardPage() {
         <div style={{ flex: 1 }} />
         <div style={{ fontSize: "0.72rem", color: "#cbd5e1" }}>Press Enter to add a new row · Tab to move between cells</div>
       </div>
-      </>
       )}
 
       {/* ── Font Picker Modal ── */}
