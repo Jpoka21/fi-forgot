@@ -11,18 +11,15 @@ const BIZ_TYPES = [
   "Real Estate", "Mortgage", "Insurance", "Financial Services",
   "Legal", "Medical / Wellness", "Contractor / Home Services", "Other",
 ];
-const REAL_ESTATE_TYPES = ["Real Estate", "Mortgage"];
-
 const RELATIONSHIP_OPTS = [
   "Client", "Past Client", "Referral Partner", "VIP Customer", "Other",
 ];
 
 const ALL_MOMENTS = [
-  { key: "birthday",     label: "Birthdays",      icon: "🎂" },
-  { key: "holiday",      label: "Holiday Cards",   icon: "🎄" },
-  { key: "anniversary",  label: "Anniversaries",   icon: "📅" },
-  { key: "homePurchase", label: "Home Purchase",   icon: "🏡" },
-  { key: "referral",     label: "Referral Thanks", icon: "🤝" },
+  { key: "birthday",     label: "Birthdays",    icon: "🎂" },
+  { key: "holiday",      label: "Holiday Cards", icon: "🎄" },
+  { key: "anniversary",  label: "Anniversaries", icon: "📅" },
+  { key: "homePurchase", label: "Home Purchase", icon: "🏡" },
 ];
 
 const TONE_OPTS = ["Warm Professional", "Professional", "Friendly", "Casual", "Luxury / High End"];
@@ -200,141 +197,127 @@ type EventsPickerRow = {
 };
 type EventsPickerPatch = Partial<EventsPickerRow>;
 
-function EventsPicker({ row, onUpdate, onSave }: {
+function AnnivDetail({ row, onUpdate, onSave }: {
   row: EventsPickerRow;
   onUpdate: (patch: EventsPickerPatch) => void;
   onSave: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (!open) return;
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-        onSave();
-      }
+    function h(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) { setOpen(false); onSave(); }
     }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
   }, [open, onSave]);
 
-  const activeEvents = EVENT_DEFS.filter(e => (row as Record<string, boolean>)[e.key]);
-
+  const hasDetail = row.anniversaryDate || row.anniversaryNote;
   return (
-    <div ref={ref} style={{ position: "relative" }}>
+    <div ref={ref} style={{ position: "relative", display: "inline-flex" }}>
       <button
         onClick={() => setOpen(o => !o)}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#94a3b8"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0"; }}
+        title="Edit anniversary details"
         style={{
-          display: "flex", flexWrap: "wrap", gap: 3, alignItems: "center",
-          background: "#fafafa", cursor: "pointer", textAlign: "left",
-          border: "1px dashed #e2e8f0", borderRadius: 7,
-          padding: "3px 7px", minWidth: 120, transition: "border-color 0.15s",
+          background: "none", border: "none", cursor: "pointer", padding: "0 2px",
+          fontSize: "0.7rem", lineHeight: 1,
+          color: hasDetail ? "#15803d" : "#94a3b8",
         }}
-      >
-        {activeEvents.length === 0
-          ? <span style={{ fontSize: "0.78rem", color: "#94a3b8", fontFamily: "'Inter', sans-serif", fontStyle: "italic" }}>
-              + Choose events ▾
-            </span>
-          : <>
-              {activeEvents.map(e => (
-                <span key={e.key} style={{
-                  background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10,
-                  padding: "1px 7px", fontSize: "0.7rem", color: "#15803d",
-                  display: "inline-flex", alignItems: "center", gap: 3,
-                  fontFamily: "'Inter', sans-serif",
-                }}>
-                  {e.icon} {e.label}
-                </span>
-              ))}
-              <span style={{ fontSize: "0.6rem", color: "#94a3b8", marginLeft: 1 }}>▾</span>
-            </>
-        }
-      </button>
-
+      >✏</button>
       {open && (
         <div style={{
-          position: "absolute", top: "calc(100% + 4px)", left: 0, zIndex: 100,
+          position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 200,
           background: "#fff", border: "1px solid #e2e8f0", borderRadius: 9,
-          padding: "6px 0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)", minWidth: 240,
+          padding: "12px 14px", boxShadow: "0 6px 20px rgba(0,0,0,0.13)", width: 260,
+          display: "flex", flexDirection: "column", gap: 10,
         }}>
-          {EVENT_DEFS.map(e => {
-            const checked = (row as Record<string, boolean>)[e.key];
-            const isAnniv = e.key === "autoAnniversary";
-            return (
-              <div key={e.key}>
-                <label style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  padding: "8px 14px", cursor: "pointer",
-                  fontSize: "0.87rem", color: "#334155", fontFamily: "'Inter', sans-serif",
-                }}
-                  onMouseEnter={ev => { if (!isAnniv || !checked) ev.currentTarget.style.background = "#f8fafc"; }}
-                  onMouseLeave={ev => (ev.currentTarget.style.background = "none")}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => onUpdate({ [e.key]: !checked } as EventsPickerPatch)}
-                    style={{ accentColor: "#E23B2E", width: 15, height: 15, cursor: "pointer", flexShrink: 0 }}
-                  />
-                  <span style={{ fontSize: "1rem" }}>{e.icon}</span>
-                  <span style={{ fontWeight: checked ? 600 : 400 }}>{e.label}</span>
-                  {isAnniv && (
-                    <InfoTooltip text="Not a wedding anniversary — this is a meaningful business milestone: a home closing, deal anniversary, 1-year client milestone, or any date worth celebrating." />
-                  )}
-                </label>
-
-                {/* Anniversary detail fields — shown when checked */}
-                {isAnniv && checked && (
-                  <div style={{
-                    margin: "0 14px 10px 39px",
-                    padding: "10px 12px",
-                    background: "#f8fafc",
-                    borderRadius: 7,
-                    border: "1px solid #e2e8f0",
-                    display: "flex", flexDirection: "column", gap: 8,
-                  }}>
-                    <div>
-                      <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 4, letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                        Anniversary Date
-                      </div>
-                      <MonthYearPicker
-                        value={row.anniversaryDate}
-                        onChange={v => onUpdate({ anniversaryDate: v })}
-                        onBlur={onSave}
-                      />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 4, letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                        What are we celebrating?
-                      </div>
-                      <input
-                        value={row.anniversaryNote}
-                        onChange={e => onUpdate({ anniversaryNote: e.target.value })}
-                        onBlur={onSave}
-                        placeholder="e.g. Closed on their first home, 3-year client milestone…"
-                        style={{
-                          width: "100%", border: "none", background: "transparent",
-                          fontSize: "0.82rem", color: "#334155", outline: "none",
-                          fontFamily: "'Inter', sans-serif", padding: "1px 0",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                      <div style={{ borderBottom: "1px solid #cbd5e1", marginTop: 2 }} />
-                      <div style={{ fontSize: "0.67rem", color: "#94a3b8", marginTop: 4, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>
-                        This helps us write a card that feels personal — the AI will reference what you're celebrating.
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748b", fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+            Special Anniversary Details
+            <InfoTooltip text="Not a wedding anniversary — a business milestone: home closing, deal anniversary, 1-year client milestone, or any date worth celebrating." />
+          </div>
+          <div>
+            <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>Date</div>
+            <MonthYearPicker value={row.anniversaryDate} onChange={v => onUpdate({ anniversaryDate: v })} onBlur={onSave} />
+          </div>
+          <div>
+            <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>What are we celebrating?</div>
+            <input
+              value={row.anniversaryNote}
+              onChange={e => onUpdate({ anniversaryNote: e.target.value })}
+              onBlur={onSave}
+              placeholder="e.g. Closed on their first home…"
+              style={{
+                width: "100%", border: "none", borderBottom: "1px solid #e2e8f0",
+                background: "transparent", fontSize: "0.82rem", color: "#334155",
+                outline: "none", fontFamily: "'Inter', sans-serif", padding: "2px 0",
+                boxSizing: "border-box",
+              }}
+            />
+            <div style={{ fontSize: "0.67rem", color: "#94a3b8", marginTop: 5, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>
+              The AI will reference this when writing the card.
+            </div>
+          </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function EventsPicker({ row, onUpdate, onSave }: {
+  row: EventsPickerRow;
+  onUpdate: (patch: EventsPickerPatch) => void;
+  onSave: () => void;
+}) {
+  const activeCount = EVENT_DEFS.filter(e => (row as Record<string, boolean>)[e.key]).length;
+
+  function toggle(key: string) {
+    onUpdate({ [key]: !(row as Record<string, boolean>)[key] } as EventsPickerPatch);
+    setTimeout(onSave, 0);
+  }
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+      {/* Count badge */}
+      <span style={{
+        fontSize: "0.65rem", fontWeight: 700, minWidth: 26, textAlign: "center",
+        background: activeCount > 0 ? "#dcfce7" : "#f1f5f9",
+        color: activeCount > 0 ? "#15803d" : "#94a3b8",
+        borderRadius: 10, padding: "1px 5px",
+        fontFamily: "'Inter', sans-serif", flexShrink: 0,
+      }}>
+        {activeCount}/{EVENT_DEFS.length}
+      </span>
+
+      {EVENT_DEFS.map(e => {
+        const active = (row as Record<string, boolean>)[e.key];
+        const isAnniv = e.key === "autoAnniversary";
+        return (
+          <div key={e.key} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+            <button
+              onClick={() => toggle(e.key)}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 3,
+                background: active ? "#f0fdf4" : "#f8fafc",
+                border: `1px solid ${active ? "#bbf7d0" : "#e2e8f0"}`,
+                borderRadius: 10, padding: "2px 8px",
+                fontSize: "0.7rem",
+                color: active ? "#15803d" : "#c4cdd8",
+                cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                transition: "all 0.12s", fontWeight: active ? 600 : 400,
+              }}
+              onMouseEnter={el => { (el.currentTarget as HTMLElement).style.borderColor = active ? "#86efac" : "#cbd5e1"; }}
+              onMouseLeave={el => { (el.currentTarget as HTMLElement).style.borderColor = active ? "#bbf7d0" : "#e2e8f0"; }}
+            >
+              <span style={{ opacity: active ? 1 : 0.35, fontSize: "0.85rem" }}>{e.icon}</span>
+              {e.label}
+            </button>
+            {isAnniv && active && (
+              <AnnivDetail row={row} onUpdate={onUpdate} onSave={onSave} />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -356,6 +339,7 @@ interface ClientRow {
   autoAnniversary: boolean;
   anniversaryDate: string;
   anniversaryNote: string;
+  tone: string;
   requireApproval: boolean;
   notes: string;
   _dirty: boolean;
@@ -377,7 +361,7 @@ function newRow(businessId: string): ClientRow {
     fullName: "", company: "", relationship: "", birthday: "",
     homePurchaseAnniversary: "", clientSince: "",
     autoBirthday: true, autoHoliday: true, autoAnniversary: false,
-    anniversaryDate: "", anniversaryNote: "", requireApproval: false,
+    anniversaryDate: "", anniversaryNote: "", tone: "", requireApproval: false,
     notes: "",
     _dirty: false, _saving: false, _saved: false, _isNew: true,
   };
@@ -399,6 +383,7 @@ function rowFromClient(c: Record<string, unknown>, businessId: string): ClientRo
     autoAnniversary: Boolean(c.autoAnniversary ?? false),
     anniversaryDate: String(c.anniversaryDate ?? ""),
     anniversaryNote: String(c.anniversaryNote ?? ""),
+    tone: String(c.tone ?? ""),
     requireApproval: Boolean(c.requireApproval ?? false),
     notes: String(c.notes ?? ""),
     _dirty: false, _saving: false, _saved: true, _isNew: false,
@@ -541,8 +526,6 @@ export default function BusinessDashboardPage() {
   const [saving,  setSaving]  = useState(false);
 
   const businessId = activeWorkspace?.businessId ?? "";
-  const isRealEstate = REAL_ESTATE_TYPES.includes(bizType);
-  const showHomePurchase = isRealEstate && moments.includes("homePurchase");
 
   // Auth guard
   useEffect(() => {
@@ -615,6 +598,7 @@ export default function BusinessDashboardPage() {
           autoAnniversary: row.autoAnniversary,
           anniversaryDate: row.anniversaryDate || undefined,
           anniversaryNote: row.anniversaryNote || undefined,
+          tone: row.tone || undefined,
           requireApproval: row.requireApproval,
           notes: row.notes || undefined,
         }),
@@ -719,7 +703,7 @@ export default function BusinessDashboardPage() {
             <div>
               <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>Moments to Track</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {ALL_MOMENTS.filter(m => m.key !== "homePurchase" || isRealEstate).map(m => (
+                {ALL_MOMENTS.map(m => (
                   <button key={m.key} type="button" onClick={() => toggleMoment(m.key)}
                     style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, border: moments.includes(m.key) ? `1.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)", background: moments.includes(m.key) ? `${RED}22` : "rgba(255,255,255,0.05)", color: moments.includes(m.key) ? "#fff" : "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer", transition: "all 0.12s" }}>
                     {m.icon} {m.label}
@@ -783,7 +767,7 @@ export default function BusinessDashboardPage() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", minWidth: 900 }}>
             <colgroup>
-              <col style={{ width: 28 }} /><col style={{ width: 180 }} /><col style={{ width: 130 }} /><col style={{ width: 140 }} /><col style={{ width: 110 }} />{showHomePurchase && <col style={{ width: 120 }} />}<col style={{ width: 100 }} /><col style={{ width: 175 }} /><col style={{ width: 80 }} /><col /><col style={{ width: 34 }} />
+              <col style={{ width: 28 }} /><col style={{ width: 160 }} /><col style={{ width: 120 }} /><col style={{ width: 130 }} /><col style={{ width: 100 }} /><col style={{ width: 110 }} /><col style={{ width: 90 }} /><col style={{ width: 290 }} /><col style={{ width: 140 }} /><col style={{ width: 76 }} /><col /><col style={{ width: 34 }} />
             </colgroup>
 
             <thead>
@@ -793,7 +777,7 @@ export default function BusinessDashboardPage() {
                 <th style={TH}>Company</th>
                 <th style={TH}>Relationship</th>
                 <th style={TH}>Birthday</th>
-                {showHomePurchase && <th style={TH}>Home Purchase</th>}
+                <th style={TH}>Home Purchase</th>
                 <th style={TH}>
                   Client Since
                   <InfoTooltip text="We use this to send a card on their client anniversary — celebrating how long they've worked with you." />
@@ -801,6 +785,10 @@ export default function BusinessDashboardPage() {
                 <th style={TH}>
                   Send Cards For
                   <InfoTooltip text="Pick which occasions you'd like us to automatically send a card for this person. You can override per-client here even if a moment is on globally." />
+                </th>
+                <th style={TH}>
+                  Tone
+                  <InfoTooltip text="Override the global tone for this person. Leave blank to use your account default." />
                 </th>
                 <th style={{ ...TH, textAlign: "center" }}>
                   Approval
@@ -872,15 +860,13 @@ export default function BusinessDashboardPage() {
                     </td>
 
                     {/* Home Purchase */}
-                    {showHomePurchase && (
-                      <td style={TD}>
-                        <MonthYearPicker
-                          value={row.homePurchaseAnniversary}
-                          onChange={v => updateRow(row._rowId, { homePurchaseAnniversary: v })}
-                          onBlur={() => saveRow(row)}
-                        />
-                      </td>
-                    )}
+                    <td style={TD}>
+                      <MonthYearPicker
+                        value={row.homePurchaseAnniversary}
+                        onChange={v => updateRow(row._rowId, { homePurchaseAnniversary: v })}
+                        onBlur={() => saveRow(row)}
+                      />
+                    </td>
 
                     {/* Client Since */}
                     <td style={TD}>
@@ -898,6 +884,19 @@ export default function BusinessDashboardPage() {
                         onUpdate={patch => updateRow(row._rowId, patch)}
                         onSave={() => saveRow(row)}
                       />
+                    </td>
+
+                    {/* Tone override */}
+                    <td style={TD}>
+                      <select
+                        value={row.tone}
+                        onChange={e => updateRow(row._rowId, { tone: e.target.value })}
+                        onBlur={() => saveRow(row)}
+                        style={{ ...cellSelect, color: row.tone ? "#1e293b" : "#94a3b8" }}
+                      >
+                        <option value="">Default</option>
+                        {TONE_OPTS.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
                     </td>
 
                     {/* Require Approval */}
