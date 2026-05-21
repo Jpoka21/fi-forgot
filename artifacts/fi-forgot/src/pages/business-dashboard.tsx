@@ -354,11 +354,13 @@ interface ClientRow {
 interface HwFont { id: string; name: string; previewUrl?: string; }
 
 interface BizSettings {
-  bizType:       string;
-  bizTypeOther:  string;
-  tone:          string;
-  cardSignature: string;
-  cardFont:      string;
+  bizType:        string;
+  bizTypeOther:   string;
+  tone:           string;
+  cardSignature:  string;
+  cardFont:       string;
+  notifyTiming:   string[];
+  notifyChannel:  string;
 }
 
 function newRow(businessId: string): ClientRow {
@@ -400,7 +402,7 @@ const SETTINGS_KEY = "fi_biz_settings";
 function loadSettings(): BizSettings {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
-  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "", cardFont: "" }; }
+  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "", cardFont: "", notifyTiming: ["14 days before"], notifyChannel: "email" }; }
 }
 
 function saveSettings(s: BizSettings) {
@@ -523,7 +525,9 @@ export default function BusinessDashboardPage() {
   const [bizTypeOther,  setBizTypeOther]  = useState<string>(stored.bizTypeOther  ?? "");
   const [tone,          setTone]          = useState<string>(stored.tone          ?? "Warm Professional");
   const [cardSignature, setCardSignature] = useState<string>(stored.cardSignature ?? "");
-  const [cardFont,      setCardFont]      = useState<string>(stored.cardFont      ?? "");
+  const [cardFont,       setCardFont]      = useState<string>(stored.cardFont       ?? "");
+  const [notifyTiming,   setNotifyTiming]  = useState<string[]>(stored.notifyTiming  ?? ["14 days before"]);
+  const [notifyChannel,  setNotifyChannel] = useState<string>(stored.notifyChannel  ?? "email");
   const [fontPickerOpen, setFontPickerOpen] = useState(false);
   const [hwFonts,       setHwFonts]      = useState<HwFont[]>([]);
   const [fontsLoading,  setFontsLoading]  = useState(false);
@@ -565,8 +569,8 @@ export default function BusinessDashboardPage() {
 
   // Persist settings
   useEffect(() => {
-    saveSettings({ bizType, bizTypeOther, tone, cardSignature, cardFont });
-  }, [bizType, bizTypeOther, tone, cardSignature, cardFont]);
+    saveSettings({ bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel });
+  }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -801,6 +805,48 @@ export default function BusinessDashboardPage() {
                   <button key={t} type="button" onClick={() => setTone(t)}
                     style={{ padding: "5px 12px", borderRadius: 20, border: tone === t ? `1.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)", background: tone === t ? `${RED}22` : "rgba(255,255,255,0.05)", color: tone === t ? "#fff" : "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer", transition: "all 0.12s" }}>
                     {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notification Timing */}
+            <div>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>
+                Notify Me Before Cards Go Out
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {(["Day of", "2 days before", "7 days before", "14 days before", "30 days before"] as const).map(opt => {
+                  const active = notifyTiming.includes(opt);
+                  return (
+                    <button key={opt} type="button" onClick={() => {
+                      setNotifyTiming(prev => active ? prev.filter(x => x !== opt) : [...prev, opt]);
+                    }}
+                      style={{ padding: "5px 12px", borderRadius: 20, border: active ? `1.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)", background: active ? `${RED}22` : "rgba(255,255,255,0.05)", color: active ? "#fff" : "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer", transition: "all 0.12s" }}>
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.3)", marginTop: 6, fontFamily: "'Inter', sans-serif" }}>
+                Pick one or more. We'll notify you at each chosen interval.
+              </div>
+            </div>
+
+            {/* Notification Channel */}
+            <div>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>
+                How to Notify You
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                {[
+                  { value: "email", label: "✉️  Email" },
+                  { value: "text",  label: "💬  Text"  },
+                  { value: "both",  label: "📲  Both"  },
+                ].map(opt => (
+                  <button key={opt.value} type="button" onClick={() => setNotifyChannel(opt.value)}
+                    style={{ padding: "5px 14px", borderRadius: 20, border: notifyChannel === opt.value ? `1.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)", background: notifyChannel === opt.value ? `${RED}22` : "rgba(255,255,255,0.05)", color: notifyChannel === opt.value ? "#fff" : "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer", transition: "all 0.12s" }}>
+                    {opt.label}
                   </button>
                 ))}
               </div>
