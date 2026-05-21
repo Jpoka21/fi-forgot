@@ -6,8 +6,6 @@ import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { B } from "@/components/brand";
 
-import DaveBackground from "@/components/brand/DaveBackground";
-
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
 const signupSchema = z.object({
@@ -119,9 +117,7 @@ export default function PersonalAuthPage({ initialMode = "signup" }: Props) {
       className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden"
       style={{ background: B.beige }}
     >
-      <DaveBackground />
-
-      <div className="w-full max-w-7xl relative z-10">
+      <div className="w-full max-w-7xl">
         <div className="grid md:grid-cols-2 gap-14 items-start">
 
           {/* ── Left: Brand pitch ─────────────────────────────────────────── */}
