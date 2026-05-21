@@ -336,7 +336,6 @@ interface ClientRow {
   relationship: string;
   relationshipOther: string;
   birthday: string;
-  clientSince: string;
   autoBirthday:   boolean;
   autoHoliday:    boolean;
   autoAnniversary: boolean;
@@ -366,7 +365,6 @@ function newRow(businessId: string): ClientRow {
     _rowId: `row-${Date.now()}-${Math.random()}`,
     businessId,
     fullName: "", company: "", relationship: "", relationshipOther: "", birthday: "",
-    clientSince: "",
     autoBirthday: true, autoHoliday: true, autoAnniversary: false,
     anniversaryDate: "", anniversaryNote: "", tone: "", requireApproval: false,
     notes: "",
@@ -384,7 +382,6 @@ function rowFromClient(c: Record<string, unknown>, businessId: string): ClientRo
     relationship: String(c.relationship ?? ""),
     relationshipOther: String(c.relationshipOther ?? ""),
     birthday: String(c.birthday ?? ""),
-    clientSince: String(c.clientSince ?? ""),
     autoBirthday:   Boolean(c.autoBirthday   ?? true),
     autoHoliday:    Boolean(c.autoHoliday    ?? true),
     autoAnniversary: Boolean(c.autoAnniversary ?? false),
@@ -607,7 +604,6 @@ export default function BusinessDashboardPage() {
             : row.relationship || undefined,
           relationshipOther: row.relationshipOther || undefined,
           birthday: row.birthday || undefined,
-          clientSince: row.clientSince || undefined,
           autoBirthday: row.autoBirthday, autoHoliday: row.autoHoliday,
           autoAnniversary: row.autoAnniversary,
           anniversaryDate: row.anniversaryDate || undefined,
@@ -861,10 +857,6 @@ export default function BusinessDashboardPage() {
                 <th style={TH}>Company</th>
                 <th style={TH}>Relationship</th>
                 <th style={TH}>Birthday</th>
-                <th style={TH}>
-                  Client Since
-                  <InfoTooltip text="We use this to send a card on their client anniversary — celebrating how long they've worked with you." />
-                </th>
                 <th style={TH}>Send Cards For</th>
                 <th style={TH}>
                   Tone
@@ -945,15 +937,6 @@ export default function BusinessDashboardPage() {
                       <MonthDayPicker
                         value={row.birthday}
                         onChange={v => updateRow(row._rowId, { birthday: v })}
-                        onBlur={() => saveRow(row)}
-                      />
-                    </td>
-
-                    {/* Client Since */}
-                    <td style={TD}>
-                      <YearPicker
-                        value={row.clientSince}
-                        onChange={v => updateRow(row._rowId, { clientSince: v })}
                         onBlur={() => saveRow(row)}
                       />
                     </td>
