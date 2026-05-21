@@ -579,7 +579,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function BusinessDashboardPage() {
-  const { isLoggedIn, user, activeWorkspace, workspaces, logout } = useAuth();
+  const { isLoggedIn, user, activeWorkspace, workspaces, logout, repairBusinessId, switchWorkspace } = useAuth();
   const [, setLocation] = useLocation();
 
   // Settings
@@ -613,15 +613,19 @@ export default function BusinessDashboardPage() {
   const rowsRef = useRef<ClientRow[]>([]);
   rowsRef.current = rows;
 
-  // Auth guard
+  // Auth guard — also auto-switches to business workspace if personal is active
   useEffect(() => {
     if (!isLoggedIn) { setLocation("/business/signup"); return; }
     if (!activeWorkspace) return;
     if (activeWorkspace.type !== "business") {
       const biz = workspaces.find(w => w.type === "business");
-      if (!biz) setLocation("/business/create-workspace");
+      if (!biz) {
+        setLocation("/business/create-workspace");
+      } else {
+        switchWorkspace(biz.id);
+      }
     }
-  }, [isLoggedIn, activeWorkspace]);
+  }, [isLoggedIn, activeWorkspace, workspaces]);
 
   // Load clients — flush any unsaved dirty rows first so they aren't lost on workspace switch
   useEffect(() => {
@@ -657,9 +661,19 @@ export default function BusinessDashboardPage() {
     Promise.all(flushPromises).then(() =>
       fetch(`/api/business-clients?businessId=${encodeURIComponent(businessId)}`)
         .then(r => r.json())
-        .then((data: { clients?: Record<string, unknown>[] }) => {
+        .then((data: { clients?: Record<string, unknown>[]; suggestedBusinessId?: string }) => {
           if (data.clients?.length) {
             setRows(data.clients.map(c => rowFromClient(c, businessId)));
+          } else if (data.suggestedBusinessId) {
+            // Workspace businessId was wrong — server found data under a different ID.
+            // Repair the workspace and re-fetch using the correct ID.
+            const realId = data.suggestedBusinessId;
+            repairBusinessId(realId);
+            return fetch(`/api/business-clients?businessId=${encodeURIComponent(realId)}`)
+              .then(r => r.json())
+              .then((d: { clients?: Record<string, unknown>[] }) => {
+                setRows(d.clients?.length ? d.clients.map(c => rowFromClient(c, realId)) : [newRow(realId)]);
+              });
           } else {
             setRows([newRow(businessId)]);
           }

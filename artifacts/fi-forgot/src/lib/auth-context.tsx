@@ -49,6 +49,7 @@ interface AuthContextType {
   upgradePlan: (plan: Plan) => void;
   switchWorkspace: (id: string) => void;
   createBusinessWorkspace: (businessName: string, businessType: string) => Workspace;
+  repairBusinessId: (correctId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -65,6 +66,7 @@ const AuthContext = createContext<AuthContextType>({
   upgradePlan: () => {},
   switchWorkspace: () => {},
   createBusinessWorkspace: () => ({ id: "", type: "business", name: "" }),
+  repairBusinessId: () => {},
 });
 
 const PERSONALITY_LABELS: Record<string, string> = {
@@ -416,12 +418,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  function repairBusinessId(correctId: string) {
+    setWorkspaces(prev => {
+      const updated = prev.map(w => w.type === "business" ? { ...w, businessId: correctId } : w);
+      saveWorkspaces(updated);
+      return updated;
+    });
+    setActiveWorkspace(prev => prev?.type === "business" ? { ...prev, businessId: correctId } : prev);
+  }
+
   return (
     <AuthContext.Provider value={{
       isLoggedIn, onboardingComplete, user,
       workspaces, activeWorkspace,
       login, signup, businessSignup, completeOnboarding, logout, upgradePlan,
-      switchWorkspace, createBusinessWorkspace,
+      switchWorkspace, createBusinessWorkspace, repairBusinessId,
     }}>
       {children}
     </AuthContext.Provider>

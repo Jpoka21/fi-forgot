@@ -12,7 +12,19 @@ router.get("/business-clients", async (req, res) => {
     .from(businessClientsTable)
     .where(eq(businessClientsTable.businessId, businessId))
     .orderBy(businessClientsTable.createdAt);
-  res.json({ clients });
+
+  // Self-healing: if no clients found, suggest the real businessId from DB so the
+  // client can repair a corrupted/missing workspace businessId.
+  let suggestedBusinessId: string | undefined;
+  if (clients.length === 0) {
+    const [any] = await db
+      .select({ businessId: businessClientsTable.businessId })
+      .from(businessClientsTable)
+      .limit(1);
+    if (any && any.businessId !== businessId) suggestedBusinessId = any.businessId;
+  }
+
+  res.json({ clients, suggestedBusinessId });
 });
 
 router.post("/business-clients", async (req, res) => {
