@@ -1107,8 +1107,8 @@ export default function BusinessDashboardPage() {
       {/* ── Section Tabs ─────────────────────────────────────────────────────── */}
       <div style={{ background: DARK, borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 28px", display: "flex", gap: 4, flexShrink: 0 }}>
         {([
-          { id: "upcoming",   label: "Upcoming Cards", icon: "📅", count: upcomingCards.length },
           { id: "recipients", label: "All Recipients",  icon: "👥", count: rows.filter(r => r.fullName.trim()).length },
+          { id: "upcoming",   label: "Upcoming Cards", icon: "📅", count: upcomingCards.length },
         ] as const).map(tab => {
           const active = activeSection === tab.id;
           return (
