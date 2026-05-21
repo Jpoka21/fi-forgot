@@ -1313,13 +1313,16 @@ export default function BusinessDashboardPage() {
 
                     {/* Relationship */}
                     <td style={TD}>
-                      <select value={row.relationship}
-                        onChange={e => { updateRow(row._rowId, { relationship: e.target.value, relationshipOther: "" }); }}
-                        onBlur={() => saveRow(row)}
-                        style={{ ...cellSelect, color: row.relationship ? "#1e293b" : "#94a3b8" }}>
-                        <option value="">Type…</option>
-                        {RELATIONSHIP_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
+                      <div style={{ position: "relative" }}>
+                        <select value={row.relationship}
+                          onChange={e => { updateRow(row._rowId, { relationship: e.target.value, relationshipOther: "" }); }}
+                          onBlur={() => saveRow(row)}
+                          style={{ ...cellSelect, width: "100%", paddingRight: 20, color: row.relationship ? "#1e293b" : "#94a3b8" }}>
+                          <option value="">Type…</option>
+                          {RELATIONSHIP_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
+                        <span style={{ position: "absolute", right: 5, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#94a3b8", fontSize: "0.7rem", lineHeight: 1 }}>▾</span>
+                      </div>
                       {row.relationship === "Other" && (
                         <input
                           value={row.relationshipOther}
@@ -1351,15 +1354,18 @@ export default function BusinessDashboardPage() {
 
                     {/* Tone override */}
                     <td style={TD}>
-                      <select
-                        value={row.tone}
-                        onChange={e => updateRow(row._rowId, { tone: e.target.value })}
-                        onBlur={() => saveRow(row)}
-                        style={{ ...cellSelect, color: row.tone ? "#1e293b" : "#94a3b8" }}
-                      >
-                        <option value="">{tone} ·default</option>
-                        {TONE_OPTS.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
+                      <div style={{ position: "relative" }}>
+                        <select
+                          value={row.tone}
+                          onChange={e => updateRow(row._rowId, { tone: e.target.value })}
+                          onBlur={() => saveRow(row)}
+                          style={{ ...cellSelect, width: "100%", paddingRight: 20, color: row.tone ? "#1e293b" : "#94a3b8" }}
+                        >
+                          <option value="">{tone} ·default</option>
+                          {TONE_OPTS.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                        <span style={{ position: "absolute", right: 5, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#94a3b8", fontSize: "0.7rem", lineHeight: 1 }}>▾</span>
+                      </div>
                     </td>
 
                     {/* Require Approval */}
