@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth, OnboardingData } from "@/lib/auth-context";
+import DaveBackground from "@/components/brand/DaveBackground";
 import { suggestedEvents, HOLIDAYS, PreviewDays, PREVIEW_DAYS_OPTIONS } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
@@ -170,7 +171,8 @@ export default function OnboardingPage() {
 
   return (
     // Full-viewport container — no page scroll
-    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", background: CREAM }}>
+    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", background: CREAM, position: "relative" }}>
+      <DaveBackground />
 
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 md:px-8" style={{ flexShrink: 0, paddingTop: 14, paddingBottom: 14, background: "#fff", borderBottom: `1px solid ${BLACK}10` }}>

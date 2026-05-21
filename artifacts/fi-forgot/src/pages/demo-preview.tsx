@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
 import { useParams } from "wouter";
 import { B } from "@/components/brand";
+import DaveBackground from "@/components/brand/DaveBackground";
 
 interface CardInfo {
   bgColor: string;
@@ -192,7 +193,8 @@ export default function DemoPreviewPage() {
   const allImages = data.cardImageUrls ?? (selectedImage ? [selectedImage] : []);
 
   return (
-    <div style={{ background: "#F2E6D3", minHeight: "100svh" }}>
+    <div style={{ background: "#F2E6D3", minHeight: "100svh", position: "relative" }}>
+      <DaveBackground />
 
       {/* Nav */}
       <div style={{ background: B.black, padding: "18px 24px" }}>
