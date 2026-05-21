@@ -628,6 +628,8 @@ export default function BusinessDashboardPage() {
   async function saveRow(row: ClientRow) {
     if (!row._dirty && !row._isNew) return;
     if (!row.fullName.trim()) return;
+    const effectiveBusinessId = businessId || row.businessId;
+    if (!effectiveBusinessId) return; // can't save without a workspace ID
     setRows(prev => prev.map(r => r._rowId === row._rowId ? { ...r, _saving: true } : r));
     try {
       const method = row.id ? "PATCH" : "POST";
@@ -636,7 +638,7 @@ export default function BusinessDashboardPage() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessId: businessId || row.businessId, fullName: row.fullName,
+          businessId: effectiveBusinessId, fullName: row.fullName,
           company: row.company || undefined,
           relationship: row.relationship === "Other" && row.relationshipOther
             ? `Other (${row.relationshipOther})`
@@ -714,7 +716,11 @@ export default function BusinessDashboardPage() {
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
 
   async function generateCardFor(cardKey: string, clientRowId: string) {
-    if (!businessId) return;
+    if (!businessId) {
+      setCardGenState(s => ({ ...s, [cardKey]: "error" }));
+      setTimeout(() => setCardGenState(s => { const n = { ...s }; delete n[cardKey]; return n; }), 6000);
+      return;
+    }
     setCardGenState(s => ({ ...s, [cardKey]: "generating" }));
     try {
       const res = await fetch("/api/business-cards/generate", {
