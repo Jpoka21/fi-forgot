@@ -6,6 +6,67 @@ import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { B } from "@/components/brand";
 
+// ── Wrapping-paper background ─────────────────────────────────────────────────
+
+const DAVE_IMAGES = [
+  "sleeping_on_couch.png", "doghouse.png", "rain_dave.png", "missed_calls.png",
+  "sad_dave.png", "broken_vase.png", "couch_sad.png", "wife_list.png",
+  "fixing_chair.png", "flowers_store.png", "gas_station_flowers.png", "bbq_dave.png",
+  "honey_can_we_talk.png", "pillow_dave.png", "forgot_to_mail.png", "sleeping_with_dog.png",
+];
+
+// Fixed rotations & offsets so the pattern looks hand-scattered but is deterministic
+const TILE_META = [
+   -8,  4, -3, 10,  -6,  2,  8, -12,
+    5, -9,  7, -4,  12,  -2, -7,   6,
+   -5,  9, -1,  8,  -10,  3,  6,  -8,
+    4, -6, 11, -3,    7, -5,  2,  10,
+];
+
+function DaveBackground() {
+  // Build a grid: 4 cols × 8 rows = 32 tiles, cycling through 16 images
+  const tiles: { src: string; rot: number }[] = [];
+  for (let i = 0; i < 32; i++) {
+    tiles.push({ src: DAVE_IMAGES[i % DAVE_IMAGES.length], rot: TILE_META[i % TILE_META.length] });
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: "absolute", inset: 0,
+        display: "grid",
+        gridTemplateColumns: "repeat(4, 1fr)",
+        gridAutoRows: "1fr",
+        gap: "0px",
+        opacity: 0.12,
+        pointerEvents: "none",
+        overflow: "hidden",
+      }}
+    >
+      {tiles.map((t, i) => (
+        <div
+          key={i}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "8px",
+          }}
+        >
+          <img
+            src={`/dave/${t.src}`}
+            alt=""
+            draggable={false}
+            style={{
+              width: "90%", height: "90%", objectFit: "contain",
+              transform: `rotate(${t.rot}deg)`,
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
 const signupSchema = z.object({
@@ -117,6 +178,7 @@ export default function PersonalAuthPage({ initialMode = "signup" }: Props) {
       className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden"
       style={{ background: B.beige }}
     >
+      <DaveBackground />
 
       <div className="w-full max-w-7xl relative z-10">
         <div className="grid md:grid-cols-2 gap-14 items-start">
