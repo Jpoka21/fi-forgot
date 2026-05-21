@@ -894,7 +894,7 @@ export default function BusinessDashboardPage() {
                         onBlur={() => saveRow(row)}
                         style={{ ...cellSelect, color: row.tone ? "#1e293b" : "#94a3b8" }}
                       >
-                        <option value="">Default</option>
+                        <option value="">{tone} ·default</option>
                         {TONE_OPTS.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                     </td>
