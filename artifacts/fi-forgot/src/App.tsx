@@ -25,6 +25,7 @@ import BusinessSignupPage from "@/pages/business-signup";
 import BusinessLoginPage from "@/pages/business-login";
 import BusinessDashboardPage from "@/pages/business-dashboard";
 import CreateBusinessWorkspacePage from "@/pages/create-business-workspace";
+import BusinessApprovePage from "@/pages/business-approve";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +120,7 @@ function Router() {
       <Route path="/business/login" component={BusinessLoginPage} />
       <Route path="/business/create-workspace" component={CreateBusinessWorkspacePage} />
       <Route path="/business/dashboard" component={BusinessDashboardPage} />
+      <Route path="/business/approve/:token" component={BusinessApprovePage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -12,10 +12,11 @@ export const businessSettingsTable = pgTable("business_settings", {
   cardSignature: text("card_signature"),
   cardFont:      text("card_font"),
 
-  notifyTiming:  text("notify_timing"),
-  notifyChannel: text("notify_channel"),
-  notifyEmail:   text("notify_email"),
-  notifyPhone:   text("notify_phone"),
+  notifyTiming:   text("notify_timing"),
+  notifyChannel:  text("notify_channel"),
+  notifyEmail:    text("notify_email"),
+  notifyPhone:    text("notify_phone"),
+  automationMode: text("automation_mode"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

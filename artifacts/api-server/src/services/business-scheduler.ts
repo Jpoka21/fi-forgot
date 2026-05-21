@@ -2,41 +2,39 @@
  * Business autopilot scheduler.
  *
  * Runs hourly. For each business client with automations on:
- *   - Birthday   (autoBirthday = true)
- *   - Happy Holidays (autoHoliday = true) — fixed Dec 18 mail date
- *   - Special Anniversary (autoAnniversary = true, anniversaryDate set)
+ *   - Birthday       (autoBirthday = true)
+ *   - Happy Holidays (autoHoliday = true) — fixed Dec 25 occasion, mails Dec 18
+ *   - Anniversary    (autoAnniversary = true, anniversaryDate set)
  *
  * Cards are mailed 7 days before the occasion.
- * We queue the card when we're within the business's chosen notifyTiming window.
- * Notification is sent to notifyEmail / notifyPhone per notifyChannel setting.
+ * When requireApproval = true  → AI generates message, queues in business_card_queue, sends approval email.
+ * When requireApproval = false → AI generates message, tries to send via Handwrytten directly.
+ *
+ * Dedup: skips if a record already exists in business_card_queue for the same
+ * clientId + eventType + mailDate (persists across server restarts).
  */
 
-import { db, businessClientsTable, businessSettingsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
+import { and, eq } from "drizzle-orm";
+import { db, businessClientsTable, businessSettingsTable, businessCardQueueTable } from "@workspace/db";
 import { logger } from "../lib/logger";
+import { generateBizCardMessage } from "./biz-card-message";
+import { createHandwryttenOrder, listHandwryttenCards } from "./handwrytten";
+import { sendBusinessApprovalEmail } from "./sendgrid";
 
 const MAIL_LEAD_DAYS = 7;
+const HOLIDAY_MONTH  = 12;
+const HOLIDAY_DAY    = 25;
 
-// Holiday card targets Dec 25 → mails Dec 18
-const HOLIDAY_MONTH = 12;
-const HOLIDAY_DAY   = 25;
-
-// How far out we trigger (before the MAIL date, not the occasion)
 const NOTIFY_TIMING_DAYS: Record<string, number> = {
-  "Same day it mails":      0,
-  "2 days before it mails": 2,
-  "7 days before it mails": 7,
+  "Same day it mails":       0,
+  "2 days before it mails":  2,
+  "7 days before it mails":  7,
   "14 days before it mails": 14,
   "30 days before it mails": 30,
 };
 
-function toISODate(d: Date): string {
-  return d.toISOString().split("T")[0]!;
-}
-
-function todayStr(): string {
-  return toISODate(new Date());
-}
+function toISODate(d: Date): string { return d.toISOString().split("T")[0]!; }
 
 function nextOccurrence(month: number, day: number): Date {
   const today = new Date();
@@ -53,10 +51,8 @@ function mailDateFor(occasionDate: Date): Date {
 }
 
 function daysUntil(target: Date): number {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const t = new Date(target);
-  t.setHours(0, 0, 0, 0);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const t   = new Date(target); t.setHours(0, 0, 0, 0);
   return Math.round((t.getTime() - now.getTime()) / 86_400_000);
 }
 
@@ -65,87 +61,72 @@ function parseNotifyTiming(raw: string | null | undefined): number[] {
   try {
     const arr: unknown = JSON.parse(raw);
     if (Array.isArray(arr)) {
-      return arr
-        .map((s: unknown) => NOTIFY_TIMING_DAYS[String(s)] ?? -1)
-        .filter((n) => n >= 0);
+      return arr.map((s: unknown) => NOTIFY_TIMING_DAYS[String(s)] ?? -1).filter(n => n >= 0);
     }
   } catch { /* ignore */ }
   return [14];
 }
 
-function alreadyNotifiedKey(clientId: string, eventType: string, year: number): string {
-  return `biz_notified_${clientId}_${eventType}_${year}`;
+function parseAddress(raw: string | null | undefined): {
+  street1: string; city: string; state: string; zip: string;
+} | null {
+  if (!raw?.trim()) return null;
+  const parts = raw.split(",").map(s => s.trim());
+  if (parts.length >= 3) {
+    const street1 = parts[0]!;
+    const city    = parts[1]!;
+    const rest    = parts.slice(2).join(" ").trim().split(/\s+/);
+    const zipIdx  = rest.findIndex(t => /^\d{5}/.test(t));
+    if (zipIdx > 0) return { street1, city, state: rest.slice(0, zipIdx).join(" "), zip: rest[zipIdx]! };
+  }
+  return null;
 }
 
-// Simple in-memory dedup (resets on server restart — good enough for hourly cron)
-const notifiedSet = new Set<string>();
+function parseNameParts(fullName: string): { firstName: string; lastName: string } {
+  const parts = fullName.trim().split(/\s+/);
+  return parts.length === 1
+    ? { firstName: parts[0]!, lastName: parts[0]! }
+    : { firstName: parts[0]!, lastName: parts.slice(1).join(" ") };
+}
 
-async function sendNotification(opts: {
-  businessId:    string;
-  clientName:    string;
-  eventType:     string;
-  occasionDate:  string;
-  mailDate:      string;
-  notifyEmail:   string | null | undefined;
-  notifyPhone:   string | null | undefined;
-  notifyChannel: string | null | undefined;
-  appBaseUrl:    string;
-}): Promise<void> {
-  const { clientName, eventType, occasionDate, mailDate, notifyEmail, notifyChannel } = opts;
-
-  const channel = notifyChannel ?? "email";
-
-  if ((channel === "email" || channel === "both") && notifyEmail) {
-    try {
-      await fetch(`${opts.appBaseUrl}/api/business-notify-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to: notifyEmail, clientName, eventType, occasionDate, mailDate }),
-      });
-    } catch (err) {
-      logger.warn({ err }, "business-scheduler: email notification failed");
-    }
-  }
-
-  // Text notifications will be handled when Twilio / SMS is integrated
-  if ((channel === "text" || channel === "both") && opts.notifyPhone) {
-    logger.info(
-      { phone: opts.notifyPhone, clientName, eventType },
-      "business-scheduler: SMS notification queued (integration pending)",
-    );
-  }
+async function pickCardId(eventType: string): Promise<string | number> {
+  try {
+    const cards = await listHandwryttenCards();
+    const category =
+      eventType === "Birthday"       ? "Birthday" :
+      eventType === "Happy Holidays" ? "Holiday"  :
+      eventType === "Anniversary"    ? "Anniversary" : null;
+    const match = category ? cards.find(c => c.category?.toLowerCase().includes(category.toLowerCase())) : null;
+    return match?.id ?? cards[0]?.id ?? "hw-4421";
+  } catch { return "hw-4421"; }
 }
 
 export async function runBusinessScheduler(appBaseUrl: string): Promise<void> {
-  const today = todayStr();
-  const thisYear = new Date().getFullYear();
+  const today    = toISODate(new Date());
+  const clients  = await db.select().from(businessClientsTable);
+  const bizIds   = [...new Set(clients.map(c => c.businessId))];
 
-  const clients = await db
-    .select()
-    .from(businessClientsTable);
-
-  // Group clients by businessId so we only fetch settings once per business
-  const businessIds = [...new Set(clients.map((c) => c.businessId))];
-
-  for (const businessId of businessIds) {
+  for (const businessId of bizIds) {
     const [settings] = await db
       .select()
       .from(businessSettingsTable)
       .where(eq(businessSettingsTable.businessId, businessId));
 
-    const notifyDays   = parseNotifyTiming(settings?.notifyTiming);
-    const notifyEmail  = settings?.notifyEmail;
-    const notifyPhone  = settings?.notifyPhone;
+    const notifyDays    = parseNotifyTiming(settings?.notifyTiming);
+    const notifyEmail   = settings?.notifyEmail;
     const notifyChannel = settings?.notifyChannel ?? "email";
+    const bizType       = settings?.bizType ?? "Professional Services";
+    const defaultTone   = settings?.tone   ?? "Warm Professional";
+    const cardSignature = settings?.cardSignature ?? "";
+    const cardFont      = settings?.cardFont ?? "";
 
-    const bizClients = clients.filter((c) => c.businessId === businessId);
+    const bizClients = clients.filter(c => c.businessId === businessId);
 
     for (const client of bizClients) {
       if (!client.fullName) continue;
 
-      const events: Array<{ type: string; occasionDate: Date }> = [];
+      const events: Array<{ type: string; occasionDate: Date; eventDate?: string }> = [];
 
-      // Birthday
       if (client.autoBirthday && client.birthday) {
         const parts = client.birthday.split("-").map(Number);
         if (parts.length >= 3) {
@@ -153,53 +134,141 @@ export async function runBusinessScheduler(appBaseUrl: string): Promise<void> {
           events.push({ type: "Birthday", occasionDate: nextOccurrence(m, d) });
         }
       }
-
-      // Happy Holidays (Dec 25 occasion → mails Dec 18)
       if (client.autoHoliday) {
         events.push({ type: "Happy Holidays", occasionDate: nextOccurrence(HOLIDAY_MONTH, HOLIDAY_DAY) });
       }
-
-      // Special Anniversary
       if (client.autoAnniversary && client.anniversaryDate) {
         const parts = client.anniversaryDate.split("-").map(Number);
         if (parts.length >= 3) {
           const [, m, d] = parts as [number, number, number];
-          events.push({ type: "Anniversary", occasionDate: nextOccurrence(m, d) });
+          events.push({ type: "Anniversary", occasionDate: nextOccurrence(m, d), eventDate: client.anniversaryDate });
         }
       }
 
-      for (const { type, occasionDate } of events) {
-        const mailDate = mailDateFor(occasionDate);
+      for (const { type, occasionDate, eventDate } of events) {
+        const mailDate   = mailDateFor(occasionDate);
         const daysToMail = daysUntil(mailDate);
 
-        // Skip if mail date is in the past
         if (daysToMail < 0) continue;
 
-        // Check if today matches any of the notify windows
-        const shouldNotify = notifyDays.some((n) => n === daysToMail);
-        if (!shouldNotify) continue;
+        const shouldAct = notifyDays.some(n => n === daysToMail);
+        if (!shouldAct) continue;
 
-        // Dedup: only notify once per client/event/year
-        const dedupKey = alreadyNotifiedKey(client.id, type, thisYear);
-        if (notifiedSet.has(dedupKey)) continue;
-        notifiedSet.add(dedupKey);
+        const mailDateStr = toISODate(mailDate);
 
-        logger.info(
-          { clientId: client.id, clientName: client.fullName, type, mailDate: toISODate(mailDate) },
-          "business-scheduler: triggering notification",
-        );
+        // ── DB dedup: skip if already queued for this client + event + mailDate ──
+        const existing = await db
+          .select({ id: businessCardQueueTable.id })
+          .from(businessCardQueueTable)
+          .where(
+            and(
+              eq(businessCardQueueTable.clientId, client.id),
+              eq(businessCardQueueTable.eventType, type),
+              eq(businessCardQueueTable.mailDate, mailDateStr),
+            ),
+          );
+        if (existing.length > 0) {
+          logger.info({ clientId: client.id, type }, "business-scheduler: already queued, skipping");
+          continue;
+        }
 
-        await sendNotification({
+        logger.info({ clientId: client.id, clientName: client.fullName, type, mailDate: mailDateStr }, "business-scheduler: processing");
+
+        // ── Generate AI card message ──────────────────────────────────────────
+        let cardMessage: string;
+        try {
+          cardMessage = await generateBizCardMessage({
+            businessType: bizType,
+            tone:         client.tone ?? defaultTone,
+            relationship: client.relationship ?? "Client",
+            eventType:    type,
+            eventDate:    eventDate,
+            cardSignature,
+          });
+        } catch (err) {
+          logger.error({ err }, "business-scheduler: message generation failed, skipping");
+          continue;
+        }
+
+        const token = randomUUID();
+
+        // ── Queue in DB ───────────────────────────────────────────────────────
+        await db.insert(businessCardQueueTable).values({
           businessId,
-          clientName:    client.fullName,
+          clientId:      client.id,
+          approvalToken: token,
+          status:        "pending",
           eventType:     type,
           occasionDate:  toISODate(occasionDate),
-          mailDate:      toISODate(mailDate),
-          notifyEmail,
-          notifyPhone,
-          notifyChannel,
-          appBaseUrl,
+          mailDate:      mailDateStr,
+          cardMessage,
+          clientName:    client.fullName,
+          clientAddress: client.address ?? null,
+          clientCompany: client.company ?? null,
+          cardFont:      cardFont || null,
+          cardSignature: cardSignature || null,
+          notifyEmail:   notifyEmail ?? null,
         });
+
+        const approvalUrl = `${appBaseUrl}/business/approve/${token}`;
+
+        // ── Auto-send path (requireApproval = false) ──────────────────────────
+        if (!client.requireApproval) {
+          const address = parseAddress(client.address);
+          if (address) {
+            try {
+              const { firstName, lastName } = parseNameParts(client.fullName);
+              const cardId = await pickCardId(type);
+              const order  = await createHandwryttenOrder({
+                cardId,
+                recipientAddress: { firstName, lastName, ...address },
+                message: cardMessage,
+                wishes:  cardSignature,
+                fontId:  cardFont || undefined,
+              });
+              await db
+                .update(businessCardQueueTable)
+                .set({ status: "sent", hwOrderId: order.orderId, resolvedAt: new Date() })
+                .where(eq(businessCardQueueTable.approvalToken, token));
+              logger.info({ clientName: client.fullName, hwOrderId: order.orderId }, "business-scheduler: auto-sent via Handwrytten");
+
+              // Send a "card sent" FYI notification
+              if ((notifyChannel === "email" || notifyChannel === "both") && notifyEmail) {
+                try {
+                  await sendBusinessApprovalEmail({
+                    to: notifyEmail, clientName: client.fullName,
+                    eventType: type, occasionDate: toISODate(occasionDate), mailDate: mailDateStr,
+                    cardMessage, approvalUrl,
+                  });
+                } catch (err) {
+                  logger.warn({ err }, "business-scheduler: FYI notification email failed");
+                }
+              }
+              continue;
+            } catch (err) {
+              logger.error({ err }, "business-scheduler: auto-send failed, falling through to approval email");
+            }
+          }
+          // Fall through: no address or send failed → send approval email instead
+        }
+
+        // ── Approval path: send review email ─────────────────────────────────
+        if ((notifyChannel === "email" || notifyChannel === "both") && notifyEmail) {
+          try {
+            await sendBusinessApprovalEmail({
+              to: notifyEmail, clientName: client.fullName,
+              eventType: type, occasionDate: toISODate(occasionDate), mailDate: mailDateStr,
+              cardMessage, approvalUrl,
+            });
+            logger.info({ clientName: client.fullName, approvalUrl }, "business-scheduler: approval email sent");
+          } catch (err) {
+            logger.warn({ err }, "business-scheduler: approval email failed");
+          }
+        }
+
+        if ((notifyChannel === "text" || notifyChannel === "both") && client.phone) {
+          logger.info({ phone: client.phone, clientName: client.fullName, type }, "business-scheduler: SMS queued (integration pending)");
+        }
       }
     }
   }

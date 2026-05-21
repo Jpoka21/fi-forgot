@@ -14,6 +14,7 @@ import sampleCardsRouter from "./sample-cards";
 import businessClientsRouter from "./business-clients";
 import businessSettingsRouter from "./business-settings";
 import handwryttenFontsRouter from "./handwrytten-fonts";
+import businessApprovalRouter from "./business-approval";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(sampleCardsRouter);
 router.use(businessClientsRouter);
 router.use(businessSettingsRouter);
 router.use(handwryttenFontsRouter);
+router.use(businessApprovalRouter);
 
 export default router;

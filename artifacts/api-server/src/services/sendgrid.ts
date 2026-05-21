@@ -925,3 +925,93 @@ export async function sendDemoEmail(opts: {
   if (error) throw new Error(`Resend error: ${error.message}`);
   logger.info({ to: opts.email, recipientName: opts.recipientName, occasion: opts.occasion }, "Demo email sent via Resend");
 }
+
+// ─── Business approval email ──────────────────────────────────────────────────
+
+export async function sendBusinessApprovalEmail(opts: {
+  to: string;
+  clientName: string;
+  eventType: string;
+  occasionDate: string;
+  mailDate: string;
+  cardMessage: string;
+  approvalUrl: string;
+}): Promise<void> {
+  const resend   = getResend();
+  const fromEmail = getFromEmail();
+  const { to, clientName, eventType, occasionDate, mailDate, cardMessage, approvalUrl } = opts;
+
+  const eventIcon =
+    eventType === "Birthday"       ? "🎂" :
+    eventType === "Happy Holidays" ? "🎁" :
+    eventType === "Anniversary"    ? "🏆" : "✉️";
+
+  const escapedMsg = escapeHtml(cardMessage).replace(/\n/g, "<br>");
+
+  function fmtDate(d: string): string {
+    try { return new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }); }
+    catch { return d; }
+  }
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F2E6D3;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F2E6D3;padding:32px 16px;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;">
+
+  <tr><td style="background:#071A33;padding:24px 32px;border-radius:10px 10px 0 0;">
+    <div style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:2px;font-family:Arial Black,Arial,sans-serif;">F*I FORGOT</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;letter-spacing:1px;text-transform:uppercase;font-family:Arial,sans-serif;">Business Dashboard &mdash; Card Ready for Review</div>
+  </td></tr>
+
+  <tr><td style="background:#ffffff;padding:40px 32px;border-left:1px solid #e8dcc8;border-right:1px solid #e8dcc8;">
+    <p style="margin:0 0 6px;font-size:24px;font-weight:900;color:#071A33;font-family:Arial Black,Arial,sans-serif;">
+      ${eventIcon} ${escapeHtml(eventType)} card ready
+    </p>
+    <p style="margin:0 0 28px;font-size:15px;color:#444;font-family:Arial,sans-serif;">
+      For <strong>${escapeHtml(clientName)}</strong> &bull; Occasion on ${fmtDate(occasionDate)} &bull; Mailing <strong>${fmtDate(mailDate)}</strong>
+    </p>
+
+    <div style="background:#f8f8f8;border-left:4px solid #E23B2E;padding:16px 20px;border-radius:0 6px 6px 0;margin-bottom:32px;">
+      <p style="margin:0 0 8px;font-size:10px;font-weight:bold;color:#999;letter-spacing:1px;text-transform:uppercase;font-family:Arial,sans-serif;">Card Message Preview</p>
+      <p style="margin:0;font-size:15px;color:#333;line-height:1.7;font-family:Georgia,serif;font-style:italic;">${escapedMsg}</p>
+    </div>
+
+    <p style="margin:0 0 24px;font-size:14px;color:#555;line-height:1.6;font-family:Arial,sans-serif;">
+      Review and edit the message, then click <strong>Approve &amp; Send</strong> to queue it for mailing — or reject it and no card goes out.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td align="center" style="padding-bottom:20px;">
+        <a href="${approvalUrl}" style="display:inline-block;background:#16a34a;color:#ffffff;font-family:Arial Black,Arial,sans-serif;font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;text-decoration:none;padding:18px 48px;border-radius:6px;">
+          REVIEW &amp; APPROVE &rarr;
+        </a>
+      </td></tr>
+    </table>
+    <p style="margin:0;font-size:11px;color:#aaa;text-align:center;font-family:Arial,sans-serif;">You can edit the message or reject the card on the review page.</p>
+  </td></tr>
+
+  <tr><td style="background:#071A33;padding:20px 32px;border-radius:0 0 10px 10px;text-align:center;">
+    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;font-family:Arial,sans-serif;">
+      F*I Forgot &mdash; Business Dashboard &bull; This notification was sent to your registered email.
+    </p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`.trim();
+
+  const { error } = await resend.emails.send({
+    from: `F*I Forgot <${fromEmail}>`,
+    to,
+    subject: `${eventIcon} Review your ${eventType} card for ${clientName} — mails ${fmtDate(mailDate)}`,
+    html,
+  });
+
+  if (error) throw new Error(`Resend error: ${error.message}`);
+  logger.info({ to, clientName, eventType }, "Business approval email sent");
+}
