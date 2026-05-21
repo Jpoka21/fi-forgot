@@ -12,7 +12,7 @@ const BUSINESS_TYPES = [
 ];
 
 export default function CreateBusinessWorkspacePage() {
-  const { isLoggedIn, user, workspaces, createBusinessWorkspace, switchWorkspace } = useAuth();
+  const { isLoggedIn, user, workspaces, createBusinessWorkspace, switchWorkspace, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");

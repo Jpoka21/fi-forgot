@@ -269,10 +269,11 @@ function EventsPicker({ row, onUpdate, onSave }: {
   onUpdate: (patch: EventsPickerPatch) => void;
   onSave: () => void;
 }) {
-  const activeCount = EVENT_DEFS.filter(e => (row as Record<string, boolean>)[e.key]).length;
+  const rowFlags = row as unknown as Record<string, boolean>;
+  const activeCount = EVENT_DEFS.filter(e => rowFlags[e.key]).length;
 
   function toggle(key: string) {
-    onUpdate({ [key]: !(row as Record<string, boolean>)[key] } as EventsPickerPatch);
+    onUpdate({ [key]: !rowFlags[key] } as EventsPickerPatch);
     setTimeout(onSave, 0);
   }
 
@@ -291,7 +292,7 @@ function EventsPicker({ row, onUpdate, onSave }: {
         </span>
 
         {EVENT_DEFS.map(e => {
-          const active = (row as Record<string, boolean>)[e.key];
+          const active = rowFlags[e.key];
           const isAnniv = e.key === "autoAnniversary";
           return (
             <div key={e.key} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
@@ -363,6 +364,7 @@ interface BizSettings {
   notifyChannel:  string;
   notifyEmail:    string;
   notifyPhone:    string;
+  automationMode: "auto" | "approval";
 }
 
 function newRow(businessId: string): ClientRow {
@@ -404,7 +406,7 @@ const SETTINGS_KEY = "fi_biz_settings";
 function loadSettings(): BizSettings {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
-  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "", cardFont: "", notifyTiming: ["14 days before"], notifyChannel: "email", notifyEmail: "", notifyPhone: "" }; }
+  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "", cardFont: "", notifyTiming: ["14 days before it mails"], notifyChannel: "email", notifyEmail: "", notifyPhone: "", automationMode: "approval" }; }
 }
 
 function saveSettings(s: BizSettings) {
@@ -553,6 +555,7 @@ export default function BusinessDashboardPage() {
   const [notifyChannel,  setNotifyChannel] = useState<string>(stored.notifyChannel  ?? "email");
   const [notifyEmail,    setNotifyEmail]   = useState<string>(stored.notifyEmail    ?? "");
   const [notifyPhone,    setNotifyPhone]   = useState<string>(stored.notifyPhone    ?? "");
+  const [automationMode, setAutomationMode] = useState<"auto" | "approval">(stored.automationMode ?? "approval");
   const [fontPickerOpen, setFontPickerOpen] = useState(false);
   const [hwFonts,       setHwFonts]      = useState<HwFont[]>([]);
   const [fontsLoading,  setFontsLoading]  = useState(false);
@@ -594,12 +597,12 @@ export default function BusinessDashboardPage() {
 
   // Persist settings to localStorage immediately; debounce API sync
   useEffect(() => {
-    const s = { bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone };
+    const s = { bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone, automationMode };
     saveSettings(s);
     if (!businessId) return;
     const t = setTimeout(() => { void syncSettingsToApi({ ...s, businessId }); }, 1500);
     return () => clearTimeout(t);
-  }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone, businessId]);
+  }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone, automationMode, businessId]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -669,11 +672,42 @@ export default function BusinessDashboardPage() {
   }
 
 
-  const filtered = rows.filter(r =>
-    !search || r.fullName.toLowerCase().includes(search.toLowerCase()) ||
-    r.relationship.toLowerCase().includes(search.toLowerCase()) ||
-    r.company.toLowerCase().includes(search.toLowerCase())
-  );
+  function nextOccurrence(month: number, day: number): Date {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const year = today.getFullYear();
+    let d = new Date(year, month - 1, day);
+    if (d <= today) d = new Date(year + 1, month - 1, day);
+    return d;
+  }
+
+  function soonestEventDate(row: ClientRow): Date {
+    const candidates: Date[] = [];
+    if (row.autoBirthday && row.birthday) {
+      const parts = row.birthday.split("-").map(Number);
+      if (parts.length >= 3) candidates.push(nextOccurrence(parts[1]!, parts[2]!));
+    }
+    if (row.autoHoliday) candidates.push(nextOccurrence(12, 25));
+    if (row.autoAnniversary && row.anniversaryDate) {
+      const parts = row.anniversaryDate.split("-").map(Number);
+      if (parts.length >= 3) candidates.push(nextOccurrence(parts[1]!, parts[2]!));
+    }
+    return candidates.length ? candidates.sort((a, b) => a.getTime() - b.getTime())[0]! : new Date(9999, 0, 1);
+  }
+
+  const filtered = rows
+    .filter(r =>
+      !search || r.fullName.toLowerCase().includes(search.toLowerCase()) ||
+      r.relationship.toLowerCase().includes(search.toLowerCase()) ||
+      r.company.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aHasName = !!a.fullName.trim();
+      const bHasName = !!b.fullName.trim();
+      if (!aHasName && !bHasName) return 0;
+      if (!aHasName) return 1;
+      if (!bHasName) return -1;
+      return soonestEventDate(a).getTime() - soonestEventDate(b).getTime();
+    });
 
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
 
@@ -771,6 +805,34 @@ export default function BusinessDashboardPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Automation Mode */}
+            <div>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 10 }}>
+                Automation Mode
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                {([
+                  { value: "auto",     icon: "🚀", title: "Full Autopilot",    desc: "We write, design, and mail every card automatically. No action needed from you." },
+                  { value: "approval", icon: "✋", title: "Review & Approve",  desc: "We queue the card and notify you. You review and approve before anything ships." },
+                ] as const).map(opt => {
+                  const active = automationMode === opt.value;
+                  return (
+                    <button key={opt.value} type="button" onClick={() => setAutomationMode(opt.value)}
+                      style={{
+                        flex: 1, textAlign: "left", padding: "12px 14px", borderRadius: 10, cursor: "pointer",
+                        border: `1.5px solid ${active ? RED : "rgba(255,255,255,0.15)"}`,
+                        background: active ? `${RED}18` : "rgba(255,255,255,0.04)",
+                        transition: "all 0.12s",
+                      }}>
+                      <div style={{ fontSize: "1.2rem", marginBottom: 4 }}>{opt.icon}</div>
+                      <div style={{ fontWeight: 700, fontSize: "0.78rem", color: active ? "#fff" : "rgba(255,255,255,0.7)", fontFamily: "'Inter', sans-serif", marginBottom: 3 }}>{opt.title}</div>
+                      <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>{opt.desc}</div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Handwriting Style */}
@@ -1085,7 +1147,20 @@ export default function BusinessDashboardPage() {
 
                     {/* Require Approval */}
                     <td style={{ ...TD, textAlign: "center" }}>
-                      <Toggle checked={row.requireApproval} onChange={v => { updateRow(row._rowId, { requireApproval: v }); }} />
+                      <button
+                        type="button"
+                        onClick={() => { updateRow(row._rowId, { requireApproval: !row.requireApproval }); setTimeout(() => saveRow({ ...row, requireApproval: !row.requireApproval }), 0); }}
+                        style={{
+                          padding: "3px 10px", borderRadius: 20, border: "none", cursor: "pointer",
+                          fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 600,
+                          background: row.requireApproval ? "#fef9c3" : "#dcfce7",
+                          color: row.requireApproval ? "#854d0e" : "#15803d",
+                          transition: "all 0.12s", whiteSpace: "nowrap",
+                        }}
+                        title={row.requireApproval ? "Needs your approval before mailing" : "Will mail automatically"}
+                      >
+                        {row.requireApproval ? "⏳ Needs Approval" : "✓ Auto-Send"}
+                      </button>
                     </td>
 
                     {/* Notes */}
