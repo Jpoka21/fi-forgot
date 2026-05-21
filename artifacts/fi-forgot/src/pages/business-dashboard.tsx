@@ -1231,7 +1231,7 @@ export default function BusinessDashboardPage() {
                       </span>
                     ) : (
                       <span style={{ background: "#f0fdf4", color: "#15803d", border: "1px solid #86efac", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
-                        ✓ Auto-Send
+                        ✓ Approved — Will Auto-Send
                       </span>
                     )}
                   </div>
@@ -1388,7 +1388,7 @@ export default function BusinessDashboardPage() {
                         }}
                         title={row.requireApproval ? "Needs your approval before mailing" : "Will mail automatically"}
                       >
-                        {row.requireApproval ? "⏳ Needs Approval" : "✓ Auto-Send"}
+                        {row.requireApproval ? "⏳ Needs Approval" : "✓ Approved — Will Auto-Send"}
                       </button>
                     </td>
 
