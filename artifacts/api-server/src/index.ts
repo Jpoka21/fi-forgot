@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { sendPendingReminderEmails } from "./routes/approval";
+import { runBusinessScheduler } from "./services/business-scheduler";
 
 const rawPort = process.env["PORT"];
 
@@ -32,13 +33,23 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
 
-  // Daily reminder cron — check every hour, send if 24h have elapsed since last reminder
   const ONE_HOUR_MS = 60 * 60 * 1000;
+
+  // Personal reminder cron — check every hour
   setInterval(async () => {
     try {
       await sendPendingReminderEmails(getAppBaseUrl());
     } catch (err) {
       logger.error({ err }, "Reminder cron failed");
+    }
+  }, ONE_HOUR_MS);
+
+  // Business scheduler cron — check every hour
+  setInterval(async () => {
+    try {
+      await runBusinessScheduler(getAppBaseUrl());
+    } catch (err) {
+      logger.error({ err }, "Business scheduler cron failed");
     }
   }, ONE_HOUR_MS);
 });

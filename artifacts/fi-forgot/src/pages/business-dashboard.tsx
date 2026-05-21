@@ -411,6 +411,27 @@ function saveSettings(s: BizSettings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
 }
 
+async function syncSettingsToApi(s: BizSettings & { businessId: string }) {
+  try {
+    await fetch("/api/business-settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessId:    s.businessId,
+        bizType:       s.bizType       || undefined,
+        bizTypeOther:  s.bizTypeOther  || undefined,
+        tone:          s.tone          || undefined,
+        cardSignature: s.cardSignature || undefined,
+        cardFont:      s.cardFont      || undefined,
+        notifyTiming:  s.notifyTiming,
+        notifyChannel: s.notifyChannel || undefined,
+        notifyEmail:   s.notifyEmail   || undefined,
+        notifyPhone:   s.notifyPhone   || undefined,
+      }),
+    });
+  } catch { /* best-effort — localStorage is source of truth for UI */ }
+}
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function AccountMenu({ user, onLogout }: { user: { name: string; email: string } | null; onLogout: () => void }) {
@@ -571,10 +592,14 @@ export default function BusinessDashboardPage() {
       .finally(() => setLoading(false));
   }, [businessId]);
 
-  // Persist settings
+  // Persist settings to localStorage immediately; debounce API sync
   useEffect(() => {
-    saveSettings({ bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone });
-  }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone]);
+    const s = { bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone };
+    saveSettings(s);
+    if (!businessId) return;
+    const t = setTimeout(() => { void syncSettingsToApi({ ...s, businessId }); }, 1500);
+    return () => clearTimeout(t);
+  }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone, businessId]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 

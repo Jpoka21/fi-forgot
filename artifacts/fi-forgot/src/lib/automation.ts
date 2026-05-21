@@ -142,9 +142,9 @@ async function processEvent(opts: {
   const { recipient, customer, event, eventDate, thisYear } = opts;
 
   const eventDateStr = toISODate(eventDate);
-  // Mail 5 days before the event to ensure delivery
+  // Mail 7 days before the event to ensure delivery
   const mailDate = new Date(eventDate);
-  mailDate.setDate(mailDate.getDate() - 5);
+  mailDate.setDate(mailDate.getDate() - 7);
   const mailDateStr = toISODate(mailDate);
 
   const itemId = queueKey(recipient.id, event, thisYear);

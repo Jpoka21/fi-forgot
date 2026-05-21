@@ -12,6 +12,7 @@ import refineMessageRouter from "./refine-message";
 import businessCardMessageRouter from "./business-card-message";
 import sampleCardsRouter from "./sample-cards";
 import businessClientsRouter from "./business-clients";
+import businessSettingsRouter from "./business-settings";
 import handwryttenFontsRouter from "./handwrytten-fonts";
 
 const router: IRouter = Router();
@@ -29,6 +30,7 @@ router.use(refineMessageRouter);
 router.use(businessCardMessageRouter);
 router.use(sampleCardsRouter);
 router.use(businessClientsRouter);
+router.use(businessSettingsRouter);
 router.use(handwryttenFontsRouter);
 
 export default router;

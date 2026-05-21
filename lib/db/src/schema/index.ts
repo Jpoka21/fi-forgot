@@ -22,3 +22,4 @@ export * from "./demo-leads";
 export * from "./card-classifications";
 export * from "./sample-card-messages";
 export * from "./business-clients";
+export * from "./business-settings";

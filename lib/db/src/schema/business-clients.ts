@@ -17,6 +17,10 @@ export const businessClientsTable = pgTable("business_clients", {
   clientSince: text("client_since"),
   customEvents: text("custom_events"),
 
+  relationshipOther: text("relationship_other"),
+  anniversaryDate: text("anniversary_date"),
+  anniversaryNote: text("anniversary_note"),
+  tone: text("tone"),
   kidsNames: text("kids_names"),
   pets: text("pets"),
   interests: text("interests"),
