@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 
@@ -144,6 +144,134 @@ function YearPicker({ value, onChange, onBlur }: {
       <option value="">Year…</option>
       {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
     </select>
+  );
+}
+
+// ── Info Tooltip ──────────────────────────────────────────────────────────────
+
+function InfoTooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span style={{ position: "relative", display: "inline-flex", alignItems: "center", marginLeft: 4, verticalAlign: "middle" }}>
+      <span
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        style={{
+          cursor: "help", color: "#94a3b8", fontSize: "0.6rem", fontWeight: 700,
+          border: "1.5px solid #94a3b8", borderRadius: "50%", width: 13, height: 13,
+          display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1,
+          userSelect: "none",
+        }}
+      >i</span>
+      {show && (
+        <div style={{
+          position: "absolute", bottom: "calc(100% + 7px)", left: "50%", transform: "translateX(-50%)",
+          background: "#1e293b", color: "#fff", fontSize: "0.72rem", padding: "8px 11px",
+          borderRadius: 7, width: 210, lineHeight: 1.5, zIndex: 200,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.25)", whiteSpace: "normal",
+          fontWeight: 400, letterSpacing: 0, textTransform: "none",
+          fontFamily: "'Inter', sans-serif", pointerEvents: "none",
+        }}>
+          {text}
+          <div style={{
+            position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
+            border: "5px solid transparent", borderTopColor: "#1e293b",
+          }} />
+        </div>
+      )}
+    </span>
+  );
+}
+
+// ── Events Picker ─────────────────────────────────────────────────────────────
+
+const EVENT_DEFS = [
+  { key: "autoBirthday",   icon: "🎂", label: "Birthday"    },
+  { key: "autoHoliday",    icon: "🎄", label: "Holiday"     },
+  { key: "autoAnniversary",icon: "📅", label: "Anniversary" },
+];
+
+function EventsPicker({ row, onUpdate, onSave }: {
+  row: { autoBirthday: boolean; autoHoliday: boolean; autoAnniversary: boolean };
+  onUpdate: (patch: { autoBirthday?: boolean; autoHoliday?: boolean; autoAnniversary?: boolean }) => void;
+  onSave: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        onSave();
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open, onSave]);
+
+  const activeEvents = EVENT_DEFS.filter(e => (row as Record<string, boolean>)[e.key]);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: "flex", flexWrap: "wrap", gap: 3, alignItems: "center",
+          background: "none", border: "none", cursor: "pointer", padding: "2px 0",
+          minWidth: 80, textAlign: "left",
+        }}
+      >
+        {activeEvents.length === 0
+          ? <span style={{ fontSize: "0.78rem", color: "#cbd5e1", fontFamily: "'Inter', sans-serif" }}>None ▾</span>
+          : <>
+              {activeEvents.map(e => (
+                <span key={e.key} style={{
+                  background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10,
+                  padding: "1px 7px", fontSize: "0.7rem", color: "#15803d",
+                  display: "inline-flex", alignItems: "center", gap: 3,
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  {e.icon} {e.label}
+                </span>
+              ))}
+              <span style={{ fontSize: "0.6rem", color: "#94a3b8" }}>▾</span>
+            </>
+        }
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", left: 0, zIndex: 100,
+          background: "#fff", border: "1px solid #e2e8f0", borderRadius: 9,
+          padding: "6px 0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)", minWidth: 175,
+        }}>
+          {EVENT_DEFS.map(e => {
+            const checked = (row as Record<string, boolean>)[e.key];
+            return (
+              <label key={e.key} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "8px 14px", cursor: "pointer",
+                fontSize: "0.87rem", color: "#334155", fontFamily: "'Inter', sans-serif",
+              }}
+                onMouseEnter={ev => (ev.currentTarget.style.background = "#f8fafc")}
+                onMouseLeave={ev => (ev.currentTarget.style.background = "none")}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => onUpdate({ [e.key]: !checked } as { autoBirthday?: boolean; autoHoliday?: boolean; autoAnniversary?: boolean })}
+                  style={{ accentColor: "#E23B2E", width: 15, height: 15, cursor: "pointer" }}
+                />
+                <span style={{ fontSize: "1rem" }}>{e.icon}</span>
+                <span style={{ fontWeight: checked ? 600 : 400 }}>{e.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -583,19 +711,7 @@ export default function BusinessDashboardPage() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", minWidth: 900 }}>
             <colgroup>
-              <col style={{ width: 28 }} />   {/* status dot */}
-              <col style={{ width: 180 }} />  {/* name */}
-              <col style={{ width: 130 }} />  {/* company */}
-              <col style={{ width: 140 }} />  {/* relationship */}
-              <col style={{ width: 110 }} />  {/* birthday */}
-              {showHomePurchase && <col style={{ width: 120 }} />}
-              <col style={{ width: 100 }} />  {/* client since */}
-              {moments.includes("birthday")    && <col style={{ width: 68 }} />}
-              {moments.includes("holiday")     && <col style={{ width: 68 }} />}
-              {moments.includes("anniversary") && <col style={{ width: 68 }} />}
-              <col style={{ width: 76 }} />  {/* approval */}
-              <col />                           {/* notes */}
-              <col style={{ width: 34 }} />   {/* delete */}
+              <col style={{ width: 28 }} /><col style={{ width: 180 }} /><col style={{ width: 130 }} /><col style={{ width: 140 }} /><col style={{ width: 110 }} />{showHomePurchase && <col style={{ width: 120 }} />}<col style={{ width: 100 }} /><col style={{ width: 175 }} /><col style={{ width: 80 }} /><col /><col style={{ width: 34 }} />
             </colgroup>
 
             <thead>
@@ -606,11 +722,18 @@ export default function BusinessDashboardPage() {
                 <th style={TH}>Relationship</th>
                 <th style={TH}>Birthday</th>
                 {showHomePurchase && <th style={TH}>Home Purchase</th>}
-                <th style={TH}>Client Since</th>
-                {moments.includes("birthday")    && <th style={{ ...TH, textAlign: "center" }}>🎂 Auto</th>}
-                {moments.includes("holiday")     && <th style={{ ...TH, textAlign: "center" }}>🎄 Auto</th>}
-                {moments.includes("anniversary") && <th style={{ ...TH, textAlign: "center" }}>📅 Auto</th>}
-                <th style={{ ...TH, textAlign: "center" }}>Approval</th>
+                <th style={TH}>
+                  Client Since
+                  <InfoTooltip text="We use this to send a card on their client anniversary — celebrating how long they've worked with you." />
+                </th>
+                <th style={TH}>
+                  Send Cards For
+                  <InfoTooltip text="Pick which occasions you'd like us to automatically send a card for this person. You can override per-client here even if a moment is on globally." />
+                </th>
+                <th style={{ ...TH, textAlign: "center" }}>
+                  Approval
+                  <InfoTooltip text="When on, you'll review and approve the card message before it's mailed. Great for VIP clients." />
+                </th>
                 <th style={TH}>Notes / Tags</th>
                 <th style={TH} />
               </tr>
@@ -696,26 +819,14 @@ export default function BusinessDashboardPage() {
                       />
                     </td>
 
-                    {/* Birthday Auto */}
-                    {moments.includes("birthday") && (
-                      <td style={{ ...TD, textAlign: "center" }}>
-                        <Toggle checked={row.autoBirthday} onChange={v => { updateRow(row._rowId, { autoBirthday: v }); }} />
-                      </td>
-                    )}
-
-                    {/* Holiday Auto */}
-                    {moments.includes("holiday") && (
-                      <td style={{ ...TD, textAlign: "center" }}>
-                        <Toggle checked={row.autoHoliday} onChange={v => { updateRow(row._rowId, { autoHoliday: v }); }} />
-                      </td>
-                    )}
-
-                    {/* Anniversary Auto */}
-                    {moments.includes("anniversary") && (
-                      <td style={{ ...TD, textAlign: "center" }}>
-                        <Toggle checked={row.autoAnniversary} onChange={v => { updateRow(row._rowId, { autoAnniversary: v }); }} />
-                      </td>
-                    )}
+                    {/* Events Picker */}
+                    <td style={TD}>
+                      <EventsPicker
+                        row={row}
+                        onUpdate={patch => updateRow(row._rowId, patch)}
+                        onSave={() => saveRow(row)}
+                      />
+                    </td>
 
                     {/* Require Approval */}
                     <td style={{ ...TD, textAlign: "center" }}>
