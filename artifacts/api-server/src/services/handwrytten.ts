@@ -159,21 +159,24 @@ export async function listHandwryttenCards(category?: string): Promise<Handwrytt
     });
 }
 
-export async function listHandwryttenFonts(): Promise<{ id: string; name: string }[]> {
+export async function listHandwryttenFonts(): Promise<{ id: string; name: string; previewUrl?: string }[]> {
   if (IS_MOCK || !hw) {
     return [
-      { id: "hwDavid", name: "David (Natural)" },
-      { id: "hwMegan", name: "Megan (Casual)" },
-      { id: "hwJennifer", name: "Jennifer (Formal)" },
+      { id: "hwDavid",    name: "David",    previewUrl: "https://app.handwrytten.com/uploads/fonts/hwDavid.png" },
+      { id: "hwMegan",    name: "Megan",    previewUrl: "https://app.handwrytten.com/uploads/fonts/hwMegan.png" },
+      { id: "hwJennifer", name: "Jennifer", previewUrl: "https://app.handwrytten.com/uploads/fonts/hwJennifer.png" },
+      { id: "hwAmber",    name: "Amber",    previewUrl: "https://app.handwrytten.com/uploads/fonts/hwAmber.png" },
+      { id: "hwSophia",   name: "Sophia",   previewUrl: "https://app.handwrytten.com/uploads/fonts/hwSophia.png" },
     ];
   }
   const fonts = await hw.fonts.list();
   return (fonts as any[]).map((f: any) => {
     const id = String(f.id ?? f.name ?? "");
-    // SDK returns empty name — derive a readable label from the ID (e.g. "hwAmber" → "Amber")
     const rawName = String(f.name ?? f.title ?? "").trim();
     const label = rawName || id.replace(/^hw/i, "");
-    return { id, name: label };
+    const previewUrl: string | undefined =
+      f.sampleImage ?? f.sample_image ?? f.previewUrl ?? f.preview_url ?? f.image ?? f.imageUrl ?? undefined;
+    return { id, name: label, previewUrl: previewUrl || undefined };
   });
 }
 

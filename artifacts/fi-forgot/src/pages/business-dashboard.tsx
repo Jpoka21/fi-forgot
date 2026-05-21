@@ -351,11 +351,14 @@ interface ClientRow {
   _isNew:  boolean;
 }
 
+interface HwFont { id: string; name: string; previewUrl?: string; }
+
 interface BizSettings {
   bizType:       string;
   bizTypeOther:  string;
   tone:          string;
   cardSignature: string;
+  cardFont:      string;
 }
 
 function newRow(businessId: string): ClientRow {
@@ -399,7 +402,7 @@ const SETTINGS_KEY = "fi_biz_settings";
 function loadSettings(): BizSettings {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
-  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "" }; }
+  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional", cardSignature: "", cardFont: "" }; }
 }
 
 function saveSettings(s: BizSettings) {
@@ -522,6 +525,10 @@ export default function BusinessDashboardPage() {
   const [bizTypeOther,  setBizTypeOther]  = useState<string>(stored.bizTypeOther  ?? "");
   const [tone,          setTone]          = useState<string>(stored.tone          ?? "Warm Professional");
   const [cardSignature, setCardSignature] = useState<string>(stored.cardSignature ?? "");
+  const [cardFont,      setCardFont]      = useState<string>(stored.cardFont      ?? "");
+  const [fontPickerOpen, setFontPickerOpen] = useState(false);
+  const [hwFonts,       setHwFonts]      = useState<HwFont[]>([]);
+  const [fontsLoading,  setFontsLoading]  = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Rows
@@ -560,8 +567,8 @@ export default function BusinessDashboardPage() {
 
   // Persist settings
   useEffect(() => {
-    saveSettings({ bizType, bizTypeOther, tone, cardSignature });
-  }, [bizType, bizTypeOther, tone, cardSignature]);
+    saveSettings({ bizType, bizTypeOther, tone, cardSignature, cardFont });
+  }, [bizType, bizTypeOther, tone, cardSignature, cardFont]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -734,6 +741,40 @@ export default function BusinessDashboardPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Handwriting Style */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Handwriting Style</div>
+              <button
+                type="button"
+                onClick={async () => {
+                  setFontPickerOpen(true);
+                  if (hwFonts.length === 0) {
+                    setFontsLoading(true);
+                    try {
+                      const r = await fetch("/api/handwrytten-fonts");
+                      const d = await r.json() as { fonts: HwFont[] };
+                      setHwFonts(d.fonts ?? []);
+                    } catch { /* leave empty */ }
+                    setFontsLoading(false);
+                  }
+                }}
+                style={{
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)",
+                  borderRadius: 6, color: WHITE, padding: "7px 12px",
+                  fontSize: "0.82rem", cursor: "pointer", textAlign: "left",
+                  fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 8,
+                  width: 220,
+                }}
+              >
+                <span style={{ fontSize: "1rem" }}>✍️</span>
+                <span style={{ flex: 1 }}>{cardFont ? (hwFonts.find(f => f.id === cardFont)?.name ?? cardFont) : "Choose a style…"}</span>
+                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem" }}>▾</span>
+              </button>
+              <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.3)", fontFamily: "'Inter', sans-serif" }}>
+                The handwriting style used on every card.
+              </div>
             </div>
 
             {/* Card Signature */}
@@ -987,6 +1028,95 @@ export default function BusinessDashboardPage() {
         <div style={{ flex: 1 }} />
         <div style={{ fontSize: "0.72rem", color: "#cbd5e1" }}>Press Enter to add a new row · Tab to move between cells</div>
       </div>
+
+      {/* ── Font Picker Modal ── */}
+      {fontPickerOpen && (
+        <div
+          onClick={() => setFontPickerOpen(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 500,
+            background: "rgba(0,0,0,0.55)", display: "flex",
+            alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "#fff", borderRadius: 14, padding: "28px 28px 20px",
+              width: 620, maxWidth: "95vw", maxHeight: "80vh",
+              display: "flex", flexDirection: "column", gap: 16,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: "1.05rem", color: NAVY, fontFamily: "'Inter', sans-serif" }}>
+              Choose a Handwriting Style
+            </div>
+            <div style={{ fontSize: "0.82rem", color: "#64748b", marginTop: -8, fontFamily: "'Inter', sans-serif" }}>
+              Every card we send will be handwritten using real pens. Pick the style that fits your brand.
+            </div>
+
+            {fontsLoading ? (
+              <div style={{ textAlign: "center", padding: "32px 0", color: "#94a3b8", fontFamily: "'Inter', sans-serif" }}>Loading styles…</div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, overflowY: "auto", paddingRight: 4 }}>
+                {hwFonts.map(font => {
+                  const selected = cardFont === font.id;
+                  return (
+                    <button
+                      key={font.id}
+                      type="button"
+                      onClick={() => { setCardFont(font.id); setFontPickerOpen(false); }}
+                      style={{
+                        border: `2px solid ${selected ? RED : "#e2e8f0"}`,
+                        borderRadius: 10, padding: "14px 16px", cursor: "pointer",
+                        background: selected ? "#fff5f5" : "#fff",
+                        textAlign: "left", transition: "all 0.12s",
+                        display: "flex", flexDirection: "column", gap: 10,
+                      }}
+                      onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLElement).style.borderColor = "#cbd5e1"; }}
+                      onMouseLeave={e => { if (!selected) (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0"; }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontWeight: 700, fontSize: "0.88rem", color: NAVY, fontFamily: "'Inter', sans-serif" }}>{font.name}</span>
+                        {selected && <span style={{ fontSize: "0.72rem", background: RED, color: "#fff", borderRadius: 20, padding: "2px 8px", fontFamily: "'Inter', sans-serif" }}>Selected</span>}
+                      </div>
+                      {font.previewUrl ? (
+                        <img
+                          src={font.previewUrl}
+                          alt={`${font.name} handwriting sample`}
+                          style={{ width: "100%", height: 70, objectFit: "contain", objectPosition: "left center" }}
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; (e.currentTarget.nextSibling as HTMLElement).style.display = "block"; }}
+                        />
+                      ) : null}
+                      <div style={{
+                        display: font.previewUrl ? "none" : "block",
+                        fontFamily: "cursive", fontSize: "1.1rem", color: "#334155",
+                        lineHeight: 1.5, paddingTop: 4,
+                      }}>
+                        Warm wishes and heartfelt thanks!
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 4, borderTop: "1px solid #f1f5f9" }}>
+              {cardFont && (
+                <button type="button" onClick={() => { setCardFont(""); setFontPickerOpen(false); }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "0.8rem", fontFamily: "'Inter', sans-serif" }}>
+                  Clear selection
+                </button>
+              )}
+              <div style={{ flex: 1 }} />
+              <button type="button" onClick={() => setFontPickerOpen(false)}
+                style={{ background: NAVY, color: WHITE, border: "none", borderRadius: 7, padding: "8px 20px", cursor: "pointer", fontSize: "0.85rem", fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
