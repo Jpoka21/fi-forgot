@@ -814,8 +814,8 @@ export default function BusinessDashboardPage() {
               </div>
               <div style={{ display: "flex", gap: 10 }}>
                 {([
-                  { value: "auto",     icon: "🚀", title: "Full Autopilot",    desc: "We write, design, and mail every card automatically. No action needed from you." },
-                  { value: "approval", icon: "✋", title: "Review & Approve",  desc: "We queue the card and notify you. You review and approve before anything ships." },
+                  { value: "auto",     icon: "🚀", title: "Full Autopilot",    desc: "We write, design, and mail every card automatically. No action needed from you.",  recommended: false },
+                  { value: "approval", icon: "✋", title: "Review & Approve",  desc: "We queue the card and notify you. You review and approve before anything ships.",    recommended: true  },
                 ] as const).map(opt => {
                   const active = automationMode === opt.value;
                   return (
@@ -827,7 +827,10 @@ export default function BusinessDashboardPage() {
                         transition: "all 0.12s",
                       }}>
                       <div style={{ fontSize: "1.2rem", marginBottom: 4 }}>{opt.icon}</div>
-                      <div style={{ fontWeight: 700, fontSize: "0.78rem", color: active ? "#fff" : "rgba(255,255,255,0.7)", fontFamily: "'Inter', sans-serif", marginBottom: 3 }}>{opt.title}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                        <span style={{ fontWeight: 700, fontSize: "0.78rem", color: active ? "#fff" : "rgba(255,255,255,0.7)", fontFamily: "'Inter', sans-serif" }}>{opt.title}</span>
+                        {opt.recommended && <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.05em", background: "#16a34a", color: "#fff", borderRadius: 4, padding: "1px 5px", fontFamily: "'Inter', sans-serif" }}>Recommended</span>}
+                      </div>
                       <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>{opt.desc}</div>
                     </button>
                   );
