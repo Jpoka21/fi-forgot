@@ -848,7 +848,7 @@ export default function BusinessDashboardPage() {
                 Cards are mailed ~7 days before the occasion to ensure delivery. These intervals are before the card leaves — not before the occasion itself.
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {(["Same day it mails", "2 days before it mails", "7 days before it mails", "14 days before it mails", "30 days before it mails"] as const).map(opt => {
+                {(["7 days before it mails", "14 days before it mails", "30 days before it mails"] as const).map(opt => {
                   const active = notifyTiming.includes(opt);
                   return (
                     <button key={opt} type="button" onClick={() => {
