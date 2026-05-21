@@ -142,34 +142,26 @@ function YearPicker({ value, onChange, onBlur }: {
 
 function InfoTooltip({ text }: { text: string }) {
   const [show, setShow] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (!show) return;
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setShow(false);
-    }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [show]);
   return (
-    <span ref={ref} style={{ position: "relative", display: "inline-flex", alignItems: "center", marginLeft: 4, verticalAlign: "middle" }}>
+    <span style={{ position: "relative", display: "inline-flex", alignItems: "center", marginLeft: 4, verticalAlign: "middle" }}>
       <span
-        onClick={e => { e.stopPropagation(); setShow(s => !s); }}
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
         style={{
-          cursor: "pointer", color: show ? "#475569" : "#94a3b8", fontSize: "0.6rem", fontWeight: 700,
-          border: `1.5px solid ${show ? "#475569" : "#94a3b8"}`, borderRadius: "50%", width: 13, height: 13,
+          cursor: "help", color: "#94a3b8", fontSize: "0.6rem", fontWeight: 700,
+          border: "1.5px solid #94a3b8", borderRadius: "50%", width: 13, height: 13,
           display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1,
-          userSelect: "none", transition: "color 0.1s, border-color 0.1s",
+          userSelect: "none",
         }}
       >i</span>
       {show && (
         <div style={{
           position: "absolute", bottom: "calc(100% + 7px)", left: "50%", transform: "translateX(-50%)",
           background: "#1e293b", color: "#fff", fontSize: "0.72rem", padding: "8px 11px",
-          borderRadius: 7, width: 210, lineHeight: 1.5, zIndex: 300,
+          borderRadius: 7, width: 210, lineHeight: 1.5, zIndex: 200,
           boxShadow: "0 6px 20px rgba(0,0,0,0.25)", whiteSpace: "normal",
           fontWeight: 400, letterSpacing: 0, textTransform: "none",
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Inter', sans-serif", pointerEvents: "none",
         }}>
           {text}
           <div style={{
