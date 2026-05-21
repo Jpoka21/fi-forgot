@@ -65,11 +65,11 @@ export default function BusinessLoginPage() {
     <div style={{ minHeight: "100vh", background: NAVY, display: "flex", flexDirection: "column" }}>
 
       {/* Nav */}
-      <nav style={{ padding: "0 40px", height: 80, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+      <nav style={{ padding: "0 40px", height: 96, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.4rem", color: RED, fontStyle: "italic", marginRight: 6 }}>F*</span>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.4rem", color: WHITE, letterSpacing: "0.05em" }}>I FORGOT</span>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", marginLeft: 8, alignSelf: "flex-end", paddingBottom: 5 }}>BUSINESS</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: RED, fontStyle: "italic", marginRight: 6 }}>F*</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: WHITE, letterSpacing: "0.05em" }}>I FORGOT</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.45)", marginLeft: 10, alignSelf: "flex-end", paddingBottom: 6 }}>BUSINESS</span>
         </Link>
         <Link href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
           Personal sign in →

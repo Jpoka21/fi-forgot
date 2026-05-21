@@ -398,19 +398,19 @@ export default function BusinessDashboardPage() {
 
       {/* ── Header ── */}
       <header style={{
-        background: NAVY, padding: "0 24px", height: 60,
+        background: NAVY, padding: "0 24px", height: 96,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         position: "sticky", top: 0, zIndex: 50,
         boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: WHITE, letterSpacing: "0.05em" }}>
-              <span style={{ color: RED }}>F*</span>I FORGOT
-            </span>
+          <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: RED, fontStyle: "italic", marginRight: 6 }}>F*</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.1rem", color: WHITE, letterSpacing: "0.05em" }}>I FORGOT</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.45)", marginLeft: 10, alignSelf: "flex-end", paddingBottom: 6 }}>BUSINESS</span>
           </Link>
-          <div style={{ width: 1, height: 24, background: "rgba(255,255,255,0.12)" }} />
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.75)" }}>
+          <div style={{ width: 1, height: 32, background: "rgba(255,255,255,0.12)" }} />
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.75)" }}>
             YOUR CLIENTS
           </span>
         </div>
