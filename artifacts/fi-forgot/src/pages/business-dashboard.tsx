@@ -226,14 +226,19 @@ function EventsPicker({ row, onUpdate, onSave }: {
     <div ref={ref} style={{ position: "relative" }}>
       <button
         onClick={() => setOpen(o => !o)}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#94a3b8"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0"; }}
         style={{
           display: "flex", flexWrap: "wrap", gap: 3, alignItems: "center",
-          background: "none", border: "none", cursor: "pointer", padding: "2px 0",
-          minWidth: 80, textAlign: "left",
+          background: "#fafafa", cursor: "pointer", textAlign: "left",
+          border: "1px dashed #e2e8f0", borderRadius: 7,
+          padding: "3px 7px", minWidth: 120, transition: "border-color 0.15s",
         }}
       >
         {activeEvents.length === 0
-          ? <span style={{ fontSize: "0.78rem", color: "#cbd5e1", fontFamily: "'Inter', sans-serif" }}>None ▾</span>
+          ? <span style={{ fontSize: "0.78rem", color: "#94a3b8", fontFamily: "'Inter', sans-serif", fontStyle: "italic" }}>
+              + Choose events ▾
+            </span>
           : <>
               {activeEvents.map(e => (
                 <span key={e.key} style={{
@@ -245,7 +250,7 @@ function EventsPicker({ row, onUpdate, onSave }: {
                   {e.icon} {e.label}
                 </span>
               ))}
-              <span style={{ fontSize: "0.6rem", color: "#94a3b8" }}>▾</span>
+              <span style={{ fontSize: "0.6rem", color: "#94a3b8", marginLeft: 1 }}>▾</span>
             </>
         }
       </button>
