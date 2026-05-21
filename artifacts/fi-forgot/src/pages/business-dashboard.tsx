@@ -15,11 +15,6 @@ const RELATIONSHIP_OPTS = [
   "Client", "Referral Partner", "VIP Customer", "Other",
 ];
 
-const ALL_MOMENTS = [
-  { key: "birthday",    label: "Birthdays",    icon: "🎂" },
-  { key: "holiday",     label: "Holiday Cards", icon: "🎄" },
-  { key: "anniversary", label: "Anniversaries", icon: "📅" },
-];
 
 const TONE_OPTS = ["Warm Professional", "Professional", "Friendly", "Casual", "Luxury / High End"];
 
@@ -359,7 +354,7 @@ interface ClientRow {
 interface BizSettings {
   bizType:      string;
   bizTypeOther: string;
-  moments:      string[];
+
   tone:         string;
 }
 
@@ -404,7 +399,7 @@ const SETTINGS_KEY = "fi_biz_settings";
 function loadSettings(): BizSettings {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}");
-  } catch { return { bizType: "", bizTypeOther: "", moments: ["birthday", "holiday"], tone: "Warm Professional" }; }
+  } catch { return { bizType: "", bizTypeOther: "", tone: "Warm Professional" }; }
 }
 
 function saveSettings(s: BizSettings) {
@@ -525,7 +520,6 @@ export default function BusinessDashboardPage() {
   const stored = loadSettings();
   const [bizType,      setBizType]      = useState<string>(stored.bizType      ?? "");
   const [bizTypeOther, setBizTypeOther] = useState<string>(stored.bizTypeOther ?? "");
-  const [moments,  setMoments]  = useState<string[]>(stored.moments ?? ["birthday", "holiday"]);
   const [tone,     setTone]     = useState<string>(stored.tone     ?? "Warm Professional");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -565,8 +559,8 @@ export default function BusinessDashboardPage() {
 
   // Persist settings
   useEffect(() => {
-    saveSettings({ bizType, bizTypeOther, moments, tone });
-  }, [bizType, bizTypeOther, moments, tone]);
+    saveSettings({ bizType, bizTypeOther, tone });
+  }, [bizType, bizTypeOther, tone]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -636,8 +630,6 @@ export default function BusinessDashboardPage() {
     setSaving(false);
   }
 
-  const toggleMoment = (key: string) =>
-    setMoments(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
 
   const filtered = rows.filter(r =>
     !search || r.fullName.toLowerCase().includes(search.toLowerCase()) ||
@@ -741,19 +733,6 @@ export default function BusinessDashboardPage() {
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Moments to track */}
-            <div>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>Moments to Track</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {ALL_MOMENTS.map(m => (
-                  <button key={m.key} type="button" onClick={() => toggleMoment(m.key)}
-                    style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, border: moments.includes(m.key) ? `1.5px solid ${RED}` : "1.5px solid rgba(255,255,255,0.15)", background: moments.includes(m.key) ? `${RED}22` : "rgba(255,255,255,0.05)", color: moments.includes(m.key) ? "#fff" : "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer", transition: "all 0.12s" }}>
-                    {m.icon} {m.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Tone */}
