@@ -556,7 +556,8 @@ export default function BusinessDashboardPage() {
   const [notifyEmail,    setNotifyEmail]   = useState<string>(stored.notifyEmail    ?? "");
   const [notifyPhone,    setNotifyPhone]   = useState<string>(stored.notifyPhone    ?? "");
   const [automationMode, setAutomationMode] = useState<"auto" | "approval">(stored.automationMode ?? "approval");
-  const [fontPickerOpen, setFontPickerOpen] = useState(false);
+  const [fontPickerOpen,  setFontPickerOpen]  = useState(false);
+  const [activeSection,   setActiveSection]   = useState<"recipients" | "upcoming">("upcoming");
   const [hwFonts,       setHwFonts]      = useState<HwFont[]>([]);
   const [fontsLoading,  setFontsLoading]  = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -710,6 +711,50 @@ export default function BusinessDashboardPage() {
     });
 
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
+
+  interface UpcomingCard {
+    key: string;
+    clientRowId: string;
+    clientName: string;
+    company: string;
+    eventType: string;
+    occasionDate: Date;
+    mailDate: Date;
+    daysUntilMail: number;
+    requireApproval: boolean;
+  }
+
+  const upcomingCards: UpcomingCard[] = (() => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const cards: UpcomingCard[] = [];
+    for (const row of rows) {
+      if (!row.fullName.trim()) continue;
+      const add = (type: string, occ: Date) => {
+        const md = new Date(occ); md.setDate(md.getDate() - 7);
+        cards.push({
+          key: `${row._rowId}-${type}`,
+          clientRowId: row._rowId,
+          clientName: row.fullName,
+          company: row.company,
+          eventType: type,
+          occasionDate: occ,
+          mailDate: md,
+          daysUntilMail: Math.round((md.getTime() - today.getTime()) / 86_400_000),
+          requireApproval: row.requireApproval,
+        });
+      };
+      if (row.autoBirthday && row.birthday) {
+        const p = row.birthday.split("-").map(Number);
+        if (p.length >= 3) add("Birthday", nextOccurrence(p[1]!, p[2]!));
+      }
+      if (row.autoHoliday) add("Happy Holidays", nextOccurrence(12, 25));
+      if (row.autoAnniversary && row.anniversaryDate) {
+        const p = row.anniversaryDate.split("-").map(Number);
+        if (p.length >= 3) add("Anniversary", nextOccurrence(p[1]!, p[2]!));
+      }
+    }
+    return cards.sort((a, b) => a.occasionDate.getTime() - b.occasionDate.getTime());
+  })();
 
   // ── Cell styles ────────────────────────────────────────────────────────────
   const TH: React.CSSProperties = {
@@ -993,20 +1038,56 @@ export default function BusinessDashboardPage() {
         )}
       </div>
 
+      {/* ── Section Tabs ─────────────────────────────────────────────────────── */}
+      <div style={{ background: DARK, borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 28px", display: "flex", gap: 4, flexShrink: 0 }}>
+        {([
+          { id: "upcoming",   label: "Upcoming Cards", icon: "📅", count: upcomingCards.length },
+          { id: "recipients", label: "All Recipients",  icon: "👥", count: rows.filter(r => r.fullName.trim()).length },
+        ] as const).map(tab => {
+          const active = activeSection === tab.id;
+          return (
+            <button key={tab.id} onClick={() => setActiveSection(tab.id)}
+              style={{
+                padding: "12px 18px", border: "none", cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.04em",
+                background: "none", borderBottom: `2px solid ${active ? RED : "transparent"}`,
+                color: active ? WHITE : "rgba(255,255,255,0.45)",
+                transition: "all 0.12s", display: "flex", alignItems: "center", gap: 7,
+              }}>
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+              <span style={{
+                background: active ? RED : "rgba(255,255,255,0.12)",
+                color: active ? WHITE : "rgba(255,255,255,0.5)",
+                borderRadius: 20, padding: "1px 7px", fontSize: "0.68rem", fontWeight: 700,
+              }}>{tab.count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <div style={{ background: WHITE, borderBottom: "1px solid #e2e8f0", padding: "12px 28px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-        {/* Search */}
-        <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
-          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "0.85rem" }}>🔍</span>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients…"
-            style={{ width: "100%", paddingLeft: 30, paddingRight: 12, paddingTop: 8, paddingBottom: 8, border: "1.5px solid #e2e8f0", borderRadius: 8, fontSize: "0.88rem", background: "#f8fafc", outline: "none", boxSizing: "border-box" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "#94a3b8")}
-            onBlur={e => (e.currentTarget.style.borderColor = "#e2e8f0")} />
-        </div>
-
-        <span style={{ fontSize: "0.82rem", color: "#94a3b8", marginLeft: 4 }}>
-          {rows.filter(r => r.fullName.trim()).length} client{rows.filter(r => r.fullName.trim()).length !== 1 ? "s" : ""}
-        </span>
+        {activeSection === "recipients" && (
+          <>
+            {/* Search */}
+            <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
+              <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "0.85rem" }}>🔍</span>
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients…"
+                style={{ width: "100%", paddingLeft: 30, paddingRight: 12, paddingTop: 8, paddingBottom: 8, border: "1.5px solid #e2e8f0", borderRadius: 8, fontSize: "0.88rem", background: "#f8fafc", outline: "none", boxSizing: "border-box" }}
+                onFocus={e => (e.currentTarget.style.borderColor = "#94a3b8")}
+                onBlur={e => (e.currentTarget.style.borderColor = "#e2e8f0")} />
+            </div>
+            <span style={{ fontSize: "0.82rem", color: "#94a3b8", marginLeft: 4 }}>
+              {rows.filter(r => r.fullName.trim()).length} client{rows.filter(r => r.fullName.trim()).length !== 1 ? "s" : ""}
+            </span>
+          </>
+        )}
+        {activeSection === "upcoming" && (
+          <span style={{ fontSize: "0.82rem", color: "#64748b" }}>
+            {upcomingCards.length} card{upcomingCards.length !== 1 ? "s" : ""} scheduled across {rows.filter(r => r.fullName.trim()).length} client{rows.filter(r => r.fullName.trim()).length !== 1 ? "s" : ""}
+          </span>
+        )}
 
         <div style={{ flex: 1 }} />
 
@@ -1017,13 +1098,108 @@ export default function BusinessDashboardPage() {
           </button>
         )}
 
-        <button onClick={addRow}
-          style={{ padding: "8px 18px", borderRadius: 8, background: NAVY, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-          + ADD ROW
-        </button>
+        {activeSection === "recipients" && (
+          <button onClick={addRow}
+            style={{ padding: "8px 18px", borderRadius: 8, background: NAVY, border: "none", color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+            + ADD ROW
+          </button>
+        )}
       </div>
 
+      {/* ── Upcoming Cards Section ──────────────────────────────────────────── */}
+      {activeSection === "upcoming" && (
+        <div style={{ flex: 1, overflowY: "auto", background: "#f1f5f9", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 10 }}>
+          {upcomingCards.length === 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, paddingTop: 80, color: "#94a3b8" }}>
+              <span style={{ fontSize: "2.5rem" }}>📭</span>
+              <div style={{ fontSize: "0.95rem", fontWeight: 600 }}>No cards scheduled yet</div>
+              <div style={{ fontSize: "0.82rem" }}>Add recipients and turn on events in the All Recipients tab</div>
+            </div>
+          ) : (
+            upcomingCards.map(card => {
+              const daysAway = card.daysUntilMail;
+              const urgency = daysAway <= 0 ? "#ef4444" : daysAway <= 14 ? "#f97316" : daysAway <= 45 ? "#eab308" : "#22c55e";
+              const urgencyBg = daysAway <= 0 ? "#fef2f2" : daysAway <= 14 ? "#fff7ed" : daysAway <= 45 ? "#fefce8" : "#f0fdf4";
+              const eventIcon = card.eventType === "Birthday" ? "🎂" : card.eventType === "Happy Holidays" ? "🎄" : card.eventType === "Anniversary" ? "💼" : "📅";
+              const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+              return (
+                <div key={card.key} style={{
+                  background: WHITE, borderRadius: 10, padding: "16px 20px",
+                  display: "flex", alignItems: "center", gap: 16,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.06)", border: "1px solid #e2e8f0",
+                }}>
+                  {/* Days-away pill */}
+                  <div style={{
+                    minWidth: 70, textAlign: "center", background: urgencyBg,
+                    border: `1.5px solid ${urgency}`, borderRadius: 8, padding: "6px 10px",
+                    flexShrink: 0,
+                  }}>
+                    <div style={{ fontSize: "1.1rem", fontWeight: 800, color: urgency, lineHeight: 1 }}>
+                      {daysAway <= 0 ? "NOW" : daysAway}
+                    </div>
+                    {daysAway > 0 && (
+                      <div style={{ fontSize: "0.62rem", fontWeight: 600, color: urgency, letterSpacing: "0.06em", textTransform: "uppercase", marginTop: 2 }}>
+                        days
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Event type */}
+                  <div style={{ minWidth: 130, flexShrink: 0 }}>
+                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: NAVY, display: "flex", alignItems: "center", gap: 5 }}>
+                      <span>{eventIcon}</span> {card.eventType}
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div style={{ width: 1, height: 36, background: "#e2e8f0", flexShrink: 0 }} />
+
+                  {/* Client info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {card.clientName}
+                    </div>
+                    {card.company && (
+                      <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {card.company}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dates */}
+                  <div style={{ textAlign: "right", flexShrink: 0 }}>
+                    <div style={{ fontSize: "0.75rem", color: "#64748b", display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+                      <span style={{ color: "#94a3b8" }}>✉ mails</span>
+                      <span style={{ fontWeight: 600, color: "#334155" }}>{fmt(card.mailDate)}</span>
+                    </div>
+                    <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: 3, display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+                      <span>occasion</span>
+                      <span>{fmt(card.occasionDate)}</span>
+                    </div>
+                  </div>
+
+                  {/* Approval badge */}
+                  <div style={{ flexShrink: 0 }}>
+                    {card.requireApproval ? (
+                      <span style={{ background: "#fffbeb", color: "#b45309", border: "1px solid #fcd34d", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
+                        ⏳ Needs Approval
+                      </span>
+                    ) : (
+                      <span style={{ background: "#f0fdf4", color: "#15803d", border: "1px solid #86efac", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
+                        ✓ Auto-Send
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
       {/* ── Spreadsheet ─────────────────────────────────────────────────────── */}
+      {activeSection === "recipients" && (
+      <>
       <div style={{ flex: 1, overflowX: "auto", overflowY: "auto", background: WHITE }}>
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200, color: "#94a3b8", fontSize: "0.9rem" }}>
@@ -1209,6 +1385,8 @@ export default function BusinessDashboardPage() {
         <div style={{ flex: 1 }} />
         <div style={{ fontSize: "0.72rem", color: "#cbd5e1" }}>Press Enter to add a new row · Tab to move between cells</div>
       </div>
+      </>
+      )}
 
       {/* ── Font Picker Modal ── */}
       {fontPickerOpen && (
