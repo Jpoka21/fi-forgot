@@ -217,13 +217,17 @@ function AnnivDetail({ row, onUpdate, onSave }: {
     <div ref={ref} style={{ position: "relative", display: "inline-flex" }}>
       <button
         onClick={() => setOpen(o => !o)}
-        title="Edit anniversary details"
+        title="Add anniversary details"
         style={{
-          background: "none", border: "none", cursor: "pointer", padding: "0 2px",
-          fontSize: "0.7rem", lineHeight: 1,
+          background: hasDetail ? "#f0fdf4" : "#f8fafc",
+          border: `1px solid ${hasDetail ? "#bbf7d0" : "#e2e8f0"}`,
+          borderRadius: 10, cursor: "pointer",
+          padding: "2px 8px", fontSize: "0.68rem", lineHeight: 1.4,
           color: hasDetail ? "#15803d" : "#94a3b8",
+          fontFamily: "'Inter', sans-serif", fontWeight: hasDetail ? 600 : 400,
+          whiteSpace: "nowrap",
         }}
-      >✏</button>
+      >{hasDetail ? "✏ Edit Details" : "+ Add Details"}</button>
       {open && (
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 200,
@@ -322,18 +326,6 @@ function EventsPicker({ row, onUpdate, onSave }: {
         })}
       </div>
 
-      {/* Always-visible anniversary hint */}
-      {row.autoAnniversary && (
-        <div style={{
-          fontSize: "0.67rem", color: "#64748b", fontFamily: "'Inter', sans-serif",
-          lineHeight: 1.4, paddingLeft: 2,
-        }}>
-          We will reference this when writing the card.{" "}
-          <strong style={{ color: "#475569" }}>
-            Not a wedding anniversary — think home closing, deal anniversary, 1-year client milestone, or any meaningful business date.
-          </strong>
-        </div>
-      )}
     </div>
   );
 }
