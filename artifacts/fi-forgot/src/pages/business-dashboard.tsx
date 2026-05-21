@@ -83,7 +83,7 @@ function MonthYearPicker({ value, onChange, onBlur }: {
   onBlur: () => void;
 }) {
   // value format: "Jun 2022"
-  const parts = value.split(" ");
+  const parts = (value ?? "").split(" ");
   const month = MONTHS.includes(parts[0]) ? parts[0] : "";
   const year  = parts[1] ?? "";
 
@@ -186,14 +186,23 @@ function InfoTooltip({ text }: { text: string }) {
 // ── Events Picker ─────────────────────────────────────────────────────────────
 
 const EVENT_DEFS = [
-  { key: "autoBirthday",   icon: "🎂", label: "Birthday"    },
-  { key: "autoHoliday",    icon: "🎄", label: "Holiday"     },
-  { key: "autoAnniversary",icon: "📅", label: "Anniversary" },
+  { key: "autoBirthday",   icon: "🎂", label: "Birthday"              },
+  { key: "autoHoliday",    icon: "🎄", label: "Holiday"               },
+  { key: "autoAnniversary",icon: "📅", label: "Special Anniversary"   },
 ];
 
+type EventsPickerRow = {
+  autoBirthday: boolean;
+  autoHoliday: boolean;
+  autoAnniversary: boolean;
+  anniversaryDate: string;
+  anniversaryNote: string;
+};
+type EventsPickerPatch = Partial<EventsPickerRow>;
+
 function EventsPicker({ row, onUpdate, onSave }: {
-  row: { autoBirthday: boolean; autoHoliday: boolean; autoAnniversary: boolean };
-  onUpdate: (patch: { autoBirthday?: boolean; autoHoliday?: boolean; autoAnniversary?: boolean }) => void;
+  row: EventsPickerRow;
+  onUpdate: (patch: EventsPickerPatch) => void;
   onSave: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -245,28 +254,78 @@ function EventsPicker({ row, onUpdate, onSave }: {
         <div style={{
           position: "absolute", top: "calc(100% + 4px)", left: 0, zIndex: 100,
           background: "#fff", border: "1px solid #e2e8f0", borderRadius: 9,
-          padding: "6px 0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)", minWidth: 175,
+          padding: "6px 0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)", minWidth: 240,
         }}>
           {EVENT_DEFS.map(e => {
             const checked = (row as Record<string, boolean>)[e.key];
+            const isAnniv = e.key === "autoAnniversary";
             return (
-              <label key={e.key} style={{
-                display: "flex", alignItems: "center", gap: 10,
-                padding: "8px 14px", cursor: "pointer",
-                fontSize: "0.87rem", color: "#334155", fontFamily: "'Inter', sans-serif",
-              }}
-                onMouseEnter={ev => (ev.currentTarget.style.background = "#f8fafc")}
-                onMouseLeave={ev => (ev.currentTarget.style.background = "none")}
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => onUpdate({ [e.key]: !checked } as { autoBirthday?: boolean; autoHoliday?: boolean; autoAnniversary?: boolean })}
-                  style={{ accentColor: "#E23B2E", width: 15, height: 15, cursor: "pointer" }}
-                />
-                <span style={{ fontSize: "1rem" }}>{e.icon}</span>
-                <span style={{ fontWeight: checked ? 600 : 400 }}>{e.label}</span>
-              </label>
+              <div key={e.key}>
+                <label style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "8px 14px", cursor: "pointer",
+                  fontSize: "0.87rem", color: "#334155", fontFamily: "'Inter', sans-serif",
+                }}
+                  onMouseEnter={ev => { if (!isAnniv || !checked) ev.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={ev => (ev.currentTarget.style.background = "none")}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => onUpdate({ [e.key]: !checked } as EventsPickerPatch)}
+                    style={{ accentColor: "#E23B2E", width: 15, height: 15, cursor: "pointer", flexShrink: 0 }}
+                  />
+                  <span style={{ fontSize: "1rem" }}>{e.icon}</span>
+                  <span style={{ fontWeight: checked ? 600 : 400 }}>{e.label}</span>
+                  {isAnniv && (
+                    <InfoTooltip text="Not a wedding anniversary — this is a meaningful business milestone: a home closing, deal anniversary, 1-year client milestone, or any date worth celebrating." />
+                  )}
+                </label>
+
+                {/* Anniversary detail fields — shown when checked */}
+                {isAnniv && checked && (
+                  <div style={{
+                    margin: "0 14px 10px 39px",
+                    padding: "10px 12px",
+                    background: "#f8fafc",
+                    borderRadius: 7,
+                    border: "1px solid #e2e8f0",
+                    display: "flex", flexDirection: "column", gap: 8,
+                  }}>
+                    <div>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 4, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                        Anniversary Date
+                      </div>
+                      <MonthYearPicker
+                        value={row.anniversaryDate}
+                        onChange={v => onUpdate({ anniversaryDate: v })}
+                        onBlur={onSave}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 4, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                        What are we celebrating?
+                      </div>
+                      <input
+                        value={row.anniversaryNote}
+                        onChange={e => onUpdate({ anniversaryNote: e.target.value })}
+                        onBlur={onSave}
+                        placeholder="e.g. Closed on their first home, 3-year client milestone…"
+                        style={{
+                          width: "100%", border: "none", background: "transparent",
+                          fontSize: "0.82rem", color: "#334155", outline: "none",
+                          fontFamily: "'Inter', sans-serif", padding: "1px 0",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                      <div style={{ borderBottom: "1px solid #cbd5e1", marginTop: 2 }} />
+                      <div style={{ fontSize: "0.67rem", color: "#94a3b8", marginTop: 4, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>
+                        This helps us write a card that feels personal — the AI will reference what you're celebrating.
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -290,6 +349,8 @@ interface ClientRow {
   autoBirthday:   boolean;
   autoHoliday:    boolean;
   autoAnniversary: boolean;
+  anniversaryDate: string;
+  anniversaryNote: string;
   requireApproval: boolean;
   notes: string;
   _dirty: boolean;
@@ -310,7 +371,8 @@ function newRow(businessId: string): ClientRow {
     businessId,
     fullName: "", company: "", relationship: "", birthday: "",
     homePurchaseAnniversary: "", clientSince: "",
-    autoBirthday: true, autoHoliday: true, autoAnniversary: false, requireApproval: false,
+    autoBirthday: true, autoHoliday: true, autoAnniversary: false,
+    anniversaryDate: "", anniversaryNote: "", requireApproval: false,
     notes: "",
     _dirty: false, _saving: false, _saved: false, _isNew: true,
   };
@@ -330,6 +392,8 @@ function rowFromClient(c: Record<string, unknown>, businessId: string): ClientRo
     autoBirthday:   Boolean(c.autoBirthday   ?? true),
     autoHoliday:    Boolean(c.autoHoliday    ?? true),
     autoAnniversary: Boolean(c.autoAnniversary ?? false),
+    anniversaryDate: String(c.anniversaryDate ?? ""),
+    anniversaryNote: String(c.anniversaryNote ?? ""),
     requireApproval: Boolean(c.requireApproval ?? false),
     notes: String(c.notes ?? ""),
     _dirty: false, _saving: false, _saved: true, _isNew: false,
@@ -543,7 +607,10 @@ export default function BusinessDashboardPage() {
           homePurchaseAnniversary: row.homePurchaseAnniversary || undefined,
           clientSince: row.clientSince || undefined,
           autoBirthday: row.autoBirthday, autoHoliday: row.autoHoliday,
-          autoAnniversary: row.autoAnniversary, requireApproval: row.requireApproval,
+          autoAnniversary: row.autoAnniversary,
+          anniversaryDate: row.anniversaryDate || undefined,
+          anniversaryNote: row.anniversaryNote || undefined,
+          requireApproval: row.requireApproval,
           notes: row.notes || undefined,
         }),
       });
