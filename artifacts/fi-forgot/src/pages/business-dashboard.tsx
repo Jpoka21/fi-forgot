@@ -68,15 +68,17 @@ function MonthDayPicker({ value, onChange, onBlur }: {
   );
 }
 
-function MonthYearPicker({ value, onChange, onBlur }: {
+function MonthDayYearPicker({ value, onChange, onBlur }: {
   value: string;
   onChange: (v: string) => void;
   onBlur: () => void;
 }) {
-  // value format: "Jun 2022"
-  const parts = (value ?? "").split(" ");
-  const month = MONTHS.includes(parts[0]) ? parts[0] : "";
-  const year  = parts[1] ?? "";
+  // value format: "YYYY-MM-DD"
+  const parts = (value ?? "").split("-");
+  const yearVal  = parts.length === 3 ? (parts[0] ?? "") : "";
+  const monthIdx = parts.length === 3 ? parseInt(parts[1] ?? "0") - 1 : -1;
+  const month    = monthIdx >= 0 && monthIdx < 12 ? (MONTHS[monthIdx] ?? "") : "";
+  const day      = parts.length === 3 ? (parseInt(parts[2] ?? "0") || "") : "";
 
   const sel: React.CSSProperties = {
     border: "none", background: "transparent", fontSize: "0.85rem",
@@ -85,18 +87,25 @@ function MonthYearPicker({ value, onChange, onBlur }: {
     appearance: "none" as const,
   };
 
-  function emit(m: string, y: string) {
-    onChange(m && y ? `${m} ${y}` : m || y || "");
+  function emit(m: string, d: string | number, y: string) {
+    if (m && d && y) {
+      const mi = MONTHS.indexOf(m) + 1;
+      onChange(`${y}-${String(mi).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+    } else {
+      onChange("");
+    }
   }
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => currentYear - i);
+  const daysInMonth = month ? new Date(Number(yearVal) || currentYear, MONTHS.indexOf(month) + 1, 0).getDate() : 31;
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
       <select
         value={month}
-        onChange={e => emit(e.target.value, year)}
+        onChange={e => emit(e.target.value, day, yearVal)}
         onBlur={onBlur}
         style={{ ...sel, width: 46, color: month ? "#1e293b" : "#94a3b8" }}
       >
@@ -104,10 +113,19 @@ function MonthYearPicker({ value, onChange, onBlur }: {
         {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
       </select>
       <select
-        value={year}
-        onChange={e => emit(month, e.target.value)}
+        value={String(day)}
+        onChange={e => emit(month, e.target.value, yearVal)}
         onBlur={onBlur}
-        style={{ ...sel, width: 50, color: year ? "#1e293b" : "#94a3b8" }}
+        style={{ ...sel, width: 36, color: day ? "#1e293b" : "#94a3b8" }}
+      >
+        <option value="">DD</option>
+        {days.map(d => <option key={d} value={String(d)}>{d}</option>)}
+      </select>
+      <select
+        value={yearVal}
+        onChange={e => emit(month, day, e.target.value)}
+        onBlur={onBlur}
+        style={{ ...sel, width: 50, color: yearVal ? "#1e293b" : "#94a3b8" }}
       >
         <option value="">YYYY</option>
         {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
@@ -235,7 +253,7 @@ function AnnivDetail({ row, onUpdate, onSave }: {
           </div>
           <div>
             <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>Date</div>
-            <MonthYearPicker value={row.anniversaryDate} onChange={v => onUpdate({ anniversaryDate: v })} onBlur={onSave} />
+            <MonthDayYearPicker value={row.anniversaryDate} onChange={v => onUpdate({ anniversaryDate: v })} onBlur={onSave} />
           </div>
           <div>
             <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>What are we celebrating?</div>
