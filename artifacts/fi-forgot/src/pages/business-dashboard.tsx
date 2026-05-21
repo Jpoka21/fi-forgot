@@ -796,28 +796,69 @@ export default function BusinessDashboardPage() {
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
 
   async function generateCardFor(cardKey: string, clientRowId: string) {
-    const effectiveBizId = businessId || rows.find(r => r._rowId === clientRowId)?.businessId || "";
-    if (!effectiveBizId) {
+    const rowMatch = rows.find(r => r._rowId === clientRowId);
+    const effectiveBizId = businessId || rowMatch?.businessId || "";
+    const errorOut = () => {
       setCardGenState(s => ({ ...s, [cardKey]: "error" }));
       setTimeout(() => setCardGenState(s => { const n = { ...s }; delete n[cardKey]; return n; }), 6000);
-      return;
-    }
+    };
+    if (!effectiveBizId || !rowMatch) { errorOut(); return; }
+
     setCardGenState(s => ({ ...s, [cardKey]: "generating" }));
+
+    // Ensure the row is persisted in DB so the scheduler can find it by real UUID
+    let dbClientId = rowMatch.id || "";
+    if (!dbClientId || rowMatch._isNew || rowMatch._dirty) {
+      try {
+        const method = rowMatch.id ? "PATCH" : "POST";
+        const url = rowMatch.id ? `/api/business-clients/${rowMatch.id}` : "/api/business-clients";
+        const saveRes = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            businessId: effectiveBizId,
+            fullName: rowMatch.fullName,
+            company: rowMatch.company || undefined,
+            relationship: rowMatch.relationship === "Other" && rowMatch.relationshipOther
+              ? `Other (${rowMatch.relationshipOther})`
+              : rowMatch.relationship || undefined,
+            relationshipOther: rowMatch.relationshipOther || undefined,
+            birthday: rowMatch.birthday || undefined,
+            autoBirthday: rowMatch.autoBirthday, autoHoliday: rowMatch.autoHoliday,
+            autoAnniversary: rowMatch.autoAnniversary,
+            anniversaryDate: rowMatch.anniversaryDate || undefined,
+            anniversaryNote: rowMatch.anniversaryNote || undefined,
+            tone: rowMatch.tone || undefined,
+            requireApproval: rowMatch.requireApproval,
+            notes: rowMatch.notes || undefined,
+          }),
+        });
+        if (saveRes.ok) {
+          const body = await saveRes.json() as { client?: { id?: string } };
+          dbClientId = body.client?.id ?? dbClientId;
+          setRows(prev => prev.map(r => r._rowId === clientRowId
+            ? { ...r, id: dbClientId, businessId: effectiveBizId, _dirty: false, _isNew: false, _saved: true }
+            : r
+          ));
+        }
+      } catch { /* fall through */ }
+    }
+
+    if (!dbClientId) { errorOut(); return; }
+
     try {
       const res = await fetch("/api/business-cards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessId: effectiveBizId, clientId: clientRowId }),
+        body: JSON.stringify({ businessId: effectiveBizId, clientId: dbClientId }),
       });
       if (res.ok) {
         setCardGenState(s => ({ ...s, [cardKey]: "done" }));
       } else {
-        setCardGenState(s => ({ ...s, [cardKey]: "error" }));
-        setTimeout(() => setCardGenState(s => { const n = { ...s }; delete n[cardKey]; return n; }), 6000);
+        errorOut();
       }
     } catch {
-      setCardGenState(s => ({ ...s, [cardKey]: "error" }));
-      setTimeout(() => setCardGenState(s => { const n = { ...s }; delete n[cardKey]; return n; }), 6000);
+      errorOut();
     }
   }
 

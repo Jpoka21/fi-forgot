@@ -252,7 +252,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const ob = localStorage.getItem("fi_forgot_onboarding");
         setOnboardingComplete(!!ob);
 
-        const ws = loadWorkspaces();
+        let ws = loadWorkspaces();
+        // Repair: any business workspace missing a businessId gets one assigned
+        const repaired = ws.map(w =>
+          (w.type === "business" && !w.businessId)
+            ? { ...w, businessId: crypto.randomUUID() }
+            : w
+        );
+        if (repaired.some((w, i) => w.businessId !== ws[i].businessId)) {
+          saveWorkspaces(repaired);
+          ws = repaired;
+        }
         setWorkspaces(ws);
         const activeId = loadActiveWorkspaceId();
         const active = ws.find(w => w.id === activeId) ?? ws[0] ?? null;
