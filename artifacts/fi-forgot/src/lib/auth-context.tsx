@@ -253,13 +253,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setOnboardingComplete(!!ob);
 
         let ws = loadWorkspaces();
-        // Repair: any business workspace missing a businessId gets one assigned
+        // Repair: fi_forgot_business is the canonical source of truth for businessId
+        // (never wiped by clearAllUserData). Always sync it into the business workspace
+        // so a lost or incorrectly-minted businessId gets corrected on every load.
+        try {
+          const oldBiz = localStorage.getItem("fi_forgot_business");
+          if (oldBiz) {
+            const biz = JSON.parse(oldBiz) as { businessId?: string };
+            if (biz.businessId) {
+              const synced = ws.map(w =>
+                (w.type === "business" && w.businessId !== biz.businessId)
+                  ? { ...w, businessId: biz.businessId! }
+                  : w
+              );
+              if (synced.some((w, i) => w.businessId !== ws[i]?.businessId)) {
+                saveWorkspaces(synced);
+                ws = synced;
+              }
+            }
+          }
+        } catch { /* ignore */ }
+        // Fallback: if no fi_forgot_business exists, mint a new UUID for any workspace missing one
         const repaired = ws.map(w =>
           (w.type === "business" && !w.businessId)
             ? { ...w, businessId: crypto.randomUUID() }
             : w
         );
-        if (repaired.some((w, i) => w.businessId !== ws[i].businessId)) {
+        if (repaired.some((w, i) => w.businessId !== ws[i]?.businessId)) {
           saveWorkspaces(repaired);
           ws = repaired;
         }
