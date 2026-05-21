@@ -103,7 +103,7 @@ async function pickCardId(eventType: string): Promise<string | number> {
 
 export async function runBusinessScheduler(
   appBaseUrl: string,
-  opts?: { forceBusinessId?: string },
+  opts?: { forceBusinessId?: string; force?: boolean },
 ): Promise<void> {
   const today    = toISODate(new Date());
   const clients  = await db.select().from(businessClientsTable);
@@ -157,7 +157,7 @@ export async function runBusinessScheduler(
 
         if (daysToMail < 0) continue;
 
-        const shouldAct = notifyDays.some(n => n === daysToMail);
+        const shouldAct = opts?.force || notifyDays.some(n => n === daysToMail);
         if (!shouldAct) continue;
 
         const mailDateStr = toISODate(mailDate);

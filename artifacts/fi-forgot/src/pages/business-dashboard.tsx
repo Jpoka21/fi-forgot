@@ -637,7 +637,7 @@ export default function BusinessDashboardPage() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessId: row.businessId, fullName: row.fullName,
+          businessId: businessId || row.businessId, fullName: row.fullName,
           company: row.company || undefined,
           relationship: row.relationship === "Other" && row.relationshipOther
             ? `Other (${row.relationshipOther})`

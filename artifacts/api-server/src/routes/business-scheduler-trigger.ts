@@ -10,7 +10,7 @@ router.post("/business-scheduler/trigger", async (req, res) => {
     ? `https://${process.env["REPLIT_DEV_DOMAIN"]}`
     : `http://localhost:${process.env["PORT"] ?? 8080}`;
   const appBaseUrl = host.replace(/\/api$/, "");
-  await runBusinessScheduler(appBaseUrl, { forceBusinessId: businessId });
+  await runBusinessScheduler(appBaseUrl, { forceBusinessId: businessId, force: true });
   res.json({ ok: true });
 });
 
