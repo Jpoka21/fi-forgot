@@ -7,8 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
-import LoginPage from "@/pages/login";
-import SignupPage from "@/pages/signup";
+import PersonalAuthPage from "@/pages/personal-auth";
 import OnboardingPage from "@/pages/onboarding";
 import DashboardPage from "@/pages/dashboard";
 import RecipientsPage from "@/pages/recipients";
@@ -84,8 +83,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
-      <Route path="/login" component={LoginPage} />
-      <Route path="/signup" component={SignupPage} />
+      <Route path="/login">{() => <PersonalAuthPage initialMode="signin" />}</Route>
+      <Route path="/signup">{() => <PersonalAuthPage initialMode="signup" />}</Route>
       <Route path="/onboarding" component={OnboardingRoute} />
       <Route path="/dashboard">
         <ProtectedRoute component={DashboardPage} />
