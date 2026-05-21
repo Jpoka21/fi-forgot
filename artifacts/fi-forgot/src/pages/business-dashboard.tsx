@@ -609,6 +609,10 @@ export default function BusinessDashboardPage() {
 
   const businessId = activeWorkspace?.businessId ?? "";
 
+  // Always keep a ref to the latest rows so cleanup functions can access them
+  const rowsRef = useRef<ClientRow[]>([]);
+  rowsRef.current = rows;
+
   // Auth guard
   useEffect(() => {
     if (!isLoggedIn) { setLocation("/business/signup"); return; }
@@ -619,20 +623,50 @@ export default function BusinessDashboardPage() {
     }
   }, [isLoggedIn, activeWorkspace]);
 
-  // Load clients
+  // Load clients — flush any unsaved dirty rows first so they aren't lost on workspace switch
   useEffect(() => {
     if (!businessId) { setLoading(false); return; }
-    fetch(`/api/business-clients?businessId=${encodeURIComponent(businessId)}`)
-      .then(r => r.json())
-      .then((data: { clients?: Record<string, unknown>[] }) => {
-        if (data.clients?.length) {
-          setRows(data.clients.map(c => rowFromClient(c, businessId)));
-        } else {
-          setRows([newRow(businessId)]);
-        }
-      })
-      .catch(() => setRows([newRow(businessId)]))
-      .finally(() => setLoading(false));
+
+    // Flush dirty rows from the previous businessId before overwriting state
+    const dirty = rowsRef.current.filter(r => (r._dirty || r._isNew) && r.fullName.trim());
+    const flushPromises = dirty.map(row => {
+      const effectiveBizId = row.businessId || businessId;
+      if (!effectiveBizId) return Promise.resolve();
+      const method = row.id ? "PATCH" : "POST";
+      const url = row.id ? `/api/business-clients/${row.id}` : "/api/business-clients";
+      return fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessId: effectiveBizId, fullName: row.fullName,
+          company: row.company || undefined,
+          relationship: row.relationship === "Other" && row.relationshipOther
+            ? `Other (${row.relationshipOther})` : row.relationship || undefined,
+          birthday: row.birthday || undefined,
+          autoBirthday: row.autoBirthday, autoHoliday: row.autoHoliday,
+          autoAnniversary: row.autoAnniversary,
+          anniversaryDate: row.anniversaryDate || undefined,
+          anniversaryNote: row.anniversaryNote || undefined,
+          tone: row.tone || undefined, requireApproval: row.requireApproval,
+          notes: row.notes || undefined,
+        }),
+      }).catch(() => { /* best-effort */ });
+    });
+
+    setLoading(true);
+    Promise.all(flushPromises).then(() =>
+      fetch(`/api/business-clients?businessId=${encodeURIComponent(businessId)}`)
+        .then(r => r.json())
+        .then((data: { clients?: Record<string, unknown>[] }) => {
+          if (data.clients?.length) {
+            setRows(data.clients.map(c => rowFromClient(c, businessId)));
+          } else {
+            setRows([newRow(businessId)]);
+          }
+        })
+        .catch(() => setRows([newRow(businessId)]))
+        .finally(() => setLoading(false))
+    );
   }, [businessId]);
 
   // Persist settings to localStorage immediately; debounce API sync
