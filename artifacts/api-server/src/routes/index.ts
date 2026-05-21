@@ -15,7 +15,7 @@ import businessClientsRouter from "./business-clients";
 import businessSettingsRouter from "./business-settings";
 import handwryttenFontsRouter from "./handwrytten-fonts";
 import businessApprovalRouter from "./business-approval";
-import businessSchedulerTriggerRouter from "./business-scheduler-trigger";
+import businessSchedulerTriggerRouter from "./business-scheduler-trigger"; // also mounts /business-cards/generate
 
 const router: IRouter = Router();
 

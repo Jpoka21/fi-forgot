@@ -104,13 +104,17 @@ async function pickCardId(eventType: string): Promise<string | number> {
 export async function runBusinessScheduler(
   appBaseUrl: string,
   opts?: { forceBusinessId?: string; force?: boolean },
-): Promise<void> {
+): Promise<{ queued: number; skipped: number }> {
+  const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
   const today    = toISODate(new Date());
   const clients  = await db.select().from(businessClientsTable);
   const allBizIds = [...new Set(clients.map(c => c.businessId))];
   const bizIds   = opts?.forceBusinessId
     ? allBizIds.filter(id => id === opts.forceBusinessId)
     : allBizIds;
+
+  let queued = 0;
+  let skipped = 0;
 
   for (const businessId of bizIds) {
     const [settings] = await db
@@ -155,14 +159,18 @@ export async function runBusinessScheduler(
         const mailDate   = mailDateFor(occasionDate);
         const daysToMail = daysUntil(mailDate);
 
-        if (daysToMail < 0) continue;
-
-        const shouldAct = opts?.force || notifyDays.some(n => n === daysToMail);
-        if (!shouldAct) continue;
+        // In force mode allow past mail dates as long as the occasion is still future
+        if (opts?.force) {
+          if (occasionDate <= todayDate) { skipped++; continue; }
+        } else {
+          if (daysToMail < 0) { skipped++; continue; }
+          const shouldAct = notifyDays.some(n => n === daysToMail);
+          if (!shouldAct) { skipped++; continue; }
+        }
 
         const mailDateStr = toISODate(mailDate);
 
-        // ── DB dedup: skip if already queued for this client + event + mailDate ──
+        // ── DB dedup: skip if already queued for this client + event + occasionDate ──
         const existing = await db
           .select({ id: businessCardQueueTable.id })
           .from(businessCardQueueTable)
@@ -170,11 +178,12 @@ export async function runBusinessScheduler(
             and(
               eq(businessCardQueueTable.clientId, client.id),
               eq(businessCardQueueTable.eventType, type),
-              eq(businessCardQueueTable.mailDate, mailDateStr),
+              eq(businessCardQueueTable.occasionDate, toISODate(occasionDate)),
             ),
           );
         if (existing.length > 0) {
           logger.info({ clientId: client.id, type }, "business-scheduler: already queued, skipping");
+          skipped++;
           continue;
         }
 
@@ -197,6 +206,8 @@ export async function runBusinessScheduler(
         }
 
         const token = randomUUID();
+
+        queued++;
 
         // ── Queue in DB ───────────────────────────────────────────────────────
         await db.insert(businessCardQueueTable).values({
@@ -278,4 +289,5 @@ export async function runBusinessScheduler(
       }
     }
   }
+  return { queued, skipped };
 }

@@ -714,26 +714,32 @@ export default function BusinessDashboardPage() {
 
   const dirtyCount = rows.filter(r => (r._dirty || r._isNew) && r.fullName.trim()).length;
 
-  async function triggerScheduler() {
+  async function generateCards() {
     if (!businessId) return;
     setTriggering(true);
     setTriggerMsg(null);
     try {
-      const res = await fetch("/api/business-scheduler/trigger", {
+      const res = await fetch("/api/business-cards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ businessId }),
       });
       if (res.ok) {
-        setTriggerMsg("✓ Scheduler ran — check your inbox for an approval email");
+        const body = await res.json() as { queued?: number; skipped?: number };
+        const n = body.queued ?? 0;
+        if (n === 0) {
+          setTriggerMsg("All cards already generated — check your inbox for any pending approvals");
+        } else {
+          setTriggerMsg(`✓ ${n} card${n !== 1 ? "s" : ""} generated — check your inbox to approve`);
+        }
       } else {
-        setTriggerMsg("Something went wrong — check that your notify email is set in Settings");
+        setTriggerMsg("Something went wrong — make sure your notify email is set in Settings");
       }
     } catch {
       setTriggerMsg("Network error — try again");
     } finally {
       setTriggering(false);
-      setTimeout(() => setTriggerMsg(null), 7000);
+      setTimeout(() => setTriggerMsg(null), 10000);
     }
   }
 
@@ -1123,11 +1129,11 @@ export default function BusinessDashboardPage() {
         )}
 
         <button
-          onClick={triggerScheduler}
+          onClick={generateCards}
           disabled={triggering}
-          title="Manually run the scheduler now — useful for testing"
-          style={{ padding: "7px 14px", borderRadius: 8, background: triggering ? "#e2e8f0" : "#f1f5f9", border: "1.5px solid #cbd5e1", color: triggering ? "#94a3b8" : "#475569", fontSize: "0.78rem", fontWeight: 600, cursor: triggering ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
-          {triggering ? "⏳ Running…" : "▶ Run Scheduler Now"}
+          title="Generate AI card messages for all upcoming events across all recipients"
+          style={{ padding: "7px 16px", borderRadius: 8, background: triggering ? "#e2e8f0" : NAVY, border: "none", color: triggering ? "#94a3b8" : WHITE, fontSize: "0.8rem", fontWeight: 600, cursor: triggering ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 7, whiteSpace: "nowrap" }}>
+          {triggering ? "⏳ Generating…" : "✨ Generate Cards"}
         </button>
 
         {dirtyCount > 0 && (
