@@ -16,10 +16,9 @@ const RELATIONSHIP_OPTS = [
 ];
 
 const ALL_MOMENTS = [
-  { key: "birthday",     label: "Birthdays",    icon: "🎂" },
-  { key: "holiday",      label: "Holiday Cards", icon: "🎄" },
-  { key: "anniversary",  label: "Anniversaries", icon: "📅" },
-  { key: "homePurchase", label: "Home Purchase", icon: "🏡" },
+  { key: "birthday",    label: "Birthdays",    icon: "🎂" },
+  { key: "holiday",     label: "Holiday Cards", icon: "🎄" },
+  { key: "anniversary", label: "Anniversaries", icon: "📅" },
 ];
 
 const TONE_OPTS = ["Warm Professional", "Professional", "Friendly", "Casual", "Luxury / High End"];
@@ -234,7 +233,6 @@ function AnnivDetail({ row, onUpdate, onSave }: {
         }}>
           <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748b", fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", textTransform: "uppercase" }}>
             Special Anniversary Details
-            <InfoTooltip text="Not a wedding anniversary — a business milestone: home closing, deal anniversary, 1-year client milestone, or any date worth celebrating." />
           </div>
           <div>
             <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "#64748b", fontFamily: "'Inter', sans-serif", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>Date</div>
@@ -254,8 +252,11 @@ function AnnivDetail({ row, onUpdate, onSave }: {
                 boxSizing: "border-box",
               }}
             />
-            <div style={{ fontSize: "0.67rem", color: "#94a3b8", marginTop: 5, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>
-              The AI will reference this when writing the card.
+            <div style={{ fontSize: "0.72rem", color: "#64748b", marginTop: 6, fontFamily: "'Inter', sans-serif", lineHeight: 1.5 }}>
+              We will reference this when writing the card.
+              <div style={{ fontWeight: 700, color: "#475569", marginTop: 5 }}>
+                Not a wedding anniversary — think home closing, deal anniversary, 1-year client milestone, or any meaningful business date.
+              </div>
             </div>
           </div>
         </div>
@@ -332,7 +333,6 @@ interface ClientRow {
   company:  string;
   relationship: string;
   birthday: string;
-  homePurchaseAnniversary: string;
   clientSince: string;
   autoBirthday:   boolean;
   autoHoliday:    boolean;
@@ -360,7 +360,7 @@ function newRow(businessId: string): ClientRow {
     _rowId: `row-${Date.now()}-${Math.random()}`,
     businessId,
     fullName: "", company: "", relationship: "", birthday: "",
-    homePurchaseAnniversary: "", clientSince: "",
+    clientSince: "",
     autoBirthday: true, autoHoliday: true, autoAnniversary: false,
     anniversaryDate: "", anniversaryNote: "", tone: "", requireApproval: false,
     notes: "",
@@ -377,7 +377,6 @@ function rowFromClient(c: Record<string, unknown>, businessId: string): ClientRo
     company:  String(c.company ?? ""),
     relationship: String(c.relationship ?? ""),
     birthday: String(c.birthday ?? ""),
-    homePurchaseAnniversary: String(c.homePurchaseAnniversary ?? ""),
     clientSince: String(c.clientSince ?? ""),
     autoBirthday:   Boolean(c.autoBirthday   ?? true),
     autoHoliday:    Boolean(c.autoHoliday    ?? true),
@@ -594,7 +593,6 @@ export default function BusinessDashboardPage() {
           company: row.company || undefined,
           relationship: row.relationship || undefined,
           birthday: row.birthday || undefined,
-          homePurchaseAnniversary: row.homePurchaseAnniversary || undefined,
           clientSince: row.clientSince || undefined,
           autoBirthday: row.autoBirthday, autoHoliday: row.autoHoliday,
           autoAnniversary: row.autoAnniversary,
@@ -727,7 +725,7 @@ export default function BusinessDashboardPage() {
                     }}
                   />
                   <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.3)", marginTop: 4, fontFamily: "'Inter', sans-serif" }}>
-                    The AI will use this description when writing your cards.
+                    We will use this description when writing your cards.
                   </div>
                 </div>
               )}
@@ -811,7 +809,6 @@ export default function BusinessDashboardPage() {
                 <th style={TH}>Company</th>
                 <th style={TH}>Relationship</th>
                 <th style={TH}>Birthday</th>
-                <th style={TH}>Home Purchase</th>
                 <th style={TH}>
                   Client Since
                   <InfoTooltip text="We use this to send a card on their client anniversary — celebrating how long they've worked with you." />
@@ -889,15 +886,6 @@ export default function BusinessDashboardPage() {
                       <MonthDayPicker
                         value={row.birthday}
                         onChange={v => updateRow(row._rowId, { birthday: v })}
-                        onBlur={() => saveRow(row)}
-                      />
-                    </td>
-
-                    {/* Home Purchase */}
-                    <td style={TD}>
-                      <MonthYearPicker
-                        value={row.homePurchaseAnniversary}
-                        onChange={v => updateRow(row._rowId, { homePurchaseAnniversary: v })}
                         onBlur={() => saveRow(row)}
                       />
                     </td>
