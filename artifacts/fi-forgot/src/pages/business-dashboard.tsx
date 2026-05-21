@@ -1246,7 +1246,7 @@ export default function BusinessDashboardPage() {
 
                   {/* Approval badge */}
                   <div style={{ flexShrink: 0 }}>
-                    {card.requireApproval ? (
+                    {(automationMode === "approval" || card.requireApproval) ? (
                       <span style={{ background: "#fffbeb", color: "#b45309", border: "1px solid #fcd34d", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
                         ⏳ Needs Approval
                       </span>

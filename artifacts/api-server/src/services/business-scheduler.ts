@@ -129,6 +129,7 @@ export async function runBusinessScheduler(
     const defaultTone   = settings?.tone   ?? "Warm Professional";
     const cardSignature = settings?.cardSignature ?? "";
     const cardFont      = settings?.cardFont ?? "";
+    const automationMode = settings?.automationMode ?? "approval";
 
     const bizClients = clients.filter(c =>
       c.businessId === businessId &&
@@ -232,8 +233,8 @@ export async function runBusinessScheduler(
 
         const approvalUrl = `${appBaseUrl}/business/approve/${token}`;
 
-        // ── Auto-send path (requireApproval = false) ──────────────────────────
-        if (!client.requireApproval) {
+        // ── Auto-send path (requireApproval = false AND global mode = auto) ──
+        if (!client.requireApproval && automationMode !== "approval") {
           const address = parseAddress(client.address);
           if (address) {
             try {
