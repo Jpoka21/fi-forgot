@@ -156,18 +156,18 @@ function InfoTooltip({ text }: { text: string }) {
       >i</span>
       {show && (
         <div style={{
-          position: "absolute", bottom: "calc(100% + 7px)", left: "50%", transform: "translateX(-50%)",
+          position: "absolute", top: "calc(100% + 7px)", left: "50%", transform: "translateX(-50%)",
           background: "#1e293b", color: "#fff", fontSize: "0.72rem", padding: "8px 11px",
-          borderRadius: 7, width: 210, lineHeight: 1.5, zIndex: 200,
+          borderRadius: 7, width: 210, lineHeight: 1.5, zIndex: 9999,
           boxShadow: "0 6px 20px rgba(0,0,0,0.25)", whiteSpace: "normal",
           fontWeight: 400, letterSpacing: 0, textTransform: "none",
           fontFamily: "'Inter', sans-serif", pointerEvents: "none",
         }}>
-          {text}
           <div style={{
-            position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
-            border: "5px solid transparent", borderTopColor: "#1e293b",
+            position: "absolute", bottom: "100%", left: "50%", transform: "translateX(-50%)",
+            border: "5px solid transparent", borderBottomColor: "#1e293b",
           }} />
+          {text}
         </div>
       )}
     </span>
