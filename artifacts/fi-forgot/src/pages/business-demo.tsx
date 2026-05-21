@@ -194,7 +194,7 @@ function upcomingMoments(a: Answers) {
   if (a.moments.includes("Birthdays"))
     items.push({ icon: "🎂", text: "Sarah K. birthday card scheduled — arriving 3 days early" });
   if (a.moments.includes("Holiday / Christmas Cards"))
-    items.push({ icon: "🎄", text: "Holiday cards queued for all clients — delivery in December" });
+    items.push({ icon: "🎁", text: "Happy Holidays cards queued for all clients — delivery in December" });
   if (a.moments.includes("Home Purchase Anniversaries"))
     items.push({ icon: "🏡", text: "Home anniversary card approaching — mailing next week" });
   if (a.moments.includes("Client Anniversaries"))

@@ -63,7 +63,7 @@ Write a single, short greeting card message (2–4 sentences max). Rules:
 - For home purchase anniversary: naturally mention how many years it has been since they got their home — make it feel warm and celebratory
 - For client anniversary: mention the milestone duration if provided
 - For birthdays: keep it warm and celebratory
-- For holidays: keep it seasonal and sincere
+- For holidays: write a warm, inclusive "Happy Holidays" message. NEVER mention Christmas, Hanukkah, Kwanzaa, or any specific holiday or religion. Always use "Happy Holidays" or "this holiday season" — nothing more specific.
 - For referrals: express genuine gratitude
 - No fake emojis, no corporate buzzwords, no "we are pleased to"
 - Write in first-person plural ("we") 
