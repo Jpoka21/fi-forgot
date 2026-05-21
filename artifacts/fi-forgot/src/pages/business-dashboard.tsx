@@ -27,6 +27,126 @@ const ALL_MOMENTS = [
 
 const TONE_OPTS = ["Warm Professional", "Professional", "Friendly", "Casual", "Luxury / High End"];
 
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS   = Array.from({ length: 31 }, (_, i) => i + 1);
+
+// ── Structured date inputs ────────────────────────────────────────────────────
+
+function MonthDayPicker({ value, onChange, onBlur }: {
+  value: string;
+  onChange: (v: string) => void;
+  onBlur: () => void;
+}) {
+  // value format: "May 14"
+  const parts  = value.split(" ");
+  const month  = MONTHS.includes(parts[0]) ? parts[0] : "";
+  const day    = parts[1] ?? "";
+
+  const sel: React.CSSProperties = {
+    border: "none", background: "transparent", fontSize: "0.85rem",
+    color: "#1e293b", outline: "none", cursor: "pointer",
+    fontFamily: "'Inter', sans-serif", padding: "1px 2px",
+    appearance: "none" as const,
+  };
+
+  function emit(m: string, d: string) {
+    onChange(m && d ? `${m} ${d}` : m || "");
+  }
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <select
+        value={month}
+        onChange={e => emit(e.target.value, day)}
+        onBlur={onBlur}
+        style={{ ...sel, width: 46, color: month ? "#1e293b" : "#94a3b8" }}
+      >
+        <option value="">Mon</option>
+        {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+      </select>
+      <select
+        value={day}
+        onChange={e => emit(month, e.target.value)}
+        onBlur={onBlur}
+        style={{ ...sel, width: 40, color: day ? "#1e293b" : "#94a3b8" }}
+      >
+        <option value="">DD</option>
+        {DAYS.map(d => <option key={d} value={String(d)}>{d}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function MonthYearPicker({ value, onChange, onBlur }: {
+  value: string;
+  onChange: (v: string) => void;
+  onBlur: () => void;
+}) {
+  // value format: "Jun 2022"
+  const parts = value.split(" ");
+  const month = MONTHS.includes(parts[0]) ? parts[0] : "";
+  const year  = parts[1] ?? "";
+
+  const sel: React.CSSProperties = {
+    border: "none", background: "transparent", fontSize: "0.85rem",
+    color: "#1e293b", outline: "none", cursor: "pointer",
+    fontFamily: "'Inter', sans-serif", padding: "1px 2px",
+    appearance: "none" as const,
+  };
+
+  function emit(m: string, y: string) {
+    onChange(m && y ? `${m} ${y}` : m || y || "");
+  }
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 30 }, (_, i) => currentYear - i);
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <select
+        value={month}
+        onChange={e => emit(e.target.value, year)}
+        onBlur={onBlur}
+        style={{ ...sel, width: 46, color: month ? "#1e293b" : "#94a3b8" }}
+      >
+        <option value="">Mon</option>
+        {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+      </select>
+      <select
+        value={year}
+        onChange={e => emit(month, e.target.value)}
+        onBlur={onBlur}
+        style={{ ...sel, width: 50, color: year ? "#1e293b" : "#94a3b8" }}
+      >
+        <option value="">YYYY</option>
+        {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function YearPicker({ value, onChange, onBlur }: {
+  value: string;
+  onChange: (v: string) => void;
+  onBlur: () => void;
+}) {
+  const sel: React.CSSProperties = {
+    border: "none", background: "transparent", fontSize: "0.85rem",
+    outline: "none", cursor: "pointer",
+    fontFamily: "'Inter', sans-serif", padding: "1px 2px",
+    appearance: "none" as const, width: "100%",
+  };
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 30 }, (_, i) => currentYear - i);
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)} onBlur={onBlur}
+      style={{ ...sel, color: value ? "#1e293b" : "#94a3b8" }}>
+      <option value="">Year…</option>
+      {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
+    </select>
+  );
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface ClientRow {
@@ -549,19 +669,31 @@ export default function BusinessDashboardPage() {
 
                     {/* Birthday */}
                     <td style={TD}>
-                      <input value={row.birthday} placeholder="e.g. May 14" onChange={e => updateRow(row._rowId, { birthday: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.birthday ? "#1e293b" : "#94a3b8" }} />
+                      <MonthDayPicker
+                        value={row.birthday}
+                        onChange={v => updateRow(row._rowId, { birthday: v })}
+                        onBlur={() => saveRow(row)}
+                      />
                     </td>
 
                     {/* Home Purchase */}
                     {showHomePurchase && (
                       <td style={TD}>
-                        <input value={row.homePurchaseAnniversary} placeholder="e.g. Jun 2022" onChange={e => updateRow(row._rowId, { homePurchaseAnniversary: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.homePurchaseAnniversary ? "#1e293b" : "#94a3b8" }} />
+                        <MonthYearPicker
+                          value={row.homePurchaseAnniversary}
+                          onChange={v => updateRow(row._rowId, { homePurchaseAnniversary: v })}
+                          onBlur={() => saveRow(row)}
+                        />
                       </td>
                     )}
 
                     {/* Client Since */}
                     <td style={TD}>
-                      <input value={row.clientSince} placeholder="e.g. 2021" onChange={e => updateRow(row._rowId, { clientSince: e.target.value })} onBlur={() => saveRow(row)} style={{ ...cellInput, color: row.clientSince ? "#1e293b" : "#94a3b8" }} />
+                      <YearPicker
+                        value={row.clientSince}
+                        onChange={v => updateRow(row._rowId, { clientSince: v })}
+                        onBlur={() => saveRow(row)}
+                      />
                     </td>
 
                     {/* Birthday Auto */}
