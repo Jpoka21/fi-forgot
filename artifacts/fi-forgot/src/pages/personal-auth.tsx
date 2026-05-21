@@ -117,19 +117,18 @@ export default function PersonalAuthPage({ initialMode = "signup" }: Props) {
       className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden"
       style={{ background: B.beige }}
     >
-      {/* Background watermark */}
+      {/* Background illustration */}
       <div
         aria-hidden="true"
         style={{
-          position: "absolute", top: "5%", right: "-3%",
-          fontFamily: "'Bebas Neue', cursive", fontSize: "20vw",
-          color: B.red, opacity: 0.025, lineHeight: 1,
-          pointerEvents: "none", userSelect: "none",
-          transform: "rotate(8deg)",
+          position: "absolute", inset: 0,
+          backgroundImage: "url(/login-bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.18,
+          pointerEvents: "none",
         }}
-      >
-        SEND IT
-      </div>
+      />
 
       <div className="w-full max-w-7xl relative z-10">
         <div className="grid md:grid-cols-2 gap-14 items-start">
