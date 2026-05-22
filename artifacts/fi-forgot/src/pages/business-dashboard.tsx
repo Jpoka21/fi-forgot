@@ -1313,9 +1313,27 @@ export default function BusinessDashboardPage() {
           </>
         )}
         {activeSection === "upcoming" && (
-          <span style={{ fontSize: "0.82rem", color: "#64748b" }}>
-            {upcomingCards.length} card{upcomingCards.length !== 1 ? "s" : ""} scheduled across {rows.filter(r => r.fullName.trim()).length} client{rows.filter(r => r.fullName.trim()).length !== 1 ? "s" : ""}
-          </span>
+          <>
+            <span style={{ fontSize: "0.82rem", color: "#64748b" }}>
+              {upcomingCards.length} card{upcomingCards.length !== 1 ? "s" : ""} scheduled across {rows.filter(r => r.fullName.trim()).length} client{rows.filter(r => r.fullName.trim()).length !== 1 ? "s" : ""}
+            </span>
+            {(() => {
+              const unqueued = upcomingCards.filter(card => {
+                const clientDbId = rows.find(r => r._rowId === card.clientRowId)?.id ?? "";
+                return !queueItems.find(q => q.clientId === clientDbId && q.eventType === card.eventType);
+              });
+              if (unqueued.length === 0) return null;
+              const allGenerating = unqueued.every(c => cardGenState[c.key] === "generating");
+              return (
+                <button
+                  disabled={allGenerating}
+                  onClick={() => { unqueued.forEach(c => void generateCardFor(c.key, c.clientRowId)); }}
+                  style={{ padding: "7px 16px", borderRadius: 8, background: allGenerating ? "#e2e8f0" : RED, border: "none", color: allGenerating ? "#94a3b8" : WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.92rem", letterSpacing: "0.07em", cursor: allGenerating ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
+                  {allGenerating ? "⏳ GENERATING…" : `✨ GENERATE ALL (${unqueued.length})`}
+                </button>
+              );
+            })()}
+          </>
         )}
 
         <div style={{ flex: 1 }} />

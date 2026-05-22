@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "wouter";
 
-const NAVY = "#071A33";
-const RED  = "#E23B2E";
+const NAVY  = "#071A33";
+const RED   = "#E23B2E";
 const GREEN = "#16a34a";
 
 interface QueueItem {
@@ -14,6 +14,15 @@ interface QueueItem {
   cardMessage: string;
   clientCompany: string | null;
   status: string;
+  cardFont: string | null;
+  cardSignature: string | null;
+}
+
+interface CardPreview {
+  id: string | number;
+  name: string;
+  category?: string;
+  imageUrl?: string;
 }
 
 const EVENT_ICON: Record<string, string> = {
@@ -21,6 +30,14 @@ const EVENT_ICON: Record<string, string> = {
   "Happy Holidays": "🎁",
   "Anniversary": "🏆",
 };
+
+const EDIT_ACTIONS = [
+  { label: "Make warmer",    action: "warmer",    instruction: "Make this card noticeably warmer and more heartfelt. Keep the same structure but increase the emotional depth." },
+  { label: "Make funnier",   action: "funnier",   instruction: "Make this card funnier and more self-aware. Add a touch of humor that still feels genuine." },
+  { label: "Make shorter",   action: "shorter",   instruction: "Shorten this card significantly. Keep only the most important and impactful lines." },
+  { label: "More emotional", action: "emotional", instruction: "Make this card more emotionally raw and vulnerable. Really go there." },
+  { label: "Rewrite",        action: "rewrite",   instruction: "Completely rewrite this card in a fresh way while keeping the same recipient, occasion, and tone." },
+] as const;
 
 function fmt(dateStr: string): string {
   try {
@@ -30,12 +47,14 @@ function fmt(dateStr: string): string {
 
 export default function BusinessApprovePage() {
   const { token } = useParams<{ token: string }>();
-  const [item,    setItem]    = useState<QueueItem | null>(null);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState<string | null>(null);
-  const [result,  setResult]  = useState<"approved" | "sent" | "rejected" | null>(null);
-  const [acting,  setActing]  = useState(false);
+  const [item,         setItem]         = useState<QueueItem | null>(null);
+  const [message,      setMessage]      = useState("");
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState<string | null>(null);
+  const [result,       setResult]       = useState<"approved" | "sent" | "rejected" | null>(null);
+  const [acting,       setActing]       = useState(false);
+  const [cardPreview,  setCardPreview]  = useState<CardPreview | null>(null);
+  const [editingAction, setEditingAction] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -49,11 +68,39 @@ export default function BusinessApprovePage() {
           }
           setItem(d.item);
           setMessage(d.item.cardMessage);
+          // Fetch the card design preview for this event type
+          fetch(`/api/business-cards/pick-card?eventType=${encodeURIComponent(d.item.eventType)}`)
+            .then(r => r.json())
+            .then((p: { card?: CardPreview }) => { if (p.card) setCardPreview(p.card); })
+            .catch(() => {});
         }
       })
       .catch(() => setError("Failed to load this approval link."))
       .finally(() => setLoading(false));
   }, [token]);
+
+  async function applyEdit(instruction: string, actionKey: string) {
+    if (!item || editingAction) return;
+    setEditingAction(actionKey);
+    try {
+      const r = await fetch("/api/edit-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientName: item.clientName,
+          holiday: item.eventType,
+          tone: "professional",
+          currentCardText: message,
+          instruction,
+        }),
+      });
+      if (r.ok) {
+        const d = await r.json() as { text?: string };
+        if (d.text) setMessage(d.text);
+      }
+    } catch {}
+    setEditingAction(null);
+  }
 
   async function act(action: "approve" | "reject") {
     if (!token || acting) return;
@@ -77,9 +124,9 @@ export default function BusinessApprovePage() {
   const icon = item ? (EVENT_ICON[item.eventType] ?? "✉️") : "✉️";
 
   return (
-    <div style={{ minHeight: "100svh", background: NAVY, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px" }}>
+    <div style={{ minHeight: "100svh", background: NAVY, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "32px 16px 48px" }}>
       {/* Header */}
-      <div style={{ marginBottom: 32, textAlign: "center" }}>
+      <div style={{ marginBottom: 28, textAlign: "center" }}>
         <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: "#fff", letterSpacing: "0.12em" }}>
           <span style={{ color: RED }}>F*</span> I FORGOT
         </div>
@@ -89,7 +136,7 @@ export default function BusinessApprovePage() {
       </div>
 
       {/* Card */}
-      <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 36, maxWidth: 560, width: "100%" }}>
+      <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 36, maxWidth: 600, width: "100%" }}>
 
         {loading && (
           <div style={{ textAlign: "center", color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif", padding: "40px 0" }}>
@@ -135,7 +182,7 @@ export default function BusinessApprovePage() {
         {!loading && item && result === null && (
           <>
             {/* Client + event header */}
-            <div style={{ marginBottom: 28 }}>
+            <div style={{ marginBottom: 24 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                 <span style={{ fontSize: "1.6rem" }}>{icon}</span>
                 <div>
@@ -159,8 +206,38 @@ export default function BusinessApprovePage() {
               </div>
             </div>
 
+            {/* Card design preview */}
+            {cardPreview && (
+              <div style={{ marginBottom: 24, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
+                {cardPreview.imageUrl ? (
+                  <img
+                    src={cardPreview.imageUrl}
+                    alt={cardPreview.name}
+                    style={{ width: 72, height: 52, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{ width: 72, height: 52, borderRadius: 6, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", flexShrink: 0 }}>
+                    {icon}
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Inter', sans-serif", marginBottom: 3 }}>
+                    Selected Card Design
+                  </div>
+                  <div style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.88rem" }}>
+                    {cardPreview.name}
+                  </div>
+                  {cardPreview.category && (
+                    <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Inter', sans-serif", marginTop: 2 }}>
+                      {cardPreview.category}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Message editor */}
-            <div style={{ marginBottom: 28 }}>
+            <div style={{ marginBottom: 16 }}>
               <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>
                 Card Message — edit freely before approving
               </label>
@@ -178,28 +255,62 @@ export default function BusinessApprovePage() {
               />
             </div>
 
+            {/* AI editing tools */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+              {EDIT_ACTIONS.map(({ label, action, instruction }) => {
+                const busy = editingAction === action;
+                return (
+                  <button
+                    key={action}
+                    disabled={!!editingAction || acting}
+                    onClick={() => applyEdit(instruction, action)}
+                    style={{
+                      padding: "6px 14px", borderRadius: 20,
+                      border: "1.5px solid rgba(255,255,255,0.18)",
+                      background: busy ? "rgba(255,255,255,0.12)" : "transparent",
+                      color: busy ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.7)",
+                      fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 600,
+                      cursor: editingAction || acting ? "not-allowed" : "pointer",
+                      transition: "all 0.12s",
+                      display: "flex", alignItems: "center", gap: 5,
+                    }}
+                  >
+                    {busy && <span style={{ display: "inline-block", width: 10, height: 10, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />}
+                    {busy ? "Rewriting…" : label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Signature preview */}
+            {item.cardSignature && (
+              <div style={{ marginBottom: 24, fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", fontFamily: "Georgia, serif", fontStyle: "italic" }}>
+                Signature: {item.cardSignature}
+              </div>
+            )}
+
             {/* Action buttons */}
             <div style={{ display: "flex", gap: 12 }}>
               <button
-                disabled={acting || !message.trim()}
+                disabled={acting || !!editingAction || !message.trim()}
                 onClick={() => act("approve")}
                 style={{
                   flex: 3, padding: "14px 0", borderRadius: 8, border: "none", cursor: acting ? "not-allowed" : "pointer",
                   background: GREEN, color: "#fff", fontFamily: "'Inter', sans-serif",
-                  fontWeight: 700, fontSize: "0.9rem", opacity: acting ? 0.6 : 1,
+                  fontWeight: 700, fontSize: "0.9rem", opacity: acting || editingAction ? 0.6 : 1,
                   transition: "opacity 0.15s",
                 }}
               >
                 {acting ? "Processing…" : "✅ Approve & Send"}
               </button>
               <button
-                disabled={acting}
+                disabled={acting || !!editingAction}
                 onClick={() => act("reject")}
                 style={{
                   flex: 1, padding: "14px 0", borderRadius: 8,
                   border: `1.5px solid ${RED}`, cursor: acting ? "not-allowed" : "pointer",
                   background: "transparent", color: RED, fontFamily: "'Inter', sans-serif",
-                  fontWeight: 700, fontSize: "0.9rem", opacity: acting ? 0.6 : 1,
+                  fontWeight: 700, fontSize: "0.9rem", opacity: acting || editingAction ? 0.6 : 1,
                   transition: "opacity 0.15s",
                 }}
               >
@@ -209,6 +320,8 @@ export default function BusinessApprovePage() {
             <p style={{ marginTop: 14, fontSize: "0.7rem", color: "rgba(255,255,255,0.25)", textAlign: "center", fontFamily: "'Inter', sans-serif" }}>
               Approving will queue this card for mailing on {fmt(item.mailDate)}.
             </p>
+
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </>
         )}
       </div>

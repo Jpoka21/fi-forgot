@@ -20,6 +20,24 @@ router.post("/business-cards/generate", async (req, res) => {
   res.json({ ok: true, queued: result.queued, skipped: result.skipped });
 });
 
+// Return the card Handwrytten would pick for a given event type — for preview on approval page
+router.get("/business-cards/pick-card", async (req, res) => {
+  const eventType = (req.query.eventType as string | undefined) ?? "";
+  try {
+    const { listHandwryttenCards } = await import("../services/handwrytten");
+    const cards = await listHandwryttenCards();
+    const category =
+      eventType === "Birthday"       ? "Birthday"   :
+      eventType === "Happy Holidays" ? "Holiday"    :
+      eventType === "Anniversary"    ? "Anniversary" : null;
+    const match = category ? cards.find(c => c.category?.toLowerCase().includes(category.toLowerCase())) : null;
+    const chosen = match ?? cards[0];
+    res.json({ card: chosen ?? null });
+  } catch {
+    res.json({ card: null });
+  }
+});
+
 // List pending queue items for a business — used by dashboard to show "Review" links
 router.get("/business-cards/queue", async (req, res) => {
   const businessId = req.query.businessId as string | undefined;
