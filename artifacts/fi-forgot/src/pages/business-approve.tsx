@@ -73,9 +73,10 @@ export default function BusinessApprovePage() {
           }
           setItem(d.item);
           setMessage(d.item.cardMessage);
-          // Fetch the card design preview — pass contextNote so AI can pick the right design
+          // Fetch the card design preview — pass contextNote + cardMessage so AI can pick the right design
           const previewParams = new URLSearchParams({ eventType: d.item.eventType });
           if (d.item.contextNote) previewParams.set("contextNote", d.item.contextNote);
+          if (d.item.cardMessage) previewParams.set("cardMessage", d.item.cardMessage);
           fetch(`/api/business-cards/pick-card?${previewParams.toString()}`)
             .then(r => r.json())
             .then((p: { card?: CardPreview }) => { if (p.card) setCardPreview(p.card); })
@@ -95,6 +96,7 @@ export default function BusinessApprovePage() {
     try {
       const params = new URLSearchParams({ eventType: item.eventType });
       if (item.contextNote) params.set("contextNote", item.contextNote);
+      if (message) params.set("cardMessage", message);
       if (newExcluded.length) params.set("excludeIds", newExcluded.join(","));
       const r = await fetch(`/api/business-cards/pick-card?${params.toString()}`);
       const d = await r.json() as { card?: CardPreview };

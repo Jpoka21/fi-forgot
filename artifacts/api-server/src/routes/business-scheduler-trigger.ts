@@ -25,11 +25,12 @@ router.post("/business-cards/generate", async (req, res) => {
 router.get("/business-cards/pick-card", async (req, res) => {
   const eventType   = (req.query.eventType   as string | undefined) ?? "";
   const contextNote = (req.query.contextNote as string | undefined) ?? null;
+  const cardMessage = (req.query.cardMessage as string | undefined) ?? null;
   const excludeIds  = ((req.query.excludeIds as string | undefined) ?? "")
     .split(",").map(s => s.trim()).filter(Boolean);
   try {
     const { pickBestCard } = await import("../services/ai-card-picker");
-    const card = await pickBestCard(eventType, contextNote, excludeIds);
+    const card = await pickBestCard(eventType, contextNote, excludeIds, cardMessage);
     res.json({ card: card ?? null });
   } catch {
     res.json({ card: null });

@@ -18,6 +18,7 @@ import { db } from "@workspace/db";
 import { cardClassificationsTable, customHolidayCardsTable } from "@workspace/db";
 import { inArray, eq } from "drizzle-orm";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
+import { generateCustomAnniversaryCard } from "./custom-card-generator";
 import { logger } from "../lib/logger";
 
 const openai = new OpenAI({
@@ -343,12 +344,30 @@ export async function pickBestCard(
   eventType: string,
   contextNote?: string | null,
   excludeIds: string[] = [],
+  cardMessage?: string | null,
 ): Promise<HandwryttenCard> {
   // For Happy Holidays: prioritise custom AI-generated cards if any exist
   const isHoliday = eventType.toLowerCase() === "happy holidays" || eventType.toLowerCase() === "holiday";
   if (isHoliday) {
     const custom = await pickCustomHolidayCard(excludeIds);
     if (custom) return custom;
+  }
+
+  // For Anniversary: generate a custom card tailored to the specific message
+  const isAnniversary = eventType.toLowerCase() === "anniversary";
+  if (isAnniversary && cardMessage?.trim()) {
+    try {
+      const generated = await generateCustomAnniversaryCard(contextNote ?? null, cardMessage.trim());
+      logger.info({ cardId: generated.handwryttenCardId }, "ai-card-picker: custom anniversary card generated");
+      return {
+        id: generated.handwryttenCardId,
+        name: generated.name,
+        category: "Custom",
+        imageUrl: generated.imageUrl,
+      };
+    } catch (err) {
+      logger.warn({ err }, "ai-card-picker: anniversary card generation failed, falling back to catalog");
+    }
   }
 
   const allCards = await listHandwryttenCards();
