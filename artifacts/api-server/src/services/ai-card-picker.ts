@@ -237,6 +237,9 @@ function scoreCard(
     if (occ.includes("Christmas")) score += 100;
     if (occ.includes("New Year's")) score += 90;
     if (holidayWords.some(w => name.includes(w) || imgLower.includes(w))) score += 70;
+    // Hard-exclude spring/floral imagery — cherry blossom, bouquet, etc. are not holiday cards
+    const springWords = ["blossom","bouquet","floral","flower","spring","cherry","tulip","daisy","sunflower","peony","garden","botanical","wreath"];
+    if (springWords.some(w => name.includes(w) || imgLower.includes(w))) return -999;
   }
 
   if (congrats.some(w => name.includes(w))) score += 15;
