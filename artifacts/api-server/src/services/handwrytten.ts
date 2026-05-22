@@ -302,3 +302,85 @@ export const handwryttenService = {
   cancelOrder: cancelHandwryttenOrder,
   isMock: IS_MOCK,
 };
+
+// ─── Custom card helpers ───────────────────────────────────────────────────────
+
+export interface CustomCardDimension {
+  id: number;
+  name?: string;
+  orientation?: string;
+  format?: string;
+  openWidth?: string;
+  openHeight?: string;
+}
+
+export interface UploadedCustomImage {
+  id: number;
+  imageUrl?: string;
+  imageType?: string;
+}
+
+export interface CreatedCustomCard {
+  cardId: number;
+  categoryId?: number;
+}
+
+export async function getCustomCardDimensions(): Promise<CustomCardDimension[]> {
+  if (IS_MOCK || !hw) {
+    return [{ id: 1, name: "A2 Portrait", orientation: "portrait", format: "A2" }];
+  }
+  const dims = await hw.customCards.dimensions();
+  return (dims as any[]).map((d: any) => ({
+    id: d.id,
+    name: d.name,
+    orientation: d.orientation,
+    format: d.format,
+    openWidth: d.openWidth ?? d.open_width,
+    openHeight: d.openHeight ?? d.open_height,
+  }));
+}
+
+export async function uploadCustomImage(options: { url?: string; buffer?: Buffer; imageType?: string }): Promise<UploadedCustomImage> {
+  if (IS_MOCK || !hw) {
+    logger.info({ imageType: options.imageType }, "MOCK: uploadCustomImage");
+    return { id: 99999, imageUrl: options.url ?? "https://example.com/mock-card.png", imageType: options.imageType };
+  }
+
+  let result: any;
+  if (options.buffer) {
+    // Build a FormData from the raw image buffer
+    const blob = new Blob([new Uint8Array(options.buffer)], { type: "image/png" });
+    const formData = new FormData();
+    formData.append("file", blob, "card.png");
+    formData.append("type", options.imageType ?? "cover");
+    result = await hw.customCards.uploadImage({ file: formData as any, imageType: options.imageType ?? "cover" }) as any;
+  } else {
+    result = await hw.customCards.uploadImage({ url: options.url, imageType: options.imageType }) as any;
+  }
+
+  return {
+    id: result.id ?? result.imageId ?? result.image_id,
+    imageUrl: result.imageUrl ?? result.image_url,
+    imageType: result.imageType ?? result.image_type,
+  };
+}
+
+export async function createCustomHandwryttenCard(options: {
+  name: string;
+  dimensionId: string;
+  coverId?: number;
+}): Promise<CreatedCustomCard> {
+  if (IS_MOCK || !hw) {
+    logger.info({ options }, "MOCK: createCustomHandwryttenCard");
+    return { cardId: Math.floor(Math.random() * 900000) + 100000 };
+  }
+  const result = await hw.customCards.create({
+    name: options.name,
+    dimensionId: options.dimensionId,
+    coverId: options.coverId,
+  }) as any;
+  return {
+    cardId: result.cardId ?? result.card_id ?? result.id,
+    categoryId: result.categoryId ?? result.category_id,
+  };
+}

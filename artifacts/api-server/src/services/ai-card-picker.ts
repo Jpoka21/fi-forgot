@@ -15,8 +15,8 @@
 
 import OpenAI from "openai";
 import { db } from "@workspace/db";
-import { cardClassificationsTable } from "@workspace/db";
-import { inArray } from "drizzle-orm";
+import { cardClassificationsTable, customHolidayCardsTable } from "@workspace/db";
+import { inArray, eq } from "drizzle-orm";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
 import { logger } from "../lib/logger";
 
@@ -310,11 +310,47 @@ async function gpxPickFromCandidates(
 
 // ─── Public API ──────────────────────────────────────────────────────────────
 
+/**
+ * For Happy Holidays events: check the custom_holiday_cards table first.
+ * Returns a card shaped like HandwryttenCard, or null if none available.
+ */
+async function pickCustomHolidayCard(excludeIds: string[]): Promise<HandwryttenCard | null> {
+  try {
+    const rows = await db
+      .select()
+      .from(customHolidayCardsTable)
+      .where(eq(customHolidayCardsTable.active, true));
+
+    const available = rows.filter(r => !excludeIds.includes(String(r.handwryttenCardId)));
+    if (!available.length) return null;
+
+    // Rotate randomly so each refresh shows a different option
+    const pick = available[Math.floor(Math.random() * available.length)]!;
+    logger.info({ cardId: pick.handwryttenCardId, name: pick.name }, "ai-card-picker: custom holiday card selected");
+    return {
+      id: pick.handwryttenCardId,
+      name: pick.name,
+      category: "Custom",
+      imageUrl: pick.imageUrl,
+    };
+  } catch (err) {
+    logger.warn({ err }, "ai-card-picker: custom holiday card lookup failed, falling back");
+    return null;
+  }
+}
+
 export async function pickBestCard(
   eventType: string,
   contextNote?: string | null,
   excludeIds: string[] = [],
 ): Promise<HandwryttenCard> {
+  // For Happy Holidays: prioritise custom AI-generated cards if any exist
+  const isHoliday = eventType.toLowerCase() === "happy holidays" || eventType.toLowerCase() === "holiday";
+  if (isHoliday) {
+    const custom = await pickCustomHolidayCard(excludeIds);
+    if (custom) return custom;
+  }
+
   const allCards = await listHandwryttenCards();
   const cards = excludeIds.length
     ? allCards.filter(c => !excludeIds.includes(String(c.id)))

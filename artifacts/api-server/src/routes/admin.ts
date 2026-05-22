@@ -396,4 +396,64 @@ router.get("/admin/card-classifications", (_req, res) => {
   res.json(getClassificationStats());
 });
 
+// ─── Custom holiday cards ─────────────────────────────────────────────────────
+
+import { generateHolidayCards, getActiveHolidayCards } from "../services/custom-card-generator";
+import { db as adminDb } from "@workspace/db";
+import { customHolidayCardsTable } from "@workspace/db";
+import { eq as drizzleEq } from "drizzle-orm";
+
+router.get("/admin/holiday-cards", async (req, res) => {
+  try {
+    const cards = await adminDb.select().from(customHolidayCardsTable);
+    res.json({ cards });
+  } catch (err) {
+    req.log.error({ err }, "holiday-cards: list failed");
+    res.status(500).json({ error: "Failed to list holiday cards" });
+  }
+});
+
+router.post("/admin/holiday-cards/generate", async (req, res) => {
+  const force = req.body?.force === true;
+  req.log.info({ force }, "holiday-cards: generation started");
+  try {
+    const result = await generateHolidayCards(force);
+    req.log.info({ succeeded: result.succeeded.length, failed: result.failed.length }, "holiday-cards: generation complete");
+    res.json(result);
+  } catch (err) {
+    req.log.error({ err }, "holiday-cards: generation failed");
+    res.status(500).json({ error: "Holiday card generation failed" });
+  }
+});
+
+router.patch("/admin/holiday-cards/:id/toggle", async (req, res) => {
+  const id = parseInt(req.params["id"] ?? "", 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+  try {
+    const [existing] = await adminDb.select().from(customHolidayCardsTable).where(drizzleEq(customHolidayCardsTable.id, id)).limit(1);
+    if (!existing) { res.status(404).json({ error: "Not found" }); return; }
+    const [updated] = await adminDb
+      .update(customHolidayCardsTable)
+      .set({ active: !existing.active })
+      .where(drizzleEq(customHolidayCardsTable.id, id))
+      .returning();
+    res.json(updated);
+  } catch (err) {
+    req.log.error({ err }, "holiday-cards: toggle failed");
+    res.status(500).json({ error: "Failed to toggle card" });
+  }
+});
+
+router.delete("/admin/holiday-cards/:id", async (req, res) => {
+  const id = parseInt(req.params["id"] ?? "", 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+  try {
+    await adminDb.delete(customHolidayCardsTable).where(drizzleEq(customHolidayCardsTable.id, id));
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "holiday-cards: delete failed");
+    res.status(500).json({ error: "Failed to delete card" });
+  }
+});
+
 export default router;

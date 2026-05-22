@@ -20,6 +20,7 @@
 export * from "./pending-approvals";
 export * from "./demo-leads";
 export * from "./card-classifications";
+export * from "./custom-holiday-cards";
 export * from "./sample-card-messages";
 export * from "./business-clients";
 export * from "./business-settings";
