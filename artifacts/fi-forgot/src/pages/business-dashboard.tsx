@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 
@@ -607,6 +607,10 @@ export default function BusinessDashboardPage() {
   const [search,  setSearch]  = useState("");
   const [saving,  setSaving]  = useState(false);
 
+  // Card queue (pending/approved items so dashboard can show "Review" links)
+  interface QueueItem { clientId: string; eventType: string; occasionDate: string; approvalToken: string; status: string; }
+  const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
+
   const businessId = activeWorkspace?.businessId ?? "";
 
   // Always keep a ref to the latest rows so cleanup functions can access them
@@ -724,6 +728,17 @@ export default function BusinessDashboardPage() {
     const t = setTimeout(() => { void syncSettingsToApi({ ...s, businessId }); }, 1500);
     return () => clearTimeout(t);
   }, [bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone, automationMode, businessId]);
+
+  // Fetch pending/approved queue items so dashboard can show "Review" links
+  const fetchQueue = useCallback(() => {
+    if (!businessId) return;
+    fetch(`/api/business-cards/queue?businessId=${encodeURIComponent(businessId)}`)
+      .then(r => r.json())
+      .then((d: { items?: QueueItem[] }) => { if (d.items) setQueueItems(d.items); })
+      .catch(() => {});
+  }, [businessId]);
+
+  useEffect(() => { fetchQueue(); }, [fetchQueue]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -917,6 +932,7 @@ export default function BusinessDashboardPage() {
       });
       if (res.ok) {
         setCardGenState(s => ({ ...s, [cardKey]: "done" }));
+        fetchQueue(); // refresh so "Review Card →" link appears immediately
       } else {
         errorOut();
       }
@@ -1404,15 +1420,25 @@ export default function BusinessDashboardPage() {
                     )}
                   </div>
 
-                  {/* Per-card Generate button */}
+                  {/* Per-card Generate / Review button */}
                   {(() => {
                     const gs = cardGenState[card.key];
-                    if (gs === "done") return (
-                      <span style={{ fontSize: "0.72rem", color: "#15803d", fontWeight: 700, whiteSpace: "nowrap" }}>✓ Generated</span>
-                    );
+                    const clientDbId = rows.find(r => r._rowId === card.clientRowId)?.id ?? "";
+                    const queued = queueItems.find(q => q.clientId === clientDbId && q.eventType === card.eventType);
+
                     if (gs === "error") return (
                       <span style={{ fontSize: "0.72rem", color: "#b91c1c", fontWeight: 700, whiteSpace: "nowrap" }}>✗ Failed</span>
                     );
+
+                    if (queued) return (
+                      <Link
+                        href={`/business/approve/${queued.approvalToken}`}
+                        style={{ padding: "5px 13px", borderRadius: 8, background: "#16a34a", border: "none", color: WHITE, fontSize: "0.74rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, textDecoration: "none", display: "inline-block" }}
+                      >
+                        👁 Review Card →
+                      </Link>
+                    );
+
                     return (
                       <button
                         onClick={() => generateCardFor(card.key, card.clientRowId)}
