@@ -206,7 +206,7 @@ function scoreCard(
   const homeWords    = ["home", "house", "housiversary", "houseiversary", "realtor", "real estate", "mortgage", "property"];
   const workWords    = ["work", "job", "career", "business", "office", "professional", "employee", "colleague"];
   const bdayWords    = ["birthday", "bday", "born", "celebrate", "another year", "candles", "balloons", "party hat"];
-  const holidayWords = ["holiday", "christmas", "xmas", "season", "merry", "cheer", "winter", "new year", "festive", "yuletide", "tis the season"];
+  const holidayWords = ["holiday", "christmas", "xmas", "merry", "winter", "new year", "festive", "yuletide", "tis the season"];
   const congrats     = ["congrat", "congratulations", "achievement", "milestone"];
 
   const isHomeCtx    = homeWords.some(w => ctx.includes(w));
@@ -214,11 +214,13 @@ function scoreCard(
   const isBdayEvt    = eventLower === "birthday";
   const isHolidayEvt = eventLower === "happy holidays" || eventLower === "holiday";
 
-  // For holidays, hard-exclude thank-you, grateful, and support-themed cards
+  // For holidays, hard-exclude thank-you, grateful, support, and work-anniversary cards
   if (isHolidayEvt && (
     name.includes("thank") || name.includes("grateful") || name.includes("support") ||
+    name.includes("workiversary") || name.includes("work anniversary") ||
     imgLower.includes("thank_you") || imgLower.includes("thankyou") ||
-    imgLower.includes("grateful") || imgLower.includes("support")
+    imgLower.includes("grateful") || imgLower.includes("support") ||
+    imgLower.includes("workiversary")
   )) return -999;
 
   if (isHomeCtx) {
