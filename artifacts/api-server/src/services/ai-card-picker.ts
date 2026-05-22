@@ -214,8 +214,12 @@ function scoreCard(
   const isBdayEvt    = eventLower === "birthday";
   const isHolidayEvt = eventLower === "happy holidays" || eventLower === "holiday";
 
-  // For holidays, hard-exclude pure thank-you cards — they're not seasonal
-  if (isHolidayEvt && (name.includes("thank") || imgLower.includes("thank_you") || imgLower.includes("thankyou"))) return -999;
+  // For holidays, hard-exclude thank-you, grateful, and support-themed cards
+  if (isHolidayEvt && (
+    name.includes("thank") || name.includes("grateful") || name.includes("support") ||
+    imgLower.includes("thank_you") || imgLower.includes("thankyou") ||
+    imgLower.includes("grateful") || imgLower.includes("support")
+  )) return -999;
 
   if (isHomeCtx) {
     const nameHomeMatch = homeWords.some(w => name.includes(w));
