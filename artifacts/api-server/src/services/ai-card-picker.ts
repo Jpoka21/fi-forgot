@@ -142,8 +142,11 @@ function scoreCard(
   const occ     = card.occasions;
   let score     = 0;
 
-  // Hard exclude anything romantic/wedding for this business service
+  // Hard exclude invitations, romantic/wedding cards — this is a business card-sending service
   if (hwCat === "wedding") return -999;
+  if (hwCat === "invitations") return -999;
+  const nameLower = name;
+  if (nameLower.includes("invitation") || nameLower.includes("invite") || nameLower.includes("rsvp") || nameLower.includes("you're invited")) return -999;
   if (occ.includes("Valentine's Day") && occ.length === 1) return -999;
 
   // Preferred-category bonus (first = highest)
