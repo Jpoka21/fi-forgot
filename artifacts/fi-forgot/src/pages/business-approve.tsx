@@ -248,21 +248,23 @@ export default function BusinessApprovePage() {
                 <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Inter', sans-serif" }}>
                   Selected Card Design
                 </div>
-                <button
-                  onClick={regenCard}
-                  disabled={regenLoading || acting || !!editingAction}
-                  style={{
-                    background: "transparent", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: 20,
-                    color: regenLoading ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.65)",
-                    fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 600,
-                    padding: "4px 12px", cursor: regenLoading ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", gap: 5, transition: "all 0.12s",
-                  }}
-                >
-                  {regenLoading
-                    ? <><span style={{ display: "inline-block", width: 9, height: 9, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /> Picking…</>
-                    : "↻ Try another card"}
-                </button>
+                {excludedIds.length < 4 && (
+                  <button
+                    onClick={regenCard}
+                    disabled={regenLoading || acting || !!editingAction}
+                    style={{
+                      background: "transparent", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: 20,
+                      color: regenLoading ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.65)",
+                      fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 600,
+                      padding: "4px 12px", cursor: regenLoading ? "not-allowed" : "pointer",
+                      display: "flex", alignItems: "center", gap: 5, transition: "all 0.12s",
+                    }}
+                  >
+                    {regenLoading
+                      ? <><span style={{ display: "inline-block", width: 9, height: 9, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /> Picking…</>
+                      : "↻ Try another card"}
+                  </button>
+                )}
               </div>
 
               {regenLoading ? (
