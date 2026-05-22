@@ -135,6 +135,7 @@ function scoreCard(
   card: EnrichedCard,
   preferredCategories: string[],
   contextNote: string | null,
+  eventType: string,
 ): number {
   const name    = (card.name ?? "").toLowerCase();
   const ctx     = (contextNote ?? "").toLowerCase();
@@ -148,6 +149,26 @@ function scoreCard(
   const nameLower = name;
   if (nameLower.includes("invitation") || nameLower.includes("invite") || nameLower.includes("rsvp") || nameLower.includes("you're invited")) return -999;
   if (occ.includes("Valentine's Day") && occ.length === 1) return -999;
+
+  // Hard exclude cards whose name OR image URL signals the wrong occasion
+  const eventLower = eventType.toLowerCase();
+  const imgLower   = (card.imageUrl ?? "").toLowerCase();
+
+  if (eventLower === "birthday") {
+    // Exclude anniversary-themed cards (name or image URL is the giveaway)
+    const anniversarySignal =
+      (nameLower.includes("anniversary") && !nameLower.includes("birthday")) ||
+      (imgLower.includes("anniversary") && !imgLower.includes("birthday"));
+    if (anniversarySignal) return -999;
+    if (nameLower.includes("workiversary") || nameLower.includes("housiversary") || nameLower.includes("work anniversary")) return -999;
+  }
+  if (eventLower === "anniversary") {
+    // Exclude pure birthday cards
+    const birthdaySignal =
+      (nameLower.includes("birthday") && !nameLower.includes("anniversary")) ||
+      (imgLower.includes("birthday") && !imgLower.includes("anniversary"));
+    if (birthdaySignal) return -999;
+  }
 
   // Preferred-category bonus (first = highest)
   const catIdx = preferredCategories.findIndex(
@@ -253,7 +274,7 @@ export async function pickBestCard(
 
   // Step 2: Score all cards
   const scored = enriched
-    .map(c => ({ card: c, score: scoreCard(c, preferredCategories, contextNote ?? null) }))
+    .map(c => ({ card: c, score: scoreCard(c, preferredCategories, contextNote ?? null, eventType) }))
     .filter(x => x.score > -999)
     .sort((a, b) => b.score - a.score);
 
