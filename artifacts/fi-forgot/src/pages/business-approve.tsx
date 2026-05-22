@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 
 const NAVY  = "#071A33";
 const RED   = "#E23B2E";
@@ -48,6 +48,7 @@ function fmt(dateStr: string): string {
 
 export default function BusinessApprovePage() {
   const { token } = useParams<{ token: string }>();
+  const [, navigate] = useLocation();
   const [item,          setItem]          = useState<QueueItem | null>(null);
   const [message,       setMessage]       = useState("");
   const [loading,       setLoading]       = useState(true);
@@ -149,7 +150,19 @@ export default function BusinessApprovePage() {
   return (
     <div style={{ minHeight: "100svh", background: NAVY, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "32px 16px 48px" }}>
       {/* Header */}
-      <div style={{ marginBottom: 28, textAlign: "center" }}>
+      <div style={{ marginBottom: 28, textAlign: "center", position: "relative", width: "100%", maxWidth: 600 }}>
+        <button
+          onClick={() => navigate("/business/dashboard")}
+          style={{
+            position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
+            background: "transparent", border: "none", cursor: "pointer",
+            color: "rgba(255,255,255,0.45)", fontFamily: "'Inter', sans-serif",
+            fontSize: "0.75rem", fontWeight: 600, display: "flex", alignItems: "center", gap: 5,
+            padding: 0, letterSpacing: "0.03em",
+          }}
+        >
+          ← Dashboard
+        </button>
         <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: "#fff", letterSpacing: "0.12em" }}>
           <span style={{ color: RED }}>F*</span> I FORGOT
         </div>
