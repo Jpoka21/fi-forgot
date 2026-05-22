@@ -57,6 +57,8 @@ export default function BusinessApprovePage() {
   const [cardPreview,   setCardPreview]   = useState<CardPreview | null>(null);
   const [editingAction, setEditingAction] = useState<string | null>(null);
   const [lightboxOpen,  setLightboxOpen]  = useState(false);
+  const [regenLoading,  setRegenLoading]  = useState(false);
+  const [excludedIds,   setExcludedIds]   = useState<string[]>([]);
 
   useEffect(() => {
     if (!token) return;
@@ -82,6 +84,23 @@ export default function BusinessApprovePage() {
       .catch(() => setError("Failed to load this approval link."))
       .finally(() => setLoading(false));
   }, [token]);
+
+  async function regenCard() {
+    if (!item || regenLoading) return;
+    const newExcluded = cardPreview ? [...excludedIds, String(cardPreview.id)] : excludedIds;
+    setExcludedIds(newExcluded);
+    setRegenLoading(true);
+    setCardPreview(null);
+    try {
+      const params = new URLSearchParams({ eventType: item.eventType });
+      if (item.contextNote) params.set("contextNote", item.contextNote);
+      if (newExcluded.length) params.set("excludeIds", newExcluded.join(","));
+      const r = await fetch(`/api/business-cards/pick-card?${params.toString()}`);
+      const d = await r.json() as { card?: CardPreview };
+      if (d.card) setCardPreview(d.card);
+    } catch {}
+    setRegenLoading(false);
+  }
 
   async function applyEdit(instruction: string, actionKey: string) {
     if (!item || editingAction) return;
@@ -211,38 +230,58 @@ export default function BusinessApprovePage() {
             </div>
 
             {/* Card design preview */}
-            {cardPreview && (
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Inter', sans-serif", marginBottom: 10 }}>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Inter', sans-serif" }}>
                   Selected Card Design
                 </div>
-                {cardPreview.imageUrl ? (
-                  <div
-                    onClick={() => setLightboxOpen(true)}
-                    style={{ cursor: "zoom-in", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.15)", position: "relative", display: "inline-block", width: "100%" }}
-                  >
-                    <img
-                      src={cardPreview.imageUrl}
-                      alt={cardPreview.name}
-                      style={{ width: "100%", display: "block", maxHeight: 300, objectFit: "contain", background: "#1a2744" }}
-                    />
-                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.7))", padding: "18px 14px 10px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-                      <div>
-                        <div style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.82rem" }}>{cardPreview.name}</div>
-                        {cardPreview.category && <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", fontFamily: "'Inter', sans-serif" }}>{cardPreview.category}</div>}
-                      </div>
-                      <div style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "4px 9px", fontSize: "0.68rem", color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, flexShrink: 0 }}>
-                        🔍 View full size
-                      </div>
+                <button
+                  onClick={regenCard}
+                  disabled={regenLoading || acting || !!editingAction}
+                  style={{
+                    background: "transparent", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: 20,
+                    color: regenLoading ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.65)",
+                    fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 600,
+                    padding: "4px 12px", cursor: regenLoading ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", gap: 5, transition: "all 0.12s",
+                  }}
+                >
+                  {regenLoading
+                    ? <><span style={{ display: "inline-block", width: 9, height: 9, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /> Picking…</>
+                    : "↻ Try another card"}
+                </button>
+              </div>
+
+              {regenLoading ? (
+                <div style={{ height: 160, borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.3)", fontFamily: "'Inter', sans-serif", fontSize: "0.8rem" }}>
+                  Finding a different card…
+                </div>
+              ) : cardPreview?.imageUrl ? (
+                <div
+                  onClick={() => setLightboxOpen(true)}
+                  style={{ cursor: "zoom-in", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.15)", position: "relative", width: "100%" }}
+                >
+                  <img
+                    src={cardPreview.imageUrl}
+                    alt={cardPreview.name}
+                    style={{ width: "100%", display: "block", maxHeight: 300, objectFit: "contain", background: "#1a2744" }}
+                  />
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.7))", padding: "18px 14px 10px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.82rem" }}>{cardPreview.name}</div>
+                      {cardPreview.category && <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", fontFamily: "'Inter', sans-serif" }}>{cardPreview.category}</div>}
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "4px 9px", fontSize: "0.68rem", color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, flexShrink: 0 }}>
+                      🔍 View full size
                     </div>
                   </div>
-                ) : (
-                  <div style={{ height: 120, borderRadius: 10, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>
-                    {icon}
-                  </div>
-                )}
-              </div>
-            )}
+                </div>
+              ) : cardPreview ? (
+                <div style={{ height: 120, borderRadius: 10, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>
+                  {icon}
+                </div>
+              ) : null}
+            </div>
 
             {/* Lightbox */}
             {lightboxOpen && cardPreview?.imageUrl && (
@@ -255,7 +294,21 @@ export default function BusinessApprovePage() {
                   alt={cardPreview.name}
                   style={{ maxWidth: "100%", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, boxShadow: "0 0 60px rgba(0,0,0,0.8)" }}
                 />
-                <div style={{ position: "absolute", top: 20, right: 24, color: "rgba(255,255,255,0.6)", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem" }}>
+                {/* Close button */}
+                <button
+                  onClick={e => { e.stopPropagation(); setLightboxOpen(false); }}
+                  style={{
+                    position: "absolute", top: 20, right: 20,
+                    width: 40, height: 40, borderRadius: "50%",
+                    background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+                    color: "#fff", fontSize: "1.1rem", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: "'Inter', sans-serif", lineHeight: 1,
+                  }}
+                >
+                  ✕
+                </button>
+                <div style={{ position: "absolute", bottom: 20, color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}>
                   Click anywhere to close
                 </div>
               </div>

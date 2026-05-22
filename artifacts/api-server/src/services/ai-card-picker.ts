@@ -238,8 +238,12 @@ async function gpxPickFromCandidates(
 export async function pickBestCard(
   eventType: string,
   contextNote?: string | null,
+  excludeIds: string[] = [],
 ): Promise<HandwryttenCard> {
-  const cards = await listHandwryttenCards();
+  const allCards = await listHandwryttenCards();
+  const cards = excludeIds.length
+    ? allCards.filter(c => !excludeIds.includes(String(c.id)))
+    : allCards;
   if (!cards.length) return { id: "hw-4421", name: "Classic Card", category: "General" };
 
   const enriched = await enrichCards(cards);

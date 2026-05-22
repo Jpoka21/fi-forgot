@@ -21,12 +21,15 @@ router.post("/business-cards/generate", async (req, res) => {
 });
 
 // Return the card Handwrytten would pick for a given event type — for preview on approval page
+// Pass excludeId to skip a card the user already rejected on the approval page
 router.get("/business-cards/pick-card", async (req, res) => {
   const eventType   = (req.query.eventType   as string | undefined) ?? "";
   const contextNote = (req.query.contextNote as string | undefined) ?? null;
+  const excludeIds  = ((req.query.excludeIds as string | undefined) ?? "")
+    .split(",").map(s => s.trim()).filter(Boolean);
   try {
     const { pickBestCard } = await import("../services/ai-card-picker");
-    const card = await pickBestCard(eventType, contextNote);
+    const card = await pickBestCard(eventType, contextNote, excludeIds);
     res.json({ card: card ?? null });
   } catch {
     res.json({ card: null });
