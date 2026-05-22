@@ -19,7 +19,8 @@ import { and, eq } from "drizzle-orm";
 import { db, businessClientsTable, businessSettingsTable, businessCardQueueTable } from "@workspace/db";
 import { logger } from "../lib/logger";
 import { generateBizCardMessage } from "./biz-card-message";
-import { createHandwryttenOrder, listHandwryttenCards } from "./handwrytten";
+import { createHandwryttenOrder } from "./handwrytten";
+import { pickCardId } from "./ai-card-picker";
 import { sendBusinessApprovalEmail } from "./sendgrid";
 
 const MAIL_LEAD_DAYS = 7;
@@ -105,17 +106,6 @@ function parseNameParts(fullName: string): { firstName: string; lastName: string
     : { firstName: parts[0]!, lastName: parts.slice(1).join(" ") };
 }
 
-async function pickCardId(eventType: string): Promise<string | number> {
-  try {
-    const cards = await listHandwryttenCards();
-    const category =
-      eventType === "Birthday"       ? "Birthday" :
-      eventType === "Happy Holidays" ? "Holiday"  :
-      eventType === "Anniversary"    ? "Anniversary" : null;
-    const match = category ? cards.find(c => c.category?.toLowerCase().includes(category.toLowerCase())) : null;
-    return match?.id ?? cards[0]?.id ?? "hw-4421";
-  } catch { return "hw-4421"; }
-}
 
 export async function runBusinessScheduler(
   appBaseUrl: string,
@@ -227,6 +217,7 @@ export async function runBusinessScheduler(
         queued++;
 
         // ── Queue in DB ───────────────────────────────────────────────────────
+        const contextNote = type === "Anniversary" ? (client.anniversaryNote ?? null) : null;
         await db.insert(businessCardQueueTable).values({
           businessId,
           clientId:      client.id,
@@ -242,6 +233,7 @@ export async function runBusinessScheduler(
           cardFont:      cardFont || null,
           cardSignature: cardSignature || null,
           notifyEmail:   notifyEmail ?? null,
+          contextNote,
         });
 
         const approvalUrl = `${appBaseUrl}/business/approve/${token}`;
@@ -252,7 +244,7 @@ export async function runBusinessScheduler(
           if (address) {
             try {
               const { firstName, lastName } = parseNameParts(client.fullName);
-              const cardId = await pickCardId(type);
+              const cardId = await pickCardId(type, type === "Anniversary" ? (client.anniversaryNote ?? null) : null);
               const order  = await createHandwryttenOrder({
                 cardId,
                 recipientAddress: { firstName, lastName, ...address },

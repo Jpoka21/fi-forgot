@@ -16,6 +16,7 @@ interface QueueItem {
   status: string;
   cardFont: string | null;
   cardSignature: string | null;
+  contextNote: string | null;
 }
 
 interface CardPreview {
@@ -68,8 +69,10 @@ export default function BusinessApprovePage() {
           }
           setItem(d.item);
           setMessage(d.item.cardMessage);
-          // Fetch the card design preview for this event type
-          fetch(`/api/business-cards/pick-card?eventType=${encodeURIComponent(d.item.eventType)}`)
+          // Fetch the card design preview — pass contextNote so AI can pick the right design
+          const previewParams = new URLSearchParams({ eventType: d.item.eventType });
+          if (d.item.contextNote) previewParams.set("contextNote", d.item.contextNote);
+          fetch(`/api/business-cards/pick-card?${previewParams.toString()}`)
             .then(r => r.json())
             .then((p: { card?: CardPreview }) => { if (p.card) setCardPreview(p.card); })
             .catch(() => {});

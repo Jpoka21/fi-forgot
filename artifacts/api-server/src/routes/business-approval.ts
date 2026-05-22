@@ -2,7 +2,8 @@ import { Router } from "express";
 import { eq } from "drizzle-orm";
 import { db, businessCardQueueTable } from "@workspace/db";
 import { logger } from "../lib/logger";
-import { createHandwryttenOrder, listHandwryttenCards } from "../services/handwrytten";
+import { createHandwryttenOrder } from "../services/handwrytten";
+import { pickCardId } from "../services/ai-card-picker";
 
 const router = Router();
 
@@ -30,19 +31,6 @@ function parseNameParts(fullName: string): { firstName: string; lastName: string
     : { firstName: parts[0]!, lastName: parts.slice(1).join(" ") };
 }
 
-async function pickCardId(eventType: string): Promise<string | number> {
-  try {
-    const cards = await listHandwryttenCards();
-    const category =
-      eventType === "Birthday"       ? "Birthday"  :
-      eventType === "Happy Holidays" ? "Holiday"   :
-      eventType === "Anniversary"    ? "Anniversary" : null;
-    const match = category ? cards.find(c => c.category?.toLowerCase().includes(category.toLowerCase())) : null;
-    return match?.id ?? cards[0]?.id ?? "hw-4421";
-  } catch {
-    return "hw-4421";
-  }
-}
 
 // GET /api/business-approval/:token
 router.get("/business-approval/:token", async (req, res) => {
@@ -101,7 +89,7 @@ router.post("/business-approval/:token", async (req, res) => {
     if (address) {
       try {
         const { firstName, lastName } = parseNameParts(item.clientName);
-        const cardId = await pickCardId(item.eventType);
+        const cardId = await pickCardId(item.eventType, item.contextNote);
         const order  = await createHandwryttenOrder({
           cardId,
           recipientAddress: { firstName, lastName, ...address },

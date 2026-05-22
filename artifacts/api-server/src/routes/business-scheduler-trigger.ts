@@ -22,17 +22,12 @@ router.post("/business-cards/generate", async (req, res) => {
 
 // Return the card Handwrytten would pick for a given event type — for preview on approval page
 router.get("/business-cards/pick-card", async (req, res) => {
-  const eventType = (req.query.eventType as string | undefined) ?? "";
+  const eventType   = (req.query.eventType   as string | undefined) ?? "";
+  const contextNote = (req.query.contextNote as string | undefined) ?? null;
   try {
-    const { listHandwryttenCards } = await import("../services/handwrytten");
-    const cards = await listHandwryttenCards();
-    const category =
-      eventType === "Birthday"       ? "Birthday"   :
-      eventType === "Happy Holidays" ? "Holiday"    :
-      eventType === "Anniversary"    ? "Anniversary" : null;
-    const match = category ? cards.find(c => c.category?.toLowerCase().includes(category.toLowerCase())) : null;
-    const chosen = match ?? cards[0];
-    res.json({ card: chosen ?? null });
+    const { pickBestCard } = await import("../services/ai-card-picker");
+    const card = await pickBestCard(eventType, contextNote);
+    res.json({ card: card ?? null });
   } catch {
     res.json({ card: null });
   }

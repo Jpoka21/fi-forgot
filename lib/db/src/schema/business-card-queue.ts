@@ -19,6 +19,7 @@ export const businessCardQueueTable = pgTable("business_card_queue", {
   cardSignature: text("card_signature"),
   notifyEmail: text("notify_email"),
   hwOrderId: text("hw_order_id"),
+  contextNote: text("context_note"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   resolvedAt: timestamp("resolved_at"),
 });
