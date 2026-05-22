@@ -74,7 +74,7 @@ router.post("/admin/generate-message", async (req, res) => {
 CRITICAL RULES — violating any of these is a failure:
 1. NEVER invent or assume any facts about the recipient. Only reference details explicitly provided in the context. If you don't know something (family size, personality, hobbies, life situations), do NOT mention it.
 2. NEVER use the same theme, angle, or specific detail that appears in previous cards for this recipient. If Greek roots was used before, find a completely different angle.
-3. Never open with relationship duration. Never use greeting card clichés ("wishing you all the best", "on your special day", etc.).
+3. Never open with relationship duration. Never use greeting card clichés ("wishing you all the best", "on your special day", "thank you for your support", "thank you for your continued support", "grateful for your support", "season's greetings", "hope this holiday season", "during this holiday season", etc.).
 4. Sign with exactly the name provided — never add a last name or change it.`;
 
   const userPrompt = `Write a ${tone} ${eventType} card from ${signatureName} to ${recipientName}. Sign it exactly as "${signatureName}" — nothing more.
