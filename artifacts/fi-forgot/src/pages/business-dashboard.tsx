@@ -683,6 +683,39 @@ export default function BusinessDashboardPage() {
     );
   }, [businessId]);
 
+  // On mount / businessId change: pull settings from DB so a fresh session gets the correct values
+  useEffect(() => {
+    if (!businessId) return;
+    fetch(`/api/business-settings?businessId=${encodeURIComponent(businessId)}`)
+      .then(r => r.json())
+      .then(({ settings }: { settings: Record<string, string> | null }) => {
+        if (!settings) return;
+        const parseArr = (v: string | undefined) => { try { return v ? JSON.parse(v) as string[] : undefined; } catch { return v ? [v] : undefined; } };
+        if (settings.bizType)        setBizType(settings.bizType);
+        if (settings.bizTypeOther)   setBizTypeOther(settings.bizTypeOther);
+        if (settings.tone)           setTone(settings.tone);
+        if (settings.cardSignature)  setCardSignature(settings.cardSignature);
+        if (settings.cardFont)       setCardFont(settings.cardFont);
+        const nt = parseArr(settings.notifyTiming);
+        if (nt)                      setNotifyTiming(nt);
+        if (settings.notifyChannel)  setNotifyChannel(settings.notifyChannel);
+        if (settings.notifyEmail)    setNotifyEmail(settings.notifyEmail);
+        if (settings.notifyPhone)    setNotifyPhone(settings.notifyPhone);
+        if (settings.automationMode) setAutomationMode(settings.automationMode as "auto" | "approval");
+      })
+      .catch(() => {});
+  }, [businessId]);
+
+  // Register email → businessId on server (covers existing users created before this feature)
+  useEffect(() => {
+    if (!businessId || !user?.email) return;
+    fetch("/api/business-settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessId, email: user.email.toLowerCase().trim() }),
+    }).catch(() => {});
+  }, [businessId, user?.email]);
+
   // Persist settings to localStorage immediately; debounce API sync
   useEffect(() => {
     const s = { bizType, bizTypeOther, tone, cardSignature, cardFont, notifyTiming, notifyChannel, notifyEmail, notifyPhone, automationMode };

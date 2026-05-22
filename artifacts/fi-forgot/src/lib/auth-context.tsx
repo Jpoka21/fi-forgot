@@ -49,6 +49,7 @@ interface AuthContextType {
   upgradePlan: (plan: Plan) => void;
   switchWorkspace: (id: string) => void;
   createBusinessWorkspace: (businessName: string, businessType: string) => Workspace;
+  restoreBusinessWorkspace: (businessId: string, businessName: string, businessType: string) => void;
   repairBusinessId: (correctId: string) => void;
 }
 
@@ -66,6 +67,7 @@ const AuthContext = createContext<AuthContextType>({
   upgradePlan: () => {},
   switchWorkspace: () => {},
   createBusinessWorkspace: () => ({ id: "", type: "business", name: "" }),
+  restoreBusinessWorkspace: () => {},
   repairBusinessId: () => {},
 });
 
@@ -220,10 +222,8 @@ function makePersonalWorkspace(): Workspace {
   return { id: crypto.randomUUID(), type: "personal", name: "Personal" };
 }
 
-function makeBusinessWorkspace(businessName: string, businessType: string): Workspace {
-  const businessId = crypto.randomUUID();
-  // Write a durable anchor that is NEVER cleared — survives logout, storage version bumps, etc.
-  // Used to repair a workspace that somehow loses its businessId.
+function makeBusinessWorkspace(businessName: string, businessType: string, existingBusinessId?: string): Workspace {
+  const businessId = existingBusinessId ?? crypto.randomUUID();
   try { localStorage.setItem("fi_forgot_biz_id_anchor", businessId); } catch { /* ignore */ }
   return {
     id: crypto.randomUUID(),
@@ -232,6 +232,14 @@ function makeBusinessWorkspace(businessName: string, businessType: string): Work
     businessType,
     businessId,
   };
+}
+
+function registerEmailOnServer(email: string, businessId: string, bizType?: string) {
+  fetch("/api/business-settings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ businessId, email: email.toLowerCase().trim(), bizType: bizType || undefined }),
+  }).catch(() => {});
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -361,6 +369,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveActiveWorkspaceId(business.id);
     setWorkspaces(ws);
     setActiveWorkspace(business);
+
+    // Register email → businessId on server so it can be recovered on future sign-ins
+    registerEmailOnServer(email, business.businessId!, businessType);
   }
 
   function createBusinessWorkspace(businessName: string, businessType: string): Workspace {
@@ -370,7 +381,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveActiveWorkspaceId(business.id);
     setWorkspaces(ws);
     setActiveWorkspace(business);
+    // Register email → businessId on server
+    if (user?.email) registerEmailOnServer(user.email, business.businessId!, businessType);
     return business;
+  }
+
+  function restoreBusinessWorkspace(businessId: string, businessName: string, businessType: string) {
+    const existing = loadWorkspaces();
+    const hasBiz = existing.some(w => w.type === "business");
+    if (hasBiz) {
+      const updated = existing.map(w =>
+        w.type === "business"
+          ? { ...w, businessId, name: businessName || w.name, businessType: businessType || w.businessType }
+          : w
+      );
+      saveWorkspaces(updated);
+      setWorkspaces(updated);
+      const biz = updated.find(w => w.type === "business")!;
+      setActiveWorkspace(biz);
+      saveActiveWorkspaceId(biz.id);
+    } else {
+      const business = makeBusinessWorkspace(businessName || "My Business", businessType || "", businessId);
+      const ws = [...existing, business];
+      saveWorkspaces(ws);
+      saveActiveWorkspaceId(business.id);
+      setWorkspaces(ws);
+      setActiveWorkspace(business);
+    }
   }
 
   function switchWorkspace(id: string) {
@@ -424,7 +461,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoggedIn, onboardingComplete, user,
       workspaces, activeWorkspace,
       login, signup, businessSignup, completeOnboarding, logout, upgradePlan,
-      switchWorkspace, createBusinessWorkspace, repairBusinessId,
+      switchWorkspace, createBusinessWorkspace, restoreBusinessWorkspace, repairBusinessId,
     }}>
       {children}
     </AuthContext.Provider>

@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
+import { useState } from "react";
 
 const RED  = "#E23B2E";
 const NAVY = "#0a1f3d";
@@ -15,36 +16,44 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function BusinessLoginPage() {
-  const { login } = useAuth();
+  const { login, restoreBusinessWorkspace } = useAuth();
   const [, setLocation] = useLocation();
+  const [checking, setChecking] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
 
-  function onSubmit(data: FormData) {
+  async function onSubmit(data: FormData) {
+    setChecking(true);
     login(data.email);
+
+    // Check localStorage first
     try {
       const raw = localStorage.getItem("fi_forgot_workspaces");
-      const ws = raw ? JSON.parse(raw) : [];
-      const activeId = localStorage.getItem("fi_forgot_active_workspace");
-      const active = ws.find((w: { id: string; type: string }) => w.id === activeId) ?? ws[0];
-      if (active?.type === "business") {
+      const ws = raw ? JSON.parse(raw) as Array<{ id: string; type: string; businessId?: string }> : [];
+      if (ws.some(w => w.type === "business")) {
+        const biz = ws.find(w => w.type === "business")!;
+        localStorage.setItem("fi_forgot_active_workspace", biz.id);
         setLocation("/business/dashboard");
-      } else if (ws.some((w: { type: string }) => w.type === "business")) {
-        // Has a business workspace but it's not active — activate it
-        const biz = ws.find((w: { type: string }) => w.type === "business");
-        if (biz) {
-          localStorage.setItem("fi_forgot_active_workspace", biz.id);
-          setLocation("/business/dashboard");
-        }
-      } else {
-        setLocation("/business/create-workspace");
+        return;
       }
-    } catch {
-      setLocation("/business/create-workspace");
-    }
+    } catch { /* fall through to server lookup */ }
+
+    // No workspace in localStorage — look up businessId by email on the server
+    try {
+      const resp = await fetch(`/api/business-settings/by-email?email=${encodeURIComponent(data.email.toLowerCase().trim())}`);
+      const { settings } = await resp.json() as { settings: { businessId: string; bizType?: string; businessName?: string } | null };
+      if (settings?.businessId) {
+        restoreBusinessWorkspace(settings.businessId, "My Business", settings.bizType ?? "");
+        setLocation("/business/dashboard");
+        return;
+      }
+    } catch { /* ignore — fall through to create-workspace */ }
+
+    setChecking(false);
+    setLocation("/business/create-workspace");
   }
 
   const inputStyle: React.CSSProperties = {
@@ -126,14 +135,14 @@ export default function BusinessLoginPage() {
                 {errors.password && <p style={{ color: RED, fontSize: "0.8rem", marginTop: 5 }}>{errors.password.message}</p>}
               </div>
 
-              <button type="submit" style={{
+              <button type="submit" disabled={checking} style={{
                 width: "100%", padding: "14px",
-                background: RED, color: WHITE, border: "none", borderRadius: 8,
+                background: checking ? "#94a3b8" : RED, color: WHITE, border: "none", borderRadius: 8,
                 fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem",
-                letterSpacing: "0.12em", cursor: "pointer",
-                boxShadow: `0 4px 16px ${RED}40`,
+                letterSpacing: "0.12em", cursor: checking ? "not-allowed" : "pointer",
+                boxShadow: checking ? "none" : `0 4px 16px ${RED}40`,
               }}>
-                SIGN IN TO BUSINESS →
+                {checking ? "SIGNING IN…" : "SIGN IN TO BUSINESS →"}
               </button>
             </form>
 

@@ -4,6 +4,17 @@ import { eq } from "drizzle-orm";
 
 const router = Router();
 
+// Look up a business account by email — used to recover businessId on sign-in
+router.get("/business-settings/by-email", async (req, res) => {
+  const email = (req.query.email as string | undefined)?.toLowerCase().trim();
+  if (!email) { res.status(400).json({ error: "email required" }); return; }
+  const [settings] = await db
+    .select()
+    .from(businessSettingsTable)
+    .where(eq(businessSettingsTable.email, email));
+  res.json({ settings: settings ?? null });
+});
+
 router.get("/business-settings", async (req, res) => {
   const businessId = req.query.businessId as string;
   if (!businessId) { res.status(400).json({ error: "businessId required" }); return; }

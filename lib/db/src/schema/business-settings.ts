@@ -5,6 +5,7 @@ import { z } from "zod/v4";
 export const businessSettingsTable = pgTable("business_settings", {
   id: uuid("id").primaryKey().defaultRandom(),
   businessId: text("business_id").notNull().unique(),
+  email:     text("email"),
 
   bizType:       text("biz_type"),
   bizTypeOther:  text("biz_type_other"),
