@@ -811,11 +811,27 @@ export default function BusinessDashboardPage() {
     return d;
   }
 
+  const MONTH_NAMES: Record<string, number> = {
+    jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12,
+  };
+  function parseDateField(s: string): { month: number; day: number } | null {
+    if (!s) return null;
+    const iso = s.match(/^(?:\d{4})-(\d{2})-(\d{2})$/);
+    if (iso) return { month: parseInt(iso[1]!), day: parseInt(iso[2]!) };
+    const short = s.match(/^([A-Za-z]{3})\s+(\d{1,2})$/);
+    if (short) {
+      const m = MONTH_NAMES[short[1]!.toLowerCase()];
+      const d = parseInt(short[2]!);
+      if (m && d) return { month: m, day: d };
+    }
+    return null;
+  }
+
   function soonestEventDate(row: ClientRow): Date {
     const candidates: Date[] = [];
     if (row.autoBirthday && row.birthday) {
-      const parts = row.birthday.split("-").map(Number);
-      if (parts.length >= 3) candidates.push(nextOccurrence(parts[1]!, parts[2]!));
+      const p = parseDateField(row.birthday);
+      if (p) candidates.push(nextOccurrence(p.month, p.day));
     }
     if (row.autoHoliday) candidates.push(nextOccurrence(12, 25));
     if (row.autoAnniversary && row.anniversaryDate) {
@@ -941,8 +957,8 @@ export default function BusinessDashboardPage() {
         });
       };
       if (row.autoBirthday && row.birthday) {
-        const p = row.birthday.split("-").map(Number);
-        if (p.length >= 3) add("Birthday", nextOccurrence(p[1]!, p[2]!));
+        const p = parseDateField(row.birthday);
+        if (p) add("Birthday", nextOccurrence(p.month, p.day));
       }
       if (row.autoHoliday) add("Happy Holidays", nextOccurrence(12, 25));
       if (row.autoAnniversary && row.anniversaryDate) {

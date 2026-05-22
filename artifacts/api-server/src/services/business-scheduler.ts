@@ -56,6 +56,22 @@ function daysUntil(target: Date): number {
   return Math.round((t.getTime() - now.getTime()) / 86_400_000);
 }
 
+const MONTH_NAMES: Record<string, number> = {
+  jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12,
+};
+function parseDateField(s: string): { month: number; day: number } | null {
+  if (!s) return null;
+  const iso = s.match(/^(?:\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) return { month: parseInt(iso[1]!), day: parseInt(iso[2]!) };
+  const short = s.match(/^([A-Za-z]{3})\s+(\d{1,2})$/);
+  if (short) {
+    const m = MONTH_NAMES[short[1]!.toLowerCase()];
+    const d = parseInt(short[2]!);
+    if (m && d) return { month: m, day: d };
+  }
+  return null;
+}
+
 function parseNotifyTiming(raw: string | null | undefined): number[] {
   if (!raw) return [NOTIFY_TIMING_DAYS["14 days before it mails"]!];
   try {
@@ -142,11 +158,8 @@ export async function runBusinessScheduler(
       const events: Array<{ type: string; occasionDate: Date; eventDate?: string }> = [];
 
       if (client.autoBirthday && client.birthday) {
-        const parts = client.birthday.split("-").map(Number);
-        if (parts.length >= 3) {
-          const [, m, d] = parts as [number, number, number];
-          events.push({ type: "Birthday", occasionDate: nextOccurrence(m, d) });
-        }
+        const p = parseDateField(client.birthday);
+        if (p) events.push({ type: "Birthday", occasionDate: nextOccurrence(p.month, p.day) });
       }
       if (client.autoHoliday) {
         events.push({ type: "Happy Holidays", occasionDate: nextOccurrence(HOLIDAY_MONTH, HOLIDAY_DAY) });
