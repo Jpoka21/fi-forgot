@@ -34,17 +34,31 @@ interface EnrichedCard extends HandwryttenCard {
 
 // ─── DB enrichment ──────────────────────────────────────────────────────────
 
+interface EnrichedCard extends HandwryttenCard {
+  /** Occasion tags from card_classifications DB (AI-tagged) */
+  occasions: string[];
+  /** If true, this card is manually flagged as unsuitable — always excluded */
+  skip?: boolean;
+}
+
 async function enrichCards(cards: HandwryttenCard[]): Promise<EnrichedCard[]> {
   const imageUrls = cards.map(c => c.imageUrl ?? "").filter(Boolean);
   if (!imageUrls.length) return cards.map(c => ({ ...c, occasions: [] }));
 
   const rows = await db
-    .select({ imageUrl: cardClassificationsTable.imageUrl, occasions: cardClassificationsTable.occasions })
+    .select({
+      imageUrl: cardClassificationsTable.imageUrl,
+      occasions: cardClassificationsTable.occasions,
+      skip: cardClassificationsTable.skip,
+    })
     .from(cardClassificationsTable)
     .where(inArray(cardClassificationsTable.imageUrl, imageUrls));
 
-  const byUrl = new Map(rows.map(r => [r.imageUrl, (r.occasions as string[]) ?? []]));
-  return cards.map(c => ({ ...c, occasions: byUrl.get(c.imageUrl ?? "") ?? [] }));
+  const byUrl = new Map(rows.map(r => [r.imageUrl, { occasions: (r.occasions as string[]) ?? [], skip: r.skip ?? false }]));
+  return cards.map(c => {
+    const entry = byUrl.get(c.imageUrl ?? "");
+    return { ...c, occasions: entry?.occasions ?? [], skip: entry?.skip ?? false };
+  });
 }
 
 // ─── Category selection ──────────────────────────────────────────────────────
@@ -143,11 +157,18 @@ function scoreCard(
   const occ     = card.occasions;
   let score     = 0;
 
+  // Hard exclude cards manually flagged as unsuitable in the DB
+  if (card.skip) return -999;
+
   // Hard exclude invitations, romantic/wedding cards — this is a business card-sending service
   if (hwCat === "wedding") return -999;
   if (hwCat === "invitations") return -999;
   const nameLower = name;
-  if (nameLower.includes("invitation") || nameLower.includes("invite") || nameLower.includes("rsvp") || nameLower.includes("you're invited")) return -999;
+  if (
+    nameLower.includes("invitation") || nameLower.includes("invite") ||
+    nameLower.includes("rsvp") || nameLower.includes("you're invited") ||
+    nameLower.includes("join us for") || nameLower.includes("join us to")
+  ) return -999;
   if (occ.includes("Valentine's Day") && occ.length === 1) return -999;
 
   // Hard exclude cards whose name OR image URL signals the wrong occasion
