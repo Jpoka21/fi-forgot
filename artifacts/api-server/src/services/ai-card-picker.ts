@@ -106,6 +106,8 @@ async function pickCategories(eventType: string, contextNote: string | null): Pr
             `IMPORTANT: This is a business service — never choose "Wedding". ` +
             `For home-purchase anniversaries use ["Anniversary","Congratulations","For Business"]. ` +
             `For work anniversaries use ["Employee Appreciation","For Business","Congratulations"]. ` +
+            `For "Happy Holidays" or any holiday/seasonal event use ["Everyday","Congratulations","Just For Fun"] — ` +
+            `seasonal/New Year celebration cards are ideal, NOT thank-you cards. ` +
             `Return ONLY a JSON array of strings, nothing else.`,
         },
         {
@@ -201,14 +203,19 @@ function scoreCard(
   else if (catIdx > 2)   score += 10;
 
   // Card NAME keyword matching against context
-  const homeWords  = ["home", "house", "housiversary", "houseiversary", "realtor", "real estate", "mortgage", "property"];
-  const workWords  = ["work", "job", "career", "business", "office", "professional", "employee", "colleague"];
-  const bdayWords  = ["birthday", "bday", "born", "celebrate", "another year", "candles", "balloons", "party hat"];
-  const congrats   = ["congrat", "congratulations", "achievement", "milestone"];
+  const homeWords    = ["home", "house", "housiversary", "houseiversary", "realtor", "real estate", "mortgage", "property"];
+  const workWords    = ["work", "job", "career", "business", "office", "professional", "employee", "colleague"];
+  const bdayWords    = ["birthday", "bday", "born", "celebrate", "another year", "candles", "balloons", "party hat"];
+  const holidayWords = ["holiday", "christmas", "xmas", "season", "merry", "cheer", "winter", "new year", "festive", "yuletide", "tis the season"];
+  const congrats     = ["congrat", "congratulations", "achievement", "milestone"];
 
-  const isHomeCtx  = homeWords.some(w => ctx.includes(w));
-  const isWorkCtx  = workWords.some(w => ctx.includes(w));
-  const isBdayEvt  = eventLower === "birthday";
+  const isHomeCtx    = homeWords.some(w => ctx.includes(w));
+  const isWorkCtx    = workWords.some(w => ctx.includes(w));
+  const isBdayEvt    = eventLower === "birthday";
+  const isHolidayEvt = eventLower === "happy holidays" || eventLower === "holiday";
+
+  // For holidays, hard-exclude pure thank-you cards — they're not seasonal
+  if (isHolidayEvt && (name.includes("thank") || imgLower.includes("thank_you") || imgLower.includes("thankyou"))) return -999;
 
   if (isHomeCtx) {
     const nameHomeMatch = homeWords.some(w => name.includes(w));
@@ -219,10 +226,17 @@ function scoreCard(
     if (nameWorkMatch) score += 60;
   }
 
-  // Birthday event: strongly boost cards that are actually birthday cards
+  // Birthday event: strongly boost actual birthday cards
   if (isBdayEvt) {
     if (occ.includes("Birthday")) score += 60;
     if (bdayWords.some(w => name.includes(w) || imgLower.includes(w))) score += 40;
+  }
+
+  // Holiday event: strongly boost actual holiday/seasonal cards
+  if (isHolidayEvt) {
+    if (occ.includes("Christmas")) score += 100;
+    if (occ.includes("New Year's")) score += 90;
+    if (holidayWords.some(w => name.includes(w) || imgLower.includes(w))) score += 70;
   }
 
   if (congrats.some(w => name.includes(w))) score += 15;
@@ -259,9 +273,12 @@ async function gpxPickFromCandidates(
             `You are selecting a physical greeting card for a business to send to a client. ` +
             `Read the occasion and context carefully. Pick the card whose NAME and category best ` +
             `match the specific situation — not just the generic event type. ` +
-            `For example, a home-purchase anniversary deserves a home/house-themed card, not a ` +
-            `generic anniversary card. A work anniversary deserves an employee-appreciation card. ` +
-            `NEVER pick a romantic or wedding card. Reply ONLY with the card id value, nothing else.`,
+            `For example, a home-purchase anniversary → home/house-themed card. ` +
+            `A work anniversary → employee-appreciation card. ` +
+            `A Happy Holidays / holiday event → celebration, seasonal, New Year's, or champagne card — ` +
+            `NOT a thank-you card, NOT a generic everyday card. ` +
+            `NEVER pick a romantic, wedding, invitation, or thank-you card for holidays. ` +
+            `Reply ONLY with the card id value, nothing else.`,
         },
         {
           role: "user",
