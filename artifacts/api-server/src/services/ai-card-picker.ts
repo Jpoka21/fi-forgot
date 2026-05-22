@@ -1,14 +1,16 @@
 /**
  * AI-powered card picker.
  *
- * Uses the card_classifications DB table (occasion labels) joined with
- * the live Handwrytten catalog (card IDs + images) to find the best card.
- *
  * Strategy:
- *  1. Fetch live Handwrytten cards (id + imageUrl + name)
- *  2. Join with card_classifications by imageUrl to get occasion tags
- *  3. Score cards based on event type + contextNote
- *  4. When context is ambiguous, ask GPT to pick from the top candidates
+ *  1. Fetch live Handwrytten cards — each has an official `category` field
+ *     (Anniversary, For Business, Congratulations, etc.) matching Handwrytten's
+ *     own taxonomy shown in their sidebar.
+ *  2. Ask GPT which Handwrytten categories best fit the event + contextNote.
+ *  3. Score cards using: preferred categories + card name keywords + DB occasion tags.
+ *  4. Ask GPT to make the final pick from the top candidates, giving it full context.
+ *
+ * This means even cards not yet classified in card_classifications are found,
+ * as long as Handwrytten categorises them and/or their name contains relevant keywords.
  */
 
 import OpenAI from "openai";
@@ -23,19 +25,14 @@ const openai = new OpenAI({
   apiKey:  process.env["AI_INTEGRATIONS_OPENAI_API_KEY"],
 });
 
-// Occasions that indicate a romantic/wedding card — avoid for business contexts
-const ROMANTIC_OCCASIONS = new Set(["Valentine's Day"]);
-// Pure-anniversary-only cards are usually wedding cards
-function isRomantic(occasions: string[]): boolean {
-  if (occasions.some(o => ROMANTIC_OCCASIONS.has(o))) return true;
-  // If the only occasion is "Anniversary" with no "Just Because" safety, likely wedding
-  if (occasions.length === 1 && occasions[0] === "Anniversary") return true;
-  return false;
-}
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 interface EnrichedCard extends HandwryttenCard {
+  /** Occasion tags from card_classifications DB (AI-tagged) */
   occasions: string[];
 }
+
+// ─── DB enrichment ──────────────────────────────────────────────────────────
 
 async function enrichCards(cards: HandwryttenCard[]): Promise<EnrichedCard[]> {
   const imageUrls = cards.map(c => c.imageUrl ?? "").filter(Boolean);
@@ -46,80 +43,158 @@ async function enrichCards(cards: HandwryttenCard[]): Promise<EnrichedCard[]> {
     .from(cardClassificationsTable)
     .where(inArray(cardClassificationsTable.imageUrl, imageUrls));
 
-  const byUrl = new Map(rows.map(r => [r.imageUrl, r.occasions as string[] ?? []]));
+  const byUrl = new Map(rows.map(r => [r.imageUrl, (r.occasions as string[]) ?? []]));
   return cards.map(c => ({ ...c, occasions: byUrl.get(c.imageUrl ?? "") ?? [] }));
 }
 
+// ─── Category selection ──────────────────────────────────────────────────────
+
 /**
- * Score a card for a given event + context.
- * Higher = better match.
+ * All official Handwrytten categories (matches their sidebar taxonomy).
  */
-function scoreCard(card: EnrichedCard, eventType: string, contextNote: string | null): number {
-  const occ = card.occasions;
-  const name = (card.name ?? "").toLowerCase();
-  const ctx  = (contextNote ?? "").toLowerCase();
-  let score = 0;
+const ALL_HW_CATEGORIES = [
+  "Anniversary",
+  "Birthday",
+  "Condolences",
+  "Congratulations",
+  "Employee Appreciation",
+  "Everyday",
+  "Father's Day",
+  "For Business",
+  "Get Well",
+  "Graduation",
+  "Invitations",
+  "Just For Fun",
+  "Mother's Day",
+  "New Baby",
+  "Thank You",
+  "Wedding",
+] as const;
 
-  // Hard exclude romantic cards in all cases (this is a business service)
-  if (isRomantic(occ)) return -999;
+/**
+ * Ask GPT which Handwrytten categories are most relevant for this event + context.
+ * Returns an ordered list: first = most preferred.
+ */
+async function pickCategories(eventType: string, contextNote: string | null): Promise<string[]> {
+  const ctx = contextNote?.trim() || "none";
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.1",
+      max_completion_tokens: 120,
+      messages: [
+        {
+          role: "system",
+          content:
+            `You help a business greeting-card service pick cards for clients. ` +
+            `Given an event type and context note, return an ordered JSON array of the best ` +
+            `Handwrytten category names to search. Choose from ONLY these categories: ` +
+            ALL_HW_CATEGORIES.join(", ") + `. ` +
+            `IMPORTANT: This is a business service — never choose "Wedding". ` +
+            `For home-purchase anniversaries use ["Anniversary","Congratulations","For Business"]. ` +
+            `For work anniversaries use ["Employee Appreciation","For Business","Congratulations"]. ` +
+            `Return ONLY a JSON array of strings, nothing else.`,
+        },
+        {
+          role: "user",
+          content: `Event type: ${eventType}\nContext: ${ctx}`,
+        },
+      ],
+    });
 
-  const isHomeContext = ctx.includes("home") || ctx.includes("house") || ctx.includes("property") || ctx.includes("real estate") || ctx.includes("mortgage");
-  const isWorkContext = ctx.includes("work") || ctx.includes("job") || ctx.includes("career") || ctx.includes("business") || ctx.includes("compan");
-  const isPersonalAnniversary = eventType === "Anniversary" && !isHomeContext && !isWorkContext;
-
-  // Perfect name match for home
-  if (isHomeContext && (name.includes("home") || name.includes("house") || name.includes("housiversary"))) score += 100;
-
-  // Occasion scoring
-  if (eventType === "Birthday" && occ.includes("Birthday")) score += 50;
-  if (eventType === "Happy Holidays" && occ.includes("Holiday")) score += 50;
-  if (eventType === "Anniversary") {
-    if (isHomeContext && occ.includes("Just Because")) score += 40;
-    if (isWorkContext && (occ.includes("Work Anniversary") || occ.includes("Just Because"))) score += 40;
-    if (isPersonalAnniversary && occ.includes("Anniversary") && occ.includes("Just Because")) score += 40;
-    if (occ.includes("Congratulations")) score += 30;
+    const raw = completion.choices[0]?.message?.content?.trim() ?? "[]";
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      logger.info({ eventType, contextNote, categories: parsed }, "ai-card-picker: GPT picked categories");
+      return parsed as string[];
+    }
+  } catch (err) {
+    logger.warn({ err }, "ai-card-picker: category GPT failed, using fallback");
   }
 
-  // General boosts
-  if (occ.includes("Just Because")) score += 10;
+  // Fallback heuristic
+  if (eventType === "Birthday") return ["Birthday"];
+  if (eventType === "Happy Holidays") return ["Everyday", "Just For Fun"];
+  if (eventType === "Anniversary") {
+    const ctx2 = (contextNote ?? "").toLowerCase();
+    const isHome = ctx2.includes("home") || ctx2.includes("house") || ctx2.includes("propert") || ctx2.includes("real estate") || ctx2.includes("mortgage");
+    const isWork = ctx2.includes("work") || ctx2.includes("job") || ctx2.includes("career") || ctx2.includes("business") || ctx2.includes("compan");
+    if (isHome) return ["Anniversary", "Congratulations", "For Business"];
+    if (isWork) return ["Employee Appreciation", "For Business", "Congratulations"];
+    return ["Anniversary", "Just For Fun", "Congratulations"];
+  }
+  return ["For Business", "Congratulations", "Everyday"];
+}
+
+// ─── Keyword scoring ─────────────────────────────────────────────────────────
+
+/**
+ * Score a single card.  Higher = better.
+ * Uses: Handwrytten category, card name keywords, and DB occasion tags.
+ */
+function scoreCard(
+  card: EnrichedCard,
+  preferredCategories: string[],
+  contextNote: string | null,
+): number {
+  const name    = (card.name ?? "").toLowerCase();
+  const ctx     = (contextNote ?? "").toLowerCase();
+  const hwCat   = (card.category ?? "").toLowerCase();
+  const occ     = card.occasions;
+  let score     = 0;
+
+  // Hard exclude anything romantic/wedding for this business service
+  if (hwCat === "wedding") return -999;
+  if (occ.includes("Valentine's Day") && occ.length === 1) return -999;
+
+  // Preferred-category bonus (first = highest)
+  const catIdx = preferredCategories.findIndex(
+    c => c.toLowerCase() === hwCat,
+  );
+  if (catIdx === 0) score += 60;
+  else if (catIdx === 1) score += 40;
+  else if (catIdx === 2) score += 25;
+  else if (catIdx > 2)   score += 10;
+
+  // Card NAME keyword matching against context
+  const homeWords  = ["home", "house", "housiversary", "houseiversary", "realtor", "real estate", "mortgage", "property"];
+  const workWords  = ["work", "job", "career", "business", "office", "professional", "employee", "colleague"];
+  const bdayWords  = ["birthday", "bday", "born", "celebrate", "another year"];
+  const congrats   = ["congrat", "congratulations", "achievement", "milestone"];
+
+  const isHomeCtx  = homeWords.some(w => ctx.includes(w));
+  const isWorkCtx  = workWords.some(w => ctx.includes(w));
+
+  if (isHomeCtx) {
+    const nameHomeMatch = homeWords.some(w => name.includes(w));
+    if (nameHomeMatch) score += 80;
+  }
+  if (isWorkCtx) {
+    const nameWorkMatch = workWords.some(w => name.includes(w));
+    if (nameWorkMatch) score += 60;
+  }
+  if (bdayWords.some(w => name.includes(w)) && ctx.includes("birth")) score += 50;
+  if (congrats.some(w => name.includes(w))) score += 15;
+
+  // DB occasion tag bonuses (supplementary)
+  if (occ.includes("Just Because")) score += 8;
   if (occ.includes("Congratulations")) score += 8;
-  if (occ.includes("Work Anniversary")) score += (isWorkContext ? 20 : 5);
-  if (occ.includes("Client Appreciation")) score += 12;
+  if (occ.includes("Work Anniversary")) score += (isWorkCtx ? 15 : 3);
 
   return score;
 }
 
-export async function pickBestCard(
+// ─── Final GPT pick ──────────────────────────────────────────────────────────
+
+async function gpxPickFromCandidates(
+  candidates: EnrichedCard[],
   eventType: string,
-  contextNote?: string | null,
-): Promise<HandwryttenCard> {
-  const cards = await listHandwryttenCards();
-  if (!cards.length) return { id: "hw-4421", name: "Classic Card", category: "General" };
-
-  const enriched = await enrichCards(cards);
-
-  // Score every card
-  const scored = enriched
-    .map(c => ({ card: c, score: scoreCard(c, eventType, contextNote ?? null) }))
-    .filter(x => x.score > -999)
-    .sort((a, b) => b.score - a.score);
-
-  if (!scored.length) return cards[0]!;
-
-  // If top card has a very strong score (clear winner), use it directly
-  const top = scored[0]!;
-  if (top.score >= 80) {
-    logger.info({ eventType, contextNote, chosenId: top.card.id, chosenName: top.card.name, score: top.score }, "ai-card-picker: direct score win");
-    return top.card;
-  }
-
-  // Otherwise ask GPT to pick from top 12 candidates
-  const candidates = scored.slice(0, 12).map(x => x.card);
-
+  contextNote: string | null,
+): Promise<EnrichedCard | null> {
   try {
     const catalog = candidates.map(c => {
-      const occ = c.occasions.length ? ` occasions=[${c.occasions.join(", ")}]` : "";
-      return `id="${c.id}" name="${c.name}"${occ}`;
+      const occ  = c.occasions.length ? ` occasions=[${c.occasions.join(", ")}]` : "";
+      const cat  = c.category ? ` hwCategory="${c.category}"` : "";
+      return `id="${c.id}" name="${c.name}"${cat}${occ}`;
     }).join("\n");
 
     const completion = await openai.chat.completions.create({
@@ -128,7 +203,13 @@ export async function pickBestCard(
       messages: [
         {
           role: "system",
-          content: `You are a business greeting card selector for a professional card-mailing service. Pick the single most appropriate card for the occasion. This is NOT a personal/romantic context — it is a business sending cards to clients. Avoid anything romantic or wedding-themed. Reply ONLY with the card id value, nothing else.`,
+          content:
+            `You are selecting a physical greeting card for a business to send to a client. ` +
+            `Read the occasion and context carefully. Pick the card whose NAME and category best ` +
+            `match the specific situation — not just the generic event type. ` +
+            `For example, a home-purchase anniversary deserves a home/house-themed card, not a ` +
+            `generic anniversary card. A work anniversary deserves an employee-appreciation card. ` +
+            `NEVER pick a romantic or wedding card. Reply ONLY with the card id value, nothing else.`,
         },
         {
           role: "user",
@@ -140,13 +221,51 @@ export async function pickBestCard(
     const raw = completion.choices[0]?.message?.content?.trim() ?? "";
     const chosen = candidates.find(c => String(c.id) === raw.replace(/^"|"$/g, "").trim());
     if (chosen) {
-      logger.info({ eventType, contextNote, chosenId: chosen.id, chosenName: chosen.name }, "ai-card-picker: GPT selected");
+      logger.info({ eventType, contextNote, chosenId: chosen.id, chosenName: chosen.name }, "ai-card-picker: GPT final pick");
       return chosen;
     }
   } catch (err) {
-    logger.warn({ err }, "ai-card-picker: GPT failed, using top scored card");
+    logger.warn({ err }, "ai-card-picker: final GPT pick failed");
+  }
+  return null;
+}
+
+// ─── Public API ──────────────────────────────────────────────────────────────
+
+export async function pickBestCard(
+  eventType: string,
+  contextNote?: string | null,
+): Promise<HandwryttenCard> {
+  const cards = await listHandwryttenCards();
+  if (!cards.length) return { id: "hw-4421", name: "Classic Card", category: "General" };
+
+  const enriched = await enrichCards(cards);
+
+  // Step 1: Ask GPT which Handwrytten categories are relevant
+  const preferredCategories = await pickCategories(eventType, contextNote ?? null);
+
+  // Step 2: Score all cards
+  const scored = enriched
+    .map(c => ({ card: c, score: scoreCard(c, preferredCategories, contextNote ?? null) }))
+    .filter(x => x.score > -999)
+    .sort((a, b) => b.score - a.score);
+
+  if (!scored.length) return cards[0]!;
+
+  const top = scored[0]!;
+
+  // Step 3: If there's an overwhelming winner (strong name + category match), use it
+  if (top.score >= 120) {
+    logger.info({ eventType, contextNote, chosenId: top.card.id, chosenName: top.card.name, score: top.score, categories: preferredCategories }, "ai-card-picker: direct score win");
+    return top.card;
   }
 
+  // Step 4: GPT makes the final call from top 15 candidates
+  const candidates = scored.slice(0, 15).map(x => x.card);
+  const gptPick = await gpxPickFromCandidates(candidates, eventType, contextNote ?? null);
+  if (gptPick) return gptPick;
+
+  // Fallback
   logger.info({ eventType, contextNote, chosenId: top.card.id, chosenName: top.card.name, score: top.score }, "ai-card-picker: score fallback");
   return top.card;
 }
