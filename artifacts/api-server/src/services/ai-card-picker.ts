@@ -182,11 +182,12 @@ function scoreCard(
   // Card NAME keyword matching against context
   const homeWords  = ["home", "house", "housiversary", "houseiversary", "realtor", "real estate", "mortgage", "property"];
   const workWords  = ["work", "job", "career", "business", "office", "professional", "employee", "colleague"];
-  const bdayWords  = ["birthday", "bday", "born", "celebrate", "another year"];
+  const bdayWords  = ["birthday", "bday", "born", "celebrate", "another year", "candles", "balloons", "party hat"];
   const congrats   = ["congrat", "congratulations", "achievement", "milestone"];
 
   const isHomeCtx  = homeWords.some(w => ctx.includes(w));
   const isWorkCtx  = workWords.some(w => ctx.includes(w));
+  const isBdayEvt  = eventLower === "birthday";
 
   if (isHomeCtx) {
     const nameHomeMatch = homeWords.some(w => name.includes(w));
@@ -196,7 +197,13 @@ function scoreCard(
     const nameWorkMatch = workWords.some(w => name.includes(w));
     if (nameWorkMatch) score += 60;
   }
-  if (bdayWords.some(w => name.includes(w)) && ctx.includes("birth")) score += 50;
+
+  // Birthday event: strongly boost cards that are actually birthday cards
+  if (isBdayEvt) {
+    if (occ.includes("Birthday")) score += 60;
+    if (bdayWords.some(w => name.includes(w) || imgLower.includes(w))) score += 40;
+  }
+
   if (congrats.some(w => name.includes(w))) score += 15;
 
   // DB occasion tag bonuses (supplementary)
