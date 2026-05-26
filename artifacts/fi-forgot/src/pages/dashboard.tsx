@@ -3,6 +3,8 @@ import { Link, useLocation } from "wouter";
 import {
   getCards, getRecipients, getBriefingsForRecipient, updateCard,
   CardOrder, Recipient, getAge, saveCard, deleteCard, saveRecipient,
+  getPersonalSettings, savePersonalSettings, PersonalSettings,
+  TONES, PREVIEW_DAYS_OPTIONS,
 } from "@/lib/data";
 import {
   getCustomerPendingApprovals, customerApproveCard,
@@ -364,6 +366,8 @@ export default function DashboardPage() {
   const [refineOpen, setRefineOpen]                 = useState<string | null>(null);
   const [activeTab, setActiveTab]                   = useState<"people" | "upcoming">("people");
   const [search, setSearch]                         = useState("");
+  const [settingsOpen, setSettingsOpen]             = useState(false);
+  const [personalSettings, setPersonalSettings]     = useState<PersonalSettings>(() => getPersonalSettings());
   const [generatingFor, setGeneratingFor]           = useState<string | null>(null);
   const [approvingId, setApprovingId]               = useState<string | null>(null);
   const [editedMessages, setEditedMessages]         = useState<Record<string, string>>({});
@@ -464,6 +468,14 @@ export default function DashboardPage() {
     { key: "people"   as const, label: "Your People",    icon: Users,        count: recipients.length },
     { key: "upcoming" as const, label: "Upcoming Cards", icon: CalendarDays, count: allUpcomingEvents.length },
   ];
+
+  function updateSettings<K extends keyof PersonalSettings>(key: K, val: PersonalSettings[K]) {
+    setPersonalSettings(prev => {
+      const next = { ...prev, [key]: val };
+      savePersonalSettings(next);
+      return next;
+    });
+  }
 
   async function generateEarly(ev: { recipient: Recipient; event: string; daysAway: number; dateStr: string; briefingDone: boolean }) {
     const key = `${ev.recipient.id}:::${ev.event}`;
@@ -568,15 +580,22 @@ export default function DashboardPage() {
 
           {/* Nav links — same font/size as landing page */}
           <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
-            {[
-              { label: "RECIPIENTS",  href: "/recipients" },
-              { label: "SETTINGS",    href: "/settings" },
-              { label: "PLANS",       href: "/signup" },
-            ].map(link => (
-              <Link key={link.href} href={link.href}
+            {([
+              { label: "RECIPIENTS", href: "/recipients" as string | null },
+              { label: "SETTINGS",   href: null },
+              { label: "PLANS",      href: "/signup" as string | null },
+            ]).map(link => link.href ? (
+              <Link key={link.label} href={link.href}
                 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: BLACK, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: 0.85 }}>
                 {link.label}
               </Link>
+            ) : (
+              <button key={link.label}
+                onClick={() => setSettingsOpen(o => !o)}
+                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: settingsOpen ? RED : BLACK, background: "none", border: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: settingsOpen ? 1 : 0.85, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
+                {link.label}
+                <span style={{ fontSize: "0.6rem", opacity: 0.6 }}>{settingsOpen ? "▲" : "▼"}</span>
+              </button>
             ))}
           </div>
 
@@ -671,6 +690,137 @@ export default function DashboardPage() {
             <span style={{ fontSize: "0.7rem", fontWeight: 800, color: `${BLACK}70`, letterSpacing: "0.04em" }}>{label}</span>
           </div>
         ))}
+      </div>
+
+      {/* ── Personal Settings Panel ──────────────────────────────────────────── */}
+      <div style={{ background: BEIGE, borderBottom: `1px solid ${BLACK}12`, padding: "0 28px", flexShrink: 0 }}>
+        <button
+          onClick={() => setSettingsOpen(o => !o)}
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", background: "none", border: "none", cursor: "pointer", color: `${BLACK}70`, fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const }}
+        >
+          <span style={{ fontSize: "0.9rem" }}>⚙️</span>
+          Personal Settings
+          <span style={{ fontSize: "0.6rem", marginLeft: 2 }}>{settingsOpen ? "▲" : "▼"}</span>
+        </button>
+
+        {settingsOpen && (
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 28, paddingBottom: 20 }}>
+
+            {/* Automation Mode */}
+            <div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 8 }}>Automation Mode</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {([
+                  { value: "autopilot" as const, icon: "🚀", title: "Full Autopilot",   desc: "We write, design, and mail automatically. No action needed." },
+                  { value: "approve"   as const, icon: "✋", title: "Review & Approve", desc: "You review before anything ships.", badge: "Recommended" },
+                ]).map(opt => {
+                  const active = personalSettings.automationMode === opt.value;
+                  return (
+                    <button key={opt.value} onClick={() => updateSettings("automationMode", opt.value)} style={{
+                      textAlign: "left" as const, padding: "10px 12px", borderRadius: 8, cursor: "pointer",
+                      border: `1.5px solid ${active ? RED : `${BLACK}20`}`,
+                      background: active ? `${RED}10` : WHITE,
+                      minWidth: 155, maxWidth: 200,
+                      transition: "all 0.12s",
+                    }}>
+                      <div style={{ fontSize: "1rem", marginBottom: 3 }}>{opt.icon}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
+                        <span style={{ fontWeight: 700, fontSize: "0.75rem", color: active ? RED : BLACK, fontFamily: "'Inter', sans-serif" }}>{opt.title}</span>
+                        {"badge" in opt && opt.badge && <span style={{ fontSize: "0.55rem", fontWeight: 700, background: "#16a34a", color: WHITE, borderRadius: 3, padding: "1px 5px" }}>{opt.badge}</span>}
+                      </div>
+                      <div style={{ fontSize: "0.65rem", color: GRAY, fontFamily: "'Inter', sans-serif", lineHeight: 1.35 }}>{opt.desc}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Default Tone */}
+            <div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 8 }}>Default Tone</div>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
+                {TONES.map(t => (
+                  <button key={t} onClick={() => updateSettings("defaultTone", t)} style={{
+                    padding: "4px 11px", borderRadius: 16, cursor: "pointer",
+                    border: `1.5px solid ${personalSettings.defaultTone === t ? RED : `${BLACK}18`}`,
+                    background: personalSettings.defaultTone === t ? `${RED}12` : WHITE,
+                    color: personalSettings.defaultTone === t ? RED : BLACK,
+                    fontSize: "0.75rem", fontWeight: 600, fontFamily: "'Inter', sans-serif",
+                  }}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Card Signature */}
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45` }}>Card Signature</div>
+              <input
+                value={personalSettings.cardSignature}
+                onChange={e => updateSettings("cardSignature", e.target.value)}
+                placeholder="e.g. Love, James"
+                style={{ background: WHITE, border: `1px solid ${BLACK}20`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 220, fontFamily: "'Inter', sans-serif" }}
+              />
+              <div style={{ fontSize: "0.63rem", color: `${BLACK}40`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this.</div>
+            </div>
+
+            {/* Draft Lead Time */}
+            <div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 4 }}>How Early to Draft</div>
+              <div style={{ fontSize: "0.63rem", color: `${BLACK}40`, marginBottom: 7, fontFamily: "'Inter', sans-serif" }}>How far before the card mails do we write it?</div>
+              <div style={{ display: "flex", gap: 5 }}>
+                {PREVIEW_DAYS_OPTIONS.map(opt => (
+                  <button key={opt.days} onClick={() => updateSettings("previewDays", opt.days)} style={{
+                    padding: "4px 12px", borderRadius: 16, cursor: "pointer",
+                    border: `1.5px solid ${personalSettings.previewDays === opt.days ? RED : `${BLACK}18`}`,
+                    background: personalSettings.previewDays === opt.days ? `${RED}12` : WHITE,
+                    color: personalSettings.previewDays === opt.days ? RED : BLACK,
+                    fontSize: "0.75rem", fontWeight: 600, fontFamily: "'Inter', sans-serif",
+                  }}>
+                    {opt.days}d{opt.badge && <span style={{ fontSize: "0.6rem", marginLeft: 3, opacity: 0.7 }}>★</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notify Channel */}
+            <div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 8 }}>How to Notify You</div>
+              <div style={{ display: "flex", gap: 5 }}>
+                {([
+                  { value: "email" as const, label: "✉️  Email" },
+                  { value: "text"  as const, label: "💬  Text"  },
+                  { value: "both"  as const, label: "📲  Both"  },
+                ]).map(opt => (
+                  <button key={opt.value} onClick={() => updateSettings("notifyChannel", opt.value)} style={{
+                    padding: "4px 12px", borderRadius: 16, cursor: "pointer",
+                    border: `1.5px solid ${personalSettings.notifyChannel === opt.value ? RED : `${BLACK}18`}`,
+                    background: personalSettings.notifyChannel === opt.value ? `${RED}12` : WHITE,
+                    color: personalSettings.notifyChannel === opt.value ? RED : BLACK,
+                    fontSize: "0.75rem", fontWeight: 600, fontFamily: "'Inter', sans-serif",
+                  }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notify Email */}
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45` }}>Notify Email</div>
+              <input
+                type="email"
+                value={personalSettings.notifyEmail}
+                onChange={e => updateSettings("notifyEmail", e.target.value)}
+                placeholder="you@example.com"
+                style={{ background: WHITE, border: `1px solid ${BLACK}20`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 240, fontFamily: "'Inter', sans-serif" }}
+              />
+              <div style={{ fontSize: "0.63rem", color: `${BLACK}40`, fontFamily: "'Inter', sans-serif" }}>Draft notifications and order updates.</div>
+            </div>
+
+          </div>
+        )}
       </div>
 
       {/* ── Alert banners ────────────────────────────────────────────────────── */}
