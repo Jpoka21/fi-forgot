@@ -1412,8 +1412,8 @@ export default function DashboardPage() {
                                     zIndex: 50,
                                   }}>
                                     {ev.briefingDone
-                                      ? <>Tell us more about {ev.recipient.name} — every answer makes future cards smarter.</>
-                                      : <>A few questions about {ev.recipient.name}. The more we know, the more every card feels written just for them.</>}
+                                      ? <>Tell us more about {ev.recipient.name} — every answer makes future cards smarter. Totally optional.</>
+                                      : <>A few optional questions about {ev.recipient.name}. The more we know, the more every card feels written just for them — skip anytime.</>}
                                     <div style={{
                                       position: "absolute", top: "100%", right: 14,
                                       border: "5px solid transparent",
