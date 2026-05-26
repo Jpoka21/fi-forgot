@@ -129,7 +129,7 @@ function WorkspaceToggle() {
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
       >
         <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: `${BLACK}70` }}>
-          {biz ? biz.name.split(" ")[0] : "Business"}
+          Business
         </span>
       </button>
     </div>
@@ -457,47 +457,28 @@ export default function DashboardPage() {
       {/* ── Sticky header ────────────────────────────────────────────────────── */}
       <div style={{ position: "sticky", top: 0, zIndex: 40, flexShrink: 0 }}>
 
-        {/* Main header bar — beige, matching the personal landing page */}
+        {/* Main header bar — matches home page style */}
         <header style={{
           background: BEIGE,
-          borderBottom: `2px solid ${BLACK}12`,
+          borderBottom: `1px solid ${BLACK}14`,
           padding: "0 28px",
-          height: 72,
+          height: 80,
           display: "flex", alignItems: "center", justifyContent: "space-between",
           boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
         }}>
-          {/* Left: logo */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: RED, fontStyle: "italic", marginRight: 5 }}>F*</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: BLACK, letterSpacing: "0.05em" }}>I FORGOT</span>
-            <span style={{
-              fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem",
-              letterSpacing: "0.18em", color: `${BLACK}50`,
-              marginLeft: 10, alignSelf: "flex-end", paddingBottom: 5,
-            }}>PERSONAL</span>
+          {/* Left: logo + tagline (home page style) */}
+          <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: RED, fontStyle: "italic", marginRight: 4 }}>F*</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: BLACK, letterSpacing: "0.05em" }}>I FORGOT</span>
+            </div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginTop: -4 }}>
+              Relationship Damage Control
+            </div>
           </div>
 
-          {/* Right: stat pills + workspace toggle + account */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Stat chips */}
-            <div style={{ display: "flex", gap: 6 }}>
-              {[
-                { label: "People", value: recipients.length },
-                { label: "Events", value: disastersAvoided },
-              ].map(({ label, value }) => (
-                <div key={label} style={{
-                  textAlign: "center" as const,
-                  padding: "4px 12px",
-                  background: `${BLACK}08`,
-                  borderRadius: 8,
-                  border: `1px solid ${BLACK}12`,
-                }}>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", color: BLACK, lineHeight: 1 }}>{value}</div>
-                  <div style={{ fontSize: "0.53rem", fontWeight: 700, letterSpacing: "0.1em", color: `${BLACK}50`, textTransform: "uppercase" as const }}>{label}</div>
-                </div>
-              ))}
-            </div>
-
+          {/* Right: workspace toggle + account */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {/* Pending alert */}
             {approvalCount > 0 && (
               <button
@@ -568,6 +549,25 @@ export default function DashboardPage() {
             );
           })}
         </div>
+      </div>
+
+      {/* ── Stat strip — sits just below the sticky header ───────────────────── */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 16,
+        padding: "10px 28px",
+        borderBottom: `1px solid ${BLACK}10`,
+        background: BEIGE,
+      }}>
+        {[
+          { label: "People covered",   value: recipients.length,    color: BLACK },
+          { label: "Events on autopilot", value: disastersAvoided, color: BLACK },
+          { label: "Upcoming (90 days)", value: allUpcomingEvents.length, color: allUpcomingEvents.length > 0 ? RED : BLACK },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color, lineHeight: 1 }}>{value}</span>
+            <span style={{ fontSize: "0.7rem", fontWeight: 600, color: `${BLACK}50`, letterSpacing: "0.04em" }}>{label}</span>
+          </div>
+        ))}
       </div>
 
       {/* ── Alert banners ────────────────────────────────────────────────────── */}
