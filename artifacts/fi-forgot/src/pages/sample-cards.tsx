@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
+import { useAuth } from "@/lib/auth-context";
 
 const RED    = "#E23B2E";
 const NAVY   = "#071A33";
@@ -272,6 +273,9 @@ function PreviewModal({ card, onClose }: { card: SampleCard; onClose: () => void
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function SampleCardsPage() {
+  const { isLoggedIn, activeWorkspace } = useAuth();
+  const dashboardHref = activeWorkspace?.type === "business" ? "/business/dashboard" : "/dashboard";
+
   const [cards, setCards]             = useState<SampleCard[]>([]);
   const [loading, setLoading]         = useState(true);
   const [activeCategory, setCategory] = useState("All");
@@ -303,7 +307,15 @@ export default function SampleCardsPage() {
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
           <Link href="/business-demo" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>HOW IT WORKS</Link>
-          <Link href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>SIGN IN</Link>
+          {isLoggedIn ? (
+            <Link href={dashboardHref} style={{
+              fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em",
+              color: "#fff", textDecoration: "none",
+              background: RED, padding: "8px 18px", borderRadius: 4,
+            }}>DASHBOARD →</Link>
+          ) : (
+            <Link href="/login" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.56rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>SIGN IN</Link>
+          )}
         </div>
       </nav>
 
