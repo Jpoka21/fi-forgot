@@ -11,12 +11,7 @@ const CATEGORIES = [
   "All",
   "Birthday",
   "Holiday",
-  "Client Appreciation",
-  "Referral Thank You",
-  "Work Anniversary",
-  "Congratulations",
-  "Sympathy",
-  "General Follow Up",
+  "Anniversary",
 ];
 
 const TONES = ["Professional", "Warm", "Funny", "Luxury", "Short and Sweet"];

@@ -10,42 +10,36 @@ const openai = new OpenAI({
 });
 
 // ── Category derivation ────────────────────────────────────────────────────────
+// Only three categories are supported for business cards.
 
-function deriveCategory(occasions: string[]): string {
+function deriveCategory(occasions: string[]): string | null {
   const lower = occasions.map((o) => o.toLowerCase());
-  if (lower.some((o) => o.includes("birthday")))                                           return "Birthday";
-  if (lower.some((o) => o.includes("christmas") || o.includes("holiday") || o.includes("hanukkah") || o.includes("thanksgiving") || o.includes("new year"))) return "Holiday";
-  if (lower.some((o) => o.includes("sympathy") || o.includes("condolence") || o.includes("bereavement") || o.includes("loss"))) return "Sympathy";
-  if (lower.some((o) => o.includes("referral")))                                           return "Referral Thank You";
-  if (lower.some((o) => o.includes("work anniversary") || o.includes("business anniversary") || o.includes("job anniversary") || o.includes("work"))) return "Work Anniversary";
-  if (lower.some((o) => o.includes("congratulation") || o.includes("graduation") || o.includes("new home") || o.includes("new baby") || o.includes("promotion") || o.includes("new job"))) return "Congratulations";
-  if (lower.some((o) => o.includes("thank") || o.includes("appreciation") || o.includes("anniversary") || o.includes("client"))) return "Client Appreciation";
-  return "General Follow Up";
+  if (lower.some((o) => o.includes("birthday"))) return "Birthday";
+  if (lower.some((o) =>
+    o.includes("christmas") || o.includes("holiday") ||
+    o.includes("hanukkah") || o.includes("thanksgiving") || o.includes("new year")
+  )) return "Holiday";
+  if (lower.some((o) =>
+    o.includes("work anniversary") || o.includes("business anniversary") ||
+    o.includes("job anniversary") || o.includes("client anniversary") ||
+    o.includes("work milestone")
+  )) return "Anniversary";
+  return null; // filtered out — not a category we send
 }
 
 function bestForText(category: string): string {
   const map: Record<string, string> = {
-    "Birthday":            "Best for client birthdays",
-    "Holiday":             "Best for seasonal client greetings",
-    "Client Appreciation": "Best for client thank-you moments",
-    "Referral Thank You":  "Best for referral appreciation",
-    "Work Anniversary":    "Best for work milestone celebrations",
-    "Congratulations":     "Best for major life milestones",
-    "Sympathy":            "Best for difficult moments",
-    "General Follow Up":   "Best for staying in touch",
+    "Birthday":     "Best for client birthdays",
+    "Holiday":      "Best for seasonal greetings",
+    "Anniversary":  "Best for client work milestones",
   };
   return map[category] ?? "Best for client moments";
 }
 
 const FALLBACK_MESSAGES: Record<string, string> = {
-  "Birthday":            "Happy Birthday. I hope you have a great day and a year ahead filled with good things. I just wanted to let you know I'm thinking of you and appreciate staying connected.",
-  "Holiday":             "Wishing you and your family a wonderful holiday season. I hope this time of year brings you a chance to relax, recharge, and enjoy the people who matter most.",
-  "Client Appreciation": "I just wanted to send a quick note to say thank you. I really appreciate your trust and the opportunity to stay connected.",
-  "Referral Thank You":  "Thank you again for the referral. It means a lot that you thought of me, and I truly appreciate the trust behind that recommendation.",
-  "Work Anniversary":    "Congratulations on another year of hard work and growth. Wishing you continued success in the year ahead.",
-  "Congratulations":     "Congratulations on the exciting news. I'm really happy for you and wanted to send a quick note to celebrate the moment.",
-  "Sympathy":            "I'm very sorry for your loss. I just wanted to send a note to let you know I'm thinking of you during this difficult time.",
-  "General Follow Up":   "It was great connecting with you. I just wanted to send a quick note to say I appreciate the conversation and hope we stay in touch.",
+  "Birthday":    "Happy Birthday. I hope you have a great day and a year ahead filled with good things. It's a pleasure staying connected — wishing you all the best.",
+  "Holiday":     "Wishing you and your family a wonderful holiday season. I hope this time of year brings you a chance to relax, recharge, and enjoy the people who matter most.",
+  "Anniversary": "Congratulations on reaching another milestone. It means a lot to be part of your journey — wishing you continued success in the year ahead.",
 };
 
 // ── GET /sample-cards ──────────────────────────────────────────────────────────
@@ -64,15 +58,16 @@ router.get("/sample-cards", async (req, res) => {
 
     const cards = rows
       .filter((r) => r.occasions.length > 0 || r.imageUrl)
-      .map((r) => {
+      .flatMap((r) => {
         const category = deriveCategory(r.occasions);
-        return {
-          imageUrl:      r.imageUrl,
+        if (!category) return []; // skip cards that don't fit Birthday / Holiday / Anniversary
+        return [{
+          imageUrl:        r.imageUrl,
           category,
-          bestFor:       bestForText(category),
-          occasions:     r.occasions,
-          fallbackMessage: FALLBACK_MESSAGES[category] ?? FALLBACK_MESSAGES["General Follow Up"],
-        };
+          bestFor:         bestForText(category),
+          occasions:       r.occasions,
+          fallbackMessage: FALLBACK_MESSAGES[category] ?? "",
+        }];
       });
 
     res.json({ cards });
