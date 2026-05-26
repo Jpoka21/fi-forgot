@@ -14,6 +14,7 @@ import RecipientsPage from "@/pages/recipients";
 import RecipientProfilePage from "@/pages/recipient-profile";
 import CardGeneratorPage from "@/pages/card-generator";
 import ReminderSettingsPage from "@/pages/reminder-settings";
+import PersonalSettingsPage from "@/pages/personal-settings";
 import AdminPage from "@/pages/admin";
 import BriefingPage from "@/pages/briefing";
 import TryPage from "@/pages/try";
@@ -107,6 +108,9 @@ function Router() {
       </Route>
       <Route path="/settings/reminders">
         <ProtectedRoute component={ReminderSettingsPage} />
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute component={PersonalSettingsPage} />
       </Route>
       <Route path="/admin">
         <ProtectedRoute component={AdminPage} />

@@ -609,6 +609,40 @@ export const PREVIEW_DAYS_OPTIONS: { days: PreviewDays; label: string; descripti
   { days: 30, label: "30 days before", description: "A whole month of daily pings. If you still haven't touched it, we handle it. No excuses accepted." },
 ];
 
+// ─── Personal settings ───────────────────────────────────────────────────────
+
+export interface PersonalSettings {
+  automationMode: "autopilot" | "approve";
+  defaultTone: Tone;
+  cardSignature: string;
+  previewDays: PreviewDays;
+  notifyChannel: "email" | "text" | "both";
+  notifyEmail: string;
+}
+
+const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
+  automationMode: "approve",
+  defaultTone: "Sweet",
+  cardSignature: "",
+  previewDays: 14,
+  notifyChannel: "email",
+  notifyEmail: "",
+};
+
+const STORAGE_KEY_SETTINGS = "fi_forgot_personal_settings";
+
+export function getPersonalSettings(): PersonalSettings {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+    if (raw) return { ...DEFAULT_PERSONAL_SETTINGS, ...JSON.parse(raw) as Partial<PersonalSettings> };
+  } catch { /* ignore */ }
+  return { ...DEFAULT_PERSONAL_SETTINGS };
+}
+
+export function savePersonalSettings(s: PersonalSettings): void {
+  localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(s));
+}
+
 // ─── Storage ─────────────────────────────────────────────────────────────────
 
 const DATA_VERSION = "5";

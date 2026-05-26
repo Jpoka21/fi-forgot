@@ -570,7 +570,7 @@ export default function DashboardPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
             {[
               { label: "RECIPIENTS",  href: "/recipients" },
-              { label: "REMINDERS",   href: "/settings/reminders" },
+              { label: "SETTINGS",    href: "/settings" },
               { label: "PLANS",       href: "/signup" },
             ].map(link => (
               <Link key={link.href} href={link.href}
@@ -1151,48 +1151,6 @@ export default function DashboardPage() {
                           {!ev.briefingDone && !hasCard && (
                             <div style={{ fontSize: "0.72rem", marginTop: 5, color: GRAY, fontStyle: "italic", lineHeight: 1.4 }}>
                               3 quick questions so the card sounds like <em style={{ fontStyle: "normal", fontWeight: 600, color: BLACK }}>you</em>, not a template.
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Approval timing chip */}
-                        <div style={{ position: "relative" as const, flexShrink: 0 }}>
-                          <button
-                            onClick={() => setTimingPickerOpen(isTimingOpen ? null : timingKey)}
-                            style={{
-                              display: "flex", alignItems: "center", gap: 5,
-                              fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.03em",
-                              padding: "4px 10px", borderRadius: 20,
-                              border: `1px solid ${BLACK}20`, background: `${BLACK}05`,
-                              color: GRAY, cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                            }}>
-                            <Clock size={10} />
-                            {previewDays}d notice
-                            {isTimingOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-                          </button>
-                          {isTimingOpen && (
-                            <div style={{
-                              position: "absolute" as const, top: "calc(100% + 6px)", right: 0,
-                              background: WHITE, borderRadius: 10, padding: 6,
-                              boxShadow: "0 8px 24px rgba(0,0,0,0.13)",
-                              border: `1px solid ${BLACK}12`, zIndex: 100, minWidth: 190,
-                            }}>
-                              {([14, 21, 30] as const).map(d => (
-                                <button key={d}
-                                  onClick={() => updateApprovalTiming(ev.recipient.id, d)}
-                                  style={{
-                                    display: "block", width: "100%", textAlign: "left" as const,
-                                    padding: "8px 12px", borderRadius: 8, border: "none",
-                                    background: previewDays === d ? `${RED}10` : "transparent",
-                                    color: previewDays === d ? RED : BLACK,
-                                    fontWeight: previewDays === d ? 700 : 500,
-                                    fontSize: "0.8rem", cursor: "pointer",
-                                    fontFamily: "'Inter', sans-serif",
-                                  }}>
-                                  {d} days before
-                                  {d === 14 && <span style={{ fontSize: "0.65rem", color: GRAY, marginLeft: 6 }}>recommended</span>}
-                                </button>
-                              ))}
                             </div>
                           )}
                         </div>
