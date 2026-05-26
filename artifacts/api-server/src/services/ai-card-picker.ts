@@ -22,8 +22,7 @@ import { generateCustomAnniversaryCard } from "./custom-card-generator";
 import { logger } from "../lib/logger";
 
 const openai = new OpenAI({
-  baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
-  apiKey:  process.env["AI_INTEGRATIONS_OPENAI_API_KEY"],
+  apiKey: process.env["OPENAI_API_KEY"],
 });
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -94,7 +93,7 @@ async function pickCategories(eventType: string, contextNote: string | null): Pr
   const ctx = contextNote?.trim() || "none";
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       max_completion_tokens: 120,
       messages: [
         {
@@ -274,7 +273,7 @@ async function gpxPickFromCandidates(
     }).join("\n");
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       max_completion_tokens: 60,
       messages: [
         {

@@ -2,8 +2,7 @@ import OpenAI from "openai";
 import { logger } from "../lib/logger";
 
 const openai = new OpenAI({
-  baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
-  apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"],
+  apiKey: process.env["OPENAI_API_KEY"],
 });
 
 function yearsPhrase(eventDate: string): string {
@@ -55,7 +54,7 @@ ${opts.cardSignature ? `- End the message with exactly this signature on a new l
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       max_completion_tokens: 300,
       messages: [{ role: "user", content: prompt }],
     });

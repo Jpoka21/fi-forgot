@@ -4,8 +4,7 @@ import OpenAI from "openai";
 const router = Router();
 
 const openai = new OpenAI({
-  baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
-  apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"],
+  apiKey: process.env["OPENAI_API_KEY"],
 });
 
 router.post("/generate-card", async (req, res) => {
@@ -85,7 +84,7 @@ Use \\n for line breaks within card text. Do not include markdown. Return only t
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       max_completion_tokens: 2000,
       messages: [
         { role: "system", content: systemPrompt },

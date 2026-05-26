@@ -10,8 +10,7 @@ import { getClassificationStats } from "../services/card-classifier";
 const router = Router();
 
 const openai = new OpenAI({
-  baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
-  apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"],
+  apiKey: process.env["OPENAI_API_KEY"],
 });
 
 // ─── Generate admin message ───────────────────────────────────────────────────
@@ -83,7 +82,7 @@ ${context}
 
 Keep it to 3–6 sentences. Personal, specific, grounded only in the facts provided. Return only the card text, no quotes, no labels.`;
 
-  const usesMockAI = !process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  const usesMockAI = !process.env["OPENAI_API_KEY"];
 
   if (usesMockAI) {
     // Placeholder response for when OpenAI is not connected
@@ -97,7 +96,7 @@ Keep it to 3–6 sentences. Personal, specific, grounded only in the facts provi
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       max_completion_tokens: 500,
       messages: [
         { role: "system", content: systemPrompt },
@@ -197,7 +196,7 @@ Pick the card that best matches the event type first, then secondarily reflects 
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       max_completion_tokens: 200,
       messages: [
         { role: "system", content: systemPrompt },
@@ -245,7 +244,7 @@ router.post("/admin/refine-message", async (req, res) => {
     return;
   }
 
-  const usesMockAI = !process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  const usesMockAI = !process.env["OPENAI_API_KEY"];
   if (usesMockAI) {
     req.log.info("MOCK: refine-message (no API key configured)");
     res.json({ message: currentMessage, mock: true });
@@ -273,7 +272,7 @@ Rewrite the message applying exactly what the customer asked for.`;
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       max_completion_tokens: 400,
       messages: [
         { role: "system", content: systemPrompt },

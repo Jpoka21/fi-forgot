@@ -16,8 +16,7 @@ import { uploadCustomImage, createCustomHandwryttenCard, getCustomCardDimensions
 import { logger } from "../lib/logger";
 
 const openai = new OpenAI({
-  baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
-  apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"],
+  apiKey: process.env["OPENAI_API_KEY"],
 });
 
 // ─── Card designs ────────────────────────────────────────────────────────────
@@ -192,7 +191,7 @@ export async function generateCustomAnniversaryCard(
 ): Promise<GeneratedAnniversaryCard> {
   // Step 1: GPT writes a tailored visual design brief
   const briefCompletion = await openai.chat.completions.create({
-    model: "gpt-5.1",
+    model: "gpt-4o",
     max_completion_tokens: 300,
     messages: [
       {
