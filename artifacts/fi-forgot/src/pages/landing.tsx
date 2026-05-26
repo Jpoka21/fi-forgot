@@ -472,7 +472,7 @@ export default function LandingPage() {
         {/* Mobile: individual step images — clip container removes bottom whitespace (~27% of each image) */}
         <div className="md:hidden flex flex-col">
           {[1,2,3,4,5,6].map(n => (
-            <div key={n} style={{ width: "100%", overflow: "hidden", aspectRatio: "590 / 1200" }}>
+            <div key={n} style={{ width: "100%", overflow: "hidden", aspectRatio: "590 / 1450" }}>
               <img src={`/hiw-${n}.png`} alt={`Step ${n}`}
                 style={{ width: "100%", display: "block" }} />
             </div>
