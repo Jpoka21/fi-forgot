@@ -178,7 +178,7 @@ export function DemoFormSection() {
           margin: "0 0 36px",
           lineHeight: 1.6,
         }}>
-          Tell us about one person you want to remember. We'll send you a fully personalized sample card — and show you exactly how we built it.
+          Pick someone important. We'll write them a real card, mail it to you, and show you exactly how we did it.
         </p>
 
         {status === "success" ? (
