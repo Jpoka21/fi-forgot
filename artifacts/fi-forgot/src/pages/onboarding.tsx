@@ -608,50 +608,25 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* Step 6 — Mailing address */}
+            {/* Step 6 — Subscriber's mailing address */}
             {step === 6 && (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {/* Delivery preference */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {(["Mail it to me", "Mail it directly to her"] as const).map((pref) => {
-                    const selected = data.deliveryPreference === pref;
-                    const sub = pref === "Mail it to me"
-                      ? "We send it to you first. You hand it off."
-                      : "Straight to their door. Maximum autopilot.";
-                    return (
-                      <button
-                        key={pref}
-                        onClick={() => setData((d) => ({ ...d, deliveryPreference: pref }))}
-                        style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          padding: "14px 20px", borderRadius: 12,
-                          border: `2px solid ${selected ? RED : `${BLACK}15`}`,
-                          background: selected ? `${RED}12` : "#fff",
-                          cursor: "pointer", transition: "all 0.15s", textAlign: "left",
-                        }}
-                      >
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: "1.05rem", color: selected ? RED : BLACK }}>{pref}</div>
-                          <div style={{ fontSize: "0.88rem", marginTop: 2, color: "#888" }}>{sub}</div>
-                        </div>
-                        {selected && <span style={{ color: RED, fontWeight: 700, fontSize: "1.1rem" }}>✓</span>}
-                      </button>
-                    );
-                  })}
+                <div style={{ padding: "14px 18px", borderRadius: 12, background: `${NAVY}06`, border: `1px solid ${NAVY}12` }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK, marginBottom: 4 }}>📬 By default, all cards come to you.</div>
+                  <div style={{ fontSize: "0.85rem", color: "#666", lineHeight: 1.55 }}>
+                    We mail every card to your address — you hand it off (or keep the credit without the effort). When you approve a specific card, you can send it directly somewhere else instead.
+                  </div>
                 </div>
 
-                {/* Address fields */}
-                <div style={{ borderRadius: 12, padding: "18px 20px", background: `${NAVY}06`, border: `1px solid ${NAVY}12`, display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ borderRadius: 12, padding: "18px 20px", background: "#fff", border: `1.5px solid ${BLACK}15`, display: "flex", flexDirection: "column", gap: 12 }}>
                   <div style={{ fontSize: "0.95rem", fontWeight: 600, color: BLACK, marginBottom: 2 }}>
-                    {data.deliveryPreference === "Mail it directly to her"
-                      ? `${data.recipientName || "Their"}'s mailing address`
-                      : "Your mailing address"}&nbsp;
-                    <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                    Your mailing address&nbsp;
+                    <span style={{ fontWeight: 400, color: "#aaa" }}>(optional — add it now or later)</span>
                   </div>
 
                   <input
                     className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                    style={{ borderColor: `${BLACK}20`, background: "#fafafa", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
                     placeholder="Street address"
                     value={data.mailingAddress?.line1 ?? ""}
                     onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, line1: e.target.value } }))}
@@ -659,7 +634,7 @@ export default function OnboardingPage() {
                   />
                   <input
                     className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                    style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                    style={{ borderColor: `${BLACK}20`, background: "#fafafa", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
                     placeholder="Apt / Suite (optional)"
                     value={data.mailingAddress?.line2 ?? ""}
                     onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, line2: e.target.value } }))}
@@ -667,7 +642,7 @@ export default function OnboardingPage() {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 100px", gap: 10 }}>
                     <input
                       className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                      style={{ borderColor: `${BLACK}20`, background: "#fafafa", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
                       placeholder="City"
                       value={data.mailingAddress?.city ?? ""}
                       onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, city: e.target.value } }))}
@@ -675,8 +650,8 @@ export default function OnboardingPage() {
                     />
                     <input
                       className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
-                      placeholder="State"
+                      style={{ borderColor: `${BLACK}20`, background: "#fafafa", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                      placeholder="ST"
                       maxLength={2}
                       value={data.mailingAddress?.state ?? ""}
                       onChange={(e) => setData((d) => ({ ...d, mailingAddress: { ...d.mailingAddress!, state: e.target.value.toUpperCase() } }))}
@@ -684,7 +659,7 @@ export default function OnboardingPage() {
                     />
                     <input
                       className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
+                      style={{ borderColor: `${BLACK}20`, background: "#fafafa", color: BLACK, fontSize: "1rem", padding: "11px 16px" }}
                       placeholder="Zip"
                       maxLength={10}
                       value={data.mailingAddress?.zip ?? ""}

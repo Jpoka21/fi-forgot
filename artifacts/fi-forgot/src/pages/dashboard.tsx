@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import {
   getCards, getRecipients, getBriefingsForRecipient, updateCard,
-  CardOrder, Recipient, getAge, saveCard, deleteCard, saveRecipient,
+  CardOrder, Recipient, RecipientAddress, getAge, saveCard, deleteCard, saveRecipient,
   getPersonalSettings, savePersonalSettings, PersonalSettings,
   childrenSummary, getYearsTogether,
   TONES,
@@ -380,6 +380,8 @@ export default function DashboardPage() {
   const [approvingId, setApprovingId]               = useState<string | null>(null);
   const [editedMessages, setEditedMessages]         = useState<Record<string, string>>({});
   const [editActionId, setEditActionId]             = useState<string | null>(null);
+  const [showAddrOverride, setShowAddrOverride]     = useState<Record<string, boolean>>({});
+  const [addrOverride, setAddrOverride]             = useState<Record<string, Partial<RecipientAddress>>>({});
   const [timingPickerOpen, setTimingPickerOpen]     = useState<string | null>(null);
   const [hoveredBriefing, setHoveredBriefing]       = useState<string | null>(null);
   const [viewingCardId, setViewingCardId]           = useState<string | null>(null);
@@ -549,7 +551,13 @@ export default function DashboardPage() {
 
   function approvePersonalCard(card: CardOrder) {
     const message = editedMessages[card.id] ?? card.approvedMessage ?? "";
-    updateCard({ ...card, status: "Approved", approvedMessage: message });
+    const override = addrOverride[card.id];
+    const hasOverride = showAddrOverride[card.id] &&
+      override?.line1?.trim() && override?.city?.trim() && override?.state?.trim() && override?.zip?.trim();
+    const overrideAddress: RecipientAddress | undefined = hasOverride
+      ? { line1: override!.line1!, line2: override!.line2, city: override!.city!, state: override!.state!, zip: override!.zip! }
+      : undefined;
+    updateCard({ ...card, status: "Approved", approvedMessage: message, overrideAddress });
     setCards(getCards());
     setApprovingId(null);
   }
@@ -1291,6 +1299,62 @@ export default function DashboardPage() {
                               );
                             })}
                           </div>
+
+                          {/* Mailing address */}
+                          {(() => {
+                            const addr = user?.mailingAddress;
+                            const isOverriding = showAddrOverride[card.id] ?? false;
+                            const ov = addrOverride[card.id] ?? {};
+                            const setOv = (patch: Partial<RecipientAddress>) =>
+                              setAddrOverride(prev => ({ ...prev, [card.id]: { ...prev[card.id], ...patch } }));
+                            return (
+                              <div style={{ marginTop: 14, borderRadius: 10, border: `1px solid ${BLACK}12`, overflow: "hidden" }}>
+                                <div style={{ padding: "10px 14px", background: `${BLACK}04`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                    <span style={{ fontSize: "0.9rem" }}>📬</span>
+                                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: BLACK }}>
+                                      {isOverriding
+                                        ? "Sending to a custom address"
+                                        : addr
+                                          ? `Mailing to: ${addr.line1}${addr.line2 ? ` ${addr.line2}` : ""}, ${addr.city}, ${addr.state} ${addr.zip}`
+                                          : "No mailing address on file"}
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={() => setShowAddrOverride(prev => ({ ...prev, [card.id]: !isOverriding }))}
+                                    style={{ fontSize: "0.7rem", fontWeight: 600, color: isOverriding ? GRAY : RED, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}>
+                                    {isOverriding ? "← Use my address" : addr ? "Send somewhere else" : "Add my address"}
+                                  </button>
+                                </div>
+                                {isOverriding && (
+                                  <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                                    <input
+                                      placeholder="Street address"
+                                      value={ov.line1 ?? ""}
+                                      onChange={e => setOv({ line1: e.target.value })}
+                                      style={{ width: "100%", border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none", boxSizing: "border-box" as const }}
+                                    />
+                                    <input
+                                      placeholder="Apt / Suite (optional)"
+                                      value={ov.line2 ?? ""}
+                                      onChange={e => setOv({ line2: e.target.value })}
+                                      style={{ width: "100%", border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none", boxSizing: "border-box" as const }}
+                                    />
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 58px 84px", gap: 8 }}>
+                                      <input placeholder="City" value={ov.city ?? ""} onChange={e => setOv({ city: e.target.value })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none" }} />
+                                      <input placeholder="ST" maxLength={2} value={ov.state ?? ""} onChange={e => setOv({ state: e.target.value.toUpperCase() })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none" }} />
+                                      <input placeholder="Zip" maxLength={10} value={ov.zip ?? ""} onChange={e => setOv({ zip: e.target.value })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none" }} />
+                                    </div>
+                                  </div>
+                                )}
+                                {!addr && !isOverriding && (
+                                  <div style={{ padding: "8px 14px", fontSize: "0.72rem", color: "#b45309", background: "#fffbeb", borderTop: `1px solid #fde68a` }}>
+                                    Cards will still be queued — add your address above so we know where to mail them.
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
 
                           {/* Approve / Reject */}
                           <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end" }}>

@@ -132,6 +132,7 @@ export interface CardOrder {
   approvedMessage?: string;
   adminNotes?: string;
   deliveryPreference: DeliveryPreference;
+  overrideAddress?: RecipientAddress;
 }
 
 // ─── Helper functions ───────────────────────────────────────────────────────

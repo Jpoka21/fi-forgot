@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents } from "./data";
+import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents, RecipientAddress } from "./data";
 import type { Plan } from "./plan";
 
 export interface OnboardingData {
@@ -38,7 +38,7 @@ export interface Workspace {
 interface AuthContextType {
   isLoggedIn: boolean;
   onboardingComplete: boolean;
-  user: { name: string; email: string; plan?: Plan } | null;
+  user: { name: string; email: string; plan?: Plan; mailingAddress?: RecipientAddress } | null;
   workspaces: Workspace[];
   activeWorkspace: Workspace | null;
   login: (email: string, name?: string) => void;
@@ -47,6 +47,7 @@ interface AuthContextType {
   completeOnboarding: (data: OnboardingData) => void;
   logout: () => void;
   upgradePlan: (plan: Plan) => void;
+  updateMailingAddress: (addr: RecipientAddress) => void;
   switchWorkspace: (id: string) => void;
   createBusinessWorkspace: (businessName: string, businessType: string) => Workspace;
   restoreBusinessWorkspace: (businessId: string, businessName: string, businessType: string) => void;
@@ -65,6 +66,7 @@ const AuthContext = createContext<AuthContextType>({
   completeOnboarding: () => {},
   logout: () => {},
   upgradePlan: () => {},
+  updateMailingAddress: () => {},
   switchWorkspace: () => {},
   createBusinessWorkspace: () => ({ id: "", type: "business", name: "" }),
   restoreBusinessWorkspace: () => {},
@@ -427,7 +429,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const recipient = onboardingToRecipient(data);
       saveRecipient(recipient);
     }
+    // Save subscriber's mailing address to user profile if provided
+    if (data.mailingAddress?.line1?.trim()) {
+      setUser(prev => {
+        if (!prev) return prev;
+        const updated = { ...prev, mailingAddress: data.mailingAddress as RecipientAddress };
+        localStorage.setItem("fi_forgot_user", JSON.stringify(updated));
+        return updated;
+      });
+    }
     setOnboardingComplete(true);
+  }
+
+  function updateMailingAddress(addr: RecipientAddress) {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, mailingAddress: addr };
+      localStorage.setItem("fi_forgot_user", JSON.stringify(updated));
+      return updated;
+    });
   }
 
   function logout() {
@@ -465,7 +485,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       isLoggedIn, onboardingComplete, user,
       workspaces, activeWorkspace,
-      login, signup, businessSignup, completeOnboarding, logout, upgradePlan,
+      login, signup, businessSignup, completeOnboarding, logout, upgradePlan, updateMailingAddress,
       switchWorkspace, createBusinessWorkspace, restoreBusinessWorkspace, repairBusinessId,
     }}>
       {children}
