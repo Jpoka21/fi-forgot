@@ -13,7 +13,7 @@ export default function TryPage() {
         background: B.black,
         borderBottom: "1px solid #1e1e1e",
         padding: "0 24px",
-        height: 56,
+        height: 96,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -23,18 +23,15 @@ export default function TryPage() {
       }}>
         <a
           href="/"
-          style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "1.2rem",
-            letterSpacing: "0.08em",
-            color: "#ffffff",
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
+          style={{ textDecoration: "none", display: "flex", flexDirection: "column" }}
         >
-          <span style={{ color: B.red }}>F*</span>I FORGOT
+          <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: "#ffffff", letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: "#555", marginTop: -2, fontWeight: 900 }}>
+            RELATIONSHIP DAMAGE CONTROL
+          </div>
         </a>
 
         <a
