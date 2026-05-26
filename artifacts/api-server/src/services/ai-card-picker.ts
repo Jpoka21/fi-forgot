@@ -15,10 +15,9 @@
 
 import OpenAI from "openai";
 import { db } from "@workspace/db";
-import { cardClassificationsTable, customHolidayCardsTable } from "@workspace/db";
-import { inArray, eq } from "drizzle-orm";
+import { cardClassificationsTable, customHolidayCardsTable, aiCardLibraryTable } from "@workspace/db";
+import { inArray, eq, and, sql } from "drizzle-orm";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
-import { generateCustomAnniversaryCard } from "./custom-card-generator";
 import { logger } from "../lib/logger";
 
 const openai = new OpenAI({
@@ -339,34 +338,125 @@ async function pickCustomHolidayCard(excludeIds: string[]): Promise<HandwryttenC
   }
 }
 
+// ─── Library picker ──────────────────────────────────────────────────────────
+
+/**
+ * Detect which ai_card_library categories to search for a given event + context.
+ */
+function resolveLibraryCategories(eventType: string, contextNote: string | null): string[] {
+  const evt = eventType.toLowerCase();
+  const ctx = (contextNote ?? "").toLowerCase();
+
+  if (evt === "happy holidays" || evt === "holiday") {
+    return ["holiday"];
+  }
+
+  if (evt === "anniversary") {
+    const isHome  = /home|house|propert|real.?estate|mortgage|closing|sold|bought|purchas/.test(ctx);
+    const isWork  = /work|job|career|business|compan|employ|office|client|partner/.test(ctx);
+    const isClose = /closing|sold|keys|real.?estate|realtor/.test(ctx);
+
+    if (isClose) return ["closing_anniversary", "home_purchase_anniversary"];
+    if (isHome)  return ["home_purchase_anniversary", "closing_anniversary", "general_milestone"];
+    if (isWork)  return ["business_relationship_anniversary", "general_milestone"];
+    return ["home_purchase_anniversary", "business_relationship_anniversary", "closing_anniversary", "general_milestone"];
+  }
+
+  return [];
+}
+
+/**
+ * Pick a card from ai_card_library.  Returns null if no active cards are available.
+ * Prioritises cards with higher selection rates and fewer rejections.
+ * Increments timesShown on the chosen card.
+ */
+async function pickFromLibrary(
+  eventType: string,
+  contextNote: string | null,
+  excludeIds: string[],   // Handwrytten card IDs to skip
+): Promise<(HandwryttenCard & { libraryCardId: string }) | null> {
+  const categories = resolveLibraryCategories(eventType, contextNote);
+  if (!categories.length) return null;
+
+  try {
+    const rows = await db
+      .select()
+      .from(aiCardLibraryTable)
+      .where(
+        and(
+          eq(aiCardLibraryTable.active, true),
+          inArray(aiCardLibraryTable.category, categories),
+        ),
+      );
+
+    const available = rows.filter(r =>
+      r.handwryttenCardId !== null &&
+      !excludeIds.includes(r.handwryttenCardId),
+    );
+
+    if (!available.length) return null;
+
+    // Score: prefer cards with high selection rate and shown to the right category first
+    const catOrder = new Map(categories.map((c, i) => [c, i]));
+
+    const scored = available.map(r => {
+      let score = 0;
+      // Category preference (earlier in list = better)
+      const catRank = catOrder.get(r.category) ?? 99;
+      score -= catRank * 10;
+      // Selection rate bonus (selected / max(shown,1))
+      const rate = r.timesSelected / Math.max(r.timesShown, 1);
+      score += rate * 20;
+      // Rejection penalty
+      score -= r.timesRejected * 5;
+      // Small random jitter so we rotate among equal cards
+      score += Math.random() * 3;
+      return { card: r, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const chosen = scored[0]!.card;
+
+    // Increment timesShown
+    await db
+      .update(aiCardLibraryTable)
+      .set({ timesShown: sql`${aiCardLibraryTable.timesShown} + 1` })
+      .where(eq(aiCardLibraryTable.id, chosen.id));
+
+    logger.info({ id: chosen.id, title: chosen.title, category: chosen.category }, "ai-card-picker: library card selected");
+
+    return {
+      id: chosen.handwryttenCardId!,
+      name: chosen.title,
+      category: "Custom",
+      imageUrl: chosen.imageUrl,
+      libraryCardId: chosen.id,
+    };
+  } catch (err) {
+    logger.warn({ err }, "ai-card-picker: library pick failed, falling back");
+    return null;
+  }
+}
+
 export async function pickBestCard(
   eventType: string,
   contextNote?: string | null,
   excludeIds: string[] = [],
   cardMessage?: string | null,
-): Promise<HandwryttenCard> {
-  // For Happy Holidays: prioritise custom AI-generated cards if any exist
-  const isHoliday = eventType.toLowerCase() === "happy holidays" || eventType.toLowerCase() === "holiday";
+): Promise<HandwryttenCard & { libraryCardId?: string }> {
+  const isHoliday    = eventType.toLowerCase() === "happy holidays" || eventType.toLowerCase() === "holiday";
+  const isAnniversary = eventType.toLowerCase() === "anniversary";
+
+  // For Anniversary and Holiday: try the AI card library first
+  if (isAnniversary || isHoliday) {
+    const libCard = await pickFromLibrary(eventType, contextNote ?? null, excludeIds);
+    if (libCard) return libCard;
+  }
+
+  // Holiday fallback: custom_holiday_cards table (legacy)
   if (isHoliday) {
     const custom = await pickCustomHolidayCard(excludeIds);
     if (custom) return custom;
-  }
-
-  // For Anniversary: generate a custom card tailored to the specific message
-  const isAnniversary = eventType.toLowerCase() === "anniversary";
-  if (isAnniversary && cardMessage?.trim()) {
-    try {
-      const generated = await generateCustomAnniversaryCard(contextNote ?? null, cardMessage.trim());
-      logger.info({ cardId: generated.handwryttenCardId }, "ai-card-picker: custom anniversary card generated");
-      return {
-        id: generated.handwryttenCardId,
-        name: generated.name,
-        category: "Custom",
-        imageUrl: generated.imageUrl,
-      };
-    } catch (err) {
-      logger.warn({ err }, "ai-card-picker: anniversary card generation failed, falling back to catalog");
-    }
   }
 
   const allCards = await listHandwryttenCards();

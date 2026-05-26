@@ -1,0 +1,247 @@
+We are building a reusable AI greeting card library for our business card automation platform.
+
+IMPORTANT:
+We are NO LONGER generating new card images on customer approval pages.
+All AI cards must be generated once, stored in the database, and reused forever.
+
+GOAL:
+Create a reusable anniversary and holiday card library system with categories, metadata, storage, rotation logic, and admin management.
+
+==================================================
+STEP 1 — DATABASE
+==================================================
+
+Create a new database table called:
+
+ai_card_library
+
+Fields:
+
+id
+uuid
+
+category
+(string)
+
+subcategory
+(string)
+
+title
+(string)
+
+image_url
+(string)
+
+thumbnail_url
+(string, optional)
+
+prompt_used
+(text)
+
+tags
+(json array)
+
+style
+(string)
+
+tone
+(string)
+
+primary_color
+(string)
+
+seasonal
+(boolean)
+
+active
+(boolean)
+
+times_shown
+(integer default 0)
+
+times_selected
+(integer default 0)
+
+times_rejected
+(integer default 0)
+
+created_at
+(timestamp)
+
+==================================================
+STEP 2 — INITIAL LIBRARY GENERATION
+==================================================
+
+We only want to spend about $10 initially.
+Assume image generation costs approximately $0.25 each.
+
+Generate approximately 40 total reusable card designs.
+
+DO NOT generate random cards.
+Generate structured reusable business-appropriate cards.
+
+Create cards for these categories:
+
+1. Home Purchase Anniversary
+Generate 12 cards
+
+Themes:
+- cozy home
+- modern house
+- luxury home
+- neighborhood
+- front porch
+- fireplace
+- moving milestone
+- seasonal home scenes
+- warm family feel
+- classy minimalist home themes
+
+2. Business Relationship Anniversary
+Generate 10 cards
+
+Themes:
+- partnership
+- client appreciation
+- handshake
+- coffee meeting
+- success milestone
+- elegant professional
+- small business themes
+- modern business aesthetic
+- teamwork
+- warm professional relationship
+
+3. Closing Anniversary
+Generate 8 cards
+
+Themes:
+- sold sign
+- keys
+- celebration
+- moving boxes
+- real estate success
+- classy closing scenes
+- investment property
+- professional milestone
+
+4. General Business Milestone
+Generate 5 cards
+
+Themes:
+- growth
+- success
+- celebration
+- achievement
+- premium business style
+
+5. Holiday
+Generate 5 cards
+
+Themes:
+- elegant winter
+- business holiday
+- warm festive
+- premium holiday aesthetic
+- modern seasonal design
+
+==================================================
+STEP 3 — IMAGE STYLE RULES
+==================================================
+
+ALL generated cards must:
+
+- feel premium
+- feel emotionally warm
+- be business appropriate
+- NOT feel romantic
+- NOT mention specific businesses or industries
+- NOT include heavy text on the front
+- leave room for personalized inside messages
+- look realistic and professional
+- have variety in style and colors
+- avoid looking AI-generated
+
+Mix styles:
+- modern minimal
+- watercolor
+- luxury photography
+- illustration
+- elegant typography
+- cozy lifestyle
+- seasonal warmth
+
+==================================================
+STEP 4 — STORE EVERYTHING
+==================================================
+
+After generation:
+
+1. Upload/store image assets
+2. Save every generated card into ai_card_library
+3. Save metadata/tags for intelligent future selection
+
+Example tags:
+["modern", "blue", "luxury", "warm", "minimal", "professional"]
+
+==================================================
+STEP 5 — ADMIN PAGE
+==================================================
+
+Create an admin page:
+
+/admin/card-library
+
+Features:
+
+- View all generated cards
+- Filter by category
+- Filter by tags
+- Activate/deactivate cards
+- Delete cards
+- Regenerate individual cards
+- Generate additional cards later
+- View performance stats:
+  - times shown
+  - times selected
+  - times rejected
+
+==================================================
+STEP 6 — CARD SELECTION LOGIC
+==================================================
+
+Customer approval pages should NEVER generate new card images.
+
+Instead:
+
+1. Detect event type
+2. Match category/subcategory
+3. Select best reusable card from ai_card_library
+4. Rotate alternatives when user clicks:
+   "Try another card"
+
+Track:
+- shown
+- selected
+- rejected
+
+Over time prioritize high-performing cards.
+
+==================================================
+STEP 7 — FUTURE EXPANSION
+==================================================
+
+The architecture must support adding more reusable categories later without changing the system.
+
+Future categories may include:
+- birthdays
+- thank you
+- sympathy
+- congratulations
+- referrals
+- holidays
+- weddings
+- baby
+- client appreciation
+
+Build the system to scale cleanly.

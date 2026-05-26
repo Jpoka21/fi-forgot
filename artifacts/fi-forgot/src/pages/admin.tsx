@@ -12,10 +12,11 @@ import { AdminQueue } from "./admin/AdminQueue";
 import { AdminAudit } from "./admin/AdminAudit";
 import { AdminBriefings } from "./admin/AdminBriefings";
 import { AdminEvents } from "./admin/AdminEvents";
+import { AdminCardLibrary } from "./admin/AdminCardLibrary";
 import {
   ShieldCheck, LayoutDashboard, Users, UserCheck,
   CalendarDays, CreditCard, MessageSquare, Send, ScrollText,
-  AlertTriangle, ClipboardList, RefreshCw, Trash2,
+  AlertTriangle, ClipboardList, RefreshCw, Trash2, Library,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -34,18 +35,20 @@ type AdminTab =
   | "messages"
   | "queue"
   | "briefings"
-  | "audit";
+  | "audit"
+  | "card-library";
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType; description: string }[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, description: "Overview and alerts" },
-  { id: "customers", label: "Customers", icon: Users, description: "Manage subscriber accounts" },
-  { id: "recipients", label: "Recipients", icon: UserCheck, description: "Mailing addresses and profiles" },
-  { id: "events", label: "Events", icon: CalendarDays, description: "Schedules and send dates" },
-  { id: "templates", label: "Templates", icon: CreditCard, description: "Handwrytten card catalog" },
-  { id: "messages", label: "Messages", icon: MessageSquare, description: "AI drafts and approvals" },
-  { id: "queue", label: "Queue", icon: Send, description: "Fulfillment and Handwrytten orders" },
-  { id: "briefings", label: "Briefings", icon: ClipboardList, description: "Pre-event customer answers" },
-  { id: "audit", label: "Audit Log", icon: ScrollText, description: "All admin actions tracked" },
+  { id: "dashboard",    label: "Dashboard",    icon: LayoutDashboard, description: "Overview and alerts" },
+  { id: "customers",    label: "Customers",    icon: Users,           description: "Manage subscriber accounts" },
+  { id: "recipients",   label: "Recipients",   icon: UserCheck,       description: "Mailing addresses and profiles" },
+  { id: "events",       label: "Events",       icon: CalendarDays,    description: "Schedules and send dates" },
+  { id: "templates",    label: "Templates",    icon: CreditCard,      description: "Handwrytten card catalog" },
+  { id: "messages",     label: "Messages",     icon: MessageSquare,   description: "AI drafts and approvals" },
+  { id: "queue",        label: "Queue",        icon: Send,            description: "Fulfillment and Handwrytten orders" },
+  { id: "briefings",    label: "Briefings",    icon: ClipboardList,   description: "Pre-event customer answers" },
+  { id: "audit",        label: "Audit Log",    icon: ScrollText,      description: "All admin actions tracked" },
+  { id: "card-library", label: "Card Library", icon: Library,         description: "AI card library — generate, manage, and track reusable card designs" },
 ];
 
 
@@ -140,8 +143,9 @@ export default function AdminPage() {
       case "templates": return <AdminTemplates />;
       case "messages": return <AdminMessages />;
       case "queue": return <AdminQueue />;
-      case "briefings": return <AdminBriefings />;
-      case "audit": return <AdminAudit />;
+      case "briefings":    return <AdminBriefings />;
+      case "audit":        return <AdminAudit />;
+      case "card-library": return <AdminCardLibrary />;
     }
   }
 

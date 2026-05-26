@@ -24,6 +24,7 @@ interface CardPreview {
   name: string;
   category?: string;
   imageUrl?: string;
+  libraryCardId?: string;
 }
 
 const EVENT_ICON: Record<string, string> = {
@@ -89,6 +90,14 @@ export default function BusinessApprovePage() {
 
   async function regenCard() {
     if (!item || regenLoading) return;
+    // Track rejection on the current library card before swapping
+    if (cardPreview?.libraryCardId) {
+      fetch(`/api/admin/card-library/${cardPreview.libraryCardId}/track`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: "rejected" }),
+      }).catch(() => {});
+    }
     const newExcluded = cardPreview ? [...excludedIds, String(cardPreview.id)] : excludedIds;
     setExcludedIds(newExcluded);
     setRegenLoading(true);
@@ -131,6 +140,14 @@ export default function BusinessApprovePage() {
   async function act(action: "approve" | "reject") {
     if (!token || acting) return;
     setActing(true);
+    // Track selection on the current library card when approving
+    if (action === "approve" && cardPreview?.libraryCardId) {
+      fetch(`/api/admin/card-library/${cardPreview.libraryCardId}/track`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: "selected" }),
+      }).catch(() => {});
+    }
     try {
       const r = await fetch(`/api/business-approval/${token}`, {
         method: "POST",
