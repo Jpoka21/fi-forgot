@@ -469,13 +469,16 @@ export default function LandingPage() {
           alt="How it works: We remember, We get to know them, We pick the perfect card, We write it for you, We send it on time, You get all the credit"
           style={{ width: "100%", height: "auto" }}
         />
-        {/* Mobile: individual step images — clip container removes bottom whitespace (~27% of each image) */}
+        {/* Mobile: original step images */}
         <div className="md:hidden flex flex-col">
-          {[1,2,3,4,5,6].map(n => (
-            <div key={n} style={{ width: "100%", overflow: "hidden", aspectRatio: "590 / 1450" }}>
-              <img src={`/hiw-${n}.png`} alt={`Step ${n}`}
-                style={{ width: "100%", display: "block" }} />
-            </div>
+          {[
+            { n: 1, src: "/hiw_extracted/step-1-we-remember-clean.png",      alt: "Step 1: We Remember" },
+            { n: 2, src: "/hiw_extracted/step-2-we-pick-the-card-clean.png",  alt: "Step 2: We Pick the Card" },
+            { n: 3, src: "/hiw_extracted/step-3-we-write-it-for-you-clean.png", alt: "Step 3: We Write It For You" },
+            { n: 4, src: "/hiw_extracted/step-4-we-send-it-on-time-clean.png", alt: "Step 4: We Send It On Time" },
+            { n: 5, src: "/hiw_extracted/step-5-you-get-credit-clean.png",    alt: "Step 5: You Get All the Credit" },
+          ].map(({ n, src, alt }) => (
+            <img key={n} src={src} alt={alt} style={{ width: "100%", height: "auto", display: "block" }} />
           ))}
         </div>
       </section>
