@@ -740,6 +740,13 @@ export default function BusinessDashboardPage() {
 
   useEffect(() => { fetchQueue(); }, [fetchQueue]);
 
+  // Re-fetch queue whenever the user returns to this tab (e.g. after approving a card)
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") fetchQueue(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [fetchQueue]);
+
   // ── Row helpers ────────────────────────────────────────────────────────────
 
   function updateRow(rowId: string, patch: Partial<ClientRow>) {
@@ -1427,18 +1434,26 @@ export default function BusinessDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Approval badge */}
-                  <div style={{ flexShrink: 0 }}>
-                    {(automationMode === "approval" || card.requireApproval) ? (
-                      <span style={{ background: "#fffbeb", color: "#b45309", border: "1px solid #fcd34d", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
-                        ⏳ Needs Approval
-                      </span>
-                    ) : (
-                      <span style={{ background: "#f0fdf4", color: "#15803d", border: "1px solid #86efac", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
-                        ✓ Approved — Will Auto-Send
-                      </span>
-                    )}
-                  </div>
+                  {/* Approval badge — checks actual queue status for this card */}
+                  {(() => {
+                    const clientDbId = rows.find(r => r._rowId === card.clientRowId)?.id ?? "";
+                    const queued = queueItems.find(q => q.clientId === clientDbId && q.eventType === card.eventType);
+                    const isActuallyApproved = queued?.status === "approved" || queued?.status === "sent";
+                    const needsApproval = !isActuallyApproved && (automationMode === "approval" || card.requireApproval);
+                    return (
+                      <div style={{ flexShrink: 0 }}>
+                        {needsApproval ? (
+                          <span style={{ background: "#fffbeb", color: "#b45309", border: "1px solid #fcd34d", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
+                            ⏳ Needs Approval
+                          </span>
+                        ) : (
+                          <span style={{ background: "#f0fdf4", color: "#15803d", border: "1px solid #86efac", borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, whiteSpace: "nowrap" }}>
+                            ✓ {isActuallyApproved ? "Approved" : "Will Auto-Send"}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Per-card Generate / Review button */}
                   {(() => {
