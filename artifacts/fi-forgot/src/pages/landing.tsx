@@ -467,7 +467,7 @@ export default function LandingPage() {
           className="hidden md:block"
           src="/how-it-works.png"
           alt="How it works: We remember, We get to know them, We pick the perfect card, We write it for you, We send it on time, You get all the credit"
-          style={{ width: "100%", height: "auto", display: "block" }}
+          style={{ width: "100%", height: "auto" }}
         />
         {/* Mobile: individual step images stacked */}
         <div className="md:hidden flex flex-col">
