@@ -223,8 +223,10 @@ export function AdminCardLibrary() {
   const [filterCat,   setFilterCat]   = useState<string>("all");
   const [filterActive, setFilterActive] = useState<string>("all");
   const [generating,  setGenerating]  = useState(false);
+  const [genBackground, setGenBackground] = useState(false);
   const [genLog,      setGenLog]      = useState<string[]>([]);
   const [genTarget,   setGenTarget]   = useState<string>("all");
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
   const loadCards = useCallback(async () => {
@@ -249,6 +251,41 @@ export function AdminCardLibrary() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [genLog]);
 
+  // Poll category counts every 4 s while generation runs in background.
+  // Stops when count is stable for 2 consecutive checks.
+  function startPolling() {
+    if (pollRef.current) return;
+    let lastTotal = -1;
+    let stableCount = 0;
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch("/api/admin/card-library/categories");
+        const data = await res.json() as { categories: CategoryStat[] };
+        const cats = data.categories ?? [];
+        const total = cats.reduce((s: number, c: CategoryStat) => s + c.count, 0);
+        setCategories(cats);
+        if (total !== lastTotal) {
+          setGenLog(l => [...l, `⏳ ${total} cards in library…`]);
+          lastTotal = total;
+          stableCount = 0;
+        } else {
+          stableCount++;
+          if (stableCount >= 2) {
+            stopPolling();
+            setGenLog(l => [...l, `✓ Done — ${total} cards total. Refreshing…`]);
+            setGenerating(false);
+            setGenBackground(false);
+            await loadCards();
+          }
+        }
+      } catch { /* ignore transient errors */ }
+    }, 4_000);
+  }
+
+  function stopPolling() {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  }
+
   async function handleGenerate() {
     if (!confirm(
       genTarget === "all"
@@ -257,12 +294,16 @@ export function AdminCardLibrary() {
     )) return;
 
     setGenerating(true);
+    setGenBackground(false);
     setGenLog([]);
+    stopPolling();
+
+    const body: { categories?: string[]; force: boolean } = { force: false };
+    if (genTarget !== "all") body.categories = [genTarget];
+
+    let gotDone = false;
 
     try {
-      const body: { categories?: string[]; force: boolean } = { force: false };
-      if (genTarget !== "all") body.categories = [genTarget];
-
       const resp = await fetch("/api/admin/card-library/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -281,11 +322,13 @@ export function AdminCardLibrary() {
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
         for (const line of lines) {
+          if (line.startsWith(": ")) continue; // keepalive comment
           if (!line.startsWith("data: ")) continue;
           try {
             const payload = JSON.parse(line.slice(6)) as { type: string; message?: string; result?: object };
             if (payload.message) setGenLog(l => [...l, payload.message!]);
             if (payload.type === "done") {
+              gotDone = true;
               const r = payload.result as { succeeded: unknown[]; failed: unknown[]; skipped: unknown[] };
               setGenLog(l => [...l,
                 `✓ ${r.succeeded.length} generated, ${r.skipped.length} skipped, ${r.failed.length} failed`,
@@ -294,13 +337,21 @@ export function AdminCardLibrary() {
           } catch {}
         }
       }
-
-      await loadCards();
-    } catch (err) {
-      setGenLog(l => [...l, `Error: ${err instanceof Error ? err.message : String(err)}`]);
+    } catch {
+      // Stream cut by proxy — generation continues on server
     }
 
-    setGenerating(false);
+    if (gotDone) {
+      // Stream completed cleanly
+      await loadCards();
+      setGenerating(false);
+      setGenBackground(false);
+    } else {
+      // Proxy cut the connection — switch to polling mode
+      setGenBackground(true);
+      setGenLog(l => [...l, "⚡ Connection timed out — generation is still running on the server. Checking for new cards every 4 seconds…"]);
+      startPolling();
+    }
   }
 
   async function handleToggle(id: string, active: boolean) {
@@ -422,22 +473,43 @@ export function AdminCardLibrary() {
               cursor: generating ? "not-allowed" : "pointer", whiteSpace: "nowrap",
             }}
           >
-            {generating ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Generating…</> : <><Zap size={14} /> Generate</>}
+            {generating
+              ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> {genBackground ? "Watching…" : "Generating…"}</>
+              : <><Zap size={14} /> Generate</>}
           </button>
         </div>
+
+        {genBackground && (
+          <div style={{
+            marginTop: 14, display: "flex", alignItems: "center", gap: 10,
+            background: "rgba(216,167,37,0.12)", border: "1px solid rgba(216,167,37,0.3)",
+            borderRadius: 8, padding: "10px 14px",
+          }}>
+            <Loader2 size={14} color={GOLD} style={{ animation: "spin 1s linear infinite", flexShrink: 0 }} />
+            <span style={{ fontSize: "0.75rem", color: GOLD, fontFamily: "'Inter', sans-serif" }}>
+              Generation is running on the server — cards will appear as they finish. Do not click Generate again.
+            </span>
+          </div>
+        )}
 
         {genLog.length > 0 && (
           <div
             ref={logRef}
             style={{
-              marginTop: 14, background: "#030d1a", borderRadius: 8, padding: "12px 14px",
+              marginTop: 10, background: "#030d1a", borderRadius: 8, padding: "12px 14px",
               maxHeight: 160, overflowY: "auto", fontSize: "0.72rem",
               fontFamily: "'Courier New', monospace", color: "rgba(255,255,255,0.65)",
               lineHeight: 1.7,
             }}
           >
             {genLog.map((line, i) => (
-              <div key={i} style={{ color: line.startsWith("✓") ? GREEN : line.startsWith("Failed") ? RED : undefined }}>
+              <div key={i} style={{
+                color: line.startsWith("✓") ? GREEN
+                     : line.startsWith("Failed") ? RED
+                     : line.startsWith("⏳") ? GOLD
+                     : line.startsWith("⚡") ? "rgba(255,255,255,0.45)"
+                     : undefined,
+              }}>
                 {line}
               </div>
             ))}

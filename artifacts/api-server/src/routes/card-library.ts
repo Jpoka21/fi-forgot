@@ -70,9 +70,21 @@ router.post("/admin/card-library/generate", async (req, res) => {
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
+  let closed = false;
+  req.on("close", () => { closed = true; });
+
+  // Silent send — swallow write errors when the proxy/browser cuts the connection.
+  // Generation continues regardless; the client polls for progress.
   const send = (data: object) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
+    if (closed) return;
+    try { res.write(`data: ${JSON.stringify(data)}\n\n`); } catch { closed = true; }
   };
+
+  // Keepalive comment every 20 s to prevent intermediate proxies from closing early
+  const keepalive = setInterval(() => {
+    if (closed) { clearInterval(keepalive); return; }
+    try { res.write(": keepalive\n\n"); } catch { closed = true; clearInterval(keepalive); }
+  }, 20_000);
 
   send({ type: "start", message: "Starting generation…" });
 
@@ -91,7 +103,8 @@ router.post("/admin/card-library/generate", async (req, res) => {
     logger.error({ err }, "ai-card-library: batch generation error");
   }
 
-  res.end();
+  clearInterval(keepalive);
+  try { res.end(); } catch { /* already closed */ }
 });
 
 // ── Update a card ─────────────────────────────────────────────────────────────
