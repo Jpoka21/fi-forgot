@@ -380,6 +380,7 @@ export default function DashboardPage() {
   const [editedMessages, setEditedMessages]         = useState<Record<string, string>>({});
   const [editActionId, setEditActionId]             = useState<string | null>(null);
   const [timingPickerOpen, setTimingPickerOpen]     = useState<string | null>(null);
+  const [hoveredBriefing, setHoveredBriefing]       = useState<string | null>(null);
 
   const { user, logout } = useAuth();
   const [, setLocation]  = useLocation();
@@ -1387,15 +1388,42 @@ export default function DashboardPage() {
                         ) : (
                           <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                             <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
-                              <button style={{
-                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
-                                borderRadius: 8, border: `1px solid ${BLACK}18`,
-                                background: ev.briefingDone ? `${BLACK}06` : `${RED}10`,
-                                color: ev.briefingDone ? GRAY : RED,
-                                cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                              }}>
-                                {ev.briefingDone ? "Update answers" : "Answer now"}
-                              </button>
+                              <div style={{ position: "relative", display: "inline-block" }}
+                                onMouseEnter={() => setHoveredBriefing(genKey)}
+                                onMouseLeave={() => setHoveredBriefing(null)}
+                              >
+                                <button style={{
+                                  fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
+                                  borderRadius: 8, border: `1px solid ${ev.briefingDone ? `${BLACK}18` : RED}`,
+                                  background: ev.briefingDone ? `${BLACK}06` : `${RED}10`,
+                                  color: ev.briefingDone ? GRAY : RED,
+                                  cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                                }}>
+                                  {ev.briefingDone ? "Edit personalization" : "✦ Personalize"}
+                                </button>
+                                {hoveredBriefing === genKey && (
+                                  <div style={{
+                                    position: "absolute", bottom: "calc(100% + 8px)", left: "50%",
+                                    transform: "translateX(-50%)",
+                                    background: "#1a1a1a", color: WHITE,
+                                    fontSize: "0.68rem", lineHeight: 1.45,
+                                    padding: "7px 10px", borderRadius: 7,
+                                    whiteSpace: "nowrap", pointerEvents: "none",
+                                    boxShadow: "0 3px 12px rgba(0,0,0,0.2)",
+                                    zIndex: 50,
+                                  }}>
+                                    {ev.briefingDone
+                                      ? "Update your answers — we'll rewrite the card with the new details."
+                                      : "3 quick questions so the card sounds like you, not a template."}
+                                    <div style={{
+                                      position: "absolute", top: "100%", left: "50%",
+                                      transform: "translateX(-50%)",
+                                      border: "5px solid transparent",
+                                      borderTopColor: "#1a1a1a",
+                                    }} />
+                                  </div>
+                                )}
+                              </div>
                             </Link>
                             <button
                               onClick={() => generateEarly(ev)}
