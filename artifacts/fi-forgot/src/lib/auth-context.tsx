@@ -264,9 +264,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(parsed);
         setIsLoggedIn(true);
         const ob = localStorage.getItem("fi_forgot_onboarding");
-        setOnboardingComplete(!!ob);
-
         let ws = loadWorkspaces();
+        const hasBusiness = ws.some(w => w.type === "business");
+        setOnboardingComplete(!!ob || hasBusiness);
         // Fallback: if any business workspace is missing a businessId, check the durable anchor
         // key (set when the workspace is first created, never cleared) before minting a new UUID.
         const repaired = ws.map(w => {

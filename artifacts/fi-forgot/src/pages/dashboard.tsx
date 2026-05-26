@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import AppLayout from "@/components/layout/AppLayout";
 import {
   getCards, getRecipients, getBriefingsForRecipient,
@@ -241,7 +241,12 @@ export default function DashboardPage() {
   const [refinePrompt, setRefinePrompt] = useState<Record<string, string>>({});
   const [refiningId, setRefiningId] = useState<string | null>(null);
   const [refineOpen, setRefineOpen] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, workspaces, switchWorkspace } = useAuth();
+  const [, setLocation] = useLocation();
+  const businessWorkspace = workspaces.find(w => w.type === "business");
+  function goBusiness() {
+    if (businessWorkspace) { switchWorkspace(businessWorkspace.id); setLocation("/business/dashboard"); }
+  }
 
   function reloadApprovals() {
     if (user?.email) setPendingApprovals(getCustomerPendingApprovals(user.email));
@@ -373,15 +378,32 @@ export default function DashboardPage() {
         <div className="p-6 md:p-8 max-w-6xl mx-auto">
 
           {/* ── Greeting ─────────────────────────────────────────────────── */}
-          <div className="mb-6">
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK, lineHeight: 1 }}>
-              {user?.name ? `Hey, ${user.name.split(" ")[0]}.` : "Dashboard"}
-            </h1>
-            <p className="mt-1" style={{ fontSize: "1rem", color: GRAY }}>
-              {recipients.length > 0
-                ? "Your relationship autopilot is running. Nothing to panic about."
-                : "Set up your first recipient and you'll never panic-buy flowers again."}
-            </p>
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK, lineHeight: 1 }}>
+                {user?.name ? `Hey, ${user.name.split(" ")[0]}.` : "Dashboard"}
+              </h1>
+              <p className="mt-1" style={{ fontSize: "1rem", color: GRAY }}>
+                {recipients.length > 0
+                  ? "Your relationship autopilot is running. Nothing to panic about."
+                  : "Set up your first recipient and you'll never panic-buy flowers again."}
+              </p>
+            </div>
+            {businessWorkspace && (
+              <div style={{ display: "flex", background: `${BLACK}12`, borderRadius: 8, padding: 3, gap: 2, flexShrink: 0 }}>
+                <div style={{ padding: "6px 14px", borderRadius: 6, background: RED }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: "#fff" }}>Personal</span>
+                </div>
+                <button
+                  onClick={goBusiness}
+                  style={{ padding: "6px 14px", borderRadius: 6, background: "transparent", border: "none", cursor: "pointer" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = `${BLACK}10`)}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: `${BLACK}60` }}>Business</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* ── Hero status card ─────────────────────────────────────────── */}

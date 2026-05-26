@@ -665,7 +665,7 @@ export default function BusinessDashboardPage() {
     Promise.all(flushPromises).then(() =>
       fetch(`/api/business-clients?businessId=${encodeURIComponent(businessId)}`)
         .then(r => r.json())
-        .then((data: { clients?: Record<string, unknown>[]; suggestedBusinessId?: string }) => {
+        .then((data: { clients?: Record<string, unknown>[]; suggestedBusinessId?: string }): Promise<void> | void => {
           if (data.clients?.length) {
             setRows(data.clients.map(c => rowFromClient(c, businessId)));
           } else if (data.suggestedBusinessId) {
