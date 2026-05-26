@@ -578,25 +578,24 @@ export default function DashboardPage() {
             </div>
           </Link>
 
-          {/* Nav links — same font/size as landing page */}
+          {/* Nav links — same as landing page */}
           <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
-            {([
-              { label: "RECIPIENTS", href: "/recipients" as string | null },
-              { label: "SETTINGS",   href: null },
-              { label: "PLANS",      href: "/signup" as string | null },
-            ]).map(link => link.href ? (
-              <Link key={link.label} href={link.href}
+            {[
+              { label: "HOW IT WORKS", href: "/#how-it-works" },
+              { label: "PLANS",        href: "/#pricing" },
+              { label: "EXAMPLES",     href: "/#examples" },
+              { label: "REVIEWS",      href: "/#reviews" },
+              { label: "FAQ",          href: "/#faq" },
+            ].map(link => (
+              <a key={link.href} href={link.href}
                 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: BLACK, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: 0.85 }}>
                 {link.label}
-              </Link>
-            ) : (
-              <button key={link.label}
-                onClick={() => setSettingsOpen(o => !o)}
-                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: settingsOpen ? RED : BLACK, background: "none", border: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: settingsOpen ? 1 : 0.85, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
-                {link.label}
-                <span style={{ fontSize: "0.6rem", opacity: 0.6 }}>{settingsOpen ? "▲" : "▼"}</span>
-              </button>
+              </a>
             ))}
+            <Link href="/business"
+              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: RED, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const }}>
+              FOR BUSINESS
+            </Link>
           </div>
 
           {/* Right: pending alert + workspace toggle + account */}
