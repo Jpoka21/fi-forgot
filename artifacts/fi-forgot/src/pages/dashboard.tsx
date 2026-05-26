@@ -251,7 +251,7 @@ function RecipientCard({
   return (
     <div
       style={{
-        background: WHITE,
+        background: BEIGE,
         border: `1.5px solid ${BLACK}14`,
         borderRadius: 16,
         padding: "20px 20px 16px",
