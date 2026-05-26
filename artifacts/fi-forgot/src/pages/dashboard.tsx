@@ -1413,8 +1413,8 @@ export default function DashboardPage() {
                                     zIndex: 50,
                                   }}>
                                     {ev.briefingDone
-                                      ? "Update your answers — we'll rewrite the card with the new details."
-                                      : "3 quick questions so the card sounds like you, not a template."}
+                                      ? <>Tell us more about {ev.recipient.name} — every answer makes future cards smarter.</>
+                                      : <>A few questions about {ev.recipient.name}. The more we know, the more every card feels written just for them.</>}
                                     <div style={{
                                       position: "absolute", top: "100%", left: "50%",
                                       transform: "translateX(-50%)",
