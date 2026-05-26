@@ -469,11 +469,11 @@ export default function LandingPage() {
           alt="How it works: We remember, We get to know them, We pick the perfect card, We write it for you, We send it on time, You get all the credit"
           style={{ width: "100%", height: "auto", display: "block" }}
         />
-        {/* Mobile: individual step images stacked, trim top/bottom whitespace per card */}
-        <div className="md:hidden flex flex-col" style={{ overflow: "hidden" }}>
-          {[1,2,3,4,5].map(n => (
+        {/* Mobile: individual step images stacked */}
+        <div className="md:hidden flex flex-col">
+          {[1,2,3,4,5,6].map(n => (
             <img key={n} src={`/hiw-${n}.png`} alt={`Step ${n}`}
-              style={{ width: "100%", height: "auto", display: "block", marginTop: "-6%", marginBottom: "-6%" }} />
+              style={{ width: "100%", height: "auto", display: "block" }} />
           ))}
         </div>
       </section>
