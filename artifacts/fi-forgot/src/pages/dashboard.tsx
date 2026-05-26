@@ -457,49 +457,57 @@ export default function DashboardPage() {
       {/* ── Sticky header ────────────────────────────────────────────────────── */}
       <div style={{ position: "sticky", top: 0, zIndex: 40, flexShrink: 0 }}>
 
-        {/* Main header bar — matches home page style */}
+        {/* Main header bar — exact home page nav style */}
         <header style={{
           background: BEIGE,
-          borderBottom: `1px solid ${BLACK}14`,
-          padding: "0 28px",
-          height: 80,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          borderBottom: `1px solid ${BLACK}1A`,
+          padding: "0 32px 0 24px",
+          height: 96,
+          display: "flex", alignItems: "center", gap: 0,
         }}>
-          {/* Left: logo + tagline (home page style) */}
-          <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: RED, fontStyle: "italic", marginRight: 4 }}>F*</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: BLACK, letterSpacing: "0.05em" }}>I FORGOT</span>
+          {/* Logo — identical to landing page */}
+          <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column" as const, marginRight: 40, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: BLACK, letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
             </div>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginTop: -4 }}>
-              Relationship Damage Control
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: GRAY, marginTop: -2, fontWeight: 900 }}>
+              RELATIONSHIP DAMAGE CONTROL
             </div>
+          </Link>
+
+          {/* Nav links — same font/size as landing page */}
+          <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
+            {[
+              { label: "RECIPIENTS",  href: "/recipients" },
+              { label: "REMINDERS",   href: "/settings/reminders" },
+              { label: "PLANS",       href: "/signup" },
+            ].map(link => (
+              <Link key={link.href} href={link.href}
+                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: BLACK, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: 0.85 }}>
+                {link.label}
+              </Link>
+            ))}
           </div>
 
-          {/* Right: workspace toggle + account */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* Pending alert */}
+          {/* Right: pending alert + workspace toggle + account */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
             {approvalCount > 0 && (
               <button
                 onClick={() => setActiveTab("upcoming")}
                 style={{
                   display: "flex", alignItems: "center", gap: 6,
                   background: `${RED}15`, border: `1px solid ${RED}40`,
-                  borderRadius: 8, padding: "5px 12px", cursor: "pointer",
+                  borderRadius: 8, padding: "6px 14px", cursor: "pointer",
                 }}
               >
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: RED, display: "block" }} />
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.09em", color: RED }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.09em", color: RED }}>
                   {approvalCount} AWAITING REVIEW
                 </span>
               </button>
             )}
-
-            {/* Workspace toggle */}
             <WorkspaceToggle />
-
-            {/* Account menu */}
             <AccountMenu user={user} onLogout={() => { logout(); setLocation("/"); }} />
           </div>
         </header>
