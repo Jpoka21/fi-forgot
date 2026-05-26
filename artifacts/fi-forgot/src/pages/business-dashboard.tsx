@@ -1465,14 +1465,22 @@ export default function BusinessDashboardPage() {
                       <span style={{ fontSize: "0.72rem", color: "#b91c1c", fontWeight: 700, whiteSpace: "nowrap" }}>✗ Failed</span>
                     );
 
-                    if (queued) return (
-                      <Link
-                        href={`/business/approve/${queued.approvalToken}`}
-                        style={{ padding: "5px 13px", borderRadius: 8, background: "#16a34a", border: "none", color: WHITE, fontSize: "0.74rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, textDecoration: "none", display: "inline-block" }}
-                      >
-                        👁 Review Card →
-                      </Link>
-                    );
+                    if (queued) {
+                      const isApproved = queued.status === "approved" || queued.status === "sent";
+                      return (
+                        <Link
+                          href={`/business/approve/${queued.approvalToken}`}
+                          style={{
+                            padding: "5px 13px", borderRadius: 8, border: "none", cursor: "pointer",
+                            whiteSpace: "nowrap", flexShrink: 0, textDecoration: "none", display: "inline-block",
+                            fontSize: "0.74rem", fontWeight: 700, color: WHITE,
+                            background: isApproved ? "#1d4ed8" : "#16a34a",
+                          }}
+                        >
+                          {isApproved ? "✔ View Approved Card →" : "👁 Review Card →"}
+                        </Link>
+                      );
+                    }
 
                     return (
                       <button

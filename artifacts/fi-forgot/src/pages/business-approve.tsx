@@ -218,20 +218,108 @@ export default function BusinessApprovePage() {
         )}
 
         {!loading && item && (result === "approved" || result === "sent") && (
-          <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <div style={{ fontSize: "2.5rem", marginBottom: 16 }}>✅</div>
-            <div style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: "1.1rem", marginBottom: 8 }}>
-              {result === "sent" ? "Card approved & queued for mailing!" : "Card approved!"}
+          <>
+            {/* Approved banner */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(22,163,74,0.15)", border: "1px solid rgba(22,163,74,0.35)", borderRadius: 10, padding: "12px 16px", marginBottom: 24 }}>
+              <span style={{ fontSize: "1.3rem" }}>✅</span>
+              <div>
+                <div style={{ color: "#4ade80", fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: "0.88rem" }}>
+                  {result === "sent" ? "Card approved & queued for mailing" : "Card approved"}
+                </div>
+                <div style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", marginTop: 2 }}>
+                  Mailing on {fmt(item.mailDate)}
+                </div>
+              </div>
             </div>
-            <div style={{ color: "rgba(255,255,255,0.45)", fontFamily: "'Inter', sans-serif", fontSize: "0.85rem" }}>
-              {result === "sent"
-                ? `The ${item.eventType.toLowerCase()} card for ${item.clientName} is on its way.`
-                : `The ${item.eventType.toLowerCase()} card for ${item.clientName} has been approved. We'll handle the rest.`}
+
+            {/* Client + event header */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                <span style={{ fontSize: "1.6rem" }}>{icon}</span>
+                <div>
+                  <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff", fontFamily: "'Inter', sans-serif" }}>
+                    {item.eventType} card for {item.clientName}
+                  </div>
+                  {item.clientCompany && (
+                    <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Inter', sans-serif" }}>{item.clientCompany}</div>
+                  )}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 10 }}>
+                <div style={{ fontSize: "0.7rem", fontFamily: "'Inter', sans-serif" }}>
+                  <span style={{ color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Occasion</span>
+                  <div style={{ color: "rgba(255,255,255,0.8)", marginTop: 2 }}>{fmt(item.occasionDate)}</div>
+                </div>
+                <div style={{ fontSize: "0.7rem", fontFamily: "'Inter', sans-serif" }}>
+                  <span style={{ color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Mails On</span>
+                  <div style={{ color: RED, fontWeight: 700, marginTop: 2 }}>{fmt(item.mailDate)}</div>
+                </div>
+              </div>
             </div>
-            <div style={{ marginTop: 16, fontSize: "0.8rem", color: "rgba(255,255,255,0.3)", fontFamily: "'Inter', sans-serif" }}>
-              Mailing on {fmt(item.mailDate)}
+
+            {/* Card design preview (read-only) */}
+            {cardPreview?.imageUrl && (
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Inter', sans-serif", marginBottom: 10 }}>
+                  Card Design
+                </div>
+                <div
+                  onClick={() => setLightboxOpen(true)}
+                  style={{ cursor: "zoom-in", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.15)", position: "relative", width: "100%" }}
+                >
+                  <img
+                    src={cardPreview.imageUrl}
+                    alt={cardPreview.name}
+                    style={{ width: "100%", display: "block", maxHeight: 300, objectFit: "contain", background: "#1a2744" }}
+                  />
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.7))", padding: "18px 14px 10px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.82rem" }}>{cardPreview.name}</div>
+                      {cardPreview.category && <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", fontFamily: "'Inter', sans-serif" }}>{cardPreview.category}</div>}
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.18)", borderRadius: 6, padding: "4px 9px", fontSize: "0.68rem", color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, flexShrink: 0 }}>
+                      🔍 View full size
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Lightbox */}
+            {lightboxOpen && cardPreview?.imageUrl && (
+              <div
+                onClick={() => setLightboxOpen(false)}
+                style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, cursor: "zoom-out" }}
+              >
+                <img src={cardPreview.imageUrl} alt={cardPreview.name} style={{ maxWidth: "100%", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, boxShadow: "0 0 60px rgba(0,0,0,0.8)" }} />
+                <button
+                  onClick={e => { e.stopPropagation(); setLightboxOpen(false); }}
+                  style={{ position: "absolute", top: 20, right: 20, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#fff", fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif", lineHeight: 1 }}
+                >✕</button>
+                <div style={{ position: "absolute", bottom: 20, color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}>Click anywhere to close</div>
+              </div>
+            )}
+
+            {/* Approved message (read-only) */}
+            <div>
+              <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>
+                Approved Message
+              </div>
+              <div style={{
+                background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 8, padding: "14px 16px",
+                color: "rgba(255,255,255,0.85)", fontFamily: "Georgia, serif",
+                fontSize: "0.9rem", lineHeight: 1.7, whiteSpace: "pre-wrap",
+              }}>
+                {message}
+              </div>
+              {item.cardSignature && (
+                <div style={{ marginTop: 10, fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", fontFamily: "Georgia, serif", fontStyle: "italic" }}>
+                  Signature: {item.cardSignature}
+                </div>
+              )}
             </div>
-          </div>
+          </>
         )}
 
         {!loading && item && result === null && (
