@@ -1403,12 +1403,11 @@ export default function DashboardPage() {
                                 </button>
                                 {hoveredBriefing === genKey && (
                                   <div style={{
-                                    position: "absolute", bottom: "calc(100% + 8px)", left: "50%",
-                                    transform: "translateX(-50%)",
+                                    position: "absolute", bottom: "calc(100% + 8px)", right: 0,
                                     background: "#1a1a1a", color: WHITE,
-                                    fontSize: "0.68rem", lineHeight: 1.45,
-                                    padding: "7px 10px", borderRadius: 7,
-                                    whiteSpace: "nowrap", pointerEvents: "none",
+                                    fontSize: "0.68rem", lineHeight: 1.5,
+                                    padding: "8px 11px", borderRadius: 7,
+                                    maxWidth: 220, pointerEvents: "none",
                                     boxShadow: "0 3px 12px rgba(0,0,0,0.2)",
                                     zIndex: 50,
                                   }}>
@@ -1416,8 +1415,7 @@ export default function DashboardPage() {
                                       ? <>Tell us more about {ev.recipient.name} — every answer makes future cards smarter.</>
                                       : <>A few questions about {ev.recipient.name}. The more we know, the more every card feels written just for them.</>}
                                     <div style={{
-                                      position: "absolute", top: "100%", left: "50%",
-                                      transform: "translateX(-50%)",
+                                      position: "absolute", top: "100%", right: 14,
                                       border: "5px solid transparent",
                                       borderTopColor: "#1a1a1a",
                                     }} />
