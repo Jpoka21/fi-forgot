@@ -386,6 +386,8 @@ export default function DashboardPage() {
   const [hoveredBriefing, setHoveredBriefing]       = useState<string | null>(null);
   const [viewingCardId, setViewingCardId]           = useState<string | null>(null);
 
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
   const { user, logout } = useAuth();
   const [, setLocation]  = useLocation();
 
@@ -413,6 +415,12 @@ export default function DashboardPage() {
     }
     pending.sort((a, b) => a.daysAway - b.daysAway);
     setUpcomingBriefings(pending);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
   }, []);
 
   const awaitingApproval  = cards.filter((c) => c.status === "Ready for approval");
@@ -599,47 +607,54 @@ export default function DashboardPage() {
       {/* ── Sticky header ────────────────────────────────────────────────────── */}
       <div style={{ position: "sticky", top: 0, zIndex: 40, flexShrink: 0 }}>
 
-        {/* Main header bar — exact home page nav style */}
+        {/* Main header bar — responsive */}
         <header style={{
           background: BEIGE,
           borderBottom: `1px solid ${BLACK}1A`,
-          padding: "0 32px 0 24px",
-          height: 96,
+          padding: isMobile ? "0 16px" : "0 32px 0 24px",
+          height: isMobile ? 64 : 96,
           display: "flex", alignItems: "center", gap: 0,
         }}>
-          {/* Logo — identical to landing page */}
-          <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column" as const, marginRight: 40, flexShrink: 0 }}>
+          {/* Logo */}
+          <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column" as const, marginRight: isMobile ? 12 : 40, flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: BLACK, letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.9rem, 6vw, 3.6rem)", color: RED, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.9rem, 6vw, 3.6rem)", color: BLACK, letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
             </div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: GRAY, marginTop: -2, fontWeight: 900 }}>
-              RELATIONSHIP DAMAGE CONTROL
-            </div>
+            {!isMobile && (
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: GRAY, marginTop: -2, fontWeight: 900 }}>
+                RELATIONSHIP DAMAGE CONTROL
+              </div>
+            )}
           </Link>
 
-          {/* Nav links — same as landing page */}
-          <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
-            {[
-              { label: "HOW IT WORKS", href: "/#how-it-works" },
-              { label: "PLANS",        href: "/#pricing" },
-              { label: "EXAMPLES",     href: "/#examples" },
-              { label: "REVIEWS",      href: "/#reviews" },
-              { label: "FAQ",          href: "/#faq" },
-            ].map(link => (
-              <a key={link.href} href={link.href}
-                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: BLACK, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: 0.85 }}>
-                {link.label}
-              </a>
-            ))}
-            <Link href="/business"
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: RED, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const }}>
-              FOR BUSINESS
-            </Link>
-          </div>
+          {/* Nav links — desktop only */}
+          {!isMobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
+              {[
+                { label: "HOW IT WORKS", href: "/#how-it-works" },
+                { label: "PLANS",        href: "/#pricing" },
+                { label: "EXAMPLES",     href: "/#examples" },
+                { label: "REVIEWS",      href: "/#reviews" },
+                { label: "FAQ",          href: "/#faq" },
+              ].map(link => (
+                <a key={link.href} href={link.href}
+                  style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: BLACK, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: 0.85 }}>
+                  {link.label}
+                </a>
+              ))}
+              <Link href="/business"
+                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: RED, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const }}>
+                FOR BUSINESS
+              </Link>
+            </div>
+          )}
+
+          {/* Spacer — mobile only, pushes controls to the right */}
+          {isMobile && <div style={{ flex: 1 }} />}
 
           {/* Right: pending alert + workspace toggle + account */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 14, flexShrink: 0 }}>
             {approvalCount > 0 && (
               <button
                 onClick={() => setActiveTab("upcoming")}
@@ -660,13 +675,16 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Tab bar */}
+        {/* Tab bar — scrollable on mobile */}
         <div style={{
           background: BEIGE,
           borderBottom: `1px solid ${BLACK}12`,
-          padding: "0 20px",
+          padding: "0 16px",
           display: "flex", alignItems: "center", gap: 4,
           height: 52,
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch" as const,
+          scrollbarWidth: "none" as const,
         }}>
           {TABS.map(({ key, label, icon: Icon, count }) => {
             const active = activeTab === key;
@@ -707,12 +725,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Stat strip — sits just below the sticky header ───────────────────── */}
+      {/* ── Stat strip — scrollable on mobile ───────────────────────────────── */}
       <div style={{
         display: "flex", alignItems: "center", gap: 12,
-        padding: "12px 28px",
+        padding: "10px 16px",
         borderBottom: `1px solid ${BLACK}10`,
         background: WHITE,
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch" as const,
+        scrollbarWidth: "none" as const,
+        flexWrap: "nowrap",
       }}>
         {[
           { label: "People covered",      value: recipients.length,           color: BLACK },

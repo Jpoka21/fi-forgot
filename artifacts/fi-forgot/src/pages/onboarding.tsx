@@ -236,7 +236,7 @@ export default function OnboardingPage() {
             <p style={{ fontSize: "1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6, color: RED }}>
               Step {step + 1} — {STEPS[step]}
             </p>
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3rem", color: BLACK, lineHeight: 1, margin: 0 }}>
+            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(2.1rem, 7vw, 3rem)", color: BLACK, lineHeight: 1, margin: 0 }}>
               {stepTitles[step]}
             </h1>
             <p style={{ fontSize: "1rem", color: "#666", marginTop: 6, marginBottom: 0 }}>
