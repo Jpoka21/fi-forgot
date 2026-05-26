@@ -707,7 +707,7 @@ export default function DashboardPage() {
 
             {/* Automation Mode */}
             <div>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 8 }}>Automation Mode</div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>Automation Mode</div>
               <div style={{ display: "flex", gap: 8 }}>
                 {([
                   { value: "autopilot" as const, icon: "🚀", title: "Full Autopilot",   desc: "We write, design, and mail automatically. No action needed." },
@@ -717,7 +717,7 @@ export default function DashboardPage() {
                   return (
                     <button key={opt.value} onClick={() => updateSettings("automationMode", opt.value)} style={{
                       textAlign: "left" as const, padding: "10px 12px", borderRadius: 8, cursor: "pointer",
-                      border: `1.5px solid ${active ? RED : `${BLACK}20`}`,
+                      border: `1.5px solid ${active ? RED : `${BLACK}40`}`,
                       background: active ? `${RED}10` : WHITE,
                       minWidth: 155, maxWidth: 200,
                       transition: "all 0.12s",
@@ -727,7 +727,7 @@ export default function DashboardPage() {
                         <span style={{ fontWeight: 700, fontSize: "0.75rem", color: active ? RED : BLACK, fontFamily: "'Inter', sans-serif" }}>{opt.title}</span>
                         {"badge" in opt && opt.badge && <span style={{ fontSize: "0.55rem", fontWeight: 700, background: "#16a34a", color: WHITE, borderRadius: 3, padding: "1px 5px" }}>{opt.badge}</span>}
                       </div>
-                      <div style={{ fontSize: "0.65rem", color: GRAY, fontFamily: "'Inter', sans-serif", lineHeight: 1.35 }}>{opt.desc}</div>
+                      <div style={{ fontSize: "0.65rem", color: `${BLACK}80`, fontFamily: "'Inter', sans-serif", lineHeight: 1.35 }}>{opt.desc}</div>
                     </button>
                   );
                 })}
@@ -736,12 +736,12 @@ export default function DashboardPage() {
 
             {/* Default Tone */}
             <div>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 8 }}>Default Tone</div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>Default Tone</div>
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
                 {TONES.map(t => (
                   <button key={t} onClick={() => updateSettings("defaultTone", t)} style={{
                     padding: "4px 11px", borderRadius: 16, cursor: "pointer",
-                    border: `1.5px solid ${personalSettings.defaultTone === t ? RED : `${BLACK}18`}`,
+                    border: `1.5px solid ${personalSettings.defaultTone === t ? RED : `${BLACK}40`}`,
                     background: personalSettings.defaultTone === t ? `${RED}12` : WHITE,
                     color: personalSettings.defaultTone === t ? RED : BLACK,
                     fontSize: "0.75rem", fontWeight: 600, fontFamily: "'Inter', sans-serif",
@@ -754,25 +754,25 @@ export default function DashboardPage() {
 
             {/* Card Signature */}
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45` }}>Card Signature</div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Card Signature</div>
               <input
                 value={personalSettings.cardSignature}
                 onChange={e => updateSettings("cardSignature", e.target.value)}
                 placeholder="e.g. Love, James"
-                style={{ background: WHITE, border: `1px solid ${BLACK}20`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 220, fontFamily: "'Inter', sans-serif" }}
+                style={{ background: WHITE, border: `1px solid ${BLACK}40`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 220, fontFamily: "'Inter', sans-serif" }}
               />
-              <div style={{ fontSize: "0.63rem", color: `${BLACK}40`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this.</div>
+              <div style={{ fontSize: "0.63rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this.</div>
             </div>
 
             {/* Draft Lead Time */}
             <div>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 4 }}>How Early to Draft</div>
-              <div style={{ fontSize: "0.63rem", color: `${BLACK}40`, marginBottom: 7, fontFamily: "'Inter', sans-serif" }}>How far before the card mails do we write it?</div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 4 }}>How Early to Draft</div>
+              <div style={{ fontSize: "0.63rem", color: `${BLACK}65`, marginBottom: 7, fontFamily: "'Inter', sans-serif" }}>How far before the card mails do we write it?</div>
               <div style={{ display: "flex", gap: 5 }}>
                 {PREVIEW_DAYS_OPTIONS.map(opt => (
                   <button key={opt.days} onClick={() => updateSettings("previewDays", opt.days)} style={{
                     padding: "4px 12px", borderRadius: 16, cursor: "pointer",
-                    border: `1.5px solid ${personalSettings.previewDays === opt.days ? RED : `${BLACK}18`}`,
+                    border: `1.5px solid ${personalSettings.previewDays === opt.days ? RED : `${BLACK}40`}`,
                     background: personalSettings.previewDays === opt.days ? `${RED}12` : WHITE,
                     color: personalSettings.previewDays === opt.days ? RED : BLACK,
                     fontSize: "0.75rem", fontWeight: 600, fontFamily: "'Inter', sans-serif",
@@ -785,7 +785,7 @@ export default function DashboardPage() {
 
             {/* Notify Channel */}
             <div>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45`, marginBottom: 8 }}>How to Notify You</div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>How to Notify You</div>
               <div style={{ display: "flex", gap: 5 }}>
                 {([
                   { value: "email" as const, label: "✉️  Email" },
@@ -794,7 +794,7 @@ export default function DashboardPage() {
                 ]).map(opt => (
                   <button key={opt.value} onClick={() => updateSettings("notifyChannel", opt.value)} style={{
                     padding: "4px 12px", borderRadius: 16, cursor: "pointer",
-                    border: `1.5px solid ${personalSettings.notifyChannel === opt.value ? RED : `${BLACK}18`}`,
+                    border: `1.5px solid ${personalSettings.notifyChannel === opt.value ? RED : `${BLACK}40`}`,
                     background: personalSettings.notifyChannel === opt.value ? `${RED}12` : WHITE,
                     color: personalSettings.notifyChannel === opt.value ? RED : BLACK,
                     fontSize: "0.75rem", fontWeight: 600, fontFamily: "'Inter', sans-serif",
@@ -807,15 +807,15 @@ export default function DashboardPage() {
 
             {/* Notify Email */}
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}45` }}>Notify Email</div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Notify Email</div>
               <input
                 type="email"
                 value={personalSettings.notifyEmail}
                 onChange={e => updateSettings("notifyEmail", e.target.value)}
                 placeholder="you@example.com"
-                style={{ background: WHITE, border: `1px solid ${BLACK}20`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 240, fontFamily: "'Inter', sans-serif" }}
+                style={{ background: WHITE, border: `1px solid ${BLACK}40`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 240, fontFamily: "'Inter', sans-serif" }}
               />
-              <div style={{ fontSize: "0.63rem", color: `${BLACK}40`, fontFamily: "'Inter', sans-serif" }}>Draft notifications and order updates.</div>
+              <div style={{ fontSize: "0.63rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>Draft notifications and order updates.</div>
             </div>
 
           </div>
