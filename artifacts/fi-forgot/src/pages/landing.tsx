@@ -461,7 +461,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ background: B.beige, overflow: "hidden" }}>
+      <section id="how-it-works" style={{ background: B.beige }}>
         {/* Desktop */}
         <img
           className="hidden md:block"
