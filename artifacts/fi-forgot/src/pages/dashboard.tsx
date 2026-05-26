@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import AppLayout from "@/components/layout/AppLayout";
 import {
   getCards, getRecipients, getBriefingsForRecipient,
-  STATUS_COLORS, CardOrder, Recipient, getAge,
+  CardOrder, Recipient, getAge,
 } from "@/lib/data";
 import {
   getCustomerPendingApprovals, customerApproveCard,
@@ -12,59 +12,65 @@ import {
 } from "@/lib/admin-data";
 import { useAuth } from "@/lib/auth-context";
 import {
-  CalendarDays, Users, Zap, CheckCircle2, Plus, ShieldCheck,
+  Users, Zap, CheckCircle2, Plus, ShieldCheck,
   Clock, ClipboardList, ThumbsUp, Sparkles, Loader2,
-  ChevronDown, ChevronUp, AlertTriangle, Layers, ChevronLeft, ChevronRight,
+  ChevronDown, ChevronUp, CalendarDays, Search,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 const NAVY  = "#071A33";
 const RED   = "#E23B2E";
-const BLACK = "#111111";
-const BEIGE = "#F2E6D3";
-const GRAY  = "#6B6B6B";
+const WHITE = "#FFFFFF";
+const GRAY  = "#94a3b8";
+const LIGHT = "#f1f5f9";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
-  "Valentine's Day": { month: 2, day: 14 },
-  "Mother's Day":    { month: 5, day: 12 },
-  "Father's Day":    { month: 6, day: 16 },
+  "Valentine's Day": { month: 2,  day: 14 },
+  "Mother's Day":    { month: 5,  day: 12 },
+  "Father's Day":    { month: 6,  day: 16 },
   "Thanksgiving":    { month: 11, day: 28 },
   "Christmas":       { month: 12, day: 25 },
   "Hanukkah":        { month: 12, day: 26 },
-  "New Year's":      { month: 1, day: 1 },
-  "Easter":          { month: 4, day: 20 },
+  "New Year's":      { month: 1,  day: 1  },
+  "Easter":          { month: 4,  day: 20 },
 };
 
 function daysUntilEvent(event: string, recipient: Recipient): number | null {
   const today = new Date();
   const year = today.getFullYear();
-
   if (event === "Birthday" && recipient.birthday) {
     const [, m, d] = recipient.birthday.split("-").map(Number);
     let next = new Date(year, m - 1, d);
     if (next < today) next = new Date(year + 1, m - 1, d);
     return Math.ceil((next.getTime() - today.getTime()) / 86400000);
   }
-
-  if (event === "Anniversary" && recipient.marriageDate) {
-    const [, m, d] = recipient.marriageDate.split("-").map(Number);
-    let next = new Date(year, m - 1, d);
-    if (next < today) next = new Date(year + 1, m - 1, d);
+  if (event === "Anniversary") {
+    const src = recipient.anniversaryDate ?? recipient.marriageDate;
+    if (src) {
+      const parts = src.split("-").map(Number);
+      let next = new Date(year, parts[1] - 1, parts[2]);
+      if (next < today) next = new Date(year + 1, parts[1] - 1, parts[2]);
+      return Math.ceil((next.getTime() - today.getTime()) / 86400000);
+    }
+  }
+  const custom = recipient.customDates?.find((c) => c.label === event);
+  if (custom?.date) {
+    const parts = custom.date.split("-").map(Number);
+    let next = new Date(year, parts[1] - 1, parts[2]);
+    if (next < today) next = new Date(year + 1, parts[1] - 1, parts[2]);
     return Math.ceil((next.getTime() - today.getTime()) / 86400000);
   }
-
   const fixed = HOLIDAY_DATES[event];
   if (fixed) {
     let next = new Date(year, fixed.month - 1, fixed.day);
     if (next < today) next = new Date(year + 1, fixed.month - 1, fixed.day);
     return Math.ceil((next.getTime() - today.getTime()) / 86400000);
   }
-
   return null;
 }
 
-/** Format a local Date as YYYY-MM-DD without UTC conversion drift */
 function localDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
@@ -72,38 +78,26 @@ function localDateStr(d: Date): string {
 function getEventDate(event: string, recipient: Recipient): string | null {
   const now = new Date();
   const year = now.getFullYear();
-
-  // Helper: given a stored ISO date string (any year), return next occurrence
   function nextOccurrence(stored: string): string {
     const parts = stored.split("-").map(Number);
-    const m = parts[1];
-    const d = parts[2];
+    const m = parts[1]; const d = parts[2];
     let next = new Date(year, m - 1, d);
     if (next < now) next = new Date(year + 1, m - 1, d);
     return localDateStr(next);
   }
-
-  if (event === "Birthday" && recipient.birthday)
-    return nextOccurrence(recipient.birthday);
-
-  // Anniversary may come from anniversaryDate (onboarding) or marriageDate (manual edit)
+  if (event === "Birthday" && recipient.birthday) return nextOccurrence(recipient.birthday);
   if (event === "Anniversary") {
     const src = recipient.anniversaryDate ?? recipient.marriageDate;
     if (src) return nextOccurrence(src);
   }
-
-  // Custom dates: Work Anniversary, Graduation, Just Because, etc.
   const custom = recipient.customDates?.find((c) => c.label === event);
   if (custom?.date) return nextOccurrence(custom.date);
-
-  // Fixed holidays
   const fixed = HOLIDAY_DATES[event];
   if (fixed) {
-    let next = new Date(year, fixed.month - 1, fixed.day);
-    if (next < now) next = new Date(year + 1, fixed.month - 1, fixed.day);
-    return localDateStr(next);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const stored = `${year}-${pad(fixed.month)}-${pad(fixed.day)}`;
+    return nextOccurrence(stored);
   }
-
   return null;
 }
 
@@ -114,139 +108,171 @@ interface UpcomingBriefing {
   briefingDoneThisYear: boolean;
 }
 
-function StatusBadge({ status }: { status: CardOrder["status"] }) {
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[status]}`}>
-      {status}
-    </span>
-  );
-}
-
-function StatCard({
-  label, value, icon: Icon, accentColor, sub, href,
-}: {
-  label: string; value: string | number; icon: React.ElementType;
-  accentColor: string; sub?: string; href?: string;
-}) {
-  const inner = (
-    <div
-      className="rounded-2xl p-5 flex items-center gap-4 transition-all hover:-translate-y-0.5"
-      style={{
-        background: "#fff", border: `1.5px solid ${BLACK}18`,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-        cursor: href ? "pointer" : "default",
-        textDecoration: "none",
-      }}
-    >
-      <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: `${accentColor}15` }}
-      >
-        <Icon size={20} style={{ color: accentColor }} />
-      </div>
-      <div>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: BLACK, lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 2 }}>{label}</div>
-        {sub && <div style={{ fontSize: "0.7rem", fontWeight: 700, marginTop: 2, color: accentColor }}>{sub}</div>}
-      </div>
-    </div>
-  );
-  if (href) return <Link href={href} style={{ textDecoration: "none" }}>{inner}</Link>;
-  return inner;
-}
-
-function IllustrationPlaceholder({
-  size = "md",
-}: {
-  size?: "sm" | "md" | "lg";
-}) {
-  const dims: Record<string, string> = { sm: "h-16 w-20", md: "h-24 w-28", lg: "h-36 w-44" };
-  return (
-    <div
-      className={`${dims[size]} rounded-2xl flex flex-col items-center justify-center gap-1.5 flex-shrink-0 select-none`}
-      style={{ background: `${RED}08`, border: `1.5px dashed ${RED}30` }}
-      aria-hidden="true"
-    >
-      <Layers size={16} style={{ color: `${RED}50` }} />
-      <span style={{ fontSize: "8px", color: `${BLACK}40`, maxWidth: "80px", textAlign: "center", lineHeight: 1.3, fontWeight: 500 }}>
-        Custom illustration area
-      </span>
-    </div>
-  );
-}
-
-function RiskMeter({ level }: { level: "low" | "medium" | "high" }) {
-  const pct = level === "low" ? 15 : level === "medium" ? 52 : 82;
-  const color = level === "low" ? "#22c55e" : level === "medium" ? "#f59e0b" : RED;
-  const label = level === "low" ? "Low" : level === "medium" ? "Medium" : "High";
-  const reason =
-    level === "low"   ? "No upcoming card emergencies detected."
-    : level === "medium" ? "A few events coming up — stay alert."
-    : "Cards overdue. Panic flowers incoming.";
-
-  return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1.5px solid ${BLACK}18`, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-      <div className="w-full flex items-center justify-center py-5" style={{ background: BEIGE }}>
-        <IllustrationPlaceholder size="sm" />
-      </div>
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.05em", color: BLACK }}>Relationship Risk Meter</div>
-          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: color }}>
-            {label}
-          </span>
-        </div>
-        <div className="relative h-3 rounded-full overflow-hidden mb-2" style={{ background: `${BLACK}12` }}>
-          <div className="absolute inset-y-0 left-0 flex" style={{ width: "100%" }}>
-            <div className="h-full flex-1" style={{ background: "#22c55e", opacity: 0.2 }} />
-            <div className="h-full flex-1" style={{ background: "#f59e0b", opacity: 0.2 }} />
-            <div className="h-full flex-1" style={{ background: RED, opacity: 0.2 }} />
-          </div>
-          <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
-        </div>
-        <div className="flex justify-between text-xs mb-3" style={{ color: GRAY }}>
-          <span>Safe</span>
-          <span>Danger Zone</span>
-        </div>
-        <p className="text-xs" style={{ color: GRAY }}>
-          Current risk: <span className="font-semibold" style={{ color }}>{label}</span> — {reason}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function DisasterCounter() {
-  return (
-    <div className="rounded-2xl p-5 text-center" style={{ background: BLACK }}>
-      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.5rem", color: "#fff", lineHeight: 1 }}>13</div>
-      <div className="text-xs font-semibold mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-        days since last relationship emergency
-      </div>
-      <div className="mt-2 text-xs font-semibold" style={{ color: RED }}>
-        Keep it up. You're doing great.
-      </div>
-    </div>
-  );
-}
-
 type PendingApproval = QueueItem & { message?: MessageDraft };
 
+function UrgencyBadge({ days }: { days: number }) {
+  const urgent = days <= 14;
+  const soon   = days <= 30;
+  const bg    = urgent ? RED       : soon ? "#f59e0b" : "#22c55e";
+  const light = urgent ? `${RED}15` : soon ? "#fef3c715" : "#dcfce715";
+  return (
+    <div
+      style={{
+        minWidth: 52, height: 52, borderRadius: 12,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        background: light, border: `1.5px solid ${bg}40`, flexShrink: 0,
+      }}
+    >
+      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: bg, lineHeight: 1 }}>{days}</span>
+      <span style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.08em", color: bg, textTransform: "uppercase" as const }}>days</span>
+    </div>
+  );
+}
+
+function RecipientCard({ r, upcoming }: { r: Recipient; upcoming: { event: string; daysAway: number; briefingDone: boolean }[] }) {
+  const nextEvent = upcoming[0] ?? null;
+  const childCount = r.children?.length ?? 0;
+  const yearsMarried = r.marriageDate ? getAge(r.marriageDate) : null;
+  const events = r.selectedEvents ?? [];
+
+  const initials = r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
+
+  return (
+    <div
+      style={{
+        background: WHITE,
+        border: "1.5px solid #e2e8f0",
+        borderRadius: 16,
+        padding: "20px 20px 16px",
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: 14,
+        boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
+        transition: "box-shadow 0.15s, transform 0.15s",
+      }}
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 18px rgba(0,0,0,0.10)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 1px 6px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
+    >
+      {/* Top row: avatar + name + next event badge */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+        <div
+          style={{
+            width: 46, height: 46, borderRadius: 12,
+            background: NAVY, display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: WHITE, letterSpacing: "0.04em" }}>{initials}</span>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", color: NAVY, letterSpacing: "0.04em", lineHeight: 1.1 }}>
+            {r.name}
+          </div>
+          <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 2, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" as const }}>
+            <span style={{ background: `${NAVY}12`, color: NAVY, borderRadius: 4, padding: "1px 6px", fontWeight: 600, fontSize: "0.68rem", letterSpacing: "0.05em" }}>
+              {r.relationship}
+            </span>
+            {yearsMarried !== null && yearsMarried > 0 && (
+              <span>{yearsMarried} yr{yearsMarried !== 1 ? "s" : ""}</span>
+            )}
+            {childCount > 0 && (
+              <span>{childCount} kid{childCount !== 1 ? "s" : ""}</span>
+            )}
+          </div>
+        </div>
+        {nextEvent && (
+          <div style={{ flexShrink: 0, textAlign: "right" as const }}>
+            <div style={{
+              background: nextEvent.daysAway <= 14 ? `${RED}12` : nextEvent.daysAway <= 30 ? "#fef3c7" : "#f0fdf4",
+              border: `1px solid ${nextEvent.daysAway <= 14 ? RED : nextEvent.daysAway <= 30 ? "#f59e0b" : "#22c55e"}40`,
+              borderRadius: 8, padding: "4px 8px", display: "inline-block",
+            }}>
+              <span style={{
+                fontFamily: "'Bebas Neue', cursive", fontSize: "1rem",
+                color: nextEvent.daysAway <= 14 ? RED : nextEvent.daysAway <= 30 ? "#b45309" : "#16a34a",
+                lineHeight: 1,
+              }}>
+                {nextEvent.daysAway}d
+              </span>
+            </div>
+            <div style={{ fontSize: "0.6rem", color: GRAY, marginTop: 2, textAlign: "right" as const }}>
+              {nextEvent.event}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Event chips */}
+      {events.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
+          {events.slice(0, 5).map(e => {
+            const days = daysUntilEvent(e, r);
+            const isNext = nextEvent?.event === e;
+            return (
+              <span
+                key={e}
+                style={{
+                  fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, fontWeight: 600,
+                  background: isNext ? `${RED}15` : "#f1f5f9",
+                  color: isNext ? RED : "#475569",
+                  border: `1px solid ${isNext ? `${RED}35` : "#e2e8f0"}`,
+                }}
+              >
+                {e}{days !== null && days <= 45 ? ` · ${days}d` : ""}
+              </span>
+            );
+          })}
+          {events.length > 5 && (
+            <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, background: "#f1f5f9", color: GRAY }}>
+              +{events.length - 5}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Footer: manage button */}
+      <div style={{ marginTop: "auto", paddingTop: 4, borderTop: "1px solid #f1f5f9", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        {nextEvent && !nextEvent.briefingDone ? (
+          <Link href={`/briefings/${r.id}/${encodeURIComponent(nextEvent.event)}`}>
+            <button style={{
+              fontSize: "0.7rem", fontWeight: 700, color: RED, background: `${RED}10`,
+              border: `1px solid ${RED}30`, borderRadius: 6, padding: "4px 10px", cursor: "pointer",
+              fontFamily: "'Inter', sans-serif", letterSpacing: "0.03em",
+            }}>
+              Answer questions →
+            </button>
+          </Link>
+        ) : (
+          <span />
+        )}
+        <Link href={`/recipients/${r.id}`}>
+          <button style={{
+            fontSize: "0.7rem", fontWeight: 700, color: "#475569", background: "#f8fafc",
+            border: "1px solid #e2e8f0", borderRadius: 6, padding: "4px 10px", cursor: "pointer",
+            fontFamily: "'Inter', sans-serif",
+          }}>
+            Manage →
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
-  const [cards, setCards] = useState<CardOrder[]>([]);
-  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [cards, setCards]                     = useState<CardOrder[]>([]);
+  const [recipients, setRecipients]           = useState<Recipient[]>([]);
   const [upcomingBriefings, setUpcomingBriefings] = useState<UpcomingBriefing[]>([]);
-  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
+  const [pendingApprovals, setPendingApprovals]   = useState<PendingApproval[]>([]);
   const [refinedMessages, setRefinedMessages] = useState<Record<string, string>>({});
-  const [refinePrompt, setRefinePrompt] = useState<Record<string, string>>({});
-  const [refiningId, setRefiningId] = useState<string | null>(null);
-  const [refineOpen, setRefineOpen] = useState<string | null>(null);
-  const { user, workspaces, switchWorkspace } = useAuth();
+  const [refinePrompt, setRefinePrompt]       = useState<Record<string, string>>({});
+  const [refiningId, setRefiningId]           = useState<string | null>(null);
+  const [refineOpen, setRefineOpen]           = useState<string | null>(null);
+  const [activeTab, setActiveTab]             = useState<"people" | "upcoming">("people");
+  const [search, setSearch]                   = useState("");
+
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const businessWorkspace = workspaces.find(w => w.type === "business");
-  function goBusiness() {
-    if (businessWorkspace) { switchWorkspace(businessWorkspace.id); setLocation("/business/dashboard"); }
-  }
 
   function reloadApprovals() {
     if (user?.email) setPendingApprovals(getCustomerPendingApprovals(user.email));
@@ -274,7 +300,7 @@ export default function DashboardPage() {
     setUpcomingBriefings(pending);
   }, []);
 
-  const upcoming = cards.filter((c) => !["Delivered", "Given"].includes(c.status));
+  const upcoming      = cards.filter((c) => !["Delivered", "Given"].includes(c.status));
   const awaitingApproval = cards.filter((c) => c.status === "Ready for approval");
   const disastersAvoided = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
 
@@ -304,186 +330,161 @@ export default function DashboardPage() {
     result.sort((a, b) => a.daysAway - b.daysAway);
     return result;
   }, [recipients]);
-  const upcomingEventCount = allUpcomingEvents.length;
-  const primaryPreviewDays = recipients[0]?.previewDays ?? null;
+
   const briefingsNeeded = upcomingBriefings.filter((b) => !b.briefingDoneThisYear);
+  const approvalCount = awaitingApproval.length + pendingApprovals.length;
 
-  const minDaysToEvent = upcomingBriefings.length > 0
-    ? Math.min(...upcomingBriefings.map((b) => b.daysAway))
-    : 999;
-  const riskLevel: "low" | "medium" | "high" =
-    pendingApprovals.length > 0 || awaitingApproval.length > 0 ? "medium"
-    : minDaysToEvent < 14 ? "medium"
-    : "low";
-
-  const today = new Date();
-  const [calMonth, setCalMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
-
-  const calendarDays = Array.from({ length: 35 }, (_, i) => {
-    const d = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1);
-    d.setDate(d.getDate() - d.getDay() + i);
-    return d;
-  });
-
-  // Map of ISO date → list of {label, recipientId, recipientName} for the viewed year
-  const eventsByDate = useMemo(() => {
-    const viewYear = calMonth.getFullYear();
-    const map = new Map<string, Array<{ label: string; recipientId: string; recipientName: string }>>();
-
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const isoFor = (y: number, m: number, d: number) => `${y}-${pad(m)}-${pad(d)}`;
-    const addEntry = (iso: string, label: string, r: Recipient) => {
-      const list = map.get(iso) ?? [];
-      if (!list.find(e => e.label === label && e.recipientId === r.id))
-        list.push({ label, recipientId: r.id, recipientName: r.name });
-      map.set(iso, list);
-    };
-
-    for (const r of recipients) {
-      for (const event of r.selectedEvents ?? []) {
-        if (event === "Birthday" && r.birthday) {
-          const [, m, d] = r.birthday.split("-").map(Number);
-          addEntry(isoFor(viewYear, m, d), `${r.name}'s Birthday`, r);
-        }
-        if (event === "Anniversary") {
-          const src = r.anniversaryDate ?? r.marriageDate;
-          if (src) {
-            const [, m, d] = src.split("-").map(Number);
-            addEntry(isoFor(viewYear, m, d), `${r.name}'s Anniversary`, r);
-          }
-        }
-        const custom = r.customDates?.find((c) => c.label === event);
-        if (custom?.date) {
-          const [, m, d] = custom.date.split("-").map(Number);
-          addEntry(isoFor(viewYear, m, d), `${r.name} – ${event}`, r);
-        }
-        const fixed = HOLIDAY_DATES[event];
-        if (fixed) addEntry(isoFor(viewYear, fixed.month, fixed.day), event, r);
-      }
+  // Per-recipient upcoming events map
+  const recipientUpcomingMap = useMemo(() => {
+    const m = new Map<string, typeof allUpcomingEvents>();
+    for (const ev of allUpcomingEvents) {
+      const list = m.get(ev.recipient.id) ?? [];
+      list.push(ev);
+      m.set(ev.recipient.id, list);
     }
-    // Card due dates
-    for (const c of cards) {
-      const r = recipients.find(r => r.id === c.recipientId);
-      addEntry(c.dueDate, `${r?.name ?? "Card"} – ${c.holiday}`, r ?? { id: "", name: "Card" } as Recipient);
-    }
+    return m;
+  }, [allUpcomingEvents]);
 
-    return map;
-  }, [recipients, cards, calMonth]);
+  const filteredRecipients = recipients.filter(r =>
+    !search || r.name.toLowerCase().includes(search.toLowerCase()) ||
+    r.relationship.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const [hoveredDay, setHoveredDay] = useState<string | null>(null);
+  const QUICK_PROMPTS = [
+    { label: "Shorter",        prompt: "Make it significantly shorter and more punchy." },
+    { label: "More funny",     prompt: "Make it funnier and add some humor." },
+    { label: "Add more heart", prompt: "Make it warmer and more heartfelt." },
+    { label: "More personal",  prompt: "Make it feel more personal and specific." },
+  ];
+
+  // ── Tab definitions ──────────────────────────────────────────────────────────
+  const TABS = [
+    { key: "people" as const,   label: "Your People",     icon: Users,       count: recipients.length },
+    { key: "upcoming" as const, label: "Upcoming Cards",  icon: CalendarDays, count: allUpcomingEvents.length },
+  ];
 
   return (
     <AppLayout>
-      <div className="min-h-screen" style={{ background: BEIGE }}>
-        <div className="p-6 md:p-8 max-w-6xl mx-auto">
+      <div style={{ minHeight: "100vh", background: LIGHT, display: "flex", flexDirection: "column", fontFamily: "'Inter', sans-serif" }}>
 
-          {/* ── Greeting ─────────────────────────────────────────────────── */}
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div>
-              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK, lineHeight: 1 }}>
-                {user?.name ? `Hey, ${user.name.split(" ")[0]}.` : "Dashboard"}
-              </h1>
-              <p className="mt-1" style={{ fontSize: "1rem", color: GRAY }}>
-                {recipients.length > 0
-                  ? "Your relationship autopilot is running. Nothing to panic about."
-                  : "Set up your first recipient and you'll never panic-buy flowers again."}
-              </p>
-            </div>
-            {businessWorkspace && (
-              <div style={{ display: "flex", background: `${BLACK}12`, borderRadius: 8, padding: 3, gap: 2, flexShrink: 0 }}>
-                <div style={{ padding: "6px 14px", borderRadius: 6, background: RED }}>
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: "#fff" }}>Personal</span>
+        {/* ── Sticky header ──────────────────────────────────────────────────── */}
+        <div style={{ position: "sticky", top: 0, zIndex: 40, flexShrink: 0 }}>
+
+          {/* Main header bar */}
+          <div style={{
+            background: NAVY,
+            padding: "0 28px",
+            height: 72,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.18)",
+          }}>
+            {/* Left: title */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: RED, fontStyle: "italic", marginRight: 5 }}>F*</span>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: WHITE, letterSpacing: "0.05em" }}>I FORGOT</span>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.4)", marginLeft: 10, alignSelf: "flex-end", paddingBottom: 4 }}>PERSONAL</span>
                 </div>
+              </div>
+              <div style={{ width: 1, height: 28, background: "rgba(255,255,255,0.12)" }} />
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>
+                {user?.name ? `HEY, ${user.name.split(" ")[0].toUpperCase()}.` : "DASHBOARD"}
+              </span>
+            </div>
+
+            {/* Right: stat pills */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {approvalCount > 0 && (
                 <button
-                  onClick={goBusiness}
-                  style={{ padding: "6px 14px", borderRadius: 6, background: "transparent", border: "none", cursor: "pointer" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = `${BLACK}10`)}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  onClick={() => { setActiveTab("upcoming"); }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: `${RED}25`, border: `1px solid ${RED}50`,
+                    borderRadius: 8, padding: "5px 12px", cursor: "pointer",
+                  }}
                 >
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: `${BLACK}60` }}>Business</span>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: RED, display: "block" }} />
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.1em", color: "#fff" }}>
+                    {approvalCount} AWAITING REVIEW
+                  </span>
                 </button>
-              </div>
-            )}
-          </div>
-
-          {/* ── Hero status card ─────────────────────────────────────────── */}
-          <div
-            className="relative rounded-2xl px-7 py-6 mb-6 overflow-hidden"
-            style={{
-              background: `linear-gradient(125deg, ${BLACK} 0%, #1a1a1a 60%, #111 100%)`,
-              border: `1px solid ${RED}30`,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-            }}
-          >
-            {/* Red glow accent */}
-            <div
-              className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-15 pointer-events-none"
-              style={{ background: RED, filter: "blur(40px)" }}
-            />
-            <div className="relative flex items-center justify-between gap-4">
-              <div className="flex items-center gap-5 flex-1 min-w-0">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${RED}20`, border: `1px solid ${RED}40` }}
-                >
-                  <Zap size={22} style={{ color: RED }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.05em", color: "#fff", lineHeight: 1.1 }}>
-                    Relationship Autopilot: Armed
+              )}
+              <div style={{ display: "flex", gap: 8 }}>
+                {[
+                  { label: "People", value: recipients.length },
+                  { label: "Events", value: disastersAvoided },
+                ].map(({ label, value }) => (
+                  <div key={label} style={{ textAlign: "center" as const, padding: "4px 12px", background: "rgba(255,255,255,0.07)", borderRadius: 8 }}>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: WHITE, lineHeight: 1 }}>{value}</div>
+                    <div style={{ fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.1em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" as const }}>{label}</div>
                   </div>
-                  <div className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>
-                    No panic flowers. No gas station cards. No couch sleeping.
-                  </div>
-                  <div
-                    className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-bold"
-                    style={{ background: "rgba(34,197,94,0.18)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-                    Crisis level: Low
-                  </div>
-                </div>
-              </div>
-              <div className="hidden sm:block flex-shrink-0">
-                <IllustrationPlaceholder size="lg" />
+                ))}
               </div>
             </div>
-            {primaryPreviewDays && (
-              <div className="mt-4 pt-4 border-t flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                <div className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  First heads-up: <span className="text-white font-semibold">{primaryPreviewDays} days before</span>
-                  <span className="ml-2 mr-2" style={{ color: "rgba(255,255,255,0.25)" }}>·</span>
-                  <span style={{ color: "rgba(255,255,255,0.4)" }}>Daily reminders until you act or we do</span>
-                </div>
-                <Link href="/settings/reminders">
-                  <button
-                    className="text-xs font-semibold px-3 py-1 rounded-lg transition-all hover:opacity-80"
-                    style={{ background: `${RED}20`, color: "rgba(255,255,255,0.7)", border: `1px solid ${RED}30` }}
-                  >
-                    Settings
-                  </button>
-                </Link>
-              </div>
-            )}
           </div>
 
-          {/* ── Pending Customer Approvals ────────────────────────────────── */}
+          {/* Tab bar */}
+          <div style={{ background: "#0a1f3d", borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 28px", display: "flex", alignItems: "center", gap: 0 }}>
+            {TABS.map(({ key, label, icon: Icon, count }) => {
+              const active = activeTab === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "0 20px", height: 44,
+                    background: active ? "rgba(255,255,255,0.07)" : "transparent",
+                    border: "none", borderBottom: active ? `2px solid ${RED}` : "2px solid transparent",
+                    cursor: "pointer", transition: "all 0.15s",
+                    marginBottom: -1,
+                  }}
+                >
+                  <Icon size={14} style={{ color: active ? WHITE : "rgba(255,255,255,0.4)" }} />
+                  <span style={{
+                    fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem",
+                    letterSpacing: "0.1em", color: active ? WHITE : "rgba(255,255,255,0.4)",
+                  }}>
+                    {label}
+                  </span>
+                  {count > 0 && (
+                    <span style={{
+                      background: active ? `${RED}30` : "rgba(255,255,255,0.08)",
+                      color: active ? WHITE : "rgba(255,255,255,0.35)",
+                      borderRadius: 10, padding: "0 7px", fontSize: "0.65rem", fontWeight: 700, lineHeight: "18px",
+                    }}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Alert banners ──────────────────────────────────────────────────── */}
+        <div style={{ padding: "0 28px" }}>
+
+          {/* Pending approvals */}
           {pendingApprovals.length > 0 && (
-            <div id="approvals" className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <ThumbsUp size={18} style={{ color: RED }} />
-                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: RED }}>
+            <div style={{ marginTop: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <ThumbsUp size={16} style={{ color: RED }} />
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.05em", color: RED }}>
                   {pendingApprovals.length === 1 ? "1 card needs your approval" : `${pendingApprovals.length} cards need your approval`}
-                </h2>
+                </span>
               </div>
-              <div className="space-y-4">
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
                 {pendingApprovals.map((item) => {
                   const originalMessage = item.message
                     ? (item.message.approvedMessage ?? item.message.generatedMessage ?? "")
                     : "";
                   const currentMessage = refinedMessages[item.id] ?? originalMessage;
-                  const isRefining = refiningId === item.id;
-                  const isRefineOpen = refineOpen === item.id;
+                  const isRefining    = refiningId === item.id;
+                  const isRefineOpen  = refineOpen === item.id;
 
                   async function handleApprove() {
                     if (item.message?.id && refinedMessages[item.id]) {
@@ -525,139 +526,105 @@ export default function DashboardPage() {
                     }
                   }
 
-                  const QUICK_PROMPTS = [
-                    { label: "✂️ Shorter", prompt: "Make it shorter — cut it to 2–3 sentences max." },
-                    { label: "😄 Funnier", prompt: "Add a bit more humor and lightness while keeping it genuine." },
-                    { label: "❤️ More heartfelt", prompt: "Make it deeper and more emotionally sincere." },
-                    { label: "✍️ More specific", prompt: "Make it feel more specific and personal to this person." },
-                    { label: "🌟 More casual", prompt: "Make the tone more casual and relaxed, less formal." },
-                  ];
-
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border-2 overflow-hidden"
-                      style={{ background: "#fff", borderColor: `${RED}35`, boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}
+                      id={`approval-${item.id}`}
+                      style={{
+                        background: WHITE, border: `1.5px solid ${RED}25`,
+                        borderRadius: 14, padding: "20px 22px",
+                        boxShadow: "0 2px 8px rgba(226,59,46,0.08)",
+                      }}
                     >
-                      <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3" style={{ background: `${RED}08` }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: "1rem", color: BLACK }}>{item.eventType} card for {item.recipientName}</div>
-                          <div className="text-xs mt-0.5" style={{ color: GRAY }}>
-                            Mailing {item.scheduledMailDate} · Review and approve so we can mail it
+                          <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#1e293b" }}>
+                            {item.eventType} card for <span style={{ color: RED }}>{item.recipientName}</span>
                           </div>
+                          <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 2 }}>Review and approve below</div>
                         </div>
-                        <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: RED }}>
-                          Needs your OK
-                        </span>
-                      </div>
-
-                      {originalMessage ? (
-                        <div className="px-5 py-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: GRAY }}>Card Message</div>
-                            {refinedMessages[item.id] && (
-                              <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: RED }}>✨ AI refined</span>
-                            )}
-                          </div>
-                          <div className="relative">
-                            <div
-                              className={`rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap border transition-opacity ${isRefining ? "opacity-40" : "opacity-100"}`}
-                              style={{ background: BEIGE, color: BLACK, borderColor: `${BLACK}18`, fontFamily: "'Caveat', cursive", fontSize: "1.05rem" }}
-                            >
-                              {currentMessage}
-                            </div>
-                            {isRefining && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-lg shadow-sm text-sm font-semibold" style={{ color: RED }}>
-                                  <Loader2 size={15} className="animate-spin" /> Rewriting…
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="px-5 py-4 text-sm italic" style={{ color: GRAY }}>Message not available yet — check back soon.</div>
-                      )}
-
-                      <div className="px-5 pb-3">
                         <button
                           onClick={handleApprove}
-                          disabled={isRefining}
-                          className="w-full flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-xl text-white hover:opacity-90 disabled:opacity-50 transition-all"
-                          style={{ background: RED }}
+                          style={{
+                            background: RED, color: WHITE, border: "none", borderRadius: 8,
+                            padding: "8px 18px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
+                            fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.08em",
+                          }}
                         >
-                          <ThumbsUp size={14} /> Looks great — send it!
+                          Looks great — send it!
                         </button>
                       </div>
-
-                      {originalMessage && (
-                        <div className="px-5 pb-4">
-                          <button
-                            onClick={() => setRefineOpen(isRefineOpen ? null : item.id)}
-                            className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl border transition-all"
-                            style={{ borderColor: `${BLACK}18`, color: GRAY }}
-                          >
-                            <Sparkles size={13} />
-                            Want to tweak it with AI?
-                            {isRefineOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                          </button>
-
-                          {isRefineOpen && (
-                            <div className="mt-3 space-y-3">
-                              <div>
-                                <div className="text-xs font-medium mb-2" style={{ color: GRAY }}>Quick options</div>
-                                <div className="flex flex-wrap gap-2">
-                                  {QUICK_PROMPTS.map(({ label, prompt }) => (
-                                    <button
-                                      key={label}
-                                      onClick={() => handleRefine(prompt)}
-                                      disabled={isRefining}
-                                      className="text-xs font-semibold px-3 py-1.5 rounded-full border hover:opacity-80 disabled:opacity-50 transition-all"
-                                      style={{ borderColor: `${RED}40`, color: RED, background: `${RED}08` }}
-                                    >
-                                      {label}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="flex-1 h-px" style={{ background: `${BLACK}12` }} />
-                                <span className="text-xs" style={{ color: GRAY }}>or write your own</span>
-                                <div className="flex-1 h-px" style={{ background: `${BLACK}12` }} />
-                              </div>
-                              <div className="flex gap-2">
-                                <textarea
-                                  rows={2}
-                                  value={refinePrompt[item.id] ?? ""}
-                                  onChange={(e) => setRefinePrompt((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                                  placeholder="e.g. Mention the camping trip, add something about her garden, skip the age reference…"
-                                  disabled={isRefining}
-                                  className="flex-1 border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none disabled:opacity-50"
-                                  style={{ borderColor: `${BLACK}18` }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter" && !e.shiftKey) {
-                                      e.preventDefault();
-                                      handleRefine(refinePrompt[item.id] ?? "");
-                                    }
-                                  }}
-                                />
-                                <button
-                                  onClick={() => handleRefine(refinePrompt[item.id] ?? "")}
-                                  disabled={isRefining || !(refinePrompt[item.id] ?? "").trim()}
-                                  className="self-end flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-40 transition-all hover:opacity-90"
-                                  style={{ background: RED }}
-                                >
-                                  {isRefining ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                                  Rewrite
-                                </button>
-                              </div>
-                              <p className="text-xs" style={{ color: GRAY }}>
-                                Hit "Rewrite" as many times as you want — when it looks right, click "Looks great — send it!" above.
-                              </p>
-                            </div>
-                          )}
+                      {currentMessage && (
+                        <div style={{
+                          background: LIGHT, borderRadius: 10, padding: "14px 16px",
+                          fontSize: "0.88rem", color: "#1e293b", lineHeight: 1.6,
+                          fontStyle: "italic",
+                          whiteSpace: "pre-wrap",
+                        }}>
+                          {currentMessage}
                         </div>
                       )}
+                      <div style={{ marginTop: 12 }}>
+                        <button
+                          onClick={() => setRefineOpen(refineOpen === item.id ? null : item.id)}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            background: "none", border: "none", cursor: "pointer",
+                            fontSize: "0.78rem", fontWeight: 600, color: "#64748b",
+                            padding: 0,
+                          }}
+                        >
+                          <Sparkles size={13} style={{ color: RED }} />
+                          Want to tweak it with AI?
+                          {isRefineOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        </button>
+                        {isRefineOpen && (
+                          <div style={{ marginTop: 12, display: "flex", flexDirection: "column" as const, gap: 10 }}>
+                            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
+                              {QUICK_PROMPTS.map(({ label, prompt }) => (
+                                <button
+                                  key={label}
+                                  onClick={() => handleRefine(prompt)}
+                                  disabled={isRefining}
+                                  style={{
+                                    fontSize: "0.75rem", fontWeight: 600, padding: "5px 12px",
+                                    borderRadius: 20, border: `1px solid ${RED}40`, color: RED,
+                                    background: `${RED}08`, cursor: "pointer",
+                                  }}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <textarea
+                                rows={2}
+                                value={refinePrompt[item.id] ?? ""}
+                                onChange={(e) => setRefinePrompt((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                                placeholder="e.g. Mention the camping trip, add her garden, skip the age reference…"
+                                disabled={isRefining}
+                                style={{
+                                  flex: 1, border: "1px solid #e2e8f0", borderRadius: 10,
+                                  padding: "8px 12px", fontSize: "0.82rem", resize: "none" as const,
+                                  outline: "none", fontFamily: "'Inter', sans-serif",
+                                }}
+                              />
+                              <button
+                                onClick={() => handleRefine(refinePrompt[item.id] ?? "")}
+                                disabled={isRefining || !(refinePrompt[item.id] ?? "").trim()}
+                                style={{
+                                  alignSelf: "flex-end", display: "flex", alignItems: "center", gap: 6,
+                                  background: RED, color: WHITE, border: "none", borderRadius: 10,
+                                  padding: "8px 16px", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer",
+                                }}
+                              >
+                                {isRefining ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                                Rewrite
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -665,478 +632,255 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── Briefings banner ──────────────────────────────────────────── */}
+          {/* Briefings banner */}
           {briefingsNeeded.length > 0 && (
-            <div
-              className="mb-6 rounded-2xl border-2 p-5"
-              style={{ background: `${RED}08`, borderColor: `${RED}30` }}
-            >
-              <div className="flex items-start gap-3">
-                <ClipboardList size={20} className="mt-0.5 flex-shrink-0" style={{ color: RED }} />
-                <div className="flex-1">
-                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK }}>
-                    {briefingsNeeded.length === 1 ? "1 event briefing coming up" : `${briefingsNeeded.length} event briefings coming up`}
-                  </div>
-                  <p className="text-xs mt-0.5 mb-3" style={{ color: GRAY }}>
-                    Answer a few questions so we write the best possible card.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {briefingsNeeded.slice(0, 4).map((b) => (
-                      <Link key={`${b.recipient.id}-${b.event}`} href={`/briefings/${b.recipient.id}/${encodeURIComponent(b.event)}`}>
-                        <button
-                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full hover:opacity-80 transition-all"
-                          style={{ background: RED, color: "#fff" }}
-                          data-testid={`btn-briefing-${b.event.toLowerCase().replace(/\s+/g, "-")}`}
-                        >
-                          {b.event} · {b.recipient.name}
-                          <span style={{ opacity: 0.65 }}>{b.daysAway}d away</span>
-                        </button>
-                      </Link>
-                    ))}
-                  </div>
+            <div style={{
+              marginTop: 20, background: WHITE,
+              border: `1.5px solid ${RED}30`, borderRadius: 14, padding: "16px 20px",
+              display: "flex", alignItems: "flex-start", gap: 12,
+            }}>
+              <ClipboardList size={18} style={{ color: RED, marginTop: 2, flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#1e293b" }}>
+                  {briefingsNeeded.length === 1 ? "1 event briefing coming up" : `${briefingsNeeded.length} event briefings coming up`}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Stat cards ────────────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <StatCard
-              label="Upcoming cards"
-              value={upcomingEventCount}
-              icon={CalendarDays}
-              accentColor={BLACK}
-              sub={upcomingEventCount > 0 ? "in next 90 days" : undefined}
-              href={upcomingEventCount > 0 ? "#upcoming-cards" : undefined}
-            />
-            <StatCard label="Recipients covered"  value={recipients.length}     icon={Users}        accentColor={RED} />
-            <StatCard
-              label="Disasters avoided"
-              value={disastersAvoided}
-              icon={ShieldCheck}
-              accentColor="#22c55e"
-              sub={disastersAvoided > 0 ? "events on autopilot" : undefined}
-            />
-            <StatCard
-              label="Awaiting approval"
-              value={awaitingApproval.length + pendingApprovals.length}
-              icon={Clock}
-              accentColor={(awaitingApproval.length + pendingApprovals.length) > 0 ? RED : GRAY}
-              href={(awaitingApproval.length + pendingApprovals.length) > 0 ? "#approvals" : undefined}
-              sub={(awaitingApproval.length + pendingApprovals.length) > 0 ? "tap to review" : undefined}
-            />
-          </div>
-
-          {/* ── Upcoming Cards Section ────────────────────────────────────── */}
-          {allUpcomingEvents.length > 0 && (
-            <div id="upcoming-cards" className="mb-8">
-              <div className="flex items-center justify-between mb-1">
-                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.05em", color: BLACK }}>
-                  Upcoming Cards
-                </h2>
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: `${BLACK}10`, color: GRAY }}>
-                  Next 90 days
-                </span>
-              </div>
-              <p className="text-sm mb-4" style={{ color: GRAY }}>
-                Answer a couple of quick questions now so we can write the most personal card — or skip it and we'll email you when it gets close.
-              </p>
-              <div className="space-y-3">
-                {allUpcomingEvents.map((ev) => (
-                  <div
-                    key={`${ev.recipient.id}-${ev.event}`}
-                    className="rounded-2xl p-4 flex items-center justify-between gap-4"
-                    style={{
-                      background: "#fff",
-                      border: `1.5px solid ${ev.briefingDone ? "#22c55e30" : `${BLACK}12`}`,
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold"
-                        style={{ background: ev.briefingDone ? "#22c55e18" : `${RED}12`, color: ev.briefingDone ? "#16a34a" : RED }}
-                      >
-                        {ev.daysAway}d
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-semibold truncate" style={{ fontSize: "0.9rem", color: BLACK }}>
-                          {ev.event}
-                          <span className="font-normal ml-1" style={{ color: GRAY }}>for {ev.recipient.name}</span>
-                        </div>
-                        <div className="text-xs mt-0.5 flex items-center gap-2" style={{ color: GRAY }}>
-                          <span>{new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                          {ev.briefingDone && (
-                            <span className="font-semibold" style={{ color: "#16a34a" }}>✓ Briefing done</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
-                        <button
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-80 whitespace-nowrap"
-                          style={{
-                            background: ev.briefingDone ? `${BLACK}08` : RED,
-                            color: ev.briefingDone ? GRAY : "#fff",
-                            border: ev.briefingDone ? `1px solid ${BLACK}15` : "none",
-                          }}
-                        >
-                          {ev.briefingDone ? "Update answers" : "Answer now"}
-                        </button>
-                      </Link>
-                      {!ev.briefingDone && (
-                        <span className="text-xs" style={{ color: `${GRAY}99` }}>
-                          or we'll email you {ev.daysAway <= 14 ? "soon" : "when it's close"}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── Main grid ─────────────────────────────────────────────────── */}
-          <div className="grid md:grid-cols-3 gap-6">
-
-            {/* Left column */}
-            <div className="md:col-span-2">
-
-              {awaitingApproval.length > 0 && (
-                <div className="mb-6 rounded-2xl p-5 flex items-start gap-4" style={{ background: `${RED}08`, border: `1.5px solid ${RED}30` }}>
-                  <CheckCircle2 size={22} className="mt-0.5 flex-shrink-0" style={{ color: RED }} />
-                  <div>
-                    <div style={{ fontWeight: 700, color: BLACK }}>
-                      {awaitingApproval.length === 1 ? "1 card" : `${awaitingApproval.length} cards`} ready for review
-                    </div>
-                    <p className="text-sm mt-0.5" style={{ color: GRAY }}>We wrote 3 versions. Pick the one that sounds like you.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Cards section */}
-              <div className="flex items-center justify-between mb-4">
-                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.05em", color: BLACK }}>Your Cards</h2>
-              </div>
-
-              {upcoming.length === 0 ? (
-                <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-                  <div className="w-full flex items-center justify-center py-8" style={{ background: BEIGE }}>
-                    <IllustrationPlaceholder size="lg" />
-                  </div>
-                  <div className="px-8 pb-8 pt-5 text-center">
-                    <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 4 }}>
-                      {recipients.length === 0 ? "Autopilot needs a target." : "Nothing scheduled yet — we'll get to work."}
-                    </p>
-                    <p className="text-sm mb-5" style={{ color: GRAY }}>
-                      {recipients.length === 0
-                        ? "Add your first recipient before you're standing in CVS at 9:47 PM pretending you planned this."
-                        : "Cards will appear here as occasions approach."}
-                    </p>
-                    {recipients.length === 0 && (
-                      <Link href="/recipients/new">
-                        <button
-                          className="text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all"
-                          style={{ background: RED }}
-                          data-testid="link-add-recipient-empty"
-                        >
-                          Add first recipient
-                        </button>
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {upcoming.map((card) => (
-                    <div
-                      key={card.id}
-                      className="rounded-2xl p-5 flex items-center justify-between transition-all hover:-translate-y-0.5"
-                      style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}
-                      data-testid={`card-order-${card.id}`}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 600, color: BLACK }}>{card.holiday} card for {card.recipientName}</div>
-                        <div className="text-sm mt-0.5" style={{ color: GRAY }}>Due {card.dueDate} · {card.deliveryPreference}</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <StatusBadge status={card.status} />
-                        {card.status === "Ready for approval" && (
-                          <span
-                            className="text-xs font-semibold px-2 py-1 rounded-lg"
-                            style={{ color: RED, background: `${RED}10`, border: `1px solid ${RED}25` }}
-                          >Pick yours →</span>
-                        )}
-                      </div>
-                    </div>
+                <p style={{ fontSize: "0.75rem", color: GRAY, margin: "3px 0 10px" }}>
+                  Answer a few quick questions so we write the most personal card possible.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
+                  {briefingsNeeded.slice(0, 4).map((b) => (
+                    <Link key={`${b.recipient.id}-${b.event}`} href={`/briefings/${b.recipient.id}/${encodeURIComponent(b.event)}`}>
+                      <button style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px",
+                        borderRadius: 20, background: RED, color: WHITE, border: "none", cursor: "pointer",
+                      }}>
+                        {b.event} · {b.recipient.name}
+                        <span style={{ opacity: 0.7 }}>{b.daysAway}d</span>
+                      </button>
+                    </Link>
                   ))}
                 </div>
-              )}
-
-              {/* Recipients section */}
-              <div className="mt-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.05em", color: BLACK }}>Recipients</h2>
-                  <Link href="/recipients/new">
-                    <button
-                      className="flex items-center gap-1.5 text-sm font-semibold hover:underline transition-all"
-                      style={{ color: RED }}
-                      data-testid="link-add-recipient"
-                    >
-                      <Plus size={14} /> Add recipient
-                    </button>
-                  </Link>
-                </div>
-
-                {recipients.length === 0 ? (
-                  <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-                    <div className="w-full flex items-center justify-center py-6" style={{ background: BEIGE }}>
-                      <IllustrationPlaceholder size="md" />
-                    </div>
-                    <div className="px-6 pb-6 pt-4 text-center">
-                      <p style={{ fontWeight: 600, color: BLACK }}>No recipients yet.</p>
-                      <p className="text-sm mt-1" style={{ color: GRAY }}>That is how disasters begin.</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {recipients.map((r) => {
-                      const childCount = r.children?.length ?? 0;
-                      const yearsMarried = r.marriageDate ? getAge(r.marriageDate) : null;
-                      return (
-                        <Link key={r.id} href={`/recipients/${r.id}`} data-testid={`card-recipient-${r.id}`}>
-                          <div
-                            className="rounded-2xl p-5 hover:-translate-y-0.5 transition-all cursor-pointer"
-                            style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}
-                          >
-                            <div className="flex items-center gap-3 mb-2">
-                              <div
-                                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                                style={{ background: RED, fontFamily: "'Bebas Neue', cursive", fontSize: "1rem" }}
-                              >
-                                {r.name.charAt(0)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div style={{ fontWeight: 600, color: BLACK }} className="truncate">{r.name}</div>
-                                <div className="text-xs" style={{ color: GRAY }}>
-                                  {r.relationship}
-                                  {yearsMarried !== null && yearsMarried > 0 && ` · ${yearsMarried} yrs`}
-                                  {childCount > 0 && ` · ${childCount} kid${childCount !== 1 ? "s" : ""}`}
-                                </div>
-                              </div>
-                              {r.previewDays && (
-                                <Zap size={14} style={{ color: RED, flexShrink: 0 }} />
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {(r.selectedEvents ?? []).slice(0, 4).map((e) => (
-                                <span
-                                  key={e}
-                                  className="text-xs px-2 py-0.5 rounded-full"
-                                  style={{ background: `${RED}10`, color: RED, fontWeight: 600 }}
-                                >
-                                  {e}
-                                </span>
-                              ))}
-                              {(r.selectedEvents ?? []).length > 4 && (
-                                <span
-                                  className="text-xs px-2 py-0.5 rounded-full"
-                                  style={{ background: `${BLACK}08`, color: GRAY }}
-                                >
-                                  +{(r.selectedEvents ?? []).length - 4} more
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
             </div>
+          )}
+        </div>
 
-            {/* Right column */}
-            <div className="space-y-4">
+        {/* ── Tab content ────────────────────────────────────────────────────── */}
+        <div style={{ flex: 1, padding: "24px 28px 40px" }}>
 
-              {/* Calendar */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: BLACK }}>
-                    {MONTHS[calMonth.getMonth()]} {calMonth.getFullYear()}
-                  </h2>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-70"
-                      style={{ background: `${BLACK}08` }}
-                    >
-                      <ChevronLeft size={14} style={{ color: BLACK }} />
-                    </button>
-                    <button
-                      onClick={() => setCalMonth(new Date(today.getFullYear(), today.getMonth(), 1))}
-                      className="px-2 h-7 rounded-lg text-xs font-semibold transition-all hover:opacity-70"
-                      style={{ background: `${BLACK}08`, color: GRAY }}
-                    >
-                      Today
-                    </button>
-                    <button
-                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-70"
-                      style={{ background: `${BLACK}08` }}
-                    >
-                      <ChevronRight size={14} style={{ color: BLACK }} />
-                    </button>
-                  </div>
+          {/* ─── YOUR PEOPLE ─────────────────────────────────────────────────── */}
+          {activeTab === "people" && (
+            <div>
+              {/* Toolbar */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                <div style={{ flex: 1, position: "relative" as const }}>
+                  <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: GRAY }} />
+                  <input
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search by name or relationship…"
+                    style={{
+                      width: "100%", paddingLeft: 36, paddingRight: 14, paddingTop: 9, paddingBottom: 9,
+                      border: "1.5px solid #e2e8f0", borderRadius: 10, fontSize: "0.85rem",
+                      fontFamily: "'Inter', sans-serif", outline: "none", background: WHITE,
+                      color: "#1e293b",
+                      boxSizing: "border-box" as const,
+                    }}
+                  />
                 </div>
-                <div className="rounded-2xl p-5" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-                  <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                    {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d) => (
-                      <div key={d} className="text-xs font-semibold" style={{ color: GRAY }}>{d}</div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7 gap-1" style={{ overflow: "visible" }}>
-                    {calendarDays.map((d, i) => {
-                      const iso = localDateStr(d);
-                      const events = eventsByDate.get(iso) ?? [];
-                      const hasEvent = events.length > 0;
-                      const isToday = iso === localDateStr(today);
-                      const isCalMonth = d.getMonth() === calMonth.getMonth();
-                      const isHovered = hoveredDay === iso;
-                      // position popover above for last two rows, below otherwise
-                      const row = Math.floor(i / 7);
-                      const popoverTop = row >= 3 ? undefined : "100%";
-                      const popoverBottom = row >= 3 ? "100%" : undefined;
-                      return (
-                        <div
-                          key={i}
-                          className="aspect-square flex items-center justify-center rounded-lg text-xs relative cursor-default"
-                          style={{
-                            background: isToday ? RED : hasEvent && isCalMonth ? `${RED}12` : "transparent",
-                            color: isToday ? "#fff" : isCalMonth ? BLACK : `${BLACK}35`,
-                            fontWeight: isToday || (hasEvent && isCalMonth) ? 700 : undefined,
-                            border: hasEvent && isCalMonth && !isToday ? `1.5px solid ${RED}40` : undefined,
-                            cursor: hasEvent && isCalMonth ? "pointer" : "default",
-                            zIndex: isHovered ? 10 : undefined,
-                          }}
-                          data-testid={`calendar-day-${iso}`}
-                          onMouseEnter={() => hasEvent && isCalMonth && setHoveredDay(iso)}
-                          onMouseLeave={() => setHoveredDay(null)}
-                        >
-                          {d.getDate()}
-                          {hasEvent && isCalMonth && !isToday && (
-                            <span
-                              className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                              style={{ background: RED }}
-                            />
-                          )}
-
-                          {/* Hover popover */}
-                          {isHovered && hasEvent && isCalMonth && (
-                            <div
-                              className="absolute left-1/2 -translate-x-1/2"
-                              style={{
-                                top: popoverTop,
-                                bottom: popoverBottom,
-                                marginTop: popoverTop ? 6 : undefined,
-                                marginBottom: popoverBottom ? 6 : undefined,
-                                zIndex: 50,
-                                background: "#fff",
-                                border: `1.5px solid ${BLACK}15`,
-                                borderRadius: 10,
-                                boxShadow: "0 8px 24px rgba(0,0,0,0.13)",
-                                minWidth: 160,
-                                maxWidth: 220,
-                                padding: "10px 12px",
-                                pointerEvents: "auto",
-                              }}
-                              onMouseEnter={() => setHoveredDay(iso)}
-                              onMouseLeave={() => setHoveredDay(null)}
-                            >
-                              <div style={{ fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.07em", color: GRAY, marginBottom: 6 }}>
-                                {new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase()}
-                              </div>
-                              {events.map((ev, ei) => (
-                                <Link
-                                  key={ei}
-                                  href={ev.recipientId ? `/recipients/${ev.recipientId}` : "#"}
-                                  style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none", padding: "4px 0", borderBottom: ei < events.length - 1 ? `1px solid ${BLACK}08` : undefined }}
-                                >
-                                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: RED, flexShrink: 0 }} />
-                                  <span style={{ fontSize: "0.75rem", color: BLACK, fontWeight: 600, lineHeight: 1.3 }}>{ev.label}</span>
-                                  <span style={{ marginLeft: "auto", fontSize: "0.65rem", color: RED, fontWeight: 700, whiteSpace: "nowrap" }}>Edit →</span>
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="mt-4 pt-4 border-t flex items-center gap-2 text-xs" style={{ borderColor: `${BLACK}10`, color: GRAY }}>
-                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RED }} />
-                    Hover an occasion to view &amp; edit
-                  </div>
-                </div>
-              </div>
-
-              {/* Risk Meter */}
-              <RiskMeter level={riskLevel} />
-
-              {/* Days since disaster */}
-              <DisasterCounter />
-
-              {/* Plan status */}
-              <div className="rounded-2xl p-5" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-                <div className="flex items-center justify-between mb-3">
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.05em", color: BLACK }}>Your Plan</div>
-                  <span className="text-xs font-bold px-2 py-1 rounded-full text-white" style={{ background: BLACK }}>BASIC</span>
-                </div>
-                <p className="text-xs mb-3" style={{ color: GRAY }}>
-                  Up to 6 cards/year · {recipients.length} recipient{recipients.length !== 1 ? "s" : ""} active
-                </p>
-                <Link href="/signup">
+                <Link href="/recipients/new">
                   <button
-                    className="block w-full text-center text-xs font-bold py-2 rounded-xl hover:opacity-90 transition-all text-white"
-                    style={{ background: RED }}
+                    data-testid="link-add-recipient"
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: RED, color: WHITE, border: "none", borderRadius: 10,
+                      padding: "9px 18px", fontFamily: "'Bebas Neue', cursive",
+                      fontSize: "0.9rem", letterSpacing: "0.1em", cursor: "pointer",
+                      whiteSpace: "nowrap" as const, flexShrink: 0,
+                    }}
                   >
-                    Upgrade Plan
+                    <Plus size={14} />
+                    Add Person
                   </button>
                 </Link>
               </div>
 
-              {/* Autopilot summary */}
-              <div className="rounded-2xl p-5" style={{ background: BLACK }}>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.05em", color: "#fff", marginBottom: 12 }}>Autopilot Summary</div>
-                <div className="space-y-2 text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  <div className="flex justify-between">
-                    <span>Recipients</span>
-                    <span className="font-bold" style={{ color: "#fff" }}>{recipients.length}</span>
+              {/* Cards grid */}
+              {filteredRecipients.length === 0 ? (
+                <div style={{
+                  background: WHITE, border: "1.5px solid #e2e8f0", borderRadius: 16,
+                  padding: "60px 40px", textAlign: "center" as const,
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+                }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: `${RED}12`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                    <Users size={26} style={{ color: RED }} />
                   </div>
-                  <div className="flex justify-between">
-                    <span>Events covered</span>
-                    <span className="font-bold" style={{ color: "#fff" }}>{disastersAvoided}</span>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.04em", color: "#1e293b", marginBottom: 8 }}>
+                    {search ? "No matches found." : "Autopilot needs a target."}
                   </div>
-                  <div className="flex justify-between">
-                    <span>Briefings needed</span>
-                    <span className="font-bold" style={{ color: briefingsNeeded.length > 0 ? RED : "rgba(255,255,255,0.5)" }}>
-                      {briefingsNeeded.length}
-                    </span>
-                  </div>
-                  {upcomingBriefings.filter((b) => b.briefingDoneThisYear).length > 0 && (
-                    <div className="flex justify-between">
-                      <span>Briefings done</span>
-                      <span className="font-bold text-green-400">
-                        {upcomingBriefings.filter((b) => b.briefingDoneThisYear).length}
-                      </span>
-                    </div>
+                  <p style={{ fontSize: "0.85rem", color: GRAY, marginBottom: 20, maxWidth: 360, margin: "0 auto 20px" }}>
+                    {search
+                      ? "Try a different name or clear your search."
+                      : "Add your first person before you're standing in CVS at 9:47 PM pretending you planned this."}
+                  </p>
+                  {!search && (
+                    <Link href="/recipients/new">
+                      <button
+                        data-testid="link-add-recipient-empty"
+                        style={{
+                          background: RED, color: WHITE, border: "none", borderRadius: 10,
+                          padding: "10px 24px", fontFamily: "'Bebas Neue', cursive",
+                          fontSize: "1rem", letterSpacing: "0.1em", cursor: "pointer",
+                        }}
+                      >
+                        Add First Person
+                      </button>
+                    </Link>
                   )}
                 </div>
-              </div>
-
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                  {filteredRecipients.map((r) => (
+                    <RecipientCard
+                      key={r.id}
+                      r={r}
+                      upcoming={recipientUpcomingMap.get(r.id) ?? []}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* ─── UPCOMING CARDS ──────────────────────────────────────────────── */}
+          {activeTab === "upcoming" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.05em", color: "#1e293b" }}>
+                  Next 90 Days
+                </div>
+                <span style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", color: GRAY, background: "#e2e8f0", borderRadius: 8, padding: "4px 10px" }}>
+                  {allUpcomingEvents.length} event{allUpcomingEvents.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+              <p style={{ fontSize: "0.82rem", color: GRAY, marginBottom: 20 }}>
+                Answer a couple of quick questions and we'll write the most personal card — or skip it and we'll email you when it's close.
+              </p>
+
+              {/* Cards awaiting approval */}
+              {awaitingApproval.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", color: GRAY, textTransform: "uppercase" as const, marginBottom: 8 }}>
+                    Ready for Review
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                    {awaitingApproval.map((card) => (
+                      <div
+                        key={card.id}
+                        data-testid={`card-order-${card.id}`}
+                        style={{
+                          background: WHITE, border: `1.5px solid ${RED}30`, borderRadius: 14,
+                          padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between",
+                          boxShadow: "0 2px 8px rgba(226,59,46,0.07)",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <CheckCircle2 size={20} style={{ color: RED, flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#1e293b" }}>
+                              {card.holiday} card for {card.recipientName}
+                            </div>
+                            <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 2 }}>
+                              Due {card.dueDate} · {card.deliveryPreference}
+                            </div>
+                          </div>
+                        </div>
+                        <span style={{
+                          fontSize: "0.75rem", fontWeight: 700, color: RED,
+                          background: `${RED}10`, border: `1px solid ${RED}25`,
+                          borderRadius: 8, padding: "5px 12px",
+                        }}>
+                          Pick yours →
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Upcoming event rows */}
+              {allUpcomingEvents.length === 0 ? (
+                <div style={{
+                  background: WHITE, border: "1.5px solid #e2e8f0", borderRadius: 16,
+                  padding: "60px 40px", textAlign: "center" as const,
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+                }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: "#f0fdf4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                    <CalendarDays size={26} style={{ color: "#22c55e" }} />
+                  </div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.04em", color: "#1e293b", marginBottom: 6 }}>
+                    {recipients.length === 0 ? "No people, no cards." : "Nothing in the next 90 days."}
+                  </div>
+                  <p style={{ fontSize: "0.82rem", color: GRAY }}>
+                    {recipients.length === 0
+                      ? "Add someone to watch over first."
+                      : "Cards will appear here as occasions approach."}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", color: GRAY, textTransform: "uppercase" as const, marginBottom: 8 }}>
+                    Upcoming Events
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                    {allUpcomingEvents.map((ev) => (
+                      <div
+                        key={`${ev.recipient.id}-${ev.event}`}
+                        style={{
+                          background: WHITE,
+                          border: `1.5px solid ${ev.briefingDone ? "#22c55e30" : "#e2e8f0"}`,
+                          borderRadius: 14, padding: "14px 18px",
+                          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
+                          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
+                          <UrgencyBadge days={ev.daysAway} />
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#1e293b" }}>
+                              {ev.event}
+                              <span style={{ fontWeight: 400, color: GRAY, marginLeft: 6 }}>for {ev.recipient.name}</span>
+                            </div>
+                            <div style={{ fontSize: "0.72rem", marginTop: 3, display: "flex", alignItems: "center", gap: 8, color: GRAY }}>
+                              <span>
+                                {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </span>
+                              {ev.briefingDone && (
+                                <span style={{ fontWeight: 700, color: "#16a34a" }}>✓ Questions answered</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
+                          <button style={{
+                            flexShrink: 0, fontSize: "0.75rem", fontWeight: 700,
+                            padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer",
+                            background: ev.briefingDone ? "#f1f5f9" : RED,
+                            color: ev.briefingDone ? "#64748b" : WHITE,
+                            fontFamily: "'Inter', sans-serif",
+                          }}>
+                            {ev.briefingDone ? "Update answers" : "Answer now"}
+                          </button>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
     </AppLayout>
