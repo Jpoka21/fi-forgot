@@ -612,20 +612,22 @@ export const PREVIEW_DAYS_OPTIONS: { days: PreviewDays; label: string; descripti
 // ─── Personal settings ───────────────────────────────────────────────────────
 
 export interface PersonalSettings {
-  notifyPhone: string;
   automationMode: "autopilot" | "approve";
   defaultTone: Tone;
   cardSignature: string;
-  previewDays: PreviewDays;
+  cardFont: string;
+  notifyTiming: string[];
   notifyChannel: "email" | "text" | "both";
   notifyEmail: string;
+  notifyPhone: string;
 }
 
 const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   automationMode: "approve",
   defaultTone: "Sweet",
   cardSignature: "",
-  previewDays: 14,
+  cardFont: "",
+  notifyTiming: ["14 days before it mails"],
   notifyChannel: "email",
   notifyEmail: "",
   notifyPhone: "",
