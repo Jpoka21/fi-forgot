@@ -461,13 +461,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ background: B.beige, lineHeight: 0, overflow: "hidden" }}>
-        {/* Desktop: negative margins clip the built-in whitespace in the image */}
+      <section id="how-it-works" style={{ background: B.beige, overflow: "hidden" }}>
+        {/* Desktop */}
         <img
           className="hidden md:block"
           src="/how-it-works.png"
           alt="How it works: We remember, We get to know them, We pick the perfect card, We write it for you, We send it on time, You get all the credit"
-          style={{ width: "100%", height: "auto", marginTop: "-13%", marginBottom: "-13%" }}
+          style={{ width: "100%", height: "auto", display: "block" }}
         />
         {/* Mobile: individual step images stacked, trim top/bottom whitespace per card */}
         <div className="md:hidden flex flex-col" style={{ overflow: "hidden" }}>
