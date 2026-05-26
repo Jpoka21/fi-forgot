@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "wouter";
+import { useAuth } from "@/lib/auth-context";
 import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import {
   B,
@@ -65,6 +66,7 @@ const examples = [
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isLoggedIn } = useAuth();
 
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
@@ -112,14 +114,23 @@ export default function LandingPage() {
 
         {/* Right side: Sign in + CTA */}
         <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
-          <Link href="/login"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", opacity: 0.75, whiteSpace: "nowrap" }}>
-            SIGN IN
-          </Link>
-          <Link href="/signup" data-testid="link-get-started-nav"
-            style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
-            START EARNING<br />BROWNIE POINTS
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard"
+              style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
+              MY DASHBOARD
+            </Link>
+          ) : (
+            <>
+              <Link href="/login"
+                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", opacity: 0.75, whiteSpace: "nowrap" }}>
+                SIGN IN
+              </Link>
+              <Link href="/signup" data-testid="link-get-started-nav"
+                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
+                START EARNING<br />BROWNIE POINTS
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -136,10 +147,17 @@ export default function LandingPage() {
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/signup" data-testid="link-mobile-nav-cta"
-              style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.64rem", letterSpacing: "0.07em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-              START EARNING BROWNIE POINTS
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" data-testid="link-mobile-nav-cta"
+                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.64rem", letterSpacing: "0.07em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+                MY DASHBOARD
+              </Link>
+            ) : (
+              <Link href="/signup" data-testid="link-mobile-nav-cta"
+                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.64rem", letterSpacing: "0.07em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+                START EARNING BROWNIE POINTS
+              </Link>
+            )}
             <button
               onClick={() => setMenuOpen(o => !o)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
