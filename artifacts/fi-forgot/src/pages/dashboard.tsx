@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  getCards, getRecipients, getBriefingsForRecipient,
-  CardOrder, Recipient, getAge,
+  getCards, getRecipients, getBriefingsForRecipient, updateCard,
+  CardOrder, Recipient, getAge, saveCard, deleteCard, saveRecipient,
 } from "@/lib/data";
 import {
   getCustomerPendingApprovals, customerApproveCard,
@@ -12,7 +12,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import {
   Users, CheckCircle2, Plus, ClipboardList, ThumbsUp,
-  Sparkles, Loader2, ChevronDown, ChevronUp, CalendarDays, Search,
+  Sparkles, Loader2, ChevronDown, ChevronUp, CalendarDays, Search, Clock,
 } from "lucide-react";
 
 /* ── Brand colours – personal palette ───────────────────────────────────── */
@@ -364,6 +364,11 @@ export default function DashboardPage() {
   const [refineOpen, setRefineOpen]                 = useState<string | null>(null);
   const [activeTab, setActiveTab]                   = useState<"people" | "upcoming">("people");
   const [search, setSearch]                         = useState("");
+  const [generatingFor, setGeneratingFor]           = useState<string | null>(null);
+  const [approvingId, setApprovingId]               = useState<string | null>(null);
+  const [editedMessages, setEditedMessages]         = useState<Record<string, string>>({});
+  const [editActionId, setEditActionId]             = useState<string | null>(null);
+  const [timingPickerOpen, setTimingPickerOpen]     = useState<string | null>(null);
 
   const { user, logout } = useAuth();
   const [, setLocation]  = useLocation();
@@ -445,10 +450,95 @@ export default function DashboardPage() {
     { label: "More personal",  prompt: "Make it feel more personal and specific." },
   ];
 
+  const upcomingWithCardKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const c of cards) {
+      if (c.status !== "Needs profile") keys.add(`${c.recipientId}:::${c.holiday}`);
+    }
+    return keys;
+  }, [cards]);
+
+  const approvedPersonalCards = useMemo(() => cards.filter(c => c.status === "Approved"), [cards]);
+
   const TABS = [
     { key: "people"   as const, label: "Your People",    icon: Users,        count: recipients.length },
     { key: "upcoming" as const, label: "Upcoming Cards", icon: CalendarDays, count: allUpcomingEvents.length },
   ];
+
+  async function generateEarly(ev: { recipient: Recipient; event: string; daysAway: number; dateStr: string; briefingDone: boolean }) {
+    const key = `${ev.recipient.id}:::${ev.event}`;
+    setGeneratingFor(key);
+    try {
+      const res = await fetch("/api/generate-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientName: ev.recipient.name,
+          relationship:  ev.recipient.relationship,
+          holiday:       ev.event,
+          tone:          ev.recipient.tonePreference,
+          personalityNotes: ev.recipient.personalityNotes,
+          thingsToAvoid:    ev.recipient.thingsToAvoid,
+          favoriteMemories: ev.recipient.favoriteMemories,
+          insideJokes:      ev.recipient.insideJokes,
+        }),
+      });
+      const data = await res.json() as { cards?: { tone: string; text: string }[] };
+      const generated = data.cards ?? [];
+      if (generated.length > 0) {
+        const match = generated.find(c => c.tone === ev.recipient.tonePreference) ?? generated[0];
+        const newCard: CardOrder = {
+          id: `personal-${Date.now()}`,
+          recipientId: ev.recipient.id,
+          recipientName: ev.recipient.name,
+          holiday: ev.event,
+          dueDate: ev.dateStr,
+          status: "Ready for approval",
+          approvedMessage: match.text,
+          deliveryPreference: ev.recipient.deliveryPreference,
+        };
+        saveCard(newCard);
+        setCards(getCards());
+      }
+    } catch { /* non-blocking */ }
+    finally { setGeneratingFor(null); }
+  }
+
+  function approvePersonalCard(card: CardOrder) {
+    const message = editedMessages[card.id] ?? card.approvedMessage ?? "";
+    updateCard({ ...card, status: "Approved", approvedMessage: message });
+    setCards(getCards());
+    setApprovingId(null);
+  }
+
+  function rejectPersonalCard(card: CardOrder) {
+    deleteCard(card.id);
+    setCards(getCards());
+  }
+
+  async function quickEditPersonalCard(card: CardOrder, instruction: string, label: string) {
+    const currentText = editedMessages[card.id] ?? card.approvedMessage ?? "";
+    const actionKey = `${card.id}-${label}`;
+    setEditActionId(actionKey);
+    try {
+      const res = await fetch("/api/edit-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipientName: card.recipientName, holiday: card.holiday, currentCardText: currentText, instruction }),
+      });
+      if (res.ok) {
+        const data = await res.json() as { card?: string };
+        if (data.card) setEditedMessages(prev => ({ ...prev, [card.id]: data.card! }));
+      }
+    } catch { /* non-blocking */ }
+    finally { setEditActionId(null); }
+  }
+
+  function updateApprovalTiming(recipientId: string, days: 14 | 21 | 30) {
+    const r = recipients.find(rec => rec.id === recipientId);
+    if (r) { saveRecipient({ ...r, previewDays: days }); setRecipients(getRecipients()); }
+    setTimingPickerOpen(null);
+  }
 
   /* ── Render ─────────────────────────────────────────────────────────────── */
   return (
@@ -866,53 +956,324 @@ export default function DashboardPage() {
 
         {/* ─── UPCOMING CARDS ──────────────────────────────────────────────── */}
         {activeTab === "upcoming" && (
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.05em", color: BLACK }}>
-                Next 90 Days
-              </div>
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", color: GRAY, background: `${BLACK}10`, borderRadius: 8, padding: "4px 10px" }}>
-                {allUpcomingEvents.length} event{allUpcomingEvents.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-            <p style={{ fontSize: "0.82rem", color: GRAY, marginBottom: 20 }}>
-              Answer a couple of quick questions and we'll write the most personal card — or skip it and we'll email you when it's close.
-            </p>
+          <div style={{ display: "flex", flexDirection: "column" as const, gap: 32 }}>
 
-            {/* Cards awaiting approval */}
+            {/* ── Section: Awaiting Your Approval ─────────────────────────── */}
             {awaitingApproval.length > 0 && (
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", color: GRAY, textTransform: "uppercase" as const, marginBottom: 8 }}>
-                  Ready for Review
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: RED, display: "inline-block", flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: RED }}>
+                    AWAITING YOUR APPROVAL
+                  </span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
+                  {awaitingApproval.map((card) => {
+                    const text = editedMessages[card.id] ?? card.approvedMessage ?? "";
+                    const isApproving = approvingId === card.id;
+                    return (
+                      <div key={card.id} data-testid={`card-order-${card.id}`} style={{
+                        background: WHITE, border: `1.5px solid ${RED}30`,
+                        borderRadius: 14, overflow: "hidden" as const,
+                        boxShadow: "0 2px 10px rgba(226,59,46,0.08)",
+                      }}>
+                        {/* Card header */}
+                        <div style={{
+                          padding: "14px 18px", borderBottom: `1px solid ${BLACK}08`,
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          background: `${RED}05`,
+                        }}>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK }}>
+                              {card.holiday} card for <span style={{ color: RED }}>{card.recipientName}</span>
+                            </div>
+                            <div style={{ fontSize: "0.7rem", color: GRAY, marginTop: 2 }}>
+                              {card.dueDate
+                                ? `Occasion ${new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })} · `
+                                : ""}
+                              {card.deliveryPreference}
+                            </div>
+                          </div>
+                          <span style={{
+                            fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.12em",
+                            background: `${RED}15`, color: RED, border: `1px solid ${RED}35`,
+                            borderRadius: 6, padding: "4px 10px",
+                          }}>
+                            READY TO REVIEW
+                          </span>
+                        </div>
+
+                        {/* Message textarea */}
+                        <div style={{ padding: "16px 18px" }}>
+                          <textarea
+                            value={text}
+                            onChange={e => setEditedMessages(prev => ({ ...prev, [card.id]: e.target.value }))}
+                            style={{
+                              width: "100%", minHeight: 140,
+                              border: `1.5px solid ${BLACK}14`, borderRadius: 10,
+                              padding: "12px 14px", fontSize: "0.9rem",
+                              fontFamily: "'Inter', sans-serif", lineHeight: 1.7, color: BLACK,
+                              background: BEIGE, resize: "vertical" as const,
+                              boxSizing: "border-box" as const, outline: "none",
+                            }}
+                          />
+
+                          {/* Quick AI edits */}
+                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 10 }}>
+                            <span style={{ fontSize: "0.65rem", fontWeight: 700, color: GRAY, alignSelf: "center", marginRight: 2 }}>AI edits:</span>
+                            {([
+                              { label: "Shorter",    instruction: "Make it significantly shorter and more punchy. Keep only the most impactful lines." },
+                              { label: "Funnier",    instruction: "Add genuine humor. Make it funnier without losing the heart." },
+                              { label: "More heart", instruction: "Make it warmer and more emotionally resonant." },
+                              { label: "Rewrite",    instruction: "Completely rewrite in a fresh way for the same person and occasion." },
+                            ] as const).map(({ label, instruction }) => {
+                              const actionKey = `${card.id}-${label}`;
+                              const isLoading = editActionId === actionKey;
+                              return (
+                                <button key={label}
+                                  onClick={() => quickEditPersonalCard(card, instruction, label)}
+                                  disabled={!!editActionId}
+                                  style={{
+                                    fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px", borderRadius: 8,
+                                    border: `1px solid ${BLACK}18`,
+                                    background: isLoading ? `${BLACK}06` : WHITE,
+                                    color: isLoading ? GRAY : BLACK,
+                                    cursor: editActionId ? "default" : "pointer",
+                                    display: "flex", alignItems: "center", gap: 5,
+                                    fontFamily: "'Inter', sans-serif",
+                                  }}>
+                                  {isLoading
+                                    ? <Loader2 size={11} className="animate-spin" />
+                                    : <Sparkles size={11} style={{ color: RED }} />}
+                                  {label}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Approve / Reject */}
+                          <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end" }}>
+                            <button
+                              onClick={() => rejectPersonalCard(card)}
+                              style={{
+                                fontSize: "0.78rem", fontWeight: 600, padding: "8px 16px",
+                                borderRadius: 8, border: `1.5px solid ${BLACK}18`,
+                                background: WHITE, color: GRAY, cursor: "pointer",
+                                fontFamily: "'Inter', sans-serif",
+                              }}>
+                              Reject &amp; regenerate
+                            </button>
+                            <button
+                              onClick={() => { setApprovingId(card.id); approvePersonalCard(card); }}
+                              disabled={isApproving}
+                              style={{
+                                fontSize: "0.78rem", fontWeight: 700, padding: "8px 22px",
+                                borderRadius: 8, border: "none",
+                                background: RED, color: WHITE,
+                                cursor: isApproving ? "default" : "pointer",
+                                fontFamily: "'Inter', sans-serif",
+                                display: "flex", alignItems: "center", gap: 6,
+                              }}>
+                              {isApproving
+                                ? <Loader2 size={13} className="animate-spin" />
+                                : <ThumbsUp size={13} />}
+                              Approve &amp; Send
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── Section: Coming Up ──────────────────────────────────────── */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: BLACK }}>
+                  COMING UP — NEXT 90 DAYS
+                </span>
+                <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.08em", color: GRAY, background: `${BLACK}09`, borderRadius: 8, padding: "4px 10px" }}>
+                  {allUpcomingEvents.length} event{allUpcomingEvents.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {allUpcomingEvents.length === 0 ? (
+                <div style={{
+                  background: WHITE, border: `1.5px solid ${BLACK}12`, borderRadius: 16,
+                  padding: "60px 40px", textAlign: "center" as const,
+                }}>
+                  <div style={{
+                    width: 56, height: 56, borderRadius: 16, background: "#f0fdf4",
+                    display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px",
+                  }}>
+                    <CalendarDays size={26} style={{ color: "#22c55e" }} />
+                  </div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 6 }}>
+                    {recipients.length === 0 ? "No people, no cards." : "Nothing in the next 90 days."}
+                  </div>
+                  <p style={{ fontSize: "0.82rem", color: GRAY }}>
+                    {recipients.length === 0 ? "Add someone to watch over first." : "Cards will appear here as occasions approach."}
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                  {allUpcomingEvents.map((ev) => {
+                    const genKey = `${ev.recipient.id}:::${ev.event}`;
+                    const isGenerating = generatingFor === genKey;
+                    const hasCard = upcomingWithCardKeys.has(genKey);
+                    const recip = recipients.find(r => r.id === ev.recipient.id);
+                    const previewDays = recip?.previewDays ?? 14;
+                    const timingKey = `${ev.recipient.id}-${ev.event}`;
+                    const isTimingOpen = timingPickerOpen === timingKey;
+
+                    return (
+                      <div key={genKey} style={{
+                        background: WHITE,
+                        border: `1.5px solid ${hasCard ? "#22c55e30" : ev.briefingDone ? `${BLACK}18` : `${BLACK}12`}`,
+                        borderRadius: 14, padding: "14px 18px",
+                        display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" as const,
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                      }}>
+                        <UrgencyBadge days={ev.daysAway} />
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: BLACK }}>
+                            {ev.event}
+                            <span style={{ fontWeight: 400, color: GRAY, marginLeft: 6 }}>for {ev.recipient.name}</span>
+                          </div>
+                          <div style={{ fontSize: "0.72rem", marginTop: 3, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const, color: GRAY }}>
+                            <span>{new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                            {ev.briefingDone && <span style={{ fontWeight: 700, color: "#16a34a" }}>✓ Questions answered</span>}
+                            {hasCard && <span style={{ fontWeight: 700, color: RED }}>↑ Needs approval above</span>}
+                          </div>
+                        </div>
+
+                        {/* Approval timing chip */}
+                        <div style={{ position: "relative" as const, flexShrink: 0 }}>
+                          <button
+                            onClick={() => setTimingPickerOpen(isTimingOpen ? null : timingKey)}
+                            style={{
+                              display: "flex", alignItems: "center", gap: 5,
+                              fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.03em",
+                              padding: "4px 10px", borderRadius: 20,
+                              border: `1px solid ${BLACK}20`, background: `${BLACK}05`,
+                              color: GRAY, cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                            }}>
+                            <Clock size={10} />
+                            {previewDays}d notice
+                            {isTimingOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+                          </button>
+                          {isTimingOpen && (
+                            <div style={{
+                              position: "absolute" as const, top: "calc(100% + 6px)", right: 0,
+                              background: WHITE, borderRadius: 10, padding: 6,
+                              boxShadow: "0 8px 24px rgba(0,0,0,0.13)",
+                              border: `1px solid ${BLACK}12`, zIndex: 100, minWidth: 190,
+                            }}>
+                              {([14, 21, 30] as const).map(d => (
+                                <button key={d}
+                                  onClick={() => updateApprovalTiming(ev.recipient.id, d)}
+                                  style={{
+                                    display: "block", width: "100%", textAlign: "left" as const,
+                                    padding: "8px 12px", borderRadius: 8, border: "none",
+                                    background: previewDays === d ? `${RED}10` : "transparent",
+                                    color: previewDays === d ? RED : BLACK,
+                                    fontWeight: previewDays === d ? 700 : 500,
+                                    fontSize: "0.8rem", cursor: "pointer",
+                                    fontFamily: "'Inter', sans-serif",
+                                  }}>
+                                  {d} days before
+                                  {d === 14 && <span style={{ fontSize: "0.65rem", color: GRAY, marginLeft: 6 }}>recommended</span>}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action buttons */}
+                        {hasCard ? (
+                          <button
+                            onClick={() => setActiveTab("upcoming")}
+                            style={{
+                              fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
+                              borderRadius: 8, border: `1px solid ${RED}30`,
+                              background: `${RED}08`, color: RED, cursor: "pointer",
+                              fontFamily: "'Inter', sans-serif", flexShrink: 0,
+                            }}>
+                            Review ↑
+                          </button>
+                        ) : (
+                          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                            <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
+                              <button style={{
+                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
+                                borderRadius: 8, border: `1px solid ${BLACK}18`,
+                                background: ev.briefingDone ? `${BLACK}06` : `${RED}10`,
+                                color: ev.briefingDone ? GRAY : RED,
+                                cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                              }}>
+                                {ev.briefingDone ? "Update answers" : "Answer now"}
+                              </button>
+                            </Link>
+                            <button
+                              onClick={() => generateEarly(ev)}
+                              disabled={!!generatingFor}
+                              style={{
+                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 14px",
+                                borderRadius: 8, border: "none",
+                                background: isGenerating ? `${BLACK}10` : RED,
+                                color: isGenerating ? GRAY : WHITE,
+                                cursor: isGenerating || !!generatingFor ? "default" : "pointer",
+                                display: "flex", alignItems: "center", gap: 5,
+                                fontFamily: "'Inter', sans-serif",
+                              }}>
+                              {isGenerating
+                                ? <><Loader2 size={11} className="animate-spin" /> Generating…</>
+                                : <><Sparkles size={11} /> Generate Early</>}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ── Section: Approved & Queued ──────────────────────────────── */}
+            {approvedPersonalCards.length > 0 && (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: "#16a34a" }}>
+                    ✓ APPROVED &amp; QUEUED TO MAIL
+                  </span>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                  {awaitingApproval.map((card) => (
-                    <div
-                      key={card.id}
-                      data-testid={`card-order-${card.id}`}
-                      style={{
-                        background: WHITE, border: `1.5px solid ${RED}28`, borderRadius: 14,
-                        padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between",
-                        boxShadow: "0 2px 6px rgba(226,59,46,0.06)",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <CheckCircle2 size={20} style={{ color: RED, flexShrink: 0 }} />
+                  {approvedPersonalCards.map(card => (
+                    <div key={card.id} style={{
+                      background: WHITE, border: "1.5px solid #22c55e28",
+                      borderRadius: 12, padding: "12px 18px",
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <CheckCircle2 size={16} style={{ color: "#16a34a", flexShrink: 0 }} />
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: BLACK }}>
-                            {card.holiday} card for {card.recipientName}
+                          <div style={{ fontWeight: 600, fontSize: "0.88rem", color: BLACK }}>
+                            {card.holiday} · {card.recipientName}
                           </div>
-                          <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 2 }}>
-                            Due {card.dueDate} · {card.deliveryPreference}
+                          <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 1 }}>
+                            {card.deliveryPreference}
                           </div>
                         </div>
                       </div>
                       <span style={{
-                        fontSize: "0.75rem", fontWeight: 700, color: RED,
-                        background: `${RED}10`, border: `1px solid ${RED}22`,
-                        borderRadius: 8, padding: "5px 12px",
+                        fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
+                        background: "#f0fdf4", color: "#16a34a", border: "1px solid #22c55e30",
+                        borderRadius: 6, padding: "3px 10px",
                       }}>
-                        Pick yours →
+                        QUEUED TO MAIL
                       </span>
                     </div>
                   ))}
@@ -920,78 +1281,6 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Upcoming event rows */}
-            {allUpcomingEvents.length === 0 ? (
-              <div style={{
-                background: WHITE, border: `1.5px solid ${BLACK}12`, borderRadius: 16,
-                padding: "60px 40px", textAlign: "center" as const,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-              }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: 16, background: "#f0fdf4",
-                  display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px",
-                }}>
-                  <CalendarDays size={26} style={{ color: "#22c55e" }} />
-                </div>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 6 }}>
-                  {recipients.length === 0 ? "No people, no cards." : "Nothing in the next 90 days."}
-                </div>
-                <p style={{ fontSize: "0.82rem", color: GRAY }}>
-                  {recipients.length === 0
-                    ? "Add someone to watch over first."
-                    : "Cards will appear here as occasions approach."}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", color: GRAY, textTransform: "uppercase" as const, marginBottom: 8 }}>
-                  Upcoming Events
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                  {allUpcomingEvents.map((ev) => (
-                    <div
-                      key={`${ev.recipient.id}-${ev.event}`}
-                      style={{
-                        background: WHITE,
-                        border: `1.5px solid ${ev.briefingDone ? "#22c55e28" : `${BLACK}12`}`,
-                        borderRadius: 14, padding: "14px 18px",
-                        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
-                        <UrgencyBadge days={ev.daysAway} />
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: BLACK }}>
-                            {ev.event}
-                            <span style={{ fontWeight: 400, color: GRAY, marginLeft: 6 }}>for {ev.recipient.name}</span>
-                          </div>
-                          <div style={{ fontSize: "0.72rem", marginTop: 3, display: "flex", alignItems: "center", gap: 8, color: GRAY }}>
-                            <span>
-                              {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                            </span>
-                            {ev.briefingDone && (
-                              <span style={{ fontWeight: 700, color: "#16a34a" }}>✓ Questions answered</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
-                        <button style={{
-                          flexShrink: 0, fontSize: "0.75rem", fontWeight: 700,
-                          padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer",
-                          background: ev.briefingDone ? `${BLACK}08` : RED,
-                          color: ev.briefingDone ? GRAY : WHITE,
-                          fontFamily: "'Inter', sans-serif",
-                        }}>
-                          {ev.briefingDone ? "Update answers" : "Answer now"}
-                        </button>
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

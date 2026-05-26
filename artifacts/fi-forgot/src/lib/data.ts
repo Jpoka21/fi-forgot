@@ -691,6 +691,22 @@ export function updateCard(card: CardOrder): void {
   }
 }
 
+export function saveCard(card: CardOrder): void {
+  const all = loadCards();
+  const idx = all.findIndex((c) => c.id === card.id);
+  if (idx >= 0) {
+    all[idx] = card;
+  } else {
+    all.push(card);
+  }
+  localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(all));
+}
+
+export function deleteCard(id: string): void {
+  const all = loadCards().filter((c) => c.id !== id);
+  localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(all));
+}
+
 export function getBriefings(): EventBriefing[] {
   return loadBriefings();
 }
