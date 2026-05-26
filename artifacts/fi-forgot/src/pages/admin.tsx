@@ -13,10 +13,11 @@ import { AdminAudit } from "./admin/AdminAudit";
 import { AdminBriefings } from "./admin/AdminBriefings";
 import { AdminEvents } from "./admin/AdminEvents";
 import { AdminCardLibrary } from "./admin/AdminCardLibrary";
+import { AdminLeads } from "./admin/AdminLeads";
 import {
   ShieldCheck, LayoutDashboard, Users, UserCheck,
   CalendarDays, CreditCard, MessageSquare, Send, ScrollText,
-  AlertTriangle, ClipboardList, RefreshCw, Trash2, Library,
+  AlertTriangle, ClipboardList, RefreshCw, Trash2, Library, Mail,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -36,7 +37,8 @@ type AdminTab =
   | "queue"
   | "briefings"
   | "audit"
-  | "card-library";
+  | "card-library"
+  | "leads";
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType; description: string }[] = [
   { id: "dashboard",    label: "Dashboard",    icon: LayoutDashboard, description: "Overview and alerts" },
@@ -49,6 +51,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType; description:
   { id: "briefings",    label: "Briefings",    icon: ClipboardList,   description: "Pre-event customer answers" },
   { id: "audit",        label: "Audit Log",    icon: ScrollText,      description: "All admin actions tracked" },
   { id: "card-library", label: "Card Library", icon: Library,         description: "AI card library — generate, manage, and track reusable card designs" },
+  { id: "leads",        label: "Leads",        icon: Mail,            description: "Emails captured from the demo flow" },
 ];
 
 
@@ -146,6 +149,7 @@ export default function AdminPage() {
       case "briefings":    return <AdminBriefings />;
       case "audit":        return <AdminAudit />;
       case "card-library": return <AdminCardLibrary />;
+      case "leads":        return <AdminLeads />;
     }
   }
 

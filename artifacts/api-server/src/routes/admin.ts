@@ -399,8 +399,8 @@ router.get("/admin/card-classifications", (_req, res) => {
 
 import { generateHolidayCards, getActiveHolidayCards } from "../services/custom-card-generator";
 import { db as adminDb } from "@workspace/db";
-import { customHolidayCardsTable } from "@workspace/db";
-import { eq as drizzleEq } from "drizzle-orm";
+import { customHolidayCardsTable, demoLeadsTable } from "@workspace/db";
+import { eq as drizzleEq, desc } from "drizzle-orm";
 
 router.get("/admin/holiday-cards", async (req, res) => {
   try {
@@ -452,6 +452,21 @@ router.delete("/admin/holiday-cards/:id", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "holiday-cards: delete failed");
     res.status(500).json({ error: "Failed to delete card" });
+  }
+});
+
+// ─── Demo leads ───────────────────────────────────────────────────────────────
+
+router.get("/admin/leads", async (req, res) => {
+  try {
+    const leads = await adminDb
+      .select()
+      .from(demoLeadsTable)
+      .orderBy(desc(demoLeadsTable.createdAt));
+    res.json({ leads });
+  } catch (err) {
+    req.log.error({ err }, "admin/leads: fetch failed");
+    res.status(500).json({ error: "Failed to fetch leads" });
   }
 });
 
