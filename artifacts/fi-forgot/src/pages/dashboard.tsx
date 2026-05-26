@@ -382,6 +382,7 @@ export default function DashboardPage() {
   const [editActionId, setEditActionId]             = useState<string | null>(null);
   const [timingPickerOpen, setTimingPickerOpen]     = useState<string | null>(null);
   const [hoveredBriefing, setHoveredBriefing]       = useState<string | null>(null);
+  const [viewingCardId, setViewingCardId]           = useState<string | null>(null);
 
   const { user, logout } = useAuth();
   const [, setLocation]  = useLocation();
@@ -1396,18 +1397,33 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Action buttons */}
-                        {hasCard ? (
-                          <button
-                            onClick={() => setActiveTab("upcoming")}
-                            style={{
-                              fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
-                              borderRadius: 8, border: `1px solid ${RED}30`,
-                              background: `${RED}08`, color: RED, cursor: "pointer",
-                              fontFamily: "'Inter', sans-serif", flexShrink: 0,
-                            }}>
-                            Review ↑
-                          </button>
-                        ) : (
+                        {hasCard ? (() => {
+                          const matchedCard = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
+                          const isApproved = matchedCard?.status === "Approved";
+                          return isApproved ? (
+                            <button
+                              onClick={() => setViewingCardId(matchedCard!.id)}
+                              style={{
+                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
+                                borderRadius: 8, border: "none",
+                                background: "#1d4ed8", color: WHITE, cursor: "pointer",
+                                fontFamily: "'Inter', sans-serif", flexShrink: 0,
+                              }}>
+                              ✔ View Approved Card
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setActiveTab("upcoming")}
+                              style={{
+                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
+                                borderRadius: 8, border: `1px solid ${RED}30`,
+                                background: `${RED}08`, color: RED, cursor: "pointer",
+                                fontFamily: "'Inter', sans-serif", flexShrink: 0,
+                              }}>
+                              Review ↑
+                            </button>
+                          );
+                        })() : (
                           <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                             <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
                               <div style={{ position: "relative", display: "inline-block" }}
@@ -1496,13 +1512,25 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       </div>
-                      <span style={{
-                        fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
-                        background: "#f0fdf4", color: "#16a34a", border: "1px solid #22c55e30",
-                        borderRadius: 6, padding: "3px 10px",
-                      }}>
-                        QUEUED TO MAIL
-                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{
+                          fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
+                          background: "#f0fdf4", color: "#16a34a", border: "1px solid #22c55e30",
+                          borderRadius: 6, padding: "3px 10px",
+                        }}>
+                          QUEUED TO MAIL
+                        </span>
+                        <button
+                          onClick={() => setViewingCardId(card.id)}
+                          style={{
+                            fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px",
+                            borderRadius: 7, border: "none",
+                            background: "#1d4ed8", color: WHITE, cursor: "pointer",
+                            fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap",
+                          }}>
+                          View Card →
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1514,6 +1542,67 @@ export default function DashboardPage() {
 
       </div>
     </div>
+
+      {/* ── Approved Card Viewer Modal ──────────────────────────────────────── */}
+      {viewingCardId && (() => {
+        const card = cards.find(c => c.id === viewingCardId);
+        if (!card) return null;
+        const message = editedMessages[card.id] ?? card.approvedMessage ?? "";
+        const mailDate = card.dueDate
+          ? new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+          : null;
+        return (
+          <div
+            onClick={() => setViewingCardId(null)}
+            style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{ background: WHITE, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "88vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}
+            >
+              {/* Header */}
+              <div style={{ padding: "18px 20px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK, fontFamily: "'Inter', sans-serif" }}>
+                    {card.holiday} · {card.recipientName}
+                  </div>
+                  {mailDate && (
+                    <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 3, fontFamily: "'Inter', sans-serif" }}>
+                      Mailing on {mailDate}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setViewingCardId(null)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "1.1rem", lineHeight: 1, padding: "2px 6px", flexShrink: 0 }}
+                >✕</button>
+              </div>
+
+              {/* Approved banner */}
+              <div style={{ margin: "14px 20px 0", display: "flex", alignItems: "center", gap: 8, background: "#f0fdf4", border: "1px solid #22c55e30", borderRadius: 8, padding: "10px 14px" }}>
+                <CheckCircle2 size={15} style={{ color: "#16a34a", flexShrink: 0 }} />
+                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#15803d", fontFamily: "'Inter', sans-serif" }}>
+                  Card approved — queued to mail
+                </span>
+              </div>
+
+              {/* Message */}
+              <div style={{ padding: "16px 20px 24px" }}>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: GRAY, fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>
+                  Approved Message
+                </div>
+                <div style={{
+                  background: BEIGE, border: `1.5px solid ${BLACK}12`, borderRadius: 10,
+                  padding: "14px 16px", fontSize: "0.9rem", lineHeight: 1.7,
+                  color: BLACK, fontFamily: "Georgia, serif", whiteSpace: "pre-wrap",
+                }}>
+                  {message || <span style={{ color: GRAY, fontStyle: "italic" }}>No message on file.</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Handwriting Font Picker Modal ────────────────────────────────────── */}
       {fontPickerOpen && (
