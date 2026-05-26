@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
@@ -55,10 +55,67 @@ const plans = [
 ];
 
 
-const examples = [
-  { occasion: "Birthday", recipient: "Dad", preview: `"You never made a big deal out of much, and somehow that taught me everything. Happy Birthday, Dad. I don't say it enough — but I mean it every time I do."` },
-  { occasion: "Anniversary", recipient: "Wife, 12 years", preview: `"Twelve years in and I still reach for your hand without thinking. That probably says more than anything I could write in a card. Happy Anniversary."` },
-  { occasion: "Just Because", recipient: "Best Friend", preview: `"No occasion. No reason. Just thought you should know that you're one of the few people I'd actually call if something went wrong. That's rare. Don't make it weird."` },
+const cardExamples = [
+  {
+    label: "Birthday",
+    recipient: "Dad",
+    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1753826720255_hbd_tiered_cake_a_2_p_front.png",
+    inside: `You never made a big deal out of much — no speeches, no fuss — and somehow that taught me more than anything else ever did.
+
+Happy Birthday, Dad. I don't say it enough. But I mean it every single time I do.
+
+Love,\nMichael`,
+  },
+  {
+    label: "Birthday",
+    recipient: "Wife",
+    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1747262218835_blow_out_the_candles_a_2_front.png",
+    inside: `Another year of somehow making everything look effortless. Watching you do all of it — and still somehow show up for the rest of us — is the thing I'm most grateful for.
+
+Happy Birthday. I love you more than I'll ever say correctly out loud.
+
+Jake`,
+  },
+  {
+    label: "Anniversary",
+    recipient: "Wife, 12 Years",
+    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1726752517024_1710792136753_We%20Heart%20Working%20with%20You%20-%20Script-A2L%20-%20Front%20(1).png",
+    inside: `Twelve years in and I still reach for your hand without thinking. That probably says more than anything I could write in a card.
+
+Happy Anniversary. Let's do at least twelve more before we make any major decisions.
+
+All of me,\nTom`,
+  },
+  {
+    label: "Happy Holidays",
+    recipient: "Family",
+    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1747871147429_gather_together_a_2_front.png",
+    inside: `Some years the holidays feel like something to survive. This year I just want to feel all of it — the noise, the mess, the random hours and too much food and all of it.
+
+Wishing your whole house every bit of warmth it deserves.
+
+Happy Holidays — Sam & family`,
+  },
+  {
+    label: "Happy Holidays",
+    recipient: "Entire Team",
+    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1716229616296_Champagne%20-%20Front.png",
+    inside: `Another year in the books. Whatever it threw at us — and it threw a lot — you showed up every single time.
+
+Grateful for this team every day. Happy Holidays to all of you and everyone at your table.
+
+With appreciation,\nDavid`,
+  },
+  {
+    label: "Work Anniversary",
+    recipient: "Sarah, 3 Years",
+    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1718213934189_New%20Favorite%20Client%20-%20Front.png",
+    inside: `Three years in and I still can't imagine this place without you. Thank you for every problem you solved before I even knew it existed — and for making the work feel lighter just by being here.
+
+We're genuinely lucky to have you.
+
+The team`,
+  },
 ];
 
 // ─── Landing Page ─────────────────────────────────────────────────────────────
@@ -67,6 +124,15 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const { isLoggedIn } = useAuth();
+  const [cardSide, setCardSide] = useState<Record<number, "front" | "inside">>({});
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lightboxImg) return;
+    const close = (e: KeyboardEvent) => { if (e.key === "Escape") setLightboxImg(null); };
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [lightboxImg]);
 
   return (
     <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
@@ -528,34 +594,120 @@ export default function LandingPage() {
       {/* ── EXAMPLES ─────────────────────────────────────────────────────── */}
       <section id="examples" className="py-20 px-6" style={{ background: B.black }}>
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <SectionHeading sub="Written for them. Sounds completely you. They'll never know." inverted>
-            What the Cards Sound Like
+          <SectionHeading sub="Real card fronts. Real handwritten messages. Made for real people." inverted>
+            What the Cards Look Like
           </SectionHeading>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {examples.map((ex) => (
-              <div
-                key={ex.occasion}
-                className="p-7 rounded-sm"
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: `1.5px solid rgba(255,255,255,0.1)`,
-                  borderTop: `3px solid ${B.red}`,
-                }}
-              >
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.18em", color: B.red, marginBottom: 6 }}>
-                  {ex.occasion} · {ex.recipient}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
+            {cardExamples.map((ex, i) => {
+              const side = cardSide[i] ?? "front";
+              return (
+                <div key={i} style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1.5px solid rgba(255,255,255,0.1)",
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                }}>
+                  {/* Label */}
+                  <div style={{ padding: "10px 14px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.16em", color: B.red }}>
+                      {ex.label} · {ex.recipient}
+                    </div>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.6rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)" }}>
+                      REAL CARD
+                    </div>
+                  </div>
+
+                  {/* Front / Inside toggle */}
+                  <div style={{ display: "flex", margin: "10px 14px 0", borderRadius: 6, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    {(["front", "inside"] as const).map(s => (
+                      <button key={s} onClick={() => setCardSide(prev => ({ ...prev, [i]: s }))}
+                        style={{
+                          flex: 1, padding: "6px 0",
+                          background: side === s ? B.red : "transparent",
+                          color: side === s ? "#fff" : "rgba(255,255,255,0.45)",
+                          border: "none", cursor: "pointer",
+                          fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em",
+                          transition: "all 0.15s",
+                        }}>
+                        {s === "front" ? "CARD FRONT" : "INSIDE →"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Content area */}
+                  <div style={{ flex: 1, padding: 14 }}>
+                    {side === "front" ? (
+                      <div
+                        onClick={() => setLightboxImg(ex.imageUrl)}
+                        style={{ position: "relative", cursor: "zoom-in", borderRadius: 6, overflow: "hidden", lineHeight: 0 }}
+                      >
+                        <img
+                          src={ex.imageUrl}
+                          alt={`${ex.label} card for ${ex.recipient}`}
+                          style={{ width: "100%", display: "block", borderRadius: 6, objectFit: "cover", aspectRatio: "5/4" }}
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                        />
+                        <div style={{
+                          position: "absolute", inset: 0,
+                          background: "linear-gradient(transparent 60%, rgba(0,0,0,0.55))",
+                          display: "flex", alignItems: "flex-end", justifyContent: "flex-end",
+                          padding: "10px 12px",
+                          opacity: 0,
+                          transition: "opacity 0.15s",
+                        }}
+                          className="card-hover-overlay"
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0"; }}
+                        >
+                          <span style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)", borderRadius: 5, padding: "4px 10px", fontSize: "0.7rem", color: "#fff", fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.1em" }}>
+                            🔍 ZOOM
+                          </span>
+                        </div>
+                        {/* Always-visible zoom hint */}
+                        <div style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.5)", borderRadius: 4, padding: "3px 8px", fontSize: "0.62rem", color: "rgba(255,255,255,0.6)", fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.1em", pointerEvents: "none" }}>
+                          CLICK TO ZOOM
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{
+                        background: "#fffef9",
+                        borderRadius: 6, padding: "18px 16px",
+                        minHeight: 180,
+                        position: "relative",
+                      }}>
+                        {/* Ruled lines effect */}
+                        <div style={{
+                          position: "absolute", inset: 0, borderRadius: 6,
+                          backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, rgba(0,0,0,0.07) 27px, rgba(0,0,0,0.07) 28px)",
+                          backgroundPositionY: "48px",
+                          pointerEvents: "none",
+                        }} />
+                        <p style={{
+                          fontFamily: "'Caveat', cursive",
+                          fontSize: "1.05rem",
+                          lineHeight: 1.85,
+                          color: "#1a1a1a",
+                          whiteSpace: "pre-wrap",
+                          position: "relative",
+                          margin: 0,
+                        }}>
+                          {ex.inside}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ padding: "0 14px 12px" }}>
+                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.62rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
+                      WRITTEN FOR YOU · MAILED IN A REAL ENVELOPE
+                    </span>
+                  </div>
                 </div>
-                <p style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "rgba(255,255,255,0.85)", lineHeight: 1.75 }}>
-                  {ex.preview}
-                </p>
-                <div className="mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.7rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
-                    Written for you · Personally signed
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-10 text-center">
@@ -565,6 +717,27 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── LIGHTBOX ─────────────────────────────────────────────────────── */}
+      {lightboxImg && (
+        <div
+          onClick={() => setLightboxImg(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.93)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, cursor: "zoom-out" }}
+        >
+          <img
+            src={lightboxImg}
+            alt="Card front — full size"
+            style={{ maxWidth: "90vw", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, boxShadow: "0 0 80px rgba(0,0,0,0.9)" }}
+          />
+          <button
+            onClick={e => { e.stopPropagation(); setLightboxImg(null); }}
+            style={{ position: "absolute", top: 20, right: 20, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#fff", fontSize: "1.2rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+          >✕</button>
+          <div style={{ position: "absolute", bottom: 16, color: "rgba(255,255,255,0.3)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em" }}>
+            CLICK ANYWHERE OR PRESS ESC TO CLOSE
+          </div>
+        </div>
+      )}
 
       {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
       <section id="reviews" className="py-20 px-6" style={{ background: B.white }}>
