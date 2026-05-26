@@ -514,7 +514,7 @@ export default function DashboardPage() {
 
         {/* Tab bar — slightly darker beige strip */}
         <div style={{
-          background: `${BLACK}06`,
+          background: BEIGE,
           borderBottom: `1px solid ${BLACK}12`,
           padding: "0 28px",
           display: "flex", alignItems: "center", gap: 0,
