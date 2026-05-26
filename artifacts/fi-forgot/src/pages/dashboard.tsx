@@ -1148,6 +1148,11 @@ export default function DashboardPage() {
                             {ev.briefingDone && <span style={{ fontWeight: 700, color: "#16a34a" }}>✓ Questions answered</span>}
                             {hasCard && <span style={{ fontWeight: 700, color: RED }}>↑ Needs approval above</span>}
                           </div>
+                          {!ev.briefingDone && !hasCard && (
+                            <div style={{ fontSize: "0.72rem", marginTop: 5, color: GRAY, fontStyle: "italic", lineHeight: 1.4 }}>
+                              3 quick questions so the card sounds like <em style={{ fontStyle: "normal", fontWeight: 600, color: BLACK }}>you</em>, not a template.
+                            </div>
+                          )}
                         </div>
 
                         {/* Approval timing chip */}
