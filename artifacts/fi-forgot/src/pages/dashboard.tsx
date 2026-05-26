@@ -452,7 +452,7 @@ export default function DashboardPage() {
 
   /* ── Render ─────────────────────────────────────────────────────────────── */
   return (
-    <div style={{ minHeight: "100vh", background: BEIGE, display: "flex", flexDirection: "column" as const, fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: WHITE, display: "flex", flexDirection: "column" as const, fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── Sticky header ────────────────────────────────────────────────────── */}
       <div style={{ position: "sticky", top: 0, zIndex: 40, flexShrink: 0 }}>
