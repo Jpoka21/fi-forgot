@@ -651,7 +651,7 @@ export default function DashboardPage() {
                   marginBottom: -1,
                 }}
               >
-                <Icon size={14} style={{ color: active ? BLACK : `${BLACK}45` }} />
+                <Icon size={14} style={{ color: active ? BLACK : `${BLACK}60` }} />
                 <span style={{
                   fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem",
                   letterSpacing: "0.1em",
@@ -734,7 +734,7 @@ export default function DashboardPage() {
                         <span style={{ fontWeight: 700, fontSize: "0.78rem", color: active ? RED : BLACK, fontFamily: "'Inter', sans-serif" }}>{opt.title}</span>
                         {opt.recommended && <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.05em", background: "#16a34a", color: WHITE, borderRadius: 4, padding: "1px 5px", fontFamily: "'Inter', sans-serif" }}>Recommended</span>}
                       </div>
-                      <div style={{ fontSize: "0.67rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>{opt.desc}</div>
+                      <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>{opt.desc}</div>
                     </button>
                   );
                 })}
@@ -769,7 +769,7 @@ export default function DashboardPage() {
                 <span style={{ flex: 1 }}>{personalSettings.cardFont ? (hwFonts.find(f => f.id === personalSettings.cardFont)?.name ?? personalSettings.cardFont) : "Choose a style…"}</span>
                 <span style={{ color: `${BLACK}50`, fontSize: "0.75rem" }}>▾</span>
               </button>
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>The handwriting style used on every card.</div>
+              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>The handwriting style used on every card.</div>
             </div>
 
             {/* Card Signature */}
@@ -781,7 +781,7 @@ export default function DashboardPage() {
                 placeholder="e.g. Love, James"
                 style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
               />
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this signature.</div>
+              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this signature.</div>
             </div>
 
             {/* Default Tone */}
@@ -808,7 +808,7 @@ export default function DashboardPage() {
               <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 4 }}>
                 Notify Me Before the Card Is Mailed
               </div>
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}65`, marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
+              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
                 Cards are mailed ~7 days before the occasion to ensure delivery. These intervals are before the card leaves — not before the occasion itself.
               </div>
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
@@ -832,7 +832,7 @@ export default function DashboardPage() {
                   );
                 })}
               </div>
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}65`, marginTop: 6, fontFamily: "'Inter', sans-serif" }}>Pick one or more. We'll notify you at each chosen interval.</div>
+              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginTop: 6, fontFamily: "'Inter', sans-serif" }}>Pick one or more. We'll notify you at each chosen interval.</div>
             </div>
 
             {/* How to Notify You */}
@@ -862,7 +862,7 @@ export default function DashboardPage() {
               <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Where to Reach You</div>
               {(personalSettings.notifyChannel === "email" || personalSettings.notifyChannel === "both") && (
                 <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
-                  <label style={{ fontSize: "0.72rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>Email address</label>
+                  <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Email address</label>
                   <input
                     type="email"
                     value={personalSettings.notifyEmail}
@@ -874,7 +874,7 @@ export default function DashboardPage() {
               )}
               {(personalSettings.notifyChannel === "text" || personalSettings.notifyChannel === "both") && (
                 <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
-                  <label style={{ fontSize: "0.72rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>Mobile number</label>
+                  <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Mobile number</label>
                   <input
                     type="tel"
                     value={personalSettings.notifyPhone}
