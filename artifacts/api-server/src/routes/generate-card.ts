@@ -7,6 +7,18 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
+interface BriefingAnswer {
+  questionKey: string;
+  question: string;
+  answer: string;
+}
+
+interface PastBriefing {
+  event: string;
+  year: number;
+  answers: BriefingAnswer[];
+}
+
 router.post("/generate-card", async (req, res) => {
   const {
     recipientName,
@@ -23,7 +35,27 @@ router.post("/generate-card", async (req, res) => {
     thingsToAvoid,
     emotionalLevel,
     senderName = "Mike",
-  } = req.body;
+    // Briefing data
+    eventBriefing = [] as BriefingAnswer[],
+    recipientHistory = [] as PastBriefing[],
+  } = req.body as {
+    recipientName?: string;
+    relationship?: string;
+    holiday?: string;
+    personalityNotes?: string;
+    interests?: string[];
+    tonePreference?: string;
+    petName?: string;
+    insideJokes?: string;
+    yearsTogther?: string;
+    kidsNames?: string;
+    favoriteMemories?: string;
+    thingsToAvoid?: string;
+    emotionalLevel?: number;
+    senderName?: string;
+    eventBriefing?: BriefingAnswer[];
+    recipientHistory?: PastBriefing[];
+  };
 
   if (!recipientName || !holiday) {
     res.status(400).json({ error: "recipientName and holiday are required" });
@@ -31,6 +63,8 @@ router.post("/generate-card", async (req, res) => {
   }
 
   const contextLines: string[] = [];
+
+  // ── Core profile ──────────────────────────────────────────────────────────
   if (relationship) contextLines.push(`- Relationship to sender: ${relationship}`);
   if (personalityNotes) contextLines.push(`- Her personality: ${personalityNotes}`);
   if (interests.length > 0) contextLines.push(`- Her interests: ${interests.join(", ")}`);
@@ -43,8 +77,32 @@ router.post("/generate-card", async (req, res) => {
   if (yearsTogther) contextLines.push(`- [BACKGROUND ONLY - do NOT state this in the card] How long they've been together: ${yearsTogther}`);
   if (thingsToAvoid) contextLines.push(`- NEVER include: ${thingsToAvoid}`);
 
+  // ── This card's personalization briefing (Q&A answered by the sender) ────
+  const activeBriefingItems = (eventBriefing ?? []).filter((a: BriefingAnswer) => a.answer?.trim());
+  if (activeBriefingItems.length > 0) {
+    contextLines.push(`\n--- Personalization for this ${holiday} card (answers provided by sender) ---`);
+    for (const a of activeBriefingItems) {
+      contextLines.push(`  ${a.question}: ${a.answer}`);
+    }
+  }
+
+  // ── Everything we know from past briefings (cumulative recipient profile) ─
+  const historyWithAnswers = (recipientHistory ?? [])
+    .map((b: PastBriefing) => ({ ...b, answers: b.answers.filter((a: BriefingAnswer) => a.answer?.trim()) }))
+    .filter((b: PastBriefing) => b.answers.length > 0);
+
+  if (historyWithAnswers.length > 0) {
+    contextLines.push(`\n--- What we've learned about ${recipientName} from past cards (use as background color) ---`);
+    for (const b of historyWithAnswers) {
+      contextLines.push(`  [${b.event} ${b.year}]`);
+      for (const a of b.answers) {
+        contextLines.push(`    ${a.question}: ${a.answer}`);
+      }
+    }
+  }
+
   const context = contextLines.length > 0
-    ? `Here is what we know about her:\n${contextLines.join("\n")}`
+    ? `Here is what we know about ${recipientName}:\n${contextLines.join("\n")}`
     : "";
 
   const systemPrompt = `You are a professional greeting card writer for "F" I Forgot — a concierge card service that writes genuinely great, personalized cards for men to send to the important women in their lives.
@@ -56,16 +114,18 @@ Rules:
 - NEVER use greeting card clichés ("words cannot express", "on this special day", "from the bottom of my heart")
 - Each of the 3 versions must have a completely different opening line — vary the structure, not just the words
 - Reference specific details from her profile when possible — interests, kids, personality, memories
+- If briefing answers are provided, use them as the primary raw material — these are real details the sender gave us and they MUST show up in the card
 - If she has children listed, naturally reference her role as a mom when relevant
 - If kids' ages are provided, you can infer how long she has been a mom
+- Background history from past cards should inform tone and depth — don't repeat what's old news, use it to write like someone who truly knows her
 - Cards should feel earned, not manufactured
-- Sign as "${senderName}"`;
+- Sign as "${senderName ?? "Mike"}"`;
 
   const userPrompt = `Write exactly 3 versions of a ${holiday} card for ${recipientName}.
 
 ${context}
 
-Write each card as the sender (${senderName}) speaking directly to her. Make each version genuinely distinct — different opening, different angle, different emotional register:
+Write each card as the sender (${senderName ?? "Mike"}) speaking directly to her. Make each version genuinely distinct — different opening, different angle, different emotional register:
 
 1. SWEET — Warm, genuine, heartfelt. Shows real appreciation without being over-the-top. Notices the small things.
 2. FUNNY — Self-aware and charming. Makes her laugh, gently pokes fun at the sender (never her), but still lands with real feeling underneath.

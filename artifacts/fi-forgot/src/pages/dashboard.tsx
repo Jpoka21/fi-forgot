@@ -4,6 +4,7 @@ import {
   getCards, getRecipients, getBriefingsForRecipient, updateCard,
   CardOrder, Recipient, getAge, saveCard, deleteCard, saveRecipient,
   getPersonalSettings, savePersonalSettings, PersonalSettings,
+  childrenSummary, getYearsTogether,
   TONES,
 } from "@/lib/data";
 
@@ -489,18 +490,39 @@ export default function DashboardPage() {
     const key = `${ev.recipient.id}:::${ev.event}`;
     setGeneratingFor(key);
     try {
+      // Pull ALL briefings for this recipient to build a cumulative profile
+      const allBriefings = getBriefingsForRecipient(ev.recipient.id);
+      // Most recent briefing for THIS specific event
+      const currentBriefing = allBriefings
+        .filter(b => b.event === ev.event)
+        .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())[0];
+      // All briefings from OTHER events — everything we've ever learned about this person
+      const recipientHistory = allBriefings
+        .filter(b => b.event !== ev.event)
+        .map(b => ({ event: b.event, year: b.year, answers: b.answers }));
+
       const res = await fetch("/api/generate-card", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          recipientName: ev.recipient.name,
-          relationship:  ev.recipient.relationship,
-          holiday:       ev.event,
-          tone:          ev.recipient.tonePreference,
+          recipientName:    ev.recipient.name,
+          relationship:     ev.recipient.relationship,
+          holiday:          ev.event,
+          tonePreference:   ev.recipient.tonePreference,
+          senderName:       ev.recipient.senderName,
           personalityNotes: ev.recipient.personalityNotes,
           thingsToAvoid:    ev.recipient.thingsToAvoid,
           favoriteMemories: ev.recipient.favoriteMemories,
           insideJokes:      ev.recipient.insideJokes,
+          emotionalLevel:   ev.recipient.emotionalLevel,
+          kidsNames:        childrenSummary(ev.recipient.children),
+          yearsTogther:     ev.recipient.marriageDate
+                              ? String(getYearsTogether(ev.recipient.marriageDate))
+                              : undefined,
+          // Current event briefing — Q&A specific to this card
+          eventBriefing:    currentBriefing?.answers ?? [],
+          // Everything learned from all past briefings for this person
+          recipientHistory,
         }),
       });
       const data = await res.json() as { cards?: { tone: string; text: string }[] };
