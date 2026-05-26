@@ -628,12 +628,13 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Tab bar — slightly darker beige strip */}
+        {/* Tab bar */}
         <div style={{
           background: BEIGE,
           borderBottom: `1px solid ${BLACK}12`,
-          padding: "0 28px",
-          display: "flex", alignItems: "center", gap: 0,
+          padding: "0 20px",
+          display: "flex", alignItems: "center", gap: 4,
+          height: 52,
         }}>
           {TABS.map(({ key, label, icon: Icon, count }) => {
             const active = activeTab === key;
@@ -642,27 +643,26 @@ export default function DashboardPage() {
                 key={key}
                 onClick={() => setActiveTab(key)}
                 style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "0 20px", height: 44,
-                  background: active ? `${BLACK}06` : "transparent",
-                  border: "none",
-                  borderBottom: active ? `2px solid ${RED}` : "2px solid transparent",
+                  display: "flex", alignItems: "center", gap: 7,
+                  padding: "7px 16px",
+                  background: active ? RED : "transparent",
+                  border: `1.5px solid ${active ? RED : `${BLACK}25`}`,
+                  borderRadius: 6,
                   cursor: "pointer", transition: "all 0.15s",
-                  marginBottom: -1,
                 }}
               >
-                <Icon size={14} style={{ color: active ? BLACK : `${BLACK}60` }} />
+                <Icon size={14} style={{ color: active ? WHITE : BLACK }} />
                 <span style={{
-                  fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem",
+                  fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem",
                   letterSpacing: "0.1em",
-                  color: active ? BLACK : `${BLACK}45`,
+                  color: active ? WHITE : BLACK,
                 }}>
                   {label}
                 </span>
                 {count > 0 && (
                   <span style={{
-                    background: active ? `${RED}20` : `${BLACK}10`,
-                    color: active ? RED : `${BLACK}50`,
+                    background: active ? "rgba(255,255,255,0.25)" : `${BLACK}12`,
+                    color: active ? WHITE : BLACK,
                     borderRadius: 10, padding: "0 7px",
                     fontSize: "0.65rem", fontWeight: 700, lineHeight: "18px",
                   }}>

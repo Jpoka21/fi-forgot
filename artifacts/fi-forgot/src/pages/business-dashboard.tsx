@@ -1268,7 +1268,7 @@ export default function BusinessDashboardPage() {
       </div>
 
       {/* ── Section Tabs ─────────────────────────────────────────────────────── */}
-      <div style={{ background: DARK, borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 28px", display: "flex", gap: 4, flexShrink: 0 }}>
+      <div style={{ background: DARK, borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "0 20px", display: "flex", gap: 4, flexShrink: 0, alignItems: "center", height: 52 }}>
         {([
           { id: "recipients", label: "All Recipients",  icon: "👥", count: rows.filter(r => r.fullName.trim()).length },
           { id: "upcoming",   label: "Upcoming Cards", icon: "📅", count: upcomingCards.length },
@@ -1277,17 +1277,19 @@ export default function BusinessDashboardPage() {
           return (
             <button key={tab.id} onClick={() => setActiveSection(tab.id)}
               style={{
-                padding: "12px 18px", border: "none", cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.04em",
-                background: "none", borderBottom: `2px solid ${active ? RED : "transparent"}`,
-                color: active ? WHITE : "rgba(255,255,255,0.45)",
+                padding: "7px 16px", cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.04em",
+                background: active ? RED : "transparent",
+                border: `1.5px solid ${active ? RED : "rgba(255,255,255,0.25)"}`,
+                borderRadius: 6,
+                color: active ? WHITE : "rgba(255,255,255,0.8)",
                 transition: "all 0.12s", display: "flex", alignItems: "center", gap: 7,
               }}>
               <span>{tab.icon}</span>
               <span>{tab.label}</span>
               <span style={{
-                background: active ? RED : "rgba(255,255,255,0.12)",
-                color: active ? WHITE : "rgba(255,255,255,0.5)",
+                background: active ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.12)",
+                color: active ? WHITE : "rgba(255,255,255,0.8)",
                 borderRadius: 20, padding: "1px 7px", fontSize: "0.68rem", fontWeight: 700,
               }}>{tab.count}</span>
             </button>
