@@ -561,17 +561,22 @@ export default function DashboardPage() {
 
       {/* ── Stat strip — sits just below the sticky header ───────────────────── */}
       <div style={{
-        display: "flex", alignItems: "center", gap: 16,
-        padding: "10px 28px",
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "12px 28px",
         borderBottom: `1px solid ${BLACK}10`,
-        background: BEIGE,
+        background: WHITE,
       }}>
         {[
-          { label: "People covered",   value: recipients.length,    color: BLACK },
-          { label: "Events on autopilot", value: disastersAvoided, color: BLACK },
-          { label: "Upcoming (90 days)", value: allUpcomingEvents.length, color: allUpcomingEvents.length > 0 ? RED : BLACK },
+          { label: "People covered",      value: recipients.length,           color: BLACK },
+          { label: "Events on autopilot", value: disastersAvoided,            color: BLACK },
+          { label: "Upcoming (90 days)",  value: allUpcomingEvents.length,    color: allUpcomingEvents.length > 0 ? RED : BLACK },
         ].map(({ label, value, color }) => (
-          <div key={label} style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+          <div key={label} style={{
+            display: "flex", alignItems: "baseline", gap: 6,
+            border: `1.5px solid ${color === RED ? RED + "40" : BLACK + "18"}`,
+            borderRadius: 8, padding: "5px 14px",
+            background: color === RED ? `${RED}08` : `${BLACK}04`,
+          }}>
             <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color, lineHeight: 1 }}>{value}</span>
             <span style={{ fontSize: "0.7rem", fontWeight: 600, color: `${BLACK}50`, letterSpacing: "0.04em" }}>{label}</span>
           </div>
