@@ -578,7 +578,7 @@ export default function DashboardPage() {
             background: color === RED ? `${RED}08` : `${BLACK}04`,
           }}>
             <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color, lineHeight: 1 }}>{value}</span>
-            <span style={{ fontSize: "0.7rem", fontWeight: 600, color: `${BLACK}50`, letterSpacing: "0.04em" }}>{label}</span>
+            <span style={{ fontSize: "0.7rem", fontWeight: 800, color: `${BLACK}70`, letterSpacing: "0.04em" }}>{label}</span>
           </div>
         ))}
       </div>
