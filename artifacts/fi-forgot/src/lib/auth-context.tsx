@@ -322,6 +322,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoggedIn(true);
     setOnboardingComplete(true);
     localStorage.setItem("fi_forgot_user", JSON.stringify(u));
+    // Persist onboarding-complete so ProtectedRoute survives a page reload.
+    // Don't overwrite real onboarding data if it already exists.
+    if (!localStorage.getItem("fi_forgot_onboarding")) {
+      localStorage.setItem("fi_forgot_onboarding", JSON.stringify({ loginRestore: true }));
+    }
 
     // Ensure a personal workspace exists
     let ws = loadWorkspaces();

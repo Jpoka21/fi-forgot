@@ -66,15 +66,9 @@ export default function PersonalAuthPage({ initialMode = "signup" }: Props) {
 
   function onSignin(data: SigninData) {
     login(data.email);
-    try {
-      const raw = localStorage.getItem("fi_forgot_workspaces");
-      const ws = raw ? JSON.parse(raw) : [];
-      const activeId = localStorage.getItem("fi_forgot_active_workspace");
-      const active = ws.find((w: { id: string; type: string }) => w.id === activeId) ?? ws[0];
-      setLocation(active?.type === "business" ? "/business/dashboard" : "/dashboard");
-    } catch {
-      setLocation("/dashboard");
-    }
+    // Personal sign-in always lands on the personal dashboard.
+    // From there the user can toggle to Business if they have one.
+    setLocation("/dashboard");
   }
 
   // ── Shared input style ────────────────────────────────────────────────────
