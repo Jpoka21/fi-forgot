@@ -177,6 +177,7 @@ function AccountMenu({ user, onLogout }: { user: { name: string; email: string }
           {[
             { icon: "⚙️", label: "Account Settings", action: () => alert("Coming soon") },
             { icon: "💳", label: "Billing & Plan",   action: () => alert("Coming soon") },
+            { icon: "🛡️", label: "Admin",             action: () => { setOpen(false); window.location.href = "/admin"; } },
           ].map(item => (
             <button
               key={item.label}
