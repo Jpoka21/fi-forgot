@@ -178,7 +178,7 @@ export function DemoFormSection() {
           margin: "0 0 36px",
           lineHeight: 1.6,
         }}>
-          Pick someone important. We'll write them a real card, mail it to you, and show you exactly how we did it.
+          Give us one name. We'll write them a card, mail it to you, and let you take all the credit. They'll never know.
         </p>
 
         {status === "success" ? (
