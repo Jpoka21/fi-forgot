@@ -466,7 +466,7 @@ export default function LandingPage() {
         <img
           className="hidden md:block"
           src="/how-it-works.png"
-          alt="How it works: We remember, We pick the card, We write it for you, We send it on time, You get credit"
+          alt="How it works: We remember, We get to know them, We pick the perfect card, We write it for you, We send it on time, You get all the credit"
           style={{ width: "100%", height: "auto", marginTop: "-13%", marginBottom: "-13%" }}
         />
         {/* Mobile: individual step images stacked, trim top/bottom whitespace per card */}
