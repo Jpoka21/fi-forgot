@@ -1,7 +1,7 @@
 import { Router } from "express";
 import OpenAI from "openai";
 import { db, cardClassificationsTable, sampleCardMessagesTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 const router = Router();
 
@@ -53,8 +53,21 @@ router.get("/sample-cards", async (req, res) => {
         keywords:   cardClassificationsTable.keywords,
       })
       .from(cardClassificationsTable)
-      .where(eq(cardClassificationsTable.skip, false))
-      .limit(120);
+      .where(
+        and(
+          eq(cardClassificationsTable.skip, false),
+          sql`(
+            occasions::text ILIKE '%birthday%' OR
+            occasions::text ILIKE '%christmas%' OR
+            occasions::text ILIKE '%holiday%' OR
+            occasions::text ILIKE '%hanukkah%' OR
+            occasions::text ILIKE '%thanksgiving%' OR
+            occasions::text ILIKE '%new year%' OR
+            occasions::text ILIKE '%work anniversary%'
+          )`
+        )
+      )
+      .limit(200);
 
     const cards = rows
       .filter((r) => r.occasions.length > 0 || r.imageUrl)
