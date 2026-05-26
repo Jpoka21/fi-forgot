@@ -254,10 +254,17 @@ export default function LandingPage() {
                 FOR BUSINESS
                 <span style={{ fontSize: "0.55rem", letterSpacing: "0.15em", background: B.red, color: "#fff", padding: "2px 6px", borderRadius: 2 }}>NEW</span>
               </Link>
-              <Link href="/login"
-                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
-                SIGN IN
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/dashboard" onClick={() => setMenuOpen(false)}
+                  style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
+                  MY DASHBOARD
+                </Link>
+              ) : (
+                <Link href="/login" onClick={() => setMenuOpen(false)}
+                  style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
+                  SIGN IN
+                </Link>
+              )}
             </div>
           </div>
         )}
