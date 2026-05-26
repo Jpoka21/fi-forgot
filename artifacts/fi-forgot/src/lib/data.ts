@@ -612,6 +612,7 @@ export const PREVIEW_DAYS_OPTIONS: { days: PreviewDays; label: string; descripti
 // ─── Personal settings ───────────────────────────────────────────────────────
 
 export interface PersonalSettings {
+  notifyPhone: string;
   automationMode: "autopilot" | "approve";
   defaultTone: Tone;
   cardSignature: string;
@@ -627,6 +628,7 @@ const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   previewDays: 14,
   notifyChannel: "email",
   notifyEmail: "",
+  notifyPhone: "",
 };
 
 const STORAGE_KEY_SETTINGS = "fi_forgot_personal_settings";

@@ -805,17 +805,34 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Notify Email */}
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Notify Email</div>
-              <input
-                type="email"
-                value={personalSettings.notifyEmail}
-                onChange={e => updateSettings("notifyEmail", e.target.value)}
-                placeholder="you@example.com"
-                style={{ background: WHITE, border: `1px solid ${BLACK}40`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 240, fontFamily: "'Inter', sans-serif" }}
-              />
-              <div style={{ fontSize: "0.63rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>Draft notifications and order updates.</div>
+            {/* Contact info — shown conditionally based on notify channel */}
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Where to Reach You</div>
+              {(personalSettings.notifyChannel === "email" || personalSettings.notifyChannel === "both") && (
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
+                  <label style={{ fontSize: "0.7rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>Email address</label>
+                  <input
+                    type="email"
+                    value={personalSettings.notifyEmail}
+                    onChange={e => updateSettings("notifyEmail", e.target.value)}
+                    placeholder="you@example.com"
+                    style={{ background: WHITE, border: `1px solid ${BLACK}40`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 240, fontFamily: "'Inter', sans-serif" }}
+                  />
+                </div>
+              )}
+              {(personalSettings.notifyChannel === "text" || personalSettings.notifyChannel === "both") && (
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
+                  <label style={{ fontSize: "0.7rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>Mobile number</label>
+                  <input
+                    type="tel"
+                    value={personalSettings.notifyPhone}
+                    onChange={e => updateSettings("notifyPhone", e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                    style={{ background: WHITE, border: `1px solid ${BLACK}40`, borderRadius: 6, color: BLACK, padding: "6px 10px", fontSize: "0.82rem", outline: "none", width: 240, fontFamily: "'Inter', sans-serif" }}
+                  />
+                </div>
+              )}
+              <div style={{ fontSize: "0.63rem", color: `${BLACK}65`, fontFamily: "'Inter', sans-serif" }}>Draft notifications and order updates go here.</div>
             </div>
 
           </div>
