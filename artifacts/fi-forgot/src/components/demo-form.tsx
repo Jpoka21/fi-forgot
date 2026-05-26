@@ -178,7 +178,7 @@ export function DemoFormSection() {
           margin: "0 0 36px",
           lineHeight: 1.6,
         }}>
-          Give us one name. We'll write them a card, mail it to you, and let you take all the credit. They'll never know.
+          One name. That's all we need. We'll handle the card, the words, and the mailing. You handle looking like you had this planned all along.
         </p>
 
         {status === "success" ? (
