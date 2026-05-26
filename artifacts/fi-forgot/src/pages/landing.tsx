@@ -469,17 +469,17 @@ export default function LandingPage() {
           alt="How it works: We remember, We get to know them, We pick the perfect card, We write it for you, We send it on time, You get all the credit"
           style={{ width: "100%", height: "auto" }}
         />
-        {/* Mobile: desktop-style individual panels */}
+        {/* Mobile: square step panels */}
         <div className="md:hidden flex flex-col">
           {[
-            { n: 1, src: "/hiw_desktop/1_we_remember_desktop.png",               alt: "Step 1: We Remember" },
-            { n: 2, src: "/hiw_desktop/2_we_get_to_know_them_desktop.png",        alt: "Step 2: We Get to Know Them" },
-            { n: 3, src: "/hiw_desktop/3_we_pick_the_perfect_card_desktop.png",   alt: "Step 3: We Pick the Perfect Card" },
-            { n: 4, src: "/hiw_desktop/4_we_write_it_for_you_desktop.png",        alt: "Step 4: We Write It For You" },
-            { n: 5, src: "/hiw_desktop/5_we_send_it_on_time_desktop.png",         alt: "Step 5: We Send It On Time" },
-            { n: 6, src: "/hiw_desktop/6_you_get_all_the_credit_desktop.png",     alt: "Step 6: You Get All the Credit" },
-          ].map(({ n, src, alt }) => (
-            <img key={n} src={src} alt={alt} style={{ width: "100%", height: "auto", display: "block" }} />
+            { n: 1, alt: "Step 1: We Remember" },
+            { n: 2, alt: "Step 2: We Get to Know Them" },
+            { n: 3, alt: "Step 3: We Pick the Perfect Card" },
+            { n: 4, alt: "Step 4: We Write It For You" },
+            { n: 5, alt: "Step 5: We Deliver It To Them" },
+            { n: 6, alt: "Step 6: You Get All the Credit" },
+          ].map(({ n, alt }) => (
+            <img key={n} src={`/hiw_mobile/step-${n}.png`} alt={alt} style={{ width: "100%", height: "auto", display: "block" }} />
           ))}
         </div>
       </section>
