@@ -114,8 +114,8 @@ export default function PersonalAuthPage({ initialMode = "signup" }: Props) {
       <div className="w-full max-w-7xl">
         <div className="grid md:grid-cols-2 gap-14 items-start">
 
-          {/* ── Left: Brand pitch ─────────────────────────────────────────── */}
-          <div className="pt-2">
+          {/* ── Left: Brand pitch — hidden on mobile so form is first ──────── */}
+          <div className="hidden md:block pt-2">
             <Link href="/" className="inline-block mb-10">
               <img src="/logo.png" alt="F* I Forgot" style={{ height: 90, width: "auto" }} />
             </Link>

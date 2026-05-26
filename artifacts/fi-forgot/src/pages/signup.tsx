@@ -64,8 +64,8 @@ export default function SignupPage() {
       <div className="w-full max-w-7xl relative z-10">
         <div className="grid md:grid-cols-2 gap-14 items-start">
 
-          {/* ── Left: Brand pitch ──────────────────────────────────────────── */}
-          <div className="pt-2">
+          {/* ── Left: Brand pitch — hidden on mobile so form is first ──────── */}
+          <div className="hidden md:block pt-2">
             <Link href="/" className="inline-block mb-10">
               <img src="/logo.png" alt="F* I Forgot" style={{ height: 90, width: "auto" }} />
             </Link>
@@ -124,8 +124,8 @@ export default function SignupPage() {
               ))}
             </ul>
 
-            {/* Stamps decorations */}
-            <div className="flex items-end gap-5 flex-wrap">
+            {/* Stamps decorations — hidden on mobile to avoid burying the form */}
+            <div className="hidden md:flex items-end gap-5 flex-wrap">
               <img src="/stamp-disaster-averted.png" alt="Disaster Averted" style={{ height: 126, width: "auto" }} />
               <img src="/stamp-date-locked-in.png" alt="Important Date Locked In" style={{ height: 126, width: "auto" }} />
               <img src="/sticky-note.png" alt="You forgot again, didn't you?" style={{ height: 232, width: "auto", transform: "rotate(-3deg)" }} />

@@ -26,10 +26,10 @@ export default function TryPage() {
           style={{ textDecoration: "none", display: "flex", flexDirection: "column" }}
         >
           <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: "#ffffff", letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 5vw, 3.6rem)", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.8rem, 5vw, 3.6rem)", color: "#ffffff", letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: "#555", marginTop: -2, fontWeight: 900 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.5rem, 1.2vw, 0.72rem)", letterSpacing: "0.22em", color: "#555", marginTop: -2, fontWeight: 900 }}>
             RELATIONSHIP DAMAGE CONTROL
           </div>
         </a>
