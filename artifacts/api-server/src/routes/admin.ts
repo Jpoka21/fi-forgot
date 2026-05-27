@@ -399,7 +399,14 @@ router.get("/admin/card-classifications", (_req, res) => {
 
 import { generateHolidayCards, getActiveHolidayCards } from "../services/custom-card-generator";
 import { db as adminDb } from "@workspace/db";
-import { customHolidayCardsTable, demoLeadsTable } from "@workspace/db";
+import {
+  customHolidayCardsTable,
+  demoLeadsTable,
+  businessSettingsTable,
+  businessClientsTable,
+  businessCardQueueTable,
+  pendingApprovalsTable,
+} from "@workspace/db";
 import { eq as drizzleEq, desc } from "drizzle-orm";
 
 router.get("/admin/holiday-cards", async (req, res) => {
@@ -452,6 +459,25 @@ router.delete("/admin/holiday-cards/:id", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "holiday-cards: delete failed");
     res.status(500).json({ error: "Failed to delete card" });
+  }
+});
+
+// ─── Reset all data ───────────────────────────────────────────────────────────
+
+router.post("/admin/reset-all-data", async (req, res) => {
+  try {
+    await Promise.all([
+      adminDb.delete(demoLeadsTable),
+      adminDb.delete(businessSettingsTable),
+      adminDb.delete(businessClientsTable),
+      adminDb.delete(businessCardQueueTable),
+      adminDb.delete(pendingApprovalsTable),
+    ]);
+    req.log.info("admin/reset-all-data: all tables cleared");
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "admin/reset-all-data: failed");
+    res.status(500).json({ error: "Reset failed" });
   }
 });
 
