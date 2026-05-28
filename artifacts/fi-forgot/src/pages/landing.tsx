@@ -586,7 +586,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <p className="text-center mt-10 italic" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "'Caveat', cursive", fontSize: "1.15rem" }}>
+          <p className="text-center mt-10 italic" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'Caveat', cursive", fontSize: "1.5rem" }}>
             One missed anniversary costs more than an entire year of Domestic Peacekeeper.
           </p>
         </div>
