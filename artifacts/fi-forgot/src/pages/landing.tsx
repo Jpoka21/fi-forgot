@@ -747,7 +747,7 @@ export default function LandingPage() {
                         <img
                           src={ex.imageUrl}
                           alt={`${ex.label} card for ${ex.recipient}`}
-                          style={{ width: "100%", display: "block", borderRadius: 6, objectFit: "cover", aspectRatio: "5/4" }}
+                          style={{ width: "100%", display: "block", borderRadius: 6, objectFit: "contain", background: "#fff" }}
                           onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                         />
                         <div style={{
