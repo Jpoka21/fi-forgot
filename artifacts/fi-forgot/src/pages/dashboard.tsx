@@ -436,7 +436,7 @@ export default function DashboardPage() {
       setRegenLoadingIds(prev => ({ ...prev, [card.id]: true }));
       const params = new URLSearchParams({ eventType: card.holiday });
       if (card.approvedMessage) params.set("cardMessage", card.approvedMessage);
-      fetch(`/api/business-cards/pick-card?${params.toString()}`)
+      fetch(`/api/personal-cards/pick-card?${params.toString()}`)
         .then(r => r.json())
         .then((d: { card?: CardDesign }) => {
           if (d.card) setCardDesignMap(prev => ({ ...prev, [card.id]: d.card! }));
@@ -457,7 +457,7 @@ export default function DashboardPage() {
       const params = new URLSearchParams({ eventType: holiday });
       if (message) params.set("cardMessage", message);
       if (newExcluded.length) params.set("excludeIds", newExcluded.join(","));
-      const r = await fetch(`/api/business-cards/pick-card?${params.toString()}`);
+      const r = await fetch(`/api/personal-cards/pick-card?${params.toString()}`);
       const d = await r.json() as { card?: CardDesign };
       if (d.card) setCardDesignMap(prev => ({ ...prev, [cardId]: d.card! }));
     } catch {}
