@@ -273,7 +273,6 @@ export default function LandingPage() {
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
-        className="md:h-auto"
         style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
         {/* Mobile portrait hero */}
@@ -283,12 +282,12 @@ export default function LandingPage() {
           className="md:hidden w-full"
           style={{ height: "auto", filter: "brightness(1.45)" }}
         />
-        {/* Desktop landscape hero */}
+        {/* Desktop landscape hero — fills exactly the remaining viewport height */}
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="hidden md:block w-full"
-          style={{ height: "auto", filter: "brightness(1.45)" }}
+          style={{ height: "calc(100vh - 96px)", objectFit: "cover", objectPosition: "center top", filter: "brightness(1.45)" }}
         />
 
         {/* Mobile — left-side dark gradient to ensure text readability */}
@@ -377,12 +376,12 @@ export default function LandingPage() {
 
         {/* Desktop text overlay */}
         <div className="hidden md:flex flex-col" style={{
-          position: "absolute", top: "6%", left: "3.5%", width: "40%",
+          position: "absolute", top: "8%", left: "4%", width: "44%",
           lineHeight: "normal",
         }}>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2.6rem, 5.8vw, 5.8rem)",
+            fontSize: "clamp(3.5rem, 7.5vw, 8rem)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.95,
@@ -392,7 +391,7 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(2.6rem, 5.8vw, 5.8rem)",
+            fontSize: "clamp(3.5rem, 7.5vw, 8rem)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.95,
@@ -403,22 +402,22 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(1rem, 1.8vw, 1.75rem)",
-            color: "rgba(255,255,255,0.88)",
+            fontSize: "clamp(1.3rem, 2.2vw, 2.2rem)",
+            color: "rgba(255,255,255,0.92)",
             letterSpacing: "0.04em",
             lineHeight: 1.25,
             textShadow: "1px 1px 8px rgba(0,0,0,0.75)",
-            marginTop: "0.65em",
+            marginTop: "0.6em",
           }}>
             You focus on life. We remember everything.
           </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(0.8rem, 1.1vw, 1rem)",
+            fontSize: "clamp(0.95rem, 1.4vw, 1.25rem)",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.75)",
+            color: "rgba(255,255,255,0.78)",
             lineHeight: 1.6,
-            margin: "0.6em 0 0",
+            margin: "0.65em 0 0",
             textShadow: "1px 1px 6px rgba(0,0,0,0.85)",
           }}>
             We choose, write, and mail real greeting cards for birthdays,
@@ -426,12 +425,12 @@ export default function LandingPage() {
           </p>
           <Link href="/signup" data-testid="link-cta-hitzone"
             style={{
-              display: "inline-block", marginTop: "1em", alignSelf: "flex-start",
+              display: "inline-block", marginTop: "1.2em", alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(0.85rem, 1.3vw, 1.2rem)",
+              fontSize: "clamp(1rem, 1.6vw, 1.5rem)",
               letterSpacing: "0.1em",
-              padding: "0.55em 1.1em",
+              padding: "0.65em 1.3em",
               borderRadius: 4,
               textDecoration: "none",
               boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.4)`,
