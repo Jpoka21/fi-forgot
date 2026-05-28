@@ -468,39 +468,72 @@ export default function LandingPage() {
       </div>
 
       {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
-      <section id="reviews" className="py-20 px-6" style={{ background: B.white }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <SectionHeading sub="Real stories. Changed names. Relationships still intact.">
-            Men Who Survived
-          </SectionHeading>
+      <section id="reviews" className="py-24 px-6" style={{ background: "#1a1008" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(2.8rem, 6vw, 5rem)", letterSpacing: "0.06em", color: B.white, lineHeight: 1 }}>
+              MEN WHO SURVIVED
+            </div>
+            <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: "rgba(255,255,255,0.5)", marginTop: 10 }}>
+              Real stories. Changed names. Relationships still intact.
+            </div>
+          </div>
+
+          {/* Testimonial cards */}
+          <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
               <div
                 key={t.name}
-                className="p-7 rounded-sm shadow-md"
                 style={{
-                  background: B.beige,
-                  border: `1.5px solid ${B.black}10`,
-                  borderTop: `3px solid ${B.red}`,
-                  transform: i % 2 === 0 ? "rotate(-0.7deg)" : "rotate(0.7deg)",
+                  background: i === 1 ? B.red : "#2a1f12",
+                  borderRadius: 12,
+                  padding: "36px 32px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 20,
+                  transform: i === 0 ? "rotate(-1deg)" : i === 2 ? "rotate(1deg)" : "none",
+                  boxShadow: i === 1 ? `0 16px 48px rgba(226,59,46,0.35)` : "0 8px 32px rgba(0,0,0,0.4)",
                 }}
               >
-                <div className="flex gap-0.5 mb-4">
-                  {[...Array(5)].map((_, j) => <span key={j} style={{ color: B.red }}>★</span>)}
+                {/* Big open-quote mark */}
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "5rem", lineHeight: 0.7, color: i === 1 ? "rgba(255,255,255,0.3)" : B.red, userSelect: "none" }}>
+                  "
                 </div>
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: "#333", lineHeight: 1.7, marginBottom: 20 }}>
-                  "{t.quote}"
+
+                {/* Quote text */}
+                <p style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
+                  color: i === 1 ? "#fff" : "rgba(255,255,255,0.9)",
+                  lineHeight: 1.65,
+                  margin: 0,
+                  flex: 1,
+                }}>
+                  {t.quote}
                 </p>
+
+                {/* Stars + attribution */}
                 <div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.black }}>{t.name}</div>
-                  <div style={{ fontSize: "0.75rem", color: B.gray }}>{t.role}</div>
+                  <div className="flex gap-1 mb-3">
+                    {[...Array(5)].map((_, j) => (
+                      <span key={j} style={{ color: i === 1 ? "rgba(255,255,255,0.8)" : B.red, fontSize: "1rem" }}>★</span>
+                    ))}
+                  </div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em", color: i === 1 ? "#fff" : B.white }}>
+                    {t.name}
+                  </div>
+                  <div style={{ fontSize: "0.82rem", color: i === 1 ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.45)", marginTop: 2 }}>
+                    {t.role}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="mt-12 flex items-center justify-center gap-8 flex-wrap">
+          {/* Sticky notes */}
+          <div className="mt-16 flex items-center justify-center gap-8 flex-wrap">
             <StickyNote rotate={-3}>Don't Forget<br /><span style={{ fontSize: "0.85rem" }}>(Again)</span></StickyNote>
             <StickyNote rotate={2}>Set it once.<br /><span style={{ fontSize: "0.85rem" }}>Take credit forever.</span></StickyNote>
             <StickyNote rotate={-1}>Approved by<br /><span style={{ fontSize: "0.85rem" }}>Husbands™</span></StickyNote>
