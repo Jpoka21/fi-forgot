@@ -1,0 +1,238 @@
+Update the F* I Forgot homepage conversion flow and copy.
+
+Goal:
+Keep the current visual brand, humor, colors, fonts, Dave mascot style, sticky CTA, and overall layout. Do not redesign the whole site. Improve the homepage order, sales logic, and copy so the visitor understands the value faster and feels more emotional proof before seeing pricing.
+
+Make these changes:
+
+1. Homepage section order
+
+Change the homepage order to:
+
+Hero
+How It Works
+Men Who Survived
+Life With vs Without F* I Forgot
+Pricing
+Card Examples
+FAQ
+Final CTA
+
+2. Hero headline
+
+Replace the current hero headline with:
+
+DAVE FORGOT.
+YOU DON'T HAVE TO.
+
+Subheadline:
+
+Real greeting cards, automatically remembered, personally written, and mailed on time.
+
+Keep the Dave doghouse hero image.
+
+Keep the main CTA button, but use this text:
+
+AUTOMATE BEING THOUGHTFUL
+
+Keep the smaller floating CTA:
+
+SEE HOW IT WORKS FOR FREE
+TAKES 2 MIN · NO CARD NEEDED
+
+3. How It Works section
+
+Keep the six column layout and images.
+
+Use this exact step copy:
+
+1. WE REMEMBER
+We track birthdays, anniversaries, holidays, and important moments before they become emergencies.
+
+2. WE GET TO KNOW THEM
+We ask a few simple questions about the person, including favorite things, inside jokes, big moments, and what matters most.
+
+3. WE PICK THE PERFECT CARD
+We choose a real card that fits the occasion, the relationship, and the personality.
+
+4. WE WRITE IT FOR YOU
+We create a personal message that sounds thoughtful, specific, and human.
+
+5. WE SEND IT ON TIME
+We print, address, stamp, and mail the card before the date sneaks up on you.
+
+6. YOU GET ALL THE CREDIT
+They feel remembered. You look thoughtful. Everyone wins.
+
+4. Move reviews above pricing
+
+Move the “Men Who Survived” testimonial section so it appears immediately after the How It Works section.
+
+Update the section header to:
+
+MEN WHO SURVIVED
+
+Subtitle:
+
+Real stories. Changed names. Relationships still intact.
+
+Replace testimonials with:
+
+Marcus T.
+Husband, 8 years
+“My wife cried reading the Mother’s Day card. I pretended I wrote every word. F* I Forgot is keeping my marriage intact.”
+
+James R.
+Son, perpetually forgetful
+“I forgot my mom’s birthday three years in a row. Now she brags about what a thoughtful son I am. Life is good.”
+
+Derek M.
+Boyfriend, 2 years
+“My girlfriend thinks I’m way more emotionally available than I actually am. F* I Forgot is doing the Lord’s work.”
+
+Add three sticky notes below the testimonials:
+
+Don’t Forget
+Again
+
+Set it once.
+Take credit forever.
+
+Approved by
+Husbands™
+
+5. Add new comparison section after testimonials
+
+Create a new section after Men Who Survived called:
+
+WHAT HAPPENS IF YOU DO NOTHING?
+
+Use two side by side cards.
+
+Left card title:
+
+WITHOUT F* I FORGOT
+
+Bullets:
+Forget anniversary
+Panic buy flowers
+Write terrible card in parking lot
+Sleep on couch
+Apologize again
+
+Right card title:
+
+WITH F* I FORGOT
+
+Bullets:
+Important dates remembered
+Personal card written for you
+Real card mailed on time
+You look thoughtful
+Relationship survives
+
+Add a short line under the two cards:
+
+One missed anniversary costs more than an entire year of Domestic Peacekeeper.
+
+6. Pricing section
+
+Keep the current pricing cards and plan names.
+
+Above the pricing cards add this small line:
+
+Choose your survival plan. Cancel anytime.
+
+Keep plans:
+
+Bare Minimum
+$6/month
+
+Domestic Peacekeeper
+$15/month
+Most Popular
+
+Legend Status
+$29/month
+
+Keep the plan details mostly the same, but add this sentence under the section title:
+
+Because forgetting once was funny. Repeatedly forgetting becomes a lifestyle.
+
+7. Card examples section
+
+Keep the dark background and card grid.
+
+Add a small explanation above the cards:
+
+We don’t just send generic cards. We use what you tell us about the person to write messages that feel specific, warm, and real.
+
+Add a mini “Before / After” card example near the top of this section if it fits cleanly.
+
+Before:
+Happy Birthday.
+Love, Dave.
+
+After:
+Happy Birthday Mom. Thanks for always answering the phone when I call with random questions. I hope today reminds you how loved and appreciated you are.
+Love, Dave.
+
+8. FAQ section
+
+Keep the title:
+
+QUESTIONS FROM MEN IN THE WILD
+
+Keep FAQ accordion design.
+
+Use these questions:
+
+How does it know what to write?
+Is the card actually mailed, or is it digital?
+Will they know it wasn’t written by me?
+What if I want to review it before it goes out?
+When does the card arrive?
+What occasions does it cover?
+Can I add more people later?
+Can I cancel anytime?
+
+Use clear answers focused on trust, personalization, real mailed cards, and control.
+
+9. Final CTA section
+
+At the bottom, create or update the final CTA to say:
+
+GOOD RELATIONSHIPS DON'T HAPPEN BY ACCIDENT.
+
+Subtext:
+
+We remember. We write. We send. You get the credit.
+
+CTA button:
+
+START EARNING BROWNIE POINTS
+
+Secondary CTA:
+
+SEE HOW IT WORKS FOR FREE
+
+10. Important design rules
+
+Keep the current beige, black, red, and white brand palette.
+Keep the bold condensed headline font style.
+Keep the comedic masculine tone.
+Keep the sticky bottom right CTA.
+Make sure desktop and mobile both look clean.
+Avoid crowded sections.
+Do not remove the For Business link.
+Do not remove Sign In.
+Do not break existing routing, signup, demo, or pricing links.
+Do not create fake checkout behavior.
+Only update homepage layout, copy, and section order.
+
+After making changes, verify:
+The page builds with no errors.
+The navigation still scrolls or routes correctly.
+All CTA buttons still link to the existing correct destinations.
+Mobile layout stacks cleanly.
+No text is cut off.

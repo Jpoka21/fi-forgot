@@ -22,6 +22,8 @@ const faqs = [
   { q: "What if I want to review it before it goes out?", a: "You choose your level of involvement: Full Autopilot (we handle everything), Preview First (we show you the message before mailing), or Require Approval (nothing ships without your sign-off). Most people start on Preview and switch to Autopilot once they trust it." },
   { q: "When does the card arrive?", a: "Cards go out about 7 days before the occasion — enough time to arrive, not so early it's strange. We track each person's mailing address and adjust for holidays and longer delivery windows automatically." },
   { q: "What occasions does it cover?", a: "Birthdays, anniversaries, Mother's Day, Father's Day, Valentine's Day, Christmas, Hanukkah, Thanksgiving, graduations, work anniversaries, 'just because' — and anything else you want to add. If it matters to someone you care about, it can go on the calendar." },
+  { q: "Can I add more people later?", a: "Yes. You can add recipients any time from your dashboard — family members, friends, coworkers, whoever matters. As long as you're within your plan's recipient limit, just add them and we handle everything from there." },
+  { q: "Can I cancel anytime?", a: "Yes. No contracts, no commitments, no cancellation fees. Cancel from your dashboard in one click and you won't be charged again. If you cancel mid-month, you keep access until the end of the billing period." },
 ];
 
 const testimonials = [
@@ -311,7 +313,7 @@ export default function LandingPage() {
             lineHeight: 0.96,
             textShadow: "0 2px 16px rgba(0,0,0,0.85)",
           }}>
-            GREETING CARDS
+            DAVE FORGOT.
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
@@ -322,37 +324,23 @@ export default function LandingPage() {
             textShadow: "0 2px 14px rgba(0,0,0,0.75)",
             marginTop: "0.1em",
           }}>
-            ON AUTOPILOT.
+            YOU DON'T HAVE TO.
           </div>
 
           {/* Thin divider */}
           <div style={{ width: 32, height: 2, background: B.red, borderRadius: 1, marginTop: 10 }} />
 
-          {/* Slogan */}
+          {/* Subheadline */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: "clamp(10.5px, 2.8vw, 13px)",
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.92)",
-            lineHeight: 1.45,
+            fontWeight: 500,
+            color: "rgba(255,255,255,0.88)",
+            lineHeight: 1.5,
             textShadow: "0 1px 10px rgba(0,0,0,0.9)",
             marginTop: 8,
-            letterSpacing: "0.01em",
           }}>
-            You focus on life.<br />We remember everything.
-          </div>
-
-          {/* Supporting paragraph */}
-          <div style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(12px, 3.2vw, 15px)",
-            fontWeight: 500,
-            color: "rgba(255,255,255,0.82)",
-            lineHeight: 1.65,
-            textShadow: "0 1px 8px rgba(0,0,0,0.9)",
-            marginTop: 8,
-          }}>
-            We choose, write, and mail real<br />greeting cards automatically.
+            Real greeting cards, automatically remembered,<br />personally written, and mailed on time.
           </div>
 
           {/* CTA */}
@@ -370,7 +358,7 @@ export default function LandingPage() {
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
               whiteSpace: "nowrap",
             }}>
-            AUTOMATE BEING THOUGHTFUL →
+            AUTOMATE BEING THOUGHTFUL
           </Link>
         </div>
 
@@ -387,7 +375,7 @@ export default function LandingPage() {
             lineHeight: 0.95,
             textShadow: "2px 3px 0 #00000088, -1px -1px 0 #00000033",
           }}>
-            GREETING CARDS
+            DAVE FORGOT.
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
@@ -398,30 +386,18 @@ export default function LandingPage() {
             textShadow: "2px 3px 0 #00000066",
             marginTop: "0.05em",
           }}>
-            ON AUTOPILOT.
-          </div>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(1.3rem, 2.2vw, 2.2rem)",
-            color: "rgba(255,255,255,0.92)",
-            letterSpacing: "0.04em",
-            lineHeight: 1.25,
-            textShadow: "1px 1px 8px rgba(0,0,0,0.75)",
-            marginTop: "0.6em",
-          }}>
-            You focus on life. We remember everything.
+            YOU DON'T HAVE TO.
           </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: "clamp(0.95rem, 1.4vw, 1.25rem)",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.78)",
+            color: "rgba(255,255,255,0.82)",
             lineHeight: 1.6,
-            margin: "0.65em 0 0",
+            margin: "0.8em 0 0",
             textShadow: "1px 1px 6px rgba(0,0,0,0.85)",
           }}>
-            We choose, write, and mail real greeting cards for birthdays,
-            anniversaries, holidays, and every important moment.
+            Real greeting cards, automatically remembered,<br />personally written, and mailed on time.
           </p>
           <Link href="/signup" data-testid="link-cta-hitzone"
             style={{
@@ -435,7 +411,7 @@ export default function LandingPage() {
               textDecoration: "none",
               boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.4)`,
             }}>
-            AUTOMATE BEING THOUGHTFUL →
+            AUTOMATE BEING THOUGHTFUL
           </Link>
         </div>
 
@@ -491,6 +467,87 @@ export default function LandingPage() {
           style={{ position: "absolute", top: "10%", right: "2%", width: "18%", height: "80%", display: "block", cursor: "pointer" }} />
       </div>
 
+      {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
+      <section id="reviews" className="py-20 px-6" style={{ background: B.white }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+          <SectionHeading sub="Real stories. Changed names. Relationships still intact.">
+            Men Who Survived
+          </SectionHeading>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <div
+                key={t.name}
+                className="p-7 rounded-sm shadow-md"
+                style={{
+                  background: B.beige,
+                  border: `1.5px solid ${B.black}10`,
+                  borderTop: `3px solid ${B.red}`,
+                  transform: i % 2 === 0 ? "rotate(-0.7deg)" : "rotate(0.7deg)",
+                }}
+              >
+                <div className="flex gap-0.5 mb-4">
+                  {[...Array(5)].map((_, j) => <span key={j} style={{ color: B.red }}>★</span>)}
+                </div>
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: "#333", lineHeight: 1.7, marginBottom: 20 }}>
+                  "{t.quote}"
+                </p>
+                <div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.black }}>{t.name}</div>
+                  <div style={{ fontSize: "0.75rem", color: B.gray }}>{t.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 flex items-center justify-center gap-8 flex-wrap">
+            <StickyNote rotate={-3}>Don't Forget<br /><span style={{ fontSize: "0.85rem" }}>(Again)</span></StickyNote>
+            <StickyNote rotate={2}>Set it once.<br /><span style={{ fontSize: "0.85rem" }}>Take credit forever.</span></StickyNote>
+            <StickyNote rotate={-1}>Approved by<br /><span style={{ fontSize: "0.85rem" }}>Husbands™</span></StickyNote>
+          </div>
+        </div>
+      </section>
+
+      {/* ── COMPARISON ───────────────────────────────────────────────────── */}
+      <section className="py-20 px-6" style={{ background: B.black }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <SectionHeading inverted>WHAT HAPPENS IF YOU DO NOTHING?</SectionHeading>
+
+          <div className="grid md:grid-cols-2 gap-8 mt-10">
+            {/* Without */}
+            <div style={{ background: "rgba(226,59,46,0.1)", border: "2px solid rgba(226,59,46,0.3)", borderRadius: 10, padding: "32px 28px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", color: "#ff6b6b", marginBottom: 20 }}>
+                WITHOUT F* I FORGOT
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+                {["Forget anniversary", "Panic buy flowers", "Write terrible card in parking lot", "Sleep on couch", "Apologize again"].map(item => (
+                  <li key={item} style={{ display: "flex", alignItems: "center", gap: 12, color: "rgba(255,255,255,0.65)", fontSize: "1rem" }}>
+                    <span style={{ color: "#ff6b6b", fontWeight: 900, fontSize: "1.1rem", flexShrink: 0 }}>✗</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* With */}
+            <div style={{ background: "rgba(0,180,80,0.07)", border: "2px solid rgba(0,160,70,0.3)", borderRadius: 10, padding: "32px 28px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", color: "#5dde8c", marginBottom: 20 }}>
+                WITH F* I FORGOT
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+                {["Important dates remembered", "Personal card written for you", "Real card mailed on time", "You look thoughtful", "Relationship survives"].map(item => (
+                  <li key={item} style={{ display: "flex", alignItems: "center", gap: 12, color: "rgba(255,255,255,0.82)", fontSize: "1rem" }}>
+                    <span style={{ color: "#5dde8c", fontWeight: 900, fontSize: "1.1rem", flexShrink: 0 }}>✓</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <p className="text-center mt-10 italic" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "'Caveat', cursive", fontSize: "1.15rem" }}>
+            One missed anniversary costs more than an entire year of Domestic Peacekeeper.
+          </p>
+        </div>
+      </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section
@@ -515,6 +572,10 @@ export default function LandingPage() {
           <SectionHeading sub="Because forgetting once was funny. Repeatedly forgetting becomes a lifestyle.">
             ✦ Choose Your Survival Plan ✦
           </SectionHeading>
+
+          <p className="text-center mb-10" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.14em", color: B.gray }}>
+            CHOOSE YOUR SURVIVAL PLAN. CANCEL ANYTIME.
+          </p>
 
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan) => (
@@ -583,6 +644,26 @@ export default function LandingPage() {
           <SectionHeading sub="Real card fronts. Real handwritten messages. Made for real people." inverted>
             What the Cards Look Like
           </SectionHeading>
+
+          <p className="text-center mb-10" style={{ color: "rgba(255,255,255,0.55)", fontSize: "1rem", lineHeight: 1.6, maxWidth: 700, margin: "0 auto 40px" }}>
+            We don't just send generic cards. We use what you tell us about the person to write messages that feel specific, warm, and real.
+          </p>
+
+          {/* Before / After example */}
+          <div className="grid md:grid-cols-2 gap-6 mb-14" style={{ maxWidth: 760, margin: "0 auto 56px" }}>
+            <div style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "24px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.2em", color: "#ff6b6b", marginBottom: 12 }}>✗ BEFORE</div>
+              <div style={{ background: "#fffef9", borderRadius: 6, padding: "16px", fontFamily: "'Caveat', cursive", fontSize: "1.1rem", lineHeight: 1.75, color: "#1a1a1a" }}>
+                Happy Birthday.<br />Love, Dave.
+              </div>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(93,222,140,0.3)", borderRadius: 10, padding: "24px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.2em", color: "#5dde8c", marginBottom: 12 }}>✓ AFTER — WITH F* I FORGOT</div>
+              <div style={{ background: "#fffef9", borderRadius: 6, padding: "16px", fontFamily: "'Caveat', cursive", fontSize: "1.05rem", lineHeight: 1.75, color: "#1a1a1a" }}>
+                Happy Birthday Mom. Thanks for always answering the phone when I call with random questions. I hope today reminds you how loved and appreciated you are.<br /><br />Love, Dave.
+              </div>
+            </div>
+          </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
             {cardExamples.map((ex, i) => {
@@ -725,47 +806,6 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
-      <section id="reviews" className="py-20 px-6" style={{ background: B.white }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <SectionHeading sub="Real stories. Changed names. Marriages still intact.">
-            Men Who Survived
-          </SectionHeading>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <div
-                key={t.name}
-                className="p-7 rounded-sm shadow-md"
-                style={{
-                  background: B.beige,
-                  border: `1.5px solid ${B.black}10`,
-                  borderTop: `3px solid ${B.red}`,
-                  transform: i % 2 === 0 ? "rotate(-0.7deg)" : "rotate(0.7deg)",
-                }}
-              >
-                <div className="flex gap-0.5 mb-4">
-                  {[...Array(5)].map((_, j) => <span key={j} style={{ color: B.red }}>★</span>)}
-                </div>
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: "#333", lineHeight: 1.7, marginBottom: 20 }}>
-                  "{t.quote}"
-                </p>
-                <div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.black }}>{t.name}</div>
-                  <div style={{ fontSize: "0.75rem", color: B.gray }}>{t.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 flex items-center justify-center gap-8 flex-wrap">
-            <StickyNote rotate={-3}>Don't Forget<br /><span style={{ fontSize: "0.85rem" }}>(Again)</span></StickyNote>
-            <StickyNote rotate={2}>Set it once.<br /><span style={{ fontSize: "0.85rem" }}>Take credit forever.</span></StickyNote>
-            <StickyNote rotate={-1}>Approved by<br /><span style={{ fontSize: "0.85rem" }}>Husbands™</span></StickyNote>
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
       <section id="faq" className="py-20 px-6" style={{ background: B.beigeD }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -810,7 +850,7 @@ export default function LandingPage() {
             sub="We remember. We write. We send. You get the credit."
             primaryLabel="Start Earning Brownie Points"
             primaryHref="/signup"
-            secondaryLabel="See How It Works"
+            secondaryLabel="See How It Works For Free"
             secondaryHref="/try"
           />
         </div>
