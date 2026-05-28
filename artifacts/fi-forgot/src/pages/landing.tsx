@@ -532,11 +532,21 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Sticky notes */}
-          <div className="mt-16 flex items-center justify-center gap-8 flex-wrap">
-            <StickyNote rotate={-3}>Don't Forget<br /><span style={{ fontSize: "0.85rem" }}>(Again)</span></StickyNote>
-            <StickyNote rotate={2}>Set it once.<br /><span style={{ fontSize: "0.85rem" }}>Take credit forever.</span></StickyNote>
-            <StickyNote rotate={-1}>Approved by<br /><span style={{ fontSize: "0.85rem" }}>Husbands™</span></StickyNote>
+          {/* Sticky notes — big on desktop, compact on mobile */}
+          <div className="mt-16 flex items-center justify-center flex-wrap"
+            style={{ gap: "clamp(16px, 4vw, 48px)" }}>
+            <StickyNote rotate={-3} style={{ fontSize: "clamp(1.2rem, 2.4vw, 1.9rem)", padding: "clamp(14px, 2vw, 26px) clamp(16px, 2.5vw, 30px) clamp(18px, 2.5vw, 32px)", minWidth: "clamp(120px, 18vw, 200px)" }}>
+              Don't Forget<br />
+              <span style={{ fontSize: "0.85em" }}>(Again)</span>
+            </StickyNote>
+            <StickyNote rotate={2} style={{ fontSize: "clamp(1.2rem, 2.4vw, 1.9rem)", padding: "clamp(14px, 2vw, 26px) clamp(16px, 2.5vw, 30px) clamp(18px, 2.5vw, 32px)", minWidth: "clamp(120px, 18vw, 200px)" }}>
+              Set it once.<br />
+              <span style={{ fontSize: "0.85em" }}>Take credit forever.</span>
+            </StickyNote>
+            <StickyNote rotate={-1} style={{ fontSize: "clamp(1.2rem, 2.4vw, 1.9rem)", padding: "clamp(14px, 2vw, 26px) clamp(16px, 2.5vw, 30px) clamp(18px, 2.5vw, 32px)", minWidth: "clamp(120px, 18vw, 200px)" }}>
+              Approved by<br />
+              <span style={{ fontSize: "0.85em" }}>Husbands™</span>
+            </StickyNote>
           </div>
         </div>
       </section>

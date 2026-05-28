@@ -353,10 +353,12 @@ export function StickyNote({
   children,
   rotate = -2,
   className = "",
+  style: overrideStyle = {},
 }: {
   children: ReactNode;
   rotate?: number;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   return (
     <div
@@ -374,6 +376,7 @@ export function StickyNote({
         lineHeight: 1.5,
         minWidth: 110,
         position: "relative" as const,
+        ...overrideStyle,
       }}
     >
       {/* Top tape strip */}
