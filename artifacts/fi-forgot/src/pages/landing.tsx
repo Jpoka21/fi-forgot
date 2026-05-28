@@ -693,17 +693,42 @@ export default function LandingPage() {
           </p>
 
           {/* Before / After example */}
-          <div className="grid md:grid-cols-2 gap-6 mb-14" style={{ maxWidth: 760, margin: "0 auto 56px" }}>
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "24px" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.2em", color: "#ff6b6b", marginBottom: 12 }}>✗ BEFORE</div>
-              <div style={{ background: "#fffef9", borderRadius: 6, padding: "16px", fontFamily: "'Caveat', cursive", fontSize: "1.1rem", lineHeight: 1.75, color: "#1a1a1a" }}>
-                Happy Birthday.<br />Love, Dave.
+          <div className="grid md:grid-cols-2 gap-0 mb-16" style={{ maxWidth: 960, margin: "0 auto 64px", borderRadius: 14, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
+            {/* BEFORE */}
+            <div style={{ background: "#2a0a0a", padding: "32px 36px 36px", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: "50%", background: "#ff4444", color: "#fff", fontWeight: 900, fontSize: "1rem", flexShrink: 0 }}>✗</span>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.18em", color: "#ff6b6b" }}>WITHOUT F*I FORGOT</span>
+              </div>
+              {/* Paper card */}
+              <div style={{ background: "#fffef9", borderRadius: 8, padding: "28px 24px", position: "relative", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
+                <div style={{
+                  position: "absolute", inset: 0, borderRadius: 8,
+                  backgroundImage: "repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.06) 31px, rgba(0,0,0,0.06) 32px)",
+                  backgroundPositionY: "52px", pointerEvents: "none",
+                }} />
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.5rem", lineHeight: 1.8, color: "#1a1a1a", margin: 0, position: "relative" }}>
+                  Happy Birthday.<br /><br />Love, Dave.
+                </p>
               </div>
             </div>
-            <div style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(93,222,140,0.3)", borderRadius: 10, padding: "24px" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.2em", color: "#5dde8c", marginBottom: 12 }}>✓ AFTER — WITH F* I FORGOT</div>
-              <div style={{ background: "#fffef9", borderRadius: 6, padding: "16px", fontFamily: "'Caveat', cursive", fontSize: "1.05rem", lineHeight: 1.75, color: "#1a1a1a" }}>
-                Happy Birthday Mom. Thanks for always answering the phone when I call with random questions. I hope today reminds you how loved and appreciated you are.<br /><br />Love, Dave.
+
+            {/* AFTER */}
+            <div style={{ background: "#0a1f12", padding: "32px 36px 36px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: "50%", background: "#22c55e", color: "#fff", fontWeight: 900, fontSize: "1rem", flexShrink: 0 }}>✓</span>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.18em", color: "#5dde8c" }}>WITH F*I FORGOT</span>
+              </div>
+              {/* Paper card */}
+              <div style={{ background: "#fffef9", borderRadius: 8, padding: "28px 24px", position: "relative", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
+                <div style={{
+                  position: "absolute", inset: 0, borderRadius: 8,
+                  backgroundImage: "repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.06) 31px, rgba(0,0,0,0.06) 32px)",
+                  backgroundPositionY: "52px", pointerEvents: "none",
+                }} />
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.5rem", lineHeight: 1.8, color: "#1a1a1a", margin: 0, position: "relative" }}>
+                  Happy Birthday Mom. Thanks for always answering the phone when I call with random questions. I hope today reminds you how loved and appreciated you are.<br /><br />Love, Dave.
+                </p>
               </div>
             </div>
           </div>
