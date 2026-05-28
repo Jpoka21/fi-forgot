@@ -282,12 +282,12 @@ export default function LandingPage() {
           className="md:hidden w-full"
           style={{ height: "auto", filter: "brightness(1.45)" }}
         />
-        {/* Desktop landscape hero — fills exactly the remaining viewport height */}
+        {/* Desktop landscape hero — full image, scaled to fit viewport height */}
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="hidden md:block w-full"
-          style={{ height: "calc(100vh - 96px)", objectFit: "cover", objectPosition: "center top", filter: "brightness(1.45)" }}
+          style={{ height: "calc(100vh - 96px)", objectFit: "contain", objectPosition: "center center", filter: "brightness(1.45)" }}
         />
 
         {/* Mobile — left-side dark gradient to ensure text readability */}
