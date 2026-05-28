@@ -675,7 +675,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <p className="text-center mt-8 italic" style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>
+          <p className="text-center mt-8 italic" style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1.4rem" }}>
             No relationships were guaranteed in the making of this subscription.
           </p>
         </div>
