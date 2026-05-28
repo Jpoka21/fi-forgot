@@ -176,7 +176,7 @@ export default function LandingPage() {
           ))}
           <Link href="/business"
             style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" }}>
-            FOR BUSINESS
+            F*I FORGOT FOR BUSINESS
           </Link>
         </div>
 
@@ -253,7 +253,7 @@ export default function LandingPage() {
             <div style={{ borderTop: `1px solid ${B.black}12`, margin: "8px 20px 0", paddingTop: 8 }}>
               <Link href="/business" onClick={() => setMenuOpen(false)}
                 style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "8px 0" }}>
-                FOR BUSINESS
+                F*I FORGOT FOR BUSINESS
                 <span style={{ fontSize: "0.55rem", letterSpacing: "0.15em", background: B.red, color: "#fff", padding: "2px 6px", borderRadius: 2 }}>NEW</span>
               </Link>
               {isLoggedIn ? (
