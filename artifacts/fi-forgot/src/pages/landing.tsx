@@ -340,14 +340,14 @@ export default function LandingPage() {
             textShadow: "0 1px 10px rgba(0,0,0,0.9)",
             marginTop: 8,
           }}>
-            Real greeting cards, automatically remembered,<br />personally written, and mailed on time.
+            We write and mail real cards before you forget.
           </div>
 
           {/* CTA */}
           <Link href="/signup" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
-              marginTop: 22, alignSelf: "flex-start",
+              marginTop: 14, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
               fontSize: "clamp(13px, 3.64vw, 17px)",
