@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
+interface CardDesign { id: string; name: string; category?: string; imageUrl?: string; libraryCardId?: string; }
 
 /* ── Brand colours – personal palette ───────────────────────────────────── */
 const BEIGE = "#F2E6D3";
@@ -385,6 +386,10 @@ export default function DashboardPage() {
   const [timingPickerOpen, setTimingPickerOpen]     = useState<string | null>(null);
   const [hoveredBriefing, setHoveredBriefing]       = useState<string | null>(null);
   const [viewingCardId, setViewingCardId]           = useState<string | null>(null);
+  const [cardDesignMap, setCardDesignMap]           = useState<Record<string, CardDesign>>({});
+  const [regenLoadingIds, setRegenLoadingIds]       = useState<Record<string, boolean>>({});
+  const [excludedDesignIds, setExcludedDesignIds]   = useState<Record<string, string[]>>({});
+  const [lightboxDesignCard, setLightboxDesignCard] = useState<string | null>(null);
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
@@ -422,6 +427,42 @@ export default function DashboardPage() {
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
+
+  // Fetch a card design for each approval card that doesn't have one yet
+  useEffect(() => {
+    const appCards = cards.filter(c => c.status === "Ready for approval");
+    for (const card of appCards) {
+      if (cardDesignMap[card.id] || regenLoadingIds[card.id]) continue;
+      setRegenLoadingIds(prev => ({ ...prev, [card.id]: true }));
+      const params = new URLSearchParams({ eventType: card.holiday });
+      if (card.approvedMessage) params.set("cardMessage", card.approvedMessage);
+      fetch(`/api/business-cards/pick-card?${params.toString()}`)
+        .then(r => r.json())
+        .then((d: { card?: CardDesign }) => {
+          if (d.card) setCardDesignMap(prev => ({ ...prev, [card.id]: d.card! }));
+        })
+        .catch(() => {})
+        .finally(() => setRegenLoadingIds(prev => ({ ...prev, [card.id]: false })));
+    }
+  }, [cards]);
+
+  async function regenCardDesign(cardId: string, holiday: string, message: string) {
+    const current = cardDesignMap[cardId];
+    const prevExcluded = excludedDesignIds[cardId] ?? [];
+    const newExcluded = current ? [...prevExcluded, String(current.id)] : prevExcluded;
+    setExcludedDesignIds(prev => ({ ...prev, [cardId]: newExcluded }));
+    setRegenLoadingIds(prev => ({ ...prev, [cardId]: true }));
+    setCardDesignMap(prev => { const n = { ...prev }; delete n[cardId]; return n; });
+    try {
+      const params = new URLSearchParams({ eventType: holiday });
+      if (message) params.set("cardMessage", message);
+      if (newExcluded.length) params.set("excludeIds", newExcluded.join(","));
+      const r = await fetch(`/api/business-cards/pick-card?${params.toString()}`);
+      const d = await r.json() as { card?: CardDesign };
+      if (d.card) setCardDesignMap(prev => ({ ...prev, [cardId]: d.card! }));
+    } catch {}
+    setRegenLoadingIds(prev => ({ ...prev, [cardId]: false }));
+  }
 
   const awaitingApproval  = cards.filter((c) => c.status === "Ready for approval");
   const disastersAvoided  = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
@@ -1273,6 +1314,72 @@ export default function DashboardPage() {
                             READY TO REVIEW
                           </span>
                         </div>
+
+                        {/* Card design picker */}
+                        <div style={{ padding: "12px 18px 0" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                            <span style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, textTransform: "uppercase" as const, fontFamily: "'Inter', sans-serif" }}>
+                              Card Design
+                            </span>
+                            {(excludedDesignIds[card.id]?.length ?? 0) < 4 && (
+                              <button
+                                onClick={() => regenCardDesign(card.id, card.holiday, text)}
+                                disabled={!!regenLoadingIds[card.id] || !!editActionId}
+                                style={{
+                                  background: "transparent", border: `1px solid ${BLACK}20`, borderRadius: 20,
+                                  color: regenLoadingIds[card.id] ? GRAY : BLACK,
+                                  fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 600,
+                                  padding: "3px 10px", cursor: regenLoadingIds[card.id] ? "not-allowed" : "pointer",
+                                  display: "flex", alignItems: "center", gap: 5,
+                                }}
+                              >
+                                {regenLoadingIds[card.id]
+                                  ? <><Loader2 size={10} className="animate-spin" /> Picking…</>
+                                  : "↻ Try another"}
+                              </button>
+                            )}
+                          </div>
+
+                          {regenLoadingIds[card.id] ? (
+                            <div style={{ height: 120, borderRadius: 8, background: `${BLACK}05`, border: `1px solid ${BLACK}10`, display: "flex", alignItems: "center", justifyContent: "center", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", marginBottom: 12 }}>
+                              Finding a card design…
+                            </div>
+                          ) : cardDesignMap[card.id]?.imageUrl ? (
+                            <div
+                              onClick={() => setLightboxDesignCard(card.id)}
+                              style={{ cursor: "zoom-in", borderRadius: 8, overflow: "hidden", border: `1px solid ${BLACK}14`, position: "relative", marginBottom: 12 }}
+                            >
+                              <img
+                                src={cardDesignMap[card.id].imageUrl}
+                                alt={cardDesignMap[card.id].name}
+                                style={{ width: "100%", display: "block", maxHeight: 220, objectFit: "contain", background: BEIGE }}
+                              />
+                              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.55))", padding: "16px 12px 8px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                                <span style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.78rem" }}>{cardDesignMap[card.id].name}</span>
+                                <span style={{ background: "rgba(255,255,255,0.18)", borderRadius: 5, padding: "3px 8px", fontSize: "0.65rem", color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>🔍 Full size</span>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+
+                        {/* Lightbox */}
+                        {lightboxDesignCard === card.id && cardDesignMap[card.id]?.imageUrl && (
+                          <div
+                            onClick={() => setLightboxDesignCard(null)}
+                            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, cursor: "zoom-out" }}
+                          >
+                            <img
+                              src={cardDesignMap[card.id].imageUrl}
+                              alt={cardDesignMap[card.id].name}
+                              style={{ maxWidth: "100%", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, boxShadow: "0 0 60px rgba(0,0,0,0.8)" }}
+                            />
+                            <button
+                              onClick={e => { e.stopPropagation(); setLightboxDesignCard(null); }}
+                              style={{ position: "absolute", top: 20, right: 20, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#fff", fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif" }}
+                            >✕</button>
+                            <div style={{ position: "absolute", bottom: 20, color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}>Click anywhere to close</div>
+                          </div>
+                        )}
 
                         {/* Message textarea */}
                         <div style={{ padding: "16px 18px" }}>
