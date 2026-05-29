@@ -344,7 +344,7 @@ export default function LandingPage() {
           </div>
 
           {/* CTA */}
-          <Link href="/signup" data-testid="link-cta-hitzone"
+          <Link href="/try" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
               marginTop: 14, alignSelf: "flex-start",
@@ -399,7 +399,7 @@ export default function LandingPage() {
           }}>
             Real greeting cards, automatically remembered,<br />personally written, and mailed on time.
           </p>
-          <Link href="/signup" data-testid="link-cta-hitzone"
+          <Link href="/try" data-testid="link-cta-hitzone"
             style={{
               display: "inline-block", marginTop: "1.2em", alignSelf: "flex-start",
               background: B.red, color: "#fff",
