@@ -1,0 +1,46 @@
+Update the mobile homepage hero and header only. Do not change desktop unless the same styles are shared and unavoidable.
+
+Use the mobile screenshot as the reference.
+
+Make these changes:
+
+1. Mobile header
+    Increase the mobile header height slightly, about 15 percent taller than it is now.
+    Increase the F* I Forgot logo size by about 15 to 20 percent.
+    Add a little more left padding around the logo, about 8 to 12px more than it has now.
+    Keep the Dashboard button and hamburger menu in the same general position.
+    Do not make the header feel oversized. It should still feel tight and premium.
+2. Logo tagline
+    The tagline under the logo, “Relationship Damage Control,” is too small on mobile.
+    Keep the tagline visible, but make it readable.
+    Increase its font size and letter spacing slightly if needed.
+    Make sure it does not crowd the logo or make the header look messy.
+3. Value proposition text
+    Increase the size of this line on mobile by about 20 percent:
+
+“We write and mail real cards before you forget.”
+
+This line should be easier to read and should feel like the main explanation of the product.
+
+4. Red underline
+    Remove the small red underline under the headline in the mobile hero section.
+    If it is used elsewhere as a decorative divider, remove it only from this mobile hero area.
+5. Hero height
+    Reduce the mobile hero section height by about 10 percent so visitors reach the next section sooner.
+    Do not crop important content awkwardly.
+    Keep the main visual, Dave, the doghouse, and the cards looking intentional.
+    Do not edit the actual image file.
+6. Do not change CTA behavior
+    Do not change the “Automate Being Thoughtful” button.
+    Do not change the hovering “See How It Works For Free” bar.
+    Do not change their copy, placement logic, or behavior.
+7. Logged in state
+    Do not change the “My Dashboard” button logic. It appears because I am signed in.
+
+After making the changes, check the homepage on mobile width around 390px wide. Make sure:
+The logo is easier to see.
+The tagline is readable.
+The header feels slightly more substantial.
+The value proposition line is more readable.
+The hero is slightly shorter.
+The floating CTA still works and does not cover important content awkwardly.
