@@ -309,7 +309,7 @@ export default function LandingPage() {
 
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 16, top: 32, maxWidth: "54vw",
+          position: "absolute", left: 16, top: 32, maxWidth: "44vw",
           lineHeight: "normal", zIndex: 2,
         }}>
           {/* Headline */}
