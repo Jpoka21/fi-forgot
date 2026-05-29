@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { saveRecipient, saveCard, availableHolidays } from "@/lib/data";
@@ -78,6 +78,7 @@ export default function TryPage() {
   const [excludedDesignIds, setExcluded] = useState<string[]>([]);
   const [lightboxOpen, setLightbox] = useState(false);
   const [aiEditLoading, setAiEditLoading] = useState<string|null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [previewOccasion, setPreviewOccasion] = useState<string>(draft.previewOccasion ?? "");
 
   // ── Signup overlay ──────────────────────────────────────────────────────
@@ -695,14 +696,17 @@ export default function TryPage() {
 
               <div style={{ padding: "16px" }}>
                 <textarea
+                  ref={textareaRef}
                   value={editedText}
                   onChange={e => setEdited(e.target.value)}
                   style={{ width: "100%", minHeight: 160, border: `1.5px solid ${BLACK}14`, borderRadius: 10, padding: "14px", fontSize: "1.15rem", fontFamily: "'Caveat', cursive", lineHeight: 1.7, color: "#111111", background: BEIGE, resize: "vertical", boxSizing: "border-box", outline: "none", fontWeight: 600 } as React.CSSProperties}
                 />
 
-                {/* AI quick edits */}
+                {/* F*I quick edits */}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-                  <span style={{ fontSize: "0.65rem", fontWeight: 700, color: GRAY, alignSelf: "center", fontFamily: "'Inter', sans-serif" }}>AI edits:</span>
+                  <span style={{ fontSize: "0.65rem", fontWeight: 700, color: GRAY, alignSelf: "center", fontFamily: "'Inter', sans-serif" }}>
+                    <span style={{ fontFamily: "'Bebas Neue', cursive", color: RED, fontSize: "0.75rem", letterSpacing: "0.04em" }}>F*I</span> edits:
+                  </span>
                   {[
                     { label: "Shorter",    instruction: "Make it significantly shorter and more punchy." },
                     { label: "Funnier",    instruction: "Add genuine humor. Make it funnier without losing the heart." },
@@ -714,6 +718,13 @@ export default function TryPage() {
                       {label}
                     </button>
                   ))}
+                  <button
+                    onClick={() => { setEdited(""); setTimeout(() => textareaRef.current?.focus(), 0); }}
+                    disabled={!!aiEditLoading}
+                    style={{ fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px", borderRadius: 8, border: `1px solid ${RED}40`, background: WHITE, color: RED, cursor: aiEditLoading ? "default" : "pointer", display: "flex", alignItems: "center", gap: 5, fontFamily: "'Inter', sans-serif" }}
+                  >
+                    ✏️ Write your own
+                  </button>
                 </div>
               </div>
               </>
