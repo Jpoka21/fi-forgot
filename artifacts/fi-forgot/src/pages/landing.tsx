@@ -289,7 +289,7 @@ export default function LandingPage() {
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
-        className="max-h-[85vh] md:max-h-none"
+        className=""
         style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
         {/* Mobile portrait hero */}
