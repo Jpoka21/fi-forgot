@@ -316,7 +316,7 @@ export default function LandingPage() {
 
         {/* Mobile — top-center headline + subheadline */}
         <div className="md:hidden flex flex-col items-center" style={{
-          position: "absolute", top: 54, left: "10%", right: "10%",
+          position: "absolute", top: 14, left: "10%", right: "10%",
           textAlign: "center", lineHeight: "normal", zIndex: 2,
         }}>
           <div style={{
