@@ -237,6 +237,12 @@ export default function LandingPage() {
 
 
         {menuOpen && (
+          <>
+          <div
+            onClick={() => setMenuOpen(false)}
+            style={{ position: "fixed", inset: 0, zIndex: -1 }}
+            aria-hidden="true"
+          />
           <div style={{ background: B.beige, borderTop: `1px solid ${B.black}12`, padding: "8px 0 12px" }}>
             {[
               { label: "How It Works", href: "#how-it-works" },
@@ -269,6 +275,7 @@ export default function LandingPage() {
               )}
             </div>
           </div>
+          </>
         )}
       </nav>
 
