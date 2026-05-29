@@ -307,32 +307,38 @@ export default function LandingPage() {
           style={{ height: "calc(100vh - 96px)", objectFit: "contain", objectPosition: "center center", filter: "brightness(1.45)" }}
         />
 
-        {/* Mobile — left-side dark gradient to ensure text readability */}
+        {/* Mobile — top gradient for headline readability */}
         <div className="md:hidden" style={{
-          position: "absolute", inset: 0, zIndex: 1,
-          background: "linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 55%, transparent 80%)",
+          position: "absolute", top: 0, left: 0, right: 0, height: "28%", zIndex: 1,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 70%, transparent 100%)",
           pointerEvents: "none",
         }} />
 
-        {/* Mobile text overlay */}
-        <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 16, top: 215, maxWidth: "54vw",
-          lineHeight: "normal", zIndex: 2,
+        {/* Mobile — left gradient at shoulder level for CTA readability */}
+        <div className="md:hidden" style={{
+          position: "absolute", top: "35%", bottom: "30%", left: 0, width: "60%", zIndex: 1,
+          background: "linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)",
+          pointerEvents: "none",
+        }} />
+
+        {/* Mobile — top-center headline + subheadline */}
+        <div className="md:hidden flex flex-col items-center" style={{
+          position: "absolute", top: 14, left: "10%", right: "10%",
+          textAlign: "center", lineHeight: "normal", zIndex: 2,
         }}>
-          {/* Headline */}
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 6.5vw, 34px)",
+            fontSize: "clamp(28px, 7vw, 36px)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.96,
-            textShadow: "0 2px 16px rgba(0,0,0,0.85)",
+            textShadow: "0 2px 16px rgba(0,0,0,0.9)",
           }}>
             DAVE FORGOT.
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 6.5vw, 34px)",
+            fontSize: "clamp(28px, 7vw, 36px)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.96,
@@ -340,25 +346,26 @@ export default function LandingPage() {
           }}>
             YOU DON'T HAVE TO.
           </div>
-
-          {/* Subheadline */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(12.5px, 3.35vw, 15.5px)",
+            fontSize: "clamp(12px, 3.1vw, 14.5px)",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.88)",
+            color: "rgba(255,255,255,0.9)",
             lineHeight: 1.4,
             textShadow: "0 1px 10px rgba(0,0,0,0.9)",
             marginTop: 6,
           }}>
             We write and mail real cards before you forget.
           </div>
+        </div>
 
-          {/* CTA */}
+        {/* Mobile — CTA at Dave's shoulder level, left aligned */}
+        <div className="md:hidden" style={{
+          position: "absolute", left: 16, top: "42%", zIndex: 2,
+        }}>
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
-              marginTop: 10, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
               fontSize: "clamp(13px, 3.64vw, 17px)",
@@ -366,7 +373,7 @@ export default function LandingPage() {
               padding: "12px 18px",
               borderRadius: 2,
               textDecoration: "none",
-              boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.55)",
               whiteSpace: "nowrap",
             }}>
             AUTOMATE BEING THOUGHTFUL
