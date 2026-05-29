@@ -110,8 +110,14 @@ export default function TryPage() {
 
   const holidays = availableHolidays(relationship);
 
+  const EVENT_CAP = 6;
+
   function toggleEvent(h: string) {
-    setEvents(prev => prev.includes(h) ? prev.filter(e => e !== h) : [...prev, h]);
+    setEvents(prev => {
+      if (prev.includes(h)) return prev.filter(e => e !== h);
+      if (prev.length >= EVENT_CAP) return prev;
+      return [...prev, h];
+    });
   }
 
   function togglePersonality(tag: string) {
@@ -236,7 +242,7 @@ export default function TryPage() {
     localStorage.setItem("fi_forgot_pending_recipient", JSON.stringify(pendingRecipient));
     localStorage.removeItem(LS_KEY);
 
-    signup(sigupName, signupEmail);
+    signup(sigupName, signupEmail, true);
 
     // Save recipient directly (signup sets up localStorage storage)
     const recipientId = `r_${Date.now()}`;
@@ -287,7 +293,7 @@ export default function TryPage() {
     }
 
     setSignupLoading(false);
-    setLocation("/dashboard");
+    setLocation("/subscribe");
   }
 
   // ── Validation helpers ────────────────────────────────────────────────────
@@ -404,6 +410,20 @@ export default function TryPage() {
             </div>
 
             {sectionCard(<>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ fontSize: "0.75rem", color: GRAY, fontFamily: "'Inter', sans-serif" }}>
+                  {selectedEvents.length < EVENT_CAP
+                    ? `${selectedEvents.length} of ${EVENT_CAP} selected`
+                    : <span style={{ color: RED, fontWeight: 600 }}>Max {EVENT_CAP} reached — upgrade for more</span>}
+                </span>
+                {selectedEvents.length > 0 && (
+                  <span style={{ fontSize: "0.7rem", color: GRAY, fontFamily: "'Inter', sans-serif" }}>
+                    {Array.from({ length: EVENT_CAP }, (_, i) => (
+                      <span key={i} style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: i < selectedEvents.length ? RED : `${BLACK}20`, marginLeft: 3 }} />
+                    ))}
+                  </span>
+                )}
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {holidays.map(h => {
                   const checked = selectedEvents.includes(h);
@@ -737,9 +757,6 @@ export default function TryPage() {
               style={{ width: "100%", padding: "18px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 4px 20px rgba(226,59,46,0.4)", lineHeight: 1.2 }}>
               LIKE IT? SET IT ONCE.<br />LOOK GREAT FOREVER.
             </button>
-            <p style={{ textAlign: "center", fontSize: "0.75rem", color: GRAY, marginTop: 10, fontFamily: "'Inter', sans-serif" }}>
-              No credit card required to start. Cancel anytime.
-            </p>
           </div>
         )}
       </div>

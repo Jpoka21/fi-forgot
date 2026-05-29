@@ -17,6 +17,8 @@ import ReminderSettingsPage from "@/pages/reminder-settings";
 import AdminPage from "@/pages/admin";
 import BriefingPage from "@/pages/briefing";
 import TryPage from "@/pages/try";
+import SubscribePage from "@/pages/subscribe";
+import CheckoutSuccessPage from "@/pages/checkout-success";
 import DemoPreviewPage from "@/pages/demo-preview";
 import BusinessPage from "@/pages/business";
 import BusinessDemoPage from "@/pages/business-demo";
@@ -112,6 +114,8 @@ function Router() {
         <ProtectedRoute component={AdminPage} />
       </Route>
       <Route path="/try" component={TryPage} />
+      <Route path="/subscribe" component={SubscribePage} />
+      <Route path="/checkout/success" component={CheckoutSuccessPage} />
       <Route path="/demo/:id" component={DemoPreviewPage} />
       <Route path="/business" component={BusinessPage} />
       <Route path="/business-demo" component={BusinessDemoPage} />
@@ -127,7 +131,7 @@ function Router() {
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo"];
+const HIDE_TRY_BUTTON_ON = ["/try", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo"];
 
 function FloatingTryButton() {
   const [location] = useLocation();

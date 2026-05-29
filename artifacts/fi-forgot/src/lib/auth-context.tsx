@@ -344,13 +344,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (active) saveActiveWorkspaceId(active.id);
   }
 
-  function signup(name: string, email: string) {
+  function signup(name: string, email: string, skipOnboarding = false) {
     const u = { name, email };
     setUser(u);
     setIsLoggedIn(true);
-    setOnboardingComplete(false);
+    setOnboardingComplete(skipOnboarding);
     localStorage.setItem("fi_forgot_user", JSON.stringify(u));
-    localStorage.removeItem("fi_forgot_onboarding");
+    if (skipOnboarding) {
+      localStorage.setItem("fi_forgot_onboarding", "true");
+    } else {
+      localStorage.removeItem("fi_forgot_onboarding");
+    }
 
     // Create personal workspace
     const personal = makePersonalWorkspace();

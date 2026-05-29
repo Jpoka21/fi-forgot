@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import stripeRouter from "./stripe";
 import generateCardRouter from "./generate-card";
 import editCardRouter from "./edit-card";
 import adminRouter from "./admin";
@@ -40,5 +41,6 @@ router.use(businessApprovalRouter);
 router.use(businessSchedulerTriggerRouter);
 router.use(cardLibraryRouter);
 router.use(personalCardsRouter);
+router.use(stripeRouter);
 
 export default router;
