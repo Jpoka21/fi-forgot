@@ -1,4 +1,4 @@
-import { Component, ComponentType, ReactNode } from "react";
+import { Component, ComponentType, ReactNode, useState, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { StampDistressFilter } from "@/components/brand";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -131,6 +131,21 @@ const HIDE_TRY_BUTTON_ON = ["/try", "/demo", "/dashboard", "/recipients", "/onbo
 
 function FloatingTryButton() {
   const [location] = useLocation();
+  const [revealed, setRevealed] = useState(() => typeof window !== "undefined" && window.innerWidth >= 768);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || window.innerWidth >= 768) return;
+    if (revealed) return;
+
+    const onScroll = () => {
+      if (window.scrollY >= 75) {
+        setRevealed(true);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [revealed]);
 
   const hide = HIDE_TRY_BUTTON_ON.some(p => location === p || location.startsWith(p + "/"));
   if (hide) return null;
@@ -154,7 +169,10 @@ function FloatingTryButton() {
         alignItems: "center",
         gap: 1,
         whiteSpace: "nowrap",
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? "translateY(0)" : "translateY(80px)",
+        transition: "opacity 0.3s ease, transform 0.3s ease",
+        pointerEvents: revealed ? "auto" : "none",
         cursor: "pointer",
       }}
     >
