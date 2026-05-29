@@ -316,7 +316,7 @@ export default function LandingPage() {
 
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 16, top: 32, maxWidth: "44vw",
+          position: "absolute", left: 16, top: 190, maxWidth: "54vw",
           lineHeight: "normal", zIndex: 2,
         }}>
           {/* Headline */}
@@ -357,7 +357,7 @@ export default function LandingPage() {
           {/* CTA */}
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              display: "inline-flex", alignItems: "center",
               marginTop: 10, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
@@ -367,8 +367,7 @@ export default function LandingPage() {
               borderRadius: 2,
               textDecoration: "none",
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
-              maxWidth: "100%",
-              textAlign: "center" as const,
+              whiteSpace: "nowrap",
             }}>
             AUTOMATE BEING THOUGHTFUL
           </Link>
