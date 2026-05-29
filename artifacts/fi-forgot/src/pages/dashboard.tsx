@@ -311,13 +311,11 @@ function RecipientCard({
               <span key={e} style={{
                 fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, fontWeight: 600,
                 display: "flex", alignItems: "center", gap: 3,
-                background: locked ? `${BLACK}05` : isNext ? `${RED}13` : `${BLACK}07`,
-                color: locked ? `${BLACK}40` : isNext ? RED : "#475569",
-                border: `1px solid ${locked ? `${BLACK}08` : isNext ? `${RED}30` : `${BLACK}10`}`,
-                textDecoration: locked ? "line-through" : "none",
-                opacity: locked ? 0.6 : 1,
+                background: locked ? `${BLACK}08` : isNext ? `${RED}13` : `${BLACK}07`,
+                color: locked ? "#6b7280" : isNext ? RED : "#475569",
+                border: `1px solid ${locked ? `${BLACK}15` : isNext ? `${RED}30` : `${BLACK}10`}`,
               }}>
-                {locked && <Lock size={9} style={{ flexShrink: 0 }} />}
+                {locked && <Lock size={9} style={{ flexShrink: 0, color: "#9ca3af" }} />}
                 {e}{!locked && days !== null && days <= 45 ? ` · ${days}d` : ""}
               </span>
             );
@@ -333,7 +331,7 @@ function RecipientCard({
               background: `${RED}10`, color: RED, border: `1px solid ${RED}30`,
               cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
             }}>
-              <Lock size={9} /> {lockedCount} locked
+              <Lock size={9} /> Unlock {lockedCount}
             </button>
           )}
         </div>
