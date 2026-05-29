@@ -357,7 +357,7 @@ export default function LandingPage() {
 
         {/* Desktop text overlay */}
         <div className="hidden md:flex flex-col" style={{
-          position: "absolute", top: "8%", left: "4%", width: "44%",
+          position: "absolute", top: "4%", left: "4%", width: "44%",
           lineHeight: "normal",
         }}>
           <div style={{
