@@ -329,7 +329,7 @@ export default function LandingPage() {
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.96,
-            textShadow: "0 2px 14px rgba(0,0,0,0.75)",
+            textShadow: "1px 1px 0 rgba(0,0,0,0.95), -1px -1px 0 rgba(0,0,0,0.95), 1px -1px 0 rgba(0,0,0,0.95), -1px 1px 0 rgba(0,0,0,0.95), 0 2px 18px rgba(0,0,0,1)",
           }}>
             YOU DON'T HAVE TO.
           </div>
@@ -357,7 +357,7 @@ export default function LandingPage() {
               fontSize: "clamp(13px, 3.64vw, 17px)",
               letterSpacing: "0.08em",
               padding: "12px 18px",
-              borderRadius: 5,
+              borderRadius: 2,
               textDecoration: "none",
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
               maxWidth: "100%",
