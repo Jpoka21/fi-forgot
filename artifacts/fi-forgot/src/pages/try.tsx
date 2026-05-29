@@ -356,14 +356,24 @@ export default function TryPage() {
             </>)}
 
             {sectionCard(<>
-              <label style={labelStyle()}>Your name (for the card signature)</label>
+              <label style={labelStyle()}>How should your cards be signed?</label>
               <input
                 style={inputStyle()}
-                placeholder="Dave, Uncle Jim, Dad…"
+                placeholder="Love, James · James · Dad · Your Secret Admirer…"
                 value={senderName}
                 onChange={e => setSender(e.target.value)}
               />
-              <p style={{ fontSize: "0.72rem", color: GRAY, margin: "6px 0 0" }}>This is how your cards will be signed.</p>
+              <p style={{ fontSize: "0.72rem", color: GRAY, margin: "6px 0 0", lineHeight: 1.5 }}>
+                Type it exactly how you want it on the card — sign-off and all.{" "}
+                <span style={{ color: BLACK, fontWeight: 600 }}>Include "Love," if you want it.</span>
+              </p>
+              {senderName.trim() && (
+                <div style={{ marginTop: 10, background: BEIGE, border: `1px dashed ${BLACK}20`, borderRadius: 8, padding: "10px 14px", fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: BLACK, lineHeight: 1.6 }}>
+                  <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, fontFamily: "'Inter', sans-serif", display: "block", marginBottom: 4, textTransform: "uppercase" }}>Preview</span>
+                  "…Happy Birthday, Sarah.<br />
+                  <span style={{ marginLeft: 0 }}>{senderName}"</span>
+                </div>
+              )}
             </>)}
 
             <button
