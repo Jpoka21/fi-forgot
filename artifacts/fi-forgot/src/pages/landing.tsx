@@ -315,7 +315,7 @@ export default function LandingPage() {
           {/* Headline */}
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(22px, 5.5vw, 29px)",
+            fontSize: "clamp(26px, 6.5vw, 34px)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.96,
@@ -325,7 +325,7 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(22px, 5.5vw, 29px)",
+            fontSize: "clamp(26px, 6.5vw, 34px)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.96,
@@ -337,12 +337,12 @@ export default function LandingPage() {
           {/* Subheadline */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(11px, 2.9vw, 13.5px)",
+            fontSize: "clamp(12.5px, 3.35vw, 15.5px)",
             fontWeight: 500,
             color: "rgba(255,255,255,0.88)",
             lineHeight: 1.4,
             textShadow: "0 1px 10px rgba(0,0,0,0.9)",
-            marginTop: 5,
+            marginTop: 6,
           }}>
             We write and mail real cards before you forget.
           </div>
@@ -351,12 +351,12 @@ export default function LandingPage() {
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
-              marginTop: 9, alignSelf: "flex-start",
+              marginTop: 10, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(12px, 3.3vw, 15px)",
+              fontSize: "clamp(13px, 3.64vw, 17px)",
               letterSpacing: "0.08em",
-              padding: "9px 14px",
+              padding: "12px 18px",
               borderRadius: 5,
               textDecoration: "none",
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
