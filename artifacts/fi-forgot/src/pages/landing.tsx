@@ -314,12 +314,6 @@ export default function LandingPage() {
           pointerEvents: "none",
         }} />
 
-        {/* Mobile — left gradient at shoulder level for CTA readability */}
-        <div className="md:hidden" style={{
-          position: "absolute", top: "35%", bottom: "30%", left: 0, width: "60%", zIndex: 1,
-          background: "linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)",
-          pointerEvents: "none",
-        }} />
 
         {/* Mobile — top-center headline + subheadline */}
         <div className="md:hidden flex flex-col items-center" style={{
