@@ -27,3 +27,4 @@ export * from "./business-settings";
 export * from "./business-card-queue";
 export * from "./ai-card-library";
 export * from "./users";
+export * from "./personal-recipients";

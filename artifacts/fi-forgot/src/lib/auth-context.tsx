@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents, RecipientAddress } from "./data";
+import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents, RecipientAddress, setServerSyncUserId, hydrateRecipientsFromServer } from "./data";
 import type { Plan } from "./plan";
 
 export interface OnboardingData {
@@ -244,6 +244,22 @@ function registerEmailOnServer(email: string, businessId: string, bizType?: stri
   }).catch(() => {});
 }
 
+function connectSession(email: string, name?: string) {
+  fetch("/api/auth/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email.toLowerCase().trim(), name }),
+  })
+    .then(r => r.json())
+    .then((d: { userId?: string }) => {
+      if (d.userId) {
+        setServerSyncUserId(d.userId);
+        hydrateRecipientsFromServer(d.userId).catch(() => {});
+      }
+    })
+    .catch(() => {});
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(true);
@@ -265,6 +281,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(stored);
         setUser(parsed);
         setIsLoggedIn(true);
+        connectSession(parsed.email as string, parsed.name as string | undefined);
         const ob = localStorage.getItem("fi_forgot_onboarding");
         let ws = loadWorkspaces();
         const hasBusiness = ws.some(w => w.type === "business");
@@ -342,6 +359,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const active = ws.find(w => w.id === activeId) ?? ws[0] ?? null;
     setActiveWorkspace(active);
     if (active) saveActiveWorkspaceId(active.id);
+
+    connectSession(email, displayName);
   }
 
   function signup(name: string, email: string, skipOnboarding = false) {
@@ -363,6 +382,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveActiveWorkspaceId(personal.id);
     setWorkspaces(ws);
     setActiveWorkspace(personal);
+
+    connectSession(email, name);
   }
 
   function businessSignup(name: string, email: string, businessName: string, businessType: string) {
@@ -460,6 +481,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setOnboardingComplete(true);
     setWorkspaces([]);
     setActiveWorkspace(null);
+    setServerSyncUserId(null);
     localStorage.removeItem("fi_forgot_user");
     localStorage.removeItem("fi_forgot_onboarding");
     localStorage.removeItem("fi_forgot_workspaces");

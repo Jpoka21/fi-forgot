@@ -701,6 +701,41 @@ export function getRecipient(id: string): Recipient | undefined {
   return loadRecipients().find((r) => r.id === id);
 }
 
+// ─── Server sync ─────────────────────────────────────────────────────────────
+
+let _serverUserId: string | null = null;
+
+export function setServerSyncUserId(id: string | null): void {
+  _serverUserId = id;
+}
+
+function syncHeaders(): HeadersInit {
+  return _serverUserId ? { "Content-Type": "application/json", "x-user-id": _serverUserId } : { "Content-Type": "application/json" };
+}
+
+/** On login: fetch server recipients. If server has data, replace local. If not, push local to server. */
+export async function hydrateRecipientsFromServer(userId: string): Promise<void> {
+  try {
+    const res = await fetch("/api/recipients", { headers: { "x-user-id": userId } });
+    if (!res.ok) return;
+    const { recipients: serverRecipients } = await res.json() as { recipients: Recipient[] };
+    if (serverRecipients.length > 0) {
+      localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(serverRecipients));
+    } else {
+      const local = loadRecipients();
+      if (local.length > 0) {
+        await Promise.all(local.map(r =>
+          fetch(`/api/recipients/${r.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", "x-user-id": userId },
+            body: JSON.stringify(r),
+          })
+        ));
+      }
+    }
+  } catch { /* non-blocking */ }
+}
+
 export function saveRecipient(recipient: Recipient): void {
   const all = loadRecipients();
   const idx = all.findIndex((r) => r.id === recipient.id);
@@ -710,11 +745,26 @@ export function saveRecipient(recipient: Recipient): void {
     all.push(recipient);
   }
   localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(all));
+
+  if (_serverUserId) {
+    fetch(`/api/recipients/${recipient.id}`, {
+      method: "PUT",
+      headers: syncHeaders(),
+      body: JSON.stringify(recipient),
+    }).catch(() => {});
+  }
 }
 
 export function deleteRecipient(id: string): void {
   const all = loadRecipients().filter((r) => r.id !== id);
   localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(all));
+
+  if (_serverUserId) {
+    fetch(`/api/recipients/${id}`, {
+      method: "DELETE",
+      headers: { "x-user-id": _serverUserId },
+    }).catch(() => {});
+  }
 }
 
 export function getCards(): CardOrder[] {

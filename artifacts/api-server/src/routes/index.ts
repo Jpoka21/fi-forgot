@@ -19,6 +19,7 @@ import businessApprovalRouter from "./business-approval";
 import businessSchedulerTriggerRouter from "./business-scheduler-trigger"; // also mounts /business-cards/generate
 import cardLibraryRouter from "./card-library";
 import personalCardsRouter from "./personal-cards";
+import personalRecipientsRouter from "./personal-recipients";
 
 const router: IRouter = Router();
 
@@ -41,6 +42,7 @@ router.use(businessApprovalRouter);
 router.use(businessSchedulerTriggerRouter);
 router.use(cardLibraryRouter);
 router.use(personalCardsRouter);
+router.use(personalRecipientsRouter);
 router.use(stripeRouter);
 
 export default router;
