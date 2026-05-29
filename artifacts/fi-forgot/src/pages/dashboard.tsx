@@ -234,21 +234,20 @@ function UrgencyBadge({ days }: { days: number }) {
 
 /* ── Recipient profile card ──────────────────────────────────────────────── */
 function RecipientCard({
-  r, upcoming, plan, onUpgradeClick, isMobile,
+  r, upcoming, plan, onUpgradeClick, isMobile, cardsUsed, cardsTotal,
 }: {
   r: Recipient;
   upcoming: Array<{ event: string; daysAway: number; briefingDone: boolean }>;
   plan: Plan;
   onUpgradeClick: () => void;
   isMobile: boolean;
+  cardsUsed: number;
+  cardsTotal: number;
 }) {
   const nextEvent   = upcoming[0] ?? null;
   const needsBrief  = !!(nextEvent && !nextEvent.briefingDone);
   const events      = r.selectedEvents ?? [];
   const initials    = r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
-  const allowedOcc  = PLANS[plan].allowedOccasions;
-  const isLocked    = (e: string) => allowedOcc !== null && !allowedOcc.includes(e);
-  const lockedCount = events.filter(isLocked).length;
   const urgColor    = nextEvent
     ? nextEvent.daysAway <= 14 ? RED : nextEvent.daysAway <= 30 ? "#c2820a" : "#16a34a"
     : GRAY;
@@ -285,6 +284,19 @@ function RecipientCard({
             {r.relationship}
           </span>
         </div>
+        {/* Per-recipient card count */}
+        {events.length > 0 && (
+          <div style={{
+            flexShrink: 0, display: "flex", flexDirection: "column" as const, alignItems: "center",
+            background: `${BLACK}06`, border: `1px solid ${BLACK}12`, borderRadius: 10,
+            padding: "4px 10px", lineHeight: 1,
+          }}>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK }}>{events.length}</span>
+            <span style={{ fontSize: "0.58rem", fontWeight: 700, color: GRAY, letterSpacing: "0.04em" }}>
+              card{events.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Needs attention highlight */}
@@ -303,36 +315,25 @@ function RecipientCard({
       {/* Event chips */}
       {events.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
-          {events.slice(0, 5).map(e => {
+          {events.slice(0, 6).map(e => {
             const days   = daysUntilEvent(e, r);
             const isNext = nextEvent?.event === e;
-            const locked = isLocked(e);
             return (
               <span key={e} style={{
                 fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, fontWeight: 600,
                 display: "flex", alignItems: "center", gap: 3,
-                background: locked ? `${BLACK}08` : isNext ? `${RED}13` : `${BLACK}07`,
-                color: locked ? "#6b7280" : isNext ? RED : "#475569",
-                border: `1px solid ${locked ? `${BLACK}15` : isNext ? `${RED}30` : `${BLACK}10`}`,
+                background: isNext ? `${RED}13` : `${BLACK}07`,
+                color: isNext ? RED : "#475569",
+                border: `1px solid ${isNext ? `${RED}30` : `${BLACK}10`}`,
               }}>
-                {locked && <Lock size={9} style={{ flexShrink: 0, color: "#9ca3af" }} />}
-                {e}{!locked && days !== null && days <= 45 ? ` · ${days}d` : ""}
+                {e}{days !== null && days <= 45 ? ` · ${days}d` : ""}
               </span>
             );
           })}
-          {events.length > 5 && (
+          {events.length > 6 && (
             <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, background: `${BLACK}07`, color: GRAY }}>
-              +{events.length - 5}
+              +{events.length - 6}
             </span>
-          )}
-          {lockedCount > 0 && (
-            <button onClick={onUpgradeClick} style={{
-              fontSize: "0.62rem", padding: "2px 9px", borderRadius: 20, fontWeight: 700,
-              background: `${RED}10`, color: RED, border: `1px solid ${RED}30`,
-              cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
-            }}>
-              <Lock size={9} /> Unlock {lockedCount}
-            </button>
           )}
         </div>
       )}
@@ -1332,34 +1333,42 @@ export default function DashboardPage() {
               </div>
             ) : (
               <>
-                {/* Compact upgrade pill — replaces full-width banner */}
-                {PLANS[plan].allowedOccasions !== null && recipients.some(r => (r.selectedEvents ?? []).some(e => !PLANS[plan].allowedOccasions!.includes(e))) && (() => {
-                  const lockedTotal = recipients.reduce((sum, r) =>
-                    sum + (r.selectedEvents ?? []).filter(e => !PLANS[plan].allowedOccasions!.includes(e)).length, 0);
+                {/* Card balance bar */}
+                {(() => {
+                  const totalCards = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+                  const cap = PLANS[plan].maxCardsPerYear;
+                  const pct = Math.min(100, Math.round((totalCards / cap) * 100));
+                  const atCap = totalCards >= cap;
                   return (
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" as const }}>
-                      <div style={{
-                        display: "inline-flex", alignItems: "center", gap: 8,
-                        background: `${RED}08`, border: `1px solid ${RED}22`,
-                        borderRadius: 20, padding: "6px 14px",
-                      }}>
-                        <Lock size={12} style={{ color: RED }} />
-                        <span style={{ fontSize: "0.78rem", fontWeight: 700, color: RED }}>
-                          {lockedTotal} Occasion{lockedTotal !== 1 ? "s" : ""} Locked
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: BLACK }}>
+                          Card Balance
                         </span>
-                        <span style={{ fontSize: "0.75rem", color: GRAY }}>·</span>
-                        <span style={{ fontSize: "0.75rem", color: GRAY }}>Upgrade to unlock all occasions.</span>
-                        <button
-                          onClick={() => setUpgradeOpen(true)}
-                          style={{
-                            background: RED, color: WHITE, border: "none", borderRadius: 12,
-                            padding: "3px 12px", fontFamily: "'Bebas Neue', cursive",
-                            fontSize: "0.8rem", letterSpacing: "0.08em", cursor: "pointer",
-                          }}
-                        >
-                          Upgrade
-                        </button>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: atCap ? RED : BLACK }}>
+                          {totalCards} / {cap} cards planned
+                          {atCap && (
+                            <button onClick={() => setUpgradeOpen(true)} style={{
+                              marginLeft: 8, background: RED, color: WHITE, border: "none",
+                              borderRadius: 10, padding: "2px 10px", fontFamily: "'Bebas Neue', cursive",
+                              fontSize: "0.72rem", letterSpacing: "0.08em", cursor: "pointer",
+                            }}>Upgrade</button>
+                          )}
+                        </span>
                       </div>
+                      <div style={{ height: 6, borderRadius: 6, background: `${BLACK}10`, overflow: "hidden" }}>
+                        <div style={{
+                          height: "100%", borderRadius: 6,
+                          width: `${pct}%`,
+                          background: atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a",
+                          transition: "width 0.4s ease",
+                        }} />
+                      </div>
+                      {!atCap && (
+                        <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 4 }}>
+                          {cap - totalCards} card{cap - totalCards !== 1 ? "s" : ""} remaining — split them however you want
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
@@ -1369,16 +1378,22 @@ export default function DashboardPage() {
                   gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(288px, 1fr))",
                   gap: isMobile ? 14 : 16,
                 }}>
-                  {filteredRecipients.map((r) => (
-                    <RecipientCard
-                      key={r.id}
-                      r={r}
-                      upcoming={recipientUpcomingMap.get(r.id) ?? []}
-                      plan={plan}
-                      onUpgradeClick={() => setUpgradeOpen(true)}
-                      isMobile={isMobile}
-                    />
-                  ))}
+                  {(() => {
+                    const totalCards = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+                    const cap = PLANS[plan].maxCardsPerYear;
+                    return filteredRecipients.map((r) => (
+                      <RecipientCard
+                        key={r.id}
+                        r={r}
+                        upcoming={recipientUpcomingMap.get(r.id) ?? []}
+                        plan={plan}
+                        onUpgradeClick={() => setUpgradeOpen(true)}
+                        isMobile={isMobile}
+                        cardsUsed={totalCards}
+                        cardsTotal={cap}
+                      />
+                    ));
+                  })()}
                 </div>
               </>
             )}

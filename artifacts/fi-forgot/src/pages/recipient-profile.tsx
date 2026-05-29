@@ -288,6 +288,9 @@ export default function RecipientProfilePage() {
   const plan = (user?.plan ?? "basic") as Plan;
   const allRecipients = getRecipients();
   const activeCount = allRecipients.filter((r) => r.active !== false).length;
+  // Card balance: total occasions across all recipients vs. plan cap
+  const totalCardsUsed = allRecipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+  const cardCap = PLANS[plan].maxCardsPerYear;
 
   const existing = isNew ? undefined : getRecipient(params.id);
   const isInactive = !isNew && existing?.active === false;
@@ -392,11 +395,20 @@ export default function RecipientProfilePage() {
 
   function toggleEvent(event: string) {
     const current = form.getValues("selectedEvents");
-    form.setValue(
-      "selectedEvents",
-      current.includes(event) ? current.filter((e) => e !== event) : [...current, event],
-      { shouldDirty: true }
-    );
+    if (current.includes(event)) {
+      form.setValue("selectedEvents", current.filter((e) => e !== event), { shouldDirty: true });
+    } else {
+      // Block adding if at cap (count existing minus this recipient's own events)
+      const otherRecipientCards = allRecipients
+        .filter((r) => r.id !== (existing?.id ?? ""))
+        .reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+      const projectedTotal = otherRecipientCards + current.length + 1;
+      if (projectedTotal > cardCap) {
+        setUpgradeOpen(true);
+        return;
+      }
+      form.setValue("selectedEvents", [...current, event], { shouldDirty: true });
+    }
   }
 
   function setEventDate(event: string, date: string) {
@@ -586,6 +598,42 @@ export default function RecipientProfilePage() {
                     Auto-selected based on relationship. Adjust freely. <strong>Date-sensitive events show a date field</strong> — fill it in so we can put them on your calendar.
                   </p>
                 </div>
+                {/* Card balance mini-bar */}
+                {(() => {
+                  const otherCards = allRecipients
+                    .filter((r) => r.id !== (existing?.id ?? ""))
+                    .reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+                  const thisCards = watchSelectedEvents.length;
+                  const used = otherCards + thisCards;
+                  const atCap = used >= cardCap;
+                  return (
+                    <div style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      background: atCap ? `${RED}08` : `${BLACK}04`,
+                      border: `1px solid ${atCap ? `${RED}20` : `${BLACK}10`}`,
+                      borderRadius: 10, padding: "8px 12px",
+                    }}>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: atCap ? RED : BLACK }}>
+                        {used} / {cardCap} cards planned
+                      </span>
+                      {atCap ? (
+                        <button
+                          type="button"
+                          onClick={() => setUpgradeOpen(true)}
+                          style={{
+                            background: RED, color: "#fff", border: "none", borderRadius: 8,
+                            padding: "3px 10px", fontFamily: "'Bebas Neue', cursive",
+                            fontSize: "0.72rem", letterSpacing: "0.08em", cursor: "pointer",
+                          }}
+                        >Upgrade for more</button>
+                      ) : (
+                        <span style={{ fontSize: "0.68rem", color: GRAY }}>
+                          {cardCap - used} remaining
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {availableHolidays(watchRelationship).map((h) => {
                     const selected = watchSelectedEvents.includes(h);
