@@ -234,89 +234,76 @@ function UrgencyBadge({ days }: { days: number }) {
 
 /* ── Recipient profile card ──────────────────────────────────────────────── */
 function RecipientCard({
-  r,
-  upcoming,
-  plan,
-  onUpgradeClick,
+  r, upcoming, plan, onUpgradeClick, isMobile,
 }: {
   r: Recipient;
   upcoming: Array<{ event: string; daysAway: number; briefingDone: boolean }>;
   plan: Plan;
   onUpgradeClick: () => void;
+  isMobile: boolean;
 }) {
-  const nextEvent      = upcoming[0] ?? null;
-  const childCount     = r.children?.length ?? 0;
-  const yearsMarried   = r.marriageDate ? getAge(r.marriageDate) : null;
-  const events         = r.selectedEvents ?? [];
-  const initials       = r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
-  const allowedOcc     = PLANS[plan].allowedOccasions;
-  const isLocked       = (e: string) => allowedOcc !== null && !allowedOcc.includes(e);
-  const lockedCount    = events.filter(isLocked).length;
-
-  const urgColor = nextEvent
-    ? nextEvent.daysAway <= 14 ? RED
-      : nextEvent.daysAway <= 30 ? "#c2820a"
-      : "#16a34a"
+  const nextEvent   = upcoming[0] ?? null;
+  const needsBrief  = !!(nextEvent && !nextEvent.briefingDone);
+  const events      = r.selectedEvents ?? [];
+  const initials    = r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
+  const allowedOcc  = PLANS[plan].allowedOccasions;
+  const isLocked    = (e: string) => allowedOcc !== null && !allowedOcc.includes(e);
+  const lockedCount = events.filter(isLocked).length;
+  const urgColor    = nextEvent
+    ? nextEvent.daysAway <= 14 ? RED : nextEvent.daysAway <= 30 ? "#c2820a" : "#16a34a"
     : GRAY;
-  const urgBg = nextEvent
-    ? nextEvent.daysAway <= 14 ? `${RED}10`
-      : nextEvent.daysAway <= 30 ? "#fef9c3"
-      : "#f0fdf4"
-    : `${BLACK}06`;
 
   return (
-    <div
-      style={{
-        background: BEIGE,
-        border: `1.5px solid ${BLACK}14`,
-        borderRadius: 16,
-        padding: "20px 20px 16px",
-        display: "flex", flexDirection: "column" as const, gap: 14,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-        transition: "box-shadow 0.15s, transform 0.15s",
-      }}
-      onMouseEnter={e => { const el = e.currentTarget as HTMLDivElement; el.style.boxShadow = "0 4px 18px rgba(0,0,0,0.10)"; el.style.transform = "translateY(-2px)"; }}
-      onMouseLeave={e => { const el = e.currentTarget as HTMLDivElement; el.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; el.style.transform = "none"; }}
+    <div style={{
+      background: WHITE,
+      border: `1.5px solid ${needsBrief ? `${RED}28` : `${BLACK}12`}`,
+      borderRadius: 16,
+      padding: isMobile ? "18px" : "20px",
+      display: "flex", flexDirection: "column" as const, gap: 12,
+      boxShadow: needsBrief ? `0 2px 16px ${RED}0C` : "0 1px 6px rgba(0,0,0,0.05)",
+      transition: "box-shadow 0.15s, transform 0.15s",
+    }}
+      onMouseEnter={e => { if (!isMobile) { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 6px 24px rgba(0,0,0,0.10)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}}
+      onMouseLeave={e => { if (!isMobile) { (e.currentTarget as HTMLDivElement).style.boxShadow = needsBrief ? `0 2px 16px ${RED}0C` : "0 1px 6px rgba(0,0,0,0.05)"; (e.currentTarget as HTMLDivElement).style.transform = "none"; }}}
     >
-      {/* Top row */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+      {/* Avatar + name + relationship */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{
-          width: 44, height: 44, borderRadius: 12, background: BLACK,
-          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          width: isMobile ? 46 : 44, height: isMobile ? 46 : 44,
+          borderRadius: 12, background: BLACK, flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", color: WHITE, letterSpacing: "0.04em" }}>
             {initials}
           </span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1.1 }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.2rem" : "1.1rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1.1 }}>
             {r.name}
           </div>
-          <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 3, display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" as const }}>
-            <span style={{ background: `${BLACK}10`, color: BLACK, borderRadius: 4, padding: "1px 6px", fontWeight: 600, fontSize: "0.66rem", letterSpacing: "0.04em" }}>
-              {r.relationship}
+          <span style={{ background: `${BLACK}10`, color: BLACK, borderRadius: 4, padding: "1px 7px", fontWeight: 600, fontSize: "0.67rem", letterSpacing: "0.04em" }}>
+            {r.relationship}
+          </span>
+        </div>
+      </div>
+
+      {/* Needs attention highlight */}
+      {needsBrief && nextEvent && (
+        <div style={{ background: `${RED}07`, border: `1px solid ${RED}20`, borderRadius: 10, padding: "10px 12px" }}>
+          <div style={{ fontSize: "0.6rem", fontWeight: 800, color: RED, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 3 }}>Needs Attention</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontWeight: 700, fontSize: isMobile ? "0.92rem" : "0.86rem", color: BLACK }}>{nextEvent.event}</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: urgColor, letterSpacing: "0.06em" }}>
+              {nextEvent.daysAway}d
             </span>
-            {yearsMarried !== null && yearsMarried > 0 && <span>{yearsMarried} yr{yearsMarried !== 1 ? "s" : ""}</span>}
-            {childCount > 0 && <span>{childCount} kid{childCount !== 1 ? "s" : ""}</span>}
           </div>
         </div>
-        {/* Next event badge */}
-        {nextEvent && (
-          <div style={{ flexShrink: 0, textAlign: "right" as const }}>
-            <div style={{ background: urgBg, border: `1px solid ${urgColor}35`, borderRadius: 8, padding: "4px 9px", display: "inline-block" }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: urgColor, lineHeight: 1 }}>
-                {nextEvent.daysAway}d
-              </span>
-            </div>
-            <div style={{ fontSize: "0.6rem", color: GRAY, marginTop: 2 }}>{nextEvent.event}</div>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Event chips */}
       {events.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
-          {events.slice(0, 6).map(e => {
+          {events.slice(0, 5).map(e => {
             const days   = daysUntilEvent(e, r);
             const isNext = nextEvent?.event === e;
             const locked = isLocked(e);
@@ -335,50 +322,46 @@ function RecipientCard({
               </span>
             );
           })}
-          {events.length > 6 && (
+          {events.length > 5 && (
             <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, background: `${BLACK}07`, color: GRAY }}>
-              +{events.length - 6}
+              +{events.length - 5}
             </span>
           )}
           {lockedCount > 0 && (
-            <button
-              onClick={onUpgradeClick}
-              style={{
-                fontSize: "0.62rem", padding: "2px 9px", borderRadius: 20, fontWeight: 700,
-                background: `${RED}10`, color: RED,
-                border: `1px solid ${RED}30`,
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
-              }}
-            >
-              <Lock size={9} /> {lockedCount} locked · Upgrade
+            <button onClick={onUpgradeClick} style={{
+              fontSize: "0.62rem", padding: "2px 9px", borderRadius: 20, fontWeight: 700,
+              background: `${RED}10`, color: RED, border: `1px solid ${RED}30`,
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
+            }}>
+              <Lock size={9} /> {lockedCount} locked
             </button>
           )}
         </div>
       )}
 
-      {/* Footer actions */}
-      <div style={{
-        marginTop: "auto", paddingTop: 10, borderTop: `1px solid ${BLACK}08`,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
-        {nextEvent && !nextEvent.briefingDone ? (
-          <Link href={`/briefings/${r.id}/${encodeURIComponent(nextEvent.event)}`}>
+      {/* Actions */}
+      <div style={{ display: "flex", gap: 8, marginTop: "auto", paddingTop: 4 }}>
+        {needsBrief && nextEvent ? (
+          <Link href={`/briefings/${r.id}/${encodeURIComponent(nextEvent.event)}`} style={{ flex: 1 }}>
             <button style={{
-              fontSize: "0.7rem", fontWeight: 700, color: RED,
-              background: `${RED}10`, border: `1px solid ${RED}28`,
-              borderRadius: 6, padding: "4px 10px", cursor: "pointer",
+              width: "100%", padding: isMobile ? "13px 12px" : "9px 14px",
+              background: RED, color: WHITE, border: "none", borderRadius: 10,
+              fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1rem" : "0.9rem",
+              letterSpacing: "0.08em", cursor: "pointer",
             }}>
-              Answer questions →
+              Answer Questions →
             </button>
           </Link>
-        ) : <span />}
+        ) : <div style={{ flex: 1 }} />}
         <Link href={`/recipients/${r.id}`}>
           <button style={{
-            fontSize: "0.7rem", fontWeight: 700, color: GRAY,
-            background: `${BLACK}06`, border: `1px solid ${BLACK}12`,
-            borderRadius: 6, padding: "4px 10px", cursor: "pointer",
+            padding: isMobile ? "13px 16px" : "9px 14px",
+            background: `${BLACK}06`, color: BLACK,
+            border: `1px solid ${BLACK}14`, borderRadius: 10,
+            fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1rem" : "0.9rem",
+            letterSpacing: "0.06em", cursor: "pointer",
           }}>
-            Manage →
+            Manage
           </button>
         </Link>
       </div>
@@ -962,44 +945,166 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Stat strip — scrollable on mobile ───────────────────────────────── */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 12,
-        padding: "10px 16px",
-        borderBottom: `1px solid ${BLACK}10`,
-        background: WHITE,
-        overflowX: "auto",
-        WebkitOverflowScrolling: "touch" as const,
-        scrollbarWidth: "none" as const,
-        flexWrap: "nowrap",
-      }}>
-        {[
-          { label: "People covered",      value: recipients.length,           color: BLACK },
-          { label: "Events on autopilot", value: disastersAvoided,            color: BLACK },
-          { label: "Upcoming (90 days)",  value: allUpcomingEvents.length,    color: allUpcomingEvents.length > 0 ? RED : BLACK },
-        ].map(({ label, value, color }) => (
-          <div key={label} style={{
-            display: "flex", alignItems: "baseline", gap: 6,
-            border: `1.5px solid ${color === RED ? RED + "40" : BLACK + "18"}`,
-            borderRadius: 8, padding: "5px 14px",
-            background: color === RED ? `${RED}08` : `${BLACK}04`,
+      {/* ── Desktop stat pills (above action center) ─────────────────────────── */}
+      {!isMobile && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 28px 0" }}>
+          {[
+            { label: "People covered",      value: recipients.length,        color: BLACK },
+            { label: "Events on autopilot", value: disastersAvoided,         color: BLACK },
+            { label: "Upcoming",            value: allUpcomingEvents.length, color: allUpcomingEvents.length > 0 ? RED : BLACK },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: color === RED ? `${RED}08` : `${BLACK}04`,
+              border: `1px solid ${color === RED ? `${RED}25` : `${BLACK}12`}`,
+              borderRadius: 20, padding: "4px 14px",
+            }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color, lineHeight: 1 }}>{value}</span>
+              <span style={{ fontSize: "0.67rem", fontWeight: 700, color: `${BLACK}55`, letterSpacing: "0.03em" }}>{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Needs Your Attention — action center ─────────────────────────────── */}
+      {(briefingsNeeded.length > 0 || pendingApprovals.length > 0) && (
+        <div style={{ padding: isMobile ? "14px 14px 0" : "20px 28px 0" }}>
+          <div style={{
+            background: WHITE,
+            border: `2px solid ${RED}1E`,
+            borderRadius: 16,
+            boxShadow: `0 4px 28px ${RED}09`,
+            overflow: "hidden" as const,
           }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color, lineHeight: 1 }}>{value}</span>
-            <span style={{ fontSize: "0.7rem", fontWeight: 800, color: `${BLACK}70`, letterSpacing: "0.04em" }}>{label}</span>
+            {/* Header */}
+            <div style={{
+              padding: "12px 20px",
+              background: `${RED}05`,
+              borderBottom: `1px solid ${RED}12`,
+              display: "flex", alignItems: "center", gap: 10,
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: RED, display: "inline-block", flexShrink: 0 }} />
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.12em", color: RED }}>
+                NEEDS YOUR ATTENTION
+              </span>
+              <span style={{ marginLeft: "auto", background: `${RED}15`, color: RED, borderRadius: 20, padding: "2px 10px", fontSize: "0.65rem", fontWeight: 800 }}>
+                {briefingsNeeded.length + pendingApprovals.length}
+              </span>
+            </div>
+
+            {/* Briefing items */}
+            {briefingsNeeded.map((b) => {
+              const urgColor2 = b.daysAway <= 14 ? RED : b.daysAway <= 30 ? "#c2820a" : "#16a34a";
+              const ini = b.recipient.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
+              return (
+                <div key={`${b.recipient.id}-${b.event}`} style={{
+                  display: "flex", alignItems: "center", gap: isMobile ? 10 : 14,
+                  padding: isMobile ? "13px 14px" : "14px 20px",
+                  borderBottom: `1px solid ${BLACK}06`,
+                }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10, background: BLACK, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <span style={{ fontFamily: "'Bebas Neue', cursive", color: WHITE, fontSize: "0.9rem" }}>{ini}</span>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK, lineHeight: 1.2 }}>{b.recipient.name}</div>
+                    <div style={{ fontSize: "0.75rem", color: GRAY }}>{b.event}</div>
+                  </div>
+                  <div style={{ textAlign: "right" as const, flexShrink: 0, marginRight: 4 }}>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: urgColor2, lineHeight: 1 }}>{b.daysAway}d</div>
+                    <div style={{ fontSize: "0.58rem", color: GRAY, letterSpacing: "0.06em" }}>due</div>
+                  </div>
+                  <Link href={`/briefings/${b.recipient.id}/${encodeURIComponent(b.event)}`}>
+                    <button style={{
+                      background: RED, color: WHITE, border: "none", borderRadius: 8,
+                      padding: isMobile ? "10px 13px" : "8px 18px",
+                      fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em",
+                      cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" as const,
+                    }}>
+                      {isMobile ? "Go →" : "Answer Questions →"}
+                    </button>
+                  </Link>
+                </div>
+              );
+            })}
+
+            {/* Pending approval items */}
+            {pendingApprovals.length > 0 && (
+              <div style={{ marginTop: 0 }}>
+                {pendingApprovals.map((item) => {
+                  const ini = item.recipientName.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
+                  return (
+                    <div key={item.id} style={{
+                      display: "flex", alignItems: "center", gap: isMobile ? 10 : 14,
+                      padding: isMobile ? "13px 14px" : "14px 20px",
+                      borderBottom: `1px solid ${BLACK}06`,
+                    }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 10, background: `${RED}15`, flexShrink: 0,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <span style={{ fontFamily: "'Bebas Neue', cursive", color: RED, fontSize: "0.9rem" }}>{ini}</span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK, lineHeight: 1.2 }}>{item.recipientName}</div>
+                        <div style={{ fontSize: "0.75rem", color: GRAY }}>{item.eventType} card ready</div>
+                      </div>
+                      <span style={{
+                        fontSize: "0.6rem", fontWeight: 800, color: RED, background: `${RED}12`,
+                        border: `1px solid ${RED}25`, borderRadius: 20, padding: "2px 8px", flexShrink: 0,
+                      }}>REVIEW</span>
+                      <button onClick={() => setActiveTab("upcoming")} style={{
+                        background: `${RED}10`, color: RED, border: `1px solid ${RED}28`,
+                        borderRadius: 8, padding: isMobile ? "10px 13px" : "8px 18px",
+                        fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em",
+                        cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" as const,
+                      }}>
+                        {isMobile ? "Review →" : "Review Card →"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {/* ── Alert banners ────────────────────────────────────────────────────── */}
-      <div style={{ padding: "0 28px" }}>
+      {/* ── Mobile stat pills (below action center) ──────────────────────────── */}
+      {isMobile && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "12px 14px 0",
+          overflowX: "auto", WebkitOverflowScrolling: "touch" as const, scrollbarWidth: "none" as const,
+        }}>
+          {[
+            { label: "People",   value: recipients.length,        color: BLACK },
+            { label: "Events",   value: disastersAvoided,         color: BLACK },
+            { label: "Upcoming", value: allUpcomingEvents.length, color: allUpcomingEvents.length > 0 ? RED : BLACK },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{
+              display: "flex", alignItems: "center", gap: 5,
+              background: color === RED ? `${RED}08` : `${BLACK}04`,
+              border: `1px solid ${color === RED ? `${RED}25` : `${BLACK}12`}`,
+              borderRadius: 20, padding: "4px 13px", flexShrink: 0,
+            }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", color, lineHeight: 1 }}>{value}</span>
+              <span style={{ fontSize: "0.65rem", fontWeight: 700, color: `${BLACK}55` }}>{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
-        {/* Pending approvals */}
-        {pendingApprovals.length > 0 && (
-          <div style={{ marginTop: 20 }}>
+      {/* ── Full admin-approval review UI (separate from the quick action center) */}
+      {pendingApprovals.length > 0 && (
+      <div style={{ padding: isMobile ? "12px 14px 0" : "20px 28px 0" }}>
+        <div style={{ marginTop: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
               <ThumbsUp size={16} style={{ color: RED }} />
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.05em", color: RED }}>
-                {pendingApprovals.length === 1 ? "1 card needs your approval" : `${pendingApprovals.length} cards need your approval`}
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: RED }}>
+                {pendingApprovals.length === 1 ? "1 card ready to review" : `${pendingApprovals.length} cards ready to review`}
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
@@ -1147,56 +1252,23 @@ export default function DashboardPage() {
               })}
             </div>
           </div>
-        )}
-
-        {/* Briefings banner */}
-        {briefingsNeeded.length > 0 && (
-          <div style={{
-            marginTop: 20, background: WHITE,
-            border: `1.5px solid ${RED}25`, borderRadius: 14, padding: "16px 20px",
-            display: "flex", alignItems: "flex-start", gap: 12,
-          }}>
-            <ClipboardList size={18} style={{ color: RED, marginTop: 2, flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>
-                {briefingsNeeded.length === 1 ? "1 event briefing coming up" : `${briefingsNeeded.length} event briefings coming up`}
-              </div>
-              <p style={{ fontSize: "0.75rem", color: GRAY, margin: "3px 0 10px" }}>
-                Answer a few quick questions so we write the most personal card possible.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                {briefingsNeeded.slice(0, 4).map((b) => (
-                  <Link key={`${b.recipient.id}-${b.event}`} href={`/briefings/${b.recipient.id}/${encodeURIComponent(b.event)}`}>
-                    <button style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px",
-                      borderRadius: 20, background: RED, color: WHITE, border: "none", cursor: "pointer",
-                    }}>
-                      {b.event} · {b.recipient.name}
-                      <span style={{ opacity: 0.7 }}>{b.daysAway}d</span>
-                    </button>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ── Tab content ──────────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, padding: "24px 28px 48px" }}>
+      <div style={{ flex: 1, padding: isMobile ? "16px 14px 96px" : "24px 28px 56px", position: "relative" as const }}>
 
         {/* ─── YOUR PEOPLE ─────────────────────────────────────────────────── */}
         {activeTab === "people" && (
           <div>
-            {/* Toolbar */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            {/* Toolbar — one row */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <div style={{ flex: 1, position: "relative" as const }}>
                 <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: GRAY, pointerEvents: "none" }} />
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Search by name or relationship…"
+                  placeholder="Search people…"
                   style={{
                     width: "100%", paddingLeft: 36, paddingRight: 14, paddingTop: 9, paddingBottom: 9,
                     border: `1.5px solid ${BLACK}16`, borderRadius: 10, fontSize: "0.85rem",
@@ -1205,21 +1277,24 @@ export default function DashboardPage() {
                   }}
                 />
               </div>
-              <Link href="/recipients/new">
-                <button
-                  data-testid="link-add-recipient"
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    background: RED, color: WHITE, border: "none", borderRadius: 10,
-                    padding: "9px 18px", fontFamily: "'Bebas Neue', cursive",
-                    fontSize: "0.9rem", letterSpacing: "0.1em", cursor: "pointer",
-                    whiteSpace: "nowrap" as const, flexShrink: 0,
-                  }}
-                >
-                  <Plus size={14} />
-                  Add Person
-                </button>
-              </Link>
+              {/* Desktop Add Person button — mobile uses FAB */}
+              {!isMobile && (
+                <Link href="/recipients/new">
+                  <button
+                    data-testid="link-add-recipient"
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: RED, color: WHITE, border: "none", borderRadius: 10,
+                      padding: "9px 18px", fontFamily: "'Bebas Neue', cursive",
+                      fontSize: "0.9rem", letterSpacing: "0.1em", cursor: "pointer",
+                      whiteSpace: "nowrap" as const, flexShrink: 0,
+                    }}
+                  >
+                    <Plus size={14} />
+                    Add Person
+                  </button>
+                </Link>
+              )}
             </div>
 
             {filteredRecipients.length === 0 ? (
@@ -1259,27 +1334,43 @@ export default function DashboardPage() {
               </div>
             ) : (
               <>
-                {/* Upgrade banner — shown when basic plan has locked occasions */}
-                {PLANS[plan].allowedOccasions !== null && recipients.some(r => (r.selectedEvents ?? []).some(e => !PLANS[plan].allowedOccasions!.includes(e))) && (
-                  <div style={{ background: `${RED}08`, border: `1.5px solid ${RED}25`, borderRadius: 12, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
-                    <div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.06em", color: RED }}>
-                        YOU HAVE LOCKED OCCASIONS
+                {/* Compact upgrade pill — replaces full-width banner */}
+                {PLANS[plan].allowedOccasions !== null && recipients.some(r => (r.selectedEvents ?? []).some(e => !PLANS[plan].allowedOccasions!.includes(e))) && (() => {
+                  const lockedTotal = recipients.reduce((sum, r) =>
+                    sum + (r.selectedEvents ?? []).filter(e => !PLANS[plan].allowedOccasions!.includes(e)).length, 0);
+                  return (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" as const }}>
+                      <div style={{
+                        display: "inline-flex", alignItems: "center", gap: 8,
+                        background: `${RED}08`, border: `1px solid ${RED}22`,
+                        borderRadius: 20, padding: "6px 14px",
+                      }}>
+                        <Lock size={12} style={{ color: RED }} />
+                        <span style={{ fontSize: "0.78rem", fontWeight: 700, color: RED }}>
+                          {lockedTotal} Occasion{lockedTotal !== 1 ? "s" : ""} Locked
+                        </span>
+                        <span style={{ fontSize: "0.75rem", color: GRAY }}>·</span>
+                        <span style={{ fontSize: "0.75rem", color: GRAY }}>Upgrade to unlock all occasions.</span>
+                        <button
+                          onClick={() => setUpgradeOpen(true)}
+                          style={{
+                            background: RED, color: WHITE, border: "none", borderRadius: 12,
+                            padding: "3px 12px", fontFamily: "'Bebas Neue', cursive",
+                            fontSize: "0.8rem", letterSpacing: "0.08em", cursor: "pointer",
+                          }}
+                        >
+                          Upgrade
+                        </button>
                       </div>
-                      <p style={{ fontSize: "0.78rem", color: GRAY, margin: "2px 0 0", fontFamily: "'Inter', sans-serif" }}>
-                        Your <strong>{PLANS[plan].label}</strong> plan covers Birthday + Anniversary only. Upgrade to unlock all occasions automatically.
-                      </p>
                     </div>
-                    <button
-                      onClick={() => setUpgradeOpen(true)}
-                      style={{ background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.08em", padding: "9px 20px", borderRadius: 7, border: "none", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
-                    >
-                      UNLOCK ALL — $15/MO
-                    </button>
-                  </div>
-                )}
+                  );
+                })()}
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(288px, 1fr))",
+                  gap: isMobile ? 14 : 16,
+                }}>
                   {filteredRecipients.map((r) => (
                     <RecipientCard
                       key={r.id}
@@ -1287,6 +1378,7 @@ export default function DashboardPage() {
                       upcoming={recipientUpcomingMap.get(r.id) ?? []}
                       plan={plan}
                       onUpgradeClick={() => setUpgradeOpen(true)}
+                      isMobile={isMobile}
                     />
                   ))}
                 </div>
@@ -1825,6 +1917,27 @@ export default function DashboardPage() {
           </div>
         );
       })()}
+
+      {/* ── Mobile FAB — Add Person ─────────────────────────────────────────── */}
+      {isMobile && activeTab === "people" && (
+        <Link href="/recipients/new">
+          <button
+            data-testid="link-add-recipient"
+            style={{
+              position: "fixed", bottom: 24, right: 20, zIndex: 200,
+              display: "flex", alignItems: "center", gap: 8,
+              background: RED, color: WHITE, border: "none",
+              borderRadius: 28, padding: "14px 22px",
+              fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em",
+              boxShadow: "0 4px 20px rgba(226,59,46,0.38)",
+              cursor: "pointer",
+            }}
+          >
+            <Plus size={16} />
+            Add Person
+          </button>
+        </Link>
+      )}
 
       {/* ── Handwriting Font Picker Modal ────────────────────────────────────── */}
       {fontPickerOpen && (

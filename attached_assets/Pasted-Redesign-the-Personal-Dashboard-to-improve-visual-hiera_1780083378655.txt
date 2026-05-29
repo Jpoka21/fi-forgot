@@ -1,0 +1,230 @@
+Redesign the Personal Dashboard to improve visual hierarchy, reduce clutter, and create separate desktop and mobile experiences.
+
+GOAL
+
+When a user lands on this page, they should instantly know:
+
+1. Who needs attention
+2. What action is required
+3. What to click next
+
+The dashboard should feel calm, organized, and action focused.
+
+Do NOT redesign the logo, header navigation, Personal/Business toggle, branding, colors, or overall visual identity.
+
+Focus only on dashboard layout and hierarchy.
+
+====================================================
+DESKTOP LAYOUT
+====================================================
+
+Create a clear visual flow:
+
+Stats
+↓
+Needs Your Attention
+↓
+Search Toolbar
+↓
+People Cards
+
+Remove unnecessary visual competition between sections.
+
+-----------------------------------
+1. CREATE A PRIMARY ACTION CENTER
+-----------------------------------
+
+Replace the current large event briefing box with a prominent card titled:
+
+"Needs Your Attention"
+
+Show upcoming actions directly inside:
+
+Mom
+Just Because
+Due in 2 days
+[Answer Questions]
+
+Stacy
+Birthday
+Due in 26 days
+[Answer Questions]
+
+This should become the most visually important section on the page.
+
+Use stronger typography, generous spacing, and subtle elevation.
+
+-----------------------------------
+2. REDUCE STAT VISUAL WEIGHT
+-----------------------------------
+
+Convert:
+
+2 People Covered
+11 Events on Autopilot
+2 Upcoming
+
+into compact informational pills.
+
+These should not compete with the Action Center.
+
+-----------------------------------
+3. SHRINK UPGRADE PROMOTION
+-----------------------------------
+
+Replace the full width locked occasions banner with a compact card:
+
+🔒 9 Occasions Locked
+
+Upgrade to unlock all occasions.
+
+[Upgrade]
+
+Position it above the people grid.
+
+Do not use a full width banner.
+
+-----------------------------------
+4. CLEAN SEARCH TOOLBAR
+-----------------------------------
+
+Place Search and Add Person on one row.
+
+Example:
+
+[ Search People ]     [ + Add Person ]
+
+Reduce vertical space.
+
+-----------------------------------
+5. SIMPLIFY PERSON CARDS
+-----------------------------------
+
+Each card should focus on the next action.
+
+Display:
+
+Avatar
+Name
+Relationship
+
+Then:
+
+Needs Attention
+Just Because due in 2 days
+
+Occasion chips below.
+
+Primary button:
+Answer Questions
+
+Secondary button:
+Manage
+
+The due date should stand out more than locked occasion badges.
+
+-----------------------------------
+6. IMPROVE SPACING
+-----------------------------------
+
+Reduce stacked containers.
+
+Increase whitespace between major sections.
+
+Use fewer borders.
+
+Allow the eye to naturally move down the page.
+
+====================================================
+MOBILE LAYOUT
+====================================================
+
+Do NOT simply shrink the desktop layout.
+
+Create a dedicated mobile experience for screens below 768px.
+
+The mobile dashboard should prioritize tasks above everything else.
+
+-----------------------------------
+1. SHOW ACTIONS FIRST
+-----------------------------------
+
+The first thing visible after loading should be:
+
+Needs Your Attention
+
+Mom
+Just Because
+2 Days
+[Answer Questions]
+
+Stacy
+Birthday
+26 Days
+[Answer Questions]
+
+No scrolling should be required to find pending actions.
+
+-----------------------------------
+2. MOVE STATS LOWER
+-----------------------------------
+
+Show stats beneath the Action Center.
+
+Keep them compact.
+
+-----------------------------------
+3. COLLAPSE UPGRADE SECTION
+-----------------------------------
+
+Do not show a large upgrade banner.
+
+Use a small pill:
+
+🔒 9 Occasions Locked
+
+with a simple Upgrade link.
+
+-----------------------------------
+4. STACK EVERYTHING CLEANLY
+-----------------------------------
+
+Single column layout.
+
+Cards should be full width.
+
+Increase touch targets.
+
+Buttons should be easy to tap.
+
+-----------------------------------
+5. IMPROVE CARD READABILITY
+-----------------------------------
+
+Increase spacing between cards.
+
+Use larger typography for names and due dates.
+
+Make "Answer Questions" the most prominent button.
+
+-----------------------------------
+6. FLOATING ADD PERSON BUTTON
+-----------------------------------
+
+On mobile only, consider a floating Add Person button anchored near the bottom right.
+
+This keeps the primary action accessible without taking up vertical space.
+
+====================================================
+FINAL OBJECTIVE
+====================================================
+
+The dashboard should feel like a task manager first and a settings page second.
+
+Users should immediately understand:
+
+Who needs attention
+What needs to be done
+How to do it
+
+The page should be scannable in under 3 seconds on both desktop and mobile.
