@@ -183,10 +183,17 @@ export default function LandingPage() {
         {/* Right side: Sign in + CTA */}
         <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
           {isLoggedIn ? (
-            <Link href="/dashboard"
-              style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
-              MY DASHBOARD
-            </Link>
+            <>
+              <button
+                onClick={() => logout()}
+                style={{ background: "none", border: "none", fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.1em", color: B.black, opacity: 0.5, cursor: "pointer", whiteSpace: "nowrap", padding: 0 }}>
+                SIGN OUT
+              </button>
+              <Link href="/dashboard"
+                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
+                MY DASHBOARD
+              </Link>
+            </>
           ) : (
             <>
               <Link href="/login"
