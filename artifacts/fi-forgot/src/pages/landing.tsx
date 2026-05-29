@@ -282,6 +282,7 @@ export default function LandingPage() {
       {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
+        className="max-h-[85vh] md:max-h-none"
         style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
         {/* Mobile portrait hero */}
@@ -308,13 +309,13 @@ export default function LandingPage() {
 
         {/* Mobile text overlay */}
         <div className="md:hidden flex flex-col" style={{
-          position: "absolute", left: 16, top: 52, maxWidth: "54vw",
+          position: "absolute", left: 16, top: 32, maxWidth: "54vw",
           lineHeight: "normal", zIndex: 2,
         }}>
           {/* Headline */}
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 6.5vw, 34px)",
+            fontSize: "clamp(22px, 5.5vw, 29px)",
             color: "#ffffff",
             letterSpacing: "0.01em",
             lineHeight: 0.96,
@@ -324,12 +325,11 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 6.5vw, 34px)",
+            fontSize: "clamp(22px, 5.5vw, 29px)",
             color: B.red,
             letterSpacing: "0.01em",
             lineHeight: 0.96,
             textShadow: "0 2px 14px rgba(0,0,0,0.75)",
-            marginTop: "0.1em",
           }}>
             YOU DON'T HAVE TO.
           </div>
@@ -337,12 +337,12 @@ export default function LandingPage() {
           {/* Subheadline */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(12.5px, 3.35vw, 15.5px)",
+            fontSize: "clamp(11px, 2.9vw, 13.5px)",
             fontWeight: 500,
             color: "rgba(255,255,255,0.88)",
-            lineHeight: 1.5,
+            lineHeight: 1.4,
             textShadow: "0 1px 10px rgba(0,0,0,0.9)",
-            marginTop: 8,
+            marginTop: 5,
           }}>
             We write and mail real cards before you forget.
           </div>
@@ -351,12 +351,12 @@ export default function LandingPage() {
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
               display: "inline-flex", alignItems: "center",
-              marginTop: 14, alignSelf: "flex-start",
+              marginTop: 9, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(13px, 3.64vw, 17px)",
+              fontSize: "clamp(12px, 3.3vw, 15px)",
               letterSpacing: "0.08em",
-              padding: "12px 18px",
+              padding: "9px 14px",
               borderRadius: 5,
               textDecoration: "none",
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
