@@ -15,9 +15,10 @@ import {
 } from "@/lib/admin-data";
 
 import { useAuth } from "@/lib/auth-context";
+import { Plan, PLANS } from "@/lib/plan";
 import {
   Users, CheckCircle2, Plus, ClipboardList, ThumbsUp,
-  Sparkles, Loader2, ChevronDown, ChevronUp, CalendarDays, Search, Clock,
+  Sparkles, Loader2, ChevronDown, ChevronUp, CalendarDays, Search, Clock, Lock,
 } from "lucide-react";
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
@@ -235,15 +236,22 @@ function UrgencyBadge({ days }: { days: number }) {
 function RecipientCard({
   r,
   upcoming,
+  plan,
+  onUpgradeClick,
 }: {
   r: Recipient;
   upcoming: Array<{ event: string; daysAway: number; briefingDone: boolean }>;
+  plan: Plan;
+  onUpgradeClick: () => void;
 }) {
-  const nextEvent    = upcoming[0] ?? null;
-  const childCount   = r.children?.length ?? 0;
-  const yearsMarried = r.marriageDate ? getAge(r.marriageDate) : null;
-  const events       = r.selectedEvents ?? [];
-  const initials     = r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
+  const nextEvent      = upcoming[0] ?? null;
+  const childCount     = r.children?.length ?? 0;
+  const yearsMarried   = r.marriageDate ? getAge(r.marriageDate) : null;
+  const events         = r.selectedEvents ?? [];
+  const initials       = r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
+  const allowedOcc     = PLANS[plan].allowedOccasions;
+  const isLocked       = (e: string) => allowedOcc !== null && !allowedOcc.includes(e);
+  const lockedCount    = events.filter(isLocked).length;
 
   const urgColor = nextEvent
     ? nextEvent.daysAway <= 14 ? RED
@@ -308,24 +316,42 @@ function RecipientCard({
       {/* Event chips */}
       {events.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
-          {events.slice(0, 5).map(e => {
-            const days  = daysUntilEvent(e, r);
+          {events.slice(0, 6).map(e => {
+            const days   = daysUntilEvent(e, r);
             const isNext = nextEvent?.event === e;
+            const locked = isLocked(e);
             return (
               <span key={e} style={{
                 fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, fontWeight: 600,
-                background: isNext ? `${RED}13` : `${BLACK}07`,
-                color: isNext ? RED : "#475569",
-                border: `1px solid ${isNext ? `${RED}30` : `${BLACK}10`}`,
+                display: "flex", alignItems: "center", gap: 3,
+                background: locked ? `${BLACK}05` : isNext ? `${RED}13` : `${BLACK}07`,
+                color: locked ? `${BLACK}40` : isNext ? RED : "#475569",
+                border: `1px solid ${locked ? `${BLACK}08` : isNext ? `${RED}30` : `${BLACK}10`}`,
+                textDecoration: locked ? "line-through" : "none",
+                opacity: locked ? 0.6 : 1,
               }}>
-                {e}{days !== null && days <= 45 ? ` · ${days}d` : ""}
+                {locked && <Lock size={9} style={{ flexShrink: 0 }} />}
+                {e}{!locked && days !== null && days <= 45 ? ` · ${days}d` : ""}
               </span>
             );
           })}
-          {events.length > 5 && (
+          {events.length > 6 && (
             <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, background: `${BLACK}07`, color: GRAY }}>
-              +{events.length - 5}
+              +{events.length - 6}
             </span>
+          )}
+          {lockedCount > 0 && (
+            <button
+              onClick={onUpgradeClick}
+              style={{
+                fontSize: "0.62rem", padding: "2px 9px", borderRadius: 20, fontWeight: 700,
+                background: `${RED}10`, color: RED,
+                border: `1px solid ${RED}30`,
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
+              }}
+            >
+              <Lock size={9} /> {lockedCount} locked · Upgrade
+            </button>
           )}
         </div>
       )}
@@ -393,8 +419,10 @@ export default function DashboardPage() {
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
-  const { user, logout } = useAuth();
+  const { user, logout, upgradePlan } = useAuth();
   const [, setLocation]  = useLocation();
+  const plan = (user?.plan ?? "basic") as Plan;
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   function reloadApprovals() {
     if (user?.email) setPendingApprovals(getCustomerPendingApprovals(user.email));
@@ -1253,15 +1281,39 @@ export default function DashboardPage() {
                 )}
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                {filteredRecipients.map((r) => (
-                  <RecipientCard
-                    key={r.id}
-                    r={r}
-                    upcoming={recipientUpcomingMap.get(r.id) ?? []}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Upgrade banner — shown when basic plan has locked occasions */}
+                {PLANS[plan].allowedOccasions !== null && recipients.some(r => (r.selectedEvents ?? []).some(e => !PLANS[plan].allowedOccasions!.includes(e))) && (
+                  <div style={{ background: `${RED}08`, border: `1.5px solid ${RED}25`, borderRadius: 12, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+                    <div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.06em", color: RED }}>
+                        YOU HAVE LOCKED OCCASIONS
+                      </div>
+                      <p style={{ fontSize: "0.78rem", color: GRAY, margin: "2px 0 0", fontFamily: "'Inter', sans-serif" }}>
+                        Your <strong>{PLANS[plan].label}</strong> plan covers Birthday + Anniversary only. Upgrade to unlock all occasions automatically.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setUpgradeOpen(true)}
+                      style={{ background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.08em", padding: "9px 20px", borderRadius: 7, border: "none", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
+                    >
+                      UNLOCK ALL — $15/MO
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                  {filteredRecipients.map((r) => (
+                    <RecipientCard
+                      key={r.id}
+                      r={r}
+                      upcoming={recipientUpcomingMap.get(r.id) ?? []}
+                      plan={plan}
+                      onUpgradeClick={() => setUpgradeOpen(true)}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}
@@ -1851,6 +1903,67 @@ export default function DashboardPage() {
                 Done
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Upgrade Modal ─────────────────────────────────────────────────────── */}
+      {upgradeOpen && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setUpgradeOpen(false); }}
+          style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16 }}
+        >
+          <div style={{ background: WHITE, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: "28px 24px 36px" }}>
+            <div style={{ width: 40, height: 4, background: `${BLACK}20`, borderRadius: 2, margin: "0 auto 24px" }} />
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.04em", color: BLACK, lineHeight: 1, marginBottom: 4 }}>
+              UNLOCK ALL OCCASIONS
+            </div>
+            <p style={{ fontSize: "0.85rem", color: GRAY, marginBottom: 20, fontFamily: "'Inter', sans-serif", lineHeight: 1.5 }}>
+              Your current plan only covers Birthday and Anniversary. Upgrade to put every occasion on autopilot.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
+              {(["basic","standard","premium"] as Plan[]).map((key) => {
+                const config = PLANS[key];
+                const isCurrent = key === plan;
+                const orderedPlans: Plan[] = ["basic","standard","premium"];
+                const isUpgrade = orderedPlans.indexOf(key) > orderedPlans.indexOf(plan);
+                return (
+                  <div key={key} style={{ borderRadius: 12, padding: "16px", border: `2px solid ${isCurrent ? `${BLACK}20` : isUpgrade ? `${RED}30` : `${BLACK}08`}`, background: isCurrent ? BEIGE : "#fafafa" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const, marginBottom: 2 }}>
+                          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK }}>{config.label}</span>
+                          {isCurrent && <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "1px 8px", borderRadius: 10, background: `${BLACK}10`, color: GRAY }}>Current</span>}
+                          {key === "standard" && !isCurrent && <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "1px 8px", borderRadius: 10, background: `${RED}12`, color: RED }}>Most Popular</span>}
+                        </div>
+                        <p style={{ fontSize: "0.72rem", color: GRAY, margin: "0 0 8px", fontFamily: "'Inter', sans-serif" }}>{config.tagline}</p>
+                        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column" as const, gap: 3 }}>
+                          {config.perks.map(perk => (
+                            <li key={perk} style={{ fontSize: "0.72rem", color: BLACK, display: "flex", alignItems: "center", gap: 5, fontFamily: "'Inter', sans-serif" }}>
+                              <span style={{ color: RED, fontWeight: 700 }}>✓</span> {perk}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
+                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: BLACK, lineHeight: 1 }}>{config.price}</span>
+                        {!isCurrent && (
+                          <button
+                            onClick={() => { upgradePlan(key); setUpgradeOpen(false); }}
+                            style={{ background: isUpgrade ? RED : `${BLACK}10`, color: isUpgrade ? WHITE : GRAY, border: "none", borderRadius: 7, padding: "7px 16px", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'Inter', sans-serif", cursor: "pointer", whiteSpace: "nowrap" }}
+                          >
+                            {isUpgrade ? "Upgrade" : "Downgrade"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p style={{ fontSize: "0.7rem", textAlign: "center", color: `${GRAY}80`, marginTop: 16, fontFamily: "'Inter', sans-serif" }}>
+              No relationships were guaranteed in the making of this subscription.
+            </p>
           </div>
         </div>
       )}

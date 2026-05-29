@@ -7,6 +7,8 @@ export interface PlanConfig {
   maxRecipients: number;
   maxCardsPerYear: number;
   perks: string[];
+  /** Occasions allowed on this plan. null = all occasions allowed. */
+  allowedOccasions: string[] | null;
 }
 
 export const PLANS: Record<Plan, PlanConfig> = {
@@ -17,6 +19,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     maxRecipients: 1,
     maxCardsPerYear: 6,
     perks: ["6 cards per year", "1 recipient", "Birthday + anniversary coverage", "Personally written messages", "We print and mail them for you"],
+    allowedOccasions: ["Birthday", "Anniversary"],
   },
   standard: {
     label: "Domestic Peacekeeper",
@@ -25,6 +28,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     maxRecipients: 5,
     maxCardsPerYear: 18,
     perks: ["18 cards per year", "Up to 5 recipients", "All major occasions covered", "Full autopilot mode", "Personalized, heartfelt messages"],
+    allowedOccasions: null,
   },
   premium: {
     label: "Legend Status",
@@ -33,6 +37,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     maxRecipients: Infinity,
     maxCardsPerYear: 40,
     perks: ["40 cards per year", "Unlimited recipients", "Premium card styles", "Gift add-ons", "Emergency save mode", "Concierge reminders"],
+    allowedOccasions: null,
   },
 };
 
