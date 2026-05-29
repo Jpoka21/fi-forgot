@@ -605,18 +605,36 @@ export default function RecipientProfilePage() {
                     .reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
                   const thisCards = watchSelectedEvents.length;
                   const used = otherCards + thisCards;
+                  const overBy = Math.max(0, used - cardCap);
                   const atCap = used >= cardCap;
                   return (
                     <div style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
-                      background: atCap ? `${RED}08` : `${BLACK}04`,
-                      border: `1px solid ${atCap ? `${RED}20` : `${BLACK}10`}`,
+                      background: overBy > 0 ? `${RED}08` : atCap ? `${BLACK}06` : `${BLACK}04`,
+                      border: `1px solid ${overBy > 0 ? `${RED}25` : atCap ? `${BLACK}15` : `${BLACK}10`}`,
                       borderRadius: 10, padding: "8px 12px",
                     }}>
-                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: atCap ? RED : BLACK }}>
-                        {used} / {cardCap} cards planned
-                      </span>
-                      {atCap ? (
+                      <div>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: overBy > 0 ? RED : BLACK }}>
+                          {used} / {cardCap} cards planned
+                        </span>
+                        {overBy > 0 && (
+                          <div style={{ fontSize: "0.68rem", color: RED, marginTop: 2 }}>
+                            Uncheck {overBy} occasion{overBy !== 1 ? "s" : ""} below to save
+                          </div>
+                        )}
+                      </div>
+                      {overBy > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setUpgradeOpen(true)}
+                          style={{
+                            background: RED, color: "#fff", border: "none", borderRadius: 8,
+                            padding: "3px 10px", fontFamily: "'Bebas Neue', cursive",
+                            fontSize: "0.72rem", letterSpacing: "0.08em", cursor: "pointer",
+                          }}
+                        >Or Upgrade</button>
+                      ) : atCap ? (
                         <button
                           type="button"
                           onClick={() => setUpgradeOpen(true)}
@@ -635,10 +653,18 @@ export default function RecipientProfilePage() {
                   );
                 })()}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {availableHolidays(watchRelationship).map((h) => {
+                  {(() => {
+                    const otherCards = allRecipients
+                      .filter((r) => r.id !== (existing?.id ?? ""))
+                      .reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+                    const overBy = Math.max(0, otherCards + watchSelectedEvents.length - cardCap);
+                    // The LAST overBy selected events are "over limit" — user must uncheck them
+                    const overLimitEvents = new Set(overBy > 0 ? watchSelectedEvents.slice(-overBy) : []);
+                    return availableHolidays(watchRelationship).map((h) => {
                     const selected = watchSelectedEvents.includes(h);
                     const needsDate = DATE_SENSITIVE.has(h);
                     const currentDate = watchEventDates?.[h] ?? "";
+                    const isOverLimit = overLimitEvents.has(h);
 
                     // Compute years for Anniversary display
                     const yearsLabel =
@@ -658,8 +684,8 @@ export default function RecipientProfilePage() {
                           onClick={() => toggleEvent(h)}
                           className="w-full flex items-center gap-2 py-2.5 px-3 rounded-xl border-2 text-left transition-all"
                           style={{
-                            borderColor: selected ? RED : `${BLACK}15`,
-                            background: selected ? `${RED}10` : "#fff",
+                            borderColor: isOverLimit ? RED : selected ? RED : `${BLACK}15`,
+                            background: isOverLimit ? `${RED}06` : selected ? `${RED}10` : "#fff",
                             borderBottomLeftRadius: selected && needsDate ? "0" : undefined,
                             borderBottomRightRadius: selected && needsDate ? "0" : undefined,
                           }}
@@ -667,11 +693,15 @@ export default function RecipientProfilePage() {
                         >
                           <div
                             className="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0"
-                            style={{ borderColor: selected ? RED : `${BLACK}25`, background: selected ? RED : "transparent" }}
+                            style={{ borderColor: isOverLimit ? RED : selected ? RED : `${BLACK}25`, background: isOverLimit ? "#fff" : selected ? RED : "transparent" }}
                           >
-                            {selected && <span className="text-white text-xs leading-none">✓</span>}
+                            {isOverLimit && <span style={{ color: RED, fontSize: "0.7rem", lineHeight: 1 }}>✕</span>}
+                            {selected && !isOverLimit && <span className="text-white text-xs leading-none">✓</span>}
                           </div>
-                          <span className="text-sm font-medium flex-1" style={{ color: selected ? RED : BLACK }}>{h}</span>
+                          <span className="text-sm font-medium flex-1" style={{ color: isOverLimit ? RED : selected ? RED : BLACK }}>{h}</span>
+                          {isOverLimit && (
+                            <span style={{ fontSize: "0.62rem", fontWeight: 700, color: RED, background: `${RED}15`, borderRadius: 6, padding: "1px 6px" }}>over limit</span>
+                          )}
                           {needsDate && (
                             <CalendarDays size={13} style={{ color: selected ? RED : `${BLACK}30`, flexShrink: 0 }} />
                           )}
@@ -716,7 +746,8 @@ export default function RecipientProfilePage() {
                         )}
                       </div>
                     );
-                  })}
+                  });
+                  })()}
                 </div>
               </SectionCard>
 
@@ -917,14 +948,38 @@ export default function RecipientProfilePage() {
               </SectionCard>
 
               {/* Save */}
-              <button
-                type="submit"
-                className="w-full py-3.5 rounded-2xl text-white font-bold text-base hover:opacity-90 transition-all"
-                style={{ background: RED, fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em" }}
-                data-testid="button-save-recipient"
-              >
-                {isNew ? "Save Recipient" : "Save Changes"}
-              </button>
+              {(() => {
+                const otherCards = allRecipients
+                  .filter((r) => r.id !== (existing?.id ?? ""))
+                  .reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
+                const overBy = Math.max(0, otherCards + watchSelectedEvents.length - cardCap);
+                return (
+                  <>
+                    {overBy > 0 && (
+                      <div style={{
+                        background: `${RED}08`, border: `1px solid ${RED}25`, borderRadius: 12,
+                        padding: "10px 14px", fontSize: "0.8rem", color: RED, fontWeight: 600, textAlign: "center" as const,
+                      }}>
+                        Remove {overBy} occasion{overBy !== 1 ? "s" : ""} marked "over limit" before saving
+                      </div>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={overBy > 0}
+                      className="w-full py-3.5 rounded-2xl text-white font-bold text-base transition-all"
+                      style={{
+                        background: overBy > 0 ? GRAY : RED,
+                        fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em",
+                        cursor: overBy > 0 ? "not-allowed" : "pointer",
+                        opacity: overBy > 0 ? 0.5 : 1,
+                      }}
+                      data-testid="button-save-recipient"
+                    >
+                      {overBy > 0 ? `Remove ${overBy} to Save` : isNew ? "Save Recipient" : "Save Changes"}
+                    </button>
+                  </>
+                );
+              })()}
             </form>
           </Form>
 

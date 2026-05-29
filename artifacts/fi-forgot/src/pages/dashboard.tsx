@@ -1337,38 +1337,49 @@ export default function DashboardPage() {
                 {(() => {
                   const totalCards = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
                   const cap = PLANS[plan].maxCardsPerYear;
-                  const pct = Math.min(100, Math.round((totalCards / cap) * 100));
+                  const overBy = Math.max(0, totalCards - cap);
                   const atCap = totalCards >= cap;
+                  const pct = Math.min(100, Math.round((totalCards / cap) * 100));
                   return (
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: BLACK }}>
-                          Card Balance
-                        </span>
-                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: atCap ? RED : BLACK }}>
-                          {totalCards} / {cap} cards planned
-                          {atCap && (
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: BLACK }}>Card Balance</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: atCap ? RED : BLACK }}>
+                            {totalCards} / {cap} cards planned
+                          </span>
+                          {overBy > 0 ? (
+                            <span style={{
+                              fontSize: "0.7rem", fontWeight: 700, color: RED,
+                              background: `${RED}12`, border: `1px solid ${RED}30`,
+                              borderRadius: 8, padding: "2px 8px",
+                            }}>
+                              {overBy} over limit
+                            </span>
+                          ) : atCap ? (
                             <button onClick={() => setUpgradeOpen(true)} style={{
-                              marginLeft: 8, background: RED, color: WHITE, border: "none",
+                              background: RED, color: WHITE, border: "none",
                               borderRadius: 10, padding: "2px 10px", fontFamily: "'Bebas Neue', cursive",
                               fontSize: "0.72rem", letterSpacing: "0.08em", cursor: "pointer",
                             }}>Upgrade</button>
-                          )}
-                        </span>
+                          ) : null}
+                        </div>
                       </div>
                       <div style={{ height: 6, borderRadius: 6, background: `${BLACK}10`, overflow: "hidden" }}>
                         <div style={{
                           height: "100%", borderRadius: 6,
                           width: `${pct}%`,
-                          background: atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a",
+                          background: overBy > 0 ? RED : atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a",
                           transition: "width 0.4s ease",
                         }} />
                       </div>
-                      {!atCap && (
-                        <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 4 }}>
-                          {cap - totalCards} card{cap - totalCards !== 1 ? "s" : ""} remaining — split them however you want
-                        </div>
-                      )}
+                      <div style={{ fontSize: "0.68rem", marginTop: 4, color: overBy > 0 ? RED : GRAY }}>
+                        {overBy > 0
+                          ? `Remove ${overBy} occasion${overBy !== 1 ? "s" : ""} from your people, or upgrade your plan`
+                          : atCap
+                          ? "You're at your plan limit — upgrade to add more"
+                          : `${cap - totalCards} card${cap - totalCards !== 1 ? "s" : ""} remaining — split them however you want`}
+                      </div>
                     </div>
                   );
                 })()}
