@@ -682,45 +682,22 @@ export default function DashboardPage() {
           borderBottom: `1px solid ${BLACK}1A`,
           padding: isMobile ? "0 16px" : "0 32px 0 24px",
           height: isMobile ? 64 : 96,
-          display: "flex", alignItems: "center", gap: 0,
+          display: "flex", alignItems: "center", justifyContent: "space-between" as const, gap: 0,
         }}>
-          {/* Logo */}
-          <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column" as const, marginRight: isMobile ? 12 : 40, flexShrink: 0 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.9rem, 6vw, 3.6rem)", color: RED, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.9rem, 6vw, 3.6rem)", color: BLACK, letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
-            </div>
+          {/* Logo + PERSONAL label + section title */}
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 20 }}>
+            <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.9rem" : "3.1rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 6 }}>F*</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.9rem" : "3.1rem", color: BLACK, letterSpacing: "0.04em" }}>I FORGOT</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "0.65rem" : "1rem", letterSpacing: "0.18em", color: `${BLACK}55`, marginLeft: 10, alignSelf: "flex-end", paddingBottom: isMobile ? 4 : 6 }}>PERSONAL</span>
+            </Link>
             {!isMobile && (
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: GRAY, marginTop: -2, fontWeight: 900 }}>
-                RELATIONSHIP DAMAGE CONTROL
-              </div>
+              <>
+                <div style={{ width: 1, height: 32, background: `${BLACK}18` }} />
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em", color: `${BLACK}60` }}>YOUR PEOPLE</span>
+              </>
             )}
-          </Link>
-
-          {/* Nav links — desktop only */}
-          {!isMobile && (
-            <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
-              {[
-                { label: "HOW IT WORKS", href: "/#how-it-works" },
-                { label: "PLANS",        href: "/#pricing" },
-                { label: "EXAMPLES",     href: "/#examples" },
-                { label: "REVIEWS",      href: "/#reviews" },
-                { label: "FAQ",          href: "/#faq" },
-              ].map(link => (
-                <a key={link.href} href={link.href}
-                  style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: BLACK, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const, opacity: 0.85 }}>
-                  {link.label}
-                </a>
-              ))}
-              <Link href="/business"
-                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: RED, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" as const }}>
-                FOR BUSINESS
-              </Link>
-            </div>
-          )}
-
-          {/* Spacer — mobile only, pushes controls to the right */}
-          {isMobile && <div style={{ flex: 1 }} />}
+          </div>
 
           {/* Right: pending alert + workspace toggle + account */}
           <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 14, flexShrink: 0 }}>
@@ -743,6 +720,197 @@ export default function DashboardPage() {
             <AccountMenu user={user} onLogout={() => { logout(); setLocation("/"); }} />
           </div>
         </header>
+
+        {/* ── Personal Settings Strip ──────────────────────────────────────────── */}
+        <div style={{ background: BEIGE, borderBottom: `1px solid ${BLACK}12`, padding: "0 28px", flexShrink: 0 }}>
+          <button
+            onClick={() => setSettingsOpen(o => !o)}
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", background: "none", border: "none", cursor: "pointer", color: `${BLACK}70`, fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const }}
+          >
+            <span style={{ fontSize: "0.9rem" }}>⚙️</span>
+            Personal Settings
+            <span style={{ fontSize: "0.6rem", marginLeft: 2 }}>{settingsOpen ? "▲" : "▼"}</span>
+          </button>
+
+          {settingsOpen && (
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 32, paddingBottom: 18 }}>
+
+              {/* Automation Mode */}
+              <div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 10 }}>Automation Mode</div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {([
+                    { value: "autopilot" as const, icon: "🚀", title: "Full Autopilot",   desc: "We write, design, and mail every card automatically. No action needed from you.",  recommended: false },
+                    { value: "approve"   as const, icon: "✋", title: "Review & Approve", desc: "We queue the card and notify you. You review and approve before anything ships.",    recommended: true  },
+                  ]).map(opt => {
+                    const active = personalSettings.automationMode === opt.value;
+                    return (
+                      <button key={opt.value} onClick={() => updateSettings("automationMode", opt.value)} style={{
+                        flex: 1, textAlign: "left" as const, padding: "12px 14px", borderRadius: 10, cursor: "pointer",
+                        border: `1.5px solid ${active ? RED : `${BLACK}35`}`,
+                        background: active ? `${RED}12` : WHITE,
+                        transition: "all 0.12s", minWidth: 160,
+                      }}>
+                        <div style={{ fontSize: "1.2rem", marginBottom: 4 }}>{opt.icon}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <span style={{ fontWeight: 700, fontSize: "0.78rem", color: active ? RED : BLACK, fontFamily: "'Inter', sans-serif" }}>{opt.title}</span>
+                          {opt.recommended && <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.05em", background: "#16a34a", color: WHITE, borderRadius: 4, padding: "1px 5px", fontFamily: "'Inter', sans-serif" }}>Recommended</span>}
+                        </div>
+                        <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>{opt.desc}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Handwriting Style */}
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Handwriting Style</div>
+                <button
+                  onClick={async () => {
+                    setFontPickerOpen(true);
+                    if (hwFonts.length === 0) {
+                      setFontsLoading(true);
+                      try {
+                        const r = await fetch("/api/handwrytten-fonts");
+                        const d = await r.json() as { fonts: HwFont[] };
+                        setHwFonts(d.fonts ?? []);
+                      } catch { /* leave empty */ }
+                      setFontsLoading(false);
+                    }
+                  }}
+                  style={{
+                    background: WHITE, border: `1px solid ${BLACK}35`,
+                    borderRadius: 6, color: BLACK, padding: "7px 12px",
+                    fontSize: "0.82rem", cursor: "pointer", textAlign: "left" as const,
+                    fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 8,
+                    width: 220,
+                  }}
+                >
+                  <span style={{ fontSize: "1rem" }}>✍️</span>
+                  <span style={{ flex: 1 }}>{personalSettings.cardFont ? (hwFonts.find(f => f.id === personalSettings.cardFont)?.name ?? personalSettings.cardFont) : "Choose a style…"}</span>
+                  <span style={{ color: `${BLACK}50`, fontSize: "0.75rem" }}>▾</span>
+                </button>
+                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>The handwriting style used on every card.</div>
+              </div>
+
+              {/* Card Signature */}
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Card Signature</div>
+                <input
+                  value={personalSettings.cardSignature}
+                  onChange={e => updateSettings("cardSignature", e.target.value)}
+                  placeholder="e.g. Love, James"
+                  style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
+                />
+                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this signature.</div>
+              </div>
+
+              {/* Default Tone */}
+              <div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>Default Tone</div>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
+                  {TONES.map(t => (
+                    <button key={t} onClick={() => updateSettings("defaultTone", t)} style={{
+                      padding: "5px 12px", borderRadius: 20, cursor: "pointer",
+                      border: `1.5px solid ${personalSettings.defaultTone === t ? RED : `${BLACK}35`}`,
+                      background: personalSettings.defaultTone === t ? `${RED}18` : WHITE,
+                      color: personalSettings.defaultTone === t ? RED : BLACK,
+                      fontSize: "0.78rem", transition: "all 0.12s",
+                      fontFamily: "'Inter', sans-serif",
+                    }}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notification Timing */}
+              <div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 4 }}>
+                  Notify Me Before the Card Is Mailed
+                </div>
+                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
+                  Cards are mailed ~7 days before the occasion to ensure delivery. These intervals are before the card leaves — not before the occasion itself.
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
+                  {(["7 days before it mails", "14 days before it mails", "30 days before it mails"] as const).map(opt => {
+                    const active = personalSettings.notifyTiming.includes(opt);
+                    return (
+                      <button key={opt} onClick={() => {
+                        const next = active
+                          ? personalSettings.notifyTiming.filter(x => x !== opt)
+                          : [...personalSettings.notifyTiming, opt];
+                        updateSettings("notifyTiming", next);
+                      }} style={{
+                        padding: "5px 12px", borderRadius: 20, cursor: "pointer",
+                        border: `1.5px solid ${active ? RED : `${BLACK}35`}`,
+                        background: active ? `${RED}18` : WHITE,
+                        color: active ? RED : BLACK,
+                        fontSize: "0.78rem", transition: "all 0.12s", fontFamily: "'Inter', sans-serif",
+                      }}>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginTop: 6, fontFamily: "'Inter', sans-serif" }}>Pick one or more. We'll notify you at each chosen interval.</div>
+              </div>
+
+              {/* How to Notify You */}
+              <div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>How to Notify You</div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {([
+                    { value: "email" as const, label: "✉️  Email" },
+                    { value: "text"  as const, label: "💬  Text"  },
+                    { value: "both"  as const, label: "📲  Both"  },
+                  ]).map(opt => (
+                    <button key={opt.value} onClick={() => updateSettings("notifyChannel", opt.value)} style={{
+                      padding: "5px 14px", borderRadius: 20, cursor: "pointer",
+                      border: `1.5px solid ${personalSettings.notifyChannel === opt.value ? RED : `${BLACK}35`}`,
+                      background: personalSettings.notifyChannel === opt.value ? `${RED}18` : WHITE,
+                      color: personalSettings.notifyChannel === opt.value ? RED : BLACK,
+                      fontSize: "0.78rem", transition: "all 0.12s", fontFamily: "'Inter', sans-serif",
+                    }}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Where to Reach You */}
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Where to Reach You</div>
+                {(personalSettings.notifyChannel === "email" || personalSettings.notifyChannel === "both") && (
+                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
+                    <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Email address</label>
+                    <input
+                      type="email"
+                      value={personalSettings.notifyEmail}
+                      onChange={e => updateSettings("notifyEmail", e.target.value)}
+                      placeholder="you@example.com"
+                      style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
+                    />
+                  </div>
+                )}
+                {(personalSettings.notifyChannel === "text" || personalSettings.notifyChannel === "both") && (
+                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
+                    <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Mobile number</label>
+                    <input
+                      type="tel"
+                      value={personalSettings.notifyPhone}
+                      onChange={e => updateSettings("notifyPhone", e.target.value)}
+                      placeholder="+1 (555) 000-0000"
+                      style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
+                    />
+                  </div>
+                )}
+              </div>
+
+            </div>
+          )}
+        </div>
 
         {/* Tab bar — scrollable on mobile */}
         <div style={{
@@ -820,197 +988,6 @@ export default function DashboardPage() {
             <span style={{ fontSize: "0.7rem", fontWeight: 800, color: `${BLACK}70`, letterSpacing: "0.04em" }}>{label}</span>
           </div>
         ))}
-      </div>
-
-      {/* ── Personal Settings Panel ──────────────────────────────────────────── */}
-      <div style={{ background: BEIGE, borderBottom: `1px solid ${BLACK}12`, padding: "0 28px", flexShrink: 0 }}>
-        <button
-          onClick={() => setSettingsOpen(o => !o)}
-          style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", background: "none", border: "none", cursor: "pointer", color: `${BLACK}70`, fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const }}
-        >
-          <span style={{ fontSize: "0.9rem" }}>⚙️</span>
-          Personal Settings
-          <span style={{ fontSize: "0.6rem", marginLeft: 2 }}>{settingsOpen ? "▲" : "▼"}</span>
-        </button>
-
-        {settingsOpen && (
-          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 32, paddingBottom: 18 }}>
-
-            {/* Automation Mode */}
-            <div>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 10 }}>Automation Mode</div>
-              <div style={{ display: "flex", gap: 10 }}>
-                {([
-                  { value: "autopilot" as const, icon: "🚀", title: "Full Autopilot",   desc: "We write, design, and mail every card automatically. No action needed from you.",  recommended: false },
-                  { value: "approve"   as const, icon: "✋", title: "Review & Approve", desc: "We queue the card and notify you. You review and approve before anything ships.",    recommended: true  },
-                ]).map(opt => {
-                  const active = personalSettings.automationMode === opt.value;
-                  return (
-                    <button key={opt.value} onClick={() => updateSettings("automationMode", opt.value)} style={{
-                      flex: 1, textAlign: "left" as const, padding: "12px 14px", borderRadius: 10, cursor: "pointer",
-                      border: `1.5px solid ${active ? RED : `${BLACK}35`}`,
-                      background: active ? `${RED}12` : WHITE,
-                      transition: "all 0.12s", minWidth: 160,
-                    }}>
-                      <div style={{ fontSize: "1.2rem", marginBottom: 4 }}>{opt.icon}</div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontWeight: 700, fontSize: "0.78rem", color: active ? RED : BLACK, fontFamily: "'Inter', sans-serif" }}>{opt.title}</span>
-                        {opt.recommended && <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.05em", background: "#16a34a", color: WHITE, borderRadius: 4, padding: "1px 5px", fontFamily: "'Inter', sans-serif" }}>Recommended</span>}
-                      </div>
-                      <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>{opt.desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Handwriting Style */}
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Handwriting Style</div>
-              <button
-                onClick={async () => {
-                  setFontPickerOpen(true);
-                  if (hwFonts.length === 0) {
-                    setFontsLoading(true);
-                    try {
-                      const r = await fetch("/api/handwrytten-fonts");
-                      const d = await r.json() as { fonts: HwFont[] };
-                      setHwFonts(d.fonts ?? []);
-                    } catch { /* leave empty */ }
-                    setFontsLoading(false);
-                  }
-                }}
-                style={{
-                  background: WHITE, border: `1px solid ${BLACK}35`,
-                  borderRadius: 6, color: BLACK, padding: "7px 12px",
-                  fontSize: "0.82rem", cursor: "pointer", textAlign: "left" as const,
-                  fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 8,
-                  width: 220,
-                }}
-              >
-                <span style={{ fontSize: "1rem" }}>✍️</span>
-                <span style={{ flex: 1 }}>{personalSettings.cardFont ? (hwFonts.find(f => f.id === personalSettings.cardFont)?.name ?? personalSettings.cardFont) : "Choose a style…"}</span>
-                <span style={{ color: `${BLACK}50`, fontSize: "0.75rem" }}>▾</span>
-              </button>
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>The handwriting style used on every card.</div>
-            </div>
-
-            {/* Card Signature */}
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Card Signature</div>
-              <input
-                value={personalSettings.cardSignature}
-                onChange={e => updateSettings("cardSignature", e.target.value)}
-                placeholder="e.g. Love, James"
-                style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
-              />
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this signature.</div>
-            </div>
-
-            {/* Default Tone */}
-            <div>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>Default Tone</div>
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                {TONES.map(t => (
-                  <button key={t} onClick={() => updateSettings("defaultTone", t)} style={{
-                    padding: "5px 12px", borderRadius: 20, cursor: "pointer",
-                    border: `1.5px solid ${personalSettings.defaultTone === t ? RED : `${BLACK}35`}`,
-                    background: personalSettings.defaultTone === t ? `${RED}18` : WHITE,
-                    color: personalSettings.defaultTone === t ? RED : BLACK,
-                    fontSize: "0.78rem", transition: "all 0.12s",
-                    fontFamily: "'Inter', sans-serif",
-                  }}>
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Notification Timing */}
-            <div>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 4 }}>
-                Notify Me Before the Card Is Mailed
-              </div>
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
-                Cards are mailed ~7 days before the occasion to ensure delivery. These intervals are before the card leaves — not before the occasion itself.
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                {(["7 days before it mails", "14 days before it mails", "30 days before it mails"] as const).map(opt => {
-                  const active = personalSettings.notifyTiming.includes(opt);
-                  return (
-                    <button key={opt} onClick={() => {
-                      const next = active
-                        ? personalSettings.notifyTiming.filter(x => x !== opt)
-                        : [...personalSettings.notifyTiming, opt];
-                      updateSettings("notifyTiming", next);
-                    }} style={{
-                      padding: "5px 12px", borderRadius: 20, cursor: "pointer",
-                      border: `1.5px solid ${active ? RED : `${BLACK}35`}`,
-                      background: active ? `${RED}18` : WHITE,
-                      color: active ? RED : BLACK,
-                      fontSize: "0.78rem", transition: "all 0.12s", fontFamily: "'Inter', sans-serif",
-                    }}>
-                      {opt}
-                    </button>
-                  );
-                })}
-              </div>
-              <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginTop: 6, fontFamily: "'Inter', sans-serif" }}>Pick one or more. We'll notify you at each chosen interval.</div>
-            </div>
-
-            {/* How to Notify You */}
-            <div>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>How to Notify You</div>
-              <div style={{ display: "flex", gap: 6 }}>
-                {([
-                  { value: "email" as const, label: "✉️  Email" },
-                  { value: "text"  as const, label: "💬  Text"  },
-                  { value: "both"  as const, label: "📲  Both"  },
-                ]).map(opt => (
-                  <button key={opt.value} onClick={() => updateSettings("notifyChannel", opt.value)} style={{
-                    padding: "5px 14px", borderRadius: 20, cursor: "pointer",
-                    border: `1.5px solid ${personalSettings.notifyChannel === opt.value ? RED : `${BLACK}35`}`,
-                    background: personalSettings.notifyChannel === opt.value ? `${RED}18` : WHITE,
-                    color: personalSettings.notifyChannel === opt.value ? RED : BLACK,
-                    fontSize: "0.78rem", transition: "all 0.12s", fontFamily: "'Inter', sans-serif",
-                  }}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Where to Reach You */}
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
-              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Where to Reach You</div>
-              {(personalSettings.notifyChannel === "email" || personalSettings.notifyChannel === "both") && (
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
-                  <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Email address</label>
-                  <input
-                    type="email"
-                    value={personalSettings.notifyEmail}
-                    onChange={e => updateSettings("notifyEmail", e.target.value)}
-                    placeholder="you@example.com"
-                    style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
-                  />
-                </div>
-              )}
-              {(personalSettings.notifyChannel === "text" || personalSettings.notifyChannel === "both") && (
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
-                  <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Mobile number</label>
-                  <input
-                    type="tel"
-                    value={personalSettings.notifyPhone}
-                    onChange={e => updateSettings("notifyPhone", e.target.value)}
-                    placeholder="+1 (555) 000-0000"
-                    style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
-                  />
-                </div>
-              )}
-            </div>
-
-          </div>
-        )}
       </div>
 
       {/* ── Alert banners ────────────────────────────────────────────────────── */}
