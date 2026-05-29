@@ -283,6 +283,12 @@ export default function RecipientProfilePage() {
   const [saved, setSaved] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<"card-limit" | "recipient-limit">("recipient-limit");
+
+  function openUpgrade(reason: "card-limit" | "recipient-limit") {
+    setUpgradeReason(reason);
+    setUpgradeOpen(true);
+  }
   const { user, upgradePlan } = useAuth();
 
   const plan = (user?.plan ?? "basic") as Plan;
@@ -404,7 +410,7 @@ export default function RecipientProfilePage() {
         .reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
       const projectedTotal = otherRecipientCards + current.length + 1;
       if (projectedTotal > cardCap) {
-        setUpgradeOpen(true);
+        openUpgrade("card-limit");
         return;
       }
       form.setValue("selectedEvents", [...current, event], { shouldDirty: true });
@@ -627,7 +633,7 @@ export default function RecipientProfilePage() {
                       {overBy > 0 ? (
                         <button
                           type="button"
-                          onClick={() => setUpgradeOpen(true)}
+                          onClick={() => openUpgrade("card-limit")}
                           style={{
                             background: RED, color: "#fff", border: "none", borderRadius: 8,
                             padding: "3px 10px", fontFamily: "'Bebas Neue', cursive",
@@ -637,7 +643,7 @@ export default function RecipientProfilePage() {
                       ) : atCap ? (
                         <button
                           type="button"
-                          onClick={() => setUpgradeOpen(true)}
+                          onClick={() => openUpgrade("card-limit")}
                           style={{
                             background: RED, color: "#fff", border: "none", borderRadius: 8,
                             padding: "3px 10px", fontFamily: "'Bebas Neue', cursive",
@@ -1000,6 +1006,7 @@ export default function RecipientProfilePage() {
         <ProfileUpgradeModal
           currentPlan={plan}
           recipientName={existing?.name}
+          reason={upgradeReason}
           onUpgrade={(newPlan) => {
             upgradePlan(newPlan);
             // Mark this recipient as active now that the plan covers it
@@ -1020,15 +1027,24 @@ export default function RecipientProfilePage() {
 function ProfileUpgradeModal({
   currentPlan,
   recipientName,
+  reason,
   onUpgrade,
   onClose,
 }: {
   currentPlan: Plan;
   recipientName?: string;
+  reason?: "card-limit" | "recipient-limit";
   onUpgrade: (plan: Plan) => void;
   onClose: () => void;
 }) {
   const orderedPlans: Plan[] = ["basic", "standard", "premium"];
+  const cardCap = PLANS[currentPlan].maxCardsPerYear;
+
+  const subtitle = reason === "card-limit"
+    ? `You've used all ${cardCap} card slots on your current plan. Upgrade to plan more occasions across your people.`
+    : recipientName
+    ? `You've hit your recipient limit. Upgrade to send cards for ${recipientName}.`
+    : "Upgrade your plan to activate autopilot for more recipients.";
 
   return (
     <div
@@ -1041,13 +1057,9 @@ function ProfileUpgradeModal({
           <div className="flex items-start justify-between mb-1">
             <div>
               <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.05em", color: BLACK, lineHeight: 1 }}>
-                Upgrade to Activate
+                {reason === "card-limit" ? "Need More Cards?" : "Upgrade to Activate"}
               </h2>
-              <p className="text-sm mt-1.5" style={{ color: GRAY }}>
-                {recipientName
-                  ? `You've hit your recipient limit. Upgrade to send cards for ${recipientName}.`
-                  : "Upgrade your plan to activate autopilot for more recipients."}
-              </p>
+              <p className="text-sm mt-1.5" style={{ color: GRAY }}>{subtitle}</p>
             </div>
             <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 text-xl font-bold leading-none ml-4 flex-shrink-0">×</button>
           </div>

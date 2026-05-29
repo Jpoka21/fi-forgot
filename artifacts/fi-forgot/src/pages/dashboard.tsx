@@ -2030,10 +2030,10 @@ export default function DashboardPage() {
           <div style={{ background: WHITE, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: "28px 24px 36px" }}>
             <div style={{ width: 40, height: 4, background: `${BLACK}20`, borderRadius: 2, margin: "0 auto 24px" }} />
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.04em", color: BLACK, lineHeight: 1, marginBottom: 4 }}>
-              UNLOCK ALL OCCASIONS
+              NEED MORE CARDS?
             </div>
             <p style={{ fontSize: "0.85rem", color: GRAY, marginBottom: 20, fontFamily: "'Inter', sans-serif", lineHeight: 1.5 }}>
-              Your current plan only covers Birthday and Anniversary. Upgrade to put every occasion on autopilot.
+              You've used all {PLANS[plan].maxCardsPerYear} card slots on your current plan. Upgrade to cover more occasions across your people.
             </p>
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
               {(["basic","standard","premium"] as Plan[]).map((key) => {
