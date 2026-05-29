@@ -125,7 +125,7 @@ The team`,
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   const [cardSide, setCardSide] = useState<Record<number, "front" | "inside">>({});
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
@@ -263,10 +263,17 @@ export default function LandingPage() {
                 <span style={{ fontSize: "0.55rem", letterSpacing: "0.15em", background: B.red, color: "#fff", padding: "2px 6px", borderRadius: 2 }}>NEW</span>
               </Link>
               {isLoggedIn ? (
-                <Link href="/dashboard" onClick={() => setMenuOpen(false)}
-                  style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
-                  MY DASHBOARD
-                </Link>
+                <>
+                  <Link href="/dashboard" onClick={() => setMenuOpen(false)}
+                    style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
+                    MY DASHBOARD
+                  </Link>
+                  <button
+                    onClick={() => { setMenuOpen(false); logout(); }}
+                    style={{ display: "block", width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, padding: "6px 0" }}>
+                    SIGN OUT
+                  </button>
+                </>
               ) : (
                 <Link href="/login" onClick={() => setMenuOpen(false)}
                   style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
