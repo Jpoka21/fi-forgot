@@ -348,33 +348,37 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(12px, 3.1vw, 14.5px)",
-            fontWeight: 500,
-            color: "rgba(255,255,255,0.9)",
+            fontSize: "clamp(14px, 3.8vw, 17px)",
+            fontWeight: 600,
+            color: "#ffffff",
             lineHeight: 1.4,
-            textShadow: "0 1px 10px rgba(0,0,0,0.9)",
-            marginTop: 6,
+            marginTop: 8,
+            background: "rgba(0,0,0,0.45)",
+            padding: "5px 12px",
+            borderRadius: 4,
           }}>
             We write and mail real cards before you forget.
           </div>
         </div>
 
-        {/* Mobile — CTA at Dave's shoulder level, left aligned */}
+        {/* Mobile — CTA over upper-right bush/fence area */}
         <div className="md:hidden" style={{
-          position: "absolute", left: 16, top: "42%", zIndex: 2,
+          position: "absolute", right: 12, top: "18%", zIndex: 2,
         }}>
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
-              display: "inline-flex", alignItems: "center",
+              display: "flex", alignItems: "center", justifyContent: "center",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(13px, 3.64vw, 17px)",
+              fontSize: "clamp(16px, 4.5vw, 20px)",
               letterSpacing: "0.08em",
-              padding: "12px 18px",
+              padding: "14px 18px",
               borderRadius: 2,
               textDecoration: "none",
-              boxShadow: "0 4px 18px rgba(0,0,0,0.55)",
-              whiteSpace: "nowrap",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.6)",
+              width: "38vw",
+              textAlign: "center" as const,
+              lineHeight: 1.15,
             }}>
             AUTOMATE BEING THOUGHTFUL
           </Link>
