@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getUncachableStripeClient } from "../stripeClient.js";
 import { logger } from "../lib/logger.js";
 
@@ -13,31 +13,45 @@ function getBaseUrl(req: any): string {
   return `${req.protocol}://${req.get("host")}`;
 }
 
-router.get("/api/stripe/plans", async (_req, res) => {
+router.get("/stripe/plans", async (_req, res) => {
   try {
-    const result = await db.execute(sql`
-      SELECT
-        p.id as product_id,
-        p.name as product_name,
-        p.description,
-        p.metadata,
-        pr.id as price_id,
-        pr.unit_amount,
-        pr.currency,
-        pr.recurring
-      FROM stripe.products p
-      JOIN stripe.prices pr ON pr.product = p.id AND pr.active = true
-      WHERE p.active = true
-      ORDER BY pr.unit_amount ASC
-    `);
-    res.json({ data: result.rows });
+    const stripe = await getUncachableStripeClient();
+    const products = await stripe.products.list({ active: true, limit: 20 });
+
+    const planData = await Promise.all(
+      products.data.map(async (product) => {
+        const prices = await stripe.prices.list({
+          product: product.id,
+          active: true,
+          limit: 1,
+        });
+        const price = prices.data[0];
+        if (!price) return null;
+        return {
+          product_id: product.id,
+          product_name: product.name,
+          description: product.description,
+          metadata: product.metadata,
+          price_id: price.id,
+          unit_amount: price.unit_amount,
+          currency: price.currency,
+          recurring: price.recurring,
+        };
+      }),
+    );
+
+    const sorted = planData
+      .filter(Boolean)
+      .sort((a, b) => (a!.unit_amount ?? 0) - (b!.unit_amount ?? 0));
+
+    res.json({ data: sorted });
   } catch (err) {
     logger.error({ err }, "Failed to fetch Stripe plans");
     res.status(500).json({ error: "Failed to load plans" });
   }
 });
 
-router.post("/api/stripe/checkout", async (req, res) => {
+router.post("/stripe/checkout", async (req, res) => {
   try {
     const { email, name, priceId, planKey } = req.body as {
       email: string;
@@ -97,7 +111,7 @@ router.post("/api/stripe/checkout", async (req, res) => {
   }
 });
 
-router.post("/api/stripe/portal", async (req, res) => {
+router.post("/stripe/portal", async (req, res) => {
   try {
     const { email } = req.body as { email: string };
     if (!email) { res.status(400).json({ error: "email required" }); return; }

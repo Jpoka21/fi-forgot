@@ -28,6 +28,7 @@ export default function SubscribePage() {
 
   useEffect(() => {
     fetch("/api/stripe/plans")
+      .then(r => { if (!r.ok) throw new Error(`${r.status}`); return r; })
       .then(r => r.json())
       .then(json => {
         const rows: StripePlan[] = (json.data ?? [])

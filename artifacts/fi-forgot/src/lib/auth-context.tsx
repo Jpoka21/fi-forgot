@@ -42,7 +42,7 @@ interface AuthContextType {
   workspaces: Workspace[];
   activeWorkspace: Workspace | null;
   login: (email: string, name?: string) => void;
-  signup: (name: string, email: string) => void;
+  signup: (name: string, email: string, skipOnboarding?: boolean) => void;
   businessSignup: (name: string, email: string, businessName: string, businessType: string) => void;
   completeOnboarding: (data: OnboardingData) => void;
   logout: () => void;
