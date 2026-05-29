@@ -1,0 +1,81 @@
+IMPORTANT
+
+Create a backup branch, checkpoint, or snapshot before making any changes.
+
+All changes in this prompt are MOBILE ONLY.
+
+Target screens below 768px width.
+
+Do not modify desktop layouts, desktop typography, desktop spacing, desktop header sizing, desktop navigation, or desktop logo sizing.
+
+Use media queries if necessary so these changes only apply to mobile devices.
+
+MOBILE HEADER IMPROVEMENTS
+
+The current mobile header looks clean, but the branding feels slightly undersized.
+
+Make the following changes:
+
+1. Header Height
+
+Increase the mobile header height by approximately 15%.
+
+The header should feel slightly more substantial while still remaining compact and premium.
+
+Do not make it oversized.
+
+2. Logo Size
+
+Increase the F* I Forgot logo size by approximately 15 to 20%.
+
+The logo should be easier to recognize immediately when landing on the page.
+
+3. Logo Spacing
+
+Add approximately 8 to 12px more left padding around the logo.
+
+The logo currently feels slightly crowded against the edge of the screen.
+
+Give it more breathing room.
+
+4. Tagline Readability
+
+The tagline:
+
+“Relationship Damage Control”
+
+is difficult to read on mobile.
+
+Keep the tagline visible.
+
+Increase its readability slightly by adjusting font size and spacing.
+
+Do not make it compete with the main logo.
+
+Maintain this visual hierarchy:
+
+• F* I FORGOT = primary
+• Relationship Damage Control = secondary
+
+5. Navigation Elements
+
+Keep the My Dashboard button exactly where it is.
+
+Keep the hamburger menu exactly where it is.
+
+Do not change button styling, functionality, spacing, or behavior.
+
+FINAL QA CHECK
+
+Test on approximately 390px mobile width and verify:
+
+• Header is slightly taller
+• Logo is noticeably easier to see
+• Logo has more breathing room on the left
+• Tagline is readable but still secondary
+• Dashboard button remains unchanged
+• Hamburger menu remains unchanged
+• Desktop header remains untouched
+• Overall appearance remains clean, modern, and premium
+
+Success means the header looks almost identical to the current version, but with stronger branding and improved readability on mobile.

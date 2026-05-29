@@ -205,12 +205,12 @@ export default function LandingPage() {
       {/* ── Mobile nav ────────────────────────────────────────────────────── */}
       <nav className="md:hidden sticky top-0 z-50"
         style={{ background: B.beige, borderBottom: `1px solid ${B.black}18` }}>
-        <div className="flex items-center justify-between" style={{ padding: "8px 16px" }}>
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: B.black, lineHeight: 0.95 }}>
+        <div className="flex items-center justify-between" style={{ padding: "10px 16px" }}>
+          <Link href="/" style={{ textDecoration: "none", paddingLeft: 10 }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", color: B.black, lineHeight: 0.95 }}>
               <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>{" "}I FORGOT
             </div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.42rem", letterSpacing: "0.2em", color: B.gray, marginTop: 1 }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.58rem", letterSpacing: "0.18em", color: B.gray, marginTop: 2 }}>
               RELATIONSHIP DAMAGE CONTROL
             </div>
           </Link>
@@ -282,7 +282,7 @@ export default function LandingPage() {
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="md:hidden w-full"
-          style={{ height: "auto", filter: "brightness(1.45)" }}
+          style={{ height: "auto", maxHeight: "85vh", objectFit: "cover", objectPosition: "center top", filter: "brightness(1.45)" }}
         />
         {/* Desktop landscape hero — full image, scaled to fit viewport height */}
         <img
@@ -327,13 +327,10 @@ export default function LandingPage() {
             YOU DON'T HAVE TO.
           </div>
 
-          {/* Thin divider */}
-          <div style={{ width: 32, height: 2, background: B.red, borderRadius: 1, marginTop: 10 }} />
-
           {/* Subheadline */}
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(10.5px, 2.8vw, 13px)",
+            fontSize: "clamp(12.5px, 3.35vw, 15.5px)",
             fontWeight: 500,
             color: "rgba(255,255,255,0.88)",
             lineHeight: 1.5,
