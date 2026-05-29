@@ -292,12 +292,12 @@ export default function LandingPage() {
         className=""
         style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
-        {/* Mobile portrait hero */}
+        {/* Mobile portrait hero — cropped just below last card row, floor hidden */}
         <img
           src="/hero-mobile.png"
           alt="F* I Forgot — You focus on life. We remember everything."
           className="md:hidden w-full"
-          style={{ height: "auto", filter: "brightness(1.45)" }}
+          style={{ aspectRatio: "853 / 1565", objectFit: "cover", objectPosition: "top center", display: "block", filter: "brightness(1.45)" }}
         />
         {/* Desktop landscape hero — full image, scaled to fit viewport height */}
         <img
