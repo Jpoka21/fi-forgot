@@ -1333,52 +1333,106 @@ export default function DashboardPage() {
               </div>
             ) : (
               <>
-                {/* Card balance bar */}
+                {/* Card balance box */}
                 {(() => {
                   const totalCards = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
                   const cap = PLANS[plan].maxCardsPerYear;
+                  const remaining = Math.max(0, cap - totalCards);
                   const overBy = Math.max(0, totalCards - cap);
                   const atCap = totalCards >= cap;
-                  const pct = Math.min(100, Math.round((totalCards / cap) * 100));
+                  const pct = Math.min(100, (totalCards / cap) * 100);
+                  const barColor = overBy > 0 ? RED : atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a";
+                  const statusColor = overBy > 0 ? RED : atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a";
                   return (
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: BLACK }}>Card Balance</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: atCap ? RED : BLACK }}>
-                            {totalCards} / {cap} cards planned
+                    <div style={{
+                      background: WHITE,
+                      border: `1.5px solid ${overBy > 0 ? RED : atCap ? `${RED}50` : `${BLACK}12`}`,
+                      borderRadius: 16,
+                      padding: "20px 24px 18px",
+                      marginBottom: 20,
+                      boxShadow: overBy > 0 ? `0 0 0 3px ${RED}18` : "0 1px 4px rgba(0,0,0,0.06)",
+                    }}>
+                      {/* Top row: label + status badge */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK }}>
+                          CARD BALANCE
+                        </span>
+                        {overBy > 0 ? (
+                          <span style={{
+                            fontSize: "0.72rem", fontWeight: 700, color: RED,
+                            background: `${RED}12`, border: `1px solid ${RED}30`,
+                            borderRadius: 20, padding: "3px 10px",
+                          }}>
+                            {overBy} over limit
                           </span>
-                          {overBy > 0 ? (
-                            <span style={{
-                              fontSize: "0.7rem", fontWeight: 700, color: RED,
-                              background: `${RED}12`, border: `1px solid ${RED}30`,
-                              borderRadius: 8, padding: "2px 8px",
-                            }}>
-                              {overBy} over limit
-                            </span>
-                          ) : atCap ? (
-                            <button onClick={() => setUpgradeOpen(true)} style={{
-                              background: RED, color: WHITE, border: "none",
-                              borderRadius: 10, padding: "2px 10px", fontFamily: "'Bebas Neue', cursive",
-                              fontSize: "0.72rem", letterSpacing: "0.08em", cursor: "pointer",
-                            }}>Upgrade</button>
-                          ) : null}
-                        </div>
+                        ) : atCap ? (
+                          <span style={{
+                            fontSize: "0.72rem", fontWeight: 700, color: RED,
+                            background: `${RED}10`, border: `1px solid ${RED}25`,
+                            borderRadius: 20, padding: "3px 10px",
+                          }}>
+                            At limit
+                          </span>
+                        ) : (
+                          <span style={{
+                            fontSize: "0.72rem", fontWeight: 600, color: statusColor,
+                            background: `${statusColor}12`, border: `1px solid ${statusColor}30`,
+                            borderRadius: 20, padding: "3px 10px",
+                          }}>
+                            {remaining} left
+                          </span>
+                        )}
                       </div>
-                      <div style={{ height: 6, borderRadius: 6, background: `${BLACK}10`, overflow: "hidden" }}>
+
+                      {/* Big numbers */}
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 12 }}>
+                        <span style={{
+                          fontFamily: "'Bebas Neue', cursive",
+                          fontSize: "3rem",
+                          lineHeight: 1,
+                          color: overBy > 0 ? RED : BLACK,
+                          letterSpacing: "0.02em",
+                        }}>
+                          {totalCards}
+                        </span>
+                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: GRAY, letterSpacing: "0.03em", lineHeight: 1 }}>
+                          / {cap}
+                        </span>
+                        <span style={{ fontSize: "0.8rem", color: GRAY, marginLeft: 4, fontFamily: "'Inter', sans-serif" }}>
+                          cards planned this year
+                        </span>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div style={{ height: 8, borderRadius: 8, background: `${BLACK}10`, overflow: "hidden", marginBottom: 10 }}>
                         <div style={{
-                          height: "100%", borderRadius: 6,
+                          height: "100%", borderRadius: 8,
                           width: `${pct}%`,
-                          background: overBy > 0 ? RED : atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a",
+                          background: barColor,
                           transition: "width 0.4s ease",
                         }} />
                       </div>
-                      <div style={{ fontSize: "0.68rem", marginTop: 4, color: overBy > 0 ? RED : GRAY }}>
-                        {overBy > 0
-                          ? `Remove ${overBy} occasion${overBy !== 1 ? "s" : ""} from your people, or upgrade your plan`
-                          : atCap
-                          ? "You're at your plan limit — upgrade to add more"
-                          : `${cap - totalCards} card${cap - totalCards !== 1 ? "s" : ""} remaining — split them however you want`}
+
+                      {/* Bottom row: message + optional upgrade */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: "0.75rem", color: overBy > 0 ? RED : GRAY, fontFamily: "'Inter', sans-serif" }}>
+                          {overBy > 0
+                            ? `Remove ${overBy} occasion${overBy !== 1 ? "s" : ""} from your people, or upgrade`
+                            : atCap
+                            ? "You're at your plan limit"
+                            : `${remaining} card${remaining !== 1 ? "s" : ""} still available — add more occasions`}
+                        </span>
+                        {(overBy > 0 || atCap) && (
+                          <button onClick={() => setUpgradeOpen(true)} style={{
+                            background: RED, color: WHITE, border: "none",
+                            borderRadius: 10, padding: "5px 14px",
+                            fontFamily: "'Bebas Neue', cursive",
+                            fontSize: "0.8rem", letterSpacing: "0.08em", cursor: "pointer",
+                            flexShrink: 0, marginLeft: 12,
+                          }}>
+                            Upgrade
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
