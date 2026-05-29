@@ -1,5 +1,5 @@
 import { Router } from "express";
-import OpenAI from "openai";
+import { openai, hasAI } from "../lib/openai";
 import {
   handwryttenService,
   HandwryttenOrderRequest,
@@ -8,10 +8,6 @@ import {
 import { getClassificationStats } from "../services/card-classifier";
 
 const router = Router();
-
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 // ─── Generate admin message ───────────────────────────────────────────────────
 
@@ -82,7 +78,7 @@ ${context}
 
 Keep it to 3–6 sentences. Personal, specific, grounded only in the facts provided. Return only the card text, no quotes, no labels.`;
 
-  const usesMockAI = !process.env["OPENAI_API_KEY"];
+  const usesMockAI = !hasAI;
 
   if (usesMockAI) {
     // Placeholder response for when OpenAI is not connected
@@ -244,7 +240,7 @@ router.post("/admin/refine-message", async (req, res) => {
     return;
   }
 
-  const usesMockAI = !process.env["OPENAI_API_KEY"];
+  const usesMockAI = !hasAI;
   if (usesMockAI) {
     req.log.info("MOCK: refine-message (no API key configured)");
     res.json({ message: currentMessage, mock: true });

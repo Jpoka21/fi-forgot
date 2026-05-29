@@ -10,14 +10,13 @@
  *  - GPT prompts use personal / family context, not business context
  */
 
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 import { db } from "@workspace/db";
 import { cardClassificationsTable } from "@workspace/db";
 import { inArray } from "drizzle-orm";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
 import { logger } from "../lib/logger";
 
-const openai = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
 
 interface EnrichedCard extends HandwryttenCard {
   occasions: string[];

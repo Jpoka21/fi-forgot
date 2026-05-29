@@ -1,7 +1,7 @@
 // Email service — using Resend (RESEND_API_KEY secret)
 // Keeping file named sendgrid.ts to avoid changing imports elsewhere
 import { Resend } from "resend";
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 import { logger } from "../lib/logger";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
 import {
@@ -12,9 +12,6 @@ import {
   startPeriodicRescan,
 } from "./card-classifier";
 
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"] ?? "placeholder",
-});
 
 /**
  * Generate a unique handwritten card message using GPT.

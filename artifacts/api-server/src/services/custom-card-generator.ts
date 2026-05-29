@@ -8,16 +8,13 @@
  *  4. Store the resulting Handwrytten card ID in the custom_holiday_cards DB table
  */
 
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 import { db } from "@workspace/db";
 import { customHolidayCardsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { uploadCustomImage, createCustomHandwryttenCard, getCustomCardDimensions } from "./handwrytten";
 import { logger } from "../lib/logger";
 
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 // ─── Card designs ────────────────────────────────────────────────────────────
 

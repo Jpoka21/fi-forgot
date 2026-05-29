@@ -1,11 +1,7 @@
 import { Router } from "express";
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 
 const router = Router();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 function yearsPhrase(eventDate: string): string {
   const then = new Date(eventDate);

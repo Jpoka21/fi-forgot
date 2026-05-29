@@ -1,13 +1,9 @@
 import { Router } from "express";
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 import { db, cardClassificationsTable, sampleCardMessagesTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 
 const router = Router();
-
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 // ── Category derivation ────────────────────────────────────────────────────────
 // Only three categories are supported for business cards.

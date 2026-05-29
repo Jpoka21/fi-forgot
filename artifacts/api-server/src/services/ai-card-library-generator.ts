@@ -13,14 +13,13 @@
  *   holiday                    (5 cards)
  */
 
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 import { db } from "@workspace/db";
 import { aiCardLibraryTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { uploadCustomImage, createCustomHandwryttenCard, getCustomCardDimensions } from "./handwrytten";
 import { logger } from "../lib/logger";
 
-const openai = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
 
 // ─── Card designs ─────────────────────────────────────────────────────────────
 

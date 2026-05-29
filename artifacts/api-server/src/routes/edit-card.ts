@@ -1,11 +1,7 @@
 import { Router } from "express";
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 
 const router = Router();
-
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 router.post("/edit-card", async (req, res) => {
   const { recipientName, holiday, tone, currentCardText, instruction } = req.body;

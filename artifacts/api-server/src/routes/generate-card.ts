@@ -1,11 +1,7 @@
 import { Router } from "express";
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 
 const router = Router();
-
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 interface BriefingAnswer {
   questionKey: string;
@@ -156,8 +152,23 @@ Use \\n for line breaks within card text. Do not include markdown. Return only t
 
     let parsed: { cards: { tone: string; text: string }[] };
     try {
+      // Extract the outermost JSON object (handles markdown fences or preamble)
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+      let jsonStr = jsonMatch ? jsonMatch[0] : raw;
+
+      // Attempt 1: parse as-is
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        // Attempt 2: repair common truncation — missing closing } for last card
+        // Pattern: last card ends without }, before the closing ]
+        jsonStr = jsonStr
+          .replace(/("text"\s*:\s*"(?:[^"\\]|\\.)*")\s*\n?\s*\]/g, '$1\n    }]')
+          .replace(/\}\s*\]\s*$/, "}]}")  // ensure outer object closes
+          .trim();
+        if (!jsonStr.endsWith("}")) jsonStr += "}";
+        parsed = JSON.parse(jsonStr);
+      }
     } catch {
       req.log.error({ raw }, "Failed to parse OpenAI JSON response");
       res.status(500).json({ error: "Failed to parse card response" });

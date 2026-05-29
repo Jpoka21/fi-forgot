@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 import { eq } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { cardClassificationsTable } from "@workspace/db/schema";
@@ -10,9 +10,6 @@ const anthropic = new Anthropic({
   apiKey: process.env["AI_INTEGRATIONS_ANTHROPIC_API_KEY"] ?? "placeholder",
 });
 
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"] ?? "placeholder",
-});
 
 
 const VALID_OCCASIONS = [

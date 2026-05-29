@@ -72,6 +72,7 @@ export default function TryPage() {
   const [cards, setCards]       = useState<{tone:string;text:string}[]>(draft.cards ?? []);
   const [selectedTone, setTone] = useState<string>(draft.selectedTone ?? "Sweet");
   const [editedText, setEdited] = useState<string>(draft.editedText ?? "");
+  const [genError, setGenError] = useState<string|null>(null);
   const [cardDesign, setDesign] = useState<CardDesign|null>(draft.cardDesign ?? null);
   const [designLoading, setDesignLoading] = useState(false);
   const [excludedDesignIds, setExcluded] = useState<string[]>([]);
@@ -131,6 +132,7 @@ export default function TryPage() {
     const occasion = pickPreviewOccasion();
     setPreviewOccasion(occasion);
     setStep("generating");
+    setGenError(null);
 
     const interests = interestsText.split(",").map(s => s.trim()).filter(Boolean);
 
@@ -151,16 +153,19 @@ export default function TryPage() {
             insideJokes: jokes,
             thingsToAvoid: avoid,
             emotionalLevel,
+            tonePreference: selectedTone,
             senderName: senderName || "Me",
           }),
         }),
         fetch(`/api/personal-cards/pick-card?eventType=${encodeURIComponent(occasion)}`),
       ]);
 
-      const genData = await genRes.json() as { cards?: {tone:string;text:string}[] };
+      const genData = await genRes.json() as { cards?: {tone:string;text:string}[]; error?: string };
       const pickData = await pickRes.json() as { card?: CardDesign };
 
-      if (genData.cards?.length) {
+      if (!genRes.ok || !genData.cards?.length) {
+        setGenError(genData.error ?? "We couldn't write the card right now. Try again in a moment.");
+      } else {
         setCards(genData.cards);
         const first = genData.cards[0]!;
         setTone(first.tone);
@@ -168,7 +173,7 @@ export default function TryPage() {
       }
       if (pickData.card) setDesign(pickData.card);
     } catch {
-      // Fallback: show whatever we got
+      setGenError("Something went wrong. Check your connection and try again.");
     }
 
     setStep("preview");
@@ -660,8 +665,26 @@ export default function TryPage() {
               </div>
             )}
 
-            {/* Tone selector */}
-            <div style={{ background: WHITE, borderRadius: 14, border: `1.5px solid ${BLACK}12`, overflow: "hidden", marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            {/* Tone selector / error state */}
+            <div style={{ background: WHITE, borderRadius: 14, border: `1.5px solid ${genError ? `${RED}30` : `${BLACK}12`}`, overflow: "hidden", marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+              {genError ? (
+                <div style={{ padding: "24px 20px", textAlign: "center" }}>
+                  <div style={{ fontSize: "1.8rem", marginBottom: 10 }}>✉️</div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: RED, marginBottom: 6 }}>
+                    COULDN'T WRITE THE CARD
+                  </div>
+                  <p style={{ fontSize: "0.82rem", color: GRAY, margin: "0 0 16px", fontFamily: "'Inter', sans-serif", lineHeight: 1.5 }}>
+                    {genError}
+                  </p>
+                  <button
+                    onClick={generate}
+                    style={{ background: RED, color: WHITE, border: "none", borderRadius: 8, padding: "10px 24px", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.08em", cursor: "pointer" }}
+                  >
+                    TRY AGAIN
+                  </button>
+                </div>
+              ) : (
+              <>
               <div style={{ display: "flex", borderBottom: `1px solid ${BLACK}08` }}>
                 {cards.map(c => (
                   <button key={c.tone} onClick={() => setTone(c.tone)} style={{ flex: 1, padding: "12px 8px", border: "none", borderBottom: `2.5px solid ${selectedTone === c.tone ? RED : "transparent"}`, background: selectedTone === c.tone ? `${RED}06` : WHITE, color: selectedTone === c.tone ? RED : GRAY, fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", cursor: "pointer" }}>
@@ -693,6 +716,8 @@ export default function TryPage() {
                   ))}
                 </div>
               </div>
+              </>
+              )}
             </div>
 
             {/* Primary CTA */}

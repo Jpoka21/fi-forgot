@@ -13,16 +13,13 @@
  * as long as Handwrytten categorises them and/or their name contains relevant keywords.
  */
 
-import OpenAI from "openai";
+import { openai } from "../lib/openai";
 import { db } from "@workspace/db";
 import { cardClassificationsTable, customHolidayCardsTable, aiCardLibraryTable } from "@workspace/db";
 import { inArray, eq, and, sql } from "drizzle-orm";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
 import { logger } from "../lib/logger";
 
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
