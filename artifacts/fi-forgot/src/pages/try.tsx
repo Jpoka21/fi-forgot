@@ -697,7 +697,7 @@ export default function TryPage() {
                 <textarea
                   value={editedText}
                   onChange={e => setEdited(e.target.value)}
-                  style={{ width: "100%", minHeight: 160, border: `1.5px solid ${BLACK}14`, borderRadius: 10, padding: "14px", fontSize: "0.92rem", fontFamily: "'Caveat', cursive", lineHeight: 1.8, color: BLACK, background: BEIGE, resize: "vertical", boxSizing: "border-box", outline: "none" } as React.CSSProperties}
+                  style={{ width: "100%", minHeight: 160, border: `1.5px solid ${BLACK}14`, borderRadius: 10, padding: "14px", fontSize: "1.15rem", fontFamily: "'Caveat', cursive", lineHeight: 1.7, color: "#111111", background: BEIGE, resize: "vertical", boxSizing: "border-box", outline: "none", fontWeight: 600 } as React.CSSProperties}
                 />
 
                 {/* AI quick edits */}
