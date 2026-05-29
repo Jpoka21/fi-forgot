@@ -309,15 +309,14 @@ export default function LandingPage() {
 
         {/* Mobile — top gradient for headline readability */}
         <div className="md:hidden" style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: "28%", zIndex: 1,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 70%, transparent 100%)",
+          position: "absolute", top: 0, left: 0, right: 0, height: "34%", zIndex: 1,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 72%, transparent 100%)",
           pointerEvents: "none",
         }} />
 
-
         {/* Mobile — top-center headline + subheadline */}
         <div className="md:hidden flex flex-col items-center" style={{
-          position: "absolute", top: 14, left: "10%", right: "10%",
+          position: "absolute", top: 54, left: "10%", right: "10%",
           textAlign: "center", lineHeight: "normal", zIndex: 2,
         }}>
           <div style={{
@@ -342,40 +341,18 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(14px, 3.8vw, 17px)",
+            fontSize: "clamp(13px, 3.5vw, 16px)",
             fontWeight: 600,
             color: "#ffffff",
             lineHeight: 1.4,
-            marginTop: 8,
+            marginTop: 5,
             background: "rgba(0,0,0,0.45)",
-            padding: "5px 12px",
+            padding: "4px 10px",
             borderRadius: 4,
+            maxWidth: "85%",
           }}>
             We write and mail real cards before you forget.
           </div>
-        </div>
-
-        {/* Mobile — CTA over left fence/bush area */}
-        <div className="md:hidden" style={{
-          position: "absolute", left: 12, top: "30%", zIndex: 2,
-        }}>
-          <Link href="/try" data-testid="link-cta-hitzone"
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: B.red, color: "#fff",
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(16px, 4.5vw, 20px)",
-              letterSpacing: "0.08em",
-              padding: "14px 18px",
-              borderRadius: 2,
-              textDecoration: "none",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.6)",
-              width: "38vw",
-              textAlign: "center" as const,
-              lineHeight: 1.15,
-            }}>
-            AUTOMATE BEING THOUGHTFUL
-          </Link>
         </div>
 
         {/* Desktop text overlay */}
