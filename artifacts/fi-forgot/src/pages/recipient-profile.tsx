@@ -280,6 +280,9 @@ export default function RecipientProfilePage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const isNew = params.id === "new";
+  const backTo = new URLSearchParams(window.location.search).get("from") === "dashboard"
+    ? "/dashboard"
+    : "/recipients";
   const [saved, setSaved] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -474,9 +477,9 @@ export default function RecipientProfilePage() {
     saveRecipient(recipient);
     setSaved(true);
     if (!shouldBeActive) {
-      setTimeout(() => setLocation("/recipients"), 1600);
+      setTimeout(() => setLocation(backTo), 1600);
     } else {
-      setTimeout(() => setLocation("/recipients"), 1200);
+      setTimeout(() => setLocation(backTo), 1200);
     }
   }
 
@@ -491,7 +494,7 @@ export default function RecipientProfilePage() {
 
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
-            <Link href="/recipients">
+            <Link href={backTo}>
               <button
                 className="p-2 rounded-xl hover:bg-white/50 transition-colors"
                 style={{ color: GRAY }}

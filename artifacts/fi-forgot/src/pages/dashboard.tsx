@@ -352,7 +352,7 @@ function RecipientCard({
             </button>
           </Link>
         ) : <div style={{ flex: 1 }} />}
-        <Link href={`/recipients/${r.id}`}>
+        <Link href={`/recipients/${r.id}?from=dashboard`}>
           <button style={{
             padding: isMobile ? "13px 16px" : "9px 14px",
             background: `${BLACK}06`, color: BLACK,
