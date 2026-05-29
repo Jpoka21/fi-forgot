@@ -26,7 +26,13 @@ export default function SubscribePage() {
   const [checkingOut, setCheckingOut] = useState<Plan | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
+  const DEV_BYPASS = import.meta.env.DEV;
+
   useEffect(() => {
+    if (DEV_BYPASS) {
+      setLoading(false);
+      return;
+    }
     fetch("/api/stripe/plans")
       .then(r => { if (!r.ok) throw new Error(`${r.status}`); return r; })
       .then(r => r.json())
@@ -42,7 +48,7 @@ export default function SubscribePage() {
       })
       .catch(() => setLoadError("Couldn't load plan details — Stripe may not be connected yet."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [DEV_BYPASS]);
 
   async function handleSubscribe(planKey: Plan) {
     const email = user?.email;
@@ -51,14 +57,22 @@ export default function SubscribePage() {
       return;
     }
 
-    const match = stripePlans.find(p => p.planKey === planKey);
-    if (!match) {
-      setCheckoutError("This plan isn't available yet. Please try again shortly.");
+    setCheckingOut(planKey);
+    setCheckoutError(null);
+
+    // Dev bypass: skip Stripe checkout during testing
+    if (DEV_BYPASS) {
+      upgradePlan(planKey);
+      setLocation("/dashboard");
       return;
     }
 
-    setCheckingOut(planKey);
-    setCheckoutError(null);
+    const match = stripePlans.find(p => p.planKey === planKey);
+    if (!match) {
+      setCheckoutError("This plan isn't available yet. Please try again shortly.");
+      setCheckingOut(null);
+      return;
+    }
 
     try {
       const res = await fetch("/api/stripe/checkout", {
@@ -104,7 +118,7 @@ export default function SubscribePage() {
           const plan = PLANS[key];
           const isPopular = key === "standard";
           const isChecking = checkingOut === key;
-          const stripeReady = stripePlans.some(p => p.planKey === key);
+          const stripeReady = DEV_BYPASS || stripePlans.some(p => p.planKey === key);
 
           return (
             <div key={key} style={{ background: WHITE, borderRadius: 16, border: isPopular ? `2.5px solid ${RED}` : `1.5px solid ${BLACK}18`, padding: "32px 28px", display: "flex", flexDirection: "column", position: "relative", boxShadow: isPopular ? "0 8px 32px rgba(226,59,46,0.15)" : "0 2px 12px rgba(0,0,0,0.06)" }}>
