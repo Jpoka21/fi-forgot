@@ -361,9 +361,9 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Mobile — CTA over upper-right bush/fence area */}
+        {/* Mobile — CTA over left fence/bush area */}
         <div className="md:hidden" style={{
-          position: "absolute", right: 12, top: "18%", zIndex: 2,
+          position: "absolute", left: 12, top: "30%", zIndex: 2,
         }}>
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
