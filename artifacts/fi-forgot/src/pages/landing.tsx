@@ -350,7 +350,7 @@ export default function LandingPage() {
           {/* CTA */}
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
-              display: "inline-flex", alignItems: "center",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
               marginTop: 10, alignSelf: "flex-start",
               background: B.red, color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
@@ -360,7 +360,8 @@ export default function LandingPage() {
               borderRadius: 5,
               textDecoration: "none",
               boxShadow: "0 4px 18px rgba(0,0,0,0.45)",
-              whiteSpace: "nowrap",
+              maxWidth: "100%",
+              textAlign: "center" as const,
             }}>
             AUTOMATE BEING THOUGHTFUL
           </Link>
