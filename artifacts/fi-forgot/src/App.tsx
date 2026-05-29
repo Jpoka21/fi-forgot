@@ -135,17 +135,14 @@ function FloatingTryButton() {
 
   useEffect(() => {
     if (typeof window === "undefined" || window.innerWidth >= 768) return;
-    if (revealed) return;
 
     const onScroll = () => {
-      if (window.scrollY >= 75) {
-        setRevealed(true);
-      }
+      setRevealed(window.scrollY >= 75);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [revealed]);
+  }, []);
 
   const hide = HIDE_TRY_BUTTON_ON.some(p => location === p || location.startsWith(p + "/"));
   if (hide) return null;
