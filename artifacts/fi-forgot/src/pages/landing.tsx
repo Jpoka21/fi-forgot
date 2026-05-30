@@ -293,29 +293,30 @@ export default function LandingPage() {
         )}
       </nav>
 
-      {/* ── MOBILE HERO — full-width image with text over white sky ────── */}
-      <section className="md:hidden" style={{ position: "relative", lineHeight: 0 }}>
+      {/* ── MOBILE HERO — top sky cropped, text over remaining sky ─────── */}
+      <section className="md:hidden" style={{ position: "relative", overflow: "hidden", lineHeight: 0 }}>
 
-        {/* Full-width image at natural ratio — no black bars */}
+        {/* Shift image up ~45% of the blank sky height to crop empty whitespace.
+            overflow:hidden on the section clips the top; image bottom is unaffected. */}
         <img
           src="/hero-dave-mobile.png"
           alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
-          style={{ width: "100%", height: "auto", display: "block" }}
+          style={{ width: "100%", height: "auto", display: "block", marginTop: "-12%" }}
         />
 
-        {/* Text overlay — positioned over the white sky at the top of the image */}
+        {/* Text overlay — sits in the remaining visible sky strip at the top */}
         <div style={{
           position: "absolute",
-          top: "3%",
+          top: "2%",
           left: "50%",
           transform: "translateX(-50%)",
-          width: "90%",
+          width: "92%",
           textAlign: "center",
           lineHeight: "normal",
         }}>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(28px, 8vw, 38px)",
+            fontSize: "clamp(26px, 7.5vw, 36px)",
             color: B.black,
             letterSpacing: "0.02em",
             lineHeight: 0.95,
@@ -324,21 +325,21 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(28px, 8vw, 38px)",
+            fontSize: "clamp(26px, 7.5vw, 36px)",
             color: B.red,
             letterSpacing: "0.02em",
             lineHeight: 0.95,
-            marginBottom: 8,
+            marginBottom: 6,
           }}>
             THE PEOPLE WHO MATTER
           </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(12px, 3.2vw, 14px)",
+            fontSize: "clamp(11px, 3vw, 13px)",
             fontWeight: 600,
             color: "#333",
-            lineHeight: 1.4,
-            marginBottom: 10,
+            lineHeight: 1.35,
+            marginBottom: 8,
           }}>
             We write and mail real cards before you forget.
           </p>
@@ -348,9 +349,9 @@ export default function LandingPage() {
               background: B.red,
               color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(13px, 4vw, 17px)",
+              fontSize: "clamp(12px, 3.8vw, 16px)",
               letterSpacing: "0.1em",
-              padding: "9px 20px",
+              padding: "8px 18px",
               borderRadius: 4,
               textDecoration: "none",
               boxShadow: `0 3px 12px rgba(226,59,46,0.4)`,
