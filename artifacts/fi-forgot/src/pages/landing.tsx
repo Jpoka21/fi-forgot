@@ -334,7 +334,7 @@ export default function LandingPage() {
             lineHeight: 0.96,
             textShadow: "0 2px 16px rgba(0,0,0,0.9)",
           }}>
-            DAVE FORGOT.
+            NEVER FORGET
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
@@ -344,7 +344,7 @@ export default function LandingPage() {
             lineHeight: 0.96,
             textShadow: "1px 1px 0 rgba(0,0,0,0.95), -1px -1px 0 rgba(0,0,0,0.95), 1px -1px 0 rgba(0,0,0,0.95), -1px 1px 0 rgba(0,0,0,0.95), 0 2px 18px rgba(0,0,0,1)",
           }}>
-            YOU DON'T HAVE TO.
+            THE PEOPLE WHO MATTER
           </div>
           <div style={{
             fontFamily: "'Inter', sans-serif",
@@ -358,8 +358,36 @@ export default function LandingPage() {
             borderRadius: 4,
             maxWidth: "85%",
           }}>
-            We write and mail real cards before you forget.
+            We write and mail real cards for birthdays, holidays, anniversaries, and special moments before you forget.
           </div>
+        </div>
+
+        {/* Mobile — floating sticky notes (4, away from Dave's face ~center 45-60% from top) */}
+        <div className="md:hidden" style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none" }}>
+          {[
+            { label: "Mom's Birthday", top: "32%", left: "3%",  rotate: -4, bg: "#FFF176" },
+            { label: "Dad's Birthday", top: "30%", right: "3%", rotate:  3, bg: "#FFDBB3" },
+            { label: "Grandma's\nBirthday", top: "71%", left: "3%",  rotate: -3, bg: "#FFDBB3" },
+            { label: "Holidays",       top: "72%", right: "3%", rotate:  4, bg: "#FFF176" },
+          ].map(({ label, bg, rotate, ...pos }) => (
+            <div key={label} style={{
+              position: "absolute", ...pos,
+              background: bg,
+              padding: "8px 11px 11px",
+              borderRadius: 2,
+              boxShadow: "2px 4px 10px rgba(0,0,0,0.35), inset 0 -2px 0 rgba(0,0,0,0.08)",
+              transform: `rotate(${rotate}deg)`,
+              fontFamily: "'Caveat', cursive",
+              fontSize: "clamp(13px, 3.2vw, 16px)",
+              color: "#111",
+              lineHeight: 1.3,
+              whiteSpace: "pre-line",
+              maxWidth: 90,
+            }}>
+              <div style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)", width: 32, height: 13, background: `${bg}99`, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 2 }} />
+              {label}
+            </div>
+          ))}
         </div>
 
         {/* Desktop text overlay */}
@@ -375,7 +403,7 @@ export default function LandingPage() {
             lineHeight: 0.95,
             textShadow: "2px 3px 0 #00000088, -1px -1px 0 #00000033",
           }}>
-            DAVE FORGOT.
+            NEVER FORGET
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
@@ -386,7 +414,7 @@ export default function LandingPage() {
             textShadow: "2px 3px 0 #00000066",
             marginTop: "0.05em",
           }}>
-            YOU DON'T HAVE TO.
+            THE PEOPLE<br />WHO MATTER
           </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
@@ -397,7 +425,7 @@ export default function LandingPage() {
             margin: "0.8em 0 0",
             textShadow: "1px 1px 6px rgba(0,0,0,0.85)",
           }}>
-            Real greeting cards, automatically remembered,<br />personally written, and mailed on time.
+            We write and mail real cards for birthdays, holidays,<br />anniversaries, and special moments before you forget.
           </p>
           <Link href="/try" data-testid="link-cta-hitzone"
             style={{
@@ -413,6 +441,36 @@ export default function LandingPage() {
             }}>
             AUTOMATE BEING THOUGHTFUL
           </Link>
+        </div>
+
+        {/* Desktop — floating sticky notes (6, right half of hero, clear of Dave's face ~55-75% left, 30-55% top) */}
+        <div className="hidden md:block" style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none" }}>
+          {([
+            { label: "Mom's Birthday",       top: "7%",  left: "50%",  rotate: -4, bg: "#FFF176" },
+            { label: "Dad's Birthday",        top: "5%",  right: "5%",  rotate:  3, bg: "#FFDBB3" },
+            { label: "Grandma's\nBirthday",   top: "26%", right: "3%",  rotate: -2, bg: "#FFF176" },
+            { label: "Father's Day",          top: "60%", right: "5%",  rotate:  3, bg: "#FFDBB3" },
+            { label: "Best Friend's\nBirthday", top: "75%", right: "9%", rotate: -3, bg: "#FFF176" },
+            { label: "Holidays",              top: "73%", left: "47%",  rotate:  4, bg: "#FFDBB3" },
+          ] as Array<{ label: string; top: string; left?: string; right?: string; rotate: number; bg: string }>).map(({ label, bg, rotate, ...pos }) => (
+            <div key={label} style={{
+              position: "absolute", ...pos,
+              background: bg,
+              padding: "10px 14px 14px",
+              borderRadius: 2,
+              boxShadow: "2px 4px 14px rgba(0,0,0,0.35), inset 0 -3px 0 rgba(0,0,0,0.08)",
+              transform: `rotate(${rotate}deg)`,
+              fontFamily: "'Caveat', cursive",
+              fontSize: "clamp(14px, 1.1vw, 18px)",
+              color: "#111",
+              lineHeight: 1.35,
+              whiteSpace: "pre-line",
+              minWidth: 100,
+            }}>
+              <div style={{ position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", width: 38, height: 15, background: `${bg}99`, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 2 }} />
+              {label}
+            </div>
+          ))}
         </div>
 
         {/* Bottom label — desktop only */}
