@@ -300,7 +300,7 @@ export default function LandingPage() {
         <img
           src="/hero-dave-mobile.png"
           alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
-          style={{ width: "100%", height: "auto", display: "block", marginTop: "-26%" }}
+          style={{ width: "100%", height: "auto", display: "block", marginTop: "-33%" }}
         />
 
         {/* Text overlay — headline + subheadline only, no CTA */}
