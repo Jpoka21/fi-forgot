@@ -293,14 +293,29 @@ export default function LandingPage() {
         )}
       </nav>
 
-      {/* ── MOBILE HERO — headline + image filling one screen ───────────── */}
-      <div className="md:hidden" style={{ height: "calc(100dvh - 56px)", display: "flex", flexDirection: "column" }}>
+      {/* ── MOBILE HERO — full-width image with text over white sky ────── */}
+      <section className="md:hidden" style={{ position: "relative", lineHeight: 0 }}>
 
-        {/* Headline block — tight, takes only what it needs */}
-        <div style={{ background: B.beige, padding: "14px 20px 12px", textAlign: "center", flexShrink: 0 }}>
+        {/* Full-width image at natural ratio — no black bars */}
+        <img
+          src="/hero-dave-mobile.png"
+          alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
+          style={{ width: "100%", height: "auto", display: "block" }}
+        />
+
+        {/* Text overlay — positioned over the white sky at the top of the image */}
+        <div style={{
+          position: "absolute",
+          top: "3%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "90%",
+          textAlign: "center",
+          lineHeight: "normal",
+        }}>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(30px, 9vw, 40px)",
+            fontSize: "clamp(28px, 8vw, 38px)",
             color: B.black,
             letterSpacing: "0.02em",
             lineHeight: 0.95,
@@ -309,21 +324,21 @@ export default function LandingPage() {
           </div>
           <div style={{
             fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(30px, 9vw, 40px)",
+            fontSize: "clamp(28px, 8vw, 38px)",
             color: B.red,
             letterSpacing: "0.02em",
             lineHeight: 0.95,
-            marginBottom: 10,
+            marginBottom: 8,
           }}>
             THE PEOPLE WHO MATTER
           </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(13px, 3.5vw, 15px)",
-            fontWeight: 500,
-            color: "#555",
-            lineHeight: 1.45,
-            marginBottom: 12,
+            fontSize: "clamp(12px, 3.2vw, 14px)",
+            fontWeight: 600,
+            color: "#333",
+            lineHeight: 1.4,
+            marginBottom: 10,
           }}>
             We write and mail real cards before you forget.
           </p>
@@ -333,27 +348,18 @@ export default function LandingPage() {
               background: B.red,
               color: "#fff",
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(14px, 4.5vw, 18px)",
+              fontSize: "clamp(13px, 4vw, 17px)",
               letterSpacing: "0.1em",
-              padding: "10px 22px",
+              padding: "9px 20px",
               borderRadius: 4,
               textDecoration: "none",
-              boxShadow: `0 3px 14px rgba(226,59,46,0.35)`,
+              boxShadow: `0 3px 12px rgba(226,59,46,0.4)`,
             }}>
             START EARNING BROWNIE POINTS
           </Link>
         </div>
 
-        {/* Dave image — fills all remaining screen space, fully uncropped */}
-        <div style={{ flex: 1, minHeight: 0, background: B.black, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          <img
-            src="/hero-dave-mobile.png"
-            alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
-            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
-          />
-        </div>
-
-      </div>
+      </section>
 
       {/* ── DESKTOP HERO IMAGE ───────────────────────────────────────────── */}
       <section
