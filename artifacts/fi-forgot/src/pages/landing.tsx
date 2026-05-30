@@ -293,102 +293,79 @@ export default function LandingPage() {
         )}
       </nav>
 
-      {/* ── HERO IMAGE ───────────────────────────────────────────────────── */}
+      {/* ── MOBILE HERO CONTENT (above image) ───────────────────────────── */}
+      <section className="md:hidden" style={{ background: B.beige, padding: "40px 24px 36px", textAlign: "center" }}>
+        <div style={{
+          fontFamily: "'Bebas Neue', cursive",
+          fontSize: "clamp(38px, 11vw, 52px)",
+          color: B.black,
+          letterSpacing: "0.02em",
+          lineHeight: 0.95,
+        }}>
+          NEVER FORGET
+        </div>
+        <div style={{
+          fontFamily: "'Bebas Neue', cursive",
+          fontSize: "clamp(38px, 11vw, 52px)",
+          color: B.red,
+          letterSpacing: "0.02em",
+          lineHeight: 0.95,
+          marginBottom: 16,
+        }}>
+          THE PEOPLE<br />WHO MATTER
+        </div>
+        <p style={{
+          fontFamily: "'Inter', sans-serif",
+          fontSize: "clamp(15px, 4vw, 17px)",
+          fontWeight: 500,
+          color: "#444",
+          lineHeight: 1.55,
+          marginBottom: 28,
+          maxWidth: 320,
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}>
+          We write and mail real cards before you forget.
+        </p>
+        <Link href="/try" data-testid="link-cta-hitzone-mobile"
+          style={{
+            display: "inline-block",
+            background: B.red,
+            color: "#fff",
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(16px, 5vw, 20px)",
+            letterSpacing: "0.1em",
+            padding: "14px 28px",
+            borderRadius: 4,
+            textDecoration: "none",
+            boxShadow: `0 4px 18px rgba(226,59,46,0.35)`,
+          }}>
+          START EARNING BROWNIE POINTS
+        </Link>
+      </section>
+
+      {/* ── MOBILE HERO IMAGE ────────────────────────────────────────────── */}
+      <section className="md:hidden" style={{ lineHeight: 0, background: B.black }}>
+        <img
+          src="/hero-dave-mobile.png"
+          alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
+          style={{ width: "100%", display: "block" }}
+        />
+      </section>
+
+      {/* ── DESKTOP HERO IMAGE ───────────────────────────────────────────── */}
       <section
         aria-label="Hero"
-        className=""
+        className="hidden md:block"
         style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
       >
-        {/* Mobile portrait hero — cropped just below last card row, floor hidden */}
-        <img
-          src="/hero-mobile.png"
-          alt="F* I Forgot — You focus on life. We remember everything."
-          className="md:hidden w-full"
-          style={{ aspectRatio: "853 / 1565", objectFit: "cover", objectPosition: "top center", filter: "brightness(1.45)" }}
-        />
         {/* Desktop landscape hero — full image, scaled to fit viewport height */}
         <img
           src="/hero.png"
           alt="F* I Forgot — You focus on life. We remember everything."
-          className="hidden md:block w-full"
+          className="w-full"
           style={{ height: "calc(100vh - 96px)", objectFit: "contain", objectPosition: "center center", filter: "brightness(1.45)" }}
         />
-
-        {/* Mobile — top gradient for headline readability */}
-        <div className="md:hidden" style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: "34%", zIndex: 1,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 72%, transparent 100%)",
-          pointerEvents: "none",
-        }} />
-
-        {/* Mobile — top-center headline + subheadline */}
-        <div className="md:hidden flex flex-col items-center" style={{
-          position: "absolute", top: 14, left: "10%", right: "10%",
-          textAlign: "center", lineHeight: "normal", zIndex: 2,
-        }}>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(28px, 7vw, 36px)",
-            color: "#ffffff",
-            letterSpacing: "0.01em",
-            lineHeight: 0.96,
-            textShadow: "0 2px 16px rgba(0,0,0,0.9)",
-          }}>
-            NEVER FORGET
-          </div>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(28px, 7vw, 36px)",
-            color: B.red,
-            letterSpacing: "0.01em",
-            lineHeight: 0.96,
-            textShadow: "1px 1px 0 rgba(0,0,0,0.95), -1px -1px 0 rgba(0,0,0,0.95), 1px -1px 0 rgba(0,0,0,0.95), -1px 1px 0 rgba(0,0,0,0.95), 0 2px 18px rgba(0,0,0,1)",
-          }}>
-            THE PEOPLE WHO MATTER
-          </div>
-          <div style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(13px, 3.5vw, 16px)",
-            fontWeight: 600,
-            color: "#ffffff",
-            lineHeight: 1.4,
-            marginTop: 5,
-            background: "rgba(0,0,0,0.45)",
-            padding: "4px 10px",
-            borderRadius: 4,
-            maxWidth: "85%",
-          }}>
-            We write and mail real cards for birthdays, holidays, anniversaries, and special moments before you forget.
-          </div>
-        </div>
-
-        {/* Mobile — floating sticky notes (4, away from Dave's face ~center 45-60% from top) */}
-        <div className="md:hidden" style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none" }}>
-          {[
-            { label: "Mom's Birthday", top: "32%", left: "3%",  rotate: -4, bg: "#FFF176" },
-            { label: "Dad's Birthday", top: "30%", right: "3%", rotate:  3, bg: "#FFDBB3" },
-            { label: "Grandma's\nBirthday", top: "71%", left: "3%",  rotate: -3, bg: "#FFDBB3" },
-            { label: "Holidays",       top: "72%", right: "3%", rotate:  4, bg: "#FFF176" },
-          ].map(({ label, bg, rotate, ...pos }) => (
-            <div key={label} style={{
-              position: "absolute", ...pos,
-              background: bg,
-              padding: "8px 11px 11px",
-              borderRadius: 2,
-              boxShadow: "2px 4px 10px rgba(0,0,0,0.35), inset 0 -2px 0 rgba(0,0,0,0.08)",
-              transform: `rotate(${rotate}deg)`,
-              fontFamily: "'Caveat', cursive",
-              fontSize: "clamp(13px, 3.2vw, 16px)",
-              color: "#111",
-              lineHeight: 1.3,
-              whiteSpace: "pre-line",
-              maxWidth: 90,
-            }}>
-              <div style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)", width: 32, height: 13, background: `${bg}99`, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 2 }} />
-              {label}
-            </div>
-          ))}
-        </div>
 
         {/* Desktop text overlay */}
         <div className="hidden md:flex flex-col" style={{
