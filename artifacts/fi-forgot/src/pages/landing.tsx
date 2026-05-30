@@ -293,65 +293,67 @@ export default function LandingPage() {
         )}
       </nav>
 
-      {/* ── MOBILE HERO CONTENT (above image) ───────────────────────────── */}
-      <section className="md:hidden" style={{ background: B.beige, padding: "40px 24px 36px", textAlign: "center" }}>
-        <div style={{
-          fontFamily: "'Bebas Neue', cursive",
-          fontSize: "clamp(38px, 11vw, 52px)",
-          color: B.black,
-          letterSpacing: "0.02em",
-          lineHeight: 0.95,
-        }}>
-          NEVER FORGET
-        </div>
-        <div style={{
-          fontFamily: "'Bebas Neue', cursive",
-          fontSize: "clamp(38px, 11vw, 52px)",
-          color: B.red,
-          letterSpacing: "0.02em",
-          lineHeight: 0.95,
-          marginBottom: 16,
-        }}>
-          THE PEOPLE<br />WHO MATTER
-        </div>
-        <p style={{
-          fontFamily: "'Inter', sans-serif",
-          fontSize: "clamp(15px, 4vw, 17px)",
-          fontWeight: 500,
-          color: "#444",
-          lineHeight: 1.55,
-          marginBottom: 28,
-          maxWidth: 320,
-          marginLeft: "auto",
-          marginRight: "auto",
-        }}>
-          We write and mail real cards before you forget.
-        </p>
-        <Link href="/try" data-testid="link-cta-hitzone-mobile"
-          style={{
-            display: "inline-block",
-            background: B.red,
-            color: "#fff",
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(16px, 5vw, 20px)",
-            letterSpacing: "0.1em",
-            padding: "14px 28px",
-            borderRadius: 4,
-            textDecoration: "none",
-            boxShadow: `0 4px 18px rgba(226,59,46,0.35)`,
-          }}>
-          START EARNING BROWNIE POINTS
-        </Link>
-      </section>
+      {/* ── MOBILE HERO — headline + image filling one screen ───────────── */}
+      <div className="md:hidden" style={{ height: "calc(100dvh - 56px)", display: "flex", flexDirection: "column" }}>
 
-      {/* ── MOBILE HERO IMAGE ────────────────────────────────────────────── */}
-      <section className="md:hidden" style={{ lineHeight: 0, background: B.black }}>
-        <img
-          src="/hero-dave-mobile.png"
-          alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
-          style={{ width: "100%", display: "block" }}
-        />
-      </section>
+        {/* Headline block — tight, takes only what it needs */}
+        <div style={{ background: B.beige, padding: "14px 20px 12px", textAlign: "center", flexShrink: 0 }}>
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(30px, 9vw, 40px)",
+            color: B.black,
+            letterSpacing: "0.02em",
+            lineHeight: 0.95,
+          }}>
+            NEVER FORGET
+          </div>
+          <div style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(30px, 9vw, 40px)",
+            color: B.red,
+            letterSpacing: "0.02em",
+            lineHeight: 0.95,
+            marginBottom: 10,
+          }}>
+            THE PEOPLE WHO MATTER
+          </div>
+          <p style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: "clamp(13px, 3.5vw, 15px)",
+            fontWeight: 500,
+            color: "#555",
+            lineHeight: 1.45,
+            marginBottom: 12,
+          }}>
+            We write and mail real cards before you forget.
+          </p>
+          <Link href="/try" data-testid="link-cta-hitzone-mobile"
+            style={{
+              display: "inline-block",
+              background: B.red,
+              color: "#fff",
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "clamp(14px, 4.5vw, 18px)",
+              letterSpacing: "0.1em",
+              padding: "10px 22px",
+              borderRadius: 4,
+              textDecoration: "none",
+              boxShadow: `0 3px 14px rgba(226,59,46,0.35)`,
+            }}>
+            START EARNING BROWNIE POINTS
+          </Link>
+        </div>
+
+        {/* Dave image — fills all remaining screen space, fully uncropped */}
+        <div style={{ flex: 1, minHeight: 0, background: B.black, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+          <img
+            src="/hero-dave-mobile.png"
+            alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
+            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
+          />
+        </div>
+
+      </div>
 
       {/* ── DESKTOP HERO IMAGE ───────────────────────────────────────────── */}
       <section
