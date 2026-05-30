@@ -179,6 +179,15 @@ function scoreCard(
 
   // Event-specific keyword boosts
   const bdayWords    = ["birthday","bday","born","celebrate","another year","candles","balloons","party hat"];
+
+  // Just Because hard-excludes — no holiday, birthday, thank-you, or seasonal cards
+  if (evt === "just because") {
+    const seasonalWords = ["christmas","xmas","holiday","hanukkah","thanksgiving","easter","new year","valentine","halloween","pumpkin","turkey","santa","snowflake","menorah","reindeer","ornament","wreath"];
+    if (seasonalWords.some(w => name.includes(w) || imgLower.includes(w))) return -999;
+    if (occ.some(o => ["Christmas","Hanukkah","Easter","Thanksgiving","Valentine's Day","New Year's","Birthday"].includes(o))) return -999;
+    if (hwCat === "thank you") score -= 40;
+    if (bdayWords.some(w => name.includes(w) || imgLower.includes(w))) score -= 50;
+  }
   const holidayWords = ["holiday","christmas","xmas","merry","winter","new year","festive","yuletide","tis the season"];
   const valentineWords = ["love","heart","valentine","roses","romance","xoxo"];
   const graduationWords = ["grad","graduate","diploma","congratulations","cap","tassel","commencement"];
