@@ -230,7 +230,7 @@ export default function LandingPage() {
             ) : (
               <Link href="/signup" data-testid="link-mobile-nav-cta"
                 style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.64rem", letterSpacing: "0.07em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-                START EARNING BROWNIE POINTS
+                SET IT AND FORGET IT
               </Link>
             )}
             <button
