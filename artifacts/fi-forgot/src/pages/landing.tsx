@@ -334,10 +334,10 @@ export default function LandingPage() {
           </div>
           <p style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(11px, 3vw, 13px)",
-            fontWeight: 600,
+            fontSize: "clamp(14px, 4vw, 16px)",
+            fontWeight: 500,
             color: "#333",
-            lineHeight: 1.3,
+            lineHeight: 1.4,
             margin: 0,
           }}>
             We write and mail real cards before you forget.
