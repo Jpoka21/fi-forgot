@@ -1,0 +1,74 @@
+Update the mobile homepage hero section.
+
+IMPORTANT:
+Use the newly uploaded hero image as the mobile hero image.
+Remove the current hero image completely and replace it with the new uploaded image.
+
+REMOVE:
+• All floating post-it notes
+• Mom's Birthday note
+• Dad's Birthday note
+• Grandma's Birthday note
+• Holidays note
+• Any positioning code related to the post-it notes
+
+REMOVE the current overlay text that sits on top of the image:
+
+"NEVER FORGET THE PEOPLE WHO MATTER"
+
+and
+
+"We write and mail real cards for birthdays, holidays, anniversaries, and special moments before you forget."
+
+The new hero image already contains the visual storytelling and should not have text layered on top of it.
+
+NEW MOBILE HERO STRUCTURE:
+
+1. Header remains unchanged
+   • Logo
+   • CTA button
+   • Hamburger menu
+
+2. White / cream content section
+   • Place below header
+   • No image behind it
+   • Center aligned
+
+Headline:
+Never Forget
+The People Who Matter
+
+Subheadline:
+We write and mail real cards before you forget.
+
+CTA:
+Start Earning Brownie Points
+
+3. Hero image section
+   • Place directly below the white content section
+   • Use the newly uploaded hero image
+   • Full width
+   • No text overlays
+   • No dark transparent text box
+   • No floating notes
+   • No additional graphics layered on top
+
+4. Image display requirements
+   • Show the entire composition
+   • Do not crop Dave's face
+   • Do not crop the DAVE sign
+   • Do not crop the WiFi / Netflix / Garage Code chalkboard
+   • Do not crop the "Dave Had One Job. Dave Forgot. We Fixed It." sign
+   • Do not crop the Bad Boy bowl
+   • Do not crop the Anniversary, Mom, and Dad cards
+
+5. Mobile optimization
+   • Image should feel like the second section of the page
+   • Content section above should flow naturally into the image
+   • Keep generous white space around the headline and CTA
+   • The page should feel cleaner and less cluttered than the current version
+
+Goal:
+The headline explains the value proposition.
+The hero image delivers the humor.
+The image should support the copy, not compete with it.
