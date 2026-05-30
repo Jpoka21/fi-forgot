@@ -152,11 +152,11 @@ function scoreCard(
       (imgLower.includes("anniversary") && !imgLower.includes("birthday"));
     if (anniversarySignal) return -999;
   }
+  // Wedding cards only make sense for anniversary and valentine's day
   if (evt === "anniversary" || evt === "valentine's day") {
-    // Allow romantic/wedding cards — these are appropriate for personal use
-  } else {
-    // For non-romantic events, downgrade wedding cards
-    if (hwCat === "wedding") score -= 30;
+    // Allow romantic/wedding cards — appropriate here
+  } else if (hwCat === "wedding") {
+    return -999;
   }
 
   // Holiday / seasonal hard-excludes
