@@ -296,18 +296,17 @@ export default function LandingPage() {
       {/* ── MOBILE HERO — top sky cropped, text over remaining sky ─────── */}
       <section className="md:hidden" style={{ position: "relative", overflow: "hidden", lineHeight: 0 }}>
 
-        {/* Shift image up ~45% of the blank sky height to crop empty whitespace.
-            overflow:hidden on the section clips the top; image bottom is unaffected. */}
+        {/* Shift image up to crop ~65% of blank sky; overflow:hidden clips the top */}
         <img
           src="/hero-dave-mobile.png"
           alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
-          style={{ width: "100%", height: "auto", display: "block", marginTop: "-12%" }}
+          style={{ width: "100%", height: "auto", display: "block", marginTop: "-19%" }}
         />
 
-        {/* Text overlay — sits in the remaining visible sky strip at the top */}
+        {/* Text overlay — headline + subheadline only, no CTA */}
         <div style={{
           position: "absolute",
-          top: "2%",
+          top: "1%",
           left: "50%",
           transform: "translateX(-50%)",
           width: "92%",
@@ -329,7 +328,7 @@ export default function LandingPage() {
             color: B.red,
             letterSpacing: "0.02em",
             lineHeight: 0.95,
-            marginBottom: 6,
+            marginBottom: 4,
           }}>
             THE PEOPLE WHO MATTER
           </div>
@@ -338,26 +337,11 @@ export default function LandingPage() {
             fontSize: "clamp(11px, 3vw, 13px)",
             fontWeight: 600,
             color: "#333",
-            lineHeight: 1.35,
-            marginBottom: 8,
+            lineHeight: 1.3,
+            margin: 0,
           }}>
             We write and mail real cards before you forget.
           </p>
-          <Link href="/try" data-testid="link-cta-hitzone-mobile"
-            style={{
-              display: "inline-block",
-              background: B.red,
-              color: "#fff",
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(12px, 3.8vw, 16px)",
-              letterSpacing: "0.1em",
-              padding: "8px 18px",
-              borderRadius: 4,
-              textDecoration: "none",
-              boxShadow: `0 3px 12px rgba(226,59,46,0.4)`,
-            }}>
-            START EARNING BROWNIE POINTS
-          </Link>
         </div>
 
       </section>
