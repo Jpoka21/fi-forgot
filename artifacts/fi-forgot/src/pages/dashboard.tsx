@@ -398,6 +398,8 @@ export default function DashboardPage() {
   const [regenLoadingIds, setRegenLoadingIds]       = useState<Record<string, boolean>>({});
   const [excludedDesignIds, setExcludedDesignIds]   = useState<Record<string, string[]>>({});
   const [lightboxDesignCard, setLightboxDesignCard] = useState<string | null>(null);
+  const [shareLoadingIds, setShareLoadingIds]       = useState<Record<string, boolean>>({});
+  const [shareCopiedIds, setShareCopiedIds]         = useState<Record<string, boolean>>({});
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
@@ -624,6 +626,36 @@ export default function DashboardPage() {
   function rejectPersonalCard(card: CardOrder) {
     deleteCard(card.id);
     setCards(getCards());
+  }
+
+  async function shareCardPreview(card: CardOrder) {
+    const design = cardDesignMap[card.id];
+    if (!design?.imageUrl) return;
+    const message = editedMessages[card.id] ?? card.approvedMessage ?? "";
+    setShareLoadingIds(prev => ({ ...prev, [card.id]: true }));
+    try {
+      const res = await fetch("/api/card-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl:      design.imageUrl,
+          cardName:      design.name ?? "",
+          messageText:   message,
+          recipientName: card.recipientName,
+          eventType:     card.holiday,
+        }),
+      });
+      const data = await res.json() as { url: string };
+      const shareText = `Here's a preview of the card I'm sending you 📬 ${data.url}`;
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: "Card Preview", text: shareText, url: data.url });
+      } else {
+        await navigator.clipboard.writeText(data.url);
+        setShareCopiedIds(prev => ({ ...prev, [card.id]: true }));
+        setTimeout(() => setShareCopiedIds(prev => ({ ...prev, [card.id]: false })), 3000);
+      }
+    } catch { /* user cancelled share or clipboard failed */ }
+    finally { setShareLoadingIds(prev => ({ ...prev, [card.id]: false })); }
   }
 
   async function quickEditPersonalCard(card: CardOrder, instruction: string, label: string) {
@@ -1684,8 +1716,35 @@ export default function DashboardPage() {
                             );
                           })()}
 
+                          {/* Share Preview */}
+                          {cardDesignMap[card.id]?.imageUrl && (
+                            <div style={{ marginTop: 14 }}>
+                              <button
+                                onClick={() => shareCardPreview(card)}
+                                disabled={shareLoadingIds[card.id]}
+                                style={{
+                                  width: "100%",
+                                  fontSize: "0.78rem", fontWeight: 600, padding: "9px 16px",
+                                  borderRadius: 8, border: `1.5px solid ${BLACK}18`,
+                                  background: WHITE, color: BLACK,
+                                  cursor: shareLoadingIds[card.id] ? "default" : "pointer",
+                                  fontFamily: "'Inter', sans-serif",
+                                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                                }}>
+                                {shareLoadingIds[card.id]
+                                  ? <Loader2 size={13} className="animate-spin" />
+                                  : <span style={{ fontSize: "0.9rem" }}>📱</span>}
+                                {shareCopiedIds[card.id]
+                                  ? "Link copied!"
+                                  : shareLoadingIds[card.id]
+                                    ? "Creating link…"
+                                    : "Share preview via text"}
+                              </button>
+                            </div>
+                          )}
+
                           {/* Approve / Reject */}
-                          <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end" }}>
+                          <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" }}>
                             <button
                               onClick={() => rejectPersonalCard(card)}
                               style={{

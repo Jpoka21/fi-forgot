@@ -20,6 +20,7 @@ import businessSchedulerTriggerRouter from "./business-scheduler-trigger"; // al
 import cardLibraryRouter from "./card-library";
 import personalCardsRouter from "./personal-cards";
 import personalRecipientsRouter from "./personal-recipients";
+import cardPreviewRouter from "./card-preview";
 
 const router: IRouter = Router();
 
@@ -43,6 +44,7 @@ router.use(businessSchedulerTriggerRouter);
 router.use(cardLibraryRouter);
 router.use(personalCardsRouter);
 router.use(personalRecipientsRouter);
+router.use(cardPreviewRouter);
 router.use(stripeRouter);
 
 export default router;
