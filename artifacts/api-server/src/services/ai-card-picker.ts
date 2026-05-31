@@ -359,6 +359,34 @@ function resolveLibraryCategories(eventType: string, contextNote: string | null)
     return ["home_purchase_anniversary", "business_relationship_anniversary", "closing_anniversary", "general_milestone"];
   }
 
+  if (evt === "just because") {
+    return ["just_because"];
+  }
+
+  if (evt === "thinking of you") {
+    return ["thinking_of_you", "just_because"];
+  }
+
+  if (evt === "encouragement" || evt === "you've got this" || evt === "support") {
+    return ["encouragement", "thinking_of_you"];
+  }
+
+  if (evt === "congratulations" || evt === "congrats" || evt === "new job" || evt === "promotion") {
+    return ["congratulations_personal", "encouragement"];
+  }
+
+  if (evt === "new baby" || evt === "baby shower") {
+    return ["new_baby"];
+  }
+
+  if (evt === "get well" || evt === "get well soon") {
+    return ["get_well"];
+  }
+
+  if (evt === "miss you" || evt === "long distance" || evt === "farewell") {
+    return ["miss_you", "thinking_of_you"];
+  }
+
   return [];
 }
 
