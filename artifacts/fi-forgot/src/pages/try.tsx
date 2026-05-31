@@ -82,6 +82,9 @@ export default function TryPage() {
   const [previewOccasion, setPreviewOccasion] = useState<string>(draft.previewOccasion ?? "");
 
   // ── Signup overlay ──────────────────────────────────────────────────────
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareCopied, setShareCopied]   = useState(false);
+
   const [showSignup, setShowSignup] = useState(false);
   const [sigupName, setSignupName]  = useState("");
   const [signupEmail, setSignupEmail] = useState("");
@@ -217,6 +220,33 @@ export default function TryPage() {
       }
     } catch {}
     setAiEditLoading(null);
+  }
+
+  async function sharePreview() {
+    if (!cardDesign?.imageUrl) return;
+    setShareLoading(true);
+    try {
+      const res = await fetch("/api/card-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl:      cardDesign.imageUrl,
+          cardName:      cardDesign.name ?? "",
+          messageText:   editedText,
+          recipientName: name,
+          eventType:     previewOccasion,
+        }),
+      });
+      const data = await res.json() as { url: string };
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: "Card Preview", text: `Here's a preview of the card I'm sending you 📬`, url: data.url });
+      } else {
+        await navigator.clipboard.writeText(data.url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 3000);
+      }
+    } catch { /* cancelled or clipboard failed */ }
+    finally { setShareLoading(false); }
   }
 
   // ── Signup ────────────────────────────────────────────────────────────────
@@ -750,6 +780,20 @@ export default function TryPage() {
               </>
               )}
             </div>
+
+            {/* Share preview button */}
+            {cardDesign?.imageUrl && (
+              <button
+                onClick={sharePreview}
+                disabled={shareLoading}
+                style={{ width: "100%", padding: "13px", borderRadius: 10, border: `1.5px solid ${BLACK}18`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.85rem", cursor: shareLoading ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+              >
+                {shareLoading
+                  ? <Loader2 size={14} style={{ animation: "spin 0.6s linear infinite" }} />
+                  : <span style={{ fontSize: "1rem" }}>📱</span>}
+                {shareCopied ? "Link copied!" : shareLoading ? "Creating link…" : "Share preview via text"}
+              </button>
+            )}
 
             {/* Primary CTA */}
             <button
