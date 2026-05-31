@@ -12,6 +12,12 @@ function generateToken(): string {
 }
 
 function getBaseUrl(req: import("express").Request): string {
+  // Prefer the first entry in REPLIT_DOMAINS (the canonical public domain)
+  const replitDomains = process.env.REPLIT_DOMAINS;
+  if (replitDomains) {
+    const first = replitDomains.split(",")[0].trim();
+    if (first) return `https://${first}`;
+  }
   const host = req.headers["x-forwarded-host"] ?? req.headers.host ?? "localhost";
   const proto = req.headers["x-forwarded-proto"] ?? (req.secure ? "https" : "http");
   return `${proto}://${host}`;
