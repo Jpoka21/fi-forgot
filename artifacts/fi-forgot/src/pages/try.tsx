@@ -84,6 +84,7 @@ export default function TryPage() {
   // ── Signup overlay ──────────────────────────────────────────────────────
   const [shareLoading, setShareLoading] = useState(false);
   const [shareCopied, setShareCopied]   = useState(false);
+  const [shareUrl, setShareUrl]         = useState<string | null>(null);
 
   const [showSignup, setShowSignup] = useState(false);
   const [sigupName, setSignupName]  = useState("");
@@ -238,14 +239,8 @@ export default function TryPage() {
         }),
       });
       const data = await res.json() as { url: string };
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "Card Preview", text: `Here's a preview of the card I'm sending you 📬`, url: data.url });
-      } else {
-        await navigator.clipboard.writeText(data.url);
-        setShareCopied(true);
-        setTimeout(() => setShareCopied(false), 3000);
-      }
-    } catch { /* cancelled or clipboard failed */ }
+      setShareUrl(data.url);
+    } catch { /* fetch failed */ }
     finally { setShareLoading(false); }
   }
 
@@ -781,18 +776,48 @@ export default function TryPage() {
               )}
             </div>
 
-            {/* Share preview button */}
+            {/* Share preview */}
             {cardDesign?.imageUrl && (
-              <button
-                onClick={sharePreview}
-                disabled={shareLoading}
-                style={{ width: "100%", padding: "13px", borderRadius: 10, border: `1.5px solid ${BLACK}18`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.85rem", cursor: shareLoading ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
-              >
-                {shareLoading
-                  ? <Loader2 size={14} style={{ animation: "spin 0.6s linear infinite" }} />
-                  : <span style={{ fontSize: "1rem" }}>📱</span>}
-                {shareCopied ? "Link copied!" : shareLoading ? "Creating link…" : "Share preview via text"}
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {!shareUrl ? (
+                  <button
+                    onClick={sharePreview}
+                    disabled={shareLoading}
+                    style={{ width: "100%", padding: "13px", borderRadius: 10, border: `1.5px solid ${BLACK}18`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.85rem", cursor: shareLoading ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                  >
+                    {shareLoading
+                      ? <Loader2 size={14} style={{ animation: "spin 0.6s linear infinite" }} />
+                      : "🔗"}
+                    {shareLoading ? "Creating link…" : "Share preview via text"}
+                  </button>
+                ) : (
+                  <div style={{ borderRadius: 10, border: `1.5px solid ${BLACK}18`, background: WHITE, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", color: BLACK, fontFamily: "'Inter', sans-serif", textTransform: "uppercase" as const }}>
+                      📬 Copy this link &amp; text it to {name || "them"}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <input
+                        readOnly
+                        value={shareUrl}
+                        onFocus={e => e.target.select()}
+                        style={{ flex: 1, fontSize: "0.78rem", padding: "8px 10px", borderRadius: 7, border: `1px solid ${BLACK}18`, background: "#f8f5f0", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none", minWidth: 0 }}
+                      />
+                      <button
+                        onClick={async () => { await navigator.clipboard.writeText(shareUrl); setShareCopied(true); setTimeout(() => setShareCopied(false), 2500); }}
+                        style={{ flexShrink: 0, padding: "8px 14px", borderRadius: 7, border: "none", background: shareCopied ? "#22c55e" : BLACK, color: WHITE, fontSize: "0.75rem", fontWeight: 700, fontFamily: "'Inter', sans-serif", cursor: "pointer", transition: "background 0.2s" }}
+                      >
+                        {shareCopied ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setShareUrl(null)}
+                      style={{ alignSelf: "flex-start", background: "none", border: "none", color: "#aaa", fontSize: "0.72rem", fontFamily: "'Inter', sans-serif", cursor: "pointer", padding: 0 }}
+                    >
+                      ✕ Close
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Primary CTA */}

@@ -400,6 +400,7 @@ export default function DashboardPage() {
   const [lightboxDesignCard, setLightboxDesignCard] = useState<string | null>(null);
   const [shareLoadingIds, setShareLoadingIds]       = useState<Record<string, boolean>>({});
   const [shareCopiedIds, setShareCopiedIds]         = useState<Record<string, boolean>>({});
+  const [shareUrlIds, setShareUrlIds]               = useState<Record<string, string>>({});
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
@@ -646,15 +647,8 @@ export default function DashboardPage() {
         }),
       });
       const data = await res.json() as { url: string };
-      const shareText = `Here's a preview of the card I'm sending you 📬 ${data.url}`;
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "Card Preview", text: shareText, url: data.url });
-      } else {
-        await navigator.clipboard.writeText(data.url);
-        setShareCopiedIds(prev => ({ ...prev, [card.id]: true }));
-        setTimeout(() => setShareCopiedIds(prev => ({ ...prev, [card.id]: false })), 3000);
-      }
-    } catch { /* user cancelled share or clipboard failed */ }
+      setShareUrlIds(prev => ({ ...prev, [card.id]: data.url }));
+    } catch { /* fetch failed */ }
     finally { setShareLoadingIds(prev => ({ ...prev, [card.id]: false })); }
   }
 
@@ -1719,27 +1713,51 @@ export default function DashboardPage() {
                           {/* Share Preview */}
                           {cardDesignMap[card.id]?.imageUrl && (
                             <div style={{ marginTop: 14 }}>
-                              <button
-                                onClick={() => shareCardPreview(card)}
-                                disabled={shareLoadingIds[card.id]}
-                                style={{
-                                  width: "100%",
-                                  fontSize: "0.78rem", fontWeight: 600, padding: "9px 16px",
-                                  borderRadius: 8, border: `1.5px solid ${BLACK}18`,
-                                  background: WHITE, color: BLACK,
-                                  cursor: shareLoadingIds[card.id] ? "default" : "pointer",
-                                  fontFamily: "'Inter', sans-serif",
-                                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                                }}>
-                                {shareLoadingIds[card.id]
-                                  ? <Loader2 size={13} className="animate-spin" />
-                                  : <span style={{ fontSize: "0.9rem" }}>📱</span>}
-                                {shareCopiedIds[card.id]
-                                  ? "Link copied!"
-                                  : shareLoadingIds[card.id]
-                                    ? "Creating link…"
-                                    : "Share preview via text"}
-                              </button>
+                              {!shareUrlIds[card.id] ? (
+                                <button
+                                  onClick={() => shareCardPreview(card)}
+                                  disabled={shareLoadingIds[card.id]}
+                                  style={{
+                                    width: "100%",
+                                    fontSize: "0.78rem", fontWeight: 600, padding: "9px 16px",
+                                    borderRadius: 8, border: `1.5px solid ${BLACK}18`,
+                                    background: WHITE, color: BLACK,
+                                    cursor: shareLoadingIds[card.id] ? "default" : "pointer",
+                                    fontFamily: "'Inter', sans-serif",
+                                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                                  }}>
+                                  {shareLoadingIds[card.id]
+                                    ? <Loader2 size={13} className="animate-spin" />
+                                    : "🔗"}
+                                  {shareLoadingIds[card.id] ? "Creating link…" : "Share preview via text"}
+                                </button>
+                              ) : (
+                                <div style={{ borderRadius: 8, border: `1.5px solid ${BLACK}18`, background: WHITE, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+                                  <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: BLACK, fontFamily: "'Inter', sans-serif", textTransform: "uppercase" as const }}>
+                                    📬 Copy &amp; text this link to {card.recipientName}
+                                  </div>
+                                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                    <input
+                                      readOnly
+                                      value={shareUrlIds[card.id]}
+                                      onFocus={e => e.target.select()}
+                                      style={{ flex: 1, fontSize: "0.72rem", padding: "6px 8px", borderRadius: 6, border: `1px solid ${BLACK}18`, background: "#f8f5f0", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none", minWidth: 0 }}
+                                    />
+                                    <button
+                                      onClick={async () => { await navigator.clipboard.writeText(shareUrlIds[card.id]); setShareCopiedIds(prev => ({ ...prev, [card.id]: true })); setTimeout(() => setShareCopiedIds(prev => ({ ...prev, [card.id]: false })), 2500); }}
+                                      style={{ flexShrink: 0, padding: "6px 12px", borderRadius: 6, border: "none", background: shareCopiedIds[card.id] ? "#22c55e" : BLACK, color: WHITE, fontSize: "0.7rem", fontWeight: 700, fontFamily: "'Inter', sans-serif", cursor: "pointer", transition: "background 0.2s" }}
+                                    >
+                                      {shareCopiedIds[card.id] ? "Copied!" : "Copy"}
+                                    </button>
+                                  </div>
+                                  <button
+                                    onClick={() => setShareUrlIds(prev => { const n = { ...prev }; delete n[card.id]; return n; })}
+                                    style={{ alignSelf: "flex-start", background: "none", border: "none", color: "#aaa", fontSize: "0.68rem", fontFamily: "'Inter', sans-serif", cursor: "pointer", padding: 0 }}
+                                  >
+                                    ✕ Close
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           )}
 
