@@ -415,7 +415,7 @@ export default function LandingPage() {
               display: "flex",
               gap: "clamp(16px, 2.5vw, 32px)",
               marginTop: "clamp(22px, 3vw, 36px)",
-              maxWidth: "clamp(280px, 34vw, 480px)",
+              maxWidth: "clamp(240px, 29vw, 400px)",
             }}>
               {/* Real Cards */}
               <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
