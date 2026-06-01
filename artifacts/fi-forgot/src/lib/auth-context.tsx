@@ -275,6 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (version !== STORAGE_VERSION) {
       clearAllUserData();
       localStorage.setItem("fi_forgot_storage_version", STORAGE_VERSION);
+      setAuthReady(true);
       return;
     }
 
