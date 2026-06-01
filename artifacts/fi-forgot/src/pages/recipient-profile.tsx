@@ -298,8 +298,9 @@ export default function RecipientProfilePage() {
   const allRecipients = getRecipients();
   const activeCount = allRecipients.filter((r) => r.active !== false).length;
   // Card balance: total occasions across all recipients vs. plan cap
+  // Dev bypass: no cap in development so owners can test freely
   const totalCardsUsed = allRecipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
-  const cardCap = PLANS[plan].maxCardsPerYear;
+  const cardCap = import.meta.env.DEV ? 9999 : PLANS[plan].maxCardsPerYear;
 
   const existing = isNew ? undefined : getRecipient(params.id);
   const isInactive = !isNew && existing?.active === false;
