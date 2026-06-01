@@ -75,7 +75,7 @@ router.post("/generate-card", async (req, res) => {
   if (personalityNotes) contextLines.push(`- ${capPron} personality: ${personalityNotes}`);
   if (interests.length > 0) contextLines.push(`- ${capPron} interests: ${interests.join(", ")}`);
   if (tonePreference) contextLines.push(`- Preferred card tone: ${tonePreference}`);
-  if (emotionalLevel) contextLines.push(`- Emotional depth (1=low, 5=high): ${emotionalLevel}`);
+  if (emotionalLevel) contextLines.push(`- Card depth (1=light & brief, 5=deep & heartfelt): ${emotionalLevel}`);
   if (kidsNames) contextLines.push(`- ${capPron} children (names & ages): ${kidsNames}`);
   if (favoriteMemories) contextLines.push(`- Favorite shared memories: ${favoriteMemories}`);
   if (insideJokes) contextLines.push(`- Inside references or shared history: ${insideJokes}`);

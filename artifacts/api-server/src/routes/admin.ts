@@ -49,7 +49,7 @@ router.post("/admin/generate-message", async (req, res) => {
   if (favoriteMemories) contextLines.push(`Shared memories: ${favoriteMemories}`);
   if (insideJokes) contextLines.push(`Inside references: ${insideJokes}`);
   if (petName) contextLines.push(`Pet name / nickname: "${petName}"`);
-  if (emotionalLevel) contextLines.push(`Emotional depth (1=brief, 5=sweeping): ${emotionalLevel}`);
+  if (emotionalLevel) contextLines.push(`Card depth (1=light & brief, 5=deep & heartfelt): ${emotionalLevel}`);
   if (customNotes) contextLines.push(`Admin notes: ${customNotes}`);
   if (thingsToAvoid) contextLines.push(`NEVER include: ${thingsToAvoid}`);
 

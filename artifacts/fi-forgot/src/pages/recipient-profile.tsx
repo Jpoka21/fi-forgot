@@ -906,7 +906,7 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="emotionalLevel" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Emotional dial — {field.value === 1 ? "Pure comedy" : field.value === 5 ? "Full cryfest" : "Balanced"}</FormLabel>
+                    <FormLabel>Card depth — {field.value === 1 ? "Light touch" : field.value === 5 ? "Deep & heartfelt" : "Balanced"}</FormLabel>
                     <FormControl>
                       <Slider
                         min={1} max={5} step={1}
@@ -916,7 +916,7 @@ export default function RecipientProfilePage() {
                       />
                     </FormControl>
                     <div className="flex justify-between text-xs mt-1" style={{ color: GRAY }}>
-                      <span>Pure comedy</span><span>Full cryfest</span>
+                      <span>Light touch</span><span>Deep &amp; heartfelt</span>
                     </div>
                   </FormItem>
                 )} />

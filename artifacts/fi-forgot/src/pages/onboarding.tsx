@@ -540,7 +540,7 @@ export default function OnboardingPage() {
                   )}
                   <div>
                     <label style={{ display: "block", fontSize: "1.05rem", fontWeight: 600, marginBottom: 8, color: BLACK }}>
-                      Emotional dial <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                      Card depth <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
                     </label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       <input
@@ -551,11 +551,11 @@ export default function OnboardingPage() {
                         data-testid="input-emotional-dial"
                       />
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#888" }}>
-                        <span>Pure comedy</span>
+                        <span>Light touch</span>
                         <span style={{ fontWeight: 600, color: RED }}>
-                          {["", "Pure comedy", "Mostly fun", "Balanced", "Mostly heartfelt", "Full cryfest"][(data.emotionalLevel ?? 3)]}
+                          {["", "Light touch", "Light", "Balanced", "Heartfelt", "Deep & heartfelt"][(data.emotionalLevel ?? 3)]}
                         </span>
-                        <span>Full cryfest</span>
+                        <span>Deep &amp; heartfelt</span>
                       </div>
                     </div>
                   </div>
