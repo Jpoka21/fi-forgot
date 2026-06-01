@@ -148,6 +148,7 @@ function WorkspaceToggle() {
 /* ── Account avatar + dropdown ───────────────────────────────────────────── */
 function AccountMenu({ user, onLogout }: { user: { name: string; email: string } | null; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
