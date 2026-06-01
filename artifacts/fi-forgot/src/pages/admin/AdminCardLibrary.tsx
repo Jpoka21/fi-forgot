@@ -7,6 +7,7 @@ const GOLD  = "#D8A725";
 const GREEN = "#16a34a";
 
 const CATEGORY_LABELS: Record<string, string> = {
+  just_because:                       "Just Because (Personal)",
   home_purchase_anniversary:          "Home Purchase Anniversary",
   business_relationship_anniversary:  "Business Relationship Anniversary",
   closing_anniversary:                "Closing Anniversary",
@@ -15,6 +16,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_TARGETS: Record<string, number> = {
+  just_because:                       25,
   home_purchase_anniversary:          12,
   business_relationship_anniversary:  10,
   closing_anniversary:                8,
