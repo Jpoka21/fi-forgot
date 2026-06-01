@@ -617,6 +617,7 @@ export default function RecipientProfilePage() {
                   const used = otherCards + thisCards;
                   const overBy = Math.max(0, used - cardCap);
                   const atCap = used >= cardCap;
+                  if (import.meta.env.DEV) return null;
                   return (
                     <div style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
