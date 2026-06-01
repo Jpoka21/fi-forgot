@@ -65,7 +65,8 @@ class ErrorBoundary extends Component<{ children: ReactNode; fallback?: ReactNod
 
 // ── Route guards ────────────────────────────────────────────────────────────
 function ProtectedRoute({ component: Component }: { component: ComponentType }) {
-  const { isLoggedIn, onboardingComplete } = useAuth();
+  const { isLoggedIn, authReady, onboardingComplete } = useAuth();
+  if (!authReady) return null;
   if (!isLoggedIn) return <Redirect to="/login" />;
   if (!onboardingComplete) return <Redirect to="/onboarding" />;
   return (

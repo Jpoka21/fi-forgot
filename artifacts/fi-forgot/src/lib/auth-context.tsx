@@ -37,6 +37,7 @@ export interface Workspace {
 
 interface AuthContextType {
   isLoggedIn: boolean;
+  authReady: boolean;
   onboardingComplete: boolean;
   user: { name: string; email: string; plan?: Plan; mailingAddress?: RecipientAddress } | null;
   workspaces: Workspace[];
@@ -56,6 +57,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
+  authReady: false,
   onboardingComplete: true,
   user: null,
   workspaces: [],
@@ -262,6 +264,7 @@ function connectSession(email: string, name?: string) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(true);
   const [user, setUser] = useState<{ name: string; email: string; plan?: Plan } | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -310,6 +313,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setActiveWorkspace(active);
       } catch {}
     }
+
+    setAuthReady(true);
 
     // Migrate old fi_forgot_business data into workspaces
     const oldBiz = localStorage.getItem("fi_forgot_business");
@@ -509,7 +514,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      isLoggedIn, onboardingComplete, user,
+      isLoggedIn, authReady, onboardingComplete, user,
       workspaces, activeWorkspace,
       login, signup, businessSignup, completeOnboarding, logout, upgradePlan, updateMailingAddress,
       switchWorkspace, createBusinessWorkspace, restoreBusinessWorkspace, repairBusinessId,
