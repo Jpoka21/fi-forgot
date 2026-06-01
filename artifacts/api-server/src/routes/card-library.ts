@@ -47,6 +47,7 @@ router.get("/admin/card-library/categories", async (_req, res) => {
     { key: "general_milestone", label: "General Business Milestone", target: 5 },
     { key: "holiday", label: "Holiday", target: 5 },
     { key: "just_because", label: "Just Because", target: 10 },
+    { key: "humor", label: "Humor & Funny", target: 15 },
     { key: "thinking_of_you", label: "Thinking of You", target: 8 },
     { key: "encouragement", label: "Encouragement", target: 8 },
     { key: "congratulations_personal", label: "Congratulations (Personal)", target: 6 },
