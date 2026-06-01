@@ -27,7 +27,7 @@ export type Tone =
   | "From the kids"
   | "Apology style";
 
-export type DeliveryPreference = "Mail it to me" | "Mail it directly to her";
+export type DeliveryPreference = "Mail it to me" | "Mail it directly to them";
 
 export type PreviewDays = 14 | 21 | 30;
 
@@ -670,7 +670,15 @@ function loadRecipients(): Recipient[] {
   ensureDataVersion();
   try {
     const raw = localStorage.getItem(STORAGE_KEY_RECIPIENTS);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Recipient[];
+      return parsed.map((r) => ({
+        ...r,
+        deliveryPreference: (r.deliveryPreference as string) === "Mail it directly to her"
+          ? "Mail it directly to them"
+          : r.deliveryPreference,
+      }));
+    }
   } catch {}
   return [];
 }
@@ -830,7 +838,7 @@ export function defaultDelivery(relationship: Relationship): DeliveryPreference 
   if (["Wife", "Girlfriend", "Mom", "Mother in law", "Grandmother"].includes(relationship)) {
     return "Mail it to me";
   }
-  return "Mail it directly to her";
+  return "Mail it directly to them";
 }
 
 export function suggestedEvents(relationship: Relationship): string[] {

@@ -84,7 +84,7 @@ const schema = z.object({
   insideJokes: z.string(),
   thingsToAvoid: z.string(),
   emotionalLevel: z.number().min(1).max(5),
-  deliveryPreference: z.enum(["Mail it to me", "Mail it directly to her"] as [DeliveryPreference, DeliveryPreference]),
+  deliveryPreference: z.enum(["Mail it to me", "Mail it directly to them"] as [DeliveryPreference, DeliveryPreference]),
   mailingAddress: addressSchema,
 });
 
@@ -813,7 +813,7 @@ export default function RecipientProfilePage() {
                   <FormItem>
                     <FormControl>
                       <div className="space-y-2">
-                        {(["Mail it to me", "Mail it directly to her"] as DeliveryPreference[]).map((opt) => {
+                        {(["Mail it to me", "Mail it directly to them"] as DeliveryPreference[]).map((opt) => {
                           const selected = field.value === opt;
                           return (
                             <button
@@ -832,7 +832,7 @@ export default function RecipientProfilePage() {
                               <div>
                                 <div className="text-sm font-semibold" style={{ color: BLACK }}>{opt}</div>
                                 <div className="text-xs" style={{ color: GRAY }}>
-                                  {opt === "Mail it to me" ? "We send it to you — you hand it over. Maximum control." : "Straight to her door. Maximum autopilot."}
+                                  {opt === "Mail it to me" ? "We send it to you — you hand it over. Maximum control." : "Straight to their door. Maximum autopilot."}
                                 </div>
                               </div>
                             </button>

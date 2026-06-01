@@ -17,7 +17,7 @@ export interface OnboardingData {
   emotionalLevel?: number;
   favoriteMemories?: string;
   insideJokes?: string;
-  deliveryPreference?: "Mail it to me" | "Mail it directly to her";
+  deliveryPreference?: "Mail it to me" | "Mail it directly to them";
   mailingAddress?: {
     line1: string;
     line2?: string;
@@ -138,7 +138,7 @@ function onboardingToRecipient(data: OnboardingData): Recipient {
 
   const deliveryPref: DeliveryPreference = isPartner || isMom
     ? "Mail it to me"
-    : "Mail it directly to her";
+    : "Mail it directly to them";
 
   const events = data.selectedEvents.length > 0
     ? data.selectedEvents
