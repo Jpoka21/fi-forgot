@@ -413,8 +413,9 @@ export default function LandingPage() {
             {/* Three feature items */}
             <div style={{
               display: "flex",
-              gap: "clamp(20px, 3vw, 40px)",
+              gap: "clamp(16px, 2.5vw, 32px)",
               marginTop: "clamp(22px, 3vw, 36px)",
+              maxWidth: "clamp(280px, 34vw, 480px)",
             }}>
               {/* Real Cards */}
               <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
@@ -423,7 +424,7 @@ export default function LandingPage() {
                   <path d="M2 9l12 8 12-8"/>
                 </svg>
                 <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>Real Cards</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#555", lineHeight: 1.4 }}>Written by real people who care.</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#333", lineHeight: 1.4 }}>Written by real people who care.</div>
               </div>
 
               {/* Never Miss */}
@@ -436,7 +437,7 @@ export default function LandingPage() {
                   <circle cx="19" cy="16" r="1.5" fill={B.red} stroke="none"/>
                 </svg>
                 <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>Never Miss</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#555", lineHeight: 1.4 }}>Birthdays, anniversaries, and important dates.</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#333", lineHeight: 1.4 }}>Birthdays, anniversaries, and important dates.</div>
               </div>
 
               {/* We Handle It All */}
@@ -448,7 +449,7 @@ export default function LandingPage() {
                   <path d="M14 14v3"/>
                 </svg>
                 <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>We Handle It All</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#555", lineHeight: 1.4 }}>You approve, we mail, they smile.</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#333", lineHeight: 1.4 }}>You approve, we mail, they smile.</div>
               </div>
             </div>
 
