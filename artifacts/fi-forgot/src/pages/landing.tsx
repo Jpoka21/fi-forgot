@@ -346,121 +346,114 @@ export default function LandingPage() {
 
       </section>
 
-      {/* ── DESKTOP HERO IMAGE ───────────────────────────────────────────── */}
+      {/* ── DESKTOP HERO ─────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
         className="hidden md:block"
-        style={{ background: B.black, lineHeight: 0, position: "relative", overflow: "hidden" }}
+        style={{ position: "relative", overflow: "hidden", height: "calc(100vh - 96px)", minHeight: 560, maxHeight: 900 }}
       >
-        {/* Desktop landscape hero — full image, scaled to fit viewport height */}
+        {/* Background image — cream fade left, Dave/doghouse right */}
         <img
-          src="/hero.png"
-          alt="F* I Forgot — You focus on life. We remember everything."
-          className="w-full"
-          style={{ height: "calc(100vh - 96px)", objectFit: "contain", objectPosition: "center center", filter: "brightness(1.45)" }}
+          src="/hero-desktop.png"
+          alt="F* I Forgot — Never forget the people who matter"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center right" }}
         />
 
-        {/* Desktop text overlay */}
-        <div className="hidden md:flex flex-col" style={{
-          position: "absolute", top: "4%", left: "4%", width: "44%",
-          lineHeight: "normal",
+        {/* Left-side overlay content */}
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center",
+          paddingLeft: "clamp(40px, 6vw, 96px)",
         }}>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(3.5rem, 7.5vw, 8rem)",
-            color: "#ffffff",
-            letterSpacing: "0.01em",
-            lineHeight: 0.95,
-            textShadow: "2px 3px 0 #00000088, -1px -1px 0 #00000033",
-          }}>
-            NEVER FORGET
-          </div>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(3.5rem, 7.5vw, 8rem)",
-            color: B.red,
-            letterSpacing: "0.01em",
-            lineHeight: 0.95,
-            textShadow: "2px 3px 0 #00000066",
-            marginTop: "0.05em",
-          }}>
-            THE PEOPLE<br />WHO MATTER
-          </div>
-          <p style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(0.95rem, 1.4vw, 1.25rem)",
-            fontWeight: 500,
-            color: "rgba(255,255,255,0.82)",
-            lineHeight: 1.6,
-            margin: "0.8em 0 0",
-            textShadow: "1px 1px 6px rgba(0,0,0,0.85)",
-          }}>
-            We write and mail real cards for birthdays, holidays,<br />anniversaries, and special moments before you forget.
-          </p>
-          <Link href="/try" data-testid="link-cta-hitzone"
-            style={{
-              display: "inline-block", marginTop: "1.2em", alignSelf: "flex-start",
-              background: B.red, color: "#fff",
+          <div style={{ maxWidth: "clamp(340px, 42vw, 580px)", display: "flex", flexDirection: "column", gap: 0 }}>
+
+            {/* Headline */}
+            <div style={{
               fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(1rem, 1.6vw, 1.5rem)",
-              letterSpacing: "0.1em",
-              padding: "0.65em 1.3em",
-              borderRadius: 4,
-              textDecoration: "none",
-              boxShadow: `0 0 0 2px ${B.red}, 0 4px 18px rgba(226,59,46,0.4)`,
+              fontSize: "clamp(3.2rem, 6.5vw, 7.5rem)",
+              color: B.black,
+              letterSpacing: "0.01em",
+              lineHeight: 0.92,
             }}>
-            AUTOMATE BEING THOUGHTFUL
-          </Link>
-        </div>
-
-        {/* Desktop — floating sticky notes (6, right half of hero, clear of Dave's face ~55-75% left, 30-55% top) */}
-        <div className="hidden md:block" style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none" }}>
-          {([
-            { label: "Mom's Birthday",       top: "7%",  left: "50%",  rotate: -4, bg: "#FFF176" },
-            { label: "Dad's Birthday",        top: "5%",  right: "5%",  rotate:  3, bg: "#FFDBB3" },
-            { label: "Grandma's\nBirthday",   top: "26%", right: "3%",  rotate: -2, bg: "#FFF176" },
-            { label: "Father's Day",          top: "60%", right: "5%",  rotate:  3, bg: "#FFDBB3" },
-            { label: "Best Friend's\nBirthday", top: "75%", right: "9%", rotate: -3, bg: "#FFF176" },
-            { label: "Holidays",              top: "73%", left: "47%",  rotate:  4, bg: "#FFDBB3" },
-          ] as Array<{ label: string; top: string; left?: string; right?: string; rotate: number; bg: string }>).map(({ label, bg, rotate, ...pos }) => (
-            <div key={label} style={{
-              position: "absolute", ...pos,
-              background: bg,
-              padding: "10px 14px 14px",
-              borderRadius: 2,
-              boxShadow: "2px 4px 14px rgba(0,0,0,0.35), inset 0 -3px 0 rgba(0,0,0,0.08)",
-              transform: `rotate(${rotate}deg)`,
-              fontFamily: "'Caveat', cursive",
-              fontSize: "clamp(14px, 1.1vw, 18px)",
-              color: "#111",
-              lineHeight: 1.35,
-              whiteSpace: "pre-line",
-              minWidth: 100,
-            }}>
-              <div style={{ position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", width: 38, height: 15, background: `${bg}99`, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 2 }} />
-              {label}
+              NEVER FORGET<br />THE PEOPLE<br />
+              <span style={{ color: B.red }}>WHO MATTER</span>
             </div>
-          ))}
-        </div>
 
-        {/* Bottom label — desktop only */}
-        <div className="hidden md:flex" style={{
-          position: "absolute", bottom: "3%", left: "3.5%",
-          alignItems: "center", gap: 8, zIndex: 2,
-        }}>
-          <div style={{ width: 24, height: 2, background: B.red, borderRadius: 1 }} />
-          <span style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(0.7rem, 1vw, 0.9rem)",
-            letterSpacing: "0.18em",
-            color: "rgba(255,255,255,0.65)",
-            textShadow: "0 1px 6px rgba(0,0,0,0.7)",
-          }}>
-            REAL CARDS, AUTOMATICALLY SENT FOR YOU
-          </span>
-          <div style={{ width: 24, height: 2, background: B.red, borderRadius: 1 }} />
-        </div>
+            {/* Subheadline */}
+            <p style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "clamp(0.95rem, 1.35vw, 1.2rem)",
+              fontWeight: 500,
+              color: "#333",
+              lineHeight: 1.6,
+              margin: "clamp(14px, 2vw, 22px) 0 0",
+            }}>
+              We write, address, stamp, and mail real cards for you<br />before you forget.
+            </p>
 
+            {/* CTA */}
+            <Link href="/try" data-testid="link-cta-hitzone"
+              style={{
+                display: "inline-block",
+                marginTop: "clamp(16px, 2.2vw, 28px)",
+                alignSelf: "flex-start",
+                background: B.red,
+                color: "#fff",
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "clamp(1rem, 1.5vw, 1.4rem)",
+                letterSpacing: "0.12em",
+                padding: "0.7em 1.6em",
+                borderRadius: 6,
+                textDecoration: "none",
+                boxShadow: "0 4px 20px rgba(226,59,46,0.35)",
+              }}>
+              GET STARTED TODAY
+            </Link>
+
+            {/* Three feature items */}
+            <div style={{
+              display: "flex",
+              gap: "clamp(20px, 3vw, 40px)",
+              marginTop: "clamp(22px, 3vw, 36px)",
+            }}>
+              {/* Real Cards */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke={B.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="6" width="24" height="17" rx="2"/>
+                  <path d="M2 9l12 8 12-8"/>
+                </svg>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>Real Cards</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#555", lineHeight: 1.4 }}>Written by real people who care.</div>
+              </div>
+
+              {/* Never Miss */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke={B.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="22" height="22" rx="2"/>
+                  <path d="M19 2v4M9 2v4M3 10h22"/>
+                  <circle cx="9" cy="16" r="1.5" fill={B.red} stroke="none"/>
+                  <circle cx="14" cy="16" r="1.5" fill={B.red} stroke="none"/>
+                  <circle cx="19" cy="16" r="1.5" fill={B.red} stroke="none"/>
+                </svg>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>Never Miss</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#555", lineHeight: 1.4 }}>Birthdays, anniversaries, and important dates.</div>
+              </div>
+
+              {/* We Handle It All */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke={B.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 20h20v4H4z"/>
+                  <path d="M6 20v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8"/>
+                  <path d="M11 10V7a3 3 0 0 1 6 0v3"/>
+                  <path d="M14 14v3"/>
+                </svg>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>We Handle It All</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#555", lineHeight: 1.4 }}>You approve, we mail, they smile.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
