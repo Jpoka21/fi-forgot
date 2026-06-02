@@ -72,6 +72,11 @@ router.get("/admin/card-library/categories", async (_req, res) => {
     { key: "new_baby", label: "New Baby", target: 6 },
     { key: "get_well", label: "Get Well", target: 6 },
     { key: "miss_you", label: "Miss You", target: 6 },
+    { key: "birthday", label: "Birthday", target: 12 },
+    { key: "personal_anniversary", label: "Personal Anniversary", target: 8 },
+    { key: "thank_you", label: "Thank You", target: 8 },
+    { key: "graduation", label: "Graduation", target: 6 },
+    { key: "holiday_personal", label: "Holiday (Personal)", target: 8 },
   ];
 
   const byKey = new Map(rows.map(r => [r.category, r]));
