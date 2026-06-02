@@ -149,6 +149,7 @@ ${optionBlock}
 
 Write as ${senderName} speaking directly to ${firstName}.
 Each version must open completely differently — different angle, different voice.
+Never write a specific number of years (e.g. "seven years", "3 years", "15+ years") — use how long they've been together only to inform the emotional depth and familiarity, not as literal text in the card.
 Return valid JSON only:
 {
   "cards": [

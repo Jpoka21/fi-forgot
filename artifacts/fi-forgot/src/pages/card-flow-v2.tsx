@@ -93,7 +93,7 @@ const REL_QUESTIONS: Record<string, QuestionScreen[]> = {
   ],
   spouse: [
     { id: "timeTogether", question: "How long have you been together?", kind: "select",
-      options: ["Less Than A Year","1–3 Years","3–7 Years","7–15 Years","15+ Years"] },
+      options: ["Just started","A couple of years","Several years","A long time","Forever (it feels like)"] },
     { id: "spouseSmile", question: "What makes you smile about them?", hint: "One thing — whatever first comes to mind", kind: "textarea", optional: true },
   ],
   child: [
