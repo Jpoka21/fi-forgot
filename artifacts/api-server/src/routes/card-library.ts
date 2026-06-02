@@ -7,6 +7,24 @@ import { logger } from "../lib/logger";
 
 const router = Router();
 
+// ── Print audit — return all cards for client-side image analysis ─────────────
+
+router.get("/admin/print-audit", async (_req, res) => {
+  const cards = await db
+    .select({
+      id:               aiCardLibraryTable.id,
+      title:            aiCardLibraryTable.title,
+      category:         aiCardLibraryTable.category,
+      subcategory:      aiCardLibraryTable.subcategory,
+      imageUrl:         aiCardLibraryTable.imageUrl,
+      handwryttenCardId: aiCardLibraryTable.handwryttenCardId,
+      active:           aiCardLibraryTable.active,
+    })
+    .from(aiCardLibraryTable)
+    .orderBy(aiCardLibraryTable.category, aiCardLibraryTable.title);
+  res.json({ cards });
+});
+
 // ── List cards ────────────────────────────────────────────────────────────────
 
 router.get("/admin/card-library", async (req, res) => {
