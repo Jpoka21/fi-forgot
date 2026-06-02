@@ -71,6 +71,7 @@ interface QuestionScreen {
 }
 
 interface CardOption { tone: string; text: string; }
+interface CardDesign { id: string; name: string; category?: string; imageUrl?: string; }
 interface DuplicateMatch { id: string; firstName: string; relationshipType: string; }
 type Phase = "who" | "flow" | "generating" | "results" | "final";
 
@@ -230,6 +231,10 @@ export default function CardFlowV2() {
   const [isEditing, setIsEditing] = useState(false);
   const [refining, setRefining]   = useState<number | null>(null);
   const [genError, setGenError]   = useState<string | null>(null);
+  // Card design picker
+  const [design, setDesign]               = useState<CardDesign | null>(null);
+  const [designLoading, setDesignLoading] = useState(false);
+  const [excludedDesignIds, setExcludedDesignIds] = useState<string[]>([]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -339,9 +344,28 @@ export default function CardFlowV2() {
 
   // ── GENERATE ────────────────────────────────────────────────────────────────
 
+  async function regenDesign() {
+    if (designLoading) return;
+    const newExcluded = design ? [...excludedDesignIds, String(design.id)] : excludedDesignIds;
+    setExcludedDesignIds(newExcluded);
+    setDesign(null);
+    setDesignLoading(true);
+    try {
+      const occasionVal = (answers["occasion"] as string | undefined) ?? "";
+      const params = new URLSearchParams({ eventType: occasionVal });
+      if (newExcluded.length) params.set("excludeIds", newExcluded.join(","));
+      const r = await fetch(`/api/personal-cards/pick-card?${params.toString()}`);
+      const d = await r.json() as { card?: CardDesign };
+      if (d.card) setDesign(d.card);
+    } catch { /* non-fatal */ }
+    finally { setDesignLoading(false); }
+  }
+
   async function generateCards(withAnswers: Record<string, string | string[]>) {
     setPhase("generating");
     setGenError(null);
+    setDesign(null);
+    setExcludedDesignIds([]);
 
     const relIds = new Set((REL_QUESTIONS[getRelGroup(relationship)] ?? []).map(s => s.id));
     const relAnswers: Record<string, string> = {};
@@ -350,30 +374,39 @@ export default function CardFlowV2() {
     }
     const get = (id: string) => { const v = withAnswers[id]; return Array.isArray(v) ? v.join(", ") : (v ?? ""); };
 
+    const occasionForPicker = get("occasion") === "Holiday" && get("holidayName") ? `Holiday - ${get("holidayName")}` : get("occasion");
+
     try {
-      const res  = await fetch("/api/v2/generate-card", {
-        method: "POST", headers: getApiHeaders(),
-        body: JSON.stringify({
-          firstName: firstName.trim(),
-          relationship,
-          occasion:          get("occasion") === "Holiday" && get("holidayName") ? `Holiday - ${get("holidayName")}` : get("occasion"),
-          objective:         get("objective"),
-          tone:              get("tone"),
-          emotionalOpenness: get("emotionalOpenness"),
-          avoidList:         (withAnswers["avoidList"] as string[] | undefined) ?? [],
-          birthday:          get("birthday"),
-          details:           get("details"),
-          avoidMentioning:   get("avoidMentioning"),
-          relAnswers,
-          senderName:        user?.name ?? "Me",
-          recipientId,
+      const [res, pickRes] = await Promise.all([
+        fetch("/api/v2/generate-card", {
+          method: "POST", headers: getApiHeaders(),
+          body: JSON.stringify({
+            firstName: firstName.trim(),
+            relationship,
+            occasion:          occasionForPicker,
+            objective:         get("objective"),
+            tone:              get("tone"),
+            emotionalOpenness: get("emotionalOpenness"),
+            avoidList:         (withAnswers["avoidList"] as string[] | undefined) ?? [],
+            birthday:          get("birthday"),
+            details:           get("details"),
+            avoidMentioning:   get("avoidMentioning"),
+            relAnswers,
+            senderName:        user?.name ?? "Me",
+            recipientId,
+          }),
         }),
-      });
-      const data = await res.json() as { cards?: CardOption[]; error?: string };
+        fetch(`/api/personal-cards/pick-card?eventType=${encodeURIComponent(occasionForPicker)}`),
+      ]);
+
+      const data     = await res.json()     as { cards?: CardOption[]; error?: string };
+      const pickData = await pickRes.json() as { card?: CardDesign };
+
       if (!data.cards?.length) throw new Error(data.error ?? "No cards returned");
       setCards(data.cards);
       setActiveCard(0);
       setEditedText(data.cards[0]?.text ?? "");
+      if (pickData.card) setDesign(pickData.card);
       setPhase("results");
     } catch (err) {
       setGenError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -687,6 +720,36 @@ export default function CardFlowV2() {
           >
             {isEditing ? "DONE" : "EDIT"}
           </button>
+        </div>
+
+        {/* Card design */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", color: GRAY, textTransform: "uppercase" }}>
+              CARD DESIGN
+            </span>
+            <button
+              onClick={regenDesign}
+              disabled={designLoading}
+              style={{ background: "none", border: "none", color: RED, fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 600, cursor: designLoading ? "default" : "pointer", opacity: designLoading ? 0.5 : 1 }}
+            >
+              {designLoading ? "Loading..." : "Try another →"}
+            </button>
+          </div>
+          {design?.imageUrl ? (
+            <div style={{ borderRadius: 12, overflow: "hidden", border: `1.5px solid ${BLACK}10` }}>
+              <img src={design.imageUrl} alt={design.name} style={{ width: "100%", display: "block", maxHeight: 180, objectFit: "cover" }} />
+              <div style={{ padding: "8px 12px", background: BEIGE }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY }}>{design.name}</span>
+              </div>
+            </div>
+          ) : (
+            <div style={{ height: 100, borderRadius: 12, background: BEIGE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY }}>
+                {designLoading ? "Picking a design..." : "No design available"}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Refine actions */}
