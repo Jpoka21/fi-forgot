@@ -29,6 +29,21 @@ import { aiCardLibraryTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { uploadCustomImage, createCustomHandwryttenCard, getCustomCardDimensions } from "./handwrytten";
 import { logger } from "../lib/logger";
+import sharp from "sharp";
+
+// Target: exactly 300 DPI at 5" × 7" (Handwrytten standard portrait card)
+const PRINT_WIDTH_PX  = 1500; // 5"  × 300 DPI
+const PRINT_HEIGHT_PX = 2100; // 7"  × 300 DPI
+
+async function upscaleToPrintResolution(inputBuffer: Buffer): Promise<Buffer> {
+  return sharp(inputBuffer)
+    .resize(PRINT_WIDTH_PX, PRINT_HEIGHT_PX, {
+      kernel: sharp.kernel.lanczos3,
+      fit: "fill",
+    })
+    .png({ compressionLevel: 6 })
+    .toBuffer();
+}
 
 
 // ─── Card designs ─────────────────────────────────────────────────────────────
@@ -1474,7 +1489,12 @@ export async function generateLibraryCards(options: {
 
       const b64 = (imageResponse.data?.[0] as any)?.b64_json as string | undefined;
       if (!b64) throw new Error("gpt-image-1 returned no image data");
-      const imageBuffer = Buffer.from(b64, "base64");
+      const rawBuffer = Buffer.from(b64, "base64");
+
+      onProgress?.(`Upscaling to 300 DPI: ${design.title}…`);
+
+      // Step 1b: Upscale to 1500×2100 (300 DPI at 5"×7") before uploading
+      const imageBuffer = await upscaleToPrintResolution(rawBuffer);
 
       onProgress?.(`Uploading to Handwrytten: ${design.title}…`);
 
@@ -1565,7 +1585,10 @@ export async function regenerateLibraryCard(id: string): Promise<RegenerateResul
 
   const b64 = (imageResponse.data?.[0] as any)?.b64_json as string | undefined;
   if (!b64) throw new Error("gpt-image-1 returned no image data");
-  const imageBuffer = Buffer.from(b64, "base64");
+  const rawBuffer = Buffer.from(b64, "base64");
+
+  // Upscale to 1500×2100 (300 DPI at 5"×7") before uploading
+  const imageBuffer = await upscaleToPrintResolution(rawBuffer);
 
   const uploaded = await uploadCustomImage({ buffer: imageBuffer, imageType: "cover" });
   if (!uploaded.id) throw new Error("Handwrytten upload returned no image ID");

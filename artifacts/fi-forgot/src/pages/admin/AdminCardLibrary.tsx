@@ -230,6 +230,8 @@ export function AdminCardLibrary() {
   const [genBackground, setGenBackground] = useState(false);
   const [genLog,      setGenLog]      = useState<string[]>([]);
   const [genTarget,   setGenTarget]   = useState<string>("all");
+  const [upgrading,   setUpgrading]   = useState(false);
+  const [upgradeProgress, setUpgradeProgress] = useState({ done: 0, total: 0 });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -381,6 +383,34 @@ export function AdminCardLibrary() {
     }
   }
 
+  async function handleUpgradeAll() {
+    if (!confirm(
+      `Upgrade all ${cards.length} cards to 300 DPI (1500×2100px)?\n\n` +
+      `This regenerates every card image and re-uploads to Handwrytten.\n` +
+      `Estimated time: ${Math.round(cards.length * 0.5)} – ${cards.length} minutes.\n` +
+      `Estimated cost: ~$${(cards.length * 0.25).toFixed(0)}.`
+    )) return;
+
+    setUpgrading(true);
+    setUpgradeProgress({ done: 0, total: cards.length });
+
+    // Regenerate one at a time to avoid overwhelming the API
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      try {
+        const r = await fetch(`/api/admin/card-library/${card.id}/regenerate`, { method: "POST" });
+        if (r.ok) {
+          const d = await r.json() as { card?: { imageUrl: string } };
+          if (d.card) setCards(cs => cs.map(c => c.id === card.id ? { ...c, imageUrl: d.card!.imageUrl } : c));
+        }
+      } catch { /* continue on error */ }
+      setUpgradeProgress({ done: i + 1, total: cards.length });
+    }
+
+    setUpgrading(false);
+    await loadCards();
+  }
+
   const totalCards   = categories.reduce((s, c) => s + c.count, 0);
   const activeCards  = categories.reduce((s, c) => s + c.activeCount, 0);
   const totalShown   = cards.reduce((s, c) => s + c.timesShown, 0);
@@ -467,21 +497,57 @@ export function AdminCardLibrary() {
           </div>
           <button
             onClick={handleGenerate}
-            disabled={generating}
+            disabled={generating || upgrading}
             style={{
               display: "flex", alignItems: "center", gap: 8,
               background: generating ? "rgba(255,255,255,0.05)" : GOLD,
               color: generating ? "rgba(255,255,255,0.4)" : NAVY,
               border: "none", borderRadius: 8, padding: "8px 18px",
               fontWeight: 700, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem",
-              cursor: generating ? "not-allowed" : "pointer", whiteSpace: "nowrap",
+              cursor: generating || upgrading ? "not-allowed" : "pointer", whiteSpace: "nowrap",
             }}
           >
             {generating
               ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> {genBackground ? "Watching…" : "Generating…"}</>
               : <><Zap size={14} /> Generate</>}
           </button>
+          <button
+            onClick={handleUpgradeAll}
+            disabled={generating || upgrading || cards.length === 0}
+            title="Regenerate every card at 1500×2100px (300 DPI) and re-upload to Handwrytten"
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: upgrading ? "rgba(255,255,255,0.05)" : "#1d4ed8",
+              color: upgrading ? "rgba(255,255,255,0.4)" : "#fff",
+              border: "none", borderRadius: 8, padding: "8px 18px",
+              fontWeight: 700, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem",
+              cursor: generating || upgrading || cards.length === 0 ? "not-allowed" : "pointer", whiteSpace: "nowrap",
+            }}
+          >
+            {upgrading
+              ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> {upgradeProgress.done}/{upgradeProgress.total} upgraded…</>
+              : <><RefreshCw size={14} /> Upgrade All to 300 DPI</>}
+          </button>
         </div>
+
+        {upgrading && (
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.6)", fontFamily: "'Inter', sans-serif" }}>
+                Upgrading to 300 DPI — regenerating images and re-uploading to Handwrytten…
+              </span>
+              <span style={{ fontSize: "0.72rem", color: "#93c5fd", fontFamily: "'Inter', sans-serif", fontWeight: 700 }}>
+                {upgradeProgress.done} / {upgradeProgress.total}
+              </span>
+            </div>
+            <div style={{ height: 5, background: "rgba(255,255,255,0.08)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{
+                width: `${upgradeProgress.total > 0 ? (upgradeProgress.done / upgradeProgress.total) * 100 : 0}%`,
+                height: "100%", background: "#3b82f6", borderRadius: 3, transition: "width 0.4s ease",
+              }} />
+            </div>
+          </div>
+        )}
 
         {genBackground && (
           <div style={{
