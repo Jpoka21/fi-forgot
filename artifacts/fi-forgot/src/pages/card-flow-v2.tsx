@@ -50,13 +50,6 @@ const AVOID_OPTIONS = [
   "Too Inappropriate","Too Professional","Too Childish",
 ];
 
-const REFINE_ACTIONS = [
-  { label: "😂 Funnier",      instruction: "Make it significantly funnier. More humor, less sentiment." },
-  { label: "🎯 Less Sweet",   instruction: "Reduce sweetness. More direct and less sentimental." },
-  { label: "✂️ Shorter",      instruction: "Cut to roughly half the length. Keep only the best parts." },
-  { label: "💙 More Heartfelt", instruction: "Go deeper and more genuinely emotional." },
-  { label: "🗣️ More Like Me", instruction: "Make it sound more casual and personal, less polished." },
-];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -230,8 +223,9 @@ export default function CardFlowV2() {
   const [activeCard, setActiveCard] = useState(0);
   const [editedText, setEditedText] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [refining, setRefining]   = useState<number | null>(null);
-  const [genError, setGenError]   = useState<string | null>(null);
+  const [refining, setRefining]     = useState<number | null>(null);
+  const [genError, setGenError]     = useState<string | null>(null);
+  const [aiInstruction, setAiInstruction] = useState("");
   // Card design picker
   const [design, setDesign]               = useState<CardDesign | null>(null);
   const [designLoading, setDesignLoading] = useState(false);
@@ -701,7 +695,7 @@ export default function CardFlowV2() {
         </div>
 
         {/* Card text */}
-        <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 16, minHeight: 160, position: "relative" }}>
+        <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 16, minHeight: 160 }}>
           {isEditing ? (
             <textarea
               ref={textareaRef}
@@ -715,12 +709,6 @@ export default function CardFlowV2() {
               {editedText}
             </p>
           )}
-          <button
-            onClick={() => setIsEditing(e => !e)}
-            style={{ position: "absolute", top: 10, right: 10, background: `${BLACK}08`, border: "none", color: GRAY, fontSize: "0.7rem", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontWeight: 600, padding: "4px 8px", borderRadius: 6 } as React.CSSProperties}
-          >
-            {isEditing ? "DONE" : "EDIT"}
-          </button>
         </div>
 
         {/* Card design */}
@@ -753,35 +741,46 @@ export default function CardFlowV2() {
           )}
         </div>
 
-        {/* Refine actions */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
-          {REFINE_ACTIONS.map(action => (
-            <button
-              key={action.label}
-              onClick={() => handleRefine(activeCard, action.instruction)}
-              disabled={refining !== null}
-              style={{
-                padding: "8px 14px", borderRadius: 20, border: `1.5px solid ${BLACK}15`,
-                background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif",
-                fontSize: "0.78rem", fontWeight: 500, cursor: refining !== null ? "default" : "pointer",
-                opacity: refining !== null ? 0.5 : 1,
-              } as React.CSSProperties}
-            >
-              {action.label}
-            </button>
-          ))}
+        {/* Text edit actions */}
+        <div style={{ marginBottom: 20 }}>
+          {/* Make Shorter quick action */}
           <button
-            onClick={() => generateCards(answers)}
+            onClick={() => handleRefine(activeCard, "Make it shorter")}
             disabled={refining !== null}
-            style={{ padding: "8px 14px", borderRadius: 20, border: `1.5px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", fontWeight: 500, cursor: "pointer" } as React.CSSProperties}
+            style={{
+              padding: "9px 18px", borderRadius: 20, border: `1.5px solid ${BLACK}15`,
+              background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif",
+              fontSize: "0.8rem", fontWeight: 500, cursor: refining !== null ? "default" : "pointer",
+              opacity: refining !== null ? 0.5 : 1, marginBottom: 12,
+            } as React.CSSProperties}
           >
-            🔄 Regenerate All
+            ✂️ Make Shorter
           </button>
-        </div>
 
-        {refining !== null && (
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", color: GRAY, marginBottom: 12 }}>Refining card...</p>
-        )}
+          {/* AI rewrite input */}
+          <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+            <input
+              type="text"
+              value={aiInstruction}
+              onChange={e => setAiInstruction(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && aiInstruction.trim() && refining === null) { handleRefine(activeCard, aiInstruction); setAiInstruction(""); } }}
+              placeholder="Tell AI how to change it…"
+              disabled={refining !== null}
+              style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${BLACK}15`, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", color: BLACK, background: WHITE, outline: "none" } as React.CSSProperties}
+            />
+            <button
+              onClick={() => { if (aiInstruction.trim() && refining === null) { handleRefine(activeCard, aiInstruction); setAiInstruction(""); } }}
+              disabled={refining !== null || !aiInstruction.trim()}
+              style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 700, cursor: refining !== null || !aiInstruction.trim() ? "default" : "pointer", opacity: refining !== null || !aiInstruction.trim() ? 0.5 : 1 } as React.CSSProperties}
+            >
+              Apply
+            </button>
+          </div>
+
+          {refining !== null && (
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, marginTop: 8, marginBottom: 0 }}>Rewriting…</p>
+          )}
+        </div>
 
         {/* CTA */}
         <button
