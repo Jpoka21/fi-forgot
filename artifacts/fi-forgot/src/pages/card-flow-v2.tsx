@@ -64,9 +64,10 @@ interface QuestionScreen {
   id: string;
   question: string;
   hint?: string;
-  kind: "select" | "multiselect" | "textarea";
+  kind: "select" | "multiselect" | "textarea" | "date";
   options?: string[];
   optional?: boolean;
+  condition?: (answers: Record<string, string | string[]>) => boolean;
 }
 
 interface CardOption { tone: string; text: string; }
@@ -117,6 +118,8 @@ const REL_QUESTIONS: Record<string, QuestionScreen[]> = {
 
 const UNIVERSAL_QUESTIONS: QuestionScreen[] = [
   { id: "occasion",         question: "What is the occasion?", kind: "select",      options: OCCASIONS },
+  { id: "birthday",         question: "When is their birthday?", hint: "We'll remind you automatically every year", kind: "date", optional: true,
+    condition: (a) => a["occasion"] === "Birthday" },
   { id: "objective",        question: "What should this card mainly do?", kind: "select", options: OBJECTIVES },
   { id: "tone",             question: "What tone should this card have?", kind: "select", options: TONES },
   { id: "emotionalOpenness",question: "How openly emotional should it sound?", kind: "select", options: EMOTIONAL_OPTIONS },
@@ -206,7 +209,6 @@ export default function CardFlowV2() {
   // WHO state
   const [firstName, setFirstName]     = useState("");
   const [relationship, setRelationship] = useState("");
-  const [birthday, setBirthday]       = useState("");
   const [nameError, setNameError]     = useState("");
   const [busy, setBusy]               = useState(false);
   const [duplicates, setDuplicates]   = useState<DuplicateMatch[]>([]);
@@ -276,7 +278,7 @@ export default function CardFlowV2() {
       try {
         const res  = await fetch("/api/v2/recipients", {
           method: "POST", headers: getApiHeaders(),
-          body: JSON.stringify({ firstName: firstName.trim(), relationshipType: relationship, birthday: birthday || undefined }),
+          body: JSON.stringify({ firstName: firstName.trim(), relationshipType: relationship }),
         });
         const data = await res.json() as { recipient?: { id: string } };
         rId = data.recipient?.id ?? null;
@@ -307,16 +309,28 @@ export default function CardFlowV2() {
     setAnswers({ ...answers, [currentStep.id]: cur.includes(option) ? cur.filter(o => o !== option) : [...cur, option] });
   }
 
+  function nextAllowedIdx(fromIdx: number, withAnswers: Record<string, string | string[]>, direction: 1 | -1): number | null {
+    let i = fromIdx + direction;
+    while (i >= 0 && i < steps.length) {
+      const cond = steps[i]?.condition;
+      if (!cond || cond(withAnswers)) return i;
+      i += direction;
+    }
+    return null;
+  }
+
   function advanceStep(withAnswers = answers) {
-    if (stepIdx < steps.length - 1) {
-      setStepIdx(i => i + 1);
+    const next = nextAllowedIdx(stepIdx, withAnswers, 1);
+    if (next !== null) {
+      setStepIdx(next);
     } else {
       generateCards(withAnswers);
     }
   }
 
   function goBack() {
-    if (stepIdx > 0) { setStepIdx(i => i - 1); }
+    const prev = nextAllowedIdx(stepIdx, answers, -1);
+    if (prev !== null) { setStepIdx(prev); }
     else { setPhase("who"); }
   }
 
@@ -344,6 +358,7 @@ export default function CardFlowV2() {
           tone:              get("tone"),
           emotionalOpenness: get("emotionalOpenness"),
           avoidList:         (withAnswers["avoidList"] as string[] | undefined) ?? [],
+          birthday:          get("birthday"),
           details:           get("details"),
           avoidMentioning:   get("avoidMentioning"),
           relAnswers,
@@ -442,19 +457,6 @@ export default function CardFlowV2() {
           </div>
         </div>
 
-        {/* Birthday (optional) */}
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", color: GRAY, textTransform: "uppercase", marginBottom: 6 }}>
-            Birthday <span style={{ fontWeight: 400, color: `${GRAY}90` }}>(optional)</span>
-          </label>
-          <input
-            type="date"
-            value={birthday}
-            onChange={e => setBirthday(e.target.value)}
-            style={{ width: "100%", padding: "13px 16px", borderRadius: 12, border: `1.5px solid ${BLACK}18`, fontFamily: "'Inter', sans-serif", fontSize: "0.95rem", color: birthday ? BLACK : GRAY, background: WHITE, outline: "none", boxSizing: "border-box" } as React.CSSProperties}
-          />
-        </div>
-
         {nameError && <p style={{ color: RED, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", marginBottom: 12 }}>{nameError}</p>}
 
         <button
@@ -529,6 +531,7 @@ export default function CardFlowV2() {
     const isSelectKind   = currentStep.kind === "select";
     const isMultiKind    = currentStep.kind === "multiselect";
     const isTextKind     = currentStep.kind === "textarea";
+    const isDateKind     = currentStep.kind === "date";
 
     return (
       <WizardShell progress={progressPct} onBack={goBack}>
@@ -571,6 +574,32 @@ export default function CardFlowV2() {
             >
               {selectedArr.length > 0 ? `CONTINUE (${selectedArr.length} selected)` : "SKIP →"}
             </button>
+          </>
+        )}
+
+        {/* DATE */}
+        {isDateKind && (
+          <>
+            <input
+              type="date"
+              value={selectedStr}
+              onChange={e => setAnswers({ ...answers, [currentStep.id]: e.target.value })}
+              style={{ width: "100%", padding: "14px 16px", borderRadius: 12, border: `1.5px solid ${BLACK}18`, fontFamily: "'Inter', sans-serif", fontSize: "1rem", color: selectedStr ? BLACK : GRAY, background: WHITE, outline: "none", boxSizing: "border-box", marginBottom: 16 } as React.CSSProperties}
+            />
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => advanceStep()}
+                style={{ flex: 1, padding: 14, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", cursor: "pointer" }}
+              >
+                CONTINUE →
+              </button>
+              <button
+                onClick={() => advanceStep()}
+                style={{ padding: "14px 20px", borderRadius: 12, border: `1.5px solid ${BLACK}15`, background: "none", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", cursor: "pointer" }}
+              >
+                Skip
+              </button>
+            </div>
           </>
         )}
 
@@ -747,7 +776,7 @@ export default function CardFlowV2() {
         <button
           onClick={() => {
             setPhase("who");
-            setFirstName(""); setRelationship(""); setBirthday("");
+            setFirstName(""); setRelationship("");
             setAnswers({}); setCards([]); setRecipientId(null);
           }}
           style={{ width: "100%", marginTop: 12, padding: 13, borderRadius: 12, border: `1.5px solid ${BLACK}15`, background: "none", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", cursor: "pointer" }}
