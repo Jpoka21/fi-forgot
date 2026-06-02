@@ -116,8 +116,8 @@ function Router() {
       <Route path="/admin">
         <ProtectedRoute component={AdminPage} />
       </Route>
-      <Route path="/try" component={TryPage} />
-      <Route path="/v2" component={CardFlowV2Page} />
+      <Route path="/try" component={CardFlowV2Page} />
+      <Route path="/v2"><Redirect to="/try" /></Route>
       <Route path="/subscribe" component={SubscribePage} />
       <Route path="/checkout/success" component={CheckoutSuccessPage} />
       <Route path="/demo/:id" component={DemoPreviewPage} />
