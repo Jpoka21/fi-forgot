@@ -674,7 +674,7 @@ export default function CardFlowV2() {
           3 CARDS FOR {firstName.toUpperCase()}
         </h2>
 
-        {/* Card tabs */}
+        {/* Tone tabs */}
         <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
           {cards.map((c, i) => (
             <button
@@ -694,8 +694,38 @@ export default function CardFlowV2() {
           ))}
         </div>
 
+        {/* Card design — shown first so they see the physical card + text together */}
+        <div style={{ marginBottom: 16 }}>
+          {design?.imageUrl ? (
+            <div style={{ borderRadius: 12, overflow: "hidden", border: `1.5px solid ${BLACK}10`, position: "relative" }}>
+              <img src={design.imageUrl} alt={design.name} style={{ width: "100%", display: "block", maxHeight: 160, objectFit: "cover" }} />
+              <button
+                onClick={regenDesign}
+                disabled={designLoading}
+                style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.55)", border: "none", color: WHITE, fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 600, padding: "5px 10px", borderRadius: 20, cursor: designLoading ? "default" : "pointer", opacity: designLoading ? 0.6 : 1 }}
+              >
+                {designLoading ? "Loading…" : "Try another →"}
+              </button>
+              <div style={{ padding: "7px 12px", background: BEIGE }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", color: GRAY }}>{design.name}</span>
+              </div>
+            </div>
+          ) : (
+            <div style={{ height: 80, borderRadius: 12, background: BEIGE, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY }}>
+                {designLoading ? "Finding a card design…" : "No design found"}
+              </span>
+              {!designLoading && (
+                <button onClick={regenDesign} style={{ background: "none", border: "none", color: RED, fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", padding: 0 }}>
+                  Try again →
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Card text */}
-        <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 16, minHeight: 160 }}>
+        <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 14, minHeight: 160 }}>
           {isEditing ? (
             <textarea
               ref={textareaRef}
@@ -711,60 +741,35 @@ export default function CardFlowV2() {
           )}
         </div>
 
-        {/* Card design */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", color: GRAY, textTransform: "uppercase" }}>
-              CARD DESIGN
-            </span>
-            <button
-              onClick={regenDesign}
-              disabled={designLoading}
-              style={{ background: "none", border: "none", color: RED, fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 600, cursor: designLoading ? "default" : "pointer", opacity: designLoading ? 0.5 : 1 }}
-            >
-              {designLoading ? "Loading..." : "Try another →"}
-            </button>
-          </div>
-          {design?.imageUrl ? (
-            <div style={{ borderRadius: 12, overflow: "hidden", border: `1.5px solid ${BLACK}10` }}>
-              <img src={design.imageUrl} alt={design.name} style={{ width: "100%", display: "block", maxHeight: 180, objectFit: "cover" }} />
-              <div style={{ padding: "8px 12px", background: BEIGE }}>
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY }}>{design.name}</span>
-              </div>
-            </div>
-          ) : (
-            <div style={{ height: 100, borderRadius: 12, background: BEIGE, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY }}>
-                {designLoading ? "Picking a design..." : "No design available"}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Text edit actions */}
-        <div style={{ marginBottom: 20 }}>
-          {/* Make Shorter quick action */}
+        {/* Quick edit row */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           <button
             onClick={() => handleRefine(activeCard, "Make it shorter")}
             disabled={refining !== null}
-            style={{
-              padding: "9px 18px", borderRadius: 20, border: `1.5px solid ${BLACK}15`,
-              background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif",
-              fontSize: "0.8rem", fontWeight: 500, cursor: refining !== null ? "default" : "pointer",
-              opacity: refining !== null ? 0.5 : 1, marginBottom: 12,
-            } as React.CSSProperties}
+            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1.5px solid ${BLACK}15`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", fontWeight: 600, cursor: refining !== null ? "default" : "pointer", opacity: refining !== null ? 0.5 : 1 } as React.CSSProperties}
           >
             ✂️ Make Shorter
           </button>
+          <button
+            onClick={() => { setIsEditing(true); }}
+            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1.5px solid ${BLACK}15`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
+          >
+            ✏️ Write My Own
+          </button>
+        </div>
 
-          {/* AI rewrite input */}
-          <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+        {/* AI suggestion input */}
+        <div style={{ marginBottom: 20 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 700, color: GRAY, letterSpacing: "0.05em", textTransform: "uppercase", margin: "0 0 6px" }}>
+            Use AI to suggest edits
+          </p>
+          <div style={{ display: "flex", gap: 8 }}>
             <input
               type="text"
               value={aiInstruction}
               onChange={e => setAiInstruction(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && aiInstruction.trim() && refining === null) { handleRefine(activeCard, aiInstruction); setAiInstruction(""); } }}
-              placeholder="Tell AI how to change it…"
+              placeholder="e.g. make it funnier, add a joke about camping…"
               disabled={refining !== null}
               style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${BLACK}15`, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", color: BLACK, background: WHITE, outline: "none" } as React.CSSProperties}
             />
@@ -776,9 +781,8 @@ export default function CardFlowV2() {
               Apply
             </button>
           </div>
-
           {refining !== null && (
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, marginTop: 8, marginBottom: 0 }}>Rewriting…</p>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, marginTop: 7, marginBottom: 0 }}>Rewriting…</p>
           )}
         </div>
 
@@ -788,12 +792,6 @@ export default function CardFlowV2() {
           style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 4px 20px rgba(226,59,46,0.35)" }}
         >
           USE THIS CARD →
-        </button>
-        <button
-          onClick={() => setIsEditing(true)}
-          style={{ width: "100%", marginTop: 10, padding: 13, borderRadius: 12, border: `1.5px solid ${BLACK}15`, background: "none", color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.9rem", fontWeight: 600, cursor: "pointer" }}
-        >
-          ✏️ Write my own
         </button>
       </WizardShell>
     );
