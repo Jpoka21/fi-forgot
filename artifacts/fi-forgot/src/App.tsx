@@ -29,6 +29,7 @@ import BusinessDashboardPage from "@/pages/business-dashboard";
 import CreateBusinessWorkspacePage from "@/pages/create-business-workspace";
 import BusinessApprovePage from "@/pages/business-approve";
 import CardPreviewPage from "@/pages/card-preview";
+import CardFlowV2Page from "@/pages/card-flow-v2";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,7 @@ function Router() {
         <ProtectedRoute component={AdminPage} />
       </Route>
       <Route path="/try" component={TryPage} />
+      <Route path="/v2" component={CardFlowV2Page} />
       <Route path="/subscribe" component={SubscribePage} />
       <Route path="/checkout/success" component={CheckoutSuccessPage} />
       <Route path="/demo/:id" component={DemoPreviewPage} />
@@ -134,7 +136,7 @@ function Router() {
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo"];
+const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo"];
 
 function FloatingTryButton() {
   const [location] = useLocation();

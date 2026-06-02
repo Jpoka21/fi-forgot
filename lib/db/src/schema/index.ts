@@ -29,3 +29,4 @@ export * from "./ai-card-library";
 export * from "./users";
 export * from "./personal-recipients";
 export * from "./card-previews";
+export * from "./recipients-v2";

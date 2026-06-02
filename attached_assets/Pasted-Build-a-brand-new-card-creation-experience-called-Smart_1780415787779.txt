@@ -1,0 +1,770 @@
+Build a brand new card creation experience called Smart Card Flow V2.
+
+Do not replace the current card flow yet. Build this beside the existing flow so both systems can be tested.
+
+PRIMARY GOAL
+
+FiForgot is not just a card generator.
+
+FiForgot is building a relationship memory system that becomes more intelligent over time.
+
+The system should collect useful relationship information while keeping the user experience fast and simple.
+
+The user should never feel like they are filling out a CRM.
+
+The system should quietly build a relationship database in the background.
+
+---
+
+## RECIPIENT DATABASE ARCHITECTURE
+
+Every recipient must have:
+
+recipient_id (unique)
+user_id (owner of recipient)
+first_name
+relationship_type
+
+All recipient data must always be scoped to the logged in user.
+
+Never identify recipients by name alone.
+
+Never share recipient data across users.
+
+If a user creates a recipient whose first name already exists in their account:
+
+Display:
+
+"We found another recipient named Joe."
+
+Options:
+
+Use Existing Joe
+Create New Joe
+
+Do not automatically merge recipients.
+
+Do not require last names.
+
+Do not require email addresses.
+
+Do not require phone numbers.
+
+Keep recipient creation friction extremely low.
+
+---
+
+## RECIPIENT CREATION
+
+Step 1:
+
+Who is this card for?
+
+First Name
+
+Relationship
+
+Relationship options:
+
+Friend
+Brother
+Sister
+Mom
+Dad
+Son
+Daughter
+Husband
+Wife
+Boyfriend
+Girlfriend
+Grandparent
+Grandchild
+Aunt
+Uncle
+Cousin
+Coworker
+Employee
+Boss
+Client
+Neighbor
+Teacher
+Coach
+Other
+
+Optional:
+
+Birthday
+
+Create recipient record immediately.
+
+Generate recipient_id.
+
+Associate recipient with user_id.
+
+---
+
+## PROGRESSIVE MEMORY MODEL
+
+Do not ask dozens of questions up front.
+
+Instead:
+
+Collect information naturally during card creation.
+
+Save everything to recipient memory.
+
+Future versions of the platform will send follow up questions via email to expand recipient knowledge.
+
+Design the database now so it supports that future functionality.
+
+Create memory categories:
+
+Permanent Facts
+
+Relationship DNA
+
+Card Fuel
+
+Card Preferences
+
+---
+
+## PERMANENT FACTS
+
+Relationship Type
+
+Birthday
+
+Nickname
+
+Family Members Mentioned
+
+Occupation
+
+Location Mentioned
+
+Hobbies
+
+Interests
+
+---
+
+## RELATIONSHIP DNA
+
+How they communicate
+
+How emotional the relationship is
+
+How much teasing is normal
+
+Role in sender's life
+
+What sender admires
+
+What annoys sender
+
+What makes relationship unique
+
+---
+
+## CARD FUEL
+
+Shared memories
+
+Funny stories
+
+Inside jokes
+
+Catchphrases
+
+Proud moments
+
+Life lessons
+
+Achievements
+
+Funny habits
+
+Things they always do
+
+Things they always say
+
+Things to avoid mentioning
+
+---
+
+## CARD PREFERENCES
+
+Preferred tone
+
+Humor style
+
+Emotional style
+
+Card archetypes used
+
+Past card feedback
+
+---
+
+## CARD CREATION FLOW
+
+Use one question per screen.
+
+Mobile first design.
+
+Large buttons.
+
+Minimal typing.
+
+Fast completion.
+
+---
+
+## RELATIONSHIP SPECIFIC BRANCHING
+
+After relationship is selected, show dynamic questions.
+
+---
+
+## FRIEND QUESTIONS
+
+What kind of friend are they?
+
+Best Friend
+
+Childhood Friend
+
+Work Friend
+
+Neighbor Friend
+
+Friend I Joke Around With
+
+Friend I Want To Reconnect With
+
+Other
+
+How do you usually communicate?
+
+Mostly Jokes
+
+Mix Of Jokes And Serious
+
+Mostly Serious
+
+We Rarely Talk About Feelings
+
+We Talk About Everything
+
+How much roasting is normal?
+
+None
+
+Light Teasing
+
+Regular Roasting
+
+Full Roast Is Fine
+
+---
+
+## BROTHER OR SISTER QUESTIONS
+
+Older Or Younger
+
+Are You Close
+
+What Did They Do Growing Up That Drove You Crazy
+
+What Do You Respect Most About Them
+
+Mostly Jokes Or Mostly Serious
+
+---
+
+## MOM OR DAD QUESTIONS
+
+What Is Something They Taught You
+
+What Is Something They Always Did For The Family
+
+How Would You Describe Them
+
+Funny
+
+Tough
+
+Quiet
+
+Emotional
+
+Practical
+
+Supportive
+
+Do You Tell Them What They Mean To You Often
+
+---
+
+## SPOUSE OR PARTNER QUESTIONS
+
+How Long Have You Been Together
+
+How Did You Meet
+
+What Makes You Smile About Them
+
+What Drives You Crazy About Them
+
+Desired Tone
+
+Romantic
+
+Funny
+
+Grateful
+
+Simple
+
+Deeply Emotional
+
+---
+
+## SON OR DAUGHTER QUESTIONS
+
+Age
+
+What Makes You Proud Of Them
+
+What Makes Them Laugh
+
+Desired Tone
+
+Playful
+
+Encouraging
+
+Proud
+
+Heartfelt
+
+---
+
+## PROFESSIONAL RELATIONSHIPS
+
+Coworker
+
+Employee
+
+Boss
+
+Client
+
+Teacher
+
+Coach
+
+Ask:
+
+What Do They Do Well
+
+What Are You Recognizing Them For
+
+Desired Tone
+
+Professional
+
+Warm
+
+Funny But Safe
+
+Simple
+
+No romantic language.
+
+No emotional dependency language.
+
+No aggressive roasting.
+
+---
+
+## UNIVERSAL QUESTIONS
+
+What Is The Occasion
+
+Birthday
+
+Anniversary
+
+Thank You
+
+Congratulations
+
+Get Well
+
+Sympathy
+
+Apology
+
+Thinking Of You
+
+Just Because
+
+Holiday
+
+Encouragement
+
+Retirement
+
+New Baby
+
+Wedding
+
+Graduation
+
+Other
+
+---
+
+## CARD OBJECTIVE
+
+What Should This Card Mainly Do
+
+Make Them Laugh
+
+Bring Back A Memory
+
+Tell Them I Appreciate Them
+
+Tell Them I Am Proud Of Them
+
+Encourage Them
+
+Comfort Them
+
+Celebrate Them
+
+Say Something I Normally Do Not Say
+
+Roast Them Affectionately
+
+Keep It Short And Simple
+
+---
+
+## CARD TONE
+
+Funny
+
+Roast
+
+Heartfelt
+
+Nostalgic
+
+Simple
+
+Romantic
+
+Warm
+
+Respectful
+
+Encouraging
+
+Bold And Honest
+
+---
+
+## EMOTIONAL OPENNESS
+
+How Openly Emotional Should It Sound
+
+Not Emotional Just Funny
+
+A Little Appreciation At The End
+
+Meaningful But Not Mushy
+
+Clearly Heartfelt
+
+Deep And Emotional
+
+---
+
+## AVOID LIST
+
+What Should This Card Never Sound Like
+
+Multi Select
+
+Too Cheesy
+
+Too Sweet
+
+Too Formal
+
+Too Generic
+
+Too Romantic
+
+Too Emotional
+
+Too Mean
+
+Too Long
+
+Too Clean
+
+Too Inappropriate
+
+Too Professional
+
+Too Childish
+
+---
+
+## MEMORY COLLECTION
+
+What Memories, Stories, Jokes, Or Details Should We Include
+
+Large Text Box
+
+Optional
+
+What Should We Avoid Mentioning
+
+Large Text Box
+
+Optional
+
+All answers saved to recipient memory.
+
+---
+
+## CARD ARCHETYPE ENGINE
+
+Before writing any card, classify the card into one or more archetypes.
+
+Available archetypes:
+
+Appreciation
+
+Roast
+
+Nostalgia
+
+Celebration
+
+Encouragement
+
+Love
+
+Gratitude
+
+Pride
+
+Comfort
+
+Apology
+
+Recognition
+
+Simple Check In
+
+Examples:
+
+Friend + Just Because + Roast + Low Emotion
+
+= Roast + Nostalgia
+
+Dad + Birthday + Meaningful
+
+= Gratitude + Respect + Pride
+
+Employee + Thank You
+
+= Recognition
+
+Spouse + Anniversary
+
+= Love + Appreciation
+
+The AI must determine archetype before writing.
+
+---
+
+## AI WRITING RULES
+
+Do not automatically write sweet cards.
+
+Do not assume heartfelt is better.
+
+Write what this sender would realistically say.
+
+Use relationship type heavily.
+
+Use communication style heavily.
+
+Use emotional openness heavily.
+
+Use specific details whenever available.
+
+Use memories before compliments.
+
+Use stories before generic praise.
+
+Do not overuse:
+
+You mean the world to me
+
+Life would not be the same without you
+
+Rare person
+
+One of a kind
+
+Impossible not to like
+
+Or similar generic greeting card language
+
+For funny male friendships:
+
+Favor teasing
+
+Inside jokes
+
+Shared stupidity
+
+Understated appreciation
+
+For siblings:
+
+Mix annoyance and loyalty
+
+For parents:
+
+Favor gratitude
+
+Life lessons
+
+Sacrifice
+
+Pride
+
+For spouses:
+
+Favor real life details over generic romance
+
+For professional relationships:
+
+Remain professional and appropriate
+
+---
+
+## GENERATE THREE CARD OPTIONS
+
+Option 1
+
+Best Match
+
+Closest to inputs
+
+Option 2
+
+More Casual And Funny
+
+Option 3
+
+More Heartfelt
+
+Respect all avoid list selections
+
+---
+
+## POST GENERATION ACTIONS
+
+Each generated card must have:
+
+Use This
+
+Edit
+
+Write My Own
+
+Make Funnier
+
+Make Less Sweet
+
+Make More Like Me
+
+Make Shorter
+
+Make More Heartfelt
+
+Regenerate
+
+---
+
+## FEEDBACK LEARNING
+
+When users click improvement buttons:
+
+Pass feedback into regeneration prompt.
+
+Save preference to recipient profile.
+
+Example:
+
+User repeatedly clicks Make Less Sweet
+
+Future cards should automatically reduce sentimentality.
+
+User repeatedly clicks Make Funnier
+
+Future cards should automatically increase humor.
+
+Over time the system should learn how each sender prefers cards to be written for each recipient.
+
+---
+
+## PROFILE COMPLETENESS
+
+Track recipient completeness.
+
+Do not show aggressively.
+
+Quietly calculate profile strength.
+
+Example:
+
+Name
+
+Relationship
+
+Communication Style
+
+Memories
+
+Inside Jokes
+
+Personality Insights
+
+Profile Completeness: 68%
+
+Use this later for future memory collection campaigns.
+
+---
+
+## DO NOT REMOVE
+
+Keep existing card editor.
+
+Keep manual editing.
+
+Keep ability to write entire card from scratch.
+
+Generated cards are suggestions, not requirements.
+
+Users must always have full control over final card content.

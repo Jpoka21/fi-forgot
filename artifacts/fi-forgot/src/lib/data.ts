@@ -721,6 +721,10 @@ function syncHeaders(): HeadersInit {
   return _serverUserId ? { "Content-Type": "application/json", "x-user-id": _serverUserId } : { "Content-Type": "application/json" };
 }
 
+export function getApiHeaders(): HeadersInit {
+  return syncHeaders();
+}
+
 /** On login: fetch server recipients. If server has data, replace local. If not, push local to server. */
 export async function hydrateRecipientsFromServer(userId: string): Promise<void> {
   try {
