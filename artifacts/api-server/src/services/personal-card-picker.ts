@@ -12,8 +12,8 @@
 
 import { openai } from "../lib/openai";
 import { db } from "@workspace/db";
-import { cardClassificationsTable } from "@workspace/db";
-import { inArray } from "drizzle-orm";
+import { cardClassificationsTable, aiCardLibraryTable } from "@workspace/db";
+import { inArray, and, eq, sql } from "drizzle-orm";
 import { listHandwryttenCards, type HandwryttenCard } from "./handwrytten";
 import { logger } from "../lib/logger";
 
@@ -40,6 +40,74 @@ const ALL_HW_CATEGORIES = [
   "Thank You",
   "Wedding",
 ] as const;
+
+// ── AI library (our generated cards) ─────────────────────────────────────────
+
+function resolveLibraryCategories(eventType: string): string[] {
+  const evt = eventType.toLowerCase();
+  if (evt === "just because")                         return ["just_because", "humor"];
+  if (evt === "thinking of you")                      return ["thinking_of_you", "just_because"];
+  if (evt === "get well" || evt === "get well soon")  return ["get_well"];
+  if (evt === "miss you")                             return ["miss_you", "thinking_of_you"];
+  if (evt === "encouragement")                        return ["encouragement", "thinking_of_you"];
+  if (evt === "congratulations" || evt === "congrats" || evt === "new job" || evt === "promotion")
+                                                      return ["congratulations_personal"];
+  if (evt === "new baby" || evt === "baby shower")    return ["new_baby"];
+  return [];
+}
+
+async function pickFromLibrary(
+  eventType: string,
+  excludeIds: string[],
+): Promise<HandwryttenCard | null> {
+  const categories = resolveLibraryCategories(eventType);
+  if (!categories.length) return null;
+
+  try {
+    const rows = await db
+      .select()
+      .from(aiCardLibraryTable)
+      .where(and(
+        eq(aiCardLibraryTable.active, true),
+        inArray(aiCardLibraryTable.category, categories),
+      ));
+
+    const available = rows.filter(r =>
+      r.handwryttenCardId !== null &&
+      !excludeIds.includes(r.handwryttenCardId),
+    );
+    if (!available.length) return null;
+
+    const catOrder = new Map(categories.map((c, i) => [c, i]));
+    const scored = available.map(r => {
+      let score = 0;
+      score -= (catOrder.get(r.category) ?? 99) * 10;
+      score += (r.timesSelected / Math.max(r.timesShown, 1)) * 20;
+      score -= r.timesRejected * 5;
+      score += Math.random() * 3;
+      return { card: r, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    const chosen = scored[0]!.card;
+
+    await db
+      .update(aiCardLibraryTable)
+      .set({ timesShown: sql`${aiCardLibraryTable.timesShown} + 1` })
+      .where(eq(aiCardLibraryTable.id, chosen.id));
+
+    logger.info({ id: chosen.id, title: chosen.title, category: chosen.category }, "personal-card-picker: library card selected");
+
+    return {
+      id: chosen.handwryttenCardId!,
+      name: chosen.title,
+      category: "Custom",
+      imageUrl: chosen.imageUrl,
+    };
+  } catch (err) {
+    logger.warn({ err }, "personal-card-picker: library pick failed, falling back");
+    return null;
+  }
+}
 
 // ── DB enrichment ────────────────────────────────────────────────────────────
 
@@ -285,6 +353,10 @@ export async function pickPersonalCard(
   excludeIds: string[] = [],
   cardMessage?: string | null,
 ): Promise<HandwryttenCard> {
+  // Try our AI-generated library first for personal event types
+  const libCard = await pickFromLibrary(eventType, excludeIds.map(String));
+  if (libCard) return libCard;
+
   const allCards = await listHandwryttenCards();
   const cards = excludeIds.length
     ? allCards.filter(c => !excludeIds.includes(String(c.id)))

@@ -86,6 +86,7 @@ export default function TryPage() {
   const [shareLoading, setShareLoading] = useState(false);
   const [shareCopied, setShareCopied]   = useState(false);
   const [shareUrl, setShareUrl]         = useState<string | null>(null);
+  const [expanded, setExpanded]         = useState(false);
 
   const [showSignup, setShowSignup] = useState(false);
   const [sigupName, setSignupName]  = useState("");
@@ -761,12 +762,19 @@ export default function TryPage() {
               </div>
 
               <div style={{ padding: "16px" }}>
-                <textarea
-                  ref={textareaRef}
-                  value={editedText}
-                  onChange={e => setEdited(e.target.value)}
-                  style={{ width: "100%", minHeight: 160, border: `1.5px solid ${BLACK}14`, borderRadius: 10, padding: "14px", fontSize: "1.15rem", fontFamily: "'Caveat', cursive", lineHeight: 1.7, color: "#111111", background: BEIGE, resize: "vertical", boxSizing: "border-box", outline: "none", fontWeight: 600 } as React.CSSProperties}
-                />
+                <div style={{ position: "relative" }}>
+                  <textarea
+                    ref={textareaRef}
+                    value={editedText}
+                    onChange={e => setEdited(e.target.value)}
+                    style={{ width: "100%", minHeight: 160, border: `1.5px solid ${BLACK}14`, borderRadius: 10, padding: "14px", paddingRight: 44, fontSize: "1.15rem", fontFamily: "'Caveat', cursive", lineHeight: 1.7, color: "#111111", background: WHITE, resize: "vertical", boxSizing: "border-box", outline: "none", fontWeight: 600 } as React.CSSProperties}
+                  />
+                  <button
+                    title="Expand message"
+                    onClick={() => setExpanded(true)}
+                    style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: 6, border: `1px solid ${BLACK}15`, background: WHITE, color: BLACK, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", opacity: 0.6 }}
+                  >⛶</button>
+                </div>
 
                 {/* F*I quick edits */}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
@@ -850,6 +858,36 @@ export default function TryPage() {
           </div>
         )}
       </div>
+
+      {/* ── EXPAND MESSAGE MODAL ─────────────────────────────────────────────── */}
+      {expanded && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+          onClick={() => setExpanded(false)}
+        >
+          <div
+            style={{ background: WHITE, borderRadius: 16, width: "100%", maxWidth: 560, padding: 24, boxShadow: "0 12px 48px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column", gap: 16 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em", color: BLACK }}>CARD MESSAGE</span>
+              <button onClick={() => setExpanded(false)} style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: GRAY, lineHeight: 1 }}>✕</button>
+            </div>
+            <textarea
+              value={editedText}
+              onChange={e => setEdited(e.target.value)}
+              style={{ width: "100%", height: 340, border: `1.5px solid ${BLACK}14`, borderRadius: 10, padding: 16, fontSize: "1.25rem", fontFamily: "'Caveat', cursive", lineHeight: 1.8, color: BLACK, background: WHITE, resize: "none", boxSizing: "border-box", outline: "none", fontWeight: 600 } as React.CSSProperties}
+              autoFocus
+            />
+            <button
+              onClick={() => setExpanded(false)}
+              style={{ width: "100%", padding: "13px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", cursor: "pointer" }}
+            >
+              DONE
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── SIGNUP OVERLAY ──────────────────────────────────────────────────── */}
       {showSignup && (
