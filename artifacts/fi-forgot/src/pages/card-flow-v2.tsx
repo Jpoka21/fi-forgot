@@ -220,10 +220,9 @@ export default function CardFlowV2() {
   const [recipientId, setRecipientId] = useState<string | null>(null);
 
   // Results state
-  const [cards, setCards]         = useState<CardOption[]>([]);
+  const [cards, setCards]           = useState<CardOption[]>([]);
   const [activeCard, setActiveCard] = useState(0);
-  const [editedText, setEditedText] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const [editedTexts, setEditedTexts] = useState<string[]>([]);
   const [refining, setRefining]     = useState<number | null>(null);
   const [genError, setGenError]     = useState<string | null>(null);
   const [aiInstruction, setAiInstruction] = useState("");
@@ -402,7 +401,7 @@ export default function CardFlowV2() {
       if (!data.cards?.length) throw new Error(data.error ?? "No cards returned");
       setCards(data.cards);
       setActiveCard(0);
-      setEditedText(data.cards[0]?.text ?? "");
+      setEditedTexts(data.cards.map(c => c.text));
       if (pickData.card) setDesign(pickData.card);
       setPhase("results");
     } catch (err) {
@@ -428,7 +427,7 @@ export default function CardFlowV2() {
       if (data.text) {
         const updated = cards.map((c, i) => i === cardIdx ? { ...c, text: data.text! } : c);
         setCards(updated);
-        if (cardIdx === activeCard) setEditedText(data.text);
+        setEditedTexts(prev => prev.map((t, i) => i === cardIdx ? data.text! : t));
       }
     } catch { /* non-fatal */ }
     finally { setRefining(null); }
@@ -670,33 +669,63 @@ export default function CardFlowV2() {
 
   // ── RESULTS ──────────────────────────────────────────────────────────────────
   if (phase === "results") {
+    const TAB_LABELS = ["Recommended Draft", "More Casual", "More Heartfelt"];
+    const currentText   = editedTexts[activeCard] ?? "";
+    const originalText  = cards[activeCard]?.text ?? "";
+    const isPersonalized = currentText.trim() !== originalText.trim();
+
+    function updateEditedText(idx: number, val: string) {
+      setEditedTexts(prev => prev.map((t, i) => i === idx ? val : t));
+    }
+
+    function handleEditDraft() {
+      textareaRef.current?.focus();
+      textareaRef.current?.select();
+    }
+
+    function handleWriteMyOwn() {
+      if (isPersonalized) {
+        if (!window.confirm("Replace your edits with a blank message?")) return;
+      }
+      updateEditedText(activeCard, "");
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+
     return (
       <WizardShell progress={progressPct} onBack={() => { setPhase("flow"); setStepIdx(steps.length - 1); }}>
-        <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 18 }}>
-          3 CARDS FOR {firstName.toUpperCase()}
-        </h2>
 
-        {/* Tone tabs */}
+        {/* Draft framing banner */}
+        <div style={{ background: BEIGE, borderRadius: 12, padding: "13px 16px", marginBottom: 20, borderLeft: `3px solid ${RED}` }}>
+          <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.06em", color: BLACK, margin: "0 0 2px" }}>
+            DRAFTS READY
+          </p>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", color: GRAY, margin: 0, lineHeight: 1.5 }}>
+            Choose one, edit it directly, personalize the wording, or write your own.
+          </p>
+        </div>
+
+        {/* Draft tabs */}
         <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-          {cards.map((c, i) => (
+          {cards.map((_, i) => (
             <button
               key={i}
-              onClick={() => { setActiveCard(i); setEditedText(c.text); setIsEditing(false); }}
+              onClick={() => setActiveCard(i)}
               style={{
-                flex: 1, padding: "10px 6px", borderRadius: 10,
+                flex: 1, padding: "10px 4px", borderRadius: 10,
                 border: i === activeCard ? `2px solid ${RED}` : `1.5px solid ${BLACK}12`,
                 background: i === activeCard ? `${RED}10` : WHITE,
                 color: i === activeCard ? RED : GRAY,
-                fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 700,
-                cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.05em",
+                fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", fontWeight: 700,
+                cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.04em",
+                lineHeight: 1.3,
               } as React.CSSProperties}
             >
-              {c.tone}
+              {TAB_LABELS[i]}
             </button>
           ))}
         </div>
 
-        {/* Card design — shown first so they see the physical card + text together */}
+        {/* Card image */}
         <div style={{ marginBottom: 16 }}>
           {design?.imageUrl ? (
             <div style={{ borderRadius: 12, overflow: "hidden", border: `1.5px solid ${BLACK}10`, position: "relative" }}>
@@ -726,44 +755,55 @@ export default function CardFlowV2() {
           )}
         </div>
 
-        {/* Card text */}
-        <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 14, minHeight: 160 }}>
-          {isEditing ? (
-            <textarea
-              ref={textareaRef}
-              value={editedText}
-              onChange={e => setEditedText(e.target.value)}
-              style={{ width: "100%", minHeight: 160, background: "transparent", border: "none", outline: "none", fontFamily: "'Caveat', cursive", fontSize: "1.2rem", lineHeight: 1.7, color: BLACK, resize: "vertical", boxSizing: "border-box", fontWeight: 600 } as React.CSSProperties}
-              autoFocus
-            />
-          ) : (
-            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", lineHeight: 1.7, color: BLACK, margin: 0, whiteSpace: "pre-wrap", fontWeight: 600 }}>
-              {editedText}
-            </p>
-          )}
+        {/* Editable card message */}
+        <div style={{ background: BEIGE, borderRadius: 16, padding: "14px 18px 18px", marginBottom: 14 }}>
+          {/* Status row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <span style={{
+              fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", fontWeight: 700,
+              letterSpacing: "0.07em", textTransform: "uppercase",
+              color: isPersonalized ? RED : `${BLACK}45`,
+            }}>
+              {isPersonalized ? "✦ Personalized by You" : "Ready to Review"}
+            </span>
+            {isPersonalized && (
+              <button
+                onClick={() => updateEditedText(activeCard, originalText)}
+                style={{ background: "none", border: "none", fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", color: GRAY, cursor: "pointer", padding: 0, textDecoration: "underline" }}
+              >
+                Reset
+              </button>
+            )}
+          </div>
+          <textarea
+            ref={textareaRef}
+            value={currentText}
+            onChange={e => updateEditedText(activeCard, e.target.value)}
+            rows={7}
+            style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontFamily: "'Caveat', cursive", fontSize: "1.2rem", lineHeight: 1.7, color: BLACK, resize: "none", boxSizing: "border-box", fontWeight: 600, padding: 0 } as React.CSSProperties}
+          />
         </div>
 
-        {/* Quick edit row */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+        {/* Edit controls */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
           <button
-            onClick={() => handleRefine(activeCard, "Make it shorter")}
-            disabled={refining !== null}
-            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1.5px solid ${BLACK}15`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", fontWeight: 600, cursor: refining !== null ? "default" : "pointer", opacity: refining !== null ? 0.5 : 1 } as React.CSSProperties}
+            onClick={handleEditDraft}
+            style={{ flex: 2, padding: "11px 0", borderRadius: 10, border: `1.5px solid ${BLACK}15`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
           >
-            ✂️ Make Shorter
+            ✏️ Edit Draft
           </button>
           <button
-            onClick={() => { setIsEditing(true); }}
-            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1.5px solid ${BLACK}15`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
+            onClick={handleWriteMyOwn}
+            style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1.5px solid ${BLACK}12`, background: "none", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", fontWeight: 500, cursor: "pointer" } as React.CSSProperties}
           >
-            ✏️ Write My Own
+            Write My Own
           </button>
         </div>
 
-        {/* AI suggestion input */}
-        <div style={{ marginBottom: 20 }}>
+        {/* Personalize This Draft */}
+        <div style={{ marginBottom: 22 }}>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 700, color: GRAY, letterSpacing: "0.05em", textTransform: "uppercase", margin: "0 0 6px" }}>
-            Use AI to suggest edits
+            Personalize This Draft
           </p>
           <div style={{ display: "flex", gap: 8 }}>
             <input
@@ -771,7 +811,7 @@ export default function CardFlowV2() {
               value={aiInstruction}
               onChange={e => setAiInstruction(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && aiInstruction.trim() && refining === null) { handleRefine(activeCard, aiInstruction); setAiInstruction(""); } }}
-              placeholder="e.g. make it funnier, add a joke about camping…"
+              placeholder="e.g. make it warmer, add a joke about camping…"
               disabled={refining !== null}
               style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${BLACK}15`, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", color: BLACK, background: WHITE, outline: "none" } as React.CSSProperties}
             />
@@ -783,17 +823,33 @@ export default function CardFlowV2() {
               Apply
             </button>
           </div>
-          {refining !== null && (
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, marginTop: 7, marginBottom: 0 }}>Rewriting…</p>
+          {refining !== null ? (
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, marginTop: 7, marginBottom: 0 }}>Rewriting your draft…</p>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+              {["Make it shorter", "Make it warmer", "Add some humor", "Make it more personal"].map(s => (
+                <button
+                  key={s}
+                  onClick={() => { handleRefine(activeCard, s); }}
+                  disabled={refining !== null}
+                  style={{ padding: "5px 10px", borderRadius: 20, border: `1px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", cursor: "pointer" } as React.CSSProperties}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* CTA */}
+        {/* Helper text + CTA */}
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, textAlign: "center", margin: "0 0 10px", lineHeight: 1.5 }}>
+          You can edit this draft as much or as little as you want before sending.
+        </p>
         <button
           onClick={() => setPhase("final")}
           style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 4px 20px rgba(226,59,46,0.35)" }}
         >
-          USE THIS CARD →
+          APPROVE & SEND →
         </button>
       </WizardShell>
     );
@@ -801,6 +857,8 @@ export default function CardFlowV2() {
 
   // ── FINAL ────────────────────────────────────────────────────────────────────
   if (phase === "final") {
+    const finalText = editedTexts[activeCard] ?? "";
+
     return (
       <WizardShell progress={1} onBack={() => setPhase("results")}>
         <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 6 }}>
@@ -812,8 +870,8 @@ export default function CardFlowV2() {
 
         <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 24 }}>
           <textarea
-            value={editedText}
-            onChange={e => setEditedText(e.target.value)}
+            value={finalText}
+            onChange={e => setEditedTexts(prev => prev.map((t, i) => i === activeCard ? e.target.value : t))}
             style={{ width: "100%", minHeight: 200, background: "transparent", border: "none", outline: "none", fontFamily: "'Caveat', cursive", fontSize: "1.25rem", lineHeight: 1.75, color: BLACK, resize: "vertical", boxSizing: "border-box", fontWeight: 600 } as React.CSSProperties}
           />
         </div>

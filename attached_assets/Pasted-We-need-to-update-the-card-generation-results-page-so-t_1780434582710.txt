@@ -1,0 +1,197 @@
+We need to update the card generation results page so the user clearly understands the card is a draft they can approve, edit, personalize, or rewrite.
+
+The goal is to reposition this page away from “AI wrote this for you” and toward “we prepared a thoughtful draft, now you can make it yours.”
+
+Important: Do not change the core logistics or card generation flow. Keep the same basic functionality. This is mainly a UX, copy, layout, and editing improvement.
+
+Current page behavior:
+After a user answers the questions and generates cards, the page shows 3 card options with tabs like Best Match, More Casual, More Heartfelt. It shows the card image, the message, buttons like Make Shorter and Write My Own, a section called Use AI To Suggest Edits, and a large button that says Use This Card.
+
+Please make these changes:
+
+1. Add a draft framing section at the top
+
+Under the title, add a small friendly banner or intro box.
+
+Replace or supplement the top area with copy like:
+
+Drafts Ready
+
+We prepared three card drafts based on what you shared. Choose one, edit it directly, personalize the wording, or write your own.
+
+The page should feel like the user is reviewing drafts, not being handed a final AI written card.
+
+2. Rename the card option tabs
+
+Change the tabs to:
+
+Recommended Draft
+More Casual
+More Heartfelt
+
+Do not use Best Match anymore.
+
+3. Remove the word AI from this page
+
+Do not show “Use AI To Suggest Edits.”
+
+Do not label the message as AI generated.
+
+Do not use wording that makes the user feel like AI is replacing them.
+
+Use words like:
+
+Draft
+Suggested message
+Personalize
+Edit
+Review
+Approve
+
+4. Make the card message directly editable
+
+The user should be able to click into the message text and edit it directly.
+
+The editable message should still look like the card preview, but it should allow typing.
+
+Important requirements:
+
+The edited text should persist while the user stays on the page.
+If the user switches between the three draft tabs, each draft should keep its own edited version.
+If the user edits a draft, show a small status somewhere near the message that says:
+
+Personalized by You
+
+Before editing, the status can say:
+
+Ready to Review
+
+Make the editable area obvious enough that users understand they can change the words, but do not make it look like a boring form field.
+
+5. Rename editing controls
+
+Replace the current Make Shorter button with:
+
+Edit Draft
+
+Keep Write My Own, but make it secondary.
+
+Suggested button layout:
+
+Edit Draft
+Write My Own
+
+When the user clicks Edit Draft, focus the editable message area and show a small helper line:
+
+Click into the message and change anything you want.
+
+When the user clicks Write My Own, clear the current message or open a blank editable message area, but ask for confirmation first if the current draft has already been edited.
+
+6. Replace the “Use AI To Suggest Edits” section
+
+Change the label to:
+
+Personalize This Draft
+
+Use placeholder examples like:
+
+Make it sound more like me
+Add a joke about camping
+Mention our anniversary trip
+Make it warmer but not too cheesy
+Make it shorter and more casual
+
+The button should say:
+
+Apply
+
+The Apply function can continue using the existing edit generation logic behind the scenes. Just change the user facing wording.
+
+7. Change the main CTA
+
+Replace:
+
+Use This Card
+
+with:
+
+Approve & Send
+
+This should be the main red button.
+
+The CTA should feel like the user is approving the draft, not using stock content.
+
+8. Add helper text near the CTA
+
+Right above or below Approve & Send, add a small reassuring line:
+
+You can edit this draft as much or as little as you want before sending.
+
+9. Improve visual hierarchy
+
+The page currently feels like all elements compete for attention.
+
+Please clean up the spacing and hierarchy:
+
+Top title
+Draft Ready intro
+Draft tabs
+Card image
+Editable card message
+Personalization controls
+Approve & Send CTA
+
+Make the message preview the main focus.
+
+Keep the design mobile friendly.
+
+Make sure everything fits nicely on a mobile screen without feeling crowded.
+
+10. Do not add the “Built using” memory tags
+
+We decided not to show things like camping memories, shared humor, anniversary, etc. That would add clutter right now.
+
+11. Make the language consistent across the full card review flow
+
+Anywhere on this page or related card review components that currently says:
+
+Generated card
+AI message
+AI generated
+Use AI
+Best Match
+Use This Card
+
+Replace with softer ownership based language:
+
+Card draft
+Suggested message
+Personalize this draft
+Recommended Draft
+Approve & Send
+
+12. Preserve existing functions
+
+Do not break:
+
+Card image selection
+Try another image
+Three draft options
+Tone switching
+Message editing logic
+Write my own flow
+Final send or approve flow
+Mobile layout
+
+13. Expected end result
+
+The user should feel like:
+
+The system prepared a thoughtful starting point.
+They are still in control.
+They can approve it quickly.
+They can edit it directly.
+They can write it themselves.
+The final card feels like it came from them.
+
+This is a product positioning change inside the UX, not just a copy change.
