@@ -128,6 +128,7 @@ const UNIVERSAL_QUESTIONS: QuestionScreen[] = [
   { id: "tone",             question: "What tone should this card have?", kind: "select", options: TONES },
   { id: "emotionalOpenness",question: "How openly emotional should it sound?", kind: "select", options: EMOTIONAL_OPTIONS },
   { id: "avoidList",        question: "What should this card NEVER sound like?", hint: "Select all that apply — or skip", kind: "multiselect", options: AVOID_OPTIONS, optional: true },
+  { id: "interests",        question: "What are their hobbies or interests?", hint: "e.g. hiking, drawing, cooking — skip if nothing comes to mind", kind: "textarea", optional: true },
   { id: "details",          question: "Any memories, stories, or details to include?", hint: "Optional — specific details make much better cards", kind: "textarea", optional: true },
   { id: "avoidMentioning",  question: "Anything we should avoid mentioning?", hint: "Optional", kind: "textarea", optional: true },
 ];
@@ -389,7 +390,7 @@ export default function CardFlowV2() {
             emotionalOpenness: get("emotionalOpenness"),
             avoidList:         (withAnswers["avoidList"] as string[] | undefined) ?? [],
             birthday:          get("birthday"),
-            details:           get("details"),
+            details:           [get("interests") ? `Their interests: ${get("interests")}` : "", get("details")].filter(Boolean).join("\n\n"),
             avoidMentioning:   get("avoidMentioning"),
             relAnswers,
             senderName:        user?.name ?? "Me",
