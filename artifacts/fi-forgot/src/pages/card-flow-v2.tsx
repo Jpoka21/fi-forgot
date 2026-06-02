@@ -124,6 +124,7 @@ const UNIVERSAL_QUESTIONS: QuestionScreen[] = [
   { id: "interests",        question: "What are their hobbies or interests?", hint: "e.g. hiking, drawing, cooking — skip if nothing comes to mind", kind: "textarea", optional: true },
   { id: "details",          question: "Any memories, stories, or details to include?", hint: "Optional — specific details make much better cards", kind: "textarea", optional: true },
   { id: "avoidMentioning",  question: "Anything we should avoid mentioning?", hint: "Optional", kind: "textarea", optional: true },
+  { id: "signOff",          question: "How do you want to sign the card?", hint: 'e.g. Love, Sarah  •  XOXO Mom  •  Your friend, Jake', kind: "textarea", optional: true },
 ];
 
 function getRelGroup(rel: string): string {
@@ -388,6 +389,7 @@ export default function CardFlowV2() {
             avoidMentioning:   get("avoidMentioning"),
             relAnswers,
             senderName:        user?.name ?? "Me",
+            signOff:           get("signOff") || undefined,
             recipientId,
           }),
         }),

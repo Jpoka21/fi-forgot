@@ -98,6 +98,7 @@ function buildUserPrompt(
   avoidMentioning: string | undefined,
   relAnswers: Record<string, string> | undefined,
   senderName: string,
+  signOff: string | undefined,
 ): string {
   const contextLines: string[] = [];
   const rel = relationship.toLowerCase();
@@ -150,6 +151,7 @@ ${optionBlock}
 Write as ${senderName} speaking directly to ${firstName}.
 Each version must open completely differently — different angle, different voice.
 Never write a specific number of years (e.g. "seven years", "3 years", "15+ years") — use how long they've been together only to inform the emotional depth and familiarity, not as literal text in the card.
+${signOff ? `End every card with exactly this sign-off on its own line: "${signOff}" — do not alter, rephrase, or add anything to it.` : `End every card with the sender's name on its own line — use "${senderName}" unless it is "Me", in which case write "[Your Name]".`}
 Return valid JSON only:
 {
   "cards": [
@@ -186,6 +188,7 @@ router.post("/v2/generate-card", async (req, res) => {
     avoidMentioning,
     relAnswers = {},
     senderName = "Me",
+    signOff,
     recipientId,
   } = req.body as {
     firstName: string;
@@ -199,6 +202,7 @@ router.post("/v2/generate-card", async (req, res) => {
     avoidMentioning?: string;
     relAnswers?: Record<string, string>;
     senderName?: string;
+    signOff?: string;
     recipientId?: string;
   };
 
@@ -211,7 +215,7 @@ router.post("/v2/generate-card", async (req, res) => {
   logger.info({ firstName, relationship, occasion, archetypes }, "v2-generate-card: archetypes determined");
 
   const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, avoidList);
-  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName);
+  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff);
 
   try {
     const completion = await openai.chat.completions.create({
