@@ -617,6 +617,26 @@ export default function TryPage() {
             </>)}
 
             {sectionCard(<>
+              <label style={labelStyle()}>Card tone</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {["Sweet", "Funny", "Romantic", "Simple"].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTone(t)}
+                    style={{
+                      padding: "7px 16px", borderRadius: 20, fontSize: "0.82rem", fontWeight: 600,
+                      fontFamily: "'Inter', sans-serif",
+                      border: `1.5px solid ${selectedTone === t ? RED : `${BLACK}20`}`,
+                      background: selectedTone === t ? `${RED}12` : WHITE,
+                      color: selectedTone === t ? RED : BLACK,
+                      cursor: "pointer",
+                    }}
+                  >{t}</button>
+                ))}
+              </div>
+            </>)}
+
+            {sectionCard(<>
               <label style={labelStyle()}>{selectedTone === "Funny" ? "How funny should the cards be?" : "How emotional should the cards be?"}</label>
               <div style={{ padding: "8px 0" }}>
                 <input
