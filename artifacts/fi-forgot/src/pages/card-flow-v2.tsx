@@ -120,6 +120,9 @@ const UNIVERSAL_QUESTIONS: QuestionScreen[] = [
   { id: "occasion",         question: "What is the occasion?", kind: "select",      options: OCCASIONS },
   { id: "birthday",         question: "When is their birthday?", hint: "We'll remind you automatically every year", kind: "date", optional: true,
     condition: (a) => a["occasion"] === "Birthday" },
+  { id: "holidayName",      question: "Which holiday?", kind: "select",
+    options: ["Christmas","Hanukkah","Diwali","Eid","Easter","Thanksgiving","Mother's Day","Father's Day","Valentine's Day","New Year's","4th of July","Halloween","Other"],
+    condition: (a) => a["occasion"] === "Holiday" },
   { id: "objective",        question: "What should this card mainly do?", kind: "select", options: OBJECTIVES },
   { id: "tone",             question: "What tone should this card have?", kind: "select", options: TONES },
   { id: "emotionalOpenness",question: "How openly emotional should it sound?", kind: "select", options: EMOTIONAL_OPTIONS },
@@ -353,7 +356,7 @@ export default function CardFlowV2() {
         body: JSON.stringify({
           firstName: firstName.trim(),
           relationship,
-          occasion:          get("occasion"),
+          occasion:          get("occasion") === "Holiday" && get("holidayName") ? `Holiday - ${get("holidayName")}` : get("occasion"),
           objective:         get("objective"),
           tone:              get("tone"),
           emotionalOpenness: get("emotionalOpenness"),
