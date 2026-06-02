@@ -904,22 +904,29 @@ export default function RecipientProfilePage() {
                   </FormItem>
                 )} />
 
-                <FormField control={form.control} name="emotionalLevel" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Card depth — {field.value === 1 ? "Light touch" : field.value === 5 ? "Deep & heartfelt" : "Balanced"}</FormLabel>
-                    <FormControl>
-                      <Slider
-                        min={1} max={5} step={1}
-                        value={[field.value]}
-                        onValueChange={([v]) => field.onChange(v)}
-                        data-testid="slider-emotional-level"
-                      />
-                    </FormControl>
-                    <div className="flex justify-between text-xs mt-1" style={{ color: GRAY }}>
-                      <span>Light touch</span><span>Deep &amp; heartfelt</span>
-                    </div>
-                  </FormItem>
-                )} />
+                <FormField control={form.control} name="emotionalLevel" render={({ field }) => {
+                  const isFunnyTone = form.getValues("tonePreference") === "Funny";
+                  const DEPTH_LABELS: Record<number,string> = isFunnyTone
+                    ? { 1:"Gentle smirk", 2:"Solid chuckle", 3:"Genuinely funny", 4:"Bold roast", 5:"No holds barred" }
+                    : { 1:"Light touch",  2:"Light",         3:"Balanced",        4:"Heartfelt",  5:"Deep & heartfelt" };
+                  return (
+                    <FormItem>
+                      <FormLabel>{isFunnyTone ? "Comedy level" : "Card depth"} — {DEPTH_LABELS[field.value] ?? DEPTH_LABELS[3]}</FormLabel>
+                      <FormControl>
+                        <Slider
+                          min={1} max={5} step={1}
+                          value={[field.value]}
+                          onValueChange={([v]) => field.onChange(v)}
+                          data-testid="slider-emotional-level"
+                        />
+                      </FormControl>
+                      <div className="flex justify-between text-xs mt-1" style={{ color: GRAY }}>
+                        <span>{isFunnyTone ? "Gentle smirk" : "Light touch"}</span>
+                        <span>{isFunnyTone ? "No holds barred" : "Deep &amp; heartfelt"}</span>
+                      </div>
+                    </FormItem>
+                  );
+                }} />
 
                 <FormField control={form.control} name="personalityNotes" render={({ field }) => (
                   <FormItem>

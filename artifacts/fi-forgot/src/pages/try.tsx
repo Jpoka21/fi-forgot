@@ -16,6 +16,7 @@ const PERSONALITY_TAGS = ["Sentimental","Funny","Warm","Down-to-earth","Adventur
 const RELATIONSHIPS = ["Wife","Girlfriend","Husband","Boyfriend","Mom","Dad","Mother in law","Father in law","Daughter","Son","Grandmother","Grandfather","Sister","Brother","Friend","Employee","Other"];
 
 const EMOTIONAL_LABELS: Record<number,string> = { 1:"Keep it light", 2:"Warm but brief", 3:"Genuine & heartfelt", 4:"Goes deep", 5:"Pull no punches" };
+const HUMOR_LABELS:    Record<number,string> = { 1:"Gentle smirk", 2:"Solid chuckle", 3:"Genuinely funny", 4:"Bold roast", 5:"No holds barred" };
 
 interface CardDesign { id: string; name: string; category?: string; imageUrl?: string; }
 
@@ -616,7 +617,7 @@ export default function TryPage() {
             </>)}
 
             {sectionCard(<>
-              <label style={labelStyle()}>How emotional should the cards be?</label>
+              <label style={labelStyle()}>{selectedTone === "Funny" ? "How funny should the cards be?" : "How emotional should the cards be?"}</label>
               <div style={{ padding: "8px 0" }}>
                 <input
                   type="range" min={1} max={5} step={1}
@@ -627,7 +628,7 @@ export default function TryPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
                   {[1,2,3,4,5].map(n => (
                     <span key={n} style={{ fontSize: "0.7rem", fontWeight: emotionalLevel === n ? 700 : 400, color: emotionalLevel === n ? RED : GRAY, fontFamily: "'Inter', sans-serif", textAlign: "center", width: "20%" }}>
-                      {EMOTIONAL_LABELS[n]}
+                      {(selectedTone === "Funny" ? HUMOR_LABELS : EMOTIONAL_LABELS)[n]}
                     </span>
                   ))}
                 </div>
