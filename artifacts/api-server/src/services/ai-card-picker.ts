@@ -344,8 +344,16 @@ function resolveLibraryCategories(eventType: string, contextNote: string | null)
   const evt = eventType.toLowerCase();
   const ctx = (contextNote ?? "").toLowerCase();
 
-  if (evt === "happy holidays" || evt === "holiday") {
-    return ["holiday"];
+  if (evt === "birthday" || evt === "client birthday") {
+    return ["birthday"];
+  }
+
+  if (evt === "thank you" || evt === "referral thank you" || evt === "referral") {
+    return ["thank_you"];
+  }
+
+  if (evt === "happy holidays" || evt === "holiday" || evt === "christmas") {
+    return ["holiday", "holiday_personal"];
   }
 
   if (evt === "anniversary") {

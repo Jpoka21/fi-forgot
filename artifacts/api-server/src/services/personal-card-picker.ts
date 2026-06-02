@@ -45,6 +45,19 @@ const ALL_HW_CATEGORIES = [
 
 function resolveLibraryCategories(eventType: string): string[] {
   const evt = eventType.toLowerCase();
+  if (evt === "birthday")                             return ["birthday", "humor"];
+  if (evt === "anniversary")                          return ["personal_anniversary"];
+  if (evt === "valentine's day" || evt === "valentines day")
+                                                      return ["personal_anniversary", "holiday_personal"];
+  if (evt === "mother's day" || evt === "mothers day") return ["holiday_personal"];
+  if (evt === "father's day" || evt === "fathers day") return ["holiday_personal"];
+  if (evt === "christmas" || evt === "holiday")        return ["holiday_personal"];
+  if (evt === "thanksgiving")                         return ["holiday_personal"];
+  if (evt === "hanukkah")                             return ["holiday_personal"];
+  if (evt === "new year's" || evt === "new years")    return ["holiday_personal"];
+  if (evt === "graduation")                           return ["graduation", "congratulations_personal"];
+  if (evt === "thank you" || evt === "referral thank you" || evt === "referral")
+                                                      return ["thank_you"];
   if (evt === "just because")                         return ["just_because", "humor"];
   if (evt === "thinking of you")                      return ["thinking_of_you", "just_because"];
   if (evt === "get well" || evt === "get well soon")  return ["get_well"];
@@ -53,6 +66,7 @@ function resolveLibraryCategories(eventType: string): string[] {
   if (evt === "congratulations" || evt === "congrats" || evt === "new job" || evt === "promotion")
                                                       return ["congratulations_personal"];
   if (evt === "new baby" || evt === "baby shower")    return ["new_baby"];
+  if (evt === "work anniversary")                     return ["congratulations_personal", "just_because"];
   return [];
 }
 
