@@ -172,7 +172,7 @@ function calcCompleteness(relAnswers: Record<string, string>, details: string): 
 
 // ── Route ─────────────────────────────────────────────────────────────────────
 
-router.post("/api/v2/generate-card", async (req, res) => {
+router.post("/v2/generate-card", async (req, res) => {
   const {
     firstName,
     relationship,
@@ -271,7 +271,7 @@ router.post("/api/v2/generate-card", async (req, res) => {
 
 // ── Feedback save ─────────────────────────────────────────────────────────────
 
-router.post("/api/v2/card-feedback", async (req, res) => {
+router.post("/v2/card-feedback", async (req, res) => {
   const { recipientId, feedback } = req.body as { recipientId: string; feedback: string };
   if (!recipientId || !feedback) { res.status(400).json({ error: "recipientId and feedback required" }); return; }
 
@@ -304,7 +304,7 @@ router.post("/api/v2/card-feedback", async (req, res) => {
 
 // ── Single-card refine ────────────────────────────────────────────────────────
 
-router.post("/api/v2/refine-card", async (req, res) => {
+router.post("/v2/refine-card", async (req, res) => {
   const { cardText, instruction, context } = req.body as {
     cardText: string;
     instruction: string;

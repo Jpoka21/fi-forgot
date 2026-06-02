@@ -14,7 +14,7 @@ function requireUserId(req: Parameters<Parameters<typeof router.get>[1]>[0], res
 
 // ── Check for duplicate name ──────────────────────────────────────────────────
 
-router.post("/api/v2/recipients/check", async (req, res) => {
+router.post("/v2/recipients/check", async (req, res) => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
@@ -38,7 +38,7 @@ router.post("/api/v2/recipients/check", async (req, res) => {
 
 // ── Create recipient ──────────────────────────────────────────────────────────
 
-router.post("/api/v2/recipients", async (req, res) => {
+router.post("/v2/recipients", async (req, res) => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
@@ -71,7 +71,7 @@ router.post("/api/v2/recipients", async (req, res) => {
 
 // ── List recipients ───────────────────────────────────────────────────────────
 
-router.get("/api/v2/recipients", async (req, res) => {
+router.get("/v2/recipients", async (req, res) => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
@@ -86,7 +86,7 @@ router.get("/api/v2/recipients", async (req, res) => {
 
 // ── Get single recipient with memory ─────────────────────────────────────────
 
-router.get("/api/v2/recipients/:id", async (req, res) => {
+router.get("/v2/recipients/:id", async (req, res) => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
@@ -180,7 +180,7 @@ router.patch("/api/v2/recipients/:id", async (req, res) => {
 
 // ── Delete recipient ──────────────────────────────────────────────────────────
 
-router.delete("/api/v2/recipients/:id", async (req, res) => {
+router.delete("/v2/recipients/:id", async (req, res) => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
