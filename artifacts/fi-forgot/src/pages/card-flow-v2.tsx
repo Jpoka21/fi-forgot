@@ -199,6 +199,50 @@ function WizardShell({
   );
 }
 
+function ShareDraftButton({ text, recipientName }: { text: string; recipientName: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleShare() {
+    const shareText = text.trim();
+    if (!shareText) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Card for ${recipientName}`,
+          text: shareText,
+        });
+        return;
+      } catch {
+        // user cancelled or not supported — fall through to clipboard
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* non-fatal */ }
+  }
+
+  return (
+    <button
+      onClick={handleShare}
+      style={{
+        width: "100%", marginTop: 10, padding: "13px 0",
+        borderRadius: 12, border: `1.5px solid ${BLACK}15`,
+        background: "none", color: GRAY,
+        fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", fontWeight: 600,
+        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+      } as React.CSSProperties}
+    >
+      <span style={{ fontSize: "1rem" }}>{copied ? "✓" : "↑"}</span>
+      {copied ? "Copied to clipboard" : "Share this draft"}
+    </button>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function CardFlowV2() {
@@ -851,6 +895,9 @@ export default function CardFlowV2() {
         >
           APPROVE & SEND →
         </button>
+
+        {/* Share button */}
+        <ShareDraftButton text={currentText} recipientName={firstName} />
       </WizardShell>
     );
   }
