@@ -30,6 +30,7 @@ import CreateBusinessWorkspacePage from "@/pages/create-business-workspace";
 import BusinessApprovePage from "@/pages/business-approve";
 import CardPreviewPage from "@/pages/card-preview";
 import CardFlowV2Page from "@/pages/card-flow-v2";
+import CardsReviewPage from "@/pages/cards-review";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +110,9 @@ function Router() {
       </Route>
       <Route path="/cards/generate">
         <ProtectedRoute component={CardGeneratorPage} />
+      </Route>
+      <Route path="/cards/review">
+        <ProtectedRoute component={CardsReviewPage} />
       </Route>
       <Route path="/settings/reminders">
         <ProtectedRoute component={ReminderSettingsPage} />

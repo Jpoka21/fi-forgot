@@ -1,0 +1,271 @@
+DASHBOARD REFINEMENT REQUEST
+
+The new Relationship Health direction is much stronger than the old dashboard, but after reviewing the current implementation, I believe we are still mixing a dashboard and a workspace together.
+
+The dashboard should be a summary page.
+
+It should answer:
+
+* How am I doing?
+* What should I do next?
+* What important moment is coming up?
+* Which relationship needs attention?
+* Am I making progress?
+
+It should NOT contain full workflows.
+
+CURRENT PROBLEM
+
+The dashboard currently contains:
+
+* Relationship Health
+* Recommended Next Step
+* Full card review interface
+* Full card editing tools
+* Full card preview
+* Relationship list
+* Progress tracking
+* Plan usage
+
+This causes the page to feel crowded and task heavy.
+
+The dashboard is becoming a workspace rather than a summary.
+
+NEW DESIGN PRINCIPLE
+
+The dashboard should preview work.
+
+The dashboard should not contain work.
+
+Users should click into dedicated pages to complete workflows.
+
+DASHBOARD STRUCTURE
+
+Keep the dashboard focused on:
+
+1. Relationship Health Hero
+2. Recommended Next Step
+3. Cards Awaiting Review (summary only)
+4. Upcoming Moments
+5. Your Relationships
+6. Why Your Score Is What It Is
+7. Recent Progress
+8. Relationship Coverage
+9. Plan Usage
+
+REMOVE FROM DASHBOARD
+
+Remove:
+
+* Full card editor
+* Full card review interface
+* Full draft editing controls
+* Full approval workflow
+* Large text editing areas
+* Expanded card content previews
+
+These belong on dedicated workflow pages.
+
+CARDS AWAITING REVIEW SECTION
+
+Instead of displaying full cards, show a compact summary.
+
+Example:
+
+Cards Awaiting Review
+
+2 cards ready
+
+Stacy Birthday
+Ready for review
+
+Mom Birthday
+Ready for review
+
+Button:
+Review Cards
+
+or
+
+Button:
+Review Stacy Card
+
+The dashboard should simply tell the user that cards need attention.
+
+Clicking should open the dedicated review workflow.
+
+DEDICATED REVIEW PAGE
+
+Create a separate page or workflow for reviewing cards.
+
+This page should contain:
+
+* Full card preview
+* Edit tools
+* AI improvement tools
+* Approve and Send button
+* Skip button
+* Draft controls
+
+All editing should happen here.
+
+Not on the dashboard.
+
+RELATIONSHIP HEALTH HERO IMPROVEMENTS
+
+The Relationship Health hero should become the dominant visual element.
+
+Increase its visual weight significantly.
+
+The first thing the user should notice when loading the dashboard is:
+
+Relationship Health
+
+59%
+
+Good Progress
+
+Up 4 percent this month
+
+Everything important is being watched.
+
+Make the score larger.
+
+Add more whitespace.
+
+Reduce competing information inside the hero.
+
+CATEGORY BARS
+
+Move category breakdown out of the hero.
+
+The hero should focus on:
+
+* Health score
+* Trend
+* Reassurance
+* Primary CTA
+
+The category bars should appear later in the page under:
+
+Why Your Score Is What It Is
+
+VISUAL HIERARCHY
+
+The order of visual importance should be:
+
+1. Relationship Health Score
+2. Recommended Next Step
+3. Upcoming Moments
+4. Relationship List
+5. Score Breakdown
+6. Progress History
+7. Coverage
+8. Plan Usage
+
+Nothing should visually compete with the Relationship Health score.
+
+RECOMMENDED NEXT STEP
+
+Keep only one recommendation.
+
+Do not show multiple competing improvement cards.
+
+The system should determine the single highest value next action.
+
+Examples:
+
+Improve Mom
+
+or
+
+Review Stacy Birthday Card
+
+or
+
+Add one recent memory for Dad
+
+One action.
+One button.
+
+RECENT PROGRESS
+
+Increase the visibility of Recent Progress.
+
+Instead of showing a simple list, make progress feel rewarding.
+
+Example:
+
+Relationship Health
+
+55% → 59%
+
+This Month
+
+Mom
+
++8%
+
+Dad
+
++2%
+
+The user should immediately understand that their actions improved their score.
+
+VISUAL DESIGN IMPROVEMENTS
+
+Reduce the number of bordered containers.
+
+Use more whitespace.
+
+Use fewer stacked cards.
+
+Use subtle separators instead of heavy outlines where possible.
+
+Keep the cream background.
+
+Keep charcoal typography.
+
+Reserve brand red primarily for:
+
+* Primary CTAs
+* Important actions
+
+Do not overuse red for informational elements.
+
+Use calmer colors for:
+
+* Relationship Health
+* Progress
+* Coverage
+
+Relationship Health should feel positive and reassuring, not alarming.
+
+MOBILE EXPERIENCE
+
+On mobile, before the user scrolls, they should ideally see:
+
+1. Relationship Health
+2. Recommended Next Step
+3. Upcoming Moment
+
+Everything else can appear lower.
+
+SUCCESS CRITERIA
+
+After this refinement, the dashboard should feel:
+
+* Like a relationship health summary
+* Like a progress tracker
+* Like an executive overview
+
+Not:
+
+* A task manager
+* A CRM
+* A card editor
+* A workspace
+
+The dashboard should preview work.
+
+Dedicated pages should contain work.

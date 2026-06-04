@@ -312,7 +312,7 @@ export function getRecommendedAction(
       type: "approve_card",
       title: pendingApprovalCount === 1 ? "A card is ready for your review" : `${pendingApprovalCount} cards are ready for review`,
       description: "Read through, make any tweaks, and approve. Takes about 60 seconds.",
-      href: "#review",
+      href: "/cards/review",
       urgency: "high",
     };
   }
