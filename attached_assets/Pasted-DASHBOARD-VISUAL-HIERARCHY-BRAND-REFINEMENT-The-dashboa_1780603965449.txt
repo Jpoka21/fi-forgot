@@ -1,0 +1,347 @@
+DASHBOARD VISUAL HIERARCHY + BRAND REFINEMENT
+
+The dashboard is moving in the right direction, but there is still a major visual hierarchy issue.
+
+The problem is no longer layout.
+
+The problem is visibility.
+
+Several important sections are visually disappearing.
+
+CURRENT ISSUE
+
+The following section titles are too small, too light, and too easy to miss:
+
+* We Got Your Back
+* Recommended Next Step
+* Brownie Points
+* Your Relationships
+* People You May Be Forgetting
+
+Currently these feel like metadata labels.
+
+They do not feel like section headlines.
+
+Users notice the content cards before they notice the section titles.
+
+This is backwards.
+
+SECTION HEADINGS MUST BECOME HEADLINES
+
+These are major sections.
+
+Treat them like headlines, not labels.
+
+DESIRED BEHAVIOR
+
+When users scan the page they should immediately see:
+
+We Got Your Back
+
+Recommended Next Step
+
+Brownie Points
+
+Your Relationships
+
+before they read the content underneath.
+
+VISUAL CHANGES
+
+For all major section titles:
+
+* Increase font size significantly
+* Use darker color
+* Reduce excessive letter spacing
+* Increase weight
+* Add more spacing above and below
+* Make them feel intentional
+
+Use the F*I Forgot brand font for section titles.
+
+Use charcoal or near-black.
+
+Suggested:
+
+#1F1F1F
+
+Do not use light gray.
+
+Do not use tiny text.
+
+Do not use excessive tracking.
+
+TITLE CASE
+
+Move away from ALL CAPS section titles.
+
+Current:
+
+WE GOT YOUR BACK
+
+RECOMMENDED NEXT STEP
+
+BROWNIE POINTS
+
+Desired:
+
+We Got Your Back
+
+Recommended Next Step
+
+Brownie Points
+
+This feels more premium, more human, and more aligned with the direction of the dashboard.
+
+The dashboard should feel like a helpful concierge.
+
+Not a control panel.
+
+WE GOT YOUR BACK SECTION
+
+This section represents the core promise of the product.
+
+It should feel important.
+
+Example:
+
+We Got Your Back
+
+Everything important is being watched.
+
+✓ Stacy's birthday is on track
+
+✓ 2 cards ready for review
+
+✓ No important moments at risk
+
+✓ 6 occasions being watched
+
+This section should create relief.
+
+This is one of the most important sections on the page.
+
+RECOMMENDED NEXT STEP
+
+This section should feel important and actionable.
+
+The title should stand out.
+
+Users should immediately understand:
+
+"This is what I should do next."
+
+The title should not disappear above the card.
+
+BROWNIE POINTS
+
+The Brownie Points section needs stronger identity.
+
+Current issue:
+
+The score is visible.
+The title is not.
+
+Users notice:
+
+59
+
+before noticing:
+
+Brownie Points
+
+The section should clearly communicate:
+
+Brownie Points
+
+59
+
+Building Momentum
+
+Your cards are getting more personal every month.
+
+Keep Brownie Points as a supporting score.
+
+Do not let it become the primary focus of the dashboard.
+
+PEOPLE ARE THE HERO
+
+Continue reinforcing:
+
+People first.
+Scores second.
+
+The first thing users should care about:
+
+Stacy
+Mom
+Dad
+
+The second thing they should care about:
+
+Brownie Points
+
+The score supports the relationship.
+
+The relationship is the product.
+
+DESKTOP LAYOUT IMPROVEMENT
+
+The dashboard still feels too narrow and left-heavy.
+
+Use the available desktop width better.
+
+The page should feel balanced.
+
+Suggested structure:
+
+Left side:
+
+* Upcoming person card
+* Relationships
+
+Right side:
+
+* We Got Your Back
+* Recommended Next Step
+* Brownie Points
+* Recent Wins
+
+Avoid making desktop feel like a mobile layout stretched wider.
+
+READABILITY IMPROVEMENTS
+
+Several text elements are still difficult to read.
+
+Increase readability throughout.
+
+Use:
+
+Primary text:
+#1F1F1F
+
+Secondary text:
+#4B5563
+
+Avoid low contrast gray text on cream backgrounds.
+
+Increase readability for:
+
+* subtitles
+* helper text
+* section descriptions
+* small status labels
+* score explanations
+
+If readability and style conflict, choose readability.
+
+BUTTON HIERARCHY
+
+Buttons should not dominate the page.
+
+The eye should notice:
+
+1. Stacy
+2. Upcoming moments
+3. We Got Your Back
+4. Recommended Next Step
+
+before noticing:
+
+Review Cards
+View
+Add Person
+
+Buttons should support the content, not overpower it.
+
+BROWNIE POINTS LEVELS
+
+Keep the levels simple.
+
+Do not display the full ladder.
+
+Show only:
+
+Brownie Points
+
+59
+
+Building Momentum
+
+A few more details will make future cards even more thoughtful.
+
+Optionally:
+
++4 this month
+
+The full score ladder should only appear if expanded.
+
+PEOPLE YOU MAY BE FORGETTING
+
+Rename:
+
+Add More People
+
+to:
+
+People You May Be Forgetting
+
+Examples:
+
+Dad
+
+Close Friend
+
+Brother
+
+Coworker
+
+This feels more on brand.
+
+RECENT WINS
+
+Continue building this section.
+
+Examples:
+
+🎉 Stacy's birthday card is ready
+
+🎉 No important moments missed this month
+
+🎉 Mom's profile improved
+
+This should create positive reinforcement.
+
+SUCCESS CRITERIA
+
+When a user opens the dashboard:
+
+They should immediately see:
+
+We Got Your Back
+
+They should immediately understand:
+
+Stacy's birthday is handled.
+
+They should feel:
+
+Relief first.
+
+Confidence second.
+
+Motivation third.
+
+The dashboard should feel like:
+
+A thoughtful concierge.
+
+Not:
+
+A relationship analytics tool.
+
+People are the hero.
+
+Moments are the story.
+
+Brownie Points are the supporting score.
