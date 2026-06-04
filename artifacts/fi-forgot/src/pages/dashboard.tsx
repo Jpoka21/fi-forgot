@@ -288,6 +288,7 @@ export default function DashboardPage() {
   const [isMobile, setIsMobile]                     = useState(() => window.innerWidth < 768);
   const [scoreHistory, setScoreHistory]             = useState<ScoreSnapshot[]>([]);
   const [upgradeOpen, setUpgradeOpen]               = useState(false);
+  const [scoreBreakdownOpen, setScoreBreakdownOpen] = useState(false);
 
   const { user, logout, upgradePlan } = useAuth();
   const [, setLocation] = useLocation();
@@ -1170,8 +1171,18 @@ export default function DashboardPage() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {health.score > 0 && (
           <div style={{ marginBottom: 20 }}>
-            <SectionHead label="WHY YOUR SCORE IS WHAT IT IS" />
-            <div style={{ background: WHITE, borderRadius: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.16em", color: `${BLACK}60` }}>
+                WHY YOUR SCORE IS WHAT IT IS
+              </span>
+              <button
+                onClick={() => setScoreBreakdownOpen(o => !o)}
+                style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: `1px solid ${BLACK}12`, borderRadius: 7, padding: "4px 10px", cursor: "pointer", color: GRAY, fontSize: "0.72rem", fontWeight: 600 }}
+              >
+                {scoreBreakdownOpen ? <><ChevronUp size={11} /> Hide</> : <><ChevronDown size={11} /> Show</>}
+              </button>
+            </div>
+            {scoreBreakdownOpen && <div style={{ background: WHITE, borderRadius: 16 }}>
               {health.recipientHealths.length > 0 && (
                 <div style={{ padding: "20px 22px", borderBottom: health.topInsight ? `1px solid ${BLACK}07` : "none" }}>
                   <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
@@ -1225,7 +1236,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </div>}
           </div>
         )}
 
