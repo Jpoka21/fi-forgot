@@ -1,0 +1,2 @@
+- [Dashboard Health Redesign](dashboard-health.md) — Phase 2 complete: scoring engine + full dashboard rewrite; key conventions documented
+- [API & Type Quirks](api-type-quirks.md) — critical type mappings: QueueItem/PersonalSettings field names differ from intuitive names

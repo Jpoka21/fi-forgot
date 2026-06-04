@@ -19,12 +19,20 @@ import { Plan, PLANS } from "@/lib/plan";
 import {
   Users, CheckCircle2, Plus, ClipboardList, ThumbsUp,
   Sparkles, Loader2, ChevronDown, ChevronUp, CalendarDays, Search, Clock, Lock,
+  TrendingUp, Star, Shield, Target, ArrowRight, Settings, AlertCircle,
 } from "lucide-react";
 
-interface HwFont { id: string; name: string; previewUrl?: string; }
+import {
+  computeOverallHealth, computeCoverage, getRecommendedAction,
+  recordScoreSnapshot, getScoreHistory, CAT_LABELS, CAT_DESCRIPTIONS,
+  getScoreMeta, getEventStatus, TIER_LABELS, TIER_COLORS, TIER_WEIGHTS,
+  ScoreSnapshot, OverallHealth, RecipientHealth,
+} from "@/lib/relationship-health";
+
+interface HwFont   { id: string; name: string; previewUrl?: string; }
 interface CardDesign { id: string; name: string; category?: string; imageUrl?: string; libraryCardId?: string; }
 
-/* ── Brand colours – personal palette ───────────────────────────────────── */
+/* ── Brand colours ───────────────────────────────────────────────────────── */
 const BEIGE = "#F2E6D3";
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -113,7 +121,7 @@ interface UpcomingBriefing {
 
 type PendingApproval = QueueItem & { message?: MessageDraft };
 
-/* ── Workspace toggle (Personal active / Business) ───────────────────────── */
+/* ── Workspace toggle ────────────────────────────────────────────────────── */
 function WorkspaceToggle() {
   const { workspaces, switchWorkspace } = useAuth();
   const [, setLocation] = useLocation();
@@ -124,22 +132,16 @@ function WorkspaceToggle() {
   }
   return (
     <div style={{ display: "flex", background: `${BLACK}14`, borderRadius: 8, padding: 3, gap: 2 }}>
-      {/* Personal — active */}
       <div style={{ padding: "6px 14px", borderRadius: 6, background: RED }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: WHITE }}>
-          Personal
-        </span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: WHITE }}>Personal</span>
       </div>
-      {/* Business — inactive */}
       <button
         onClick={goBusiness}
         style={{ padding: "6px 14px", borderRadius: 6, background: "transparent", border: "none", cursor: "pointer" }}
         onMouseEnter={e => (e.currentTarget.style.background = `${BLACK}10`)}
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
       >
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: `${BLACK}70` }}>
-          Business
-        </span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.1em", color: `${BLACK}70` }}>Business</span>
       </button>
     </div>
   );
@@ -216,7 +218,7 @@ function AccountMenu({ user, onLogout }: { user: { name: string; email: string }
   );
 }
 
-/* ── Urgency countdown badge ─────────────────────────────────────────────── */
+/* ── Urgency badge ───────────────────────────────────────────────────────── */
 function UrgencyBadge({ days }: { days: number }) {
   const color = days <= 14 ? RED : days <= 30 ? "#c2820a" : "#16a34a";
   const bg    = days <= 14 ? `${RED}12` : days <= 30 ? "#fef9c3" : "#f0fdf4";
@@ -233,144 +235,55 @@ function UrgencyBadge({ days }: { days: number }) {
   );
 }
 
-/* ── Recipient profile card ──────────────────────────────────────────────── */
-function RecipientCard({
-  r, upcoming, plan, onUpgradeClick, isMobile, cardsUsed, cardsTotal,
-}: {
-  r: Recipient;
-  upcoming: Array<{ event: string; daysAway: number; briefingDone: boolean }>;
-  plan: Plan;
-  onUpgradeClick: () => void;
-  isMobile: boolean;
-  cardsUsed: number;
-  cardsTotal: number;
+/* ── Score ring SVG ──────────────────────────────────────────────────────── */
+function ScoreRing({ score, size = 100, strokeWidth = 9, color, bg = `${BLACK}0E` }: {
+  score: number; size?: number; strokeWidth?: number; color: string; bg?: string;
 }) {
-  const nextEvent   = upcoming[0] ?? null;
-  const needsBrief  = !!(nextEvent && !nextEvent.briefingDone);
-  const events      = r.selectedEvents ?? [];
-  const initials    = r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
-  const urgColor    = nextEvent
-    ? nextEvent.daysAway <= 14 ? RED : nextEvent.daysAway <= 30 ? "#c2820a" : "#16a34a"
-    : GRAY;
-
+  const r    = (size - strokeWidth) / 2;
+  const circ = 2 * Math.PI * r;
+  const off  = circ - (Math.max(0, Math.min(100, score)) / 100) * circ;
   return (
-    <div style={{
-      background: WHITE,
-      border: `1.5px solid ${needsBrief ? `${RED}28` : `${BLACK}12`}`,
-      borderRadius: 16,
-      padding: isMobile ? "18px" : "20px",
-      display: "flex", flexDirection: "column" as const, gap: 12,
-      boxShadow: needsBrief ? `0 2px 16px ${RED}0C` : "0 1px 6px rgba(0,0,0,0.05)",
-      transition: "box-shadow 0.15s, transform 0.15s",
-    }}
-      onMouseEnter={e => { if (!isMobile) { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 6px 24px rgba(0,0,0,0.10)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}}
-      onMouseLeave={e => { if (!isMobile) { (e.currentTarget as HTMLDivElement).style.boxShadow = needsBrief ? `0 2px 16px ${RED}0C` : "0 1px 6px rgba(0,0,0,0.05)"; (e.currentTarget as HTMLDivElement).style.transform = "none"; }}}
-    >
-      {/* Avatar + name + relationship */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{
-          width: isMobile ? 46 : 44, height: isMobile ? 46 : 44,
-          borderRadius: 12, background: BLACK, flexShrink: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", color: WHITE, letterSpacing: "0.04em" }}>
-            {initials}
-          </span>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.2rem" : "1.1rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1.1 }}>
-            {r.name}
-          </div>
-          <span style={{ background: `${BLACK}10`, color: BLACK, borderRadius: 4, padding: "1px 7px", fontWeight: 600, fontSize: "0.67rem", letterSpacing: "0.04em" }}>
-            {r.relationship}
-          </span>
-        </div>
-        {/* Per-recipient card count */}
-        {events.length > 0 && (
-          <div style={{
-            flexShrink: 0, display: "flex", flexDirection: "column" as const, alignItems: "center",
-            background: `${BLACK}06`, border: `1px solid ${BLACK}12`, borderRadius: 10,
-            padding: "4px 10px", lineHeight: 1,
-          }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK }}>{events.length}</span>
-            <span style={{ fontSize: "0.58rem", fontWeight: 700, color: GRAY, letterSpacing: "0.04em" }}>
-              card{events.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-        )}
-      </div>
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)", display: "block" }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={bg} strokeWidth={strokeWidth} />
+      <circle
+        cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke={color} strokeWidth={strokeWidth}
+        strokeDasharray={circ} strokeDashoffset={off}
+        strokeLinecap="round"
+        style={{ transition: "stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)" }}
+      />
+    </svg>
+  );
+}
 
-      {/* Needs attention highlight */}
-      {needsBrief && nextEvent && (
-        <div style={{ background: `${RED}07`, border: `1px solid ${RED}20`, borderRadius: 10, padding: "10px 12px" }}>
-          <div style={{ fontSize: "0.6rem", fontWeight: 800, color: RED, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 3 }}>Needs Attention</div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontWeight: 700, fontSize: isMobile ? "0.92rem" : "0.86rem", color: BLACK }}>{nextEvent.event}</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: urgColor, letterSpacing: "0.06em" }}>
-              {nextEvent.daysAway}d
-            </span>
-          </div>
-        </div>
-      )}
+/* ── Thin category progress bar ──────────────────────────────────────────── */
+function CatBar({ score, max, color }: { score: number; max: number; color: string }) {
+  return (
+    <div style={{ height: 5, background: `${BLACK}0C`, borderRadius: 3, overflow: "hidden" }}>
+      <div style={{
+        height: "100%", width: `${(score / max) * 100}%`,
+        background: color, borderRadius: 3,
+        transition: "width 0.5s ease",
+      }} />
+    </div>
+  );
+}
 
-      {/* Event chips */}
-      {events.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
-          {events.slice(0, 6).map(e => {
-            const days   = daysUntilEvent(e, r);
-            const isNext = nextEvent?.event === e;
-            return (
-              <span key={e} style={{
-                fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, fontWeight: 600,
-                display: "flex", alignItems: "center", gap: 3,
-                background: isNext ? `${RED}13` : `${BLACK}07`,
-                color: isNext ? RED : "#475569",
-                border: `1px solid ${isNext ? `${RED}30` : `${BLACK}10`}`,
-              }}>
-                {e}{days !== null && days <= 45 ? ` · ${days}d` : ""}
-              </span>
-            );
-          })}
-          {events.length > 6 && (
-            <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 20, background: `${BLACK}07`, color: GRAY }}>
-              +{events.length - 6}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Actions */}
-      <div style={{ display: "flex", gap: 8, marginTop: "auto", paddingTop: 4 }}>
-        {needsBrief && nextEvent ? (
-          <Link href={`/briefings/${r.id}/${encodeURIComponent(nextEvent.event)}`} style={{ flex: 1 }}>
-            <button style={{
-              width: "100%", padding: isMobile ? "13px 12px" : "9px 14px",
-              background: RED, color: WHITE, border: "none", borderRadius: 10,
-              fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1rem" : "0.9rem",
-              letterSpacing: "0.08em", cursor: "pointer",
-            }}>
-              Answer Questions →
-            </button>
-          </Link>
-        ) : <div style={{ flex: 1 }} />}
-        <Link href={`/recipients/${r.id}?from=dashboard`}>
-          <button style={{
-            padding: isMobile ? "13px 16px" : "9px 14px",
-            background: `${BLACK}06`, color: BLACK,
-            border: `1px solid ${BLACK}14`, borderRadius: 10,
-            fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1rem" : "0.9rem",
-            letterSpacing: "0.06em", cursor: "pointer",
-          }}>
-            Manage
-          </button>
-        </Link>
-      </div>
+/* ── Section header ──────────────────────────────────────────────────────── */
+function SectionHead({ label, right }: { label: string; right?: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.92rem", letterSpacing: "0.14em", color: `${BLACK}70` }}>
+        {label}
+      </span>
+      {right}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
+  // ── All preserved state ─────────────────────────────────────────────────
   const [cards, setCards]                           = useState<CardOrder[]>([]);
   const [recipients, setRecipients]                 = useState<Recipient[]>([]);
   const [upcomingBriefings, setUpcomingBriefings]   = useState<UpcomingBriefing[]>([]);
@@ -379,7 +292,6 @@ export default function DashboardPage() {
   const [refinePrompt, setRefinePrompt]             = useState<Record<string, string>>({});
   const [refiningId, setRefiningId]                 = useState<string | null>(null);
   const [refineOpen, setRefineOpen]                 = useState<string | null>(null);
-  const [activeTab, setActiveTab]                   = useState<"people" | "upcoming">("people");
   const [search, setSearch]                         = useState("");
   const [settingsOpen, setSettingsOpen]             = useState(false);
   const [personalSettings, setPersonalSettings]     = useState<PersonalSettings>(() => getPersonalSettings());
@@ -402,8 +314,9 @@ export default function DashboardPage() {
   const [shareLoadingIds, setShareLoadingIds]       = useState<Record<string, boolean>>({});
   const [shareCopiedIds, setShareCopiedIds]         = useState<Record<string, boolean>>({});
   const [shareUrlIds, setShareUrlIds]               = useState<Record<string, string>>({});
-
+  const [expandedScoreRecipient, setExpandedScoreRecipient] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [scoreHistory, setScoreHistory] = useState<ScoreSnapshot[]>([]);
 
   const { user, logout, upgradePlan } = useAuth();
   const [, setLocation]  = useLocation();
@@ -434,6 +347,7 @@ export default function DashboardPage() {
     }
     pending.sort((a, b) => a.daysAway - b.daysAway);
     setUpcomingBriefings(pending);
+    setScoreHistory(getScoreHistory());
   }, []);
 
   useEffect(() => {
@@ -442,7 +356,6 @@ export default function DashboardPage() {
     return () => window.removeEventListener("resize", handler);
   }, []);
 
-  // Fetch a card design for each approval card that doesn't have one yet
   useEffect(() => {
     const appCards = cards.filter(c => c.status === "Ready for approval");
     for (const card of appCards) {
@@ -460,24 +373,19 @@ export default function DashboardPage() {
     }
   }, [cards]);
 
-  async function regenCardDesign(cardId: string, holiday: string, message: string) {
-    const current = cardDesignMap[cardId];
-    const prevExcluded = excludedDesignIds[cardId] ?? [];
-    const newExcluded = current ? [...prevExcluded, String(current.id)] : prevExcluded;
-    setExcludedDesignIds(prev => ({ ...prev, [cardId]: newExcluded }));
-    setRegenLoadingIds(prev => ({ ...prev, [cardId]: true }));
-    setCardDesignMap(prev => { const n = { ...prev }; delete n[cardId]; return n; });
-    try {
-      const params = new URLSearchParams({ eventType: holiday });
-      if (message) params.set("cardMessage", message);
-      if (newExcluded.length) params.set("excludeIds", newExcluded.join(","));
-      const r = await fetch(`/api/personal-cards/pick-card?${params.toString()}`);
-      const d = await r.json() as { card?: CardDesign };
-      if (d.card) setCardDesignMap(prev => ({ ...prev, [cardId]: d.card! }));
-    } catch {}
-    setRegenLoadingIds(prev => ({ ...prev, [cardId]: false }));
-  }
+  // ── Scoring computations ────────────────────────────────────────────────
+  const health   = useMemo(() => computeOverallHealth(recipients), [recipients]);
+  const coverage = useMemo(() => computeCoverage(recipients), [recipients]);
 
+  // Record score snapshot once per day
+  useEffect(() => {
+    if (health.score > 0) {
+      recordScoreSnapshot(health.score);
+      setScoreHistory(getScoreHistory());
+    }
+  }, [health.score]);
+
+  // ── All preserved computed values ───────────────────────────────────────
   const awaitingApproval  = cards.filter((c) => c.status === "Ready for approval");
   const disastersAvoided  = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
   const briefingsNeeded   = upcomingBriefings.filter((b) => !b.briefingDoneThisYear);
@@ -522,13 +430,6 @@ export default function DashboardPage() {
     r.relationship.toLowerCase().includes(search.toLowerCase())
   );
 
-  const QUICK_PROMPTS = [
-    { label: "Shorter",        prompt: "Make it significantly shorter and more punchy." },
-    { label: "More funny",     prompt: "Make it funnier and add some humor." },
-    { label: "Add more heart", prompt: "Make it warmer and more heartfelt." },
-    { label: "More personal",  prompt: "Make it feel more personal and specific." },
-  ];
-
   const upcomingWithCardKeys = useMemo(() => {
     const keys = new Set<string>();
     for (const c of cards) {
@@ -539,11 +440,15 @@ export default function DashboardPage() {
 
   const approvedPersonalCards = useMemo(() => cards.filter(c => c.status === "Approved"), [cards]);
 
-  const TABS = [
-    { key: "people"   as const, label: "People & Events",  icon: Users,        count: recipients.length },
-    { key: "upcoming" as const, label: "Review & Approve", icon: ClipboardList, count: approvalCount },
-  ];
+  // Recommended next action
+  const recommendedAction = useMemo(() => getRecommendedAction(
+    recipients,
+    approvalCount,
+    allUpcomingEvents.filter(ev => !ev.briefingDone),
+    health,
+  ), [recipients, approvalCount, allUpcomingEvents, health]);
 
+  // ── All preserved functions ─────────────────────────────────────────────
   function updateSettings<K extends keyof PersonalSettings>(key: K, val: PersonalSettings[K]) {
     setPersonalSettings(prev => {
       const next = { ...prev, [key]: val };
@@ -556,13 +461,10 @@ export default function DashboardPage() {
     const key = `${ev.recipient.id}:::${ev.event}`;
     setGeneratingFor(key);
     try {
-      // Pull ALL briefings for this recipient to build a cumulative profile
       const allBriefings = getBriefingsForRecipient(ev.recipient.id);
-      // Most recent briefing for THIS specific event
       const currentBriefing = allBriefings
         .filter(b => b.event === ev.event)
         .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())[0];
-      // All briefings from OTHER events — everything we've ever learned about this person
       const recipientHistory = allBriefings
         .filter(b => b.event !== ev.event)
         .map(b => ({ event: b.event, year: b.year, answers: b.answers }));
@@ -585,9 +487,7 @@ export default function DashboardPage() {
           yearsTogther:     ev.recipient.marriageDate
                               ? String(getYearsTogether(ev.recipient.marriageDate))
                               : undefined,
-          // Current event briefing — Q&A specific to this card
           eventBriefing:    currentBriefing?.answers ?? [],
-          // Everything learned from all past briefings for this person
           recipientHistory,
         }),
       });
@@ -671,1548 +571,1354 @@ export default function DashboardPage() {
     finally { setEditActionId(null); }
   }
 
+  async function regenCardDesign(cardId: string, holiday: string, message: string) {
+    const current = cardDesignMap[cardId];
+    const prevExcluded = excludedDesignIds[cardId] ?? [];
+    const newExcluded = current ? [...prevExcluded, String(current.id)] : prevExcluded;
+    setExcludedDesignIds(prev => ({ ...prev, [cardId]: newExcluded }));
+    setRegenLoadingIds(prev => ({ ...prev, [cardId]: true }));
+    setCardDesignMap(prev => { const n = { ...prev }; delete n[cardId]; return n; });
+    try {
+      const params = new URLSearchParams({ eventType: holiday });
+      if (message) params.set("cardMessage", message);
+      if (newExcluded.length) params.set("excludeIds", newExcluded.join(","));
+      const r = await fetch(`/api/personal-cards/pick-card?${params.toString()}`);
+      const d = await r.json() as { card?: CardDesign };
+      if (d.card) setCardDesignMap(prev => ({ ...prev, [cardId]: d.card! }));
+    } catch {}
+    setRegenLoadingIds(prev => ({ ...prev, [cardId]: false }));
+  }
+
   function updateApprovalTiming(recipientId: string, days: 14 | 21 | 30) {
     const r = recipients.find(rec => rec.id === recipientId);
     if (r) { saveRecipient({ ...r, previewDays: days }); setRecipients(getRecipients()); }
     setTimingPickerOpen(null);
   }
 
-  /* ── Render ─────────────────────────────────────────────────────────────── */
+  // Load fonts lazily when font picker opens
+  useEffect(() => {
+    if (!fontPickerOpen || hwFonts.length > 0) return;
+    setFontsLoading(true);
+    fetch("/api/handwrytten-fonts")
+      .then(r => r.json())
+      .then((d: { fonts?: HwFont[] }) => { if (d.fonts) setHwFonts(d.fonts); })
+      .catch(() => {})
+      .finally(() => setFontsLoading(false));
+  }, [fontPickerOpen]);
+
+  /* ── Plan info ─────────────────────────────────────────────────────────── */
+  const planConfig  = PLANS[plan];
+  const cardsUsed   = approvedPersonalCards.length;
+  const cardsTotal  = planConfig.maxCardsPerYear;
+  const cardsLeft   = Math.max(0, cardsTotal - cardsUsed);
+  const usagePct    = Math.min(100, Math.round((cardsUsed / Math.max(cardsTotal, 1)) * 100));
+  const atLimit     = cardsLeft === 0;
+
+  /* ── Recent progress stats ─────────────────────────────────────────────── */
+  const past30Score = useMemo(() => {
+    const cutoff = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    const old = scoreHistory.filter(s => s.date <= cutoff);
+    return old.length > 0 ? old[old.length - 1].score : null;
+  }, [scoreHistory]);
+  const scoreDelta = past30Score !== null ? health.score - past30Score : null;
+
+  /* ── Padding shorthand ─────────────────────────────────────────────────── */
+  const px = isMobile ? 14 : 32;
+
+  /* ═══════════════════════════════════════════════════════════════════════ */
+  /* RENDER                                                                   */
+  /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <>
-    <div style={{ minHeight: "100vh", background: WHITE, display: "flex", flexDirection: "column" as const, fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: BEIGE, display: "flex", flexDirection: "column" as const, fontFamily: "'Inter', sans-serif" }}>
 
-      {/* ── Sticky header ────────────────────────────────────────────────────── */}
-      <div style={{ position: "sticky", top: 0, zIndex: 40, flexShrink: 0 }}>
+      {/* ── Sticky header ──────────────────────────────────────────────────── */}
+      <header style={{
+        position: "sticky", top: 0, zIndex: 40,
+        background: BEIGE, borderBottom: `1px solid ${BLACK}18`,
+        padding: `0 ${px}px`,
+        height: isMobile ? 60 : 72,
+        display: "flex", alignItems: "center", justifyContent: "space-between" as const,
+      }}>
+        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.7rem" : "2.2rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 5 }}>F*</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.7rem" : "2.2rem", color: BLACK, letterSpacing: "0.04em" }}>I FORGOT</span>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.65rem", letterSpacing: "0.18em", color: `${BLACK}50`, marginLeft: 8, alignSelf: "flex-end", paddingBottom: 4 }}>PERSONAL</span>
+        </Link>
 
-        {/* Main header bar — responsive */}
-        <header style={{
-          background: BEIGE,
-          borderBottom: `1px solid ${BLACK}1A`,
-          padding: isMobile ? "0 16px" : "0 32px 0 24px",
-          height: isMobile ? 64 : 96,
-          display: "flex", alignItems: "center", justifyContent: "space-between" as const, gap: 0,
-        }}>
-          {/* Logo + PERSONAL label + section title */}
-          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 20 }}>
-            <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.9rem" : "3.1rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 6 }}>F*</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.9rem" : "3.1rem", color: BLACK, letterSpacing: "0.04em" }}>I FORGOT</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "0.65rem" : "1rem", letterSpacing: "0.18em", color: `${BLACK}55`, marginLeft: 10, alignSelf: "flex-end", paddingBottom: isMobile ? 4 : 6 }}>PERSONAL</span>
-            </Link>
-            {!isMobile && (
-              <>
-                <div style={{ width: 1, height: 32, background: `${BLACK}18` }} />
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em", color: `${BLACK}60` }}>YOUR PEOPLE</span>
-              </>
-            )}
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 14 }}>
+          {approvalCount > 0 && (
+            <a href="#review" style={{ textDecoration: "none" }}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: `${RED}15`, border: `1px solid ${RED}40`,
+                borderRadius: 8, padding: "5px 10px", cursor: "pointer",
+              }}>
+                <AlertCircle size={13} style={{ color: RED }} />
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.08em", color: RED }}>
+                  {approvalCount} to review
+                </span>
+              </div>
+            </a>
+          )}
+          {!isMobile && <WorkspaceToggle />}
+          <AccountMenu user={user} onLogout={logout} />
+        </div>
+      </header>
+
+      {/* ── Settings strip (collapsible) ────────────────────────────────────── */}
+      <div style={{ background: `${BLACK}06`, borderBottom: `1px solid ${BLACK}0E` }}>
+        <button
+          onClick={() => setSettingsOpen(o => !o)}
+          style={{
+            width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: `10px ${px}px`, background: "none", border: "none", cursor: "pointer",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Settings size={13} style={{ color: GRAY }} />
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.14em", color: GRAY }}>
+              AUTOPILOT SETTINGS
+            </span>
+            <span style={{ fontSize: "0.7rem", color: GRAY }}>·</span>
+            <span style={{ fontSize: "0.72rem", color: GRAY }}>
+              {personalSettings.automationMode === "autopilot" ? "Fully automatic" : "Approval required"}
+            </span>
           </div>
+          {settingsOpen ? <ChevronUp size={14} style={{ color: GRAY }} /> : <ChevronDown size={14} style={{ color: GRAY }} />}
+        </button>
 
-          {/* Right: pending alert + workspace toggle + account */}
-          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 14, flexShrink: 0 }}>
-            {approvalCount > 0 && (
+        {settingsOpen && (
+          <div style={{ padding: `0 ${px}px 20px`, display: "flex", flexDirection: "column" as const, gap: 14 }}>
+            {/* Automation mode */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" as const }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: "0.82rem", color: BLACK }}>Automation Mode</div>
+                <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 1 }}>
+                  {personalSettings.automationMode === "autopilot"
+                    ? "Cards generate and send automatically — no action needed."
+                    : "You'll receive a preview before each card is mailed."}
+                </div>
+              </div>
+              <div style={{ display: "flex", background: `${BLACK}10`, borderRadius: 8, padding: 3, gap: 2 }}>
+                {(["autopilot", "approve"] as const).map(level => (
+                  <button key={level} onClick={() => updateSettings("automationMode", level)} style={{
+                    padding: "6px 14px", borderRadius: 6, border: "none",
+                    background: personalSettings.automationMode === level ? BLACK : "transparent",
+                    color: personalSettings.automationMode === level ? WHITE : GRAY,
+                    fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.78rem", cursor: "pointer",
+                  }}>
+                    {level === "autopilot" ? "Automatic" : "Manual"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Font + Signature + Tone + Timing grid */}
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 12 }}>
+              {/* Handwriting style */}
               <button
-                onClick={() => setActiveTab("upcoming")}
+                onClick={() => setFontPickerOpen(true)}
                 style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  background: `${RED}15`, border: `1px solid ${RED}40`,
-                  borderRadius: 8, padding: "6px 14px", cursor: "pointer",
+                  textAlign: "left" as const, padding: "10px 14px", borderRadius: 10,
+                  border: `1px solid ${BLACK}14`, background: WHITE, cursor: "pointer",
                 }}
               >
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: RED, display: "block" }} />
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.09em", color: RED }}>
-                  {approvalCount} AWAITING REVIEW
-                </span>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, marginBottom: 2 }}>HANDWRITING STYLE</div>
+                <div style={{ fontWeight: 600, fontSize: "0.82rem", color: BLACK }}>
+                  {personalSettings.cardFont
+                    ? (hwFonts.find(f => f.id === personalSettings.cardFont)?.name ?? "Custom")
+                    : "Default style"}
+                </div>
               </button>
-            )}
-            <WorkspaceToggle />
-            <AccountMenu user={user} onLogout={() => { logout(); setLocation("/"); }} />
-          </div>
-        </header>
 
-        {/* ── Personal Settings Strip ──────────────────────────────────────────── */}
-        <div style={{ background: BEIGE, borderBottom: `1px solid ${BLACK}12`, padding: "0 28px", flexShrink: 0 }}>
-          <button
-            onClick={() => setSettingsOpen(o => !o)}
-            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0", background: "none", border: "none", cursor: "pointer", color: `${BLACK}70`, fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const }}
-          >
-            <span style={{ fontSize: "0.9rem" }}>⚙️</span>
-            Personal Settings
-            <span style={{ fontSize: "0.6rem", marginLeft: 2 }}>{settingsOpen ? "▲" : "▼"}</span>
-          </button>
-
-          {settingsOpen && (
-            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 32, paddingBottom: 18 }}>
-
-              {/* Automation Mode */}
-              <div>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 10 }}>Automation Mode</div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  {([
-                    { value: "autopilot" as const, icon: "🚀", title: "Full Autopilot",   desc: "We write, design, and mail every card automatically. No action needed from you.",  recommended: false },
-                    { value: "approve"   as const, icon: "✋", title: "Review & Approve", desc: "We queue the card and notify you. You review and approve before anything ships.",    recommended: true  },
-                  ]).map(opt => {
-                    const active = personalSettings.automationMode === opt.value;
-                    return (
-                      <button key={opt.value} onClick={() => updateSettings("automationMode", opt.value)} style={{
-                        flex: 1, textAlign: "left" as const, padding: "12px 14px", borderRadius: 10, cursor: "pointer",
-                        border: `1.5px solid ${active ? RED : `${BLACK}35`}`,
-                        background: active ? `${RED}12` : WHITE,
-                        transition: "all 0.12s", minWidth: 160,
-                      }}>
-                        <div style={{ fontSize: "1.2rem", marginBottom: 4 }}>{opt.icon}</div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                          <span style={{ fontWeight: 700, fontSize: "0.78rem", color: active ? RED : BLACK, fontFamily: "'Inter', sans-serif" }}>{opt.title}</span>
-                          {opt.recommended && <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.05em", background: "#16a34a", color: WHITE, borderRadius: 4, padding: "1px 5px", fontFamily: "'Inter', sans-serif" }}>Recommended</span>}
-                        </div>
-                        <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>{opt.desc}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Handwriting Style */}
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Handwriting Style</div>
-                <button
-                  onClick={async () => {
-                    setFontPickerOpen(true);
-                    if (hwFonts.length === 0) {
-                      setFontsLoading(true);
-                      try {
-                        const r = await fetch("/api/handwrytten-fonts");
-                        const d = await r.json() as { fonts: HwFont[] };
-                        setHwFonts(d.fonts ?? []);
-                      } catch { /* leave empty */ }
-                      setFontsLoading(false);
-                    }
-                  }}
-                  style={{
-                    background: WHITE, border: `1px solid ${BLACK}35`,
-                    borderRadius: 6, color: BLACK, padding: "7px 12px",
-                    fontSize: "0.82rem", cursor: "pointer", textAlign: "left" as const,
-                    fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 8,
-                    width: 220,
-                  }}
-                >
-                  <span style={{ fontSize: "1rem" }}>✍️</span>
-                  <span style={{ flex: 1 }}>{personalSettings.cardFont ? (hwFonts.find(f => f.id === personalSettings.cardFont)?.name ?? personalSettings.cardFont) : "Choose a style…"}</span>
-                  <span style={{ color: `${BLACK}50`, fontSize: "0.75rem" }}>▾</span>
-                </button>
-                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>The handwriting style used on every card.</div>
-              </div>
-
-              {/* Card Signature */}
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Card Signature</div>
+              {/* Card signature */}
+              <div style={{ padding: "10px 14px", borderRadius: 10, border: `1px solid ${BLACK}14`, background: WHITE }}>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, marginBottom: 4 }}>SIGNED AS</div>
                 <input
-                  value={personalSettings.cardSignature}
+                  value={personalSettings.cardSignature ?? ""}
                   onChange={e => updateSettings("cardSignature", e.target.value)}
-                  placeholder="e.g. Love, James"
-                  style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
+                  placeholder="e.g. Love, Mom"
+                  style={{ width: "100%", border: "none", background: "none", fontWeight: 600, fontSize: "0.82rem", color: BLACK, outline: "none", fontFamily: "'Inter', sans-serif", boxSizing: "border-box" as const }}
                 />
-                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>We'll close every card with this signature.</div>
               </div>
 
-              {/* Default Tone */}
-              <div>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>Default Tone</div>
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                  {TONES.map(t => (
-                    <button key={t} onClick={() => updateSettings("defaultTone", t)} style={{
-                      padding: "5px 12px", borderRadius: 20, cursor: "pointer",
-                      border: `1.5px solid ${personalSettings.defaultTone === t ? RED : `${BLACK}35`}`,
-                      background: personalSettings.defaultTone === t ? `${RED}18` : WHITE,
-                      color: personalSettings.defaultTone === t ? RED : BLACK,
-                      fontSize: "0.78rem", transition: "all 0.12s",
-                      fontFamily: "'Inter', sans-serif",
-                    }}>
-                      {t}
-                    </button>
+              {/* Default tone */}
+              <div style={{ padding: "10px 14px", borderRadius: 10, border: `1px solid ${BLACK}14`, background: WHITE }}>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, marginBottom: 4 }}>DEFAULT TONE</div>
+                <select
+                  value={personalSettings.defaultTone ?? ""}
+                  onChange={e => updateSettings("defaultTone", e.target.value as import("@/lib/data").Tone)}
+                  style={{ width: "100%", border: "none", background: "none", fontWeight: 600, fontSize: "0.82rem", color: BLACK, outline: "none", fontFamily: "'Inter', sans-serif", cursor: "pointer" }}
+                >
+                  <option value="">No preference</option>
+                  {TONES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Privacy note */}
+            <div style={{ fontSize: "0.67rem", color: GRAY, display: "flex", alignItems: "center", gap: 5 }}>
+              <Shield size={11} />
+              Profile details are private and used only to personalize your reminders and cards. We never share them.
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Main scrollable content ─────────────────────────────────────────── */}
+      <div style={{ flex: 1, padding: `28px ${px}px 60px`, maxWidth: 1000, margin: "0 auto", width: "100%", boxSizing: "border-box" as const }}>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 1 — RELATIONSHIP HEALTH HERO                             */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div style={{
+          background: WHITE, borderRadius: 20, padding: isMobile ? "24px 20px" : "28px 32px",
+          marginBottom: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+        }}>
+          {recipients.length === 0 ? (
+            /* FTUE empty state */
+            <div style={{ textAlign: "center" as const, padding: "8px 0 4px" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "2rem" : "2.6rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1.1, marginBottom: 10 }}>
+                RELATIONSHIP HEALTH
+              </div>
+              <p style={{ fontSize: "0.9rem", color: GRAY, maxWidth: 380, margin: "0 auto 20px", lineHeight: 1.6 }}>
+                Not enough information yet. Add your first important person and we'll build your health score as you go.
+              </p>
+              <Link href="/recipients/new">
+                <button
+                  data-testid="link-add-recipient"
+                  style={{
+                    background: RED, color: WHITE, border: "none", borderRadius: 10,
+                    padding: "12px 28px", fontFamily: "'Bebas Neue', cursive",
+                    fontSize: "1rem", letterSpacing: "0.1em", cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                  }}>
+                  <Plus size={15} /> Add someone you care about
+                </button>
+              </Link>
+            </div>
+          ) : (
+            /* Scored state */
+            <div style={{ display: "flex", gap: isMobile ? 18 : 32, flexWrap: "wrap" as const, alignItems: "flex-start" }}>
+              {/* Score ring + number */}
+              <div style={{ position: "relative", flexShrink: 0 }}>
+                <ScoreRing score={health.score} size={isMobile ? 96 : 110} strokeWidth={10} color={health.color} />
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column" as const,
+                  alignItems: "center", justifyContent: "center",
+                  pointerEvents: "none",
+                }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.8rem" : "2.1rem", color: BLACK, lineHeight: 1 }}>
+                    {health.score}
+                  </span>
+                  <span style={{ fontSize: "0.6rem", fontWeight: 700, color: health.color, letterSpacing: "0.06em", textTransform: "uppercase" as const }}>
+                    {health.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right: label + tagline + category bars */}
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.4rem" : "1.7rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1, marginBottom: 4 }}>
+                  RELATIONSHIP HEALTH
+                </div>
+                <p style={{ fontSize: "0.82rem", color: GRAY, margin: "0 0 16px", lineHeight: 1.5 }}>
+                  {health.tagline}
+                </p>
+
+                {/* 5 category bars */}
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                  {Object.entries(health.recipientHealths.length > 0
+                    ? health.recipientHealths.reduce<Record<string, { score: number; max: number }>>((acc, rh) => {
+                        for (const [k, v] of Object.entries(rh.categories)) {
+                          if (!acc[k]) acc[k] = { score: 0, max: 0 };
+                          acc[k].score += v.score * TIER_WEIGHTS[rh.tier];
+                          acc[k].max   += v.max   * TIER_WEIGHTS[rh.tier];
+                        }
+                        return acc;
+                      }, {})
+                    : {}
+                  ).map(([catKey, { score, max }]) => (
+                    <div key={catKey}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                        <span style={{ fontSize: "0.7rem", fontWeight: 600, color: BLACK }}>{CAT_LABELS[catKey]}</span>
+                        <span style={{ fontSize: "0.68rem", color: GRAY }}>{Math.round((score / Math.max(max, 1)) * 100)}%</span>
+                      </div>
+                      <CatBar score={score} max={max} color={getScoreMeta(Math.round((score / Math.max(max, 1)) * 100)).color} />
+                    </div>
                   ))}
                 </div>
               </div>
 
-              {/* Notification Timing */}
-              <div>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 4 }}>
-                  Notify Me Before the Card Is Mailed
+              {/* Score delta chip (if history exists) */}
+              {scoreDelta !== null && Math.abs(scoreDelta) >= 1 && (
+                <div style={{
+                  alignSelf: "flex-start",
+                  background: scoreDelta > 0 ? "#f0fdf4" : "#fff5f5",
+                  border: `1px solid ${scoreDelta > 0 ? "#22c55e30" : `${RED}20`}`,
+                  borderRadius: 8, padding: "5px 10px",
+                  fontSize: "0.72rem", fontWeight: 700,
+                  color: scoreDelta > 0 ? "#16a34a" : RED,
+                  display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
+                }}>
+                  <TrendingUp size={11} />
+                  {scoreDelta > 0 ? "+" : ""}{scoreDelta} this month
                 </div>
-                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
-                  Cards are mailed ~7 days before the occasion to ensure delivery. These intervals are before the card leaves — not before the occasion itself.
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                  {(["7 days before it mails", "14 days before it mails", "30 days before it mails"] as const).map(opt => {
-                    const active = personalSettings.notifyTiming.includes(opt);
-                    return (
-                      <button key={opt} onClick={() => {
-                        const next = active
-                          ? personalSettings.notifyTiming.filter(x => x !== opt)
-                          : [...personalSettings.notifyTiming, opt];
-                        updateSettings("notifyTiming", next);
-                      }} style={{
-                        padding: "5px 12px", borderRadius: 20, cursor: "pointer",
-                        border: `1.5px solid ${active ? RED : `${BLACK}35`}`,
-                        background: active ? `${RED}18` : WHITE,
-                        color: active ? RED : BLACK,
-                        fontSize: "0.78rem", transition: "all 0.12s", fontFamily: "'Inter', sans-serif",
-                      }}>
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div style={{ fontSize: "0.67rem", color: `${BLACK}BB`, marginTop: 6, fontFamily: "'Inter', sans-serif" }}>Pick one or more. We'll notify you at each chosen interval.</div>
-              </div>
-
-              {/* How to Notify You */}
-              <div>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80`, marginBottom: 8 }}>How to Notify You</div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  {([
-                    { value: "email" as const, label: "✉️  Email" },
-                    { value: "text"  as const, label: "💬  Text"  },
-                    { value: "both"  as const, label: "📲  Both"  },
-                  ]).map(opt => (
-                    <button key={opt.value} onClick={() => updateSettings("notifyChannel", opt.value)} style={{
-                      padding: "5px 14px", borderRadius: 20, cursor: "pointer",
-                      border: `1.5px solid ${personalSettings.notifyChannel === opt.value ? RED : `${BLACK}35`}`,
-                      background: personalSettings.notifyChannel === opt.value ? `${RED}18` : WHITE,
-                      color: personalSettings.notifyChannel === opt.value ? RED : BLACK,
-                      fontSize: "0.78rem", transition: "all 0.12s", fontFamily: "'Inter', sans-serif",
-                    }}>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Where to Reach You */}
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}80` }}>Where to Reach You</div>
-                {(personalSettings.notifyChannel === "email" || personalSettings.notifyChannel === "both") && (
-                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
-                    <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Email address</label>
-                    <input
-                      type="email"
-                      value={personalSettings.notifyEmail}
-                      onChange={e => updateSettings("notifyEmail", e.target.value)}
-                      placeholder="you@example.com"
-                      style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
-                    />
-                  </div>
-                )}
-                {(personalSettings.notifyChannel === "text" || personalSettings.notifyChannel === "both") && (
-                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
-                    <label style={{ fontSize: "0.72rem", color: `${BLACK}BB`, fontFamily: "'Inter', sans-serif" }}>Mobile number</label>
-                    <input
-                      type="tel"
-                      value={personalSettings.notifyPhone}
-                      onChange={e => updateSettings("notifyPhone", e.target.value)}
-                      placeholder="+1 (555) 000-0000"
-                      style={{ background: WHITE, border: `1px solid ${BLACK}35`, borderRadius: 6, color: BLACK, padding: "7px 10px", fontSize: "0.82rem", outline: "none", width: 280, fontFamily: "'Inter', sans-serif" }}
-                    />
-                  </div>
-                )}
-              </div>
-
+              )}
             </div>
           )}
         </div>
 
-        {/* Tab bar — scrollable on mobile */}
-        <div style={{
-          background: BEIGE,
-          borderBottom: `1px solid ${BLACK}12`,
-          padding: "0 16px",
-          display: "flex", alignItems: "center", gap: 4,
-          height: 52,
-          overflowX: "auto",
-          WebkitOverflowScrolling: "touch" as const,
-          scrollbarWidth: "none" as const,
-        }}>
-          {TABS.map(({ key, label, icon: Icon, count }) => {
-            const active = activeTab === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 7,
-                  padding: "7px 16px",
-                  background: active ? RED : "transparent",
-                  border: `1.5px solid ${active ? RED : `${BLACK}25`}`,
-                  borderRadius: 6,
-                  cursor: "pointer", transition: "all 0.15s",
-                }}
-              >
-                <Icon size={14} style={{ color: active ? WHITE : BLACK }} />
-                <span style={{
-                  fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem",
-                  letterSpacing: "0.1em",
-                  color: active ? WHITE : BLACK,
-                }}>
-                  {label}
-                </span>
-                {count > 0 && (
-                  <span style={{
-                    background: active ? "rgba(255,255,255,0.25)" : `${BLACK}12`,
-                    color: active ? WHITE : BLACK,
-                    borderRadius: 10, padding: "0 7px",
-                    fontSize: "0.65rem", fontWeight: 700, lineHeight: "18px",
-                  }}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Desktop stat pills (above action center) ─────────────────────────── */}
-      {!isMobile && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 28px 0" }}>
-          {[
-            { label: "People covered",      value: recipients.length,        color: BLACK },
-            { label: "Events on autopilot", value: disastersAvoided,         color: BLACK },
-            { label: "Upcoming",            value: allUpcomingEvents.length, color: allUpcomingEvents.length > 0 ? RED : BLACK },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{
-              display: "flex", alignItems: "center", gap: 6,
-              background: color === RED ? `${RED}08` : `${BLACK}04`,
-              border: `1px solid ${color === RED ? `${RED}25` : `${BLACK}12`}`,
-              borderRadius: 20, padding: "4px 14px",
-            }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color, lineHeight: 1 }}>{value}</span>
-              <span style={{ fontSize: "0.67rem", fontWeight: 700, color: `${BLACK}55`, letterSpacing: "0.03em" }}>{label}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── Needs Your Attention — action center ─────────────────────────────── */}
-      {activeTab === "upcoming" && (briefingsNeeded.length > 0 || pendingApprovals.length > 0) && (
-        <div style={{ padding: isMobile ? "14px 14px 0" : "20px 28px 0" }}>
-          <div style={{
-            background: WHITE,
-            border: `2px solid ${RED}1E`,
-            borderRadius: 16,
-            boxShadow: `0 4px 28px ${RED}09`,
-            overflow: "hidden" as const,
-          }}>
-            {/* Header */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 2 — RECOMMENDED NEXT STEP                                */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {recipients.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <SectionHead label="RECOMMENDED NEXT STEP" />
             <div style={{
-              padding: "12px 20px",
-              background: `${RED}05`,
-              borderBottom: `1px solid ${RED}12`,
-              display: "flex", alignItems: "center", gap: 10,
+              background: recommendedAction.urgency === "high" ? `${RED}08` : WHITE,
+              border: `1.5px solid ${recommendedAction.urgency === "high" ? `${RED}28` : `${BLACK}12`}`,
+              borderRadius: 16, padding: "18px 20px",
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" as const,
+              boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
             }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: RED, display: "inline-block", flexShrink: 0 }} />
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.12em", color: RED }}>
-                NEEDS YOUR ATTENTION
-              </span>
-              <span style={{ marginLeft: "auto", background: `${RED}15`, color: RED, borderRadius: 20, padding: "2px 10px", fontSize: "0.65rem", fontWeight: 800 }}>
-                {briefingsNeeded.length + pendingApprovals.length}
-              </span>
-            </div>
-
-            {/* Briefing items */}
-            {briefingsNeeded.map((b) => {
-              const urgColor2 = b.daysAway <= 14 ? RED : b.daysAway <= 30 ? "#c2820a" : "#16a34a";
-              const ini = b.recipient.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
-              return (
-                <div key={`${b.recipient.id}-${b.event}`} style={{
-                  display: "flex", alignItems: "center", gap: isMobile ? 10 : 14,
-                  padding: isMobile ? "13px 14px" : "14px 20px",
-                  borderBottom: `1px solid ${BLACK}06`,
-                }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10, background: BLACK, flexShrink: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", color: WHITE, fontSize: "0.9rem" }}>{ini}</span>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK, lineHeight: 1.2 }}>{b.recipient.name}</div>
-                    <div style={{ fontSize: "0.75rem", color: GRAY }}>{b.event}</div>
-                  </div>
-                  <div style={{ textAlign: "right" as const, flexShrink: 0, marginRight: 4 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: urgColor2, lineHeight: 1 }}>{b.daysAway}d</div>
-                    <div style={{ fontSize: "0.58rem", color: GRAY, letterSpacing: "0.06em" }}>due</div>
-                  </div>
-                  <Link href={`/briefings/${b.recipient.id}/${encodeURIComponent(b.event)}`}>
-                    <button style={{
-                      background: RED, color: WHITE, border: "none", borderRadius: 8,
-                      padding: isMobile ? "10px 13px" : "8px 18px",
-                      fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em",
-                      cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" as const,
-                    }}>
-                      {isMobile ? "Go →" : "Answer Questions →"}
-                    </button>
-                  </Link>
-                </div>
-              );
-            })}
-
-            {/* Pending approval items */}
-            {pendingApprovals.length > 0 && (
-              <div style={{ marginTop: 0 }}>
-                {pendingApprovals.map((item) => {
-                  const ini = item.recipientName.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
-                  return (
-                    <div key={item.id} style={{
-                      display: "flex", alignItems: "center", gap: isMobile ? 10 : 14,
-                      padding: isMobile ? "13px 14px" : "14px 20px",
-                      borderBottom: `1px solid ${BLACK}06`,
-                    }}>
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 10, background: `${RED}15`, flexShrink: 0,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                      }}>
-                        <span style={{ fontFamily: "'Bebas Neue', cursive", color: RED, fontSize: "0.9rem" }}>{ini}</span>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK, lineHeight: 1.2 }}>{item.recipientName}</div>
-                        <div style={{ fontSize: "0.75rem", color: GRAY }}>{item.eventType} card ready</div>
-                      </div>
-                      <span style={{
-                        fontSize: "0.6rem", fontWeight: 800, color: RED, background: `${RED}12`,
-                        border: `1px solid ${RED}25`, borderRadius: 20, padding: "2px 8px", flexShrink: 0,
-                      }}>REVIEW</span>
-                      <button onClick={() => setActiveTab("upcoming")} style={{
-                        background: `${RED}10`, color: RED, border: `1px solid ${RED}28`,
-                        borderRadius: 8, padding: isMobile ? "10px 13px" : "8px 18px",
-                        fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em",
-                        cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" as const,
-                      }}>
-                        {isMobile ? "Review →" : "Review Card →"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Mobile stat pills (below action center) ──────────────────────────── */}
-      {isMobile && (
-        <div style={{
-          display: "flex", alignItems: "center", gap: 8,
-          padding: "12px 14px 0",
-          overflowX: "auto", WebkitOverflowScrolling: "touch" as const, scrollbarWidth: "none" as const,
-        }}>
-          {[
-            { label: "People",   value: recipients.length,        color: BLACK },
-            { label: "Events",   value: disastersAvoided,         color: BLACK },
-            { label: "Upcoming", value: allUpcomingEvents.length, color: allUpcomingEvents.length > 0 ? RED : BLACK },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{
-              display: "flex", alignItems: "center", gap: 5,
-              background: color === RED ? `${RED}08` : `${BLACK}04`,
-              border: `1px solid ${color === RED ? `${RED}25` : `${BLACK}12`}`,
-              borderRadius: 20, padding: "4px 13px", flexShrink: 0,
-            }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", color, lineHeight: 1 }}>{value}</span>
-              <span style={{ fontSize: "0.65rem", fontWeight: 700, color: `${BLACK}55` }}>{label}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── Full admin-approval review UI (separate from the quick action center) */}
-      {activeTab === "upcoming" && pendingApprovals.length > 0 && (
-      <div style={{ padding: isMobile ? "12px 14px 0" : "20px 28px 0" }}>
-        <div style={{ marginTop: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <ThumbsUp size={16} style={{ color: RED }} />
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: RED }}>
-                {pendingApprovals.length === 1 ? "1 card ready to review" : `${pendingApprovals.length} cards ready to review`}
-              </span>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
-              {pendingApprovals.map((item) => {
-                const originalMessage = item.message
-                  ? (item.message.approvedMessage ?? item.message.generatedMessage ?? "")
-                  : "";
-                const currentMessage = refinedMessages[item.id] ?? originalMessage;
-                const isRefining     = refiningId === item.id;
-                const isRefineOpen   = refineOpen === item.id;
-
-                async function handleApprove() {
-                  if (item.message?.id && refinedMessages[item.id]) {
-                    updateDraftApprovedMessage(item.message.id, refinedMessages[item.id]);
-                  }
-                  customerApproveCard(item.id);
-                  reloadApprovals();
-                  try {
-                    await fetch("/api/admin/resolve-customer-approval", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ queueItemId: item.id }),
-                    });
-                  } catch { /* non-blocking */ }
-                }
-
-                async function handleRefine(prompt: string) {
-                  if (!prompt.trim() || isRefining) return;
-                  setRefiningId(item.id);
-                  try {
-                    const res = await fetch("/api/admin/refine-message", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        currentMessage, refinementPrompt: prompt,
-                        recipientName: item.recipientName, eventType: item.eventType,
-                        senderName: item.message?.approvedMessage?.split("—").pop()?.trim() ?? "",
-                      }),
-                    });
-                    if (res.ok) {
-                      const { message } = await res.json() as { message: string };
-                      setRefinedMessages((prev) => ({ ...prev, [item.id]: message }));
-                    }
-                  } catch { /* non-blocking */ } finally {
-                    setRefiningId(null);
-                    setRefinePrompt((prev) => ({ ...prev, [item.id]: "" }));
-                  }
-                }
-
-                return (
-                  <div key={item.id} style={{
-                    background: WHITE, border: `1.5px solid ${RED}22`,
-                    borderRadius: 14, padding: "20px 22px",
-                    boxShadow: "0 2px 8px rgba(226,59,46,0.06)",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK }}>
-                          {item.eventType} card for <span style={{ color: RED }}>{item.recipientName}</span>
-                        </div>
-                        <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 2 }}>Review and approve below</div>
-                      </div>
-                      <button
-                        onClick={handleApprove}
-                        style={{
-                          background: RED, color: WHITE, border: "none", borderRadius: 8,
-                          padding: "8px 18px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
-                          fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.08em",
-                        }}
-                      >
-                        Looks great — send it!
-                      </button>
-                    </div>
-                    {currentMessage && (
-                      <div style={{
-                        background: BEIGE, borderRadius: 10, padding: "14px 16px",
-                        fontSize: "0.88rem", color: BLACK, lineHeight: 1.6,
-                        fontStyle: "italic", whiteSpace: "pre-wrap",
-                      }}>
-                        {currentMessage}
-                      </div>
-                    )}
-                    <div style={{ marginTop: 12 }}>
-                      <button
-                        onClick={() => setRefineOpen(refineOpen === item.id ? null : item.id)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 6,
-                          background: "none", border: "none", cursor: "pointer",
-                          fontSize: "0.78rem", fontWeight: 600, color: GRAY, padding: 0,
-                        }}
-                      >
-                        <Sparkles size={13} style={{ color: RED }} />
-                        Want to tweak it with AI?
-                        {isRefineOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                      </button>
-                      {isRefineOpen && (
-                        <div style={{ marginTop: 12, display: "flex", flexDirection: "column" as const, gap: 10 }}>
-                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
-                            {QUICK_PROMPTS.map(({ label, prompt }) => (
-                              <button
-                                key={label}
-                                onClick={() => handleRefine(prompt)}
-                                disabled={isRefining}
-                                style={{
-                                  fontSize: "0.75rem", fontWeight: 600, padding: "5px 12px",
-                                  borderRadius: 20, border: `1px solid ${RED}35`,
-                                  color: RED, background: `${RED}08`, cursor: "pointer",
-                                }}
-                              >
-                                {label}
-                              </button>
-                            ))}
-                          </div>
-                          <div style={{ display: "flex", gap: 8 }}>
-                            <textarea
-                              rows={2}
-                              value={refinePrompt[item.id] ?? ""}
-                              onChange={(e) => setRefinePrompt((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                              placeholder="e.g. Mention the camping trip, skip the age reference…"
-                              disabled={isRefining}
-                              style={{
-                                flex: 1, border: `1px solid ${BLACK}18`, borderRadius: 10,
-                                padding: "8px 12px", fontSize: "0.82rem", resize: "none" as const,
-                                outline: "none", fontFamily: "'Inter', sans-serif", background: WHITE,
-                              }}
-                            />
-                            <button
-                              onClick={() => handleRefine(refinePrompt[item.id] ?? "")}
-                              disabled={isRefining || !(refinePrompt[item.id] ?? "").trim()}
-                              style={{
-                                alignSelf: "flex-end", display: "flex", alignItems: "center", gap: 6,
-                                background: RED, color: WHITE, border: "none", borderRadius: 10,
-                                padding: "8px 16px", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer",
-                              }}
-                            >
-                              {isRefining ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                              Rewrite
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Tab content ──────────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, padding: isMobile ? "16px 14px 96px" : "24px 28px 56px", position: "relative" as const }}>
-
-        {/* ─── YOUR PEOPLE ─────────────────────────────────────────────────── */}
-        {activeTab === "people" && (
-          <div>
-            {/* Toolbar — one row */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-              <div style={{ flex: 1, position: "relative" as const }}>
-                <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: GRAY, pointerEvents: "none" }} />
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search people…"
-                  style={{
-                    width: "100%", paddingLeft: 36, paddingRight: 14, paddingTop: 9, paddingBottom: 9,
-                    border: `1.5px solid ${BLACK}16`, borderRadius: 10, fontSize: "0.85rem",
-                    fontFamily: "'Inter', sans-serif", outline: "none", background: WHITE, color: BLACK,
-                    boxSizing: "border-box" as const,
-                  }}
-                />
-              </div>
-              {/* Desktop Add Person button — mobile uses FAB */}
-              {!isMobile && (
-                <Link href="/recipients/new">
-                  <button
-                    data-testid="link-add-recipient"
-                    style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      background: RED, color: WHITE, border: "none", borderRadius: 10,
-                      padding: "9px 18px", fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "0.9rem", letterSpacing: "0.1em", cursor: "pointer",
-                      whiteSpace: "nowrap" as const, flexShrink: 0,
-                    }}
-                  >
-                    <Plus size={14} />
-                    Add Person
-                  </button>
-                </Link>
-              )}
-            </div>
-
-            {filteredRecipients.length === 0 ? (
-              <div style={{
-                background: WHITE, border: `1.5px solid ${BLACK}12`, borderRadius: 16,
-                padding: "60px 40px", textAlign: "center" as const,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-              }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0 }}>
                 <div style={{
-                  width: 56, height: 56, borderRadius: 16, background: `${RED}10`,
-                  display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px",
+                  width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                  background: recommendedAction.urgency === "high" ? `${RED}15` : `${BLACK}07`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <Users size={26} style={{ color: RED }} />
+                  {recommendedAction.type === "approve_card"    && <ThumbsUp size={17} style={{ color: RED }} />}
+                  {recommendedAction.type === "answer_briefing" && <Sparkles size={17} style={{ color: recommendedAction.urgency === "high" ? RED : "#1d4ed8" }} />}
+                  {recommendedAction.type === "improve_profile" && <Target size={17} style={{ color: "#26A69A" }} />}
+                  {recommendedAction.type === "add_person"      && <Plus size={17} style={{ color: GRAY }} />}
                 </div>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 8 }}>
-                  {search ? "No matches found." : "Autopilot needs a target."}
-                </div>
-                <p style={{ fontSize: "0.85rem", color: GRAY, margin: "0 auto 20px", maxWidth: 360 }}>
-                  {search
-                    ? "Try a different name or clear your search."
-                    : "Add your first person before you're standing in CVS at 9:47 PM pretending you planned this."}
-                </p>
-                {!search && (
-                  <Link href="/recipients/new">
-                    <button
-                      data-testid="link-add-recipient-empty"
-                      style={{
-                        background: RED, color: WHITE, border: "none", borderRadius: 10,
-                        padding: "10px 24px", fontFamily: "'Bebas Neue', cursive",
-                        fontSize: "1rem", letterSpacing: "0.1em", cursor: "pointer",
-                      }}
-                    >
-                      Add First Person
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Card balance box */}
-                {(() => {
-                  const totalCards = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
-                  const cap = PLANS[plan].maxCardsPerYear;
-                  const remaining = Math.max(0, cap - totalCards);
-                  const overBy = Math.max(0, totalCards - cap);
-                  const atCap = totalCards >= cap;
-                  const pct = Math.min(100, (totalCards / cap) * 100);
-                  const barColor = overBy > 0 ? RED : atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a";
-                  const statusColor = overBy > 0 ? RED : atCap ? RED : pct >= 80 ? "#c2820a" : "#16a34a";
-                  return (
-                    <div style={{
-                      background: WHITE,
-                      border: `1.5px solid ${overBy > 0 ? RED : atCap ? `${RED}50` : `${BLACK}12`}`,
-                      borderRadius: 16,
-                      padding: "20px 24px 18px",
-                      marginBottom: 20,
-                      boxShadow: overBy > 0 ? `0 0 0 3px ${RED}18` : "0 1px 4px rgba(0,0,0,0.06)",
-                    }}>
-                      {/* Top row: label + status badge */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK }}>
-                          CARD BALANCE
-                        </span>
-                        {overBy > 0 ? (
-                          <span style={{
-                            fontSize: "0.72rem", fontWeight: 700, color: RED,
-                            background: `${RED}12`, border: `1px solid ${RED}30`,
-                            borderRadius: 20, padding: "3px 10px",
-                          }}>
-                            {overBy} over limit
-                          </span>
-                        ) : atCap ? (
-                          <span style={{
-                            fontSize: "0.72rem", fontWeight: 700, color: RED,
-                            background: `${RED}10`, border: `1px solid ${RED}25`,
-                            borderRadius: 20, padding: "3px 10px",
-                          }}>
-                            At limit
-                          </span>
-                        ) : (
-                          <span style={{
-                            fontSize: "0.72rem", fontWeight: 600, color: statusColor,
-                            background: `${statusColor}12`, border: `1px solid ${statusColor}30`,
-                            borderRadius: 20, padding: "3px 10px",
-                          }}>
-                            {remaining} left
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Big numbers */}
-                      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 12 }}>
-                        <span style={{
-                          fontFamily: "'Bebas Neue', cursive",
-                          fontSize: "3rem",
-                          lineHeight: 1,
-                          color: overBy > 0 ? RED : BLACK,
-                          letterSpacing: "0.02em",
-                        }}>
-                          {totalCards}
-                        </span>
-                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: GRAY, letterSpacing: "0.03em", lineHeight: 1 }}>
-                          / {cap}
-                        </span>
-                        <span style={{ fontSize: "0.8rem", color: GRAY, marginLeft: 4, fontFamily: "'Inter', sans-serif" }}>
-                          cards planned this year
-                        </span>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div style={{ height: 8, borderRadius: 8, background: `${BLACK}10`, overflow: "hidden", marginBottom: 10 }}>
-                        <div style={{
-                          height: "100%", borderRadius: 8,
-                          width: `${pct}%`,
-                          background: barColor,
-                          transition: "width 0.4s ease",
-                        }} />
-                      </div>
-
-                      {/* Bottom row: message + optional upgrade */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: "0.75rem", color: overBy > 0 ? RED : GRAY, fontFamily: "'Inter', sans-serif" }}>
-                          {overBy > 0
-                            ? `Remove ${overBy} occasion${overBy !== 1 ? "s" : ""} from your people, or upgrade`
-                            : atCap
-                            ? "You're at your plan limit"
-                            : `${remaining} card${remaining !== 1 ? "s" : ""} still available — add more occasions`}
-                        </span>
-                        {(overBy > 0 || atCap) && (
-                          <button onClick={() => setUpgradeOpen(true)} style={{
-                            background: RED, color: WHITE, border: "none",
-                            borderRadius: 10, padding: "5px 14px",
-                            fontFamily: "'Bebas Neue', cursive",
-                            fontSize: "0.8rem", letterSpacing: "0.08em", cursor: "pointer",
-                            flexShrink: 0, marginLeft: 12,
-                          }}>
-                            Upgrade
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                <div style={{
-                  display: "grid",
-                  gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(288px, 1fr))",
-                  gap: isMobile ? 14 : 16,
-                }}>
-                  {(() => {
-                    const totalCards = recipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
-                    const cap = PLANS[plan].maxCardsPerYear;
-                    return filteredRecipients.map((r) => (
-                      <RecipientCard
-                        key={r.id}
-                        r={r}
-                        upcoming={recipientUpcomingMap.get(r.id) ?? []}
-                        plan={plan}
-                        onUpgradeClick={() => setUpgradeOpen(true)}
-                        isMobile={isMobile}
-                        cardsUsed={totalCards}
-                        cardsTotal={cap}
-                      />
-                    ));
-                  })()}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* ─── UPCOMING CARDS ──────────────────────────────────────────────── */}
-        {activeTab === "upcoming" && (
-          <div style={{ display: "flex", flexDirection: "column" as const, gap: 32 }}>
-
-            {/* ── Section: Awaiting Your Approval ─────────────────────────── */}
-            {awaitingApproval.length > 0 && (
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: RED, display: "inline-block", flexShrink: 0 }} />
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: RED }}>
-                    AWAITING YOUR APPROVAL
-                  </span>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
-                  {awaitingApproval.map((card) => {
-                    const text = editedMessages[card.id] ?? card.approvedMessage ?? "";
-                    const isApproving = approvingId === card.id;
-                    return (
-                      <div key={card.id} data-testid={`card-order-${card.id}`} style={{
-                        background: WHITE, border: `1.5px solid ${RED}30`,
-                        borderRadius: 14, overflow: "hidden" as const,
-                        boxShadow: "0 2px 10px rgba(226,59,46,0.08)",
-                      }}>
-                        {/* Card header */}
-                        <div style={{
-                          padding: "14px 18px", borderBottom: `1px solid ${BLACK}08`,
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          background: `${RED}05`,
-                        }}>
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK }}>
-                              {card.holiday} card for <span style={{ color: RED }}>{card.recipientName}</span>
-                            </div>
-                            <div style={{ fontSize: "0.7rem", color: GRAY, marginTop: 2 }}>
-                              {card.dueDate
-                                ? `Occasion ${new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })} · `
-                                : ""}
-                              {card.deliveryPreference}
-                            </div>
-                          </div>
-                          <span style={{
-                            fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.12em",
-                            background: `${RED}15`, color: RED, border: `1px solid ${RED}35`,
-                            borderRadius: 6, padding: "4px 10px",
-                          }}>
-                            READY TO REVIEW
-                          </span>
-                        </div>
-
-                        {/* Card design picker */}
-                        <div style={{ padding: "12px 18px 0" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                            <span style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, textTransform: "uppercase" as const, fontFamily: "'Inter', sans-serif" }}>
-                              Card Design
-                            </span>
-                            {(excludedDesignIds[card.id]?.length ?? 0) < 4 && (
-                              <button
-                                onClick={() => regenCardDesign(card.id, card.holiday, text)}
-                                disabled={!!regenLoadingIds[card.id] || !!editActionId}
-                                style={{
-                                  background: "transparent", border: `1px solid ${BLACK}20`, borderRadius: 20,
-                                  color: regenLoadingIds[card.id] ? GRAY : BLACK,
-                                  fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 600,
-                                  padding: "3px 10px", cursor: regenLoadingIds[card.id] ? "not-allowed" : "pointer",
-                                  display: "flex", alignItems: "center", gap: 5,
-                                }}
-                              >
-                                {regenLoadingIds[card.id]
-                                  ? <><Loader2 size={10} className="animate-spin" /> Picking…</>
-                                  : "↻ Try another"}
-                              </button>
-                            )}
-                          </div>
-
-                          {regenLoadingIds[card.id] ? (
-                            <div style={{ height: 120, borderRadius: 8, background: `${BLACK}05`, border: `1px solid ${BLACK}10`, display: "flex", alignItems: "center", justifyContent: "center", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", marginBottom: 12 }}>
-                              Finding a card design…
-                            </div>
-                          ) : cardDesignMap[card.id]?.imageUrl ? (
-                            <div
-                              onClick={() => setLightboxDesignCard(card.id)}
-                              style={{ cursor: "zoom-in", borderRadius: 8, overflow: "hidden", border: `1px solid ${BLACK}14`, position: "relative", marginBottom: 12 }}
-                            >
-                              <img
-                                src={cardDesignMap[card.id].imageUrl}
-                                alt={cardDesignMap[card.id].name}
-                                style={{ width: "100%", display: "block", maxHeight: 220, objectFit: "contain", background: BEIGE }}
-                              />
-                              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.55))", padding: "16px 12px 8px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-                                <span style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.78rem" }}>{cardDesignMap[card.id].name}</span>
-                                <span style={{ background: "rgba(255,255,255,0.18)", borderRadius: 5, padding: "3px 8px", fontSize: "0.65rem", color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>🔍 Full size</span>
-                              </div>
-                            </div>
-                          ) : null}
-                        </div>
-
-                        {/* Lightbox */}
-                        {lightboxDesignCard === card.id && cardDesignMap[card.id]?.imageUrl && (
-                          <div
-                            onClick={() => setLightboxDesignCard(null)}
-                            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, cursor: "zoom-out" }}
-                          >
-                            <img
-                              src={cardDesignMap[card.id].imageUrl}
-                              alt={cardDesignMap[card.id].name}
-                              style={{ maxWidth: "100%", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, boxShadow: "0 0 60px rgba(0,0,0,0.8)" }}
-                            />
-                            <button
-                              onClick={e => { e.stopPropagation(); setLightboxDesignCard(null); }}
-                              style={{ position: "absolute", top: 20, right: 20, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#fff", fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif" }}
-                            >✕</button>
-                            <div style={{ position: "absolute", bottom: 20, color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}>Click anywhere to close</div>
-                          </div>
-                        )}
-
-                        {/* Message textarea */}
-                        <div style={{ padding: "16px 18px" }}>
-                          <textarea
-                            value={text}
-                            onChange={e => setEditedMessages(prev => ({ ...prev, [card.id]: e.target.value }))}
-                            style={{
-                              width: "100%", minHeight: 140,
-                              border: `1.5px solid ${BLACK}14`, borderRadius: 10,
-                              padding: "12px 14px", fontSize: "0.9rem",
-                              fontFamily: "'Inter', sans-serif", lineHeight: 1.7, color: BLACK,
-                              background: BEIGE, resize: "vertical" as const,
-                              boxSizing: "border-box" as const, outline: "none",
-                            }}
-                          />
-
-                          {/* Quick AI edits */}
-                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 10 }}>
-                            <span style={{ fontSize: "0.65rem", fontWeight: 700, color: GRAY, alignSelf: "center", marginRight: 2 }}>AI edits:</span>
-                            {([
-                              { label: "Shorter",    instruction: "Make it significantly shorter and more punchy. Keep only the most impactful lines." },
-                              { label: "Funnier",    instruction: "Add genuine humor. Make it funnier without losing the heart." },
-                              { label: "More heart", instruction: "Make it warmer and more emotionally resonant." },
-                              { label: "Rewrite",    instruction: "Completely rewrite in a fresh way for the same person and occasion." },
-                            ] as const).map(({ label, instruction }) => {
-                              const actionKey = `${card.id}-${label}`;
-                              const isLoading = editActionId === actionKey;
-                              return (
-                                <button key={label}
-                                  onClick={() => quickEditPersonalCard(card, instruction, label)}
-                                  disabled={!!editActionId}
-                                  style={{
-                                    fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px", borderRadius: 8,
-                                    border: `1px solid ${BLACK}18`,
-                                    background: isLoading ? `${BLACK}06` : WHITE,
-                                    color: isLoading ? GRAY : BLACK,
-                                    cursor: editActionId ? "default" : "pointer",
-                                    display: "flex", alignItems: "center", gap: 5,
-                                    fontFamily: "'Inter', sans-serif",
-                                  }}>
-                                  {isLoading
-                                    ? <Loader2 size={11} className="animate-spin" />
-                                    : <Sparkles size={11} style={{ color: RED }} />}
-                                  {label}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          {/* Mailing address */}
-                          {(() => {
-                            const addr = user?.mailingAddress;
-                            const isOverriding = showAddrOverride[card.id] ?? false;
-                            const ov = addrOverride[card.id] ?? {};
-                            const setOv = (patch: Partial<RecipientAddress>) =>
-                              setAddrOverride(prev => ({ ...prev, [card.id]: { ...prev[card.id], ...patch } }));
-                            return (
-                              <div style={{ marginTop: 14, borderRadius: 10, border: `1px solid ${BLACK}12`, overflow: "hidden" }}>
-                                <div style={{ padding: "10px 14px", background: `${BLACK}04`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
-                                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                                    <span style={{ fontSize: "0.9rem" }}>📬</span>
-                                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: BLACK }}>
-                                      {isOverriding
-                                        ? "Sending to a custom address"
-                                        : addr
-                                          ? `Mailing to: ${addr.line1}${addr.line2 ? ` ${addr.line2}` : ""}, ${addr.city}, ${addr.state} ${addr.zip}`
-                                          : "No mailing address on file"}
-                                    </span>
-                                  </div>
-                                  <button
-                                    onClick={() => setShowAddrOverride(prev => ({ ...prev, [card.id]: !isOverriding }))}
-                                    style={{ fontSize: "0.7rem", fontWeight: 600, color: isOverriding ? GRAY : RED, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}>
-                                    {isOverriding ? "← Use my address" : addr ? "Send somewhere else" : "Add my address"}
-                                  </button>
-                                </div>
-                                {isOverriding && (
-                                  <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                                    <input
-                                      placeholder="Street address"
-                                      value={ov.line1 ?? ""}
-                                      onChange={e => setOv({ line1: e.target.value })}
-                                      style={{ width: "100%", border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none", boxSizing: "border-box" as const }}
-                                    />
-                                    <input
-                                      placeholder="Apt / Suite (optional)"
-                                      value={ov.line2 ?? ""}
-                                      onChange={e => setOv({ line2: e.target.value })}
-                                      style={{ width: "100%", border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none", boxSizing: "border-box" as const }}
-                                    />
-                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 58px 84px", gap: 8 }}>
-                                      <input placeholder="City" value={ov.city ?? ""} onChange={e => setOv({ city: e.target.value })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none" }} />
-                                      <input placeholder="ST" maxLength={2} value={ov.state ?? ""} onChange={e => setOv({ state: e.target.value.toUpperCase() })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none" }} />
-                                      <input placeholder="Zip" maxLength={10} value={ov.zip ?? ""} onChange={e => setOv({ zip: e.target.value })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none" }} />
-                                    </div>
-                                  </div>
-                                )}
-                                {!addr && !isOverriding && (
-                                  <div style={{ padding: "8px 14px", fontSize: "0.72rem", color: "#b45309", background: "#fffbeb", borderTop: `1px solid #fde68a` }}>
-                                    Cards will still be queued — add your address above so we know where to mail them.
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })()}
-
-                          {/* Share Preview */}
-                          {cardDesignMap[card.id]?.imageUrl && (
-                            <div style={{ marginTop: 14 }}>
-                              {!shareUrlIds[card.id] ? (
-                                <button
-                                  onClick={() => shareCardPreview(card)}
-                                  disabled={shareLoadingIds[card.id]}
-                                  style={{
-                                    width: "100%",
-                                    fontSize: "0.78rem", fontWeight: 600, padding: "9px 16px",
-                                    borderRadius: 8, border: `1.5px solid ${BLACK}18`,
-                                    background: WHITE, color: BLACK,
-                                    cursor: shareLoadingIds[card.id] ? "default" : "pointer",
-                                    fontFamily: "'Inter', sans-serif",
-                                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                                  }}>
-                                  {shareLoadingIds[card.id]
-                                    ? <Loader2 size={13} className="animate-spin" />
-                                    : "🔗"}
-                                  {shareLoadingIds[card.id] ? "Creating link…" : "Share preview via text"}
-                                </button>
-                              ) : (
-                                <div style={{ borderRadius: 8, border: `1.5px solid ${BLACK}18`, background: WHITE, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
-                                  <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: BLACK, fontFamily: "'Inter', sans-serif", textTransform: "uppercase" as const }}>
-                                    📬 Copy &amp; text this link to {card.recipientName}
-                                  </div>
-                                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                                    <input
-                                      readOnly
-                                      value={shareUrlIds[card.id]}
-                                      onFocus={e => e.target.select()}
-                                      style={{ flex: 1, fontSize: "0.72rem", padding: "6px 8px", borderRadius: 6, border: `1px solid ${BLACK}18`, background: "#f8f5f0", color: BLACK, fontFamily: "'Inter', sans-serif", outline: "none", minWidth: 0 }}
-                                    />
-                                    <button
-                                      onClick={async () => { await navigator.clipboard.writeText(shareUrlIds[card.id]); setShareCopiedIds(prev => ({ ...prev, [card.id]: true })); setTimeout(() => setShareCopiedIds(prev => ({ ...prev, [card.id]: false })), 2500); }}
-                                      style={{ flexShrink: 0, padding: "6px 12px", borderRadius: 6, border: "none", background: shareCopiedIds[card.id] ? "#22c55e" : BLACK, color: WHITE, fontSize: "0.7rem", fontWeight: 700, fontFamily: "'Inter', sans-serif", cursor: "pointer", transition: "background 0.2s" }}
-                                    >
-                                      {shareCopiedIds[card.id] ? "Copied!" : "Copy"}
-                                    </button>
-                                  </div>
-                                  <button
-                                    onClick={() => setShareUrlIds(prev => { const n = { ...prev }; delete n[card.id]; return n; })}
-                                    style={{ alignSelf: "flex-start", background: "none", border: "none", color: "#aaa", fontSize: "0.68rem", fontFamily: "'Inter', sans-serif", cursor: "pointer", padding: 0 }}
-                                  >
-                                    ✕ Close
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Approve / Reject */}
-                          <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" }}>
-                            <button
-                              onClick={() => rejectPersonalCard(card)}
-                              style={{
-                                fontSize: "0.78rem", fontWeight: 600, padding: "8px 16px",
-                                borderRadius: 8, border: `1.5px solid ${BLACK}18`,
-                                background: WHITE, color: GRAY, cursor: "pointer",
-                                fontFamily: "'Inter', sans-serif",
-                              }}>
-                              Reject &amp; regenerate
-                            </button>
-                            <button
-                              onClick={() => { setApprovingId(card.id); approvePersonalCard(card); }}
-                              disabled={isApproving}
-                              style={{
-                                fontSize: "0.78rem", fontWeight: 700, padding: "8px 22px",
-                                borderRadius: 8, border: "none",
-                                background: RED, color: WHITE,
-                                cursor: isApproving ? "default" : "pointer",
-                                fontFamily: "'Inter', sans-serif",
-                                display: "flex", alignItems: "center", gap: 6,
-                              }}>
-                              {isApproving
-                                ? <Loader2 size={13} className="animate-spin" />
-                                : <ThumbsUp size={13} />}
-                              Approve &amp; Send
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* ── Section: Coming Up ──────────────────────────────────────── */}
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: BLACK }}>
-                  COMING UP — NEXT 90 DAYS
-                </span>
-                <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.08em", color: GRAY, background: `${BLACK}09`, borderRadius: 8, padding: "4px 10px" }}>
-                  {allUpcomingEvents.length} event{allUpcomingEvents.length !== 1 ? "s" : ""}
-                </span>
-              </div>
-
-              {allUpcomingEvents.length === 0 ? (
-                <div style={{
-                  background: WHITE, border: `1.5px solid ${BLACK}12`, borderRadius: 16,
-                  padding: "60px 40px", textAlign: "center" as const,
-                }}>
-                  <div style={{
-                    width: 56, height: 56, borderRadius: 16, background: "#f0fdf4",
-                    display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px",
-                  }}>
-                    <CalendarDays size={26} style={{ color: "#22c55e" }} />
-                  </div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 6 }}>
-                    {recipients.length === 0 ? "No people, no cards." : "Nothing in the next 90 days."}
-                  </div>
-                  <p style={{ fontSize: "0.82rem", color: GRAY }}>
-                    {recipients.length === 0 ? "Add someone to watch over first." : "Cards will appear here as occasions approach."}
-                  </p>
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                  {allUpcomingEvents.map((ev) => {
-                    const genKey = `${ev.recipient.id}:::${ev.event}`;
-                    const isGenerating = generatingFor === genKey;
-                    const hasCard = upcomingWithCardKeys.has(genKey);
-                    const recip = recipients.find(r => r.id === ev.recipient.id);
-                    const previewDays = recip?.previewDays ?? 14;
-                    const timingKey = `${ev.recipient.id}-${ev.event}`;
-                    const isTimingOpen = timingPickerOpen === timingKey;
-
-                    return (
-                      <div key={genKey} style={{
-                        background: WHITE,
-                        border: `1.5px solid ${hasCard ? "#22c55e30" : ev.briefingDone ? `${BLACK}18` : `${BLACK}12`}`,
-                        borderRadius: 14, padding: "14px 18px",
-                        display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" as const,
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                      }}>
-                        <UrgencyBadge days={ev.daysAway} />
-
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: BLACK }}>
-                            {ev.event}
-                            <span style={{ fontWeight: 400, color: GRAY, marginLeft: 6 }}>for {ev.recipient.name}</span>
-                          </div>
-                          <div style={{ fontSize: "0.72rem", marginTop: 3, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const, color: GRAY }}>
-                            <span>{new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                            {ev.briefingDone && <span style={{ fontWeight: 700, color: "#16a34a" }}>✓ Questions answered</span>}
-                            {hasCard && <span style={{ fontWeight: 700, color: RED }}>↑ Needs approval above</span>}
-                          </div>
-                          {!ev.briefingDone && !hasCard && (
-                            <div style={{ fontSize: "0.72rem", marginTop: 5, color: GRAY, fontStyle: "italic", lineHeight: 1.4 }}>
-                              3 quick questions so the card sounds like <em style={{ fontStyle: "normal", fontWeight: 600, color: BLACK }}>you</em>, not a template.
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Action buttons */}
-                        {hasCard ? (() => {
-                          const matchedCard = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
-                          const isApproved = matchedCard?.status === "Approved";
-                          return isApproved ? (
-                            <button
-                              onClick={() => setViewingCardId(matchedCard!.id)}
-                              style={{
-                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
-                                borderRadius: 8, border: "none",
-                                background: "#1d4ed8", color: WHITE, cursor: "pointer",
-                                fontFamily: "'Inter', sans-serif", flexShrink: 0,
-                              }}>
-                              ✔ View Approved Card
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setActiveTab("upcoming")}
-                              style={{
-                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
-                                borderRadius: 8, border: `1px solid ${RED}30`,
-                                background: `${RED}08`, color: RED, cursor: "pointer",
-                                fontFamily: "'Inter', sans-serif", flexShrink: 0,
-                              }}>
-                              Review ↑
-                            </button>
-                          );
-                        })() : (
-                          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                            <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
-                              <div style={{ position: "relative", display: "inline-block" }}
-                                onMouseEnter={() => setHoveredBriefing(genKey)}
-                                onMouseLeave={() => setHoveredBriefing(null)}
-                              >
-                                <button style={{
-                                  fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px",
-                                  borderRadius: 8, border: `1px solid ${ev.briefingDone ? `${BLACK}18` : RED}`,
-                                  background: ev.briefingDone ? `${BLACK}06` : `${RED}10`,
-                                  color: ev.briefingDone ? GRAY : RED,
-                                  cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                                }}>
-                                  {ev.briefingDone ? "Edit personalization" : "✦ Personalize"}
-                                </button>
-                                {hoveredBriefing === genKey && (
-                                  <div style={{
-                                    position: "absolute", bottom: "calc(100% + 8px)", right: 0,
-                                    background: "#1a1a1a", color: WHITE,
-                                    fontSize: "0.68rem", lineHeight: 1.5,
-                                    padding: "8px 11px", borderRadius: 7,
-                                    maxWidth: 220, pointerEvents: "none",
-                                    boxShadow: "0 3px 12px rgba(0,0,0,0.2)",
-                                    zIndex: 50,
-                                  }}>
-                                    {ev.briefingDone
-                                      ? <>Tell us more about {ev.recipient.name} — every answer makes future cards smarter. Totally optional.</>
-                                      : <>A few optional questions about {ev.recipient.name}. The more we know, the more every card feels written just for them — skip anytime.</>}
-                                    <div style={{
-                                      position: "absolute", top: "100%", right: 14,
-                                      border: "5px solid transparent",
-                                      borderTopColor: "#1a1a1a",
-                                    }} />
-                                  </div>
-                                )}
-                              </div>
-                            </Link>
-                            <button
-                              onClick={() => generateEarly(ev)}
-                              disabled={!!generatingFor}
-                              style={{
-                                fontSize: "0.72rem", fontWeight: 700, padding: "6px 14px",
-                                borderRadius: 8, border: "none",
-                                background: isGenerating ? `${BLACK}10` : RED,
-                                color: isGenerating ? GRAY : WHITE,
-                                cursor: isGenerating || !!generatingFor ? "default" : "pointer",
-                                display: "flex", alignItems: "center", gap: 5,
-                                fontFamily: "'Inter', sans-serif",
-                              }}>
-                              {isGenerating
-                                ? <><Loader2 size={11} className="animate-spin" /> Generating…</>
-                                : <><Sparkles size={11} /> Generate Early</>}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* ── Section: Approved & Queued ──────────────────────────────── */}
-            {approvedPersonalCards.length > 0 && (
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: "#16a34a" }}>
-                    ✓ APPROVED &amp; QUEUED TO MAIL
-                  </span>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                  {approvedPersonalCards.map(card => (
-                    <div key={card.id} style={{
-                      background: WHITE, border: "1.5px solid #22c55e28",
-                      borderRadius: 12, padding: "12px 18px",
-                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-                    }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <CheckCircle2 size={16} style={{ color: "#16a34a", flexShrink: 0 }} />
-                        <div>
-                          <div style={{ fontWeight: 600, fontSize: "0.88rem", color: BLACK }}>
-                            {card.holiday} · {card.recipientName}
-                          </div>
-                          <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 1 }}>
-                            {card.deliveryPreference}
-                          </div>
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{
-                          fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
-                          background: "#f0fdf4", color: "#16a34a", border: "1px solid #22c55e30",
-                          borderRadius: 6, padding: "3px 10px",
-                        }}>
-                          QUEUED TO MAIL
-                        </span>
-                        <button
-                          onClick={() => setViewingCardId(card.id)}
-                          style={{
-                            fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px",
-                            borderRadius: 7, border: "none",
-                            background: "#1d4ed8", color: WHITE, cursor: "pointer",
-                            fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap",
-                          }}>
-                          View Card →
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-          </div>
-        )}
-
-      </div>
-    </div>
-
-      {/* ── Approved Card Viewer Modal ──────────────────────────────────────── */}
-      {viewingCardId && (() => {
-        const card = cards.find(c => c.id === viewingCardId);
-        if (!card) return null;
-        const message = editedMessages[card.id] ?? card.approvedMessage ?? "";
-        const mailDate = card.dueDate
-          ? new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-          : null;
-        return (
-          <div
-            onClick={() => setViewingCardId(null)}
-            style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" }}
-          >
-            <div
-              onClick={e => e.stopPropagation()}
-              style={{ background: WHITE, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "88vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}
-            >
-              {/* Header */}
-              <div style={{ padding: "18px 20px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK, fontFamily: "'Inter', sans-serif" }}>
-                    {card.holiday} · {card.recipientName}
-                  </div>
-                  {mailDate && (
-                    <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 3, fontFamily: "'Inter', sans-serif" }}>
-                      Mailing on {mailDate}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK, marginBottom: 2 }}>{recommendedAction.title}</div>
+                  <div style={{ fontSize: "0.78rem", color: GRAY, lineHeight: 1.4 }}>{recommendedAction.description}</div>
+                  {recommendedAction.daysUntil !== undefined && (
+                    <div style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                      <Clock size={10} style={{ color: recommendedAction.urgency === "high" ? RED : "#c2820a" }} />
+                      <span style={{ fontSize: "0.68rem", fontWeight: 700, color: recommendedAction.urgency === "high" ? RED : "#c2820a" }}>
+                        {recommendedAction.daysUntil} days away
+                      </span>
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => setViewingCardId(null)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "1.1rem", lineHeight: 1, padding: "2px 6px", flexShrink: 0 }}
-                >✕</button>
               </div>
-
-              {/* Approved banner */}
-              <div style={{ margin: "14px 20px 0", display: "flex", alignItems: "center", gap: 8, background: "#f0fdf4", border: "1px solid #22c55e30", borderRadius: 8, padding: "10px 14px" }}>
-                <CheckCircle2 size={15} style={{ color: "#16a34a", flexShrink: 0 }} />
-                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#15803d", fontFamily: "'Inter', sans-serif" }}>
-                  Card approved — queued to mail
-                </span>
-              </div>
-
-              {/* Message */}
-              <div style={{ padding: "16px 20px 24px" }}>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: GRAY, fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>
-                  Approved Message
-                </div>
-                <div style={{
-                  background: BEIGE, border: `1.5px solid ${BLACK}12`, borderRadius: 10,
-                  padding: "14px 16px", fontSize: "0.9rem", lineHeight: 1.7,
-                  color: BLACK, fontFamily: "Georgia, serif", whiteSpace: "pre-wrap",
+              <a
+                href={recommendedAction.href}
+                style={{ textDecoration: "none", flexShrink: 0 }}
+                {...(recommendedAction.href.startsWith("#") ? {} : { onClick: (e: React.MouseEvent) => { e.preventDefault(); setLocation(recommendedAction.href); } })}
+              >
+                <button style={{
+                  background: recommendedAction.urgency === "high" ? RED : BLACK,
+                  color: WHITE, border: "none", borderRadius: 9,
+                  padding: "9px 18px", fontFamily: "'Bebas Neue', cursive",
+                  fontSize: "0.85rem", letterSpacing: "0.08em", cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 6,
                 }}>
-                  {message || <span style={{ color: GRAY, fontStyle: "italic" }}>No message on file.</span>}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── Mobile FAB — Add Person ─────────────────────────────────────────── */}
-      {isMobile && activeTab === "people" && (
-        <Link href="/recipients/new">
-          <button
-            data-testid="link-add-recipient"
-            style={{
-              position: "fixed", bottom: 24, right: 20, zIndex: 200,
-              display: "flex", alignItems: "center", gap: 8,
-              background: RED, color: WHITE, border: "none",
-              borderRadius: 28, padding: "14px 22px",
-              fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em",
-              boxShadow: "0 4px 20px rgba(226,59,46,0.38)",
-              cursor: "pointer",
-            }}
-          >
-            <Plus size={16} />
-            Add Person
-          </button>
-        </Link>
-      )}
-
-      {/* ── Handwriting Font Picker Modal ────────────────────────────────────── */}
-      {fontPickerOpen && (
-        <div
-          onClick={() => setFontPickerOpen(false)}
-          style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: WHITE, borderRadius: 14, padding: "28px 28px 20px", width: 760, maxWidth: "95vw", maxHeight: "88vh", display: "flex", flexDirection: "column" as const, gap: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}
-          >
-            <div style={{ fontWeight: 700, fontSize: "1.05rem", color: BLACK, fontFamily: "'Inter', sans-serif" }}>Choose a Handwriting Style</div>
-            <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: -8, fontFamily: "'Inter', sans-serif" }}>
-              Every card we send will be handwritten using real pens. Pick the style that feels like you.
-            </div>
-            {fontsLoading ? (
-              <div style={{ textAlign: "center", padding: "32px 0", color: GRAY, fontFamily: "'Inter', sans-serif" }}>Loading styles…</div>
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, overflowY: "auto", paddingRight: 4 }}>
-                {hwFonts.map((font, idx) => {
-                  const selected = personalSettings.cardFont === font.id;
-                  return (
-                    <button key={font.id}
-                      onClick={() => { updateSettings("cardFont", font.id); setFontPickerOpen(false); }}
-                      style={{ border: `2px solid ${selected ? RED : "#e2e8f0"}`, borderRadius: 10, padding: "14px 16px", cursor: "pointer", background: selected ? `${RED}08` : WHITE, textAlign: "left" as const, transition: "all 0.12s", display: "flex", flexDirection: "column" as const, gap: 10 }}
-                      onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLElement).style.borderColor = "#cbd5e1"; }}
-                      onMouseLeave={e => { if (!selected) (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0"; }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK, fontFamily: "'Inter', sans-serif" }}>{font.name}</span>
-                        {idx === 0  && <span style={{ fontSize: "0.68rem", background: "#f1f5f9", color: GRAY, border: "1px solid #e2e8f0", borderRadius: 20, padding: "1px 7px", fontFamily: "'Inter', sans-serif" }}>Default</span>}
-                        {selected   && <span style={{ fontSize: "0.68rem", background: RED, color: WHITE, borderRadius: 20, padding: "1px 7px", fontFamily: "'Inter', sans-serif" }}>Selected</span>}
-                      </div>
-                      {font.previewUrl
-                        ? <img src={font.previewUrl} alt={`${font.name} handwriting sample`} style={{ width: "100%", height: 160, objectFit: "contain", objectPosition: "center center" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; (e.currentTarget.nextSibling as HTMLElement).style.display = "block"; }} />
-                        : null}
-                      <div style={{ display: font.previewUrl ? "none" : "block", fontFamily: "cursive", fontSize: "1.1rem", color: "#334155", lineHeight: 1.5, paddingTop: 4 }}>Warm wishes and heartfelt thanks!</div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 4, borderTop: `1px solid ${BLACK}10` }}>
-              {personalSettings.cardFont && (
-                <button onClick={() => { updateSettings("cardFont", ""); setFontPickerOpen(false); }}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "0.8rem", fontFamily: "'Inter', sans-serif" }}>
-                  Clear selection
+                  {recommendedAction.type === "approve_card" ? "Review Cards" :
+                   recommendedAction.type === "answer_briefing" ? "Personalize" :
+                   recommendedAction.type === "add_person" ? "Add Person" : "Improve Profile"}
+                  <ArrowRight size={13} />
                 </button>
-              )}
-              <div style={{ flex: 1 }} />
-              <button onClick={() => setFontPickerOpen(false)}
-                style={{ background: RED, color: WHITE, border: "none", borderRadius: 7, padding: "8px 20px", cursor: "pointer", fontSize: "0.85rem", fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
-                Done
-              </button>
+              </a>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Upgrade Modal ─────────────────────────────────────────────────────── */}
-      {upgradeOpen && (
-        <div
-          onClick={(e) => { if (e.target === e.currentTarget) setUpgradeOpen(false); }}
-          style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16 }}
-        >
-          <div style={{ background: WHITE, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: "28px 24px 36px" }}>
-            <div style={{ width: 40, height: 4, background: `${BLACK}20`, borderRadius: 2, margin: "0 auto 24px" }} />
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.04em", color: BLACK, lineHeight: 1, marginBottom: 4 }}>
-              NEED MORE CARDS?
-            </div>
-            <p style={{ fontSize: "0.85rem", color: GRAY, marginBottom: 20, fontFamily: "'Inter', sans-serif", lineHeight: 1.5 }}>
-              You've used all {PLANS[plan].maxCardsPerYear} card slots on your current plan. Upgrade to cover more occasions across your people.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
-              {(["basic","standard","premium"] as Plan[]).map((key) => {
-                const config = PLANS[key];
-                const isCurrent = key === plan;
-                const orderedPlans: Plan[] = ["basic","standard","premium"];
-                const isUpgrade = orderedPlans.indexOf(key) > orderedPlans.indexOf(plan);
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 3 — REVIEW & APPROVE (only when items pending)           */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {(awaitingApproval.length > 0 || pendingApprovals.length > 0) && (
+          <div id="review" style={{ marginBottom: 20 }}>
+            <SectionHead
+              label="REVIEW & APPROVE"
+              right={
+                <span style={{ fontSize: "0.72rem", fontWeight: 700, color: RED, background: `${RED}12`, borderRadius: 8, padding: "3px 10px" }}>
+                  {approvalCount} waiting
+                </span>
+              }
+            />
+
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
+
+              {/* ── Admin pending approvals ── */}
+              {pendingApprovals.map(pa => {
+                const msgText = refinedMessages[pa.id] ?? pa.message?.approvedMessage ?? pa.message?.generatedMessage ?? "";
                 return (
-                  <div key={key} style={{ borderRadius: 12, padding: "16px", border: `2px solid ${isCurrent ? `${BLACK}20` : isUpgrade ? `${RED}30` : `${BLACK}08`}`, background: isCurrent ? BEIGE : "#fafafa" }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const, marginBottom: 2 }}>
-                          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK }}>{config.label}</span>
-                          {isCurrent && <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "1px 8px", borderRadius: 10, background: `${BLACK}10`, color: GRAY }}>Current</span>}
-                          {key === "standard" && !isCurrent && <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "1px 8px", borderRadius: 10, background: `${RED}12`, color: RED }}>Most Popular</span>}
-                        </div>
-                        <p style={{ fontSize: "0.72rem", color: GRAY, margin: "0 0 8px", fontFamily: "'Inter', sans-serif" }}>{config.tagline}</p>
-                        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column" as const, gap: 3 }}>
-                          {config.perks.map(perk => (
-                            <li key={perk} style={{ fontSize: "0.72rem", color: BLACK, display: "flex", alignItems: "center", gap: 5, fontFamily: "'Inter', sans-serif" }}>
-                              <span style={{ color: RED, fontWeight: 700 }}>✓</span> {perk}
-                            </li>
-                          ))}
-                        </ul>
+                  <div key={pa.id} style={{
+                    background: WHITE, border: `1.5px solid ${BLACK}18`,
+                    borderRadius: 16, overflow: "hidden",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  }}>
+                    <div style={{ padding: "14px 18px 10px", display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${BLACK}0E` }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: "#1d4ed8", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ color: WHITE, fontSize: "0.85rem" }}>✉</span>
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
-                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: BLACK, lineHeight: 1 }}>{config.price}</span>
-                        {!isCurrent && (
-                          <button
-                            onClick={() => { upgradePlan(key); setUpgradeOpen(false); }}
-                            style={{ background: isUpgrade ? RED : `${BLACK}10`, color: isUpgrade ? WHITE : GRAY, border: "none", borderRadius: 7, padding: "7px 16px", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'Inter', sans-serif", cursor: "pointer", whiteSpace: "nowrap" }}
-                          >
-                            {isUpgrade ? "Upgrade" : "Downgrade"}
-                          </button>
-                        )}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>{pa.eventType} · {pa.recipientName}</div>
+                        <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 1 }}>{pa.eventDate ? new Date(pa.eventDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}</div>
+                      </div>
+                    </div>
+                    <div style={{ padding: "14px 18px" }}>
+                      <textarea
+                        value={msgText}
+                        onChange={e => setRefinedMessages(prev => ({ ...prev, [pa.id]: e.target.value }))}
+                        style={{
+                          width: "100%", minHeight: 120, border: `1.5px solid ${BLACK}14`,
+                          borderRadius: 10, padding: "12px 14px", fontSize: "0.88rem",
+                          fontFamily: "'Inter', sans-serif", lineHeight: 1.7, color: BLACK,
+                          background: BEIGE, resize: "vertical" as const, boxSizing: "border-box" as const, outline: "none",
+                        }}
+                      />
+                      <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" }}>
+                        <button
+                          onClick={() => { const t = refinedMessages[pa.id]; if (t) updateDraftApprovedMessage(pa.id, t); reloadApprovals(); }}
+                          style={{ padding: "8px 16px", borderRadius: 8, border: `1.5px solid ${BLACK}18`, background: WHITE, color: GRAY, cursor: "pointer", fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "0.78rem" }}>
+                          Save edits
+                        </button>
+                        <button
+                          onClick={() => { const t = refinedMessages[pa.id]; if (t) updateDraftApprovedMessage(pa.id, t); customerApproveCard(pa.id); reloadApprovals(); }}
+                          style={{ padding: "8px 22px", borderRadius: 8, border: "none", background: RED, color: WHITE, cursor: "pointer", fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: "0.78rem", display: "flex", alignItems: "center", gap: 6 }}>
+                          <ThumbsUp size={13} /> Approve &amp; Send
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* ── Personal card approval cards ── */}
+              {awaitingApproval.map((card) => {
+                const isApproving = approvingId === card.id;
+                const text = editedMessages[card.id] ?? card.approvedMessage ?? "";
+                const design = cardDesignMap[card.id];
+                const isRegenning = regenLoadingIds[card.id];
+
+                return (
+                  <div key={card.id} style={{
+                    background: WHITE, border: `1.5px solid ${BLACK}18`,
+                    borderRadius: 16, overflow: "hidden",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  }}>
+                    {/* Card header */}
+                    <div style={{ padding: "14px 18px 10px", display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${BLACK}0E` }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: `${RED}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ color: RED, fontSize: "0.85rem" }}>✦</span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>{card.holiday} · {card.recipientName}</div>
+                        <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 1 }}>{card.dueDate ? `Mailing ${new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</div>
+                      </div>
+                      <span style={{
+                        fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
+                        background: `${RED}10`, color: RED, borderRadius: 6, padding: "3px 9px",
+                      }}>
+                        NEEDS REVIEW
+                      </span>
+                    </div>
+
+                    {/* Card design preview */}
+                    {(design || isRegenning) && (
+                      <div style={{ position: "relative", background: BEIGE }}>
+                        {isRegenning ? (
+                          <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                            <Loader2 size={18} className="animate-spin" style={{ color: GRAY }} />
+                            <span style={{ fontSize: "0.8rem", color: GRAY }}>Finding a card design…</span>
+                          </div>
+                        ) : design?.imageUrl ? (
+                          <>
+                            <img
+                              src={design.imageUrl}
+                              alt={design.name}
+                              onClick={() => setLightboxDesignCard(card.id)}
+                              style={{ width: "100%", display: "block", maxHeight: 220, objectFit: "contain", background: BEIGE, cursor: "zoom-in" }}
+                            />
+                            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.5))", padding: "16px 12px 8px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                              <span style={{ color: WHITE, fontWeight: 600, fontSize: "0.76rem" }}>{design.name}</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <button
+                                  onClick={() => regenCardDesign(card.id, card.holiday, text)}
+                                  style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.12)", color: WHITE, fontSize: "0.65rem", fontWeight: 600, cursor: "pointer" }}>
+                                  Try another →
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
+                    )}
+
+                    {/* Lightbox */}
+                    {lightboxDesignCard === card.id && design?.imageUrl && (
+                      <div
+                        onClick={() => setLightboxDesignCard(null)}
+                        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, cursor: "zoom-out" }}
+                      >
+                        <img src={design.imageUrl} alt={design.name} style={{ maxWidth: "100%", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, boxShadow: "0 0 60px rgba(0,0,0,0.8)" }} />
+                        <button onClick={e => { e.stopPropagation(); setLightboxDesignCard(null); }} style={{ position: "absolute", top: 20, right: 20, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: WHITE, fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                        <div style={{ position: "absolute", bottom: 20, color: "rgba(255,255,255,0.35)", fontSize: "0.72rem" }}>Click anywhere to close</div>
+                      </div>
+                    )}
+
+                    {/* Message + actions */}
+                    <div style={{ padding: "16px 18px" }}>
+                      <textarea
+                        value={text}
+                        onChange={e => setEditedMessages(prev => ({ ...prev, [card.id]: e.target.value }))}
+                        style={{
+                          width: "100%", minHeight: 140,
+                          border: `1.5px solid ${BLACK}14`, borderRadius: 10,
+                          padding: "12px 14px", fontSize: "0.9rem",
+                          fontFamily: "'Inter', sans-serif", lineHeight: 1.7, color: BLACK,
+                          background: BEIGE, resize: "vertical" as const,
+                          boxSizing: "border-box" as const, outline: "none",
+                        }}
+                      />
+
+                      {/* Quick AI edits */}
+                      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 10 }}>
+                        <span style={{ fontSize: "0.65rem", fontWeight: 700, color: GRAY, alignSelf: "center", marginRight: 2 }}>AI edits:</span>
+                        {([
+                          { label: "Shorter",    instruction: "Make it significantly shorter and more punchy." },
+                          { label: "Funnier",    instruction: "Add genuine humor without losing the heart." },
+                          { label: "More heart", instruction: "Make it warmer and more emotionally resonant." },
+                          { label: "Rewrite",    instruction: "Completely rewrite in a fresh way." },
+                        ] as const).map(({ label, instruction }) => {
+                          const actionKey = `${card.id}-${label}`;
+                          const isLoading = editActionId === actionKey;
+                          return (
+                            <button key={label}
+                              onClick={() => quickEditPersonalCard(card, instruction, label)}
+                              disabled={!!editActionId}
+                              style={{
+                                fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px", borderRadius: 8,
+                                border: `1px solid ${BLACK}18`,
+                                background: isLoading ? `${BLACK}06` : WHITE,
+                                color: isLoading ? GRAY : BLACK,
+                                cursor: editActionId ? "default" : "pointer",
+                                display: "flex", alignItems: "center", gap: 5,
+                              }}>
+                              {isLoading ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} style={{ color: RED }} />}
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Mailing address */}
+                      {(() => {
+                        const addr = user?.mailingAddress;
+                        const isOverriding = showAddrOverride[card.id] ?? false;
+                        const ov = addrOverride[card.id] ?? {};
+                        const setOv = (patch: Partial<RecipientAddress>) =>
+                          setAddrOverride(prev => ({ ...prev, [card.id]: { ...prev[card.id], ...patch } }));
+                        return (
+                          <div style={{ marginTop: 14, borderRadius: 10, border: `1px solid ${BLACK}12`, overflow: "hidden" }}>
+                            <div style={{ padding: "10px 14px", background: `${BLACK}04`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 6 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                <span style={{ fontSize: "0.9rem" }}>📬</span>
+                                <span style={{ fontSize: "0.75rem", fontWeight: 600, color: BLACK }}>
+                                  {isOverriding
+                                    ? "Sending to a custom address"
+                                    : addr
+                                      ? `Mailing to: ${addr.line1}${addr.line2 ? ` ${addr.line2}` : ""}, ${addr.city}, ${addr.state} ${addr.zip}`
+                                      : "No mailing address on file"}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => setShowAddrOverride(prev => ({ ...prev, [card.id]: !isOverriding }))}
+                                style={{ fontSize: "0.7rem", fontWeight: 600, color: isOverriding ? GRAY : RED, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}>
+                                {isOverriding ? "← Use my address" : addr ? "Send somewhere else" : "Add my address"}
+                              </button>
+                            </div>
+                            {isOverriding && (
+                              <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                                <input placeholder="Street address" value={ov.line1 ?? ""} onChange={e => setOv({ line1: e.target.value })} style={{ width: "100%", border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, outline: "none", boxSizing: "border-box" as const }} />
+                                <input placeholder="Apt / Suite (optional)" value={ov.line2 ?? ""} onChange={e => setOv({ line2: e.target.value })} style={{ width: "100%", border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, outline: "none", boxSizing: "border-box" as const }} />
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 58px 84px", gap: 8 }}>
+                                  <input placeholder="City" value={ov.city ?? ""} onChange={e => setOv({ city: e.target.value })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, outline: "none" }} />
+                                  <input placeholder="ST" maxLength={2} value={ov.state ?? ""} onChange={e => setOv({ state: e.target.value.toUpperCase() })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, outline: "none" }} />
+                                  <input placeholder="Zip" maxLength={10} value={ov.zip ?? ""} onChange={e => setOv({ zip: e.target.value })} style={{ border: `1.5px solid ${BLACK}18`, borderRadius: 8, padding: "8px 12px", fontSize: "0.82rem", color: BLACK, outline: "none" }} />
+                                </div>
+                              </div>
+                            )}
+                            {!addr && !isOverriding && (
+                              <div style={{ padding: "8px 14px", fontSize: "0.72rem", color: "#b45309", background: "#fffbeb", borderTop: `1px solid #fde68a` }}>
+                                Cards will still be queued — add your address so we know where to mail them.
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Share preview */}
+                      {design?.imageUrl && (
+                        <div style={{ marginTop: 14 }}>
+                          {!shareUrlIds[card.id] ? (
+                            <button
+                              onClick={() => shareCardPreview(card)}
+                              disabled={shareLoadingIds[card.id]}
+                              style={{
+                                width: "100%", fontSize: "0.78rem", fontWeight: 600, padding: "9px 16px",
+                                borderRadius: 8, border: `1.5px solid ${BLACK}18`,
+                                background: WHITE, color: BLACK,
+                                cursor: shareLoadingIds[card.id] ? "default" : "pointer",
+                                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                              }}>
+                              {shareLoadingIds[card.id] ? <Loader2 size={13} className="animate-spin" /> : "🔗"}
+                              {shareLoadingIds[card.id] ? "Creating link…" : "Share preview via text"}
+                            </button>
+                          ) : (
+                            <div style={{ borderRadius: 8, border: `1.5px solid ${BLACK}18`, background: WHITE, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+                              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: BLACK, textTransform: "uppercase" as const }}>📬 Copy &amp; text this link to {card.recipientName}</div>
+                              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <input readOnly value={shareUrlIds[card.id]} onFocus={e => e.target.select()} style={{ flex: 1, fontSize: "0.72rem", padding: "6px 8px", borderRadius: 6, border: `1px solid ${BLACK}18`, background: "#f8f5f0", color: BLACK, outline: "none", minWidth: 0 }} />
+                                <button
+                                  onClick={async () => { await navigator.clipboard.writeText(shareUrlIds[card.id]); setShareCopiedIds(prev => ({ ...prev, [card.id]: true })); setTimeout(() => setShareCopiedIds(prev => ({ ...prev, [card.id]: false })), 2500); }}
+                                  style={{ flexShrink: 0, padding: "6px 12px", borderRadius: 6, border: "none", background: shareCopiedIds[card.id] ? "#22c55e" : BLACK, color: WHITE, fontSize: "0.7rem", fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }}>
+                                  {shareCopiedIds[card.id] ? "Copied!" : "Copy"}
+                                </button>
+                              </div>
+                              <button onClick={() => setShareUrlIds(prev => { const n = { ...prev }; delete n[card.id]; return n; })} style={{ alignSelf: "flex-start", background: "none", border: "none", color: "#aaa", fontSize: "0.68rem", cursor: "pointer", padding: 0 }}>
+                                ✕ Close
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Approve / Reject */}
+                      <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
+                        <button
+                          onClick={() => rejectPersonalCard(card)}
+                          style={{ fontSize: "0.78rem", fontWeight: 600, padding: "9px 18px", borderRadius: 8, border: `1.5px solid ${BLACK}18`, background: WHITE, color: GRAY, cursor: "pointer" }}>
+                          Reject &amp; regenerate
+                        </button>
+                        <button
+                          onClick={() => { setApprovingId(card.id); approvePersonalCard(card); }}
+                          disabled={isApproving}
+                          style={{
+                            fontSize: "0.78rem", fontWeight: 700, padding: "9px 24px",
+                            borderRadius: 8, border: "none",
+                            background: RED, color: WHITE,
+                            cursor: isApproving ? "default" : "pointer",
+                            display: "flex", alignItems: "center", gap: 6,
+                          }}>
+                          {isApproving ? <Loader2 size={13} className="animate-spin" /> : <ThumbsUp size={13} />}
+                          Approve &amp; Send
+                        </button>
                       </div>
                     </div>
                   </div>
                 );
               })}
             </div>
-            <p style={{ fontSize: "0.7rem", textAlign: "center", color: `${GRAY}80`, marginTop: 16, fontFamily: "'Inter', sans-serif" }}>
-              No relationships were guaranteed in the making of this subscription.
-            </p>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 4 — UPCOMING MOMENTS                                     */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div style={{ marginBottom: 20 }}>
+          <SectionHead
+            label="UPCOMING MOMENTS — NEXT 90 DAYS"
+            right={
+              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: GRAY, background: `${BLACK}09`, borderRadius: 8, padding: "3px 10px" }}>
+                {allUpcomingEvents.length} event{allUpcomingEvents.length !== 1 ? "s" : ""}
+              </span>
+            }
+          />
+
+          {allUpcomingEvents.length === 0 ? (
+            <div style={{ background: WHITE, border: `1.5px solid ${BLACK}12`, borderRadius: 16, padding: "48px 32px", textAlign: "center" as const, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: "#f0fdf4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+                <CalendarDays size={22} style={{ color: "#22c55e" }} />
+              </div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 6 }}>
+                {recipients.length === 0 ? "No people, no occasions." : "Nothing in the next 90 days."}
+              </div>
+              <p style={{ fontSize: "0.82rem", color: GRAY, margin: 0 }}>
+                {recipients.length === 0 ? "Add someone to watch over first." : "Cards will appear here as occasions approach."}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+              {allUpcomingEvents.map((ev) => {
+                const genKey = `${ev.recipient.id}:::${ev.event}`;
+                const isGenerating = generatingFor === genKey;
+                const hasCard = upcomingWithCardKeys.has(genKey);
+                const recip = recipients.find(r => r.id === ev.recipient.id);
+                const previewDays = recip?.previewDays ?? 14;
+                const timingKey = `${ev.recipient.id}-${ev.event}`;
+                const isTimingOpen = timingPickerOpen === timingKey;
+                const matchedCard = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
+                const isApproved = matchedCard?.status === "Approved";
+                const status = getEventStatus(ev.daysAway, ev.briefingDone, hasCard, !!isApproved);
+
+                return (
+                  <div key={genKey} style={{
+                    background: WHITE,
+                    border: `1.5px solid ${hasCard && !isApproved ? `${RED}28` : `${BLACK}10`}`,
+                    borderRadius: 14, padding: "14px 18px",
+                    display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" as const,
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.03)",
+                  }}>
+                    <UrgencyBadge days={ev.daysAway} />
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const }}>
+                        <span style={{ fontWeight: 600, fontSize: "0.9rem", color: BLACK }}>{ev.event}</span>
+                        <span style={{ fontWeight: 400, color: GRAY, fontSize: "0.88rem" }}>for {ev.recipient.name}</span>
+                        <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: status.bg, color: status.color }}>
+                          {status.label}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "0.72rem", marginTop: 3, color: GRAY }}>
+                        {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {ev.briefingDone && <span style={{ marginLeft: 8, fontWeight: 700, color: "#16a34a" }}>✓ Personalized</span>}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    {hasCard ? (
+                      isApproved ? (
+                        <button onClick={() => setViewingCardId(matchedCard!.id)} style={{ fontSize: "0.72rem", fontWeight: 700, padding: "7px 14px", borderRadius: 8, border: "none", background: "#1d4ed8", color: WHITE, cursor: "pointer", flexShrink: 0 }}>
+                          ✔ View Approved
+                        </button>
+                      ) : (
+                        <a href="#review" style={{ textDecoration: "none" }}>
+                          <button style={{ fontSize: "0.72rem", fontWeight: 700, padding: "7px 14px", borderRadius: 8, border: `1px solid ${RED}30`, background: `${RED}08`, color: RED, cursor: "pointer", flexShrink: 0 }}>
+                            Review ↑
+                          </button>
+                        </a>
+                      )
+                    ) : (
+                      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                        <div style={{ position: "relative" }}
+                          onMouseEnter={() => setHoveredBriefing(genKey)}
+                          onMouseLeave={() => setHoveredBriefing(null)}
+                        >
+                          <Link href={`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`}>
+                            <button style={{
+                              fontSize: "0.72rem", fontWeight: 700, padding: "7px 12px",
+                              borderRadius: 8, border: `1px solid ${ev.briefingDone ? `${BLACK}18` : RED}`,
+                              background: ev.briefingDone ? `${BLACK}06` : `${RED}10`,
+                              color: ev.briefingDone ? GRAY : RED, cursor: "pointer",
+                            }}>
+                              {ev.briefingDone ? "Edit personalization" : "✦ Personalize"}
+                            </button>
+                          </Link>
+                          {hoveredBriefing === genKey && (
+                            <div style={{
+                              position: "absolute", bottom: "calc(100% + 8px)", right: 0,
+                              background: "#1a1a1a", color: WHITE, fontSize: "0.68rem", lineHeight: 1.5,
+                              padding: "8px 11px", borderRadius: 7, maxWidth: 220, pointerEvents: "none",
+                              boxShadow: "0 3px 12px rgba(0,0,0,0.2)", zIndex: 50,
+                            }}>
+                              {ev.briefingDone
+                                ? <>Tell us more — every answer makes future cards smarter.</>
+                                : <>A few optional questions. The more we know, the more personal every card.</>}
+                              <div style={{ position: "absolute", top: "100%", right: 14, border: "5px solid transparent", borderTopColor: "#1a1a1a" }} />
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => generateEarly(ev)}
+                          disabled={!!generatingFor}
+                          style={{
+                            fontSize: "0.72rem", fontWeight: 700, padding: "7px 14px",
+                            borderRadius: 8, border: "none",
+                            background: isGenerating ? `${BLACK}10` : RED,
+                            color: isGenerating ? GRAY : WHITE,
+                            cursor: isGenerating || !!generatingFor ? "default" : "pointer",
+                            display: "flex", alignItems: "center", gap: 5,
+                          }}>
+                          {isGenerating ? <><Loader2 size={11} className="animate-spin" /> Generating…</> : <><Sparkles size={11} /> Generate Early</>}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* ── Approved & queued strip ───────────────────────────────────────── */}
+        {approvedPersonalCards.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.92rem", letterSpacing: "0.14em", color: "#16a34a" }}>
+                ✓ APPROVED &amp; QUEUED TO MAIL
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
+              {approvedPersonalCards.map(card => (
+                <div key={card.id} style={{
+                  background: WHITE, border: "1.5px solid #22c55e28",
+                  borderRadius: 12, padding: "11px 16px",
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <CheckCircle2 size={15} style={{ color: "#16a34a", flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: "0.86rem", color: BLACK }}>{card.holiday} · {card.recipientName}</div>
+                      <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 1 }}>{card.deliveryPreference}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: "0.65rem", fontWeight: 700, background: "#f0fdf4", color: "#16a34a", border: "1px solid #22c55e30", borderRadius: 6, padding: "3px 9px" }}>QUEUED</span>
+                    <button onClick={() => setViewingCardId(card.id)} style={{ fontSize: "0.72rem", fontWeight: 700, padding: "5px 12px", borderRadius: 7, border: "none", background: "#1d4ed8", color: WHITE, cursor: "pointer" }}>
+                      View →
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 5 — YOUR RELATIONSHIPS                                   */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div style={{ marginBottom: 20 }}>
+          <SectionHead
+            label="YOUR RELATIONSHIPS"
+            right={
+              <Link href="/recipients/new">
+                <button
+                  data-testid="link-add-recipient"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: RED, color: WHITE, border: "none",
+                    borderRadius: 8, padding: "6px 14px",
+                    fontFamily: "'Bebas Neue', cursive", fontSize: "0.8rem", letterSpacing: "0.08em", cursor: "pointer",
+                  }}>
+                  <Plus size={12} /> Add Person
+                </button>
+              </Link>
+            }
+          />
+
+          {/* Search (only if ≥ 4 recipients) */}
+          {recipients.length >= 4 && (
+            <div style={{ position: "relative", marginBottom: 12 }}>
+              <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: GRAY, pointerEvents: "none" }} />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search by name or relationship…"
+                style={{
+                  width: "100%", border: `1.5px solid ${BLACK}14`, borderRadius: 10,
+                  padding: "10px 12px 10px 34px",
+                  fontSize: "0.85rem", color: BLACK, background: WHITE, outline: "none",
+                  boxSizing: "border-box" as const,
+                }}
+              />
+            </div>
+          )}
+
+          {recipients.length === 0 ? (
+            <div style={{ background: WHITE, border: `1.5px dashed ${BLACK}20`, borderRadius: 16, padding: "40px 24px", textAlign: "center" as const }}>
+              <div style={{ fontSize: "2rem", marginBottom: 10 }}>👥</div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: BLACK, letterSpacing: "0.04em", marginBottom: 8 }}>No one added yet</div>
+              <p style={{ fontSize: "0.82rem", color: GRAY, margin: "0 0 18px" }}>Start with someone whose birthday you always forget.</p>
+              <Link href="/recipients/new">
+                <button data-testid="link-add-recipient" style={{ background: RED, color: WHITE, border: "none", borderRadius: 9, padding: "11px 24px", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.1em", cursor: "pointer" }}>
+                  Add Your First Person
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+              {/* Sort: core first, then important, then occasional; within tier: lowest score first */}
+              {filteredRecipients
+                .slice()
+                .sort((a, b) => {
+                  const rhA = health.recipientHealths.find(r => r.id === a.id);
+                  const rhB = health.recipientHealths.find(r => r.id === b.id);
+                  const tierDiff = (TIER_WEIGHTS[rhB?.tier ?? "occasional"] ?? 1) - (TIER_WEIGHTS[rhA?.tier ?? "occasional"] ?? 1);
+                  if (tierDiff !== 0) return tierDiff;
+                  return (rhA?.score ?? 50) - (rhB?.score ?? 50); // lowest score first in tier (needs most help)
+                })
+                .map(r => {
+                  const rh = health.recipientHealths.find(h => h.id === r.id);
+                  const upcoming = recipientUpcomingMap.get(r.id) ?? [];
+                  const nextEv = upcoming[0];
+                  const tierColor = TIER_COLORS[rh?.tier ?? "occasional"];
+                  const scoreColor = getScoreMeta(rh?.score ?? 15).color;
+                  const isExpanded = expandedScoreRecipient === r.id;
+
+                  return (
+                    <div key={r.id} style={{
+                      background: WHITE,
+                      border: `1.5px solid ${BLACK}10`,
+                      borderRadius: 14,
+                      overflow: "hidden",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                    }}>
+                      {/* Main row */}
+                      <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                        {/* Avatar */}
+                        <div style={{
+                          width: 40, height: 40, borderRadius: 10, background: BLACK, flexShrink: 0,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: WHITE, letterSpacing: "0.04em" }}>
+                            {r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
+                          </span>
+                        </div>
+
+                        {/* Name + relationship + tier */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" as const }}>
+                            <span style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK, whiteSpace: "nowrap" as const }}>{r.name}</span>
+                            <span style={{ fontSize: "0.65rem", fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: `${BLACK}09`, color: GRAY }}>
+                              {r.relationship}
+                            </span>
+                            {rh && (
+                              <span style={{ fontSize: "0.62rem", fontWeight: 700, padding: "1px 7px", borderRadius: 20, background: `${tierColor}18`, color: tierColor, border: `1px solid ${tierColor}30` }}>
+                                {TIER_LABELS[rh.tier]}
+                              </span>
+                            )}
+                          </div>
+                          {/* Health bar + score */}
+                          {rh && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5 }}>
+                              <div style={{ flex: 1, height: 5, background: `${BLACK}0C`, borderRadius: 3, overflow: "hidden" }}>
+                                <div style={{ height: "100%", width: `${rh.score}%`, background: scoreColor, borderRadius: 3, transition: "width 0.5s" }} />
+                              </div>
+                              <span style={{ fontSize: "0.68rem", fontWeight: 700, color: scoreColor, minWidth: 24, textAlign: "right" as const }}>{rh.score}</span>
+                            </div>
+                          )}
+                          {/* Next event */}
+                          {nextEv && (
+                            <div style={{ marginTop: 3, fontSize: "0.68rem", color: GRAY }}>
+                              Next: <span style={{ fontWeight: 600, color: nextEv.daysAway <= 14 ? RED : BLACK }}>{nextEv.event}</span>
+                              <span> in {nextEv.daysAway}d</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
+                          {rh && rh.pointsAvailable > 0 && (
+                            <button
+                              onClick={() => setExpandedScoreRecipient(isExpanded ? null : r.id)}
+                              style={{
+                                fontSize: "0.68rem", fontWeight: 600, padding: "5px 10px", borderRadius: 7,
+                                border: `1px solid ${BLACK}14`, background: WHITE, color: GRAY, cursor: "pointer",
+                                display: "flex", alignItems: "center", gap: 4,
+                              }}>
+                              +{rh.pointsAvailable}pts {isExpanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+                            </button>
+                          )}
+                          <Link href={`/recipients/${r.id}?from=dashboard`}>
+                            <button style={{
+                              padding: "6px 12px", background: `${BLACK}06`, color: BLACK,
+                              border: `1px solid ${BLACK}14`, borderRadius: 8,
+                              fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.06em", cursor: "pointer",
+                            }}>
+                              Manage
+                            </button>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Expandable score breakdown */}
+                      {isExpanded && rh && (
+                        <div style={{ borderTop: `1px solid ${BLACK}0E`, padding: "14px 16px", background: BEIGE }}>
+                          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: GRAY, marginBottom: 10, letterSpacing: "0.06em" }}>
+                            SCORE BREAKDOWN · {rh.score}/100
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                            {Object.entries(rh.categories).map(([key, cat]) => {
+                              const catPct = cat.score / cat.max;
+                              return (
+                                <div key={key}>
+                                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                                    <span style={{ fontSize: "0.72rem", fontWeight: 600, color: BLACK }}>{CAT_LABELS[key]}</span>
+                                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: getScoreMeta(Math.round(catPct * 100)).color }}>
+                                      {cat.score}/{cat.max}
+                                    </span>
+                                  </div>
+                                  <CatBar score={cat.score} max={cat.max} color={getScoreMeta(Math.round(catPct * 100)).color} />
+                                  {cat.gaps.length > 0 && (
+                                    <div style={{ marginTop: 3, fontSize: "0.68rem", color: GRAY }}>
+                                      → {cat.gaps[0]}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <Link href={`/recipients/${r.id}?from=dashboard`}>
+                            <button style={{
+                              marginTop: 12, width: "100%", padding: "9px", background: RED, color: WHITE,
+                              border: "none", borderRadius: 8, fontFamily: "'Bebas Neue', cursive",
+                              fontSize: "0.85rem", letterSpacing: "0.08em", cursor: "pointer",
+                            }}>
+                              Update {r.name}'s Profile →
+                            </button>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 6 — WHY YOUR SCORE IS WHAT IT IS                        */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {health.score > 0 && health.topInsight && (
+          <div style={{ marginBottom: 20 }}>
+            <SectionHead label="TOP IMPROVEMENT OPPORTUNITY" />
+            <div style={{
+              background: WHITE, borderRadius: 16, padding: "18px 20px",
+              border: `1.5px solid ${BLACK}10`, boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
+              display: "flex", gap: 14, alignItems: "flex-start",
+            }}>
+              <div style={{ width: 38, height: 38, borderRadius: 9, background: "#e0f7fa", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Target size={17} style={{ color: "#00897B" }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK, marginBottom: 4 }}>
+                  {health.topInsight.action}
+                </div>
+                <div style={{ fontSize: "0.78rem", color: GRAY, lineHeight: 1.5, marginBottom: 10 }}>
+                  For <strong>{health.topInsight.recipientName}</strong> · {health.topInsight.category} category · worth up to +{health.topInsight.pointsGain} points
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
+                  {Object.entries(CAT_LABELS).map(([key, label]) => {
+                    const avgCatScore = health.recipientHealths.length === 0 ? 0 : Math.round(
+                      health.recipientHealths.reduce((s, rh) => {
+                        const cat = rh.categories[key as keyof typeof rh.categories];
+                        return s + (cat ? cat.score / cat.max : 0);
+                      }, 0) / health.recipientHealths.length * 100
+                    );
+                    return (
+                      <div key={key} style={{ fontSize: "0.7rem", padding: "4px 10px", borderRadius: 20, background: `${BLACK}06`, color: BLACK, display: "flex", gap: 5, alignItems: "center" }}>
+                        <span style={{ fontWeight: 600 }}>{label}</span>
+                        <span style={{ color: getScoreMeta(avgCatScore).color, fontWeight: 700 }}>{avgCatScore}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 7 — RECENT PROGRESS                                      */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {scoreHistory.length >= 2 && (
+          <div style={{ marginBottom: 20 }}>
+            <SectionHead label="RECENT PROGRESS" />
+            <div style={{
+              background: WHITE, borderRadius: 16, padding: "18px 20px",
+              border: `1.5px solid ${BLACK}10`, boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
+            }}>
+              <div style={{ display: "flex", gap: isMobile ? 16 : 28, flexWrap: "wrap" as const }}>
+                {/* Score sparkline */}
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, marginBottom: 8 }}>SCORE TREND</div>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
+                    {scoreHistory.slice(-14).map((s, i) => {
+                      const maxS = Math.max(...scoreHistory.slice(-14).map(x => x.score), 1);
+                      return (
+                        <div key={i} style={{
+                          flex: 1, borderRadius: "2px 2px 0 0",
+                          height: `${(s.score / maxS) * 100}%`,
+                          background: getScoreMeta(s.score).color,
+                          opacity: i === scoreHistory.slice(-14).length - 1 ? 1 : 0.4,
+                          minHeight: 3,
+                        }} title={`${s.date}: ${s.score}`} />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                {[
+                  { label: "Current Score",    value: String(health.score),       sub: health.label },
+                  { label: "People Covered",   value: String(coverage.coveredCount), sub: `of ${coverage.totalActive} active` },
+                  { label: "Occasions Tracked", value: String(disastersAvoided), sub: "total events" },
+                ].map(stat => (
+                  <div key={stat.label} style={{ textAlign: "center" as const, minWidth: 80 }}>
+                    <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, marginBottom: 4 }}>{stat.label}</div>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>{stat.value}</div>
+                    <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 2 }}>{stat.sub}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 8 — RELATIONSHIP COVERAGE                                */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {recipients.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <SectionHead label="RELATIONSHIP COVERAGE" />
+            <div style={{
+              background: WHITE, borderRadius: 16, padding: "18px 20px",
+              border: `1.5px solid ${BLACK}10`, boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
+            }}>
+              {/* Coverage bar */}
+              <div style={{ marginBottom: coverage.gaps.length > 0 ? 16 : 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: "0.78rem", fontWeight: 600, color: BLACK }}>
+                    {coverage.coveredCount} of {coverage.totalActive} people have occasions set
+                  </span>
+                  <span style={{ fontSize: "0.78rem", fontWeight: 700, color: getScoreMeta(coverage.score).color }}>
+                    {coverage.score}%
+                  </span>
+                </div>
+                <CatBar score={coverage.score} max={100} color={getScoreMeta(coverage.score).color} />
+              </div>
+
+              {/* Coverage gaps */}
+              {coverage.gaps.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                  {coverage.gaps.map(gap => (
+                    <div key={gap.relationship} style={{
+                      display: "flex", alignItems: "center", gap: 12,
+                      padding: "10px 12px", borderRadius: 10, background: BEIGE,
+                    }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 7, background: `${TIER_COLORS[gap.tier]}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span style={{ fontSize: "0.8rem" }}>👤</span>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, fontSize: "0.82rem", color: BLACK }}>Consider adding a {gap.relationship}</div>
+                        <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 1 }}>{gap.suggestion}</div>
+                      </div>
+                      <Link href="/recipients/new">
+                        <button style={{ padding: "5px 12px", borderRadius: 7, border: "none", background: `${BLACK}08`, color: BLACK, fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" as const }}>
+                          + Add
+                        </button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION 9 — PLAN USAGE                                           */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div style={{ marginBottom: 4 }}>
+          <SectionHead label="PLAN USAGE" />
+          <div style={{
+            background: WHITE, borderRadius: 16, padding: "18px 20px",
+            border: `1.5px solid ${atLimit ? `${RED}30` : `${BLACK}10`}`,
+            boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" as const }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: "0.78rem", fontWeight: 600, color: BLACK }}>
+                    {planConfig.label} Plan — {cardsUsed} of {cardsTotal} cards used
+                  </span>
+                  <span style={{ fontSize: "0.78rem", fontWeight: 700, color: atLimit ? RED : GRAY }}>
+                    {cardsLeft} left
+                  </span>
+                </div>
+                <div style={{ height: 7, background: `${BLACK}0C`, borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{
+                    height: "100%", width: `${usagePct}%`,
+                    background: atLimit ? RED : usagePct > 75 ? "#FFA726" : "#26A69A",
+                    borderRadius: 4, transition: "width 0.5s",
+                  }} />
+                </div>
+                {atLimit && (
+                  <div style={{ marginTop: 6, fontSize: "0.72rem", color: RED, fontWeight: 600 }}>
+                    You've used all your card slots. Upgrade to cover more occasions.
+                  </div>
+                )}
+              </div>
+
+              {plan !== "premium" && (
+                <button
+                  onClick={() => setUpgradeOpen(true)}
+                  style={{
+                    padding: "8px 18px", borderRadius: 9, border: "none",
+                    background: atLimit ? RED : `${BLACK}08`,
+                    color: atLimit ? WHITE : BLACK,
+                    fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em",
+                    cursor: "pointer", flexShrink: 0,
+                  }}>
+                  {atLimit ? "Upgrade Plan" : "See All Plans"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      )}
+
+      </div> {/* end main content */}
+    </div>
+
+    {/* ── Mobile FAB – Add Person ──────────────────────────────────────────── */}
+    {isMobile && recipients.length === 0 && (
+      <Link href="/recipients/new">
+        <button
+          data-testid="link-add-recipient"
+          style={{
+            position: "fixed", bottom: 24, right: 20, zIndex: 200,
+            display: "flex", alignItems: "center", gap: 8,
+            background: RED, color: WHITE, border: "none",
+            borderRadius: 28, padding: "14px 22px",
+            fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em",
+            boxShadow: "0 4px 20px rgba(226,59,46,0.38)", cursor: "pointer",
+          }}>
+          <Plus size={16} /> Add Person
+        </button>
+      </Link>
+    )}
+
+    {/* ── Approved Card Viewer Modal ───────────────────────────────────────── */}
+    {viewingCardId && (() => {
+      const card = cards.find(c => c.id === viewingCardId);
+      if (!card) return null;
+      const message = editedMessages[card.id] ?? card.approvedMessage ?? "";
+      const mailDate = card.dueDate
+        ? new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+        : null;
+      return (
+        <div
+          onClick={() => setViewingCardId(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: WHITE, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "88vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}
+          >
+            <div style={{ padding: "18px 20px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK }}>{card.holiday} · {card.recipientName}</div>
+                {mailDate && <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 3 }}>Mailing on {mailDate}</div>}
+              </div>
+              <button onClick={() => setViewingCardId(null)} style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "1.1rem", lineHeight: 1, padding: "2px 6px", flexShrink: 0 }}>✕</button>
+            </div>
+            <div style={{ margin: "14px 20px 0", display: "flex", alignItems: "center", gap: 8, background: "#f0fdf4", border: "1px solid #22c55e30", borderRadius: 8, padding: "10px 14px" }}>
+              <CheckCircle2 size={15} style={{ color: "#16a34a", flexShrink: 0 }} />
+              <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#15803d" }}>Card approved — queued to mail</span>
+            </div>
+            <div style={{ padding: "16px 20px 24px" }}>
+              <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: GRAY, marginBottom: 8 }}>Approved Message</div>
+              <div style={{ background: BEIGE, border: `1.5px solid ${BLACK}12`, borderRadius: 10, padding: "14px 16px", fontSize: "0.9rem", lineHeight: 1.7, color: BLACK, fontFamily: "Georgia, serif", whiteSpace: "pre-wrap" }}>
+                {message || <span style={{ color: GRAY, fontStyle: "italic" }}>No message on file.</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })()}
+
+    {/* ── Handwriting Font Picker Modal ────────────────────────────────────── */}
+    {fontPickerOpen && (
+      <div onClick={() => setFontPickerOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div onClick={e => e.stopPropagation()} style={{ background: WHITE, borderRadius: 14, padding: "28px 28px 20px", width: 760, maxWidth: "95vw", maxHeight: "88vh", display: "flex", flexDirection: "column" as const, gap: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+          <div style={{ fontWeight: 700, fontSize: "1.05rem", color: BLACK }}>Choose a Handwriting Style</div>
+          <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: -8 }}>Every card we send will be handwritten using real pens. Pick the style that feels like you.</div>
+          {fontsLoading ? (
+            <div style={{ textAlign: "center", padding: "32px 0", color: GRAY }}>Loading styles…</div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, overflowY: "auto", paddingRight: 4 }}>
+              {hwFonts.map((font, idx) => {
+                const selected = personalSettings.cardFont === font.id;
+                return (
+                  <button key={font.id} onClick={() => { updateSettings("cardFont", font.id); setFontPickerOpen(false); }}
+                    style={{ border: `2px solid ${selected ? RED : "#e2e8f0"}`, borderRadius: 10, padding: "14px 16px", cursor: "pointer", background: selected ? `${RED}08` : WHITE, textAlign: "left" as const, transition: "all 0.12s", display: "flex", flexDirection: "column" as const, gap: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK }}>{font.name}</span>
+                      {idx === 0 && <span style={{ fontSize: "0.68rem", background: "#f1f5f9", color: GRAY, border: "1px solid #e2e8f0", borderRadius: 20, padding: "1px 7px" }}>Default</span>}
+                      {selected && <span style={{ fontSize: "0.68rem", background: RED, color: WHITE, borderRadius: 20, padding: "1px 7px" }}>Selected</span>}
+                    </div>
+                    {font.previewUrl
+                      ? <img src={font.previewUrl} alt={`${font.name} handwriting sample`} style={{ width: "100%", height: 160, objectFit: "contain", objectPosition: "center center" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                      : <div style={{ fontFamily: "cursive", fontSize: "1.1rem", color: "#334155", lineHeight: 1.5, paddingTop: 4 }}>Warm wishes and heartfelt thanks!</div>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 4, borderTop: `1px solid ${BLACK}10` }}>
+            {personalSettings.cardFont && (
+              <button onClick={() => { updateSettings("cardFont", ""); setFontPickerOpen(false); }} style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "0.8rem" }}>
+                Clear selection
+              </button>
+            )}
+            <div style={{ flex: 1 }} />
+            <button onClick={() => setFontPickerOpen(false)} style={{ background: RED, color: WHITE, border: "none", borderRadius: 7, padding: "8px 20px", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 }}>Done</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ── Upgrade Modal ─────────────────────────────────────────────────────── */}
+    {upgradeOpen && (
+      <div onClick={(e) => { if (e.target === e.currentTarget) setUpgradeOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16 }}>
+        <div style={{ background: WHITE, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: "28px 24px 36px" }}>
+          <div style={{ width: 40, height: 4, background: `${BLACK}20`, borderRadius: 2, margin: "0 auto 24px" }} />
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.04em", color: BLACK, lineHeight: 1, marginBottom: 4 }}>NEED MORE CARDS?</div>
+          <p style={{ fontSize: "0.85rem", color: GRAY, marginBottom: 20, lineHeight: 1.5 }}>
+            You've used all {PLANS[plan].maxCardsPerYear} card slots on your current plan. Upgrade to cover more occasions.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
+            {(["basic", "standard", "premium"] as Plan[]).map((key) => {
+              const config = PLANS[key];
+              const isCurrent = key === plan;
+              const orderedPlans: Plan[] = ["basic", "standard", "premium"];
+              const isUpgrade = orderedPlans.indexOf(key) > orderedPlans.indexOf(plan);
+              return (
+                <div key={key} style={{ borderRadius: 12, padding: 16, border: `2px solid ${isCurrent ? `${BLACK}20` : isUpgrade ? `${RED}30` : `${BLACK}08`}`, background: isCurrent ? BEIGE : "#fafafa" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const, marginBottom: 2 }}>
+                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK }}>{config.label}</span>
+                        {isCurrent && <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "1px 8px", borderRadius: 10, background: `${BLACK}10`, color: GRAY }}>Current</span>}
+                        {key === "standard" && !isCurrent && <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "1px 8px", borderRadius: 10, background: `${RED}12`, color: RED }}>Most Popular</span>}
+                      </div>
+                      <p style={{ fontSize: "0.72rem", color: GRAY, margin: "0 0 8px" }}>{config.tagline}</p>
+                      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column" as const, gap: 3 }}>
+                        {config.perks.map(perk => (
+                          <li key={perk} style={{ fontSize: "0.72rem", color: BLACK, display: "flex", alignItems: "center", gap: 5 }}>
+                            <span style={{ color: RED, fontWeight: 700 }}>✓</span> {perk}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
+                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: BLACK, lineHeight: 1 }}>{config.price}</span>
+                      {!isCurrent && (
+                        <button onClick={() => { upgradePlan(key); setUpgradeOpen(false); }} style={{ background: isUpgrade ? RED : `${BLACK}10`, color: isUpgrade ? WHITE : GRAY, border: "none", borderRadius: 7, padding: "7px 16px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" as const }}>
+                          {isUpgrade ? "Upgrade" : "Downgrade"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p style={{ fontSize: "0.7rem", textAlign: "center" as const, color: `${GRAY}80`, marginTop: 16 }}>
+            No relationships were guaranteed in the making of this subscription.
+          </p>
+        </div>
+      </div>
+    )}
     </>
   );
 }

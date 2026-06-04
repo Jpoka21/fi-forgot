@@ -95,7 +95,8 @@ export interface Recipient {
   id: string;
   name: string;
   relationship: Relationship;
-  active?: boolean; // undefined/true = autopilot on; false = saved but paused (over plan limit)
+  active?: boolean; // undefined/true = autopilot on; false = archived/paused
+  profileUpdatedAt?: string; // ISO datetime — set on save; drives freshness decay
   birthday?: string;
   anniversaryDate?: string;
   marriageDate?: string; // ISO date — years married auto-computes
