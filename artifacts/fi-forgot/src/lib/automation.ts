@@ -166,6 +166,7 @@ async function processEvent(opts: {
       eventType:        event,
       tone:             recipient.preferredTone ?? "warm and genuine",
       personalityNotes: recipient.personalityNotes ?? "",
+      personality:      recipient.personality ?? [],
       interests:        recipient.interests ?? [],
       favoriteMemories: recipient.favoriteMemories ?? "",
       insideJokes:      recipient.insideJokes ?? "",

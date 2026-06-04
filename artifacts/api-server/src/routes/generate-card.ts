@@ -21,6 +21,7 @@ router.post("/generate-card", async (req, res) => {
     relationship,
     holiday,
     personalityNotes,
+    personality = [],
     interests = [],
     tonePreference,
     petName,
@@ -39,6 +40,7 @@ router.post("/generate-card", async (req, res) => {
     relationship?: string;
     holiday?: string;
     personalityNotes?: string;
+    personality?: string[];
     interests?: string[];
     tonePreference?: string;
     petName?: string;
@@ -72,8 +74,9 @@ router.post("/generate-card", async (req, res) => {
 
   // ── Core profile ──────────────────────────────────────────────────────────
   if (relationship) contextLines.push(`- Relationship to sender: ${relationship}`);
-  if (personalityNotes) contextLines.push(`- ${capPron} personality: ${personalityNotes}`);
-  if (interests.length > 0) contextLines.push(`- ${capPron} interests: ${interests.join(", ")}`);
+  if (personality.length > 0) contextLines.push(`- ${capPron} personality traits: ${personality.join(", ")}`);
+  if (personalityNotes) contextLines.push(`- ${capPron} personality (additional notes): ${personalityNotes}`);
+  if (interests.length > 0) contextLines.push(`- ${capPron} interests/hobbies: ${interests.join(", ")}`);
   if (tonePreference) contextLines.push(`- Preferred card tone: ${tonePreference}`);
   if (emotionalLevel) contextLines.push(tonePreference === "Funny"
     ? `- Comedy intensity (1=gentle smirk, 5=no-holds-barred roast): ${emotionalLevel}`

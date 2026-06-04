@@ -49,11 +49,11 @@ export default function CardGeneratorPage() {
       recipientName: selectedRecipient?.name ?? "her",
       relationship: isOnboardingRecipient ? onboarding.relationship : selectedRecipient?.relationship ?? "",
       holiday: selectedHoliday,
-      personality: isOnboardingRecipient ? (onboarding.personality ?? []) : [],
-      interests: isOnboardingRecipient ? (onboarding.interests ?? []) : [],
+      personality: isOnboardingRecipient ? (onboarding.personality ?? []) : (selectedRecipient?.personality ?? []),
+      interests: isOnboardingRecipient ? (onboarding.interests ?? []) : (selectedRecipient?.interests ?? []),
       tone: isOnboardingRecipient ? onboarding.tone : selectedRecipient?.tonePreference ?? "",
-      petName: isOnboardingRecipient ? onboarding.petName : "",
-      yearsTogther: isOnboardingRecipient ? onboarding.yearsTogther : "",
+      petName: isOnboardingRecipient ? onboarding.petName : (selectedRecipient?.petName ?? ""),
+      yearsTogther: isOnboardingRecipient ? onboarding.yearsTogther : (selectedRecipient?.yearsTogther ?? ""),
       thingsToAvoid: isOnboardingRecipient
         ? onboarding.thingsToAvoid
         : selectedRecipient?.thingsToAvoid ?? "",

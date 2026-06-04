@@ -55,6 +55,30 @@ const GENDER_OPTIONS = [
   { id: "nonbinary", label: "Non-binary", emoji: "🧒" },
 ] as const;
 
+const PERSONALITIES = [
+  { id: "sweet",    label: "Sweet & sentimental", emoji: "🥰" },
+  { id: "funny",    label: "Funny & sarcastic",   emoji: "😂" },
+  { id: "calm",     label: "Calm & graceful",     emoji: "🌸" },
+  { id: "tough",    label: "Tough love — no fluff", emoji: "💪" },
+  { id: "dramatic", label: "Dramatic — loves big gestures", emoji: "🎭" },
+  { id: "earthy",   label: "Down to earth",        emoji: "🌿" },
+];
+
+const INTERESTS = [
+  { id: "family",  label: "Family & kids",      emoji: "👨‍👩‍👧" },
+  { id: "travel",  label: "Travel & adventure", emoji: "✈️" },
+  { id: "food",    label: "Food & cooking",     emoji: "🍳" },
+  { id: "reading", label: "Reading & learning", emoji: "📚" },
+  { id: "fitness", label: "Fitness & health",   emoji: "🏃‍♀️" },
+  { id: "music",   label: "Music & arts",       emoji: "🎵" },
+  { id: "animals", label: "Animals & pets",     emoji: "🐾" },
+  { id: "nature",  label: "Nature & outdoors",  emoji: "🌲" },
+  { id: "movies",  label: "Movies & TV",        emoji: "🎬" },
+  { id: "fashion", label: "Fashion & style",    emoji: "👗" },
+];
+
+const PARTNER_RELATIONSHIPS = ["Wife", "Girlfriend", "Husband", "Boyfriend"];
+
 const addressSchema = z.object({
   line1: z.string(),
   line2: z.string().optional(),
@@ -79,6 +103,10 @@ const schema = z.object({
   previewDays: z.union([z.literal(14), z.literal(21), z.literal(30)]),
   tonePreference: z.enum(TONES as [Tone, ...Tone[]]),
   senderName: z.string().optional(),
+  petName: z.string().optional(),
+  yearsTogther: z.string().optional(),
+  personality: z.array(z.string()),
+  interests: z.array(z.string()),
   personalityNotes: z.string(),
   favoriteMemories: z.string(),
   insideJokes: z.string(),
@@ -347,6 +375,10 @@ export default function RecipientProfilePage() {
           previewDays: ([14, 21, 30].includes(existing.previewDays ?? 14) ? existing.previewDays : 14) as 14 | 21 | 30,
           tonePreference: existing.tonePreference,
           senderName: existing.senderName ?? "",
+          petName: existing.petName ?? "",
+          yearsTogther: existing.yearsTogther ?? "",
+          personality: existing.personality ?? [],
+          interests: existing.interests ?? [],
           personalityNotes: existing.personalityNotes,
           favoriteMemories: existing.favoriteMemories,
           insideJokes: existing.insideJokes,
@@ -370,6 +402,10 @@ export default function RecipientProfilePage() {
           previewDays: 14 as 14 | 21 | 30,
           tonePreference: "Sweet",
           senderName: "",
+          petName: "",
+          yearsTogther: "",
+          personality: [],
+          interests: [],
           personalityNotes: "",
           favoriteMemories: "",
           insideJokes: "",
@@ -383,6 +419,9 @@ export default function RecipientProfilePage() {
   const watchRelationship = form.watch("relationship");
   const watchSelectedEvents = form.watch("selectedEvents");
   const watchEventDates = form.watch("eventDates");
+  const watchPersonality = form.watch("personality");
+  const watchInterests = form.watch("interests");
+  const isPartnerRelationship = PARTNER_RELATIONSHIPS.includes(watchRelationship);
 
   useEffect(() => {
     if (isNew) form.setValue("deliveryPreference", defaultDelivery(watchRelationship));
@@ -467,6 +506,10 @@ export default function RecipientProfilePage() {
       previewDays: data.previewDays,
       tonePreference: data.tonePreference,
       senderName: data.senderName,
+      petName: data.petName || undefined,
+      yearsTogther: data.yearsTogther || undefined,
+      personality: data.personality,
+      interests: data.interests,
       personalityNotes: data.personalityNotes,
       favoriteMemories: data.favoriteMemories,
       insideJokes: data.insideJokes,
@@ -889,9 +932,105 @@ export default function RecipientProfilePage() {
                 {sectionHeading("Writing Style & Personality")}
                 <p className="text-xs mb-4" style={{ color: GRAY }}>The more detail you give us, the more the card sounds like it came from you.</p>
 
+                {/* Personality picker */}
+                <div>
+                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                    What are they like? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick up to 2)</span>
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {PERSONALITIES.map((p) => {
+                      const selected = watchPersonality.includes(p.id);
+                      const maxed = watchPersonality.length >= 2 && !selected;
+                      return (
+                        <button
+                          key={p.id} type="button"
+                          disabled={maxed}
+                          onClick={() => {
+                            const current = form.getValues("personality");
+                            form.setValue(
+                              "personality",
+                              current.includes(p.id) ? current.filter((x) => x !== p.id) : [...current, p.id],
+                              { shouldDirty: true }
+                            );
+                          }}
+                          className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
+                          style={{
+                            borderColor: selected ? RED : `${BLACK}15`,
+                            background: selected ? `${RED}10` : "#fff",
+                            opacity: maxed ? 0.4 : 1,
+                            cursor: maxed ? "not-allowed" : "pointer",
+                          }}
+                          data-testid={`btn-personality-${p.id}`}
+                        >
+                          <span className="text-xl">{p.emoji}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{p.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Interests picker */}
+                <div>
+                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                    What do they love? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick all that fit)</span>
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {INTERESTS.map((item) => {
+                      const selected = watchInterests.includes(item.id);
+                      return (
+                        <button
+                          key={item.id} type="button"
+                          onClick={() => {
+                            const current = form.getValues("interests");
+                            form.setValue(
+                              "interests",
+                              current.includes(item.id) ? current.filter((x) => x !== item.id) : [...current, item.id],
+                              { shouldDirty: true }
+                            );
+                          }}
+                          className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
+                          style={{
+                            borderColor: selected ? RED : `${BLACK}15`,
+                            background: selected ? `${RED}10` : "#fff",
+                            cursor: "pointer",
+                          }}
+                          data-testid={`btn-interest-${item.id}`}
+                        >
+                          <span className="text-xl">{item.emoji}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Pet name */}
+                <FormField control={form.control} name="petName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nickname or pet name <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
+                    <FormControl>
+                      <Input placeholder="Babe, honey, mama bear, big guy…" data-testid="input-pet-name" {...field} />
+                    </FormControl>
+                    <p className="text-xs" style={{ color: GRAY }}>We'll weave this in naturally when it fits.</p>
+                  </FormItem>
+                )} />
+
+                {/* Years together — partner relationships only */}
+                {isPartnerRelationship && (
+                  <FormField control={form.control} name="yearsTogther" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>How long have you two been together? <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="3 years, since college, married 8 years…" data-testid="input-years-together" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )} />
+                )}
+
                 <FormField control={form.control} name="tonePreference" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tone</FormLabel>
+                    <FormLabel>Card tone</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-tone"><SelectValue /></SelectTrigger>
@@ -930,9 +1069,9 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="personalityNotes" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>What's she like?</FormLabel>
+                    <FormLabel>Additional notes <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
                     <FormControl>
-                      <Textarea rows={3} placeholder="Describe her personality, what makes her laugh, what she values…" data-testid="input-personality-notes" {...field} />
+                      <Textarea rows={3} placeholder="Anything else we should know — what makes her laugh, pet peeves, quirks…" data-testid="input-personality-notes" {...field} />
                     </FormControl>
                   </FormItem>
                 )} />

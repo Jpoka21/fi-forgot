@@ -52,6 +52,7 @@ export interface AdminRecipient {
   // AI profile fields — used when generating card messages
   senderName?: string; // How this recipient addresses the sender — "James", "Dad", etc.
   interests?: string[];
+  personality?: string[];
   personalityNotes?: string;
   kidsNames?: string;
   insideJokes?: string;

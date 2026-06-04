@@ -110,6 +110,10 @@ export interface Recipient {
   selectedEvents: string[];
   customDates: CustomDate[];
   senderName?: string; // How this recipient knows the sender — "James", "Dad", "Uncle Jim"
+  petName?: string; // Nickname / pet name
+  yearsTogther?: string; // How long they've been together (partner relationships)
+  personality?: string[]; // Structured personality picks
+  interests?: string[]; // Structured interest picks
   tonePreference: Tone;
   personalityNotes: string;
   favoriteMemories: string;
