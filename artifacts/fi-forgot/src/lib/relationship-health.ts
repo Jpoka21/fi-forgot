@@ -383,35 +383,35 @@ export function getRecommendedAction(
 
 // ── Score display helpers ─────────────────────────────────────────────────────
 export function getScoreMeta(score: number): { label: string; color: string; tagline: string; explanation: string } {
-  if (score >= 80) return {
-    label: "Strong Profile",
+  if (score >= 91) return {
+    label: "Legend Status",
     color: "#4CAF50",
-    tagline: "You're well prepared for the people who matter.",
-    explanation: "We know enough about these relationships to create highly personal cards. Keep profiles fresh as things change.",
+    tagline: "Your relationships are in exceptional shape.",
+    explanation: "We know these people deeply. Your cards are as personal as they get — keep profiles fresh and you'll stay right here.",
   };
-  if (score >= 65) return {
-    label: "Good Foundation",
+  if (score >= 76) return {
+    label: "Thoughtful Human",
     color: "#26A69A",
-    tagline: "Good foundation — a few more details make cards even better.",
-    explanation: "We can create personalized cards, but a few more memories and preferences will make future cards feel much more personal.",
+    tagline: "You're genuinely keeping up with the people who matter.",
+    explanation: "Your cards are personal and your relationships are well covered. A few more memories will push things even further.",
   };
-  if (score >= 45) return {
-    label: "Building Up",
+  if (score >= 51) return {
+    label: "Building Momentum",
     color: "#FFA726",
-    tagline: "Making progress. A few improvements will make a real difference.",
-    explanation: "We have the basics covered. Adding memories and personal details will significantly improve card quality.",
+    tagline: "Good progress — keep adding details to make cards more personal.",
+    explanation: "We can create personalized cards, but a few more memories and preferences will make future cards feel much more thoughtful.",
   };
-  if (score >= 25) return {
-    label: "Just Starting",
+  if (score >= 26) return {
+    label: "Staying Out of Trouble",
     color: "#FF7043",
-    tagline: "There's room to grow. Start with the recommended next step.",
-    explanation: "There's a lot of room to grow. Follow the recommendations below to start building real relationship profiles.",
+    tagline: "The basics are covered. Time to make things more personal.",
+    explanation: "We have enough to send cards, but adding memories and personal details will make a real difference in how they land.",
   };
   return {
-    label: "Getting Started",
+    label: "Just Surviving",
     color: "#9E9E9E",
-    tagline: "Every relationship starts somewhere. Add what you know.",
-    explanation: "Every relationship starts somewhere. Add what you know and we'll build from there.",
+    tagline: "Let's get the important people covered.",
+    explanation: "Every relationship starts somewhere. Add a few details and we'll start building cards that actually mean something.",
   };
 }
 

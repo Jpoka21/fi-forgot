@@ -1,0 +1,268 @@
+BRANDING + READABILITY REFINEMENT
+
+The dashboard is moving in the right direction, but we have identified two major issues:
+
+1. The dashboard still feels slightly too much like a software dashboard.
+2. Some text has become difficult to read due to low contrast and small typography.
+
+We want to move the experience closer to the F*I Forgot brand.
+
+BRAND DIRECTION
+
+F*I Forgot is not:
+
+* Relationship therapy
+* Self improvement software
+* A health tracker
+* A corporate CRM
+
+F*I Forgot is:
+
+* Thoughtful
+* Helpful
+* Slightly playful
+* Reassuring
+* Human
+
+The core promise is:
+
+"We got your back."
+
+Users are paying because they do not want to forget important people and important moments.
+
+The dashboard should reinforce that feeling.
+
+PRIMARY BRAND MESSAGE
+
+Move away from making Relationship Health the emotional centerpiece.
+
+People and moments are the centerpiece.
+
+Use language such as:
+
+We Got Your Back
+
+You're Covered
+
+On Track
+
+Card Ready
+
+No Important Moments At Risk
+
+Everything Important Is Being Watched
+
+COMING UP SECTION
+
+The most important content on the dashboard should be:
+
+People and upcoming moments.
+
+The hero should focus on:
+
+Stacy
+Birthday in 20 days
+Card draft ready
+
+Not:
+
+59%
+
+People first.
+Metrics second.
+
+BROWNIE POINTS
+
+Rename Relationship Health to:
+
+Brownie Points
+
+Reason:
+
+* More memorable
+* More on brand
+* More playful
+* Easier to understand
+* Fits existing pricing language
+
+Examples:
+
+Brownie Points
+
+59
+
+Building Momentum
+
+Your cards are getting more personal every month.
+
+A few more details about Stacy and Mom will make future cards feel even more thoughtful.
+
+BROWNIE POINT LEVELS
+
+0 to 25
+Just Surviving
+
+26 to 50
+Staying Out Of Trouble
+
+51 to 75
+Building Momentum
+
+76 to 90
+Thoughtful Human
+
+91 to 98
+Legend Status
+
+Do not display 100.
+
+Cap displayed score at 98.
+
+WE GOT YOUR BACK SECTION
+
+Near the top of the dashboard, include a reassuring section.
+
+Example:
+
+We Got Your Back
+
+✓ Stacy's birthday is on track
+
+✓ 2 cards ready for review
+
+✓ No important moments at risk
+
+✓ 6 occasions being watched
+
+This should feel like a concierge update.
+
+PEOPLE YOU MAY BE FORGETTING
+
+Rename:
+
+Add More People
+
+To:
+
+People You May Be Forgetting
+
+Examples:
+
+Dad
+
+Close Friend
+
+Brother
+
+Coworker
+
+This feels much more on brand.
+
+READABILITY IMPROVEMENTS
+
+This is extremely important.
+
+Several sections currently have low contrast text that is difficult to read.
+
+Improve readability throughout the dashboard.
+
+Use stronger contrast.
+
+Typography should always prioritize readability over style.
+
+TEXT COLORS
+
+Primary text:
+
+#1F1F1F
+
+Secondary text:
+
+#4B5563
+
+Avoid using very light gray text on cream backgrounds.
+
+Avoid low contrast labels.
+
+Avoid tiny light colored descriptions.
+
+All informational text should pass accessibility contrast standards.
+
+FONT SIZES
+
+Increase readability of:
+
+* descriptions
+* helper text
+* score explanations
+* status labels
+* relationship summaries
+
+Avoid tiny text.
+
+If text feels decorative rather than readable, increase size and contrast.
+
+HEADINGS
+
+Keep the F*I Forgot brand font for:
+
+* major headings
+* section labels
+* branding
+
+Use a clean modern font such as Inter or Geist for:
+
+* body copy
+* descriptions
+* statuses
+* helper text
+* relationship details
+
+SPACING
+
+Increase vertical spacing between sections.
+
+Allow more breathing room.
+
+Avoid cramped layouts.
+
+The page should feel relaxed and easy to scan.
+
+BUTTONS
+
+Red buttons should remain the primary CTA.
+
+However:
+
+Do not allow buttons to visually overpower people and moments.
+
+The user's eye should first notice:
+
+* Stacy
+* Mom
+* Dad
+* Upcoming moments
+
+Before noticing:
+
+* buttons
+* scores
+* metrics
+
+SUCCESS CRITERIA
+
+When a user opens the dashboard, their reaction should be:
+
+"Good. We got Stacy covered."
+
+Not:
+
+"Let me analyze my metrics."
+
+The dashboard should feel like a relationship concierge that helps users stay thoughtful and avoid forgetting important people.
+
+People are the hero.
+
+Moments are the story.
+
+Brownie Points are the supporting score.
