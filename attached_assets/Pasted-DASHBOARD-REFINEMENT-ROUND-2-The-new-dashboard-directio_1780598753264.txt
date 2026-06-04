@@ -1,0 +1,326 @@
+DASHBOARD REFINEMENT ROUND 2
+
+The new dashboard direction is much stronger, but after reviewing the latest version there are still several UX and visual issues that need refinement.
+
+Do not redesign the system.
+
+Do not change the underlying Relationship Health architecture.
+
+Refine the experience.
+
+MOST IMPORTANT GOAL
+
+The dashboard should answer:
+
+"How am I doing?"
+
+before it answers:
+
+"What data do I have?"
+
+The dashboard should feel like a premium progress tracker, not a statistics page.
+
+RELATIONSHIP HEALTH HERO
+
+The Relationship Health hero should remain the dominant visual element.
+
+However, the score alone is not enough.
+
+Users need to understand what the number means.
+
+Example:
+
+Relationship Health
+
+59%
+
+Good Foundation
+
+Card Quality: Good
+
+We can create personalized cards, but a few more memories and preferences will make future cards feel much more personal.
+
+Everything important is being watched.
+
+Add a visible trend whenever possible:
+
++4% this month
+
+or
+
+Improved 3 times this month
+
+The trend is often more important than the absolute score.
+
+Progress is what makes users care.
+
+SCORES MUST BE TRANSLATED
+
+Every score should have a human explanation.
+
+Examples:
+
+59%
+Good Foundation
+
+We know the basics and can create personalized cards, but there is still room to improve.
+
+82%
+Strong Profile
+
+We know enough about this person to create highly personal cards.
+
+95%
+Deep Understanding
+
+Cards should require very little editing.
+
+The explanation should matter more than the percentage.
+
+RELATIONSHIP OUTCOMES BEFORE SCORE IMPROVEMENTS
+
+Do not overemphasize score gains.
+
+Users did not buy F*I Forgot to increase percentages.
+
+Users bought F*I Forgot to avoid forgetting important people.
+
+When showing recommendations, prioritize outcomes.
+
+Prefer:
+
+Add one recent memory to make Stacy’s birthday card more personal.
+
+Instead of:
+
+Gain 4%.
+
+The score should support the behavior, not become the behavior.
+
+RELATIONSHIP WINS
+
+Add more emotional wins throughout the dashboard.
+
+Examples:
+
+Stacy’s birthday is fully covered.
+
+Mom’s Easter card is already on track.
+
+You have not missed an important moment in 6 months.
+
+Dad’s birthday is protected.
+
+These moments reinforce the value of the product.
+
+The user should feel reassured, not graded.
+
+RELATIONSHIP LIST IMPROVEMENTS
+
+Make the relationship list more outcome focused.
+
+Instead of:
+
+Stacy
+92%
+
+Prefer:
+
+Stacy
+
+Birthday protected
+
+Next event in 20 days
+
+92%
+
+Protection first.
+Score second.
+
+Users care more about the outcome than the metric.
+
+CATEGORY LABELS
+
+Continue making category labels more human.
+
+Keep:
+
+Event Coverage
+Shared Memories
+Likes & Interests
+
+Replace:
+
+Action Readiness
+
+With a more human label such as:
+
+Card Readiness
+
+or
+
+Ready to Send
+
+Use whichever fits best.
+
+COMMUNICATION STYLE LABEL
+
+Evaluate whether:
+
+How They Like To Be Spoken To
+
+is too long.
+
+If needed, find a shorter but equally human alternative.
+
+RELATIONSHIP COVERAGE NAMING
+
+Evaluate alternative naming.
+
+Examples:
+
+Relationship Coverage
+People Covered
+Moments Protected
+
+Recommend the strongest option.
+
+The goal is immediate understanding.
+
+Do not blindly keep the original label if a better one exists.
+
+RELATIONSHIP UPDATES SECTION
+
+Add a lightweight updates section.
+
+Purpose:
+
+Answer:
+
+"What changed since my last visit?"
+
+Examples:
+
+New birthday draft ready.
+
+Mom profile improved 8%.
+
+Dad has not been updated in 8 months.
+
+Birthday is now 20 days away.
+
+This section should make the dashboard feel alive and dynamic.
+
+RECENT PROGRESS
+
+Continue emphasizing progress.
+
+Progress should feel rewarding.
+
+Examples:
+
+Relationship Health
+
+55% → 59%
+
+This Month
+
+Mom
+
++8%
+
+Dad
+
++2%
+
+Use subtle visual reinforcement.
+
+Avoid gamification.
+
+ANIMATION GUIDELINES
+
+Use subtle animations only.
+
+Acceptable:
+
+Score increasing
+Progress bars filling
+Success confirmations
+
+Avoid:
+
+Confetti
+Bouncing elements
+Flashy transitions
+Game-like effects
+Celebration screens
+
+The product should feel premium.
+
+VISUAL REFINEMENT
+
+Continue simplifying.
+
+Reduce visual noise.
+
+Reduce unnecessary borders.
+
+Reduce stacked containers.
+
+Use whitespace more aggressively.
+
+Prefer:
+
+clean sections
+
+over
+
+many nested cards
+
+COLOR SYSTEM
+
+Relationship Health should feel positive and calming.
+
+Use sage green as the primary progress color.
+
+Reserve brand red primarily for:
+
+Primary CTAs
+Review actions
+Important actions
+
+Do not use red as the dominant informational color.
+
+Avoid rainbow progress bars.
+
+Use a consistent progress color system.
+
+MOBILE EXPERIENCE
+
+The first screen on mobile should communicate:
+
+1. Relationship Health
+2. Human explanation
+3. Recommended next step
+4. Upcoming important moment
+
+Everything else can appear lower.
+
+SUCCESS CRITERIA
+
+The dashboard should feel:
+
+Reassuring
+Premium
+Calm
+Human
+Progress oriented
+
+The user should understand:
+
+How am I doing?
+What changed?
+What should I do next?
+What important moments are covered?
+
+without needing to interpret percentages or internal scoring systems.

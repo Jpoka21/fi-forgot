@@ -33,6 +33,7 @@ export interface OverallHealth {
   label:            string;
   color:            string;
   tagline:          string;
+  explanation:      string;
   recipientHealths: RecipientHealth[];
   topInsight:       HealthInsight | null;
 }
@@ -239,7 +240,12 @@ export function computeOverallHealth(recipients: Recipient[]): OverallHealth {
   const active = recipients.filter(r => r.active !== false);
 
   if (active.length === 0) {
-    return { score: 0, label: "Not started", color: "#9E9E9E", tagline: "Add your first important person to get started.", recipientHealths: [], topInsight: null };
+    return {
+      score: 0, label: "Not started", color: "#9E9E9E",
+      tagline: "Add your first important person to get started.",
+      explanation: "Add the people who matter most and we'll track every important moment for you.",
+      recipientHealths: [], topInsight: null,
+    };
   }
 
   const recipientHealths = active.map(computeRecipientHealth);
@@ -251,7 +257,7 @@ export function computeOverallHealth(recipients: Recipient[]): OverallHealth {
     weightTotal += w;
   }
   const score = Math.round(weightedSum / weightTotal);
-  const { label, color, tagline } = getScoreMeta(score);
+  const { label, color, tagline, explanation } = getScoreMeta(score);
 
   // Best improvement opportunity: highest-tier recipient with most points to gain
   const topOpp = [...recipientHealths]
@@ -274,7 +280,7 @@ export function computeOverallHealth(recipients: Recipient[]): OverallHealth {
     }
   }
 
-  return { score, label, color, tagline, recipientHealths, topInsight };
+  return { score, label, color, tagline, explanation, recipientHealths, topInsight };
 }
 
 // ── Public: coverage analysis ─────────────────────────────────────────────────
@@ -322,7 +328,7 @@ export function getRecommendedAction(
     return {
       type: "answer_briefing",
       title: `Personalize ${urgent.recipient.name}'s ${urgent.event} card`,
-      description: `3 quick questions so the card sounds like you, not a template. ${urgent.daysAway} days away.`,
+      description: `Answer a few quick questions so the card sounds like you wrote it. ${urgent.daysAway} days away.`,
       href: `/briefings/${urgent.recipient.id}/${encodeURIComponent(urgent.event)}`,
       recipientName: urgent.recipient.name,
       daysUntil: urgent.daysAway,
@@ -334,8 +340,8 @@ export function getRecommendedAction(
   if (soon) {
     return {
       type: "answer_briefing",
-      title: `Personalize ${soon.recipient.name}'s ${soon.event} card`,
-      description: `${soon.daysAway} days away — a few details now will make the card much better.`,
+      title: `Add a personal touch to ${soon.recipient.name}'s ${soon.event} card`,
+      description: `A few details now will make ${soon.recipient.name}'s card feel genuinely personal, not generic.`,
       href: `/briefings/${soon.recipient.id}/${encodeURIComponent(soon.event)}`,
       recipientName: soon.recipient.name,
       daysUntil: soon.daysAway,
@@ -347,8 +353,8 @@ export function getRecommendedAction(
     const rh = health.recipientHealths.find(r => r.name === health.topInsight!.recipientName);
     return {
       type: "improve_profile",
-      title: `Improve ${health.topInsight.recipientName}'s profile`,
-      description: `${health.topInsight.action} — worth up to +${health.topInsight.pointsGain} points toward your score.`,
+      title: `Make ${health.topInsight.recipientName}'s next card more personal`,
+      description: `${health.topInsight.action} — this will make future cards feel much more like they came from you.`,
       href: rh?.topGapHref ?? "/recipients",
       recipientName: health.topInsight.recipientName,
       urgency: "medium",
@@ -368,28 +374,53 @@ export function getRecommendedAction(
 
   return {
     type: "improve_profile",
-    title: "You're in great shape",
-    description: "All your relationships are well covered. Keep profiles fresh as things change.",
+    title: "Your relationships are well covered",
+    description: "All the important people are being watched. Keep profiles fresh as things change.",
     href: "/recipients",
     urgency: "low",
   };
 }
 
 // ── Score display helpers ─────────────────────────────────────────────────────
-export function getScoreMeta(score: number): { label: string; color: string; tagline: string } {
-  if (score >= 80) return { label: "Solid",          color: "#4CAF50", tagline: "You're well prepared for the people who matter." };
-  if (score >= 65) return { label: "Good",            color: "#26A69A", tagline: "Good foundation — a few more details make cards even better." };
-  if (score >= 45) return { label: "Getting there",  color: "#FFA726", tagline: "Making progress. A few improvements will make a real difference." };
-  if (score >= 25) return { label: "Needs work",     color: "#FF7043", tagline: "There's room to grow. Start with the recommended next step." };
-  return               { label: "Just starting",    color: "#9E9E9E", tagline: "Every relationship starts somewhere. Add what you know." };
+export function getScoreMeta(score: number): { label: string; color: string; tagline: string; explanation: string } {
+  if (score >= 80) return {
+    label: "Strong Profile",
+    color: "#4CAF50",
+    tagline: "You're well prepared for the people who matter.",
+    explanation: "We know enough about these relationships to create highly personal cards. Keep profiles fresh as things change.",
+  };
+  if (score >= 65) return {
+    label: "Good Foundation",
+    color: "#26A69A",
+    tagline: "Good foundation — a few more details make cards even better.",
+    explanation: "We can create personalized cards, but a few more memories and preferences will make future cards feel much more personal.",
+  };
+  if (score >= 45) return {
+    label: "Building Up",
+    color: "#FFA726",
+    tagline: "Making progress. A few improvements will make a real difference.",
+    explanation: "We have the basics covered. Adding memories and personal details will significantly improve card quality.",
+  };
+  if (score >= 25) return {
+    label: "Just Starting",
+    color: "#FF7043",
+    tagline: "There's room to grow. Start with the recommended next step.",
+    explanation: "There's a lot of room to grow. Follow the recommendations below to start building real relationship profiles.",
+  };
+  return {
+    label: "Getting Started",
+    color: "#9E9E9E",
+    tagline: "Every relationship starts somewhere. Add what you know.",
+    explanation: "Every relationship starts somewhere. Add what you know and we'll build from there.",
+  };
 }
 
 export const CAT_LABELS: Record<string, string> = {
   eventCoverage:   "Event Coverage",
-  memoryBank:      "Memory Bank",
-  preferences:     "Preferences",
+  memoryBank:      "Shared Memories",
+  preferences:     "Likes & Interests",
   commStyle:       "Communication Style",
-  actionReadiness: "Action Readiness",
+  actionReadiness: "Card Readiness",
 };
 
 export const CAT_DESCRIPTIONS: Record<string, string> = {
@@ -403,7 +434,7 @@ export const CAT_DESCRIPTIONS: Record<string, string> = {
 export function getEventStatus(
   daysAway: number, hasBriefing: boolean, hasCard: boolean, cardApproved: boolean,
 ): { label: string; color: string; bg: string } {
-  if (cardApproved)                           return { label: "Scheduled",         color: "#15803d", bg: "#f0fdf4" };
+  if (cardApproved)                           return { label: "Protected",          color: "#15803d", bg: "#f0fdf4" };
   if (hasCard)                                return { label: "Draft Ready",        color: "#1d4ed8", bg: "#eff6ff" };
   if (hasBriefing && daysAway > 14)          return { label: "On Track",           color: "#15803d", bg: "#f0fdf4" };
   if (daysAway <= 7)                          return { label: "Watching",           color: "#b45309", bg: "#fffbeb" };
