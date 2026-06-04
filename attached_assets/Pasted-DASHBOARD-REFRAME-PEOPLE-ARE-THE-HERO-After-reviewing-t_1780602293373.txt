@@ -1,0 +1,341 @@
+DASHBOARD REFRAME: PEOPLE ARE THE HERO
+
+After reviewing the latest dashboard iterations, I believe we have identified the core issue.
+
+We have been treating Relationship Health as the hero.
+
+It is not.
+
+The people are the hero.
+
+Relationship Health is important, but it should support the experience rather than lead it.
+
+The reason users pay for F*I Forgot is not to improve a score.
+
+The reason users pay is:
+
+* To remember Stacy's birthday.
+* To send thoughtful cards.
+* To avoid forgetting important people.
+* To strengthen relationships.
+
+The dashboard should reflect that.
+
+NEW PRINCIPLE
+
+When a user logs in, the first thing they should see is:
+
+People and Moments
+
+Not metrics.
+
+Not scores.
+
+Not analytics.
+
+The dashboard should immediately answer:
+
+Who needs me?
+What's coming up?
+Am I covered?
+
+before it answers:
+
+How is my score doing?
+
+NEW DASHBOARD HIERARCHY
+
+1. Important People & Upcoming Moments
+2. You're Covered
+3. Recommended Next Step
+4. Relationship Health
+5. Relationship List
+6. Relationship Insights
+7. Recent Wins
+8. Plan Usage
+
+SECTION 1: IMPORTANT PEOPLE & UPCOMING MOMENTS
+
+This becomes the hero section.
+
+Examples:
+
+Stacy ❤️
+
+Birthday in 20 days
+
+Card draft ready
+
+[Review Card]
+
+---
+
+Mom 🌷
+
+Easter in 34 days
+
+On Track
+
+---
+
+Dad 🎂
+
+Birthday in 55 days
+
+Needs one more memory
+
+[Add Memory]
+
+The hero should feel emotional and instantly understandable.
+
+The user should immediately recognize the people they care about.
+
+The people should be more visually prominent than the scores.
+
+SECTION 2: YOU'RE COVERED
+
+Immediately below the hero.
+
+Example:
+
+You're Covered
+
+✓ No important moments at risk
+
+✓ 2 cards ready for review
+
+✓ 6 occasions being watched
+
+✓ Stacy's birthday is on track
+
+This section should create reassurance.
+
+The user should feel:
+
+"Good. Everything important is being handled."
+
+Do not make this feel like analytics.
+
+Make it feel like a personal concierge update.
+
+SECTION 3: RECOMMENDED NEXT STEP
+
+Keep one recommendation only.
+
+Examples:
+
+Review Stacy's Birthday Card
+
+or
+
+Add one recent memory for Dad
+
+or
+
+Add Mom's favorite restaurant
+
+The recommendation should explain why it matters.
+
+Example:
+
+Add one recent memory for Dad to make future cards more personal.
+
+Not:
+
+Gain 4%.
+
+Relationship outcomes should be more important than score gains.
+
+SECTION 4: RELATIONSHIP HEALTH
+
+Move Relationship Health lower.
+
+Relationship Health should still exist, but it should no longer dominate the page.
+
+Example:
+
+Relationship Health
+
+59%
+
+Building Up
+
+Your cards are becoming more personal.
+
+Add a few more memories and details to make them even stronger.
+
+Trend:
+
++4% this month
+
+The explanation should be more important than the number.
+
+SECTION 5: RELATIONSHIP LIST
+
+Keep a compact relationship list.
+
+Each person should show:
+
+Name
+
+Human status
+
+Next event
+
+Relationship Health
+
+Action
+
+Example:
+
+Stacy
+
+Strong Profile
+
+Birthday in 20 days
+
+92%
+
+[View]
+
+Example:
+
+Mom
+
+Good Foundation
+
+Easter in 34 days
+
+68%
+
+[Improve]
+
+People should feel like people, not CRM records.
+
+SECTION 6: RELATIONSHIP INSIGHTS
+
+Rename:
+
+"Why Your Score Is What It Is"
+
+This sounds analytical and boring.
+
+Replace with something more human such as:
+
+Make Future Cards Better
+
+or
+
+Help Us Know Them Better
+
+or
+
+Personalize Future Cards
+
+This section should explain:
+
+What information is missing
+
+Why it matters
+
+How it improves future cards
+
+The focus should be card quality and personalization.
+
+Not scoring mechanics.
+
+SECTION 7: RECENT WINS
+
+Lean into positive reinforcement.
+
+Examples:
+
+🎉 Stacy's birthday card is ready
+
+🎉 Mom's profile improved 8%
+
+🎉 No important moments missed in 6 months
+
+Celebrate outcomes.
+
+Not percentages.
+
+This section should make the user feel good.
+
+SECTION 8: PLAN USAGE
+
+Keep visually small.
+
+Keep near the bottom.
+
+Do not let plan usage compete with relationships.
+
+COPY DIRECTION
+
+Use language like:
+
+You're Covered
+
+On Track
+
+Card Ready
+
+Building Up
+
+Strong Profile
+
+Good Foundation
+
+Everything important is being watched
+
+No important moments at risk
+
+Thoughtful cards. Stronger relationships.
+
+Avoid language like:
+
+Coverage Score
+
+Optimization
+
+Performance
+
+Task Completion
+
+Operational Metrics
+
+Utilization
+
+The dashboard should feel human.
+
+VISUAL DIRECTION
+
+The people should visually dominate the page.
+
+The user should see:
+
+Stacy
+
+Mom
+
+Dad
+
+before they focus on:
+
+59%
+
+The relationships are the product.
+
+The score is supporting evidence.
+
+SUCCESS CRITERIA
+
+When a user opens the dashboard, their first thought should be:
+
+"Good. Stacy's birthday is handled."
+
+Not:
+
+"My Relationship Health is 59%."
+
+That emotional shift is the goal of this redesign.

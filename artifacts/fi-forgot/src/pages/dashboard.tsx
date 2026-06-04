@@ -4,16 +4,14 @@ import {
   getCards, getRecipients, getBriefingsForRecipient,
   CardOrder, Recipient, saveCard,
   getPersonalSettings, savePersonalSettings, PersonalSettings,
-  childrenSummary, getYearsTogether,
-  TONES,
+  childrenSummary, getYearsTogether, TONES,
 } from "@/lib/data";
 import { getCustomerPendingApprovals, QueueItem, MessageDraft } from "@/lib/admin-data";
 import { useAuth } from "@/lib/auth-context";
 import { Plan, PLANS } from "@/lib/plan";
 import {
   Plus, Sparkles, Loader2, ChevronDown, ChevronUp,
-  Search, Clock, ArrowRight, Settings, CheckCircle2,
-  TrendingUp, Target, ThumbsUp, Shield,
+  Search, ArrowRight, Settings, CheckCircle2, TrendingUp, Target,
 } from "lucide-react";
 import {
   computeOverallHealth, computeCoverage, getRecommendedAction,
@@ -24,7 +22,7 @@ import {
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
 
-/* ── Brand colours ────────────────────────────────────────────────────────── */
+/* ── Brand ── */
 const BEIGE = "#F2E6D3";
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -32,26 +30,34 @@ const WHITE = "#FFFFFF";
 const GRAY  = "#6B6B6B";
 const SAGE  = "#5B8C6B";
 
-/* ── Event emojis ─────────────────────────────────────────────────────────── */
+/* ── Event emojis ── */
 function eventEmoji(event: string): string {
   const map: Record<string, string> = {
-    "Birthday": "🎂", "Anniversary": "💕", "Mother's Day": "🌸",
+    "Birthday": "🎂", "Anniversary": "💕", "Mother's Day": "🌷",
     "Father's Day": "🎩", "Valentine's Day": "❤️", "Christmas": "🎄",
     "Hanukkah": "🕎", "Thanksgiving": "🍂", "Easter": "🐣", "New Year's": "🥂",
   };
   return map[event] ?? "🎉";
 }
 
-/* ── Score → human label ──────────────────────────────────────────────────── */
-function scoreLabel(score: number): { text: string; color: string } {
-  if (score >= 80) return { text: "Strong Profile",    color: SAGE };
-  if (score >= 65) return { text: "Good Foundation",   color: "#26A69A" };
-  if (score >= 45) return { text: "Building Up",       color: "#F59E0B" };
-  if (score >= 25) return { text: "Just Starting",     color: "#EF6C00" };
-  return               { text: "Getting Started",  color: GRAY };
+/* ── Urgency color for days-away ── */
+function daysColor(n: number): string {
+  if (n <= 7)  return RED;
+  if (n <= 14) return "#D97706";
+  if (n <= 30) return BLACK;
+  return GRAY;
 }
 
-/* ── Holiday fixed dates ──────────────────────────────────────────────────── */
+/* ── Score → human label ── */
+function scoreLabel(score: number): { text: string; color: string } {
+  if (score >= 80) return { text: "Strong Profile",   color: SAGE };
+  if (score >= 65) return { text: "Good Foundation",  color: "#26A69A" };
+  if (score >= 45) return { text: "Building Up",      color: "#F59E0B" };
+  if (score >= 25) return { text: "Just Starting",    color: "#EF6C00" };
+  return               { text: "Getting Started", color: GRAY };
+}
+
+/* ── Holiday fixed dates ── */
 const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
   "Valentine's Day": { month: 2,  day: 14 }, "Mother's Day":  { month: 5,  day: 12 },
   "Father's Day":    { month: 6,  day: 16 }, "Thanksgiving":  { month: 11, day: 28 },
@@ -60,15 +66,15 @@ const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
 };
 
 function getEventDate(event: string, r: Recipient): string | null {
-  const now = new Date(); const year = now.getFullYear();
+  const now  = new Date(); const year = now.getFullYear();
   const pad  = (n: number) => String(n).padStart(2, "0");
   const next = (stored: string) => {
     const p = stored.split("-").map(Number);
-    let d = new Date(year, p[1] - 1, p[2]);
+    let d   = new Date(year, p[1] - 1, p[2]);
     if (d < now) d = new Date(year + 1, p[1] - 1, p[2]);
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   };
-  if (event === "Birthday"    && r.birthday)  return next(r.birthday);
+  if (event === "Birthday" && r.birthday)  return next(r.birthday);
   if (event === "Anniversary") {
     const src = r.anniversaryDate ?? r.marriageDate;
     if (src) return next(src);
@@ -80,9 +86,10 @@ function getEventDate(event: string, r: Recipient): string | null {
   return null;
 }
 
+type UpcomingEvent = { recipient: Recipient; event: string; daysAway: number; dateStr: string; briefingDone: boolean };
 type PendingApproval = QueueItem & { message?: MessageDraft };
 
-/* ── Thin bar ─────────────────────────────────────────────────────────────── */
+/* ── Thin bar ── */
 function ThinBar({ pct, color = SAGE, h = 4 }: { pct: number; color?: string; h?: number }) {
   return (
     <div style={{ height: h, background: `${BLACK}0C`, borderRadius: h, overflow: "hidden" }}>
@@ -91,7 +98,19 @@ function ThinBar({ pct, color = SAGE, h = 4 }: { pct: number; color?: string; h?
   );
 }
 
-/* ── Warm account menu ────────────────────────────────────────────────────── */
+/* ── Section label ── */
+function SectionLabel({ text, emoji }: { text: string; emoji?: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.18em", color: `${BLACK}45` }}>
+        {text}
+      </span>
+      {emoji && <span style={{ fontSize: "0.85rem" }}>{emoji}</span>}
+    </div>
+  );
+}
+
+/* ── Account menu ── */
 function AccountMenu({ user, onLogout }: { user: { name: string; email: string } | null; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const [, setLocation] = useLocation();
@@ -104,25 +123,12 @@ function AccountMenu({ user, onLogout }: { user: { name: string; email: string }
   const initial = user?.name?.charAt(0).toUpperCase() ?? "?";
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        data-testid="btn-account-menu"
-        style={{
-          display: "flex", alignItems: "center", gap: 8,
-          background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 8,
-        }}
-      >
-        <div style={{
-          width: 32, height: 32, borderRadius: "50%",
-          background: open ? RED : `${BLACK}15`,
-          color: open ? WHITE : BLACK,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem",
-          transition: "all 0.15s",
-        }}>{initial}</div>
-        <span style={{ fontSize: "0.82rem", fontWeight: 600, color: BLACK }}>
-          {user?.name?.split(" ")[0]}
-        </span>
+      <button onClick={() => setOpen(o => !o)} data-testid="btn-account-menu"
+        style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 8 }}>
+        <div style={{ width: 32, height: 32, borderRadius: "50%", background: open ? RED : `${BLACK}15`, color: open ? WHITE : BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", transition: "all 0.15s" }}>
+          {initial}
+        </div>
+        <span style={{ fontSize: "0.82rem", fontWeight: 600, color: BLACK }}>{user?.name?.split(" ")[0]}</span>
         <ChevronDown size={13} style={{ color: GRAY }} />
       </button>
       {open && (
@@ -133,7 +139,6 @@ function AccountMenu({ user, onLogout }: { user: { name: string; email: string }
           </div>
           {[
             { label: "Account Settings", action: () => alert("Coming soon") },
-            { label: "Billing & Plan",   action: () => alert("Coming soon") },
             { label: "Admin Panel",      action: () => { setOpen(false); setLocation("/admin"); } },
           ].map(item => (
             <button key={item.label} onClick={() => { item.action(); setOpen(false); }}
@@ -170,11 +175,11 @@ export default function DashboardPage() {
   const [fontPickerOpen, setFontPickerOpen]         = useState(false);
   const [generatingFor, setGeneratingFor]           = useState<string | null>(null);
   const [viewingCardId, setViewingCardId]           = useState<string | null>(null);
-  const [isMobile, setIsMobile]                     = useState(() => window.innerWidth < 768);
+  const [isMobile, setIsMobile]                     = useState(() => window.innerWidth < 640);
   const [scoreHistory, setScoreHistory]             = useState<ScoreSnapshot[]>([]);
   const [upgradeOpen, setUpgradeOpen]               = useState(false);
-  const [scoreBreakdownOpen, setScoreBreakdownOpen] = useState(false);
-  const [comingUpExpanded, setComingUpExpanded]     = useState(false);
+  const [insightsOpen, setInsightsOpen]             = useState(false);
+  const [heroExpanded, setHeroExpanded]             = useState(false);
 
   const { user, logout, upgradePlan } = useAuth();
   const [, setLocation] = useLocation();
@@ -188,7 +193,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const h = () => setIsMobile(window.innerWidth < 768);
+    const h = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener("resize", h);
     return () => window.removeEventListener("resize", h);
   }, []);
@@ -200,16 +205,16 @@ export default function DashboardPage() {
     if (health.score > 0) { recordScoreSnapshot(health.score); setScoreHistory(getScoreHistory()); }
   }, [health.score]);
 
-  const approvedCards     = useMemo(() => cards.filter(c => c.status === "Approved"), [cards]);
-  const awaitingApproval  = cards.filter(c => c.status === "Ready for approval");
-  const approvalCount     = awaitingApproval.length + pendingApprovals.length;
-  const disastersAvoided  = recipients.reduce((s, r) => s + (r.selectedEvents?.length ?? 0), 0);
+  const approvedCards    = useMemo(() => cards.filter(c => c.status === "Approved"), [cards]);
+  const awaitingApproval = cards.filter(c => c.status === "Ready for approval");
+  const approvalCount    = awaitingApproval.length + pendingApprovals.length;
+  const disastersAvoided = recipients.reduce((s, r) => s + (r.selectedEvents?.length ?? 0), 0);
 
   const allUpcomingEvents = useMemo(() => {
-    const today = new Date();
-    const cutoff = new Date(today.getTime() + 90 * 86400000);
+    const today   = new Date();
+    const cutoff  = new Date(today.getTime() + 90 * 86400000);
     const thisYear = today.getFullYear();
-    const result: Array<{ recipient: Recipient; event: string; daysAway: number; dateStr: string; briefingDone: boolean }> = [];
+    const result: UpcomingEvent[] = [];
     for (const r of recipients) {
       const briefings = getBriefingsForRecipient(r.id);
       for (const event of r.selectedEvents ?? []) {
@@ -217,7 +222,7 @@ export default function DashboardPage() {
         if (!dateStr) continue;
         const d = new Date(dateStr);
         if (d < today || d > cutoff) continue;
-        const daysAway = Math.ceil((d.getTime() - today.getTime()) / 86400000);
+        const daysAway    = Math.ceil((d.getTime() - today.getTime()) / 86400000);
         const briefingDone = briefings.some(b => b.event === event && b.year === thisYear);
         result.push({ recipient: r, event, daysAway, dateStr, briefingDone });
       }
@@ -239,48 +244,38 @@ export default function DashboardPage() {
 
   const past30Score = useMemo(() => {
     const cutoff = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
-    const old = scoreHistory.filter(s => s.date <= cutoff);
+    const old    = scoreHistory.filter(s => s.date <= cutoff);
     return old.length > 0 ? old[old.length - 1].score : null;
   }, [scoreHistory]);
   const scoreDelta = past30Score !== null ? health.score - past30Score : null;
 
-  /* Wins */
-  const wins = useMemo(() => {
-    const list: string[] = [];
-    for (const c of approvedCards) list.push(`${c.recipientName}'s ${c.holiday} card is approved and on its way`);
-    for (const ev of allUpcomingEvents) {
-      if (ev.briefingDone && ev.daysAway > 7 && !approvedCards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event))
-        list.push(`${ev.recipient.name}'s ${ev.event} is personalized and on track`);
-    }
-    const momentsAtRisk = allUpcomingEvents.filter(e => e.daysAway <= 14 && !e.briefingDone && !upcomingWithCardKeys.has(`${e.recipient.id}:::${e.event}`)).length;
-    if (momentsAtRisk === 0 && recipients.length > 0) list.push("No important moments are at risk right now");
-    if (scoreDelta && scoreDelta > 0) list.push(`Relationship health improved ${scoreDelta} point${scoreDelta > 1 ? "s" : ""} this month`);
-    return list.slice(0, 4);
-  }, [approvedCards, allUpcomingEvents, recipients, scoreDelta, upcomingWithCardKeys]);
-
-  /* Moments at risk count */
   const momentsAtRisk = useMemo(() =>
     allUpcomingEvents.filter(e => e.daysAway <= 14 && !e.briefingDone && !upcomingWithCardKeys.has(`${e.recipient.id}:::${e.event}`)).length,
   [allUpcomingEvents, upcomingWithCardKeys]);
 
-  /* People protected count */
-  const peopleProtected = useMemo(() =>
-    recipients.filter(r => {
-      const evts = allUpcomingEvents.filter(e => e.recipient.id === r.id);
-      return evts.some(e => e.briefingDone || upcomingWithCardKeys.has(`${r.id}:::${e.event}`));
-    }).length,
-  [recipients, allUpcomingEvents, upcomingWithCardKeys]);
+  /* Wins */
+  const wins = useMemo(() => {
+    const list: string[] = [];
+    for (const c of approvedCards) list.push(`${c.recipientName}'s ${c.holiday} card is approved and ready to mail`);
+    for (const ev of allUpcomingEvents) {
+      if (ev.briefingDone && ev.daysAway > 7 && !approvedCards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event))
+        list.push(`${ev.recipient.name}'s ${ev.event} is personalized and on track`);
+    }
+    if (momentsAtRisk === 0 && recipients.length > 0) list.push("No important moments are at risk right now");
+    if (scoreDelta && scoreDelta > 0) list.push(`Relationship health improved ${scoreDelta} point${scoreDelta > 1 ? "s" : ""} this month`);
+    return list.slice(0, 4);
+  }, [approvedCards, allUpcomingEvents, recipients, scoreDelta, momentsAtRisk]);
 
   function updateSettings<K extends keyof PersonalSettings>(key: K, val: PersonalSettings[K]) {
     setPersonalSettings(prev => { const next = { ...prev, [key]: val }; savePersonalSettings(next); return next; });
   }
 
-  async function generateEarly(ev: { recipient: Recipient; event: string; daysAway: number; dateStr: string; briefingDone: boolean }) {
+  async function generateEarly(ev: UpcomingEvent) {
     const key = `${ev.recipient.id}:::${ev.event}`;
     setGeneratingFor(key);
     try {
-      const allBriefings = getBriefingsForRecipient(ev.recipient.id);
-      const currentBriefing = allBriefings.filter(b => b.event === ev.event).sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())[0];
+      const allBriefings     = getBriefingsForRecipient(ev.recipient.id);
+      const currentBriefing  = allBriefings.filter(b => b.event === ev.event).sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())[0];
       const res = await fetch("/api/generate-card", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -297,7 +292,7 @@ export default function DashboardPage() {
       const data = await res.json() as { cards?: { tone: string; text: string }[] };
       const generated = data.cards ?? [];
       if (generated.length > 0) {
-        const match = generated.find(c => c.tone === ev.recipient.tonePreference) ?? generated[0];
+        const match   = generated.find(c => c.tone === ev.recipient.tonePreference) ?? generated[0];
         const newCard: CardOrder = {
           id: `personal-${Date.now()}`, recipientId: ev.recipient.id, recipientName: ev.recipient.name,
           holiday: ev.event, dueDate: ev.dateStr, status: "Ready for approval",
@@ -314,39 +309,37 @@ export default function DashboardPage() {
     fetch("/api/handwrytten-fonts").then(r => r.json()).then((d: { fonts?: HwFont[] }) => { if (d.fonts) setHwFonts(d.fonts); }).catch(() => {}).finally(() => setFontsLoading(false));
   }, [fontPickerOpen]);
 
-  const planConfig = PLANS[plan];
-  const cardsUsed  = approvedCards.length;
-  const cardsTotal = planConfig.maxCardsPerYear;
-  const cardsLeft  = Math.max(0, cardsTotal - cardsUsed);
-  const atLimit    = cardsLeft === 0;
-  const usagePct   = Math.min(100, Math.round((cardsUsed / Math.max(cardsTotal, 1)) * 100));
-  const px = isMobile ? 16 : 28;
+  const planConfig   = PLANS[plan];
+  const cardsUsed    = approvedCards.length;
+  const cardsTotal   = planConfig.maxCardsPerYear;
+  const cardsLeft    = Math.max(0, cardsTotal - cardsUsed);
+  const atLimit      = cardsLeft === 0;
+  const usagePct     = Math.min(100, Math.round((cardsUsed / Math.max(cardsTotal, 1)) * 100));
+  const px           = isMobile ? 16 : 28;
+  const firstName    = user?.name?.split(" ")[0] ?? "there";
 
   const filteredRecipients = recipients.filter(r =>
     !search || r.name.toLowerCase().includes(search.toLowerCase()) || r.relationship.toLowerCase().includes(search.toLowerCase())
   );
 
-  const comingUpToShow = comingUpExpanded ? allUpcomingEvents : allUpcomingEvents.slice(0, 4);
+  const heroEvents   = heroExpanded ? allUpcomingEvents : allUpcomingEvents.slice(0, 3);
+  const heroColumns  = isMobile ? "1fr" : allUpcomingEvents.slice(0, 3).length === 1 ? "minmax(0,560px)" : `repeat(${Math.min(allUpcomingEvents.slice(0, 3).length, 3)}, 1fr)`;
 
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <>
     <div style={{ minHeight: "100vh", background: BEIGE, fontFamily: "'Inter', sans-serif" }}>
 
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 40, background: BEIGE,
-        borderBottom: `1px solid ${BLACK}10`, padding: `0 ${px}px`,
-        height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" as const,
-      }}>
+      {/* ── Header ────────────────────────────────────────────────────── */}
+      <header style={{ position: "sticky", top: 0, zIndex: 40, background: BEIGE, borderBottom: `1px solid ${BLACK}10`, padding: `0 ${px}px`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" as const }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.6rem" : "2rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 4 }}>F*</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.6rem" : "2rem", color: BLACK, letterSpacing: "0.04em" }}>I FORGOT</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.5rem" : "1.9rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 4 }}>F*</span>
+            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.5rem" : "1.9rem", color: BLACK, letterSpacing: "0.04em" }}>I FORGOT</span>
           </Link>
           {!isMobile && (
-            <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: `${BLACK}55`, marginLeft: 16, paddingBottom: 2 }}>
-              We got your important people.
+            <span style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: `${BLACK}50`, marginLeft: 14, paddingBottom: 2 }}>
+              Thoughtful cards. Stronger relationships.
             </span>
           )}
         </div>
@@ -360,7 +353,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* ── Settings strip ───────────────────────────────────────────────── */}
+      {/* ── Settings strip ─────────────────────────────────────────────── */}
       <div style={{ background: `${BLACK}04`, borderBottom: `1px solid ${BLACK}08` }}>
         <button onClick={() => setSettingsOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: `8px ${px}px`, background: "none", border: "none", cursor: "pointer" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -407,16 +400,18 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── Main ─────────────────────────────────────────────────────────── */}
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: `24px ${px}px 64px`, boxSizing: "border-box" as const }}>
+      {/* ── Main content ──────────────────────────────────────────────── */}
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: `28px ${px}px 72px`, boxSizing: "border-box" as const }}>
 
-        {/* ── Empty state ── */}
+        {/* ══ EMPTY STATE ══════════════════════════════════════════════ */}
         {recipients.length === 0 && (
-          <div style={{ background: WHITE, borderRadius: 20, padding: "56px 32px", textAlign: "center" as const, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
-            <div style={{ fontSize: "3rem", marginBottom: 14 }}>💌</div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, letterSpacing: "0.04em", marginBottom: 8 }}>THOUGHTFUL CARDS. STRONGER RELATIONSHIPS.</div>
-            <p style={{ fontSize: "0.95rem", color: GRAY, maxWidth: 380, margin: "0 auto 28px", lineHeight: 1.65 }}>
-              Start by adding the people who matter most. We'll handle the cards — you get the credit.
+          <div style={{ background: WHITE, borderRadius: 24, padding: "64px 32px", textAlign: "center" as const, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+            <div style={{ fontSize: "3.5rem", marginBottom: 16 }}>💌</div>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.8rem" : "2.4rem", color: BLACK, letterSpacing: "0.04em", marginBottom: 10, lineHeight: 1.1 }}>
+              ADD THE PEOPLE<br />WHO MATTER MOST
+            </div>
+            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: GRAY, maxWidth: 340, margin: "0 auto 28px", lineHeight: 1.6 }}>
+              We'll handle the cards — you get the credit.
             </p>
             <Link href="/recipients/new">
               <button data-testid="link-add-recipient" style={{ background: RED, color: WHITE, border: "none", borderRadius: 12, padding: "14px 32px", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.1em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -428,293 +423,330 @@ export default function DashboardPage() {
 
         {recipients.length > 0 && (
           <>
-            {/* ════════════════════════════════════════════════════════════ */}
-            {/* YOU'RE COVERED — reassurance strip                          */}
-            {/* ════════════════════════════════════════════════════════════ */}
-            <div style={{ background: WHITE, borderRadius: 16, padding: "18px 22px", marginBottom: 20, boxShadow: "0 1px 8px rgba(0,0,0,0.04)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 14 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: `${SAGE}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ fontSize: "1.2rem" }}>🛡️</span>
-                </div>
-                <div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.04em", color: BLACK }}>
-                    {momentsAtRisk === 0 ? "You're covered." : `${momentsAtRisk} moment${momentsAtRisk > 1 ? "s" : ""} need attention.`}
-                  </div>
-                  <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 1 }}>
-                    {momentsAtRisk === 0 ? "No important moments are at risk right now." : "Check the upcoming events below to take action."}
-                  </div>
-                </div>
+            {/* ══ SECTION 1: PEOPLE & MOMENTS — THE HERO ══════════════ */}
+            <div style={{ marginBottom: 28 }}>
+              {/* Warm greeting */}
+              <div style={{ marginBottom: 18 }}>
+                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.8rem" : "2.2rem", letterSpacing: "0.04em", color: BLACK, margin: 0, lineHeight: 1 }}>
+                  {allUpcomingEvents.length > 0
+                    ? `HERE'S WHO NEEDS YOU, ${firstName.toUpperCase()}.`
+                    : `YOU'RE ALL CLEAR, ${firstName.toUpperCase()}.`}
+                </h1>
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: `${BLACK}55`, margin: "6px 0 0", lineHeight: 1 }}>
+                  {allUpcomingEvents.length > 0
+                    ? "Upcoming moments. Covered."
+                    : "No occasions in the next 90 days."}
+                </p>
               </div>
-              <div style={{ display: "flex", gap: isMobile ? 12 : 28, flexWrap: "wrap" as const }}>
-                {[
-                  { value: recipients.length,                label: "people covered",     emoji: "👥" },
-                  { value: approvalCount,                    label: "cards to review",    emoji: "📬" },
-                  { value: disastersAvoided,                 label: "occasions tracked",  emoji: "📅" },
-                ].map(stat => (
-                  <div key={stat.label} style={{ textAlign: "center" as const }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: stat.value > 0 && stat.label === "cards to review" ? RED : BLACK, lineHeight: 1 }}>
-                      {stat.value}
-                    </div>
-                    <div style={{ fontSize: "0.65rem", color: GRAY, marginTop: 1, whiteSpace: "nowrap" as const }}>{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* ════════════════════════════════════════════════════════════ */}
-            {/* 2-COLUMN LAYOUT                                             */}
-            {/* ════════════════════════════════════════════════════════════ */}
-            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row" as const, gap: 20, alignItems: "flex-start" }}>
-
-              {/* ── LEFT: Your People ───────────────────────────────────── */}
-              <div style={{ flex: isMobile ? "none" : "0 0 52%", width: "100%", boxSizing: "border-box" as const }}>
-
-                {/* People header */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.16em", color: `${BLACK}50` }}>YOUR PEOPLE</span>
-                    <span style={{ fontSize: "0.9rem" }}>❤️</span>
-                  </div>
-                  <Link href="/recipients/new">
-                    <button data-testid="link-add-recipient" style={{ display: "flex", alignItems: "center", gap: 4, background: RED, color: WHITE, border: "none", borderRadius: 7, padding: "5px 11px", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.08em", cursor: "pointer" }}>
-                      <Plus size={10} /> Add
-                    </button>
+              {allUpcomingEvents.length === 0 ? (
+                <div style={{ background: WHITE, borderRadius: 18, padding: "32px 24px", textAlign: "center" as const, boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+                  <div style={{ fontSize: "2rem", marginBottom: 10 }}>🎉</div>
+                  <p style={{ fontSize: "0.9rem", color: GRAY, margin: "0 0 16px", lineHeight: 1.6 }}>Nothing coming up in the next 90 days. Add more occasions to stay covered year-round.</p>
+                  <Link href="/recipients">
+                    <button style={{ background: BEIGE, border: "none", borderRadius: 9, padding: "9px 18px", fontSize: "0.82rem", fontWeight: 700, color: BLACK, cursor: "pointer" }}>Review people →</button>
                   </Link>
                 </div>
+              ) : (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: heroColumns, gap: 12, justifyContent: isMobile ? "stretch" : "start" }}>
+                    {heroEvents.map(ev => {
+                      const genKey        = `${ev.recipient.id}:::${ev.event}`;
+                      const isGenerating  = generatingFor === genKey;
+                      const matchedCard   = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
+                      const hasCard       = upcomingWithCardKeys.has(genKey);
+                      const isApproved    = matchedCard?.status === "Approved";
+                      const rh            = health.recipientHealths.find(h => h.id === ev.recipient.id);
+                      const sl            = rh ? scoreLabel(rh.score) : null;
 
-                {recipients.length >= 5 && (
-                  <div style={{ position: "relative", marginBottom: 10 }}>
-                    <Search size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: GRAY, pointerEvents: "none" }} />
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" style={{ width: "100%", border: `1px solid ${BLACK}10`, borderRadius: 8, padding: "8px 10px 8px 28px", fontSize: "0.82rem", color: BLACK, background: WHITE, outline: "none", boxSizing: "border-box" as const }} />
-                  </div>
-                )}
+                      /* Status */
+                      let statusText = ""; let statusColor = GRAY; let statusTick = false;
+                      if (isApproved)           { statusText = "Card approved, on its way";            statusColor = SAGE; statusTick = true; }
+                      else if (hasCard)         { statusText = "Card draft ready to review";           statusColor = "#1d4ed8"; statusTick = true; }
+                      else if (ev.briefingDone) { statusText = "Personalized and on track";            statusColor = SAGE; statusTick = true; }
+                      else if (ev.daysAway <= 7){ statusText = "Needs attention soon";                 statusColor = RED; }
+                      else if (ev.daysAway<=14) { statusText = "Add one more detail to be ready";      statusColor = "#D97706"; }
+                      else                      { statusText = "On track, nothing needed yet";         statusColor = SAGE; statusTick = true; }
 
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                  {filteredRecipients
-                    .slice().sort((a, b) => (TIER_WEIGHTS[health.recipientHealths.find(r => r.id === b.id)?.tier ?? "occasional"] ?? 1) - (TIER_WEIGHTS[health.recipientHealths.find(r => r.id === a.id)?.tier ?? "occasional"] ?? 1))
-                    .map(r => {
-                      const rh = health.recipientHealths.find(h => h.id === r.id);
-                      const nextEv = allUpcomingEvents.find(e => e.recipient.id === r.id);
-                      const protectedCard = approvedCards.find(c => c.recipientId === r.id);
-                      const hasCard = nextEv && upcomingWithCardKeys.has(`${r.id}:::${nextEv.event}`);
-                      const sl = rh ? scoreLabel(rh.score) : null;
-                      const pct = rh ? (rh.score / 100) * 100 : 0;
-                      const barColor = rh ? (rh.score >= 65 ? SAGE : rh.score >= 45 ? "#F59E0B" : "#EF6C00") : GRAY;
+                      /* CTA */
+                      let ctaLabel = ""; let ctaRed = false; let ctaAction = () => {};
+                      if (isApproved)           { ctaLabel = "View card";           ctaRed = false; ctaAction = () => setViewingCardId(matchedCard!.id); }
+                      else if (hasCard)         { ctaLabel = "Review card →";        ctaRed = true;  ctaAction = () => setLocation("/cards/review"); }
+                      else if (ev.briefingDone) { ctaLabel = "Update details";       ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
+                      else if (ev.daysAway<=7)  { ctaLabel = "Add details now →";   ctaRed = true;  ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
+                      else                      { ctaLabel = `Add a memory`;         ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
 
                       return (
-                        <div key={r.id} style={{ background: WHITE, borderRadius: 14, padding: "14px 16px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)", display: "flex", alignItems: "center", gap: 12 }}>
-                          {/* Avatar */}
-                          <div style={{ width: 44, height: 44, borderRadius: 11, background: BLACK, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: WHITE }}>
-                              {r.name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()}
-                            </span>
-                          </div>
+                        <div key={genKey} style={{ background: WHITE, borderRadius: 18, padding: "22px 20px 18px", boxShadow: "0 1px 10px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" as const, gap: 0, position: "relative" as const, overflow: "hidden" }}>
+                          {/* Urgency accent strip */}
+                          {ev.daysAway <= 14 && (
+                            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: ev.daysAway <= 7 ? RED : "#D97706", borderRadius: "18px 18px 0 0" }} />
+                          )}
 
-                          {/* Info */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 2 }}>
-                              <span style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK }}>{r.name}</span>
-                              {sl && <span style={{ fontSize: "0.62rem", fontWeight: 700, padding: "1px 7px", borderRadius: 10, background: `${sl.color}15`, color: sl.color }}>{sl.text}</span>}
+                          {/* Avatar + name */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 16 }}>
+                            <div style={{ width: 56, height: 56, borderRadius: 14, background: BLACK, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: WHITE }}>
+                                {ev.recipient.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
+                              </span>
                             </div>
-                            <div style={{ fontSize: "0.72rem", color: GRAY, marginBottom: 6 }}>{r.relationship}</div>
-
-                            {/* Outcome line */}
-                            {protectedCard && (
-                              <div style={{ fontSize: "0.72rem", color: SAGE, display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
-                                <CheckCircle2 size={11} /> {protectedCard.holiday} card approved
-                              </div>
-                            )}
-                            {!protectedCard && nextEv && (
-                              <div style={{ fontSize: "0.72rem", color: hasCard ? "#1d4ed8" : nextEv.daysAway <= 14 ? RED : GRAY, display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
-                                {eventEmoji(nextEv.event)} {nextEv.event} in {nextEv.daysAway} day{nextEv.daysAway !== 1 ? "s" : ""}
-                                {hasCard && <span style={{ color: "#1d4ed8", fontWeight: 700 }}>· draft ready</span>}
-                                {!hasCard && nextEv.briefingDone && <span style={{ color: SAGE, fontWeight: 700 }}>· on track</span>}
-                              </div>
-                            )}
-
-                            {/* Score bar */}
-                            {rh && <ThinBar pct={pct} color={barColor} h={3} />}
+                            <div>
+                              <div style={{ fontWeight: 800, fontSize: "1.1rem", color: BLACK, lineHeight: 1.1 }}>{ev.recipient.name}</div>
+                              <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 2 }}>{ev.recipient.relationship}</div>
+                              {sl && <span style={{ display: "inline-block", marginTop: 4, fontSize: "0.62rem", fontWeight: 700, padding: "1px 7px", borderRadius: 10, background: `${sl.color}14`, color: sl.color }}>{sl.text}</span>}
+                            </div>
                           </div>
 
-                          {/* Manage button */}
-                          <Link href={`/recipients/${r.id}?from=dashboard`}>
-                            <button style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${BLACK}10`, background: `${BLACK}04`, color: BLACK, fontSize: "0.74rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" as const }}>
-                              Manage
+                          {/* Event */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
+                            <span style={{ fontSize: "1.5rem", lineHeight: 1 }}>{eventEmoji(ev.event)}</span>
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>{ev.event}</div>
+                              <div style={{ fontSize: "0.76rem", fontWeight: 700, color: daysColor(ev.daysAway) }}>
+                                {ev.daysAway} day{ev.daysAway !== 1 ? "s" : ""} away  ·  {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Status */}
+                          <div style={{ fontSize: "0.76rem", fontWeight: 600, color: statusColor, marginBottom: 14, display: "flex", alignItems: "center", gap: 4, paddingLeft: 2 }}>
+                            {statusTick && <CheckCircle2 size={12} />}
+                            {statusText}
+                          </div>
+
+                          {/* CTAs */}
+                          <div style={{ display: "flex", gap: 7, flexWrap: "wrap" as const, marginTop: "auto" }}>
+                            <button onClick={ctaAction} style={{ flex: "1 1 auto", padding: "9px 14px", background: ctaRed ? RED : `${BLACK}08`, color: ctaRed ? WHITE : BLACK, border: "none", borderRadius: 9, fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
+                              {ctaLabel}
                             </button>
-                          </Link>
+                            {!hasCard && !isApproved && !isGenerating && (
+                              <button onClick={() => generateEarly(ev)} disabled={!!generatingFor}
+                                style={{ padding: "9px 11px", background: "none", border: `1px solid ${BLACK}10`, borderRadius: 9, fontSize: "0.72rem", color: GRAY, cursor: !!generatingFor ? "default" : "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                                <Sparkles size={10} /> Generate
+                              </button>
+                            )}
+                            {isGenerating && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.72rem", color: GRAY, padding: "9px 11px" }}><Loader2 size={10} className="animate-spin" /> Writing…</span>}
+                          </div>
                         </div>
                       );
                     })}
-                </div>
+                  </div>
 
-                {/* Health summary — compact, below people on desktop */}
-                {!isMobile && health.score > 0 && (
-                  <div style={{ marginTop: 16 }}>
-                    <HealthCompact
-                      score={health.score} label={health.label} explanation={health.explanation}
-                      color={health.color} scoreDelta={scoreDelta} scoreHistory={scoreHistory}
-                      onImprove={() => {
+                  {/* Show more / add person */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
+                    {allUpcomingEvents.length > 3 && (
+                      <button onClick={() => setHeroExpanded(o => !o)}
+                        style={{ flex: 1, padding: "9px", background: WHITE, border: `1px solid ${BLACK}0C`, borderRadius: 10, fontSize: "0.78rem", color: GRAY, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                        {heroExpanded ? <><ChevronUp size={13} /> Show fewer</> : <><ChevronDown size={13} /> {allUpcomingEvents.length - 3} more coming up</>}
+                      </button>
+                    )}
+                    <Link href="/recipients/new">
+                      <button data-testid="link-add-recipient" style={{ padding: "9px 16px", background: "none", border: `1px solid ${BLACK}12`, borderRadius: 10, fontSize: "0.78rem", color: GRAY, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
+                        <Plus size={11} /> Add person
+                      </button>
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* ══ SECTION 2: YOU'RE COVERED ════════════════════════════ */}
+            <div style={{ marginBottom: 20 }}>
+              <SectionLabel text="YOU'RE COVERED" />
+              <div style={{ background: WHITE, borderRadius: 16, padding: "18px 20px", boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 9 }}>
+                  {/* No moments at risk */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <CheckCircle2 size={16} style={{ color: SAGE, flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.85rem", color: BLACK, fontWeight: 600 }}>
+                      {momentsAtRisk === 0
+                        ? "No important moments are at risk right now"
+                        : `${momentsAtRisk} moment${momentsAtRisk > 1 ? "s" : ""} need${momentsAtRisk === 1 ? "s" : ""} attention soon`}
+                    </span>
+                  </div>
+                  {/* Cards ready */}
+                  {approvalCount > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <CheckCircle2 size={16} style={{ color: "#1d4ed8", flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.85rem", color: BLACK }}>{approvalCount} card{approvalCount > 1 ? "s" : ""} ready for your review</span>
+                    </div>
+                  )}
+                  {/* Occasions watched */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <CheckCircle2 size={16} style={{ color: SAGE, flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.85rem", color: BLACK }}>{disastersAvoided} occasion{disastersAvoided !== 1 ? "s" : ""} being watched across {recipients.length} {recipients.length === 1 ? "person" : "people"}</span>
+                  </div>
+                  {/* First upcoming on track */}
+                  {allUpcomingEvents.length > 0 && (() => {
+                    const ev = allUpcomingEvents[0];
+                    const hasCard = upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`);
+                    const isGood = ev.briefingDone || hasCard;
+                    if (!isGood) return null;
+                    return (
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <CheckCircle2 size={16} style={{ color: SAGE, flexShrink: 0 }} />
+                        <span style={{ fontSize: "0.85rem", color: BLACK }}>{ev.recipient.name}'s {ev.event} is on track</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* ══ SECTION 3: RECOMMENDED NEXT STEP ════════════════════ */}
+            <div style={{ marginBottom: 20 }}>
+              <SectionLabel text="RECOMMENDED NEXT STEP" />
+              <div style={{
+                background: recommendedAction.urgency === "high" ? `${RED}07` : WHITE,
+                border: `1.5px solid ${recommendedAction.urgency === "high" ? `${RED}18` : `${BLACK}08`}`,
+                borderRadius: 16, padding: "18px 18px",
+                display: "flex", gap: 14, alignItems: "flex-start",
+                boxShadow: "0 1px 8px rgba(0,0,0,0.04)"
+              }}>
+                <div style={{ width: 42, height: 42, borderRadius: 10, background: recommendedAction.urgency === "high" ? `${RED}12` : `${SAGE}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.2rem" }}>
+                  {recommendedAction.type === "approve_card"    ? "📬"
+                  : recommendedAction.type === "answer_briefing" ? "✍️"
+                  : recommendedAction.type === "add_person"      ? "👤"
+                  :                                               "🌱"}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK, marginBottom: 4 }}>{recommendedAction.title}</div>
+                  <div style={{ fontSize: "0.8rem", color: GRAY, lineHeight: 1.55, marginBottom: 12 }}>{recommendedAction.description}</div>
+                  <button onClick={() => { if (recommendedAction.href.startsWith("/")) setLocation(recommendedAction.href); else window.location.href = recommendedAction.href; }}
+                    style={{ background: recommendedAction.urgency === "high" ? RED : BLACK, color: WHITE, border: "none", borderRadius: 9, padding: "9px 18px", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    {recommendedAction.type === "approve_card"    ? "Review cards"
+                    : recommendedAction.type === "answer_briefing" ? "Add a personal touch"
+                    : recommendedAction.type === "add_person"      ? "Add person"
+                    :                                               "Improve profile"}
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ══ SECTION 4: RELATIONSHIP HEALTH ══════════════════════ */}
+            {health.score > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <SectionLabel text="RELATIONSHIP HEALTH" />
+                <div style={{ background: WHITE, borderRadius: 16, padding: "20px 20px", boxShadow: "0 1px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 20, flexWrap: "wrap" as const }}>
+                    {/* Score */}
+                    <div style={{ flexShrink: 0 }}>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.2rem", color: health.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{health.score}</div>
+                      <div style={{ fontSize: "0.76rem", fontWeight: 700, color: health.color, marginTop: 2 }}>{health.label}</div>
+                      {scoreDelta !== null && Math.abs(scoreDelta) >= 1 && (
+                        <div style={{ marginTop: 7, display: "inline-flex", alignItems: "center", gap: 4, background: scoreDelta > 0 ? `${SAGE}12` : `${RED}08`, borderRadius: 20, padding: "3px 10px" }}>
+                          <TrendingUp size={10} style={{ color: scoreDelta > 0 ? SAGE : RED }} />
+                          <span style={{ fontSize: "0.65rem", fontWeight: 700, color: scoreDelta > 0 ? SAGE : RED }}>{scoreDelta > 0 ? "+" : ""}{scoreDelta} this month</span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Explanation + sparkline */}
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <p style={{ fontSize: "0.82rem", color: `${BLACK}75`, lineHeight: 1.65, margin: "0 0 14px" }}>{health.explanation}</p>
+                      {scoreHistory.length >= 2 && (
+                        <>
+                          <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 28, marginBottom: 4 }}>
+                            {scoreHistory.slice(-14).map((s, i, arr) => (
+                              <div key={i} style={{ flex: 1, borderRadius: "2px 2px 0 0", height: `${(s.score / Math.max(...arr.map(x => x.score), 1)) * 100}%`, background: SAGE, opacity: i === arr.length - 1 ? 1 : 0.2, minHeight: 3 }} />
+                            ))}
+                          </div>
+                          <div style={{ fontSize: "0.6rem", color: GRAY }}>Trend over time</div>
+                        </>
+                      )}
+                      <button onClick={() => {
                         if (health.topInsight) {
                           const rh = health.recipientHealths.find(r => r.name === health.topInsight?.recipientName);
                           setLocation(rh?.topGapHref ?? "/recipients");
                         } else setLocation("/recipients");
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* ── RIGHT: Coming Up + Recommended + Wins ────────────────── */}
-              <div style={{ flex: 1, minWidth: 0, width: "100%" }}>
-
-                {/* COMING UP */}
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.16em", color: `${BLACK}50` }}>COMING UP</span>
-                    <span style={{ fontSize: "0.7rem", fontWeight: 700, color: GRAY, background: `${BLACK}07`, borderRadius: 20, padding: "3px 10px" }}>{allUpcomingEvents.length} in 90 days</span>
-                  </div>
-
-                  {allUpcomingEvents.length === 0 ? (
-                    <div style={{ background: WHITE, borderRadius: 14, padding: "28px 20px", textAlign: "center" as const }}>
-                      <div style={{ fontSize: "1.6rem", marginBottom: 8 }}>🗓️</div>
-                      <p style={{ fontSize: "0.84rem", color: GRAY, margin: 0 }}>Nothing in the next 90 days. Cards will appear as occasions approach.</p>
-                    </div>
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                      {comingUpToShow.map(ev => {
-                        const genKey = `${ev.recipient.id}:::${ev.event}`;
-                        const isGenerating = generatingFor === genKey;
-                        const matchedCard = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
-                        const hasCard = upcomingWithCardKeys.has(genKey);
-                        const isApproved = matchedCard?.status === "Approved";
-                        const urgentColor = ev.daysAway <= 7 ? RED : ev.daysAway <= 14 ? "#D97706" : `${BLACK}30`;
-
-                        let statusText = ""; let statusColor = GRAY;
-                        if (isApproved)             { statusText = "Card approved, on its way";       statusColor = SAGE; }
-                        else if (hasCard)           { statusText = "Card draft ready!";               statusColor = "#1d4ed8"; }
-                        else if (ev.briefingDone)   { statusText = "Personalized and on track";       statusColor = SAGE; }
-                        else if (ev.daysAway <= 7)  { statusText = "Needs attention soon";            statusColor = RED; }
-                        else if (ev.daysAway <= 14) { statusText = "Add one detail to be ready";      statusColor = "#D97706"; }
-                        else                        { statusText = "On track";                        statusColor = SAGE; }
-
-                        let ctaLabel = ""; let ctaAction = () => {};
-                        if (isApproved)           { ctaLabel = "View card"; ctaAction = () => setViewingCardId(matchedCard!.id); }
-                        else if (hasCard)          { ctaLabel = "Review →"; ctaAction = () => setLocation("/cards/review"); }
-                        else if (ev.briefingDone)  { ctaLabel = "Update details"; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
-                        else                       { ctaLabel = `Update ${ev.recipient.name.split(" ")[0]}`; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
-
-                        return (
-                          <div key={genKey} style={{ background: WHITE, borderRadius: 14, padding: "14px 15px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)", display: "flex", alignItems: "center", gap: 12 }}>
-                            {/* Emoji */}
-                            <div style={{ width: 44, height: 44, borderRadius: 11, background: BEIGE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.4rem" }}>
-                              {eventEmoji(ev.event)}
-                            </div>
-
-                            {/* Info */}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK, marginBottom: 1 }}>
-                                {ev.recipient.name}'s {ev.event}
-                              </div>
-                              <div style={{ fontSize: "0.72rem", marginBottom: 3 }}>
-                                <span style={{ fontWeight: 700, color: urgentColor }}>{ev.daysAway} day{ev.daysAway !== 1 ? "s" : ""} away</span>
-                                <span style={{ color: GRAY }}>  ·  {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                              </div>
-                              <div style={{ fontSize: "0.7rem", fontWeight: 600, color: statusColor }}>
-                                {(isApproved || hasCard || ev.briefingDone) && "✓ "}{statusText}
-                              </div>
-                            </div>
-
-                            {/* CTA */}
-                            <div style={{ display: "flex", flexDirection: "column" as const, gap: 4, flexShrink: 0, alignItems: "flex-end" }}>
-                              <button onClick={ctaAction} style={{ background: isApproved ? "#1d4ed8" : hasCard ? RED : `${BLACK}07`, color: isApproved || hasCard ? WHITE : BLACK, border: "none", borderRadius: 8, padding: "7px 12px", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" as const }}>
-                                {ctaLabel}
-                              </button>
-                              {!hasCard && !isGenerating && (
-                                <button onClick={() => generateEarly(ev)} disabled={!!generatingFor} style={{ background: "none", border: "none", cursor: !!generatingFor ? "default" : "pointer", fontSize: "0.65rem", color: GRAY, display: "flex", alignItems: "center", gap: 3, padding: "2px 4px" }}>
-                                  <Sparkles size={9} /> Generate card
-                                </button>
-                              )}
-                              {isGenerating && <span style={{ fontSize: "0.65rem", color: GRAY, display: "flex", alignItems: "center", gap: 3 }}><Loader2 size={9} className="animate-spin" /> Generating…</span>}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {allUpcomingEvents.length > 4 && (
-                        <button onClick={() => setComingUpExpanded(o => !o)} style={{ width: "100%", padding: "9px", background: WHITE, border: `1px solid ${BLACK}0C`, borderRadius: 10, fontSize: "0.78rem", color: GRAY, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                          {comingUpExpanded ? <><ChevronUp size={13} /> Show less</> : <><ChevronDown size={13} /> {allUpcomingEvents.length - 4} more upcoming</>}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* RECOMMENDED NEXT STEP */}
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.16em", color: `${BLACK}50`, marginBottom: 12 }}>RECOMMENDED NEXT STEP</div>
-                  <div style={{ background: recommendedAction.urgency === "high" ? `${RED}08` : WHITE, border: `1.5px solid ${recommendedAction.urgency === "high" ? `${RED}20` : `${BLACK}08`}`, borderRadius: 14, padding: "16px 16px", display: "flex", gap: 12, alignItems: "flex-start", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 9, background: recommendedAction.urgency === "high" ? `${RED}14` : `${SAGE}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.1rem" }}>
-                      {recommendedAction.type === "approve_card" ? "📬" : recommendedAction.type === "answer_briefing" ? "✍️" : recommendedAction.type === "add_person" ? "👤" : "🌱"}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK, marginBottom: 3 }}>{recommendedAction.title}</div>
-                      <div style={{ fontSize: "0.76rem", color: GRAY, lineHeight: 1.5, marginBottom: 10 }}>{recommendedAction.description}</div>
-                      <button onClick={() => { if (recommendedAction.href.startsWith("/")) setLocation(recommendedAction.href); else window.location.href = recommendedAction.href; }}
-                        style={{ background: recommendedAction.urgency === "high" ? RED : BLACK, color: WHITE, border: "none", borderRadius: 8, padding: "8px 16px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}>
-                        {recommendedAction.type === "approve_card" ? "Review Cards" : recommendedAction.type === "answer_briefing" ? "Add a personal touch" : recommendedAction.type === "add_person" ? "Add person" : "Improve profile"}
-                        <ArrowRight size={12} />
+                      }} style={{ marginTop: 12, padding: "8px 16px", background: BEIGE, border: "none", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, color: BLACK, cursor: "pointer" }}>
+                        Improve a profile →
                       </button>
                     </div>
                   </div>
                 </div>
-
-                {/* RECENT WINS */}
-                {wins.length > 0 && (
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.16em", color: `${BLACK}50` }}>RECENT WINS</span>
-                      <span style={{ fontSize: "0.85rem" }}>🎉</span>
-                    </div>
-                    <div style={{ background: WHITE, borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
-                      {wins.map((win, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 16px", borderBottom: i < wins.length - 1 ? `1px solid ${BLACK}06` : "none" }}>
-                          <CheckCircle2 size={14} style={{ color: SAGE, flexShrink: 0, marginTop: 1 }} />
-                          <span style={{ fontSize: "0.81rem", color: `${BLACK}80`, lineHeight: 1.5 }}>{win}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Health compact (mobile only — desktop is left column) */}
-            {isMobile && health.score > 0 && (
-              <div style={{ marginTop: 20 }}>
-                <HealthCompact
-                  score={health.score} label={health.label} explanation={health.explanation}
-                  color={health.color} scoreDelta={scoreDelta} scoreHistory={scoreHistory}
-                  onImprove={() => {
-                    if (health.topInsight) {
-                      const rh = health.recipientHealths.find(r => r.name === health.topInsight?.recipientName);
-                      setLocation(rh?.topGapHref ?? "/recipients");
-                    } else setLocation("/recipients");
-                  }}
-                />
               </div>
             )}
 
-            {/* ════════════════════════════════════════════════════════════ */}
-            {/* SCORE BREAKDOWN — collapsed                                 */}
-            {/* ════════════════════════════════════════════════════════════ */}
-            <div style={{ marginTop: 20 }}>
-              <button onClick={() => setScoreBreakdownOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: scoreBreakdownOpen ? 12 : 0 }}>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.14em", color: `${BLACK}45` }}>WHY YOUR SCORE IS WHAT IT IS</span>
-                {scoreBreakdownOpen ? <ChevronUp size={12} style={{ color: `${BLACK}40` }} /> : <ChevronDown size={12} style={{ color: `${BLACK}40` }} />}
+            {/* ══ SECTION 5: RELATIONSHIP LIST ═════════════════════════ */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <SectionLabel text="YOUR RELATIONSHIPS" emoji="❤️" />
+                <Link href="/recipients/new">
+                  <button data-testid="link-add-recipient" style={{ display: "flex", alignItems: "center", gap: 4, background: RED, color: WHITE, border: "none", borderRadius: 7, padding: "5px 11px", fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.08em", cursor: "pointer", marginBottom: 12 }}>
+                    <Plus size={10} /> Add
+                  </button>
+                </Link>
+              </div>
+
+              {recipients.length >= 5 && (
+                <div style={{ position: "relative", marginBottom: 10 }}>
+                  <Search size={12} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: GRAY, pointerEvents: "none" }} />
+                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+                    style={{ width: "100%", border: `1px solid ${BLACK}10`, borderRadius: 8, padding: "8px 10px 8px 28px", fontSize: "0.82rem", color: BLACK, background: WHITE, outline: "none", boxSizing: "border-box" as const }} />
+                </div>
+              )}
+
+              <div style={{ background: WHITE, borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+                {filteredRecipients
+                  .slice().sort((a, b) => (TIER_WEIGHTS[health.recipientHealths.find(r => r.id === b.id)?.tier ?? "occasional"] ?? 1) - (TIER_WEIGHTS[health.recipientHealths.find(r => r.id === a.id)?.tier ?? "occasional"] ?? 1))
+                  .map((r, i, arr) => {
+                    const rh     = health.recipientHealths.find(h => h.id === r.id);
+                    const nextEv = allUpcomingEvents.find(e => e.recipient.id === r.id);
+                    const hasCard = nextEv && upcomingWithCardKeys.has(`${r.id}:::${nextEv.event}`);
+                    const sl     = rh ? scoreLabel(rh.score) : null;
+                    const pct    = rh ? rh.score : 0;
+                    const barColor = rh ? (rh.score >= 65 ? SAGE : rh.score >= 45 ? "#F59E0B" : "#EF6C00") : GRAY;
+
+                    return (
+                      <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderBottom: i < arr.length - 1 ? `1px solid ${BLACK}06` : "none" }}>
+                        {/* Avatar */}
+                        <div style={{ width: 40, height: 40, borderRadius: 10, background: BLACK, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", color: WHITE }}>
+                            {r.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
+                          </span>
+                        </div>
+                        {/* Info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                            <span style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK }}>{r.name}</span>
+                            {sl && <span style={{ fontSize: "0.6rem", fontWeight: 700, padding: "1px 6px", borderRadius: 10, background: `${sl.color}14`, color: sl.color }}>{sl.text}</span>}
+                          </div>
+                          {nextEv ? (
+                            <div style={{ fontSize: "0.71rem", color: nextEv.daysAway <= 14 ? daysColor(nextEv.daysAway) : GRAY }}>
+                              {eventEmoji(nextEv.event)} {nextEv.event} in {nextEv.daysAway} day{nextEv.daysAway !== 1 ? "s" : ""}
+                              {hasCard && <span style={{ color: "#1d4ed8", fontWeight: 700 }}> · card ready</span>}
+                              {!hasCard && nextEv.briefingDone && <span style={{ color: SAGE, fontWeight: 700 }}> · on track</span>}
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: "0.71rem", color: GRAY }}>{r.relationship} · no upcoming occasions</div>
+                          )}
+                          {rh && <div style={{ marginTop: 5 }}><ThinBar pct={pct} color={barColor} h={3} /></div>}
+                        </div>
+                        {/* Action */}
+                        <Link href={`/recipients/${r.id}?from=dashboard`}>
+                          <button style={{ padding: "5px 11px", borderRadius: 7, border: `1px solid ${BLACK}10`, background: `${BLACK}04`, color: BLACK, fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" as const }}>
+                            {rh && rh.score < 50 ? "Improve" : "View"}
+                          </button>
+                        </Link>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* ══ SECTION 6: MAKE FUTURE CARDS BETTER ═════════════════ */}
+            <div style={{ marginBottom: 20 }}>
+              <button onClick={() => setInsightsOpen(o => !o)}
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: insightsOpen ? 12 : 0 }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.14em", color: `${BLACK}45` }}>MAKE FUTURE CARDS BETTER</span>
+                {insightsOpen ? <ChevronUp size={12} style={{ color: `${BLACK}40` }} /> : <ChevronDown size={12} style={{ color: `${BLACK}40` }} />}
               </button>
 
-              {scoreBreakdownOpen && (
+              {insightsOpen && (
                 <div style={{ background: WHITE, borderRadius: 16, padding: "20px 22px", boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
-                  {/* Category bars */}
+                  <p style={{ fontSize: "0.8rem", color: GRAY, margin: "0 0 18px", lineHeight: 1.55 }}>The more we know about your people, the more personal your cards become.</p>
+
                   <div style={{ display: "flex", flexDirection: "column" as const, gap: 14, marginBottom: health.topInsight ? 18 : 0 }}>
                     {Object.entries(
                       health.recipientHealths.reduce<Record<string, { score: number; max: number }>>((acc, rh) => {
@@ -742,16 +774,18 @@ export default function DashboardPage() {
                       );
                     })}
                   </div>
-                  {/* Biggest opportunity */}
+
                   {health.topInsight && (
                     <div style={{ marginTop: 16, borderTop: `1px solid ${BLACK}07`, paddingTop: 16, display: "flex", gap: 12, alignItems: "flex-start" }}>
                       <Target size={15} style={{ color: SAGE, flexShrink: 0, marginTop: 2 }} />
                       <div>
                         <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY, marginBottom: 3 }}>BIGGEST OPPORTUNITY</div>
                         <div style={{ fontWeight: 700, fontSize: "0.86rem", color: BLACK, marginBottom: 2 }}>{health.topInsight.action}</div>
-                        <div style={{ fontSize: "0.73rem", color: GRAY, lineHeight: 1.5 }}>For <strong>{health.topInsight.recipientName}</strong> · {health.topInsight.category} · will make future cards feel much more personal</div>
+                        <div style={{ fontSize: "0.73rem", color: GRAY, lineHeight: 1.5 }}>
+                          For <strong>{health.topInsight.recipientName}</strong> — this will help us write cards that actually sound like you.
+                        </div>
                         <Link href={`/recipients/${health.recipientHealths.find(rh => rh.name === health.topInsight?.recipientName)?.id ?? ""}`}>
-                          <button style={{ marginTop: 8, padding: "6px 13px", background: `${BLACK}06`, color: BLACK, border: `1px solid ${BLACK}10`, borderRadius: 7, fontSize: "0.73rem", fontWeight: 600, cursor: "pointer" }}>Improve profile →</button>
+                          <button style={{ marginTop: 8, padding: "6px 13px", background: `${BLACK}06`, color: BLACK, border: `1px solid ${BLACK}10`, borderRadius: 7, fontSize: "0.73rem", fontWeight: 600, cursor: "pointer" }}>Add details →</button>
                         </Link>
                       </div>
                     </div>
@@ -760,42 +794,23 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* ════════════════════════════════════════════════════════════ */}
-            {/* MOMENTS PROTECTED                                            */}
-            {/* ════════════════════════════════════════════════════════════ */}
-            {coverage.gaps.length > 0 && (
-              <div style={{ marginTop: 20 }}>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.14em", color: `${BLACK}45`, marginBottom: 12 }}>MOMENTS PROTECTED</div>
-                <div style={{ background: WHITE, borderRadius: 14, padding: "16px 18px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontSize: "0.78rem", color: BLACK, fontWeight: 600 }}>{coverage.coveredCount} of {coverage.totalActive} people have occasions set</span>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 700, color: SAGE }}>{coverage.score}%</span>
-                  </div>
-                  <ThinBar pct={coverage.score} color={SAGE} h={5} />
-                  {coverage.gaps.length > 0 && (
-                    <div style={{ marginTop: 14, display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                      {coverage.gaps.map(gap => (
-                        <div key={gap.relationship} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 9, background: BEIGE }}>
-                          <span style={{ fontSize: "1.1rem" }}>👤</span>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 600, fontSize: "0.8rem", color: BLACK }}>Consider adding your {gap.relationship}</div>
-                            <div style={{ fontSize: "0.69rem", color: GRAY, marginTop: 1 }}>{gap.suggestion}</div>
-                          </div>
-                          <Link href="/recipients/new">
-                            <button style={{ padding: "5px 11px", borderRadius: 6, border: "none", background: `${BLACK}07`, color: BLACK, fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" as const }}>+ Add</button>
-                          </Link>
-                        </div>
-                      ))}
+            {/* ══ SECTION 7: RECENT WINS ═══════════════════════════════ */}
+            {wins.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <SectionLabel text="RECENT WINS" emoji="🎉" />
+                <div style={{ background: WHITE, borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+                  {wins.map((win, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 18px", borderBottom: i < wins.length - 1 ? `1px solid ${BLACK}06` : "none" }}>
+                      <CheckCircle2 size={14} style={{ color: SAGE, flexShrink: 0, marginTop: 1 }} />
+                      <span style={{ fontSize: "0.83rem", color: `${BLACK}80`, lineHeight: 1.5 }}>{win}</span>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* ════════════════════════════════════════════════════════════ */}
-            {/* PLAN USAGE                                                   */}
-            {/* ════════════════════════════════════════════════════════════ */}
-            <div style={{ marginTop: 20 }}>
+            {/* ══ SECTION 8: PLAN USAGE ════════════════════════════════ */}
+            <div style={{ marginBottom: 28 }}>
               <div style={{ background: WHITE, borderRadius: 14, padding: "14px 18px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" as const }}>
                 <div style={{ flex: 1, minWidth: 180 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -805,16 +820,37 @@ export default function DashboardPage() {
                   <ThinBar pct={usagePct} color={atLimit ? RED : usagePct > 75 ? "#F59E0B" : SAGE} h={5} />
                 </div>
                 {plan !== "premium" && (
-                  <button onClick={() => setUpgradeOpen(true)} style={{ padding: "7px 15px", borderRadius: 8, border: "none", background: atLimit ? RED : `${BLACK}08`, color: atLimit ? WHITE : BLACK, fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" as const }}>
-                    {atLimit ? "Upgrade Plan" : "View Plans"}
+                  <button onClick={() => setUpgradeOpen(true)} style={{ padding: "7px 15px", borderRadius: 8, border: "none", background: atLimit ? RED : `${BLACK}08`, color: atLimit ? WHITE : BLACK, fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
+                    {atLimit ? "Upgrade" : "Plans"}
                   </button>
                 )}
               </div>
             </div>
 
-            {/* ── Footer tagline ── */}
-            <div style={{ marginTop: 40, textAlign: "center" as const }}>
-              <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: `${BLACK}40` }}>
+            {/* Moments Protected */}
+            {coverage.gaps.length > 0 && (
+              <div style={{ marginBottom: 28 }}>
+                <SectionLabel text="ADD MORE PEOPLE" />
+                <div style={{ background: WHITE, borderRadius: 14, padding: "16px 18px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+                  {coverage.gaps.map(gap => (
+                    <div key={gap.relationship} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0" }}>
+                      <span style={{ fontSize: "1.1rem" }}>👤</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, fontSize: "0.82rem", color: BLACK }}>Consider adding your {gap.relationship}</div>
+                        <div style={{ fontSize: "0.69rem", color: GRAY, marginTop: 1 }}>{gap.suggestion}</div>
+                      </div>
+                      <Link href="/recipients/new">
+                        <button style={{ padding: "5px 11px", borderRadius: 6, border: "none", background: `${BLACK}07`, color: BLACK, fontSize: "0.7rem", fontWeight: 600, cursor: "pointer" }}>+ Add</button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Footer ── */}
+            <div style={{ textAlign: "center" as const, paddingTop: 12 }}>
+              <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: `${BLACK}38` }}>
                 Thoughtful cards. Stronger relationships. That's what we're all about. ❤️
               </span>
             </div>
@@ -832,7 +868,7 @@ export default function DashboardPage() {
       </Link>
     )}
 
-    {/* ── Card Viewer Modal ───────────────────────────────────────────────── */}
+    {/* ── Card viewer modal ───────────────────────────────────────────────── */}
     {viewingCardId && (() => {
       const card = cards.find(c => c.id === viewingCardId);
       if (!card) return null;
@@ -862,7 +898,7 @@ export default function DashboardPage() {
       );
     })()}
 
-    {/* ── Font Picker Modal ───────────────────────────────────────────────── */}
+    {/* ── Font picker modal ───────────────────────────────────────────────── */}
     {fontPickerOpen && (
       <div onClick={() => setFontPickerOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div onClick={e => e.stopPropagation()} style={{ background: WHITE, borderRadius: 14, padding: "24px 24px 18px", width: 680, maxWidth: "94vw", maxHeight: "86vh", display: "flex", flexDirection: "column" as const, gap: 14, boxShadow: "0 20px 60px rgba(0,0,0,0.22)" }}>
@@ -899,7 +935,7 @@ export default function DashboardPage() {
       </div>
     )}
 
-    {/* ── Upgrade Modal ──────────────────────────────────────────────────── */}
+    {/* ── Upgrade modal ──────────────────────────────────────────────────── */}
     {upgradeOpen && (
       <div onClick={e => { if (e.target === e.currentTarget) setUpgradeOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16 }}>
         <div style={{ background: WHITE, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto", padding: "24px 22px 32px" }}>
@@ -920,7 +956,7 @@ export default function DashboardPage() {
                         {isCurrent && <span style={{ fontSize: "0.6rem", fontWeight: 700, padding: "1px 6px", borderRadius: 10, background: `${BLACK}09`, color: GRAY }}>Current</span>}
                         {key === "standard" && !isCurrent && <span style={{ fontSize: "0.6rem", fontWeight: 700, padding: "1px 6px", borderRadius: 10, background: `${RED}10`, color: RED }}>Popular</span>}
                       </div>
-                      <ul style={{ margin: "0 0 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column" as const, gap: 2 }}>
+                      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column" as const, gap: 2 }}>
                         {cfg.perks.map(perk => <li key={perk} style={{ fontSize: "0.7rem", color: BLACK, display: "flex", alignItems: "center", gap: 5 }}><span style={{ color: SAGE }}>✓</span>{perk}</li>)}
                       </ul>
                     </div>
@@ -937,46 +973,5 @@ export default function DashboardPage() {
       </div>
     )}
     </>
-  );
-}
-
-/* ── Health compact card (shared between desktop left col + mobile) ────────── */
-function HealthCompact({ score, label, explanation, color, scoreDelta, scoreHistory, onImprove }: {
-  score: number; label: string; explanation: string; color: string;
-  scoreDelta: number | null; scoreHistory: ScoreSnapshot[]; onImprove: () => void;
-}) {
-  const BLACK = "#111111"; const SAGE = "#5B8C6B"; const BEIGE = "#F2E6D3"; const WHITE = "#FFFFFF"; const GRAY = "#6B6B6B"; const RED = "#E23B2E";
-  return (
-    <div style={{ background: WHITE, borderRadius: 16, padding: "20px 20px", boxShadow: "0 1px 8px rgba(0,0,0,0.05)" }}>
-      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.2em", color: `${BLACK}45`, marginBottom: 14 }}>RELATIONSHIP HEALTH</div>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 14 }}>
-        {/* Big score */}
-        <div style={{ flexShrink: 0 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.5rem", color, lineHeight: 1, letterSpacing: "-0.02em" }}>{score}</div>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color, marginTop: 2 }}>{label}</div>
-          {scoreDelta !== null && Math.abs(scoreDelta) >= 1 && (
-            <div style={{ marginTop: 5, display: "inline-flex", alignItems: "center", gap: 4, background: scoreDelta > 0 ? `${SAGE}12` : `${RED}08`, borderRadius: 20, padding: "3px 10px" }}>
-              <TrendingUp size={10} style={{ color: scoreDelta > 0 ? SAGE : RED }} />
-              <span style={{ fontSize: "0.65rem", fontWeight: 700, color: scoreDelta > 0 ? SAGE : RED }}>{scoreDelta > 0 ? "+" : ""}{scoreDelta} this month</span>
-            </div>
-          )}
-        </div>
-        {/* Sparkline */}
-        {scoreHistory.length >= 2 && (
-          <div style={{ flex: 1, paddingTop: 8 }}>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 36 }}>
-              {scoreHistory.slice(-12).map((s, i, arr) => (
-                <div key={i} style={{ flex: 1, borderRadius: "2px 2px 0 0", height: `${(s.score / Math.max(...arr.map(x => x.score), 1)) * 100}%`, background: SAGE, opacity: i === arr.length - 1 ? 1 : 0.25, minHeight: 3 }} />
-              ))}
-            </div>
-            <div style={{ fontSize: "0.6rem", color: GRAY, marginTop: 4 }}>12-day trend</div>
-          </div>
-        )}
-      </div>
-      <p style={{ fontSize: "0.78rem", color: `${BLACK}70`, lineHeight: 1.6, margin: "0 0 14px" }}>{explanation}</p>
-      <button onClick={onImprove} style={{ width: "100%", padding: "9px", background: BEIGE, border: "none", borderRadius: 9, fontSize: "0.78rem", fontWeight: 600, color: BLACK, cursor: "pointer" }}>
-        Improve a profile →
-      </button>
-    </div>
   );
 }
