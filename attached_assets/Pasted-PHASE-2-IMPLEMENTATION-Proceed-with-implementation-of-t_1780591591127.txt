@@ -1,0 +1,238 @@
+PHASE 2: IMPLEMENTATION
+
+Proceed with implementation of the approved Relationship Health redesign.
+
+IMPORTANT IMPLEMENTATION RULES
+
+The dashboard should function as a relationship health progress page, not a CRM and not a task manager.
+
+PRIMARY USER QUESTIONS
+
+The finished experience should answer:
+
+* How am I doing?
+* What should I do next?
+* What important moment is coming up?
+* Which relationship needs improvement?
+* Why is my score what it is?
+* Am I making progress?
+* Are important people covered?
+* How much of my plan am I using?
+
+IMPLEMENT THE FOLLOWING
+
+1. Relationship Health scoring engine
+2. Relationship Coverage calculation
+3. Active and inactive recipients
+4. Core, Important, and Occasional relationship levels
+5. Relationship type normalization
+6. Freshness decay system
+7. Recommended Next Step engine
+8. Recent Progress engine
+9. Relationship detail pages
+10. Improve Score workflow
+11. Mobile dashboard redesign
+12. Desktop dashboard redesign
+
+DASHBOARD ORDER
+
+1. Relationship Health Hero
+2. Recommended Next Step
+3. Upcoming Moments
+4. Your Relationships
+5. Why Your Score Is What It Is
+6. Recent Progress
+7. Relationship Coverage
+8. Plan Usage
+
+RELATIONSHIP HEALTH HERO
+
+Display:
+
+* Relationship Health %
+* Progress trend
+* Reassurance message
+* Improve My Score CTA
+
+If a card requires approval and is time sensitive, it may become the Recommended Next Step.
+
+RECOMMENDED NEXT STEP
+
+Only show one recommended action.
+
+Do not show multiple competing action cards.
+
+The system should determine the highest value improvement.
+
+UPCOMING MOMENTS
+
+Show upcoming events in timeline format.
+
+Use calm reassuring statuses:
+
+* On Track
+* Watching
+* Draft Ready
+* Needs One Detail
+* Scheduled
+
+Avoid negative warning language.
+
+YOUR RELATIONSHIPS
+
+Show compact rows or compact cards.
+
+Include:
+
+* Name
+* Relationship type
+* Importance level
+* Relationship Health
+* Status
+* Next event
+* Action
+
+WHY YOUR SCORE IS WHAT IT IS
+
+Show category scores:
+
+* Event Coverage
+* Memory Bank
+* Preferences
+* Communication Style
+* Action Readiness
+
+Include one AI generated insight explaining the biggest improvement opportunity.
+
+RECENT PROGRESS
+
+Show:
+
+* Score increases
+* Relationship improvements
+* Improvements completed
+* Trend information
+
+RELATIONSHIP COVERAGE
+
+Keep separate from Relationship Health.
+
+Coverage should represent:
+
+* Important people being watched
+* Important moments being tracked
+* Upcoming events being handled
+
+PLAN USAGE
+
+Keep visually small.
+
+Do not let plan usage dominate the page.
+
+SCORING RULES
+
+Relationship Health categories:
+
+* Event Coverage
+* Memory Bank
+* Preferences
+* Communication Style
+* Action Readiness
+
+Weights should be configurable constants.
+
+Do not hard code scoring.
+
+QUALITY RULES
+
+Meaningful Context should matter more than Quick Facts.
+
+Examples of Meaningful Context:
+
+* Shared memories
+* Milestones
+* Emotional moments
+* Life updates
+* Personal goals
+* Proud moments
+
+Examples of Quick Facts:
+
+* Favorite food
+* Favorite color
+* Favorite store
+* Favorite flower
+
+FRESHNESS RULES
+
+Do not decay permanent facts.
+
+Examples:
+
+* Birthday
+* Anniversary
+* Relationship type
+
+Decay only freshness based information:
+
+* Recent memories
+* Current hobbies
+* Current life updates
+* Recent accomplishments
+
+FIRST TIME USER EXPERIENCE
+
+Do not show failing scores.
+
+If there are no relationships:
+
+Show a clean onboarding experience.
+
+Example:
+
+Relationship Health
+
+Not enough information yet.
+
+Add your first important person and we’ll help you build a stronger relationship profile over time.
+
+PRIVACY
+
+Add reassuring language indicating that profile details are private and used only to personalize reminders and cards.
+
+VISUAL DESIGN
+
+* Cream background
+* Charcoal typography
+* Brand red primarily for CTAs
+* Calm progress colors for Relationship Health
+* Generous whitespace
+* Minimal borders
+* Modern readable typography
+* Premium appearance
+
+Do not make the interface feel stressful.
+
+SUCCESS CRITERIA
+
+The final dashboard should feel:
+
+* Reassuring
+* Premium
+* Clean
+* Progress oriented
+* Relationship focused
+
+Not:
+
+* Transactional
+* Administrative
+* CRM like
+* Warning driven
+
+After implementation, provide a summary of:
+
+* Database changes
+* New components
+* New scoring logic
+* Remaining recommendations

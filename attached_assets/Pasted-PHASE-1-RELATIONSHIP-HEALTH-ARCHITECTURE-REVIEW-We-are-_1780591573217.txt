@@ -1,0 +1,133 @@
+PHASE 1: RELATIONSHIP HEALTH ARCHITECTURE REVIEW
+
+We are redesigning the F*I Forgot personal dashboard around a new concept called Relationship Health.
+
+IMPORTANT:
+Do not implement anything yet.
+
+I want you to audit the existing codebase first and return a detailed proposal before making any changes.
+
+GOALS
+
+The product should feel less like a card sending dashboard and more like a relationship health platform.
+
+The emotional goal is:
+
+1. The user feels reassured that important people and moments are covered.
+2. The user understands what to improve next.
+3. The user can see measurable progress over time.
+
+The card is the output.
+The relationship profile is the asset.
+
+NEW CORE CONCEPTS
+
+Relationship Health
+
+Measures:
+
+* How well the system knows each person.
+* How prepared the system is to create meaningful cards and reminders.
+
+Relationship Coverage
+
+Measures:
+
+* Whether important people and important moments are being watched and covered.
+
+These should remain separate concepts.
+
+TASKS
+
+Please inspect the current application and provide:
+
+1. Current dashboard audit
+2. Current database audit
+3. Current component audit
+4. Reusable components
+5. Components that should be replaced
+6. Database changes required
+7. New tables or fields required
+8. Scoring engine architecture
+9. Relationship Coverage architecture
+10. Freshness decay architecture
+11. Relationship type normalization architecture
+12. Core / Important / Occasional relationship architecture
+13. Active / Inactive recipient architecture
+14. First time user experience recommendations
+15. Mobile experience recommendations
+16. Desktop experience recommendations
+
+PROPOSED DASHBOARD HIERARCHY
+
+1. Relationship Health Hero
+2. Recommended Next Step
+3. Upcoming Moments
+4. Your Relationships
+5. Why Your Score Is What It Is
+6. Recent Progress
+7. Relationship Coverage
+8. Plan Usage
+
+PROPOSED RELATIONSHIP HEALTH CATEGORIES
+
+* Event Coverage
+* Memory Bank
+* Preferences
+* Communication Style
+* Action Readiness
+
+PROPOSED RELATIONSHIP TYPES
+
+* Wife
+* Husband
+* Mom
+* Dad
+* Adult Son
+* Adult Daughter
+* Sibling
+* Friend
+* Girlfriend
+* Boyfriend
+* Other
+
+IMPORTANT DESIGN PRINCIPLES
+
+The dashboard should feel closer to:
+
+* Apple Health
+* Wealthfront
+* Rhythm
+
+And less like:
+
+* A CRM
+* A task manager
+* A project dashboard
+
+VISUAL DIRECTION
+
+* Cream background
+* Charcoal typography
+* Brand red reserved primarily for CTAs
+* Relationship Health uses calming progress colors
+* Generous whitespace
+* Minimal borders
+* Fewer cards
+* Mobile first thinking
+
+RETURN
+
+Do not write code yet.
+
+Return:
+
+1. Technical architecture proposal
+2. Database proposal
+3. Scoring proposal
+4. Desktop wireframe concept
+5. Mobile wireframe concept
+6. Risks and concerns
+7. Recommendations before implementation
+
+Wait for approval before making any code changes.
