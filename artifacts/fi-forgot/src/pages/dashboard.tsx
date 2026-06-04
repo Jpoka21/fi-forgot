@@ -540,8 +540,8 @@ export default function DashboardPage() {
   const approvedPersonalCards = useMemo(() => cards.filter(c => c.status === "Approved"), [cards]);
 
   const TABS = [
-    { key: "people"   as const, label: "Your People",    icon: Users,        count: recipients.length },
-    { key: "upcoming" as const, label: "Upcoming Cards", icon: CalendarDays, count: allUpcomingEvents.length },
+    { key: "people"   as const, label: "People & Events",  icon: Users,        count: recipients.length },
+    { key: "upcoming" as const, label: "Review & Approve", icon: ClipboardList, count: approvalCount },
   ];
 
   function updateSettings<K extends keyof PersonalSettings>(key: K, val: PersonalSettings[K]) {
@@ -993,7 +993,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Needs Your Attention — action center ─────────────────────────────── */}
-      {(briefingsNeeded.length > 0 || pendingApprovals.length > 0) && (
+      {activeTab === "upcoming" && (briefingsNeeded.length > 0 || pendingApprovals.length > 0) && (
         <div style={{ padding: isMobile ? "14px 14px 0" : "20px 28px 0" }}>
           <div style={{
             background: WHITE,
@@ -1124,7 +1124,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Full admin-approval review UI (separate from the quick action center) */}
-      {pendingApprovals.length > 0 && (
+      {activeTab === "upcoming" && pendingApprovals.length > 0 && (
       <div style={{ padding: isMobile ? "12px 14px 0" : "20px 28px 0" }}>
         <div style={{ marginTop: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
