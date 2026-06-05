@@ -6,6 +6,10 @@ import { logger } from "../lib/logger";
 
 const router = Router();
 
+// In-process counter incremented whenever a normalized write fails.
+// Exposed on /api/healthz so silent failures are detectable without log diving.
+export let normalizedSyncErrors = 0;
+
 router.post("/auth/session", async (req, res) => {
   const { email, name } = req.body as { email?: string; name?: string };
   if (!email) { res.status(400).json({ error: "email required" }); return; }
@@ -95,7 +99,7 @@ router.put("/recipients/:id", async (req, res) => {
           ),
         );
       const isDupe = nameMatches.some(
-        d => !birthday || !d.birthday || d.birthday === birthday,
+        d => Boolean(birthday && d.birthday && d.birthday === birthday),
       );
       if (isDupe) warning = "possible_duplicate";
     }
@@ -193,6 +197,7 @@ router.put("/recipients/:id", async (req, res) => {
       });
   } catch (err) {
     logger.error({ err, recipientId: id }, "normalized recipient sync failed — primary write succeeded");
+    normalizedSyncErrors++;
   }
 
   res.json({ ok: true, ...(warning ? { warning } : {}) });
@@ -203,17 +208,20 @@ router.delete("/recipients/:id", async (req, res) => {
   if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }
   const { id } = req.params;
 
-  // Primary delete (existing behavior)
+  // Primary delete — scoped to userId so users cannot delete each other's recipients
   await db
     .delete(personalRecipientsTable)
-    .where(eq(personalRecipientsTable.id, id));
+    .where(and(eq(personalRecipientsTable.id, id), eq(personalRecipientsTable.userId, userId)));
 
-  // Normalized table cleanup — failures logged but don't fail the request
+  // Normalized table cleanup — scoped to userId where the column exists
   try {
     await db.delete(recipientProfileTable).where(eq(recipientProfileTable.id, id));
-    await db.delete(recipientsTable).where(eq(recipientsTable.id, id));
+    await db.delete(recipientsTable).where(
+      and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)),
+    );
   } catch (err) {
     logger.error({ err, recipientId: id }, "normalized recipient delete cleanup failed");
+    normalizedSyncErrors++;
   }
 
   res.json({ ok: true });
