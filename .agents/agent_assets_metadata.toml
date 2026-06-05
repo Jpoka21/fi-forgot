@@ -107,3 +107,9 @@ id = "_sONInCVuL3xDdEq600yJ"
 uri = "file://audit-summary-phase1-server-sync.md"
 type = "text"
 title = "Phase 1 Audit & Bug Fixes"
+
+[[outputs]]
+id = "ZBiVFwX4qUg2VVr7zu278"
+uri = "file://change-summary-normalized-recipients.md"
+type = "text"
+title = "Normalized Recipient Storage — Change Summary"
