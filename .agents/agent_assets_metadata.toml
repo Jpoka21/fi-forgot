@@ -137,3 +137,9 @@ id = "fwbBRfqJ7MoEa20rt9Hpd"
 uri = "file://dev-vs-prod-database-explainer.md"
 type = "text"
 title = "Dev vs Production Database Explainer"
+
+[[outputs]]
+id = "1FOzdu1pkTwKBRzyX1Hbg"
+uri = "file://checkpoint-stable-foundation.md"
+type = "text"
+title = "Stable Foundation Checkpoint"
