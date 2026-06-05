@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "hypLLZACBFDfw-6y1sr7z"
@@ -84,3 +83,9 @@ id = "uUyYGVyJYrdl1v7BupgO-"
 uri = "file://artifacts/fi-forgot/public/icon-bell.png"
 type = "image"
 title = "ringing bell icon"
+
+[[outputs]]
+id = "4hDA62A6juVs7BPeFWCz8"
+uri = "file://technical-architecture-report.md"
+type = "text"
+title = "F* I Forgot — Technical Architecture Report"
