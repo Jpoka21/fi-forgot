@@ -119,3 +119,9 @@ id = "YnRRRjupqSY2CqwmMMS34"
 uri = "file://audit-summary-normalized-recipients.md"
 type = "text"
 title = "Normalized Recipients — Audit & Fixes"
+
+[[outputs]]
+id = "iB0wA44gnYLmwyKv37cWY"
+uri = "file://soft-archive-summary.md"
+type = "text"
+title = "Soft-Archive Change — Summary"
