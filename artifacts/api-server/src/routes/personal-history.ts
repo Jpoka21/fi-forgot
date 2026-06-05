@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, personalCardsTable, questionAnswersTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -165,7 +165,8 @@ router.post("/personal/briefings", async (req, res) => {
         .onConflictDoUpdate({
           target: questionAnswersTable.id,
           set: {
-            answerText: questionAnswersTable.answerText,
+            answerText: sql`excluded.answer_text`,
+            questionText: sql`excluded.question_text`,
           },
         });
     }

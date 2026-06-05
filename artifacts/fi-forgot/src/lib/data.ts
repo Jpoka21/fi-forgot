@@ -888,7 +888,8 @@ export async function hydrateBriefingsFromServer(userId: string): Promise<void> 
   try {
     const res = await fetch("/api/personal/briefings", { headers: { "x-user-id": userId } });
     if (!res.ok) return;
-    const { answers } = await res.json() as { answers: { recipientId: string; eventType: string; eventYear: number; questionKey: string; questionText: string; answerText: string }[] };
+    const { answers } = await res.json() as { answers: { recipientId: string; eventType: string; eventYear: number; questionKey: string; questionText: string; answerText: string; createdAt: string }[] };
+
     if (answers.length === 0) {
       const local = loadBriefings();
       if (local.length > 0) {
@@ -900,7 +901,45 @@ export async function hydrateBriefingsFromServer(userId: string): Promise<void> 
           })
         ));
       }
+      return;
     }
+
+    // Group flat Q&A rows back into EventBriefing objects keyed by (recipientId, event, year)
+    const groups = new Map<string, typeof answers>();
+    for (const row of answers) {
+      const key = `${row.recipientId}_${row.eventType}_${row.eventYear}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(row);
+    }
+
+    // Use existing local briefings to recover original IDs and recipientName
+    const local = loadBriefings();
+    const localByKey = new Map(local.map(b => [`${b.recipientId}_${b.event}_${b.year}`, b]));
+    const recipientMap = new Map(loadRecipients().map(r => [r.id, r.name]));
+
+    const rebuilt: EventBriefing[] = [];
+    for (const [key, rows] of groups) {
+      const existing = localByKey.get(key);
+      const first = rows[0];
+      rebuilt.push({
+        id: existing?.id ?? `server_${key}`,
+        recipientId: first.recipientId,
+        recipientName: existing?.recipientName ?? recipientMap.get(first.recipientId) ?? "",
+        event: first.eventType,
+        year: first.eventYear,
+        completedAt: existing?.completedAt ?? first.createdAt,
+        answers: rows.map(r => ({
+          questionKey: r.questionKey,
+          question: r.questionText,
+          answer: r.answerText,
+        })),
+      });
+    }
+
+    // Merge: rebuilt server briefings win; keep any local-only briefings not on the server
+    const serverKeys = new Set(groups.keys());
+    const localOnly = local.filter(b => !serverKeys.has(`${b.recipientId}_${b.event}_${b.year}`));
+    localStorage.setItem(STORAGE_KEY_BRIEFINGS, JSON.stringify([...rebuilt, ...localOnly]));
   } catch { /* non-blocking */ }
 }
 
