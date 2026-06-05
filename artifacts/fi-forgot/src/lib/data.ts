@@ -795,6 +795,13 @@ export function updateCard(card: CardOrder): void {
     all[idx] = card;
     localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(all));
   }
+  if (_serverUserId) {
+    fetch("/api/personal/cards", {
+      method: "POST",
+      headers: syncHeaders(),
+      body: JSON.stringify(card),
+    }).catch(() => {});
+  }
 }
 
 export function saveCard(card: CardOrder): void {
@@ -806,6 +813,13 @@ export function saveCard(card: CardOrder): void {
     all.push(card);
   }
   localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(all));
+  if (_serverUserId) {
+    fetch("/api/personal/cards", {
+      method: "POST",
+      headers: syncHeaders(),
+      body: JSON.stringify(card),
+    }).catch(() => {});
+  }
 }
 
 export function deleteCard(id: string): void {
@@ -834,11 +848,60 @@ export function saveBriefing(briefing: EventBriefing): void {
     all.push(briefing);
   }
   localStorage.setItem(STORAGE_KEY_BRIEFINGS, JSON.stringify(all));
+  if (_serverUserId) {
+    fetch("/api/personal/briefings", {
+      method: "POST",
+      headers: syncHeaders(),
+      body: JSON.stringify(briefing),
+    }).catch(() => {});
+  }
 }
 
 export function deleteBriefing(id: string): void {
   const all = loadBriefings().filter((b) => b.id !== id);
   localStorage.setItem(STORAGE_KEY_BRIEFINGS, JSON.stringify(all));
+}
+
+export async function hydrateCardsFromServer(userId: string): Promise<void> {
+  try {
+    const res = await fetch("/api/personal/cards", { headers: { "x-user-id": userId } });
+    if (!res.ok) return;
+    const { cards: serverCards } = await res.json() as { cards: CardOrder[] };
+    if (serverCards.length > 0) {
+      localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(serverCards));
+    } else {
+      const local = loadCards();
+      if (local.length > 0) {
+        await Promise.all(local.map(c =>
+          fetch("/api/personal/cards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-user-id": userId },
+            body: JSON.stringify(c),
+          })
+        ));
+      }
+    }
+  } catch { /* non-blocking */ }
+}
+
+export async function hydrateBriefingsFromServer(userId: string): Promise<void> {
+  try {
+    const res = await fetch("/api/personal/briefings", { headers: { "x-user-id": userId } });
+    if (!res.ok) return;
+    const { answers } = await res.json() as { answers: { recipientId: string; eventType: string; eventYear: number; questionKey: string; questionText: string; answerText: string }[] };
+    if (answers.length === 0) {
+      const local = loadBriefings();
+      if (local.length > 0) {
+        await Promise.all(local.map(b =>
+          fetch("/api/personal/briefings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-user-id": userId },
+            body: JSON.stringify(b),
+          })
+        ));
+      }
+    }
+  } catch { /* non-blocking */ }
 }
 
 // ─── Misc helpers ─────────────────────────────────────────────────────────────

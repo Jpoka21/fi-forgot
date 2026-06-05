@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents, RecipientAddress, setServerSyncUserId, hydrateRecipientsFromServer } from "./data";
+import { saveRecipient, Recipient, Relationship, Tone, DeliveryPreference, PreviewDays, suggestedEvents, RecipientAddress, setServerSyncUserId, hydrateRecipientsFromServer, hydrateCardsFromServer, hydrateBriefingsFromServer } from "./data";
 import type { Plan } from "./plan";
 
 export interface OnboardingData {
@@ -258,6 +258,8 @@ function connectSession(email: string, name?: string) {
       if (d.userId) {
         setServerSyncUserId(d.userId);
         hydrateRecipientsFromServer(d.userId).catch(() => {});
+        hydrateCardsFromServer(d.userId).catch(() => {});
+        hydrateBriefingsFromServer(d.userId).catch(() => {});
       }
     })
     .catch(() => {});

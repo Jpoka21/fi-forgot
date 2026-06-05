@@ -30,3 +30,5 @@ export * from "./users";
 export * from "./personal-recipients";
 export * from "./card-previews";
 export * from "./recipients-v2";
+export * from "./personal-cards";
+export * from "./question-answers";

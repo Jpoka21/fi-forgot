@@ -23,6 +23,7 @@ import personalRecipientsRouter from "./personal-recipients";
 import cardPreviewRouter from "./card-preview";
 import v2RecipientsRouter from "./v2-recipients";
 import v2GenerateCardRouter from "./v2-generate-card";
+import personalHistoryRouter from "./personal-history";
 
 const router: IRouter = Router();
 
@@ -49,6 +50,7 @@ router.use(personalRecipientsRouter);
 router.use(cardPreviewRouter);
 router.use(v2RecipientsRouter);
 router.use(v2GenerateCardRouter);
+router.use(personalHistoryRouter);
 router.use(stripeRouter);
 
 export default router;
