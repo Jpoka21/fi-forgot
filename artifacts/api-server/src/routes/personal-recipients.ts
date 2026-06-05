@@ -213,14 +213,21 @@ router.delete("/recipients/:id", async (req, res) => {
     .delete(personalRecipientsTable)
     .where(and(eq(personalRecipientsTable.id, id), eq(personalRecipientsTable.userId, userId)));
 
-  // Normalized table cleanup — scoped to userId where the column exists
+  // ── 2. Normalized tables: soft-archive, not hard-delete ──────────────────────
+  // Keeps the identity and profile rows intact so future intelligence and card
+  // history joins can still reference this recipient's profile.
   try {
-    await db.delete(recipientProfileTable).where(eq(recipientProfileTable.id, id));
-    await db.delete(recipientsTable).where(
-      and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)),
-    );
+    const now = new Date();
+
+    // recipients: mark as archived, scoped by both id and user_id
+    await db
+      .update(recipientsTable)
+      .set({ active: false, archivedAt: now, updatedAt: now })
+      .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)));
+
+    // recipient_profile: left completely intact — no changes
   } catch (err) {
-    logger.error({ err, recipientId: id }, "normalized recipient delete cleanup failed");
+    logger.error({ err, recipientId: id }, "normalized recipient soft-archive failed");
     normalizedSyncErrors++;
   }
 
