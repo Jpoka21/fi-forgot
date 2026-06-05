@@ -136,6 +136,7 @@ function AccountMenu({ user, onLogout }: { user: { name: string; email: string }
             <p style={{ margin: "2px 0 0", fontSize: "0.76rem", color: MID }}>{user?.email}</p>
           </div>
           {[
+            { label: "Recipients",       action: () => { setOpen(false); setLocation("/recipients"); } },
             { label: "Account Settings", action: () => alert("Coming soon") },
             { label: "Admin Panel",      action: () => { setOpen(false); setLocation("/admin"); } },
           ].map(item => (
