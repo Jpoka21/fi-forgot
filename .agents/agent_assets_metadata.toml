@@ -125,3 +125,9 @@ id = "iB0wA44gnYLmwyKv37cWY"
 uri = "file://soft-archive-summary.md"
 type = "text"
 title = "Soft-Archive Change — Summary"
+
+[[outputs]]
+id = "T37xeYfqv9RBYTY4IJI0d"
+uri = "file://auth-session-explainer.md"
+type = "text"
+title = "Auth & Session Explainer"
