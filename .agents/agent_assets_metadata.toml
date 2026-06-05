@@ -89,3 +89,9 @@ id = "4hDA62A6juVs7BPeFWCz8"
 uri = "file://technical-architecture-report.md"
 type = "text"
 title = "F* I Forgot — Technical Architecture Report"
+
+[[outputs]]
+id = "LzIGV4VMPdHwJJjfRulYo"
+uri = "file://recipient-intelligence-architecture.md"
+type = "text"
+title = "F* I Forgot — Recipient Intelligence Architecture"

@@ -1,0 +1,166 @@
+I do not want to focus on security, authentication, deployment, testing, or production hardening yet.
+
+Instead, I want to focus on the long term architecture of the recipient intelligence system because that is the core asset of FIForgot.
+
+Assume the future vision is:
+
+* A user may have dozens of recipients.
+* Each recipient may exist in the system for years.
+* We will continuously ask users new questions over time to learn more about recipients.
+* AI should become smarter about each recipient every year.
+* Future cards should improve based on previous cards, previous events, and accumulated memory.
+* Brownie Points should become more meaningful over time.
+* Eventually the system may proactively suggest gifts, cards, reminders, relationship actions, conversation starters, and life event follow ups.
+* The goal is to build a true relationship memory platform that happens to send cards.
+
+Please review the current architecture and design the ideal long term recipient intelligence system.
+
+Recipient Architecture
+
+Specifically answer:
+
+1. What database structure should we use for recipients?
+2. What information should belong in:
+    * recipient profile
+    * recipient memory
+    * card history
+    * life events
+    * preferences
+    * relationship insights
+3. How should briefing answers be stored?
+4. How should AI memory evolve over time?
+5. How should we prevent duplicate recipients without creating too much signup friction?
+6. How should we identify recipients when two users both have a recipient named Joe, Mom, Dad, Sarah, etc.?
+7. What information should be immutable versus editable?
+8. How should Brownie Points be calculated in the future?
+9. What data model would support future features such as:
+    * gift recommendations
+    * relationship coaching
+    * event detection
+    * life milestone tracking
+    * conversation starters
+    * proactive reminders
+    * AI generated relationship insights
+10. What would the final database schema look like if we were designing FIForgot from scratch today?
+
+For each table include:
+
+* purpose
+* key columns
+* relationships
+* indexes
+
+Question Engine Architecture
+
+Also design the future question engine.
+
+I want FIForgot to continuously learn about recipients without overwhelming the user.
+
+The system should gradually build a deep understanding of each recipient over months and years.
+
+Please answer:
+
+1. How should the system decide what question to ask next?
+2. How should it know which recipient needs more information?
+3. How should it determine which information is most valuable to collect?
+4. How should it avoid asking repetitive or annoying questions?
+5. How should it prioritize questions based on upcoming events?
+6. How should questions differ for:
+    * spouse
+    * partner
+    * parent
+    * child
+    * sibling
+    * friend
+    * coworker
+    * client
+7. How should the system store every question asked and every answer received?
+8. How should it determine when an answer becomes stale and should be refreshed?
+9. How should it detect knowledge gaps such as:
+    * interests
+    * hobbies
+    * favorite memories
+    * inside jokes
+    * gift preferences
+    * communication style
+    * personality traits
+    * things to avoid
+    * important life milestones
+10. How should the system score memory completeness for each recipient?
+11. How should the system know when enough information has been collected?
+12. How should the system use answers to improve:
+
+* card generation
+* Brownie Points
+* gift suggestions
+* reminder quality
+* relationship insights
+* future questions
+
+AI Intelligence Layer
+
+Design how the AI layer should work long term.
+
+Specifically address:
+
+* Permanent facts versus temporary facts
+* Memory decay and freshness
+* Relationship timelines
+* Important life events
+* Emotional preferences
+* Recipient personality profiles
+* Things that should never be mentioned
+* Things that should always be remembered
+* Card performance feedback loops
+* How the AI should learn from previous approved cards
+* How the AI should learn from edited cards
+* How the AI should avoid repeating itself over multiple years
+
+Brownie Points Evolution
+
+Redesign Brownie Points as a meaningful long term relationship score.
+
+Explain:
+
+* What should increase the score?
+* What should decrease the score?
+* How should memory quality affect the score?
+* How should engagement affect the score?
+* How should unanswered questions affect the score?
+* How should completed cards affect the score?
+* How should relationship health be measured over years?
+
+Future Vision
+
+Assume FIForgot may eventually support:
+
+* handwritten cards
+* gifts
+* text reminders
+* email reminders
+* relationship coaching
+* anniversary tracking
+* birthday tracking
+* milestone tracking
+* AI concierge services
+* proactive relationship recommendations
+
+Design an architecture that can support all of those future features without major redesign.
+
+Deliverables
+
+Please provide:
+
+1. The ideal long term database schema.
+2. Recommended tables and relationships.
+3. Recommended indexes.
+4. Memory architecture.
+5. Question engine architecture.
+6. Brownie Points architecture.
+7. AI personalization architecture.
+8. Weaknesses in the current system.
+9. Migration path from the current system.
+10. Things we should fix now before more user data accumulates.
+11. A recommended implementation order.
+
+Focus on long term product value, AI personalization, relationship intelligence, and future automation rather than engineering perfection.
