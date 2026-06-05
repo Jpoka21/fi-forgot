@@ -143,3 +143,9 @@ id = "1FOzdu1pkTwKBRzyX1Hbg"
 uri = "file://checkpoint-stable-foundation.md"
 type = "text"
 title = "Stable Foundation Checkpoint"
+
+[[outputs]]
+id = "YvH9TX5hdmOf3tOX09g4l"
+uri = "file://exports/recipient-intelligence-summary.md"
+type = "text"
+title = "Recipient Intelligence Architecture — Session Summary"
