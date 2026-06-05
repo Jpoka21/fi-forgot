@@ -113,3 +113,9 @@ id = "ZBiVFwX4qUg2VVr7zu278"
 uri = "file://change-summary-normalized-recipients.md"
 type = "text"
 title = "Normalized Recipient Storage — Change Summary"
+
+[[outputs]]
+id = "YnRRRjupqSY2CqwmMMS34"
+uri = "file://audit-summary-normalized-recipients.md"
+type = "text"
+title = "Normalized Recipients — Audit & Fixes"
