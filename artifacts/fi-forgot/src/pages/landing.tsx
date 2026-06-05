@@ -275,6 +275,10 @@ export default function LandingPage() {
                     style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
                     MY DASHBOARD
                   </Link>
+                  <Link href="/recipients" onClick={() => setMenuOpen(false)}
+                    style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
+                    RECIPIENTS
+                  </Link>
                   <button
                     onClick={() => { setMenuOpen(false); logout(); }}
                     style={{ display: "block", width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, padding: "6px 0" }}>
