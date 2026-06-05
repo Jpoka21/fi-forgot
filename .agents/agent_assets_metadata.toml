@@ -101,3 +101,9 @@ id = "0_b1lLvB6yFv9_S93_hX7"
 uri = "file://change-summary-phase1-server-sync.md"
 type = "text"
 title = "Phase 1 Change Summary — Server Sync"
+
+[[outputs]]
+id = "_sONInCVuL3xDdEq600yJ"
+uri = "file://audit-summary-phase1-server-sync.md"
+type = "text"
+title = "Phase 1 Audit & Bug Fixes"
