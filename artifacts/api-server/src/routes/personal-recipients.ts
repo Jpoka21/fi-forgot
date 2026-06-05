@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { db, usersTable, personalRecipientsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, usersTable, personalRecipientsTable, recipientsTable, recipientProfileTable } from "@workspace/db";
+import { eq, and, ilike, ne } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -44,7 +45,9 @@ router.put("/recipients/:id", async (req, res) => {
   const userId = req.headers["x-user-id"] as string;
   if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }
   const { id } = req.params;
-  const data = req.body;
+  const data = req.body as Record<string, unknown>;
+
+  // ── 1. Primary write: personal_recipients blob (existing behavior, unchanged) ──
   await db
     .insert(personalRecipientsTable)
     .values({ id, userId, data })
@@ -52,16 +55,167 @@ router.put("/recipients/:id", async (req, res) => {
       target: personalRecipientsTable.id,
       set: { data, updatedAt: new Date() },
     });
-  res.json({ ok: true });
+
+  // ── 2. Normalized writes — additive, failures never break the primary sync ────
+  let warning: string | undefined;
+  try {
+    const now = new Date();
+
+    // Derive normalized fields from the blob
+    const fullName = ((data.name as string) ?? "").trim();
+    const nameParts = fullName.split(/\s+/);
+    const firstName = nameParts[0] || "Unknown";
+    const lastName = nameParts.slice(1).join(" ") || null;
+    const nickname = (data.petName as string) ?? null;
+    const relationshipType = (data.relationship as string) ?? "";
+    const birthday = (data.birthday as string) ?? null;
+    const anniversary = (data.anniversaryDate as string) ?? (data.marriageDate as string) ?? null;
+    const active = (data.active as boolean) ?? true;
+
+    const addr = data.mailingAddress as {
+      line1?: string; line2?: string; city?: string; state?: string; zip?: string;
+    } | undefined;
+
+    // ── 2a. Duplicate warning (new recipients only, warning only — save always proceeds) ──
+    const [alreadyNormalized] = await db
+      .select({ id: recipientsTable.id })
+      .from(recipientsTable)
+      .where(eq(recipientsTable.id, id))
+      .limit(1);
+
+    if (!alreadyNormalized) {
+      const nameMatches = await db
+        .select({ id: recipientsTable.id, birthday: recipientsTable.birthday })
+        .from(recipientsTable)
+        .where(
+          and(
+            eq(recipientsTable.userId, userId),
+            ilike(recipientsTable.firstName, firstName),
+            ne(recipientsTable.id, id),
+          ),
+        );
+      const isDupe = nameMatches.some(
+        d => !birthday || !d.birthday || d.birthday === birthday,
+      );
+      if (isDupe) warning = "possible_duplicate";
+    }
+
+    // ── 2b. Upsert recipients (normalized) ──
+    await db
+      .insert(recipientsTable)
+      .values({
+        id,
+        userId,
+        firstName,
+        lastName,
+        nickname,
+        relationshipType,
+        relationshipLabel: relationshipType || null,
+        birthday,
+        anniversary,
+        email: null,
+        phone: null,
+        addressLine1: addr?.line1 ?? null,
+        addressLine2: addr?.line2 ?? null,
+        city: addr?.city ?? null,
+        state: addr?.state ?? null,
+        postalCode: addr?.zip ?? null,
+        country: "US",
+        active,
+        archivedAt: active ? null : now,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: recipientsTable.id,
+        set: {
+          firstName,
+          lastName,
+          nickname,
+          relationshipType,
+          relationshipLabel: relationshipType || null,
+          birthday,
+          anniversary,
+          addressLine1: addr?.line1 ?? null,
+          addressLine2: addr?.line2 ?? null,
+          city: addr?.city ?? null,
+          state: addr?.state ?? null,
+          postalCode: addr?.zip ?? null,
+          active,
+          archivedAt: active ? null : now,
+          updatedAt: now,
+        },
+      });
+
+    // ── 2c. Upsert recipient_profile ──
+    const emotionalOpenness = typeof data.emotionalLevel === "number" ? data.emotionalLevel : null;
+    const previewDays = typeof data.previewDays === "number" ? data.previewDays : null;
+
+    await db
+      .insert(recipientProfileTable)
+      .values({
+        id,
+        recipientId: id,
+        personalityNotes: (data.personalityNotes as string) ?? null,
+        personalityTraits: (data.personality as string[]) ?? null,
+        interests: (data.interests as string[]) ?? null,
+        hobbies: null,
+        dislikes: null,
+        favoriteMemories: (data.favoriteMemories as string) ?? null,
+        insideJokes: (data.insideJokes as string) ?? null,
+        preferredTone: (data.tonePreference as string) ?? null,
+        emotionalOpenness,
+        thingsToAvoid: (data.thingsToAvoid as string) ?? null,
+        thingsToAlwaysInclude: null,
+        senderNickname: (data.senderName as string) ?? null,
+        signOff: null,
+        deliveryPreference: (data.deliveryPreference as string) ?? null,
+        previewDays,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: recipientProfileTable.id,
+        set: {
+          personalityNotes: (data.personalityNotes as string) ?? null,
+          personalityTraits: (data.personality as string[]) ?? null,
+          interests: (data.interests as string[]) ?? null,
+          favoriteMemories: (data.favoriteMemories as string) ?? null,
+          insideJokes: (data.insideJokes as string) ?? null,
+          preferredTone: (data.tonePreference as string) ?? null,
+          emotionalOpenness,
+          thingsToAvoid: (data.thingsToAvoid as string) ?? null,
+          senderNickname: (data.senderName as string) ?? null,
+          deliveryPreference: (data.deliveryPreference as string) ?? null,
+          previewDays,
+          updatedAt: now,
+        },
+      });
+  } catch (err) {
+    logger.error({ err, recipientId: id }, "normalized recipient sync failed — primary write succeeded");
+  }
+
+  res.json({ ok: true, ...(warning ? { warning } : {}) });
 });
 
 router.delete("/recipients/:id", async (req, res) => {
   const userId = req.headers["x-user-id"] as string;
   if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }
   const { id } = req.params;
+
+  // Primary delete (existing behavior)
   await db
     .delete(personalRecipientsTable)
     .where(eq(personalRecipientsTable.id, id));
+
+  // Normalized table cleanup — failures logged but don't fail the request
+  try {
+    await db.delete(recipientProfileTable).where(eq(recipientProfileTable.id, id));
+    await db.delete(recipientsTable).where(eq(recipientsTable.id, id));
+  } catch (err) {
+    logger.error({ err, recipientId: id }, "normalized recipient delete cleanup failed");
+  }
+
   res.json({ ok: true });
 });
 

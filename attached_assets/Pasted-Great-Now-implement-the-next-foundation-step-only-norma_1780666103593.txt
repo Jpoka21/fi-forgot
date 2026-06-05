@@ -1,0 +1,84 @@
+Great. Now implement the next foundation step only: normalized personal recipient storage.
+
+Do not change the UI design. Do not redesign onboarding. Do not build the full question engine yet.
+
+Goal:
+Move personal recipient data toward normalized PostgreSQL tables while keeping the current UI and localStorage compatibility intact.
+
+Please implement:
+
+1. Create a normalized recipients table for personal users.
+2. Create a recipient_profile table for personal recipient details.
+3. Keep the existing personal_recipients JSON blob table untouched for compatibility.
+4. When a recipient is created or updated, write to:
+    * existing localStorage
+    * existing personal_recipients
+    * new recipients
+    * new recipient_profile
+5. On login hydration, continue loading existing recipients normally, but also make sure normalized tables stay in sync.
+6. Use stable recipient IDs. Do not regenerate IDs for existing recipients.
+7. Add basic duplicate warning logic only if safe:
+    * same user
+    * same first name or nickname
+    * same birthday, if birthday exists
+    * warning only, do not block save
+8. Do not delete or migrate away from personal_recipients yet.
+9. Do not change card generation behavior yet.
+10. Do not change Brownie Points yet.
+
+Recommended table structure:
+
+recipients
+
+* id
+* user_id
+* first_name
+* last_name
+* nickname
+* relationship_type
+* relationship_label
+* birthday
+* anniversary
+* email
+* phone
+* address_line1
+* address_line2
+* city
+* state
+* postal_code
+* country
+* active
+* archived_at
+* created_at
+* updated_at
+
+recipient_profile
+
+* id
+* recipient_id
+* personality_notes
+* personality_traits
+* interests
+* hobbies
+* dislikes
+* favorite_memories
+* inside_jokes
+* preferred_tone
+* emotional_openness
+* things_to_avoid
+* things_to_always_include
+* sender_nickname
+* sign_off
+* delivery_preference
+* preview_days
+* created_at
+* updated_at
+
+Please return:
+
+1. Exact files you will change.
+2. Database schema changes.
+3. API changes.
+4. Compatibility plan with existing localStorage and personal_recipients.
+5. Data loss risks.
+6. Then implement only this step.

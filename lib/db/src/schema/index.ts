@@ -32,3 +32,4 @@ export * from "./card-previews";
 export * from "./recipients-v2";
 export * from "./personal-cards";
 export * from "./question-answers";
+export * from "./recipients-normalized";
