@@ -131,3 +131,9 @@ id = "T37xeYfqv9RBYTY4IJI0d"
 uri = "file://auth-session-explainer.md"
 type = "text"
 title = "Auth & Session Explainer"
+
+[[outputs]]
+id = "fwbBRfqJ7MoEa20rt9Hpd"
+uri = "file://dev-vs-prod-database-explainer.md"
+type = "text"
+title = "Dev vs Production Database Explainer"
