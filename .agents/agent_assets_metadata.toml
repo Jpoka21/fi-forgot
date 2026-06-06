@@ -155,3 +155,9 @@ id = "G2FFjMB0OVCoTpxkAjpcj"
 uri = "file://exports/recipient-context-audit.md"
 type = "text"
 title = "Recipient Context Audit & Bug Fixes"
+
+[[outputs]]
+id = "jBLzzQn1jRK6Ifol68FeV"
+uri = "file://exports/recipient-context-card-generation.md"
+type = "text"
+title = "Recipient Context → Card Generation — Session Summary"
