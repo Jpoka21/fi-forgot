@@ -1,0 +1,66 @@
+Question Engine v1 looks good.
+
+Next, expose it safely to the frontend and let users answer one suggested question.
+
+Keep this very small.
+
+Do not redesign the dashboard.
+Do not redesign onboarding.
+Do not build the full question engine.
+Do not change Brownie Points.
+Do not build gifts or coaching.
+
+Goal:
+On the recipient profile page, show one optional “Help us get better cards for this person” question using the new question engine.
+
+Please implement:
+
+1. Create a real API endpoint:
+    GET /api/v2/recipients/:id/next-question
+    It should use assembleRecipientContext() and getNextQuestion().
+    It must require x-user-id.
+2. Create a save endpoint or reuse the existing briefing save endpoint to save the answer.
+    Prefer reusing question_answers if safe.
+    The saved answer should include:
+    * recipientId
+    * userId
+    * questionKey or fieldKey
+    * questionText
+    * answerText
+    * triggerType = “profile_gap”
+    * eventType = “Profile”
+    * eventYear = current year
+3. Add a small, non-intrusive card on the recipient profile page:
+    Title: “Help us write better cards”
+    Show the suggested question.
+    Textarea for answer.
+    Buttons:
+    * Save answer
+    * Skip for now
+4. On save:
+    * write to server
+    * update local cache if needed
+    * refresh the next question
+    * do not break if the call fails
+5. On skip:
+    * hide the card for the current session or current page load only
+    * do not permanently mark skipped yet
+6. Do not show the question if getNextQuestion() returns null.
+7. Keep the UI simple and consistent with the existing design.
+8. Add tests or smoke checks for:
+    * endpoint requires userId
+    * user can only access their own recipient
+    * question appears when fields are missing
+    * question does not appear when profile is complete
+    * save answer writes to question_answers
+    * after saving, next question updates
+
+Please return:
+
+1. Files changed
+2. API behavior
+3. UI behavior
+4. How answers are saved
+5. Risks
+6. Test results
+7. New checkpoint ID

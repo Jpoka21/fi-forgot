@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { db, usersTable, recipientsV2Table, recipientMemoryTable } from "@workspace/db";
-import { eq, and, ilike } from "drizzle-orm";
+import { db, usersTable, recipientsV2Table, recipientMemoryTable, recipientsTable, questionAnswersTable } from "@workspace/db";
+import { eq, and, ilike, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
+import { assembleRecipientContext } from "../services/recipient-context";
+import { getNextQuestion } from "../services/question-engine";
 
 const router = Router();
 
@@ -190,6 +192,102 @@ router.delete("/v2/recipients/:id", async (req, res) => {
     .where(and(eq(recipientsV2Table.id, id), eq(recipientsV2Table.userId, userId)));
 
   res.json({ ok: true });
+});
+
+// ── Get next profile gap question ─────────────────────────────────────────────
+
+router.get("/v2/recipients/:id/next-question", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id } = req.params;
+
+  const [row] = await db
+    .select({ id: recipientsTable.id })
+    .from(recipientsTable)
+    .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)))
+    .limit(1);
+
+  if (!row) { res.status(404).json({ error: "Recipient not found" }); return; }
+
+  try {
+    const context = await assembleRecipientContext(id, userId);
+    const nextQuestion = getNextQuestion(context);
+
+    logger.info({
+      recipientId: id,
+      profileScore: context.profileCompleteness.score,
+      nextPriority: nextQuestion?.priority ?? null,
+      nextFieldKey:  nextQuestion?.fieldKey  ?? null,
+    }, "v2-recipients: next-question");
+
+    res.json({ nextQuestion });
+  } catch (err) {
+    logger.error({ err, recipientId: id }, "v2-recipients: next-question failed");
+    res.status(500).json({ error: "Failed to determine next question" });
+  }
+});
+
+// ── Save a profile-gap answer ──────────────────────────────────────────────────
+
+router.post("/v2/recipients/:id/answer-question", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id } = req.params;
+
+  const { fieldKey, questionText, answerText } = req.body as {
+    fieldKey?: string;
+    questionText?: string;
+    answerText?: string;
+  };
+
+  if (!fieldKey?.trim() || !questionText?.trim() || !answerText?.trim()) {
+    res.status(400).json({ error: "fieldKey, questionText, and answerText required" });
+    return;
+  }
+
+  const [row] = await db
+    .select({ id: recipientsTable.id })
+    .from(recipientsTable)
+    .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)))
+    .limit(1);
+
+  if (!row) { res.status(404).json({ error: "Recipient not found" }); return; }
+
+  try {
+    const now = new Date();
+    const answerId = `profile_gap_${id}_${fieldKey.trim()}`;
+
+    await db
+      .insert(questionAnswersTable)
+      .values({
+        id: answerId,
+        userId,
+        recipientId: id,
+        eventType: "Profile",
+        eventYear: now.getFullYear(),
+        questionKey: fieldKey.trim(),
+        questionText: questionText.trim(),
+        answerText: answerText.trim(),
+        wasSkipped: false,
+        triggerType: "profile_gap",
+        createdAt: now,
+      })
+      .onConflictDoUpdate({
+        target: questionAnswersTable.id,
+        set: {
+          answerText:   sql`excluded.answer_text`,
+          questionText: sql`excluded.question_text`,
+        },
+      });
+
+    logger.info({ recipientId: id, fieldKey: fieldKey.trim() }, "v2-recipients: answer-question saved");
+    res.json({ ok: true });
+  } catch (err) {
+    logger.error({ err, recipientId: id }, "v2-recipients: answer-question failed");
+    res.status(500).json({ error: "Failed to save answer" });
+  }
 });
 
 export default router;

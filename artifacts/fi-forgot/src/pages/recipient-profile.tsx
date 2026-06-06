@@ -38,6 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap } from "lucide-react";
+import ProfileQuestionCard from "@/components/ProfileQuestionCard";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -1147,6 +1148,13 @@ export default function RecipientProfilePage() {
                 recipientId={params.id}
                 selectedEvents={watchSelectedEvents}
               />
+            </div>
+          )}
+
+          {/* Profile gap question — help us write better cards */}
+          {!isNew && (
+            <div className="mt-5">
+              <ProfileQuestionCard recipientId={params.id} />
             </div>
           )}
         </div>
