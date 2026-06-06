@@ -190,8 +190,10 @@ export function buildCardHistorySummary(cards: PersonalCard[]): CardHistorySumma
     };
   }
 
-  const approved = cards.filter(c => c.status === "Approved" || c.approvedAt !== null);
-  const rejected = cards.filter(c => c.status === "Rejected" || c.rejectedAt !== null);
+  // Use status as the single source of truth. Combining status with timestamps
+  // via OR would double-count cards if both fields were ever set inconsistently.
+  const approved = cards.filter(c => c.status === "Approved");
+  const rejected = cards.filter(c => c.status === "Rejected");
   const edited = cards.filter(c => c.wasEdited);
   const eventTypes = [...new Set(cards.map(c => c.eventType).filter(Boolean))];
 
@@ -309,6 +311,7 @@ export async function assembleRecipientContext(
         and(
           eq(questionAnswersTable.userId, userId),
           eq(questionAnswersTable.recipientId, recipientId),
+          eq(questionAnswersTable.wasSkipped, false),
         ),
       )
       .orderBy(questionAnswersTable.createdAt),
@@ -325,7 +328,10 @@ export async function assembleRecipientContext(
   ]);
 
   const recipient = recipientRows[0] ?? null;
-  const profile = profileRows[0] ?? null;
+  // Gate profile on userId ownership. recipient_profile has no userId column,
+  // so ownership is enforced through the parent recipients row. If the recipient
+  // query returned nothing (wrong user or unknown id), treat profile as absent.
+  const profile = recipient ? (profileRows[0] ?? null) : null;
 
   const identity = recipient ? buildIdentity(recipient) : null;
   const relationship = recipient ? buildRelationship(recipient) : null;
