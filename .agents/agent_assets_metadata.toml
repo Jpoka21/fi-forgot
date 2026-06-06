@@ -167,3 +167,9 @@ id = "-VRsCOAfg8159o6YglmuB"
 uri = "file://exports/question-engine-implementation.md"
 type = "text"
 title = "Question Engine v1 — Implementation Summary"
+
+[[outputs]]
+id = "1JnfGiJ-6uzrALThDeZg3"
+uri = "file://exports/profile-question-card-implementation.md"
+type = "text"
+title = "Profile Question Card — Implementation Summary"
