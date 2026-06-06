@@ -161,3 +161,9 @@ id = "jBLzzQn1jRK6Ifol68FeV"
 uri = "file://exports/recipient-context-card-generation.md"
 type = "text"
 title = "Recipient Context → Card Generation — Session Summary"
+
+[[outputs]]
+id = "-VRsCOAfg8159o6YglmuB"
+uri = "file://exports/question-engine-implementation.md"
+type = "text"
+title = "Question Engine v1 — Implementation Summary"
