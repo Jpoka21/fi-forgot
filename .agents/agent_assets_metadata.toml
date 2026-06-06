@@ -149,3 +149,9 @@ id = "YvH9TX5hdmOf3tOX09g4l"
 uri = "file://exports/recipient-intelligence-summary.md"
 type = "text"
 title = "Recipient Intelligence Architecture — Session Summary"
+
+[[outputs]]
+id = "G2FFjMB0OVCoTpxkAjpcj"
+uri = "file://exports/recipient-context-audit.md"
+type = "text"
+title = "Recipient Context Audit & Bug Fixes"
