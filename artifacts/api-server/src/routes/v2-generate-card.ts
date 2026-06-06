@@ -4,6 +4,9 @@ import { db, recipientMemoryTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
+import { assembleRecipientContext } from "../services/recipient-context";
+import { buildContextSupplement, extractContextAvoids } from "../services/recipient-context-prompt";
+import type { RecipientContext } from "../services/recipient-context";
 
 const router = Router();
 
@@ -99,6 +102,7 @@ function buildUserPrompt(
   relAnswers: Record<string, string> | undefined,
   senderName: string,
   signOff: string | undefined,
+  contextSupplement: string | null,
 ): string {
   const contextLines: string[] = [];
   const rel = relationship.toLowerCase();
@@ -112,8 +116,12 @@ function buildUserPrompt(
   if (details?.trim()) contextLines.push(`Memories / specific details to include: ${details}`);
   if (avoidMentioning?.trim()) contextLines.push(`NEVER mention: ${avoidMentioning}`);
 
-  const context = contextLines.length > 0
-    ? `\nWhat we know about ${firstName}:\n${contextLines.join("\n")}\n`
+  const bodyContext = contextLines.length > 0
+    ? `${contextLines.join("\n")}`
+    : "";
+
+  const context = (bodyContext || contextSupplement)
+    ? `\nWhat we know about ${firstName}:\n${bodyContext}${bodyContext && contextSupplement ? "\n" : ""}${contextSupplement ?? ""}\n`
     : "";
 
   const emotional = emotionalOpenness.toLowerCase();
@@ -211,11 +219,46 @@ router.post("/v2/generate-card", async (req, res) => {
     return;
   }
 
-  const archetypes = determineArchetypes(relationship, occasion, objective, tone);
-  logger.info({ firstName, relationship, occasion, archetypes }, "v2-generate-card: archetypes determined");
+  // ── Recipient context assembly (non-blocking) ─────────────────────────────
+  // Requires both recipientId (body) and x-user-id (header).
+  // Failure is non-fatal: generation continues with the existing body fields.
+  const userId = req.headers["x-user-id"] as string | undefined;
+  let recipientContext: RecipientContext | null = null;
 
-  const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, avoidList);
-  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff);
+  if (recipientId && userId) {
+    try {
+      recipientContext = await assembleRecipientContext(recipientId, userId);
+      logger.info({
+        recipientId,
+        contextVersion: recipientContext.contextVersion,
+        contextUsed: true,
+        briefingAnswers: recipientContext.briefingSummary.totalAnswers,
+        hasCardHistory: recipientContext.cardHistory.totalSent > 0,
+        archived: recipientContext.identity?.archived ?? false,
+        profileScore: recipientContext.profileCompleteness.score,
+      }, "v2-generate-card: recipient context assembled");
+    } catch (ctxErr) {
+      logger.warn({ ctxErr, recipientId }, "v2-generate-card: context assembly failed (non-fatal) — falling back to body fields");
+    }
+  } else {
+    logger.info({
+      recipientId: recipientId ?? null,
+      hasUserId: !!userId,
+      contextUsed: false,
+    }, "v2-generate-card: no context (recipientId or x-user-id missing)");
+  }
+
+  // Merge context thingsToAvoid into system-level avoidList (hard instructions)
+  const mergedAvoidList = [...avoidList, ...extractContextAvoids(recipientContext)];
+
+  // Build prompt supplement from assembled context
+  const contextSupplement = buildContextSupplement(recipientContext);
+
+  const archetypes = determineArchetypes(relationship, occasion, objective, tone);
+  logger.info({ firstName, relationship, occasion, archetypes, contextUsed: !!recipientContext }, "v2-generate-card: archetypes determined");
+
+  const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList);
+  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement);
 
   try {
     const completion = await openai.chat.completions.create({
