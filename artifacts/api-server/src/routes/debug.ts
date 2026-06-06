@@ -9,6 +9,7 @@
 
 import { Router } from "express";
 import { assembleRecipientContext } from "../services/recipient-context";
+import { getNextQuestion, getAllPendingQuestions } from "../services/question-engine";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -55,6 +56,58 @@ router.get("/debug/recipient-context/:recipientId", async (req, res) => {
   } catch (err) {
     logger.error({ err, recipientId }, "debug/recipient-context failed");
     res.status(500).json({ error: "Failed to assemble recipient context" });
+  }
+});
+
+/**
+ * GET /api/debug/recipient-next-question/:recipientId
+ *
+ * Returns the single best next question to ask about a recipient, plus the
+ * full pending queue sorted by priority.
+ *
+ * Response shape:
+ *   {
+ *     recipientId,
+ *     firstName,
+ *     profileCompleteness: { score, filled, missing },
+ *     nextQuestion: SuggestedQuestion | null,
+ *     pendingQueue: SuggestedQuestion[],
+ *   }
+ *
+ * Usage:
+ *   curl localhost:80/api/debug/recipient-next-question/<id> -H "x-user-id: <uuid>"
+ */
+router.get("/debug/recipient-next-question/:recipientId", async (req, res) => {
+  if (!requireDev(res)) return;
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { recipientId } = req.params;
+
+  try {
+    const context = await assembleRecipientContext(recipientId, userId);
+    const nextQuestion = getNextQuestion(context);
+    const pendingQueue = getAllPendingQuestions(context);
+
+    logger.info({
+      recipientId,
+      profileScore:   context.profileCompleteness.score,
+      missingCount:   context.profileCompleteness.missing.length,
+      nextPriority:   nextQuestion?.priority ?? null,
+      nextFieldKey:   nextQuestion?.fieldKey  ?? null,
+      pendingCount:   pendingQueue.length,
+    }, "debug/recipient-next-question");
+
+    res.json({
+      recipientId,
+      firstName:          context.identity?.firstName ?? null,
+      profileCompleteness: context.profileCompleteness,
+      nextQuestion,
+      pendingQueue,
+    });
+  } catch (err) {
+    logger.error({ err, recipientId }, "debug/recipient-next-question failed");
+    res.status(500).json({ error: "Failed to determine next question" });
   }
 });
 
