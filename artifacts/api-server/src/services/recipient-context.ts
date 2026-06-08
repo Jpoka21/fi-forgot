@@ -272,11 +272,21 @@ const COMPLETENESS_FIELDS: {
 ];
 
 export function buildProfileCompleteness(input: CompletenessInput): ProfileCompleteness {
+  // Profile-gap answers (saved by the question engine with eventType === "Profile")
+  // satisfy a field's completeness check even when the corresponding recipient_profile
+  // column has not been written yet. This prevents the same question from reappearing
+  // immediately after a user answers it.
+  const profileGapAnswered = new Set(
+    input.briefing.allAnswers
+      .filter(a => a.eventType === "Profile")
+      .map(a => a.questionKey),
+  );
+
   const filled: string[] = [];
   const missing: string[] = [];
 
   for (const field of COMPLETENESS_FIELDS) {
-    if (field.check(input)) {
+    if (field.check(input) || profileGapAnswered.has(field.key)) {
       filled.push(field.label);
     } else {
       missing.push(field.label);

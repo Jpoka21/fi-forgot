@@ -338,6 +338,115 @@ section("buildProfileCompleteness — partial (birthday + tone only)");
   expect("Inside jokes in missing", c.missing.includes("Inside jokes"), true);
 }
 
+section("buildProfileCompleteness — profile_gap answer satisfies completeness (bug regression)");
+{
+  // Simulates the state immediately after the user answers a profile-gap question:
+  // recipient_profile column is still null, but question_answers has a row with
+  // eventType === "Profile" and questionKey === "things_to_avoid".
+  // The field must NOT appear in missing — this was the root cause of the loop bug.
+  const profileGapAnswer: Parameters<typeof buildBriefingSummary>[0][0] = {
+    id: "profile_gap_r-test_things_to_avoid",
+    userId: "u-test",
+    recipientId: "r-test",
+    eventType: "Profile",
+    eventYear: 2026,
+    questionKey: "things_to_avoid",
+    questionText: "Is there anything we should never mention in a card to Test?",
+    answerText: "Don't mention her weight.",
+    wasSkipped: false,
+    triggerType: "profile_gap",
+    createdAt: new Date(),
+  };
+
+  const c = buildProfileCompleteness({
+    relationship: null,
+    personality: buildPersonality(null),
+    interests: [],
+    memories: buildMemories(null),
+    tone: buildTone(null),        // thingsToAvoid is null in recipient_profile
+    delivery: buildDelivery(null),
+    briefing: buildBriefingSummary([profileGapAnswer]),
+  });
+
+  expect("Things to avoid NOT in missing after profile_gap answer", c.missing.includes("Things to avoid"), false);
+  expect("Things to avoid in filled after profile_gap answer",      c.filled.includes("Things to avoid"),  true);
+  // The gap answer also satisfies "Briefing answers" (totalAnswers > 0), so 2 fields are filled.
+  expect("Briefing answers filled (totalAnswers>0 from gap answer)", c.filled.includes("Briefing answers"), true);
+  expect("11 fields still missing (things_to_avoid + briefing_answers both filled)", c.missing.length, 11);
+}
+
+section("buildProfileCompleteness — multiple profile_gap answers each fill their field");
+{
+  const now = new Date();
+  const makeGapAnswer = (questionKey: string): Parameters<typeof buildBriefingSummary>[0][0] => ({
+    id: `profile_gap_r-test_${questionKey}`,
+    userId: "u-test",
+    recipientId: "r-test",
+    eventType: "Profile",
+    eventYear: 2026,
+    questionKey,
+    questionText: "Q?",
+    answerText: "A.",
+    wasSkipped: false,
+    triggerType: "profile_gap",
+    createdAt: now,
+  });
+
+  const c = buildProfileCompleteness({
+    relationship: null,
+    personality: buildPersonality(null),
+    interests: [],
+    memories: buildMemories(null),
+    tone: buildTone(null),
+    delivery: buildDelivery(null),
+    briefing: buildBriefingSummary([
+      makeGapAnswer("things_to_avoid"),
+      makeGapAnswer("inside_jokes"),
+      makeGapAnswer("favorite_memories"),
+    ]),
+  });
+
+  expect("things_to_avoid filled via gap answer",  c.filled.includes("Things to avoid"),  true);
+  expect("inside_jokes filled via gap answer",     c.filled.includes("Inside jokes"),     true);
+  expect("favorite_memories filled via gap answer",c.filled.includes("Favorite memories"),true);
+  // 3 gap fields + "Briefing answers" (totalAnswers>0) = 4 filled, 9 missing
+  expect("Briefing answers also filled (totalAnswers>0)", c.filled.includes("Briefing answers"), true);
+  expect("4 fields filled, 9 still missing", c.missing.length, 9);
+}
+
+section("buildProfileCompleteness — non-Profile eventType does NOT satisfy completeness");
+{
+  // Briefing answers from normal event briefings (eventType === "Birthday") must NOT
+  // count as satisfying profile completeness for unrelated fields.
+  const briefingAnswer: Parameters<typeof buildBriefingSummary>[0][0] = {
+    id: "briefing_r-test_Birthday_2026_things_to_avoid",
+    userId: "u-test",
+    recipientId: "r-test",
+    eventType: "Birthday",           // ← NOT "Profile"
+    eventYear: 2026,
+    questionKey: "things_to_avoid",
+    questionText: "Anything to avoid?",
+    answerText: "Nothing.",
+    wasSkipped: false,
+    triggerType: "event_briefing",
+    createdAt: new Date(),
+  };
+
+  const c = buildProfileCompleteness({
+    relationship: null,
+    personality: buildPersonality(null),
+    interests: [],
+    memories: buildMemories(null),
+    tone: buildTone(null),
+    delivery: buildDelivery(null),
+    briefing: buildBriefingSummary([briefingAnswer]),
+  });
+
+  // "Briefing answers" field IS filled (totalAnswers > 0), but "Things to avoid" must NOT be
+  expect("Things to avoid still missing (non-Profile event)", c.missing.includes("Things to avoid"), true);
+  expect("Briefing answers filled (totalAnswers > 0)", c.filled.includes("Briefing answers"), true);
+}
+
 // ─── Summary ─────────────────────────────────────────────────────────────────
 
 console.log(`\n${"─".repeat(50)}`);
