@@ -14,97 +14,36 @@
  * - wasSkipped answers are already filtered at the DB query layer; no
  *   additional filtering is needed here.
  *
- * Prompt section order (per spec):
- *   1. Permanent profile (character, interests, memories)
- *   2. Fresh updates — time-sensitive, highest priority
- *   3. Briefing Q&A answers
- *   4. Card history / always-include
+ * Prompt section order (priority-first):
+ *   1. Event Briefing Answers  — most specific to this card
+ *   2. Fresh Updates (recent)  — last 90 days, highest recency priority
+ *   3. Follow-Up Answers       — recent conversations, acts as rich memory
+ *   4. Fresh Updates (mid)     — 90–180 days
+ *   5. Permanent profile       — character, interests, shared memories
+ *   6. Card history            — to avoid repetition
  */
 
 import type { RecipientContext } from "./recipient-context";
 
-/**
- * Converts assembled recipient context into a structured prompt supplement block.
- *
- * Returns null if context is null or contains no useful data (so callers can
- * skip injection entirely and keep the prompt unchanged).
- */
 export function buildContextSupplement(context: RecipientContext | null): string | null {
   if (!context) return null;
 
   const lines: string[] = [
-    "--- Recipient profile intelligence (from saved profile — use to enrich the card) ---",
-    "[PRIORITY RULE] Recent updates (last 90 days) take precedence over older profile data. When a recent update conflicts with older information, use the most recent update. Prioritize recent updates over everything else when crafting the message.",
+    "--- Recipient memory intelligence ---",
+    "[WEAVING RULE] Do not mention one memory at a time. Weave multiple sources together naturally into the card. A card that references two or three different aspects of this person's life feels written by someone who actually knows them.",
+    "[PRIORITY RULE] Briefing answers > Recent fresh updates (last 90 days) > Follow-up conversation answers > Older updates. When context conflicts, use the most recent. Do NOT invent details not provided.",
   ];
 
-  // Archived flag — inform the AI but don't block generation
   if (context.identity?.archived) {
     lines.push("[Note] This recipient is archived — generate normally but be aware.");
   }
 
-  // ── 1. Permanent profile ──────────────────────────────────────────────────
-
-  // Character
-  const { traits, notes } = context.personality;
-  if (traits.length > 0 || notes) {
-    const parts: string[] = [];
-    if (traits.length > 0) parts.push(`traits: ${traits.join(", ")}`);
-    if (notes) parts.push(`notes: ${notes}`);
-    lines.push(`[Character] ${parts.join(" | ")}`);
-  }
-
-  // Structured interests (from recipient_profile.interests JSONB column)
-  if (context.interests.length > 0) {
-    lines.push(`[Interests] ${context.interests.join(", ")}`);
-  }
-
-  // Memories
-  if (context.memories.favoriteMemories) {
-    lines.push(`[Shared memories] ${context.memories.favoriteMemories}`);
-  }
-  if (context.memories.insideJokes) {
-    lines.push(`[Inside references / jokes] ${context.memories.insideJokes}`);
-  }
-
-  // ── 2. Fresh updates — time-sensitive, USE FIRST ──────────────────────────
-  // Grouped by recency so the AI can weight accordingly.
-
-  if (context.freshUpdates.length > 0) {
-    const recent = context.freshUpdates.filter(u => u.ageCategory === "recent");
-    const mid    = context.freshUpdates.filter(u => u.ageCategory === "mid");
-    const older  = context.freshUpdates.filter(u => u.ageCategory === "older");
-
-    if (recent.length > 0) {
-      lines.push("[Recent updates — last 90 days — USE THESE FIRST when personalising]");
-      for (const u of recent) {
-        lines.push(`  Q: ${u.question}`);
-        lines.push(`  A: ${u.answer}`);
-      }
-    }
-    if (mid.length > 0) {
-      lines.push("[Updates — 90–180 days ago — still relevant, use if recent ones are thin]");
-      for (const u of mid) {
-        lines.push(`  Q: ${u.question}`);
-        lines.push(`  A: ${u.answer}`);
-      }
-    }
-    if (older.length > 0) {
-      lines.push("[Older updates — background context only]");
-      for (const u of older) {
-        lines.push(`  Q: ${u.question}`);
-        lines.push(`  A: ${u.answer}`);
-      }
-    }
-  }
-
-  // ── 3. Briefing Q&A answers — wasSkipped=false already enforced at DB level
-
+  // ── 1. Event Briefing Answers — most specific to this card ───────────────
   if (context.briefingSummary.totalAnswers > 0) {
     for (const answers of Object.values(context.briefingSummary.byEvent)) {
       if (answers.length === 0) continue;
-      // Use first answer's fields for the event label (avoids string-splitting the key)
       const first = answers[0]!;
-      lines.push(`[Briefing answers — ${first.eventType} ${first.eventYear}]`);
+      lines.push(`[Event Briefing — ${first.eventType} ${first.eventYear} — USE THESE FIRST, most specific to this card]`);
       for (const a of answers) {
         lines.push(`  Q: ${a.question}`);
         lines.push(`  A: ${a.answer}`);
@@ -112,39 +51,93 @@ export function buildContextSupplement(context: RecipientContext | null): string
     }
   }
 
-  // ── 4. Other context ──────────────────────────────────────────────────────
+  // ── 2. Fresh Updates — recent (last 90 days) ─────────────────────────────
+  if (context.freshUpdates.length > 0) {
+    const recent = context.freshUpdates.filter(u => u.ageCategory === "recent");
+    const mid    = context.freshUpdates.filter(u => u.ageCategory === "mid");
+    const older  = context.freshUpdates.filter(u => u.ageCategory === "older");
 
-  // Card history — enough to avoid obvious repetition
+    if (recent.length > 0) {
+      lines.push("[Recent life updates — last 90 days — USE THESE, they are the most current window into this person's life]");
+      for (const u of recent) {
+        lines.push(`  Topic: ${u.question}`);
+        lines.push(`  Update: ${u.answer}`);
+      }
+    }
+
+    // ── 3. Follow-Up Conversation Answers ─────────────────────────────────
+    if (context.followUpAnswers && context.followUpAnswers.length > 0) {
+      lines.push("[Follow-up conversation answers — things we circled back on — treat as living memory]");
+      for (const fa of context.followUpAnswers) {
+        lines.push(`  Previously about: ${fa.originalTopic}`);
+        lines.push(`  Update: ${fa.answer}`);
+      }
+    }
+
+    if (mid.length > 0) {
+      lines.push("[Life updates — 90–180 days ago — still relevant, good for weaving with recent context]");
+      for (const u of mid) {
+        lines.push(`  Topic: ${u.question}`);
+        lines.push(`  Update: ${u.answer}`);
+      }
+    }
+    if (older.length > 0) {
+      lines.push("[Older life context — background only, use sparingly]");
+      for (const u of older) {
+        lines.push(`  Topic: ${u.question}`);
+        lines.push(`  Update: ${u.answer}`);
+      }
+    }
+  } else if (context.followUpAnswers && context.followUpAnswers.length > 0) {
+    // Follow-ups even if no fresh updates
+    lines.push("[Follow-up conversation answers — things we circled back on — treat as living memory]");
+    for (const fa of context.followUpAnswers) {
+      lines.push(`  Previously about: ${fa.originalTopic}`);
+      lines.push(`  Update: ${fa.answer}`);
+    }
+  }
+
+  // ── 4. Permanent profile ─────────────────────────────────────────────────
+  const { traits, notes } = context.personality;
+  if (traits.length > 0 || notes) {
+    const parts: string[] = [];
+    if (traits.length > 0) parts.push(`personality traits: ${traits.join(", ")}`);
+    if (notes)             parts.push(`notes: ${notes}`);
+    lines.push(`[Who they are] ${parts.join(" | ")}`);
+  }
+
+  if (context.interests.length > 0) {
+    lines.push(`[Interests / hobbies] ${context.interests.join(", ")}`);
+  }
+
+  if (context.memories.favoriteMemories) {
+    lines.push(`[Favorite shared memories] ${context.memories.favoriteMemories}`);
+  }
+  if (context.memories.insideJokes) {
+    lines.push(`[Inside references / callbacks] ${context.memories.insideJokes}`);
+  }
+
+  // ── 5. Card history ──────────────────────────────────────────────────────
   const ch = context.cardHistory;
   if (ch.totalSent > 0) {
     const recent = ch.mostRecentCard;
-    const histParts: string[] = [`${ch.totalSent} card(s) previously generated for this recipient`];
-    if (recent) {
-      histParts.push(`most recent: ${recent.eventType} (${recent.status})`);
-    }
+    const histParts: string[] = [`${ch.totalSent} card(s) previously generated`];
+    if (recent) histParts.push(`most recent: ${recent.eventType} (${recent.status})`);
     lines.push(
       `[Card history] ${histParts.join(", ")}. Avoid repeating the same opening structure, angle, or emotional beat used in prior cards.`,
     );
   }
 
-  // Things to always include (advisory — goes in the user prompt supplement)
+  // ── 6. Things to always include ─────────────────────────────────────────
   if (context.tone.thingsToAlwaysInclude) {
-    lines.push(`[Always include] ${context.tone.thingsToAlwaysInclude}`);
+    lines.push(`[Always include this] ${context.tone.thingsToAlwaysInclude}`);
   }
 
-  // If nothing useful was added beyond the header lines, return null
-  if (lines.length === 2) return null;
+  if (lines.length === 3) return null;
 
   return lines.join("\n");
 }
 
-/**
- * Extracts hard-avoid terms from context.tone.thingsToAvoid for merging into
- * the system-level avoidList (which becomes a hard instruction in the system
- * prompt, not advisory text).
- *
- * Returns [] if context is null or thingsToAvoid is absent/empty.
- */
 export function extractContextAvoids(context: RecipientContext | null): string[] {
   const raw = context?.tone.thingsToAvoid;
   if (!raw?.trim()) return [];

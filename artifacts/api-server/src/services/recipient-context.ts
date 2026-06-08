@@ -119,6 +119,19 @@ export interface FreshUpdate {
   ageCategory: "recent" | "mid" | "older";   // <90d | <180d | ≥180d
 }
 
+/**
+ * A follow-up conversation answer — something the user circled back on.
+ * Stored in question_answers with triggerType === "follow_up".
+ * Treated as high-priority recent memory for card generation.
+ */
+export interface FollowUpAnswer {
+  id: string;
+  originalTopic: string;   // the follow-up question (what was being revisited)
+  answer: string;
+  createdAt: string;       // ISO string
+  daysAgo: number;
+}
+
 export interface RecipientContext {
   contextVersion: typeof CONTEXT_VERSION;
   generatedAt: string;
@@ -135,6 +148,7 @@ export interface RecipientContext {
   briefingSummary: BriefingSummary;
   profileCompleteness: ProfileCompleteness;
   freshUpdates: FreshUpdate[];
+  followUpAnswers: FollowUpAnswer[];
 }
 
 // ─── Pure assembly functions (exported for testing) ───────────────────────────
@@ -287,6 +301,32 @@ export function buildFreshUpdates(rows: QuestionAnswer[]): FreshUpdate[] {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
+// ─── Follow-up answers ────────────────────────────────────────────────────────
+
+/**
+ * Converts raw question_answers rows (triggerType === "follow_up") into
+ * FollowUpAnswer objects sorted newest-first.
+ * These are treated as high-priority recent memory by the card generation prompt.
+ */
+export function buildFollowUpAnswers(rows: QuestionAnswer[]): FollowUpAnswer[] {
+  const now = Date.now();
+  return rows
+    .filter(r => !r.wasSkipped && r.archivedAt === null)
+    .map(r => {
+      const daysAgo = Math.floor(
+        (now - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24),
+      );
+      return {
+        id:            r.id,
+        originalTopic: r.questionText,
+        answer:        r.answerText,
+        createdAt:     new Date(r.createdAt).toISOString(),
+        daysAgo,
+      };
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
 // ─── Completeness scoring ──────────────────────────────────────────────────────
 
 interface CompletenessInput {
@@ -392,10 +432,15 @@ export async function assembleRecipientContext(
   // query returned nothing (wrong user or unknown id), treat profile as absent.
   const profile = recipient ? (profileRows[0] ?? null) : null;
 
-  // Split answers: fresh_update answers go to freshUpdates; all others feed
-  // briefingSummary so the profile completeness check remains correct.
-  const regularAnswerRows = answerRows.filter(r => r.triggerType !== "fresh_update");
+  // Split answers by trigger type:
+  //   fresh_update → freshUpdates (time-sensitive life moments, recency-bucketed)
+  //   follow_up    → followUpAnswers (recent conversations, high-priority memory)
+  //   everything else → briefingSummary (profile gap + briefing Q&A)
   const freshAnswerRows   = answerRows.filter(r => r.triggerType === "fresh_update");
+  const followUpAnswerRows = answerRows.filter(r => r.triggerType === "follow_up");
+  const regularAnswerRows = answerRows.filter(
+    r => r.triggerType !== "fresh_update" && r.triggerType !== "follow_up",
+  );
 
   const identity = recipient ? buildIdentity(recipient) : null;
   const relationship = recipient ? buildRelationship(recipient) : null;
@@ -407,6 +452,7 @@ export async function assembleRecipientContext(
   const cardHistory = buildCardHistorySummary(cardRows);
   const briefingSummary = buildBriefingSummary(regularAnswerRows);
   const freshUpdates = buildFreshUpdates(freshAnswerRows);
+  const followUpAnswers = buildFollowUpAnswers(followUpAnswerRows);
   const profileCompleteness = buildProfileCompleteness({
     relationship,
     personality,
@@ -432,6 +478,7 @@ export async function assembleRecipientContext(
     cardHistory,
     briefingSummary,
     freshUpdates,
+    followUpAnswers,
     profileCompleteness,
   };
 }

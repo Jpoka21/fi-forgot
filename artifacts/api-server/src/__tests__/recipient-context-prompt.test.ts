@@ -138,6 +138,7 @@ function makeContext(overrides: Partial<RecipientContext> = {}): RecipientContex
       missing: ["Anniversary"],
     },
     freshUpdates: [],
+    followUpAnswers: [],
     ...overrides,
   };
 }

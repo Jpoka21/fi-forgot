@@ -81,6 +81,7 @@ function makeContext(missing: string[], firstName = "Sarah"): RecipientContext {
     briefingSummary: { totalAnswers: 0, byEvent: {}, allAnswers: [] },
     profileCompleteness: { score, filled, missing },
     freshUpdates: [],
+    followUpAnswers: [],
   };
 }
 

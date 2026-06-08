@@ -4,3 +4,4 @@
 - [Relationship Timeline](relationship-timeline.md) — timeline feature conventions: archivedAt soft-delete, event dispatch refresh pattern, briefing grouping
 - [Brownie Points Foundation](brownie-points.md) — positive reinforcement engine: award triggers, anti-spam limits, window event dispatch pattern
 - [Follow-Up Questions](follow-up-questions.md) — AI-classified delayed follow-ups from fresh updates; priority between profile-gap and fresh-update in question engine
+- [Card Generation Quality](card-generation-quality.md) — Phase 8: banned phrases, per-relationship voice rules, quality scorer, follow-up answers now surfaced as high-priority memory

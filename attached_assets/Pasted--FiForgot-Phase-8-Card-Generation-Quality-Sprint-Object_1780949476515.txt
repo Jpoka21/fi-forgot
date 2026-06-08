@@ -1,0 +1,291 @@
+# FiForgot Phase 8: Card Generation Quality Sprint
+
+Objective:
+
+Pause new feature development.
+
+Focus entirely on improving card quality so generated cards feel personal, human, and difficult to distinguish from something the sender would have written themselves.
+
+The goal is not more cards.
+
+The goal is better cards.
+
+---
+
+## Core Principle
+
+FiForgot is not an AI card writer.
+
+FiForgot is a relationship memory system that helps users express thoughts they already feel.
+
+Every generated card should feel:
+
+"I would have written this if I had more time."
+
+Not:
+
+"AI wrote this for me."
+
+---
+
+## New Card Quality Requirements
+
+Every generated card should be evaluated against these standards.
+
+### 1. Specificity
+
+Cards must use recipient specific information naturally.
+
+Bad:
+
+"Hope you have a wonderful birthday."
+
+Good:
+
+"It's been fun hearing about your pickleball obsession this year. I still can't decide whether you're becoming an athlete or just collecting hobbies."
+
+If a card could be sent to 100 people without modification, it fails.
+
+---
+
+### 2. Memory Integration
+
+Use multiple memory sources together.
+
+Available memory sources:
+
+Profile Questions
+
+Fresh Updates
+
+Follow Up Answers
+
+Event Briefings
+
+Previous Card History
+
+Timeline Memories
+
+Do not simply mention one memory.
+
+Weave memories together naturally.
+
+Example:
+
+Instead of:
+
+"Congrats on finishing your kitchen."
+
+Prefer:
+
+"Between the kitchen renovation finally wrapping up and your new pickleball phase, it feels like you've somehow turned this year into two completely different adventures."
+
+---
+
+### 3. Relationship Specific Voice
+
+Create different writing styles based on relationship type.
+
+Examples:
+
+Spouse:
+More intimate, appreciative, emotionally warm.
+
+Parent:
+Grateful, reflective, family focused.
+
+Child:
+Encouraging, proud, playful.
+
+Friend:
+Casual, conversational, humorous.
+
+Coworker:
+Professional but personal.
+
+Grandparent:
+Warm, respectful, memory driven.
+
+The generated voice should change significantly depending on relationship.
+
+---
+
+### 4. Stronger Openings
+
+Avoid generic openings.
+
+Avoid:
+
+"Happy Birthday."
+
+"Just wanted to wish you..."
+
+"Hope you have a great day."
+
+Instead open with:
+
+A memory
+
+An observation
+
+A joke
+
+A recent life update
+
+A meaningful reflection
+
+The first sentence should immediately feel personal.
+
+---
+
+### 5. Stronger Closings
+
+Avoid:
+
+"Have a great day."
+
+"Wishing you all the best."
+
+End with:
+
+Appreciation
+
+A shared memory
+
+Optimism about something happening in their life
+
+A relationship specific sentiment
+
+The final paragraph should feel memorable.
+
+---
+
+### 6. Storytelling
+
+When enough information exists, reference short stories instead of facts.
+
+Bad:
+
+"You enjoy pickleball."
+
+Better:
+
+"It still makes me laugh that a casual attempt to try pickleball somehow turned into a regular part of your week."
+
+Cards should feel like they know the person.
+
+---
+
+### 7. Avoid AI Language
+
+Create a banned phrase list.
+
+Examples:
+
+Wishing you all the best
+
+On this special day
+
+May your year be filled with
+
+Celebrate you
+
+Cherish every moment
+
+Another trip around the sun
+
+Warmest wishes
+
+Heartfelt wishes
+
+Wishing you happiness and success
+
+Avoid repetitive AI card language.
+
+---
+
+### 8. Personal Detail Priority
+
+When card context exceeds model limits, prioritize information in this order:
+
+1. Event Briefing Answers
+2. Fresh Updates less than 90 days old
+3. Follow Up Answers
+4. Profile Question Answers
+5. Fresh Updates 90 to 180 days old
+6. Older Timeline Context
+7. Previous Cards
+
+Most recent information should have the strongest influence.
+
+---
+
+### 9. Memory Density Target
+
+Every card should contain:
+
+At least 2 specific personal references.
+
+At least 1 recent memory when available.
+
+At least 1 relationship specific observation.
+
+Cards should never feel generic when memory exists.
+
+---
+
+### 10. Internal Quality Score
+
+Create an internal quality scoring function.
+
+Score:
+
+Specificity
+
+Memory Usage
+
+Relationship Voice
+
+Opening Quality
+
+Closing Quality
+
+AI Phrase Detection
+
+Return score 0 to 100.
+
+Store score with generated draft.
+
+This score is internal only and not shown to users.
+
+---
+
+## Testing Requirement
+
+Generate and review sample cards for:
+
+Spouse
+
+Parent
+
+Child
+
+Friend
+
+Coworker
+
+Grandparent
+
+Evaluate failures.
+
+Refine prompts until cards consistently feel personal, natural, and emotionally authentic.
+
+Success metric:
+
+Users should feel:
+
+"That sounds like something I would actually send."
+
+Not:
+
+"That sounds like AI."

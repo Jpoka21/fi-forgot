@@ -44,6 +44,142 @@ function determineArchetypes(
   return archetypes.length > 0 ? archetypes : ["Appreciation"];
 }
 
+// ── Banned phrase list ────────────────────────────────────────────────────────
+// Any of these in a card = automatic quality failure. Keep in sync with
+// QUALITY_SCORER_BANNED_PHRASES below.
+
+const BANNED_PHRASES_SYSTEM = [
+  // Generic wishes
+  "wishing you all the best", "wishing you the best", "warmest wishes", "heartfelt wishes",
+  "wishing you happiness", "wishing you joy", "wishing you a wonderful",
+  "hope your day is as special as you are", "hope this day brings you",
+  "may all your wishes come true", "may your year be filled with",
+  "may your day be filled with",
+  // Calendar filler
+  "on this special day", "on this special occasion", "this special day",
+  "another trip around the sun", "time to celebrate", "this is your day",
+  "celebrate you",
+  // Filler openers
+  "just wanted to wish you", "i just wanted to take a moment",
+  "wanted to take a moment", "i wanted to reach out",
+  // Generic closers
+  "have a wonderful day", "have a great day", "hope your day is amazing",
+  "all the best", "best wishes",
+  // Empty affirmations
+  "cherish every moment", "you deserve all the best", "you deserve only the best",
+  "so blessed to have you", "truly blessed", "you are so special",
+  "words cannot express", "from the bottom of my heart",
+  "rare person", "one of a kind", "impossible not to like",
+  // AI hallmarks
+  "in these uncertain times", "this year more than ever",
+  "thoughts and prayers", "here's to you and",
+  "today and every day",
+] as const;
+
+// ── Relationship rules ────────────────────────────────────────────────────────
+
+function buildRelRules(relationship: string, occasion: string): string {
+  const rel = relationship.toLowerCase();
+  const occ = occasion.toLowerCase();
+  const isPro = PROFESSIONAL_RELS.includes(rel);
+
+  if (isPro) {
+    return `This is a PROFESSIONAL relationship. Rules:
+- Warm and genuine but professionally appropriate at all times
+- No romantic language, no emotional dependency language, no aggressive teasing
+- Reference the work context: shared projects, professional growth, team moments
+- A good work card feels personal without feeling private`;
+  }
+
+  if (["husband","wife","spouse","partner","boyfriend","girlfriend","fiancé","fiancée"].includes(rel)) {
+    return `This is a PARTNER/SPOUSE card. Rules:
+- The sender knows this person better than anyone alive — write like it
+- Avoid generic romance; favor real-life specific moments over broad declarations
+- Reference the shared life: the small habits, the running jokes, the things only they would understand
+- Intimacy here is in the detail, not the volume of sentiment
+- Do NOT write "you are my everything" or similar sweeping declarations — those are earned through specifics
+- Allowed to be vulnerable, playful, or both — depends on what the context shows`;
+  }
+
+  if (["mom","mother"].includes(rel)) {
+    return `This is a MOTHER card. Rules:
+- Channel genuine gratitude and a sense of life perspective — she shaped who the sender is
+- Favor specific inherited qualities, sacrifices she made, or things the sender now does because of her
+- Can be warm and slightly reverent, but avoid saccharine — earned sentiment beats empty praise
+- She will likely keep this card — write accordingly
+- Allowed to reference family history, specific memories, or recent life milestones`;
+  }
+
+  if (["dad","father"].includes(rel)) {
+    return `This is a FATHER card. Rules:
+- Dad cards often understate — that's a feature, not a bug
+- Favor quiet appreciation, things he taught without saying them, and specific shared moments
+- If the relationship shows humor, a well-placed joke or callback earns more than pure sentimentality
+- Avoid over-the-top emotional language — a card that makes him proud without making him uncomfortable
+- References to specific skills, hobbies, or shared experiences land best`;
+  }
+
+  if (["son","boy"].includes(rel)) {
+    return `This is a PARENT-TO-SON card. Rules:
+- Write as a proud parent — this is about his growth, not generic encouragement
+- Reference specific things he's doing, becoming, or has achieved
+- The emotional range spans proud → playful → deeply loving — let the context guide which
+- Avoid life-lesson lectures in the card — a specific observation is worth ten pieces of advice
+- He should feel genuinely seen, not universally praised`;
+  }
+
+  if (["daughter","girl"].includes(rel)) {
+    return `This is a PARENT-TO-DAUGHTER card. Rules:
+- Write as a proud parent who notices the specific person she's becoming
+- Reference her actual life: her interests, her recent moments, her growth
+- Can be warmer and more openly emotional than a son card — but still grounded in specifics
+- Avoid telling her who to be; celebrate who she already is
+- She should feel seen, not just loved`;
+  }
+
+  if (["brother"].includes(rel)) {
+    return `This is a SIBLING (BROTHER) card. Rules:
+- Only a sibling can mix roast and sincerity in the same breath — lean into that
+- The dynamic: shared history, mutual knowing, teasing as a form of love
+- If there's an inside joke or shared embarrassing memory in the context — use it
+- The card should have at least one moment of genuine warmth buried under the banter
+- Avoid being too Hallmark; avoid being too mean — the sweet spot is the callback`;
+  }
+
+  if (["sister"].includes(rel)) {
+    return `This is a SIBLING (SISTER) card. Rules:
+- Sister cards can carry more open warmth than brother cards but still benefit from humor
+- Shared history, the specific dynamic they have, moments only they remember
+- She knows the sender too well for generic sentiment to land — be specific
+- A good sister card reads like a text they'd actually send, just more considered`;
+  }
+
+  if (rel.includes("grandma") || rel.includes("grandmother") || rel.includes("grandpa") || rel.includes("grandfather") || rel.includes("grandparent")) {
+    return `This is a GRANDPARENT card. Rules:
+- Warmth and respect, with a specific generational connection
+- Reference what they've given across generations — wisdom, stories, presence
+- Avoid being condescending or overly simplified
+- A good grandparent card references something specific about this person — not just "grandparent"
+- Can be nostalgic, loving, and reflective`;
+  }
+
+  if (rel.includes("friend") || rel.includes("bestie") || rel.includes("buddy")) {
+    const isBestFriend = rel.includes("best") || rel.includes("bestie");
+    return `This is a FRIEND card${isBestFriend ? " (best friend)" : ""}. Rules:
+- A friend card should sound like the sender, not a greeting card company
+- Conversational, specific, and real — favor stories and callbacks over broad affirmations
+- If humor fits the context, use it — friends appreciate being made to laugh
+- The opening line should feel like something you'd actually say to this person
+- Avoid "you've always been there for me" and similar vague loyalty statements
+- Reference what makes THIS friendship specific`;
+  }
+
+  return `This is a personal relationship card. Rules:
+- Be genuine and specific to what we know about this person
+- Write like the sender, not like a card company
+- Use the provided context to make this feel like it could only be about them`;
+}
+
 // ── Prompt builder ────────────────────────────────────────────────────────────
 
 function buildSystemPrompt(
@@ -53,42 +189,56 @@ function buildSystemPrompt(
   archetypes: string[],
   avoidList: string[],
 ): string {
-  const rel = relationship.toLowerCase();
-  const isPro = PROFESSIONAL_RELS.includes(rel);
-
-  const relRules = isPro
-    ? `This is a professional relationship. No romantic language. No emotional dependency language. No aggressive roasting. Keep it warm, appropriate, and professional.`
-    : rel.includes("friend")
-    ? `Write for a friendship. Favor teasing, inside jokes, shared history, and understated appreciation. A card to a best friend should not sound like a Hallmark card.`
-    : ["mom","dad"].includes(rel)
-    ? `Write for a parent. Favor gratitude, life lessons, sacrifice, and pride. Make it feel earned, not generic.`
-    : ["husband","wife","boyfriend","girlfriend"].includes(rel)
-    ? `Write for a spouse or partner. Favor real life details and specific moments over generic romance. Make it personal.`
-    : ["brother","sister"].includes(rel)
-    ? `Write for a sibling. Mix annoyance and loyalty. Only siblings know how to tease and still be sincere at the same time.`
-    : ["son","daughter"].includes(rel)
-    ? `Write as a parent to their child. Favor pride, warmth, encouragement, and real moments.`
-    : `Write for a personal relationship. Be genuine and specific to what we know about this person.`;
-
+  const relRules = buildRelRules(relationship, occasion);
+  const archetypeStr = archetypes.join(" + ");
   const avoidStr = avoidList.length > 0
-    ? `\nAVOID ABSOLUTELY: ${avoidList.join(", ")}. Cards that sound like any of these will be rejected.`
+    ? `\n\nHARD AVOIDS (from sender preferences — absolute, no exceptions):\n${avoidList.map(p => `- "${p}"`).join("\n")}`
     : "";
 
-  const archetypeStr = archetypes.join(" + ");
+  return `You are a professional card writer for F*I Forgot — a high-end card service that writes cards people would have written themselves if they'd had the time.
 
-  return `You are a professional card writer for F*I Forgot — a concierge card service that writes cards people actually want to send.
+Relationship: ${relationship} (${archetypeStr} occasion: ${occasion})
 
-Relationship: ${relationship} (${archetypeStr} card)
 ${relRules}
 
-Rules:
-- Write like the sender themselves wrote it — specific, personal, never generic
-- Use relationship type heavily — a card to a ${relationship} reads nothing like a card to anyone else
-- Use specific details provided — if the sender gave us memories, stories, or facts, those go in the card
-- NEVER use clichés: "words cannot express", "on this special day", "from the bottom of my heart", "rare person", "one of a kind", "impossible not to like"
-- Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle
-- Do not overuse sentimental language when the relationship calls for humor or lightness
-- Cards should feel earned, not manufactured${avoidStr}`;
+═══════════════════════════════════════════
+QUALITY REQUIREMENTS — every card must pass all of these
+═══════════════════════════════════════════
+
+1. SPECIFICITY
+   Every card must contain at least 2 specific personal references drawn from the provided context.
+   If a card could be sent to 100 people without modification, it has failed.
+   Good: "It still makes me laugh that a casual attempt to try pickleball somehow turned into a regular part of your week."
+   Bad: "Hope you have a wonderful birthday."
+
+2. MEMORY WEAVING
+   Do not mention one memory at a time. Weave multiple sources together naturally.
+   Good: "Between the kitchen renovation finally wrapping up and your new pickleball phase, it feels like you've turned this year into two completely different adventures."
+   Bad: "Congrats on finishing your kitchen." / "You enjoy pickleball."
+
+3. OPENING LINES
+   The first sentence must immediately feel personal. Never open with a generic greeting.
+   Do NOT open with: "Happy Birthday", "Just wanted to wish you", "Hope you have", any holiday greeting phrase.
+   Instead open with: a memory, an observation, a callback, a joke, a recent life update, a reflection.
+   Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle.
+
+4. CLOSING LINES
+   End with something memorable: appreciation, a shared memory, optimism about something happening in their life, or a relationship-specific sentiment.
+   Do NOT end with: "Have a great day", "Have a wonderful day", "Hope your day is amazing", "Wishing you the best", or any of the banned phrases below.
+   The final paragraph should feel like it could only be written by someone who actually knows this person.
+
+5. RELATIONSHIP VOICE
+   A card to a spouse must read completely differently from a card to a parent, which reads completely differently from a card to a friend.
+   The voice, familiarity, and emotional register should make the relationship obvious.
+
+6. STORYTELLING
+   Reference events as small stories, not as facts.
+   Bad: "You enjoy pickleball." Better: "It still makes me laugh that a casual attempt to try pickleball somehow turned into a regular part of your week."
+
+═══════════════════════════════════════════
+BANNED PHRASES — using any of these is an automatic failure
+═══════════════════════════════════════════
+${BANNED_PHRASES_SYSTEM.map(p => `"${p}"`).join(", ")}${avoidStr}`;
 }
 
 function buildUserPrompt(
@@ -114,8 +264,8 @@ function buildUserPrompt(
       if (val?.trim()) contextLines.push(`  ${key}: ${val}`);
     }
   }
-  if (details?.trim()) contextLines.push(`Memories / specific details to include: ${details}`);
-  if (avoidMentioning?.trim()) contextLines.push(`NEVER mention: ${avoidMentioning}`);
+  if (details?.trim()) contextLines.push(`Extra details / memories to include: ${details}`);
+  if (avoidMentioning?.trim()) contextLines.push(`NEVER mention any of these: ${avoidMentioning}`);
 
   const bodyContext = contextLines.length > 0
     ? `${contextLines.join("\n")}`
@@ -127,23 +277,23 @@ function buildUserPrompt(
 
   const emotional = emotionalOpenness.toLowerCase();
   const emotionGuide =
-    emotional.includes("just funny") ? "Keep emotion to zero — pure humor." :
+    emotional.includes("just funny")        ? "Keep emotion to zero — pure humor." :
     emotional.includes("little appreciation") ? "Add just one genuine line of appreciation at the very end." :
-    emotional.includes("not mushy") ? "Be meaningful but keep it grounded — no over-the-top sentiment." :
-    emotional.includes("heartfelt") ? "Go clearly heartfelt — let the real feeling show." :
-    emotional.includes("deep") ? "Go deep and emotional — this is the full version." :
+    emotional.includes("not mushy")          ? "Be meaningful but keep it grounded — no over-the-top sentiment." :
+    emotional.includes("heartfelt")          ? "Go clearly heartfelt — let the real feeling show." :
+    emotional.includes("deep")               ? "Go deep and emotional — this is the full version." :
     "Be genuine but not excessive.";
 
   const isPro = PROFESSIONAL_RELS.includes(rel);
 
   const options = isPro ? [
-    { label: "Best Match", desc: `Closest to what was asked — professional, warm, appropriate for ${relationship}.` },
-    { label: "More Casual", desc: `Warmer and slightly more personal — still appropriate for work.` },
-    { label: "More Heartfelt", desc: `More genuine and human — the version that actually means something.` },
+    { label: "Best Match",      desc: `Professional, warm, specific to the work relationship with ${firstName}.` },
+    { label: "More Casual",     desc: `Warmer and slightly more personal — still appropriate for work.` },
+    { label: "More Heartfelt",  desc: `More genuinely human — the version that actually means something.` },
   ] : [
-    { label: "Best Match", desc: `Closest to inputs. ${tone} tone. ${emotionGuide}` },
-    { label: "More Casual", desc: `Looser and funnier — lighter touch, makes them smile first.` },
-    { label: "More Heartfelt", desc: `Goes a little deeper — the version they might keep.` },
+    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Uses the most personally relevant memories from context.` },
+    { label: "More Casual",     desc: `Looser and more conversational — like something the sender would actually text. May lead with humor or a casual callback. ${emotionGuide}` },
+    { label: "More Heartfelt",  desc: `Goes deeper into the emotional register — the version they might keep. Leans into the most meaningful memory or observation available.` },
   ];
 
   const optionBlock = options.map(o => `Option: "${o.label}" — ${o.desc}`).join("\n");
@@ -157,10 +307,22 @@ Emotional level: ${emotionGuide}
 
 ${optionBlock}
 
+MEMORY DENSITY REQUIREMENT: Every card must contain at least 2 specific personal references from the context above. Do not write a generic card when context exists. Weave multiple memories or facts together naturally rather than listing them.
+
+PRIORITY ORDER for context when space is limited:
+1. Event Briefing Answers (most specific to this card)
+2. Fresh Updates — last 90 days (most recent life moments)
+3. Follow-Up Answers (recent conversations)
+4. Profile Question Answers
+5. Fresh Updates — 90–180 days old
+6. Older context
+7. Card history (to avoid repetition)
+
 Write as ${senderName} speaking directly to ${firstName}.
-Each version must open completely differently — different angle, different voice.
-Never write a specific number of years (e.g. "seven years", "3 years", "15+ years") — use how long they've been together only to inform the emotional depth and familiarity, not as literal text in the card.
+Each version must open completely differently — different angle, different voice, different structure.
+Never write a specific number of years (e.g. "seven years", "3 years") — use the depth of history to inform emotional familiarity, not as literal text.
 ${signOff ? `End every card with exactly this sign-off on its own line: "${signOff}" — do not alter, rephrase, or add anything to it.` : `End every card with the sender's name on its own line — use "${senderName}" unless it is "Me", in which case write "[Your Name]".`}
+
 Return valid JSON only:
 {
   "cards": [
@@ -172,10 +334,136 @@ Return valid JSON only:
 Use \\n for line breaks. No markdown. JSON only.`;
 }
 
+// ── Internal quality scorer ───────────────────────────────────────────────────
+// Pure TypeScript — no API call. Scores 0–100 across five dimensions.
+// This score is INTERNAL ONLY and never shown to users.
+
+export interface CardQualityScore {
+  total:            number;  // 0–100
+  specificity:      number;  // 0–25: count of context-item hits in card text
+  memoryUsage:      number;  // 0–25: multiple memory sources woven in
+  openingQuality:   number;  // 0–20: non-generic opening line
+  closingQuality:   number;  // 0–15: non-generic closing line
+  aiPhraseDetection: number; // 0–15: absence of banned phrases (high = clean)
+}
+
+const QUALITY_SCORER_BANNED_PHRASES: string[] = [
+  "wishing you all the best", "wishing you the best", "warmest wishes", "heartfelt wishes",
+  "wishing you happiness", "wishing you joy", "wishing you a wonderful",
+  "hope your day is as special as you are", "hope this day brings you",
+  "may all your wishes come true", "may your year be filled with", "may your day be filled with",
+  "on this special day", "on this special occasion", "this special day",
+  "another trip around the sun", "time to celebrate", "this is your day", "celebrate you",
+  "just wanted to wish you", "i just wanted to take a moment", "wanted to take a moment",
+  "i wanted to reach out", "have a wonderful day", "have a great day",
+  "hope your day is amazing", "all the best", "best wishes",
+  "cherish every moment", "you deserve all the best", "you deserve only the best",
+  "so blessed to have you", "truly blessed", "you are so special",
+  "words cannot express", "from the bottom of my heart", "rare person",
+  "one of a kind", "impossible not to like", "in these uncertain times",
+  "this year more than ever", "thoughts and prayers", "today and every day",
+];
+
+const GENERIC_OPENINGS = [
+  "happy birthday", "happy anniversary", "happy mother's day", "happy father's day",
+  "happy valentine's day", "happy holidays", "just wanted", "i just wanted",
+  "hope you have a", "wishing you a", "it's your birthday",
+];
+
+const GENERIC_CLOSINGS = [
+  "have a great day", "have a wonderful day", "hope your day is amazing",
+  "wishing you the best", "all the best", "best wishes", "warmest wishes",
+  "many more to come", "wishing you all the best",
+];
+
+function scoreCardQuality(
+  cardText: string,
+  context: RecipientContext | null,
+  contextSupplement: string | null,
+): CardQualityScore {
+  const lower = cardText.toLowerCase();
+  const paragraphs = cardText.split(/\n+/).filter(p => p.trim());
+  const firstParagraph = (paragraphs[0] ?? "").toLowerCase();
+  const lastParagraph  = (paragraphs[paragraphs.length - 1] ?? "").toLowerCase();
+
+  // ── AI Phrase Detection (0–15) ─────────────────────────────────────────────
+  let bannedHits = 0;
+  for (const phrase of QUALITY_SCORER_BANNED_PHRASES) {
+    if (lower.includes(phrase)) bannedHits++;
+  }
+  const aiPhraseDetection = Math.max(0, 15 - bannedHits * 5);
+
+  // ── Opening Quality (0–20) ─────────────────────────────────────────────────
+  const badOpening = GENERIC_OPENINGS.some(g => firstParagraph.startsWith(g));
+  const openingQuality = badOpening ? 0 : 20;
+
+  // ── Closing Quality (0–15) ─────────────────────────────────────────────────
+  const badClosing = GENERIC_CLOSINGS.some(g => lastParagraph.includes(g));
+  const closingQuality = badClosing ? 0 : 15;
+
+  // ── Specificity & Memory Usage (0–25 each) ────────────────────────────────
+  // Collect all known context items: answers, interests, memories, traits
+  const contextItems: string[] = [];
+  let memorySources = 0;
+
+  if (context) {
+    // Fresh updates
+    if (context.freshUpdates.length > 0) {
+      memorySources++;
+      for (const u of context.freshUpdates) {
+        // Extract significant words from each answer (>5 chars)
+        const words = u.answer.split(/\s+/).filter(w => w.length > 5).slice(0, 5);
+        contextItems.push(...words);
+      }
+    }
+    // Briefing answers
+    if (context.briefingSummary.totalAnswers > 0) {
+      memorySources++;
+      for (const a of context.briefingSummary.allAnswers) {
+        const words = a.answer.split(/\s+/).filter(w => w.length > 5).slice(0, 5);
+        contextItems.push(...words);
+      }
+    }
+    // Follow-up answers
+    if (context.followUpAnswers && context.followUpAnswers.length > 0) {
+      memorySources++;
+      for (const a of context.followUpAnswers) {
+        const words = a.answer.split(/\s+/).filter(w => w.length > 5).slice(0, 5);
+        contextItems.push(...words);
+      }
+    }
+    // Memories / interests
+    if (context.memories.favoriteMemories) {
+      memorySources++;
+      contextItems.push(...context.memories.favoriteMemories.split(/\s+/).filter(w => w.length > 5).slice(0, 8));
+    }
+    if (context.interests.length > 0) {
+      memorySources++;
+      contextItems.push(...context.interests);
+    }
+    if (context.personality.traits.length > 0) {
+      contextItems.push(...context.personality.traits);
+    }
+  }
+
+  // Deduplicate and score hits
+  const uniqueItems = [...new Set(contextItems.map(i => i.toLowerCase()))];
+  let specificityHits = 0;
+  for (const item of uniqueItems) {
+    if (item.length > 4 && lower.includes(item)) specificityHits++;
+  }
+  const specificity  = Math.min(25, specificityHits * 5);
+  const memoryUsage  = Math.min(25, memorySources >= 2 ? 25 : memorySources === 1 ? 15 : 0);
+
+  const total = aiPhraseDetection + openingQuality + closingQuality + specificity + memoryUsage;
+
+  return { total, specificity, memoryUsage, openingQuality, closingQuality, aiPhraseDetection };
+}
+
 // ── Completeness calc ─────────────────────────────────────────────────────────
 
 function calcCompleteness(relAnswers: Record<string, string>, details: string): number {
-  let score = 30; // base: has name + relationship
+  let score = 30;
   if (Object.keys(relAnswers).length >= 1) score += 20;
   if (Object.keys(relAnswers).length >= 2) score += 10;
   if (details?.trim()) score += 30;
@@ -221,8 +509,6 @@ router.post("/v2/generate-card", async (req, res) => {
   }
 
   // ── Recipient context assembly (non-blocking) ─────────────────────────────
-  // Requires both recipientId (body) and x-user-id (header).
-  // Failure is non-fatal: generation continues with the existing body fields.
   const userId = req.headers["x-user-id"] as string | undefined;
   let recipientContext: RecipientContext | null = null;
 
@@ -234,6 +520,8 @@ router.post("/v2/generate-card", async (req, res) => {
         contextVersion: recipientContext.contextVersion,
         contextUsed: true,
         briefingAnswers: recipientContext.briefingSummary.totalAnswers,
+        followUpAnswers: recipientContext.followUpAnswers?.length ?? 0,
+        freshUpdates: recipientContext.freshUpdates.length,
         hasCardHistory: recipientContext.cardHistory.totalSent > 0,
         archived: recipientContext.identity?.archived ?? false,
         profileScore: recipientContext.profileCompleteness.score,
@@ -249,10 +537,7 @@ router.post("/v2/generate-card", async (req, res) => {
     }, "v2-generate-card: no context (recipientId or x-user-id missing)");
   }
 
-  // Merge context thingsToAvoid into system-level avoidList (hard instructions)
   const mergedAvoidList = [...avoidList, ...extractContextAvoids(recipientContext)];
-
-  // Build prompt supplement from assembled context
   const contextSupplement = buildContextSupplement(recipientContext);
 
   const archetypes = determineArchetypes(relationship, occasion, objective, tone);
@@ -283,7 +568,24 @@ router.post("/v2/generate-card", async (req, res) => {
       return;
     }
 
-    // Save card preferences to recipient memory if recipientId provided
+    // ── Quality scoring ────────────────────────────────────────────────────
+    const scoredCards = parsed.cards.map(card => {
+      const quality = scoreCardQuality(card.text, recipientContext, contextSupplement);
+      return { ...card, _qualityScore: quality };
+    });
+
+    const avgQuality = scoredCards.length > 0
+      ? Math.round(scoredCards.reduce((sum, c) => sum + c._qualityScore.total, 0) / scoredCards.length)
+      : 0;
+
+    logger.info({
+      firstName, occasion,
+      cardCount: scoredCards.length,
+      avgQualityScore: avgQuality,
+      cardScores: scoredCards.map(c => ({ tone: c.tone, quality: c._qualityScore.total })),
+    }, "v2-generate-card: quality scored");
+
+    // ── Save preferences to recipient memory ──────────────────────────────
     if (recipientId) {
       try {
         const completeness = calcCompleteness(relAnswers, details ?? "");
@@ -293,14 +595,26 @@ router.post("/v2/generate-card", async (req, res) => {
             id: randomUUID(),
             recipientId,
             cardFuel: { details, avoidMentioning, relAnswers },
-            cardPreferences: { preferredTone: tone, emotionalOpenness, avoidList, archetype: archetypes[0] },
+            cardPreferences: {
+              preferredTone: tone,
+              emotionalOpenness,
+              avoidList,
+              archetype: archetypes[0],
+              lastQualityScore: avgQuality,
+            },
             profileCompleteness: completeness,
           })
           .onConflictDoUpdate({
             target: recipientMemoryTable.recipientId,
             set: {
               cardFuel: { details, avoidMentioning, relAnswers },
-              cardPreferences: { preferredTone: tone, emotionalOpenness, avoidList, archetype: archetypes[0] },
+              cardPreferences: {
+                preferredTone: tone,
+                emotionalOpenness,
+                avoidList,
+                archetype: archetypes[0],
+                lastQualityScore: avgQuality,
+              },
               profileCompleteness: completeness,
               updatedAt: new Date(),
             },
@@ -310,11 +624,11 @@ router.post("/v2/generate-card", async (req, res) => {
       }
     }
 
-    logger.info({ firstName, occasion, cardCount: parsed.cards?.length }, "v2-generate-card: success");
     const browniePoints = userId
       ? await awardPoints(userId, "card_generate", recipientId ? { recipientId } : undefined).catch(() => null)
       : null;
-    res.json({ ...parsed, browniePoints });
+
+    res.json({ cards: scoredCards, browniePoints });
   } catch (err) {
     logger.error({ err }, "v2-generate-card: OpenAI call failed");
     res.status(500).json({ error: "Card generation failed" });
@@ -376,7 +690,9 @@ router.post("/v2/refine-card", async (req, res) => {
           role: "system",
           content:
             "You are refining a greeting card. Apply the requested change while preserving the sender's personal voice and core message. " +
-            "Do NOT add clichés or generic greeting-card language. Return ONLY the refined card text — no labels, no explanation.",
+            "Do NOT add clichés or generic greeting-card language. " +
+            `These phrases are banned: ${BANNED_PHRASES_SYSTEM.slice(0, 15).join(", ")}. ` +
+            "Return ONLY the refined card text — no labels, no explanation.",
         },
         {
           role: "user",
@@ -388,7 +704,7 @@ router.post("/v2/refine-card", async (req, res) => {
     res.json({ text });
   } catch (err) {
     logger.warn({ err }, "v2-refine-card: failed");
-    res.json({ text: cardText }); // graceful fallback — return original
+    res.json({ text: cardText });
   }
 });
 
