@@ -1,0 +1,330 @@
+Implement Recipient Health Dashboard V1.
+
+GOAL
+
+Transform FiForgot from a card generation tool into a relationship management assistant.
+
+The dashboard should answer one simple question:
+
+"Who should I spend a few minutes on today?"
+
+The system already knows:
+
+Profile completion
+Fresh updates
+Follow-up questions
+Upcoming events
+Card history
+
+Now surface that information in a useful way.
+
+---
+
+NEW DASHBOARD SECTION
+
+Add:
+
+Relationship Health
+
+to the main dashboard.
+
+Position:
+
+Above recent activity.
+
+Below the primary call-to-action area.
+
+This should become the most useful section on the dashboard.
+
+---
+
+RECIPIENT HEALTH SCORE
+
+Create:
+
+recipientHealthScore
+
+Range:
+
+0–100
+
+Recalculate automatically.
+
+---
+
+SCORING MODEL
+
+Profile Complete
+
+0–30 points
+
+Fresh Update Recency
+
+Within 30 days = 30 points
+
+31–90 days = 20 points
+
+91–180 days = 10 points
+
+180+ days = 0 points
+
+Pending Follow Up Questions
+
+No pending follow-ups = 20 points
+
+Has pending follow-up = 10 points
+
+Overdue follow-up = 0 points
+
+Upcoming Event Readiness
+
+Event more than 60 days away = 10 points
+
+Event within 60 days and recent update exists = 10 points
+
+Event within 60 days and no recent update = 0 points
+
+Last Card Activity
+
+Card sent within last year = 10 points
+
+Otherwise = 0 points
+
+Maximum:
+
+100 points
+
+---
+
+RECIPIENT STATUS
+
+Based on score:
+
+90–100
+
+Excellent
+
+70–89
+
+Healthy
+
+50–69
+
+Needs Attention
+
+Below 50
+
+Priority
+
+Display as a badge.
+
+---
+
+DASHBOARD GROUPS
+
+Automatically group recipients.
+
+Priority
+
+Needs Attention
+
+Healthy
+
+Excellent
+
+Sort:
+
+Lowest score first.
+
+---
+
+RECIPIENT CARD
+
+Each recipient row should show:
+
+Name
+
+Health Score
+
+Status Badge
+
+Next Event
+
+Last Update Age
+
+Pending Follow Up Count
+
+Example:
+
+Sarah
+
+72
+
+Healthy
+
+Birthday in 41 days
+
+Last update 2 months ago
+
+1 follow-up waiting
+
+---
+
+ACTIONABLE NEXT STEP
+
+Every recipient should have exactly one recommended action.
+
+Examples:
+
+Add a fresh update
+
+Answer follow-up question
+
+Prepare birthday card
+
+Complete profile
+
+Review recent activity
+
+Display:
+
+Recommended Next Step
+
+Example:
+
+Recommended Next Step:
+Answer follow-up question
+
+---
+
+QUICK ACTION BUTTON
+
+Each recipient should have:
+
+Take Action
+
+Click behavior:
+
+If profile incomplete:
+Open profile question flow
+
+If follow-up waiting:
+Open follow-up question
+
+If update stale:
+Open fresh update flow
+
+If event approaching:
+Open card preparation flow
+
+Always send the user directly to the highest priority action.
+
+---
+
+ATTENTION PANEL
+
+At the top of the dashboard show:
+
+Needs Attention
+
+Examples:
+
+3 recipients need updates
+
+2 follow-up questions waiting
+
+1 birthday within 30 days
+
+Display as summary cards.
+
+---
+
+EMPTY STATE
+
+If everything is healthy:
+
+Show:
+
+Everything looks good.
+
+Your relationships are up to date.
+
+Optional:
+
+Celebrate with a small Brownie Points themed illustration.
+
+Keep subtle.
+
+---
+
+RELATIONSHIP INSIGHTS
+
+Add lightweight insights.
+
+Examples:
+
+Most active recipient
+
+Recipient with longest profile
+
+Recipient with oldest update
+
+Most recent follow-up answered
+
+Do not make these the focus.
+
+Place below the main dashboard.
+
+---
+
+PERFORMANCE
+
+Health scores should be cached and recalculated efficiently.
+
+Do not run expensive calculations on every page render.
+
+Use background refresh when possible.
+
+---
+
+MOBILE
+
+Recipient cards should stack cleanly.
+
+Recommended Next Step should remain visible without expanding.
+
+Quick Action button should remain accessible.
+
+---
+
+DESIGN PHILOSOPHY
+
+This is not a CRM.
+
+This is not a sales dashboard.
+
+This is a relationship assistant.
+
+The dashboard should feel like:
+
+Here are the people who matter.
+
+Here's who could use a little attention.
+
+Here's the next best thing to do.
+
+---
+
+SUCCESS CRITERIA
+
+A user can log in and within 10 seconds know:
+
+Who needs attention.
+
+Who is ready for an upcoming card.
+
+Which relationships are thriving.
+
+What action they should take next.
+
+The dashboard becomes the primary reason users return between card events.

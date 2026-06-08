@@ -26,6 +26,7 @@ import v2GenerateCardRouter from "./v2-generate-card";
 import personalHistoryRouter from "./personal-history";
 import debugRouter from "./debug";
 import browniePointsRouter from "./brownie-points";
+import v2RecipientHealthRouter from "./v2-recipient-health";
 
 const router: IRouter = Router();
 
@@ -50,6 +51,7 @@ router.use(cardLibraryRouter);
 router.use(personalCardsRouter);
 router.use(personalRecipientsRouter);
 router.use(cardPreviewRouter);
+router.use(v2RecipientHealthRouter);
 router.use(v2RecipientsRouter);
 router.use(v2GenerateCardRouter);
 router.use(personalHistoryRouter);

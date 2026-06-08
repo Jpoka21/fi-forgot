@@ -19,6 +19,7 @@ import {
   TIER_WEIGHTS, ScoreSnapshot,
 } from "@/lib/relationship-health";
 import { useBrowniePoints } from "@/lib/brownie-points-context";
+import RelationshipHealthSection from "@/components/RelationshipHealthSection";
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
 
@@ -590,71 +591,8 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                {/* ── Your Relationships ──────────────────────────────── */}
-                <div style={{ marginBottom: isMobile ? 36 : 0 }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                    <SHead text="Your Relationships" emoji="❤️" />
-                    <Link href="/recipients/new">
-                      <button data-testid="link-add-recipient"
-                        style={{ display: "flex", alignItems: "center", gap: 4, background: RED, color: WHITE, border: "none", borderRadius: 8, padding: "6px 13px", fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.06em", cursor: "pointer", marginTop: 2 }}>
-                        <Plus size={11} /> Add
-                      </button>
-                    </Link>
-                  </div>
-
-                  {recipients.length >= 5 && (
-                    <div style={{ position: "relative", marginBottom: 12 }}>
-                      <Search size={13} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: MID, pointerEvents: "none" }} />
-                      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search your people…"
-                        style={{ width: "100%", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px 10px 32px", fontSize: "0.86rem", color: INK, background: WHITE, outline: "none", boxSizing: "border-box" as const }} />
-                    </div>
-                  )}
-
-                  <div style={{ background: WHITE, borderRadius: 16, overflow: "hidden", border: `1px solid ${BORDER}` }}>
-                    {filteredRecipients
-                      .slice()
-                      .sort((a, b) => (TIER_WEIGHTS[health.recipientHealths.find(r => r.id === b.id)?.tier ?? "occasional"] ?? 1) - (TIER_WEIGHTS[health.recipientHealths.find(r => r.id === a.id)?.tier ?? "occasional"] ?? 1))
-                      .map((r, i, arr) => {
-                        const rh      = health.recipientHealths.find(h => h.id === r.id);
-                        const nextEv  = allUpcomingEvents.find(e => e.recipient.id === r.id);
-                        const hasCard = nextEv && upcomingWithCardKeys.has(`${r.id}:::${nextEv.event}`);
-                        const sl      = rh ? personScoreLabel(rh.score) : null;
-                        const pct     = rh ? rh.score : 0;
-                        const barColor = rh ? (rh.score >= 65 ? SAGE : rh.score >= 45 ? "#F59E0B" : "#EF6C00") : MID;
-
-                        return (
-                          <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 13, padding: "13px 16px", borderBottom: i < arr.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-                            <div style={{ width: 40, height: 40, borderRadius: 10, background: INK, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", color: WHITE }}>
-                                {r.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
-                              </span>
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
-                                <span style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{r.name}</span>
-                                {sl && <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "2px 7px", borderRadius: 10, background: `${sl.color}14`, color: sl.color }}>{sl.text}</span>}
-                              </div>
-                              {nextEv ? (
-                                <div style={{ fontSize: "0.78rem", color: nextEv.daysAway <= 14 ? daysColor(nextEv.daysAway) : MID, marginBottom: 5 }}>
-                                  {eventEmoji(nextEv.event)} {nextEv.event} in {nextEv.daysAway}d
-                                  {hasCard && <span style={{ color: "#1d4ed8", fontWeight: 700 }}> · card ready</span>}
-                                  {!hasCard && nextEv.briefingDone && <span style={{ color: SAGE, fontWeight: 700 }}> · on track</span>}
-                                </div>
-                              ) : (
-                                <div style={{ fontSize: "0.78rem", color: MID, marginBottom: 5 }}>{r.relationship}</div>
-                              )}
-                              {rh && <ThinBar pct={pct} color={barColor} h={3} />}
-                            </div>
-                            <Link href={`/recipients/${r.id}?from=dashboard`}>
-                              <button style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${BORDER}`, background: `${INK}05`, color: INK, fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" as const }}>
-                                {rh && rh.score < 50 ? "Improve" : "View"}
-                              </button>
-                            </Link>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
+                {/* ── Relationship Health ──────────────────────────── */}
+                <RelationshipHealthSection isMobile={isMobile} />
               </div>
 
               {/* ╔══════════════════════════════════════════════════════════╗
