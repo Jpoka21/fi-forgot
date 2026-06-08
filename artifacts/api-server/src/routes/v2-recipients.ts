@@ -369,6 +369,7 @@ interface TimelineItem {
   summary:    string;
   source:     string;
   canArchive: boolean;
+  isArchived: boolean;
 }
 
 router.get("/v2/recipients/:id/timeline", async (req, res) => {
@@ -393,7 +394,6 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
         eq(questionAnswersTable.recipientId, id),
         eq(questionAnswersTable.userId, userId),
         eq(questionAnswersTable.wasSkipped, false),
-        isNull(questionAnswersTable.archivedAt),
       ))
       .orderBy(desc(questionAnswersTable.createdAt)),
     db
@@ -414,6 +414,8 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
 
   for (const answer of answers) {
     if (answer.triggerType === "event_briefing") {
+      // Skip archived briefing answers from groups (groups can't be archived via UI)
+      if (answer.archivedAt !== null) continue;
       const key = `${answer.eventType}_${answer.eventYear}`;
       if (!briefingGroups.has(key)) briefingGroups.set(key, []);
       briefingGroups.get(key)!.push(answer);
@@ -427,6 +429,7 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
         summary:    answer.answerText,
         source:     type === "fresh_update" ? "Fresh update" : "Profile",
         canArchive: true,
+        isArchived: answer.archivedAt !== null,
       });
     }
   }
@@ -444,6 +447,7 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
       summary,
       source:     `${first.eventType} ${first.eventYear} briefing`,
       canArchive: false,
+      isArchived: false,
     });
   }
 
@@ -459,15 +463,16 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
       summary:    message.length > 0 ? message.slice(0, 120) + (message.length > 120 ? "…" : "") : "",
       source:     card.status === "mailed" ? "Card mailed" : "Card generated",
       canArchive: false,
+      isArchived: false,
     });
   }
 
   // Important dates from recipient profile
   if (row.birthday) {
-    items.push({ id: `birthday_${id}`,     date: row.birthday,     type: "important_date", label: "Birthday",     summary: row.birthday,     source: "Profile", canArchive: false });
+    items.push({ id: `birthday_${id}`,    date: row.birthday,    type: "important_date", label: "Birthday",    summary: row.birthday,    source: "Profile", canArchive: false, isArchived: false });
   }
   if (row.anniversary) {
-    items.push({ id: `anniversary_${id}`,  date: row.anniversary,  type: "important_date", label: "Anniversary",  summary: row.anniversary,  source: "Profile", canArchive: false });
+    items.push({ id: `anniversary_${id}`, date: row.anniversary, type: "important_date", label: "Anniversary", summary: row.anniversary, source: "Profile", canArchive: false, isArchived: false });
   }
 
   // Sort newest first
@@ -492,6 +497,27 @@ router.patch("/v2/recipients/:id/answers/:answerId/archive", async (req, res) =>
       eq(questionAnswersTable.userId, userId),
       eq(questionAnswersTable.recipientId, id),
       isNull(questionAnswersTable.archivedAt),
+    ));
+
+  res.json({ ok: true });
+});
+
+// ── Restore an archived timeline answer ───────────────────────────────────────
+// No UI yet — foundation for future restore capability.
+
+router.patch("/v2/recipients/:id/answers/:answerId/restore", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id, answerId } = req.params;
+
+  await db
+    .update(questionAnswersTable)
+    .set({ archivedAt: null })
+    .where(and(
+      eq(questionAnswersTable.id, answerId),
+      eq(questionAnswersTable.userId, userId),
+      eq(questionAnswersTable.recipientId, id),
     ));
 
   res.json({ ok: true });

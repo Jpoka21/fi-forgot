@@ -1,0 +1,208 @@
+Implement the following Relationship Timeline improvements.
+
+GOAL
+
+The Relationship Timeline should become the primary memory management interface for a recipient.
+
+Users should be able to understand what the system knows, what is influencing card generation, and easily retire outdated memories without losing historical data.
+
+---
+
+ARCHIVE UX IMPROVEMENT
+
+Current action:
+
+Archive
+
+Replace with:
+
+Stop Using
+
+Add supporting helper text:
+
+This memory will stay in history but will no longer be used when generating future cards.
+
+The intent should be obvious to non-technical users.
+
+Users should understand:
+
+Not deleted
+Still visible in history
+Removed from future card generation
+
+---
+
+VISUAL STATUS INDICATORS
+
+Add memory status labels.
+
+Active memories:
+
+Status:
+Active
+
+Archived memories:
+
+Status:
+Not Used For Cards
+
+Use subtle visual styling.
+
+Do not make archived memories disappear completely.
+
+Instead:
+
+Slightly reduce opacity
+Display archived status badge
+Prevent accidental confusion
+
+---
+
+TIMELINE SECTION HEADERS
+
+Group timeline entries by month and year.
+
+Example:
+
+June 2026
+
+Fresh Update
+Card Generated
+Birthday Added
+
+May 2026
+
+Briefing
+Profile Answer
+
+This makes the timeline feel more like a relationship history.
+
+---
+
+MEMORY IMPACT INDICATOR
+
+Show which memory types influence card generation.
+
+Influences cards:
+
+Profile Answers
+Fresh Updates
+
+Does not directly influence cards:
+
+Generated Cards
+Important Dates
+Archived Memories
+
+Display a small badge:
+
+Used In Cards
+
+or
+
+Reference Only
+
+This helps users understand how FiForgot thinks.
+
+---
+
+FRESH UPDATE EMPHASIS
+
+Fresh Updates are the most valuable memory type.
+
+Keep sage green styling.
+
+Add optional label:
+
+Recent Life Update
+
+These entries should visually stand out from standard profile answers.
+
+---
+
+ARCHIVE SAFETY
+
+Before archiving:
+
+Show confirmation modal.
+
+Title:
+
+Stop Using This Memory?
+
+Body:
+
+This memory will remain in the relationship history, but future cards will no longer use it.
+
+Buttons:
+
+Cancel
+
+Stop Using
+
+Prevent accidental archiving.
+
+---
+
+FUTURE RESTORE SUPPORT
+
+Prepare data model and API structure for future restore capability.
+
+No UI required yet.
+
+Just ensure archived records can later be restored without schema changes.
+
+---
+
+CARD GENERATION AUDITABILITY
+
+Add metadata support so future versions can show:
+
+Used in last card
+
+or
+
+Last referenced on:
+
+Date
+
+No UI required yet.
+
+Store foundation if practical.
+
+This will later help explain why a card referenced a specific memory.
+
+---
+
+TIMELINE PHILOSOPHY
+
+The timeline is not an activity feed.
+
+The timeline is the relationship memory ledger.
+
+Users should feel:
+
+"I can see everything FiForgot knows about this person."
+
+Every memory should have a clear purpose:
+
+Active memory
+Archived memory
+Generated card
+Briefing
+Important date
+
+The system should feel trustworthy, transparent, and easy to manage.
+
+---
+
+SUCCESS CRITERIA
+
+Users can clearly understand:
+
+What memories exist
+Which memories influence cards
+Which memories have been retired
+Why cards are becoming more personal over time
+
+The Relationship Timeline should become the single source of truth for recipient memory management.
