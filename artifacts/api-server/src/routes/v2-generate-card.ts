@@ -6,6 +6,7 @@ import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { assembleRecipientContext } from "../services/recipient-context";
 import { buildContextSupplement, extractContextAvoids } from "../services/recipient-context-prompt";
+import { awardPoints } from "../services/brownie-points";
 import type { RecipientContext } from "../services/recipient-context";
 
 const router = Router();
@@ -310,7 +311,10 @@ router.post("/v2/generate-card", async (req, res) => {
     }
 
     logger.info({ firstName, occasion, cardCount: parsed.cards?.length }, "v2-generate-card: success");
-    res.json(parsed);
+    const browniePoints = userId
+      ? await awardPoints(userId, "card_generate", recipientId ? { recipientId } : undefined).catch(() => null)
+      : null;
+    res.json({ ...parsed, browniePoints });
   } catch (err) {
     logger.error({ err }, "v2-generate-card: OpenAI call failed");
     res.status(500).json({ error: "Card generation failed" });

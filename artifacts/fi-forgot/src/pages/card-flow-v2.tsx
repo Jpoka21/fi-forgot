@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { getApiHeaders } from "@/lib/data";
+import { dispatchBrownieAward } from "@/lib/brownie-points-context";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -329,8 +330,9 @@ export default function CardFlowV2() {
           method: "POST", headers: getApiHeaders(),
           body: JSON.stringify({ firstName: firstName.trim(), relationshipType: relationship }),
         });
-        const data = await res.json() as { recipient?: { id: string } };
+        const data = await res.json() as { recipient?: { id: string }; browniePoints?: { awarded: number; newBalance: number; toastMessage: string; milestone?: { threshold: number; message: string } } | null };
         rId = data.recipient?.id ?? null;
+        if (data.browniePoints?.awarded) dispatchBrownieAward(data.browniePoints);
       } catch { /* non-fatal */ }
     }
 
@@ -441,7 +443,7 @@ export default function CardFlowV2() {
         fetch(`/api/personal-cards/pick-card?eventType=${encodeURIComponent(occasionForPicker)}`),
       ]);
 
-      const data     = await res.json()     as { cards?: CardOption[]; error?: string };
+      const data     = await res.json()     as { cards?: CardOption[]; error?: string; browniePoints?: { awarded: number; newBalance: number; toastMessage: string; milestone?: { threshold: number; message: string } } | null };
       const pickData = await pickRes.json() as { card?: CardDesign };
 
       if (!data.cards?.length) throw new Error(data.error ?? "No cards returned");
@@ -456,6 +458,7 @@ export default function CardFlowV2() {
       setEditMode(false);
       setShowConfirm(false);
       if (pickData.card) setDesign(pickData.card);
+      if (data.browniePoints?.awarded) dispatchBrownieAward(data.browniePoints);
       setPhase("results");
     } catch (err) {
       setGenError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -824,7 +827,18 @@ export default function CardFlowV2() {
           )}
 
           <button
-            onClick={() => setPhase("final")}
+            onClick={async () => {
+              setPhase("final");
+              try {
+                const res = await fetch("/api/v2/brownie-points/award", {
+                  method: "POST",
+                  headers: getApiHeaders(),
+                  body: JSON.stringify({ action: "card_send", recipientId }),
+                });
+                const data = await res.json() as { browniePoints?: { awarded: number; newBalance: number; toastMessage: string; milestone?: { threshold: number; message: string } } | null };
+                if (data.browniePoints?.awarded) dispatchBrownieAward(data.browniePoints);
+              } catch { /* non-fatal */ }
+            }}
             style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 4px 20px rgba(226,59,46,0.35)", marginBottom: 12 }}
           >
             SEND THIS CARD →

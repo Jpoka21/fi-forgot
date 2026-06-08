@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -8,8 +8,10 @@ export const usersTable = pgTable("fi_users", {
   name: text("name"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
-  plan: text("plan").default("basic"),
-  createdAt: timestamp("created_at").defaultNow(),
+  plan:                  text("plan").default("basic"),
+  browniePointsBalance:  integer("brownie_points_balance").default(0).notNull(),
+  lifetimeBrowniePoints: integer("lifetime_brownie_points").default(0).notNull(),
+  createdAt:             timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ createdAt: true });

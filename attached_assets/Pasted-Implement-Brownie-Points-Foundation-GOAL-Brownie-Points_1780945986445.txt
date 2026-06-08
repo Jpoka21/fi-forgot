@@ -1,0 +1,265 @@
+Implement Brownie Points Foundation.
+
+GOAL
+
+Brownie Points should become the positive reinforcement engine behind FiForgot.
+
+The purpose is not gamification.
+
+The purpose is to reward thoughtful relationship habits.
+
+Users should feel:
+
+"I'm doing a better job keeping up with the people I care about."
+
+NOT:
+
+"I'm collecting meaningless points."
+
+This is Version 1.
+
+Keep it simple.
+
+---
+
+BROWNIE POINTS MODEL
+
+Create:
+
+browniePointsBalance
+
+at the account level.
+
+Store lifetime total:
+
+lifetimeBrowniePoints
+
+Store transaction history:
+
+BrowniePointTransaction
+
+Fields:
+
+id
+userId
+recipientId (nullable)
+actionType
+points
+description
+createdAt
+
+Never overwrite.
+
+Always create transactions.
+
+---
+
+POINT VALUES
+
+Profile completion milestone:
+
+Complete all 13 profile questions
++100 Brownie Points
+
+Fresh updates:
+
+Add a Fresh Update
++10 Brownie Points
+
+First Fresh Update for recipient:
++25 bonus points
+
+Generate card draft:
++5 Brownie Points
+
+Approve and send card:
++25 Brownie Points
+
+Send card at least 7 days before event:
++25 bonus points
+
+Add new recipient:
++15 Brownie Points
+
+Add birthday:
++10 Brownie Points
+
+Add anniversary:
++10 Brownie Points
+
+---
+
+ANTI-SPAM RULES
+
+Prevent abuse.
+
+Fresh Updates:
+
+Maximum:
+3 rewarded updates per recipient per day
+
+Card generation:
+
+Maximum:
+5 rewarded generations per day
+
+All other actions:
+
+Award once per legitimate action.
+
+---
+
+BROWNIE POINT TOASTS
+
+Show lightweight success messages.
+
+Examples:
+
++10 Brownie Points
+Nice touch. Future cards just got better.
+
++25 Brownie Points
+Card sent. Thoughtfulness counts.
+
++100 Brownie Points
+Recipient profile completed.
+
+Keep tone warm and encouraging.
+
+Avoid sounding like a game.
+
+---
+
+HEADER DISPLAY
+
+Add Brownie Points display to account area.
+
+Example:
+
+🍪 420 Brownie Points
+
+Keep subtle.
+
+Do not dominate navigation.
+
+---
+
+TRANSACTION HISTORY
+
+Create:
+
+Brownie Points History
+
+Display:
+
+Date
+
+Action
+
+Points
+
+Examples:
+
+Jun 12
+Added Fresh Update
++10
+
+Jun 10
+Card Sent
++25
+
+Jun 5
+Completed Recipient Profile
++100
+
+Newest first.
+
+---
+
+ACHIEVEMENT MILESTONES
+
+Create milestone tracking.
+
+No complex badges yet.
+
+Milestones:
+
+100 points
+
+500 points
+
+1,000 points
+
+2,500 points
+
+5,000 points
+
+10,000 points
+
+When crossed:
+
+Show celebration message.
+
+Example:
+
+You've earned 1,000 Brownie Points.
+
+That's a lot of thoughtful moments.
+
+Keep it tasteful.
+
+---
+
+RELATIONSHIP REINFORCEMENT
+
+Every point earning action should reinforce the mission.
+
+Good examples:
+
+You helped future cards become more personal.
+
+You stayed ahead of an important date.
+
+You invested in a relationship.
+
+Bad examples:
+
+Level Up!
+
+Combo Bonus!
+
+XP Earned!
+
+Avoid game language.
+
+---
+
+FUTURE PREPARATION
+
+Store all transactions permanently.
+
+Future versions may use points for:
+
+Premium card designs
+
+Free card credits
+
+Seasonal rewards
+
+Priority features
+
+Do not build redemption yet.
+
+Only build the foundation.
+
+---
+
+SUCCESS CRITERIA
+
+Users begin noticing Brownie Points naturally.
+
+Points reward the exact behaviors that improve FiForgot.
+
+The system feels encouraging rather than gamified.
+
+Brownie Points become a visible representation of relationship effort and consistency.

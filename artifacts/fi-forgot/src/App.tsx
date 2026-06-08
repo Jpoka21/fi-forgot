@@ -31,6 +31,9 @@ import BusinessApprovePage from "@/pages/business-approve";
 import CardPreviewPage from "@/pages/card-preview";
 import CardFlowV2Page from "@/pages/card-flow-v2";
 import CardsReviewPage from "@/pages/cards-review";
+import BrowniePointsPage from "@/pages/brownie-points";
+import { BrowniePointsProvider } from "@/lib/brownie-points-context";
+import { BrowniePointsToast } from "@/components/BrowniePointsToast";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +117,9 @@ function Router() {
       <Route path="/cards/review">
         <ProtectedRoute component={CardsReviewPage} />
       </Route>
+      <Route path="/brownie-points">
+        <ProtectedRoute component={BrowniePointsPage} />
+      </Route>
       <Route path="/settings/reminders">
         <ProtectedRoute component={ReminderSettingsPage} />
       </Route>
@@ -140,7 +146,7 @@ function Router() {
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo"];
+const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo", "/brownie-points"];
 
 function FloatingTryButton() {
   const [location] = useLocation();
@@ -216,15 +222,18 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          {/* Stamp SVG distress filter — injected once, referenced by all stamp components */}
-          <StampDistressFilter />
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-            <FloatingTryButton />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
+        <BrowniePointsProvider>
+          <TooltipProvider>
+            {/* Stamp SVG distress filter — injected once, referenced by all stamp components */}
+            <StampDistressFilter />
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+              <FloatingTryButton />
+            </WouterRouter>
+            <Toaster />
+            <BrowniePointsToast />
+          </TooltipProvider>
+        </BrowniePointsProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

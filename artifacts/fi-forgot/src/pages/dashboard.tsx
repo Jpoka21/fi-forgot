@@ -18,6 +18,7 @@ import {
   recordScoreSnapshot, getScoreHistory, CAT_LABELS, CAT_DESCRIPTIONS,
   TIER_WEIGHTS, ScoreSnapshot,
 } from "@/lib/relationship-health";
+import { useBrowniePoints } from "@/lib/brownie-points-context";
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
 
@@ -321,6 +322,8 @@ export default function DashboardPage() {
     fetch("/api/handwrytten-fonts").then(r => r.json()).then((d: { fonts?: HwFont[] }) => { if (d.fonts) setHwFonts(d.fonts); }).catch(() => {}).finally(() => setFontsLoading(false));
   }, [fontPickerOpen]);
 
+  const { balance: brownieBalance } = useBrowniePoints();
+
   const planConfig = PLANS[plan];
   const cardsUsed  = approvedCards.length;
   const cardsTotal = planConfig.maxCardsPerYear;
@@ -361,6 +364,13 @@ export default function DashboardPage() {
               style={{ display: "flex", alignItems: "center", gap: 6, background: RED, color: WHITE, border: "none", borderRadius: 20, padding: "6px 14px", cursor: "pointer", fontSize: "0.8rem", fontWeight: 700 }}>
               {approvalCount} to review →
             </button>
+          )}
+          {brownieBalance > 0 && (
+            <Link href="/brownie-points" style={{ textDecoration: "none" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 4, background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, color: SAGE, cursor: "pointer", whiteSpace: "nowrap" as const }}>
+                🍪 {brownieBalance.toLocaleString()}
+              </span>
+            </Link>
           )}
           <AccountMenu user={user} onLogout={logout} />
         </div>

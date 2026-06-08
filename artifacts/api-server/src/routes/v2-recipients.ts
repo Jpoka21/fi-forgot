@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { assembleRecipientContext } from "../services/recipient-context";
 import { getNextQuestion, getNextFreshUpdateQuestion } from "../services/question-engine";
+import { awardPoints } from "../services/brownie-points";
 import type { FreshUpdateRecord } from "../services/question-engine";
 
 const router = Router();
@@ -69,7 +70,8 @@ router.post("/v2/recipients", async (req, res) => {
     .returning();
 
   logger.info({ id, userId, firstName: created.firstName }, "v2-recipients: created");
-  res.json({ recipient: created });
+  const browniePoints = await awardPoints(userId, "recipient_created").catch(() => null);
+  res.json({ recipient: created, browniePoints });
 });
 
 // ── List recipients ───────────────────────────────────────────────────────────
@@ -178,7 +180,11 @@ router.patch("/api/v2/recipients/:id", async (req, res) => {
     })
     .where(and(eq(recipientsV2Table.id, id), eq(recipientsV2Table.userId, userId)));
 
-  res.json({ ok: true });
+  let browniePoints = null;
+  if (birthday !== undefined && birthday?.trim()) {
+    browniePoints = await awardPoints(userId, "birthday_added", { recipientId: id }).catch(() => null);
+  }
+  res.json({ ok: true, browniePoints });
 });
 
 // ── Delete recipient ──────────────────────────────────────────────────────────
@@ -326,7 +332,33 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
       logger.info({ recipientId: id, fieldKey: fieldKey.trim() }, "v2-recipients: profile-gap saved");
     }
 
-    res.json({ ok: true });
+    // Award brownie points
+    let browniePoints = null;
+    if (isFreshUpdate) {
+      browniePoints = await awardPoints(userId, "fresh_update", { recipientId: id }).catch(() => null);
+      if (browniePoints) {
+        const firstBonus = await awardPoints(userId, "fresh_update_first", { recipientId: id }).catch(() => null);
+        if (firstBonus) {
+          browniePoints = {
+            ...browniePoints,
+            awarded:      browniePoints.awarded + firstBonus.awarded,
+            newBalance:   firstBonus.newBalance,
+            toastMessage: `First update for this person — +${browniePoints.awarded + firstBonus.awarded} Brownie Points.`,
+            milestone:    firstBonus.milestone ?? browniePoints.milestone,
+          };
+        }
+      }
+    } else {
+      try {
+        const ctx   = await assembleRecipientContext(id, userId);
+        const nextQ = getNextQuestion(ctx);
+        if (nextQ === null) {
+          browniePoints = await awardPoints(userId, "profile_complete", { recipientId: id }).catch(() => null);
+        }
+      } catch { /* non-fatal — profile completeness check is best-effort */ }
+    }
+
+    res.json({ ok: true, browniePoints });
   } catch (err) {
     logger.error({ err, recipientId: id }, "v2-recipients: answer-question failed");
     res.status(500).json({ error: "Failed to save answer" });

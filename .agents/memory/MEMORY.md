@@ -2,3 +2,4 @@
 - [API & Type Quirks](api-type-quirks.md) — critical type mappings: QueueItem/PersonalSettings field names differ from intuitive names
 - [Recipient Intelligence Stack](recipient-intelligence.md) — context assembly → prompt supplement → question engine; key conventions and security constraints
 - [Relationship Timeline](relationship-timeline.md) — timeline feature conventions: archivedAt soft-delete, event dispatch refresh pattern, briefing grouping
+- [Brownie Points Foundation](brownie-points.md) — positive reinforcement engine: award triggers, anti-spam limits, window event dispatch pattern
