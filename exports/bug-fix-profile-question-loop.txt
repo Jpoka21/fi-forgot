@@ -1,0 +1,115 @@
+BUG FIX: Profile Question Loop
+Date: June 8, 2026
+Project: F.I. Forgot
+
+────────────────────────────────────────────────────
+WHAT WAS BROKEN
+────────────────────────────────────────────────────
+
+After answering a profile-gap question (e.g. "Is there anything we
+should never mention in a card to Test?"), the exact same question
+reappeared immediately after saving. The answer was stored in the
+database successfully — the problem was that the app had no way to
+see it when deciding which question to show next.
+
+
+────────────────────────────────────────────────────
+ROOT CAUSE
+────────────────────────────────────────────────────
+
+The system uses a "profile completeness" check to decide which
+question is still missing and should be asked next. That check read
+exclusively from the recipient_profile database table:
+
+  buildProfileCompleteness()
+    → c.tone.thingsToAvoid
+    → reads recipient_profile.thingsToAvoid
+    → value is null
+    → field stays "missing"
+    → same question returns
+
+But the answer-question endpoint wrote answers to a DIFFERENT table
+(question_answers) and never touched recipient_profile. So the
+profile column stayed null forever, the field stayed "missing", and
+the same question looped endlessly.
+
+The save was working. The data was there. The completeness check
+just wasn't looking in the right place.
+
+
+────────────────────────────────────────────────────
+THE FIX
+────────────────────────────────────────────────────
+
+One change, one file:
+  artifacts/api-server/src/services/recipient-context.ts
+
+buildProfileCompleteness() already received the full list of saved
+answers as an input but never used it for completeness decisions.
+
+Profile-gap answers have a stable identifier: eventType === "Profile"
+
+The fix builds a lookup set from those answers and treats any field
+with a saved gap answer as "filled" — even if the profile column is
+still null:
+
+  const profileGapAnswered = new Set(
+    input.briefing.allAnswers
+      .filter(a => a.eventType === "Profile")
+      .map(a => a.questionKey),
+  );
+
+  // A field is filled if the profile column has data
+  // OR a gap answer exists for it
+  if (field.check(input) || profileGapAnswered.has(field.key)) {
+    filled.push(field.label);
+  }
+
+Now the instant an answer is saved, the next question request sees
+that field as filled, drops it from the missing list, and returns
+the next highest-priority question instead.
+
+
+────────────────────────────────────────────────────
+WHAT DID NOT CHANGE
+────────────────────────────────────────────────────
+
+- The question_answers table — no schema changes
+- The recipient_profile table — no schema changes
+- The answer-question endpoint — still writes exactly as before
+- The question engine priority ordering — unchanged
+- All existing user data — unaffected
+
+
+────────────────────────────────────────────────────
+TESTS ADDED (4 new regression cases)
+────────────────────────────────────────────────────
+
+1. "profile_gap answer satisfies completeness (bug regression)"
+   Exact bug scenario: profile column is null, but a gap answer
+   exists — the field must be counted as filled.
+
+2. "multiple profile_gap answers each fill their field"
+   Answering 3 fields at once correctly marks all 3 as filled.
+
+3. "non-Profile eventType does NOT satisfy completeness"
+   Normal event-briefing answers (e.g. for a Birthday event) do
+   NOT accidentally fill unrelated profile fields.
+
+4. Count assertions updated to reflect that a gap answer also
+   satisfies the "Briefing answers" field (totalAnswers > 0) —
+   correct and expected behavior.
+
+Final test count: 145 passed, 0 failed
+
+
+────────────────────────────────────────────────────
+FILES CHANGED
+────────────────────────────────────────────────────
+
+artifacts/api-server/src/services/recipient-context.ts
+  Added profileGapAnswered Set to buildProfileCompleteness()
+  ~10 lines added
+
+artifacts/api-server/src/__tests__/recipient-context.test.ts
+  4 new test sections added as regression coverage

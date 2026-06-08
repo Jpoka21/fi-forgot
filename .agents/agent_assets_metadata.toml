@@ -179,3 +179,9 @@ id = "kzmYYNs7KNAl1E9OG4z4h"
 uri = "file://exports/bug-fix-profile-question-loop.md"
 type = "text"
 title = "Bug Fix — Profile Question Loop"
+
+[[outputs]]
+id = "7FQBOaG-MhktZA3HVEKyf"
+uri = "file://exports/bug-fix-profile-question-loop.txt"
+type = "text"
+title = "Bug Fix — Profile Question Loop"
