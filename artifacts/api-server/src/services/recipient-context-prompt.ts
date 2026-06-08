@@ -89,6 +89,36 @@ export function buildContextSupplement(context: RecipientContext | null): string
     lines.push(`[Always include] ${context.tone.thingsToAlwaysInclude}`);
   }
 
+  // Fresh updates — time-sensitive memories ordered by recency.
+  // Grouped so the AI knows how current the information is.
+  if (context.freshUpdates.length > 0) {
+    const recent = context.freshUpdates.filter(u => u.ageCategory === "recent");
+    const mid    = context.freshUpdates.filter(u => u.ageCategory === "mid");
+    const older  = context.freshUpdates.filter(u => u.ageCategory === "older");
+
+    if (recent.length > 0) {
+      lines.push("[Recent updates — last 90 days — USE THESE FIRST when personalising]");
+      for (const u of recent) {
+        lines.push(`  Q: ${u.question}`);
+        lines.push(`  A: ${u.answer}`);
+      }
+    }
+    if (mid.length > 0) {
+      lines.push("[Updates — 90–180 days ago — still relevant, use if recent ones are thin]");
+      for (const u of mid) {
+        lines.push(`  Q: ${u.question}`);
+        lines.push(`  A: ${u.answer}`);
+      }
+    }
+    if (older.length > 0) {
+      lines.push("[Older updates — background context only]");
+      for (const u of older) {
+        lines.push(`  Q: ${u.question}`);
+        lines.push(`  A: ${u.answer}`);
+      }
+    }
+  }
+
   // If nothing useful was added beyond the header, return null
   if (lines.length === 1) return null;
 

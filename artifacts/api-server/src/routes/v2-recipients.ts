@@ -4,7 +4,8 @@ import { eq, and, ilike, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { assembleRecipientContext } from "../services/recipient-context";
-import { getNextQuestion } from "../services/question-engine";
+import { getNextQuestion, getNextFreshUpdateQuestion } from "../services/question-engine";
+import type { FreshUpdateRecord } from "../services/question-engine";
 
 const router = Router();
 
@@ -212,16 +213,30 @@ router.get("/v2/recipients/:id/next-question", async (req, res) => {
 
   try {
     const context = await assembleRecipientContext(id, userId);
-    const nextQuestion = getNextQuestion(context);
+    const profileQuestion = getNextQuestion(context);
+    const profileComplete = profileQuestion === null;
+
+    let nextQuestion;
+    if (!profileComplete) {
+      nextQuestion = profileQuestion;
+    } else {
+      const freshUpdateHistory: FreshUpdateRecord[] = context.freshUpdates.map(u => ({
+        questionKey: u.questionKey,
+        createdAt:   new Date(u.createdAt),
+      }));
+      nextQuestion = getNextFreshUpdateQuestion(context, freshUpdateHistory);
+    }
 
     logger.info({
       recipientId: id,
-      profileScore: context.profileCompleteness.score,
-      nextPriority: nextQuestion?.priority ?? null,
-      nextFieldKey:  nextQuestion?.fieldKey  ?? null,
+      profileScore:    context.profileCompleteness.score,
+      profileComplete,
+      nextMode:        nextQuestion?.mode     ?? null,
+      nextPriority:    nextQuestion?.priority ?? null,
+      nextFieldKey:    nextQuestion?.fieldKey  ?? null,
     }, "v2-recipients: next-question");
 
-    res.json({ nextQuestion });
+    res.json({ nextQuestion, profileComplete });
   } catch (err) {
     logger.error({ err, recipientId: id }, "v2-recipients: next-question failed");
     res.status(500).json({ error: "Failed to determine next question" });
@@ -236,16 +251,19 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
 
   const { id } = req.params;
 
-  const { fieldKey, questionText, answerText } = req.body as {
-    fieldKey?: string;
+  const { fieldKey, questionText, answerText, triggerType } = req.body as {
+    fieldKey?:    string;
     questionText?: string;
-    answerText?: string;
+    answerText?:  string;
+    triggerType?: string;
   };
 
   if (!fieldKey?.trim() || !questionText?.trim() || !answerText?.trim()) {
     res.status(400).json({ error: "fieldKey, questionText, and answerText required" });
     return;
   }
+
+  const isFreshUpdate = triggerType === "fresh_update";
 
   const [row] = await db
     .select({ id: recipientsTable.id })
@@ -257,32 +275,57 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
 
   try {
     const now = new Date();
-    const answerId = `profile_gap_${id}_${fieldKey.trim()}`;
 
-    await db
-      .insert(questionAnswersTable)
-      .values({
-        id: answerId,
-        userId,
-        recipientId: id,
-        eventType: "Profile",
-        eventYear: now.getFullYear(),
-        questionKey: fieldKey.trim(),
-        questionText: questionText.trim(),
-        answerText: answerText.trim(),
-        wasSkipped: false,
-        triggerType: "profile_gap",
-        createdAt: now,
-      })
-      .onConflictDoUpdate({
-        target: questionAnswersTable.id,
-        set: {
-          answerText:   sql`excluded.answer_text`,
-          questionText: sql`excluded.question_text`,
-        },
-      });
+    if (isFreshUpdate) {
+      // Fresh updates are always new dated entries — never upserted.
+      // Each answer is an independent memory with its own timestamp.
+      const answerId = `fresh_update_${id}_${fieldKey.trim()}_${now.getTime()}`;
+      await db
+        .insert(questionAnswersTable)
+        .values({
+          id: answerId,
+          userId,
+          recipientId: id,
+          eventType:    "FreshUpdate",
+          eventYear:    now.getFullYear(),
+          questionKey:  fieldKey.trim(),
+          questionText: questionText.trim(),
+          answerText:   answerText.trim(),
+          wasSkipped:   false,
+          triggerType:  "fresh_update",
+          createdAt:    now,
+        });
 
-    logger.info({ recipientId: id, fieldKey: fieldKey.trim() }, "v2-recipients: answer-question saved");
+      logger.info({ recipientId: id, fieldKey: fieldKey.trim() }, "v2-recipients: fresh-update saved");
+    } else {
+      // Profile-gap answers upsert — one canonical answer per field.
+      const answerId = `profile_gap_${id}_${fieldKey.trim()}`;
+      await db
+        .insert(questionAnswersTable)
+        .values({
+          id: answerId,
+          userId,
+          recipientId: id,
+          eventType:    "Profile",
+          eventYear:    now.getFullYear(),
+          questionKey:  fieldKey.trim(),
+          questionText: questionText.trim(),
+          answerText:   answerText.trim(),
+          wasSkipped:   false,
+          triggerType:  "profile_gap",
+          createdAt:    now,
+        })
+        .onConflictDoUpdate({
+          target: questionAnswersTable.id,
+          set: {
+            answerText:   sql`excluded.answer_text`,
+            questionText: sql`excluded.question_text`,
+          },
+        });
+
+      logger.info({ recipientId: id, fieldKey: fieldKey.trim() }, "v2-recipients: profile-gap saved");
+    }
+
     res.json({ ok: true });
   } catch (err) {
     logger.error({ err, recipientId: id }, "v2-recipients: answer-question failed");

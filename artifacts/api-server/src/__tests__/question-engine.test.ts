@@ -8,7 +8,8 @@
  *   pnpm dlx tsx artifacts/api-server/src/__tests__/question-engine.test.ts
  */
 
-import { getNextQuestion, getAllPendingQuestions } from "../services/question-engine.js";
+import { getNextQuestion, getAllPendingQuestions, getNextFreshUpdateQuestion, FRESH_UPDATE_BANK } from "../services/question-engine.js";
+import type { FreshUpdateRecord } from "../services/question-engine.js";
 import type { RecipientContext } from "../services/recipient-context.js";
 
 // ─── Harness ─────────────────────────────────────────────────────────────────
@@ -79,6 +80,7 @@ function makeContext(missing: string[], firstName = "Sarah"): RecipientContext {
     cardHistory: { totalSent: 0, approvedCount: 0, rejectedCount: 0, editedCount: 0, eventTypes: [], mostRecentCard: null },
     briefingSummary: { totalAnswers: 0, byEvent: {}, allAnswers: [] },
     profileCompleteness: { score, filled, missing },
+    freshUpdates: [],
   };
 }
 
@@ -259,6 +261,97 @@ section("getAllPendingQuestions — SuggestedQuestion shape is complete");
   expect("has priority",   typeof q.priority,    "string");
   expect("has question",   typeof q.question,    "string");
   expect("has reason",     typeof q.reason,      "string");
+  expect("mode is profile_gap", q.mode, "profile_gap");
+}
+
+section("getNextQuestion — mode is profile_gap");
+{
+  const ctx = makeContext(["Things to avoid"]);
+  const q = getNextQuestion(ctx);
+  expect("mode === profile_gap", q?.mode, "profile_gap");
+}
+
+// ─── Tests: getNextFreshUpdateQuestion ───────────────────────────────────────
+
+section("getNextFreshUpdateQuestion — no history: returns first bank entry");
+{
+  const ctx = makeContext([]); // profile complete
+  const q = getNextFreshUpdateQuestion(ctx, []);
+  expect("mode is fresh_update",           q.mode,             "fresh_update");
+  expect("first bank entry is recent_memory", q.fieldKey,      "recent_memory");
+  expect("question contains name",         q.question.includes("Sarah"), true);
+}
+
+section("getNextFreshUpdateQuestion — substitutes name in question and reason");
+{
+  const ctx = makeContext([], "Jordan");
+  const q = getNextFreshUpdateQuestion(ctx, []);
+  expect("question uses recipient name",   q.question.includes("Jordan"), true);
+}
+
+section("getNextFreshUpdateQuestion — null identity falls back to 'them'");
+{
+  const ctx = makeContext([], "__null__");
+  const q = getNextFreshUpdateQuestion(ctx, []);
+  expect("question uses 'them' fallback",  q.question.includes("them"), true);
+}
+
+section("getNextFreshUpdateQuestion — rotates past answered question");
+{
+  const ctx = makeContext([]);
+  const t0 = new Date("2026-01-01T00:00:00Z");
+  const history: FreshUpdateRecord[] = [
+    { questionKey: "recent_memory", createdAt: t0 },
+  ];
+  const q = getNextFreshUpdateQuestion(ctx, history);
+  // recent_memory is now the most-recently-answered; next should be bank entry #2
+  expect("skips answered entry, picks #2", q.fieldKey, "current_excitement");
+}
+
+section("getNextFreshUpdateQuestion — full rotation picks oldest answered");
+{
+  const ctx = makeContext([]);
+  const base = new Date("2026-01-01T00:00:00Z");
+  // Answer all 7 bank entries at different times
+  const history: FreshUpdateRecord[] = FRESH_UPDATE_BANK.map((entry, i) => ({
+    questionKey: entry.fieldKey,
+    createdAt:   new Date(base.getTime() + i * 86_400_000), // 1 day apart
+  }));
+  const q = getNextFreshUpdateQuestion(ctx, history);
+  // recent_memory was answered first (oldest) → should come back
+  expect("full rotation returns oldest-answered entry", q.fieldKey, "recent_memory");
+}
+
+section("getNextFreshUpdateQuestion — multiple answers per key: uses most recent");
+{
+  const ctx = makeContext([]);
+  const older = new Date("2025-10-01T00:00:00Z");
+  const newer = new Date("2026-05-01T00:00:00Z");
+  const history: FreshUpdateRecord[] = [
+    // recent_memory answered twice — only the newer date should count
+    { questionKey: "recent_memory",      createdAt: older },
+    { questionKey: "recent_memory",      createdAt: newer },
+    // current_excitement answered once
+    { questionKey: "current_excitement", createdAt: new Date("2025-08-01T00:00:00Z") },
+  ];
+  const q = getNextFreshUpdateQuestion(ctx, history);
+  // 5 bank entries are never answered (epoch); current_challenge is the first of those
+  // by bank order (index 2). current_excitement and recent_memory are answered and
+  // rank after all never-answered entries.
+  expect("first never-answered entry wins (current_challenge)", q.fieldKey, "current_challenge");
+}
+
+section("getNextFreshUpdateQuestion — shape is complete");
+{
+  const ctx = makeContext([]);
+  const q = getNextFreshUpdateQuestion(ctx, []);
+  expect("has fieldKey",   typeof q.fieldKey,   "string");
+  expect("has fieldLabel", typeof q.fieldLabel,  "string");
+  expect("has category",   typeof q.category,    "string");
+  expect("has priority",   typeof q.priority,    "string");
+  expect("has question",   typeof q.question,    "string");
+  expect("has reason",     typeof q.reason,      "string");
+  expect("has mode",       q.mode,              "fresh_update");
 }
 
 // ─── Summary ─────────────────────────────────────────────────────────────────

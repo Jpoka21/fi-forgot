@@ -105,6 +105,20 @@ export interface ProfileCompleteness {
   missing: string[];
 }
 
+/**
+ * A single saved fresh-update answer with recency metadata.
+ * Stored in question_answers with triggerType === "fresh_update".
+ */
+export interface FreshUpdate {
+  id: string;
+  questionKey: string;
+  question: string;
+  answer: string;
+  createdAt: string;                          // ISO string
+  daysAgo: number;
+  ageCategory: "recent" | "mid" | "older";   // <90d | <180d | ≥180d
+}
+
 export interface RecipientContext {
   contextVersion: typeof CONTEXT_VERSION;
   generatedAt: string;
@@ -120,6 +134,7 @@ export interface RecipientContext {
   cardHistory: CardHistorySummary;
   briefingSummary: BriefingSummary;
   profileCompleteness: ProfileCompleteness;
+  freshUpdates: FreshUpdate[];
 }
 
 // ─── Pure assembly functions (exported for testing) ───────────────────────────
@@ -239,6 +254,39 @@ export function buildBriefingSummary(answers: QuestionAnswer[]): BriefingSummary
   };
 }
 
+// ─── Fresh updates ────────────────────────────────────────────────────────────
+
+/**
+ * Converts raw question_answers rows (triggerType === "fresh_update") into
+ * FreshUpdate objects sorted newest-first, with recency age categories:
+ *   recent  = last 90 days
+ *   mid     = 90–180 days
+ *   older   = 180+ days
+ */
+export function buildFreshUpdates(rows: QuestionAnswer[]): FreshUpdate[] {
+  const now = Date.now();
+  return rows
+    .filter(r => !r.wasSkipped)
+    .map(r => {
+      const daysAgo = Math.floor(
+        (now - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const ageCategory: FreshUpdate["ageCategory"] =
+        daysAgo < 90  ? "recent" :
+        daysAgo < 180 ? "mid"    : "older";
+      return {
+        id:          r.id,
+        questionKey: r.questionKey,
+        question:    r.questionText,
+        answer:      r.answerText,
+        createdAt:   new Date(r.createdAt).toISOString(),
+        daysAgo,
+        ageCategory,
+      };
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
 // ─── Completeness scoring ──────────────────────────────────────────────────────
 
 interface CompletenessInput {
@@ -343,6 +391,11 @@ export async function assembleRecipientContext(
   // query returned nothing (wrong user or unknown id), treat profile as absent.
   const profile = recipient ? (profileRows[0] ?? null) : null;
 
+  // Split answers: fresh_update answers go to freshUpdates; all others feed
+  // briefingSummary so the profile completeness check remains correct.
+  const regularAnswerRows = answerRows.filter(r => r.triggerType !== "fresh_update");
+  const freshAnswerRows   = answerRows.filter(r => r.triggerType === "fresh_update");
+
   const identity = recipient ? buildIdentity(recipient) : null;
   const relationship = recipient ? buildRelationship(recipient) : null;
   const personality = buildPersonality(profile);
@@ -351,7 +404,8 @@ export async function assembleRecipientContext(
   const tone = buildTone(profile);
   const delivery = buildDelivery(profile);
   const cardHistory = buildCardHistorySummary(cardRows);
-  const briefingSummary = buildBriefingSummary(answerRows);
+  const briefingSummary = buildBriefingSummary(regularAnswerRows);
+  const freshUpdates = buildFreshUpdates(freshAnswerRows);
   const profileCompleteness = buildProfileCompleteness({
     relationship,
     personality,
@@ -376,6 +430,7 @@ export async function assembleRecipientContext(
     delivery,
     cardHistory,
     briefingSummary,
+    freshUpdates,
     profileCompleteness,
   };
 }

@@ -137,6 +137,7 @@ function makeContext(overrides: Partial<RecipientContext> = {}): RecipientContex
       filled: ["Birthday", "Personality notes"],
       missing: ["Anniversary"],
     },
+    freshUpdates: [],
     ...overrides,
   };
 }

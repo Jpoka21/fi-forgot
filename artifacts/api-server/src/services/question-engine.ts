@@ -4,6 +4,10 @@
  * Lightweight service that reads profileCompleteness.missing from an assembled
  * RecipientContext and returns the single best next question to ask the user.
  *
+ * Two question modes:
+ *   profile_gap   — permanent profile fields; exhausts when all 13 are filled.
+ *   fresh_update  — time-sensitive, rotating prompts; never exhausted.
+ *
  * Design constraints:
  * - Question bank is in code, not the database.
  * - No answer saving — this service only suggests; it does not collect.
@@ -30,23 +34,26 @@ export type QuestionCategory =
   | "delivery"     // logistics
   | "setup";       // dates and one-time setup info
 
+export type QuestionMode = "profile_gap" | "fresh_update";
+
 export interface SuggestedQuestion {
   fieldKey: string;
   fieldLabel: string;
-  category: QuestionCategory;
+  category: QuestionCategory | "update";
   priority: QuestionPriority;
   question: string;   // {name} already substituted with recipient's first name
   reason: string;     // one-line explanation of why this question improves card quality
+  mode: QuestionMode;
 }
 
-// ─── Question bank ────────────────────────────────────────────────────────────
+// ─── Profile gap question bank ────────────────────────────────────────────────
 // fieldLabel MUST match the label values in COMPLETENESS_FIELDS (recipient-context.ts).
 // Within the same priority, earlier entries in this array win.
 
 interface QuestionBankEntry {
   fieldKey: string;
   fieldLabel: string;
-  category: QuestionCategory;
+  category: QuestionCategory | "update";
   priority: QuestionPriority;
   questionTemplate: string;   // use {name} as a placeholder
   reason: string;
@@ -168,6 +175,70 @@ const QUESTION_BANK: QuestionBankEntry[] = [
   },
 ];
 
+// ─── Fresh update question bank ───────────────────────────────────────────────
+// These rotate perpetually once all profile-gap questions are answered.
+// They are never "exhausted" — the engine picks the one answered longest ago.
+// Within the same last-answered date (or never answered), earlier entries win.
+
+export const FRESH_UPDATE_BANK: QuestionBankEntry[] = [
+  {
+    fieldKey:         "recent_memory",
+    fieldLabel:       "Recent memory",
+    category:         "update",
+    priority:         "high",
+    questionTemplate: "What\u2019s something that happened with {name} in the last 3 months that could make the next card feel more personal?",
+    reason:           "Recent moments make cards feel current — not like they were written from a template.",
+  },
+  {
+    fieldKey:         "current_excitement",
+    fieldLabel:       "Current excitement",
+    category:         "update",
+    priority:         "high",
+    questionTemplate: "What is {name} excited about right now?",
+    reason:           "What someone\u2019s excited about is the most personal detail we can put in a card.",
+  },
+  {
+    fieldKey:         "current_challenge",
+    fieldLabel:       "Current challenge",
+    category:         "update",
+    priority:         "high",
+    questionTemplate: "Is there anything challenging or stressful going on for {name} lately?",
+    reason:           "Acknowledging what someone\u2019s going through makes a card land very differently.",
+  },
+  {
+    fieldKey:         "recent_accomplishment",
+    fieldLabel:       "Recent accomplishment",
+    category:         "update",
+    priority:         "high",
+    questionTemplate: "Has {name} accomplished or achieved anything recently \u2014 big or small?",
+    reason:           "Calling out a real win makes a card feel like it was written just for them.",
+  },
+  {
+    fieldKey:         "family_news",
+    fieldLabel:       "Family news",
+    category:         "update",
+    priority:         "medium",
+    questionTemplate: "Is there anything new going on with {name}\u2019s family or home life?",
+    reason:           "Family context shapes what kind of message will land best right now.",
+  },
+  {
+    fieldKey:         "new_hobby",
+    fieldLabel:       "New hobby or interest",
+    category:         "update",
+    priority:         "medium",
+    questionTemplate: "Have they started any new hobbies, interests, or routines lately?",
+    reason:           "New interests are the easiest way to make a card feel timely and specific.",
+  },
+  {
+    fieldKey:         "anything_to_remember",
+    fieldLabel:       "Anything to remember",
+    category:         "update",
+    priority:         "medium",
+    questionTemplate: "Is there anything you\u2019d like us to remember for future cards \u2014 something you want to make sure we capture about {name}?",
+    reason:           "Whatever the sender flags tends to be exactly what makes the card matter.",
+  },
+];
+
 // ─── Priority ordering ────────────────────────────────────────────────────────
 
 const PRIORITY_ORDER: Record<QuestionPriority, number> = {
@@ -177,11 +248,11 @@ const PRIORITY_ORDER: Record<QuestionPriority, number> = {
   low:     3,
 };
 
-// ─── Engine ───────────────────────────────────────────────────────────────────
+// ─── Profile gap engine ───────────────────────────────────────────────────────
 
 /**
- * Returns the single best next question for a recipient, or null if the profile
- * is complete (nothing is missing from the question bank).
+ * Returns the single best next profile-gap question, or null when all 13
+ * profile fields are filled.
  *
  * Selection logic:
  * 1. Read profileCompleteness.missing (label strings).
@@ -196,11 +267,9 @@ export function getNextQuestion(context: RecipientContext): SuggestedQuestion | 
   const missingSet = new Set(missing);
   const firstName = context.identity?.firstName ?? "them";
 
-  // Find all bank entries whose fieldLabel appears in missing, preserving bank order
   const candidates = QUESTION_BANK.filter(entry => missingSet.has(entry.fieldLabel));
   if (candidates.length === 0) return null;
 
-  // Sort by priority (stable sort — entries with equal priority keep bank order)
   candidates.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
 
   const winner = candidates[0]!;
@@ -212,12 +281,13 @@ export function getNextQuestion(context: RecipientContext): SuggestedQuestion | 
     priority:   winner.priority,
     question:   winner.questionTemplate.replaceAll("{name}", firstName),
     reason:     winner.reason.replaceAll("{name}", firstName),
+    mode:       "profile_gap",
   };
 }
 
 /**
- * Returns all missing fields that have a question in the bank, sorted by
- * priority. Useful for showing a queue of upcoming questions.
+ * Returns all missing profile fields that have a question in the bank, sorted
+ * by priority. Useful for showing a queue of upcoming questions.
  */
 export function getAllPendingQuestions(context: RecipientContext): SuggestedQuestion[] {
   const { missing } = context.profileCompleteness;
@@ -236,5 +306,68 @@ export function getAllPendingQuestions(context: RecipientContext): SuggestedQues
     priority:   entry.priority,
     question:   entry.questionTemplate.replaceAll("{name}", firstName),
     reason:     entry.reason.replaceAll("{name}", firstName),
+    mode:       "profile_gap" as const,
   }));
+}
+
+// ─── Fresh update engine ──────────────────────────────────────────────────────
+
+/** Minimal record needed for rotation — just the key and when it was last answered. */
+export interface FreshUpdateRecord {
+  questionKey: string;
+  createdAt: Date;
+}
+
+/**
+ * Returns the next fresh-update question to ask, rotating through the bank so
+ * no prompt is repeated until all have been answered at least once.
+ *
+ * Selection logic:
+ * 1. Build a map of questionKey → most recent createdAt.
+ * 2. Never-answered questions sort before answered ones (epoch date).
+ * 3. Among answered questions, oldest answer comes first.
+ * 4. Ties preserve bank order.
+ *
+ * Always returns a question — fresh updates are never exhausted.
+ */
+export function getNextFreshUpdateQuestion(
+  context: RecipientContext,
+  freshUpdateHistory: FreshUpdateRecord[],
+): SuggestedQuestion {
+  const firstName = context.identity?.firstName ?? "them";
+
+  // Latest answer date per question key
+  const lastAnswered = new Map<string, Date>();
+  for (const record of freshUpdateHistory) {
+    const existing = lastAnswered.get(record.questionKey);
+    if (!existing || record.createdAt > existing) {
+      lastAnswered.set(record.questionKey, record.createdAt);
+    }
+  }
+
+  const epoch = new Date(0);
+  const scored = FRESH_UPDATE_BANK.map((entry, bankIndex) => ({
+    entry,
+    bankIndex,
+    lastAt: lastAnswered.get(entry.fieldKey) ?? epoch,
+  }));
+
+  // Primary sort: oldest last-answered first (epoch = never answered = oldest)
+  // Secondary sort: preserve bank order for ties
+  scored.sort((a, b) => {
+    const timeDiff = a.lastAt.getTime() - b.lastAt.getTime();
+    return timeDiff !== 0 ? timeDiff : a.bankIndex - b.bankIndex;
+  });
+
+  const winner = scored[0]!.entry;
+
+  return {
+    fieldKey:   winner.fieldKey,
+    fieldLabel: winner.fieldLabel,
+    category:   winner.category,
+    priority:   winner.priority,
+    question:   winner.questionTemplate.replaceAll("{name}", firstName),
+    reason:     winner.reason.replaceAll("{name}", firstName),
+    mode:       "fresh_update",
+  };
 }

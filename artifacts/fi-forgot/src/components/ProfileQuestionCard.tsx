@@ -1,12 +1,17 @@
 /**
  * ProfileQuestionCard
  *
- * Shows the next profile-gap question for a recipient.
+ * Shows the next profile-gap or fresh-update question for a recipient.
  * Fetches from GET /api/v2/recipients/:id/next-question on mount.
  * Saves answers via POST /api/v2/recipients/:id/answer-question.
  *
+ * Modes:
+ *   profile_gap   — permanent profile fields. Header: "Help us write better cards".
+ *   fresh_update  — rotating recent-memory prompts shown once profile is complete.
+ *                   Header: "Profile basics are complete."
+ *
  * Rules:
- * - Renders nothing while loading, when nextQuestion === null, or when skipped.
+ * - Renders nothing while loading or when skipped.
  * - Skip is session-only (page-load local state — not persisted).
  * - Save failure is surfaced inline; never crashes the parent.
  * - Does not duplicate a save or pollute the main form in any way.
@@ -18,6 +23,7 @@ import { getApiHeaders } from "@/lib/data";
 const RED   = "#E23B2E";
 const BLACK = "#111111";
 const GRAY  = "#6B6B6B";
+const SAGE  = "#5B8C6B";
 
 interface SuggestedQuestion {
   fieldKey:   string;
@@ -26,36 +32,43 @@ interface SuggestedQuestion {
   priority:   string;
   question:   string;
   reason:     string;
+  mode:       "profile_gap" | "fresh_update";
+}
+
+interface NextQuestionResponse {
+  nextQuestion:    SuggestedQuestion;
+  profileComplete: boolean;
 }
 
 export default function ProfileQuestionCard({ recipientId }: { recipientId: string }) {
-  const [question, setQuestion]   = useState<SuggestedQuestion | null | "loading">("loading");
-  const [answer,   setAnswer]     = useState("");
-  const [saving,   setSaving]     = useState(false);
-  const [skipped,  setSkipped]    = useState(false);
+  const [data,      setData]      = useState<NextQuestionResponse | null | "loading">("loading");
+  const [answer,    setAnswer]    = useState("");
+  const [saving,    setSaving]    = useState(false);
+  const [skipped,   setSkipped]   = useState(false);
   const [saveError, setSaveError] = useState(false);
 
   const fetchQuestion = useCallback(async () => {
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) {
-      setQuestion(null);
+      setData(null);
       return;
     }
     try {
       const res = await fetch(`/api/v2/recipients/${recipientId}/next-question`, { headers });
-      if (!res.ok) { setQuestion(null); return; }
-      const data = await res.json() as { nextQuestion: SuggestedQuestion | null };
-      setQuestion(data.nextQuestion ?? null);
+      if (!res.ok) { setData(null); return; }
+      const json = await res.json() as NextQuestionResponse;
+      setData(json);
       setAnswer("");
     } catch {
-      setQuestion(null);
+      setData(null);
     }
   }, [recipientId]);
 
   useEffect(() => { fetchQuestion(); }, [fetchQuestion]);
 
   async function handleSave() {
-    if (question === null || question === "loading" || !answer.trim()) return;
+    if (data === null || data === "loading" || !answer.trim()) return;
+    const { nextQuestion } = data;
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) return;
 
@@ -66,9 +79,10 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
         method: "POST",
         headers,
         body: JSON.stringify({
-          fieldKey:     question.fieldKey,
-          questionText: question.question,
+          fieldKey:     nextQuestion.fieldKey,
+          questionText: nextQuestion.question,
           answerText:   answer.trim(),
+          triggerType:  nextQuestion.mode,
         }),
       });
       if (res.ok) {
@@ -83,45 +97,75 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
     }
   }
 
-  if (question === "loading" || question === null || skipped) return null;
+  if (data === "loading" || data === null || skipped) return null;
+
+  const { nextQuestion, profileComplete } = data;
+  const isFreshUpdate = profileComplete && nextQuestion.mode === "fresh_update";
 
   return (
     <div
       className="rounded-2xl p-5 space-y-3"
       style={{
-        background:   "#fff",
-        border:       `1.5px solid ${BLACK}15`,
-        boxShadow:    "0 1px 4px rgba(0,0,0,0.05)",
+        background: "#fff",
+        border:     `1.5px solid ${isFreshUpdate ? SAGE + "40" : BLACK + "15"}`,
+        boxShadow:  "0 1px 4px rgba(0,0,0,0.05)",
       }}
     >
+      {/* Header */}
       <div>
-        <h2
-          style={{
-            fontFamily:    "'Bebas Neue', cursive",
-            fontSize:      "1.1rem",
-            letterSpacing: "0.06em",
-            color:         BLACK,
-          }}
-        >
-          Help us write better cards
-        </h2>
-        <p className="text-xs mt-0.5" style={{ color: GRAY }}>
-          {question.reason}
-        </p>
+        {isFreshUpdate ? (
+          <>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span style={{ fontSize: "0.85rem" }}>🌱</span>
+              <h2
+                style={{
+                  fontFamily:    "'Bebas Neue', cursive",
+                  fontSize:      "1.05rem",
+                  letterSpacing: "0.06em",
+                  color:         SAGE,
+                }}
+              >
+                Profile basics are complete
+              </h2>
+            </div>
+            <p className="text-xs" style={{ color: GRAY }}>
+              Add a recent update so your next card feels current.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2
+              style={{
+                fontFamily:    "'Bebas Neue', cursive",
+                fontSize:      "1.1rem",
+                letterSpacing: "0.06em",
+                color:         BLACK,
+              }}
+            >
+              Help us write better cards
+            </h2>
+            <p className="text-xs mt-0.5" style={{ color: GRAY }}>
+              {nextQuestion.reason}
+            </p>
+          </>
+        )}
       </div>
 
+      {/* Question */}
       <p className="text-sm font-medium" style={{ color: BLACK }}>
-        {question.question}
+        {nextQuestion.question}
       </p>
 
+      {/* Answer textarea */}
       <textarea
-        className="w-full rounded-xl border text-sm resize-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-300"
+        className="w-full rounded-xl border text-sm resize-none px-3 py-2.5 focus:outline-none focus:ring-2"
         style={{
-          borderColor: `${BLACK}20`,
+          borderColor: isFreshUpdate ? SAGE + "50" : BLACK + "20",
           color:       BLACK,
           background:  "#fafafa",
           minHeight:   "80px",
-        }}
+          "--tw-ring-color": isFreshUpdate ? SAGE : "#fca5a5",
+        } as React.CSSProperties}
         placeholder="Type your answer…"
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
@@ -143,13 +187,15 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
           data-testid="profile-question-save"
           className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
           style={{
-            background: !answer.trim() ? `${BLACK}12` : RED,
-            color:      !answer.trim() ? GRAY         : "#fff",
-            cursor:     !answer.trim() || saving ? "not-allowed" : "pointer",
-            opacity:    saving ? 0.7 : 1,
+            background: !answer.trim()
+              ? `${BLACK}12`
+              : isFreshUpdate ? SAGE : RED,
+            color:   !answer.trim() ? GRAY : "#fff",
+            cursor:  !answer.trim() || saving ? "not-allowed" : "pointer",
+            opacity: saving ? 0.7 : 1,
           }}
         >
-          {saving ? "Saving…" : "Save answer"}
+          {saving ? "Saving…" : isFreshUpdate ? "Save update" : "Save answer"}
         </button>
 
         <button
@@ -159,7 +205,7 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
           className="px-4 py-2 rounded-xl text-sm font-medium transition-all hover:bg-gray-100"
           style={{ color: GRAY }}
         >
-          Skip for now
+          {isFreshUpdate ? "Skip for now" : "Skip for now"}
         </button>
       </div>
     </div>
