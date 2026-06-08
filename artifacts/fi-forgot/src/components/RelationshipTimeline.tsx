@@ -17,7 +17,7 @@
  * Auto-refreshes when window event "recipient-answer-saved" fires.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getApiHeaders } from "@/lib/data";
 
 const SAGE   = "#5B8C6B";
@@ -26,7 +26,7 @@ const BLACK  = "#111111";
 const GRAY   = "#6B6B6B";
 const BEIGE  = "#F2E6D3";
 
-type ItemType = "profile_gap" | "fresh_update" | "event_briefing" | "card" | "important_date";
+type ItemType = "profile_gap" | "fresh_update" | "event_briefing" | "card" | "important_date" | "follow_up";
 
 interface TimelineItem {
   id:         string;
@@ -36,6 +36,7 @@ interface TimelineItem {
   summary:    string;
   source:     string;
   canArchive: boolean;
+  canEdit:    boolean;
   isArchived: boolean;
 }
 
@@ -46,6 +47,7 @@ const TYPE_CFG: Record<ItemType, { badge: string; color: string; bg: string }> =
   event_briefing: { badge: "Briefing",       color: RED,       bg: `${RED}12` },
   card:           { badge: "Card",           color: "#1D4ED8", bg: "#1D4ED812" },
   important_date: { badge: "Important date", color: "#B07D2A", bg: "#D8A72514" },
+  follow_up:      { badge: "Follow Up",      color: "#7C3AED", bg: "#7C3AED12" },
 };
 
 // Which types are fed into card generation
@@ -142,12 +144,84 @@ function ConfirmModal({ onConfirm, onCancel }: ConfirmModalProps) {
   );
 }
 
+// ── Inline edit area ──────────────────────────────────────────────────────────
+
+interface InlineEditProps {
+  initialValue: string;
+  onSave:       (text: string) => Promise<void>;
+  onCancel:     () => void;
+}
+
+function InlineEdit({ initialValue, onSave, onCancel }: InlineEditProps) {
+  const [value,   setValue]   = useState(initialValue);
+  const [saving,  setSaving]  = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+    const el = textareaRef.current;
+    if (el) { el.selectionStart = el.selectionEnd = el.value.length; }
+  }, []);
+
+  async function handleSave() {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === initialValue) { onCancel(); return; }
+    setSaving(true);
+    await onSave(trimmed);
+    setSaving(false);
+  }
+
+  function handleKey(e: React.KeyboardEvent) {
+    if (e.key === "Escape") { onCancel(); }
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { void handleSave(); }
+  }
+
+  return (
+    <div className="mt-1.5 space-y-2">
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={handleKey}
+        rows={3}
+        className="w-full rounded-lg px-3 py-2 text-sm resize-none outline-none"
+        style={{
+          border:     `1.5px solid ${BLACK}25`,
+          color:      BLACK,
+          background: "#fff",
+          lineHeight: 1.5,
+        }}
+      />
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => void handleSave()}
+          disabled={saving || !value.trim()}
+          className="px-3 py-1 rounded-lg text-xs font-semibold transition-opacity disabled:opacity-40"
+          style={{ background: BLACK, color: "#fff" }}
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+        <button
+          onClick={onCancel}
+          disabled={saving}
+          className="px-3 py-1 rounded-lg text-xs font-medium transition-colors hover:bg-gray-100"
+          style={{ color: GRAY, border: `1px solid ${BLACK}14` }}
+        >
+          Cancel
+        </button>
+        <span className="text-xs" style={{ color: "#bbb" }}>⌘↵ to save</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function RelationshipTimeline({ recipientId }: { recipientId: string }) {
   const [items,            setItems]            = useState<TimelineItem[]>([]);
   const [loading,          setLoading]          = useState(true);
   const [confirmingId,     setConfirmingId]     = useState<string | null>(null);
+  const [editingId,        setEditingId]        = useState<string | null>(null);
 
   const fetchTimeline = useCallback(async () => {
     setLoading(true);
@@ -188,6 +262,28 @@ export default function RelationshipTimeline({ recipientId }: { recipientId: str
       });
     } catch {
       fetchTimeline(); // restore on failure
+    }
+  }
+
+  async function handleEditSave(itemId: string, newText: string) {
+    const headers = getApiHeaders() as Record<string, string>;
+    if (!headers["x-user-id"]) return;
+
+    // Optimistic update
+    setItems(prev => prev.map(i =>
+      i.id === itemId ? { ...i, summary: newText } : i,
+    ));
+    setEditingId(null);
+
+    try {
+      const res = await fetch(`/api/v2/recipients/${recipientId}/answers/${itemId}/edit`, {
+        method:  "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body:    JSON.stringify({ answerText: newText }),
+      });
+      if (!res.ok) fetchTimeline(); // restore on failure
+    } catch {
+      fetchTimeline();
     }
   }
 
@@ -250,6 +346,7 @@ export default function RelationshipTimeline({ recipientId }: { recipientId: str
               const isFreshUpdate  = item.type === "fresh_update";
               const influencesCards = INFLUENCES_CARDS.has(item.type) && !item.isArchived;
               const isArchived     = item.isArchived;
+              const isEditing      = editingId === item.id;
 
               return (
                 <div
@@ -261,7 +358,7 @@ export default function RelationshipTimeline({ recipientId }: { recipientId: str
                     opacity:    isArchived ? 0.55 : 1,
                   }}
                 >
-                  {/* Row 1: type badge + date + impact badge + stop-using */}
+                  {/* Row 1: type badge + date + impact badge + action buttons */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       {/* Type badge */}
@@ -302,20 +399,36 @@ export default function RelationshipTimeline({ recipientId }: { recipientId: str
                       )}
                     </div>
 
-                    {/* Stop Using button (only for active, archivable items) */}
-                    {item.canArchive && !isArchived && (
-                      <button
-                        onClick={() => setConfirmingId(item.id)}
-                        className="text-xs px-2.5 py-1 rounded-lg flex-shrink-0 transition-colors hover:bg-gray-200"
-                        style={{ color: GRAY, border: `1px solid ${BLACK}10` }}
-                        title="Stop using this memory for future cards"
-                      >
-                        Stop Using
-                      </button>
+                    {/* Action buttons */}
+                    {!isArchived && !isEditing && (
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {/* Edit button */}
+                        {item.canEdit && (
+                          <button
+                            onClick={() => setEditingId(item.id)}
+                            className="text-xs px-2.5 py-1 rounded-lg transition-colors hover:bg-gray-200"
+                            style={{ color: GRAY, border: `1px solid ${BLACK}10` }}
+                            title="Fix a typo or edit this memory"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {/* Stop Using button */}
+                        {item.canArchive && (
+                          <button
+                            onClick={() => setConfirmingId(item.id)}
+                            className="text-xs px-2.5 py-1 rounded-lg transition-colors hover:bg-gray-200"
+                            style={{ color: GRAY, border: `1px solid ${BLACK}10` }}
+                            title="Stop using this memory for future cards"
+                          >
+                            Stop Using
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
 
-                  {/* Row 2: label + optional sub-label + summary */}
+                  {/* Row 2: label + optional sub-label + summary / inline edit */}
                   <div className="mt-1.5">
                     <div className="flex items-center gap-2">
                       <span
@@ -335,13 +448,21 @@ export default function RelationshipTimeline({ recipientId }: { recipientId: str
                       )}
                     </div>
 
-                    {item.summary && (
-                      <p
-                        className="text-sm mt-0.5"
-                        style={{ color: isArchived ? "#aaa" : GRAY, lineHeight: 1.5 }}
-                      >
-                        {item.summary}
-                      </p>
+                    {isEditing ? (
+                      <InlineEdit
+                        initialValue={item.summary}
+                        onSave={text => handleEditSave(item.id, text)}
+                        onCancel={() => setEditingId(null)}
+                      />
+                    ) : (
+                      item.summary && (
+                        <p
+                          className="text-sm mt-0.5"
+                          style={{ color: isArchived ? "#aaa" : GRAY, lineHeight: 1.5 }}
+                        >
+                          {item.summary}
+                        </p>
+                      )
                     )}
                   </div>
 

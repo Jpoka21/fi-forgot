@@ -441,6 +441,7 @@ interface TimelineItem {
   summary:    string;
   source:     string;
   canArchive: boolean;
+  canEdit:    boolean;
   isArchived: boolean;
 }
 
@@ -510,6 +511,7 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
         summary:    answer.answerText,
         source:     type === "fresh_update" ? "Fresh update" : "Profile",
         canArchive: true,
+        canEdit:    true,
         isArchived: answer.archivedAt !== null,
       });
     }
@@ -528,6 +530,7 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
       summary,
       source:     `${first.eventType} ${first.eventYear} briefing`,
       canArchive: false,
+      canEdit:    false,
       isArchived: false,
     });
   }
@@ -550,6 +553,7 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
       summary,
       source:     statusLabel,
       canArchive: false,
+      canEdit:    false,
       isArchived: false,
     });
   }
@@ -566,22 +570,52 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
       summary:    message.length > 0 ? message.slice(0, 120) + (message.length > 120 ? "…" : "") : "",
       source:     card.status === "mailed" ? "Card mailed" : "Card generated",
       canArchive: false,
+      canEdit:    false,
       isArchived: false,
     });
   }
 
   // Important dates from recipient profile
   if (row.birthday) {
-    items.push({ id: `birthday_${id}`,    date: row.birthday,    type: "important_date", label: "Birthday",    summary: row.birthday,    source: "Profile", canArchive: false, isArchived: false });
+    items.push({ id: `birthday_${id}`,    date: row.birthday,    type: "important_date", label: "Birthday",    summary: row.birthday,    source: "Profile", canArchive: false, canEdit: false, isArchived: false });
   }
   if (row.anniversary) {
-    items.push({ id: `anniversary_${id}`, date: row.anniversary, type: "important_date", label: "Anniversary", summary: row.anniversary, source: "Profile", canArchive: false, isArchived: false });
+    items.push({ id: `anniversary_${id}`, date: row.anniversary, type: "important_date", label: "Anniversary", summary: row.anniversary, source: "Profile", canArchive: false, canEdit: false, isArchived: false });
   }
 
   // Sort newest first
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   res.json({ items });
+});
+
+// ── Edit a timeline answer ────────────────────────────────────────────────────
+
+router.patch("/v2/recipients/:id/answers/:answerId/edit", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id, answerId } = req.params;
+  const { answerText } = req.body as { answerText?: string };
+
+  if (typeof answerText !== "string" || answerText.trim().length === 0) {
+    res.status(400).json({ error: "answerText is required" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(questionAnswersTable)
+    .set({ answerText: answerText.trim() })
+    .where(and(
+      eq(questionAnswersTable.id, answerId),
+      eq(questionAnswersTable.userId, userId),
+      eq(questionAnswersTable.recipientId, id),
+    ))
+    .returning({ id: questionAnswersTable.id });
+
+  if (!updated) { res.status(404).json({ error: "Answer not found" }); return; }
+
+  res.json({ ok: true });
 });
 
 // ── Archive a timeline answer ─────────────────────────────────────────────────
