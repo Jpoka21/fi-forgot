@@ -113,6 +113,7 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
       });
       if (res.ok) {
         await fetchQuestion();
+        window.dispatchEvent(new CustomEvent("recipient-answer-saved"));
       } else {
         setSaveError(true);
       }

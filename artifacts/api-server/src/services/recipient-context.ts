@@ -22,7 +22,7 @@ import {
   questionAnswersTable,
   personalCardsTable,
 } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import type { RecipientRow, RecipientProfileRow } from "@workspace/db";
 import type { QuestionAnswer } from "@workspace/db";
 import type { PersonalCard } from "@workspace/db";
@@ -266,7 +266,7 @@ export function buildBriefingSummary(answers: QuestionAnswer[]): BriefingSummary
 export function buildFreshUpdates(rows: QuestionAnswer[]): FreshUpdate[] {
   const now = Date.now();
   return rows
-    .filter(r => !r.wasSkipped)
+    .filter(r => !r.wasSkipped && r.archivedAt === null)
     .map(r => {
       const daysAgo = Math.floor(
         (now - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24),
@@ -370,6 +370,7 @@ export async function assembleRecipientContext(
           eq(questionAnswersTable.userId, userId),
           eq(questionAnswersTable.recipientId, recipientId),
           eq(questionAnswersTable.wasSkipped, false),
+          isNull(questionAnswersTable.archivedAt),
         ),
       )
       .orderBy(questionAnswersTable.createdAt),

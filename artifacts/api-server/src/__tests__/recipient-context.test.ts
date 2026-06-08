@@ -137,6 +137,7 @@ const baseAnswer: QuestionAnswer = {
   wasSkipped: false,
   triggerType: "event_briefing",
   importanceScore: null,
+  archivedAt: null,
   createdAt: now,
 };
 
@@ -357,6 +358,7 @@ section("buildProfileCompleteness — profile_gap answer satisfies completeness 
     wasSkipped: false,
     triggerType: "profile_gap",
     importanceScore: null,
+    archivedAt: null,
     createdAt: new Date(),
   };
 
@@ -392,6 +394,7 @@ section("buildProfileCompleteness — multiple profile_gap answers each fill the
     wasSkipped: false,
     triggerType: "profile_gap",
     importanceScore: null,
+    archivedAt: null,
     createdAt: now,
   });
 
@@ -433,6 +436,7 @@ section("buildProfileCompleteness — non-Profile eventType does NOT satisfy com
     wasSkipped: false,
     triggerType: "event_briefing",
     importanceScore: null,
+    archivedAt: null,
     createdAt: new Date(),
   };
 

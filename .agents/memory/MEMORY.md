@@ -1,3 +1,4 @@
 - [Dashboard Health Redesign](dashboard-health.md) — Phase 2 complete: scoring engine + full dashboard rewrite; key conventions documented
 - [API & Type Quirks](api-type-quirks.md) — critical type mappings: QueueItem/PersonalSettings field names differ from intuitive names
 - [Recipient Intelligence Stack](recipient-intelligence.md) — context assembly → prompt supplement → question engine; key conventions and security constraints
+- [Relationship Timeline](relationship-timeline.md) — timeline feature conventions: archivedAt soft-delete, event dispatch refresh pattern, briefing grouping

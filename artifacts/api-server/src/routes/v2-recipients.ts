@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, usersTable, recipientsV2Table, recipientMemoryTable, recipientsTable, questionAnswersTable } from "@workspace/db";
-import { eq, and, ilike, sql, desc } from "drizzle-orm";
+import { db, usersTable, recipientsV2Table, recipientMemoryTable, recipientsTable, questionAnswersTable, personalCardsTable } from "@workspace/db";
+import { eq, and, ilike, sql, desc, isNull, ne } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { assembleRecipientContext } from "../services/recipient-context";
@@ -331,6 +331,170 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
     logger.error({ err, recipientId: id }, "v2-recipients: answer-question failed");
     res.status(500).json({ error: "Failed to save answer" });
   }
+});
+
+// ── Relationship Timeline ─────────────────────────────────────────────────────
+// Aggregates all 5 knowledge sources for a recipient, sorted newest-first.
+
+const QUESTION_KEY_LABELS: Record<string, string> = {
+  things_to_avoid:      "Things to avoid",
+  interests:            "Interests",
+  favorite_memories:    "Favorite memories",
+  inside_jokes:         "Inside jokes",
+  personality_notes:    "Personality notes",
+  personality_traits:   "Personality traits",
+  preferred_tone:       "Preferred tone",
+  emotional_openness:   "Emotional openness",
+  always_include:       "Always include",
+  birthday:             "Birthday",
+  anniversary:          "Anniversary",
+  delivery_preference:  "Delivery preference",
+  briefing_answers:     "General notes",
+  recent_memory:        "Recent memory",
+  current_excitement:   "Current excitement",
+  current_challenge:    "Current challenge",
+  recent_accomplishment:"Recent accomplishment",
+  family_news:          "Family & home life",
+  new_hobby:            "New hobby or interest",
+  anything_to_remember: "Anything to remember",
+};
+
+type TimelineItemType = "profile_gap" | "fresh_update" | "event_briefing" | "card" | "important_date";
+
+interface TimelineItem {
+  id:         string;
+  date:       string;
+  type:       TimelineItemType;
+  label:      string;
+  summary:    string;
+  source:     string;
+  canArchive: boolean;
+}
+
+router.get("/v2/recipients/:id/timeline", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id } = req.params;
+
+  const [row] = await db
+    .select({ id: recipientsTable.id, birthday: recipientsTable.birthday, anniversary: recipientsTable.anniversary })
+    .from(recipientsTable)
+    .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)))
+    .limit(1);
+
+  if (!row) { res.status(404).json({ error: "Recipient not found" }); return; }
+
+  const [answers, cards] = await Promise.all([
+    db
+      .select()
+      .from(questionAnswersTable)
+      .where(and(
+        eq(questionAnswersTable.recipientId, id),
+        eq(questionAnswersTable.userId, userId),
+        eq(questionAnswersTable.wasSkipped, false),
+        isNull(questionAnswersTable.archivedAt),
+      ))
+      .orderBy(desc(questionAnswersTable.createdAt)),
+    db
+      .select()
+      .from(personalCardsTable)
+      .where(and(
+        eq(personalCardsTable.recipientId, id),
+        eq(personalCardsTable.userId, userId),
+        ne(personalCardsTable.status, "draft"),
+      ))
+      .orderBy(desc(personalCardsTable.createdAt)),
+  ]);
+
+  const items: TimelineItem[] = [];
+
+  // Group event_briefing by (eventType, eventYear); individual for all others
+  const briefingGroups = new Map<string, typeof answers>();
+
+  for (const answer of answers) {
+    if (answer.triggerType === "event_briefing") {
+      const key = `${answer.eventType}_${answer.eventYear}`;
+      if (!briefingGroups.has(key)) briefingGroups.set(key, []);
+      briefingGroups.get(key)!.push(answer);
+    } else {
+      const type: TimelineItemType = answer.triggerType === "fresh_update" ? "fresh_update" : "profile_gap";
+      items.push({
+        id:         answer.id,
+        date:       answer.createdAt.toISOString(),
+        type,
+        label:      QUESTION_KEY_LABELS[answer.questionKey] ?? answer.questionKey,
+        summary:    answer.answerText,
+        source:     type === "fresh_update" ? "Fresh update" : "Profile",
+        canArchive: true,
+      });
+    }
+  }
+
+  for (const [groupKey, group] of briefingGroups) {
+    const first      = group[0]!;
+    const latestDate = group.reduce((max, r) => r.createdAt > max ? r.createdAt : max, group[0]!.createdAt);
+    const snippet    = first.answerText.slice(0, 60) + (first.answerText.length > 60 ? "…" : "");
+    const summary    = group.length === 1 ? first.answerText : `${group.length} answers — "${snippet}"`;
+    items.push({
+      id:         `briefing_${id}_${groupKey}`,
+      date:       latestDate.toISOString(),
+      type:       "event_briefing",
+      label:      `${first.eventType} ${first.eventYear}`,
+      summary,
+      source:     `${first.eventType} ${first.eventYear} briefing`,
+      canArchive: false,
+    });
+  }
+
+  // Cards (non-draft)
+  for (const card of cards) {
+    const message   = card.messageFinal ?? card.messageOriginal ?? "";
+    const eventDate = card.mailedAt ?? card.approvedAt ?? card.createdAt;
+    items.push({
+      id:         `card_${card.id}`,
+      date:       eventDate.toISOString(),
+      type:       "card",
+      label:      `${card.eventType} card`,
+      summary:    message.length > 0 ? message.slice(0, 120) + (message.length > 120 ? "…" : "") : "",
+      source:     card.status === "mailed" ? "Card mailed" : "Card generated",
+      canArchive: false,
+    });
+  }
+
+  // Important dates from recipient profile
+  if (row.birthday) {
+    items.push({ id: `birthday_${id}`,     date: row.birthday,     type: "important_date", label: "Birthday",     summary: row.birthday,     source: "Profile", canArchive: false });
+  }
+  if (row.anniversary) {
+    items.push({ id: `anniversary_${id}`,  date: row.anniversary,  type: "important_date", label: "Anniversary",  summary: row.anniversary,  source: "Profile", canArchive: false });
+  }
+
+  // Sort newest first
+  items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  res.json({ items });
+});
+
+// ── Archive a timeline answer ─────────────────────────────────────────────────
+
+router.patch("/v2/recipients/:id/answers/:answerId/archive", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id, answerId } = req.params;
+
+  await db
+    .update(questionAnswersTable)
+    .set({ archivedAt: new Date() })
+    .where(and(
+      eq(questionAnswersTable.id, answerId),
+      eq(questionAnswersTable.userId, userId),
+      eq(questionAnswersTable.recipientId, id),
+      isNull(questionAnswersTable.archivedAt),
+    ));
+
+  res.json({ ok: true });
 });
 
 // ── Get all fresh updates for a recipient ─────────────────────────────────────
