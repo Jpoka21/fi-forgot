@@ -11,6 +11,7 @@ export const questionAnswersTable = pgTable("question_answers", {
   answerText: text("answer_text").notNull(),
   wasSkipped: boolean("was_skipped").notNull().default(false),
   triggerType: text("trigger_type").notNull().default("event_briefing"),
+  importanceScore: text("importance_score"),  // null | "minor" | "moderate" | "major"
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

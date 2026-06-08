@@ -37,7 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap, Sparkles } from "lucide-react";
 import ProfileQuestionCard from "@/components/ProfileQuestionCard";
 
 const RED   = "#E23B2E";
@@ -199,6 +199,85 @@ function ChildrenManager({ children, onChange }: { children: Child[]; onChange: 
         <Plus size={14} /> Add a child
       </button>
     </div>
+  );
+}
+
+const SAGE = "#5B8C6B";
+
+interface FreshUpdateItem {
+  id:           string;
+  questionKey:  string;
+  questionText: string;
+  answerText:   string;
+  createdAt:    string;
+  daysAgo:      number;
+  ageCategory:  "recent" | "mid" | "older";
+}
+
+const AGE_LABEL: Record<FreshUpdateItem["ageCategory"], string> = {
+  recent: "Recent",
+  mid:    "A few months ago",
+  older:  "Older",
+};
+
+const AGE_COLOR: Record<FreshUpdateItem["ageCategory"], string> = {
+  recent: SAGE,
+  mid:    "#6B6B6B",
+  older:  "#9E9E9E",
+};
+
+function FreshUpdatesPanel({ recipientId }: { recipientId: string }) {
+  const [items, setItems] = useState<FreshUpdateItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const headers = getApiHeaders() as Record<string, string>;
+    if (!headers["x-user-id"]) { setLoaded(true); return; }
+    fetch(`/api/v2/recipients/${recipientId}/fresh-updates`, { headers })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { freshUpdates: FreshUpdateItem[] } | null) => {
+        if (data?.freshUpdates) setItems(data.freshUpdates);
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, [recipientId]);
+
+  if (!loaded || items.length === 0) return null;
+
+  return (
+    <SectionCard>
+      <div className="flex items-center gap-2 mb-1">
+        <Sparkles size={15} style={{ color: SAGE }} />
+        {sectionHeading("Recent Updates")}
+      </div>
+      <p className="text-xs mt-0.5 mb-3" style={{ color: GRAY }}>
+        Time-sensitive updates used to keep cards feeling current.
+      </p>
+
+      <div className="space-y-2">
+        {items.map(item => (
+          <div
+            key={item.id}
+            className="rounded-xl px-4 py-3 space-y-1"
+            style={{ background: BEIGE, border: `1px solid ${SAGE}20` }}
+          >
+            <div className="flex items-center justify-between">
+              <span
+                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ background: `${SAGE}15`, color: AGE_COLOR[item.ageCategory] }}
+              >
+                {AGE_LABEL[item.ageCategory]}
+              </span>
+              <span className="text-xs" style={{ color: GRAY }}>
+                {new Date(item.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+            <div className="text-xs font-medium mt-1" style={{ color: BLACK }}>{item.questionText}</div>
+            <div className="text-sm whitespace-pre-wrap" style={{ color: GRAY }}>{item.answerText}</div>
+          </div>
+        ))}
+      </div>
+    </SectionCard>
   );
 }
 
@@ -1148,6 +1227,13 @@ export default function RecipientProfilePage() {
                 recipientId={params.id}
                 selectedEvents={watchSelectedEvents}
               />
+            </div>
+          )}
+
+          {/* Fresh updates history */}
+          {!isNew && existing && (
+            <div className="mt-5">
+              <FreshUpdatesPanel recipientId={params.id} />
             </div>
           )}
 

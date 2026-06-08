@@ -13,6 +13,12 @@
  * - Archived recipients are flagged in the supplement but not blocked.
  * - wasSkipped answers are already filtered at the DB query layer; no
  *   additional filtering is needed here.
+ *
+ * Prompt section order (per spec):
+ *   1. Permanent profile (character, interests, memories)
+ *   2. Fresh updates — time-sensitive, highest priority
+ *   3. Briefing Q&A answers
+ *   4. Card history / always-include
  */
 
 import type { RecipientContext } from "./recipient-context";
@@ -28,12 +34,15 @@ export function buildContextSupplement(context: RecipientContext | null): string
 
   const lines: string[] = [
     "--- Recipient profile intelligence (from saved profile — use to enrich the card) ---",
+    "[PRIORITY RULE] Recent updates (last 90 days) take precedence over older profile data. When a recent update conflicts with older information, use the most recent update. Prioritize recent updates over everything else when crafting the message.",
   ];
 
   // Archived flag — inform the AI but don't block generation
   if (context.identity?.archived) {
     lines.push("[Note] This recipient is archived — generate normally but be aware.");
   }
+
+  // ── 1. Permanent profile ──────────────────────────────────────────────────
 
   // Character
   const { traits, notes } = context.personality;
@@ -57,40 +66,9 @@ export function buildContextSupplement(context: RecipientContext | null): string
     lines.push(`[Inside references / jokes] ${context.memories.insideJokes}`);
   }
 
-  // Briefing Q&A answers — wasSkipped=false already enforced at DB level
-  if (context.briefingSummary.totalAnswers > 0) {
-    for (const answers of Object.values(context.briefingSummary.byEvent)) {
-      if (answers.length === 0) continue;
-      // Use first answer's fields for the event label (avoids string-splitting the key)
-      const first = answers[0]!;
-      lines.push(`[Briefing answers — ${first.eventType} ${first.eventYear}]`);
-      for (const a of answers) {
-        lines.push(`  Q: ${a.question}`);
-        lines.push(`  A: ${a.answer}`);
-      }
-    }
-  }
+  // ── 2. Fresh updates — time-sensitive, USE FIRST ──────────────────────────
+  // Grouped by recency so the AI can weight accordingly.
 
-  // Card history — enough to avoid obvious repetition
-  const ch = context.cardHistory;
-  if (ch.totalSent > 0) {
-    const recent = ch.mostRecentCard;
-    const histParts: string[] = [`${ch.totalSent} card(s) previously generated for this recipient`];
-    if (recent) {
-      histParts.push(`most recent: ${recent.eventType} (${recent.status})`);
-    }
-    lines.push(
-      `[Card history] ${histParts.join(", ")}. Avoid repeating the same opening structure, angle, or emotional beat used in prior cards.`,
-    );
-  }
-
-  // Things to always include (advisory — goes in the user prompt supplement)
-  if (context.tone.thingsToAlwaysInclude) {
-    lines.push(`[Always include] ${context.tone.thingsToAlwaysInclude}`);
-  }
-
-  // Fresh updates — time-sensitive memories ordered by recency.
-  // Grouped so the AI knows how current the information is.
   if (context.freshUpdates.length > 0) {
     const recent = context.freshUpdates.filter(u => u.ageCategory === "recent");
     const mid    = context.freshUpdates.filter(u => u.ageCategory === "mid");
@@ -119,8 +97,43 @@ export function buildContextSupplement(context: RecipientContext | null): string
     }
   }
 
-  // If nothing useful was added beyond the header, return null
-  if (lines.length === 1) return null;
+  // ── 3. Briefing Q&A answers — wasSkipped=false already enforced at DB level
+
+  if (context.briefingSummary.totalAnswers > 0) {
+    for (const answers of Object.values(context.briefingSummary.byEvent)) {
+      if (answers.length === 0) continue;
+      // Use first answer's fields for the event label (avoids string-splitting the key)
+      const first = answers[0]!;
+      lines.push(`[Briefing answers — ${first.eventType} ${first.eventYear}]`);
+      for (const a of answers) {
+        lines.push(`  Q: ${a.question}`);
+        lines.push(`  A: ${a.answer}`);
+      }
+    }
+  }
+
+  // ── 4. Other context ──────────────────────────────────────────────────────
+
+  // Card history — enough to avoid obvious repetition
+  const ch = context.cardHistory;
+  if (ch.totalSent > 0) {
+    const recent = ch.mostRecentCard;
+    const histParts: string[] = [`${ch.totalSent} card(s) previously generated for this recipient`];
+    if (recent) {
+      histParts.push(`most recent: ${recent.eventType} (${recent.status})`);
+    }
+    lines.push(
+      `[Card history] ${histParts.join(", ")}. Avoid repeating the same opening structure, angle, or emotional beat used in prior cards.`,
+    );
+  }
+
+  // Things to always include (advisory — goes in the user prompt supplement)
+  if (context.tone.thingsToAlwaysInclude) {
+    lines.push(`[Always include] ${context.tone.thingsToAlwaysInclude}`);
+  }
+
+  // If nothing useful was added beyond the header lines, return null
+  if (lines.length === 2) return null;
 
   return lines.join("\n");
 }

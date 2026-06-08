@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, usersTable, recipientsV2Table, recipientMemoryTable, recipientsTable, questionAnswersTable } from "@workspace/db";
-import { eq, and, ilike, sql } from "drizzle-orm";
+import { eq, and, ilike, sql, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { assembleRecipientContext } from "../services/recipient-context";
@@ -236,7 +236,7 @@ router.get("/v2/recipients/:id/next-question", async (req, res) => {
       nextFieldKey:    nextQuestion?.fieldKey  ?? null,
     }, "v2-recipients: next-question");
 
-    res.json({ nextQuestion, profileComplete });
+    res.json({ nextQuestion, profileComplete, profileScore: context.profileCompleteness.score });
   } catch (err) {
     logger.error({ err, recipientId: id }, "v2-recipients: next-question failed");
     res.status(500).json({ error: "Failed to determine next question" });
@@ -331,6 +331,87 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
     logger.error({ err, recipientId: id }, "v2-recipients: answer-question failed");
     res.status(500).json({ error: "Failed to save answer" });
   }
+});
+
+// ── Get all fresh updates for a recipient ─────────────────────────────────────
+// Returns answered fresh updates (newest first) + per-category skip stats.
+
+router.get("/v2/recipients/:id/fresh-updates", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id } = req.params;
+
+  const [row] = await db
+    .select({ id: recipientsTable.id })
+    .from(recipientsTable)
+    .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)))
+    .limit(1);
+
+  if (!row) { res.status(404).json({ error: "Recipient not found" }); return; }
+
+  // All answered fresh updates, newest first
+  const answered = await db
+    .select()
+    .from(questionAnswersTable)
+    .where(and(
+      eq(questionAnswersTable.recipientId, id),
+      eq(questionAnswersTable.triggerType, "fresh_update"),
+      eq(questionAnswersTable.wasSkipped, false),
+    ))
+    .orderBy(desc(questionAnswersTable.createdAt));
+
+  // Skipped fresh updates — for skip stats tracking only
+  const skippedRows = await db
+    .select({ questionKey: questionAnswersTable.questionKey })
+    .from(questionAnswersTable)
+    .where(and(
+      eq(questionAnswersTable.recipientId, id),
+      eq(questionAnswersTable.triggerType, "fresh_update"),
+      eq(questionAnswersTable.wasSkipped, true),
+    ));
+
+  const now = Date.now();
+
+  // Initialise skip stats for all known bank keys
+  const FRESH_UPDATE_FIELD_KEYS = [
+    "recent_memory", "current_excitement", "current_challenge",
+    "recent_accomplishment", "family_news", "new_hobby", "anything_to_remember",
+  ] as const;
+
+  const skipStats: Record<string, { timesAnswered: number; timesSkipped: number; timesAsked: number }> = {};
+  for (const key of FRESH_UPDATE_FIELD_KEYS) {
+    skipStats[key] = { timesAnswered: 0, timesSkipped: 0, timesAsked: 0 };
+  }
+  for (const r of answered) {
+    if (skipStats[r.questionKey]) {
+      skipStats[r.questionKey]!.timesAnswered++;
+      skipStats[r.questionKey]!.timesAsked++;
+    }
+  }
+  for (const r of skippedRows) {
+    if (skipStats[r.questionKey]) {
+      skipStats[r.questionKey]!.timesSkipped++;
+      skipStats[r.questionKey]!.timesAsked++;
+    }
+  }
+
+  const freshUpdates = answered.map(r => {
+    const daysAgo = Math.floor((now - new Date(r.createdAt).getTime()) / 86400000);
+    const ageCategory: "recent" | "mid" | "older" = daysAgo < 90 ? "recent" : daysAgo < 180 ? "mid" : "older";
+    return {
+      id:              r.id,
+      questionKey:     r.questionKey,
+      questionText:    r.questionText,
+      answerText:      r.answerText,
+      importanceScore: r.importanceScore ?? null,
+      createdAt:       r.createdAt,
+      daysAgo,
+      ageCategory,
+    };
+  });
+
+  res.json({ freshUpdates, skipStats });
 });
 
 export default router;

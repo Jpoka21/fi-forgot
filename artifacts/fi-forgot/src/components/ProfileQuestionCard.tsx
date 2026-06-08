@@ -38,6 +38,32 @@ interface SuggestedQuestion {
 interface NextQuestionResponse {
   nextQuestion:    SuggestedQuestion;
   profileComplete: boolean;
+  profileScore:    number;
+}
+
+function ProfileProgressBar({ score, complete }: { score: number; complete: boolean }) {
+  return (
+    <div className="space-y-1 mb-1">
+      <div
+        className="w-full rounded-full overflow-hidden"
+        style={{ height: 5, background: `${BLACK}10` }}
+      >
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width:      `${complete ? 100 : score}%`,
+            background: complete ? SAGE : RED,
+          }}
+        />
+      </div>
+      <p
+        className="text-xs font-semibold"
+        style={{ color: complete ? SAGE : GRAY }}
+      >
+        {complete ? "Profile Complete" : `${score}% complete`}
+      </p>
+    </div>
+  );
 }
 
 export default function ProfileQuestionCard({ recipientId }: { recipientId: string }) {
@@ -99,7 +125,7 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
 
   if (data === "loading" || data === null || skipped) return null;
 
-  const { nextQuestion, profileComplete } = data;
+  const { nextQuestion, profileComplete, profileScore } = data;
   const isFreshUpdate = profileComplete && nextQuestion.mode === "fresh_update";
 
   return (
@@ -111,6 +137,9 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
         boxShadow:  "0 1px 4px rgba(0,0,0,0.05)",
       }}
     >
+      {/* Progress bar */}
+      <ProfileProgressBar score={profileScore} complete={profileComplete} />
+
       {/* Header */}
       <div>
         {isFreshUpdate ? (
@@ -205,7 +234,7 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
           className="px-4 py-2 rounded-xl text-sm font-medium transition-all hover:bg-gray-100"
           style={{ color: GRAY }}
         >
-          {isFreshUpdate ? "Skip for now" : "Skip for now"}
+          Skip for now
         </button>
       </div>
     </div>

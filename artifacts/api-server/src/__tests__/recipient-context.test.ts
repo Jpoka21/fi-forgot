@@ -136,6 +136,7 @@ const baseAnswer: QuestionAnswer = {
   answerText: "The handmade photo album",
   wasSkipped: false,
   triggerType: "event_briefing",
+  importanceScore: null,
   createdAt: now,
 };
 
@@ -355,6 +356,7 @@ section("buildProfileCompleteness — profile_gap answer satisfies completeness 
     answerText: "Don't mention her weight.",
     wasSkipped: false,
     triggerType: "profile_gap",
+    importanceScore: null,
     createdAt: new Date(),
   };
 
@@ -389,6 +391,7 @@ section("buildProfileCompleteness — multiple profile_gap answers each fill the
     answerText: "A.",
     wasSkipped: false,
     triggerType: "profile_gap",
+    importanceScore: null,
     createdAt: now,
   });
 
@@ -429,6 +432,7 @@ section("buildProfileCompleteness — non-Profile eventType does NOT satisfy com
     answerText: "Nothing.",
     wasSkipped: false,
     triggerType: "event_briefing",
+    importanceScore: null,
     createdAt: new Date(),
   };
 

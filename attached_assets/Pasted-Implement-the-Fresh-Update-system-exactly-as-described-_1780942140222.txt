@@ -1,0 +1,322 @@
+Implement the Fresh Update system exactly as described below.
+
+GOAL
+
+Once a recipient's profile reaches 100% completion, the profile question engine should automatically transition into an ongoing Fresh Update mode.
+
+The purpose is to keep recipient data current over months and years without modifying or replacing the original profile information.
+
+This is a new layer of memory, not a replacement for the profile system.
+
+---
+
+CORE CONCEPT
+
+The recipient profile now has two memory layers:
+
+Layer 1: Permanent Profile
+
+The existing 13 profile fields.
+
+Examples:
+
+Favorite memories
+Personality traits
+Communication style
+Relationship details
+Family details
+Important preferences
+
+These remain unchanged.
+
+Layer 2: Fresh Updates
+
+Recent information that changes over time.
+
+Examples:
+
+Recent accomplishments
+Current challenges
+New hobbies
+Family developments
+Things they are excited about
+
+Fresh Updates are additive and historical.
+
+Never overwrite previous updates.
+
+---
+
+FRESH UPDATE QUESTION BANK
+
+Create a new constant:
+
+FRESH_UPDATE_BANK
+
+Questions:
+
+1. What's a recent memory you've shared with {recipientName} in the last few months?
+
+2. What is {recipientName} most excited about right now?
+
+3. Has anything been challenging for {recipientName} lately?
+
+4. What accomplishment would make {recipientName} proud right now?
+
+5. Has anything changed in {recipientName}'s family, home life, or daily routine?
+
+6. Has {recipientName} picked up any new hobbies, interests, or habits recently?
+
+7. Is there anything new you'd like us to remember for future cards?
+
+---
+
+ROTATION LOGIC
+
+Fresh Update mode activates automatically when:
+
+profileCompletion === 100%
+
+The profile question card remains visible.
+
+It does not disappear.
+
+Instead:
+
+questionMode = "fresh_update"
+
+Question selection logic:
+
+Find the Fresh Update category that:
+
+Has never been answered
+
+OR
+
+Has the oldest answer date
+
+Return that question.
+
+After all seven categories have answers:
+
+Continue cycling forever.
+
+Always select the category whose latest answer is oldest.
+
+This guarantees:
+
+Fresh updates never run out.
+The database continuously grows.
+The system naturally refreshes stale information.
+
+---
+
+SKIP INTELLIGENCE
+
+Add future proof tracking:
+
+timesAsked
+timesAnswered
+timesSkipped
+
+Store these metrics per fresh update category.
+
+Do not change behavior yet.
+
+This is groundwork for future optimization.
+
+---
+
+DATA STORAGE
+
+Fresh Updates must never overwrite existing profile data.
+
+Create new timeline style records.
+
+Each saved update should generate a new record:
+
+{
+id: unique timestamp based id,
+recipientId,
+triggerType: "fresh_update",
+eventType: "FreshUpdate",
+categoryKey,
+answer,
+createdAt
+}
+
+Store every answer forever.
+
+Historical updates are valuable memory.
+
+---
+
+OPTIONAL LIFE EVENT SCORING
+
+Add a nullable field:
+
+importanceScore
+
+Values:
+
+minor
+moderate
+major
+
+Default:
+
+null
+
+Do not use yet.
+
+This prepares the system for future AI ranking of important life events.
+
+---
+
+PROFILE QUESTION CARD UI
+
+When profile is incomplete:
+
+Keep existing behavior exactly as is.
+
+No visual changes.
+
+When profile is complete:
+
+Switch to Fresh Update mode.
+
+Header:
+
+Profile basics are complete.
+Add a recent update so your next card feels current.
+
+Header color:
+
+Soft sage green.
+
+Save button text:
+
+Save Update
+
+Skip button remains unchanged.
+
+Progress bar should display:
+
+Profile Complete
+
+instead of a percentage.
+
+---
+
+CARD GENERATION CHANGES
+
+Update buildContextSupplement.
+
+Fresh Updates should be inserted BEFORE briefing Q&A content.
+
+Order:
+
+1. Permanent Profile
+2. Fresh Updates
+3. Briefing Answers
+4. Other Context
+
+Group updates by age.
+
+Format:
+
+[Recent Updates — USE THESE FIRST]
+
+Updates from last 90 days.
+
+[Updates — Still Relevant]
+
+Updates between 90 and 180 days old.
+
+[Older Updates — Background Context]
+
+Updates older than 180 days.
+
+The card generation prompt should explicitly instruct the AI:
+
+Prioritize Recent Updates over older information when creating messages.
+
+---
+
+CONTEXT PRIORITY RULES
+
+When a recent update conflicts with older information:
+
+Use the most recent update.
+
+Example:
+
+Older profile:
+"Enjoys gardening."
+
+Recent update:
+"Has become obsessed with pickleball."
+
+The generator should naturally favor pickleball references.
+
+Recent information should carry more weight than historical information.
+
+---
+
+ADMIN VISIBILITY
+
+Add Fresh Updates to recipient history view.
+
+Display:
+
+Date
+Category
+Answer
+
+Newest first.
+
+This allows admins to verify memory growth over time.
+
+---
+
+TESTS
+
+Add tests covering:
+
+Fresh Update activation after 100% completion
+
+Question rotation
+
+Never answered priority
+
+Oldest answered priority
+
+Full cycle behavior
+
+Multiple answers for same category
+
+Storage integrity
+
+Context grouping by age
+
+Recent update prioritization
+
+Importance score compatibility
+
+All existing tests must continue passing.
+
+No regressions allowed.
+
+---
+
+SUCCESS CRITERIA
+
+A recipient profile never becomes stale.
+
+The longer a recipient exists in the system:
+
+The larger their memory database becomes.
+
+The quality and relevance of generated cards should improve over time because the system continuously learns what is happening in the recipient's life.
+
+This feature should feel like an ongoing relationship memory engine rather than a one time questionnaire.

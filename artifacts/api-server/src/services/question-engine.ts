@@ -186,7 +186,7 @@ export const FRESH_UPDATE_BANK: QuestionBankEntry[] = [
     fieldLabel:       "Recent memory",
     category:         "update",
     priority:         "high",
-    questionTemplate: "What\u2019s something that happened with {name} in the last 3 months that could make the next card feel more personal?",
+    questionTemplate: "What\u2019s a recent memory you\u2019ve shared with {name} in the last few months?",
     reason:           "Recent moments make cards feel current — not like they were written from a template.",
   },
   {
@@ -194,7 +194,7 @@ export const FRESH_UPDATE_BANK: QuestionBankEntry[] = [
     fieldLabel:       "Current excitement",
     category:         "update",
     priority:         "high",
-    questionTemplate: "What is {name} excited about right now?",
+    questionTemplate: "What is {name} most excited about right now?",
     reason:           "What someone\u2019s excited about is the most personal detail we can put in a card.",
   },
   {
@@ -202,7 +202,7 @@ export const FRESH_UPDATE_BANK: QuestionBankEntry[] = [
     fieldLabel:       "Current challenge",
     category:         "update",
     priority:         "high",
-    questionTemplate: "Is there anything challenging or stressful going on for {name} lately?",
+    questionTemplate: "Has anything been challenging for {name} lately?",
     reason:           "Acknowledging what someone\u2019s going through makes a card land very differently.",
   },
   {
@@ -210,15 +210,15 @@ export const FRESH_UPDATE_BANK: QuestionBankEntry[] = [
     fieldLabel:       "Recent accomplishment",
     category:         "update",
     priority:         "high",
-    questionTemplate: "Has {name} accomplished or achieved anything recently \u2014 big or small?",
+    questionTemplate: "What accomplishment would make {name} proud right now?",
     reason:           "Calling out a real win makes a card feel like it was written just for them.",
   },
   {
     fieldKey:         "family_news",
-    fieldLabel:       "Family news",
+    fieldLabel:       "Family & home life",
     category:         "update",
     priority:         "medium",
-    questionTemplate: "Is there anything new going on with {name}\u2019s family or home life?",
+    questionTemplate: "Has anything changed in {name}\u2019s family, home life, or daily routine?",
     reason:           "Family context shapes what kind of message will land best right now.",
   },
   {
@@ -226,7 +226,7 @@ export const FRESH_UPDATE_BANK: QuestionBankEntry[] = [
     fieldLabel:       "New hobby or interest",
     category:         "update",
     priority:         "medium",
-    questionTemplate: "Have they started any new hobbies, interests, or routines lately?",
+    questionTemplate: "Has {name} picked up any new hobbies, interests, or habits recently?",
     reason:           "New interests are the easiest way to make a card feel timely and specific.",
   },
   {
@@ -234,7 +234,7 @@ export const FRESH_UPDATE_BANK: QuestionBankEntry[] = [
     fieldLabel:       "Anything to remember",
     category:         "update",
     priority:         "medium",
-    questionTemplate: "Is there anything you\u2019d like us to remember for future cards \u2014 something you want to make sure we capture about {name}?",
+    questionTemplate: "Is there anything new you\u2019d like us to remember for future cards?",
     reason:           "Whatever the sender flags tends to be exactly what makes the card matter.",
   },
 ];
