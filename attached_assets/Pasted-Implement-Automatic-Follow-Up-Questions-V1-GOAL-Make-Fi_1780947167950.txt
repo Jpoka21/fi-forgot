@@ -1,0 +1,281 @@
+Implement Automatic Follow Up Questions V1.
+
+GOAL
+
+Make FiForgot feel like it remembers previous conversations and relationship details over time.
+
+The objective is not to ask random new questions.
+
+The objective is to intelligently revisit meaningful life updates that users previously shared.
+
+Users should feel:
+
+"Wow, FiForgot remembered that."
+
+This should become one of the most memorable product features.
+
+---
+
+NEW CONCEPT
+
+Create:
+
+FollowUpQuestion
+
+A follow up question is generated from an existing Fresh Update.
+
+Example:
+
+Original Update:
+
+"Sarah started pickleball."
+
+60 days later:
+
+"Last time you mentioned Sarah started pickleball. How is that going?"
+
+---
+
+DATABASE
+
+Create FollowUpQuestion records.
+
+Fields:
+
+id
+recipientId
+sourceAnswerId
+category
+triggerDate
+question
+status
+
+Statuses:
+
+pending
+answered
+expired
+
+createdAt
+
+answeredAt
+
+---
+
+FOLLOW UP CATEGORIES
+
+When a Fresh Update is saved, classify it into one of the following categories:
+
+NEW_HOBBY
+
+ACCOMPLISHMENT
+
+CAREER
+
+CHALLENGE
+
+FAMILY
+
+HOME_LIFE
+
+GENERAL
+
+Keep classification simple.
+
+AI classification is acceptable.
+
+Fallback:
+
+GENERAL
+
+---
+
+FOLLOW UP TIMING
+
+NEW_HOBBY
+
+60 days
+
+ACCOMPLISHMENT
+
+90 days
+
+CAREER
+
+90 days
+
+CHALLENGE
+
+60 days
+
+FAMILY
+
+120 days
+
+HOME_LIFE
+
+120 days
+
+GENERAL
+
+90 days
+
+---
+
+FOLLOW UP QUESTION TEMPLATES
+
+NEW_HOBBY
+
+Last time you mentioned {recipientName} started {topic}. How is that going?
+
+CAREER
+
+You mentioned a career update for {recipientName}. How are things going now?
+
+ACCOMPLISHMENT
+
+How has life changed since that accomplishment?
+
+CHALLENGE
+
+How is that situation working out for {recipientName}?
+
+FAMILY
+
+Any new developments regarding that family update?
+
+HOME_LIFE
+
+How are things going with that change in daily life?
+
+GENERAL
+
+Any updates since the last time you mentioned this?
+
+---
+
+QUESTION ENGINE PRIORITY
+
+Current:
+
+Profile Questions
+
+Fresh Updates
+
+Replace with:
+
+1. Unanswered Profile Questions
+
+2. Due Follow Up Questions
+
+3. Fresh Updates
+
+Follow ups should take priority over Fresh Updates because they continue existing stories.
+
+---
+
+UI PRESENTATION
+
+Follow Up Questions should appear in the existing question card.
+
+Do not create a new screen.
+
+Visual treatment:
+
+Light blue header.
+
+Header:
+
+Follow Up Question
+
+Subtext:
+
+You mentioned this previously. Any updates?
+
+Display original context.
+
+Example:
+
+Previously:
+
+Sarah started pickleball.
+
+Question:
+
+How is that going?
+
+---
+
+ANSWER STORAGE
+
+When answered:
+
+Store as a Fresh Update record.
+
+Do not overwrite original answer.
+
+Do not modify source answer.
+
+The follow up answer becomes new relationship memory.
+
+Mark follow up:
+
+answered
+
+---
+
+EXPIRATION
+
+If a Follow Up Question remains unanswered for 180 days:
+
+Mark:
+
+expired
+
+Do not show again.
+
+---
+
+TIMELINE INTEGRATION
+
+Add Follow Up Questions to the Relationship Timeline.
+
+Badge:
+
+Follow Up
+
+Display:
+
+Original memory reference
+
+Follow up date
+
+Answer status
+
+---
+
+BROWNIE POINTS
+
+Award:
+
++15 Brownie Points
+
+for answering a Follow Up Question.
+
+Reason:
+
+These answers are highly valuable because they continue existing relationship context.
+
+Apply anti-spam protections.
+
+---
+
+SUCCESS CRITERIA
+
+Users begin seeing questions that reference things they told FiForgot months earlier.
+
+The system feels like it remembers people.
+
+Relationship knowledge deepens naturally over time.
+
+FiForgot transitions from a card generator into an ongoing relationship memory assistant.

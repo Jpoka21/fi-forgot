@@ -7,14 +7,15 @@ description: Positive reinforcement engine — award triggers, anti-spam limits,
 
 | Action | Points | Anti-spam |
 |---|---|---|
-| `recipient_created` | 10 | once per recipient (all-time) |
-| `birthday_added` | 15 | once per recipient (all-time) |
-| `anniversary_added` | 15 | once per recipient (all-time) |
-| `fresh_update` | 5 | max 3/recipient/day |
-| `fresh_update_first` | 10 | once per recipient (all-time) |
-| `profile_complete` | 25 | once per recipient (all-time) |
-| `card_generate` | 20 | max 5/day (global) |
-| `card_send` | 30 | max 3/day (global) |
+| `recipient_created` | 15 | once per recipient (all-time) |
+| `birthday_added` | 10 | once per recipient (all-time) |
+| `anniversary_added` | 10 | once per recipient (all-time) |
+| `fresh_update` | 10 | max 3/recipient/day |
+| `fresh_update_first` | 25 | once per recipient (all-time) |
+| `profile_complete` | 100 | once per recipient (all-time) |
+| `card_generate` | 5 | max 5/day (global) |
+| `card_send` | 25 | max 3/day (global) |
+| `follow_up_answered` | 15 | max 3/day (global) |
 
 ## Milestones
 `[100, 500, 1000, 2500, 5000, 10000]` — crossing triggers a special toast via the `milestone` field on AwardResult.
@@ -36,6 +37,6 @@ Award dispatches fire **fire-and-forget** (async, try/catch, non-fatal) so they 
 **Why:** Decouples the award toast from page-specific state; any page or component can trigger it without prop drilling.
 
 ## Award Call Sites
-- `v2-recipients.ts`: POST create, PATCH birthday, POST answer-question (fresh_update / fresh_update_first / profile_complete)
+- `v2-recipients.ts`: POST create, PATCH birthday, POST answer-question (fresh_update / fresh_update_first / profile_complete / follow_up_answered)
 - `v2-generate-card.ts`: after card generation
 - `card-flow-v2.tsx`: after `advanceFromWho` (recipient create), after `generateCards`, after "SEND THIS CARD" click

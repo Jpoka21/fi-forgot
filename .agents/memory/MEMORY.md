@@ -3,3 +3,4 @@
 - [Recipient Intelligence Stack](recipient-intelligence.md) — context assembly → prompt supplement → question engine; key conventions and security constraints
 - [Relationship Timeline](relationship-timeline.md) — timeline feature conventions: archivedAt soft-delete, event dispatch refresh pattern, briefing grouping
 - [Brownie Points Foundation](brownie-points.md) — positive reinforcement engine: award triggers, anti-spam limits, window event dispatch pattern
+- [Follow-Up Questions](follow-up-questions.md) — AI-classified delayed follow-ups from fresh updates; priority between profile-gap and fresh-update in question engine

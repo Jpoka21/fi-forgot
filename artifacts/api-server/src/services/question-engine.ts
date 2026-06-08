@@ -34,7 +34,13 @@ export type QuestionCategory =
   | "delivery"     // logistics
   | "setup";       // dates and one-time setup info
 
-export type QuestionMode = "profile_gap" | "fresh_update";
+export type QuestionMode = "profile_gap" | "fresh_update" | "follow_up";
+
+export interface FollowUpMeta {
+  id:             string;
+  originalAnswer: string;
+  category:       string;
+}
 
 export interface SuggestedQuestion {
   fieldKey: string;
@@ -44,6 +50,7 @@ export interface SuggestedQuestion {
   question: string;   // {name} already substituted with recipient's first name
   reason: string;     // one-line explanation of why this question improves card quality
   mode: QuestionMode;
+  followUp?: FollowUpMeta;  // present only when mode === "follow_up"
 }
 
 // ─── Profile gap question bank ────────────────────────────────────────────────

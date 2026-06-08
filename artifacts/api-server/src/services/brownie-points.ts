@@ -12,42 +12,46 @@ export type BrownieActionType =
   | "card_send_early"
   | "recipient_created"
   | "birthday_added"
-  | "anniversary_added";
+  | "anniversary_added"
+  | "follow_up_answered";
 
 const POINT_VALUES: Record<BrownieActionType, number> = {
-  profile_complete:   100,
-  fresh_update:        10,
-  fresh_update_first:  25,
-  card_generate:        5,
-  card_send:           25,
-  card_send_early:     25,
-  recipient_created:   15,
-  birthday_added:      10,
-  anniversary_added:   10,
+  profile_complete:    100,
+  fresh_update:         10,
+  fresh_update_first:   25,
+  card_generate:         5,
+  card_send:            25,
+  card_send_early:      25,
+  recipient_created:    15,
+  birthday_added:       10,
+  anniversary_added:    10,
+  follow_up_answered:   15,
 };
 
 const ACTION_DESCRIPTIONS: Record<BrownieActionType, string> = {
-  profile_complete:   "Completed recipient profile",
-  fresh_update:       "Added fresh update",
-  fresh_update_first: "First fresh update for this person",
-  card_generate:      "Generated a card draft",
-  card_send:          "Approved and sent a card",
-  card_send_early:    "Sent a card 7+ days early",
-  recipient_created:  "Added a new recipient",
-  birthday_added:     "Added a birthday",
-  anniversary_added:  "Added an anniversary",
+  profile_complete:    "Completed recipient profile",
+  fresh_update:        "Added fresh update",
+  fresh_update_first:  "First fresh update for this person",
+  card_generate:       "Generated a card draft",
+  card_send:           "Approved and sent a card",
+  card_send_early:     "Sent a card 7+ days early",
+  recipient_created:   "Added a new recipient",
+  birthday_added:      "Added a birthday",
+  anniversary_added:   "Added an anniversary",
+  follow_up_answered:  "Answered a follow-up question",
 };
 
 export const BROWNIE_TOAST_MESSAGES: Record<BrownieActionType, string> = {
-  profile_complete:   "Recipient profile completed. Future cards just got a lot more personal.",
-  fresh_update:       "Nice touch. Future cards just got better.",
-  fresh_update_first: "First update for this person. They'll feel the difference.",
-  card_generate:      "Draft created. Off to a great start.",
-  card_send:          "Card sent. Thoughtfulness counts.",
-  card_send_early:    "Sent early. You're ahead of schedule.",
-  recipient_created:  "New relationship added. Cards on autopilot.",
-  birthday_added:     "Birthday locked in. No more scrambling.",
-  anniversary_added:  "Anniversary saved. They'll be impressed.",
+  profile_complete:    "Recipient profile completed. Future cards just got a lot more personal.",
+  fresh_update:        "Nice touch. Future cards just got better.",
+  fresh_update_first:  "First update for this person. They'll feel the difference.",
+  card_generate:       "Draft created. Off to a great start.",
+  card_send:           "Card sent. Thoughtfulness counts.",
+  card_send_early:     "Sent early. You're ahead of schedule.",
+  recipient_created:   "New relationship added. Cards on autopilot.",
+  birthday_added:      "Birthday locked in. No more scrambling.",
+  anniversary_added:   "Anniversary saved. They'll be impressed.",
+  follow_up_answered:  "You remembered. That's what makes the relationship feel real.",
 };
 
 export interface AwardResult {
@@ -164,6 +168,9 @@ export async function awardPoints(
       if (!recipientId) return null;
       const totalCount = await countAllTimeActionsForRecipient(userId, "anniversary_added", recipientId);
       if (totalCount >= 1) return null;
+    } else if (actionType === "follow_up_answered") {
+      const todayCount = await countTodayActions(userId, "follow_up_answered");
+      if (todayCount >= 3) return null;
     }
 
     const points = POINT_VALUES[actionType];

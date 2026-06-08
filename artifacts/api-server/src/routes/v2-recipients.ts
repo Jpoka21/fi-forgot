@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { db, usersTable, recipientsV2Table, recipientMemoryTable, recipientsTable, questionAnswersTable, personalCardsTable } from "@workspace/db";
-import { eq, and, ilike, sql, desc, isNull, ne } from "drizzle-orm";
+import { db, usersTable, recipientsV2Table, recipientMemoryTable, recipientsTable, questionAnswersTable, personalCardsTable, followUpQuestionsTable } from "@workspace/db";
+import { eq, and, ilike, sql, desc, isNull, ne, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { assembleRecipientContext } from "../services/recipient-context";
 import { getNextQuestion, getNextFreshUpdateQuestion } from "../services/question-engine";
 import { awardPoints } from "../services/brownie-points";
+import { scheduleFollowUp, getDueFollowUpQuestion, markFollowUpAnswered } from "../services/follow-up-questions";
 import type { FreshUpdateRecord } from "../services/question-engine";
 
 const router = Router();
@@ -226,11 +227,30 @@ router.get("/v2/recipients/:id/next-question", async (req, res) => {
     if (!profileComplete) {
       nextQuestion = profileQuestion;
     } else {
-      const freshUpdateHistory: FreshUpdateRecord[] = context.freshUpdates.map(u => ({
-        questionKey: u.questionKey,
-        createdAt:   new Date(u.createdAt),
-      }));
-      nextQuestion = getNextFreshUpdateQuestion(context, freshUpdateHistory);
+      // Priority: follow-up questions (due) → fresh updates
+      const dueFollowUp = await getDueFollowUpQuestion(userId, id);
+      if (dueFollowUp) {
+        nextQuestion = {
+          fieldKey:   "follow_up_answer",
+          fieldLabel: "Follow Up",
+          category:   "update" as const,
+          priority:   "high" as const,
+          question:   dueFollowUp.question,
+          reason:     "You mentioned this previously. Any updates?",
+          mode:       "follow_up" as const,
+          followUp: {
+            id:             dueFollowUp.id,
+            originalAnswer: dueFollowUp.originalAnswer,
+            category:       dueFollowUp.category,
+          },
+        };
+      } else {
+        const freshUpdateHistory: FreshUpdateRecord[] = context.freshUpdates.map(u => ({
+          questionKey: u.questionKey,
+          createdAt:   new Date(u.createdAt),
+        }));
+        nextQuestion = getNextFreshUpdateQuestion(context, freshUpdateHistory);
+      }
     }
 
     logger.info({
@@ -257,11 +277,12 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
 
   const { id } = req.params;
 
-  const { fieldKey, questionText, answerText, triggerType } = req.body as {
+  const { fieldKey, questionText, answerText, triggerType, followUpId } = req.body as {
     fieldKey?:    string;
     questionText?: string;
     answerText?:  string;
     triggerType?: string;
+    followUpId?:  string;
   };
 
   if (!fieldKey?.trim() || !questionText?.trim() || !answerText?.trim()) {
@@ -269,7 +290,8 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
     return;
   }
 
-  const isFreshUpdate = triggerType === "fresh_update";
+  const isFollowUp     = triggerType === "follow_up";
+  const isFreshUpdate  = triggerType === "fresh_update" || isFollowUp;
 
   const [row] = await db
     .select({ id: recipientsTable.id })
@@ -332,9 +354,27 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
       logger.info({ recipientId: id, fieldKey: fieldKey.trim() }, "v2-recipients: profile-gap saved");
     }
 
+    // Mark follow-up answered + schedule new follow-up from the answer
+    if (isFollowUp && followUpId) {
+      await markFollowUpAnswered(followUpId).catch(() => {});
+    }
+
+    // Schedule a follow-up for fresh updates (non-follow-up saves only)
+    if (triggerType === "fresh_update") {
+      const [recipient] = await db
+        .select({ firstName: recipientsV2Table.firstName })
+        .from(recipientsV2Table)
+        .where(eq(recipientsV2Table.id, id))
+        .limit(1);
+      const answerId = `fresh_update_${id}_${fieldKey.trim()}_${now.getTime()}`;
+      scheduleFollowUp(userId, id, answerId, answerText.trim(), recipient?.firstName ?? "them").catch(() => {});
+    }
+
     // Award brownie points
     let browniePoints = null;
-    if (isFreshUpdate) {
+    if (isFollowUp) {
+      browniePoints = await awardPoints(userId, "follow_up_answered").catch(() => null);
+    } else if (isFreshUpdate) {
       browniePoints = await awardPoints(userId, "fresh_update", { recipientId: id }).catch(() => null);
       if (browniePoints) {
         const firstBonus = await awardPoints(userId, "fresh_update_first", { recipientId: id }).catch(() => null);
@@ -391,7 +431,7 @@ const QUESTION_KEY_LABELS: Record<string, string> = {
   anything_to_remember: "Anything to remember",
 };
 
-type TimelineItemType = "profile_gap" | "fresh_update" | "event_briefing" | "card" | "important_date";
+type TimelineItemType = "profile_gap" | "fresh_update" | "event_briefing" | "card" | "important_date" | "follow_up";
 
 interface TimelineItem {
   id:         string;
@@ -418,7 +458,7 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
 
   if (!row) { res.status(404).json({ error: "Recipient not found" }); return; }
 
-  const [answers, cards] = await Promise.all([
+  const [answers, cards, followUps] = await Promise.all([
     db
       .select()
       .from(questionAnswersTable)
@@ -437,6 +477,15 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
         ne(personalCardsTable.status, "draft"),
       ))
       .orderBy(desc(personalCardsTable.createdAt)),
+    db
+      .select()
+      .from(followUpQuestionsTable)
+      .where(and(
+        eq(followUpQuestionsTable.recipientId, id),
+        eq(followUpQuestionsTable.userId, userId),
+        inArray(followUpQuestionsTable.status, ["answered", "pending", "expired"]),
+      ))
+      .orderBy(desc(followUpQuestionsTable.createdAt)),
   ]);
 
   const items: TimelineItem[] = [];
@@ -478,6 +527,28 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
       label:      `${first.eventType} ${first.eventYear}`,
       summary,
       source:     `${first.eventType} ${first.eventYear} briefing`,
+      canArchive: false,
+      isArchived: false,
+    });
+  }
+
+  // Follow-up questions
+  for (const fu of followUps) {
+    const dateToUse = fu.answeredAt ?? fu.triggerDate;
+    const statusLabel =
+      fu.status === "answered" ? "Answered follow-up" :
+      fu.status === "expired"  ? "Follow-up expired" :
+      "Follow-up pending";
+    const summary = fu.status === "answered"
+      ? `Follow-up on: "${fu.originalAnswer.slice(0, 80)}${fu.originalAnswer.length > 80 ? "…" : ""}"`
+      : `"${fu.originalAnswer.slice(0, 80)}${fu.originalAnswer.length > 80 ? "…" : ""}"`;
+    items.push({
+      id:         `followup_${fu.id}`,
+      date:       dateToUse.toISOString(),
+      type:       "follow_up",
+      label:      "Follow Up",
+      summary,
+      source:     statusLabel,
       canArchive: false,
       isArchived: false,
     });
