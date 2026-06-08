@@ -8,6 +8,7 @@ const BLACK = "#111111";
 const BEIGE = "#F2E6D3";
 const WHITE = "#FFFFFF";
 const GRAY  = "#6B6B6B";
+const SAGE  = "#5B8C6B";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ interface QuestionScreen {
 
 interface CardOption { tone: string; text: string; }
 interface CardDesign { id: string; name: string; category?: string; imageUrl?: string; }
+interface DraftVersion { id: number; label: string; text: string; original: string; }
 interface DuplicateMatch { id: string; firstName: string; relationshipType: string; }
 type Phase = "who" | "flow" | "generating" | "results" | "final";
 
@@ -263,13 +265,13 @@ export default function CardFlowV2() {
   const [answers, setAnswers]     = useState<Record<string, string | string[]>>({});
   const [recipientId, setRecipientId] = useState<string | null>(null);
 
-  // Results state
-  const [cards, setCards]           = useState<CardOption[]>([]);
-  const [activeCard, setActiveCard] = useState(0);
-  const [editedTexts, setEditedTexts] = useState<string[]>([]);
-  const [refining, setRefining]     = useState<number | null>(null);
-  const [genError, setGenError]     = useState<string | null>(null);
-  const [aiInstruction, setAiInstruction] = useState("");
+  // Draft state
+  const [draftVersions, setDraftVersions]   = useState<DraftVersion[]>([]);
+  const [activeDraftId, setActiveDraftId]   = useState<number>(1);
+  const [genError, setGenError]             = useState<string | null>(null);
+  const [editMode, setEditMode]             = useState(false);
+  const [showConfirm, setShowConfirm]       = useState(false);
+  const [adjusting, setAdjusting]           = useState(false);
   // Card design picker
   const [design, setDesign]               = useState<CardDesign | null>(null);
   const [designLoading, setDesignLoading] = useState(false);
@@ -443,9 +445,16 @@ export default function CardFlowV2() {
       const pickData = await pickRes.json() as { card?: CardDesign };
 
       if (!data.cards?.length) throw new Error(data.error ?? "No cards returned");
-      setCards(data.cards);
-      setActiveCard(0);
-      setEditedTexts(data.cards.map(c => c.text));
+      const DRAFT_LABELS = ["Draft 1", "Draft 2", "Draft 3"];
+      setDraftVersions((data.cards as CardOption[]).map((c, i) => ({
+        id: i + 1,
+        label: DRAFT_LABELS[i] ?? `Draft ${i + 1}`,
+        text: c.text,
+        original: c.text,
+      })));
+      setActiveDraftId(1);
+      setEditMode(false);
+      setShowConfirm(false);
       if (pickData.card) setDesign(pickData.card);
       setPhase("results");
     } catch (err) {
@@ -455,26 +464,56 @@ export default function CardFlowV2() {
     }
   }
 
-  async function handleRefine(cardIdx: number, instruction: string) {
-    if (refining !== null) return;
-    setRefining(cardIdx);
+  function updateCurrentDraft(text: string) {
+    setDraftVersions(prev => prev.map(d => d.id === activeDraftId ? { ...d, text } : d));
+  }
+
+  function resetCurrentDraft() {
+    setDraftVersions(prev => prev.map(d => d.id === activeDraftId ? { ...d, text: d.original } : d));
+  }
+
+  async function handleRegenerateDraft() {
+    if (adjusting) return;
+    const activeDraft = draftVersions.find(d => d.id === activeDraftId);
+    if (!activeDraft) return;
+    setAdjusting(true);
     try {
-      const res  = await fetch("/api/v2/refine-card", {
+      const res = await fetch("/api/v2/refine-card", {
         method: "POST", headers: getApiHeaders(),
         body: JSON.stringify({
-          cardText:    cards[cardIdx]?.text ?? "",
-          instruction,
+          cardText:    activeDraft.text,
+          instruction: "Write a completely different version from scratch — same recipient, relationship, and occasion, but a fresh angle, different opening, and different structure.",
           context:     `${relationship} • ${answers["occasion"] ?? ""} • ${firstName}`,
         }),
       });
       const data = await res.json() as { text?: string };
       if (data.text) {
-        const updated = cards.map((c, i) => i === cardIdx ? { ...c, text: data.text! } : c);
-        setCards(updated);
-        setEditedTexts(prev => prev.map((t, i) => i === cardIdx ? data.text! : t));
+        const newId = draftVersions.length + 1;
+        setDraftVersions(prev => [...prev, { id: newId, label: `Draft ${newId}`, text: data.text!, original: data.text! }]);
+        setActiveDraftId(newId);
       }
     } catch { /* non-fatal */ }
-    finally { setRefining(null); }
+    finally { setAdjusting(false); }
+  }
+
+  async function handleQuickAdjust(instruction: string) {
+    if (adjusting) return;
+    const activeDraft = draftVersions.find(d => d.id === activeDraftId);
+    if (!activeDraft) return;
+    setAdjusting(true);
+    try {
+      const res = await fetch("/api/v2/refine-card", {
+        method: "POST", headers: getApiHeaders(),
+        body: JSON.stringify({
+          cardText:    activeDraft.text,
+          instruction,
+          context:     `${relationship} • ${answers["occasion"] ?? ""} • ${firstName}`,
+        }),
+      });
+      const data = await res.json() as { text?: string };
+      if (data.text) updateCurrentDraft(data.text);
+    } catch { /* non-fatal */ }
+    finally { setAdjusting(false); }
   }
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
@@ -713,71 +752,140 @@ export default function CardFlowV2() {
 
   // ── RESULTS ──────────────────────────────────────────────────────────────────
   if (phase === "results") {
-    const TAB_LABELS = ["Recommended Draft", "More Casual", "More Heartfelt"];
-    const currentText   = editedTexts[activeCard] ?? "";
-    const originalText  = cards[activeCard]?.text ?? "";
-    const isPersonalized = currentText.trim() !== originalText.trim();
+    const activeDraft = draftVersions.find(d => d.id === activeDraftId);
+    const currentText = activeDraft?.text ?? "";
+    const isEdited    = !!(activeDraft && activeDraft.text !== activeDraft.original);
 
-    function updateEditedText(idx: number, val: string) {
-      setEditedTexts(prev => prev.map((t, i) => i === idx ? val : t));
+    const getA = (id: string): string => {
+      const v = answers[id];
+      return Array.isArray(v) ? v.join(", ") : String(v ?? "");
+    };
+    const personalTouches: string[] = [];
+    const occ = getA("occasion");
+    const ton = getA("tone");
+    const obj = getA("objective");
+    if (occ) personalTouches.push(occ + " occasion");
+    if (ton) personalTouches.push(ton.toLowerCase() + " tone");
+    if (obj && !obj.toLowerCase().includes("simple")) personalTouches.push(obj.replace(/^Tell Them /i, "").toLowerCase());
+    if (getA("interests").trim()) personalTouches.push("hobbies & interests");
+    if (getA("details").trim()) personalTouches.push("personal details");
+    if (getA("signOff").trim()) personalTouches.push("custom sign-off");
+    if (getA("avoidMentioning").trim()) personalTouches.push("sensitive topics excluded");
+
+    const hasRichContext = getA("details").trim() || getA("interests").trim();
+    const showImprove = !!recipientId && !hasRichContext;
+
+    // ── Confirmation screen ──────────────────────────────────────────────────
+    if (showConfirm) {
+      return (
+        <WizardShell progress={0.99} onBack={() => setShowConfirm(false)}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 700, color: GRAY, letterSpacing: "0.07em", textTransform: "uppercase" as const, marginBottom: 6 }}>
+            Ready to Send
+          </p>
+          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 6, lineHeight: 1.1 }}>
+            YOUR CARD
+          </h2>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", color: GRAY, marginBottom: 22 }}>
+            Take one last look before sending.
+          </p>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
+            <span style={{ padding: "6px 13px", borderRadius: 20, background: BEIGE, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", color: BLACK, fontWeight: 600 }}>
+              To: {firstName}
+            </span>
+            {occ && (
+              <span style={{ padding: "6px 13px", borderRadius: 20, background: BEIGE, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", color: BLACK }}>
+                {occ}
+              </span>
+            )}
+            <span style={{ padding: "6px 13px", borderRadius: 20, background: BEIGE, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", color: BLACK }}>
+              {relationship}
+            </span>
+          </div>
+
+          <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 22 }}>
+            {design?.imageUrl && (
+              <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: 14 }}>
+                <img src={design.imageUrl} alt={design.name} style={{ width: "100%", display: "block", maxHeight: 120, objectFit: "cover" }} />
+              </div>
+            )}
+            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", lineHeight: 1.75, color: BLACK, margin: 0, fontWeight: 600, whiteSpace: "pre-wrap" }}>
+              {currentText}
+            </p>
+          </div>
+
+          {recipientId && (
+            <div style={{ background: WHITE, border: `1px solid ${BLACK}10`, borderRadius: 12, padding: "11px 14px", marginBottom: 18, display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: "1rem" }}>💾</span>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.76rem", color: GRAY, margin: 0, lineHeight: 1.45 }}>
+                {firstName}'s profile has been saved. Future cards will use what we learned today.
+              </p>
+            </div>
+          )}
+
+          <button
+            onClick={() => setPhase("final")}
+            style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 4px 20px rgba(226,59,46,0.35)", marginBottom: 12 }}
+          >
+            SEND THIS CARD →
+          </button>
+          <button
+            onClick={() => setShowConfirm(false)}
+            style={{ width: "100%", padding: 12, borderRadius: 12, border: `1.5px solid ${BLACK}15`, background: "none", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", cursor: "pointer" }}
+          >
+            ← Back to Draft
+          </button>
+        </WizardShell>
+      );
     }
 
-    function handleEditDraft() {
-      textareaRef.current?.focus();
-      textareaRef.current?.select();
-    }
-
-    function handleWriteMyOwn() {
-      if (isPersonalized) {
-        if (!window.confirm("Replace your edits with a blank message?")) return;
-      }
-      updateEditedText(activeCard, "");
-      setTimeout(() => textareaRef.current?.focus(), 50);
-    }
-
+    // ── Main results screen ──────────────────────────────────────────────────
     return (
       <WizardShell progress={progressPct} onBack={() => { setPhase("flow"); setStepIdx(steps.length - 1); }}>
 
-        {/* Draft framing banner */}
-        <div style={{ background: BEIGE, borderRadius: 12, padding: "13px 16px", marginBottom: 20, borderLeft: `3px solid ${RED}` }}>
-          <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.06em", color: BLACK, margin: "0 0 2px" }}>
-            DRAFTS READY
+        {/* Draft Status Header */}
+        <div style={{ marginBottom: 20 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: GRAY, margin: "0 0 3px" }}>
+            Draft Generated
           </p>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", color: GRAY, margin: 0, lineHeight: 1.5 }}>
-            Choose one, edit it directly, personalize the wording, or write your own.
+          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", letterSpacing: "0.04em", color: BLACK, lineHeight: 1.1, margin: "0 0 4px" }}>
+            REVIEW YOUR DRAFT
+          </h2>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY, margin: 0 }}>
+            Edit, personalize, or pick a different version below.
           </p>
         </div>
 
-        {/* Draft tabs */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-          {cards.map((_, i) => (
+        {/* Version pills */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+          {draftVersions.map(v => (
             <button
-              key={i}
-              onClick={() => setActiveCard(i)}
+              key={v.id}
+              onClick={() => setActiveDraftId(v.id)}
               style={{
-                flex: 1, padding: "10px 4px", borderRadius: 10,
-                border: i === activeCard ? `2px solid ${RED}` : `1.5px solid ${BLACK}12`,
-                background: i === activeCard ? `${RED}10` : WHITE,
-                color: i === activeCard ? RED : GRAY,
-                fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", fontWeight: 700,
-                cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.04em",
-                lineHeight: 1.3,
+                padding: "6px 13px", borderRadius: 20,
+                border: v.id === activeDraftId ? `2px solid ${RED}` : `1.5px solid ${BLACK}12`,
+                background: v.id === activeDraftId ? `${RED}12` : WHITE,
+                color: v.id === activeDraftId ? RED : GRAY,
+                fontFamily: "'Inter', sans-serif", fontSize: "0.72rem",
+                fontWeight: v.id === activeDraftId ? 700 : 500,
+                cursor: "pointer", letterSpacing: "0.03em",
               } as React.CSSProperties}
             >
-              {TAB_LABELS[i]}
+              {v.id > 3 ? `↩ ${v.label}` : v.label}
             </button>
           ))}
         </div>
 
-        {/* Card image */}
-        <div style={{ marginBottom: 16 }}>
+        {/* Card design image */}
+        <div style={{ marginBottom: 14 }}>
           {design?.imageUrl ? (
             <div style={{ borderRadius: 12, overflow: "hidden", border: `1.5px solid ${BLACK}10`, position: "relative" }}>
               <img src={design.imageUrl} alt={design.name} style={{ width: "100%", display: "block", maxHeight: 160, objectFit: "cover" }} />
               <button
                 onClick={regenDesign}
                 disabled={designLoading}
-                style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.55)", border: "none", color: WHITE, fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 600, padding: "5px 10px", borderRadius: 20, cursor: designLoading ? "default" : "pointer", opacity: designLoading ? 0.6 : 1 }}
+                style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.55)", border: "none", color: WHITE, fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 600, padding: "5px 10px", borderRadius: 20, cursor: designLoading ? "default" : "pointer", opacity: designLoading ? 0.6 : 1 } as React.CSSProperties}
               >
                 {designLoading ? "Loading…" : "Try another →"}
               </button>
@@ -786,7 +894,7 @@ export default function CardFlowV2() {
               </div>
             </div>
           ) : (
-            <div style={{ height: 80, borderRadius: 12, background: BEIGE, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+            <div style={{ height: 72, borderRadius: 12, background: BEIGE, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY }}>
                 {designLoading ? "Finding a card design…" : "No design found"}
               </span>
@@ -799,21 +907,27 @@ export default function CardFlowV2() {
           )}
         </div>
 
-        {/* Editable card message */}
-        <div style={{ background: BEIGE, borderRadius: 16, padding: "14px 18px 18px", marginBottom: 14 }}>
-          {/* Status row */}
+        {/* Card Draft Container — hero */}
+        <div style={{
+          background: BEIGE, borderRadius: 16, padding: "14px 18px 18px", marginBottom: 14,
+          border: editMode ? `2px solid ${RED}30` : `2px solid transparent`,
+          transition: "border-color 0.2s",
+        } as React.CSSProperties}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <span style={{
-              fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", fontWeight: 700,
-              letterSpacing: "0.07em", textTransform: "uppercase",
-              color: isPersonalized ? RED : `${BLACK}45`,
-            }}>
-              {isPersonalized ? "✦ Personalized by You" : "Ready to Review"}
-            </span>
-            {isPersonalized && (
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}40`, border: `1px dashed ${BLACK}22`, padding: "2px 7px", borderRadius: 4 }}>
+                Draft
+              </span>
+              {isEdited && (
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", fontWeight: 700, color: RED }}>
+                  ✦ Edited
+                </span>
+              )}
+            </div>
+            {isEdited && (
               <button
-                onClick={() => updateEditedText(activeCard, originalText)}
-                style={{ background: "none", border: "none", fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", color: GRAY, cursor: "pointer", padding: 0, textDecoration: "underline" }}
+                onClick={resetCurrentDraft}
+                style={{ background: "none", border: "none", fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", color: GRAY, cursor: "pointer", textDecoration: "underline", padding: 0 }}
               >
                 Reset
               </button>
@@ -822,81 +936,107 @@ export default function CardFlowV2() {
           <textarea
             ref={textareaRef}
             value={currentText}
-            onChange={e => updateEditedText(activeCard, e.target.value)}
+            onChange={e => updateCurrentDraft(e.target.value)}
+            onFocus={() => setEditMode(true)}
+            onBlur={() => setEditMode(false)}
             rows={7}
             style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontFamily: "'Caveat', cursive", fontSize: "1.2rem", lineHeight: 1.7, color: BLACK, resize: "none", boxSizing: "border-box", fontWeight: 600, padding: 0 } as React.CSSProperties}
           />
         </div>
 
-        {/* Edit controls */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+        {/* Action buttons */}
+        <button
+          onClick={() => setShowConfirm(true)}
+          style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 4px 20px rgba(226,59,46,0.35)", marginBottom: 10 }}
+        >
+          APPROVE & SEND →
+        </button>
+        <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
           <button
-            onClick={handleEditDraft}
-            style={{ flex: 2, padding: "11px 0", borderRadius: 10, border: `1.5px solid ${BLACK}15`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
+            onClick={() => { setEditMode(true); setTimeout(() => { textareaRef.current?.focus(); }, 50); }}
+            style={{ flex: 1, padding: "12px 0", borderRadius: 10, border: `1.5px solid ${BLACK}18`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
           >
             ✏️ Edit Draft
           </button>
           <button
-            onClick={handleWriteMyOwn}
-            style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1.5px solid ${BLACK}12`, background: "none", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", fontWeight: 500, cursor: "pointer" } as React.CSSProperties}
+            onClick={handleRegenerateDraft}
+            disabled={adjusting}
+            style={{ flex: 1, padding: "12px 0", borderRadius: 10, border: `1.5px solid ${BLACK}12`, background: "none", color: adjusting ? GRAY : BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 500, cursor: adjusting ? "default" : "pointer", opacity: adjusting ? 0.55 : 1 } as React.CSSProperties}
           >
-            Write My Own
+            {adjusting ? "Rewriting…" : "↩ Regenerate"}
           </button>
         </div>
+        <button
+          onClick={() => { setPhase("who"); setFirstName(""); setRelationship(""); setAnswers({}); setDraftVersions([]); setRecipientId(null); setDesign(null); }}
+          style={{ width: "100%", padding: "9px 0", borderRadius: 10, background: "none", border: "none", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", cursor: "pointer", marginBottom: 22 }}
+        >
+          Start Over
+        </button>
 
-        {/* Personalize This Draft */}
-        <div style={{ marginBottom: 22 }}>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", fontWeight: 700, color: GRAY, letterSpacing: "0.05em", textTransform: "uppercase", margin: "0 0 6px" }}>
-            Personalize This Draft
+        {/* Quick Adjustments */}
+        <div style={{ marginBottom: 20 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", fontWeight: 700, color: GRAY, letterSpacing: "0.06em", textTransform: "uppercase" as const, margin: "0 0 8px" }}>
+            Quick Adjustments
           </p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              type="text"
-              value={aiInstruction}
-              onChange={e => setAiInstruction(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && aiInstruction.trim() && refining === null) { handleRefine(activeCard, aiInstruction); setAiInstruction(""); } }}
-              placeholder="e.g. make it warmer, add a joke about camping…"
-              disabled={refining !== null}
-              style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${BLACK}15`, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", color: BLACK, background: WHITE, outline: "none" } as React.CSSProperties}
-            />
-            <button
-              onClick={() => { if (aiInstruction.trim() && refining === null) { handleRefine(activeCard, aiInstruction); setAiInstruction(""); } }}
-              disabled={refining !== null || !aiInstruction.trim()}
-              style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 700, cursor: refining !== null || !aiInstruction.trim() ? "default" : "pointer", opacity: refining !== null || !aiInstruction.trim() ? 0.5 : 1 } as React.CSSProperties}
-            >
-              Apply
-            </button>
-          </div>
-          {refining !== null ? (
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, marginTop: 7, marginBottom: 0 }}>Rewriting your draft…</p>
+          {adjusting ? (
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, margin: 0 }}>Adjusting draft…</p>
           ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-              {["Make it shorter", "Make it warmer", "Add some humor", "Make it more personal"].map(s => (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {[
+                { label: "Make it shorter",  instruction: "Shorten this significantly — keep only the most impactful lines." },
+                { label: "Make it warmer",   instruction: "Make this noticeably warmer and more heartfelt." },
+                { label: "Add some humor",   instruction: "Add a genuine touch of humor that still feels warm." },
+                { label: "More personal",    instruction: "Make this feel more personal and specific, less generic." },
+              ].map(({ label, instruction }) => (
                 <button
-                  key={s}
-                  onClick={() => { handleRefine(activeCard, s); }}
-                  disabled={refining !== null}
-                  style={{ padding: "5px 10px", borderRadius: 20, border: `1px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", cursor: "pointer" } as React.CSSProperties}
+                  key={label}
+                  onClick={() => handleQuickAdjust(instruction)}
+                  style={{ padding: "5px 11px", borderRadius: 20, border: `1px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", cursor: "pointer" } as React.CSSProperties}
                 >
-                  {s}
+                  {label}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Helper text + CTA */}
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, textAlign: "center", margin: "0 0 10px", lineHeight: 1.5 }}>
-          You can edit this draft as much or as little as you want before sending.
-        </p>
-        <button
-          onClick={() => setPhase("final")}
-          style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 4px 20px rgba(226,59,46,0.35)" }}
-        >
-          APPROVE & SEND →
-        </button>
+        {/* Personal Touches Included */}
+        {personalTouches.length > 0 && (
+          <div style={{ background: WHITE, border: `1px solid ${BLACK}08`, borderRadius: 14, padding: "13px 16px", marginBottom: 14 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: GRAY, margin: "0 0 10px" }}>
+              Personal Touches Included
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {personalTouches.map(t => (
+                <span
+                  key={t}
+                  style={{ padding: "4px 11px", borderRadius: 20, background: BEIGE, fontFamily: "'Inter', sans-serif", fontSize: "0.73rem", color: BLACK }}
+                >
+                  <span style={{ color: SAGE, fontWeight: 700 }}>✓ </span>{t}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* Share button */}
+        {/* Improve Future Cards */}
+        {showImprove && (
+          <div style={{ background: BEIGE, borderRadius: 14, padding: "13px 16px", marginBottom: 16, borderLeft: `3px solid ${SAGE}` }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" as const, color: SAGE, margin: "0 0 4px" }}>
+              Improve Future Cards
+            </p>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", color: GRAY, margin: "0 0 10px", lineHeight: 1.5 }}>
+              The more we know about {firstName}, the more personal the cards will feel.
+            </p>
+            <button
+              onClick={() => setLocation(`/recipients/${recipientId}`)}
+              style={{ padding: "7px 14px", borderRadius: 8, border: `1.5px solid ${SAGE}`, background: "none", color: SAGE, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
+            >
+              Add Details for {firstName} →
+            </button>
+          </div>
+        )}
+
         <ShareDraftButton text={currentText} recipientName={firstName} />
       </WizardShell>
     );
@@ -904,37 +1044,38 @@ export default function CardFlowV2() {
 
   // ── FINAL ────────────────────────────────────────────────────────────────────
   if (phase === "final") {
-    const finalText = editedTexts[activeCard] ?? "";
+    const finalText = draftVersions.find(d => d.id === activeDraftId)?.text ?? "";
 
     return (
-      <WizardShell progress={1} onBack={() => setPhase("results")}>
+      <WizardShell progress={1} onBack={() => { setShowConfirm(true); setPhase("results"); }}>
         <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 6 }}>
-          YOUR CARD
+          YOU'RE ALL SET
         </h2>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", color: GRAY, marginBottom: 20 }}>
-          Edit as much or as little as you like.
+          Subscribe to send this card and never forget an important date again.
         </p>
 
-        <div style={{ background: BEIGE, borderRadius: 16, padding: "20px 18px", marginBottom: 24 }}>
+        <div style={{ background: BEIGE, borderRadius: 16, padding: "18px 18px 20px", marginBottom: 24 }}>
           <textarea
             value={finalText}
-            onChange={e => setEditedTexts(prev => prev.map((t, i) => i === activeCard ? e.target.value : t))}
+            onChange={e => updateCurrentDraft(e.target.value)}
             style={{ width: "100%", minHeight: 200, background: "transparent", border: "none", outline: "none", fontFamily: "'Caveat', cursive", fontSize: "1.25rem", lineHeight: 1.75, color: BLACK, resize: "vertical", boxSizing: "border-box", fontWeight: 600 } as React.CSSProperties}
           />
         </div>
 
-        {/* Profile summary chip */}
-        <div style={{ background: BEIGE, borderRadius: 12, padding: "12px 16px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: "1.2rem" }}>💾</span>
-          <div>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", fontWeight: 700, color: BLACK, margin: 0 }}>
-              {firstName}'s profile has been saved
-            </p>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", color: GRAY, margin: 0 }}>
-              Future cards will automatically use what we learned today.
-            </p>
+        {recipientId && (
+          <div style={{ background: BEIGE, borderRadius: 12, padding: "12px 16px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: "1.2rem" }}>💾</span>
+            <div>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", fontWeight: 700, color: BLACK, margin: 0 }}>
+                {firstName}'s profile has been saved
+              </p>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", color: GRAY, margin: 0 }}>
+                Future cards will automatically use what we learned today.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <button
           onClick={() => setLocation("/subscribe")}
@@ -945,11 +1086,7 @@ export default function CardFlowV2() {
         </button>
 
         <button
-          onClick={() => {
-            setPhase("who");
-            setFirstName(""); setRelationship("");
-            setAnswers({}); setCards([]); setRecipientId(null);
-          }}
+          onClick={() => { setPhase("who"); setFirstName(""); setRelationship(""); setAnswers({}); setDraftVersions([]); setRecipientId(null); setDesign(null); }}
           style={{ width: "100%", marginTop: 12, padding: 13, borderRadius: 12, border: `1.5px solid ${BLACK}15`, background: "none", color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", cursor: "pointer" }}
         >
           Start a new card

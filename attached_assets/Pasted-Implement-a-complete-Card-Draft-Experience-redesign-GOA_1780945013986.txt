@@ -1,0 +1,301 @@
+Implement a complete Card Draft Experience redesign.
+
+GOAL
+
+The generated card should feel like a thoughtful draft that helps the user, not a finished AI-generated card.
+
+The user should immediately understand:
+
+"This is a starting point that I can review, edit, approve, or improve."
+
+The card itself remains the hero.
+
+The AI remains mostly invisible.
+
+---
+
+PAGE HIERARCHY
+
+Current card page should be reorganized into:
+
+1. Draft Status Header
+2. Card Draft
+3. Action Buttons
+4. Personal Touches Included
+5. Optional Improvement Suggestions
+
+The card draft should remain the largest and most prominent element.
+
+---
+
+DRAFT STATUS HEADER
+
+Above the card display:
+
+Title:
+
+Draft Generated
+
+Subtitle:
+
+Review and personalize before sending.
+
+Alternative copy:
+
+We've prepared a draft based on what we know about this relationship.
+
+Use calm, reassuring language.
+
+Do not mention AI.
+
+Do not use technical language.
+
+---
+
+CARD DRAFT CONTAINER
+
+The card draft should visually feel editable.
+
+The current experience feels too much like a final answer.
+
+Adjust styling to communicate:
+
+Working Draft
+
+Potential ideas:
+
+Subtle "Draft" badge
+
+Soft paper/card appearance
+
+Edit icon
+
+Light draft watermark
+
+Do not overdo it.
+
+Keep the design clean.
+
+---
+
+PRIMARY ACTIONS
+
+Directly below the card.
+
+Primary button:
+
+Approve & Send
+
+Secondary buttons:
+
+Edit Draft
+
+Regenerate Draft
+
+Start Over
+
+Button hierarchy:
+
+Approve & Send = strongest visual emphasis
+
+Edit Draft = second
+
+Regenerate = tertiary
+
+Start Over = least prominent
+
+---
+
+EDIT MODE
+
+When Edit Draft is clicked:
+
+Switch to editing mode.
+
+Allow direct editing of the card text.
+
+Do not force regeneration.
+
+User edits should feel natural.
+
+Changes should auto-save while editing if practical.
+
+---
+
+REGENERATE EXPERIENCE
+
+When Regenerate Draft is selected:
+
+Generate a new version using the same memory context.
+
+Preserve access to the previous version.
+
+Store draft history:
+
+Version 1
+Version 2
+Version 3
+
+Allow users to return to previous drafts.
+
+Do not discard earlier drafts.
+
+---
+
+PERSONAL TOUCHES INCLUDED
+
+Below action buttons.
+
+Title:
+
+Personal Touches Included
+
+Display concise chips or bullets.
+
+Examples:
+
+✓ Recent accomplishment
+
+✓ Family memory
+
+✓ New hobby
+
+✓ Recent life update
+
+Keep descriptions short.
+
+Do not expose raw memory records.
+
+Do not explain AI reasoning.
+
+Purpose:
+
+Provide confidence that the card is personalized.
+
+---
+
+IMPROVE FUTURE CARDS
+
+Show only when useful.
+
+Examples:
+
+We have not received a recent update in several months.
+
+We do not know what they are excited about right now.
+
+We have very few personal memories for this recipient.
+
+Button:
+
+Add Update
+
+Should open Fresh Update flow.
+
+Keep this section small.
+
+Never let it overpower the card draft.
+
+---
+
+DRAFT HISTORY
+
+Store all generated drafts.
+
+Structure:
+
+Card
+Version Number
+Created Date
+
+Example:
+
+Draft 1
+Draft 2
+Draft 3
+
+Allow switching between versions.
+
+Do not expose raw generation metadata.
+
+Purpose:
+
+Reduce fear of regeneration.
+
+Users should feel safe experimenting.
+
+---
+
+APPROVE & SEND EXPERIENCE
+
+When clicked:
+
+Show confirmation screen.
+
+Summary:
+
+Recipient
+
+Occasion
+
+Scheduled send date
+
+Final message preview
+
+Actions:
+
+Send Card
+
+Back to Draft
+
+This is the final checkpoint before delivery.
+
+---
+
+MOBILE EXPERIENCE
+
+The card text must remain the primary focus.
+
+Buttons should stack cleanly.
+
+Avoid clutter.
+
+Avoid dashboard-style layouts.
+
+---
+
+DESIGN PHILOSOPHY
+
+FiForgot is not an AI writing tool.
+
+FiForgot is a relationship assistant.
+
+The user should feel:
+
+"I wrote a better card because FiForgot helped me remember."
+
+NOT:
+
+"AI wrote my card."
+
+The draft experience should reinforce that philosophy throughout the entire flow.
+
+---
+
+SUCCESS CRITERIA
+
+Users immediately understand:
+
+This is a draft.
+
+They are still in control.
+
+They can edit it.
+
+They can regenerate it safely.
+
+The card feels personal.
+
+The recipient remains the hero.
+
+The AI stays mostly invisible.
