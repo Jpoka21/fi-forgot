@@ -502,8 +502,13 @@ export default function DashboardPage() {
             <div>
 
               {/* ── UPCOMING MOMENTS ──────────────────────────────── */}
-              <div style={{ marginBottom: 40 }}>
-                <SHead text="Upcoming Moments" sub="What needs your attention right now." />
+              <div style={{ marginBottom: 52 }}>
+                <div style={{ marginBottom: 22 }}>
+                  <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "2rem" : "2.6rem", letterSpacing: "0.02em", color: INK, margin: 0, lineHeight: 1 }}>
+                    Upcoming Moments
+                  </h2>
+                  <p style={{ margin: "8px 0 0", fontSize: "0.88rem", color: MID, lineHeight: 1.6 }}>What needs your attention right now.</p>
+                </div>
                 {allUpcomingEvents.length === 0 ? (
                   <div style={{ background: WHITE, borderRadius: 18, padding: "36px 28px", textAlign: "center" as const, border: `1px solid ${BORDER}` }}>
                     <div style={{ fontSize: "2rem", marginBottom: 12 }}>🎉</div>
@@ -519,8 +524,6 @@ export default function DashboardPage() {
                         const matchedCard  = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
                         const hasCard      = upcomingWithCardKeys.has(genKey);
                         const isApproved   = matchedCard?.status === "Approved";
-                        const rh           = health.recipientHealths.find(h => h.id === ev.recipient.id);
-                        const sl           = rh ? personScoreLabel(rh.score) : null;
 
                         let statusText = ""; let statusColor = MID; let statusGood = false;
                         if (isApproved)             { statusText = "Card approved, on its way";       statusColor = SAGE;      statusGood = true; }
@@ -538,51 +541,52 @@ export default function DashboardPage() {
                         else                      { ctaLabel = "Add a memory";       ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
 
                         return (
-                          <div key={genKey} style={{ background: WHITE, borderRadius: 18, padding: "20px 20px 18px", border: `1px solid ${BORDER}`, display: "flex", gap: 16, position: "relative" as const, overflow: "hidden" }}>
-                            {ev.daysAway <= 14 && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: ev.daysAway <= 7 ? RED : "#D97706", borderRadius: "18px 18px 0 0" }} />}
-                            <div style={{ width: 54, height: 54, borderRadius: 13, background: `${INK}10`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2, fontSize: "1.5rem" }}>
+                          <div key={genKey} style={{ background: WHITE, borderRadius: 20, padding: isMobile ? "20px 18px" : "24px 28px", border: `1px solid ${ev.daysAway <= 7 ? `${RED}40` : BORDER}`, display: "flex", gap: isMobile ? 14 : 20, alignItems: "flex-start" }}>
+                            <div style={{ width: 62, height: 62, borderRadius: 16, background: BEIGE, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem", border: `1px solid ${BORDER}` }}>
                               {relationshipEmoji(ev.recipient.relationship)}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ marginBottom: 10 }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const }}>
-                                  <div style={{ fontWeight: 800, fontSize: "1.1rem", color: INK, lineHeight: 1 }}>{ev.recipient.name}</div>
-                                  {sl && <span style={{ fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 10, background: `${sl.color}14`, color: sl.color }}>{sl.text}</span>}
-                                </div>
-                                <div style={{ fontSize: "0.78rem", color: MID, marginTop: 3 }}>{ev.recipient.relationship}</div>
-                              </div>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                                <span style={{ fontSize: "1.4rem" }}>{eventEmoji(ev.event)}</span>
+                              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
                                 <div>
-                                  <span style={{ fontWeight: 700, fontSize: "0.96rem", color: INK }}>{ev.event}</span>
-                                  <span style={{ fontSize: "0.84rem", fontWeight: 700, color: daysColor(ev.daysAway), marginLeft: 10 }}>{ev.daysAway}d away</span>
-                                  <span style={{ fontSize: "0.78rem", color: MID, marginLeft: 6 }}>· {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                                  <div style={{ fontWeight: 800, fontSize: "1.15rem", color: INK, lineHeight: 1.1 }}>{ev.recipient.name}</div>
+                                  <div style={{ fontSize: "0.78rem", color: MID, marginTop: 3 }}>{ev.recipient.relationship}</div>
+                                </div>
+                                <div style={{ textAlign: "right" as const, flexShrink: 0 }}>
+                                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: daysColor(ev.daysAway), lineHeight: 1 }}>{ev.daysAway}</div>
+                                  <div style={{ fontSize: "0.63rem", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: daysColor(ev.daysAway) }}>days</div>
                                 </div>
                               </div>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.82rem", fontWeight: 600, color: statusColor }}>
-                                  {statusGood
-                                    ? <CheckCircle2 size={13} style={{ flexShrink: 0 }} />
-                                    : <span style={{ width: 13, height: 13, borderRadius: "50%", border: `2px solid ${statusColor}`, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "0.55rem", fontWeight: 900 }}>!</span>}
+                              <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 13, marginBottom: 13 }}>
+                                <span style={{ fontSize: "1.2rem" }}>{eventEmoji(ev.event)}</span>
+                                <span style={{ fontWeight: 700, fontSize: "1rem", color: INK }}>{ev.event}</span>
+                                <span style={{ fontSize: "0.8rem", color: MID }}>· {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                              </div>
+                              {!statusGood && (
+                                <div style={{ fontSize: "0.78rem", fontWeight: 600, color: statusColor, marginBottom: 11, display: "flex", alignItems: "center", gap: 5 }}>
+                                  <span style={{ width: 12, height: 12, borderRadius: "50%", border: `2px solid ${statusColor}`, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "0.5rem", fontWeight: 900 }}>!</span>
                                   {statusText}
                                 </div>
-                                <div style={{ display: "flex", gap: 6, marginLeft: "auto", flexWrap: "wrap" as const }}>
-                                  <button onClick={ctaAction} style={{ padding: "7px 14px", background: ctaRed ? RED : `${INK}08`, color: ctaRed ? WHITE : INK, border: "none", borderRadius: 9, fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
-                                    {ctaLabel}
+                              )}
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const }}>
+                                <button onClick={ctaAction} style={{ padding: "8px 18px", background: ctaRed ? RED : INK, color: WHITE, border: "none", borderRadius: 10, fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>
+                                  {ctaLabel}
+                                </button>
+                                <Link href={`/recipients/${ev.recipient.id}?from=dashboard`}>
+                                  <button style={{ padding: "8px 12px", background: "none", border: "none", fontSize: "0.78rem", color: MID, cursor: "pointer", textDecoration: "underline" as const, textUnderlineOffset: "3px" }}>
+                                    View profile
                                   </button>
-                                  <Link href={`/recipients/${ev.recipient.id}?from=dashboard`}>
-                                    <button style={{ padding: "7px 12px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 9, fontSize: "0.76rem", color: MID, cursor: "pointer" }}>
-                                      View person
-                                    </button>
-                                  </Link>
-                                  {!hasCard && !isApproved && !isGenerating && (
-                                    <button onClick={() => generateEarly(ev)} disabled={!!generatingFor}
-                                      style={{ padding: "7px 11px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 9, fontSize: "0.76rem", color: MID, cursor: !!generatingFor ? "default" : "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                                      <Sparkles size={11} /> Generate
-                                    </button>
-                                  )}
-                                  {isGenerating && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.76rem", color: MID, padding: "7px 11px" }}><Loader2 size={11} className="animate-spin" /> Writing…</span>}
-                                </div>
+                                </Link>
+                                {!hasCard && !isApproved && !isGenerating && (
+                                  <button onClick={() => generateEarly(ev)} disabled={!!generatingFor}
+                                    style={{ padding: "8px 12px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 9, fontSize: "0.76rem", color: MID, cursor: !!generatingFor ? "default" : "pointer", display: "flex", alignItems: "center", gap: 4, marginLeft: "auto" }}>
+                                    <Sparkles size={11} /> Generate
+                                  </button>
+                                )}
+                                {isGenerating && (
+                                  <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.76rem", color: MID, padding: "8px 0", marginLeft: "auto" }}>
+                                    <Loader2 size={11} className="animate-spin" /> Writing…
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -604,7 +608,7 @@ export default function DashboardPage() {
               </div>
 
               {/* ── YOUR PEOPLE ────────────────────────────────────── */}
-              <div style={{ marginBottom: 40 }}>
+              <div style={{ marginBottom: 52 }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, gap: 12 }}>
                   <SHead text="Your People" sub="Everyone you're looking out for." />
                   <Link href="/recipients/new">
@@ -619,25 +623,25 @@ export default function DashboardPage() {
                   <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search your people…"
                     style={{ width: "100%", padding: "10px 12px 10px 36px", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: "0.86rem", color: INK, outline: "none", boxSizing: "border-box" as const }} />
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(185px, 1fr))", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 }}>
                   {filteredRecipients.map(r => {
                     const nextEv = allUpcomingEvents.find(ev => ev.recipient.id === r.id);
                     return (
                       <Link key={r.id} href={`/recipients/${r.id}?from=dashboard`} style={{ textDecoration: "none" }}>
                         <div
-                          style={{ background: WHITE, borderRadius: 14, padding: "16px 16px 14px", border: `1px solid ${BORDER}`, cursor: "pointer", boxSizing: "border-box" as const, transition: "border-color 0.15s" }}
-                          onMouseEnter={e => ((e.currentTarget as HTMLDivElement).style.borderColor = INK)}
-                          onMouseLeave={e => ((e.currentTarget as HTMLDivElement).style.borderColor = BORDER)}
+                          style={{ background: WHITE, borderRadius: 16, padding: "20px 18px 18px", border: `1px solid ${BORDER}`, cursor: "pointer", boxSizing: "border-box" as const, transition: "border-color 0.15s, box-shadow 0.15s" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = INK; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 12px rgba(0,0,0,0.07)"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = BORDER; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
                         >
-                          <div style={{ fontSize: "1.9rem", marginBottom: 8, lineHeight: 1 }}>{relationshipEmoji(r.relationship)}</div>
-                          <div style={{ fontWeight: 800, fontSize: "0.96rem", color: INK, lineHeight: 1.2 }}>{r.name}</div>
+                          <div style={{ fontSize: "2.2rem", marginBottom: 10, lineHeight: 1 }}>{relationshipEmoji(r.relationship)}</div>
+                          <div style={{ fontWeight: 800, fontSize: "1rem", color: INK, lineHeight: 1.2 }}>{r.name}</div>
                           <div style={{ fontSize: "0.75rem", color: MID, marginTop: 3 }}>{r.relationship}</div>
                           {nextEv ? (
-                            <div style={{ marginTop: 9, display: "inline-flex", alignItems: "center", gap: 4, background: nextEv.daysAway <= 7 ? `${RED}10` : BEIGE, borderRadius: 6, padding: "3px 8px", fontSize: "0.7rem", fontWeight: 600, color: nextEv.daysAway <= 7 ? RED : MID }}>
+                            <div style={{ marginTop: 11, display: "inline-flex", alignItems: "center", gap: 4, background: nextEv.daysAway <= 7 ? `${RED}10` : BEIGE, borderRadius: 6, padding: "4px 9px", fontSize: "0.72rem", fontWeight: 600, color: nextEv.daysAway <= 7 ? RED : MID }}>
                               {eventEmoji(nextEv.event)} {nextEv.event} in {nextEv.daysAway}d
                             </div>
                           ) : (r.selectedEvents?.length ?? 0) > 0 ? (
-                            <div style={{ marginTop: 9, fontSize: "0.7rem", color: MID }}>{r.selectedEvents!.length} occasion{r.selectedEvents!.length !== 1 ? "s" : ""} tracked</div>
+                            <div style={{ marginTop: 11, fontSize: "0.72rem", color: MID }}>{r.selectedEvents!.length} occasion{r.selectedEvents!.length !== 1 ? "s" : ""} tracked</div>
                           ) : null}
                         </div>
                       </Link>
@@ -646,19 +650,36 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {/* ── QUICK CARD placeholder ─────────────────────────── */}
+              <div style={{ marginBottom: 48 }}>
+                <SHead text="Quick Card" sub="Need a card right now? Generate one in under 60 seconds." />
+                <div style={{ background: WHITE, borderRadius: 18, padding: isMobile ? "28px 20px" : "32px 36px", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" as const }}>
+                  <div style={{ fontSize: "2.4rem", lineHeight: 1, flexShrink: 0 }}>⚡</div>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.04em", color: INK, marginBottom: 4 }}>QUICK CARD</div>
+                    <p style={{ fontSize: "0.86rem", color: MID, lineHeight: 1.6, margin: 0 }}>
+                      Generate a thoughtful card for anyone in under 60 seconds.
+                    </p>
+                  </div>
+                  <span style={{ display: "inline-block", background: `${INK}08`, color: MID, borderRadius: 20, padding: "6px 16px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", flexShrink: 0 }}>COMING SOON</span>
+                </div>
+              </div>
+
               {/* ── RELATIONSHIP INSIGHTS ──────────────────────────── */}
               <div style={{ marginBottom: 36 }}>
-                <SHead text="Relationship Insights" sub="How you're doing with the people who matter." />
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 10, marginBottom: 20 }}>
+                <div style={{ marginBottom: 14 }}>
+                  <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", letterSpacing: "0.03em", color: MID, margin: 0, lineHeight: 1, fontWeight: 400 }}>Relationship Insights</h3>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: 20 }}>
                   {momentsAtRisk > 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${RED}10`, borderRadius: 20, padding: "7px 14px", fontSize: "0.82rem", fontWeight: 600, color: RED }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${RED}10`, borderRadius: 20, padding: "6px 13px", fontSize: "0.8rem", fontWeight: 600, color: RED }}>
                       ⚠ {momentsAtRisk} moment{momentsAtRisk !== 1 ? "s" : ""} need{momentsAtRisk === 1 ? "s" : ""} attention
                     </div>
                   )}
                   {health.recipientHealths.filter(r => r.score < 45).length > 0 && (() => {
                     const n = health.recipientHealths.filter(r => r.score < 45).length;
                     return (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${SAGE}12`, borderRadius: 20, padding: "7px 14px", fontSize: "0.82rem", fontWeight: 600, color: SAGE }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${SAGE}12`, borderRadius: 20, padding: "6px 13px", fontSize: "0.8rem", fontWeight: 600, color: SAGE }}>
                         👥 {n} {n === 1 ? "person needs" : "people need"} updates
                       </div>
                     );
@@ -666,25 +687,13 @@ export default function DashboardPage() {
                   {(() => {
                     const n = allUpcomingEvents.filter(e => e.daysAway <= 14 && !e.briefingDone).length;
                     return n > 0 ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${INK}07`, borderRadius: 20, padding: "7px 14px", fontSize: "0.82rem", fontWeight: 600, color: INK }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${INK}07`, borderRadius: 20, padding: "6px 13px", fontSize: "0.8rem", fontWeight: 600, color: INK }}>
                         📅 {n} upcoming event{n !== 1 ? "s" : ""} {n === 1 ? "needs" : "need"} attention
                       </div>
                     ) : null;
                   })()}
                 </div>
                 <RelationshipHealthSection isMobile={isMobile} />
-              </div>
-
-              {/* ── QUICK CARD placeholder ─────────────────────────── */}
-              <div style={{ marginBottom: 40 }}>
-                <div style={{ background: WHITE, borderRadius: 18, padding: isMobile ? "28px 20px" : "32px 36px", border: `2px dashed ${BORDER}`, textAlign: "center" as const }}>
-                  <div style={{ fontSize: "2rem", marginBottom: 10 }}>⚡</div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.04em", color: INK, marginBottom: 8 }}>QUICK CARD</div>
-                  <span style={{ display: "inline-block", background: `${INK}08`, color: MID, borderRadius: 20, padding: "4px 14px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 14 }}>COMING SOON</span>
-                  <p style={{ fontSize: "0.88rem", color: MID, lineHeight: 1.65, margin: "0 auto", maxWidth: 300 }}>
-                    Generate a thoughtful card in under 60 seconds.
-                  </p>
-                </div>
               </div>
 
               {/* ── Bottom row: Recommended Next Step + Plan/Score ─── */}
@@ -734,22 +743,25 @@ export default function DashboardPage() {
                     <ThinBar pct={usagePct} color={atLimit ? RED : usagePct > 75 ? "#F59E0B" : SAGE} h={4} />
                   </div>
                   {health.score > 0 && (
-                    <div style={{ background: WHITE, borderRadius: 14, padding: "15px 18px", border: `1px solid ${BORDER}` }}>
-                      <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: health.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{displayScore}</div>
-                        <div style={{ paddingBottom: 4 }}>
-                          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: MID, letterSpacing: "0.08em" }}>BROWNIE POINTS</div>
-                          <div style={{ fontSize: "0.8rem", fontWeight: 600, color: health.color }}>{health.label}</div>
-                        </div>
+                    <div style={{ background: WHITE, borderRadius: 14, padding: "18px 20px", border: `1px solid ${BORDER}` }}>
+                      <div style={{ fontSize: "0.72rem", fontWeight: 700, color: MID, letterSpacing: "0.08em", marginBottom: 10 }}>🍪 BROWNIE POINTS</div>
+                      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginBottom: 6 }}>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.4rem", color: health.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{displayScore}</div>
+                        <div style={{ paddingBottom: 7, fontSize: "0.82rem", fontWeight: 700, color: health.color }}>{health.label}</div>
                       </div>
+                      <p style={{ fontSize: "0.8rem", color: MID, margin: "0 0 12px", lineHeight: 1.5 }}>
+                        {displayScore >= 80 ? "You're crushing it — keep going! 🎉"
+                         : displayScore >= 60 ? "Good progress. Small touches add up."
+                         : "Every profile you fill out earns points."}
+                      </p>
                       <button onClick={() => {
                         if (health.topInsight) {
                           const rh = health.recipientHealths.find(r => r.name === health.topInsight?.recipientName);
                           setLocation(rh?.topGapHref ?? "/recipients");
                         } else setLocation("/recipients");
                       }}
-                        style={{ marginTop: 10, padding: "6px 12px", background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, color: INK, cursor: "pointer" }}>
-                        Improve a profile →
+                        style={{ padding: "7px 14px", background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, color: INK, cursor: "pointer" }}>
+                        Earn more points →
                       </button>
                     </div>
                   )}

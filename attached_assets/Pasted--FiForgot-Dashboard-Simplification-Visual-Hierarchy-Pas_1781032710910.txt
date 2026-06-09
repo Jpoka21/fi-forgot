@@ -1,0 +1,293 @@
+# FiForgot Dashboard Simplification & Visual Hierarchy Pass
+
+IMPORTANT
+
+Do NOT redesign the dashboard from scratch.
+
+Do NOT remove functionality.
+
+Do NOT change database structures.
+
+Do NOT change backend logic.
+
+Do NOT remove Brownie Points.
+
+Do NOT remove Relationship Health.
+
+Do NOT remove Insights.
+
+This is a visual hierarchy and UX refinement project.
+
+The goal is to make the dashboard feel cleaner, calmer, more premium, and easier to understand.
+
+---
+
+# PRIMARY GOAL
+
+When a user lands on the dashboard, their eyes should naturally follow this order:
+
+1. Upcoming Moments
+2. Your People
+3. Everything Else
+
+If all sections feel equally important, the design has failed.
+
+---
+
+# KEEP
+
+Keep:
+
+We Got Your Back
+
+Upcoming Moments
+
+Your People
+
+Relationship Insights
+
+Relationship Health
+
+Quick Card
+
+Brownie Points
+
+All existing functionality
+
+---
+
+# VISUAL HIERARCHY
+
+The dashboard currently feels crowded because every section has equal visual weight.
+
+Create stronger hierarchy.
+
+Make some things visually dominant.
+
+Make some things visually quiet.
+
+Not everything should compete for attention.
+
+---
+
+# SECTION 1: UPCOMING MOMENTS
+
+This should be the hero section.
+
+It is the core reason people use FiForgot.
+
+Increase visual prominence.
+
+Increase spacing.
+
+Make cards easier to scan.
+
+Reduce visual clutter.
+
+Focus on:
+
+Name
+
+Occasion
+
+Days remaining
+
+Generate Card button
+
+Everything else should be secondary.
+
+---
+
+# SECTION 2: YOUR PEOPLE
+
+Move this higher visually.
+
+Increase card size.
+
+Make recipients feel like people.
+
+Not database records.
+
+Use relationship icons instead of initials.
+
+Examples:
+
+❤️ Wife
+
+👨 Dad
+
+👩 Mom
+
+🤝 Friend
+
+👦 Son
+
+👧 Daughter
+
+Each person card should show:
+
+Name
+
+Relationship
+
+Next occasion
+
+Nothing more.
+
+Keep it simple.
+
+---
+
+# SECTION 3: QUICK CARD
+
+Move Quick Card much higher.
+
+Place it directly below Your People or directly below Upcoming Moments.
+
+Quick Card should feel like:
+
+Need a card right now?
+
+Generate one in under 60 seconds.
+
+Do not fully build the workflow yet.
+
+Focus on placement and presentation.
+
+---
+
+# RELATIONSHIP INSIGHTS
+
+Demote visually.
+
+Keep the functionality.
+
+Reduce visual weight.
+
+This is supporting information.
+
+Not primary information.
+
+---
+
+# RELATIONSHIP HEALTH
+
+Keep it.
+
+Do not remove it.
+
+Move lower on the page.
+
+Reduce visual emphasis.
+
+Use it as supporting intelligence.
+
+Not a hero section.
+
+---
+
+# BROWNIE POINTS
+
+Keep Brownie Points.
+
+Make them feel fun.
+
+Not like a KPI dashboard.
+
+Not like business software.
+
+Think reward.
+
+Think encouragement.
+
+Think progress.
+
+---
+
+# WHITESPACE
+
+Increase whitespace significantly.
+
+The current dashboard feels crowded.
+
+Add more breathing room between sections.
+
+Add more breathing room inside cards.
+
+Allow important sections to breathe.
+
+---
+
+# BORDERS
+
+Reduce heavy borders.
+
+Many cards currently compete visually.
+
+Use fewer borders.
+
+Use softer dividers.
+
+Allow buttons and actions to stand out instead.
+
+---
+
+# TYPOGRAPHY
+
+Strengthen hierarchy.
+
+Large headlines.
+
+Medium section titles.
+
+Small supporting text.
+
+A user should instantly know:
+
+What is most important
+
+What is secondary
+
+What is optional
+
+---
+
+# PREMIUM FEEL
+
+Use the design concepts already created as inspiration.
+
+The dashboard should feel:
+
+Cleaner
+
+More confident
+
+More premium
+
+More modern
+
+Less busy
+
+Less crowded
+
+Less like a collection of widgets
+
+More like a cohesive product
+
+---
+
+# FINAL TEST
+
+A new user should be able to understand the dashboard in under 10 seconds.
+
+They should immediately know:
+
+Who needs attention
+
+How to send a card
+
+Who matters to them
+
+Without explanation.
+
+After implementation, provide screenshots before making any additional dashboard changes.
