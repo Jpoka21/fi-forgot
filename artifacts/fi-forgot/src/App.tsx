@@ -32,6 +32,9 @@ import CardPreviewPage from "@/pages/card-preview";
 import CardFlowV2Page from "@/pages/card-flow-v2";
 import CardsReviewPage from "@/pages/cards-review";
 import BrowniePointsPage from "@/pages/brownie-points";
+import PeoplePage from "@/pages/people";
+import MomentsPage from "@/pages/moments";
+import QuickCardPage from "@/pages/quick-card";
 import { BrowniePointsProvider } from "@/lib/brownie-points-context";
 import { BrowniePointsToast } from "@/components/BrowniePointsToast";
 
@@ -120,6 +123,15 @@ function Router() {
       <Route path="/brownie-points">
         <ProtectedRoute component={BrowniePointsPage} />
       </Route>
+      <Route path="/people">
+        <ProtectedRoute component={PeoplePage} />
+      </Route>
+      <Route path="/moments">
+        <ProtectedRoute component={MomentsPage} />
+      </Route>
+      <Route path="/quick-card">
+        <ProtectedRoute component={QuickCardPage} />
+      </Route>
       <Route path="/settings/reminders">
         <ProtectedRoute component={ReminderSettingsPage} />
       </Route>
@@ -146,7 +158,7 @@ function Router() {
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo", "/brownie-points"];
+const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo", "/brownie-points", "/people", "/moments", "/quick-card"];
 
 function FloatingTryButton() {
   const [location] = useLocation();

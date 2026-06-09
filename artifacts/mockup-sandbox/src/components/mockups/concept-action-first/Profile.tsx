@@ -1,145 +1,201 @@
-import React from "react";
-import { ArrowLeft, Clock, MessageSquare, PenTool, CheckCircle, Edit3, Heart } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from "react";
+import { ArrowLeft, Send, Clock, CheckCircle2, PenLine, StickyNote, ChevronDown, ChevronUp, Zap } from "lucide-react";
 
-const BRAND = {
-  BG: "#F2E6D3",
-  RED: "#E23B2E",
-  BLACK: "#111111",
-  SAGE: "#5B8C6B",
-  GRAY: "#6B6B6B",
-  BORDER: "#E5E0D8",
-};
+const BG     = "#F2E6D3";
+const RED    = "#E23B2E";
+const BLACK  = "#111111";
+const SAGE   = "#5B8C6B";
+const GRAY   = "#6B6B6B";
+const BORDER = "#E5E0D8";
+const WHITE  = "#FFFFFF";
+const AMBER  = "#D97706";
+
+const DATA_VERSION = "5";
+
+const PENDING_ACTIONS = [
+  {
+    id: 1, label: "Send Birthday Card",
+    description: "His 32nd is in 7 days — needs to be sent today to arrive in time.",
+    urgency: "high" as const, dueLabel: "Due today",
+  },
+  {
+    id: 2, label: "Log recent update",
+    description: "You mentioned Marcus got promoted 3 weeks ago. Add that memory before it fades.",
+    urgency: "medium" as const, dueLabel: "This week",
+  },
+];
+
+const CONTEXT = [
+  {
+    id: 1, type: "card", date: "Aug 5, 2024",
+    label: "Promotion congrats card",
+    note: "So proud of you for landing the Senior Director role. Drinks on me next time, seriously.",
+  },
+  {
+    id: 2, type: "memory", date: "Jul 12, 2024",
+    label: "Pour-over coffee obsession",
+    note: "He's totally into pour-over coffee now. Might be a perfect gift idea.",
+  },
+  {
+    id: 3, type: "card", date: "Oct 12, 2023",
+    label: "31st Birthday card",
+    note: "Happy birthday buddy. Another lap around the sun — here's to 31 being your best one yet.",
+  },
+  {
+    id: 4, type: "memory", date: "Jun 1, 2023",
+    label: "New apartment",
+    note: "Moved to Bushwick. Really loves the neighborhood, close to Prospect Park.",
+  },
+];
+
+function HealthRing({ score }: { score: number }) {
+  const r    = 28;
+  const circ = 2 * Math.PI * r;
+  const fill = (score / 100) * circ;
+  const col  = score >= 70 ? SAGE : score >= 50 ? AMBER : RED;
+  return (
+    <svg width="68" height="68" viewBox="0 0 68 68">
+      <circle cx="34" cy="34" r={r} fill="none" stroke={`${BLACK}10`} strokeWidth="6" />
+      <circle cx="34" cy="34" r={r} fill="none" stroke={col} strokeWidth="6"
+        strokeDasharray={`${fill} ${circ}`} strokeLinecap="round"
+        transform="rotate(-90 34 34)" />
+      <text x="34" y="34" textAnchor="middle" dominantBaseline="central"
+        style={{ fontSize: "13px", fontWeight: 700, fill: col, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        {score}
+      </text>
+    </svg>
+  );
+}
 
 export function Profile() {
-  return (
-    <div
-      className="min-h-screen p-8 lg:p-12"
-      style={{ backgroundColor: BRAND.BG, color: BRAND.BLACK, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-    >
-      <header className="mb-12 max-w-4xl mx-auto flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="rounded-full hover:bg-black/5">
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
-        <h1
-          className="text-4xl uppercase tracking-wider pt-2"
-          style={{ fontFamily: "'Bebas Neue', sans-serif" }}
-        >
-          BACK TO ACTION QUEUE
-        </h1>
-      </header>
+  const [expanded, setExpanded] = useState<number | null>(1);
+  const [actionDone, setActionDone] = useState<Set<number>>(new Set());
 
-      <main className="max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-1 space-y-6">
-            <div className="text-center bg-white p-8 rounded-2xl shadow-sm border border-[#E5E0D8]">
-              <Avatar className="h-32 w-32 mx-auto mb-4 border-4 shadow-sm" style={{ borderColor: BRAND.BG }}>
-                <AvatarFallback>MC</AvatarFallback>
-                <AvatarImage src="https://i.pravatar.cc/150?u=marcus" />
-              </Avatar>
-              <h2 className="text-3xl font-bold mb-1">Marcus</h2>
-              <p className="text-lg mb-4" style={{ color: BRAND.GRAY }}>Best Friend</p>
-              
-              <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full mb-6" style={{ backgroundColor: `${BRAND.SAGE}20`, color: BRAND.SAGE }}>
-                <Heart className="h-5 w-5 fill-current" />
-                <span className="font-bold">Health: 92/100</span>
-              </div>
-              
-              <div className="flex flex-col gap-2">
-                <Button className="w-full justify-start" variant="outline">
-                  <Edit3 className="mr-2 h-4 w-4" /> Edit Profile
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <MessageSquare className="mr-2 h-4 w-4" /> Add Note
-                </Button>
+  const markDone = (id: number) => {
+    const next = new Set(actionDone);
+    next.add(id);
+    setActionDone(next);
+  };
+
+  return (
+    <div style={{ background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK }}>
+
+      {/* ── Nav ── */}
+      <nav style={{ padding: "1.25rem 2.5rem", display: "flex", alignItems: "center", gap: "0.75rem", borderBottom: `1px solid ${BORDER}` }}>
+        <button style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.78rem", background: "none", border: "none", cursor: "pointer", color: BLACK }}>
+          <ArrowLeft size={16} /> Action Queue
+        </button>
+      </nav>
+
+      <main style={{ maxWidth: "820px", margin: "0 auto", padding: "2rem 2rem 5rem" }}>
+
+        {/* ── Person header ── */}
+        <header style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "2rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+            <div style={{ width: "5.5rem", height: "5.5rem", borderRadius: "999px", background: WHITE, border: `3px solid ${BLACK}`, boxShadow: `4px 4px 0 ${BLACK}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.75rem", flexShrink: 0 }}>
+              🧔
+            </div>
+            <div>
+              <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.3rem", color: SAGE, marginBottom: "-0.3rem" }}>best friend for 8 years</p>
+              <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "4rem", lineHeight: 0.95, letterSpacing: "0.02em", margin: "0 0 0.5rem" }}>
+                MARCUS
+              </h1>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.4rem" }}>
+                {["Best Friend", "New York, NY", "Coffee nerd", "Newly promoted"].map((t, i) => (
+                  <span key={i} style={{ padding: "0.2rem 0.6rem", borderRadius: "999px", border: `2px solid ${i === 0 ? BLACK : BORDER}`, fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", background: i === 0 ? BLACK : "transparent", color: i === 0 ? WHITE : GRAY }}>
+                    {t}
+                  </span>
+                ))}
               </div>
             </div>
-            
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E5E0D8]">
-              <h3 className="font-bold mb-4 uppercase tracking-wide text-sm" style={{ color: BRAND.GRAY }}>Key Dates</h3>
-              <ul className="space-y-3">
-                <li className="flex justify-between items-center pb-2 border-b border-[#E5E0D8]">
-                  <span>Birthday</span>
-                  <span className="font-medium">Oct 12</span>
-                </li>
-                <li className="flex justify-between items-center pb-2 border-b border-[#E5E0D8]">
-                  <span>Work Anniv.</span>
-                  <span className="font-medium">Mar 4</span>
-                </li>
-              </ul>
-            </div>
           </div>
-          
-          <div className="md:col-span-2 space-y-8">
-            <section>
-              <p
-                className="text-2xl uppercase tracking-wider mb-4"
-                style={{ fontFamily: "'Bebas Neue', sans-serif", color: BRAND.RED }}
-              >
-                PENDING ACTIONS
-              </p>
-              <Card
-                className="border-2 shadow-md overflow-hidden relative"
-                style={{ backgroundColor: "#FFFFFF", borderColor: BRAND.RED }}
-              >
-                <div className="p-6 sm:p-8">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h2 className="text-2xl font-bold mb-1">Send Birthday Card</h2>
-                      <p style={{ color: BRAND.GRAY }}>
-                        Due next week. His 32nd is coming up.
-                      </p>
-                    </div>
-                    <Badge variant="destructive" className="uppercase text-xs tracking-wider font-bold bg-red-100 text-red-600 hover:bg-red-100">
-                      High Priority
-                    </Badge>
-                  </div>
-                  <Button
-                    className="w-full text-lg py-6 mt-4 hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: BRAND.RED, color: "#FFFFFF" }}
-                  >
-                    <PenTool className="mr-2 h-5 w-5" />
-                    Draft Card Now
-                  </Button>
-                </div>
-              </Card>
-            </section>
-            
-            <section>
-              <p
-                className="text-2xl uppercase tracking-wider mb-4"
-                style={{ fontFamily: "'Bebas Neue', sans-serif" }}
-              >
-                RECENT CONTEXT
-              </p>
-              <div className="space-y-4">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-l-4 border-l-[#5B8C6B] border-y-[#E5E0D8] border-r-[#E5E0D8]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-4 w-4" style={{ color: BRAND.SAGE }} />
-                    <span className="font-medium text-sm" style={{ color: BRAND.SAGE }}>Card Sent &bull; 2 months ago</span>
-                  </div>
-                  <h3 className="font-bold mb-2">Promotion Congrats</h3>
-                  <p className="italic text-lg" style={{ fontFamily: "'Caveat', cursive", color: BRAND.GRAY }}>
-                    "So proud of you for landing the Senior role! Drinks on me next time."
-                  </p>
-                </div>
-                
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E5E0D8]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4" style={{ color: BRAND.GRAY }} />
-                    <span className="font-medium text-sm" style={{ color: BRAND.GRAY }}>Note Logged &bull; 4 months ago</span>
-                  </div>
-                  <p>
-                    Mentioned he's getting really into pour-over coffee lately. Might be a good gift idea eventually.
-                  </p>
-                </div>
-              </div>
-            </section>
+          <div style={{ textAlign: "center", flexShrink: 0 }}>
+            <HealthRing score={45} />
+            <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: GRAY, display: "block", marginTop: "0.2rem" }}>Health</span>
           </div>
+        </header>
+
+        {/* ── Pending actions ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+          <Zap size={16} fill={RED} style={{ color: RED }} />
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.5rem", letterSpacing: "0.06em", color: RED, margin: 0 }}>
+            PENDING ACTIONS
+          </h2>
+          <span style={{ fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: GRAY }}>
+            · {PENDING_ACTIONS.filter(a => !actionDone.has(a.id)).length} remaining
+          </span>
         </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "2.5rem" }}>
+          {PENDING_ACTIONS.map(action => {
+            const isDone = actionDone.has(action.id);
+            return (
+              <div key={action.id} style={{ background: WHITE, borderRadius: "1rem", border: `2px solid ${isDone ? `${SAGE}30` : action.urgency === "high" ? `${RED}35` : BORDER}`, padding: "1.25rem 1.5rem", opacity: isDone ? 0.5 : 1 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                  <div>
+                    <p style={{ fontWeight: 700, fontSize: "1rem", marginBottom: "0.1rem" }}>{action.label}</p>
+                    <span style={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", padding: "0.15rem 0.5rem", borderRadius: "999px", background: action.urgency === "high" ? `${RED}12` : `${AMBER}12`, color: action.urgency === "high" ? RED : AMBER }}>
+                      {action.dueLabel}
+                    </span>
+                  </div>
+                  {isDone ? (
+                    <CheckCircle2 size={20} style={{ color: SAGE, flexShrink: 0 }} />
+                  ) : (
+                    <button onClick={() => markDone(action.id)} style={{ width: "1.5rem", height: "1.5rem", borderRadius: "999px", border: `2px solid ${BORDER}`, background: "none", cursor: "pointer", flexShrink: 0 }} />
+                  )}
+                </div>
+                <p style={{ fontSize: "0.82rem", color: GRAY, lineHeight: 1.5, marginBottom: isDone ? 0 : "1rem" }}>{action.description}</p>
+                {!isDone && (
+                  <div style={{ display: "flex", gap: "0.6rem" }}>
+                    <button onClick={() => markDone(action.id)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", background: action.urgency === "high" ? RED : BLACK, color: WHITE, border: "none", borderRadius: "0.625rem", padding: "0.75rem", fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.05em", cursor: "pointer" }}>
+                      <Send size={16} />
+                      {action.id === 1 ? "Generate Card Now" : "Add Memory"}
+                    </button>
+                    <button style={{ padding: "0.75rem 1rem", background: "none", border: `2px solid ${BORDER}`, borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.78rem", color: GRAY, cursor: "pointer", whiteSpace: "nowrap" as const }}>
+                      Skip
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Context ── */}
+        <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.5rem", letterSpacing: "0.06em", marginBottom: "1rem" }}>
+          RECENT CONTEXT
+        </h2>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+          {CONTEXT.map((c, i) => (
+            <div key={c.id} style={{ background: WHITE, borderRadius: "0.875rem", border: `1px solid ${BORDER}`, overflow: "hidden" }}>
+              <div
+                style={{ padding: "0.9rem 1.25rem", display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}
+                onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+              >
+                <div style={{ width: "2rem", height: "2rem", borderRadius: "999px", background: c.type === "card" ? `${RED}12` : `${SAGE}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {c.type === "card" ? <Send size={12} style={{ color: RED }} /> : <StickyNote size={12} style={{ color: SAGE }} />}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontWeight: 700, fontSize: "0.88rem" }}>{c.label}</p>
+                  <p style={{ fontSize: "0.67rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: GRAY, display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <Clock size={10} /> {c.date}
+                  </p>
+                </div>
+                {expanded === c.id ? <ChevronUp size={14} style={{ color: GRAY, flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: GRAY, flexShrink: 0 }} />}
+              </div>
+              {expanded === c.id && (
+                <div style={{ padding: "0 1.25rem 1rem" }}>
+                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.35rem", lineHeight: 1.45, color: BLACK, padding: "0.75rem", background: BG, borderRadius: "0.5rem", border: `1px solid ${BORDER}` }}>
+                    "{c.note}"
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "none" }} data-version={DATA_VERSION} />
       </main>
     </div>
   );

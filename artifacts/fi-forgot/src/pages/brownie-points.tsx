@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
-import { ArrowLeft, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { getApiHeaders } from "@/lib/data";
+import AppNav from "@/components/layout/AppNav";
 
 const BEIGE  = "#F2E6D3";
 const INK    = "#1F1F1F";
@@ -76,17 +76,7 @@ export default function BrowniePointsPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: BEIGE, fontFamily: "'Inter', sans-serif", color: INK }}>
-
-      {/* Header */}
-      <header style={{ position: "sticky", top: 0, zIndex: 40, background: BEIGE, borderBottom: `1px solid ${BORDER}`, padding: `0 ${px}px`, height: 62, display: "flex", alignItems: "center", gap: 14 }}>
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", color: MID, textDecoration: "none" }}>
-          <ArrowLeft size={18} />
-        </Link>
-        <div style={{ display: "flex", alignItems: "baseline" }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 4 }}>F*</span>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: INK, letterSpacing: "0.04em" }}>I FORGOT</span>
-        </div>
-      </header>
+      <AppNav />
 
       <div style={{ maxWidth: 680, margin: "0 auto", padding: `40px ${px}px 80px`, boxSizing: "border-box" as const }}>
 

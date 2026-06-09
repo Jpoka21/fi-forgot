@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import {
   getCards, getRecipients, getBriefingsForRecipient,
@@ -11,14 +11,14 @@ import { useAuth } from "@/lib/auth-context";
 import { Plan, PLANS } from "@/lib/plan";
 import {
   Plus, Sparkles, Loader2, ChevronDown, ChevronUp,
-  Search, ArrowRight, Settings, CheckCircle2, TrendingUp, Target,
+  ArrowRight, Settings, CheckCircle2, TrendingUp, Target,
 } from "lucide-react";
+import AppNav from "@/components/layout/AppNav";
 import {
   computeOverallHealth, computeCoverage, getRecommendedAction,
   recordScoreSnapshot, getScoreHistory, CAT_LABELS, CAT_DESCRIPTIONS,
   TIER_WEIGHTS, ScoreSnapshot,
 } from "@/lib/relationship-health";
-import { useBrowniePoints } from "@/lib/brownie-points-context";
 import RelationshipHealthSection from "@/components/RelationshipHealthSection";
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
@@ -125,65 +125,12 @@ function SHead({ text, sub, emoji }: { text: string; sub?: string; emoji?: strin
   );
 }
 
-/* ── Account menu ─────────────────────────────────────────────────────────── */
-function AccountMenu({ user, onLogout }: { user: { name: string; email: string } | null; onLogout: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [, setLocation] = useLocation();
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
-  }, []);
-  const initial = user?.name?.charAt(0).toUpperCase() ?? "?";
-  return (
-    <div ref={ref} style={{ position: "relative" }}>
-      <button onClick={() => setOpen(o => !o)} data-testid="btn-account-menu"
-        style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 8 }}>
-        <div style={{ width: 34, height: 34, borderRadius: "50%", background: open ? RED : `${INK}12`, color: open ? WHITE : INK, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", transition: "all 0.15s" }}>
-          {initial}
-        </div>
-        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: INK }}>{user?.name?.split(" ")[0]}</span>
-        <ChevronDown size={13} style={{ color: MID }} />
-      </button>
-      {open && (
-        <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: WHITE, borderRadius: 12, minWidth: 210, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", zIndex: 200, border: `1px solid ${BORDER}` }}>
-          <div style={{ padding: "14px 18px 12px", borderBottom: `1px solid ${BORDER}` }}>
-            <p style={{ margin: 0, fontWeight: 700, fontSize: "0.9rem", color: INK }}>{user?.name}</p>
-            <p style={{ margin: "2px 0 0", fontSize: "0.76rem", color: MID }}>{user?.email}</p>
-          </div>
-          {[
-            { label: "Recipients",       action: () => { setOpen(false); setLocation("/recipients"); } },
-            { label: "Account Settings", action: () => alert("Coming soon") },
-            { label: "Admin Panel",      action: () => { setOpen(false); setLocation("/admin"); } },
-          ].map(item => (
-            <button key={item.label} onClick={() => { item.action(); setOpen(false); }}
-              style={{ display: "block", width: "100%", padding: "10px 18px", background: "none", border: "none", cursor: "pointer", fontSize: "0.86rem", color: INK, textAlign: "left" as const }}
-              onMouseEnter={e => (e.currentTarget.style.background = BEIGE)}
-              onMouseLeave={e => (e.currentTarget.style.background = "none")}>
-              {item.label}
-            </button>
-          ))}
-          <div style={{ borderTop: `1px solid ${BORDER}` }}>
-            <button onClick={() => { setOpen(false); onLogout(); }} data-testid="btn-logout"
-              style={{ display: "block", width: "100%", padding: "10px 18px", background: "none", border: "none", cursor: "pointer", fontSize: "0.86rem", color: RED, fontWeight: 700, textAlign: "left" as const }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}
-              onMouseLeave={e => (e.currentTarget.style.background = "none")}>
-              Sign Out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
   const [cards, setCards]                       = useState<CardOrder[]>([]);
   const [recipients, setRecipients]             = useState<Recipient[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState<(QueueItem & { message?: MessageDraft })[]>([]);
-  const [search, setSearch]                     = useState("");
   const [settingsOpen, setSettingsOpen]         = useState(false);
   const [personalSettings, setPersonalSettings] = useState<PersonalSettings>(() => getPersonalSettings());
   const [hwFonts, setHwFonts]                   = useState<HwFont[]>([]);
@@ -338,7 +285,6 @@ export default function DashboardPage() {
     fetch("/api/handwrytten-fonts").then(r => r.json()).then((d: { fonts?: HwFont[] }) => { if (d.fonts) setHwFonts(d.fonts); }).catch(() => {}).finally(() => setFontsLoading(false));
   }, [fontPickerOpen]);
 
-  const { balance: brownieBalance } = useBrowniePoints();
 
   const planConfig = PLANS[plan];
   const cardsUsed  = approvedCards.length;
@@ -350,47 +296,14 @@ export default function DashboardPage() {
   const firstName  = user?.name?.split(" ")[0] ?? "there";
   const displayScore = Math.min(health.score, 98);
 
-  const filteredRecipients = recipients.filter(r =>
-    !search || r.name.toLowerCase().includes(search.toLowerCase()) || r.relationship.toLowerCase().includes(search.toLowerCase())
-  );
 
   const heroEvents = heroExpanded ? allUpcomingEvents : allUpcomingEvents.slice(0, isMobile ? 3 : 2);
 
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <>
+    <AppNav />
     <div style={{ minHeight: "100vh", background: BEIGE, fontFamily: "'Inter', sans-serif", color: INK }}>
-
-      {/* ── Header ────────────────────────────────────────────────────── */}
-      <header style={{ position: "sticky", top: 0, zIndex: 40, background: BEIGE, borderBottom: `1px solid ${BORDER}`, padding: `0 ${px}px`, height: 62, display: "flex", alignItems: "center", justifyContent: "space-between" as const }}>
-        <div style={{ display: "flex", alignItems: "baseline" }}>
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 4 }}>F*</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: INK, letterSpacing: "0.04em" }}>I FORGOT</span>
-          </Link>
-          {!isMobile && (
-            <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: MID, marginLeft: 16, paddingBottom: 2 }}>
-              We got your important people.
-            </span>
-          )}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {approvalCount > 0 && (
-            <button onClick={() => setLocation("/cards/review")}
-              style={{ display: "flex", alignItems: "center", gap: 6, background: RED, color: WHITE, border: "none", borderRadius: 20, padding: "6px 14px", cursor: "pointer", fontSize: "0.8rem", fontWeight: 700 }}>
-              {approvalCount} to review →
-            </button>
-          )}
-          {brownieBalance > 0 && (
-            <Link href="/brownie-points" style={{ textDecoration: "none" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 4, background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, color: SAGE, cursor: "pointer", whiteSpace: "nowrap" as const }}>
-                🍪 {brownieBalance.toLocaleString()}
-              </span>
-            </Link>
-          )}
-          <AccountMenu user={user} onLogout={logout} />
-        </div>
-      </header>
 
       {/* ── Settings strip ─────────────────────────────────────────────── */}
       <div style={{ background: `${INK}04`, borderBottom: `1px solid ${BORDER}` }}>
@@ -471,10 +384,11 @@ export default function DashboardPage() {
             {/* Page greeting */}
             <div style={{ marginBottom: 14 }}>
               <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.8rem" : "2.2rem", letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1 }}>
-                {allUpcomingEvents.length > 0
-                  ? `Here's Who Needs You, ${firstName}.`
-                  : `You're All Clear, ${firstName}.`}
+                Your Important People
               </h1>
+              <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: MID, margin: "4px 0 0", lineHeight: 1 }}>
+                We got your back.
+              </p>
             </div>
 
             {/* ── WE GOT YOUR BACK strip ────────────────────────────────── */}
@@ -602,20 +516,12 @@ export default function DashboardPage() {
               <div style={{ marginBottom: 28 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 12 }}>
                   <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.02em", color: INK, margin: 0, lineHeight: 1 }}>Your People</h2>
-                  <Link href="/recipients/new">
-                    <button data-testid="link-add-recipient"
-                      style={{ padding: "6px 12px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 8, fontSize: "0.76rem", color: MID, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-                      <Plus size={11} /> Add person
-                    </button>
+                  <Link href="/people" style={{ textDecoration: "none" }}>
+                    <span style={{ fontSize: "0.78rem", color: MID, fontWeight: 600, cursor: "pointer" }}>View all →</span>
                   </Link>
                 </div>
-                <div style={{ position: "relative" as const, marginBottom: 10 }}>
-                  <Search size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: MID }} />
-                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search your people…"
-                    style={{ width: "100%", padding: "8px 10px 8px 32px", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 8, fontSize: "0.82rem", color: INK, outline: "none", boxSizing: "border-box" as const }} />
-                </div>
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8 }}>
-                  {filteredRecipients.map(r => {
+                  {recipients.slice(0, 4).map(r => {
                     const nextEv = allUpcomingEvents.find(ev => ev.recipient.id === r.id);
                     return (
                       <Link key={r.id} href={`/recipients/${r.id}?from=dashboard`} style={{ textDecoration: "none" }}>

@@ -1,0 +1,343 @@
+# FiForgot Navigation & Information Architecture Pass
+
+The dashboard is now much stronger.
+
+Do NOT redesign the dashboard from scratch.
+
+Do NOT remove existing functionality.
+
+The next goal is to improve navigation and reduce dashboard overload.
+
+---
+
+# New Philosophy
+
+The dashboard should not try to be everything.
+
+The dashboard should be:
+
+A quick overview.
+
+A place to see what needs attention.
+
+A place to take action.
+
+Everything else should have its own destination.
+
+---
+
+# Change Dashboard Headline
+
+Replace:
+
+"Here's Who Needs You, James."
+
+With:
+
+# Your Important People
+
+This better matches the FiForgot brand.
+
+Current headline creates pressure.
+
+New headline should feel warm, supportive, and relationship focused.
+
+Examples:
+
+Your Important People
+
+We got your back.
+
+or
+
+Your Important People
+
+Everything important. Covered.
+
+---
+
+# Add Primary Navigation
+
+Create a simple top level navigation structure.
+
+Do NOT create a complex CRM style menu.
+
+Keep it extremely simple.
+
+Primary Navigation:
+
+🏠 Home
+
+👥 Your People
+
+📅 Upcoming Moments
+
+⚡ Quick Card
+
+🏆 Brownie Points
+
+Settings remains accessible through account/profile menu.
+
+---
+
+# Home Page
+
+Current dashboard becomes Home.
+
+Purpose:
+
+Overview only.
+
+Show:
+
+We Got Your Back
+
+Upcoming Moments
+
+Your People (preview)
+
+Quick Card
+
+Relationship Insights (summary only)
+
+Brownie Points (summary only)
+
+No deep management.
+
+No large intelligence sections.
+
+No long scrolling.
+
+---
+
+# Your People Page
+
+Create a dedicated destination.
+
+Purpose:
+
+View and manage all recipients.
+
+This becomes the primary relationship management screen.
+
+Features:
+
+Search
+
+Filters
+
+Relationship grouping
+
+Recipient cards
+
+Add person
+
+Examples:
+
+❤️ Wife
+
+👨 Dad
+
+👩 Mom
+
+🤝 Steve
+
+👦 Alex
+
+👧 Athena
+
+Each card shows:
+
+Name
+
+Relationship
+
+Next upcoming occasion
+
+Simple health indicator
+
+No clutter.
+
+This should feel like a collection of important people.
+
+Not a database.
+
+---
+
+# Upcoming Moments Page
+
+Create a dedicated destination.
+
+Purpose:
+
+View all upcoming opportunities.
+
+Sort by urgency.
+
+Examples:
+
+Steve
+Birthday in 2 days
+
+Mom
+Birthday in 12 days
+
+Dad
+Father's Day in 14 days
+
+Wife
+Anniversary in 22 days
+
+Include:
+
+Generate Card
+
+View Person
+
+Filters:
+
+Next 7 Days
+
+Next 30 Days
+
+Birthdays
+
+Anniversaries
+
+Just Because
+
+All Moments
+
+This page should answer:
+
+"What needs my attention?"
+
+---
+
+# Quick Card Page
+
+Create a dedicated destination.
+
+For now:
+
+Build the page shell and navigation.
+
+Do NOT build the complete workflow yet.
+
+Use:
+
+⚡ Quick Card
+
+Generate a thoughtful card in under 60 seconds.
+
+Coming Soon
+
+This allows us to evaluate navigation before implementing the workflow.
+
+---
+
+# Brownie Points Page
+
+Create a dedicated destination.
+
+Move detailed Brownie Point content here.
+
+Dashboard should only show a summary.
+
+This page can contain:
+
+Points
+
+Achievements
+
+Milestones
+
+Streaks
+
+Progress
+
+Relationship wins
+
+Make it fun.
+
+Not corporate.
+
+---
+
+# Dashboard Cleanup
+
+After navigation exists:
+
+Reduce dashboard content.
+
+Move detailed information into its dedicated page.
+
+Dashboard should become lighter.
+
+Faster to scan.
+
+Less vertical scrolling.
+
+---
+
+# Design Direction
+
+Continue using:
+
+Current dashboard visual language
+
+Current FiForgot branding
+
+Current typography
+
+Current color palette
+
+Current card design
+
+Do NOT introduce a radically different visual style.
+
+This is an evolution.
+
+Not a redesign.
+
+---
+
+# Success Test
+
+A new user should immediately understand:
+
+Home = overview
+
+Your People = relationships
+
+Upcoming Moments = action list
+
+Quick Card = instant card
+
+Brownie Points = rewards
+
+Without explanation.
+
+---
+
+# Stop Point
+
+Implement:
+
+Navigation
+
+Home
+
+Your People
+
+Upcoming Moments
+
+Page shells for Quick Card and Brownie Points
+
+Then STOP.
+
+Provide screenshots of all pages.
+
+Provide a list of modified files.
+
+Wait for approval before continuing.
