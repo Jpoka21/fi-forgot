@@ -1,0 +1,561 @@
+# FiForgot UX Reorganization Project
+
+## IMPORTANT
+
+Before making changes:
+
+1. Create a new branch for this work.
+2. Do not deploy automatically.
+3. Complete implementation and present for review first.
+4. Keep all existing functionality unless explicitly stated otherwise.
+
+This is a UX reorganization project, not a backend rewrite.
+
+Keep:
+
+* Existing database structure
+* Existing APIs
+* Existing card generation
+* Existing profile questions
+* Existing recipient records
+* Existing updates
+* Existing Brownie Points
+* Existing health scoring
+* Existing autopilot systems
+
+The goal is to make FiForgot dramatically easier to understand and use.
+
+---
+
+# PRIMARY PRODUCT GOAL
+
+A brand new user should be able to:
+
+Sign up
+
+Generate a card
+
+Understand the product
+
+In under 2 minutes.
+
+Desired reaction:
+
+"That was easy."
+
+---
+
+# CORE PRODUCT PHILOSOPHY
+
+Current experience:
+
+Recipient → Configuration → Questions → Briefing → Card
+
+New experience:
+
+Person → Occasion → Card
+
+Users should feel like they are managing important people.
+
+Not filling out forms.
+
+Not maintaining database records.
+
+---
+
+# NEW DASHBOARD STRUCTURE
+
+Reorganize the dashboard around three priorities:
+
+1. Quick Card
+2. Upcoming Moments
+3. Your People
+
+In that order.
+
+---
+
+# SECTION 1: QUICK CARD (TOP OF DASHBOARD)
+
+This should be the first thing users see.
+
+Prominent placement.
+
+Large visual call to action.
+
+Example:
+
+⚡ Send a Quick Card
+
+Need a card right now?
+
+Generate one in under 60 seconds.
+
+[ Start ]
+
+Purpose:
+
+Allow users to create a card immediately without building a recipient profile.
+
+---
+
+## QUICK CARD FLOW
+
+Question 1
+
+Who is this for?
+
+Example:
+Steve
+
+Question 2
+
+What is the occasion?
+
+Birthday
+
+Thank You
+
+Thinking Of You
+
+Congratulations
+
+Just Because
+
+Get Well
+
+Other
+
+Question 3
+
+Anything you'd like mentioned?
+
+Optional text box
+
+Generate
+
+Done.
+
+No recipient creation required.
+
+No profile completion required.
+
+No setup friction.
+
+Target completion time:
+
+Under 60 seconds.
+
+---
+
+## QUICK CARD CONVERSION
+
+After card generation:
+
+Display:
+
+Want us to remember Steve so future cards are even better?
+
+Benefits:
+
+We'll remember birthdays
+
+We'll remember important details
+
+Future cards become more personal
+
+Buttons:
+
+Add Steve To FiForgot
+
+Not Now
+
+This turns Quick Card into a recipient acquisition funnel.
+
+---
+
+# SECTION 2: UPCOMING MOMENTS
+
+This becomes the primary dashboard content.
+
+The dashboard should immediately answer:
+
+"What needs my attention?"
+
+Examples:
+
+Steve
+Birthday in 12 days
+Generate Card
+
+Mom
+Birthday in 21 days
+Generate Card
+
+Dad
+Father's Day in 5 days
+Generate Card
+
+Wife
+Anniversary in 30 days
+Generate Card
+
+Users should instantly understand why FiForgot exists.
+
+---
+
+# SECTION 3: YOUR PEOPLE
+
+Display recipients as visual cards.
+
+Examples:
+
+Steve
+
+Mom
+
+Dad
+
+Wife
+
+Alex
+
+Athena
+
+Each card shows:
+
+Relationship
+
+Next upcoming occasion
+
+Simple status
+
+No clutter
+
+No giant completion percentages
+
+No overwhelming health metrics
+
+Simple and easy to scan
+
+---
+
+# RECIPIENT PROFILE REDESIGN
+
+Remove the feeling of "Edit Recipient."
+
+When a user clicks Steve they should feel like:
+
+"I'm looking at Steve."
+
+Not:
+
+"I'm editing a CRM record."
+
+---
+
+# NEW RECIPIENT PROFILE
+
+Header:
+
+Steve
+
+Friend
+
+Birthday in 12 days
+
+Generate Card
+
+---
+
+## What We Know
+
+Loves camping
+
+Great sense of humor
+
+Enjoys fishing
+
+Nickname: Sto
+
+Favorite sports team
+
+* Add Memory
+
+---
+
+## Recent Updates
+
+June 2026
+
+Camping trip
+
+April 2026
+
+Started new job
+
+March 2026
+
+Bought a dog
+
+* Add Update
+
+---
+
+## Upcoming Moments
+
+Birthday
+
+Christmas
+
+Anniversary
+
+Just Because
+
+* Add Occasion
+
+---
+
+## Help Us Write Better Cards
+
+Display only ONE question at a time.
+
+Example:
+
+What's something Steve has been excited about recently?
+
+Answer box
+
+Save
+
+Never show large walls of questions.
+
+Never overwhelm users.
+
+---
+
+# MEMORY VAULT FEEL
+
+Use warmth and personality.
+
+The recipient page should feel like:
+
+A relationship profile
+
+A memory vault
+
+A scrapbook of important details
+
+Not a software settings screen.
+
+Use:
+
+Memories
+
+Updates
+
+Stories
+
+Inside jokes
+
+Important details
+
+Things we know
+
+This is where FiForgot becomes unique.
+
+---
+
+# MOVE SETTINGS OUT OF RECIPIENT PROFILES
+
+Create a dedicated settings area.
+
+Move:
+
+Mailing address
+
+Delivery preferences
+
+Approval timing
+
+Email timing
+
+Autopilot settings
+
+Workflow settings
+
+Shipping settings
+
+Address management
+
+Out of recipient pages.
+
+These are FiForgot settings.
+
+Not recipient information.
+
+---
+
+# HEALTH SCORE CHANGES
+
+Keep health scoring.
+
+Do NOT remove it.
+
+Health scoring should become a background intelligence layer.
+
+Use it for:
+
+Relationship insights
+
+Suggested updates
+
+Suggested questions
+
+Prioritization
+
+Internal recommendations
+
+Do not make it the star of onboarding.
+
+Do not make it dominate recipient profiles.
+
+---
+
+# RECIPIENT VISUAL IDENTITY
+
+Do NOT use photos.
+
+Do NOT require image uploads.
+
+Do NOT generate AI faces.
+
+Replace initials with relationship based avatars.
+
+Examples:
+
+❤️ Spouse
+
+👨 Dad
+
+👩 Mom
+
+👦 Son
+
+👧 Daughter
+
+🤝 Friend
+
+🏢 Client
+
+🐶 Pet
+
+Use branded FiForgot styling.
+
+Large colored circles.
+
+Friendly.
+
+Memorable.
+
+Easy to scan.
+
+---
+
+# BROWNIE POINTS
+
+Keep Brownie Points.
+
+Do not remove them.
+
+However:
+
+Make them feel like a fun reward.
+
+Not a KPI dashboard.
+
+Not corporate software.
+
+Fun.
+
+Light.
+
+Motivating.
+
+---
+
+# CARD GENERATION RULE
+
+Never block card generation.
+
+If information is limited:
+
+Generate the card anyway.
+
+Then show:
+
+"This card was generated with limited information. Add a few more details about Steve to make future cards even more personal."
+
+Do not force additional questions.
+
+Do not force profile completion.
+
+---
+
+# MOBILE FIRST
+
+All redesign decisions must work beautifully on mobile.
+
+Most users will likely experience FiForgot on mobile devices.
+
+Ensure:
+
+Fast scanning
+
+Large touch targets
+
+Minimal clutter
+
+Simple navigation
+
+---
+
+# SUCCESS METRICS
+
+Primary:
+
+Time to first card
+
+Target:
+
+Under 2 minutes
+
+Secondary:
+
+Quick Card usage
+
+Quick Card to Recipient conversion
+
+Card approval rate
+
+Repeat usage
+
+Recipient growth
+
+---
+
+# FINAL TEST
+
+A completely new user should be able to log in and immediately understand:
+
+1. How to send a card
+2. What needs attention
+3. Who is important to them
+
+Without explanation.
+
+If the design requires explanation, simplify further.
+
+After implementation is complete:
+
+Provide screenshots of all redesigned screens and a summary of every file modified before requesting approval to merge.

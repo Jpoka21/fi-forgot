@@ -204,7 +204,7 @@ async function classifyWithClaude(imageData: string, mediaType: string): Promise
 async function classifyWithGPT(imageData: string, mediaType: string): Promise<RawResult | null> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5-mini",
       max_completion_tokens: 512,
       messages: [{
         role: "user",

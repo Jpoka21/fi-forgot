@@ -1,0 +1,374 @@
+# FiForgot UX Simplification Redesign
+
+## Objective
+
+Redesign FiForgot around a single principle:
+
+**"That was easy."**
+
+A first time user should be able to sign up, add a recipient, and generate their first card in under 2 minutes.
+
+The goal is NOT to remove functionality.
+
+The goal is to hide complexity and make FiForgot feel effortless.
+
+---
+
+# Core Product Philosophy
+
+Current experience feels like:
+
+Recipient → Configuration → Questions → Briefing → Card
+
+New experience should feel like:
+
+Person → Occasion → Card
+
+The user should never feel like they are managing a CRM.
+
+They should feel like they are building a collection of people they care about.
+
+---
+
+# Rule #1
+
+Never block card generation.
+
+If the user only knows:
+
+Name: Steve
+
+Relationship: Friend
+
+Birthday: June 20
+
+One memory: Loves camping
+
+FiForgot should generate the card.
+
+After generation, FiForgot may suggest additional information that would improve future cards.
+
+Do not require profile completion.
+
+Do not require additional questions.
+
+Do not force onboarding steps.
+
+---
+
+# Rule #2
+
+Recipients are the center of the product.
+
+Everything should be organized around people.
+
+Not settings.
+
+Not workflows.
+
+Not health scores.
+
+Not database records.
+
+When a user clicks a recipient, they should immediately see information about that person.
+
+---
+
+# Remove "Edit Recipient"
+
+The phrase "Edit Recipient" should be eliminated from the product.
+
+Users should feel like they are viewing a person, not editing a database record.
+
+Replace with a recipient profile experience.
+
+Example:
+
+# Steve
+
+Friend
+
+Birthday in 42 days
+
+We know 5 things about Steve
+
+Last update 2 months ago
+
+---
+
+# Recipient Profile Layout
+
+Create a cleaner recipient page with four sections.
+
+## Upcoming Moments
+
+Birthday
+
+Christmas
+
+Anniversary
+
+Just Because
+
+* Add Occasion
+
+---
+
+## What We Know About Steve
+
+Loves camping
+
+Funny sense of humor
+
+Nickname Sto
+
+Enjoys fishing
+
+* Add Memory
+
+---
+
+## Recent Updates
+
+June 2026:
+Went on camping trip
+
+April 2026:
+Started new job
+
+March 2026:
+Bought a dog
+
+* Add Update
+
+---
+
+## Help Us Write Better Cards
+
+Display only ONE question at a time.
+
+Example:
+
+"What is something Steve has been excited about recently?"
+
+Answer
+
+Save
+
+Next Question
+
+Never show a large wall of profile questions.
+
+---
+
+# Move Settings Out Of Recipient Profile
+
+Create a separate Settings area.
+
+Move the following out of the main recipient page:
+
+Mailing Address
+
+Card Delivery
+
+Approval Timing
+
+Autopilot Settings
+
+Email Timing
+
+Workflow Preferences
+
+Card Handling Preferences
+
+These are FiForgot settings.
+
+They are not part of the recipient profile.
+
+---
+
+# Simplify Add Recipient Flow
+
+Current onboarding asks for too much information.
+
+New flow:
+
+Step 1
+
+Who do you want to remember?
+
+Name
+
+Relationship
+
+Save
+
+Step 2
+
+What occasion are we watching?
+
+Birthday
+
+Anniversary
+
+Christmas
+
+Other
+
+Step 3
+
+Tell us one thing about them.
+
+Free text answer
+
+Step 4
+
+Generate Card
+
+Done.
+
+Target completion time:
+
+Under 2 minutes.
+
+---
+
+# Health Score Changes
+
+Do NOT remove health scoring.
+
+Health scoring remains valuable.
+
+However:
+
+Health scoring should become a background intelligence system.
+
+Do not make it a primary first time user feature.
+
+Do not place it at the center of recipient onboarding.
+
+Health score should help FiForgot determine:
+
+Who needs updates
+
+Who needs follow up questions
+
+Which relationships are becoming stale
+
+Where card quality may decline
+
+It should support the experience.
+
+It should not define the experience.
+
+---
+
+# Card Generation Philosophy
+
+Card generation should always succeed.
+
+If data quality is low:
+
+Generate the card.
+
+Then display:
+
+"This card was generated with limited information. Add a few more details about Steve to make future cards even more personal."
+
+Never stop the user.
+
+Never create friction.
+
+---
+
+# Dashboard Redesign
+
+Current dashboard feels operational.
+
+New dashboard should feel helpful.
+
+Primary actions:
+
+Generate a Card
+
+Add Someone Important
+
+View Upcoming Occasions
+
+---
+
+Example dashboard sections:
+
+Upcoming Moments
+
+Steve's birthday in 12 days
+
+Mom's birthday in 21 days
+
+Dad's anniversary in 30 days
+
+Generate Card
+
+---
+
+People You Care About
+
+Recipient cards
+
+Simple and visual
+
+Easy access
+
+---
+
+Optional secondary section:
+
+Relationship Insights
+
+Only visible when relevant
+
+Example:
+
+3 people may need an update
+
+2 upcoming events need attention
+
+This should never dominate the page.
+
+---
+
+# Success Metric
+
+Do NOT optimize for:
+
+Profile completion
+
+Health score completion
+
+Questions answered
+
+Timeline activity
+
+Optimize for:
+
+Time to first card
+
+Target:
+
+Under 2 minutes
+
+The first card is the product.
+
+Everything else exists to improve future cards.
+
+---
+
+# Final Principle
+
+FiForgot should feel like a collection of people.
+
+Not a collection of forms.
+
+When a user clicks Steve, they should feel like they are looking at Steve.
+
+Not configuring Steve.

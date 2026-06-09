@@ -1,0 +1,221 @@
+Before making any production changes, build three visual prototype concepts only.
+
+Do NOT modify the database.
+
+Do NOT modify APIs.
+
+Do NOT modify existing functionality.
+
+Do NOT remove any existing features.
+
+Do NOT perform a redesign implementation.
+
+This is a visual exploration exercise only.
+
+Goal: Help us compare different UX directions before spending development time and credits.
+
+Create three clickable prototype screens using our existing FiForgot branding, colors, typography, Brownie Points style, and visual language.
+
+Use realistic sample data.
+
+The prototypes should feel polished enough that we can evaluate them as if they were real product screens.
+
+---
+
+CONCEPT 1: YOUR PEOPLE
+
+Philosophy:
+
+People first.
+
+The user should feel like they are managing relationships, not filling out forms.
+
+Dashboard should include:
+
+Header:
+"Good Morning James"
+
+Subheading:
+"We got your back."
+
+Primary section:
+Upcoming Moments
+
+Examples:
+
+Steve
+Birthday in 12 days
+Generate Card
+
+Mom
+Birthday in 21 days
+Generate Card
+
+Wife
+Anniversary in 34 days
+Generate Card
+
+Secondary section:
+Your People
+
+Visual cards for:
+Steve
+Mom
+Wife
+Dad
+Alex
+Athena
+
+Add Someone button
+
+Clicking Steve should open a profile concept page.
+
+Recipient profile should contain:
+
+Steve
+Friend
+
+Birthday countdown
+
+Section:
+What We Know
+
+Memories and facts
+
+Section:
+Recent Updates
+
+Recent dated updates
+
+Section:
+One Question
+
+Only one profile question visible
+
+No walls of forms
+
+No edit recipient screen
+
+No giant settings panels
+
+---
+
+CONCEPT 2: MEMORY VAULT
+
+Philosophy:
+
+Emotional and relationship focused.
+
+Feels more like a scrapbook or relationship journal.
+
+Dashboard should focus less on events and more on people.
+
+Example sections:
+
+People You Care About
+
+Recent Memories Added
+
+Recent Life Updates
+
+Upcoming Moments
+
+Clicking Steve should feel like opening a living memory profile.
+
+Include:
+
+Memories
+
+Inside Jokes
+
+Recent Updates
+
+Life Events
+
+Upcoming Occasions
+
+Generate Card button
+
+The experience should feel warm, personal, and unique.
+
+Less software.
+
+More relationship focused.
+
+---
+
+CONCEPT 3: ACTION FIRST
+
+Philosophy:
+
+Maximum simplicity.
+
+Built entirely around getting a card generated as fast as possible.
+
+Dashboard should contain:
+
+Generate Card
+
+Add Someone
+
+Upcoming Birthdays
+
+Minimal information density.
+
+Very few decisions.
+
+Very few sections.
+
+Extremely simple.
+
+The goal is for a first time user to understand the product within 10 seconds.
+
+---
+
+IMPORTANT
+
+All three concepts should:
+
+Use current FiForgot branding
+
+Use current Brownie Points branding
+
+Feel consumer friendly
+
+Feel mobile friendly
+
+Feel desktop friendly
+
+Look like real product screens
+
+Not wireframes
+
+Not sketches
+
+Not placeholder boxes
+
+Use actual UI design
+
+---
+
+Deliverables
+
+Create side by side visual mockups for:
+
+1. Dashboard view for each concept
+
+2. Recipient profile view for each concept
+
+3. Mobile version for each concept
+
+Do not implement functionality.
+
+Do not refactor code.
+
+Do not connect to APIs.
+
+Do not alter production screens.
+
+Build visual prototypes only so we can compare design directions before choosing a redesign path.
+
+At the end, include a short explanation of the strengths and weaknesses of each concept from a user experience perspective.

@@ -1,0 +1,439 @@
+# FiForgot UX Reorganization Project
+
+## IMPORTANT
+
+This is NOT a new feature project.
+
+This is NOT a database redesign.
+
+This is NOT a backend refactor.
+
+Keep existing functionality.
+
+Keep existing APIs.
+
+Keep existing data structures.
+
+Keep existing card generation logic.
+
+Keep existing profile questions.
+
+Keep existing updates.
+
+Keep existing health scoring.
+
+Keep existing Brownie Points.
+
+Keep existing recipient records.
+
+The goal is to reorganize the experience so it feels dramatically simpler.
+
+---
+
+# Product Goal
+
+A first time user should be able to:
+
+Sign up
+
+Add a person
+
+Generate a card
+
+In under 2 minutes.
+
+Desired user reaction:
+
+"That was easy."
+
+---
+
+# Core Philosophy
+
+Current experience feels like:
+
+Recipient → Configuration → Questions → Briefing → Card
+
+New experience should feel like:
+
+Person → Occasion → Card
+
+The user should feel like they are managing people they care about.
+
+Not filling out forms.
+
+Not maintaining database records.
+
+---
+
+# NEW DASHBOARD STRUCTURE
+
+The dashboard should be reorganized into three primary sections.
+
+## SECTION 1: UPCOMING MOMENTS
+
+This becomes the hero section.
+
+This is the reason people pay for FiForgot.
+
+Show:
+
+Steve
+Birthday in 12 days
+Generate Card
+
+Mom
+Birthday in 21 days
+Generate Card
+
+Dad
+Father's Day in 5 days
+Generate Card
+
+Wife
+Anniversary in 30 days
+Generate Card
+
+The dashboard should immediately answer:
+
+"What needs my attention?"
+
+---
+
+## SECTION 2: QUICK CARD
+
+Add a prominent new feature.
+
+⚡ Send a Quick Card
+
+Purpose:
+
+Allow users to generate a one off card without creating a recipient profile.
+
+Flow:
+
+Who is the card for?
+
+What is the occasion?
+
+Anything you'd like mentioned?
+
+Generate card.
+
+Target completion time:
+
+Under 60 seconds.
+
+After generation show:
+
+"Want us to remember Steve so future cards are even better?"
+
+Button:
+
+Add Steve to FiForgot
+
+This turns Quick Cards into a recipient acquisition funnel.
+
+---
+
+## SECTION 3: YOUR PEOPLE
+
+Display recipient cards.
+
+Examples:
+
+Steve
+
+Mom
+
+Dad
+
+Wife
+
+Alex
+
+Athena
+
+Each card shows:
+
+Relationship
+
+Next upcoming occasion
+
+Simple status
+
+No clutter.
+
+No large profile completion indicators.
+
+No giant health score displays.
+
+---
+
+# RECIPIENT PROFILE REDESIGN
+
+Remove the feeling of "Edit Recipient."
+
+The user should feel like they are viewing a person.
+
+Not editing a record.
+
+---
+
+## New Recipient Layout
+
+### Header
+
+Steve
+
+Friend
+
+Birthday in 12 days
+
+Generate Card
+
+---
+
+### What We Know
+
+Examples:
+
+Loves camping
+
+Great sense of humor
+
+Enjoys fishing
+
+Nickname: Sto
+
+Favorite sports team
+
+* Add Memory
+
+---
+
+### Recent Updates
+
+June 2026
+Camping trip
+
+April 2026
+Started new job
+
+March 2026
+Bought a dog
+
+* Add Update
+
+---
+
+### Upcoming Moments
+
+Birthday
+
+Christmas
+
+Anniversary
+
+Just Because
+
+* Add Occasion
+
+---
+
+### One Question
+
+Display only ONE profile question at a time.
+
+Example:
+
+"What is something Steve has been excited about recently?"
+
+Answer box
+
+Save
+
+Next question appears later.
+
+Never show walls of questions.
+
+Never overwhelm users.
+
+---
+
+# MOVE SETTINGS OUT OF RECIPIENT PROFILES
+
+Create a dedicated Settings area.
+
+Move:
+
+Mailing address
+
+Card delivery
+
+Approval timing
+
+Autopilot settings
+
+Email timing
+
+Workflow settings
+
+Shipping preferences
+
+Address management
+
+Out of the main recipient profile.
+
+These are FiForgot settings.
+
+They are not part of the recipient.
+
+---
+
+# HEALTH SCORE CHANGES
+
+Keep health scoring.
+
+Do not remove it.
+
+However:
+
+Move health scoring into a supporting role.
+
+It should power:
+
+Relationship insights
+
+Suggested questions
+
+Recommended updates
+
+Recipient prioritization
+
+Do not make it the centerpiece of onboarding.
+
+Do not make it the centerpiece of recipient profiles.
+
+Health scoring should work behind the scenes.
+
+---
+
+# RECIPIENT VISUAL IDENTITY
+
+Do NOT use photos.
+
+Do NOT use AI generated faces.
+
+Do NOT require uploads.
+
+Replace current initials based avatars with relationship based icons inside branded circles.
+
+Examples:
+
+❤️ Spouse
+
+👨 Dad
+
+👩 Mom
+
+👦 Son
+
+👧 Daughter
+
+🤝 Friend
+
+🏢 Client
+
+🐶 Pet
+
+These should be visually appealing and consistent with FiForgot branding.
+
+Users should recognize relationships at a glance.
+
+---
+
+# MEMORY VAULT FEEL
+
+Recipient profiles should feel warmer and more personal.
+
+Use concepts from the Memory Vault design direction.
+
+Focus on:
+
+Memories
+
+Updates
+
+Stories
+
+Inside jokes
+
+Things we know
+
+The profile should feel like:
+
+"This is Steve."
+
+Not:
+
+"This is Recipient #42."
+
+---
+
+# WHAT NOT TO DO
+
+Do not remove existing functionality.
+
+Do not remove profile questions.
+
+Do not remove updates.
+
+Do not remove health scoring.
+
+Do not remove Brownie Points.
+
+Do not remove autopilot.
+
+Do not redesign database structures.
+
+Do not create additional onboarding friction.
+
+Do not require profile completion.
+
+Do not block card generation.
+
+---
+
+# SUCCESS METRICS
+
+Primary:
+
+Time to first card
+
+Target:
+Under 2 minutes
+
+Secondary:
+
+More Quick Card usage
+
+More recipient creation from Quick Cards
+
+Higher card approval rates
+
+More repeat usage
+
+---
+
+# FINAL DESIGN TEST
+
+A completely new user should be able to log in and instantly understand:
+
+1. What needs attention
+2. How to send a card
+3. Who is important to them
+
+Without explanation.
+
+If the design requires explanation, simplify further.

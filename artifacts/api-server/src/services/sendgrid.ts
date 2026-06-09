@@ -54,7 +54,7 @@ Do not mention the service, apps, or technology. Write as if the sender wrote it
 Make it feel personal and specific to a ${relationship.toLowerCase()} relationship. Vary the structure so it doesn't sound like every other card.`;
 
     const resp = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5-mini",
       max_completion_tokens: 300,
       temperature: 1.1,
       messages: [{ role: "user", content: prompt }],

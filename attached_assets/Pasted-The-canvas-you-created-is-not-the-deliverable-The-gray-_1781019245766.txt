@@ -1,0 +1,227 @@
+The canvas you created is not the deliverable.
+
+The gray boxes are only placeholders.
+
+Do NOT create additional wireframes, skeletons, empty frames, placeholder layouts, or reserved spaces.
+
+I need the actual visual concepts.
+
+Pretend these are being presented to investors or customers.
+
+I want realistic FiForgot screens that look like real product screenshots.
+
+Use:
+
+* Existing FiForgot branding
+* Existing colors
+* Existing typography
+* Existing buttons
+* Existing card styles
+* Existing Brownie Points styling
+* Existing recipient examples
+* Existing event examples
+
+Populate every screen with realistic content.
+
+No gray boxes.
+
+No placeholders.
+
+No lorem ipsum.
+
+No skeleton states.
+
+No unfinished layouts.
+
+If I squint, it should feel like I am looking at a finished product.
+
+---
+
+I want FOUR complete concepts.
+
+Each concept should include:
+
+1. Dashboard
+2. Recipient Profile
+3. Mobile Version
+
+All three should be fully designed.
+
+---
+
+CONCEPT 1: UPCOMING MOMENTS FIRST
+
+Philosophy:
+
+People buy FiForgot because they are afraid of forgetting important moments.
+
+The dashboard should immediately answer:
+
+"What needs my attention?"
+
+Example:
+
+WE GOT YOUR BACK
+
+Steve
+Birthday in 12 days
+Generate Card
+
+Mom
+Birthday in 21 days
+Generate Card
+
+Dad
+Father's Day in 5 days
+Generate Card
+
+Below that:
+
+YOUR PEOPLE
+
+Steve
+Mom
+Dad
+Wife
+Alex
+Athena
+
+Below that:
+
+RELATIONSHIP INSIGHTS
+
+3 people need updates
+
+The focus is moments first, people second.
+
+---
+
+CONCEPT 2: YOUR PEOPLE
+
+Philosophy:
+
+Recipients are the center of the product.
+
+The dashboard should feel like a collection of important people.
+
+Recipient cards should dominate the experience.
+
+Upcoming events should still be visible.
+
+When opening Steve's profile it should feel like:
+
+"This is Steve."
+
+Not:
+
+"This is a recipient record."
+
+Show:
+
+What We Know
+
+Recent Updates
+
+Upcoming Moments
+
+One Question
+
+Avoid giant forms.
+
+Avoid settings.
+
+Avoid configuration screens.
+
+---
+
+CONCEPT 3: MEMORY VAULT
+
+Philosophy:
+
+Relationship scrapbook.
+
+Warm.
+
+Personal.
+
+Emotional.
+
+Feels unique.
+
+Feels unlike traditional software.
+
+Dashboard should highlight:
+
+People You Care About
+
+Recent Memories
+
+Recent Updates
+
+Upcoming Moments
+
+Steve's profile should feel like opening a memory journal.
+
+---
+
+CONCEPT 4: ACTION FIRST
+
+Philosophy:
+
+Fastest possible path to a card.
+
+A brand new user should understand the product in under 10 seconds.
+
+Focus on:
+
+Generate Card
+
+Add Someone
+
+Upcoming Events
+
+Minimal complexity.
+
+Minimal information density.
+
+---
+
+VERY IMPORTANT
+
+For all four concepts:
+
+Do not create empty layouts.
+
+Do not create placeholder boxes.
+
+Do not stop after creating frames.
+
+Actually design the screens.
+
+Use realistic data.
+
+Use realistic recipient names.
+
+Use realistic birthdays.
+
+Use realistic Brownie Points.
+
+Use realistic relationship information.
+
+Create screens that look presentation ready.
+
+---
+
+After completing all four concepts, provide a short comparison explaining:
+
+* Strengths
+* Weaknesses
+* Best concept for first time users
+* Best concept for retention
+* Which concept you personally recommend for FiForgot and why
+
+Do not start implementation work.
+
+Do not modify production code.
+
+This is a design exploration exercise only.
