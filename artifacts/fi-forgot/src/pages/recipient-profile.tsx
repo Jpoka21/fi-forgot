@@ -37,7 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap, ChevronDown, ChevronUp, Settings } from "lucide-react";
 import ProfileQuestionCard from "@/components/ProfileQuestionCard";
 import RelationshipTimeline from "@/components/RelationshipTimeline";
 
@@ -314,6 +314,7 @@ export default function RecipientProfilePage() {
     ? "/dashboard"
     : "/recipients";
   const [saved, setSaved] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<"card-limit" | "recipient-limit">("recipient-limit");
@@ -634,17 +635,184 @@ export default function RecipientProfilePage() {
                 </div>
               </SectionCard>
 
-              {/* Children */}
+              {/* ── WHAT WE KNOW ──────────────────────────────────── */}
               <SectionCard>
+                {sectionHeading("What We Know")}
+                <p className="text-xs mb-4" style={{ color: GRAY }}>The more detail you give us, the more the card sounds like it came from you.</p>
+
+                {/* Personality picker */}
                 <div>
-                  {sectionHeading("Children")}
-                  <p className="text-xs mt-0.5" style={{ color: GRAY }}>
-                    Add birthdates and we'll always know the right age. Never update this manually again.
-                  </p>
+                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                    What are they like? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick up to 2)</span>
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {PERSONALITIES.map((p) => {
+                      const selected = watchPersonality.includes(p.id);
+                      const maxed = watchPersonality.length >= 2 && !selected;
+                      return (
+                        <button
+                          key={p.id} type="button"
+                          disabled={maxed}
+                          onClick={() => {
+                            const current = form.getValues("personality");
+                            form.setValue(
+                              "personality",
+                              current.includes(p.id) ? current.filter((x) => x !== p.id) : [...current, p.id],
+                              { shouldDirty: true }
+                            );
+                          }}
+                          className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
+                          style={{
+                            borderColor: selected ? RED : `${BLACK}15`,
+                            background: selected ? `${RED}10` : "#fff",
+                            opacity: maxed ? 0.4 : 1,
+                            cursor: maxed ? "not-allowed" : "pointer",
+                          }}
+                          data-testid={`btn-personality-${p.id}`}
+                        >
+                          <span className="text-xl">{p.emoji}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{p.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <ChildrenManager children={children} onChange={setChildren} />
+
+                {/* Interests picker */}
+                <div>
+                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                    What do they love? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick all that fit)</span>
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {INTERESTS.map((item) => {
+                      const selected = watchInterests.includes(item.id);
+                      return (
+                        <button
+                          key={item.id} type="button"
+                          onClick={() => {
+                            const current = form.getValues("interests");
+                            form.setValue(
+                              "interests",
+                              current.includes(item.id) ? current.filter((x) => x !== item.id) : [...current, item.id],
+                              { shouldDirty: true }
+                            );
+                          }}
+                          className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
+                          style={{
+                            borderColor: selected ? RED : `${BLACK}15`,
+                            background: selected ? `${RED}10` : "#fff",
+                            cursor: "pointer",
+                          }}
+                          data-testid={`btn-interest-${item.id}`}
+                        >
+                          <span className="text-xl">{item.emoji}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Pet name */}
+                <FormField control={form.control} name="petName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nickname or pet name <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
+                    <FormControl>
+                      <Input placeholder="Babe, honey, mama bear, big guy…" data-testid="input-pet-name" {...field} />
+                    </FormControl>
+                    <p className="text-xs" style={{ color: GRAY }}>We'll weave this in naturally when it fits.</p>
+                  </FormItem>
+                )} />
+
+                {/* Years together — partner relationships only */}
+                {isPartnerRelationship && (
+                  <FormField control={form.control} name="yearsTogther" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>How long have you two been together? <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="3 years, since college, married 8 years…" data-testid="input-years-together" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )} />
+                )}
+
+                <FormField control={form.control} name="tonePreference" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Card tone</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-tone"><SelectValue /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="emotionalLevel" render={({ field }) => {
+                  const isFunnyTone = form.getValues("tonePreference") === "Funny";
+                  const DEPTH_LABELS: Record<number,string> = isFunnyTone
+                    ? { 1:"Gentle smirk", 2:"Solid chuckle", 3:"Genuinely funny", 4:"Bold roast", 5:"No holds barred" }
+                    : { 1:"Light touch",  2:"Light",         3:"Balanced",        4:"Heartfelt",  5:"Deep & heartfelt" };
+                  return (
+                    <FormItem>
+                      <FormLabel>{isFunnyTone ? "Comedy level" : "Card depth"} — {DEPTH_LABELS[field.value] ?? DEPTH_LABELS[3]}</FormLabel>
+                      <FormControl>
+                        <Slider
+                          min={1} max={5} step={1}
+                          value={[field.value]}
+                          onValueChange={([v]) => field.onChange(v)}
+                          data-testid="slider-emotional-level"
+                        />
+                      </FormControl>
+                      <div className="flex justify-between text-xs mt-1" style={{ color: GRAY }}>
+                        <span>{isFunnyTone ? "Gentle smirk" : "Light touch"}</span>
+                        <span>{isFunnyTone ? "No holds barred" : "Deep &amp; heartfelt"}</span>
+                      </div>
+                    </FormItem>
+                  );
+                }} />
+
+                <FormField control={form.control} name="personalityNotes" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Additional notes <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
+                    <FormControl>
+                      <Textarea rows={3} placeholder="Anything else we should know — what makes her laugh, pet peeves, quirks…" data-testid="input-personality-notes" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="favoriteMemories" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Favorite memories or stories</FormLabel>
+                    <FormControl>
+                      <Textarea rows={3} placeholder="The trip to Italy, that one concert, the time she…" data-testid="input-favorite-memories" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="insideJokes" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Inside jokes</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} placeholder="Things only the two of you would get…" data-testid="input-inside-jokes" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="thingsToAvoid" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Things to avoid</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} placeholder="Don't mention her age, avoid the word 'blessed', she hates sappy…" data-testid="input-things-to-avoid" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
               </SectionCard>
 
+              {/* ── UPCOMING MOMENTS ──────────────────────────────── */}
               {/* Occasions to cover */}
               <SectionCard>
                 <div>

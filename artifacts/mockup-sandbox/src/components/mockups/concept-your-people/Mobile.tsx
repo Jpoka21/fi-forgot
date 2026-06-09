@@ -1,59 +1,143 @@
-import React from 'react';
+import React, { useState } from "react";
+import { Plus, Calendar, Users, Settings, ChevronRight, Clock, Send } from "lucide-react";
+
+const BRAND = {
+  BG: "#F2E6D3",
+  RED: "#E23B2E",
+  BLACK: "#111111",
+  SAGE: "#5B8C6B",
+  GRAY: "#6B6B6B",
+  BORDER: "#E5E0D8",
+  WHITE: "#FFFFFF",
+};
+
+const DATA_VERSION = "5";
+
+const PEOPLE = [
+  { id: 1, name: "Mom", relation: "Mother", avatar: "👩‍🦳", health: 88, nextEvent: "Birthday", daysUntil: 3, urgent: true, lastContact: "2 wks ago" },
+  { id: 2, name: "Sarah", relation: "Sister", avatar: "👱‍♀️", health: 92, nextEvent: "New Job", daysUntil: 19, urgent: false, lastContact: "3 days ago" },
+  { id: 3, name: "Marcus", relation: "Best Friend", avatar: "🧔", health: 45, nextEvent: "Birthday", daysUntil: 24, urgent: false, lastContact: "3 mos ago" },
+  { id: 4, name: "Steve", relation: "Friend", avatar: "👨", health: 67, nextEvent: "Anniversary", daysUntil: 6, urgent: true, lastContact: "1 mo ago" },
+  { id: 5, name: "Dave", relation: "Husband", avatar: "🧑", health: 95, nextEvent: "Date Night", daysUntil: 11, urgent: false, lastContact: "Today" },
+  { id: 6, name: "Jessica", relation: "Colleague", avatar: "👩‍💼", health: 31, nextEvent: "Work Anniv", daysUntil: 53, urgent: false, lastContact: "6 mos ago" },
+];
+
+function HealthDot({ score }: { score: number }) {
+  const color = score >= 70 ? BRAND.SAGE : score >= 50 ? "#D97706" : BRAND.RED;
+  return (
+    <div style={{ position: "relative", width: "46px", height: "46px", flexShrink: 0 }}>
+      <svg width="46" height="46" viewBox="0 0 46 46" style={{ transform: "rotate(-90deg)" }}>
+        <circle cx="23" cy="23" r="18" fill="none" stroke={BRAND.BORDER} strokeWidth="4" />
+        <circle
+          cx="23" cy="23" r="18" fill="none"
+          stroke={color} strokeWidth="4"
+          strokeDasharray={`${(score / 100) * 2 * Math.PI * 18} ${2 * Math.PI * 18}`}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", fontWeight: 700, color }}>
+        {score}
+      </span>
+    </div>
+  );
+}
 
 export function Mobile() {
-  const people = [
-    { name: 'Sarah', relationship: 'Sister', health: 92, nextEvent: 'B-Day (12d)', initials: 'S', color: 'bg-orange-200' },
-    { name: 'Mom', relationship: 'Mother', health: 85, nextEvent: 'Anniv (2mo)', initials: 'M', color: 'bg-blue-200' },
-    { name: 'Marcus', relationship: 'Friend', health: 45, nextEvent: 'Promotion', initials: 'M', color: 'bg-green-200' },
-    { name: 'Dave', relationship: 'Husband', health: 70, nextEvent: 'B-Day (4mo)', initials: 'D', color: 'bg-yellow-200' },
-    { name: 'Jessica', relationship: 'Colleague', health: 30, nextEvent: 'None', initials: 'J', color: 'bg-purple-200' },
-    { name: 'Steve', relationship: 'Brother', health: 88, nextEvent: 'Graduation', initials: 'S', color: 'bg-teal-200' },
-  ];
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const needsAttention = PEOPLE.filter(p => p.health < 60).length;
 
   return (
-    <div style={{ backgroundColor: '#F2E6D3', color: '#111111', fontFamily: '"Plus Jakarta Sans", sans-serif' }} className="h-screen w-full flex flex-col relative overflow-hidden">
-      <header className="px-6 pb-6 pt-16" style={{ backgroundColor: '#111111', color: '#F2E6D3' }}>
-        <h1 style={{ fontFamily: '"Bebas Neue", sans-serif' }} className="text-5xl tracking-wider">YOUR PEOPLE</h1>
-        <p className="text-sm mt-1 opacity-80 font-bold tracking-wide">3 needs attention • 12 healthy</p>
-      </header>
+    <div
+      className="relative mx-auto border-8 border-black rounded-[3rem] overflow-hidden shadow-2xl flex flex-col"
+      style={{ width: "390px", height: "844px", backgroundColor: BRAND.BG, fontFamily: "'Plus Jakarta Sans', sans-serif", color: BRAND.BLACK }}
+    >
+      {/* Status Bar */}
+      <div style={{ height: "3rem", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 1.5rem", fontSize: "0.75rem", fontWeight: 600 }}>
+        <span>9:41</span>
+        <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+          <div style={{ width: "16px", height: "11px", backgroundColor: BRAND.BLACK, borderRadius: "2px" }} />
+          <div style={{ width: "11px", height: "11px", backgroundColor: BRAND.BLACK, borderRadius: "50%" }} />
+        </div>
+      </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-24">
-        {people.map(p => (
-          <div key={p.name} style={{ backgroundColor: '#fff', borderColor: '#E5E0D8' }} className="p-4 rounded-2xl border flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl ${p.color}`}>
-                  {p.initials}
+      {/* Header */}
+      <div style={{ padding: "0.5rem 1.5rem 1rem", borderBottom: `1px solid ${BRAND.BORDER}` }}>
+        <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: BRAND.SAGE, transform: "rotate(-1.5deg)", display: "block", marginBottom: "-0.2rem" }}>
+          checking in on…
+        </p>
+        <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "2.75rem", lineHeight: 1, letterSpacing: "0.02em" }}>YOUR PEOPLE</h1>
+        <p style={{ fontSize: "0.75rem", fontWeight: 600, color: BRAND.GRAY, marginTop: "0.25rem" }}>
+          <span style={{ color: BRAND.RED }}>{needsAttention} need attention</span>
+          {" · "}
+          {PEOPLE.length} total
+        </p>
+      </div>
+
+      {/* People List */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "0.75rem 1rem 6rem" }}>
+        {PEOPLE.map((person, i) => (
+          <div key={person.id}>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.85rem 0.5rem", cursor: "pointer" }}
+              onClick={() => setExpanded(expanded === i ? null : i)}
+            >
+              <div style={{ width: "2.75rem", height: "2.75rem", borderRadius: "999px", backgroundColor: BRAND.WHITE, border: `2px solid ${person.urgent ? BRAND.RED : BRAND.BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.35rem", flexShrink: 0 }}>
+                {person.avatar}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.4rem" }}>
+                  <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.4rem", lineHeight: 1 }}>{person.name}</h3>
+                  <span style={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: BRAND.SAGE }}>{person.relation}</span>
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white" style={{ backgroundColor: p.health > 80 ? '#5B8C6B' : p.health > 50 ? '#E23B2E' : '#E23B2E' }}></div>
+                <p style={{ fontSize: "0.75rem", color: BRAND.GRAY, fontWeight: 600, marginTop: "0.1rem" }}>
+                  {person.nextEvent}
+                  <span style={{ color: person.urgent ? BRAND.RED : BRAND.GRAY }}> · in {person.daysUntil}d</span>
+                </p>
               </div>
-              <div>
-                <h3 style={{ fontFamily: '"Bebas Neue", sans-serif' }} className="text-2xl leading-none">{p.name}</h3>
-                <p className="text-xs font-bold uppercase tracking-widest mt-1" style={{ color: '#6B6B6B' }}>{p.relationship}</p>
+              <HealthDot score={person.health} />
+            </div>
+
+            {/* Expanded inline */}
+            {expanded === i && (
+              <div style={{ margin: "0 0.5rem 0.75rem", padding: "1rem", borderRadius: "0.75rem", backgroundColor: BRAND.WHITE, border: `1px solid ${BRAND.BORDER}`, display: "flex", gap: "0.6rem" }}>
+                <button style={{ flex: 1, backgroundColor: BRAND.BLACK, color: BRAND.BG, borderRadius: "0.5rem", padding: "0.6rem", fontWeight: 700, fontSize: "0.75rem", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.3rem" }}>
+                  <Send size={13} /> Send Card
+                </button>
+                <button style={{ flex: 1, backgroundColor: "transparent", color: BRAND.BLACK, borderRadius: "0.5rem", padding: "0.6rem", fontWeight: 700, fontSize: "0.75rem", border: `2px solid ${BRAND.BORDER}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.3rem" }}>
+                  <ChevronRight size={13} /> View Profile
+                </button>
               </div>
-            </div>
-            <div className="text-right">
-              <div className="text-sm font-bold">{p.nextEvent}</div>
-              <div className="text-[10px] font-bold uppercase mt-1 tracking-widest" style={{ color: '#6B6B6B' }}>{p.health} Health</div>
-            </div>
+            )}
+
+            {i < PEOPLE.length - 1 && <div style={{ height: "1px", backgroundColor: BRAND.BORDER, margin: "0 0.5rem" }} />}
           </div>
         ))}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-white border-t flex items-start pt-4 justify-around px-6" style={{ borderColor: '#E5E0D8' }}>
-        <div className="flex flex-col items-center text-gray-400">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-          <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Timeline</span>
-        </div>
-        <div className="flex flex-col items-center" style={{ color: '#111111' }}>
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
-          <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">People</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-400">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Settings</span>
-        </div>
+      {/* FAB */}
+      <div style={{ position: "absolute", bottom: "5.5rem", right: "1.25rem" }}>
+        <button style={{ width: "3.5rem", height: "3.5rem", borderRadius: "999px", backgroundColor: BRAND.RED, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(226,59,46,0.4)" }}>
+          <Plus size={26} strokeWidth={3} />
+        </button>
       </div>
+
+      {/* Bottom Nav */}
+      <nav style={{ position: "absolute", bottom: 0, width: "100%", backgroundColor: BRAND.WHITE, borderTop: `2px solid ${BRAND.BORDER}`, display: "flex", justifyContent: "space-around", padding: "0.85rem 0 1.5rem" }}>
+        <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", opacity: 0.4, background: "none", border: "none", cursor: "pointer" }}>
+          <Calendar size={22} strokeWidth={2} />
+          <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Timeline</span>
+        </button>
+        <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", color: BRAND.BLACK, background: "none", border: "none", cursor: "pointer" }}>
+          <Users size={22} strokeWidth={2.5} />
+          <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>People</span>
+        </button>
+        <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", opacity: 0.4, background: "none", border: "none", cursor: "pointer" }}>
+          <Settings size={22} strokeWidth={2} />
+          <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Settings</span>
+        </button>
+      </nav>
+
+      <div className="hidden" data-version={DATA_VERSION} />
     </div>
   );
 }

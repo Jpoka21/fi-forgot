@@ -42,6 +42,21 @@ function eventEmoji(event: string): string {
   return map[event] ?? "🎉";
 }
 
+function relationshipEmoji(rel: string): string {
+  const map: Record<string, string> = {
+    "Wife": "❤️", "Husband": "❤️", "Girlfriend": "💑", "Boyfriend": "💑",
+    "Mom": "👩", "Dad": "👨", "Mother": "👩", "Father": "👨",
+    "Sister": "👯", "Brother": "🤜",
+    "Son": "👦", "Daughter": "👧",
+    "Friend": "🤝", "Best Friend": "✨",
+    "Grandma": "👵", "Grandpa": "👴",
+    "Grandmother": "👵", "Grandfather": "👴",
+    "Aunt": "🌸", "Uncle": "🧔",
+    "Boss": "💼", "Coworker": "🤝",
+  };
+  return map[rel] ?? "🤝";
+}
+
 function daysColor(n: number): string {
   if (n <= 7)  return RED;
   if (n <= 14) return "#D97706";
@@ -465,267 +480,244 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* ── Two-column layout (desktop) ──────────────────────────── */}
-            <div style={{
-              display: isMobile ? "block" : "grid",
-              gridTemplateColumns: "1fr 360px",
-              gap: 28,
-              alignItems: "start",
-            }}>
+            {/* ── WE GOT YOUR BACK hero ─────────────────────────────────── */}
+            <div style={{ background: INK, borderRadius: 20, padding: isMobile ? "24px 20px" : "28px 32px", marginBottom: 36, color: WHITE }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.7rem" : "2.2rem", letterSpacing: "0.04em", marginBottom: 4 }}>WE GOT YOUR BACK</div>
+              <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: `${WHITE}75`, margin: "0 0 20px", lineHeight: 1.4 }}>Never miss an important moment.</p>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
+                {weGotYourBack.map((line, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {line.good
+                      ? <CheckCircle2 size={15} style={{ color: SAGE, flexShrink: 0 }} />
+                      : <div style={{ width: 15, height: 15, borderRadius: "50%", border: `2px solid ${RED}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <span style={{ fontSize: "0.55rem", fontWeight: 900, color: RED }}>!</span>
+                        </div>}
+                    <span style={{ fontSize: "0.88rem", color: line.good ? `${WHITE}90` : "#fca5a5", fontWeight: line.good ? 400 : 600, lineHeight: 1.4 }}>{line.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-              {/* ╔══════════════════════════════════════════════════════════╗
-                  ║  LEFT COLUMN — People & Relationships                   ║
-                  ╚══════════════════════════════════════════════════════════╝ */}
-              <div>
+            {/* ── Single-column layout ──────────────────────────────────── */}
+            <div>
 
-                {/* ── Hero: Upcoming moments ──────────────────────────── */}
-                <div style={{ marginBottom: 36 }}>
-                  {allUpcomingEvents.length === 0 ? (
-                    <div style={{ background: WHITE, borderRadius: 18, padding: "36px 28px", textAlign: "center" as const, border: `1px solid ${BORDER}` }}>
-                      <div style={{ fontSize: "2rem", marginBottom: 12 }}>🎉</div>
-                      <p style={{ fontSize: "0.95rem", color: MID, margin: "0 0 18px", lineHeight: 1.65 }}>Nothing in the next 90 days. Add more occasions to stay covered year-round.</p>
-                      <Link href="/recipients"><button style={{ background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 9, padding: "10px 20px", fontSize: "0.86rem", fontWeight: 700, color: INK, cursor: "pointer" }}>Review people →</button></Link>
-                    </div>
-                  ) : (
-                    <>
-                      <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
-                        {heroEvents.map(ev => {
-                          const genKey       = `${ev.recipient.id}:::${ev.event}`;
-                          const isGenerating = generatingFor === genKey;
-                          const matchedCard  = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
-                          const hasCard      = upcomingWithCardKeys.has(genKey);
-                          const isApproved   = matchedCard?.status === "Approved";
-                          const rh           = health.recipientHealths.find(h => h.id === ev.recipient.id);
-                          const sl           = rh ? personScoreLabel(rh.score) : null;
+              {/* ── UPCOMING MOMENTS ──────────────────────────────── */}
+              <div style={{ marginBottom: 40 }}>
+                <SHead text="Upcoming Moments" sub="What needs your attention right now." />
+                {allUpcomingEvents.length === 0 ? (
+                  <div style={{ background: WHITE, borderRadius: 18, padding: "36px 28px", textAlign: "center" as const, border: `1px solid ${BORDER}` }}>
+                    <div style={{ fontSize: "2rem", marginBottom: 12 }}>🎉</div>
+                    <p style={{ fontSize: "0.95rem", color: MID, margin: "0 0 18px", lineHeight: 1.65 }}>Nothing in the next 90 days. Add more occasions to stay covered year-round.</p>
+                    <Link href="/recipients"><button style={{ background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 9, padding: "10px 20px", fontSize: "0.86rem", fontWeight: 700, color: INK, cursor: "pointer" }}>Review people →</button></Link>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
+                      {heroEvents.map(ev => {
+                        const genKey       = `${ev.recipient.id}:::${ev.event}`;
+                        const isGenerating = generatingFor === genKey;
+                        const matchedCard  = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
+                        const hasCard      = upcomingWithCardKeys.has(genKey);
+                        const isApproved   = matchedCard?.status === "Approved";
+                        const rh           = health.recipientHealths.find(h => h.id === ev.recipient.id);
+                        const sl           = rh ? personScoreLabel(rh.score) : null;
 
-                          let statusText = ""; let statusColor = MID; let statusGood = false;
-                          if (isApproved)             { statusText = "Card approved, on its way";       statusColor = SAGE;      statusGood = true; }
-                          else if (hasCard)           { statusText = "Card draft ready to review";      statusColor = "#1d4ed8"; statusGood = true; }
-                          else if (ev.briefingDone)   { statusText = "Personalized and on track";       statusColor = SAGE;      statusGood = true; }
-                          else if (ev.daysAway <= 7)  { statusText = "Needs attention soon";            statusColor = RED; }
-                          else if (ev.daysAway <= 14) { statusText = "Add one more detail to be ready"; statusColor = "#D97706"; }
-                          else                        { statusText = "On track — nothing needed yet";   statusColor = SAGE;      statusGood = true; }
+                        let statusText = ""; let statusColor = MID; let statusGood = false;
+                        if (isApproved)             { statusText = "Card approved, on its way";       statusColor = SAGE;      statusGood = true; }
+                        else if (hasCard)           { statusText = "Card draft ready to review";      statusColor = "#1d4ed8"; statusGood = true; }
+                        else if (ev.briefingDone)   { statusText = "Personalized and on track";       statusColor = SAGE;      statusGood = true; }
+                        else if (ev.daysAway <= 7)  { statusText = "Needs attention soon";            statusColor = RED; }
+                        else if (ev.daysAway <= 14) { statusText = "Add one more detail to be ready"; statusColor = "#D97706"; }
+                        else                        { statusText = "On track — nothing needed yet";   statusColor = SAGE;      statusGood = true; }
 
-                          let ctaLabel = ""; let ctaRed = false; let ctaAction = () => {};
-                          if (isApproved)           { ctaLabel = "View card";          ctaRed = false; ctaAction = () => setViewingCardId(matchedCard!.id); }
-                          else if (hasCard)         { ctaLabel = "Review card →";      ctaRed = true;  ctaAction = () => setLocation("/cards/review"); }
-                          else if (ev.briefingDone) { ctaLabel = "Update details";     ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
-                          else if (ev.daysAway<=7)  { ctaLabel = "Add details now →"; ctaRed = true;  ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
-                          else                      { ctaLabel = "Add a memory";       ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
+                        let ctaLabel = ""; let ctaRed = false; let ctaAction = () => {};
+                        if (isApproved)           { ctaLabel = "View card";          ctaRed = false; ctaAction = () => setViewingCardId(matchedCard!.id); }
+                        else if (hasCard)         { ctaLabel = "Review card →";      ctaRed = true;  ctaAction = () => setLocation("/cards/review"); }
+                        else if (ev.briefingDone) { ctaLabel = "Update details";     ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
+                        else if (ev.daysAway<=7)  { ctaLabel = "Add details now →"; ctaRed = true;  ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
+                        else                      { ctaLabel = "Add a memory";       ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
 
-                          return (
-                            <div key={genKey} style={{ background: WHITE, borderRadius: 18, padding: "20px 20px 18px", border: `1px solid ${BORDER}`, display: "flex", gap: 16, position: "relative" as const, overflow: "hidden" }}>
-                              {ev.daysAway <= 14 && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: ev.daysAway <= 7 ? RED : "#D97706", borderRadius: "18px 18px 0 0" }} />}
-
-                              {/* Avatar */}
-                              <div style={{ width: 54, height: 54, borderRadius: 13, background: INK, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-                                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: WHITE }}>
-                                  {ev.recipient.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
-                                </span>
+                        return (
+                          <div key={genKey} style={{ background: WHITE, borderRadius: 18, padding: "20px 20px 18px", border: `1px solid ${BORDER}`, display: "flex", gap: 16, position: "relative" as const, overflow: "hidden" }}>
+                            {ev.daysAway <= 14 && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: ev.daysAway <= 7 ? RED : "#D97706", borderRadius: "18px 18px 0 0" }} />}
+                            <div style={{ width: 54, height: 54, borderRadius: 13, background: `${INK}10`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2, fontSize: "1.5rem" }}>
+                              {relationshipEmoji(ev.recipient.relationship)}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ marginBottom: 10 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const }}>
+                                  <div style={{ fontWeight: 800, fontSize: "1.1rem", color: INK, lineHeight: 1 }}>{ev.recipient.name}</div>
+                                  {sl && <span style={{ fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 10, background: `${sl.color}14`, color: sl.color }}>{sl.text}</span>}
+                                </div>
+                                <div style={{ fontSize: "0.78rem", color: MID, marginTop: 3 }}>{ev.recipient.relationship}</div>
                               </div>
-
-                              {/* Content */}
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                {/* Person */}
-                                <div style={{ marginBottom: 10 }}>
-                                  <div style={{ fontWeight: 800, fontSize: "1.15rem", color: INK, lineHeight: 1 }}>{ev.recipient.name}</div>
-                                  <div style={{ fontSize: "0.78rem", color: MID, marginTop: 3 }}>{ev.recipient.relationship}</div>
-                                  {sl && <span style={{ display: "inline-block", marginTop: 5, fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 10, background: `${sl.color}14`, color: sl.color }}>{sl.text}</span>}
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                                <span style={{ fontSize: "1.4rem" }}>{eventEmoji(ev.event)}</span>
+                                <div>
+                                  <span style={{ fontWeight: 700, fontSize: "0.96rem", color: INK }}>{ev.event}</span>
+                                  <span style={{ fontSize: "0.84rem", fontWeight: 700, color: daysColor(ev.daysAway), marginLeft: 10 }}>{ev.daysAway}d away</span>
+                                  <span style={{ fontSize: "0.78rem", color: MID, marginLeft: 6 }}>· {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                                 </div>
-
-                                {/* Event + days */}
-                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                                  <span style={{ fontSize: "1.4rem" }}>{eventEmoji(ev.event)}</span>
-                                  <div>
-                                    <span style={{ fontWeight: 700, fontSize: "0.96rem", color: INK }}>{ev.event}</span>
-                                    <span style={{ fontSize: "0.84rem", fontWeight: 700, color: daysColor(ev.daysAway), marginLeft: 10 }}>{ev.daysAway}d away</span>
-                                    <span style={{ fontSize: "0.78rem", color: MID, marginLeft: 6 }}>· {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                                  </div>
+                              </div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.82rem", fontWeight: 600, color: statusColor }}>
+                                  {statusGood
+                                    ? <CheckCircle2 size={13} style={{ flexShrink: 0 }} />
+                                    : <span style={{ width: 13, height: 13, borderRadius: "50%", border: `2px solid ${statusColor}`, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "0.55rem", fontWeight: 900 }}>!</span>}
+                                  {statusText}
                                 </div>
-
-                                {/* Status + CTAs in one row */}
-                                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const }}>
-                                  <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.82rem", fontWeight: 600, color: statusColor }}>
-                                    {statusGood
-                                      ? <CheckCircle2 size={13} style={{ flexShrink: 0 }} />
-                                      : <span style={{ width: 13, height: 13, borderRadius: "50%", border: `2px solid ${statusColor}`, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "0.55rem", fontWeight: 900 }}>!</span>}
-                                    {statusText}
-                                  </div>
-                                  <div style={{ display: "flex", gap: 6, marginLeft: "auto" }}>
-                                    <button onClick={ctaAction} style={{ padding: "7px 14px", background: ctaRed ? RED : `${INK}08`, color: ctaRed ? WHITE : INK, border: "none", borderRadius: 9, fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
-                                      {ctaLabel}
+                                <div style={{ display: "flex", gap: 6, marginLeft: "auto", flexWrap: "wrap" as const }}>
+                                  <button onClick={ctaAction} style={{ padding: "7px 14px", background: ctaRed ? RED : `${INK}08`, color: ctaRed ? WHITE : INK, border: "none", borderRadius: 9, fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
+                                    {ctaLabel}
+                                  </button>
+                                  <Link href={`/recipients/${ev.recipient.id}?from=dashboard`}>
+                                    <button style={{ padding: "7px 12px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 9, fontSize: "0.76rem", color: MID, cursor: "pointer" }}>
+                                      View person
                                     </button>
-                                    {!hasCard && !isApproved && !isGenerating && (
-                                      <button onClick={() => generateEarly(ev)} disabled={!!generatingFor}
-                                        style={{ padding: "7px 11px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 9, fontSize: "0.76rem", color: MID, cursor: !!generatingFor ? "default" : "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                                        <Sparkles size={11} /> Generate
-                                      </button>
-                                    )}
-                                    {isGenerating && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.76rem", color: MID, padding: "7px 11px" }}><Loader2 size={11} className="animate-spin" /> Writing…</span>}
-                                  </div>
+                                  </Link>
+                                  {!hasCard && !isApproved && !isGenerating && (
+                                    <button onClick={() => generateEarly(ev)} disabled={!!generatingFor}
+                                      style={{ padding: "7px 11px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 9, fontSize: "0.76rem", color: MID, cursor: !!generatingFor ? "default" : "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                                      <Sparkles size={11} /> Generate
+                                    </button>
+                                  )}
+                                  {isGenerating && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.76rem", color: MID, padding: "7px 11px" }}><Loader2 size={11} className="animate-spin" /> Writing…</span>}
                                 </div>
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+                      {allUpcomingEvents.length > (isMobile ? 3 : 2) && (
+                        <button onClick={() => setHeroExpanded(o => !o)}
+                          style={{ flex: 1, padding: "9px", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: "0.82rem", color: MID, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                          {heroExpanded
+                            ? <><ChevronUp size={13} /> Show fewer</>
+                            : <><ChevronDown size={13} /> {allUpcomingEvents.length - (isMobile ? 3 : 2)} more upcoming</>}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
 
-                      {/* Show more / Add */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
-                        {allUpcomingEvents.length > (isMobile ? 3 : 2) && (
-                          <button onClick={() => setHeroExpanded(o => !o)}
-                            style={{ flex: 1, padding: "9px", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: "0.82rem", color: MID, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                            {heroExpanded
-                              ? <><ChevronUp size={13} /> Show fewer</>
-                              : <><ChevronDown size={13} /> {allUpcomingEvents.length - (isMobile ? 3 : 2)} more upcoming</>}
-                          </button>
-                        )}
-                        <Link href="/recipients/new">
-                          <button data-testid="link-add-recipient"
-                            style={{ padding: "9px 16px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: "0.82rem", color: MID, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
-                            <Plus size={12} /> Add person
-                          </button>
-                        </Link>
-                      </div>
-                    </>
-                  )}
+              {/* ── YOUR PEOPLE ────────────────────────────────────── */}
+              <div style={{ marginBottom: 40 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, gap: 12 }}>
+                  <SHead text="Your People" sub="Everyone you're looking out for." />
+                  <Link href="/recipients/new">
+                    <button data-testid="link-add-recipient"
+                      style={{ padding: "8px 14px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: "0.8rem", color: MID, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                      <Plus size={12} /> Add person
+                    </button>
+                  </Link>
                 </div>
+                <div style={{ position: "relative" as const, marginBottom: 16 }}>
+                  <Search size={14} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: MID }} />
+                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search your people…"
+                    style={{ width: "100%", padding: "10px 12px 10px 36px", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: "0.86rem", color: INK, outline: "none", boxSizing: "border-box" as const }} />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(185px, 1fr))", gap: 12 }}>
+                  {filteredRecipients.map(r => {
+                    const nextEv = allUpcomingEvents.find(ev => ev.recipient.id === r.id);
+                    return (
+                      <Link key={r.id} href={`/recipients/${r.id}?from=dashboard`} style={{ textDecoration: "none" }}>
+                        <div
+                          style={{ background: WHITE, borderRadius: 14, padding: "16px 16px 14px", border: `1px solid ${BORDER}`, cursor: "pointer", boxSizing: "border-box" as const, transition: "border-color 0.15s" }}
+                          onMouseEnter={e => ((e.currentTarget as HTMLDivElement).style.borderColor = INK)}
+                          onMouseLeave={e => ((e.currentTarget as HTMLDivElement).style.borderColor = BORDER)}
+                        >
+                          <div style={{ fontSize: "1.9rem", marginBottom: 8, lineHeight: 1 }}>{relationshipEmoji(r.relationship)}</div>
+                          <div style={{ fontWeight: 800, fontSize: "0.96rem", color: INK, lineHeight: 1.2 }}>{r.name}</div>
+                          <div style={{ fontSize: "0.75rem", color: MID, marginTop: 3 }}>{r.relationship}</div>
+                          {nextEv ? (
+                            <div style={{ marginTop: 9, display: "inline-flex", alignItems: "center", gap: 4, background: nextEv.daysAway <= 7 ? `${RED}10` : BEIGE, borderRadius: 6, padding: "3px 8px", fontSize: "0.7rem", fontWeight: 600, color: nextEv.daysAway <= 7 ? RED : MID }}>
+                              {eventEmoji(nextEv.event)} {nextEv.event} in {nextEv.daysAway}d
+                            </div>
+                          ) : (r.selectedEvents?.length ?? 0) > 0 ? (
+                            <div style={{ marginTop: 9, fontSize: "0.7rem", color: MID }}>{r.selectedEvents!.length} occasion{r.selectedEvents!.length !== 1 ? "s" : ""} tracked</div>
+                          ) : null}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
 
-                {/* ── Relationship Health ──────────────────────────── */}
+              {/* ── RELATIONSHIP INSIGHTS ──────────────────────────── */}
+              <div style={{ marginBottom: 36 }}>
+                <SHead text="Relationship Insights" sub="How you're doing with the people who matter." />
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 10, marginBottom: 20 }}>
+                  {momentsAtRisk > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${RED}10`, borderRadius: 20, padding: "7px 14px", fontSize: "0.82rem", fontWeight: 600, color: RED }}>
+                      ⚠ {momentsAtRisk} moment{momentsAtRisk !== 1 ? "s" : ""} need{momentsAtRisk === 1 ? "s" : ""} attention
+                    </div>
+                  )}
+                  {health.recipientHealths.filter(r => r.score < 45).length > 0 && (() => {
+                    const n = health.recipientHealths.filter(r => r.score < 45).length;
+                    return (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${SAGE}12`, borderRadius: 20, padding: "7px 14px", fontSize: "0.82rem", fontWeight: 600, color: SAGE }}>
+                        👥 {n} {n === 1 ? "person needs" : "people need"} updates
+                      </div>
+                    );
+                  })()}
+                  {(() => {
+                    const n = allUpcomingEvents.filter(e => e.daysAway <= 14 && !e.briefingDone).length;
+                    return n > 0 ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${INK}07`, borderRadius: 20, padding: "7px 14px", fontSize: "0.82rem", fontWeight: 600, color: INK }}>
+                        📅 {n} upcoming event{n !== 1 ? "s" : ""} {n === 1 ? "needs" : "need"} attention
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
                 <RelationshipHealthSection isMobile={isMobile} />
               </div>
 
-              {/* ╔══════════════════════════════════════════════════════════╗
-                  ║  RIGHT COLUMN — Status, Scores, Wins                    ║
-                  ╚══════════════════════════════════════════════════════════╝ */}
-              <div style={{ marginTop: isMobile ? 36 : 0 }}>
+              {/* ── QUICK CARD placeholder ─────────────────────────── */}
+              <div style={{ marginBottom: 40 }}>
+                <div style={{ background: WHITE, borderRadius: 18, padding: isMobile ? "28px 20px" : "32px 36px", border: `2px dashed ${BORDER}`, textAlign: "center" as const }}>
+                  <div style={{ fontSize: "2rem", marginBottom: 10 }}>⚡</div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.04em", color: INK, marginBottom: 8 }}>QUICK CARD</div>
+                  <span style={{ display: "inline-block", background: `${INK}08`, color: MID, borderRadius: 20, padding: "4px 14px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 14 }}>COMING SOON</span>
+                  <p style={{ fontSize: "0.88rem", color: MID, lineHeight: 1.65, margin: "0 auto", maxWidth: 300 }}>
+                    Generate a thoughtful card in under 60 seconds.
+                  </p>
+                </div>
+              </div>
 
-                {/* ── We Got Your Back ───────────────────────────────── */}
-                <div style={{ marginBottom: 28 }}>
-                  <SHead text="We Got Your Back" sub="Everything important is being watched." />
-                  <div style={{ background: WHITE, borderRadius: 16, padding: "18px 20px", border: `1px solid ${BORDER}` }}>
-                    <div style={{ display: "flex", flexDirection: "column" as const, gap: 13 }}>
-                      {weGotYourBack.map((line, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                          {line.good
-                            ? <CheckCircle2 size={17} style={{ color: SAGE, flexShrink: 0 }} />
-                            : <div style={{ width: 17, height: 17, borderRadius: "50%", border: `2px solid ${RED}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                <span style={{ fontSize: "0.6rem", fontWeight: 900, color: RED }}>!</span>
-                              </div>}
-                          <span style={{ fontSize: "0.9rem", color: INK, fontWeight: line.good ? 500 : 600 }}>{line.text}</span>
-                        </div>
-                      ))}
-                    </div>
+              {/* ── Bottom row: Recommended Next Step + Plan/Score ─── */}
+              <div style={{ display: isMobile ? "block" : "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
+                <div style={{
+                  background: recommendedAction.urgency === "high" ? "#FFF5F5" : WHITE,
+                  border: `1.5px solid ${recommendedAction.urgency === "high" ? `${RED}25` : BORDER}`,
+                  borderRadius: 16, padding: "18px 18px",
+                  display: "flex", gap: 14, alignItems: "flex-start",
+                  marginBottom: isMobile ? 16 : 0,
+                }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 11, background: recommendedAction.urgency === "high" ? `${RED}12` : `${SAGE}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.2rem" }}>
+                    {recommendedAction.type === "approve_card"     ? "📬"
+                    : recommendedAction.type === "answer_briefing" ? "✍️"
+                    : recommendedAction.type === "add_person"      ? "👤"
+                    :                                                "🌱"}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.06em", color: MID, marginBottom: 3 }}>RECOMMENDED NEXT STEP</div>
+                    <div style={{ fontWeight: 700, fontSize: "0.94rem", color: INK, marginBottom: 5 }}>{recommendedAction.title}</div>
+                    <div style={{ fontSize: "0.83rem", color: MID, lineHeight: 1.6, marginBottom: 12 }}>{recommendedAction.description}</div>
+                    <button
+                      onClick={() => { if (recommendedAction.href.startsWith("/")) setLocation(recommendedAction.href); else window.location.href = recommendedAction.href; }}
+                      style={{ background: recommendedAction.urgency === "high" ? RED : INK, color: WHITE, border: "none", borderRadius: 9, padding: "8px 16px", fontSize: "0.83rem", fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      {recommendedAction.type === "approve_card"     ? "Review cards"
+                      : recommendedAction.type === "answer_briefing" ? "Add a personal touch"
+                      : recommendedAction.type === "add_person"      ? "Add person"
+                      :                                                "Improve profile"}
+                      <ArrowRight size={12} />
+                    </button>
                   </div>
                 </div>
-
-                {/* ── Recommended Next Step ──────────────────────────── */}
-                <div style={{ marginBottom: 28 }}>
-                  <SHead text="Recommended Next Step" />
-                  <div style={{
-                    background: recommendedAction.urgency === "high" ? "#FFF5F5" : WHITE,
-                    border: `1.5px solid ${recommendedAction.urgency === "high" ? `${RED}25` : BORDER}`,
-                    borderRadius: 16, padding: "18px 18px",
-                    display: "flex", gap: 14, alignItems: "flex-start",
-                  }}>
-                    <div style={{ width: 42, height: 42, borderRadius: 11, background: recommendedAction.urgency === "high" ? `${RED}12` : `${SAGE}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.2rem" }}>
-                      {recommendedAction.type === "approve_card"     ? "📬"
-                      : recommendedAction.type === "answer_briefing" ? "✍️"
-                      : recommendedAction.type === "add_person"      ? "👤"
-                      :                                                "🌱"}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: "0.96rem", color: INK, marginBottom: 5 }}>{recommendedAction.title}</div>
-                      <div style={{ fontSize: "0.84rem", color: MID, lineHeight: 1.6, marginBottom: 13 }}>{recommendedAction.description}</div>
-                      <button
-                        onClick={() => { if (recommendedAction.href.startsWith("/")) setLocation(recommendedAction.href); else window.location.href = recommendedAction.href; }}
-                        style={{ background: recommendedAction.urgency === "high" ? RED : INK, color: WHITE, border: "none", borderRadius: 9, padding: "9px 18px", fontSize: "0.84rem", fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        {recommendedAction.type === "approve_card"     ? "Review cards"
-                        : recommendedAction.type === "answer_briefing" ? "Add a personal touch"
-                        : recommendedAction.type === "add_person"      ? "Add person"
-                        :                                                "Improve profile"}
-                        <ArrowRight size={12} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Brownie Points ─────────────────────────────────── */}
-                {health.score > 0 && (
-                  <div style={{ marginBottom: 28 }}>
-                    <SHead text="Brownie Points" emoji="🍫" />
-                    <div style={{ background: WHITE, borderRadius: 16, padding: "20px 20px", border: `1px solid ${BORDER}` }}>
-                      {/* Score + label */}
-                      <div style={{ display: "flex", alignItems: "flex-end", gap: 12, marginBottom: 14 }}>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "4.2rem", color: health.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{displayScore}</div>
-                        <div style={{ paddingBottom: 8 }}>
-                          <div style={{ fontWeight: 700, fontSize: "0.95rem", color: health.color }}>{health.label}</div>
-                          {scoreDelta !== null && Math.abs(scoreDelta) >= 1 && (
-                            <div style={{ marginTop: 5, display: "inline-flex", alignItems: "center", gap: 5, background: scoreDelta > 0 ? `${SAGE}12` : "#FFF5F5", borderRadius: 20, padding: "3px 9px" }}>
-                              <TrendingUp size={10} style={{ color: scoreDelta > 0 ? SAGE : RED }} />
-                              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: scoreDelta > 0 ? SAGE : RED }}>{scoreDelta > 0 ? "+" : ""}{scoreDelta} this month</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <p style={{ fontSize: "0.88rem", color: MID, lineHeight: 1.65, margin: "0 0 16px" }}>{health.tagline}</p>
-                      <button onClick={() => {
-                        if (health.topInsight) {
-                          const rh = health.recipientHealths.find(r => r.name === health.topInsight?.recipientName);
-                          setLocation(rh?.topGapHref ?? "/recipients");
-                        } else setLocation("/recipients");
-                      }}
-                        style={{ padding: "8px 16px", background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 9, fontSize: "0.84rem", fontWeight: 600, color: INK, cursor: "pointer", marginBottom: 14 }}>
-                        Improve a profile →
-                      </button>
-
-                      {/* Collapsible levels */}
-                      <button onClick={() => setLevelsOpen(o => !o)}
-                        style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: "0.76rem", color: MID }}>
-                        {levelsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                        {levelsOpen ? "Hide levels" : "Show Brownie Points levels"}
-                      </button>
-                      {levelsOpen && (
-                        <div style={{ display: "flex", flexDirection: "column" as const, gap: 4, marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BORDER}` }}>
-                          {[
-                            { range: "91–98", label: "Legend Status",           color: "#4CAF50" },
-                            { range: "76–90", label: "Thoughtful Human",        color: "#26A69A" },
-                            { range: "51–75", label: "Building Momentum",       color: "#FFA726" },
-                            { range: "26–50", label: "Staying Out of Trouble",  color: "#FF7043" },
-                            { range: "0–25",  label: "Just Surviving",          color: "#9E9E9E" },
-                          ].map(level => {
-                            const isCurrent = level.label === health.label;
-                            return (
-                              <div key={level.label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderRadius: 6, background: isCurrent ? `${level.color}12` : "none" }}>
-                                <span style={{ fontSize: "0.68rem", color: level.color, width: 34, flexShrink: 0, fontWeight: isCurrent ? 700 : 400 }}>{level.range}</span>
-                                <span style={{ fontSize: "0.76rem", color: isCurrent ? level.color : MID, fontWeight: isCurrent ? 700 : 400 }}>{level.label}</span>
-                                {isCurrent && <span style={{ fontSize: "0.65rem", color: level.color, marginLeft: 2 }}>← you</span>}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* ── Recent Wins ────────────────────────────────────── */}
-                {wins.length > 0 && (
-                  <div style={{ marginBottom: 28 }}>
-                    <SHead text="Recent Wins" emoji="🎉" />
-                    <div style={{ background: WHITE, borderRadius: 16, overflow: "hidden", border: `1px solid ${BORDER}` }}>
-                      {wins.map((win, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 11, padding: "13px 18px", borderBottom: i < wins.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-                          <CheckCircle2 size={15} style={{ color: SAGE, flexShrink: 0, marginTop: 1 }} />
-                          <span style={{ fontSize: "0.87rem", color: INK, lineHeight: 1.55 }}>{win}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* ── Plan usage ─────────────────────────────────────── */}
-                <div style={{ marginBottom: 28 }}>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
                   <div style={{ background: WHITE, borderRadius: 14, padding: "15px 18px", border: `1px solid ${BORDER}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                       <span style={{ fontSize: "0.82rem", fontWeight: 600, color: INK }}>{planConfig.label} · {cardsUsed}/{cardsTotal} cards</span>
@@ -733,7 +725,7 @@ export default function DashboardPage() {
                         <span style={{ fontSize: "0.8rem", fontWeight: 700, color: atLimit ? RED : MID }}>{cardsLeft} left</span>
                         {plan !== "premium" && (
                           <button onClick={() => setUpgradeOpen(true)}
-                            style={{ padding: "5px 11px", borderRadius: 7, border: "none", background: atLimit ? RED : `${INK}08`, color: atLimit ? WHITE : MID, fontSize: "0.76rem", fontWeight: 700, cursor: "pointer" }}>
+                            style={{ padding: "4px 10px", borderRadius: 7, border: "none", background: atLimit ? RED : `${INK}08`, color: atLimit ? WHITE : MID, fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>
                             {atLimit ? "Upgrade" : "Plans"}
                           </button>
                         )}
@@ -741,87 +733,28 @@ export default function DashboardPage() {
                     </div>
                     <ThinBar pct={usagePct} color={atLimit ? RED : usagePct > 75 ? "#F59E0B" : SAGE} h={4} />
                   </div>
-                </div>
-
-                {/* ── Make future cards better ───────────────────────── */}
-                <div style={{ marginBottom: 28 }}>
-                  <button onClick={() => setInsightsOpen(o => !o)}
-                    style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: insightsOpen ? 14 : 0 }}>
-                    <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.65rem", letterSpacing: "0.02em", color: INK, margin: 0, lineHeight: 1 }}>Make Cards Better</h2>
-                    {insightsOpen ? <ChevronUp size={15} style={{ color: MID }} /> : <ChevronDown size={15} style={{ color: MID }} />}
-                  </button>
-
-                  {insightsOpen && (
-                    <div style={{ background: WHITE, borderRadius: 16, padding: "18px 20px", border: `1px solid ${BORDER}` }}>
-                      <p style={{ fontSize: "0.86rem", color: MID, margin: "0 0 18px", lineHeight: 1.65 }}>
-                        The more we know about your people, the more personal your cards become.
-                      </p>
-                      <div style={{ display: "flex", flexDirection: "column" as const, gap: 14, marginBottom: health.topInsight ? 18 : 0 }}>
-                        {Object.entries(
-                          health.recipientHealths.reduce<Record<string, { score: number; max: number }>>((acc, rh) => {
-                            for (const [k, v] of Object.entries(rh.categories)) {
-                              if (!acc[k]) acc[k] = { score: 0, max: 0 };
-                              acc[k].score += v.score * TIER_WEIGHTS[rh.tier];
-                              acc[k].max   += v.max   * TIER_WEIGHTS[rh.tier];
-                            }
-                            return acc;
-                          }, {})
-                        ).map(([catKey, { score, max }]) => {
-                          const pct = Math.round((score / Math.max(max, 1)) * 100);
-                          const c   = pct >= 65 ? SAGE : pct >= 45 ? "#F59E0B" : "#EF6C00";
-                          return (
-                            <div key={catKey}>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 5 }}>
-                                <span style={{ fontSize: "0.86rem", fontWeight: 700, color: INK }}>{CAT_LABELS[catKey]}</span>
-                                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: c }}>{pct}%</span>
-                              </div>
-                              <ThinBar pct={pct} color={c} h={4} />
-                            </div>
-                          );
-                        })}
-                      </div>
-                      {health.topInsight && (
-                        <div style={{ marginTop: 18, borderTop: `1px solid ${BORDER}`, paddingTop: 16, display: "flex", gap: 12, alignItems: "flex-start" }}>
-                          <Target size={15} style={{ color: SAGE, flexShrink: 0, marginTop: 2 }} />
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: "0.88rem", color: INK, marginBottom: 4 }}>{health.topInsight.action}</div>
-                            <div style={{ fontSize: "0.8rem", color: MID, lineHeight: 1.6 }}>
-                              For <strong>{health.topInsight.recipientName}</strong> — this helps cards sound like they're really from you.
-                            </div>
-                            <Link href={`/recipients/${health.recipientHealths.find(rh => rh.name === health.topInsight?.recipientName)?.id ?? ""}`}>
-                              <button style={{ marginTop: 9, padding: "6px 13px", background: `${INK}07`, color: INK, border: `1px solid ${BORDER}`, borderRadius: 7, fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}>
-                                Add details →
-                              </button>
-                            </Link>
-                          </div>
+                  {health.score > 0 && (
+                    <div style={{ background: WHITE, borderRadius: 14, padding: "15px 18px", border: `1px solid ${BORDER}` }}>
+                      <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: health.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{displayScore}</div>
+                        <div style={{ paddingBottom: 4 }}>
+                          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: MID, letterSpacing: "0.08em" }}>BROWNIE POINTS</div>
+                          <div style={{ fontSize: "0.8rem", fontWeight: 600, color: health.color }}>{health.label}</div>
                         </div>
-                      )}
+                      </div>
+                      <button onClick={() => {
+                        if (health.topInsight) {
+                          const rh = health.recipientHealths.find(r => r.name === health.topInsight?.recipientName);
+                          setLocation(rh?.topGapHref ?? "/recipients");
+                        } else setLocation("/recipients");
+                      }}
+                        style={{ marginTop: 10, padding: "6px 12px", background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, color: INK, cursor: "pointer" }}>
+                        Improve a profile →
+                      </button>
                     </div>
                   )}
                 </div>
-
-                {/* ── People You May Be Forgetting ───────────────────── */}
-                {coverage.gaps.length > 0 && (
-                  <div style={{ marginBottom: 28 }}>
-                    <SHead text="People You May Be Forgetting" sub="Make sure the important people in your life are covered." />
-                    <div style={{ background: WHITE, borderRadius: 14, padding: "6px 0", border: `1px solid ${BORDER}` }}>
-                      {coverage.gaps.map((gap, i, arr) => (
-                        <div key={gap.relationship} style={{ display: "flex", alignItems: "center", gap: 13, padding: "13px 18px", borderBottom: i < arr.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-                          <div style={{ width: 38, height: 38, borderRadius: 9, background: BEIGE, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>👤</div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 700, fontSize: "0.88rem", color: INK }}>Your {gap.relationship}</div>
-                            <div style={{ fontSize: "0.78rem", color: MID, marginTop: 2 }}>{gap.suggestion}</div>
-                          </div>
-                          <Link href="/recipients/new">
-                            <button style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: `${INK}07`, color: INK, fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>+ Add</button>
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
-              {/* end right column */}
             </div>
 
             {/* Footer */}

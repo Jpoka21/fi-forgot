@@ -1,0 +1,321 @@
+After reviewing the four dashboard concepts on the canvas, we have chosen a direction.
+
+Do NOT continue exploring additional dashboard concepts.
+
+Do NOT build more mockups.
+
+Do NOT create additional wireframes.
+
+Move forward with a single refined direction.
+
+---
+
+# CHOSEN DIRECTION
+
+Use:
+
+Dashboard #1 ("Your Next 30 Days")
+
+as the dashboard foundation.
+
+Use:
+
+Profile #3 ("Mom")
+
+as the recipient profile foundation.
+
+These two concepts are closest to the product vision.
+
+---
+
+# DASHBOARD REFINEMENT
+
+Take Dashboard #1 and improve it.
+
+Keep:
+
+Upcoming Moments as the hero section.
+
+This is why users come to FiForgot.
+
+The dashboard should immediately answer:
+
+"What needs my attention?"
+
+Examples:
+
+Steve
+Birthday in 12 days
+
+Mom
+Birthday in 21 days
+
+Dad
+Father's Day in 5 days
+
+Each card should have:
+
+Generate Card
+
+View Person
+
+---
+
+# ADD "WE GOT YOUR BACK"
+
+Add a friendly hero section at the top.
+
+Example:
+
+WE GOT YOUR BACK
+
+Never miss an important moment.
+
+This should feel warm and reassuring.
+
+Not corporate.
+
+Not stressful.
+
+---
+
+# MOVE YOUR PEOPLE HIGHER
+
+The current "Your People" section feels buried.
+
+Place it directly below Upcoming Moments.
+
+Show recipient cards with:
+
+Relationship icon
+
+Name
+
+Relationship
+
+Next upcoming occasion
+
+Examples:
+
+🤝 Steve
+
+👩 Mom
+
+👨 Dad
+
+❤️ Wife
+
+👦 Alex
+
+👧 Athena
+
+No initials.
+
+No photos.
+
+No AI faces.
+
+Use branded relationship icons.
+
+---
+
+# RELATIONSHIP INSIGHTS
+
+Keep health scoring and relationship intelligence.
+
+But move it lower on the page.
+
+Examples:
+
+3 people need updates
+
+2 upcoming events need attention
+
+1 recipient could use more information
+
+This is supporting information.
+
+Not the primary focus.
+
+---
+
+# QUICK CARD
+
+Reserve space on the dashboard for a future Quick Card feature.
+
+Do not fully build Quick Card yet.
+
+Just create the visual placement.
+
+Example:
+
+⚡ Quick Card
+
+Coming Soon
+
+Generate a thoughtful card in under 60 seconds.
+
+This helps us evaluate placement without building the workflow yet.
+
+---
+
+# RECIPIENT PROFILE DIRECTION
+
+Use Profile #3 ("Mom") as the foundation.
+
+This profile feels more like a person.
+
+Less like a settings screen.
+
+More like a relationship profile.
+
+---
+
+# RECIPIENT PROFILE STRUCTURE
+
+Header:
+
+Relationship icon
+
+Recipient name
+
+Relationship
+
+Upcoming occasion
+
+Generate Card button
+
+---
+
+Section 1:
+
+WHAT WE KNOW
+
+Examples:
+
+Loves camping
+
+Funny sense of humor
+
+Fishing trips
+
+Nickname Sto
+
+Inside joke: Rain Check
+
+* Add Memory
+
+---
+
+Section 2:
+
+RECENT UPDATES
+
+June 2026
+Camping trip
+
+April 2026
+Started new job
+
+March 2026
+Bought a dog
+
+* Add Update
+
+---
+
+Section 3:
+
+UPCOMING MOMENTS
+
+Birthday
+
+Christmas
+
+Anniversary
+
+Just Because
+
+* Add Occasion
+
+---
+
+Section 4:
+
+HELP US WRITE BETTER CARDS
+
+Display ONE question only.
+
+Never display large walls of questions.
+
+Example:
+
+What's something Steve has been excited about recently?
+
+Answer box
+
+Save
+
+---
+
+# REMOVE FROM MAIN PROFILE
+
+Move to Settings:
+
+Mailing address
+
+Delivery settings
+
+Approval timing
+
+Autopilot settings
+
+Email settings
+
+Workflow settings
+
+Shipping preferences
+
+The profile should focus on the person.
+
+Not logistics.
+
+---
+
+# IMPLEMENTATION APPROACH
+
+Do not redesign the entire application.
+
+Do not modify backend systems.
+
+Do not change database structure.
+
+Do not touch card generation.
+
+Focus only on:
+
+Dashboard
+
+Recipient Profile
+
+Visual hierarchy
+
+Navigation
+
+User experience
+
+Use existing data whenever possible.
+
+---
+
+# STOP POINT
+
+After implementing the redesigned Dashboard and Recipient Profile:
+
+STOP.
+
+Provide screenshots.
+
+Provide a summary of files modified.
+
+Wait for approval before continuing to additional screens.
