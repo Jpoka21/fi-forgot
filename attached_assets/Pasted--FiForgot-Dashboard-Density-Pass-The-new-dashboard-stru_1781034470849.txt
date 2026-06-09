@@ -1,0 +1,211 @@
+# FiForgot Dashboard Density Pass
+
+The new dashboard structure is much better.
+
+Do not redesign from scratch.
+
+Do not remove functionality.
+
+This pass is about sizing, spacing, and information density.
+
+---
+
+# Main Problem
+
+The dashboard is too tall for the amount of information shown.
+
+There is too much scrolling.
+
+Large cards are taking up too much vertical space.
+
+The goal is:
+
+Reduce total dashboard height by approximately 40 percent without removing important information.
+
+---
+
+# Above The Fold Goal
+
+On desktop, users should see these three things without major scrolling:
+
+1. We Got Your Back
+2. Upcoming Moments
+3. Your People
+
+Quick Card should also be visible near the top if possible.
+
+Everything else can be lower.
+
+---
+
+# We Got Your Back
+
+Keep it.
+
+But reduce its height by about 50 percent.
+
+Make it a compact status strip, not a giant hero block.
+
+It should still feel branded and reassuring.
+
+But it should not dominate the first screen.
+
+---
+
+# Upcoming Moments
+
+Keep this as the most important section.
+
+Make the cards more compact.
+
+Each card should show:
+
+Name
+
+Relationship
+
+Occasion
+
+Days remaining
+
+Primary action
+
+Use a tighter layout.
+
+Think:
+
+Boarding pass
+
+Not oversized menu card.
+
+Reduce unnecessary vertical padding.
+
+---
+
+# Your People
+
+Make this section more compact.
+
+Show people as smaller horizontal cards or tiles.
+
+Do not use huge cards for only two pieces of information.
+
+Each person tile should show:
+
+Relationship icon
+
+Name
+
+Relationship
+
+Next occasion badge
+
+---
+
+# Quick Card
+
+Move Quick Card higher if possible.
+
+But make it compact.
+
+It should not be a giant banner.
+
+It should feel like a helpful action tile.
+
+Example:
+
+⚡ Quick Card
+
+Generate a card in under 60 seconds.
+
+Coming Soon
+
+---
+
+# Relationship Insights And Health
+
+Keep them.
+
+But make them lower priority and more compact.
+
+Avoid repeating:
+
+Relationship Insights
+
+Relationship Health
+
+Relationship Insights
+
+Consolidate duplicate labels.
+
+Use one clean secondary section.
+
+---
+
+# Bottom Sections
+
+Recommended Next Step
+
+Plan Usage
+
+Brownie Points
+
+Richest Profile
+
+These should not dominate the dashboard.
+
+Use compact side by side cards where possible.
+
+---
+
+# Visual Rules
+
+Reduce oversized padding.
+
+Reduce card heights.
+
+Keep whitespace, but make it intentional.
+
+Avoid giant cards with one sentence.
+
+Use tighter section spacing.
+
+Use softer borders.
+
+Keep the premium feel, but make it more efficient.
+
+---
+
+# Success Test
+
+A user should not have to scroll through multiple screens just to see basic dashboard information.
+
+The dashboard should feel:
+
+Cleaner
+
+Faster
+
+More useful
+
+Less stretched out
+
+Less empty
+
+More like a product dashboard
+
+Less like a long landing page
+
+---
+
+# Stop Point
+
+After this density pass:
+
+Stop.
+
+Show screenshots.
+
+List files modified.
+
+Do not continue into recipient profile changes until approved.
