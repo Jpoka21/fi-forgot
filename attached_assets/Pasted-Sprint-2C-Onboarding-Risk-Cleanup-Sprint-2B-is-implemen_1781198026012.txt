@@ -1,0 +1,90 @@
+Sprint 2C: Onboarding Risk Cleanup
+
+Sprint 2B is implemented. Do not redesign onboarding again.
+
+This is a narrow cleanup sprint to fix implementation risks only.
+
+Do not change the overall Sprint 2B flow.
+Do not change database schema unless absolutely necessary.
+Do not change pricing, billing, Handwrytten, Brownie Points, relationship health formulas, fresh updates, follow up logic, or the question engine.
+
+Fix and verify these specific issues:
+
+1. Safer Recipient Association
+
+Current concern:
+The flow appears to run completeOnboarding(data), then getRecipients(), then find the new recipient by name before saving the card.
+
+That is fragile.
+
+If two recipients have the same first name, the card could attach to the wrong recipient.
+
+Please update the flow so the card is attached to the exact newly created recipient.
+
+Preferred solutions:
+A. Have completeOnboarding return the created recipient id if possible.
+B. Use a stable created recipient id from the onboarding save response.
+C. If neither is possible without API changes, use a safer temporary client side identifier or strongest available matching logic and explain the limitation.
+
+Do not rely only on first name matching.
+
+2. First Time Dashboard State Exit Rule
+
+Current concern:
+The first time dashboard state uses:
+recipients.length === 1 && cards.some(c => c.recipientId === recipients[0]?.id)
+
+This may keep showing forever until the user adds a second recipient.
+
+Add a sensible exit rule.
+
+Acceptable options:
+A. Let the user dismiss the first time success state.
+B. Automatically stop showing it after the user has viewed it once or after a reasonable condition.
+C. Show it only when the most recent onboarding completion created the first card.
+
+Make sure returning users with one recipient are not trapped in the first time success layout forever.
+
+3. Correct Address Ownership Logic
+
+Current concern:
+The dashboard address nudge checks whether neither the card nor the user profile has a mailing address.
+
+But the relevant address should be the recipient/card destination address, not necessarily the user profile.
+
+Audit how addresses are stored today.
+
+Update the nudge logic so it checks the correct address source.
+
+Expected behavior:
+If the approved card is awaiting a recipient mailing address, show the address nudge.
+If the recipient/card already has a valid mailing address, do not show the nudge.
+Do not incorrectly depend on the sender or user profile address unless that is intentionally how the app ships cards.
+
+4. Verify Existing Flows Were Not Broken
+
+Because Sprint 2B touched onboarding and dashboard only, verify that the implementation did not bypass important existing behavior.
+
+Confirm:
+Existing users still land on dashboard normally.
+Existing recipients still open normally.
+Normal post-onboarding card generation still works.
+Normal briefing flow still works.
+Cards review queue still works.
+Address saved during onboarding is available to the later send/review flow.
+Cards saved during onboarding appear in the correct review or dashboard location.
+
+5. Typecheck and Report
+
+Run typecheck.
+
+If possible, also run lint or build.
+
+Final report required:
+Files changed
+What was fixed
+How recipient association is now safe
+How first time dashboard state exits
+What address source is checked
+Validation results
+Any remaining risks

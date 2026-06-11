@@ -149,7 +149,8 @@ export default function DashboardPage() {
   const [, setLocation] = useLocation();
   const plan = (user?.plan ?? "basic") as Plan;
 
-  const isFirstTimeState = recipients.length === 1 && cards.some(c => c.recipientId === recipients[0]?.id);
+  const [firstTimeDismissed, setFirstTimeDismissed] = useState(() => !!localStorage.getItem("fi_forgot_first_time_seen"));
+  const isFirstTimeState = !firstTimeDismissed && recipients.length === 1 && cards.some(c => c.recipientId === recipients[0]?.id);
 
   useEffect(() => {
     const rs = getRecipients(); const cs = getCards();
@@ -385,7 +386,12 @@ export default function DashboardPage() {
         {isFirstTimeState && (() => {
           const r = recipients[0];
           const c = cards.find(cc => cc.recipientId === r.id);
-          const hasAddress = !!(c?.overrideAddress?.line1 || user?.mailingAddress?.line1);
+          // Address nudge: check card-level override first, then recipient's stored address.
+          // The sender's user-profile address is irrelevant here — we need to know
+          // whether we have a valid delivery address for this specific recipient/card.
+          const cardHasAddress = !!c?.overrideAddress?.line1?.trim();
+          const recipientHasAddress = !!r.mailingAddress?.line1?.trim();
+          const needsAddressNudge = !cardHasAddress && !recipientHasAddress;
           return (
             <div>
               {/* Header */}
@@ -449,7 +455,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Address nudge */}
-              {!hasAddress && (
+              {needsAddressNudge && (
                 <div style={{ background: `${RED}08`, borderRadius: 12, padding: "16px 20px", marginBottom: 16, border: `1px solid ${RED}20`, display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ fontSize: "1.5rem", flexShrink: 0 }}>📬</div>
                   <div style={{ flex: 1 }}>
@@ -473,6 +479,19 @@ export default function DashboardPage() {
                   Add another person
                 </button>
               </Link>
+
+              {/* Dismiss — prevents re-showing on future visits */}
+              <div style={{ textAlign: "center" as const, marginTop: 16 }}>
+                <button
+                  onClick={() => {
+                    localStorage.setItem("fi_forgot_first_time_seen", "1");
+                    setFirstTimeDismissed(true);
+                  }}
+                  style={{ background: "none", border: "none", color: MID, fontSize: "0.82rem", cursor: "pointer",
+                    textDecoration: "underline", opacity: 0.6 }}>
+                  Show me the full dashboard
+                </button>
+              </div>
             </div>
           );
         })()}

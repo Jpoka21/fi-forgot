@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth, OnboardingData } from "@/lib/auth-context";
-import { suggestedEvents, PreviewDays, saveCard, getRecipients } from "@/lib/data";
+import { suggestedEvents, PreviewDays, saveCard } from "@/lib/data";
 import type { CardOrder } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
@@ -281,18 +281,13 @@ export default function OnboardingPage() {
     };
   }
 
-  function saveCardOrder(fd: OnboardingData, approved: boolean, addr?: typeof address) {
-    const recipients = getRecipients();
-    const recipient = recipients.find(
-      r => r.name.trim().toLowerCase() === fd.recipientName.trim().toLowerCase()
-    );
-    if (!recipient) return;
+  function saveCardOrder(recipientId: string, recipientName: string, approved: boolean, addr?: typeof address) {
     const dueDate = firstOccasionDate ||
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const card: CardOrder = {
       id:              Date.now().toString(),
-      recipientId:     recipient.id,
-      recipientName:   recipient.name,
+      recipientId,
+      recipientName,
       holiday:         firstOccasion,
       dueDate,
       status:          approved ? "Approved" : "Ready for approval",
@@ -310,23 +305,23 @@ export default function OnboardingPage() {
 
   function handleSaveToDashboard() {
     const fd = buildFinalData();
-    completeOnboarding(fd);
-    saveCardOrder(fd, false);
+    const recipientId = completeOnboarding(fd);
+    if (recipientId) saveCardOrder(recipientId, fd.recipientName.trim(), false);
     toast({ title: "Saved!", description: `${data.recipientName}'s draft is waiting on your dashboard.` });
     setLocation("/dashboard");
   }
 
   function handleSaveAddress() {
     const fd = buildFinalData(address);
-    completeOnboarding(fd);
-    saveCardOrder(fd, true, address.line1.trim() ? address : undefined);
+    const recipientId = completeOnboarding(fd);
+    if (recipientId) saveCardOrder(recipientId, fd.recipientName.trim(), true, address.line1.trim() ? address : undefined);
     setPhase("done");
   }
 
   function handleSkipAddress() {
     const fd = buildFinalData();
-    completeOnboarding(fd);
-    saveCardOrder(fd, true);
+    const recipientId = completeOnboarding(fd);
+    if (recipientId) saveCardOrder(recipientId, fd.recipientName.trim(), true);
     setPhase("done");
   }
 

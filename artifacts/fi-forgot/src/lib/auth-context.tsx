@@ -45,7 +45,7 @@ interface AuthContextType {
   login: (email: string, name?: string) => void;
   signup: (name: string, email: string, skipOnboarding?: boolean) => void;
   businessSignup: (name: string, email: string, businessName: string, businessType: string) => void;
-  completeOnboarding: (data: OnboardingData) => void;
+  completeOnboarding: (data: OnboardingData) => string | undefined;
   logout: () => void;
   upgradePlan: (plan: Plan) => void;
   updateMailingAddress: (addr: RecipientAddress) => void;
@@ -65,7 +65,7 @@ const AuthContext = createContext<AuthContextType>({
   login: () => {},
   signup: () => {},
   businessSignup: () => {},
-  completeOnboarding: () => {},
+  completeOnboarding: () => undefined,
   logout: () => {},
   upgradePlan: () => {},
   updateMailingAddress: () => {},
@@ -457,11 +457,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (ws) saveActiveWorkspaceId(ws.id);
   }
 
-  function completeOnboarding(data: OnboardingData) {
+  function completeOnboarding(data: OnboardingData): string | undefined {
     localStorage.setItem("fi_forgot_onboarding", JSON.stringify(data));
+    let recipientId: string | undefined;
     if (data.recipientName.trim()) {
       const recipient = onboardingToRecipient(data);
       saveRecipient(recipient);
+      recipientId = recipient.id;
     }
     // Save subscriber's mailing address to user profile if provided
     if (data.mailingAddress?.line1?.trim()) {
@@ -473,6 +475,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     }
     setOnboardingComplete(true);
+    return recipientId;
   }
 
   function updateMailingAddress(addr: RecipientAddress) {
