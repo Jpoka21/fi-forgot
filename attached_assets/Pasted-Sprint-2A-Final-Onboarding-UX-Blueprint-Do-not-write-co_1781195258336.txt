@@ -1,0 +1,181 @@
+Sprint 2A: Final Onboarding UX Blueprint
+
+Do not write code.
+
+Do not modify files.
+
+Do not implement anything.
+
+This is the final planning document before onboarding development begins.
+
+The onboarding analysis has already been completed and we have agreed on the following principles:
+
+1. Users should experience value as quickly as possible.
+2. The first card draft should appear during onboarding, not after onboarding.
+3. Mailing address should be collected after value has been demonstrated.
+4. The relationship memory database remains a core strategic asset.
+5. Progressive profiling should collect most non-essential information later.
+6. The onboarding experience should support both conversion and long-term data quality.
+
+Your task is to create the exact onboarding blueprint that will be built.
+
+PART 1 — Complete User Journey
+
+Show the entire user journey from:
+
+Landing Page
+→ Sign Up
+→ Onboarding
+→ First Card Draft
+→ First Approval
+→ Address Collection
+→ Dashboard
+
+For each screen include:
+
+Screen name
+Primary goal
+User mindset
+Primary CTA
+Secondary CTA
+Estimated completion time
+
+PART 2 — Screen by Screen Wireframes
+
+For every onboarding screen provide a detailed text wireframe.
+
+Include:
+
+Page title
+Headline
+Supporting copy
+Fields
+Buttons
+Progress indicator
+Validation messages
+Loading states
+Success states
+
+Show exactly what the user sees.
+
+Do not describe generally.
+
+Write the actual experience.
+
+PART 3 — Relationship Specific Memory Prompts
+
+The memory question is currently the most valuable card-quality input.
+
+Design prompts for:
+
+Spouse / Partner
+Mom
+Dad
+Grandparent
+Sibling
+Friend
+Employee
+Client
+
+For each relationship provide:
+
+Primary prompt
+Fallback prompt
+Example answer
+Why it produces better card material
+
+Goal:
+
+Increase useful responses and reduce blank answers.
+
+PART 4 — First Card Experience
+
+Design the exact first card screen.
+
+Specify:
+
+What appears immediately
+Whether generation occurs in the background
+Loading experience
+Editing controls
+Revision controls
+Approval flow
+
+Also answer:
+
+How many revision opportunities should be offered before approval?
+
+How do we prevent endless tweaking?
+
+PART 5 — Address Collection Experience
+
+Design the complete address collection step.
+
+Specify:
+
+Exact timing
+Screen layout
+Copy
+Primary CTA
+Skip behavior
+Error handling
+
+Goal:
+
+Capture the address after trust is earned but before momentum is lost.
+
+PART 6 — Post Approval Expansion Screen
+
+Immediately after the first card is approved:
+
+What should the user see?
+
+Design the screen.
+
+Potential goals:
+
+Add another recipient
+Add additional occasions
+Improve profile quality
+Invite spouse
+Enable reminders
+
+Choose the single best priority order.
+
+Explain why.
+
+PART 7 — Progressive Profiling Map
+
+Create a table showing every onboarding field that was removed.
+
+For each field include:
+
+Field name
+Where it will be collected later
+Trigger
+Expected completion rate
+Reason for timing
+
+PART 8 — Dashboard Impact
+
+Explain how the redesigned onboarding affects:
+
+First dashboard visit
+Relationship Health
+Recommended Next Step
+People growth
+Recipient profile completeness
+
+Include any dashboard adjustments required to support the new onboarding.
+
+PART 9 — Final Product Recommendation
+
+Provide the final onboarding blueprint.
+
+Do not give multiple options.
+
+Choose one direction.
+
+Assume this blueprint will be handed directly to design and engineering for implementation.
+
+The output should be detailed enough that no additional product decisions are required before development begins.

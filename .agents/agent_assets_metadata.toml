@@ -191,3 +191,9 @@ id = "4wSURtQ9nGjOKKGErcRfO"
 uri = "file://fi-forgot-product-audit.md"
 type = "text"
 title = "F.I. Forgot — Product & UX Architecture Audit"
+
+[[outputs]]
+id = "Ay4PRYJNObubvWIJz3-I8"
+uri = "file://attached_assets/sprint-2a-onboarding-blueprint.md"
+type = "text"
+title = "Sprint 2A: Final Onboarding UX Blueprint"
