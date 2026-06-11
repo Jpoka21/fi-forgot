@@ -185,3 +185,9 @@ id = "7FQBOaG-MhktZA3HVEKyf"
 uri = "file://exports/bug-fix-profile-question-loop.txt"
 type = "text"
 title = "Bug Fix — Profile Question Loop"
+
+[[outputs]]
+id = "4wSURtQ9nGjOKKGErcRfO"
+uri = "file://fi-forgot-product-audit.md"
+type = "text"
+title = "F.I. Forgot — Product & UX Architecture Audit"
