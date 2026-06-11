@@ -327,6 +327,7 @@ export default function RecipientProfilePage() {
   const [memoryText, setMemoryText] = useState("");
   const [memorySaving, setMemorySaving] = useState(false);
   const [memorySuccess, setMemorySuccess] = useState(false);
+  const [memoryError, setMemoryError] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
 
   // Auto-open memory modal when navigated via ?action=add-memory
@@ -347,6 +348,7 @@ export default function RecipientProfilePage() {
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) return;
     setMemorySaving(true);
+    setMemoryError(false);
     try {
       const res = await fetch(`/api/v2/recipients/${params.id}/answer-question`, {
         method: "POST",
@@ -364,8 +366,14 @@ export default function RecipientProfilePage() {
         setMemorySuccess(true);
         window.dispatchEvent(new CustomEvent("recipient-answer-saved"));
         setTimeout(() => setMemorySuccess(false), 3000);
+      } else {
+        setMemoryError(true);
       }
-    } catch { /**/ } finally { setMemorySaving(false); }
+    } catch {
+      setMemoryError(true);
+    } finally {
+      setMemorySaving(false);
+    }
   }
 
   const { user, upgradePlan } = useAuth();
@@ -1543,10 +1551,15 @@ export default function RecipientProfilePage() {
               className="w-full rounded-xl border text-sm resize-none px-3 py-2.5 focus:outline-none"
               style={{ borderColor: `${SAGE}50`, fontFamily: "'Inter', sans-serif", boxSizing: "border-box" as const }}
             />
+            {memoryError && (
+              <div className="mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold" style={{ background: `${RED}10`, color: RED, border: `1px solid ${RED}25` }}>
+                We couldn't save that memory. Please try again.
+              </div>
+            )}
             <div className="flex gap-3 mt-3">
               <button
                 type="button"
-                onClick={() => { setMemoryModalOpen(false); setMemoryText(""); }}
+                onClick={() => { setMemoryModalOpen(false); setMemoryText(""); setMemoryError(false); }}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
                 style={{ background: `${BLACK}08`, color: GRAY, border: "none", cursor: "pointer" }}
               >
