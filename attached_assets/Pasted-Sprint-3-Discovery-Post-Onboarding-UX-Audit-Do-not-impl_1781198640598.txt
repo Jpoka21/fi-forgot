@@ -1,0 +1,152 @@
+Sprint 3 Discovery: Post-Onboarding UX Audit
+
+Do not implement anything.
+
+Do not redesign the dashboard yet.
+
+The product has changed significantly after Sprint 2B and Sprint 2C.
+
+The onboarding flow now:
+
+* Produces a card draft during onboarding
+* Moves address collection later
+* Uses a first-time dashboard state
+* Encourages adding more recipients
+
+Because of these changes, I want a fresh UX audit of the current product.
+
+Goal:
+
+Identify the highest-impact user experience bottlenecks that remain in FiForgot after the onboarding redesign.
+
+Do not assume the dashboard is the next priority.
+
+Analyze the entire user journey.
+
+Part 1 — Current User Journey Review
+
+Review the current experience for:
+
+1. New user
+2. Returning user
+3. User with 1 recipient
+4. User with multiple recipients
+5. User with cards awaiting approval
+6. User with upcoming events
+
+For each journey identify:
+
+Most valuable moment
+Most confusing moment
+Highest friction point
+Highest abandonment risk
+
+Part 2 — Dashboard Audit
+
+Review the dashboard as it exists today.
+
+Evaluate:
+
+Visual hierarchy
+Clarity
+Decision overload
+Competing calls to action
+Usefulness of Relationship Health
+Usefulness of Brownie Points
+Usefulness of Recommended Next Step
+People section
+Upcoming Moments section
+
+Rank the top dashboard issues by impact.
+
+Part 3 — Recipient Profile Audit
+
+Review recipient profile pages.
+
+Evaluate:
+
+Ease of understanding
+Profile completeness flow
+Question answering experience
+Memory collection experience
+Progressive profiling experience
+Relationship health presentation
+
+Identify friction points and missed opportunities.
+
+Part 4 — Card Experience Audit
+
+Review:
+
+Card generation
+Card editing
+Card approval
+Card review queue
+
+Evaluate:
+
+Trust
+Confidence
+Editing friction
+Approval friction
+Emotional payoff
+
+Identify anything preventing users from quickly approving cards.
+
+Part 5 — Question Engine Audit
+
+Review:
+
+Profile questions
+Fresh updates
+Follow-up questions
+
+Evaluate:
+
+Question order
+Question quality
+Question timing
+Likelihood of response
+Value to future card quality
+
+Identify the highest leverage improvements.
+
+Part 6 — Opportunity Ranking
+
+Rank the top 10 UX opportunities remaining in FiForgot.
+
+For each include:
+
+Issue
+Impact
+Estimated effort
+Priority
+
+Use:
+
+Critical
+High
+Medium
+Low
+
+Part 7 — Recommendation
+
+Do not recommend multiple paths.
+
+Choose the single highest ROI product improvement that should become Sprint 3.
+
+Explain:
+
+Why it matters more than dashboard redesign.
+Expected impact.
+Implementation complexity.
+
+Important:
+
+Do not write code.
+
+Do not implement.
+
+Provide a product recommendation only.
+
+The goal is to identify the next highest-value improvement after the onboarding redesign.
