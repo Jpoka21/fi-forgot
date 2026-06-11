@@ -1,0 +1,147 @@
+Sprint 1B: Finish Navigation Cleanup
+
+Use the Sprint 1 follow up report as the source of truth. The first navigation sprint created AppNav and some new routes, but the cleanup is incomplete.
+
+Do not start Sprint 2. Do not redesign onboarding. Do not redesign the dashboard. Do not change card generation logic, AI prompts, question engine logic, Handwrytten integration, pricing, billing, Brownie Points scoring, or relationship health formulas.
+
+Goal:
+Finish the navigation cleanup so the authenticated personal app has one consistent navigation experience and no visible dead ends.
+
+1. Migrate Important Personal Routes to AppNav
+
+The following routes still use the old AppLayout and Sidebar:
+
+/recipients
+/recipients/:id
+/settings/reminders
+/cards/generate
+/briefings/:rId/:event
+
+Update these routes so they use the same AppNav experience as:
+
+/dashboard
+/people
+/moments
+/cards/review
+/brownie-points
+
+Do not visually redesign the pages. Only update layout and navigation wrapper unless a small spacing adjustment is required.
+
+Admin can keep its separate layout.
+
+2. Make /people the Primary People Page
+
+/people should be the main user facing people management page.
+
+Remove user facing links to the generic /recipients page.
+
+If /recipients is still needed for legacy compatibility, redirect /recipients to /people.
+
+Do not delete backend APIs or data models.
+
+Keep /recipients/:id as the recipient profile route for now unless changing it is clearly safe.
+
+3. Fix Add Person Routing
+
+The current Add Person CTA points to /recipients/new, which falls into the dynamic /recipients/:id route.
+
+This is fragile.
+
+Create a safe dedicated Add Person route or update the CTA to use the correct existing add recipient flow.
+
+The Add Person action should not accidentally treat "new" as a recipient id.
+
+After the fix, Add Person should open a real add person flow using AppNav.
+
+4. Hide Quick Card Until Functional
+
+Quick Card is still visible in AppNav but only leads to a Coming Soon page.
+
+Remove Quick Card from the primary navigation.
+
+If /quick-card is accessed directly, it should not feel like a dead end. Either redirect it to /dashboard or show a useful fallback with links to /dashboard and /moments.
+
+5. Hide Admin From Non Admin Users
+
+Admin Panel is still visible to all authenticated users.
+
+Update AccountMenu so the Admin option only appears for users who pass the same admin check used by the /admin page.
+
+Do not weaken admin route protection. Hiding the nav link is only a UX improvement. Route protection must remain.
+
+6. Remove Account Settings Placeholder
+
+Account Settings still triggers alert("Coming soon").
+
+Remove this menu item unless there is a real working Account Settings page to link to.
+
+Do not leave browser alerts or placeholder menu actions in the authenticated app.
+
+7. Make Reminder Settings Discoverable
+
+/settings/reminders is currently unreachable from the new AppNav.
+
+If Reminder Settings is still a real working page, make it reachable in a sensible place.
+
+Preferred options:
+A. Add it inside the AccountMenu as “Reminder Settings”
+B. Add a small settings link from the Autopilot or reminder related dashboard area
+
+Do not add it as a major primary tab unless you think it deserves primary navigation.
+
+8. Remove Unused or Confusing Back Params
+
+The dashboard links to recipient profiles with ?from=dashboard, but the report says this appears unused.
+
+Audit this param.
+
+If it is unused, remove it.
+
+If it is needed, make sure it powers a clear back link or breadcrumb.
+
+Do not leave unused navigation params in user facing routes.
+
+9. Recheck Main CTAs
+
+After implementation, verify:
+
+Add Person
+Open Person
+Generate Card
+Add Details
+Review Card
+Cards to Review badge
+Brownie Points counter
+Upcoming Moments nav
+Reminder Settings
+Sign Out
+
+For each one, confirm:
+Destination
+Whether it works
+Whether it uses AppNav
+Whether it avoids placeholder or dead end behavior
+
+10. Validation Required
+
+Run typecheck.
+
+If available, also run lint or build. If build cannot run because of environment variables, say that clearly.
+
+11. Final Report Required
+
+After finishing, provide:
+
+Files changed
+Routes changed
+Layout changes made
+Redirects added
+Navigation items before and after
+Menu items hidden
+Add Person fix
+Reminder Settings access fix
+Any routes intentionally left on Sidebar and why
+CTA verification table
+Tests run
+Errors or warnings
+Anything still unresolved

@@ -1,183 +1,85 @@
-import React, { useState } from "react";
-import { Plus, Home, Users, Bell, User, Send, BookOpen, ChevronRight, Heart, Mail } from "lucide-react";
+import { useState } from "react";
 
-const BG     = "#F2E6D3";
-const RED    = "#E23B2E";
-const BLACK  = "#111111";
-const SAGE   = "#5B8C6B";
-const GRAY   = "#6B6B6B";
-const BORDER = "#E5E0D8";
-const WHITE  = "#FFFFFF";
-const AMBER  = "#D97706";
+const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF";
 
-const DATA_VERSION = "5";
-
-const FEED = [
-  {
-    id: 1, person: "Mom", avatar: "👩‍🦳", date: "Today",
-    text: "Knee surgery went well, resting at home now.",
-    tag: "Health", tagColor: "#9333EA",
-    followUp: "Ask about PT schedule",
-    followUpUrgent: true,
-  },
-  {
-    id: 2, person: "Marcus", avatar: "🧔", date: "Yesterday",
-    text: "Got the promotion to Senior Director!",
-    tag: "Career", tagColor: SAGE,
-    followUp: "Send congratulatory card",
-    followUpUrgent: false,
-  },
-  {
-    id: 3, person: "Steve", avatar: "👨", date: "Oct 12",
-    text: "Started guitar lessons. Fingers are bleeding but he loves it.",
-    tag: "Hobby", tagColor: "#2563EB",
-    followUp: null,
-    followUpUrgent: false,
-  },
-  {
-    id: 4, person: "Sarah", avatar: "👱‍♀️", date: "Oct 10",
-    text: "Kids started soccer — weekends are chaos now.",
-    tag: "Family", tagColor: AMBER,
-    followUp: "Ask how the season is going",
-    followUpUrgent: false,
-  },
+const feed=[
+  {p:"Steve",  e:"👦",col:"#DBEAFE",text:"Started guitar lessons — working on chord progressions.", date:"4 days ago",follow:true},
+  {p:"Marcus", e:"👦",col:"#FEE2E2",text:"Birthday in 3 days! Last card still on his fridge.",     date:"urgent",    follow:true},
+  {p:"Mom",    e:"👩",col:"#FCE7F3",text:"Knee surgery went well. Says she's walking better.",       date:"1 week ago", follow:false},
+  {p:"Dad",    e:"👨",col:"#FEF3C7",text:"Mentioned wanting to get back into fishing.",               date:"2 weeks ago",follow:true},
+  {p:"Sarah",  e:"👧",col:"#D1FAE5",text:"New job at Fidelity — 90 day review went great.",          date:"3 weeks ago",follow:false},
 ];
 
-export function Mobile() {
-  const [activeTab, setActiveTab] = useState(0);
-  const followUpCount = FEED.filter(f => f.followUp).length;
-
-  return (
-    <div style={{
-      width: "390px", height: "844px",
-      background: BG,
-      fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK,
-      borderRadius: "3rem", overflow: "hidden", border: `8px solid ${BLACK}`,
-      boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
-      display: "flex", flexDirection: "column",
-      position: "relative",
-    }}>
-
-      {/* Status bar */}
-      <div style={{ height: "3rem", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 1.5rem", fontSize: "0.75rem", fontWeight: 600, flexShrink: 0 }}>
-        <span>9:41</span>
-        <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-          <div style={{ width: "16px", height: "11px", background: BLACK, borderRadius: "2px" }} />
-          <div style={{ width: "11px", height: "11px", background: BLACK, borderRadius: "50%" }} />
-        </div>
+export default function Mobile(){
+  const [tab,setTab]=useState("home");
+  const [logOpen,setLogOpen]=useState(false);
+  return(
+    <div style={{width:"100%",height:"100vh",background:BG,fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column" as const,overflow:"hidden",position:"relative" as const}}>
+      {/* STATUS */}
+      <div style={{background:BLACK,padding:"10px 16px 8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.25rem",color:WHITE,letterSpacing:"0.08em"}}>F*I FORGOT</span>
+        <div style={{width:26,height:26,borderRadius:"50%",background:RED,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.62rem",fontWeight:700}}>JM</div>
       </div>
 
-      {/* Header */}
-      <div style={{ padding: "0 1.5rem 0.85rem", flexShrink: 0 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <div>
-            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.15rem", color: SAGE, transform: "rotate(-2deg)", marginBottom: "-0.3rem" }}>
-              what's going on…
-            </p>
-            <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "2.75rem", lineHeight: 1, letterSpacing: "0.02em", margin: 0 }}>
-              WHAT'S NEW
-            </h1>
-          </div>
-          <div style={{ position: "relative" }}>
-            <div style={{ width: "2.6rem", height: "2.6rem", borderRadius: "999px", background: WHITE, border: `2px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Bell size={16} />
+      {/* HEADER */}
+      <div style={{background:WHITE,borderBottom:`1px solid ${BORDER}`,padding:"12px 16px"}}>
+        <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.7rem",color:BLACK,margin:0,letterSpacing:"0.04em",lineHeight:1}}>WHAT'S NEW</p>
+        <p style={{fontSize:"0.72rem",color:GRAY,margin:"3px 0 0"}}>5 updates · <span style={{color:RED,fontWeight:700}}>3 follow-ups waiting</span></p>
+      </div>
+
+      {/* FEED */}
+      <div style={{flex:1,overflowY:"auto" as const,padding:"10px 14px",display:"flex",flexDirection:"column" as const,gap:9}}>
+        {feed.map((item,i)=>(
+          <div key={i} style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:13,padding:"12px 13px",overflow:"hidden"}}>
+            <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8}}>
+              <div style={{width:32,height:32,borderRadius:8,background:item.col,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1rem"}}>{item.e}</div>
+              <div style={{flex:1}}>
+                <p style={{fontWeight:700,fontSize:"0.82rem",margin:0}}>{item.p}</p>
+                <p style={{fontSize:"0.66rem",color:item.date==="urgent"?RED:GRAY,margin:"1px 0 0",fontWeight:item.date==="urgent"?700:400}}>{item.date==="urgent"?"⚡ 3 days away":item.date}</p>
+              </div>
             </div>
-            {followUpCount > 0 && (
-              <div style={{ position: "absolute", top: "-3px", right: "-3px", width: "1.1rem", height: "1.1rem", borderRadius: "999px", background: RED, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: "0.55rem", fontWeight: 700, color: WHITE }}>{followUpCount}</span>
+            <p style={{fontFamily:"'Caveat',cursive",fontSize:"1.08rem",color:BLACK,margin:"0 0 8px",lineHeight:1.45}}>{item.text}</p>
+            {item.follow&&(
+              <div style={{display:"flex",gap:6}}>
+                <button style={{flex:1,background:item.date==="urgent"?RED:SAGE,color:WHITE,border:"none",borderRadius:7,padding:"7px",fontWeight:700,fontSize:"0.7rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+                  {item.date==="urgent"?"Send Card →":"Follow up →"}
+                </button>
+                <button style={{background:BG,color:GRAY,border:`1px solid ${BORDER}`,borderRadius:7,padding:"7px 10px",fontSize:"0.7rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Skip</button>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Urgent banner */}
-        <div style={{ marginTop: "0.75rem", background: `${RED}10`, border: `1px solid ${RED}25`, borderRadius: "0.6rem", padding: "0.55rem 0.85rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <Bell size={12} style={{ color: RED, flexShrink: 0 }} />
-          <p style={{ fontSize: "0.74rem", fontWeight: 700, color: RED, flex: 1 }}>
-            Follow up with Mom today — PT schedule
-          </p>
-          <ChevronRight size={12} style={{ color: RED, flexShrink: 0 }} />
-        </div>
-      </div>
-
-      {/* Feed */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "0.25rem 1.25rem 7rem" }}>
-        {FEED.map((item, i) => (
-          <div key={item.id} style={{ marginBottom: "1rem" }}>
-            {/* Memory card */}
-            <div style={{ background: WHITE, borderRadius: "1rem", border: `1px solid ${BORDER}`, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-              {/* Card header */}
-              <div style={{ padding: "0.7rem 1rem 0.6rem", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${BORDER}` }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <span style={{ fontSize: "1.2rem" }}>{item.avatar}</span>
-                  <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{item.person}</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <span style={{ padding: "0.15rem 0.5rem", borderRadius: "999px", fontSize: "0.58rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", background: `${item.tagColor}18`, color: item.tagColor }}>
-                    {item.tag}
-                  </span>
-                  <span style={{ fontSize: "0.65rem", fontWeight: 600, color: GRAY }}>{item.date}</span>
-                </div>
-              </div>
-
-              {/* Memory text */}
-              <div style={{ padding: "0.8rem 1rem" }}>
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", lineHeight: 1.4, color: BLACK, margin: 0 }}>
-                  "{item.text}"
-                </p>
-              </div>
-
-              {/* Follow-up */}
-              {item.followUp && (
-                <div style={{ margin: "0 0.85rem 0.75rem", padding: "0.5rem 0.75rem", background: item.followUpUrgent ? `${RED}08` : BG, borderRadius: "0.5rem", border: `1px solid ${item.followUpUrgent ? `${RED}20` : BORDER}`, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <Bell size={11} style={{ color: item.followUpUrgent ? RED : AMBER, flexShrink: 0 }} />
-                  <p style={{ fontSize: "0.74rem", color: BLACK, fontWeight: 500, flex: 1 }}>{item.followUp}</p>
-                  <ChevronRight size={11} style={{ color: GRAY, flexShrink: 0 }} />
-                </div>
-              )}
-
-              {/* Actions */}
-              <div style={{ padding: "0.55rem 1rem", borderTop: `1px solid ${BORDER}`, display: "flex", gap: "0.5rem" }}>
-                <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.3rem", background: "none", border: "none", cursor: "pointer", fontSize: "0.68rem", fontWeight: 700, color: GRAY, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  <BookOpen size={11} /> Add
-                </button>
-                <div style={{ width: "1px", background: BORDER }} />
-                <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.3rem", background: "none", border: "none", cursor: "pointer", fontSize: "0.68rem", fontWeight: 700, color: GRAY, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  <Send size={11} /> Card
-                </button>
-                <div style={{ width: "1px", background: BORDER }} />
-                <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.3rem", background: "none", border: "none", cursor: "pointer", fontSize: "0.68rem", fontWeight: 700, color: GRAY, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  <User size={11} /> Profile
-                </button>
-              </div>
-            </div>
           </div>
         ))}
       </div>
 
       {/* FAB */}
-      <div style={{ position: "absolute", bottom: "6rem", right: "1.25rem", zIndex: 20 }}>
-        <button style={{ width: "3.75rem", height: "3.75rem", borderRadius: "999px", background: RED, color: WHITE, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 20px rgba(226,59,46,0.45)" }}>
-          <Plus size={28} strokeWidth={3} />
-        </button>
-      </div>
+      <button onClick={()=>setLogOpen(!logOpen)}
+        style={{position:"absolute" as const,bottom:76,right:18,width:52,height:52,borderRadius:"50%",background:BLACK,color:WHITE,border:"none",cursor:"pointer",fontSize:"1.4rem",boxShadow:"0 4px 16px rgba(0,0,0,0.22)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
+        📝
+      </button>
 
-      {/* Bottom nav */}
-      <nav style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: WHITE, borderTop: `2px solid ${BORDER}`, display: "flex", justifyContent: "space-around", padding: "0.75rem 0 1.25rem", zIndex: 10 }}>
-        {[
-          { icon: <Home size={22} />, label: "Feed",   active: true  },
-          { icon: <Users size={22} />, label: "People", active: false },
-          { icon: <Bell size={22} />, label: "Alerts", active: false },
-          { icon: <User size={22} />, label: "Me",     active: false },
-        ].map(item => (
-          <button key={item.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.15rem", background: "none", border: "none", cursor: "pointer", opacity: item.active ? 1 : 0.35, color: item.active ? BLACK : GRAY }}>
-            {item.icon}
-            <span style={{ fontSize: "0.58rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{item.label}</span>
+      {/* LOG SHEET */}
+      {logOpen&&(
+        <div style={{position:"absolute" as const,inset:0,background:"rgba(0,0,0,0.4)",zIndex:20,display:"flex",alignItems:"flex-end"}} onClick={()=>setLogOpen(false)}>
+          <div style={{background:WHITE,borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%"}} onClick={e=>e.stopPropagation()}>
+            <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.4rem",letterSpacing:"0.06em",margin:"0 0 14px"}}>LOG A MOMENT</p>
+            <div style={{display:"flex",flexDirection:"column" as const,gap:8}}>
+              {["Marcus 👦","Steve 🧔","Mom 👩","Dad 👨","Sarah 👧","Emily 💑"].map(p=>(
+                <button key={p} style={{background:BG,border:`1px solid ${BORDER}`,borderRadius:10,padding:"11px 14px",textAlign:"left" as const,fontSize:"0.84rem",fontWeight:600,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{p}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BOTTOM NAV */}
+      <div style={{background:WHITE,borderTop:`1px solid ${BORDER}`,padding:"10px 0 14px",display:"flex",justifyContent:"space-around"}}>
+        {[{icon:"🏠",label:"Home",id:"home"},{icon:"📅",label:"Moments",id:"moments"},{icon:"👥",label:"People",id:"people"},{icon:"🏆",label:"Points",id:"points"}].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{display:"flex",flexDirection:"column" as const,alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+            <span style={{fontSize:"1.2rem"}}>{t.icon}</span>
+            <span style={{fontSize:"0.6rem",fontWeight:t.id===tab?700:400,color:t.id===tab?RED:GRAY}}>{t.label}</span>
           </button>
         ))}
-      </nav>
-
-      <div style={{ display: "none" }} data-version={DATA_VERSION} />
+      </div>
     </div>
   );
 }

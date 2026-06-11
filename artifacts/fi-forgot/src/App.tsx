@@ -103,7 +103,7 @@ function Router() {
         <ProtectedRoute component={DashboardPage} />
       </Route>
       <Route path="/recipients">
-        <ProtectedRoute component={RecipientsPage} />
+        <ProtectedRoute component={() => <Redirect to="/people" />} />
       </Route>
       <Route path="/recipients/:id">
         <ProtectedRoute component={RecipientProfilePage} />

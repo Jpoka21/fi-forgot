@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams, Link } from "wouter";
-import AppLayout from "@/components/layout/AppLayout";
+import AppNav from "@/components/layout/AppNav";
 import {
   getRecipient,
   getRecipients,
@@ -312,7 +312,7 @@ export default function RecipientProfilePage() {
   const isNew = params.id === "new";
   const backTo = new URLSearchParams(window.location.search).get("from") === "dashboard"
     ? "/dashboard"
-    : "/recipients";
+    : "/people";
   const [saved, setSaved] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
@@ -535,7 +535,8 @@ export default function RecipientProfilePage() {
   const yearsMarried = anniversaryDateVal ? getYearsTogether(anniversaryDateVal) : null;
 
   return (
-    <AppLayout>
+    <>
+      <AppNav />
       <div className="min-h-screen pb-16" style={{ background: BEIGE }}>
         <div className="p-6 md:p-8 max-w-3xl mx-auto">
 
@@ -1355,7 +1356,7 @@ export default function RecipientProfilePage() {
           onClose={() => setUpgradeOpen(false)}
         />
       )}
-    </AppLayout>
+    </>
   );
 }
 

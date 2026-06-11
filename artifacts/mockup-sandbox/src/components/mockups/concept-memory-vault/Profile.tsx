@@ -1,201 +1,108 @@
-import React, { useState } from "react";
-import { ArrowLeft, Plus, Send, Heart, Mail, BookOpen, Bell, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 
-const BG     = "#F2E6D3";
-const RED    = "#E23B2E";
-const BLACK  = "#111111";
-const SAGE   = "#5B8C6B";
-const GRAY   = "#6B6B6B";
-const BORDER = "#E5E0D8";
-const WHITE  = "#FFFFFF";
-const AMBER  = "#D97706";
+const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF";
 
-const DATA_VERSION = "5";
+type FeedItem={type:"memory"|"card"|"question";date:string;text:string;tag?:string;answer?:string};
 
-type EntryType = "memory" | "card" | "followup";
-
-interface TimelineEntry {
-  id: number;
-  type: EntryType;
-  date: string;
-  title?: string;
-  text: string;
-  tag?: string;
-  tagColor?: string;
-  followUpResolved?: boolean;
-}
-
-const TIMELINE: TimelineEntry[] = [
-  { id: 1, type: "memory",   date: "Today",    text: "Knee surgery went well, resting at home now. Needs meals delivered next week.", tag: "Health", tagColor: "#9333EA" },
-  { id: 2, type: "followup", date: "Today",    text: "Ask about her physical therapy schedule",  followUpResolved: false },
-  { id: 3, type: "card",     date: "Oct 10",   title: "'Thinking of You' card", text: "Wishing you the smoothest recovery — we'll get through this together, Mom." },
-  { id: 4, type: "memory",   date: "Oct 5",    text: "Nervous about the upcoming procedure but trying to stay positive. Keeping herself busy with crosswords.", tag: "Health", tagColor: "#9333EA" },
-  { id: 5, type: "followup", date: "Oct 5",    text: "Send flowers before surgery",  followUpResolved: true },
-  { id: 6, type: "memory",   date: "Sep 22",   text: "Had a great lunch at the new Italian place downtown. She loved the tiramisu and wants to go back.", tag: "Family", tagColor: AMBER },
-  { id: 7, type: "card",     date: "Sep 4",    title: "Birthday card", text: "Happy birthday to the woman who made me who I am. Love you to the moon." },
-  { id: 8, type: "memory",   date: "Aug 18",   text: "Mentioned she's been watching a lot of British baking shows and has started trying recipes herself.", tag: "Hobby", tagColor: "#2563EB" },
+const timeline:FeedItem[]=[
+  {type:"memory",  date:"May 28, 2026",text:"Knee surgery recovery going well. Says she's walking better than before the surgery.",tag:"Health"},
+  {type:"question",date:"May 15, 2026",text:"How is the new physical therapist working out?",answer:"'She's wonderful — goes twice a week now.'"},
+  {type:"card",    date:"May 10, 2026",text:"Sent Mother's Day card — 'Still your favorite child, right?' She called to say she laughed out loud."},
+  {type:"memory",  date:"Apr 3, 2026", text:"Started baking again — making sourdough bread every Saturday. Loves it.",tag:"Hobby"},
+  {type:"memory",  date:"Mar 12, 2026",text:"Mentioned she's been missing Dad more lately — March is always hard.",tag:"Personal"},
+  {type:"question",date:"Feb 20, 2026",text:"Has she tried that Italian restaurant near her apartment yet?",answer:"'Went last week — loved the risotto.'"},
+  {type:"card",    date:"Feb 14, 2026",text:"Sent Valentine's Day card — 'Best mom in the whole city.' She texted a heart."},
+  {type:"memory",  date:"Jan 18, 2026",text:"New neighbor moved in next door. They've had coffee twice — seems like a good fit.",tag:"Life"},
 ];
 
-const NODE_CONFIG: Record<EntryType, { bg: string; border: string; icon: React.ReactNode }> = {
-  memory:   { bg: `${SAGE}15`,  border: SAGE,  icon: <Heart size={14} fill={SAGE} style={{ color: SAGE }} /> },
-  card:     { bg: `${RED}12`,   border: RED,   icon: <Mail size={14} style={{ color: RED }} /> },
-  followup: { bg: `${AMBER}15`, border: AMBER, icon: <Bell size={14} style={{ color: AMBER }} /> },
-};
+const typeIcon=(t:string)=>t==="memory"?"📝":t==="card"?"💌":"🎯";
+const typeColor=(t:string)=>t==="memory"?"#EDF5F0":t==="card"?"#EDE9FE":"#FEF3C7";
+const typeBorder=(t:string)=>t==="memory"?SAGE:t==="card"?"#7C3AED":t==="question"?"#D97706":"#999";
 
-export function Profile() {
-  const [expanded, setExpanded] = useState<Set<number>>(new Set([1]));
+export default function Profile(){
+  const [hov,setHov]=useState("");
+  return(
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Plus Jakarta Sans',sans-serif",color:BLACK}}>
+      {/* NAV */}
+      <div style={{background:BLACK,padding:"13px 32px",display:"flex",alignItems:"center",gap:12}}>
+        <button style={{background:"none",border:"none",color:"#888",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:"0.82rem",padding:0}}>← What's New</button>
+        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.7rem",color:WHITE,letterSpacing:"0.08em"}}>F*I FORGOT</span>
+      </div>
 
-  const toggle = (id: number) => {
-    const next = new Set(expanded);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setExpanded(next);
-  };
-
-  return (
-    <div style={{ background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK }}>
-
-      {/* ── Nav ── */}
-      <nav style={{ padding: "1.25rem 2.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${BORDER}` }}>
-        <button style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.78rem", background: "none", border: "none", cursor: "pointer", color: BLACK }}>
-          <ArrowLeft size={16} /> What's New
-        </button>
-        <button style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.78rem", background: "none", border: "none", cursor: "pointer", opacity: 0.5, color: BLACK }}>
-          Edit
-        </button>
-      </nav>
-
-      <main style={{ maxWidth: "700px", margin: "0 auto", padding: "2rem 2rem 5rem" }}>
-
-        {/* ── Person hero ── */}
-        <header style={{ textAlign: "center", marginBottom: "2.25rem" }}>
-          <div style={{ width: "6rem", height: "6rem", borderRadius: "999px", background: WHITE, border: `3px solid ${BLACK}`, boxShadow: `4px 4px 0 ${BLACK}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "3rem", margin: "0 auto 0.75rem" }}>
-            👩‍🦳
+      {/* MOM HEADER */}
+      <div style={{background:WHITE,borderBottom:`1px solid ${BORDER}`,padding:"24px 32px 20px"}}>
+        <div style={{maxWidth:780,margin:"0 auto"}}>
+          <div style={{display:"flex",alignItems:"flex-start",gap:18,marginBottom:16}}>
+            <div style={{width:64,height:64,borderRadius:16,background:"#FCE7F3",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"2rem"}}>👩</div>
+            <div style={{flex:1}}>
+              <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:4}}>
+                <h1 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"2.3rem",color:BLACK,margin:0,letterSpacing:"0.04em",lineHeight:1}}>MOM</h1>
+                <span style={{background:"#FCE7F3",color:"#BE185D",borderRadius:20,padding:"3px 12px",fontSize:"0.73rem",fontWeight:700}}>MOTHER</span>
+              </div>
+              <p style={{color:GRAY,fontSize:"0.8rem",margin:"0 0 10px"}}>8 memories · 18 cards sent · Last contact May 2026</p>
+              <div style={{display:"flex",gap:7}}>
+                <button style={{background:RED,color:WHITE,border:"none",borderRadius:9,padding:"8px 16px",fontWeight:700,fontSize:"0.8rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Send a Card</button>
+                <button style={{background:WHITE,color:BLACK,border:`1px solid ${BORDER}`,borderRadius:9,padding:"8px 14px",fontSize:"0.8rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Log a Memory</button>
+                <button style={{background:WHITE,color:BLACK,border:`1px solid ${BORDER}`,borderRadius:9,padding:"8px 14px",fontSize:"0.8rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Ask Follow-up</button>
+              </div>
+            </div>
           </div>
-          <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", color: SAGE, transform: "rotate(-1.5deg)", marginBottom: "-0.3rem" }}>
-            my mom for 34 yearsTogther
-          </p>
-          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "4.5rem", lineHeight: 0.95, letterSpacing: "0.02em", margin: "0 0 0.75rem" }}>MOM</h1>
-
-          {/* Quick stats */}
-          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap" as const, marginBottom: "1.5rem" }}>
-            {["Mother", "8 memories", "4 cards sent", "3 yearsTogther of logs"].map((tag, i) => (
-              <span key={i} style={{ padding: "0.25rem 0.75rem", borderRadius: "999px", border: `2px solid ${i === 0 ? BLACK : BORDER}`, fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", background: i === 0 ? BLACK : "transparent", color: i === 0 ? WHITE : GRAY }}>
-                {tag}
-              </span>
-            ))}
+          {/* upcoming birthday banner */}
+          <div style={{background:BG,border:`1px solid ${BORDER}`,borderRadius:10,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:"1.1rem"}}>📅</span>
+              <p style={{fontWeight:700,fontSize:"0.82rem",margin:0}}>Mom's birthday is June 22 · <span style={{color:SAGE}}>11 days away</span></p>
+            </div>
+            <button style={{background:RED,color:WHITE,border:"none",borderRadius:8,padding:"7px 16px",fontWeight:700,fontSize:"0.78rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Send Birthday Card</button>
           </div>
+        </div>
+      </div>
 
-          {/* Quick actions */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.6rem" }}>
-            {[
-              { icon: <Send size={16} />, label: "Send Card", primary: true },
-              { icon: <BookOpen size={16} />, label: "Log Memory", primary: false },
-              { icon: <Bell size={16} />, label: "Add Follow-up", primary: false },
-            ].map((btn, i) => (
-              <button key={i} style={{ padding: "0.85rem", borderRadius: "0.75rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", border: btn.primary ? "none" : `2px solid ${BORDER}`, background: btn.primary ? BLACK : WHITE, color: btn.primary ? WHITE : BLACK }}>
-                {btn.icon}
-                {btn.label}
-              </button>
-            ))}
-          </div>
-        </header>
+      <div style={{padding:"22px 32px",maxWidth:780,margin:"0 auto"}}>
+        {/* LEGEND */}
+        <div style={{display:"flex",gap:14,marginBottom:18,alignItems:"center"}}>
+          <span style={{fontSize:"0.75rem",color:GRAY,fontWeight:600}}>TIMELINE</span>
+          {[["memory","📝","Memory"],["card","💌","Card sent"],["question","🎯","Follow-up"]].map(([t,ic,label])=>(
+            <div key={t} style={{display:"flex",alignItems:"center",gap:5}}>
+              <div style={{width:8,height:8,borderRadius:"50%",background:typeBorder(t)}}/>
+              <span style={{fontSize:"0.72rem",color:GRAY}}>{label}</span>
+            </div>
+          ))}
+        </div>
 
-        {/* ── Timeline label ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.75rem", margin: 0 }}>Memory Timeline</h2>
-          <div style={{ display: "flex", gap: "1rem" }}>
-            {[
-              { color: SAGE, label: "Memory" },
-              { color: RED, label: "Card sent" },
-              { color: AMBER, label: "Follow-up" },
-            ].map(l => (
-              <div key={l.label} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                <div style={{ width: "8px", height: "8px", borderRadius: "999px", background: l.color }} />
-                <span style={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: GRAY }}>{l.label}</span>
+        {/* TIMELINE */}
+        <div style={{position:"relative" as const}}>
+          <div style={{position:"absolute" as const,left:19,top:0,bottom:0,width:2,background:BORDER}}/>
+          <div style={{display:"flex",flexDirection:"column" as const,gap:14}}>
+            {timeline.map((item,i)=>(
+              <div key={i} onMouseEnter={()=>setHov(`${i}`)} onMouseLeave={()=>setHov("")}
+                style={{display:"flex",gap:14,alignItems:"flex-start"}}>
+                {/* Icon */}
+                <div style={{width:38,height:38,borderRadius:10,background:typeColor(item.type),display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0,border:`2px solid ${typeBorder(item.type)}`,position:"relative" as const,zIndex:1}}>
+                  {typeIcon(item.type)}
+                </div>
+                {/* Card */}
+                <div style={{flex:1,background:WHITE,border:`1px solid ${hov===`${i}`?GRAY:BORDER}`,borderRadius:12,padding:"13px 16px",transition:"all 0.12s",boxShadow:hov===`${i}`?"0 2px 12px rgba(0,0,0,0.07)":"none"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:7}}>
+                    <span style={{fontSize:"0.68rem",color:GRAY}}>{item.date}</span>
+                    {item.tag&&<span style={{background:BG,color:GRAY,borderRadius:20,padding:"1px 8px",fontSize:"0.64rem",fontWeight:600}}>{item.tag}</span>}
+                    {item.type==="card"&&<span style={{background:"#EDE9FE",color:"#7C3AED",borderRadius:20,padding:"1px 8px",fontSize:"0.64rem",fontWeight:600}}>✓ Delivered</span>}
+                  </div>
+                  <p style={{fontFamily:"'Caveat',cursive",fontSize:"1.1rem",color:BLACK,margin:0,lineHeight:1.5}}>{item.text}</p>
+                  {item.answer&&(
+                    <div style={{marginTop:8,background:BG,borderRadius:8,padding:"7px 11px",borderLeft:`3px solid ${SAGE}`}}>
+                      <p style={{fontSize:"0.72rem",color:GRAY,margin:"0 0 2px",fontWeight:600}}>HER ANSWER</p>
+                      <p style={{fontFamily:"'Caveat',cursive",fontSize:"1rem",color:BLACK,margin:0}}>{item.answer}</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Timeline ── */}
-        <div style={{ position: "relative" }}>
-          <div style={{ position: "absolute", left: "1.2rem", top: "1.5rem", bottom: "0.5rem", width: "2px", background: BORDER }} />
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
-            {TIMELINE.map((entry, i) => {
-              const config = NODE_CONFIG[entry.type];
-              const isExpanded = expanded.has(entry.id);
-              const isCard = entry.type === "card";
-              const isFollowup = entry.type === "followup";
-              const isMemory = entry.type === "memory";
-
-              return (
-                <div key={entry.id} style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-                  {/* Node */}
-                  <div style={{ width: "2.4rem", height: "2.4rem", borderRadius: "999px", background: config.bg, border: `2.5px solid ${config.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, zIndex: 1 }}>
-                    {config.icon}
-                  </div>
-
-                  {/* Content */}
-                  <div style={{ flex: 1, marginTop: "0.1rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.3rem" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <span style={{ fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: GRAY }}>{entry.date}</span>
-                        {entry.tag && (
-                          <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", padding: "0.1rem 0.45rem", borderRadius: "999px", background: `${entry.tagColor}18`, color: entry.tagColor }}>
-                            {entry.tag}
-                          </span>
-                        )}
-                        {isFollowup && (
-                          <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", padding: "0.1rem 0.45rem", borderRadius: "999px", background: entry.followUpResolved ? `${SAGE}15` : `${AMBER}15`, color: entry.followUpResolved ? SAGE : AMBER }}>
-                            {entry.followUpResolved ? "✓ Done" : "Pending"}
-                          </span>
-                        )}
-                      </div>
-                      {isMemory && (
-                        <button onClick={() => toggle(entry.id)} style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, padding: "0.1rem" }}>
-                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </button>
-                      )}
-                    </div>
-
-                    {isCard && (
-                      <div style={{ background: `${RED}07`, border: `1px solid ${RED}20`, borderRadius: "0.65rem", padding: "0.75rem 1rem" }}>
-                        <p style={{ fontWeight: 700, fontSize: "0.84rem", marginBottom: "0.35rem" }}>{entry.title}</p>
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.35rem", lineHeight: 1.4, color: BLACK }}>"{entry.text}"</p>
-                      </div>
-                    )}
-
-                    {isFollowup && (
-                      <div style={{ background: entry.followUpResolved ? `${SAGE}08` : `${AMBER}08`, border: `1px solid ${entry.followUpResolved ? `${SAGE}20` : `${AMBER}20`}`, borderRadius: "0.65rem", padding: "0.6rem 1rem" }}>
-                        <p style={{ fontSize: "0.84rem", color: BLACK, fontWeight: 500, textDecoration: entry.followUpResolved ? "line-through" : "none", opacity: entry.followUpResolved ? 0.5 : 1 }}>
-                          {entry.text}
-                        </p>
-                      </div>
-                    )}
-
-                    {isMemory && (
-                      <div>
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", lineHeight: 1.45, color: BLACK, overflow: isExpanded ? "visible" : "hidden", display: "-webkit-box", WebkitBoxOrient: "vertical" as const, WebkitLineClamp: isExpanded ? undefined : 2 }}>
-                          "{entry.text}"
-                        </p>
-                        {!isExpanded && (
-                          <button onClick={() => toggle(entry.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.72rem", fontWeight: 700, color: SAGE, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "0.2rem", padding: 0 }}>
-                            Read more
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div style={{ display: "none" }} data-version={DATA_VERSION} />
-      </main>
+        <button style={{marginTop:18,width:"100%",background:"none",border:`2px dashed ${BORDER}`,borderRadius:12,padding:"12px",fontSize:"0.8rem",color:GRAY,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>+ Log something new about Mom</button>
+      </div>
     </div>
   );
 }

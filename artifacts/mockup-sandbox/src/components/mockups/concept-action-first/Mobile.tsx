@@ -1,203 +1,96 @@
-import React, { useState } from "react";
-import { Send, SkipForward, CheckCircle2, ChevronRight, Bell, Sparkles } from "lucide-react";
+import { useState } from "react";
 
-const BG     = "#F2E6D3";
-const RED    = "#E23B2E";
-const BLACK  = "#111111";
-const SAGE   = "#5B8C6B";
-const GRAY   = "#6B6B6B";
-const BORDER = "#E5E0D8";
-const WHITE  = "#FFFFFF";
-const AMBER  = "#D97706";
+const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF";
 
-const DATA_VERSION = "5";
-
-const ACTIONS = [
-  {
-    id: 1, person: "Marcus",  avatar: "🧔",   relation: "Best Friend",
-    action: "Send Birthday Card",
-    context: "His 32nd is in 7 days. Send today so it arrives in time.",
-    daysLeft: 7, urgency: "high" as const,
-  },
-  {
-    id: 2, person: "Mom",     avatar: "👩‍🦳", relation: "Mother",
-    action: "Check in after surgery",
-    context: "Her knee surgery was 2 days ago. A card would mean the world.",
-    daysLeft: 1, urgency: "high" as const,
-  },
-  {
-    id: 3, person: "Sarah",   avatar: "👱‍♀️", relation: "Sister",
-    action: "Congrats on new job",
-    context: "She started at the new company last Monday. Acknowledge it!",
-    daysLeft: 8, urgency: "medium" as const,
-  },
+const heroAction={p:"Marcus",e:"👦",ev:"Birthday",due:"Jun 14",daysAway:3,msg:"Send Marcus a birthday card",context:"His birthday is Saturday — last card is still on his fridge."};
+const nextQueue=[
+  {p:"Dad",   e:"👨",action:"Father's Day card", days:10},
+  {p:"Mom",   e:"👩",action:"Birthday card",      days:11},
+  {p:"Sarah", e:"👧",action:"Anniversary card",   days:17},
 ];
 
-function HealthRing({ score }: { score: number }) {
-  const r    = 22;
-  const circ = 2 * Math.PI * r;
-  const fill = (score / 100) * circ;
-  const col  = score >= 70 ? SAGE : score >= 50 ? AMBER : RED;
-  return (
-    <svg width="52" height="52" viewBox="0 0 52 52">
-      <circle cx="26" cy="26" r={r} fill="none" stroke={`${WHITE}30`} strokeWidth="4.5" />
-      <circle cx="26" cy="26" r={r} fill="none" stroke={WHITE} strokeWidth="4.5"
-        strokeDasharray={`${fill} ${circ}`} strokeLinecap="round"
-        transform="rotate(-90 26 26)" />
-      <text x="26" y="26" textAnchor="middle" dominantBaseline="central"
-        style={{ fontSize: "11px", fontWeight: 700, fill: WHITE, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-        {score}
-      </text>
-    </svg>
-  );
-}
+export default function Mobile(){
+  const [tab,setTab]=useState("home");
+  const [done,setDone]=useState(false);
+  return(
+    <div style={{width:"100%",height:"100vh",background:BLACK,fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column" as const,overflow:"hidden"}}>
+      {/* STATUS */}
+      <div style={{padding:"10px 16px 8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.25rem",color:WHITE,letterSpacing:"0.08em"}}>F*I FORGOT</span>
+        <div style={{width:26,height:26,borderRadius:"50%",background:RED,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.62rem",fontWeight:700}}>JM</div>
+      </div>
 
-export function Mobile() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [done, setDone]                 = useState(false);
+      {/* HERO CARD - FULL WIDTH */}
+      <div style={{flex:1,padding:"10px 14px 8px",display:"flex",flexDirection:"column" as const}}>
+        <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.9rem",letterSpacing:"0.14em",color:"#555",margin:"0 0 8px",textTransform:"uppercase" as const}}>DO THIS NOW</p>
 
-  const current    = ACTIONS[currentIndex];
-  const isLast     = currentIndex === ACTIONS.length - 1;
-  const remaining  = ACTIONS.length - currentIndex;
+        <div style={{flex:1,background:done?"#1a1a1a":RED,borderRadius:20,padding:"22px 20px",display:"flex",flexDirection:"column" as const,justifyContent:"space-between",transition:"background 0.3s",boxShadow:"0 8px 40px rgba(226,59,46,0.3)"}}>
+          <div>
+            <div style={{display:"flex",gap:3,marginBottom:14}}>
+              {[0,1,2].map(i=><div key={i} style={{flex:1,height:4,borderRadius:2,background:i===0?"rgba(255,255,255,0.9)":"rgba(255,255,255,0.25)"}}/>)}
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+              <div style={{width:52,height:52,borderRadius:14,background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.7rem"}}>{heroAction.e}</div>
+              <div>
+                <p style={{fontSize:"0.7rem",color:"rgba(255,255,255,0.6)",margin:"0 0 2px",letterSpacing:"0.06em"}}>{heroAction.ev.toUpperCase()}</p>
+                <p style={{fontWeight:700,fontSize:"1rem",color:WHITE,margin:0}}>{heroAction.p}</p>
+              </div>
+              <div style={{marginLeft:"auto",background:"rgba(255,255,255,0.18)",borderRadius:20,padding:"4px 10px"}}>
+                <span style={{fontSize:"0.68rem",color:WHITE,fontWeight:700}}>⚡ {heroAction.daysAway}d</span>
+              </div>
+            </div>
+            <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"2.1rem",color:WHITE,margin:"0 0 10px",letterSpacing:"0.03em",lineHeight:1.1}}>{heroAction.msg.toUpperCase()}</p>
+            <p style={{fontSize:"0.78rem",color:"rgba(255,255,255,0.7)",margin:"0 0 0",lineHeight:1.5}}>{heroAction.context}</p>
+          </div>
 
-  const advance = () => {
-    if (isLast) setDone(true);
-    else setCurrentIndex(i => i + 1);
-  };
+          <div style={{marginTop:16}}>
+            {!done?(
+              <>
+                <button onClick={()=>setDone(true)} style={{width:"100%",background:WHITE,color:RED,border:"none",borderRadius:14,padding:"15px",fontWeight:700,fontSize:"0.95rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:8,letterSpacing:"0.01em"}}>
+                  ✉️ Send Birthday Card
+                </button>
+                <div style={{display:"flex",gap:8}}>
+                  <button style={{flex:1,background:"rgba(255,255,255,0.12)",color:WHITE,border:"1px solid rgba(255,255,255,0.2)",borderRadius:10,padding:"10px",fontSize:"0.78rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Skip</button>
+                  <button style={{flex:1,background:"rgba(255,255,255,0.12)",color:WHITE,border:"1px solid rgba(255,255,255,0.2)",borderRadius:10,padding:"10px",fontSize:"0.78rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Snooze 1d</button>
+                </div>
+              </>
+            ):(
+              <div style={{background:"rgba(91,140,107,0.25)",border:"1px solid rgba(91,140,107,0.4)",borderRadius:14,padding:"16px",textAlign:"center" as const}}>
+                <p style={{fontSize:"1.3rem",margin:"0 0 6px"}}>✅</p>
+                <p style={{fontWeight:700,fontSize:"0.88rem",color:WHITE,margin:"0 0 4px"}}>Done! Card queued for Marcus.</p>
+                <p style={{fontSize:"0.72rem",color:"rgba(255,255,255,0.6)",margin:0}}>Delivery by Jun 14</p>
+              </div>
+            )}
+          </div>
+        </div>
 
-  return (
-    <div style={{
-      width: "390px", height: "844px",
-      background: BG,
-      fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK,
-      borderRadius: "3rem", overflow: "hidden", border: `8px solid ${BLACK}`,
-      boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
-      display: "flex", flexDirection: "column",
-      position: "relative",
-    }}>
-
-      {/* Status bar */}
-      <div style={{ height: "3rem", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 1.5rem", fontSize: "0.75rem", fontWeight: 600, flexShrink: 0 }}>
-        <span>9:41</span>
-        <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-          <div style={{ width: "16px", height: "11px", background: BLACK, borderRadius: "2px" }} />
-          <div style={{ width: "11px", height: "11px", background: BLACK, borderRadius: "50%" }} />
+        {/* NEXT QUEUE */}
+        <div style={{marginTop:10}}>
+          <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.85rem",letterSpacing:"0.1em",color:"#555",margin:"0 0 8px"}}>NEXT UP</p>
+          <div style={{display:"flex",flexDirection:"column" as const,gap:6}}>
+            {nextQueue.map((q,i)=>(
+              <div key={i} style={{background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:10,padding:"9px 13px",display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:"1.1rem"}}>{q.e}</span>
+                <div style={{flex:1}}>
+                  <p style={{fontSize:"0.8rem",fontWeight:600,color:WHITE,margin:0}}>{q.p} — {q.action}</p>
+                  <p style={{fontSize:"0.67rem",color:"#666",margin:"1px 0 0"}}>In {q.days} days</p>
+                </div>
+                <span style={{fontSize:"0.67rem",color:"#555"}}>→</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Header */}
-      <div style={{ padding: "0 1.5rem 1rem", flexShrink: 0 }}>
-        <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "2.75rem", lineHeight: 1, letterSpacing: "0.02em", margin: 0 }}>
-          F*I FORGOT
-        </h1>
-        <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: SAGE, margin: "0.1rem 0 0" }}>
-          We got your important people.
-        </p>
-      </div>
-
-      {/* Main content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "0 1.25rem 1.25rem", gap: "0.75rem" }}>
-
-        {!done ? (
-          <>
-            {/* Queue progress */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1rem", letterSpacing: "0.1em", color: RED }}>
-                NEXT ACTION
-              </span>
-              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: GRAY }}>
-                {currentIndex + 1} of {ACTIONS.length}
-              </span>
-            </div>
-
-            {/* Progress dots */}
-            <div style={{ display: "flex", gap: "0.35rem" }}>
-              {ACTIONS.map((_, i) => (
-                <div key={i} style={{ flex: 1, height: "3px", borderRadius: "999px", background: i <= currentIndex ? RED : BORDER }} />
-              ))}
-            </div>
-
-            {/* Hero action card */}
-            <div style={{ flex: 1, background: BLACK, borderRadius: "1.25rem", padding: "1.5rem", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
-
-              {/* Urgency badge */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-                <span style={{ display: "inline-block", background: current.urgency === "high" ? RED : AMBER, color: WHITE, fontSize: "0.62rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", padding: "0.25rem 0.6rem", borderRadius: "999px" }}>
-                  {current.daysLeft === 1 ? "Due tomorrow" : `${current.daysLeft} days left`}
-                </span>
-                <HealthRing score={45} />
-              </div>
-
-              {/* Person */}
-              <div style={{ display: "flex", alignItems: "center", gap: "0.9rem", marginBottom: "1rem" }}>
-                <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "999px", background: `${WHITE}15`, border: `2px solid ${WHITE}25`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.75rem", flexShrink: 0 }}>
-                  {current.avatar}
-                </div>
-                <div>
-                  <p style={{ fontSize: "0.62rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${WHITE}60`, marginBottom: "0.1rem" }}>{current.relation}</p>
-                  <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "2.5rem", lineHeight: 0.95, color: WHITE, margin: 0 }}>{current.person}</h2>
-                </div>
-              </div>
-
-              {/* Action */}
-              <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.5rem", color: WHITE, lineHeight: 1.15, marginBottom: "0.6rem", letterSpacing: "0.02em" }}>
-                {current.action}
-              </p>
-
-              {/* Context */}
-              <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: `${WHITE}75`, lineHeight: 1.4, flex: 1 }}>
-                {current.context}
-              </p>
-            </div>
-
-            {/* Action buttons */}
-            <button style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", background: RED, color: WHITE, border: "none", borderRadius: "0.875rem", padding: "1rem", fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.35rem", letterSpacing: "0.06em", cursor: "pointer", boxShadow: `0 4px 20px ${RED}45` }}
-              onClick={advance}>
-              <Sparkles size={18} />
-              Generate Card Now
-            </button>
-
-            <button style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", background: "none", border: `2px solid ${BORDER}`, borderRadius: "0.875rem", padding: "0.8rem", fontWeight: 700, fontSize: "0.82rem", color: GRAY, cursor: "pointer" }}
-              onClick={advance}>
-              <SkipForward size={15} />
-              Skip for now
-            </button>
-          </>
-        ) : (
-          /* All done */
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" as const }}>
-            <div style={{ width: "5rem", height: "5rem", borderRadius: "999px", background: `${SAGE}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>
-              <CheckCircle2 size={40} style={{ color: SAGE }} />
-            </div>
-            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "3rem", letterSpacing: "0.03em", marginBottom: "0.5rem" }}>
-              Queue Empty!
-            </h2>
-            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", color: GRAY, marginBottom: "2rem", lineHeight: 1.4 }}>
-              You're an amazing friend today. All done.
-            </p>
-            <button onClick={() => { setCurrentIndex(0); setDone(false); }} style={{ background: BLACK, color: WHITE, border: "none", borderRadius: "999px", padding: "0.75rem 1.75rem", fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.05em", cursor: "pointer" }}>
-              Reset Demo
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom nav */}
-      <nav style={{ flexShrink: 0, background: WHITE, borderTop: `2px solid ${BORDER}`, display: "flex", justifyContent: "space-around", padding: "0.75rem 0 1.25rem" }}>
-        {[
-          { icon: "⚡", label: "Actions", active: true  },
-          { icon: "👥", label: "People",  active: false },
-          { icon: "🔔", label: "Alerts",  active: false },
-          { icon: "👤", label: "Me",      active: false },
-        ].map(item => (
-          <button key={item.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.15rem", background: "none", border: "none", cursor: "pointer", opacity: item.active ? 1 : 0.35 }}>
-            <span style={{ fontSize: "1.2rem" }}>{item.icon}</span>
-            <span style={{ fontSize: "0.58rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: BLACK }}>{item.label}</span>
+      {/* BOTTOM NAV */}
+      <div style={{background:"#0e0e0e",borderTop:"1px solid #222",padding:"10px 0 14px",display:"flex",justifyContent:"space-around"}}>
+        {[{icon:"🏠",label:"Home",id:"home"},{icon:"📅",label:"Moments",id:"moments"},{icon:"👥",label:"People",id:"people"},{icon:"🏆",label:"Points",id:"points"}].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{display:"flex",flexDirection:"column" as const,alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+            <span style={{fontSize:"1.2rem"}}>{t.icon}</span>
+            <span style={{fontSize:"0.6rem",fontWeight:t.id===tab?700:400,color:t.id===tab?RED:"#555"}}>{t.label}</span>
           </button>
         ))}
-      </nav>
-
-      <div style={{ display: "none" }} data-version={DATA_VERSION} />
+      </div>
     </div>
   );
 }

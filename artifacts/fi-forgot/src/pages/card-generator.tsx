@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AppLayout from "@/components/layout/AppLayout";
+import AppNav from "@/components/layout/AppNav";
 import { getRecipients, getCards, updateCard, Recipient, CardOrder, Tone, HOLIDAYS } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, RefreshCw, Flame, Heart, Scissors, Smile, Sparkles, AlertCircle } from "lucide-react";
@@ -150,7 +150,8 @@ export default function CardGeneratorPage() {
   const RED = "hsl(6,64%,46%)";
 
   return (
-    <AppLayout>
+    <div style={{ minHeight: "100vh", background: "#F2E6D3" }}>
+      <AppNav />
       <div className="p-6 md:p-8 max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-bold" style={{ color: NAVY }}>Card Generator</h1>
@@ -371,6 +372,6 @@ export default function CardGeneratorPage() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </div>
   );
 }

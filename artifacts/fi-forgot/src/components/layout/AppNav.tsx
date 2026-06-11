@@ -17,12 +17,22 @@ const NAV = [
   { label: "Home",             path: "/dashboard",      emoji: "🏠" },
   { label: "Your People",      path: "/people",         emoji: "👥" },
   { label: "Upcoming Moments", path: "/moments",        emoji: "📅" },
-  { label: "Quick Card",       path: "/quick-card",     emoji: "⚡" },
   { label: "Brownie Points",   path: "/brownie-points", emoji: "🏆" },
 ];
 
+const ADMIN_EMAILS    = ["james.massaro21@gmail.com", "james@fiforgot.com"];
+const ADMIN_FRAGS     = ["massaro", "admin"];
+
+function isAdminUser(user: { email?: string; name?: string } | null): boolean {
+  if (!user) return false;
+  const email = user.email?.toLowerCase() ?? "";
+  const name  = (user.name  ?? "").toLowerCase();
+  return ADMIN_EMAILS.includes(user.email ?? "")
+      || ADMIN_FRAGS.some(f => email.includes(f) || name.includes(f));
+}
+
 /* ── Account menu ──────────────────────────────────────────────────────────── */
-function AccountMenu({ user, onLogout }: { user: { name: string; email: string } | null; onLogout: () => void }) {
+function AccountMenu({ user, onLogout, isAdmin }: { user: { name: string; email: string } | null; onLogout: () => void; isAdmin: boolean }) {
   const [open, setOpen]     = useState(false);
   const [, navigate]        = useLocation();
   const ref                 = useRef<HTMLDivElement>(null);
@@ -69,8 +79,8 @@ function AccountMenu({ user, onLogout }: { user: { name: string; email: string }
             <p style={{ margin: "2px 0 0", fontSize: "0.74rem", color: MID }}>{user?.email}</p>
           </div>
           {[
-            { label: "Account Settings", fn: () => alert("Coming soon") },
-            { label: "Admin Panel",      fn: () => { setOpen(false); navigate("/admin"); } },
+            { label: "Reminder Settings", fn: () => { setOpen(false); navigate("/settings/reminders"); } },
+            ...(isAdmin ? [{ label: "Admin Panel", fn: () => { setOpen(false); navigate("/admin"); } }] : []),
           ].map(item => (
             <button key={item.label} onClick={() => { item.fn(); setOpen(false); }}
               style={{ display: "block", width: "100%", padding: "9px 16px", background: "none", border: "none", cursor: "pointer", fontSize: "0.84rem", color: INK, textAlign: "left" as const }}
@@ -152,7 +162,7 @@ export default function AppNav() {
               </span>
             </Link>
           )}
-          <AccountMenu user={user} onLogout={logout} />
+          <AccountMenu user={user} onLogout={logout} isAdmin={isAdminUser(user)} />
         </div>
       </div>
 

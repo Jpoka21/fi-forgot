@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
-import AppLayout from "@/components/layout/AppLayout";
+import AppNav from "@/components/layout/AppNav";
 import {
   getRecipient,
   saveRecipient,
@@ -246,14 +246,15 @@ export default function BriefingPage() {
 
   if (!recipient) {
     return (
-      <AppLayout>
+      <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
+        <AppNav />
         <div className="p-8 text-center">
           <p className="text-[hsl(221,20%,50%)]">Recipient not found.</p>
-          <Link href="/recipients" className="text-sm text-[hsl(6,64%,46%)] underline mt-2 block">
-            Back to recipients
+          <Link href="/people" className="text-sm text-[hsl(6,64%,46%)] underline mt-2 block">
+            Back to your people
           </Link>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
@@ -316,7 +317,8 @@ export default function BriefingPage() {
 
   if (submitted) {
     return (
-      <AppLayout>
+      <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
+        <AppNav />
         <div className="p-8 max-w-lg mx-auto text-center">
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 size={32} className="text-green-600" />
@@ -326,7 +328,7 @@ export default function BriefingPage() {
             We have everything we need for {recipient.name}'s {eventName} card. Redirecting...
           </p>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
@@ -334,7 +336,8 @@ export default function BriefingPage() {
   const childrenSummaryStr = childrenSummary(editedChildren);
 
   return (
-    <AppLayout>
+    <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
+      <AppNav />
       <div className="p-6 md:p-8 max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -428,6 +431,6 @@ export default function BriefingPage() {
           Your answers are saved to {recipient.name}'s profile and get smarter every year.
         </p>
       </div>
-    </AppLayout>
+    </div>
   );
 }

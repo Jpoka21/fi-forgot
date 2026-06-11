@@ -1,139 +1,123 @@
-import React from "react";
-import { ArrowLeft, Edit3, Mail, Heart, CalendarPlus, Clock } from "lucide-react";
+import { useState } from "react";
 
-const BRAND = {
-  BG: "#F2E6D3",
-  RED: "#E23B2E",
-  BLACK: "#111111",
-  SAGE: "#5B8C6B",
-  GRAY: "#6B6B6B",
-  BORDER: "#E5E0D8"
-};
+const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",CREAM="#FAF4EC";
 
-const DATA_VERSION = "5";
-
-const PAST_CARDS = [
-  { id: 1, type: "Birthday", date: "Oct 15, 2023", cover: "🎂", status: "Delivered" },
-  { id: 2, type: "Just Because", date: "May 2, 2023", cover: "🍺", status: "Delivered" },
-  { id: 3, type: "Holiday", date: "Dec 20, 2022", cover: "🎄", status: "Delivered" },
+const upcomingMoments=[
+  {ev:"Birthday",date:"Jul 5",d:24,year:2026},
+  {ev:"Christmas",date:"Dec 25",d:197,year:2026},
+];
+const cardHistory=[
+  {ev:"Birthday",date:"Jul 5, 2025",msg:"Sent a handwritten card — 'Happy Birthday, you old man 🎉'",status:"delivered"},
+  {ev:"Christmas",date:"Dec 25, 2024",msg:"Card sent — 'Merry Christmas, Steve. Catch up soon.'",status:"delivered"},
+  {ev:"Birthday",date:"Jul 5, 2024",msg:"Card sent — 'Another year wiser. Drinks soon.'",status:"delivered"},
+];
+const notes=[
+  "Started guitar lessons in March 2026",
+  "Big into trail running lately",
+  "Wife is Amy, daughter is Lily (age 4)",
+  "College roommates — met Aug 2012",
 ];
 
-const UPCOMING = [
-  { id: 1, event: "Anniversary", date: "Oct 15", days: 6, urgent: true },
-  { id: 2, event: "Birthday", date: "Mar 10", days: 145, urgent: false },
-];
+export default function Profile(){
+  const [tab,setTab]=useState<"moments"|"history"|"notes">("moments");
+  return(
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Plus Jakarta Sans',sans-serif",color:BLACK}}>
+      {/* NAV */}
+      <div style={{background:BLACK,padding:"13px 32px",display:"flex",alignItems:"center",gap:12}}>
+        <button style={{background:"none",border:"none",color:"#888",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:"0.82rem",padding:0}}>← Back</button>
+        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.7rem",color:WHITE,letterSpacing:"0.08em"}}>F*I FORGOT</span>
+      </div>
 
-export function Profile() {
-  return (
-    <div style={{ backgroundColor: BRAND.BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif", color: BRAND.BLACK }}>
-      {/* Top Nav */}
-      <nav className="px-8 py-6 flex items-center justify-between">
-        <button className="flex items-center gap-2 font-bold uppercase tracking-wider text-sm hover:opacity-70 transition-opacity">
-          <ArrowLeft size={18} /> Back
-        </button>
-        <button className="flex items-center gap-2 font-bold uppercase tracking-wider text-sm hover:opacity-70 transition-opacity">
-          <Edit3 size={18} /> Edit Profile
-        </button>
-      </nav>
-
-      <main className="max-w-4xl mx-auto px-8 py-4">
-        
-        {/* Person Header */}
-        <header className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-16 text-center md:text-left">
-          <div className="w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center text-6xl border-4 shadow-lg bg-white relative" style={{ borderColor: BRAND.BLACK }}>
-            👨
-            <div className="absolute -bottom-3 -right-3 w-12 h-12 rounded-full border-2 flex items-center justify-center bg-white" style={{ borderColor: BRAND.BLACK }}>
-              <Heart size={20} fill={BRAND.RED} color={BRAND.RED} />
+      {/* HERO HEADER */}
+      <div style={{background:CREAM,borderBottom:`1px solid ${BORDER}`,padding:"28px 32px 24px"}}>
+        <div style={{maxWidth:840,margin:"0 auto",display:"flex",alignItems:"flex-start",gap:22}}>
+          <div style={{width:72,height:72,borderRadius:18,background:SAGE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"2rem",boxShadow:"0 4px 16px rgba(91,140,107,0.25)"}}>🧔</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"baseline",gap:12}}>
+              <h1 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"2.4rem",color:BLACK,margin:0,letterSpacing:"0.04em",lineHeight:1}}>STEVE</h1>
+              <span style={{background:SAGE,color:WHITE,borderRadius:20,padding:"3px 12px",fontSize:"0.73rem",fontWeight:700,letterSpacing:"0.04em"}}>FRIEND</span>
+            </div>
+            <p style={{color:GRAY,fontSize:"0.82rem",margin:"5px 0 0"}}>Friend since 2012 · 14 cards sent · Last card Jul 2025</p>
+            <div style={{display:"flex",gap:8,marginTop:12}}>
+              <button style={{background:RED,color:WHITE,border:"none",borderRadius:9,padding:"8px 18px",fontWeight:700,fontSize:"0.82rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Send a Card</button>
+              <button style={{background:WHITE,color:BLACK,border:`1px solid ${BORDER}`,borderRadius:9,padding:"8px 16px",fontSize:"0.82rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Log Moment</button>
+              <button style={{background:WHITE,color:BLACK,border:`1px solid ${BORDER}`,borderRadius:9,padding:"8px 16px",fontSize:"0.82rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Edit Profile</button>
             </div>
           </div>
-          <div className="pt-2">
-            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.5rem", color: BRAND.SAGE, transform: "rotate(-2deg)", marginBottom: "-0.5rem" }}>
-              Known for 12 yearsTogther
-            </p>
-            <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "5rem", lineHeight: 0.9, letterSpacing: "0.02em" }}>
-              STEVE
-            </h1>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-4">
-              <span className="px-4 py-1.5 rounded-full border-2 font-bold uppercase tracking-wider text-xs" style={{ borderColor: BRAND.BLACK }}>Friend</span>
-              <span className="px-4 py-1.5 rounded-full border-2 font-bold uppercase tracking-wider text-xs" style={{ borderColor: BRAND.BLACK }}>Austin, TX</span>
-            </div>
+          {/* Health score */}
+          <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:14,padding:"16px 20px",textAlign:"center" as const,minWidth:110}}>
+            <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"2.2rem",color:SAGE,margin:0,lineHeight:1}}>64%</p>
+            <p style={{fontSize:"0.68rem",color:GRAY,margin:"4px 0 0",textTransform:"uppercase" as const,letterSpacing:"0.07em"}}>Relationship<br/>Health</p>
           </div>
-          <div className="md:ml-auto pt-4">
-            <button className="px-8 py-4 rounded-full text-white font-bold uppercase tracking-wide flex items-center gap-2 shadow-[4px_4px_0_#111111] hover:translate-y-1 hover:shadow-[2px_2px_0_#111111] transition-all" style={{ backgroundColor: BRAND.RED, fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.5rem" }}>
-              <Mail size={24} />
-              Send Card
-            </button>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          
-          {/* Upcoming Section */}
-          <div className="md:col-span-1">
-            <div className="flex items-center justify-between mb-6">
-              <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "2rem" }}>Upcoming</h2>
-              <button className="w-8 h-8 rounded-full border-2 flex items-center justify-center hover:bg-black/5" style={{ borderColor: BRAND.BLACK }}>
-                <CalendarPlus size={16} />
-              </button>
-            </div>
-            
-            <div className="flex flex-col gap-4">
-              {UPCOMING.map(item => (
-                <div key={item.id} className="p-4 rounded-xl border-2 bg-white" style={{ borderColor: item.urgent ? BRAND.RED : BRAND.BORDER }}>
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold">{item.event}</h3>
-                    {item.urgent && <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded text-white" style={{ backgroundColor: BRAND.RED }}>Soon</span>}
-                  </div>
-                  <div className="flex justify-between items-end mt-4">
-                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.5rem" }}>{item.date}</span>
-                    <span className="text-xs font-bold uppercase tracking-wider opacity-60">In {item.days} days</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* History Section */}
-          <div className="md:col-span-2">
-            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "2rem" }} className="mb-6">Card History</h2>
-            
-            <div className="relative border-l-2 ml-6 pl-8 pb-8" style={{ borderColor: BRAND.BORDER }}>
-              {PAST_CARDS.map((card, i) => (
-                <div key={card.id} className="mb-10 relative">
-                  <div className="absolute -left-[43px] top-1 w-5 h-5 rounded-full border-2 bg-white flex items-center justify-center" style={{ borderColor: BRAND.BLACK }}>
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: BRAND.BLACK }}></div>
-                  </div>
-                  
-                  <p className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2" style={{ color: BRAND.SAGE }}>
-                    <Clock size={14} />
-                    {card.date}
-                  </p>
-                  
-                  <div className="flex gap-6 items-center p-4 rounded-xl border-2 bg-white/50" style={{ borderColor: BRAND.BORDER }}>
-                    <div className="w-20 h-24 rounded shadow-sm border flex items-center justify-center text-3xl bg-white" style={{ borderColor: BRAND.BORDER }}>
-                      {card.cover}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg mb-1">{card.type}</h3>
-                      <p className="text-sm font-medium opacity-60 mb-3">Sent via automated schedule</p>
-                      <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded bg-black/5">
-                        {card.status}
-                      </span>
-                    </div>
-                    <div className="ml-auto">
-                      <button className="text-sm font-bold underline underline-offset-4 hover:opacity-70">View</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              <div className="absolute -left-[43px] bottom-0 w-5 h-5 rounded-full border-2 bg-white" style={{ borderColor: BRAND.BORDER }}></div>
-            </div>
-          </div>
-          
         </div>
-        <div className="hidden" data-version={DATA_VERSION} />
-      </main>
+      </div>
+
+      <div style={{padding:"24px 32px",maxWidth:840,margin:"0 auto"}}>
+        {/* TABS */}
+        <div style={{display:"flex",gap:2,marginBottom:22,background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:4,width:"fit-content" as const}}>
+          {(["moments","history","notes"] as const).map(t=>(
+            <button key={t} onClick={()=>setTab(t)} style={{padding:"7px 18px",borderRadius:7,border:"none",background:tab===t?BLACK:"transparent",color:tab===t?WHITE:GRAY,fontWeight:tab===t?700:400,fontSize:"0.8rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",textTransform:"capitalize" as const}}>{t}</button>
+          ))}
+        </div>
+
+        {tab==="moments"&&(
+          <div>
+            <h2 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.25rem",letterSpacing:"0.07em",margin:"0 0 14px"}}>STEVE'S UPCOMING MOMENTS</h2>
+            <div style={{display:"flex",flexDirection:"column" as const,gap:10}}>
+              {upcomingMoments.map((m,i)=>(
+                <div key={i} style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:12,padding:"14px 18px",display:"flex",alignItems:"center",gap:16,borderLeft:`4px solid ${m.d<=14?RED:SAGE}`}}>
+                  <div style={{minWidth:54,height:54,borderRadius:10,background:m.d<=14?"#FEE2E2":"#EDF5F0",display:"flex",flexDirection:"column" as const,alignItems:"center",justifyContent:"center"}}>
+                    <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.3rem",color:m.d<=14?RED:SAGE,lineHeight:1}}>{m.date.split(" ")[1]}</span>
+                    <span style={{fontSize:"0.6rem",color:GRAY,textTransform:"uppercase" as const,letterSpacing:"0.07em"}}>{m.date.split(" ")[0]}</span>
+                  </div>
+                  <div style={{flex:1}}>
+                    <p style={{fontWeight:700,fontSize:"0.92rem",margin:0}}>{m.ev} {m.year}</p>
+                    <p style={{fontSize:"0.76rem",color:GRAY,margin:"3px 0 0"}}>In {m.d} days</p>
+                  </div>
+                  <button style={{background:RED,color:WHITE,border:"none",borderRadius:9,padding:"8px 16px",fontWeight:700,fontSize:"0.8rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Send Card</button>
+                </div>
+              ))}
+            </div>
+            <button style={{marginTop:14,width:"100%",background:"none",border:`2px dashed ${BORDER}`,borderRadius:12,padding:"12px",fontSize:"0.8rem",color:GRAY,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>+ Add a Moment for Steve</button>
+          </div>
+        )}
+
+        {tab==="history"&&(
+          <div>
+            <h2 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.25rem",letterSpacing:"0.07em",margin:"0 0 14px"}}>CARDS SENT</h2>
+            <div style={{display:"flex",flexDirection:"column" as const,gap:2}}>
+              {cardHistory.map((c,i)=>(
+                <div key={i} style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:"14px 18px",display:"flex",gap:14,alignItems:"flex-start"}}>
+                  <div style={{width:36,height:36,borderRadius:8,background:"#EDF5F0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0}}>💌</div>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <p style={{fontWeight:700,fontSize:"0.84rem",margin:0}}>{c.ev}</p>
+                      <span style={{background:"#EDF5F0",color:SAGE,borderRadius:20,padding:"2px 8px",fontSize:"0.68rem",fontWeight:600}}>✓ {c.status}</span>
+                    </div>
+                    <p style={{fontSize:"0.75rem",color:GRAY,margin:"3px 0 0"}}>{c.date}</p>
+                    <p style={{fontSize:"0.78rem",color:BLACK,margin:"5px 0 0",fontStyle:"italic"}}>{c.msg}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab==="notes"&&(
+          <div>
+            <h2 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.25rem",letterSpacing:"0.07em",margin:"0 0 14px"}}>WHAT WE KNOW ABOUT STEVE</h2>
+            <div style={{display:"flex",flexDirection:"column" as const,gap:8}}>
+              {notes.map((n,i)=>(
+                <div key={i} style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:"12px 16px",display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:"0.9rem",marginTop:1}}>📝</span>
+                  <p style={{fontFamily:"'Caveat',cursive",fontSize:"1.1rem",color:BLACK,margin:0,lineHeight:1.4}}>{n}</p>
+                </div>
+              ))}
+            </div>
+            <button style={{marginTop:12,width:"100%",background:"none",border:`2px dashed ${BORDER}`,borderRadius:10,padding:"11px",fontSize:"0.78rem",color:GRAY,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>+ Add a note</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

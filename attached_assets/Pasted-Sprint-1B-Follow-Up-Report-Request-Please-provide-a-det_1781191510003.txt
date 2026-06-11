@@ -1,0 +1,82 @@
+Sprint 1B Follow Up Report Request
+
+Please provide a detailed implementation report for Sprint 1B.
+
+Do not make new product changes yet.
+
+I need the following:
+
+1. Files changed
+   List every file changed and briefly explain what changed in each one.
+
+2. Routes affected
+   Confirm the current layout and working status for:
+
+/dashboard
+/people
+/recipients
+/recipients/:id
+/recipients/new or the new Add Person route
+/moments
+/cards/review
+/cards/generate
+/briefings/:rId/:event
+/brownie-points
+/quick-card
+/settings/reminders
+/admin
+
+3. Navigation before and after
+   Show the authenticated navigation items before Sprint 1B and after Sprint 1B.
+
+4. Sidebar cleanup
+   Confirm which routes still use the old Sidebar layout and why.
+
+5. People and recipients cleanup
+   Confirm whether /people is now the primary people page.
+   Confirm whether /recipients redirects to /people or is still accessible.
+   Confirm whether user facing links to generic /recipients were removed.
+
+6. Add Person fix
+   Explain exactly what changed with Add Person.
+   Confirm it no longer treats “new” as a recipient id.
+   Confirm the Add Person flow uses the same AppNav experience.
+
+7. Quick Card
+   Confirm whether Quick Card was removed from primary navigation.
+   Confirm what happens if someone directly visits /quick-card.
+
+8. Admin visibility
+   Confirm whether Admin is hidden from non admin users.
+   Confirm whether route protection still exists.
+
+9. Account Settings
+   Confirm whether the placeholder Account Settings browser alert was removed.
+   If Account Settings still appears, explain what real page it links to.
+
+10. Reminder Settings
+    Confirm how users can now reach Reminder Settings.
+    Confirm whether /settings/reminders uses AppNav.
+
+11. CTA verification
+    For each action below, confirm destination, working status, and layout:
+
+Add Person
+Open Person
+Generate Card
+Add Details
+Review Card
+Cards to Review badge
+Brownie Points counter
+Upcoming Moments nav
+Reminder Settings
+Sign Out
+
+12. Validation
+    Tell me whether typecheck, lint, build, or runtime testing was run.
+    Include any errors or warnings.
+
+13. Remaining risks
+    List anything still confusing, duplicated, broken, risky, incomplete, or deferred.
+
+Please format this as a clear report for product review before Sprint 2.

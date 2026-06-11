@@ -423,7 +423,7 @@ export default function DashboardPage() {
                   <div style={{ background: WHITE, borderRadius: 18, padding: "36px 28px", textAlign: "center" as const, border: `1px solid ${BORDER}` }}>
                     <div style={{ fontSize: "2rem", marginBottom: 12 }}>🎉</div>
                     <p style={{ fontSize: "0.95rem", color: MID, margin: "0 0 18px", lineHeight: 1.65 }}>Nothing in the next 90 days. Add more occasions to stay covered year-round.</p>
-                    <Link href="/recipients"><button style={{ background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 9, padding: "10px 20px", fontSize: "0.86rem", fontWeight: 700, color: INK, cursor: "pointer" }}>Review people →</button></Link>
+                    <Link href="/people"><button style={{ background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 9, padding: "10px 20px", fontSize: "0.86rem", fontWeight: 700, color: INK, cursor: "pointer" }}>Review people →</button></Link>
                   </div>
                 ) : (
                   <>
@@ -650,8 +650,8 @@ export default function DashboardPage() {
                         <button onClick={() => {
                           if (health.topInsight) {
                             const rh = health.recipientHealths.find(r => r.name === health.topInsight?.recipientName);
-                            setLocation(rh?.topGapHref ?? "/recipients");
-                          } else setLocation("/recipients");
+                            setLocation(rh?.topGapHref ?? "/people");
+                          } else setLocation("/people");
                         }}
                           style={{ padding: "6px 12px", background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 7, fontSize: "0.74rem", fontWeight: 600, color: INK, cursor: "pointer", flexShrink: 0 }}>
                           Earn more →

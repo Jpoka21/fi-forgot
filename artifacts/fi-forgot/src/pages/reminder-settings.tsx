@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AppLayout from "@/components/layout/AppLayout";
+import AppNav from "@/components/layout/AppNav";
 import { Button } from "@/components/ui/button";
 import { Bell, Check } from "lucide-react";
 
@@ -46,7 +46,8 @@ export default function ReminderSettingsPage() {
   }
 
   return (
-    <AppLayout>
+    <div style={{ minHeight: "100vh", background: "#F2E6D3" }}>
+      <AppNav />
       <div className="p-6 md:p-8 max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-bold text-[hsl(221,47%,20%)]">Reminder Settings</h1>
@@ -141,6 +142,6 @@ export default function ReminderSettingsPage() {
           Save reminder settings
         </Button>
       </div>
-    </AppLayout>
+    </div>
   );
 }
