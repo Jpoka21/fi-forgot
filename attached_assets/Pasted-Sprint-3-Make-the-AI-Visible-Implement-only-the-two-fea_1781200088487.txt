@@ -1,0 +1,125 @@
+Sprint 3: Make the AI Visible
+
+Implement only the two features below.
+
+Do not redesign the dashboard.
+Do not change onboarding.
+Do not change pricing, billing, Handwrytten, Brownie Points, relationship health scoring, fresh updates, follow-up scheduling, or the question engine architecture.
+Do not add a pre-generation context summary yet.
+Do not add AI confidence scores, memory scores, percentages, or technical AI language.
+
+Goal:
+Help users understand why a card feels personal and show that answering questions makes future cards better.
+
+Feature 1: What We Kept In Mind
+
+Add a small transparency panel directly below generated card drafts.
+
+Panel headline:
+What we kept in mind
+
+The panel should show up to 3 plain-language items that influenced the card.
+
+Examples:
+✓ Her marathon training
+✓ Your trip together in May
+✓ Keep the tone light
+✓ Her promotion you told us about
+✓ Your note not to mention her old job
+
+Rules:
+Use human language only.
+Do not say AI, model, prompt, context, score, confidence, or data point.
+Do not show percentages.
+Do not show empty or negative states.
+If there are no meaningful personal items to show, hide the panel.
+Never show “we do not know enough” or guilt-based copy.
+
+Where to show it:
+Onboarding first card draft screen
+Normal card generation result screen
+Card review or approval screen if applicable
+
+Placement:
+Directly below the card text and above the main action buttons.
+
+Visual direction:
+Subtle panel.
+Small label.
+Maximum 3 items.
+Do not overpower the card.
+Use existing brand styling.
+
+Item selection priority:
+
+1. Most recent fresh update, follow-up answer, briefing answer, or memory used in the card
+2. Occasion-specific or relationship-specific detail
+3. Personality, tone, interest, or avoid preference
+
+If exact “used in the card” tracking does not exist yet, implement a safe first version:
+Use the most relevant available user-provided context that was included in the generation request.
+Avoid pretending something was used if it clearly was not available.
+Use wording like “Kept in mind” rather than “Used” for the panel.
+
+Feature 2: Used In Card Tags
+
+Add a small positive tag to user-provided memories and answers after a card is approved.
+
+Tag examples:
+✓ Used in Sarah’s Birthday Card
+✓ Helped personalize Sarah’s Birthday Card
+✓ Used in Mom’s Mother’s Day Card
+
+Where tags should appear if those surfaces exist:
+Recipient profile timeline
+Fresh update answers
+Follow-up answers
+Briefing answers
+Profile memory fields, if practical
+
+Rules:
+Only tag user-provided content, not automatically generated facts like relationship type or event type.
+Do not create guilt states for unused memories.
+Do not show “not used yet.”
+If the same answer is used in multiple cards, show the most recent usage or a simple count if already easy.
+Keep this subtle and positive.
+
+Important implementation guidance:
+If exact field-level usage tracking does not exist yet, implement the safest lightweight approach:
+When a card is approved, tag the most relevant user-provided answers or memories that were available in that card’s generation context.
+Do not overclaim.
+Prefer “Helped personalize” when unsure whether a detail was directly quoted.
+Use “Used in” only when the detail clearly appears in or directly shaped the card.
+
+Do not add new database tables unless absolutely necessary.
+Prefer storing lightweight usage metadata on existing card, timeline, answer, or memory structures.
+Preserve all existing data.
+Do not break existing card generation.
+Do not break existing onboarding first card generation.
+Do not break existing card review or approval.
+Do not break recipient profiles.
+
+Validation required:
+Run typecheck.
+If possible, run lint or build.
+Manually verify:
+Onboarding generated card shows the panel when context exists.
+Normal generated card shows the panel when context exists.
+Panel hides when there is no meaningful context.
+Approving a card creates or displays the appropriate Used In Card tag where possible.
+Existing recipient profiles still load.
+Existing card generation still works.
+Existing dashboard still works.
+
+Final report required:
+Files changed
+How the transparency panel works
+Where it appears
+How items are selected
+How Used In Card tags work
+Where tags appear
+What metadata was added, if any
+Any API or data changes
+Validation results
+Known limitations
+Known follow-up items
