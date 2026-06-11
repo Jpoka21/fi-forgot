@@ -1,0 +1,155 @@
+Sprint 4 — Audit & Product Direction Review
+
+Do not implement any new features yet.
+
+The recent architecture audit revealed that many features originally planned for Sprint 4 may already exist in the codebase, including:
+
+* Fresh Updates
+* Memory Timeline
+* Follow Up Questions
+* Relationship Health Scoring
+* Update Recency in Card Generation
+* Profile Completeness Logic
+
+Before we build anything else, we need to determine what is actually visible, usable, and valuable to a normal user.
+
+Your task is to perform a complete Sprint 4 product audit.
+
+Part 1 — UI Visibility Audit
+
+For each of the following capabilities, identify:
+
+* Where it exists
+* Whether it is visible to a normal user
+* Whether it is easy to discover
+* Whether it feels complete
+* Whether it is backend only
+
+Capabilities:
+
+1. Fresh Updates / Recent Memories
+2. Memory Timeline
+3. Follow Up Questions
+4. Relationship Health
+5. Profile Completeness
+6. Event Briefings
+7. Recommended Actions
+8. Any existing Card Readiness concepts
+9. Timeline editing and archiving
+10. Any memory related functionality not listed above
+
+For each item classify:
+
+* Fully Visible
+* Partially Visible
+* Hidden / Hard to Discover
+* Backend Only
+* Missing
+
+Include screenshots and component names where possible.
+
+Part 2 — Dashboard Evaluation
+
+Review the current dashboard experience.
+
+Evaluate:
+
+* Visual hierarchy
+* Information density
+* Scroll depth
+* Discoverability
+* Action clarity
+
+Answer these questions:
+
+1. What are users most likely to look at first?
+2. What sections compete for attention?
+3. What sections provide little value relative to the space they consume?
+4. Which elements should move to the recipient profile page?
+5. Is the dashboard becoming a control panel instead of a relationship tool?
+
+Remember:
+
+People should remain the hero of the product.
+
+Part 3 — Recipient Profile Evaluation
+
+Review the recipient profile page.
+
+Determine whether it should become the primary destination for relationship management.
+
+Evaluate:
+
+* Timeline visibility
+* Memory visibility
+* Follow up visibility
+* Profile completeness visibility
+* Event readiness visibility
+* Ease of adding new information
+
+Recommend:
+
+A. Keep profile page largely as is
+B. Expand profile page into the primary relationship hub
+C. Major redesign required
+
+Part 4 — Card Readiness Analysis
+
+Do not build Card Readiness yet.
+
+First determine whether Card Readiness is actually needed.
+
+Analyze overlap between:
+
+* Health Score
+* Profile Completeness
+* Recommended Actions
+* Event Briefings
+
+Determine:
+
+1. Is Card Readiness a genuinely new concept?
+2. Can existing concepts be improved instead?
+3. Would adding another score create user confusion?
+4. If Card Readiness should exist, what should it replace or simplify?
+
+Part 5 — Architecture Review
+
+Review the current schema situation.
+
+Current production path:
+
+* recipients
+* recipient_profile
+* question_answers
+* follow_up_questions
+* personal_cards
+
+Parallel path:
+
+* recipients_v2
+* recipient_memory
+
+Provide a recommendation:
+
+A. Stay on current production path
+B. Migrate to v2 path
+C. Hybrid approach
+
+Include risks, complexity, and long term maintainability considerations.
+
+Deliverables
+
+Return:
+
+1. Audit findings
+2. Screenshots where applicable
+3. What Sprint 4 features are already complete
+4. What is hidden or difficult to discover
+5. What should be improved next
+6. Recommended Sprint 4 implementation plan
+7. Recommended Sprint 5 implementation plan
+
+Do not implement code during this phase.
+
+This is a product review and planning exercise only.
