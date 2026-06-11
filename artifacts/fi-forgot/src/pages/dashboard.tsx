@@ -149,6 +149,8 @@ export default function DashboardPage() {
   const [, setLocation] = useLocation();
   const plan = (user?.plan ?? "basic") as Plan;
 
+  const isFirstTimeState = recipients.length === 1 && cards.some(c => c.recipientId === recipients[0]?.id);
+
   useEffect(() => {
     const rs = getRecipients(); const cs = getCards();
     setCards(cs); setRecipients(rs);
@@ -379,7 +381,103 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {recipients.length > 0 && (
+        {/* ══ FIRST-TIME SUCCESS STATE ═════════════════════════════════════ */}
+        {isFirstTimeState && (() => {
+          const r = recipients[0];
+          const c = cards.find(cc => cc.recipientId === r.id);
+          const hasAddress = !!(c?.overrideAddress?.line1 || user?.mailingAddress?.line1);
+          return (
+            <div>
+              {/* Header */}
+              <div style={{ marginBottom: 20 }}>
+                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.8rem" : "2.2rem", letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1 }}>
+                  Good start.
+                </h1>
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: MID, margin: "4px 0 0" }}>
+                  You've got {r.name} covered.
+                </p>
+              </div>
+
+              {/* Success strip */}
+              <div style={{ background: SAGE, borderRadius: 12, padding: "14px 20px", marginBottom: 20, color: WHITE, display: "flex", alignItems: "center", gap: 12 }}>
+                <CheckCircle2 size={20} style={{ flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.08em" }}>FIRST CARD READY</div>
+                  <div style={{ fontSize: "0.82rem", opacity: 0.85 }}>
+                    {c ? `${c.holiday} card for ${r.name} is ${c.status === "Approved" ? "approved and queued" : "ready for your approval"}.` : "Your card is being prepared."}
+                  </div>
+                </div>
+              </div>
+
+              {/* Recipient + card tile */}
+              <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "22px 24px", marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${RED}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", fontWeight: 700, color: RED, flexShrink: 0 }}>
+                    {r.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: "1.1rem", color: INK }}>{r.name}</div>
+                    <div style={{ fontSize: "0.85rem", color: MID }}>{r.relationship}</div>
+                  </div>
+                  {c && (
+                    <div style={{ marginLeft: "auto", padding: "5px 12px", borderRadius: 999, fontSize: "0.78rem", fontWeight: 700,
+                      background: c.status === "Approved" ? `${SAGE}20` : `${RED}15`,
+                      color: c.status === "Approved" ? SAGE : RED, letterSpacing: "0.04em", textTransform: "uppercase" as const }}>
+                      {c.status}
+                    </div>
+                  )}
+                </div>
+
+                {c && (
+                  <div style={{ padding: "14px 16px", borderRadius: 10, background: BEIGE, border: `1px solid ${BORDER}` }}>
+                    <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", color: MID, marginBottom: 6 }}>
+                      {c.holiday} · {c.dueDate}
+                    </div>
+                    {c.approvedMessage && (
+                      <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: INK, lineHeight: 1.6,
+                        display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }}>
+                        {c.approvedMessage}
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setViewingCardId(c.id)}
+                      style={{ marginTop: 10, fontSize: "0.82rem", fontWeight: 600, color: RED, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 4 }}>
+                      View full card <ArrowRight size={12} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Address nudge */}
+              {!hasAddress && (
+                <div style={{ background: `${RED}08`, borderRadius: 12, padding: "16px 20px", marginBottom: 16, border: `1px solid ${RED}20`, display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ fontSize: "1.5rem", flexShrink: 0 }}>📬</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.9rem", color: INK, marginBottom: 3 }}>Add an address so we can send {r.name}'s card</div>
+                    <div style={{ fontSize: "0.82rem", color: MID }}>Without one, the card stays in draft. Takes 30 seconds.</div>
+                  </div>
+                  <button
+                    onClick={() => setLocation(`/recipients/${r.id}`)}
+                    style={{ flexShrink: 0, padding: "9px 18px", borderRadius: 9, background: RED, color: WHITE, border: "none", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
+                    Add it →
+                  </button>
+                </div>
+              )}
+
+              {/* Add another person CTA */}
+              <Link href="/recipients/new">
+                <button style={{ width: "100%", padding: "15px", borderRadius: 12, border: `2px dashed ${BORDER}`,
+                  background: "transparent", color: MID, fontSize: "1rem", fontWeight: 600, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                  <Plus size={18} style={{ color: RED }} />
+                  Add another person
+                </button>
+              </Link>
+            </div>
+          );
+        })()}
+
+        {recipients.length > 0 && !isFirstTimeState && (
           <>
             {/* Page greeting */}
             <div style={{ marginBottom: 14 }}>

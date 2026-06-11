@@ -1,0 +1,180 @@
+Sprint 2B: Implement New Onboarding First Value Flow
+
+This is not a prototype or canvas task.
+
+Modify the live FiForgot app code only.
+
+Do not work inside mockup-sandbox.
+Do not create visual concept components.
+Do not create canvas prototypes.
+
+Use the existing Sprint 2B specification as the implementation source of truth.
+
+Build the new onboarding first value flow in the live app.
+
+Important:
+Do not redesign the database.
+Do not change pricing, billing, Handwrytten integration, Brownie Points scoring, relationship health formulas, fresh updates, follow up logic, or the existing recipient memory model.
+
+Goal:
+Replace the current long onboarding flow with a faster first value onboarding flow where the user sees a personalized first card draft during onboarding.
+
+Target:
+A new user should see a first card draft in roughly 3 to 4 minutes.
+
+Final product adjustments:
+
+1. Use “Approve This Draft” instead of “Send This Card” until address and final shipping steps are complete.
+2. Do not generate the final card before Step 3. Step 3 is the highest value memory input. You may prepare context after Step 2, but final generation should happen after Step 3 is submitted or skipped.
+3. Limit first onboarding revision to 1 simple revision request.
+4. On the post approval screen, make “Add Another Person” the primary CTA. Additional occasions should still be offered, but as secondary actions.
+
+Implement this flow:
+
+Step 1: Who’s First?
+Collect:
+Recipient first name
+Relationship type
+First important occasion
+Date if needed
+
+Use relationship based suggested occasions.
+Do not show the full event calendar.
+
+Step 2: What Are They Like?
+Collect:
+Optional personality vibe, max 1
+Interests, required minimum 1 and max 2
+Optional “anything we should never put in a card” field
+
+Use smart defaults if personality is skipped.
+
+Step 3: One Real Thing
+Collect:
+Relationship specific memory prompt
+Optional nickname or pet name
+Skip option: “Nothing specific, just write something warm”
+
+Use relationship specific prompts from the Sprint 2A blueprint.
+
+After Step 3 is submitted or skipped, generate the first card draft.
+
+Step 4: Here’s Your First Card
+Show the card draft inline inside onboarding.
+
+Primary CTA:
+Approve This Draft
+
+Secondary CTA:
+Something’s off, fix one thing
+
+Revision behavior:
+Allow only 1 revision during onboarding.
+After one revision, show:
+“Looks good enough to save. You can edit more from your dashboard.”
+
+Tertiary CTA:
+Not now, save it to my dashboard
+
+Do not show advanced tone controls, multiple variations, sliders, or full line by line editing in onboarding.
+
+Address Collection:
+After the user approves the draft, show:
+“Where should we send it?”
+
+Collect:
+Street address
+Apt or unit, optional
+City
+State
+Zip
+
+Allow skip:
+“Not yet, I’ll add this later”
+
+If skipped:
+Save the card as approved awaiting address.
+Dashboard should show a clear nudge to add address for that card.
+
+Post Approval Expansion:
+After address is saved or skipped, show a simple expansion screen.
+
+Primary CTA:
+Add Another Person
+
+Secondary actions:
+Add another occasion for this person
+Go to Dashboard
+
+Dashboard First Time State:
+Update the first dashboard visit after onboarding.
+
+If the user has one recipient and one draft or approved card:
+Show a positive success state, not a low health warning.
+
+Copy direction:
+“Good start. You’ve got [Name] covered.”
+
+Show:
+Recipient card
+Card status
+Add Another Person tile
+Recommended next step
+
+If card is awaiting address:
+Recommended next step should be:
+“Add address so we can send [Name]’s card.”
+
+Progressive Profiling:
+Move these out of onboarding:
+Preview timing
+Emotional level slider
+Inside jokes
+Additional interests beyond 2
+Second personality trait
+Years together
+Additional occasions beyond the first
+Mailing address until after draft approval
+
+Make sure these can still be collected later through existing recipient profile, relationship health nudges, reminder settings, or briefing flows.
+
+Important implementation constraints:
+Preserve existing data fields where possible.
+Do not delete old data.
+Do not break existing recipients.
+Do not break returning users.
+Do not break card generation outside onboarding.
+Do not remove the briefing flow for normal post onboarding card generation.
+Do not change the question engine architecture.
+
+Validation required:
+Run typecheck.
+If possible, run lint or build.
+Manually verify:
+New signup reaches onboarding
+Step 1 validation works
+Step 2 validation works
+Step 3 skip works
+Card draft generates after Step 3
+One revision works
+Approve draft works
+Address save works
+Address skip works
+Dashboard first time state works
+Returning users still reach dashboard
+Existing card generation still works
+Existing recipient profile still works
+
+Final report required:
+Files changed
+Flow before and after
+Fields removed from onboarding
+Where removed fields are now collected
+Card generation timing
+Revision behavior
+Address behavior
+Dashboard first time state behavior
+Any APIs changed
+Any database changes, if absolutely necessary
+Validation results
+Known issues or follow up items
