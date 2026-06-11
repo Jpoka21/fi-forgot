@@ -2,94 +2,123 @@ import { useState } from "react";
 
 const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF";
 
-const heroAction={p:"Marcus",e:"👦",ev:"Birthday",due:"Jun 14",daysAway:3,msg:"Send Marcus a birthday card",context:"His birthday is Saturday — last card is still on his fridge."};
-const nextQueue=[
-  {p:"Dad",   e:"👨",action:"Father's Day card", days:10},
-  {p:"Mom",   e:"👩",action:"Birthday card",      days:11},
-  {p:"Sarah", e:"👧",action:"Anniversary card",   days:17},
+const heroAction={
+  emoji:"🧢",name:"Marcus",event:"Birthday",dueText:"Today",days:0,
+  msg:"Send Marcus a birthday card",
+  context:"His birthday is today — we have a draft ready. One tap.",
+};
+
+const nextActions=[
+  {emoji:"🤝",name:"Steve",event:"Birthday",days:3,action:"Review draft"},
+  {emoji:"💛",name:"Mom",event:"Check-in",days:0,action:"Post-surgery update"},
 ];
 
-export default function Mobile(){
-  const [tab,setTab]=useState("home");
+const navItems=[
+  {icon:"🏠",label:"Home",active:true},
+  {icon:"👥",label:"People",active:false},
+  {icon:"",label:"",fab:true},
+  {icon:"💌",label:"Cards",active:false},
+  {icon:"⚙️",label:"Settings",active:false},
+];
+
+function Ring({h,color}:{h:number,color:string}){
+  const r=15,c=Math.PI*2*r,fill=c*(h/100);
+  return (
+    <svg width={36} height={36}>
+      <circle cx={18} cy={18} r={r} fill="none" stroke={`${color}22`} strokeWidth={3.5}/>
+      <circle cx={18} cy={18} r={r} fill="none" stroke={color} strokeWidth={3.5}
+        strokeDasharray={`${fill} ${c-fill}`} strokeLinecap="round" transform="rotate(-90 18 18)"/>
+      <text x={18} y={22} textAnchor="middle" fontFamily="'Bebas Neue',cursive" fontSize={10} fill={color}>{h}</text>
+    </svg>
+  );
+}
+
+export function Mobile() {
   const [done,setDone]=useState(false);
-  return(
-    <div style={{width:"100%",height:"100vh",background:BLACK,fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column" as const,overflow:"hidden"}}>
-      {/* STATUS */}
-      <div style={{padding:"10px 16px 8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.25rem",color:WHITE,letterSpacing:"0.08em"}}>F*I FORGOT</span>
-        <div style={{width:26,height:26,borderRadius:"50%",background:RED,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.62rem",fontWeight:700}}>JM</div>
+  const [activeNav,setActiveNav]=useState(0);
+
+  return (
+    <div style={{width:390,height:844,background:BG,fontFamily:"'Plus Jakarta Sans',sans-serif",color:BLACK,display:"flex",flexDirection:"column" as const,overflow:"hidden",borderRadius:40,boxShadow:"0 8px 48px rgba(0,0,0,0.18)"}}>
+      {/* Status bar */}
+      <div style={{background:BLACK,padding:"14px 22px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.2rem",color:RED,letterSpacing:"0.08em"}}>F.I. FORGOT</span>
+        <span style={{fontSize:"0.72rem",color:"#ffffff55"}}>9:41 AM</span>
       </div>
 
-      {/* HERO CARD - FULL WIDTH */}
-      <div style={{flex:1,padding:"10px 14px 8px",display:"flex",flexDirection:"column" as const}}>
-        <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.9rem",letterSpacing:"0.14em",color:"#555",margin:"0 0 8px",textTransform:"uppercase" as const}}>DO THIS NOW</p>
-
-        <div style={{flex:1,background:done?"#1a1a1a":RED,borderRadius:20,padding:"22px 20px",display:"flex",flexDirection:"column" as const,justifyContent:"space-between",transition:"background 0.3s",boxShadow:"0 8px 40px rgba(226,59,46,0.3)"}}>
-          <div>
-            <div style={{display:"flex",gap:3,marginBottom:14}}>
-              {[0,1,2].map(i=><div key={i} style={{flex:1,height:4,borderRadius:2,background:i===0?"rgba(255,255,255,0.9)":"rgba(255,255,255,0.25)"}}/>)}
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-              <div style={{width:52,height:52,borderRadius:14,background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.7rem"}}>{heroAction.e}</div>
-              <div>
-                <p style={{fontSize:"0.7rem",color:"rgba(255,255,255,0.6)",margin:"0 0 2px",letterSpacing:"0.06em"}}>{heroAction.ev.toUpperCase()}</p>
-                <p style={{fontWeight:700,fontSize:"1rem",color:WHITE,margin:0}}>{heroAction.p}</p>
+      <div style={{flex:1,overflowY:"auto",padding:"20px 18px 80px"}}>
+        {/* Hero action — full card */}
+        <div style={{
+          background:done?`${SAGE}15`:BLACK,
+          borderRadius:20,padding:"26px 22px",marginBottom:18,
+          border:done?`2px solid ${SAGE}40`:"none",
+          boxShadow:done?"none":"0 6px 32px rgba(0,0,0,0.25)",
+          transition:"all 0.4s",
+          minHeight:220,display:"flex",flexDirection:"column" as const,justifyContent:"space-between",
+        }}>
+          {done
+            ? <div style={{textAlign:"center" as const,padding:"20px 0"}}>
+                <div style={{fontSize:"2.5rem",marginBottom:12}}>✅</div>
+                <div style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.6rem",color:SAGE,letterSpacing:"0.04em",marginBottom:6}}>Done! We'll handle it.</div>
+                <div style={{fontFamily:"'Caveat',cursive",fontSize:"1rem",color:GRAY}}>Next: Steve's birthday in 3 days</div>
               </div>
-              <div style={{marginLeft:"auto",background:"rgba(255,255,255,0.18)",borderRadius:20,padding:"4px 10px"}}>
-                <span style={{fontSize:"0.68rem",color:WHITE,fontWeight:700}}>⚡ {heroAction.daysAway}d</span>
-              </div>
-            </div>
-            <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"2.1rem",color:WHITE,margin:"0 0 10px",letterSpacing:"0.03em",lineHeight:1.1}}>{heroAction.msg.toUpperCase()}</p>
-            <p style={{fontSize:"0.78rem",color:"rgba(255,255,255,0.7)",margin:"0 0 0",lineHeight:1.5}}>{heroAction.context}</p>
-          </div>
-
-          <div style={{marginTop:16}}>
-            {!done?(
-              <>
-                <button onClick={()=>setDone(true)} style={{width:"100%",background:WHITE,color:RED,border:"none",borderRadius:14,padding:"15px",fontWeight:700,fontSize:"0.95rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:8,letterSpacing:"0.01em"}}>
-                  ✉️ Send Birthday Card
-                </button>
-                <div style={{display:"flex",gap:8}}>
-                  <button style={{flex:1,background:"rgba(255,255,255,0.12)",color:WHITE,border:"1px solid rgba(255,255,255,0.2)",borderRadius:10,padding:"10px",fontSize:"0.78rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Skip</button>
-                  <button style={{flex:1,background:"rgba(255,255,255,0.12)",color:WHITE,border:"1px solid rgba(255,255,255,0.2)",borderRadius:10,padding:"10px",fontSize:"0.78rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Snooze 1d</button>
+            : <>
+                <div>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+                    <div style={{background:`${RED}30`,borderRadius:6,padding:"3px 10px"}}>
+                      <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.72rem",color:RED,letterSpacing:"0.1em"}}>DO THIS NOW</span>
+                    </div>
+                    <Ring h={38} color={RED}/>
+                  </div>
+                  <div style={{fontSize:"2.4rem",marginBottom:10}}>{heroAction.emoji}</div>
+                  <h2 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.65rem",color:WHITE,letterSpacing:"0.03em",margin:"0 0 8px",lineHeight:1.1}}>{heroAction.msg}</h2>
+                  <p style={{fontFamily:"'Caveat',cursive",fontSize:"1.02rem",color:"#ffffff70",margin:"0 0 18px",lineHeight:1.5}}>{heroAction.context}</p>
                 </div>
+                <button onClick={()=>setDone(true)} style={{
+                  background:RED,color:WHITE,border:"none",borderRadius:13,
+                  padding:"15px",width:"100%",
+                  fontFamily:"'Bebas Neue',cursive",fontSize:"1.15rem",letterSpacing:"0.06em",
+                  cursor:"pointer",boxShadow:`0 4px 20px ${RED}55`,
+                }}>SEND THE CARD →</button>
               </>
-            ):(
-              <div style={{background:"rgba(91,140,107,0.25)",border:"1px solid rgba(91,140,107,0.4)",borderRadius:14,padding:"16px",textAlign:"center" as const}}>
-                <p style={{fontSize:"1.3rem",margin:"0 0 6px"}}>✅</p>
-                <p style={{fontWeight:700,fontSize:"0.88rem",color:WHITE,margin:"0 0 4px"}}>Done! Card queued for Marcus.</p>
-                <p style={{fontSize:"0.72rem",color:"rgba(255,255,255,0.6)",margin:0}}>Delivery by Jun 14</p>
-              </div>
-            )}
-          </div>
+          }
         </div>
 
-        {/* NEXT QUEUE */}
-        <div style={{marginTop:10}}>
-          <p style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.85rem",letterSpacing:"0.1em",color:"#555",margin:"0 0 8px"}}>NEXT UP</p>
-          <div style={{display:"flex",flexDirection:"column" as const,gap:6}}>
-            {nextQueue.map((q,i)=>(
-              <div key={i} style={{background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:10,padding:"9px 13px",display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:"1.1rem"}}>{q.e}</span>
-                <div style={{flex:1}}>
-                  <p style={{fontSize:"0.8rem",fontWeight:600,color:WHITE,margin:0}}>{q.p} — {q.action}</p>
-                  <p style={{fontSize:"0.67rem",color:"#666",margin:"1px 0 0"}}>In {q.days} days</p>
-                </div>
-                <span style={{fontSize:"0.67rem",color:"#555"}}>→</span>
+        {/* Swipe hint */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginBottom:16}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:BLACK}}/>
+          <div style={{width:6,height:6,borderRadius:"50%",background:`${BLACK}30`}}/>
+          <div style={{width:6,height:6,borderRadius:"50%",background:`${BLACK}30`}}/>
+          <span style={{fontSize:"0.72rem",color:GRAY,marginLeft:6}}>2 more actions</span>
+        </div>
+
+        {/* Next actions */}
+        <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.2rem",letterSpacing:"0.04em",color:BLACK,margin:"0 0 10px"}}>Up Next</h3>
+        <div style={{display:"flex",flexDirection:"column" as const,gap:8}}>
+          {nextActions.map((a,i)=>(
+            <div key={i} style={{background:WHITE,borderRadius:13,padding:"13px 15px",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",gap:12}}>
+              <div style={{fontSize:"1.5rem"}}>{a.emoji}</div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:"0.9rem"}}>{a.name} · {a.event}</div>
+                <div style={{fontSize:"0.76rem",color:GRAY,marginTop:1}}>{a.action}</div>
               </div>
-            ))}
-          </div>
+              <div style={{textAlign:"right" as const}}>
+                <div style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.9rem",color:a.days===0?RED:GRAY}}>{a.days===0?"Today":`${a.days}d`}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* BOTTOM NAV */}
-      <div style={{background:"#0e0e0e",borderTop:"1px solid #222",padding:"10px 0 14px",display:"flex",justifyContent:"space-around"}}>
-        {[{icon:"🏠",label:"Home",id:"home"},{icon:"📅",label:"Moments",id:"moments"},{icon:"👥",label:"People",id:"people"},{icon:"🏆",label:"Points",id:"points"}].map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{display:"flex",flexDirection:"column" as const,alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
-            <span style={{fontSize:"1.2rem"}}>{t.icon}</span>
-            <span style={{fontSize:"0.6rem",fontWeight:t.id===tab?700:400,color:t.id===tab?RED:"#555"}}>{t.label}</span>
-          </button>
-        ))}
+      {/* Bottom nav */}
+      <div style={{background:WHITE,borderTop:`1px solid ${BORDER}`,padding:"8px 6px 16px",display:"flex",justifyContent:"space-around",alignItems:"center",position:"absolute" as const,bottom:0,left:0,right:0}}>
+        {navItems.map((n,i)=>
+          n.fab
+            ? <button key={i} style={{width:48,height:48,borderRadius:"50%",background:RED,border:"none",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.4rem",color:WHITE,cursor:"pointer",marginTop:-20,boxShadow:`0 4px 16px ${RED}50`}}>+</button>
+            : <button key={i} onClick={()=>setActiveNav(i)} style={{display:"flex",flexDirection:"column" as const,alignItems:"center",gap:2,background:"none",border:"none",cursor:"pointer",opacity:activeNav===i?1:0.4}}>
+                <span style={{fontSize:"1.2rem"}}>{n.icon}</span>
+                <span style={{fontSize:"0.6rem",fontWeight:700,color:activeNav===i?RED:GRAY}}>{n.label}</span>
+              </button>
+        )}
       </div>
     </div>
   );

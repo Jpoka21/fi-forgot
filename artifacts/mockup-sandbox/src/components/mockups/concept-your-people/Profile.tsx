@@ -1,169 +1,153 @@
 import { useState } from "react";
 
-const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",AMBER="#D97706";
+const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",CREAM="#FDF7EF";
 
-function HealthBar({label,val,color}:{label:string,val:number,color:string}){
-  return(
-    <div style={{marginBottom:10}}>
-      <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-        <span style={{fontSize:"0.78rem",color:BLACK,fontWeight:500}}>{label}</span>
-        <span style={{fontSize:"0.78rem",fontWeight:700,color}}>{val}%</span>
-      </div>
-      <div style={{height:8,borderRadius:4,background:BORDER,overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${val}%`,background:color,borderRadius:4,transition:"width 0.3s"}}/>
-      </div>
-    </div>
+const healthBreakdown=[
+  {label:"Recency",desc:"Last card 2 months ago",score:90,good:true},
+  {label:"Consistency",desc:"Never missed her birthday",score:98,good:true},
+  {label:"Effort",desc:"Personalized notes on every card",score:95,good:true},
+  {label:"Coverage",desc:"4 events per year covered",score:88,good:true},
+];
+
+const cardHistory=[
+  {event:"Anniversary",date:"Apr 3, 2025",tone:"Romantic",msg:"Four years and I'd choose you every time. Happy anniversary, sis — you two are everything."},
+  {event:"Birthday",date:"Feb 14, 2025",tone:"Funny",msg:"You're officially closer to 30 than to 20. On behalf of me, I'm so sorry. Happy birthday!"},
+  {event:"Christmas",date:"Dec 22, 2024",tone:"Sweet",msg:"Being your brother is the gift I didn't know I needed. Merry Christmas. Love you."},
+];
+
+const nextMoments=[
+  {event:"Anniversary",date:"Jun 19",days:8,status:"On track"},
+  {event:"Birthday",date:"Feb 14, 2026",days:248,status:"On track"},
+];
+
+function Ring({score,color,size=70}:{score:number,color:string,size?:number}){
+  const r=(size-10)/2,cx=size/2,cy=size/2;
+  const c=Math.PI*2*r,fill=c*(score/100);
+  return (
+    <svg width={size} height={size}>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={`${color}20`} strokeWidth={6}/>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={6}
+        strokeDasharray={`${fill} ${c-fill}`} strokeLinecap="round"
+        transform={`rotate(-90 ${cx} ${cy})`}/>
+      <text x={cx} y={cy+5} textAnchor="middle" fontFamily="'Bebas Neue',cursive" fontSize={16} fill={color}>{score}</text>
+    </svg>
   );
 }
 
-const cardHistory=[
-  {ev:"Birthday",date:"Mar 12, 2026",msg:"'Happy birthday, sis. Can't believe you're 32. Love you tons.'",tone:"Warm"},
-  {ev:"Christmas",date:"Dec 25, 2025",msg:"'Merry Christmas! Wishing you and the family the best year yet.'",tone:"Festive"},
-  {ev:"Anniversary",date:"Jun 28, 2025",msg:"'Happy anniversary to you and Tom. 6 years — you two are the best.'",tone:"Heartfelt"},
-  {ev:"Birthday",date:"Mar 12, 2025",msg:"'31 and thriving. So proud of everything you've done this year.'",tone:"Warm"},
-];
-const actions=[
-  {label:"Send a Card",icon:"✉️",bg:RED,color:WHITE},
-  {label:"Log Moment",icon:"📝",bg:WHITE,color:BLACK},
-  {label:"Ask AI",icon:"✨",bg:WHITE,color:BLACK},
-];
-const memories=[
-  "Started a new job at Fidelity in Jan 2026",
-  "Husband Tom coaches little league",
-  "Two dogs: Biscuit and Pepper",
-  "Lives in Austin, TX — moved from Boston",
-  "Runs a half marathon every spring",
-];
-
-export default function Profile(){
-  const [tab,setTab]=useState<"health"|"cards"|"notes">("health");
-  return(
-    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Plus Jakarta Sans',sans-serif",color:BLACK}}>
-      {/* NAV */}
-      <div style={{background:BLACK,padding:"13px 32px",display:"flex",alignItems:"center",gap:12}}>
-        <button style={{background:"none",border:"none",color:"#888",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:"0.82rem",padding:0}}>← Your People</button>
-        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.7rem",color:WHITE,letterSpacing:"0.08em"}}>F*I FORGOT</span>
+export function Profile() {
+  const [tab,setTab]=useState<"health"|"cards"|"moments">("health");
+  return (
+    <div style={{background:BG,minHeight:"100vh",fontFamily:"'Plus Jakarta Sans',sans-serif",color:BLACK}}>
+      <div style={{background:BLACK,height:54,display:"flex",alignItems:"center",gap:14,padding:"0 22px"}}>
+        <button style={{background:"none",border:"none",color:"#ffffff80",fontSize:"1.1rem",cursor:"pointer",padding:0}}>←</button>
+        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.35rem",color:RED,letterSpacing:"0.06em"}}>F.I. FORGOT</span>
       </div>
 
-      {/* PERSON HEADER */}
-      <div style={{background:WHITE,borderBottom:`1px solid ${BORDER}`,padding:"26px 32px 22px"}}>
-        <div style={{maxWidth:860,margin:"0 auto"}}>
-          <div style={{display:"flex",alignItems:"flex-start",gap:20}}>
-            <div style={{width:68,height:68,borderRadius:16,background:"#EDF5F0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"2.1rem"}}>👧</div>
-            <div style={{flex:1}}>
-              <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:4}}>
-                <h1 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"2.3rem",color:BLACK,margin:0,letterSpacing:"0.04em",lineHeight:1}}>SARAH</h1>
-                <span style={{background:"#EDF5F0",color:SAGE,borderRadius:20,padding:"3px 12px",fontSize:"0.73rem",fontWeight:700}}>SISTER</span>
-              </div>
-              <p style={{color:GRAY,fontSize:"0.8rem",margin:"0 0 12px"}}>Friend since birth · 7 cards sent · Last card Mar 2026</p>
-              <div style={{display:"flex",gap:8}}>
-                {actions.map((a,i)=>(
-                  <button key={i} style={{background:a.bg,color:a.color,border:`1px solid ${a.bg===WHITE?BORDER:a.bg}`,borderRadius:9,padding:"8px 16px",fontWeight:700,fontSize:"0.8rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",alignItems:"center",gap:6}}>
-                    <span>{a.icon}</span>{a.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Health ring */}
-            <div style={{background:BG,border:`1px solid ${BORDER}`,borderRadius:14,padding:"16px 18px",textAlign:"center" as const}}>
-              <div style={{position:"relative" as const,width:72,height:72,margin:"0 auto 8px"}}>
-                <svg width={72} height={72} style={{transform:"rotate(-90deg)"}}>
-                  <circle cx={36} cy={36} r={28} fill="none" stroke={BORDER} strokeWidth={6}/>
-                  <circle cx={36} cy={36} r={28} fill="none" stroke={SAGE} strokeWidth={6} strokeDasharray={`${2*Math.PI*28*0.78} ${2*Math.PI*28}`} strokeLinecap="round"/>
-                </svg>
-                <div style={{position:"absolute" as const,inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column" as const}}>
-                  <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.4rem",color:BLACK,lineHeight:1}}>78</span>
-                  <span style={{fontSize:"0.55rem",color:GRAY,textTransform:"uppercase" as const}}>%</span>
-                </div>
-              </div>
-              <p style={{fontSize:"0.68rem",color:GRAY,margin:0,textTransform:"uppercase" as const,letterSpacing:"0.06em"}}>Health<br/>Score</p>
+      <div style={{maxWidth:720,margin:"0 auto",padding:"28px 22px 48px"}}>
+
+        {/* Person header */}
+        <div style={{background:WHITE,borderRadius:18,padding:"24px 26px",border:`1px solid ${BORDER}`,marginBottom:18,display:"flex",gap:20,alignItems:"center"}}>
+          <div style={{width:64,height:64,borderRadius:16,background:`${SAGE}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"2rem",border:`2px solid ${SAGE}25`}}>👩</div>
+          <div style={{flex:1}}>
+            <h1 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.9rem",letterSpacing:"0.03em",color:BLACK,margin:0,lineHeight:1}}>Sarah</h1>
+            <div style={{fontSize:"0.86rem",color:GRAY,marginTop:3}}>Sister · 4 events per year</div>
+            <div style={{marginTop:8,display:"flex",gap:8,flexWrap:"wrap" as const}}>
+              <span style={{fontSize:"0.74rem",fontWeight:600,padding:"3px 10px",borderRadius:99,background:`${SAGE}15`,color:SAGE}}>💍 Anniversary Jun 19</span>
+              <span style={{fontSize:"0.74rem",fontWeight:600,padding:"3px 10px",borderRadius:99,background:`${BLACK}08`,color:GRAY}}>🎂 Birthday Feb 14</span>
+              <span style={{fontSize:"0.74rem",fontWeight:600,padding:"3px 10px",borderRadius:99,background:`${BLACK}08`,color:GRAY}}>🎄 Christmas</span>
             </div>
           </div>
-          {/* Next moment */}
-          <div style={{marginTop:16,background:BG,border:`1px solid ${BORDER}`,borderRadius:10,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <span style={{fontSize:"1.1rem"}}>📅</span>
-              <div>
-                <p style={{fontWeight:700,fontSize:"0.82rem",margin:0}}>Anniversary coming up</p>
-                <p style={{fontSize:"0.72rem",color:GRAY,margin:"1px 0 0"}}>June 28 · 17 days away</p>
-              </div>
-            </div>
-            <button style={{background:RED,color:WHITE,border:"none",borderRadius:8,padding:"7px 16px",fontWeight:700,fontSize:"0.78rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Send Card</button>
+          <div style={{textAlign:"center" as const}}>
+            <Ring score={94} color={SAGE}/>
+            <div style={{fontSize:"0.72rem",fontWeight:700,color:SAGE,marginTop:2,letterSpacing:"0.04em"}}>GREAT</div>
           </div>
         </div>
-      </div>
 
-      <div style={{padding:"22px 32px",maxWidth:860,margin:"0 auto"}}>
-        {/* TABS */}
-        <div style={{display:"flex",gap:2,marginBottom:20,background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:3,width:"fit-content" as const}}>
-          {(["health","cards","notes"] as const).map(t=>(
-            <button key={t} onClick={()=>setTab(t)} style={{padding:"7px 18px",borderRadius:7,border:"none",background:tab===t?BLACK:"transparent",color:tab===t?WHITE:GRAY,fontWeight:tab===t?700:400,fontSize:"0.78rem",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",textTransform:"capitalize" as const}}>{t==="health"?"Health Score":t==="cards"?"Card History":"Notes"}</button>
+        {/* Quick actions */}
+        <div style={{display:"flex",gap:8,marginBottom:18}}>
+          {[{icon:"💌",label:"Send Card",primary:true},{icon:"📝",label:"Log Moment",primary:false},{icon:"❓",label:"Ask Question",primary:false}].map((a,i)=>(
+            <button key={i} style={{
+              flex:1,padding:"10px 8px",borderRadius:10,
+              background:a.primary?RED:"transparent",
+              border:`1.5px solid ${a.primary?RED:`${BLACK}18`}`,
+              color:a.primary?WHITE:BLACK,
+              fontWeight:700,fontSize:"0.82rem",
+              cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,
+            }}><span>{a.icon}</span><span>{a.label}</span></button>
           ))}
         </div>
 
-        {tab==="health"&&(
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
-            <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:14,padding:"20px 22px"}}>
-              <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.1rem",letterSpacing:"0.07em",margin:"0 0 16px"}}>HEALTH BREAKDOWN</h3>
-              <HealthBar label="Recency (last contact)" val={72} color={AMBER}/>
-              <HealthBar label="Consistency (monthly)" val={80} color={SAGE}/>
-              <HealthBar label="Effort (personalization)" val={85} color={SAGE}/>
-              <HealthBar label="Coverage (all occasions)" val={70} color={AMBER}/>
-              <div style={{marginTop:12,background:BG,borderRadius:8,padding:"10px 12px"}}>
-                <p style={{fontSize:"0.75rem",color:GRAY,margin:0}}>💡 <strong>Tip:</strong> It's been 3 months since your last contact with Sarah. A card soon would lift her score.</p>
-              </div>
-            </div>
-            <div>
-              <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:14,padding:"18px 20px",marginBottom:14}}>
-                <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.1rem",letterSpacing:"0.07em",margin:"0 0 14px"}}>STATS</h3>
-                {[{l:"Cards sent",v:"7 total"},{l:"This year",v:"2 cards"},{l:"Streak",v:"4 months"},{l:"Avg cadence",v:"Every 2 mo"}].map((s,i)=>(
-                  <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:i<3?`1px solid ${BORDER}`:"none"}}>
-                    <span style={{fontSize:"0.78rem",color:GRAY}}>{s.l}</span>
-                    <span style={{fontSize:"0.78rem",fontWeight:700,color:BLACK}}>{s.v}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:14,padding:"18px 20px"}}>
-                <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.1rem",letterSpacing:"0.07em",margin:"0 0 12px"}}>OCCASIONS COVERED</h3>
-                {[{ev:"Birthday ✓",ok:true},{ev:"Anniversary ✓",ok:true},{ev:"Christmas ✓",ok:true},{ev:"Mother's Day",ok:false},{ev:"Valentine's",ok:false}].map((ev,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                    <div style={{width:8,height:8,borderRadius:"50%",background:ev.ok?SAGE:BORDER,flexShrink:0}}/>
-                    <span style={{fontSize:"0.78rem",color:ev.ok?BLACK:GRAY}}>{ev.ev}</span>
-                    {!ev.ok&&<span style={{fontSize:"0.67rem",color:AMBER,marginLeft:"auto"}}>+ Add</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Tabs */}
+        <div style={{display:"flex",gap:4,marginBottom:16,background:WHITE,borderRadius:10,padding:4,border:`1px solid ${BORDER}`}}>
+          {(["health","cards","moments"] as const).map(t=>(
+            <button key={t} onClick={()=>setTab(t)} style={{
+              flex:1,padding:"8px",borderRadius:8,border:"none",cursor:"pointer",
+              fontWeight:700,fontSize:"0.8rem",letterSpacing:"0.04em",
+              background:tab===t?BLACK:"transparent",
+              color:tab===t?WHITE:GRAY,transition:"all 0.15s",
+            }}>
+              {t==="health"?"Health Score":t==="cards"?"Card History":"Moments"}
+            </button>
+          ))}
+        </div>
 
-        {tab==="cards"&&(
+        {tab==="health" && (
           <div style={{display:"flex",flexDirection:"column" as const,gap:10}}>
-            {cardHistory.map((c,i)=>(
-              <div key={i} style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:12,padding:"14px 18px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-                  <span style={{fontSize:"1.1rem"}}>💌</span>
-                  <p style={{fontWeight:700,fontSize:"0.86rem",margin:0}}>{c.ev}</p>
-                  <span style={{marginLeft:"auto",fontSize:"0.72rem",color:GRAY}}>{c.date}</span>
-                  <span style={{background:"#EDF5F0",color:SAGE,borderRadius:20,padding:"2px 8px",fontSize:"0.67rem",fontWeight:600}}>{c.tone}</span>
+            <div style={{background:WHITE,borderRadius:14,padding:"18px 20px",border:`1px solid ${BORDER}`,marginBottom:4}}>
+              <div style={{fontFamily:"'Caveat',cursive",fontSize:"1.05rem",color:GRAY,marginBottom:8}}>Overall relationship health</div>
+              <div style={{display:"flex",alignItems:"center",gap:14}}>
+                <Ring score={94} color={SAGE} size={80}/>
+                <div>
+                  <div style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.6rem",color:SAGE,letterSpacing:"0.04em"}}>Excellent</div>
+                  <div style={{fontSize:"0.82rem",color:GRAY,maxWidth:280,lineHeight:1.55}}>Sarah is one of your strongest relationships. Cards are consistent, timely, and personal.</div>
                 </div>
-                <p style={{fontFamily:"'Caveat',cursive",fontSize:"1.05rem",color:BLACK,margin:0,paddingLeft:8,borderLeft:`3px solid ${BORDER}`}}>{c.msg}</p>
+              </div>
+            </div>
+            {healthBreakdown.map((h,i)=>(
+              <div key={i} style={{background:WHITE,borderRadius:12,padding:"14px 18px",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",gap:14}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:h.good?SAGE:RED,flexShrink:0}}/>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,fontSize:"0.9rem"}}>{h.label}</div>
+                  <div style={{fontSize:"0.78rem",color:GRAY,marginTop:2}}>{h.desc}</div>
+                </div>
+                <div style={{textAlign:"right" as const}}>
+                  <div style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.1rem",color:h.good?SAGE:RED}}>{h.score}</div>
+                  <div style={{fontSize:"0.62rem",color:GRAY,letterSpacing:"0.04em"}}>/ 100</div>
+                </div>
               </div>
             ))}
           </div>
         )}
 
-        {tab==="notes"&&(
-          <div>
-            <div style={{display:"flex",flexDirection:"column" as const,gap:8}}>
-              {memories.map((m,i)=>(
-                <div key={i} style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:"12px 16px",display:"flex",gap:10}}>
-                  <span style={{fontSize:"0.9rem",marginTop:2}}>📝</span>
-                  <p style={{fontFamily:"'Caveat',cursive",fontSize:"1.1rem",margin:0,lineHeight:1.4}}>{m}</p>
+        {tab==="cards" && (
+          <div style={{display:"flex",flexDirection:"column" as const,gap:10}}>
+            {cardHistory.map((c,i)=>(
+              <div key={i} style={{background:WHITE,borderRadius:13,padding:"18px 20px",border:`1px solid ${BORDER}`}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                  <span style={{fontWeight:700,fontSize:"0.95rem"}}>{c.event} <span style={{fontWeight:400,color:GRAY,fontSize:"0.82rem"}}>— {c.date}</span></span>
+                  <span style={{fontSize:"0.72rem",fontWeight:600,padding:"2px 8px",borderRadius:99,background:`${SAGE}15`,color:SAGE}}>{c.tone}</span>
                 </div>
-              ))}
-            </div>
-            <button style={{marginTop:12,width:"100%",background:"none",border:`2px dashed ${BORDER}`,borderRadius:10,padding:"11px",fontSize:"0.78rem",color:GRAY,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>+ Log something new about Sarah</button>
+                <div style={{fontFamily:"'Caveat',cursive",fontSize:"1.05rem",color:BLACK,lineHeight:1.6,background:CREAM,borderRadius:8,padding:"10px 14px"}}>"{c.msg}"</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab==="moments" && (
+          <div style={{display:"flex",flexDirection:"column" as const,gap:10}}>
+            {nextMoments.map((m,i)=>(
+              <div key={i} style={{background:WHITE,borderRadius:13,padding:"14px 18px",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",gap:14}}>
+                <div style={{minWidth:48,textAlign:"center" as const,background:CREAM,borderRadius:8,padding:"6px 4px"}}>
+                  <div style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.2rem",color:BLACK,lineHeight:1}}>{m.days}</div>
+                  <div style={{fontSize:"0.6rem",color:GRAY,fontWeight:700}}>DAYS</div>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,fontSize:"0.9rem"}}>{m.event}</div>
+                  <div style={{fontSize:"0.78rem",color:GRAY,marginTop:2}}>{m.date}</div>
+                </div>
+                <span style={{fontSize:"0.72rem",fontWeight:600,padding:"2px 8px",borderRadius:99,background:`${SAGE}15`,color:SAGE}}>{m.status}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
