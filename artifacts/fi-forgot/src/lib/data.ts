@@ -138,6 +138,33 @@ export interface CardOrder {
   adminNotes?: string;
   deliveryPreference: DeliveryPreference;
   overrideAddress?: RecipientAddress;
+  keptInMind?: string[];
+  keptInMindSources?: string[];
+}
+
+// ─── Personalization record ───────────────────────────────────────────────────
+
+export interface PersonalizationRecord {
+  items: string[];
+  sources: string[];
+  occasion: string;
+  sentAt: string;
+}
+
+const PERSONALIZATION_KEY_PREFIX = "fi_last_personalization_";
+
+export function saveLastPersonalization(recipientId: string, record: Omit<PersonalizationRecord, "sentAt">): void {
+  try {
+    localStorage.setItem(PERSONALIZATION_KEY_PREFIX + recipientId, JSON.stringify({ ...record, sentAt: new Date().toISOString() }));
+  } catch { /* ignore */ }
+}
+
+export function getLastPersonalization(recipientId: string): PersonalizationRecord | null {
+  try {
+    const raw = localStorage.getItem(PERSONALIZATION_KEY_PREFIX + recipientId);
+    if (raw) return JSON.parse(raw) as PersonalizationRecord;
+  } catch { /* ignore */ }
+  return null;
 }
 
 // ─── Helper functions ───────────────────────────────────────────────────────

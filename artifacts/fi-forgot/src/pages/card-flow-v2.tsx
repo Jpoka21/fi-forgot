@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { getApiHeaders } from "@/lib/data";
+import { getApiHeaders, saveLastPersonalization } from "@/lib/data";
 import { dispatchBrownieAward } from "@/lib/brownie-points-context";
 
 const RED   = "#E23B2E";
@@ -277,6 +277,9 @@ export default function CardFlowV2() {
   const [design, setDesign]               = useState<CardDesign | null>(null);
   const [designLoading, setDesignLoading] = useState(false);
   const [excludedDesignIds, setExcludedDesignIds] = useState<string[]>([]);
+  // Kept In Mind
+  const [keptInMind, setKeptInMind]             = useState<string[]>([]);
+  const [keptInMindSources, setKeptInMindSources] = useState<string[]>([]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -443,7 +446,7 @@ export default function CardFlowV2() {
         fetch(`/api/personal-cards/pick-card?eventType=${encodeURIComponent(occasionForPicker)}`),
       ]);
 
-      const data     = await res.json()     as { cards?: CardOption[]; error?: string; browniePoints?: { awarded: number; newBalance: number; toastMessage: string; milestone?: { threshold: number; message: string } } | null };
+      const data     = await res.json()     as { cards?: CardOption[]; error?: string; browniePoints?: { awarded: number; newBalance: number; toastMessage: string; milestone?: { threshold: number; message: string } } | null; keptInMind?: string[]; keptInMindSources?: string[] };
       const pickData = await pickRes.json() as { card?: CardDesign };
 
       if (!data.cards?.length) throw new Error(data.error ?? "No cards returned");
@@ -459,6 +462,8 @@ export default function CardFlowV2() {
       setShowConfirm(false);
       if (pickData.card) setDesign(pickData.card);
       if (data.browniePoints?.awarded) dispatchBrownieAward(data.browniePoints);
+      setKeptInMind(data.keptInMind ?? []);
+      setKeptInMindSources(data.keptInMindSources ?? []);
       setPhase("results");
     } catch (err) {
       setGenError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -829,6 +834,13 @@ export default function CardFlowV2() {
           <button
             onClick={async () => {
               setPhase("final");
+              if (recipientId && keptInMind.length > 0) {
+                saveLastPersonalization(recipientId, {
+                  items: keptInMind,
+                  sources: keptInMindSources,
+                  occasion: occ,
+                });
+              }
               try {
                 const res = await fetch("/api/v2/brownie-points/award", {
                   method: "POST",
@@ -958,6 +970,25 @@ export default function CardFlowV2() {
           />
         </div>
 
+        {/* What We Kept In Mind */}
+        {keptInMind.length > 0 && (
+          <div style={{ background: `${SAGE}0C`, border: `1px solid ${SAGE}28`, borderRadius: 14, padding: "12px 16px", marginBottom: 14 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: SAGE, margin: "0 0 9px" }}>
+              What we kept in mind
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {keptInMind.map((item, i) => (
+                <span
+                  key={i}
+                  style={{ padding: "4px 11px", borderRadius: 20, background: WHITE, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.73rem", color: BLACK, display: "inline-flex", alignItems: "center", gap: 5 }}
+                >
+                  <span style={{ color: SAGE, fontWeight: 700 }}>✓</span>{item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Action buttons */}
         <button
           onClick={() => setShowConfirm(true)}
@@ -1014,24 +1045,6 @@ export default function CardFlowV2() {
           )}
         </div>
 
-        {/* Personal Touches Included */}
-        {personalTouches.length > 0 && (
-          <div style={{ background: WHITE, border: `1px solid ${BLACK}08`, borderRadius: 14, padding: "13px 16px", marginBottom: 14 }}>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: GRAY, margin: "0 0 10px" }}>
-              Personal Touches Included
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-              {personalTouches.map(t => (
-                <span
-                  key={t}
-                  style={{ padding: "4px 11px", borderRadius: 20, background: BEIGE, fontFamily: "'Inter', sans-serif", fontSize: "0.73rem", color: BLACK }}
-                >
-                  <span style={{ color: SAGE, fontWeight: 700 }}>✓ </span>{t}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Improve Future Cards */}
         {showImprove && (

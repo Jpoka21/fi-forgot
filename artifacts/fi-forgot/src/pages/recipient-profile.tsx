@@ -16,6 +16,7 @@ import {
   PREVIEW_DAYS_OPTIONS,
   getAge,
   getYearsTogether,
+  getLastPersonalization,
   Recipient,
   RecipientAddress,
   Relationship,
@@ -44,6 +45,8 @@ import RelationshipTimeline from "@/components/RelationshipTimeline";
 const RED   = "#E23B2E";
 const BLACK = "#111111";
 const BEIGE = "#F2E6D3";
+const SAGE  = "#5B8C6B";
+const WHITE = "#FFFFFF";
 const GRAY  = "#6B6B6B";
 
 // Events that require a specific date to be meaningful on the calendar
@@ -310,6 +313,7 @@ export default function RecipientProfilePage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const isNew = params.id === "new";
+  const lastPersonalization = !isNew && params.id ? getLastPersonalization(params.id) : null;
   const backTo = new URLSearchParams(window.location.search).get("from") === "dashboard"
     ? "/dashboard"
     : "/people";
@@ -787,7 +791,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="favoriteMemories" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Favorite memories or stories</FormLabel>
+                    <FormLabel>
+                      Favorite memories or stories
+                      {lastPersonalization?.sources.includes("memory") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={3} placeholder="The trip to Italy, that one concert, the time she…" data-testid="input-favorite-memories" {...field} />
                     </FormControl>
@@ -796,7 +807,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="insideJokes" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inside jokes</FormLabel>
+                    <FormLabel>
+                      Inside jokes
+                      {lastPersonalization?.sources.includes("insideJoke") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={2} placeholder="Things only the two of you would get…" data-testid="input-inside-jokes" {...field} />
                     </FormControl>
@@ -805,7 +823,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="thingsToAvoid" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Things to avoid</FormLabel>
+                    <FormLabel>
+                      Things to avoid
+                      {lastPersonalization?.sources.includes("tone") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={2} placeholder="Don't mention her age, avoid the word 'blessed', she hates sappy…" data-testid="input-things-to-avoid" {...field} />
                     </FormControl>
@@ -1249,7 +1274,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="favoriteMemories" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Favorite memories or stories</FormLabel>
+                    <FormLabel>
+                      Favorite memories or stories
+                      {lastPersonalization?.sources.includes("memory") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={3} placeholder="The trip to Italy, that one concert, the time she…" data-testid="input-favorite-memories" {...field} />
                     </FormControl>
@@ -1258,7 +1290,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="insideJokes" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inside jokes</FormLabel>
+                    <FormLabel>
+                      Inside jokes
+                      {lastPersonalization?.sources.includes("insideJoke") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={2} placeholder="Things only the two of you would get…" data-testid="input-inside-jokes" {...field} />
                     </FormControl>
@@ -1267,7 +1306,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="thingsToAvoid" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Things to avoid</FormLabel>
+                    <FormLabel>
+                      Things to avoid
+                      {lastPersonalization?.sources.includes("tone") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={2} placeholder="Don't mention her age, avoid the word 'blessed', she hates sappy…" data-testid="input-things-to-avoid" {...field} />
                     </FormControl>

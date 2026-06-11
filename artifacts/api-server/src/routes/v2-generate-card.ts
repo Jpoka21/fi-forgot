@@ -460,6 +460,32 @@ function scoreCardQuality(
   return { total, specificity, memoryUsage, openingQuality, closingQuality, aiPhraseDetection };
 }
 
+// ── Kept In Mind builder ──────────────────────────────────────────────────────
+
+type KeptInMindSource = "freshUpdate" | "followUp" | "briefing" | "memory" | "insideJoke" | "tone";
+
+function buildKeptInMindItems(context: RecipientContext | null): { items: string[]; sources: KeptInMindSource[] } {
+  if (!context) return { items: [], sources: [] };
+  const items: string[] = [];
+  const sources: KeptInMindSource[] = [];
+
+  function add(text: string, source: KeptInMindSource) {
+    if (items.length >= 3 || !text.trim()) return;
+    const trimmed = text.trim();
+    items.push(trimmed.length > 72 ? trimmed.slice(0, 70) + "…" : trimmed);
+    sources.push(source);
+  }
+
+  for (const u of context.freshUpdates.slice(0, 2))              { if (u.answer) add(u.answer, "freshUpdate"); }
+  for (const a of (context.followUpAnswers ?? []).slice(0, 2))   { if (a.answer) add(a.answer, "followUp"); }
+  for (const a of context.briefingSummary.allAnswers.slice(0, 1)){ if (a.answer) add(a.answer, "briefing"); }
+  if (context.memories.favoriteMemories)   add(context.memories.favoriteMemories, "memory");
+  if (context.memories.insideJokes)        add(context.memories.insideJokes, "insideJoke");
+  if (context.tone.thingsToAlwaysInclude)  add(context.tone.thingsToAlwaysInclude, "tone");
+
+  return { items, sources };
+}
+
 // ── Completeness calc ─────────────────────────────────────────────────────────
 
 function calcCompleteness(relAnswers: Record<string, string>, details: string): number {
@@ -628,7 +654,8 @@ router.post("/v2/generate-card", async (req, res) => {
       ? await awardPoints(userId, "card_generate", recipientId ? { recipientId } : undefined).catch(() => null)
       : null;
 
-    res.json({ cards: scoredCards, browniePoints });
+    const { items: keptInMind, sources: keptInMindSources } = buildKeptInMindItems(recipientContext);
+    res.json({ cards: scoredCards, browniePoints, keptInMind, keptInMindSources });
   } catch (err) {
     logger.error({ err }, "v2-generate-card: OpenAI call failed");
     res.status(500).json({ error: "Card generation failed" });
