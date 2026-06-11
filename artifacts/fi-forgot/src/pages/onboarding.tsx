@@ -159,6 +159,7 @@ export default function OnboardingPage() {
   // ── Draft generation ──────────────────────────────────────────────────────
   const [generatedCard, setGeneratedCard] = useState("");
   const [genError, setGenError] = useState<string|null>(null);
+  const [onboardingKeptInMind, setOnboardingKeptInMind] = useState<string[]>([]);
 
   // ── Revision ─────────────────────────────────────────────────────────────
   const [revisionCount, setRevisionCount]     = useState(0);
@@ -236,9 +237,10 @@ export default function OnboardingPage() {
           senderName:       user?.name ?? "",
         }),
       });
-      const json = await res.json() as { cards?: { text: string }[]; error?: string };
+      const json = await res.json() as { cards?: { text: string }[]; error?: string; keptInMind?: string[] };
       if (!json.cards?.length) throw new Error(json.error ?? "No cards returned");
       setGeneratedCard(json.cards[0].text);
+      setOnboardingKeptInMind(json.keptInMind ?? []);
       setPhase("draft");
     } catch (err) {
       setGenError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -691,6 +693,25 @@ export default function OnboardingPage() {
                       {generatedCard}
                     </div>
                   </div>
+
+                  {/* What We Kept In Mind */}
+                  {onboardingKeptInMind.length > 0 && (
+                    <div style={{ background:`${SAGE}0C`, border:`1px solid ${SAGE}28`, borderRadius:14, padding:"12px 16px" }}>
+                      <p style={{ fontFamily:"'Inter', sans-serif", fontSize:"0.62rem", fontWeight:700, letterSpacing:"0.08em",
+                        textTransform:"uppercase", color:SAGE, margin:"0 0 9px" }}>
+                        What we kept in mind
+                      </p>
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
+                        {onboardingKeptInMind.map((item, i) => (
+                          <span key={i} style={{ padding:"4px 11px", borderRadius:20, background:"#fff",
+                            border:`1px solid ${SAGE}28`, fontFamily:"'Inter', sans-serif", fontSize:"0.73rem",
+                            color:BLACK, display:"inline-flex", alignItems:"center", gap:5 }}>
+                            <span style={{ color:SAGE, fontWeight:700 }}>✓</span>{item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Revision section */}
                   {revisionCount === 0 && !showRevisionInput && (

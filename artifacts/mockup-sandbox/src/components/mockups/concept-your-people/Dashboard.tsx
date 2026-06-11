@@ -1,141 +1,134 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
-const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
+const BG = "#F2E6D3";
+const RED = "#E23B2E";
+const BLACK = "#111111";
+const SAGE = "#5B8C6B";
+const GRAY = "#6B6B6B";
+const BORDER = "#E5E0D8";
+const WHITE = "#FFFFFF";
+const CREAM = "#FDF7EF";
 
 type HealthLevel = "excellent" | "healthy" | "needs-attention" | "priority";
 
-interface Person {
-  name: string; rel: string; emoji: string;
-  health: HealthLevel; healthPct: number;
-  nextEvent: string; nextDays: number;
-  lastUpdated: number;
-  action: string;
-}
+const healthConfig: Record<HealthLevel, { ring: string; label: string; pct: number }> = {
+  "excellent":       { ring: "#2D6A4F", label: "Excellent",        pct: 92 },
+  "healthy":         { ring: SAGE,      label: "Healthy",           pct: 74 },
+  "needs-attention": { ring: "#D97706", label: "Needs Attention",   pct: 48 },
+  "priority":        { ring: RED,       label: "Priority",          pct: 38 },
+};
 
-const people: Person[] = [
-  { name: "Sarah",  rel: "Sister",  emoji: "👩", health: "excellent",       healthPct: 92, nextEvent: "Anniversary",  nextDays: 8,  lastUpdated: 2,  action: "Review Draft →" },
-  { name: "Mom",    rel: "Mother",  emoji: "💛", health: "needs-attention", healthPct: 48, nextEvent: "Mother's Day", nextDays: 15, lastUpdated: 21, action: "Add Details →"  },
-  { name: "Steve",  rel: "Friend",  emoji: "🤝", health: "healthy",         healthPct: 74, nextEvent: "Birthday",     nextDays: 3,  lastUpdated: 5,  action: "Review Draft →" },
-  { name: "Marcus", rel: "Friend",  emoji: "🧢", health: "priority",        healthPct: 35, nextEvent: "Birthday",     nextDays: 3,  lastUpdated: 14, action: "Write Card →"   },
-  { name: "Dad",    rel: "Father",  emoji: "👔", health: "healthy",         healthPct: 71, nextEvent: "Father's Day", nextDays: 28, lastUpdated: 7,  action: "View →"         },
-  { name: "Jenny",  rel: "Client",  emoji: "💼", health: "excellent",       healthPct: 88, nextEvent: "Work Anniv",   nextDays: 45, lastUpdated: 3,  action: "View →"         },
+const people: { name: string; emoji: string; rel: string; health: HealthLevel; nextEvent: string; nextDays: number; action: string; priority?: boolean }[] = [
+  { name: "Sarah",  emoji: "👩",  rel: "Sister",  health: "excellent",       nextEvent: "Anniversary",  nextDays: 8,  action: "Review Draft →" },
+  { name: "Mom",    emoji: "💛",  rel: "Mother",  health: "needs-attention",  nextEvent: "Mother's Day", nextDays: 15, action: "Add Details →" },
+  { name: "Steve",  emoji: "🤝",  rel: "Friend",  health: "healthy",          nextEvent: "Birthday",     nextDays: 3,  action: "Review Draft →" },
+  { name: "Marcus", emoji: "🧢",  rel: "Friend",  health: "priority",         nextEvent: "Birthday",     nextDays: 3,  action: "Write Card →",   priority: true },
+  { name: "Dad",    emoji: "👔",  rel: "Father",  health: "healthy",          nextEvent: "Father's Day", nextDays: 28, action: "View →" },
+  { name: "Jenny",  emoji: "💼",  rel: "Client",  health: "excellent",        nextEvent: "Work Anniv",   nextDays: 45, action: "View →" },
 ];
 
-function ringColor(h: HealthLevel) {
-  if (h === "excellent")       return "#2D7D52";
-  if (h === "healthy")         return SAGE;
-  if (h === "needs-attention") return "#F59E0B";
-  return RED;
-}
-
-function ringLabel(h: HealthLevel) {
-  if (h === "excellent")       return "Excellent";
-  if (h === "healthy")         return "Healthy";
-  if (h === "needs-attention") return "Needs Attention";
-  return "Priority";
-}
-
-function HealthRing({ pct, color, size = 42 }: { pct: number; color: string; size?: number }) {
+function HealthRing({ health, size = 48 }: { health: HealthLevel; size?: number }) {
+  const { ring, pct } = healthConfig[health];
   const r = (size - 6) / 2;
   const circ = 2 * Math.PI * r;
-  const offset = circ - (pct / 100) * circ;
+  const dash = (pct / 100) * circ;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: "block" }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`${color}20`} strokeWidth={5} />
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={5}
-        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
-        transform={`rotate(-90 ${size/2} ${size/2})`} />
+    <svg width={size} height={size} style={{ flexShrink: 0 }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`${ring}22`} strokeWidth={5} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={ring} strokeWidth={5}
+        strokeDasharray={`${dash} ${circ - dash}`} strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+      <text x={size / 2} y={size / 2 + 4} textAnchor="middle" fontSize={size < 60 ? 9 : 11} fill={ring} fontWeight="700">{pct}%</text>
     </svg>
   );
 }
 
 export function Dashboard() {
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-
+    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: BG, minHeight: "100vh", color: BLACK }}>
       {/* Nav */}
-      <div style={{ background: BLACK, padding: "0 20px", height: 56, display: "flex", alignItems: "center" }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", letterSpacing: "0.04em", color: WHITE, flex: 1 }}>YOUR PEOPLE</span>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: RED, letterSpacing: "0.06em" }}>F.I. FORGOT</span>
+      <div style={{ background: BLACK, padding: "0 28px", height: 58, display: "flex", alignItems: "center", gap: 16 }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: WHITE, letterSpacing: "0.06em", flex: 1 }}>YOUR PEOPLE</span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: RED, letterSpacing: "0.06em" }}>F.I. FORGOT</span>
       </div>
 
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 18px 48px" }}>
-
+      <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 24px" }}>
         {/* Summary strip */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22, padding: "11px 16px", background: WHITE, borderRadius: 12, border: `1.5px solid ${BORDER}` }}>
-          {[{ color: "#2D7D52", label: "2 excellent" }, { color: SAGE, label: "2 healthy" }, { color: "#F59E0B", label: "1 needs attention" }, { color: RED, label: "1 priority" }].map((d) => (
-            <div key={d.label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <div style={{ width: 9, height: 9, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
-              <span style={{ fontSize: "0.72rem", color: GRAY }}>{d.label}</span>
-            </div>
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24, padding: "12px 20px", background: WHITE, borderRadius: 12, border: `1.5px solid ${BORDER}` }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#D97706" }} />
+          </div>
+          <span style={{ fontSize: "0.85rem", color: GRAY }}>
+            <strong style={{ color: BLACK }}>5 people healthy</strong> · <strong style={{ color: "#D97706" }}>1 needs attention</strong>
+          </span>
+          <div style={{ marginLeft: "auto" }}>
+            <button style={{ background: RED, color: WHITE, border: "none", borderRadius: 8, padding: "7px 14px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}>+ Add Person</button>
+          </div>
         </div>
 
-        {/* People grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-          {people.map((p) => {
-            const rc = ringColor(p.health);
+        {/* Person cards grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
+          {people.map((p, i) => {
+            const cfg = healthConfig[p.health];
             return (
               <div
-                key={p.name}
-                onMouseEnter={() => setHovered(p.name)}
+                key={i}
+                onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
                 style={{
-                  background: WHITE, borderRadius: 16, padding: "16px",
-                  border: p.health === "priority" ? `2px solid ${RED}` : `1.5px solid ${BORDER}`,
-                  borderLeft: p.health === "priority" ? `5px solid ${RED}` : undefined,
-                  boxShadow: hovered === p.name ? "0 4px 18px rgba(0,0,0,0.08)" : "none",
-                  transition: "box-shadow 0.15s", cursor: "pointer",
-                  display: "flex", flexDirection: "column" as const, gap: 10,
+                  background: hovered === i ? "#FFFAF5" : WHITE,
+                  borderRadius: 16,
+                  padding: "20px",
+                  border: `1.5px solid ${p.priority ? RED : BORDER}`,
+                  borderLeft: p.priority ? `4px solid ${RED}` : `1.5px solid ${BORDER}`,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
                 }}
               >
                 {/* Top row */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: CREAM, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>{p.emoji}</div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${BLACK}08`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", flexShrink: 0 }}>{p.emoji}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.04em", color: BLACK, lineHeight: 1 }}>{p.name.toUpperCase()}</div>
-                    <span style={{ padding: "2px 8px", borderRadius: 20, background: `${BLACK}0A`, color: GRAY, fontSize: "0.68rem", fontWeight: 600 }}>{p.rel}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1 }}>{p.name}</span>
+                      <span style={{ padding: "2px 8px", borderRadius: 20, background: `${BLACK}08`, fontSize: "0.72rem", fontWeight: 600, color: GRAY }}>{p.rel}</span>
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: GRAY }}>last updated 3 days ago</div>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 1 }}>
-                    <HealthRing pct={p.healthPct} color={rc} size={42} />
-                    <span style={{ fontSize: "0.6rem", color: rc, fontWeight: 700 }}>{p.healthPct}%</span>
-                  </div>
+                  <HealthRing health={p.health} size={52} />
                 </div>
 
                 {/* Health label */}
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: rc, flexShrink: 0 }} />
-                  <span style={{ fontSize: "0.7rem", color: rc, fontWeight: 600 }}>{ringLabel(p.health)}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: "0.72rem", fontWeight: 700, color: cfg.ring, background: `${cfg.ring}15`, padding: "3px 10px", borderRadius: 20, border: `1px solid ${cfg.ring}30` }}>{cfg.label}</span>
+                  <span style={{ fontSize: "0.78rem", color: GRAY }}>{p.nextEvent} in {p.nextDays} days</span>
                 </div>
 
-                {/* Next event chip */}
-                <div style={{ padding: "6px 10px", borderRadius: 8, background: CREAM, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.74rem", color: BLACK, fontWeight: 600 }}>{p.nextEvent}</span>
-                  <span style={{ fontSize: "0.68rem", color: p.nextDays <= 7 ? RED : GRAY, fontWeight: 600 }}>in {p.nextDays}d</span>
-                </div>
-
-                {/* Last updated */}
-                <div style={{ fontSize: "0.65rem", color: GRAY }}>Last updated {p.lastUpdated} days ago</div>
-
-                {/* Action button */}
-                <button style={{ width: "100%", padding: "9px 0", borderRadius: 9, background: p.health === "priority" ? RED : p.health === "needs-attention" ? "#F59E0B" : `${SAGE}15`, color: p.health === "priority" ? WHITE : p.health === "needs-attention" ? WHITE : SAGE, border: "none", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}>
+                {/* Action */}
+                <button style={{ width: "100%", padding: "9px", borderRadius: 9, border: `1.5px solid ${p.priority ? RED : BORDER}`, background: p.priority ? RED : "transparent", color: p.priority ? WHITE : BLACK, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer" }}>
                   {p.action}
                 </button>
               </div>
             );
           })}
 
-          {/* Add person */}
-          <div style={{ borderRadius: 16, border: `2px dashed ${SAGE}55`, display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", gap: 6, minHeight: 180, cursor: "pointer" }}>
-            <span style={{ fontSize: "1.6rem", color: SAGE }}>+</span>
-            <span style={{ fontSize: "0.8rem", color: SAGE, fontWeight: 600 }}>Add Person</span>
+          {/* Add Person */}
+          <div style={{ borderRadius: 16, padding: "20px", border: `1.5px dashed ${SAGE}50`, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 180 }}>
+            <span style={{ fontSize: "2rem", color: SAGE }}>+</span>
+            <span style={{ fontWeight: 600, color: SAGE, fontSize: "0.9rem" }}>Add Person</span>
           </div>
         </div>
-
       </div>
     </div>
   );

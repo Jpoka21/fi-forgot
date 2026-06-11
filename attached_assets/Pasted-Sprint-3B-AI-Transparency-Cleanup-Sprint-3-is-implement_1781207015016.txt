@@ -1,0 +1,136 @@
+Sprint 3B: AI Transparency Cleanup
+
+Sprint 3 is implemented.
+
+Do not redesign the feature.
+
+Do not add new transparency systems.
+
+Do not add AI scores, percentages, confidence ratings, or pre-generation summaries.
+
+This is a cleanup sprint only.
+
+Goal:
+
+Verify Sprint 3 works everywhere it should and improve the accuracy of the tagging system.
+
+1. Verify Onboarding Coverage
+
+Sprint 3 was intended to show the "What We Kept In Mind" panel on:
+
+A. Onboarding first card draft
+B. Normal card generation flow
+C. Card review or approval flow
+
+Audit all three locations.
+
+Report:
+
+Which locations currently show the panel.
+Which locations do not.
+Any locations where implementation is missing.
+
+If onboarding does not currently display the panel, implement it.
+
+The onboarding first card is now one of the most important trust-building moments in the product.
+
+2. Improve Source Accuracy
+
+Current concern:
+
+The implementation appears to map:
+Things to avoid → tone
+
+That is misleading.
+
+Review all source categories.
+
+Recommended categories:
+
+freshUpdate
+followUp
+briefing
+memory
+insideJoke
+avoid
+tone
+interest
+personality
+
+Use the closest available source labels.
+
+Do not collapse unrelated concepts together.
+
+Update tagging logic where necessary.
+
+3. Expand Used In Card Coverage
+
+Current implementation appears to show tags primarily on:
+
+Favorite memories
+Inside jokes
+Things to avoid
+
+Review all user-provided context surfaces.
+
+Determine which of these can reasonably support Used In Card tags:
+
+Favorite memories
+Inside jokes
+Things to avoid
+Fresh updates
+Follow-up answers
+Briefing answers
+Relationship timeline entries
+
+Implement tags where practical without major architecture changes.
+
+Goal:
+
+Users should see proof that their contributions matter.
+
+4. Prevent Overclaiming
+
+Review the tagging logic.
+
+If a detail was merely available in context but may not have directly influenced the final card:
+
+Prefer:
+"Helped personalize"
+
+Instead of:
+"Used in"
+
+Reserve:
+"Used in"
+
+For details that clearly influenced the final output.
+
+Be conservative.
+
+Trust matters more than coverage.
+
+5. Validation
+
+Run typecheck.
+
+Verify:
+
+Onboarding first card behavior
+Normal card generation behavior
+Card review behavior
+Recipient profile behavior
+Used In Card tags display correctly
+No existing card flows were broken
+
+6. Final Report
+
+Provide:
+
+Files changed
+Onboarding coverage results
+Source category changes
+New tag locations added
+Tag wording rules
+Validation results
+Remaining limitations

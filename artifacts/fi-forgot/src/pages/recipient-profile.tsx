@@ -649,6 +649,11 @@ export default function RecipientProfilePage() {
                 <div>
                   <Label className="text-sm font-semibold" style={{ color: BLACK }}>
                     What are they like? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick up to 2)</span>
+                    {lastPersonalization?.sources.includes("personality") && (
+                      <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                        ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                      </span>
+                    )}
                   </Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {PERSONALITIES.map((p) => {
@@ -687,6 +692,11 @@ export default function RecipientProfilePage() {
                 <div>
                   <Label className="text-sm font-semibold" style={{ color: BLACK }}>
                     What do they love? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick all that fit)</span>
+                    {lastPersonalization?.sources.includes("interest") && (
+                      <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                        ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                      </span>
+                    )}
                   </Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {INTERESTS.map((item) => {
@@ -782,7 +792,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="personalityNotes" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional notes <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
+                    <FormLabel>
+                      Additional notes <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span>
+                      {lastPersonalization?.sources.includes("personality") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={3} placeholder="Anything else we should know — what makes her laugh, pet peeves, quirks…" data-testid="input-personality-notes" {...field} />
                     </FormControl>
@@ -825,7 +842,7 @@ export default function RecipientProfilePage() {
                   <FormItem>
                     <FormLabel>
                       Things to avoid
-                      {lastPersonalization?.sources.includes("tone") && (
+                      {lastPersonalization?.sources.includes("avoid") && (
                         <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
                           ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
                         </span>
@@ -1132,6 +1149,11 @@ export default function RecipientProfilePage() {
                 <div>
                   <Label className="text-sm font-semibold" style={{ color: BLACK }}>
                     What are they like? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick up to 2)</span>
+                    {lastPersonalization?.sources.includes("personality") && (
+                      <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                        ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                      </span>
+                    )}
                   </Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {PERSONALITIES.map((p) => {
@@ -1170,6 +1192,11 @@ export default function RecipientProfilePage() {
                 <div>
                   <Label className="text-sm font-semibold" style={{ color: BLACK }}>
                     What do they love? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick all that fit)</span>
+                    {lastPersonalization?.sources.includes("interest") && (
+                      <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                        ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                      </span>
+                    )}
                   </Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {INTERESTS.map((item) => {
@@ -1265,7 +1292,14 @@ export default function RecipientProfilePage() {
 
                 <FormField control={form.control} name="personalityNotes" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional notes <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span></FormLabel>
+                    <FormLabel>
+                      Additional notes <span className="font-normal text-xs" style={{ color: GRAY }}>(optional)</span>
+                      {lastPersonalization?.sources.includes("personality") && (
+                        <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
+                          ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={3} placeholder="Anything else we should know — what makes her laugh, pet peeves, quirks…" data-testid="input-personality-notes" {...field} />
                     </FormControl>
@@ -1308,7 +1342,7 @@ export default function RecipientProfilePage() {
                   <FormItem>
                     <FormLabel>
                       Things to avoid
-                      {lastPersonalization?.sources.includes("tone") && (
+                      {lastPersonalization?.sources.includes("avoid") && (
                         <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
                           ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
                         </span>
