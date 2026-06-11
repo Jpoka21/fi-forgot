@@ -5,80 +5,70 @@ const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
 const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
 
 const nextActions = [
-  { n: 2, label: "Answer follow-up about Steve's guitar lessons", chip: "2 min",        chipClr: SAGE     },
-  { n: 3, label: "Review Sarah's anniversary card draft",          chip: "Draft ready",  chipClr: "#D97706" },
+  { num: 2, text: "Answer follow-up about Steve's guitar lessons", chip: "2 min",       chipColor: SAGE      },
+  { num: 3, text: "Review Sarah's anniversary draft",              chip: "Draft ready", chipColor: "#B45309" },
 ];
 
-const TABS = [
-  { id: "today",   icon: "⚡", label: "Today"   },
-  { id: "people",  icon: "👥", label: "People"  },
-  { id: "moments", icon: "🗓", label: "Moments" },
-  { id: "settings",icon: "⚙️", label: "Settings"},
-];
+const navTabs = ["Today", "People", "Moments", "Settings"];
 
 export function Mobile() {
-  const [activeTab, setActiveTab] = useState("today");
+  const [activeTab, setActiveTab] = useState(0);
+  const [tapped, setTapped] = useState(false);
 
   return (
-    <div style={{ maxWidth: 390, margin: "0 auto", height: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", flexDirection: "column" as const, position: "relative" as const }}>
 
-      {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: 80 }}>
+      {/* Full-screen hero */}
+      <div style={{ background: BLACK, flex: "0 0 auto", minHeight: 480, display: "flex", flexDirection: "column" as const, padding: "22px 22px 28px", position: "relative" as const }}>
+        {/* Action chip */}
+        <span style={{ display: "inline-block", padding: "4px 11px", borderRadius: 20, background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.08em", marginBottom: "auto", alignSelf: "flex-start" as const }}>ACTION 1 OF 4</span>
 
-        {/* Hero action (full-width black card) */}
-        <div style={{ background: BLACK, padding: "32px 24px 36px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ background: RED, color: WHITE, padding: "5px 14px", borderRadius: 8, fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.1em", marginBottom: 24, alignSelf: "flex-start" }}>
-            ACTION 1 OF 4
-          </div>
-
-          <div style={{ fontSize: "4rem", marginBottom: 16 }}>🧢</div>
-
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: WHITE, lineHeight: 1.1, margin: "0 0 10px", letterSpacing: "0.03em", textAlign: "center" }}>
+        {/* Center content */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, justifyContent: "center", padding: "16px 0" }}>
+          <div style={{ fontSize: "3.5rem", textAlign: "center" as const, marginBottom: 16 }}>🧢</div>
+          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.1rem", letterSpacing: "0.04em", color: WHITE, lineHeight: 1.1, margin: "0 0 10px", textAlign: "center" as const }}>
             SEND MARCUS A<br />BIRTHDAY CARD
-          </h1>
-
-          <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "#ffffff70", margin: "0 0 28px", textAlign: "center" }}>
+          </h2>
+          <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: "rgba(255,255,255,0.6)", textAlign: "center" as const, margin: "0 0 24px" }}>
             Birthday · June 14 · 3 days
           </p>
-
-          <button style={{ width: "100%", height: 52, background: RED, color: WHITE, border: "none", borderRadius: 12, fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.04em", cursor: "pointer" }}>
-            Write His Card →
+          <button
+            onClick={() => setTapped(!tapped)}
+            style={{ width: "100%", padding: "16px 0", borderRadius: 14, border: "none", background: tapped ? `${SAGE}` : RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", letterSpacing: "0.07em", cursor: "pointer", boxShadow: tapped ? `0 4px 18px ${SAGE}55` : `0 4px 24px ${RED}66`, transition: "all 0.2s" }}>
+            {tapped ? "✓ DONE" : "Write His Card →"}
           </button>
-
-          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: "#ffffff30", marginTop: 16 }}>
-            swipe for next →
-          </div>
         </div>
 
-        {/* Next actions */}
-        <div style={{ padding: "20px 14px" }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: BLACK, letterSpacing: "0.06em", marginBottom: 12 }}>Up Next</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {nextActions.map((q, i) => (
-              <div key={i} style={{ background: WHITE, borderRadius: 13, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, border: `1.5px solid ${BORDER}` }}>
-                <div style={{ width: 30, height: 30, borderRadius: "50%", background: BLACK, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", flexShrink: 0 }}>
-                  {q.n}
-                </div>
-                <div style={{ flex: 1, fontSize: "0.85rem", color: BLACK, fontWeight: 600, lineHeight: 1.4 }}>{q.label}</div>
-                <span style={{ background: `${q.chipClr}1A`, color: q.chipClr, padding: "3px 9px", borderRadius: 20, fontSize: "0.7rem", fontWeight: 700, flexShrink: 0 }}>{q.chip}</span>
+        {/* Swipe hint */}
+        <div style={{ textAlign: "center" as const, marginTop: "auto" }}>
+          <span style={{ fontFamily: "'Caveat', cursive", fontSize: "0.9rem", color: "rgba(255,255,255,0.3)" }}>swipe for next →</span>
+        </div>
+      </div>
+
+      {/* Next actions */}
+      <div style={{ flex: 1, padding: "16px 14px", paddingBottom: 70 }}>
+        <p style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: GRAY, margin: "0 0 10px" }}>Up Next</p>
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+          {nextActions.map((a) => (
+            <div key={a.num} style={{ background: WHITE, borderRadius: 12, padding: "12px 14px", border: `1.5px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 26, height: 26, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", color: WHITE, lineHeight: 1 }}>{a.num}</span>
               </div>
-            ))}
-          </div>
+              <span style={{ flex: 1, fontSize: "0.8rem", color: BLACK }}>{a.text}</span>
+              <span style={{ padding: "2px 8px", borderRadius: 20, background: `${a.chipColor}15`, color: a.chipColor, fontSize: "0.64rem", fontWeight: 600, whiteSpace: "nowrap" as const }}>{a.chip}</span>
+            </div>
+          ))}
         </div>
-
       </div>
 
       {/* Bottom nav */}
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 390, background: BLACK, display: "flex", borderTop: `1px solid #333` }}>
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setActiveTab(t.id)}
-            style={{ flex: 1, background: "transparent", border: "none", padding: "12px 0 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }}>
-            <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
-            <span style={{ fontSize: "0.62rem", fontWeight: 700, color: activeTab === t.id ? RED : "#ffffff60", letterSpacing: "0.04em" }}>{t.label.toUpperCase()}</span>
+      <div style={{ position: "fixed" as const, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 390, background: BLACK, display: "flex", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        {navTabs.map((tab, i) => (
+          <button key={tab} onClick={() => setActiveTab(i)} style={{ flex: 1, padding: "12px 0 14px", background: "none", border: "none", cursor: "pointer" }}>
+            <span style={{ fontSize: "0.58rem", fontWeight: 600, color: activeTab === i ? RED : "rgba(255,255,255,0.45)", letterSpacing: "0.04em", textTransform: "uppercase" as const, display: "block" }}>{tab}</span>
           </button>
         ))}
       </div>
-
     </div>
   );
 }
