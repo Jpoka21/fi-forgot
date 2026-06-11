@@ -1,0 +1,176 @@
+Sprint 2A: Onboarding UX Blueprint
+
+Do not implement any code yet.
+
+The onboarding analysis is approved as a direction, but before development begins I want a complete screen-by-screen UX blueprint.
+
+Goal:
+
+Design the exact onboarding experience that gets a user to their first meaningful card as quickly as possible while still supporting long-term relationship database growth.
+
+This is a UX planning exercise only.
+
+Do not write code.
+
+Do not modify files.
+
+Do not implement.
+
+Part 1: Proposed User Journey
+
+Using the onboarding analysis, design the exact journey from:
+
+Landing Page
+→ Sign Up
+→ Onboarding
+→ First Card Draft
+→ First Approval
+→ Address Collection
+→ Dashboard
+
+Show every screen in order.
+
+For each screen include:
+
+Screen name
+Purpose
+Primary CTA
+Secondary CTA
+Estimated time on screen
+What data is collected
+What data is displayed
+
+Part 2: Detailed Screen Wireframes
+
+Create a text wireframe for every onboarding screen.
+
+Example format:
+
+Header
+
+Progress indicator
+
+Main headline
+
+Supporting text
+
+Fields
+
+Buttons
+
+Helper text
+
+Warnings
+
+Success states
+
+Loading states
+
+Use this level of detail for every screen.
+
+Part 3: Relationship Specific Memory Prompt Strategy
+
+The onboarding analysis identified the memory question as the highest impact field.
+
+Design relationship-specific prompts.
+
+Examples:
+
+Spouse
+Mom
+Dad
+Friend
+Sibling
+Employee
+Client
+
+For each relationship type provide:
+
+Primary prompt
+Fallback prompt
+Why it works better than a generic memory question
+
+Goal:
+
+Maximize the chance that users provide useful card fuel.
+
+Part 4: First Card Experience
+
+Design the exact first card screen.
+
+Include:
+
+What the user sees first
+Whether the card appears immediately or with a loading state
+What editing options exist
+What actions are available
+What should be hidden
+
+Specifically address:
+
+How to prevent users from endlessly tweaking cards.
+
+Part 5: Address Collection Experience
+
+Design exactly when and how the address is collected.
+
+Goal:
+
+Collect the address after value has been demonstrated but before momentum is lost.
+
+Include:
+
+Screen layout
+Copy
+Primary CTA
+Skip behavior if allowed
+
+Part 6: Post Card Expansion
+
+Design the screen shown immediately after first approval.
+
+Goal:
+
+Convert one recipient into multiple recipients.
+
+Include:
+
+Suggested prompts
+Suggested actions
+Additional events collection
+Additional recipient collection
+
+Determine which should be emphasized first.
+
+Part 7: Progressive Profiling Blueprint
+
+Map every field removed from onboarding.
+
+For each field specify:
+
+Where it will be collected
+How it will be surfaced
+Why that timing is better
+
+Part 8: Dashboard Impact
+
+Explain how the redesigned onboarding changes:
+
+First dashboard visit
+Relationship Health
+Recommended Next Step
+People growth
+
+Show any dashboard adjustments needed to support the new onboarding flow.
+
+Part 9: Final Recommendation
+
+Provide a complete onboarding blueprint that a designer and developer could build from without additional product decisions.
+
+Do not provide multiple options.
+
+Choose one direction and fully commit to it.
+
+Do not implement.
+
+This sprint should end with a finalized onboarding UX blueprint ready for development approval.
