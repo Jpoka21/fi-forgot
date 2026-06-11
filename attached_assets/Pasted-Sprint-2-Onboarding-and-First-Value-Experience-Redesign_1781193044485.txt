@@ -1,0 +1,122 @@
+Sprint 2: Onboarding and First Value Experience Redesign
+
+Do not implement immediately.
+
+First perform a UX and product analysis of the current onboarding flow and then propose a redesign.
+
+Goal:
+
+Reduce time-to-value dramatically while preserving card quality and preserving the long term recipient memory strategy.
+
+The objective is:
+
+A new user should experience the value of FiForgot and see a strong first card draft in approximately 2 minutes or less.
+
+Important constraints:
+
+Do not redesign the database.
+
+Do not redesign the question engine architecture.
+
+Do not redesign recipient memory storage.
+
+Do not redesign follow-up questions, fresh updates, Brownie Points, relationship health, pricing, billing, or Handwrytten integration.
+
+Assume those systems remain.
+
+We are redesigning the onboarding experience and the order in which information is collected.
+
+Part 1: Audit Current Onboarding
+
+Review the current onboarding flow and identify:
+
+1. Every screen shown to a new user
+2. Every field collected
+3. Which fields are required
+4. Which fields are optional
+5. Which fields directly improve first card quality
+6. Which fields are only useful later
+7. Estimated time required to complete onboarding
+8. Highest abandonment risk points
+
+Create a table showing:
+
+Field
+Required?
+Improves first card quality?
+Can be collected later?
+Recommendation
+
+Part 2: Define the Minimum Information Needed for a Great First Card
+
+Identify the smallest set of information required to generate a genuinely personal first card.
+
+Do not optimize for shortest onboarding.
+
+Optimize for strongest first impression.
+
+Recommend:
+
+Must Have
+Should Have
+Nice To Have Later
+
+For different relationship types if applicable.
+
+Part 3: Design a New First Time User Journey
+
+Propose a revised onboarding flow.
+
+The flow should:
+
+Get users to their first meaningful card draft quickly.
+
+Collect only information necessary for first value.
+
+Move lower value questions into progressive profiling after onboarding.
+
+Show the user value before asking for significant effort.
+
+For each onboarding step include:
+
+Step name
+Purpose
+Fields shown
+Estimated completion time
+Why this step exists
+
+Part 4: Progressive Profiling Strategy
+
+Design how the remaining questions should be collected after onboarding.
+
+Examples:
+
+After first card
+On recipient profile
+Via recommended next step
+Via relationship health suggestions
+Via fresh update prompts
+
+Show how profile completeness can continue growing without overwhelming the user.
+
+Part 5: Risk Analysis
+
+Identify:
+
+What information can safely be deferred
+What information must remain in onboarding
+Any risks to card quality
+Any risks to conversion
+Any implementation complexity
+
+Part 6: Recommendation
+
+Provide a final recommended onboarding experience.
+
+Do not write code.
+
+Do not implement.
+
+Provide a product and UX proposal only.
+
+The goal of this sprint is to agree on the onboarding redesign before any code changes are made.
