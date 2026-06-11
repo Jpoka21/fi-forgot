@@ -1,131 +1,173 @@
+// DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",CREAM="#FDF7EF";
+const BG="#F2E6D3", RED="#E23B2E", BLACK="#111111", SAGE="#5B8C6B", GRAY="#6B6B6B", BORDER="#E5E0D8", WHITE="#FFFFFF", CREAM="#FDF7EF";
 
-const queue=[
-  {emoji:"🤝",name:"Steve",event:"Birthday",days:3,action:"Approve card draft",priority:"high",ctaLabel:"Review Draft →"},
-  {emoji:"💛",name:"Mom",event:"Mother's Day surgery follow-up",days:0,action:"Check in after knee surgery",priority:"high",ctaLabel:"Log Update →"},
-  {emoji:"💍",name:"Sarah",event:"Anniversary",days:8,action:"Add anniversary date to profile",priority:"medium",ctaLabel:"Add Date →"},
-  {emoji:"👔",name:"Dad",event:"Father's Day",days:28,action:"Preview card early",priority:"low",ctaLabel:"Preview →"},
-];
-
-const people=[
-  {emoji:"🧢",name:"Marcus",health:38,color:RED,event:"Birthday",days:0},
-  {emoji:"🤝",name:"Steve",health:82,color:"#3b82f6",event:"Birthday",days:3},
-  {emoji:"👩",name:"Sarah",health:94,color:SAGE,event:"Anniversary",days:8},
-  {emoji:"💛",name:"Mom",health:71,color:"#f59e0b",event:"Mother's Day",days:15},
-  {emoji:"👔",name:"Dad",health:65,color:GRAY,event:"Father's Day",days:28},
-];
-
-function HealthRing({h,color}:{h:number,color:string}){
-  const r=22,c=Math.PI*2*r,fill=c*(h/100);
+function HealthRing({ h, size = 48, stroke = 4 }: { h: number, size?: number, stroke?: number }) {
+  const r = (size - stroke) / 2;
+  const c = Math.PI * 2 * r;
+  const fill = c * (h / 100);
   return (
-    <svg width={54} height={54}>
-      <circle cx={27} cy={27} r={r} fill="none" stroke={`${color}20`} strokeWidth={5}/>
-      <circle cx={27} cy={27} r={r} fill="none" stroke={color} strokeWidth={5}
-        strokeDasharray={`${fill} ${c-fill}`} strokeLinecap="round" transform="rotate(-90 27 27)"/>
-      <text x={27} y={32} textAnchor="middle" fontFamily="'Bebas Neue',cursive" fontSize={14} fill={color}>{h}</text>
-    </svg>
+    <div style={{ position: "relative", width: size, height: size }}>
+      <svg width={size} height={size}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`${SAGE}20`} strokeWidth={stroke} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={SAGE}
+          strokeWidth={stroke}
+          strokeDasharray={`${fill} ${c - fill}`}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </svg>
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, bottom: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "'Bebas Neue', cursive",
+        fontSize: size * 0.3,
+        color: SAGE
+      }}>
+        {h}%
+      </div>
+    </div>
   );
 }
 
 export function Dashboard() {
-  const [done,setDone]=useState(false);
+  const [done, setDone] = useState(false);
+
+  const nextActions = [
+    { id: 2, text: "Answer follow-up about Steve's guitar lessons", chip: "2 min", chipBg: SAGE, chipColor: WHITE },
+    { id: 3, text: "Review Sarah's anniversary card draft", chip: "Draft ready", chipBg: "#f59e0b", chipColor: WHITE },
+    { id: 4, text: "Add details for Mom's Mother's Day card", chip: "15 days", chipBg: GRAY, chipColor: WHITE },
+  ];
+
   return (
-    <div style={{background:BG,minHeight:"100vh",fontFamily:"'Plus Jakarta Sans',sans-serif",color:BLACK}}>
-      <div style={{background:BLACK,height:54,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 28px",position:"sticky",top:0,zIndex:10}}>
-        <div>
-          <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.45rem",color:RED,letterSpacing:"0.08em"}}>F.I. FORGOT</span>
-          <span style={{fontFamily:"'Caveat',cursive",fontSize:"0.9rem",color:"#ffffff50",marginLeft:12}}>we got your important people</span>
+    <div style={{ background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK }}>
+      {/* Nav */}
+      <nav style={{ background: BLACK, padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: RED, letterSpacing: "0.05em" }}>F.I. FORGOT</span>
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:"0.78rem",color:"#ffffff60",letterSpacing:"0.04em"}}>5 COVERED</span>
-          <div style={{width:30,height:30,borderRadius:"50%",background:RED,display:"flex",alignItems:"center",justifyContent:"center",color:WHITE,fontWeight:700,fontSize:"0.78rem"}}>M</div>
-        </div>
-      </div>
+        <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "#ffffff70" }}>We got your important people</span>
+      </nav>
 
-      <div style={{maxWidth:860,margin:"0 auto",padding:"28px 22px 48px"}}>
-
-        {/* HERO ACTION CARD */}
+      <main style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+        {/* Giant Hero Action Card */}
         <div style={{
-          background:done?`${SAGE}15`:BLACK,
-          borderRadius:20,padding:"30px 32px",marginBottom:28,
-          border:done?`2px solid ${SAGE}40`:"none",
-          boxShadow:done?"none":"0 8px 40px rgba(0,0,0,0.22)",
-          transition:"all 0.4s",
+          background: BLACK,
+          borderRadius: 24,
+          padding: "40px",
+          color: WHITE,
+          position: "relative",
+          marginBottom: 32,
+          boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
         }}>
-          {done
-            ? <div style={{textAlign:"center" as const,padding:"12px 0"}}>
-                <div style={{fontSize:"2.5rem",marginBottom:10}}>✅</div>
-                <div style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.8rem",color:SAGE,letterSpacing:"0.04em"}}>Done. We'll handle the rest.</div>
-                <div style={{fontFamily:"'Caveat',cursive",fontSize:"1.05rem",color:GRAY,marginTop:6}}>Next up: Steve's birthday in 3 days</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+            <div style={{ background: RED, color: WHITE, fontSize: "0.75rem", fontWeight: 700, padding: "4px 12px", borderRadius: 4, fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "0.05em" }}>
+              TODAY · ACTION 1 OF 4
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <HealthRing h={76} size={48} stroke={4} />
+              <span style={{ fontSize: "0.6rem", color: "#ffffff60", textTransform: "uppercase" }}>Ambient</span>
+            </div>
+          </div>
+
+          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", lineHeight: 1, margin: "0 0 8px", letterSpacing: "0.02em" }}>
+            SEND MARCUS A<br />BIRTHDAY CARD
+          </h1>
+          
+          <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.3rem", color: "#ffffff80", margin: "0 0 32px" }}>
+            Birthday · June 14 · 3 days away
+          </p>
+
+          <button 
+            onClick={() => setDone(!done)}
+            style={{
+              width: "100%",
+              height: 52,
+              background: RED,
+              color: WHITE,
+              border: "none",
+              borderRadius: 12,
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: "1.3rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              transition: "transform 0.1s"
+            }}
+            onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.98)"}
+            onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+          >
+            {done ? "CARD SENT! ✅" : "Write His Card →"}
+          </button>
+        </div>
+
+        {/* Next Actions Queue */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 40 }}>
+          {nextActions.map((action) => (
+            <div key={action.id} style={{
+              background: WHITE,
+              borderRadius: 16,
+              padding: "16px 20px",
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              cursor: "pointer",
+              border: "1px solid transparent"
+            }}
+            onMouseOver={(e) => e.currentTarget.style.borderColor = BORDER}
+            onMouseOut={(e) => e.currentTarget.style.borderColor = "transparent"}
+            >
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: BLACK,
+                color: WHITE,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                flexShrink: 0
+              }}>
+                {action.id}
               </div>
-            : <>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
-                  <div style={{background:`${RED}30`,borderRadius:6,padding:"3px 10px"}}>
-                    <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.78rem",color:RED,letterSpacing:"0.1em"}}>TODAY'S ACTION</span>
-                  </div>
-                  <div style={{flex:1,height:1,background:"#ffffff15"}}/>
-                  <HealthRing h={38} color={RED}/>
-                </div>
-                <div style={{display:"flex",gap:20,alignItems:"flex-start"}}>
-                  <div style={{fontSize:"3rem",lineHeight:1}}>🧢</div>
-                  <div style={{flex:1}}>
-                    <h2 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"2rem",color:WHITE,letterSpacing:"0.03em",margin:"0 0 6px",lineHeight:1.1}}>Send Marcus a Birthday Card</h2>
-                    <p style={{fontFamily:"'Caveat',cursive",fontSize:"1.1rem",color:"#ffffff80",margin:"0 0 20px",lineHeight:1.5}}>His birthday is today — 14 months since his last card. One click and we'll handle the rest.</p>
-                    <div style={{display:"flex",gap:10}}>
-                      <button onClick={()=>setDone(true)} style={{background:RED,color:WHITE,border:"none",borderRadius:11,padding:"13px 28px",fontFamily:"'Bebas Neue',cursive",fontSize:"1.1rem",letterSpacing:"0.06em",cursor:"pointer",boxShadow:`0 4px 20px ${RED}55`}}>
-                        DO IT NOW →
-                      </button>
-                      <button style={{background:"#ffffff12",color:"#ffffffcc",border:"1px solid #ffffff20",borderRadius:11,padding:"13px 20px",fontSize:"0.85rem",fontWeight:600,cursor:"pointer"}}>View card first</button>
-                    </div>
-                  </div>
-                </div>
-              </>
-          }
+              <div style={{ flex: 1, fontSize: "0.95rem", fontWeight: 500 }}>
+                {action.text}
+              </div>
+              <div style={{
+                background: action.chipBg,
+                color: action.chipColor,
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                padding: "4px 10px",
+                borderRadius: 99,
+                whiteSpace: "nowrap"
+              }}>
+                {action.chip}
+              </div>
+              <div style={{ color: GRAY, fontSize: "1.2rem" }}>→</div>
+            </div>
+          ))}
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 260px",gap:22,alignItems:"start"}}>
-          {/* Action queue */}
-          <div>
-            <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.35rem",letterSpacing:"0.04em",color:BLACK,margin:"0 0 14px"}}>Up Next</h3>
-            <div style={{display:"flex",flexDirection:"column" as const,gap:8}}>
-              {queue.map((q,i)=>(
-                <div key={i} style={{background:WHITE,borderRadius:13,padding:"14px 18px",border:`1.5px solid ${q.priority==="high"?`${RED}30`:BORDER}`,display:"flex",alignItems:"center",gap:14,cursor:"pointer"}}>
-                  <div style={{fontSize:"1.6rem",lineHeight:1}}>{q.emoji}</div>
-                  <div style={{flex:1}}>
-                    <div style={{fontWeight:700,fontSize:"0.9rem"}}>{q.name} — {q.event}</div>
-                    <div style={{fontSize:"0.8rem",color:GRAY,marginTop:2}}>{q.action}</div>
-                  </div>
-                  {q.days>0&&<span style={{fontSize:"0.72rem",fontWeight:700,color:q.days<=7?RED:GRAY,background:q.days<=7?`${RED}10`:`${BLACK}07`,padding:"2px 8px",borderRadius:99}}>{q.days}d</span>}
-                  <button style={{background:q.priority==="high"?"transparent":"transparent",color:RED,border:`1.5px solid ${RED}40`,borderRadius:8,padding:"6px 14px",fontSize:"0.78rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap" as const}}>
-                    {q.ctaLabel}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* People health sidebar */}
-          <div style={{background:WHITE,borderRadius:14,padding:"18px",border:`1px solid ${BORDER}`}}>
-            <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.1rem",letterSpacing:"0.05em",color:BLACK,margin:"0 0 14px"}}>Coverage</h3>
-            <div style={{display:"flex",flexDirection:"column" as const,gap:8}}>
-              {people.map((p,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:10}}>
-                  <span style={{fontSize:"1.2rem"}}>{p.emoji}</span>
-                  <div style={{flex:1}}>
-                    <div style={{fontWeight:700,fontSize:"0.85rem"}}>{p.name}</div>
-                    <div style={{height:3,borderRadius:99,background:`${BLACK}10`,marginTop:4,overflow:"hidden"}}>
-                      <div style={{width:`${p.health}%`,height:"100%",background:p.color,borderRadius:99}}/>
-                    </div>
-                  </div>
-                  <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"0.95rem",color:p.color}}>{p.health}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+        {/* Footer */}
+        <footer style={{ textAlign: "center", paddingBottom: 40 }}>
+          <p style={{ color: GRAY, fontSize: "0.75rem", letterSpacing: "0.02em" }}>
+            6 people · 5 healthy · 1 priority
+          </p>
+        </footer>
+      </main>
     </div>
   );
 }

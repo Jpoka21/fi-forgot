@@ -1,0 +1,184 @@
+Sprint 3A: AI Transparency & Question Feedback Loop UX Blueprint
+
+Do not write code.
+
+Do not implement anything.
+
+This is a UX and product design sprint only.
+
+Background:
+
+The Sprint 3 discovery audit identified the highest ROI opportunity remaining in FiForgot:
+
+Users provide memories, profile answers, fresh updates, and follow-up answers, but they rarely see how that information improved the card.
+
+The result:
+
+Users do not clearly understand:
+
+* Why a card is good
+* Which information was used
+* Why answering future questions matters
+
+Goal:
+
+Make the AI's work visible without exposing AI internals.
+
+The experience should feel human and relationship-focused, not technical.
+
+Part 1 — Current State Analysis
+
+Review the current card generation experience.
+
+Identify:
+
+What information the system already knows
+What information is already available during generation
+What information could be surfaced safely
+What should never be shown to users
+
+Specifically identify:
+
+Profile fields
+Memories
+Fresh updates
+Follow-up answers
+Briefing responses
+Relationship preferences
+
+Part 2 — Card Transparency Experience
+
+Design the experience shown alongside a generated card.
+
+Goal:
+
+Help users understand why the card feels personal.
+
+Do not use technical language.
+
+Do not expose prompts.
+
+Design:
+
+Headline
+Placement
+Visual hierarchy
+Copy
+
+Examples:
+
+"What we remembered"
+"Built from what you've shared"
+"Things we kept in mind"
+
+Choose one direction.
+
+Show exactly what the user sees.
+
+Include:
+
+Good examples
+Bad examples
+
+Part 3 — Question Feedback Loop
+
+Design how profile answers, fresh updates, and follow-up answers should show value after a card is generated.
+
+Goal:
+
+Answering questions should feel rewarding.
+
+Examples:
+
+Used in Sarah's Birthday Card
+Referenced in Anniversary Card
+Helped personalize Mother's Day Card
+
+Do not assume these are correct.
+
+Design the actual system.
+
+Show:
+
+Visual treatment
+Placement
+Timing
+Rules
+
+Part 4 — Pre-Generation Context Summary
+
+Before a card is generated, design a lightweight:
+
+"Here's what we know"
+
+experience.
+
+Goal:
+
+Allow users to add one more useful detail before generation.
+
+Show:
+
+Screen layout
+Copy
+CTA hierarchy
+When it appears
+When it should not appear
+
+Avoid creating friction.
+
+Part 5 — Dashboard Opportunities
+
+Evaluate whether any of this should appear on:
+
+Dashboard
+Recipient Profile
+Upcoming Moments
+Review Queue
+
+Specify exactly where visibility creates value.
+
+Avoid adding noise.
+
+Part 6 — Trust & Approval
+
+Design how transparency should increase:
+
+Trust
+Approval rates
+Question completion rates
+Profile completion rates
+
+Explain the behavioral loop.
+
+Goal:
+
+Question → Answer → Card → Visible Proof → More Answers
+
+Part 7 — Risks
+
+Identify:
+
+Information overload risks
+Privacy risks
+Guilt-inducing UX
+AI overexplanation
+Dashboard clutter
+
+Show how the design avoids these risks.
+
+Part 8 — Final Recommendation
+
+Provide one complete UX blueprint.
+
+Do not provide multiple options.
+
+Choose the single best implementation direction.
+
+Assume this blueprint will be handed directly to design and engineering.
+
+Do not write code.
+
+Do not implement.
+
+The output should be detailed enough that the next sprint can be an implementation sprint rather than another planning sprint.

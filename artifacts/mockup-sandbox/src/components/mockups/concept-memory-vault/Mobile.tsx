@@ -1,87 +1,139 @@
+// DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF";
-
-const feed=[
-  {emoji:"🧢",name:"Marcus",tag:"Life Update",tagColor:"#22c55e",date:"2d",text:"Marcus just got promoted to Senior Engineer. Long time coming.",followUp:"💌 Send congrats card",urgent:true},
-  {emoji:"💛",name:"Mom",tag:"Health",tagColor:"#ef4444",date:"4d",text:"Knee surgery went well. Home now, doing PT. Gets tired faster.",followUp:"📞 Check in this week",urgent:true},
-  {emoji:"🤝",name:"Steve",tag:"Hobby",tagColor:"#8b5cf6",date:"1w",text:"Steve started guitar lessons. Says he's terrible but loves it.",followUp:"💬 Ask how it's going",urgent:false},
-  {emoji:"👩",name:"Sarah",tag:"Family",tagColor:"#f59e0b",date:"2w",text:"Lily started kindergarten. Sarah seemed emotional about it.",followUp:null,urgent:false},
-];
-
-const navItems=[
-  {icon:"🏠",label:"Home"},
-  {icon:"👥",label:"People"},
-  {icon:"",label:"",fab:true},
-  {icon:"💌",label:"Cards"},
-  {icon:"⚙️",label:"Settings"},
-];
-
 export function Mobile() {
-  const [activeNav,setActiveNav]=useState(0);
+  const BG="#F2E6D3", RED="#E23B2E", BLACK="#111111", SAGE="#5B8C6B", GRAY="#6B6B6B", BORDER="#E5E0D8", WHITE="#FFFFFF", CREAM="#FDF7EF";
+
+  const entries = [
+    {
+      id: 1,
+      emoji: "🧢",
+      name: "Marcus",
+      text: "Got promoted to VP of Sales — big deal for him",
+      date: "2w",
+      followUp: true,
+      usedInCard: "Birthday Card"
+    },
+    {
+      id: 2,
+      emoji: "💛",
+      name: "Mom",
+      text: "Knee surgery went really well, recovering at home",
+      date: "1w",
+      followUp: false
+    },
+    {
+      id: 3,
+      emoji: "🤝",
+      name: "Steve",
+      text: "Started taking guitar lessons — always wanted to learn",
+      date: "3w",
+      followUp: true
+    },
+    {
+      id: 4,
+      emoji: "👩",
+      name: "Sarah",
+      text: "Her daughter just started kindergarten, emotional week",
+      date: "4w",
+      followUp: false
+    }
+  ];
+
   return (
-    <div style={{width:390,height:844,background:BG,fontFamily:"'Plus Jakarta Sans',sans-serif",color:BLACK,display:"flex",flexDirection:"column" as const,overflow:"hidden",position:"relative" as const,borderRadius:40,boxShadow:"0 8px 48px rgba(0,0,0,0.18)"}}>
-      <div style={{background:BLACK,padding:"14px 22px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.2rem",color:RED,letterSpacing:"0.08em"}}>F.I. FORGOT</span>
-        <span style={{fontSize:"0.72rem",color:"#ffffff55"}}>9:41 AM</span>
-      </div>
+    <div style={{ maxWidth: "390px", margin: "0 auto", background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK, position: "relative", paddingBottom: "80px" }}>
+      {/* Header */}
+      <header style={{ background: BLACK, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
+        <h1 style={{ fontFamily: "'Bebas Neue', cursive", color: WHITE, fontSize: "1.5rem", margin: 0, letterSpacing: "1px" }}>WHAT'S NEW</h1>
+        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: RED, display: "flex", alignItems: "center", justifyContent: "center", color: WHITE, fontWeight: "bold", fontSize: "0.8rem" }}>JD</div>
+      </header>
 
-      <div style={{flex:1,overflowY:"auto",padding:"18px 16px 80px"}}>
-        <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:16}}>
-          <h2 style={{fontFamily:"'Bebas Neue',cursive",fontSize:"1.7rem",letterSpacing:"0.04em",color:BLACK,margin:0}}>What's New</h2>
-          <span style={{fontFamily:"'Caveat',cursive",fontSize:"0.9rem",color:GRAY}}>2 follow-ups</span>
-        </div>
-
-        <div style={{display:"flex",flexDirection:"column" as const,gap:10}}>
-          {feed.map((item,i)=>(
-            <div key={i} style={{background:WHITE,borderRadius:14,padding:"15px 16px",border:`1px solid ${BORDER}`,boxShadow:"0 1px 5px rgba(0,0,0,0.04)"}}>
-              <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:8}}>
-                <div style={{fontSize:"1.45rem",lineHeight:1,marginTop:1}}>{item.emoji}</div>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                    <span style={{fontWeight:700,fontSize:"0.88rem"}}>{item.name}</span>
-                    <span style={{fontSize:"0.68rem",fontWeight:600,padding:"2px 7px",borderRadius:99,background:`${item.tagColor}18`,color:item.tagColor}}>{item.tag}</span>
-                    <span style={{marginLeft:"auto",fontSize:"0.7rem",color:GRAY}}>{item.date}</span>
-                  </div>
-                  <p style={{fontFamily:"'Caveat',cursive",fontSize:"1rem",color:BLACK,lineHeight:1.55,margin:0}}>{item.text}</p>
-                </div>
+      {/* Feed */}
+      <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+        {entries.map(entry => (
+          <div key={entry.id} style={{ 
+            background: WHITE, 
+            padding: "16px", 
+            borderRadius: "12px", 
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            border: `1px solid ${BORDER}`
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <div style={{ background: CREAM, padding: "2px 10px", borderRadius: "16px", display: "flex", alignItems: "center", gap: "6px", border: `1px solid ${BORDER}` }}>
+                <span>{entry.emoji}</span>
+                <span style={{ fontWeight: "700", fontSize: "0.8rem" }}>{entry.name}</span>
               </div>
-              {item.followUp && (
-                <div style={{
-                  padding:"7px 10px",borderRadius:8,
-                  background:item.urgent?`${RED}08`:`${BLACK}04`,
-                  border:`1px solid ${item.urgent?`${RED}25`:`${BLACK}10`}`,
-                  display:"flex",alignItems:"center",justifyContent:"space-between",
-                }}>
-                  <span style={{fontSize:"0.78rem",fontWeight:600,color:item.urgent?RED:BLACK}}>{item.followUp}</span>
-                  <span style={{fontSize:"0.76rem",color:item.urgent?RED:GRAY,cursor:"pointer",fontWeight:700}}>→</span>
-                </div>
+              <span style={{ color: GRAY, fontSize: "0.75rem" }}>{entry.date}</span>
+            </div>
+            
+            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.15rem", margin: "8px 0", lineHeight: "1.4" }}>
+              "{entry.text}"
+            </p>
+
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "12px" }}>
+              {entry.followUp && (
+                <span style={{ background: "#FFF4E5", color: "#B7791F", padding: "2px 6px", borderRadius: "4px", fontSize: "0.65rem", fontWeight: "700", border: "1px solid #F6AD55" }}>
+                  ↻ Follow-up
+                </span>
+              )}
+              {entry.usedInCard && (
+                <span style={{ background: `${SAGE}10`, color: SAGE, padding: "2px 6px", borderRadius: "4px", fontSize: "0.65rem", fontWeight: "700", border: `1px solid ${SAGE}30` }}>
+                  ✓ In Card
+                </span>
               )}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
       {/* FAB */}
-      <button style={{
-        position:"absolute" as const,right:20,bottom:82,
-        width:52,height:52,borderRadius:"50%",
-        background:RED,border:"none",
-        display:"flex",alignItems:"center",justifyContent:"center",
-        fontSize:"1.5rem",color:WHITE,cursor:"pointer",
-        boxShadow:`0 4px 18px ${RED}55`,
-      }}>+</button>
+      <button style={{ 
+        position: "fixed", 
+        bottom: "100px", 
+        right: "20px", 
+        width: "56px", 
+        height: "56px", 
+        background: RED, 
+        color: WHITE, 
+        border: "none", 
+        borderRadius: "50%", 
+        fontSize: "1.5rem", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center",
+        boxShadow: "0 4px 12px rgba(226, 59, 46, 0.4)",
+        cursor: "pointer",
+        zIndex: 20
+      }}>
+        ＋
+      </button>
 
-      <div style={{background:WHITE,borderTop:`1px solid ${BORDER}`,padding:"8px 6px 16px",display:"flex",justifyContent:"space-around",alignItems:"center",position:"absolute" as const,bottom:0,left:0,right:0}}>
-        {navItems.map((n,i)=>
-          n.fab
-            ? <div key={i} style={{width:48}}/>
-            : <button key={i} onClick={()=>setActiveNav(i)} style={{display:"flex",flexDirection:"column" as const,alignItems:"center",gap:2,background:"none",border:"none",cursor:"pointer",opacity:activeNav===i?1:0.4}}>
-                <span style={{fontSize:"1.2rem"}}>{n.icon}</span>
-                <span style={{fontSize:"0.6rem",fontWeight:700,color:activeNav===i?RED:GRAY}}>{n.label}</span>
-              </button>
-        )}
-      </div>
+      {/* Bottom Nav */}
+      <nav style={{ 
+        position: "fixed", 
+        bottom: 0, 
+        left: 0, 
+        right: 0, 
+        maxWidth: "390px", 
+        margin: "0 auto", 
+        background: BLACK, 
+        display: "flex", 
+        justifyContent: "space-around", 
+        padding: "12px 0 24px 0",
+        zIndex: 30
+      }}>
+        {[
+          { label: "Feed", icon: "📱", active: true },
+          { label: "People", icon: "👥" },
+          { label: "Moments", icon: "🗓️" },
+          { label: "Settings", icon: "⚙️" }
+        ].map((item, i) => (
+          <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", opacity: item.active ? 1 : 0.5 }}>
+            <span style={{ fontSize: "1.2rem" }}>{item.icon}</span>
+            <span style={{ color: item.active ? RED : WHITE, fontSize: "0.65rem", fontWeight: "600" }}>{item.label}</span>
+          </div>
+        ))}
+      </nav>
     </div>
   );
 }
