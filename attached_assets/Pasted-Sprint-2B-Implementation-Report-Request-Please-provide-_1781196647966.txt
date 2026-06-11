@@ -1,0 +1,133 @@
+Sprint 2B Implementation Report Request
+
+Please provide a detailed implementation report for Sprint 2B.
+
+Do not make new product changes yet.
+
+I need to review exactly what changed before approving any follow up sprint.
+
+Please include:
+
+1. Files Changed
+
+List every file changed.
+
+For each file include:
+What changed
+Why it changed
+Whether the change was frontend, backend, API, database, or styling
+
+2. Onboarding Flow Before and After
+
+Show the old onboarding flow in order.
+
+Show the new onboarding flow in order.
+
+Confirm whether the new flow is:
+
+Step 1: Who’s First?
+Step 2: What Are They Like?
+Step 3: One Real Thing
+Step 4: First Card Draft
+Address Collection
+Post Approval Expansion
+Dashboard first time state
+
+3. Field Collection Changes
+
+For every field that used to be collected during onboarding, show:
+
+Field name
+Collected before?
+Collected now?
+If removed, where it is collected later
+Whether existing saved data is preserved
+
+4. Card Generation Timing
+
+Explain exactly when card generation now starts.
+
+Confirm:
+It does not generate before Step 3 is submitted or skipped.
+It uses the Step 3 memory input when provided.
+The first card draft appears inside onboarding.
+Existing post onboarding card generation still works.
+
+5. First Card Screen
+
+Confirm:
+
+The primary CTA says “Approve This Draft”
+There is only one onboarding revision allowed
+Advanced tone controls are hidden
+Full line by line editing is hidden
+The user can save to dashboard without approving
+
+6. Address Collection
+
+Confirm:
+
+Address is collected only after draft approval
+Skip address is allowed
+If skipped, card is saved as approved awaiting address
+Dashboard shows an address nudge
+Existing address data is preserved
+
+7. Post Approval Expansion
+
+Confirm:
+
+Add Another Person is the primary CTA
+Additional occasions are offered as secondary actions
+Go to Dashboard is available
+The add another person flow works
+
+8. Dashboard First Time State
+
+Confirm:
+
+New users with one recipient and one draft or approved card see a positive success state
+Low health warnings are not shown immediately after onboarding
+If address is missing, recommended next step is to add address
+Existing returning users still see the normal dashboard
+
+9. Existing User Safety
+
+Confirm:
+
+Existing users can still log in
+Existing recipients still load
+Existing recipient profiles still work
+Existing card generation still works
+Existing briefing flow still works
+Existing card review queue still works
+Existing reminder settings still work
+
+10. APIs and Data
+
+List any API changes.
+
+List any database changes.
+
+If no database changes were made, say that clearly.
+
+Confirm no existing data was deleted or migrated destructively.
+
+11. Validation
+
+Report whether the following were run:
+
+Typecheck
+Lint
+Build
+Runtime smoke test
+Manual onboarding test
+Manual returning user test
+
+Include all errors, warnings, or skipped tests.
+
+12. Known Issues
+
+List anything still broken, confusing, risky, incomplete, or deferred.
+
+Please format this as a clear product and engineering report for review before any Sprint 2C cleanup or Sprint 3 dashboard work.
