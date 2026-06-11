@@ -1,0 +1,132 @@
+Sprint 2 Review Request: Onboarding Analysis Output
+
+Please provide the complete onboarding analysis requested in Sprint 2.
+
+Do not implement any onboarding changes yet.
+
+After completing the analysis, provide a final recommendation and decision document.
+
+I need the following:
+
+1. Current Onboarding Audit
+
+List every onboarding step in order.
+
+For each step include:
+
+Step name
+Fields collected
+Required vs optional
+Estimated completion time
+Purpose of the step
+
+2. Field Analysis
+
+For every field currently collected during onboarding, create a table showing:
+
+Field
+Required today?
+Improves first card quality?
+Required before first card generation?
+Can safely be collected later?
+Recommendation:
+Keep in onboarding
+Move to progressive profiling
+Remove entirely
+
+3. Card Quality Analysis
+
+Assume the goal is:
+
+A new user should see a strong personalized card draft within approximately 2 minutes.
+
+Analyze which onboarding fields contribute the most to:
+
+Card quality
+Personalization
+Emotional impact
+
+Rank them from highest impact to lowest impact.
+
+4. Friction Analysis
+
+Identify:
+
+Highest abandonment risk questions
+Most time consuming questions
+Questions users may not know how to answer
+Questions that create unnecessary effort before value is delivered
+
+Rank the top 10 friction points.
+
+5. Progressive Profiling Strategy
+
+For every field moved out of onboarding:
+
+Specify where it should be collected later.
+
+Examples:
+
+Recipient profile page
+Recommended Next Step
+Relationship Health suggestions
+Fresh Update questions
+After first card approval
+Reminder workflow
+
+6. Proposed New Onboarding Flow
+
+Design the complete recommended onboarding experience.
+
+For each step include:
+
+Step name
+Fields shown
+Estimated completion time
+Reason it exists
+
+Also estimate:
+
+Total onboarding time today
+Total onboarding time after redesign
+
+7. Risks
+
+Identify:
+
+Risks to card quality
+Risks to conversion
+Risks to database growth
+Risks to user trust
+
+Explain how the proposed onboarding flow addresses those risks.
+
+8. Final Recommendation
+
+Make a decision.
+
+Do not provide multiple possible onboarding options.
+
+Choose the single onboarding flow you believe is best for FiForgot based on:
+
+Fast first value
+Strong first card quality
+Long term relationship database growth
+
+9. Implementation Complexity
+
+Estimate:
+
+Low
+Medium
+High
+
+And explain which pages, components, and flows would need to change if we approve the redesign.
+
+Important:
+
+Do not write code.
+
+Do not implement.
+
+This should be a product recommendation and decision document that we can review before authorizing any onboarding changes.
