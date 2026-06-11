@@ -171,7 +171,7 @@ function RecipientCard({ score, isMobile }: { score: RecipientHealthScore; isMob
           </div>
           <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap" as const }}>
             <button
-              onClick={() => setLocation(`/recipients/${score.recipientId}?action=add-memory`)}
+              onClick={() => setLocation(`/recipients/${score.recipientId}?action=add-memory&from=dashboard`)}
               style={{
                 background: "none",
                 color:       SAGE,
