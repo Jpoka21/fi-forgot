@@ -169,23 +169,40 @@ function RecipientCard({ score, isMobile }: { score: RecipientHealthScore; isMob
               {score.recommendedAction}
             </div>
           </div>
-          <button
-            onClick={() => setLocation(actionDestination(score))}
-            style={{
-              background: cfg.color,
-              color:       WHITE,
-              border:      "none",
-              borderRadius: 8,
-              padding:     "7px 14px",
-              fontSize:    "0.78rem",
-              fontWeight:  700,
-              cursor:      "pointer",
-              whiteSpace:  "nowrap" as const,
-              flexShrink:  0,
-            }}
-          >
-            Take Action →
-          </button>
+          <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap" as const }}>
+            <button
+              onClick={() => setLocation(`/recipients/${score.recipientId}?action=add-memory`)}
+              style={{
+                background: "none",
+                color:       SAGE,
+                border:      `1.5px solid ${SAGE}50`,
+                borderRadius: 8,
+                padding:     "6px 12px",
+                fontSize:    "0.74rem",
+                fontWeight:  700,
+                cursor:      "pointer",
+                whiteSpace:  "nowrap" as const,
+              }}
+            >
+              + Memory
+            </button>
+            <button
+              onClick={() => setLocation(actionDestination(score))}
+              style={{
+                background: cfg.color,
+                color:       WHITE,
+                border:      "none",
+                borderRadius: 8,
+                padding:     "7px 14px",
+                fontSize:    "0.78rem",
+                fontWeight:  700,
+                cursor:      "pointer",
+                whiteSpace:  "nowrap" as const,
+              }}
+            >
+              Take Action →
+            </button>
+          </div>
         </div>
       </div>
     </div>

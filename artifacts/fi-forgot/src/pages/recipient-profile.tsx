@@ -17,6 +17,7 @@ import {
   getAge,
   getYearsTogether,
   getLastPersonalization,
+  getApiHeaders,
   Recipient,
   RecipientAddress,
   Relationship,
@@ -322,11 +323,51 @@ export default function RecipientProfilePage() {
   const [children, setChildren] = useState<Child[]>([]);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<"card-limit" | "recipient-limit">("recipient-limit");
+  const [memoryModalOpen, setMemoryModalOpen] = useState(false);
+  const [memoryText, setMemoryText] = useState("");
+  const [memorySaving, setMemorySaving] = useState(false);
+  const [memorySuccess, setMemorySuccess] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+
+  // Auto-open memory modal when navigated via ?action=add-memory
+  useEffect(() => {
+    const action = new URLSearchParams(window.location.search).get("action");
+    if (action === "add-memory" && !isNew) {
+      setMemoryModalOpen(true);
+    }
+  }, [isNew]);
 
   function openUpgrade(reason: "card-limit" | "recipient-limit") {
     setUpgradeReason(reason);
     setUpgradeOpen(true);
   }
+
+  async function saveQuickMemory() {
+    if (!memoryText.trim() || !existing) return;
+    const headers = getApiHeaders() as Record<string, string>;
+    if (!headers["x-user-id"]) return;
+    setMemorySaving(true);
+    try {
+      const res = await fetch(`/api/v2/recipients/${params.id}/answer-question`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          fieldKey:     "fresh_update_quick",
+          questionText: `What is something recent that happened with ${existing.name}?`,
+          answerText:   memoryText.trim(),
+          triggerType:  "fresh_update",
+        }),
+      });
+      if (res.ok) {
+        setMemoryModalOpen(false);
+        setMemoryText("");
+        setMemorySuccess(true);
+        window.dispatchEvent(new CustomEvent("recipient-answer-saved"));
+        setTimeout(() => setMemorySuccess(false), 3000);
+      }
+    } catch { /**/ } finally { setMemorySaving(false); }
+  }
+
   const { user, upgradePlan } = useAuth();
 
   const plan = (user?.plan ?? "basic") as Plan;
@@ -545,24 +586,46 @@ export default function RecipientProfilePage() {
         <div className="p-6 md:p-8 max-w-3xl mx-auto">
 
           {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <Link href={backTo}>
-              <button
-                className="p-2 rounded-xl hover:bg-white/50 transition-colors"
-                style={{ color: GRAY }}
-                data-testid="button-back-recipients"
-              >
-                <ArrowLeft size={18} />
-              </button>
-            </Link>
-            <div>
-              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>
-                {isNew ? "Add Recipient" : `Edit ${existing?.name ?? "Recipient"}`}
-              </h1>
-              <p className="text-sm mt-0.5" style={{ color: GRAY }}>
-                {isNew ? "The more we know, the better the cards get." : "Keep this profile current — we use everything you give us."}
-              </p>
-            </div>
+          <div className="mb-6">
+            {isNew ? (
+              <div className="flex items-center gap-3">
+                <Link href={backTo}>
+                  <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }} data-testid="button-back-recipients">
+                    <ArrowLeft size={18} />
+                  </button>
+                </Link>
+                <div>
+                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>Add Recipient</h1>
+                  <p className="text-sm mt-0.5" style={{ color: GRAY }}>The more we know, the better the cards get.</p>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Link href={backTo}>
+                    <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }} data-testid="button-back-recipients">
+                      <ArrowLeft size={18} />
+                    </button>
+                  </Link>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, margin: 0 }}>
+                    {existing?.name?.toUpperCase() ?? "RECIPIENT"}
+                  </h1>
+                  <span style={{ padding: "4px 13px", borderRadius: 20, background: `${BLACK}08`, fontSize: "0.82rem", fontWeight: 600, color: GRAY }}>
+                    {existing?.relationship}
+                  </span>
+                  {existing?.active === false ? (
+                    <span style={{ padding: "3px 10px", borderRadius: 20, background: `${RED}12`, fontSize: "0.72rem", fontWeight: 700, color: RED }}>Paused</span>
+                  ) : (
+                    <span style={{ padding: "3px 10px", borderRadius: 20, background: `${SAGE}12`, fontSize: "0.72rem", fontWeight: 700, color: SAGE }}>Active</span>
+                  )}
+                </div>
+                <p className="text-sm mt-1" style={{ color: GRAY }}>
+                  Your relationship memory — everything that helps us write better cards.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Paused banner */}
@@ -599,6 +662,57 @@ export default function RecipientProfilePage() {
             </div>
           )}
 
+          {/* ── Profile hub for existing recipients ──────────────────────── */}
+          {!isNew && existing && (
+            <>
+              {/* Add a Recent Memory CTA */}
+              <div style={{ marginBottom: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setMemoryModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold transition-all hover:opacity-90"
+                  style={{ background: SAGE, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.06em", cursor: "pointer", border: "none" }}
+                >
+                  + Add a Recent Memory
+                </button>
+                {memorySuccess && (
+                  <div className="mt-2 rounded-xl px-4 py-2 text-sm font-semibold text-center" style={{ background: `${SAGE}15`, color: SAGE }}>
+                    ✓ Memory saved — it'll help personalize the next card.
+                  </div>
+                )}
+              </div>
+
+              {/* Profile gap / fresh update / follow-up question */}
+              <div className="mb-4">
+                <ProfileQuestionCard recipientId={params.id} />
+              </div>
+
+              {/* Relationship timeline */}
+              <div className="mb-4">
+                <RelationshipTimeline recipientId={params.id} />
+              </div>
+
+              {/* Edit Profile Details collapsible toggle */}
+              <div className="mb-5">
+                <button
+                  type="button"
+                  onClick={() => setFormOpen(o => !o)}
+                  className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl transition-all hover:opacity-80"
+                  style={{ background: `${BLACK}07`, border: `1px solid ${BLACK}12`, cursor: "pointer" }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Settings size={14} style={{ color: GRAY }} />
+                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", color: BLACK }}>Edit Profile Details</span>
+                    <span className="text-xs" style={{ color: GRAY }}>— events, tone, delivery, address</span>
+                  </div>
+                  {formOpen ? <ChevronUp size={14} style={{ color: GRAY }} /> : <ChevronDown size={14} style={{ color: GRAY }} />}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Profile form — always shown for new recipients, collapsible for existing */}
+          {(isNew || formOpen) && (<>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
@@ -1401,21 +1515,55 @@ export default function RecipientProfilePage() {
             </div>
           )}
 
-          {/* Profile gap question — help us write better cards */}
-          {!isNew && (
-            <div className="mt-5">
-              <ProfileQuestionCard recipientId={params.id} />
-            </div>
-          )}
-
-          {/* Relationship Timeline — chronological history of everything we know */}
-          {!isNew && existing && (
-            <div className="mt-5">
-              <RelationshipTimeline recipientId={params.id} />
-            </div>
-          )}
+          </>)} {/* end (isNew || formOpen) collapsible */}
         </div>
       </div>
+
+      {/* Add a Recent Memory modal */}
+      {memoryModalOpen && (
+        <div
+          onClick={() => setMemoryModalOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "#fff", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, padding: "24px 24px 40px" }}
+          >
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, marginBottom: 4, letterSpacing: "0.04em" }}>
+              Add a Recent Memory
+            </div>
+            <p className="text-sm mb-4" style={{ color: GRAY }}>
+              What is something recent that happened with {existing?.name}?
+            </p>
+            <textarea
+              value={memoryText}
+              onChange={e => setMemoryText(e.target.value)}
+              placeholder="Got promoted, started a new hobby, mentioned something funny…"
+              rows={4}
+              className="w-full rounded-xl border text-sm resize-none px-3 py-2.5 focus:outline-none"
+              style={{ borderColor: `${SAGE}50`, fontFamily: "'Inter', sans-serif", boxSizing: "border-box" as const }}
+            />
+            <div className="flex gap-3 mt-3">
+              <button
+                type="button"
+                onClick={() => { setMemoryModalOpen(false); setMemoryText(""); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                style={{ background: `${BLACK}08`, color: GRAY, border: "none", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveQuickMemory}
+                disabled={memorySaving || !memoryText.trim()}
+                style={{ flex: 2, padding: "10px", borderRadius: 12, border: "none", background: !memoryText.trim() ? `${BLACK}20` : SAGE, color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: !memoryText.trim() || memorySaving ? "not-allowed" : "pointer" }}
+              >
+                {memorySaving ? "Saving…" : "Save Memory"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upgrade modal */}
       {upgradeOpen && (

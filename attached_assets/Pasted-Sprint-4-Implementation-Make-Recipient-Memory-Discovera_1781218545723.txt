@@ -1,0 +1,217 @@
+Sprint 4 Implementation: Make Recipient Memory Discoverable
+
+Use the audit findings.
+
+Do not rebuild the memory system.
+Do not create new tables.
+Do not create a new score.
+Do not create additional recommendation systems.
+Do not create additional dashboard data sources.
+
+Goal:
+
+Make FiForgot feel like a relationship memory system, not a profile editor.
+
+The audit showed that many of the strongest features already exist:
+
+* Fresh Updates
+* Follow Up Questions
+* Relationship Timeline
+* Relationship Health
+* Recommended Actions
+* Profile Completeness
+
+The problem is discoverability and presentation, not missing infrastructure.
+
+Priority 1: Redesign Recipient Profile as Relationship Hub
+
+Update /recipients/:id so it no longer feels like a giant edit form.
+
+The profile page should become the primary destination for relationship management.
+
+New page hierarchy:
+
+1. Person Header
+
+Show:
+
+* Recipient name prominently
+* Relationship type
+* Next upcoming event
+* Last recent memory date
+* Current health status label
+
+The page should feel centered around the person.
+
+Do not lead with “Edit [Name]”.
+
+2. Primary Action Area
+
+Add a prominent button:
+
+“Add a Recent Memory”
+
+When clicked:
+
+Prompt:
+
+“What is something recent that happened with [Name]?”
+
+Save using the existing fresh_update flow.
+
+After save:
+
+* schedule existing follow up question
+* refresh timeline
+* refresh health score
+* refresh recommended actions
+* show success confirmation
+
+Do not create a new update system.
+
+3. Move ProfileQuestionCard Near the Top
+
+Keep existing functionality:
+
+* profile gap questions
+* fresh update prompts
+* follow up questions
+
+This component is already working and should remain the primary guided experience.
+
+4. Elevate the Relationship Timeline
+
+Move RelationshipTimeline above the detailed profile editing form.
+
+Users should be able to discover memories, follow ups, briefings, and card history without scrolling through the entire edit experience.
+
+5. Collapse Detailed Profile Editing
+
+The profile editor should become secondary.
+
+Place detailed profile fields inside:
+
+“Edit Profile Details”
+
+Use a collapsible section, tab, or similar pattern.
+
+The default experience should focus on:
+
+* memories
+* timeline
+* follow ups
+* next actions
+* relationship context
+
+Priority 2: Dashboard Simplification
+
+People should become the hero of the dashboard.
+
+Move RelationshipHealthSection significantly higher on the page.
+
+It should appear before Wins and We Got Your Back.
+
+Autopilot Settings should not be the first major dashboard element.
+
+Move it lower or collapse it more aggressively.
+
+Do not remove Wins or We Got Your Back during this sprint.
+
+Instead:
+
+* reduce their visual weight
+* move them lower if appropriate
+* provide a recommendation afterward on whether they should be merged, simplified, or removed
+
+The dashboard should clearly answer:
+
+1. Who needs me?
+2. Why?
+3. What should I do next?
+
+Avoid introducing additional widgets.
+
+Priority 3: Add Recent Memory Entry Point from Dashboard
+
+Within RelationshipHealthSection recipient cards, add:
+
+“Add a Recent Memory”
+
+This should:
+
+* open the recipient profile with memory entry focused
+    or
+* open a lightweight memory entry modal
+
+Reuse the existing fresh_update workflow.
+
+Do not create duplicate functionality.
+
+Priority 4: Improve Event Guidance Without New Scores
+
+Do not create a separate Card Readiness score.
+
+Do not introduce another percentage, grade, or rating.
+
+Instead improve recommended action language.
+
+Examples:
+
+Instead of:
+“Prepare Birthday Card”
+
+Use:
+“Birthday coming up. Add one recent memory first.”
+
+Or:
+
+“Birthday card is ready to draft.”
+
+Use simple language that helps users understand readiness without introducing another metric.
+
+Priority 5: Architecture Protection
+
+Do not migrate schemas.
+
+Do not move to recipients_v2.
+
+Do not activate recipient_memory.
+
+Do not create new storage patterns.
+
+Add documentation clarifying:
+
+Current production path:
+
+* recipients
+* recipient_profile
+* question_answers
+* follow_up_questions
+* personal_cards
+
+Currently unused:
+
+* recipients_v2
+* recipient_memory
+
+Also ensure Sprint 4 does not introduce any additional scoring systems, recommendation systems, or dashboard data sources.
+
+Acceptance Criteria
+
+* Recipient profile feels like a relationship hub rather than a profile editor.
+* Timeline is visible without scrolling through the full edit form.
+* Users can easily add a recent memory from the profile page.
+* Users can begin adding a recent memory from the dashboard.
+* Existing fresh update workflows continue to function.
+* Existing follow up scheduling continues to function.
+* Existing timeline functionality continues to function.
+* Existing card generation continues to function.
+* RelationshipHealthSection becomes more prominent.
+* Autopilot settings no longer dominate the top of the dashboard.
+* Wins and We Got Your Back remain present but de-emphasized.
+* No new database tables.
+* No duplicate memory systems.
+* No new health scores.
+* No new readiness scores.
+* No schema migration.
+* No additional scoring or recommendation engines.

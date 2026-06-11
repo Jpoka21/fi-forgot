@@ -60,14 +60,27 @@ function recommendedAction(
   nextEventLabel: string | null,
   hasRecentCard: boolean,
 ): { label: string; type: "profile" | "follow_up" | "fresh_update" | "card" | "review" } {
-  if (profilePct < 50)                               return { label: "Complete profile",            type: "profile"      };
-  if (hasOverdueFollowUp)                            return { label: "Answer follow-up question",   type: "follow_up"    };
-  if (nextEventDays !== null && nextEventDays <= 30) return { label: `Prepare ${nextEventLabel ?? "upcoming"} card`, type: "card" };
-  if (lastUpdateDays === null || lastUpdateDays > 90) return { label: "Add a fresh update",          type: "fresh_update" };
-  if (hasPendingFollowUp)                            return { label: "Answer follow-up question",   type: "follow_up"    };
-  if (nextEventDays !== null && nextEventDays <= 60) return { label: `Prepare ${nextEventLabel ?? "upcoming"} card`, type: "card" };
-  if (!hasRecentCard)                                return { label: "Review recent activity",      type: "review"       };
-  return                                                    { label: "Review recent activity",      type: "review"       };
+  if (profilePct < 50)
+    return { label: "Fill in the basics so we can write good cards.", type: "profile" };
+  if (hasOverdueFollowUp)
+    return { label: "You mentioned something earlier — any update?", type: "follow_up" };
+  if (nextEventDays !== null && nextEventDays <= 30) {
+    const ev = nextEventLabel ?? "Upcoming event";
+    const hasUpdate = lastUpdateDays !== null && lastUpdateDays <= 90;
+    return { label: hasUpdate ? `${ev} card is ready to draft.` : `${ev} coming up — add one recent memory first.`, type: "card" };
+  }
+  if (lastUpdateDays === null || lastUpdateDays > 90)
+    return { label: "It's been a while — share what's new.", type: "fresh_update" };
+  if (hasPendingFollowUp)
+    return { label: "You mentioned something earlier — any update?", type: "follow_up" };
+  if (nextEventDays !== null && nextEventDays <= 60) {
+    const ev = nextEventLabel ?? "Upcoming event";
+    const hasUpdate = lastUpdateDays !== null && lastUpdateDays <= 90;
+    return { label: hasUpdate ? `${ev} card is ready to draft.` : `${ev} coming up — add one recent memory first.`, type: "card" };
+  }
+  if (!hasRecentCard)
+    return { label: "Everything looks good — review recent activity.", type: "review" };
+  return { label: "Everything looks good — review recent activity.", type: "review" };
 }
 
 export interface RecipientHealthScore {

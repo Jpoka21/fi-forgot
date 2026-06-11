@@ -309,7 +309,7 @@ export default function DashboardPage() {
     <div style={{ minHeight: "100vh", background: BEIGE, fontFamily: "'Inter', sans-serif", color: INK }}>
 
       {/* ── Settings strip ─────────────────────────────────────────────── */}
-      <div style={{ background: `${INK}04`, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ background: `${INK}02` }}>
         <button onClick={() => setSettingsOpen(o => !o)}
           style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: `9px ${px}px`, background: "none", border: "none", cursor: "pointer" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -499,7 +499,7 @@ export default function DashboardPage() {
         {recipients.length > 0 && !isFirstTimeState && (
           <>
             {/* Page greeting */}
-            <div style={{ marginBottom: 14 }}>
+            <div style={{ marginBottom: 20 }}>
               <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.8rem" : "2.2rem", letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1 }}>
                 Your Important People
               </h1>
@@ -508,22 +508,9 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* ── WE GOT YOUR BACK strip ────────────────────────────────── */}
-            <div style={{ background: INK, borderRadius: 12, padding: isMobile ? "10px 14px" : "10px 20px", marginBottom: 20, color: WHITE, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" as const }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", color: WHITE, flexShrink: 0 }}>WE GOT YOUR BACK</div>
-              <div style={{ width: 1, height: 16, background: `${WHITE}25`, flexShrink: 0 }} />
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "4px 18px", flex: 1 }}>
-                {weGotYourBack.map((line, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                    {line.good
-                      ? <CheckCircle2 size={11} style={{ color: SAGE, flexShrink: 0 }} />
-                      : <div style={{ width: 11, height: 11, borderRadius: "50%", border: `2px solid ${RED}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <span style={{ fontSize: "0.42rem", fontWeight: 900, color: RED }}>!</span>
-                        </div>}
-                    <span style={{ fontSize: "0.75rem", color: line.good ? `${WHITE}75` : "#fca5a5", fontWeight: line.good ? 400 : 600 }}>{line.text}</span>
-                  </div>
-                ))}
-              </div>
+            {/* ── RELATIONSHIP HEALTH — hero position ───────────────────── */}
+            <div style={{ marginBottom: 32 }}>
+              <RelationshipHealthSection isMobile={isMobile} />
             </div>
 
             {/* ── Single-column layout ──────────────────────────────────── */}
@@ -666,6 +653,22 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {/* ── WE GOT YOUR BACK — compact status ─────────────── */}
+              {weGotYourBack.length > 0 && (
+                <div style={{ marginBottom: 16, display: "flex", alignItems: "center", flexWrap: "wrap" as const, gap: "6px 16px", padding: "9px 14px", background: WHITE, borderRadius: 10, border: `1px solid ${BORDER}` }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.1em", color: MID, flexShrink: 0 }}>WE GOT YOUR BACK</span>
+                  <div style={{ width: 1, height: 12, background: `${INK}15`, flexShrink: 0 }} />
+                  {weGotYourBack.map((line, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      {line.good
+                        ? <CheckCircle2 size={10} style={{ color: SAGE, flexShrink: 0 }} />
+                        : <span style={{ fontSize: "0.55rem", fontWeight: 900, color: RED }}>!</span>}
+                      <span style={{ fontSize: "0.72rem", color: line.good ? MID : RED, fontWeight: line.good ? 400 : 600 }}>{line.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* ── QUICK CARD placeholder ─────────────────────────── */}
               <div style={{ marginBottom: 24 }}>
                 <div style={{ background: WHITE, borderRadius: 10, padding: "11px 16px", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 11 }}>
@@ -676,37 +679,6 @@ export default function DashboardPage() {
                   </div>
                   <span style={{ display: "inline-block", background: `${INK}07`, color: MID, borderRadius: 20, padding: "3px 11px", fontSize: "0.66rem", fontWeight: 700, letterSpacing: "0.08em", flexShrink: 0 }}>COMING SOON</span>
                 </div>
-              </div>
-
-              {/* ── RELATIONSHIP INSIGHTS ──────────────────────────── */}
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ marginBottom: 8 }}>
-                  <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.03em", color: MID, margin: 0, lineHeight: 1, fontWeight: 400 }}>Relationship Insights</h3>
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginBottom: 12 }}>
-                  {momentsAtRisk > 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${RED}10`, borderRadius: 20, padding: "6px 13px", fontSize: "0.8rem", fontWeight: 600, color: RED }}>
-                      ⚠ {momentsAtRisk} moment{momentsAtRisk !== 1 ? "s" : ""} need{momentsAtRisk === 1 ? "s" : ""} attention
-                    </div>
-                  )}
-                  {health.recipientHealths.filter(r => r.score < 45).length > 0 && (() => {
-                    const n = health.recipientHealths.filter(r => r.score < 45).length;
-                    return (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${SAGE}12`, borderRadius: 20, padding: "6px 13px", fontSize: "0.8rem", fontWeight: 600, color: SAGE }}>
-                        👥 {n} {n === 1 ? "person needs" : "people need"} updates
-                      </div>
-                    );
-                  })()}
-                  {(() => {
-                    const n = allUpcomingEvents.filter(e => e.daysAway <= 14 && !e.briefingDone).length;
-                    return n > 0 ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: `${INK}07`, borderRadius: 20, padding: "6px 13px", fontSize: "0.8rem", fontWeight: 600, color: INK }}>
-                        📅 {n} upcoming event{n !== 1 ? "s" : ""} {n === 1 ? "needs" : "need"} attention
-                      </div>
-                    ) : null;
-                  })()}
-                </div>
-                <RelationshipHealthSection isMobile={isMobile} />
               </div>
 
               {/* ── Bottom row: Recommended Next Step + Plan/Score ─── */}
