@@ -1,97 +1,85 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
-const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
+const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",CREAM="#FDF7EF";
 
-const cards = [
-  { id: 1, days: 3,  emoji: "🤝", name: "Steve",  event: "Birthday",     date: "Jun 14", urgent: true },
-  { id: 2, days: 8,  emoji: "👩", name: "Sarah",  event: "Anniversary",  date: "Jun 19", urgent: false },
-  { id: 3, days: 15, emoji: "💛", name: "Mom",    event: "Mother's Day", date: "Jun 26", urgent: false },
-  { id: 4, days: 22, emoji: "🧢", name: "Marcus", event: "Just Because", date: "Jul 3",  urgent: false },
+const cards=[
+  {name:"Steve",event:"Birthday",date:"Jun 14",days:3,emoji:"🤝",urgent:true},
+  {name:"Sarah",event:"Anniversary",date:"Jun 19",days:8,emoji:"👩",urgent:false},
+  {name:"Mom",event:"Mother's Day",date:"Jun 26",days:15,emoji:"💛",urgent:false},
+  {name:"Marcus",event:"Just Because",date:"Jul 3",days:22,emoji:"🧢",urgent:false},
+  {name:"Dad",event:"Father's Day",date:"Jul 9",days:28,emoji:"👔",urgent:false},
 ];
-
-const people = [
-  { emoji: "🤝", name: "Steve",  rel: "Friend",  nextDays: 3  },
-  { emoji: "👩", name: "Sarah",  rel: "Sister",  nextDays: 8  },
-  { emoji: "💛", name: "Mom",    rel: "Mother",  nextDays: 15 },
-  { emoji: "🧢", name: "Marcus", rel: "Friend",  nextDays: 22 },
-  { emoji: "👔", name: "Dad",    rel: "Father",  nextDays: 28 },
-  { emoji: "💼", name: "Jenny",  rel: "Client",  nextDays: 45 },
+const people=[
+  {emoji:"🤝",name:"Steve",rel:"Friend",next:3},
+  {emoji:"👩",name:"Sarah",rel:"Sister",next:8},
+  {emoji:"💛",name:"Mom",rel:"Mother",next:15},
+  {emoji:"🧢",name:"Marcus",rel:"Friend",next:22},
+  {emoji:"👔",name:"Dad",rel:"Father",next:28},
 ];
-
-const navTabs = [
-  { icon: "🗓", label: "Moments" },
-  { icon: "👥", label: "People" },
-  { icon: "💌", label: "Cards" },
-  { icon: "⚙️", label: "Settings" },
+const navItems=[
+  {icon:"🗓",label:"Moments",active:true},
+  {icon:"👥",label:"People",active:false},
+  {icon:"💌",label:"Cards",active:false},
+  {icon:"⚙️",label:"Settings",active:false},
 ];
 
 export function Mobile() {
-  const [activeTab, setActiveTab] = useState(0);
-
+  const [activeTab,setActiveTab]=useState(0);
   return (
-    <div style={{ width: 390, minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", position: "relative", margin: "0 auto", overflowX: "hidden" }}>
-
+    <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",background:BG,minHeight:"100vh",maxWidth:390,margin:"0 auto",display:"flex",flexDirection:"column",position:"relative"}}>
       {/* Header */}
-      <div style={{ background: BLACK, padding: "14px 18px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.45rem", color: RED, letterSpacing: "0.06em" }}>F.I. FORGOT</span>
-        <span style={{ background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.06em", padding: "3px 10px", borderRadius: 6 }}>30 DAYS</span>
+      <div style={{background:BLACK,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px",flexShrink:0}}>
+        <span style={{fontFamily:"'Bebas Neue',cursive",color:RED,fontSize:24,letterSpacing:1}}>F.I. FORGOT</span>
+        <span style={{background:RED,color:WHITE,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,letterSpacing:0.5}}>30 DAYS</span>
       </div>
 
-      <div style={{ padding: "18px 0 100px" }}>
-
-        {/* Horizontal scroll moment cards */}
-        <div style={{ paddingLeft: 16, marginBottom: 28 }}>
-          <div style={{ fontSize: "0.62rem", fontWeight: 700, color: GRAY, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 10, paddingRight: 16 }}>Upcoming</div>
-          <div style={{ display: "flex", gap: 12, overflowX: "auto" as const, paddingRight: 24, scrollbarWidth: "none" as const }}>
-            {cards.map(c => (
-              <div key={c.id} style={{
-                minWidth: 200, background: WHITE, borderRadius: 16,
-                padding: "14px 16px", border: c.urgent ? `2px solid ${RED}` : `1.5px solid ${BORDER}`,
-                boxShadow: c.urgent ? `0 4px 16px ${RED}22` : "0 2px 8px rgba(0,0,0,0.06)",
-                flexShrink: 0,
+      {/* Scrollable content */}
+      <div style={{flex:1,overflowY:"auto",paddingBottom:72}}>
+        {/* Horizontal cards */}
+        <div style={{padding:"20px 0 4px"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px",marginBottom:12}}>
+            <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:16,letterSpacing:1}}>NEXT UP</span>
+            <span style={{color:GRAY,fontSize:11}}>5 moments</span>
+          </div>
+          <div style={{display:"flex",gap:12,overflowX:"auto",padding:"4px 20px 16px",scrollbarWidth:"none"}}>
+            {cards.map((c,i)=>(
+              <div key={i} style={{
+                minWidth:260,background:WHITE,borderRadius:16,padding:"16px",flexShrink:0,
+                border:c.urgent?`2px solid ${RED}`:`1px solid ${BORDER}`,
+                boxShadow:c.urgent?"0 3px 14px rgba(226,59,46,0.13)":"0 1px 6px rgba(0,0,0,0.05)",
               }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <div style={{
-                    padding: "4px 10px", borderRadius: 8,
-                    background: c.urgent ? RED : CREAM,
-                    border: c.urgent ? "none" : `1px solid ${BORDER}`,
-                  }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: c.urgent ? WHITE : BLACK }}>{c.days}</span>
-                    <span style={{ fontSize: "0.55rem", color: c.urgent ? `${WHITE}80` : GRAY, marginLeft: 3, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>days</span>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                  <div style={{background:c.urgent?RED:CREAM,color:c.urgent?WHITE:BLACK,borderRadius:8,padding:"4px 10px",display:"flex",alignItems:"center",gap:4}}>
+                    <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:18,lineHeight:1}}>{c.days}</span>
+                    <span style={{fontSize:9,textTransform:"uppercase",fontWeight:700,opacity:0.8}}>days</span>
                   </div>
+                  <span style={{fontSize:32}}>{c.emoji}</span>
                 </div>
-                <div style={{ fontSize: "2rem", marginBottom: 8 }}>{c.emoji}</div>
-                <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK }}>{c.name}</div>
-                <div style={{ fontSize: "0.78rem", color: GRAY, marginTop: 2 }}>{c.event}</div>
-                <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 2 }}>{c.date}</div>
+                <div style={{fontWeight:700,fontSize:16}}>{c.name}</div>
+                <div style={{color:GRAY,fontSize:13,marginTop:2}}>{c.event}</div>
+                <div style={{color:GRAY,fontSize:12,marginTop:1}}>{c.date}</div>
               </div>
             ))}
-            {/* Peek indicator */}
-            <div style={{ minWidth: 40, flexShrink: 0 }} />
           </div>
         </div>
 
-        {/* Your People list */}
-        <div style={{ padding: "0 16px" }}>
-          <div style={{ fontSize: "0.62rem", fontWeight: 700, color: GRAY, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 10 }}>Your People</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {people.map(p => (
-              <div key={p.name} style={{ background: WHITE, borderRadius: 12, padding: "11px 14px", border: `1.5px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 38, height: 38, borderRadius: "50%", background: CREAM, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>{p.emoji}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.85rem", color: BLACK }}>{p.name}</div>
-                  <div style={{ fontSize: "0.68rem", color: GRAY, marginTop: 1 }}>{p.rel}</div>
+        {/* People list */}
+        <div style={{padding:"4px 20px"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+            <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:16,letterSpacing:1}}>YOUR PEOPLE</span>
+            <span style={{color:SAGE,fontSize:12,fontWeight:600}}>See all</span>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {people.map(p=>(
+              <div key={p.name} style={{background:WHITE,borderRadius:12,padding:"12px 16px",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
+                <div style={{fontSize:24}}>{p.emoji}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,fontSize:14}}>{p.name}</div>
+                  <div style={{color:GRAY,fontSize:12}}>{p.rel}</div>
                 </div>
-                <div style={{
-                  padding: "3px 10px", borderRadius: 20,
-                  background: p.nextDays <= 7 ? `${RED}12` : `${BLACK}08`,
-                  border: `1px solid ${p.nextDays <= 7 ? `${RED}40` : BORDER}`,
-                  fontSize: "0.68rem", fontWeight: 700,
-                  color: p.nextDays <= 7 ? RED : GRAY,
-                }}>
-                  {p.nextDays}d
+                <div style={{background:p.next<=7?RED+"15":CREAM,color:p.next<=7?RED:GRAY,borderRadius:20,padding:"4px 10px",fontSize:11,fontWeight:700}}>
+                  {p.next}d
                 </div>
               </div>
             ))}
@@ -100,15 +88,11 @@ export function Mobile() {
       </div>
 
       {/* Bottom nav */}
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: 390, background: BLACK, display: "flex", borderTop: `1px solid ${WHITE}10` }}>
-        {navTabs.map((t, i) => (
-          <button
-            key={t.label}
-            onClick={() => setActiveTab(i)}
-            style={{ flex: 1, padding: "10px 0 12px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}
-          >
-            <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
-            <span style={{ fontSize: "0.58rem", fontWeight: 700, color: activeTab === i ? RED : `${WHITE}50`, letterSpacing: "0.04em", textTransform: "uppercase" as const }}>{t.label}</span>
+      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:390,background:BLACK,display:"flex",borderTop:`1px solid rgba(255,255,255,0.1)`}}>
+        {navItems.map((t,i)=>(
+          <button key={i} onClick={()=>setActiveTab(i)} style={{flex:1,background:"none",border:"none",padding:"10px 0 12px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+            <span style={{fontSize:20}}>{t.icon}</span>
+            <span style={{fontSize:10,fontWeight:700,color:activeTab===i?RED:"rgba(255,255,255,0.45)",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{t.label}</span>
           </button>
         ))}
       </div>

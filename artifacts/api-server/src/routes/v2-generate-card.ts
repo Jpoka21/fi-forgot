@@ -48,7 +48,7 @@ function determineArchetypes(
 // Any of these in a card = automatic quality failure. Keep in sync with
 // QUALITY_SCORER_BANNED_PHRASES below.
 
-const BANNED_PHRASES_SYSTEM = [
+export const BANNED_PHRASES_SYSTEM = [
   // Generic wishes
   "wishing you all the best", "wishing you the best", "warmest wishes", "heartfelt wishes",
   "wishing you happiness", "wishing you joy", "wishing you a wonderful",
@@ -78,7 +78,7 @@ const BANNED_PHRASES_SYSTEM = [
 
 // ── Relationship rules ────────────────────────────────────────────────────────
 
-function buildRelRules(relationship: string, occasion: string): string {
+export function buildRelRules(relationship: string, occasion: string): string {
   const rel = relationship.toLowerCase();
   const occ = occasion.toLowerCase();
   const isPro = PROFESSIONAL_RELS.includes(rel);
@@ -226,6 +226,12 @@ QUALITY REQUIREMENTS — every card must pass all of these
    End with something memorable: appreciation, a shared memory, optimism about something happening in their life, or a relationship-specific sentiment.
    Do NOT end with: "Have a great day", "Have a wonderful day", "Hope your day is amazing", "Wishing you the best", or any of the banned phrases below.
    The final paragraph should feel like it could only be written by someone who actually knows this person.
+   GOOD closing examples — use these as models, adapted to the specific person and context:
+   - Forward reference: "Next time you're on that court, I'll be thinking of you." (ties the ending to something active in their life)
+   - Callback to shared history: "I keep thinking about how far you've come from that first tiny apartment."
+   - Relationship anchor: "Being your dad is still the best thing I've done."
+   - Current-moment tie-in: "With everything you've got going on this year, I just want you to know I see it."
+   A strong closing references something specific about this person's life right now, not a generic wish.
 
 5. RELATIONSHIP VOICE
    A card to a spouse must read completely differently from a card to a parent, which reads completely differently from a card to a friend.
@@ -288,12 +294,12 @@ function buildUserPrompt(
 
   const options = isPro ? [
     { label: "Best Match",      desc: `Professional, warm, specific to the work relationship with ${firstName}.` },
-    { label: "More Casual",     desc: `Warmer and slightly more personal — still appropriate for work.` },
-    { label: "More Heartfelt",  desc: `More genuinely human — the version that actually means something.` },
+    { label: "More Casual",     desc: `Warmer and slightly more personal — still appropriate for work. Keep all specific references from Best Match; only the register changes.` },
+    { label: "More Heartfelt",  desc: `More genuinely human — the version that actually means something. Keep all specific references from Best Match; go deeper on the emotional weight behind them.` },
   ] : [
-    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Uses the most personally relevant memories from context.` },
-    { label: "More Casual",     desc: `Looser and more conversational — like something the sender would actually text. May lead with humor or a casual callback. ${emotionGuide}` },
-    { label: "More Heartfelt",  desc: `Goes deeper into the emotional register — the version they might keep. Leans into the most meaningful memory or observation available.` },
+    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Opens with and uses the most personally relevant memories from context.` },
+    { label: "More Casual",     desc: `Same specific content as Best Match — same memories, same details — delivered in looser, more conversational voice. Think: the text you'd actually send. Casual means HOW you say it, not LESS of what you know about them. May lead with humor or a casual callback. ${emotionGuide}` },
+    { label: "More Heartfelt",  desc: `Same specific content as Best Match — same memories, same details — but with deeper reflection behind each one. The version they might keep. Heartfelt means the emotional weight you put behind the specifics, not replacing them with declarations. ${emotionGuide}` },
   ];
 
   const optionBlock = options.map(o => `Option: "${o.label}" — ${o.desc}`).join("\n");
@@ -317,6 +323,8 @@ PRIORITY ORDER for context when space is limited:
 5. Fresh Updates — 90–180 days old
 6. Older context
 7. Card history (to avoid repetition)
+
+FRESH UPDATE OPENING RULE: If a fresh update dated within the last 45 days exists in the context above, at least one of the 3 card versions MUST open with a direct reference to it — not as a footnote or supporting detail, but as the emotional entry point. Connect it to what you know about this person's character or the relationship. A recent life moment is almost always the strongest possible opening hook.
 
 Write as ${senderName} speaking directly to ${firstName}.
 Each version must open completely differently — different angle, different voice, different structure.
