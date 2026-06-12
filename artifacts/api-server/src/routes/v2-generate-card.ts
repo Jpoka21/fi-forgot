@@ -171,7 +171,8 @@ export function buildRelRules(relationship: string, occasion: string): string {
 - If humor fits the context, use it — friends appreciate being made to laugh
 - The opening line should feel like something you'd actually say to this person
 - Avoid "you've always been there for me" and similar vague loyalty statements
-- Reference what makes THIS friendship specific — but only what the context actually tells you; do not invent the specific`;
+- Reference what makes THIS friendship specific — but only what the context actually tells you; do not invent the specific
+- WITHOUT CONTEXT — do NOT imply the friendship has any documented history, even abstractly. No "adventures", "memories we've made", "what we've been through", "fun times and the hard ones", "endless laughs", "shared moments", or anything that asserts an undocumented past. A correct no-context friend card says something genuinely true: that you're glad they're your friend, that the occasion is worth noting, and that you hope the year ahead is good for them. Nothing more.`;
   }
 
   return `This is a personal relationship card. Rules:
@@ -213,10 +214,23 @@ QUALITY REQUIREMENTS — every card must pass all of these
    Bad: "Hope you have a wonderful birthday."
 
    IF context is absent (no profile answers, no memories, no updates provided):
-   Write a warm, honest, occasion-appropriate card. Do NOT invent specifics to satisfy this requirement.
-   Do NOT attribute personality traits, character qualities, humor, or behavioral patterns that have not been described — not even vague ones like "your warmth," "your steady presence," "your integrity," or "your sense of humor."
-   Instead: say something meaningful about the relationship itself and the occasion. Example: "Sean, birthdays are a good excuse to say the things you don't always get around to saying. Lucky to have you around. Hope this one's a good one."
-   A simple truthful card passes. A card that invents traits or memories fails.
+   Write a warm, honest, 3–5 sentence card. Do NOT invent or imply anything not provided.
+
+   PROHIBITED — do NOT use any of these, even abstractly:
+   - Implied shared history: "adventures", "another adventure", "shared moments", "we've been through", "shared so many moments", "fun times and the hard ones", "memories we've made", "unforgettable memories", "all we've shared"
+   - Abstract emotional claims: "endless laughs", "always there for me", "always been there", "through thick and thin", "every step of the way"
+   - Invented traits or qualities: "your kindness", "your warmth", "your humor", "your steady presence", "your integrity", "your support"
+   - Anything implying a documented past: road trips, inside jokes, playlists, gaming, family chaos, "what we've built", "how far we've come"
+
+   WHAT IS ALLOWED without context:
+   - Honest appreciation for the relationship itself: "Glad to have you as a friend."
+   - Observation about the occasion: "Birthdays are a good excuse to say the things you don't always get around to saying."
+   - A genuine forward-looking sentiment: "Hope this year brings you good things."
+
+   CORRECT (no context): "Matty, birthdays are a good excuse to say I'm glad to have you as a friend. I hope this year brings you good things, good people, and plenty worth looking forward to. Happy Birthday."
+   WRONG (no context): "Here's to another adventure in the books — so many memories, endless laughs, the fun times and the hard ones."
+
+   A simple truthful card passes. A card that invents or implies history fails.
 
 2. MEMORY WEAVING
    IF multiple memories are present in context: Weave them together naturally rather than listing them.
@@ -354,7 +368,11 @@ PRIORITY ORDER for context when space is limited:
 7. Card history (to avoid repetition)
 
 FRESH UPDATE OPENING RULE: If a fresh update dated within the last 45 days exists in the context above, at least one of the 3 card versions MUST open with a direct reference to it — not as a footnote or supporting detail, but as the emotional entry point. Connect it to what you know about this person's character or the relationship. A recent life moment is almost always the strongest possible opening hook.
-
+${!hasContext ? `
+LOW-CONTEXT CONSTRAINT — no context was provided for this person. These phrases are banned in all 3 versions. Using any one of them is an automatic failure:
+"adventure", "adventures", "another adventure in the books", "shared moments", "shared so many moments", "we've been through", "been through a lot", "fun times and the hard ones", "the hard ones", "unforgettable memories", "unforgettable", "endless laughs", "always there for me", "always been there", "through thick and thin", "every step of the way", "road trip", "inside jokes", "gaming", "playlists", "family chaos", "unwavering support", "kindness", "what we've built", "how far we've come", "memories we've made"
+Each card must be 3–5 sentences. Warm, honest, and simple. No invented history. No implied past.
+` : ""}
 Write as ${senderName} speaking directly to ${firstName}.
 Each version must open completely differently — different angle, different voice, different structure.
 Never write a specific number of years (e.g. "seven years", "3 years") — use the depth of history to inform emotional familiarity, not as literal text.
