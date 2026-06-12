@@ -446,6 +446,25 @@ export default function BriefingPage() {
           </div>
         </div>
 
+        {/* Skip option */}
+        {!isEditing && (
+          <div
+            className="mb-5 px-4 py-3 rounded-xl flex items-center justify-between gap-3"
+            style={{ background: `${NAVY}06`, border: `1px solid ${NAVY}12` }}
+          >
+            <p className="text-sm" style={{ color: "#6b7a99", margin: 0 }}>
+              <span className="font-semibold" style={{ color: NAVY }}>Optional:</span> Answer what you know, skip the rest. Even one answer makes the card better.
+            </p>
+            <button
+              onClick={handleSubmit}
+              className="text-sm font-bold px-4 py-2 rounded-lg shrink-0"
+              style={{ background: `${NAVY}12`, color: NAVY, border: "none", cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Skip → Generate now
+            </button>
+          </div>
+        )}
+
         {/* Children summary if relevant and already have data */}
         {hasChildrenQuestion && childrenSummaryStr && (
           <div
