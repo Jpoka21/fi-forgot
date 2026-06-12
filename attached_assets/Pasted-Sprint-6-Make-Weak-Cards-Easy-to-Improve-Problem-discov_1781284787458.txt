@@ -1,0 +1,115 @@
+Sprint 6 — Make Weak Cards Easy to Improve
+
+Problem discovered during testing:
+
+When a card is generic or weak, the user has no obvious path to improve it.
+
+Current flow:
+
+Generate card
+→ Review card
+→ Realize card is generic
+→ Leave review screen
+→ Navigate to recipient profile
+→ Choose between:
+
+* Add a Recent Memory
+* Help Us Write Better Cards
+* Edit Profile Details
+  → Add information
+  → Return to card generation
+  → Generate again
+
+This creates too much friction.
+
+Users do not think in terms of:
+
+* Profile completeness
+* Fresh updates
+* Profile questions
+* Memory types
+
+Users think:
+
+"How do I make this card better?"
+
+Goal:
+
+Redesign the experience around improving the next card, not around managing profile data.
+
+Part 1 — Review Screen Evaluation
+
+Review the generated card experience.
+
+Evaluate:
+
+1. Should users be able to improve a weak card directly from the review screen?
+2. Should there be a "Make This Card More Personal" action?
+3. Should users be able to add a memory without leaving the review screen?
+4. Should adding that memory automatically regenerate the card?
+5. What is the simplest possible workflow?
+
+Example concept:
+
+This card can be more personal.
+
+Tell us one thing about Eric:
+
+* Something he accomplished recently
+* A favorite memory
+* An inside joke
+* Something happening in his life right now
+
+[ Improve This Card ]
+
+The system decides where the information is stored.
+
+The user should not need to understand memory types.
+
+Part 2 — Recipient Profile Evaluation
+
+Review the current recipient profile.
+
+Current actions:
+
+* Add a Recent Memory
+* Help Us Write Better Cards
+* Edit Profile Details
+* Timeline
+
+Determine:
+
+1. Which actions are redundant?
+2. Which actions should be merged?
+3. Which actions should be hidden?
+4. Which action most directly improves card quality?
+
+Goal:
+
+A user should immediately understand:
+
+"How do I make the next card better?"
+
+without needing to understand the underlying data model.
+
+Part 3 — Recommendation
+
+Provide:
+
+1. Current UX problems
+2. Recommended future flow
+3. Wireframe or layout proposal
+4. What should be merged
+5. What should be removed
+6. Whether card improvement should happen primarily:
+   A. On the review screen
+   B. On the recipient profile
+   C. Both
+
+Important:
+
+Do not implement yet.
+
+This is a UX simplification review.
+
+The objective is to reduce friction and make improving a weak card obvious.
