@@ -268,7 +268,7 @@ export default function MomentsPage() {
                       <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 6, alignItems: "flex-end" }}>
                         {hasCard ? (
                           <button
-                            onClick={() => setLocation("/cards")}
+                            onClick={() => setLocation("/cards/review")}
                             style={{
                               padding: "6px 12px",
                               background: SAGE, color: WHITE,
