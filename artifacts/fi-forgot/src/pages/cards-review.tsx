@@ -46,6 +46,9 @@ export default function CardsReviewPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
+  // Read ?id= param to jump straight to a specific card
+  const highlightId = new URLSearchParams(window.location.search).get("id") ?? null;
+
   const [cards, setCards]               = useState<CardOrder[]>([]);
   const [pendingApprovals, setPending]  = useState<PendingApproval[]>([]);
   const [currentIdx, setCurrentIdx]     = useState(0);
@@ -75,10 +78,42 @@ export default function CardsReviewPage() {
 
   useEffect(() => {
     const recipientIds = new Set(getRecipients().map(r => r.id));
-    const cs = getCards().filter(c => c.status === "Ready for approval" && recipientIds.has(c.recipientId));
+    const allCards = getCards();
+
+    // Debug: log every card in storage so stale/wrong cards are visible
+    console.group("[cards-review] All cards in localStorage");
+    allCards.forEach(c => {
+      console.log({
+        id: c.id,
+        recipientId: c.recipientId,
+        recipientName: c.recipientName,
+        holiday: c.holiday,
+        status: c.status,
+        deliveryPreference: c.deliveryPreference,
+        approvedMessagePreview: (c.approvedMessage ?? "").slice(0, 60),
+      });
+    });
+    console.groupEnd();
+
+    const cs = allCards.filter(c => c.status === "Ready for approval" && recipientIds.has(c.recipientId));
+
+    console.group("[cards-review] Cards shown in review queue");
+    cs.forEach(c => console.log({ id: c.id, recipientName: c.recipientName, holiday: c.holiday }));
+    console.groupEnd();
+
     setCards(cs);
     if (user?.email) setPending(getCustomerPendingApprovals(user.email));
-  }, []);
+
+    // If a specific card ID was passed in the URL, jump to it
+    if (highlightId) {
+      // pendingApprovals are at the front; personal cards follow
+      const paCount = user?.email ? getCustomerPendingApprovals(user.email).length : 0;
+      const targetCardIdx = cs.findIndex(c => c.id === highlightId);
+      if (targetCardIdx >= 0) {
+        setCurrentIdx(paCount + targetCardIdx);
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);

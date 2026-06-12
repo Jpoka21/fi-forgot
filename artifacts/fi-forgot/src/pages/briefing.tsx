@@ -381,7 +381,7 @@ export default function BriefingPage() {
                 We wrote {recipient?.name}'s {eventName} card. Read it over and approve when you're happy.
               </p>
               <button
-                onClick={() => setLocation("/cards/review")}
+                onClick={() => setLocation(`/cards/review?id=${generatedCardId}`)}
                 className="w-full font-bold py-4 rounded-xl text-white"
                 style={{ background: RED }}
               >

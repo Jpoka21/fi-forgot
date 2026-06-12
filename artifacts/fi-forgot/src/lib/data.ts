@@ -873,11 +873,19 @@ export function updateCard(card: CardOrder): void {
 }
 
 export function saveCard(card: CardOrder): void {
-  const all = loadCards();
-  const idx = all.findIndex((c) => c.id === card.id);
-  if (idx >= 0) {
-    all[idx] = card;
+  let all = loadCards();
+  const existingIdx = all.findIndex((c) => c.id === card.id);
+  if (existingIdx >= 0) {
+    all[existingIdx] = card;
   } else {
+    // Remove any stale "Ready for approval" cards for the same recipient+holiday
+    // before adding the new one, so the review queue never shows outdated cards.
+    all = all.filter(
+      (c) =>
+        !(c.recipientId === card.recipientId &&
+          c.holiday === card.holiday &&
+          c.status === "Ready for approval")
+    );
     all.push(card);
   }
   localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(all));
