@@ -217,7 +217,7 @@ export default function BriefingPage() {
   const isEditing = !!params.briefingId;
   const existingBriefing = params.briefingId ? getBriefing(params.briefingId) : undefined;
 
-  const questions = getEventQuestions(eventName);
+  const questions = getEventQuestions(eventName, recipient?.gender ?? "neutral");
 
   // Initialize answers from existing briefing or empty
   const [answers, setAnswers] = useState<Record<string, string>>(() => {

@@ -91,10 +91,13 @@ export interface RecipientAddress {
   zip: string;
 }
 
+export type RecipientGender = "male" | "female" | "neutral";
+
 export interface Recipient {
   id: string;
   name: string;
   relationship: Relationship;
+  gender?: RecipientGender;
   active?: boolean; // undefined/true = autopilot on; false = archived/paused
   profileUpdatedAt?: string; // ISO datetime — set on save; drives freshness decay
   birthday?: string;
@@ -561,24 +564,62 @@ export const EVENT_QUESTIONS: Record<string, BriefingQuestion[]> = {
   ],
 };
 
+function applyPronouns(text: string | undefined, gender: RecipientGender): string {
+  if (!text || gender === "female") return text ?? "";
+  if (gender === "male") {
+    return text
+      .replace(/\bShe's\b/g, "He's")
+      .replace(/\bshe's\b/g, "he's")
+      .replace(/\bShe'd\b/g, "He'd")
+      .replace(/\bshe'd\b/g, "he'd")
+      .replace(/\bShe'll\b/g, "He'll")
+      .replace(/\bshe'll\b/g, "he'll")
+      .replace(/\bShe\b/g, "He")
+      .replace(/\bshe\b/g, "he")
+      .replace(/\bher (profile|year|day|kids|family|heart|story|card|name|role|work|way|win|moment|strength)\b/g, "his $1")
+      .replace(/\bHer (profile|year|day|kids|family|heart|story|card|name|role|work|way|win|moment|strength)\b/g, "His $1")
+      .replace(/\bher\b/g, "him")
+      .replace(/\bHer\b/g, "Him");
+  }
+  // neutral
+  return text
+    .replace(/\bShe's\b/g, "They're")
+    .replace(/\bshe's\b/g, "they're")
+    .replace(/\bShe'd\b/g, "They'd")
+    .replace(/\bshe'd\b/g, "they'd")
+    .replace(/\bShe'll\b/g, "They'll")
+    .replace(/\bshe'll\b/g, "they'll")
+    .replace(/\bShe\b/g, "They")
+    .replace(/\bshe\b/g, "they")
+    .replace(/\bher (profile|year|day|kids|family|heart|story|card|name|role|work|way|win|moment|strength)\b/g, "their $1")
+    .replace(/\bHer (profile|year|day|kids|family|heart|story|card|name|role|work|way|win|moment|strength)\b/g, "Their $1")
+    .replace(/\bher\b/g, "them")
+    .replace(/\bHer\b/g, "Them");
+}
+
 /** Get questions for an event, falling back to generic questions */
-export function getEventQuestions(event: string): BriefingQuestion[] {
-  return (
-    EVENT_QUESTIONS[event] ?? [
-      {
-        key: "context",
-        question: `What should we know for the ${event} card?`,
-        placeholder: "Any context, recent memories, or specific things to include...",
-        type: "textarea",
-      },
-      {
-        key: "extra",
-        question: "Anything else?",
-        type: "textarea",
-        optional: true,
-      },
-    ]
-  );
+export function getEventQuestions(event: string, gender: RecipientGender = "female"): BriefingQuestion[] {
+  const questions: BriefingQuestion[] = EVENT_QUESTIONS[event] ?? [
+    {
+      key: "context",
+      question: `What should we know for the ${event} card?`,
+      placeholder: "Any context, recent memories, or specific things to include...",
+      type: "textarea",
+    },
+    {
+      key: "extra",
+      question: "Anything else?",
+      type: "textarea",
+      optional: true,
+    },
+  ];
+  if (gender === "female") return questions;
+  return questions.map((q) => ({
+    ...q,
+    question: applyPronouns(q.question, gender),
+    placeholder: applyPronouns(q.placeholder, gender),
+    hint: applyPronouns(q.hint, gender),
+  }));
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────

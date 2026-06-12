@@ -108,6 +108,7 @@ const schema = z.object({
   selectedEvents: z.array(z.string()),
   previewDays: z.union([z.literal(14), z.literal(21), z.literal(30)]),
   tonePreference: z.enum(TONES as [Tone, ...Tone[]]),
+  gender: z.enum(["male", "female", "neutral"]).optional(),
   senderName: z.string().optional(),
   petName: z.string().optional(),
   yearsTogther: z.string().optional(),
@@ -430,6 +431,7 @@ export default function RecipientProfilePage() {
           selectedEvents: existing.selectedEvents ?? [],
           previewDays: ([14, 21, 30].includes(existing.previewDays ?? 14) ? existing.previewDays : 14) as 14 | 21 | 30,
           tonePreference: existing.tonePreference,
+          gender: existing.gender ?? "neutral",
           senderName: existing.senderName ?? "",
           petName: existing.petName ?? "",
           yearsTogther: existing.yearsTogther ?? "",
@@ -457,6 +459,7 @@ export default function RecipientProfilePage() {
           selectedEvents: [],
           previewDays: 14 as 14 | 21 | 30,
           tonePreference: "Sweet",
+          gender: "neutral",
           senderName: "",
           petName: "",
           yearsTogther: "",
@@ -561,6 +564,7 @@ export default function RecipientProfilePage() {
       selectedEvents: data.selectedEvents,
       previewDays: data.previewDays,
       tonePreference: data.tonePreference,
+      gender: data.gender ?? "neutral",
       senderName: data.senderName,
       petName: data.petName || undefined,
       yearsTogther: data.yearsTogther || undefined,
@@ -749,9 +753,35 @@ export default function RecipientProfilePage() {
                       <FormMessage />
                     </FormItem>
                   )} />
+                  <FormField control={form.control} name="gender" render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Pronouns <span className="font-normal opacity-60 text-xs">(used in briefing questions)</span></FormLabel>
+                      <div className="flex gap-2">
+                        {([
+                          { value: "female", label: "She / Her" },
+                          { value: "male", label: "He / Him" },
+                          { value: "neutral", label: "They / Them" },
+                        ] as const).map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => field.onChange(opt.value)}
+                            className="flex-1 px-3 py-2 rounded-xl border-2 text-sm font-semibold transition-all"
+                            style={{
+                              borderColor: field.value === opt.value ? RED : `${BLACK}20`,
+                              background: field.value === opt.value ? `${RED}10` : "#fff",
+                              color: field.value === opt.value ? RED : "#555",
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </FormItem>
+                  )} />
                   <FormField control={form.control} name="senderName" render={({ field }) => (
                     <FormItem className="sm:col-span-2">
-                      <FormLabel>How does she know you as? <span className="font-normal opacity-60 text-xs">(optional)</span></FormLabel>
+                      <FormLabel>How do they know you as? <span className="font-normal opacity-60 text-xs">(optional)</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Dad, Uncle Jim, James…" data-testid="input-sender-name" {...field} />
                       </FormControl>
