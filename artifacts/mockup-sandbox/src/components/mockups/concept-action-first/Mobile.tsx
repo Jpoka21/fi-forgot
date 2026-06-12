@@ -1,76 +1,79 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG="#F2E6D3", RED="#E23B2E", BLACK="#111111", SAGE="#5B8C6B", GRAY="#6B6B6B", BORDER="#E5E0D8", WHITE="#FFFFFF";
+const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
+const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
 
-const actions = [
-  { name:"Marcus", action:"Send Marcus a Birthday Card",        detail:"Birthday · June 14 · 3 days",     cta:"Write His Card →" },
-  { name:"Steve",  action:"Answer follow-up about Steve",       detail:"Guitar lessons update",            cta:"Answer →"         },
-  { name:"Sarah",  action:"Review Sarah's anniversary draft",   detail:"Card ready to review",             cta:"Review →"         },
-  { name:"Mom",    action:"Add details for Mom's Mother's Day", detail:"15 days",                          cta:"Add Details →"    },
+const nextActions = [
+  { num: 2, label: "Answer follow-up about Steve's guitar lessons", chip: "2 min",      chipColor: SAGE,      chipBg: `${SAGE}18`,  chipBorder: `${SAGE}40` },
+  { num: 3, label: "Review Sarah's anniversary card draft",          chip: "Draft ready", chipColor: "#B45309", chipBg: "#FFF3CD",     chipBorder: "#FDE68A" },
+];
+
+const navTabs = [
+  { icon: "⚡", label: "Today" },
+  { icon: "👥", label: "People" },
+  { icon: "🗓", label: "Moments" },
+  { icon: "⚙️", label: "Settings" },
 ];
 
 export function Mobile() {
-  const [idx, setIdx] = useState(0);
-  const [tab, setTab] = useState<"today"|"people"|"moments"|"settings">("today");
-  const current = actions[idx];
+  const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <div style={{ width:390, minHeight:"100vh", background:BG, fontFamily:"'Plus Jakarta Sans', sans-serif", position:"relative" as const }}>
-      <div style={{ overflowY:"auto" as const, paddingBottom:72, maxHeight:"calc(100vh - 52px)" }}>
-        {tab === "today" && (
-          <>
-            {/* Hero full-screen action */}
-            <div style={{ background:BLACK, minHeight:480, padding:"36px 24px 28px", display:"flex", flexDirection:"column" as const, justifyContent:"flex-end" }}>
-              <span style={{ background:RED, color:WHITE, fontSize:"0.65rem", fontWeight:700, padding:"3px 10px", borderRadius:8, letterSpacing:"0.06em", alignSelf:"flex-start" as const, marginBottom:"auto" }}>
-                ACTION {idx+1} OF {actions.length}
-              </span>
-              <div>
-                <h2 style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"2rem", color:WHITE, margin:"0 0 6px", lineHeight:1.1 }}>
-                  {current.action.toUpperCase()}
-                </h2>
-                <p style={{ fontFamily:"'Caveat', cursive", fontSize:"0.95rem", color:"#ffffff70", margin:"0 0 20px" }}>{current.detail}</p>
-                <button style={{ width:"100%", padding:"16px", borderRadius:12, border:"none", background:RED, color:WHITE, fontFamily:"'Bebas Neue', cursive", fontSize:"1.15rem", letterSpacing:"0.06em", cursor:"pointer" }}>
-                  {current.cta}
-                </button>
-                {idx < actions.length - 1 && (
-                  <button onClick={() => setIdx(i => i+1)} style={{ width:"100%", padding:"10px", marginTop:8, borderRadius:12, border:"none", background:"transparent", color:"#ffffff40", fontFamily:"'Caveat', cursive", fontSize:"0.9rem", cursor:"pointer" }}>
-                    swipe for next →
-                  </button>
-                )}
-              </div>
-            </div>
+    <div style={{ width: 390, height: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", margin: "0 auto", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-            {/* Next actions list */}
-            <div style={{ padding:"14px 16px 0" }}>
-              <div style={{ fontSize:"0.72rem", fontWeight:700, color:GRAY, letterSpacing:"0.08em", marginBottom:8 }}>UP NEXT</div>
-              <div style={{ display:"flex", flexDirection:"column" as const, gap:6 }}>
-                {actions.filter((_,i) => i !== idx).slice(0,2).map((a,i) => (
-                  <div key={a.name} style={{ background:WHITE, borderRadius:10, padding:"10px 14px", border:`1px solid ${BORDER}`, display:"flex", alignItems:"center", gap:10 }}>
-                    <div style={{ width:24, height:24, borderRadius:"50%", background:`${BLACK}10`, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue', cursive", fontSize:"0.78rem", color:BLACK }}>{i+2}</div>
-                    <span style={{ flex:1, fontSize:"0.82rem", fontWeight:600, color:BLACK }}>{a.action}</span>
-                    <span style={{ fontSize:"0.68rem", color:GRAY }}>→</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+      {/* Hero card — fills screen minus nav */}
+      <div style={{ flex: 1, background: BLACK, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px 20px", textAlign: "center" }}>
 
-        {tab !== "today" && (
-          <div style={{ padding:"24px 16px", textAlign:"center" as const }}>
-            <div style={{ fontSize:"2rem", marginBottom:10 }}>👀</div>
-            <p style={{ color:GRAY, fontSize:"0.88rem" }}>This section is shown in the Today tab mockup.</p>
-          </div>
-        )}
+        {/* Action chip */}
+        <span style={{ background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.12em", padding: "4px 14px", borderRadius: 6, marginBottom: 24 }}>ACTION 1 OF 4</span>
+
+        {/* Emoji */}
+        <div style={{ fontSize: "4rem", marginBottom: 18 }}>🧢</div>
+
+        {/* Headline */}
+        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: WHITE, letterSpacing: "0.04em", lineHeight: 1.1, marginBottom: 10 }}>
+          SEND MARCUS A<br />BIRTHDAY CARD
+        </div>
+
+        {/* Subtitle */}
+        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: "#ffffff70", marginBottom: 32 }}>
+          Birthday · June 14 · 3 days
+        </div>
+
+        {/* CTA button */}
+        <button style={{
+          width: "100%", height: 52, borderRadius: 14, background: RED, border: "none",
+          color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem",
+          letterSpacing: "0.08em", cursor: "pointer",
+          boxShadow: `0 6px 24px ${RED}55`, marginBottom: 28,
+        }}>
+          WRITE HIS CARD →
+        </button>
+
+        {/* Swipe hint */}
+        <span style={{ fontFamily: "'Caveat', cursive", fontSize: "0.9rem", color: "#ffffff35" }}>swipe for next →</span>
+
+        {/* Next actions below */}
+        <div style={{ width: "100%", marginTop: 24, display: "flex", flexDirection: "column", gap: 8 }}>
+          {nextActions.map(a => (
+            <div key={a.num} style={{ background: `${WHITE}10`, borderRadius: 11, padding: "11px 14px", display: "flex", alignItems: "center", gap: 10, border: `1px solid ${WHITE}10`, cursor: "pointer" }}>
+              <div style={{ width: 24, height: 24, borderRadius: "50%", background: `${WHITE}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", color: WHITE }}>{a.num}</span>
+              </div>
+              <div style={{ flex: 1, fontSize: "0.76rem", fontWeight: 500, color: `${WHITE}85`, textAlign: "left" }}>{a.label}</div>
+              <span style={{ padding: "2px 8px", borderRadius: 20, background: a.chipBg, border: `1px solid ${a.chipBorder}`, fontSize: "0.6rem", fontWeight: 700, color: a.chipColor, whiteSpace: "nowrap" as const, flexShrink: 0 }}>{a.chip}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Bottom nav */}
-      <div style={{ position:"fixed" as const, bottom:0, left:0, right:0, width:390, background:BLACK, display:"flex" }}>
-        {([["today","⚡","Today"],["people","👥","People"],["moments","🗓","Moments"],["settings","⚙️","Settings"]] as const).map(([key,icon,label]) => (
-          <button key={key} onClick={() => setTab(key as typeof tab)} style={{ flex:1, padding:"10px 4px 8px", background:"none", border:"none", cursor:"pointer", display:"flex", flexDirection:"column" as const, alignItems:"center", gap:3 }}>
-            <span style={{ fontSize:"1.1rem" }}>{icon}</span>
-            <span style={{ fontSize:"0.6rem", fontWeight:700, color:tab===key ? RED : "#ffffff50", letterSpacing:"0.04em" }}>{label.toUpperCase()}</span>
+      <div style={{ background: BLACK, display: "flex", borderTop: `1px solid ${WHITE}10`, flexShrink: 0 }}>
+        {navTabs.map((t, i) => (
+          <button key={t.label} onClick={() => setActiveTab(i)} style={{ flex: 1, padding: "10px 0 12px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+            <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
+            <span style={{ fontSize: "0.58rem", fontWeight: 700, color: activeTab === i ? RED : `${WHITE}50`, letterSpacing: "0.04em", textTransform: "uppercase" as const }}>{t.label}</span>
           </button>
         ))}
       </div>

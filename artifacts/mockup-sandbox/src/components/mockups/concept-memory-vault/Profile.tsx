@@ -1,104 +1,130 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG="#F2E6D3", RED="#E23B2E", BLACK="#111111", SAGE="#5B8C6B", GRAY="#6B6B6B", BORDER="#E5E0D8", WHITE="#FFFFFF";
-const BLUE="#2E6BE2", BLUE_BG="#EEF3FD";
+const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
+const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
 
-type Tab = "all"|"memories"|"cards"|"followups";
+type TabId = "all" | "memories" | "cards" | "followups";
 
-const timeline = [
-  { type:"card",   date:"May 2024",  icon:"💌", title:"Mother's Day Card 2024", excerpt:"You've always known exactly how to make a house feel like home…", badge:null },
-  { type:"memory", date:"Apr 2025",  icon:"💭", title:"Knee surgery — recovering well at home", excerpt:null, badge:"follow_up" },
-  { type:"followup",date:"May 2025", icon:"🔁", title:"You mentioned her recovery — How is she feeling now?", excerpt:null, badge:null },
-  { type:"memory", date:"Mar 2025",  icon:"💭", title:"Started her garden again after years away", excerpt:null, badge:null },
-  { type:"card",   date:"Oct 2024",  icon:"💌", title:"Birthday Card 2024", excerpt:"Every year you show us what it means to lead with love…", badge:null },
-  { type:"memory", date:"Oct 2024",  icon:"💭", title:"Celebrated 40 years with Dad", excerpt:null, badge:null },
+const tabs: { id: TabId; label: string }[] = [
+  { id: "all",       label: "All" },
+  { id: "memories",  label: "Memories" },
+  { id: "cards",     label: "Cards" },
+  { id: "followups", label: "Follow-ups" },
 ];
 
-export function Profile() {
-  const [tab, setTab] = useState<Tab>("all");
-  const [answerOpen, setAnswerOpen] = useState(false);
-  const [answer, setAnswer] = useState("");
+type EntryType = "card" | "memory" | "followup";
 
-  const filtered = timeline.filter(t => {
-    if (tab === "all") return true;
-    if (tab === "memories") return t.type === "memory";
-    if (tab === "cards") return t.type === "card";
-    if (tab === "followups") return t.type === "followup";
-    return true;
-  });
+const timeline: { type: EntryType; date: string; content: string; excerpt?: string; followUpQ?: string; badge?: string; tabFilter: TabId[] }[] = [
+  { type: "card",     date: "May 2024",     content: "Mother's Day Card 2024",                                          excerpt: "You've always known exactly how to make a house feel like home…",    tabFilter: ["all", "cards"] },
+  { type: "memory",   date: "May 2025",     content: "Knee surgery — recovering well at home",                          badge: "↻ Follow-up due",                                                      tabFilter: ["all", "memories"] },
+  { type: "followup", date: "May 2025",     content: "Follow-up",                                                       followUpQ: "You mentioned her recovery — How is she feeling now?",             tabFilter: ["all", "followups"] },
+  { type: "memory",   date: "March 2025",   content: "Started her garden again after years away",                                                                                                      tabFilter: ["all", "memories"] },
+  { type: "card",     date: "Oct 2024",     content: "Birthday Card 2024",                                              excerpt: "You've never been one for fuss, but this year deserved a little…",  tabFilter: ["all", "cards"] },
+  { type: "memory",   date: "Oct 2024",     content: "Celebrated 40 years with Dad",                                                                                                                  tabFilter: ["all", "memories"] },
+];
+
+function dotColor(type: EntryType) {
+  if (type === "card")     return SAGE;
+  if (type === "followup") return "#B45309";
+  return RED;
+}
+
+export function Profile() {
+  const [activeTab, setActiveTab] = useState<TabId>("all");
+
+  const filtered = timeline.filter(e => e.tabFilter.includes(activeTab));
 
   return (
-    <div style={{ background:BG, minHeight:"100vh", fontFamily:"'Plus Jakarta Sans', sans-serif" }}>
-      <div style={{ background:BLACK, padding:"0 24px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky" as const, top:0, zIndex:50 }}>
-        <span style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"1.6rem", color:RED }}>F.I. FORGOT</span>
-        <span style={{ fontSize:"0.78rem", color:"#ffffff70", cursor:"pointer" }}>← What's New</span>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+
+      {/* Nav */}
+      <div style={{ background: BLACK, padding: "0 20px", height: 52, display: "flex", alignItems: "center", gap: 14 }}>
+        <span style={{ color: `${WHITE}65`, fontSize: "0.8rem", cursor: "pointer" }}>← Dashboard</span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: RED, marginLeft: "auto", letterSpacing: "0.05em" }}>F.I. FORGOT</span>
       </div>
 
-      <div style={{ maxWidth:560, margin:"0 auto", padding:"24px 20px 80px" }}>
-        {/* Person header */}
-        <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:20 }}>
-          <div style={{ width:68, height:68, borderRadius:"50%", background:BLACK, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"2.2rem", flexShrink:0 }}>🌷</div>
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "26px 20px" }}>
+
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 20 }}>
+          <div style={{ width: 68, height: 68, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", flexShrink: 0 }}>💛</div>
           <div>
-            <h1 style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"2.2rem", color:BLACK, margin:"0 0 4px", lineHeight:1 }}>MOM</h1>
-            <span style={{ padding:"3px 12px", borderRadius:20, background:`${BLACK}08`, fontSize:"0.78rem", fontWeight:600, color:GRAY }}>Mother</span>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, letterSpacing: "0.05em", lineHeight: 1 }}>MOM</div>
+            <span style={{ display: "inline-block", background: `${BLACK}10`, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "3px 12px", fontSize: "0.75rem", fontWeight: 600, color: BLACK, marginTop: 5 }}>Mother</span>
           </div>
         </div>
 
         {/* Tab bar */}
-        <div style={{ display:"flex", background:WHITE, borderRadius:10, padding:3, gap:2, marginBottom:20, border:`1px solid ${BORDER}` }}>
-          {([["all","All"],["memories","Memories"],["cards","Cards"],["followups","Follow-ups"]] as const).map(([key,label]) => (
-            <button key={key} onClick={() => setTab(key)} style={{ flex:1, padding:"7px 4px", borderRadius:7, border:"none", background:tab===key ? BLACK : "transparent", color:tab===key ? WHITE : GRAY, fontWeight:700, fontSize:"0.72rem", cursor:"pointer" }}>
-              {label}
+        <div style={{ display: "flex", gap: 0, borderBottom: `1.5px solid ${BORDER}`, marginBottom: 18 }}>
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              style={{
+                padding: "9px 16px", background: "none", border: "none", cursor: "pointer",
+                fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: activeTab === t.id ? 700 : 500,
+                fontSize: "0.8rem",
+                color: activeTab === t.id ? BLACK : GRAY,
+                borderBottom: activeTab === t.id ? `2px solid ${RED}` : "2px solid transparent",
+                marginBottom: "-1.5px",
+              }}
+            >
+              {t.label}
             </button>
           ))}
         </div>
 
         {/* Timeline */}
-        <div style={{ position:"relative" as const }}>
-          <div style={{ position:"absolute" as const, left:19, top:0, bottom:0, width:2, background:BORDER }} />
-          <div style={{ display:"flex", flexDirection:"column" as const, gap:12 }}>
-            {filtered.map((item,i) => (
-              <div key={i} style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
-                <div style={{ width:40, height:40, borderRadius:"50%", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.1rem", zIndex:1, border:`2px solid ${WHITE}`, background:item.type==="card" ? `${RED}15` : item.type==="followup" ? BLUE_BG : `${SAGE}15` }}>
-                  {item.icon}
-                </div>
-                <div style={{ flex:1, background:WHITE, borderRadius:12, padding:"12px 14px", border:`1px solid ${item.type==="followup" ? `${BLUE}30` : BORDER}` }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:item.excerpt||item.type==="followup" ? 6 : 0 }}>
-                    <span style={{ fontWeight:700, fontSize:"0.85rem", color:item.type==="followup" ? BLUE : BLACK }}>{item.title}</span>
-                    <span style={{ fontSize:"0.68rem", color:GRAY, flexShrink:0, marginLeft:8 }}>{item.date}</span>
-                  </div>
-                  {item.excerpt && (
-                    <p style={{ fontFamily:"'Caveat', cursive", fontSize:"0.92rem", color:BLACK, margin:0, fontStyle:"italic", lineHeight:1.5 }}>"{item.excerpt}"</p>
-                  )}
-                  {item.badge === "follow_up" && (
-                    <span style={{ fontSize:"0.67rem", fontWeight:700, padding:"2px 8px", borderRadius:10, background:"#FFFBEB", color:"#D97706" }}>↻ Follow-up due</span>
-                  )}
-                  {item.type === "followup" && (
-                    <button onClick={() => setAnswerOpen(true)} style={{ marginTop:8, padding:"5px 12px", borderRadius:8, border:"none", background:BLUE, color:WHITE, fontWeight:700, fontSize:"0.74rem", cursor:"pointer" }}>Answer →</button>
-                  )}
-                </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 20 }}>
+          {filtered.map((e, i) => (
+            <div key={i} style={{ display: "flex", gap: 14, paddingBottom: 16, marginBottom: 0 }}>
+              {/* Timeline line */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, paddingTop: 3 }}>
+                <div style={{ width: 11, height: 11, borderRadius: "50%", background: dotColor(e.type), flexShrink: 0 }} />
+                {i < filtered.length - 1 && <div style={{ width: 1.5, flex: 1, background: BORDER, marginTop: 5 }} />}
               </div>
-            ))}
-          </div>
+
+              {/* Content */}
+              <div style={{ flex: 1, paddingBottom: i < filtered.length - 1 ? 0 : 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: GRAY, letterSpacing: "0.04em", textTransform: "uppercase" as const }}>{e.date}</span>
+                  {e.badge && (
+                    <span style={{ background: "#FEF3C7", border: "1px solid #FDE68A", borderRadius: 20, padding: "1px 8px", fontSize: "0.62rem", fontWeight: 600, color: "#92400E" }}>{e.badge}</span>
+                  )}
+                </div>
+
+                {e.type === "card" && (
+                  <div style={{ background: WHITE, borderRadius: 12, border: `1.5px solid ${BORDER}`, padding: "10px 14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+                      <span style={{ fontSize: "0.95rem" }}>💌</span>
+                      <span style={{ fontWeight: 700, fontSize: "0.82rem", color: BLACK }}>{e.content}</span>
+                    </div>
+                    {e.excerpt && <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: GRAY, fontStyle: "italic", lineHeight: 1.4 }}>"{e.excerpt}"</div>}
+                  </div>
+                )}
+
+                {e.type === "memory" && (
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: BLACK, lineHeight: 1.5 }}>{e.content}</div>
+                )}
+
+                {e.type === "followup" && (
+                  <div style={{ background: "#FEF3C7", border: "1px solid #FDE68A", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <div style={{ fontSize: "0.78rem", color: "#92400E", lineHeight: 1.4 }}>{e.followUpQ}</div>
+                    <button style={{ padding: "5px 12px", borderRadius: 8, background: "#92400E", border: "none", color: WHITE, fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" as const }}>Answer →</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Log a Moment FAB-style button at bottom */}
-        <button style={{ position:"fixed" as const, bottom:24, left:"50%", transform:"translateX(-50%)", padding:"13px 32px", borderRadius:24, border:"none", background:SAGE, color:WHITE, fontFamily:"'Bebas Neue', cursive", fontSize:"1.05rem", letterSpacing:"0.06em", cursor:"pointer", boxShadow:`0 4px 20px ${SAGE}50`, whiteSpace:"nowrap" as const }}>
-          + Log a Moment
+        {/* Log button */}
+        <button style={{ width: "100%", padding: "13px 0", borderRadius: 12, background: SAGE, border: "none", color: WHITE, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
+          ＋ Log a Moment
         </button>
-      </div>
 
-      {answerOpen && (
-        <div onClick={() => setAnswerOpen(false)} style={{ position:"fixed" as const, inset:0, background:"rgba(0,0,0,0.45)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:200, padding:16 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background:WHITE, borderRadius:"20px 20px 0 0", width:"100%", maxWidth:520, padding:"24px 24px 36px" }}>
-            <div style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"1.3rem", color:BLUE, marginBottom:4 }}>Follow-up Answer</div>
-            <p style={{ fontSize:"0.82rem", color:GRAY, marginBottom:14 }}>How is she feeling now after the surgery?</p>
-            <textarea value={answer} onChange={e => setAnswer(e.target.value)} rows={3} placeholder="She's doing much better now…" style={{ width:"100%", borderRadius:10, border:`1.5px solid ${BLUE}30`, padding:"10px 14px", fontSize:"0.88rem", fontFamily:"'Plus Jakarta Sans', sans-serif", resize:"none" as const, boxSizing:"border-box" as const }} />
-            <button onClick={() => { setAnswerOpen(false); setAnswer(""); }} style={{ width:"100%", marginTop:12, padding:"12px", borderRadius:10, border:"none", background:BLUE, color:WHITE, fontWeight:700, cursor:"pointer" }}>Save Answer</button>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
