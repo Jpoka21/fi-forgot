@@ -1,101 +1,141 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG = "#F2E6D3";
-const RED = "#E23B2E";
-const BLACK = "#111111";
-const SAGE = "#5B8C6B";
-const GRAY = "#6B6B6B";
-const BORDER = "#E5E0D8";
-const WHITE = "#FFFFFF";
+const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
+const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
+const AMBER = "#D97706";
 
-type Tab = "all" | "memories" | "cards" | "followups";
+const TABS = ["All", "Memories", "Cards", "Follow-ups"];
 
 const TIMELINE = [
-  { type: "card", date: "May 2024", title: "Mother's Day Card 2024", excerpt: "You've always known exactly how to make a house feel like home..." },
-  { type: "memory", date: "May 2025", title: "Knee surgery — recovering well at home", followUp: true },
-  { type: "followup", date: "Follow-up", title: "You mentioned her recovery — How is she feeling now?" },
-  { type: "memory", date: "Mar 2025", title: "Started her garden again after years away" },
-  { type: "card", date: "Oct 2024", title: "Birthday Card 2024", excerpt: "Happy Birthday Mom — you light up every room you walk into..." },
-  { type: "memory", date: "Oct 2024", title: "Celebrated 40 years with Dad" },
+  {
+    type: "card" as const,
+    icon: "💌",
+    title: "Mother's Day Card 2024",
+    excerpt: "You've always known exactly how to make a house feel like home...",
+    date: "May 2024",
+  },
+  {
+    type: "memory" as const,
+    icon: "📝",
+    title: "Knee surgery — recovering well at home",
+    date: "May 2025",
+    followUp: true,
+  },
+  {
+    type: "followup" as const,
+    icon: "↻",
+    title: "You mentioned her recovery — How is she feeling now?",
+    date: "Due now",
+  },
+  {
+    type: "memory" as const,
+    icon: "📝",
+    title: "Started her garden again after years away",
+    date: "March 2025",
+    followUp: false,
+  },
+  {
+    type: "card" as const,
+    icon: "💌",
+    title: "Birthday Card 2024",
+    excerpt: "Happy birthday, Mom — wishing you all the joy in the world...",
+    date: "Feb 2024",
+  },
+  {
+    type: "memory" as const,
+    icon: "📝",
+    title: "Celebrated 40 years with Dad",
+    date: "October 2024",
+    followUp: false,
+  },
 ];
 
 export function Profile() {
-  const [activeTab, setActiveTab] = useState<Tab>("all");
+  const [activeTab, setActiveTab] = useState("All");
 
-  const filtered = TIMELINE.filter(e => {
-    if (activeTab === "all") return true;
-    if (activeTab === "memories") return e.type === "memory";
-    if (activeTab === "cards") return e.type === "card";
-    if (activeTab === "followups") return e.type === "followup" || e.followUp;
+  const filtered = TIMELINE.filter(t => {
+    if (activeTab === "All") return true;
+    if (activeTab === "Memories") return t.type === "memory";
+    if (activeTab === "Cards") return t.type === "card";
+    if (activeTab === "Follow-ups") return t.type === "followup";
     return true;
   });
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "memories", label: "Memories" },
-    { key: "cards", label: "Cards" },
-    { key: "followups", label: "Follow-ups" },
-  ];
-
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK }}>
-      <div style={{ background: BLACK, height: 44, display: "flex", alignItems: "center", padding: "0 20px" }}>
-        <span style={{ color: "#ffffff70", fontSize: "0.8rem", cursor: "pointer" }}>← What's New</span>
-      </div>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <nav style={{ background: BLACK, padding: "0 28px", height: 56, display: "flex", alignItems: "center" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", color: RED, letterSpacing: 2 }}>F.I. FORGOT</span>
+      </nav>
 
-      <div style={{ maxWidth: 640, margin: "0 auto", padding: "28px 20px 64px" }}>
+      <div style={{ maxWidth: 660, margin: "0 auto", padding: "24px 24px" }}>
+        {/* Back */}
+        <button style={{ background: "none", border: "none", color: GRAY, fontSize: "0.82rem", cursor: "pointer", padding: 0, marginBottom: 20, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          ← What's New
+        </button>
+
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24 }}>
-          <div style={{ width: 68, height: 68, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", flexShrink: 0 }}>💛</div>
-          <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", letterSpacing: "0.04em", lineHeight: 1 }}>MOM</div>
-            <span style={{ background: BLACK, color: WHITE, borderRadius: 20, padding: "3px 12px", fontSize: "0.72rem", fontWeight: 700 }}>Mother</span>
+        <div style={{ background: WHITE, borderRadius: 20, border: `1.5px solid ${BORDER}`, padding: "22px 26px", marginBottom: 20, display: "flex", alignItems: "center", gap: 20 }}>
+          <div style={{ width: 76, height: 76, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.2rem", flexShrink: 0 }}>💛</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1 }}>MOM</div>
+            <div style={{ display: "flex", gap: 8, marginTop: 6, alignItems: "center" }}>
+              <span style={{ background: `${SAGE}18`, color: SAGE, fontSize: "0.75rem", fontWeight: 700, borderRadius: 20, padding: "4px 12px" }}>Mother</span>
+              <span style={{ fontSize: "0.72rem", color: GRAY }}>6 memories · 3 cards sent</span>
+            </div>
           </div>
         </div>
 
-        {/* Tab bar */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 22, background: WHITE, borderRadius: 12, padding: 4, border: `1px solid ${BORDER}` }}>
-          {tabs.map(t => (
-            <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
-              flex: 1, padding: "8px 0", borderRadius: 9, border: "none",
-              background: activeTab === t.key ? BLACK : "transparent",
-              color: activeTab === t.key ? WHITE : GRAY,
-              fontWeight: 700, fontSize: "0.75rem", cursor: "pointer", transition: "all 0.15s",
-            }}>{t.label}</button>
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: 4, marginBottom: 16, background: WHITE, borderRadius: 12, border: `1.5px solid ${BORDER}`, padding: "4px" }}>
+          {TABS.map(t => (
+            <button key={t} onClick={() => setActiveTab(t)} style={{
+              flex: 1, padding: "9px 6px", borderRadius: 9, border: "none",
+              background: activeTab === t ? BLACK : "transparent",
+              color: activeTab === t ? WHITE : GRAY,
+              fontWeight: 700, fontSize: "0.78rem", cursor: "pointer",
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+            }}>{t}</button>
           ))}
         </div>
 
         {/* Timeline */}
-        <div style={{ position: "relative" as const }}>
-          <div style={{ position: "absolute" as const, left: 14, top: 0, bottom: 0, width: 2, background: BORDER }} />
-          <div style={{ display: "flex", flexDirection: "column" as const, gap: 16 }}>
-            {filtered.map((e, i) => (
-              <div key={i} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-                {/* Dot */}
-                <div style={{
-                  width: 28, height: 28, borderRadius: "50%", flexShrink: 0, zIndex: 1,
-                  background: e.type === "card" ? BLACK : e.type === "followup" ? "#FEF3C7" : WHITE,
-                  border: `2px solid ${e.type === "card" ? BLACK : e.type === "followup" ? "#D97706" : SAGE}`,
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem",
-                }}>
-                  {e.type === "card" ? "💌" : e.type === "followup" ? "↻" : "•"}
+        <div style={{ background: WHITE, borderRadius: 18, border: `1.5px solid ${BORDER}`, padding: "20px 22px", marginBottom: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+            {filtered.map((item, i) => (
+              <div key={i} style={{ display: "flex", gap: 16, paddingBottom: i < filtered.length - 1 ? 18 : 0, marginBottom: i < filtered.length - 1 ? 18 : 0, borderBottom: i < filtered.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                {/* Timeline track */}
+                <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", flexShrink: 0, width: 24 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: "50%",
+                    background: item.type === "card" ? SAGE : item.type === "followup" ? AMBER : CREAM,
+                    border: `2px solid ${item.type === "card" ? SAGE : item.type === "followup" ? AMBER : BORDER}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "0.8rem", flexShrink: 0,
+                  }}>{item.icon}</div>
+                  {i < filtered.length - 1 && <div style={{ width: 2, flex: 1, background: `${BORDER}`, marginTop: 4, minHeight: 20 }} />}
                 </div>
 
                 {/* Content */}
-                <div style={{ flex: 1, background: WHITE, borderRadius: 12, border: `1px solid ${e.type === "followup" ? "#FCD34D" : BORDER}`, padding: "12px 14px", marginTop: 2 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                    <span style={{ fontSize: "0.8rem", fontWeight: 700, color: e.type === "followup" ? "#92400E" : BLACK }}>{e.title}</span>
-                    <span style={{ fontSize: "0.68rem", color: GRAY, flexShrink: 0, marginLeft: 8 }}>{e.date}</span>
+                <div style={{ flex: 1, paddingTop: 2 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK }}>{item.title}</span>
+                    <span style={{ fontSize: "0.68rem", color: GRAY, flexShrink: 0 }}>{item.date}</span>
                   </div>
-                  {e.type === "card" && e.excerpt && (
-                    <div style={{ fontFamily: "'Caveat', cursive", fontStyle: "italic" as const, fontSize: "0.9rem", color: GRAY }}>{e.excerpt}</div>
+
+                  {item.type === "card" && item.excerpt && (
+                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, fontStyle: "italic", marginBottom: 4 }}>"{item.excerpt}"</div>
                   )}
-                  {e.followUp && (
-                    <span style={{ background: "#FEF3C7", color: "#92400E", borderRadius: 20, padding: "2px 10px", fontSize: "0.65rem", fontWeight: 700 }}>↻ Follow-up due</span>
+
+                  {item.type === "memory" && "followUp" in item && item.followUp && (
+                    <span style={{ background: `${AMBER}18`, color: AMBER, fontSize: "0.68rem", fontWeight: 700, borderRadius: 20, padding: "3px 9px" }}>↻ Follow-up due</span>
                   )}
-                  {e.type === "followup" && (
-                    <button style={{ marginTop: 8, background: "#D97706", color: WHITE, border: "none", borderRadius: 8, padding: "7px 16px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Answer →</button>
+
+                  {item.type === "followup" && (
+                    <div style={{ background: `${AMBER}10`, border: `1.5px solid ${AMBER}30`, borderRadius: 10, padding: "10px 14px", marginTop: 6 }}>
+                      <div style={{ fontSize: "0.78rem", color: AMBER, fontWeight: 600, marginBottom: 8 }}>{item.title}</div>
+                      <button style={{ background: AMBER, color: WHITE, border: "none", borderRadius: 7, padding: "7px 14px", fontSize: "0.76rem", fontWeight: 700, cursor: "pointer" }}>Answer →</button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -103,8 +143,9 @@ export function Profile() {
           </div>
         </div>
 
-        <button style={{ marginTop: 24, width: "100%", background: SAGE, color: WHITE, border: "none", borderRadius: 12, padding: "14px 0", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.06em", cursor: "pointer" }}>
-          + LOG A MOMENT
+        {/* Log button */}
+        <button style={{ width: "100%", padding: "14px", borderRadius: 12, border: "none", background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <span>+</span> Log a Moment
         </button>
       </div>
     </div>
