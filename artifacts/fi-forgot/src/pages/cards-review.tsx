@@ -149,11 +149,13 @@ export default function CardsReviewPage() {
     const currentText = editedMessages[card.id] ?? card.approvedMessage ?? "";
     const actionKey = `${card.id}-${label}`;
     setEditActionId(actionKey);
+    const recipient = getRecipients().find(r => r.id === card.recipientId);
+    const relationship = recipient?.relationship ?? "friend";
     try {
       const res = await fetch("/api/edit-card", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipientName: card.recipientName, holiday: card.holiday, currentCardText: currentText, instruction }),
+        body: JSON.stringify({ recipientName: card.recipientName, holiday: card.holiday, relationship, currentCardText: currentText, instruction }),
       });
       if (res.ok) {
         const data = await res.json() as { card?: string };
