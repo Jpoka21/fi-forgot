@@ -10,12 +10,14 @@ import {
   getEventQuestions,
   getYearsTogether,
   childrenSummary,
+  saveCard,
+  CardOrder,
   Child,
   EventBriefing,
   BriefingQuestion,
   BriefingAnswer,
 } from "@/lib/data";
-import { ArrowLeft, CheckCircle2, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -233,6 +235,8 @@ export default function BriefingPage() {
   );
 
   const [submitted, setSubmitted] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generatedCardId, setGeneratedCardId] = useState<string | null>(null);
 
   // Pre-fill years for anniversary if marriage date exists
   useEffect(() => {
@@ -262,7 +266,7 @@ export default function BriefingPage() {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!recipient) return;
     // Save children back to recipient profile
     const updatedRecipient = { ...recipient, children: editedChildren };
@@ -292,6 +296,7 @@ export default function BriefingPage() {
       });
     }
 
+    const allBriefings = getBriefingsForRecipient(recipient.id);
     const briefing: EventBriefing = {
       id: existingBriefing?.id ?? Date.now().toString(),
       recipientId: recipient!.id,
@@ -304,15 +309,53 @@ export default function BriefingPage() {
 
     saveBriefing(briefing);
     setSubmitted(true);
+    setGenerating(true);
 
-    toast({
-      title: "Briefing saved!",
-      description: `We'll use this to write ${recipient!.name}'s ${eventName} card.`,
-    });
-
-    setTimeout(() => {
-      setLocation(`/recipients/${recipient!.id}`);
-    }, 1800);
+    // Generate the card immediately
+    try {
+      const priorBriefings = allBriefings.filter(b => b.event !== eventName);
+      const res = await fetch("/api/generate-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientName: recipient.name,
+          relationship: recipient.relationship,
+          holiday: eventName,
+          tonePreference: recipient.tonePreference,
+          senderName: recipient.senderName,
+          personalityNotes: recipient.personalityNotes,
+          thingsToAvoid: recipient.thingsToAvoid,
+          favoriteMemories: recipient.favoriteMemories,
+          insideJokes: recipient.insideJokes,
+          emotionalLevel: recipient.emotionalLevel,
+          kidsNames: childrenSummary(editedChildren),
+          yearsTogther: recipient.marriageDate ? String(getYearsTogether(recipient.marriageDate)) : undefined,
+          eventBriefing: briefingAnswers,
+          recipientHistory: priorBriefings.map(b => ({ event: b.event, year: b.year, answers: b.answers })),
+        }),
+      });
+      const data = await res.json() as { cards?: { tone: string; text: string }[] };
+      const generated = data.cards ?? [];
+      if (generated.length > 0) {
+        const match = generated.find(c => c.tone === recipient.tonePreference) ?? generated[0];
+        const newCard: CardOrder = {
+          id: `personal-${Date.now()}`,
+          recipientId: recipient.id,
+          recipientName: recipient.name,
+          holiday: eventName,
+          dueDate: "",
+          status: "Ready for approval",
+          approvedMessage: match.text,
+          deliveryPreference: recipient.deliveryPreference,
+        };
+        saveCard(newCard);
+        setGeneratedCardId(newCard.id);
+      }
+    } catch {
+      // Card generation failed — that's OK, they can still use the dashboard
+    } finally {
+      setGenerating(false);
+    }
   }
 
   if (submitted) {
@@ -320,13 +363,49 @@ export default function BriefingPage() {
       <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
         <AppNav />
         <div className="p-8 max-w-lg mx-auto text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 size={32} className="text-green-600" />
-          </div>
-          <h2 className="font-serif text-2xl font-bold text-[hsl(221,47%,20%)] mb-2">Briefing saved.</h2>
-          <p className="text-[hsl(221,20%,50%)]">
-            We have everything we need for {recipient.name}'s {eventName} card. Redirecting...
-          </p>
+          {generating ? (
+            <>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${RED}15` }}>
+                <Loader2 size={32} style={{ color: RED }} className="animate-spin" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: NAVY }}>Writing the card…</h2>
+              <p style={{ color: "#6b7a99" }}>Using everything you just told us about {recipient?.name}.</p>
+            </>
+          ) : generatedCardId ? (
+            <>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#e8f5e9" }}>
+                <CheckCircle2 size={32} className="text-green-600" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: NAVY }}>Card ready for review!</h2>
+              <p className="mb-6" style={{ color: "#6b7a99" }}>
+                We wrote {recipient?.name}'s {eventName} card. Read it over and approve when you're happy.
+              </p>
+              <button
+                onClick={() => setLocation("/cards")}
+                className="w-full font-bold py-4 rounded-xl text-white"
+                style={{ background: RED }}
+              >
+                Review the card →
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#e8f5e9" }}>
+                <CheckCircle2 size={32} className="text-green-600" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: NAVY }}>Briefing saved.</h2>
+              <p className="mb-6" style={{ color: "#6b7a99" }}>
+                We have everything we need for {recipient?.name}'s {eventName} card.
+              </p>
+              <button
+                onClick={() => setLocation("/dashboard")}
+                className="w-full font-bold py-4 rounded-xl text-white"
+                style={{ background: RED }}
+              >
+                Back to dashboard →
+              </button>
+            </>
+          )}
         </div>
       </div>
     );
