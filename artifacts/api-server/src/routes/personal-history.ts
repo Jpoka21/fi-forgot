@@ -94,6 +94,21 @@ router.post("/personal/cards", async (req, res) => {
   }
 });
 
+router.delete("/personal/cards/:id", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const { id } = req.params;
+  try {
+    await db
+      .delete(personalCardsTable)
+      .where(and(eq(personalCardsTable.id, id), eq(personalCardsTable.userId, userId)));
+    res.json({ ok: true });
+  } catch (err) {
+    logger.error({ err, id }, "personal/cards DELETE failed");
+    res.status(500).json({ error: "Failed to delete card" });
+  }
+});
+
 // ── Briefings ────────────────────────────────────────────────────────────────
 
 router.get("/personal/briefings", async (req, res) => {

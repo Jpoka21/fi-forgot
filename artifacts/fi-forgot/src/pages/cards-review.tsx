@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
-  getCards, getRecipients, CardOrder, Recipient, RecipientAddress,
+  getCards, getRecipients, getServerUserId, CardOrder, Recipient, RecipientAddress,
   saveCard, deleteCard, updateCard,
 } from "@/lib/data";
 import {
@@ -24,6 +24,12 @@ const GRAY  = "#6B6B6B";
 interface HwFont { id: string; name: string; previewUrl?: string; }
 interface CardDesign { id: string; name: string; category?: string; imageUrl?: string; }
 type PendingApproval = QueueItem & { message?: MessageDraft };
+
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+function cardTimestamp(card: CardOrder): number {
+  const m = card.id.match(/personal-(\d+)/);
+  return m ? parseInt(m[1], 10) : 0;
+}
 
 /* ── Progress indicator ──────────────────────────────────────────────────── */
 function ProgressDots({ total, current }: { total: number; current: number }) {
@@ -77,6 +83,7 @@ export default function CardsReviewPage() {
   const [shareUrlIds, setShareUrlIds]         = useState<Record<string, string>>({});
 
   useEffect(() => {
+    const serverUserId = getServerUserId();
     const recipientIds = new Set(getRecipients().map(r => r.id));
     const allCards = getCards();
 
@@ -89,29 +96,41 @@ export default function CardsReviewPage() {
         recipientName: c.recipientName,
         holiday: c.holiday,
         status: c.status,
+        userId: c.userId,
         deliveryPreference: c.deliveryPreference,
         approvedMessagePreview: (c.approvedMessage ?? "").slice(0, 60),
       });
     });
     console.groupEnd();
 
-    const cs = allCards.filter(c => c.status === "Ready for approval" && recipientIds.has(c.recipientId));
+    // Filter: Ready for approval + valid recipient.
+    // When authenticated: also require card.userId matches the current user —
+    // this excludes stale pre-auth cards (Test, old sessions) that have no userId stamp.
+    const cs = allCards.filter(c =>
+      c.status === "Ready for approval" &&
+      recipientIds.has(c.recipientId) &&
+      (serverUserId ? c.userId === serverUserId : true)
+    );
 
-    console.group("[cards-review] Cards shown in review queue");
-    cs.forEach(c => console.log({ id: c.id, recipientName: c.recipientName, holiday: c.holiday }));
+    // Sort newest-first: timestamp is embedded in the card ID ("personal-TIMESTAMP")
+    cs.sort((a, b) => cardTimestamp(b) - cardTimestamp(a));
+
+    console.group("[cards-review] Cards shown in review queue (newest first)");
+    cs.forEach((c, i) => console.log({ idx: i, id: c.id, recipientName: c.recipientName, holiday: c.holiday, userId: c.userId }));
     console.groupEnd();
 
     setCards(cs);
     if (user?.email) setPending(getCustomerPendingApprovals(user.email));
 
-    // If a specific card ID was passed in the URL, jump to it
+    // ?id= jump: find the target card in the already-sorted list and jump to it.
+    // Without ?id=, currentIdx stays at 0, which is always the newest card after sorting.
     if (highlightId) {
-      // pendingApprovals are at the front; personal cards follow
       const paCount = user?.email ? getCustomerPendingApprovals(user.email).length : 0;
       const targetCardIdx = cs.findIndex(c => c.id === highlightId);
       if (targetCardIdx >= 0) {
         setCurrentIdx(paCount + targetCardIdx);
       }
+      // If card not in filtered list, stay at 0 (newest)
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

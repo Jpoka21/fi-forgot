@@ -143,6 +143,7 @@ export interface CardOrder {
   overrideAddress?: RecipientAddress;
   keptInMind?: string[];
   keptInMindSources?: string[];
+  userId?: string; // set at save time from the authenticated session; absent on old pre-auth cards
 }
 
 // ─── Personalization record ───────────────────────────────────────────────────
@@ -790,6 +791,33 @@ export function setServerSyncUserId(id: string | null): void {
   _serverUserId = id;
 }
 
+export function getServerUserId(): string | null {
+  return _serverUserId;
+}
+
+// Extract the epoch timestamp embedded in a personal card ID ("personal-TIMESTAMP")
+function cardTimestamp(card: CardOrder): number {
+  const m = card.id.match(/personal-(\d+)/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+// For "Ready for approval" cards that share the same recipientId + holiday,
+// keep only the newest one. Non-ready cards are always kept.
+function deduplicateReadyCards(cards: CardOrder[]): CardOrder[] {
+  const sorted = [...cards].sort((a, b) => cardTimestamp(b) - cardTimestamp(a));
+  const seen = new Set<string>();
+  const result: CardOrder[] = [];
+  for (const card of sorted) {
+    if (card.status === "Ready for approval") {
+      const key = `${card.recipientId}__${card.holiday}`;
+      if (seen.has(key)) continue; // skip older duplicate
+      seen.add(key);
+    }
+    result.push(card);
+  }
+  return result;
+}
+
 function syncHeaders(): HeadersInit {
   return _serverUserId ? { "Content-Type": "application/json", "x-user-id": _serverUserId } : { "Content-Type": "application/json" };
 }
@@ -873,27 +901,41 @@ export function updateCard(card: CardOrder): void {
 }
 
 export function saveCard(card: CardOrder): void {
+  // Stamp with current auth userId so stale pre-auth cards can be filtered out
+  const stamped: CardOrder = _serverUserId ? { ...card, userId: _serverUserId } : card;
+
   let all = loadCards();
-  const existingIdx = all.findIndex((c) => c.id === card.id);
+  const existingIdx = all.findIndex((c) => c.id === stamped.id);
   if (existingIdx >= 0) {
-    all[existingIdx] = card;
+    all[existingIdx] = stamped;
   } else {
-    // Remove any stale "Ready for approval" cards for the same recipient+holiday
-    // before adding the new one, so the review queue never shows outdated cards.
-    all = all.filter(
-      (c) =>
-        !(c.recipientId === card.recipientId &&
-          c.holiday === card.holiday &&
-          c.status === "Ready for approval")
-    );
-    all.push(card);
+    // Remove stale "Ready for approval" cards for the same recipientId + holiday.
+    // Also fire-and-forget DELETE on the server so they don't come back via sync.
+    const staleIds: string[] = [];
+    all = all.filter((c) => {
+      const isStale =
+        c.recipientId === stamped.recipientId &&
+        c.holiday === stamped.holiday &&
+        c.status === "Ready for approval";
+      if (isStale) staleIds.push(c.id);
+      return !isStale;
+    });
+    if (_serverUserId && staleIds.length > 0) {
+      for (const staleId of staleIds) {
+        fetch(`/api/personal/cards/${staleId}`, {
+          method: "DELETE",
+          headers: { "x-user-id": _serverUserId },
+        }).catch(() => {});
+      }
+    }
+    all.push(stamped);
   }
   localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(all));
   if (_serverUserId) {
     fetch("/api/personal/cards", {
       method: "POST",
       headers: syncHeaders(),
-      body: JSON.stringify(card),
+      body: JSON.stringify(stamped),
     }).catch(() => {});
   }
 }
@@ -901,6 +943,12 @@ export function saveCard(card: CardOrder): void {
 export function deleteCard(id: string): void {
   const all = loadCards().filter((c) => c.id !== id);
   localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(all));
+  if (_serverUserId) {
+    fetch(`/api/personal/cards/${id}`, {
+      method: "DELETE",
+      headers: { "x-user-id": _serverUserId },
+    }).catch(() => {});
+  }
 }
 
 export function getBriefings(): EventBriefing[] {
@@ -944,7 +992,10 @@ export async function hydrateCardsFromServer(userId: string): Promise<void> {
     if (!res.ok) return;
     const { cards: serverCards } = await res.json() as { cards: CardOrder[] };
     if (serverCards.length > 0) {
-      localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(serverCards));
+      // Deduplicate before writing: keep only the newest "Ready for approval" card
+      // per recipientId+holiday, preventing stale duplicates from re-entering the queue.
+      const deduped = deduplicateReadyCards(serverCards);
+      localStorage.setItem(STORAGE_KEY_CARDS, JSON.stringify(deduped));
     } else {
       const local = loadCards();
       if (local.length > 0) {
