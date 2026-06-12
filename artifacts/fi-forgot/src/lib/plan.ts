@@ -41,6 +41,7 @@ export function getRecipientLimit(plan: Plan): number {
 }
 
 export function canActivateRecipient(plan: Plan, activeCount: number): boolean {
+  if (import.meta.env.DEV) return true;
   return activeCount < getRecipientLimit(plan);
 }
 
