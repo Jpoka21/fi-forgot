@@ -611,24 +611,34 @@ const CHARACTER_TRAIT_WORDS: RegExp[] = [
   /\bgrit\b/i,
   /\btenacious\b/i,
   /\btenacity\b/i,
+  /\bresolve\b/i,
+  /\bcommitment\b/i,
+  /\bcommitted\b/i,
+  /\bwillpower\b/i,
+  /\bundaunted\b/i,
+  /\bperseverance\b/i,
+  /\bpersevere\b/i,
+  /\bpersevered\b/i,
+  /\bpushes? (yourself|themselves|herself|himself)\b/i,
+  /\btestament to your\b/i,
 ];
 
 function stripFabricatedCharacterAdjectives(
   cardText: string,
   contextText: string,
+  firstName: string,
 ): { text: string; strippedSentences: string[] } {
   const ctxLower = contextText.toLowerCase();
   const strippedSentences: string[] = [];
 
-  // Split preserving whitespace context — split on sentence-ending punctuation + space
-  const sentenceRe = /[^.!?]*[.!?]+["']?\s*/g;
+  // Split on sentence-ending punctuation + space, keeping delimiters
   const sentences: string[] = [];
   let remainder = cardText;
-  let match;
   const re = /[^.!?]*[.!?]+["']?(\s*)/g;
   re.lastIndex = 0;
-  while ((match = re.exec(cardText)) !== null) {
-    sentences.push(match[0]);
+  let m;
+  while ((m = re.exec(cardText)) !== null) {
+    sentences.push(m[0]);
     remainder = cardText.slice(re.lastIndex);
   }
   if (remainder.trim()) sentences.push(remainder);
@@ -651,8 +661,17 @@ function stripFabricatedCharacterAdjectives(
     return true;
   });
 
-  // Re-join and clean up extra whitespace
-  const cleaned = filtered.join("").replace(/\s{2,}/g, " ").trim();
+  let cleaned = filtered.join("").replace(/\s{2,}/g, " ").trim();
+
+  // Dangling opener repair: if stripping removed the first sentence and the
+  // result now starts with a pronoun that has no antecedent (It's, That's,
+  // This is, This was), prepend the recipient's name so the card isn't broken.
+  const DANGLING_RE = /^(it'?s|it was|that'?s|that was|this is|this was)\b/i;
+  if (strippedSentences.length > 0 && DANGLING_RE.test(cleaned)) {
+    // Capitalise first letter of cleaned and prepend name
+    cleaned = `${firstName}, ${cleaned.charAt(0).toLowerCase()}${cleaned.slice(1)}`;
+  }
+
   return { text: cleaned || cardText, strippedSentences };
 }
 
@@ -773,7 +792,7 @@ router.post("/v2/generate-card", async (req, res) => {
     ].filter(Boolean).join(" ");
 
     const filteredCards = parsed.cards.map(card => {
-      const { text, strippedSentences } = stripFabricatedCharacterAdjectives(card.text, rawContextText);
+      const { text, strippedSentences } = stripFabricatedCharacterAdjectives(card.text, rawContextText, firstName);
       if (strippedSentences.length > 0) {
         logger.info({ tone: card.tone, strippedSentences }, "v2-generate-card: stripped fabricated character adjectives");
       }
