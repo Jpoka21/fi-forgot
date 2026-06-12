@@ -87,7 +87,7 @@ export function buildRelRules(relationship: string, occasion: string): string {
     return `This is a PROFESSIONAL relationship. Rules:
 - Warm and genuine but professionally appropriate at all times
 - No romantic language, no emotional dependency language, no aggressive teasing
-- Reference the work context: shared projects, professional growth, team moments
+- Reference the work context: shared projects, professional growth, team moments — only what is present in the provided context
 - A good work card feels personal without feeling private`;
   }
 
@@ -95,7 +95,7 @@ export function buildRelRules(relationship: string, occasion: string): string {
     return `This is a PARTNER/SPOUSE card. Rules:
 - The sender knows this person better than anyone alive — write like it
 - Avoid generic romance; favor real-life specific moments over broad declarations
-- Reference the shared life: the small habits, the running jokes, the things only they would understand
+- If context provides shared life details, use them — small habits, running jokes, things only they would understand. If no context is provided, write with the warmth and earned familiarity of a close relationship without inventing those specifics
 - Intimacy here is in the detail, not the volume of sentiment
 - Do NOT write "you are my everything" or similar sweeping declarations — those are earned through specifics
 - Allowed to be vulnerable, playful, or both — depends on what the context shows`;
@@ -104,25 +104,25 @@ export function buildRelRules(relationship: string, occasion: string): string {
   if (["mom","mother"].includes(rel)) {
     return `This is a MOTHER card. Rules:
 - Channel genuine gratitude and a sense of life perspective — she shaped who the sender is
-- Favor specific inherited qualities, sacrifices she made, or things the sender now does because of her
+- Favor specific inherited qualities, sacrifices she made, or things the sender now does because of her — only when present in context
 - Can be warm and slightly reverent, but avoid saccharine — earned sentiment beats empty praise
 - She will likely keep this card — write accordingly
-- Allowed to reference family history, specific memories, or recent life milestones`;
+- Reference family history, specific memories, or recent life milestones ONLY when they are present in the provided context — do not invent them`;
   }
 
   if (["dad","father"].includes(rel)) {
     return `This is a FATHER card. Rules:
 - Dad cards often understate — that's a feature, not a bug
-- Favor quiet appreciation, things he taught without saying them, and specific shared moments
+- Favor quiet appreciation, things he taught without saying them, and specific shared moments — but only use memories and moments that are present in context; do not invent them
 - If the relationship shows humor, a well-placed joke or callback earns more than pure sentimentality
 - Avoid over-the-top emotional language — a card that makes him proud without making him uncomfortable
-- References to specific skills, hobbies, or shared experiences land best`;
+- References to specific skills, hobbies, or shared experiences land best — only when those specifics are provided`;
   }
 
   if (["son","boy"].includes(rel)) {
     return `This is a PARENT-TO-SON card. Rules:
 - Write as a proud parent — this is about his growth, not generic encouragement
-- Reference specific things he's doing, becoming, or has achieved
+- Reference specific things he's doing, becoming, or has achieved — drawn from the provided context, not invented
 - The emotional range spans proud → playful → deeply loving — let the context guide which
 - Avoid life-lesson lectures in the card — a specific observation is worth ten pieces of advice
 - He should feel genuinely seen, not universally praised`;
@@ -131,8 +131,8 @@ export function buildRelRules(relationship: string, occasion: string): string {
   if (["daughter","girl"].includes(rel)) {
     return `This is a PARENT-TO-DAUGHTER card. Rules:
 - Write as a proud parent who notices the specific person she's becoming
-- Reference her actual life: her interests, her recent moments, her growth
-- Can be warmer and more openly emotional than a son card — but still grounded in specifics
+- Reference her actual life from the provided context — her interests, her recent moments, her growth. Do not invent these details
+- Can be warmer and more openly emotional than a son card — but still grounded in specifics from context
 - Avoid telling her who to be; celebrate who she already is
 - She should feel seen, not just loved`;
   }
@@ -140,7 +140,7 @@ export function buildRelRules(relationship: string, occasion: string): string {
   if (["brother"].includes(rel)) {
     return `This is a SIBLING (BROTHER) card. Rules:
 - Only a sibling can mix roast and sincerity in the same breath — lean into that
-- The dynamic: shared history, mutual knowing, teasing as a form of love
+- The dynamic: shared history and mutual knowing — but only reference shared history when it exists in the provided context; do not invent it simply because a sibling relationship implies one might exist
 - If there's an inside joke or shared embarrassing memory in the context — use it
 - The card should have at least one moment of genuine warmth buried under the banter
 - Avoid being too Hallmark; avoid being too mean — the sweet spot is the callback`;
@@ -149,17 +149,17 @@ export function buildRelRules(relationship: string, occasion: string): string {
   if (["sister"].includes(rel)) {
     return `This is a SIBLING (SISTER) card. Rules:
 - Sister cards can carry more open warmth than brother cards but still benefit from humor
-- Shared history, the specific dynamic they have, moments only they remember
-- She knows the sender too well for generic sentiment to land — be specific
+- Reference shared history and the specific dynamic they have — but only when present in context. Do not invent shared moments, memories, or traditions
+- She knows the sender too well for generic sentiment to land — be specific to what context provides
 - A good sister card reads like a text they'd actually send, just more considered`;
   }
 
   if (rel.includes("grandma") || rel.includes("grandmother") || rel.includes("grandpa") || rel.includes("grandfather") || rel.includes("grandparent")) {
     return `This is a GRANDPARENT card. Rules:
 - Warmth and respect, with a specific generational connection
-- Reference what they've given across generations — wisdom, stories, presence
+- Reference what they've given across generations — wisdom, stories, presence — when the context supports it
 - Avoid being condescending or overly simplified
-- A good grandparent card references something specific about this person — not just "grandparent"
+- A good grandparent card references something specific about this person when context provides it — do not invent specifics when context is absent
 - Can be nostalgic, loving, and reflective`;
   }
 
@@ -167,11 +167,11 @@ export function buildRelRules(relationship: string, occasion: string): string {
     const isBestFriend = rel.includes("best") || rel.includes("bestie");
     return `This is a FRIEND card${isBestFriend ? " (best friend)" : ""}. Rules:
 - A friend card should sound like the sender, not a greeting card company
-- Conversational, specific, and real — favor stories and callbacks over broad affirmations
+- Conversational, specific, and real — favor stories and callbacks WHEN THEY EXIST in context. Without context, write warmly and genuinely about the value of the friendship without inventing its history
 - If humor fits the context, use it — friends appreciate being made to laugh
 - The opening line should feel like something you'd actually say to this person
 - Avoid "you've always been there for me" and similar vague loyalty statements
-- Reference what makes THIS friendship specific`;
+- Reference what makes THIS friendship specific — but only what the context actually tells you; do not invent the specific`;
   }
 
   return `This is a personal relationship card. Rules:
@@ -206,20 +206,30 @@ QUALITY REQUIREMENTS — every card must pass all of these
 ═══════════════════════════════════════════
 
 1. SPECIFICITY
-   Every card must contain at least 2 specific personal references drawn from the provided context.
+   IF context is provided above (profile answers, memories, fresh updates):
+   Every card must contain at least 2 specific personal references drawn from that context.
    If a card could be sent to 100 people without modification, it has failed.
-   Good: "It still makes me laugh that a casual attempt to try pickleball somehow turned into a regular part of your week."
+   Good: "Six months of training and a finish line later — that's not a small thing."
    Bad: "Hope you have a wonderful birthday."
 
+   IF context is absent (no profile answers, no memories, no updates provided):
+   Write a warm, honest, occasion-appropriate card. Do NOT invent specifics to satisfy this requirement.
+   Do NOT attribute personality traits, character qualities, humor, or behavioral patterns that have not been described — not even vague ones like "your warmth," "your steady presence," "your integrity," or "your sense of humor."
+   Instead: say something meaningful about the relationship itself and the occasion. Example: "Sean, birthdays are a good excuse to say the things you don't always get around to saying. Lucky to have you around. Hope this one's a good one."
+   A simple truthful card passes. A card that invents traits or memories fails.
+
 2. MEMORY WEAVING
-   Do not mention one memory at a time. Weave multiple sources together naturally.
+   IF multiple memories are present in context: Weave them together naturally rather than listing them.
    Good: "Between the kitchen renovation finally wrapping up and your new pickleball phase, it feels like you've turned this year into two completely different adventures."
    Bad: "Congrats on finishing your kitchen." / "You enjoy pickleball."
+   IF one memory is present: Build the card around that single anchor — do not invent additional memories to weave.
+   IF no memories are present: Do not invent memories to weave. Write warmly without invented history.
 
 3. OPENING LINES
-   The first sentence must immediately feel personal. Never open with a generic greeting.
+   The first sentence must feel personal. Never open with a generic greeting.
    Do NOT open with: "Happy Birthday", "Just wanted to wish you", "Hope you have", any holiday greeting phrase.
-   Instead open with: a memory, an observation, a callback, a joke, a recent life update, a reflection.
+   When context exists, open with: a memory, an observation, a callback, a joke, a recent life update, a reflection.
+   When no context exists, open with: a relationship reflection, an occasion reflection, or honest appreciation — NOT an invented memory or invented shared experience.
    Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle.
 
 4. CLOSING LINES
@@ -238,8 +248,22 @@ QUALITY REQUIREMENTS — every card must pass all of these
    The voice, familiarity, and emotional register should make the relationship obvious.
 
 6. STORYTELLING
-   Reference events as small stories, not as facts.
-   Bad: "You enjoy pickleball." Better: "It still makes me laugh that a casual attempt to try pickleball somehow turned into a regular part of your week."
+   Reference facts from context as small stories, not as bare facts.
+   Good: "Six months of training and one finish line later — that's not a small thing."
+   Bad (when that origin story is not in the context): "It still makes me laugh that a casual attempt to try pickleball somehow turned into a regular part of your week." — this invents the "casual attempt" origin and the escalation. Only expand on facts that exist. Do not add invented origin stories, invented escalation, or invented emotional framing to bare facts.
+
+7. ANTI-FABRICATION (permanent — applies regardless of context level — no exceptions)
+   NEVER invent any of the following unless they are explicitly present in the provided context:
+   - Trips or travel ("remember our road trip to the coast...")
+   - Hobbies or interests not stated ("you make the perfect cup of coffee")
+   - Personality traits not stated ("your kindness, humor, and unwavering support")
+   - Traditions or rituals not stated
+   - Conversations or exchanges not stated
+   - Family dynamics not stated
+   - Inside jokes not stated
+   - Relationship history not stated
+   - Shared experiences not stated
+   If context is limited, write with humility. Do not pretend the relationship is richer, closer, or more documented than the available information supports. A card that honestly reflects a simple relationship is better than a card that invents a rich one.
 
 ═══════════════════════════════════════════
 BANNED PHRASES — using any of these is an automatic failure
@@ -291,15 +315,20 @@ function buildUserPrompt(
     "Be genuine but not excessive.";
 
   const isPro = PROFESSIONAL_RELS.includes(rel);
+  const hasContext = !!(bodyContext || contextSupplement);
 
   const options = isPro ? [
     { label: "Best Match",      desc: `Professional, warm, specific to the work relationship with ${firstName}.` },
     { label: "More Casual",     desc: `Warmer and slightly more personal — still appropriate for work. Keep all specific references from Best Match; only the register changes.` },
     { label: "More Heartfelt",  desc: `More genuinely human — the version that actually means something. Keep all specific references from Best Match; go deeper on the emotional weight behind them.` },
+  ] : hasContext ? [
+    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Opens with and uses the most personally relevant facts and memories from the context provided.` },
+    { label: "More Casual",     desc: `Same specific content as Best Match — same facts, same memories from context — delivered in looser, more conversational voice. Think: the text you'd actually send. Casual means HOW you say it, not LESS of what you know about them. May lead with humor or a casual callback. ${emotionGuide}` },
+    { label: "More Heartfelt",  desc: `Same specific content as Best Match — same facts, same memories from context — but with deeper reflection behind each one. The version they might keep. Heartfelt means the emotional weight you put behind the specifics, not replacing them with declarations. ${emotionGuide}` },
   ] : [
-    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Opens with and uses the most personally relevant memories from context.` },
-    { label: "More Casual",     desc: `Same specific content as Best Match — same memories, same details — delivered in looser, more conversational voice. Think: the text you'd actually send. Casual means HOW you say it, not LESS of what you know about them. May lead with humor or a casual callback. ${emotionGuide}` },
-    { label: "More Heartfelt",  desc: `Same specific content as Best Match — same memories, same details — but with deeper reflection behind each one. The version they might keep. Heartfelt means the emotional weight you put behind the specifics, not replacing them with declarations. ${emotionGuide}` },
+    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Warm, honest, and genuine — no specific memories or details to work with, so do not invent any. Write 3–5 sentences that feel real for this relationship and occasion.` },
+    { label: "More Casual",     desc: `Same honest warmth as Best Match, delivered in a looser, more conversational voice. Think: what you'd actually say out loud. Do not introduce new invented details. ${emotionGuide}` },
+    { label: "More Heartfelt",  desc: `Same honest warmth as Best Match — deeper emotional reflection on the relationship and occasion, but still no invented specifics. The feeling comes from sincerity, not from fabricated memories. ${emotionGuide}` },
   ];
 
   const optionBlock = options.map(o => `Option: "${o.label}" — ${o.desc}`).join("\n");
@@ -313,7 +342,7 @@ Emotional level: ${emotionGuide}
 
 ${optionBlock}
 
-MEMORY DENSITY REQUIREMENT: Every card must contain at least 2 specific personal references from the context above. Do not write a generic card when context exists. Weave multiple memories or facts together naturally rather than listing them.
+MEMORY DENSITY REQUIREMENT: If context is provided above, every card must contain at least 2 specific personal references from that context. Do not write a generic card when context exists. Weave multiple memories or facts together naturally rather than listing them. If no context is provided, write a shorter, honest, occasion-appropriate card — 3 to 5 sentences is correct. Do not invent context to satisfy this requirement.
 
 PRIORITY ORDER for context when space is limited:
 1. Event Briefing Answers (most specific to this card)

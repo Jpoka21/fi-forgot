@@ -1,0 +1,139 @@
+Sprint 7 Implementation — Grounded Writing
+
+Approved.
+
+Implement the prompt and relationship rule changes only.
+
+Do not implement the fabrication-risk scorer yet.
+
+Goals:
+
+1. Stop invented memories.
+2. Stop invented personality traits.
+3. Stop invented relationship dynamics.
+4. Prefer honest simplicity over fabricated specificity.
+
+Implement:
+
+1. Conditional Specificity Rule
+
+Current behavior:
+
+Specificity is required even when context is empty.
+
+New behavior:
+
+If context exists:
+
+* Use at least 2 specific references from context.
+
+If context does not exist:
+
+* Write a warm, honest, occasion-appropriate card.
+* Do not invent specifics to satisfy the requirement.
+
+A simple truthful card passes.
+A detailed fabricated card fails.
+
+2. Conditional Memory Weaving
+
+Current behavior:
+
+Memory weaving is always required.
+
+New behavior:
+
+* Multiple memories → weave them.
+* One memory → build around it.
+* No memories → do not invent memories to weave.
+
+3. Low Context Opening Rules
+
+When no memory or update exists:
+
+Allowed:
+
+* relationship reflection
+* occasion reflection
+* appreciation
+
+Not allowed:
+
+* invented memory
+* invented callback
+* invented shared experience
+
+4. Storytelling Rule Revision
+
+Storytelling should only expand on facts that exist.
+
+Do not embellish a fact with invented history.
+
+Allowed:
+"Six months of training and a finish line later..."
+
+Not allowed:
+"It still makes me laugh how a casual attempt turned into..."
+
+unless that information exists in context.
+
+5. Anti-Fabrication Rule
+
+Add a permanent rule:
+
+Never invent:
+
+* trips
+* hobbies
+* traditions
+* conversations
+* personality traits
+* family dynamics
+* inside jokes
+* relationship history
+* shared experiences
+
+unless explicitly present in context.
+
+If context is limited:
+
+Write with humility.
+
+Do not pretend the relationship is richer, closer, or more documented than the available information supports.
+
+6. Relationship Rule Adjustments
+
+Update Friend, Spouse, Mother, Father, Brother, Sister, and other relationship rules so that:
+
+Shared history is used only when present.
+
+The model should not create shared history simply because a relationship type implies one might exist.
+
+Verification Required
+
+After implementation:
+
+Generate and show examples for:
+
+A.
+Friend + Birthday + No Memories
+
+B.
+Friend + Birthday + Marathon Memory
+
+C.
+Spouse + Anniversary + Multiple Memories
+
+For each example explain:
+
+* What facts came from context
+* What inferences were made
+* Why no fabricated details were introduced
+
+Do not implement fabrication-risk scoring yet.
+
+Do not add new database fields.
+
+Do not add new UI.
+
+Focus only on grounded writing.
