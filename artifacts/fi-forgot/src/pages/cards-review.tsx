@@ -628,7 +628,7 @@ function PersonalCard({
     setImproveSaving(true);
     setImproveError(false);
     try {
-      const headers = getApiHeaders() as Record<string, string>;
+      const headers = { ...(getApiHeaders() as Record<string, string>), "Content-Type": "application/json" };
       const res = await fetch(`/api/v2/recipients/${card.recipientId}/answer-question`, {
         method: "POST",
         headers,

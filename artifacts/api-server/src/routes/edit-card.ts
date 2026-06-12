@@ -50,7 +50,7 @@ Return only the revised card text — no commentary, no labels, no extra formatt
     });
 
     const text = completion.choices[0]?.message?.content?.trim() ?? currentCardText;
-    res.json({ text });
+    res.json({ card: text });
   } catch (err) {
     req.log.error({ err }, "OpenAI card edit failed");
     res.status(500).json({ error: "Card edit failed" });
