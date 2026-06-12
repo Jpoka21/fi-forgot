@@ -6,11 +6,11 @@ const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF"
 const AMBER = "#D97706";
 
 const MOMENTS = [
-  { name: "Steve",  emoji: "🤝", rel: "Friend",  event: "Birthday",     date: "Jun 14", days: 3,  status: "Draft ready",  statusC: SAGE  },
-  { name: "Sarah",  emoji: "👩", rel: "Sister",  event: "Anniversary",  date: "Jun 19", days: 8,  status: "On track",     statusC: SAGE  },
-  { name: "Mom",    emoji: "💛", rel: "Mother",  event: "Mother's Day", date: "Jun 26", days: 15, status: "Add details",  statusC: AMBER },
-  { name: "Marcus", emoji: "🧢", rel: "Friend",  event: "Just Because", date: "Jul 3",  days: 22, status: "On track",     statusC: SAGE  },
-  { name: "Dad",    emoji: "👔", rel: "Father",  event: "Father's Day", date: "Jul 9",  days: 28, status: "On track",     statusC: SAGE  },
+  { name: "Steve",  emoji: "🤝", rel: "Friend",  event: "Birthday",     date: "Jun 14", days: 3,  status: "Draft ready",  statusC: SAGE,  action: "Review Draft" },
+  { name: "Sarah",  emoji: "👩", rel: "Sister",  event: "Anniversary",  date: "Jun 19", days: 8,  status: "On track",     statusC: SAGE,  action: "View" },
+  { name: "Mom",    emoji: "💛", rel: "Mother",  event: "Mother's Day", date: "Jun 26", days: 15, status: "Add details",  statusC: AMBER, action: "Add Details" },
+  { name: "Marcus", emoji: "🧢", rel: "Friend",  event: "Just Because", date: "Jul 3",  days: 22, status: "On track",     statusC: SAGE,  action: "View" },
+  { name: "Dad",    emoji: "👔", rel: "Father",  event: "Father's Day", date: "Jul 9",  days: 28, status: "On track",     statusC: SAGE,  action: "View" },
 ];
 
 const PEOPLE = [
@@ -23,146 +23,154 @@ const PEOPLE = [
 ];
 
 export function Dashboard() {
-  const [hov, setHov] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Nav */}
-      <nav style={{ background: BLACK, padding: "0 32px", height: 62, display: "flex", alignItems: "center", gap: 20 }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: RED, letterSpacing: 2, flexShrink: 0 }}>F.I. FORGOT</span>
-        <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: "rgba(255,255,255,0.45)", flex: 1 }}>your next 30 days</span>
-        <button style={{ background: RED, color: WHITE, border: "none", borderRadius: 8, padding: "9px 18px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", letterSpacing: "0.03em" }}>+ ADD MOMENT</button>
-        <div style={{ width: 38, height: 38, borderRadius: "50%", background: SAGE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>🙂</div>
-      </nav>
+      <div style={{ background: BLACK, padding: "0 28px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky" as const, top: 0, zIndex: 10 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", color: RED, letterSpacing: "0.08em" }}>F.I. FORGOT</span>
+          <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "rgba(255,255,255,0.5)" }}>your next 30 days</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button style={{ background: RED, color: WHITE, border: "none", borderRadius: 8, padding: "7px 16px", fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: "0.82rem", cursor: "pointer" }}>
+            + ADD MOMENT
+          </button>
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: SAGE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.82rem", fontWeight: 700, color: WHITE }}>JD</div>
+        </div>
+      </div>
 
-      <div style={{ maxWidth: 920, margin: "0 auto", padding: "30px 28px" }}>
+      <div style={{ maxWidth: 920, margin: "0 auto", padding: "28px 24px" }}>
         {/* Hero stat strip */}
-        <div style={{ background: BLACK, borderRadius: 18, padding: "22px 32px", display: "flex", alignItems: "center", gap: 36, marginBottom: 32 }}>
-          <div style={{ textAlign: "center" as const }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3rem", color: RED, lineHeight: 1 }}>5</div>
-            <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.45)", fontWeight: 700, letterSpacing: "0.1em", marginTop: 2 }}>EVENTS COMING</div>
+        <div style={{ background: BLACK, borderRadius: 18, padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+          <div style={{ display: "flex", gap: 40, alignItems: "center" }}>
+            <div style={{ textAlign: "center" as const }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: RED, lineHeight: 1 }}>5</div>
+              <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.45)", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" as const }}>Upcoming Events</div>
+            </div>
+            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ textAlign: "center" as const }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: WHITE, lineHeight: 1 }}>3</div>
+              <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.45)", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" as const }}>Days to Next</div>
+            </div>
+            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ textAlign: "center" as const }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.6rem", color: SAGE, lineHeight: 1 }}>1</div>
+              <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.45)", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" as const }}>Draft Waiting</div>
+            </div>
           </div>
-          <div style={{ width: 1, height: 52, background: "rgba(255,255,255,0.08)" }} />
-          <div style={{ textAlign: "center" as const }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3rem", color: WHITE, lineHeight: 1 }}>3</div>
-            <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.45)", fontWeight: 700, letterSpacing: "0.1em", marginTop: 2 }}>DAYS TO NEXT</div>
-          </div>
-          <div style={{ width: 1, height: 52, background: "rgba(255,255,255,0.08)" }} />
-          <div style={{ textAlign: "center" as const }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3rem", color: SAGE, lineHeight: 1 }}>1</div>
-            <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.45)", fontWeight: 700, letterSpacing: "0.1em", marginTop: 2 }}>DRAFT WAITING</div>
-          </div>
-          <div style={{ flex: 1, textAlign: "right" as const }}>
-            <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem", color: "rgba(255,255,255,0.55)" }}>We've got it handled.</span>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.3rem", color: "rgba(255,255,255,0.35)", textAlign: "right" as const, lineHeight: 1.4 }}>
+            We've got it<br />handled.
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 296px", gap: 28 }}>
-          {/* Upcoming Moments timeline */}
-          <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: BLACK, letterSpacing: "0.12em", marginBottom: 16 }}>UPCOMING MOMENTS</div>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
-              {MOMENTS.map((m, i) => {
-                const urgent = m.days <= 7;
-                return (
-                  <div
-                    key={i}
-                    onMouseEnter={() => setHov(i)}
-                    onMouseLeave={() => setHov(null)}
-                    style={{
-                      background: WHITE,
-                      borderRadius: 14,
-                      padding: "14px 20px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 16,
-                      border: urgent ? `2px solid ${RED}` : `1.5px solid ${BORDER}`,
-                      boxShadow: urgent
-                        ? `0 4px 20px ${RED}22`
-                        : hov === i ? "0 4px 14px rgba(0,0,0,0.07)" : "0 1px 4px rgba(0,0,0,0.04)",
-                      cursor: "pointer",
-                      transition: "box-shadow 0.15s",
-                    }}
-                  >
-                    {/* Day badge */}
-                    <div style={{
-                      minWidth: 56, height: 56, borderRadius: 13,
-                      background: urgent ? RED : CREAM,
-                      display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", flexShrink: 0,
-                    }}>
-                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.65rem", color: urgent ? WHITE : BLACK, lineHeight: 1 }}>{m.days}</span>
-                      <span style={{ fontSize: "0.58rem", fontWeight: 700, color: urgent ? "rgba(255,255,255,0.75)" : GRAY, letterSpacing: "0.08em" }}>DAYS</span>
-                    </div>
-                    {/* Emoji */}
-                    <div style={{ fontSize: "2rem", flexShrink: 0 }}>{m.emoji}</div>
-                    {/* Name + event */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const }}>
-                        <span style={{ fontWeight: 800, fontSize: "1rem", color: BLACK }}>{m.name}</span>
-                        <span style={{ fontSize: "0.72rem", color: GRAY, fontWeight: 500 }}>{m.rel}</span>
-                      </div>
-                      <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: 2 }}>{m.event} · {m.date}</div>
-                    </div>
-                    {/* Status chip */}
-                    <div style={{
-                      background: `${m.statusC}18`,
-                      color: m.statusC,
-                      fontSize: "0.68rem",
-                      fontWeight: 700,
-                      borderRadius: 20,
-                      padding: "4px 11px",
-                      flexShrink: 0,
-                      letterSpacing: "0.03em",
-                    }}>{m.status}</div>
-                    {/* Action */}
-                    <button style={{
-                      background: urgent ? RED : "transparent",
-                      color: urgent ? WHITE : BLACK,
-                      border: urgent ? "none" : `1.5px solid ${BLACK}22`,
-                      borderRadius: 9,
-                      padding: "9px 15px",
-                      fontSize: "0.76rem",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      flexShrink: 0,
-                      whiteSpace: "nowrap" as const,
-                    }}>
-                      {m.status === "Draft ready" ? "Review Draft" : m.status === "Add details" ? "Add Details" : "View"}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        {/* Upcoming Moments */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, letterSpacing: "0.08em", margin: 0 }}>UPCOMING MOMENTS</h2>
+          <span style={{ fontSize: "0.75rem", color: GRAY, background: CREAM, padding: "4px 10px", borderRadius: 20, border: `1px solid ${BORDER}` }}>Next 30 days</span>
+        </div>
 
-          {/* Your People */}
-          <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: BLACK, letterSpacing: "0.12em", marginBottom: 16 }}>YOUR PEOPLE</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-              {PEOPLE.map((p, i) => (
-                <div key={i} style={{
-                  background: WHITE, borderRadius: 13, padding: "14px 8px",
-                  textAlign: "center" as const, border: `1.5px solid ${BORDER}`,
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: 10, marginBottom: 36 }}>
+          {MOMENTS.map((m, i) => {
+            const urgent = m.days <= 7;
+            return (
+              <div
+                key={i}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  background: WHITE,
+                  borderRadius: 14,
+                  border: urgent ? `2px solid ${RED}` : `1.5px solid ${BORDER}`,
+                  boxShadow: urgent ? `0 4px 16px ${RED}18` : hovered === i ? "0 3px 10px rgba(0,0,0,0.07)" : "0 1px 4px rgba(0,0,0,0.04)",
+                  padding: "14px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 16,
                   cursor: "pointer",
-                  transition: "border-color 0.15s",
+                  transition: "all 0.15s",
+                }}
+              >
+                {/* Day badge */}
+                <div style={{
+                  minWidth: 58, height: 58, borderRadius: 12,
+                  background: urgent ? RED : CREAM,
+                  border: urgent ? "none" : `1px solid ${BORDER}`,
+                  display: "flex", flexDirection: "column" as const,
+                  alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  <div style={{ fontSize: "1.7rem" }}>{p.emoji}</div>
-                  <div style={{ fontWeight: 800, fontSize: "0.78rem", color: BLACK, marginTop: 6 }}>{p.name}</div>
-                  <div style={{ fontSize: "0.65rem", color: GRAY, marginTop: 1 }}>{p.rel}</div>
-                  <div style={{ fontSize: "0.62rem", color: SAGE, marginTop: 5, fontWeight: 700 }}>{p.evts} events/yr</div>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: urgent ? WHITE : BLACK, lineHeight: 1 }}>{m.days}</span>
+                  <span style={{ fontSize: "0.6rem", color: urgent ? "rgba(255,255,255,0.75)" : GRAY, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>days</span>
                 </div>
-              ))}
-              <div style={{
-                borderRadius: 13, padding: "14px 8px",
-                textAlign: "center" as const,
-                border: `2px dashed ${SAGE}55`,
-                cursor: "pointer",
-                display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", minHeight: 90,
-              }}>
-                <div style={{ fontSize: "1.5rem", color: SAGE, lineHeight: 1 }}>+</div>
-                <div style={{ fontSize: "0.65rem", color: SAGE, fontWeight: 700, marginTop: 4 }}>Add Person</div>
+
+                {/* Emoji avatar */}
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: urgent ? `${RED}10` : `${BLACK}08`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", flexShrink: 0 }}>{m.emoji}</div>
+
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontWeight: 800, fontSize: "0.95rem", color: BLACK }}>{m.name}</span>
+                    <span style={{ fontSize: "0.68rem", color: GRAY, background: `${BLACK}08`, padding: "2px 7px", borderRadius: 20 }}>{m.rel}</span>
+                  </div>
+                  <div style={{ fontSize: "0.82rem", color: GRAY }}>
+                    <span style={{ fontWeight: 600, color: urgent ? RED : BLACK }}>{m.event}</span>
+                    <span style={{ margin: "0 5px", color: BORDER }}>·</span>
+                    <span>{m.date}</span>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div style={{
+                  padding: "5px 12px", borderRadius: 20,
+                  background: m.statusC === AMBER ? `${AMBER}15` : `${SAGE}12`,
+                  color: m.statusC, fontSize: "0.72rem", fontWeight: 700,
+                  letterSpacing: "0.02em", flexShrink: 0,
+                }}>{m.status}</div>
+
+                {/* Action button */}
+                <button style={{
+                  background: urgent ? RED : "transparent",
+                  color: urgent ? WHITE : BLACK,
+                  border: urgent ? "none" : `1.5px solid ${BORDER}`,
+                  borderRadius: 9, padding: "8px 18px",
+                  fontWeight: 700, fontSize: "0.78rem",
+                  cursor: "pointer", flexShrink: 0,
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  whiteSpace: "nowrap" as const,
+                  transition: "all 0.15s",
+                }}>
+                  {m.action} {urgent ? "→" : ""}
+                </button>
               </div>
+            );
+          })}
+        </div>
+
+        {/* Your People */}
+        <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, letterSpacing: "0.08em", margin: "0 0 16px" }}>YOUR PEOPLE</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+          {PEOPLE.map((p, i) => (
+            <div key={i} style={{
+              background: WHITE, borderRadius: 14, border: `1.5px solid ${BORDER}`,
+              padding: "18px 16px", display: "flex", flexDirection: "column" as const,
+              alignItems: "center", gap: 5, cursor: "pointer",
+              transition: "border-color 0.15s",
+            }}>
+              <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${BLACK}08`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", marginBottom: 4 }}>{p.emoji}</div>
+              <div style={{ fontWeight: 800, fontSize: "0.9rem", color: BLACK }}>{p.name}</div>
+              <div style={{ fontSize: "0.72rem", color: GRAY }}>{p.rel}</div>
+              <div style={{ fontSize: "0.68rem", color: GRAY, background: CREAM, padding: "2px 9px", borderRadius: 12, marginTop: 4, border: `1px solid ${BORDER}` }}>{p.evts} events/yr</div>
             </div>
+          ))}
+          <div style={{
+            borderRadius: 14, border: `2px dashed ${SAGE}50`,
+            padding: "18px", display: "flex", flexDirection: "column" as const,
+            alignItems: "center", justifyContent: "center", gap: 6,
+            cursor: "pointer", background: `${SAGE}05`,
+          }}>
+            <div style={{ fontSize: "1.6rem", color: SAGE, lineHeight: 1 }}>+</div>
+            <div style={{ fontSize: "0.78rem", fontWeight: 700, color: SAGE }}>Add Person</div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
-  getCards, getRecipients, getServerUserId, CardOrder, Recipient, RecipientAddress,
+  getCards, getRecipients, getServerUserId, getApiHeaders, CardOrder, Recipient, RecipientAddress,
   saveCard, deleteCard, updateCard,
 } from "@/lib/data";
 import {
@@ -619,6 +619,43 @@ function PersonalCard({
   const isRegenning = regenLoadingIds[card.id];
   const isApproving = approvingId === card.id;
 
+  const [improveText, setImproveText] = useState("");
+  const [improveSaving, setImproveSaving] = useState(false);
+  const [improveError, setImproveError] = useState(false);
+
+  async function saveAndImprove() {
+    if (!improveText.trim() || improveSaving) return;
+    setImproveSaving(true);
+    setImproveError(false);
+    try {
+      const headers = getApiHeaders() as Record<string, string>;
+      const res = await fetch(`/api/v2/recipients/${card.recipientId}/answer-question`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          fieldKey:     "fresh_update_quick",
+          questionText: `What is something recent that happened with ${card.recipientName}?`,
+          answerText:   improveText.trim(),
+          triggerType:  "fresh_update",
+        }),
+      });
+      if (res.ok) {
+        const detail = improveText.trim();
+        setImproveText("");
+        onQuickEdit(
+          `Rewrite this card to weave in the following personal detail about ${card.recipientName}: "${detail}". Make the card feel genuinely personal while keeping the same tone and occasion.`,
+          "Improve"
+        );
+      } else {
+        setImproveError(true);
+      }
+    } catch {
+      setImproveError(true);
+    } finally {
+      setImproveSaving(false);
+    }
+  }
+
   return (
     <>
     <div style={{ background: WHITE, borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
@@ -775,6 +812,62 @@ function PersonalCard({
           )}
         </div>
       )}
+
+      {/* Make this card more personal */}
+      <div style={{ margin: "0 22px 20px", borderTop: `1px solid ${BLACK}08`, paddingTop: 20 }}>
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK, marginBottom: 2 }}>
+            ✨ Make this card more personal
+          </div>
+          <div style={{ fontSize: "0.75rem", color: GRAY, lineHeight: 1.5 }}>
+            Tell us one real thing about {card.recipientName}, and we'll rewrite the card around it.
+          </div>
+        </div>
+        <textarea
+          value={improveText}
+          onChange={e => setImproveText(e.target.value)}
+          placeholder={`Something they did recently, a favorite memory, an inside joke, or what's going on in their life…`}
+          rows={3}
+          disabled={improveSaving || !!editActionId}
+          style={{
+            width: "100%", borderRadius: 10, border: `1.5px solid ${BLACK}14`,
+            padding: "10px 12px", fontSize: "0.82rem",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            lineHeight: 1.6, color: BLACK,
+            background: improveSaving ? `${BLACK}04` : BEIGE,
+            resize: "none" as const, outline: "none",
+            boxSizing: "border-box" as const,
+            opacity: improveSaving ? 0.7 : 1,
+          }}
+        />
+        {improveError && (
+          <div style={{
+            marginTop: 6, padding: "7px 10px", borderRadius: 8,
+            background: `${RED}10`, border: `1px solid ${RED}25`,
+            fontSize: "0.72rem", fontWeight: 600, color: RED,
+          }}>
+            Something went wrong — please try again.
+          </div>
+        )}
+        <button
+          onClick={saveAndImprove}
+          disabled={!improveText.trim() || improveSaving || !!editActionId}
+          style={{
+            marginTop: 8, width: "100%", padding: "11px",
+            borderRadius: 10, border: "none",
+            background: (!improveText.trim() || improveSaving || !!editActionId) ? `${BLACK}12` : "#5B8C6B",
+            color: (!improveText.trim() || improveSaving || !!editActionId) ? GRAY : WHITE,
+            fontWeight: 700, fontSize: "0.82rem",
+            cursor: (!improveText.trim() || improveSaving || !!editActionId) ? "default" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+          }}>
+          {improveSaving
+            ? <><Loader2 size={13} className="animate-spin" /> Saving…</>
+            : editActionId === `${card.id}-Improve`
+              ? <><Loader2 size={13} className="animate-spin" /> Rewriting…</>
+              : "Improve This Card"}
+        </button>
+      </div>
 
       {/* Approve / Reject */}
       <div style={{ padding: "0 22px 22px", display: "flex", gap: 10, justifyContent: "flex-end" }}>

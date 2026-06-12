@@ -1,0 +1,118 @@
+Approved for Sprint 6 implementation.
+
+Goal:
+
+Make weak cards easy to improve without exposing internal concepts like memories, profile questions, briefings, or completeness.
+
+Implement only the following.
+
+Part 1: Review Screen
+
+On the card review screen, add a section below the card message and above approval actions:
+
+“Make this card more personal”
+
+Subtext:
+“Tell us one real thing about [Recipient Name], and we’ll rewrite the card around it.”
+
+Input placeholder:
+“Something they did recently, a favorite memory, an inside joke, or what’s going on in their life…”
+
+Button:
+“Improve This Card”
+
+Behavior:
+
+* User enters one detail.
+* Save it using the existing memory or briefing storage path.
+* Do not make the user choose a category.
+* After save, regenerate the card in place.
+* Keep the user on the same review screen.
+* The improved card should replace the weak card or become the active reviewed version.
+* Show loading state while improving.
+* Show clear error state if save or regeneration fails.
+* Do not silently fail.
+* Do not navigate the user away.
+
+Important:
+
+This is for improving the current card right now.
+
+Part 2: Recipient Profile
+
+Simplify the recipient profile information entry.
+
+Merge:
+
+* Add a Recent Memory
+* Help Us Write Better Cards
+
+into one primary action:
+
+“Make [Name]’s Next Card Better”
+
+When clicked:
+
+* If there is a high priority follow up or profile question, show that.
+* Otherwise show open text input:
+  “Tell us one thing about [Name] that could make the next card more personal.”
+
+The user should not need to know whether this is a memory, profile answer, fresh update, or briefing.
+
+The system should route the answer internally using existing storage.
+
+Part 3: Demote Edit Profile Details
+
+Edit Profile Details should remain available, but it should not compete with the primary improvement action.
+
+Keep it as a secondary settings link or collapsed advanced section.
+
+Part 4: Language Cleanup
+
+Remove or reduce user facing data model terms where practical:
+
+* Fresh update
+* Profile gap
+* Memory type
+* Briefing
+* Completeness
+
+Use user outcome language instead:
+
+* Make this card more personal
+* Help us write better cards
+* Tell us one real thing
+* Make next card better
+
+Do not implement:
+
+* New tables
+* New scores
+* New memory categories
+* New dashboard widgets
+* Card readiness score
+* Quality retry logic
+* Full localStorage migration
+
+Acceptance Criteria:
+
+* A user can improve a generic card directly from the review screen.
+* Adding one detail regenerates the card without leaving review.
+* Recipient profile has one clear primary action for improving future cards.
+* Edit Profile Details is still available but secondary.
+* Existing card generation still works.
+* Existing timeline still works.
+* Existing follow up system still works.
+* Existing recent memory storage still works.
+* Errors are visible.
+* No silent failures.
+* Typecheck passes.
+
+After implementation, provide:
+
+1. Files changed
+2. Exact user flow
+3. How the new detail is stored
+4. How regeneration is triggered
+5. What happens on failure
+6. Typecheck result

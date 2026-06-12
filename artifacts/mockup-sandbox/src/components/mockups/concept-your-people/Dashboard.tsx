@@ -4,134 +4,139 @@ import { useState } from "react";
 const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
 const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
 const AMBER = "#D97706";
-const DARK_SAGE = "#3D6B4F";
+const DARK_SAGE = "#3D6B50";
 
-interface Person {
-  emoji: string; name: string; rel: string;
-  health: "Excellent" | "Healthy" | "Needs Attention" | "Priority";
-  pct: number; event: string; days: number; action: string; priority?: boolean;
-}
+type HealthLevel = "excellent" | "healthy" | "needs-attention" | "priority";
+const HEALTH_COLOR: Record<HealthLevel, string> = {
+  excellent: DARK_SAGE,
+  healthy: SAGE,
+  "needs-attention": AMBER,
+  priority: RED,
+};
+const HEALTH_LABEL: Record<HealthLevel, string> = {
+  excellent: "Excellent",
+  healthy: "Healthy",
+  "needs-attention": "Needs Attention",
+  priority: "Priority",
+};
 
-const PEOPLE: Person[] = [
-  { emoji: "👩", name: "Sarah",  rel: "Sister",  health: "Excellent",       pct: 94, event: "Anniversary",  days: 8,  action: "Review Draft →"  },
-  { emoji: "💛", name: "Mom",    rel: "Mother",  health: "Needs Attention",  pct: 52, event: "Mother's Day", days: 15, action: "Add Details →"   },
-  { emoji: "🤝", name: "Steve",  rel: "Friend",  health: "Healthy",          pct: 76, event: "Birthday",     days: 3,  action: "Review Draft →"  },
-  { emoji: "🧢", name: "Marcus", rel: "Friend",  health: "Priority",         pct: 38, event: "Birthday",     days: 3,  action: "Write Card →",   priority: true },
-  { emoji: "👔", name: "Dad",    rel: "Father",  health: "Healthy",          pct: 80, event: "Father's Day", days: 28, action: "View →"          },
-  { emoji: "💼", name: "Jenny",  rel: "Client",  health: "Excellent",        pct: 91, event: "Work Anniv",   days: 45, action: "View →"          },
+const PEOPLE = [
+  { emoji: "👩", name: "Sarah",  rel: "Sister",  health: "excellent" as HealthLevel,   pct: 88, nextEvent: "Anniversary in 8 days",   action: "Review Draft →",  urgent: false },
+  { emoji: "💛", name: "Mom",    rel: "Mother",  health: "needs-attention" as HealthLevel, pct: 54, nextEvent: "Mother's Day in 15 days", action: "Add Details →",   urgent: false },
+  { emoji: "🤝", name: "Steve",  rel: "Friend",  health: "healthy" as HealthLevel,     pct: 74, nextEvent: "Birthday in 3 days",      action: "Review Draft →",  urgent: true  },
+  { emoji: "🧢", name: "Marcus", rel: "Friend",  health: "priority" as HealthLevel,    pct: 42, nextEvent: "Birthday in 3 days",      action: "Write Card →",    urgent: true  },
+  { emoji: "👔", name: "Dad",    rel: "Father",  health: "healthy" as HealthLevel,     pct: 76, nextEvent: "Father's Day in 28 days", action: "View →",          urgent: false },
+  { emoji: "💼", name: "Jenny",  rel: "Client",  health: "excellent" as HealthLevel,   pct: 91, nextEvent: "Work Anniv in 45 days",   action: "View →",          urgent: false },
 ];
 
-function healthColor(h: Person["health"]) {
-  if (h === "Excellent")       return DARK_SAGE;
-  if (h === "Healthy")         return SAGE;
-  if (h === "Needs Attention") return AMBER;
-  return RED;
-}
-
-function HealthRing({ pct, size, color }: { pct: number; size: number; color: string }) {
-  const r = (size - 10) / 2;
+function HealthRing({ pct, color, size = 44 }: { pct: number; color: string; size?: number }) {
+  const r = (size - 6) / 2;
   const circ = 2 * Math.PI * r;
-  const dash = (pct / 100) * circ;
+  const offset = circ * (1 - pct / 100);
   return (
-    <svg width={size} height={size} style={{ flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`${color}22`} strokeWidth={7} />
-      <circle
-        cx={size / 2} cy={size / 2} r={r}
-        fill="none" stroke={color} strokeWidth={7}
-        strokeDasharray={`${dash} ${circ - dash}`}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-      />
-      <text x={size / 2} y={size / 2 + 5} textAnchor="middle" fontSize={10} fontWeight={800} fill={color}>{pct}%</text>
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`${color}20`} strokeWidth={4} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={4}
+        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" />
     </svg>
   );
 }
 
 export function Dashboard() {
-  const [hov, setHov] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Nav */}
-      <nav style={{ background: BLACK, padding: "0 32px", height: 62, display: "flex", alignItems: "center", gap: 20 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: WHITE, letterSpacing: 3 }}>YOUR PEOPLE</div>
-        </div>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: RED, letterSpacing: 2 }}>F.I. FORGOT</span>
-      </nav>
+      <div style={{ background: BLACK, padding: "0 28px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: WHITE, letterSpacing: "0.08em" }}>YOUR PEOPLE</span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", color: RED, letterSpacing: "0.06em" }}>F.I. FORGOT</span>
+      </div>
 
-      <div style={{ maxWidth: 940, margin: "0 auto", padding: "28px 28px" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 24px" }}>
         {/* Summary strip */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, padding: "12px 20px", background: WHITE, borderRadius: 12, border: `1.5px solid ${BORDER}` }}>
-          <div style={{ display: "flex", gap: 6 }}>
-            {[DARK_SAGE, DARK_SAGE, SAGE, SAGE, SAGE].map((c, i) => (
-              <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />
-            ))}
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: AMBER }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24, padding: "12px 20px", background: WHITE, borderRadius: 14, border: `1.5px solid ${BORDER}` }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: DARK_SAGE, display: "inline-block" }} />
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE, display: "inline-block" }} />
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE, display: "inline-block" }} />
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: AMBER, display: "inline-block" }} />
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: RED, display: "inline-block" }} />
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: DARK_SAGE, display: "inline-block" }} />
           </div>
-          <span style={{ fontSize: "0.85rem", color: BLACK, fontWeight: 600 }}>5 people healthy</span>
-          <span style={{ color: GRAY, fontSize: "0.82rem" }}>·</span>
-          <span style={{ fontSize: "0.85rem", color: RED, fontWeight: 700 }}>1 needs attention</span>
+          <p style={{ margin: 0, fontSize: "0.85rem", color: BLACK, fontWeight: 600 }}>
+            5 people healthy &nbsp;·&nbsp; <span style={{ color: RED }}>1 needs attention</span>
+          </p>
+          <div style={{ marginLeft: "auto" }}>
+            <button style={{ background: RED, color: WHITE, border: "none", borderRadius: 8, padding: "6px 14px", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              + Add Person
+            </button>
+          </div>
         </div>
 
         {/* People grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
           {PEOPLE.map((p, i) => {
-            const hc = healthColor(p.health);
+            const hc = HEALTH_COLOR[p.health];
+            const isPriority = p.health === "priority";
             return (
               <div
                 key={i}
-                onMouseEnter={() => setHov(i)}
-                onMouseLeave={() => setHov(null)}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
                 style={{
                   background: WHITE,
                   borderRadius: 18,
-                  border: p.priority ? `2px solid ${RED}` : `1.5px solid ${BORDER}`,
-                  borderLeft: p.priority ? `5px solid ${RED}` : `1.5px solid ${BORDER}`,
-                  padding: "20px 22px",
-                  boxShadow: hov === i ? "0 6px 24px rgba(0,0,0,0.09)" : "0 1px 4px rgba(0,0,0,0.04)",
-                  transition: "box-shadow 0.15s",
+                  border: isPriority ? `2px solid ${RED}40` : `1.5px solid ${BORDER}`,
+                  borderLeft: isPriority ? `4px solid ${RED}` : undefined,
+                  boxShadow: hovered === i ? "0 4px 16px rgba(0,0,0,0.1)" : "0 1px 4px rgba(0,0,0,0.04)",
+                  padding: "20px",
                   cursor: "pointer",
+                  transition: "box-shadow 0.15s",
+                  display: "flex",
+                  flexDirection: "column" as const,
+                  gap: 0,
                 }}
               >
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 14 }}>
-                  {/* Emoji */}
-                  <div style={{
-                    width: 52, height: 52, borderRadius: "50%",
-                    background: `${hc}18`, display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "1.7rem", flexShrink: 0,
-                  }}>{p.emoji}</div>
-                  {/* Name + rel */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, lineHeight: 1 }}>{p.name.toUpperCase()}</span>
-                      <span style={{ background: `${hc}18`, color: hc, fontSize: "0.65rem", fontWeight: 700, borderRadius: 20, padding: "3px 9px" }}>{p.rel}</span>
-                    </div>
-                    <div style={{ fontSize: "0.72rem", color: hc, fontWeight: 700, marginTop: 4, display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: hc }} />
-                      {p.health}
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${BLACK}08`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{p.emoji}</div>
+                    <div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.45rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1 }}>{p.name.toUpperCase()}</div>
+                      <span style={{ background: `${BLACK}08`, color: GRAY, fontSize: "0.7rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20 }}>{p.rel}</span>
                     </div>
                   </div>
                   {/* Health ring */}
-                  <HealthRing pct={p.pct} size={52} color={hc} />
-                </div>
-
-                {/* Event chip */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                  <div style={{ background: CREAM, borderRadius: 20, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 600, color: BLACK }}>
-                    {p.event} · {p.days} days
+                  <div style={{ position: "relative" as const, flexShrink: 0 }}>
+                    <HealthRing pct={p.pct} color={hc} size={44} />
+                    <div style={{ position: "absolute" as const, inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ fontSize: "0.6rem", fontWeight: 800, color: hc }}>{p.pct}%</span>
+                    </div>
                   </div>
-                  <div style={{ fontSize: "0.65rem", color: GRAY }}>last updated 3 days ago</div>
                 </div>
 
-                {/* Action button */}
+                {/* Health label */}
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${hc}12`, padding: "3px 10px", borderRadius: 20, marginBottom: 10, alignSelf: "flex-start" as const }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: hc, display: "inline-block" }} />
+                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: hc }}>{HEALTH_LABEL[p.health]}</span>
+                </div>
+
+                {/* Next event */}
+                <div style={{ fontSize: "0.8rem", color: GRAY, marginBottom: 4 }}>
+                  <span style={{ fontWeight: 600, color: p.urgent ? RED : BLACK }}>{p.nextEvent}</span>
+                </div>
+                <div style={{ fontSize: "0.7rem", color: GRAY, marginBottom: 16 }}>Last updated 5 days ago</div>
+
+                {/* Action */}
                 <button style={{
-                  width: "100%",
-                  background: p.priority ? RED : p.health === "Excellent" ? DARK_SAGE : p.health === "Needs Attention" ? AMBER : "transparent",
-                  color: p.priority || p.health === "Excellent" || p.health === "Needs Attention" ? WHITE : BLACK,
-                  border: p.priority || p.health === "Excellent" || p.health === "Needs Attention" ? "none" : `1.5px solid ${BLACK}22`,
-                  borderRadius: 10, padding: "10px",
-                  fontSize: "0.8rem", fontWeight: 700, cursor: "pointer",
+                  marginTop: "auto",
+                  background: isPriority ? RED : p.urgent ? `${BLACK}08` : "transparent",
+                  color: isPriority ? WHITE : BLACK,
+                  border: isPriority ? "none" : `1.5px solid ${BORDER}`,
+                  borderRadius: 10, padding: "9px 16px",
+                  fontWeight: 700, fontSize: "0.8rem",
+                  cursor: "pointer", width: "100%",
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
                 }}>
                   {p.action}
                 </button>
@@ -139,16 +144,16 @@ export function Dashboard() {
             );
           })}
 
-          {/* Add Person */}
+          {/* Add person dashed */}
           <div style={{
-            borderRadius: 18, border: `2px dashed ${SAGE}55`,
-            padding: "20px 22px",
-            display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center",
-            cursor: "pointer", minHeight: 160,
-            color: SAGE,
+            borderRadius: 18, border: `2px dashed ${SAGE}40`,
+            display: "flex", flexDirection: "column" as const,
+            alignItems: "center", justifyContent: "center", gap: 8,
+            padding: "32px", cursor: "pointer", background: `${SAGE}04`,
+            minHeight: 200,
           }}>
-            <div style={{ fontSize: "2rem", marginBottom: 8 }}>+</div>
-            <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>Add Person</div>
+            <div style={{ width: 48, height: 48, borderRadius: "50%", border: `2px dashed ${SAGE}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", color: SAGE }}>+</div>
+            <span style={{ fontWeight: 700, color: SAGE, fontSize: "0.85rem" }}>Add a Person</span>
           </div>
         </div>
       </div>

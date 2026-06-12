@@ -300,7 +300,7 @@ export default function ProfileQuestionCard({ recipientId }: { recipientId: stri
                 color:         BLACK,
               }}
             >
-              Help us write better cards
+              Make this card better
             </h2>
             <p className="text-xs mt-0.5" style={{ color: GRAY }}>
               {nextQuestion.reason}

@@ -40,7 +40,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap, ChevronDown, ChevronUp, Settings } from "lucide-react";
-import ProfileQuestionCard from "@/components/ProfileQuestionCard";
 import RelationshipTimeline from "@/components/RelationshipTimeline";
 
 const RED   = "#E23B2E";
@@ -229,8 +228,8 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
     <SectionCard>
       <div className="flex items-center justify-between">
         <div>
-          {sectionHeading("Briefing History")}
-          <p className="text-xs mt-0.5" style={{ color: GRAY }}>Every answer we've collected — editable anytime.</p>
+          {sectionHeading("Card Writing History")}
+          <p className="text-xs mt-0.5" style={{ color: GRAY }}>Everything that's helped us write better cards — editable anytime.</p>
         </div>
         <div className="flex flex-wrap gap-1">
           {selectedEvents.map((e) => (
@@ -331,6 +330,16 @@ export default function RecipientProfilePage() {
   const [memoryError, setMemoryError] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
 
+  const [betterCardOpen, setBetterCardOpen]       = useState(false);
+  const [betterCardLoading, setBetterCardLoading] = useState(false);
+  const [betterCardQuestion, setBetterCardQuestion] = useState<{
+    fieldKey: string; question: string; mode: string; followUp?: { originalAnswer: string };
+  } | null>(null);
+  const [betterCardText, setBetterCardText]       = useState("");
+  const [betterCardSaving, setBetterCardSaving]   = useState(false);
+  const [betterCardError, setBetterCardError]     = useState(false);
+  const [betterCardSuccess, setBetterCardSuccess] = useState(false);
+
   // Auto-open memory modal when navigated via ?action=add-memory
   useEffect(() => {
     const action = new URLSearchParams(window.location.search).get("action");
@@ -374,6 +383,61 @@ export default function RecipientProfilePage() {
       setMemoryError(true);
     } finally {
       setMemorySaving(false);
+    }
+  }
+
+  async function openBetterCard() {
+    setBetterCardOpen(true);
+    setBetterCardText("");
+    setBetterCardError(false);
+    setBetterCardSuccess(false);
+    setBetterCardQuestion(null);
+    setBetterCardLoading(true);
+    try {
+      const headers = getApiHeaders() as Record<string, string>;
+      if (!headers["x-user-id"]) { setBetterCardLoading(false); return; }
+      const res = await fetch(`/api/v2/recipients/${params.id}/next-question`, { headers });
+      if (res.ok) {
+        const json = await res.json() as {
+          nextQuestion: { fieldKey: string; question: string; mode: string; followUp?: { originalAnswer: string } };
+        };
+        const { nextQuestion } = json;
+        if (nextQuestion.mode === "follow_up" || nextQuestion.mode === "profile_gap") {
+          setBetterCardQuestion(nextQuestion);
+        }
+      }
+    } catch { /* fall through to open text fallback */ }
+    finally { setBetterCardLoading(false); }
+  }
+
+  async function saveBetterCard() {
+    if (!betterCardText.trim() || !existing) return;
+    const headers = getApiHeaders() as Record<string, string>;
+    if (!headers["x-user-id"]) return;
+    setBetterCardSaving(true);
+    setBetterCardError(false);
+    try {
+      const fieldKey    = betterCardQuestion?.fieldKey    ?? "fresh_update_quick";
+      const questionText = betterCardQuestion?.question   ?? `What is something about ${existing.name} that could make the next card more personal?`;
+      const triggerType = (betterCardQuestion?.mode as string | undefined) ?? "fresh_update";
+      const res = await fetch(`/api/v2/recipients/${params.id}/answer-question`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ fieldKey, questionText, answerText: betterCardText.trim(), triggerType }),
+      });
+      if (res.ok) {
+        setBetterCardOpen(false);
+        setBetterCardText("");
+        setBetterCardSuccess(true);
+        window.dispatchEvent(new CustomEvent("recipient-answer-saved"));
+        setTimeout(() => setBetterCardSuccess(false), 3500);
+      } else {
+        setBetterCardError(true);
+      }
+    } catch {
+      setBetterCardError(true);
+    } finally {
+      setBetterCardSaving(false);
     }
   }
 
@@ -677,26 +741,21 @@ export default function RecipientProfilePage() {
           {/* ── Profile hub for existing recipients ──────────────────────── */}
           {!isNew && existing && (
             <>
-              {/* Add a Recent Memory CTA */}
+              {/* Make [Name]'s Next Card Better — primary action */}
               <div style={{ marginBottom: 16 }}>
                 <button
                   type="button"
-                  onClick={() => setMemoryModalOpen(true)}
+                  onClick={openBetterCard}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold transition-all hover:opacity-90"
                   style={{ background: SAGE, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.06em", cursor: "pointer", border: "none" }}
                 >
-                  + Add a Recent Memory
+                  ✦ Make {existing.name}'s Next Card Better
                 </button>
-                {memorySuccess && (
+                {betterCardSuccess && (
                   <div className="mt-2 rounded-xl px-4 py-2 text-sm font-semibold text-center" style={{ background: `${SAGE}15`, color: SAGE }}>
-                    ✓ Memory saved — it'll help personalize the next card.
+                    ✓ Saved — it'll help personalize the next card.
                   </div>
                 )}
-              </div>
-
-              {/* Profile gap / fresh update / follow-up question */}
-              <div className="mb-4">
-                <ProfileQuestionCard recipientId={params.id} />
               </div>
 
               {/* Relationship timeline */}
@@ -704,20 +763,20 @@ export default function RecipientProfilePage() {
                 <RelationshipTimeline recipientId={params.id} />
               </div>
 
-              {/* Edit Profile Details collapsible toggle */}
-              <div className="mb-5">
+              {/* Edit Profile Details — secondary settings link */}
+              <div className="mb-5" style={{ textAlign: "center" as const }}>
                 <button
                   type="button"
                   onClick={() => setFormOpen(o => !o)}
-                  className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl transition-all hover:opacity-80"
-                  style={{ background: `${BLACK}07`, border: `1px solid ${BLACK}12`, cursor: "pointer" }}
+                  style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}
                 >
-                  <div className="flex items-center gap-2">
-                    <Settings size={14} style={{ color: GRAY }} />
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.08em", color: BLACK }}>Edit Profile Details</span>
-                    <span className="text-xs" style={{ color: GRAY }}>— events, tone, delivery, address</span>
-                  </div>
-                  {formOpen ? <ChevronUp size={14} style={{ color: GRAY }} /> : <ChevronDown size={14} style={{ color: GRAY }} />}
+                  <Settings size={12} style={{ color: `${GRAY}90` }} />
+                  <span style={{ fontSize: "0.78rem", color: `${GRAY}bb`, textDecoration: "underline", textDecorationColor: `${GRAY}40` }}>
+                    {formOpen ? "Hide profile details" : "Edit profile details"}
+                  </span>
+                  {formOpen
+                    ? <ChevronUp size={11} style={{ color: `${GRAY}90` }} />
+                    : <ChevronDown size={11} style={{ color: `${GRAY}90` }} />}
                 </button>
               </div>
             </>
@@ -1556,6 +1615,91 @@ export default function RecipientProfilePage() {
           </>)} {/* end (isNew || formOpen) collapsible */}
         </div>
       </div>
+
+      {/* Make [Name]'s Next Card Better — bottom sheet */}
+      {betterCardOpen && (
+        <div
+          onClick={() => { if (!betterCardSaving) { setBetterCardOpen(false); setBetterCardText(""); setBetterCardError(false); } }}
+          style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "#fff", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, padding: "24px 24px 40px" }}
+          >
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, marginBottom: 4, letterSpacing: "0.04em" }}>
+              Make {existing?.name}'s Next Card Better
+            </div>
+
+            {betterCardLoading ? (
+              <div style={{ textAlign: "center" as const, padding: "24px 0", color: GRAY, fontSize: "0.85rem" }}>
+                Loading…
+              </div>
+            ) : betterCardQuestion ? (
+              <>
+                {betterCardQuestion.mode === "follow_up" && betterCardQuestion.followUp?.originalAnswer && (
+                  <div style={{ background: "#EEF3FD", borderRadius: 10, padding: "9px 12px", borderLeft: "3px solid #2E6BE260", marginBottom: 12 }}>
+                    <p style={{ fontSize: "0.65rem", fontWeight: 700, color: "#2E6BE2aa", textTransform: "uppercase" as const, margin: "0 0 3px" }}>Previously</p>
+                    <p style={{ fontSize: "0.85rem", color: BLACK, margin: 0 }}>{betterCardQuestion.followUp.originalAnswer}</p>
+                  </div>
+                )}
+                <p style={{ fontSize: "0.88rem", fontWeight: 600, color: BLACK, marginBottom: 12 }}>
+                  {betterCardQuestion.question}
+                </p>
+                <textarea
+                  value={betterCardText}
+                  onChange={e => setBetterCardText(e.target.value)}
+                  placeholder="Share an update…"
+                  rows={4}
+                  className="w-full rounded-xl border text-sm resize-none px-3 py-2.5 focus:outline-none"
+                  style={{ borderColor: `${BLACK}20`, fontFamily: "'Inter', sans-serif", boxSizing: "border-box" as const }}
+                />
+              </>
+            ) : (
+              <>
+                <p className="text-sm mb-4" style={{ color: GRAY }}>
+                  Tell us one thing about {existing?.name} that could make the next card more personal.
+                </p>
+                <textarea
+                  value={betterCardText}
+                  onChange={e => setBetterCardText(e.target.value)}
+                  placeholder="Something they did recently, a favorite memory, an inside joke, or what's going on in their life…"
+                  rows={4}
+                  className="w-full rounded-xl border text-sm resize-none px-3 py-2.5 focus:outline-none"
+                  style={{ borderColor: `${SAGE}50`, fontFamily: "'Inter', sans-serif", boxSizing: "border-box" as const }}
+                />
+              </>
+            )}
+
+            {betterCardError && (
+              <div className="mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold" style={{ background: `${RED}10`, color: RED, border: `1px solid ${RED}25` }}>
+                Something went wrong — please try again.
+              </div>
+            )}
+
+            {!betterCardLoading && (
+              <div className="flex gap-3 mt-3">
+                <button
+                  type="button"
+                  onClick={() => { setBetterCardOpen(false); setBetterCardText(""); setBetterCardError(false); }}
+                  disabled={betterCardSaving}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: `${BLACK}08`, color: GRAY, border: "none", cursor: betterCardSaving ? "not-allowed" : "pointer" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={saveBetterCard}
+                  disabled={betterCardSaving || !betterCardText.trim()}
+                  style={{ flex: 2, padding: "10px", borderRadius: 12, border: "none", background: !betterCardText.trim() ? `${BLACK}20` : SAGE, color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: !betterCardText.trim() || betterCardSaving ? "not-allowed" : "pointer" }}
+                >
+                  {betterCardSaving ? "Saving…" : "Save"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Add a Recent Memory modal */}
       {memoryModalOpen && (

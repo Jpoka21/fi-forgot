@@ -3,123 +3,123 @@ import { useState } from "react";
 
 const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
 const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
-const DARK_SAGE = "#3D6B4F";
-const AMBER = "#D97706";
+const AMBER = "#D97706", DARK_SAGE = "#3D6B50";
 
-interface Person {
-  emoji: string; name: string; rel: string;
-  health: "Excellent" | "Healthy" | "Needs Attention" | "Priority";
-  pct: number; nextDays: number; nextEvent: string;
-}
+type Tab = "people" | "moments" | "cards" | "settings";
+type HealthLevel = "excellent" | "healthy" | "needs-attention" | "priority";
 
-const PEOPLE: Person[] = [
-  { emoji: "👩", name: "Sarah",  rel: "Sister",  health: "Excellent",      pct: 94, nextDays: 8,  nextEvent: "Anniversary" },
-  { emoji: "💛", name: "Mom",    rel: "Mother",  health: "Needs Attention", pct: 52, nextDays: 15, nextEvent: "Mother's Day" },
-  { emoji: "🤝", name: "Steve",  rel: "Friend",  health: "Healthy",         pct: 76, nextDays: 3,  nextEvent: "Birthday" },
-  { emoji: "🧢", name: "Marcus", rel: "Friend",  health: "Priority",        pct: 38, nextDays: 3,  nextEvent: "Birthday" },
-  { emoji: "👔", name: "Dad",    rel: "Father",  health: "Healthy",         pct: 80, nextDays: 28, nextEvent: "Father's Day" },
+const HEALTH_COLOR: Record<HealthLevel, string> = {
+  excellent: DARK_SAGE, healthy: SAGE, "needs-attention": AMBER, priority: RED,
+};
+
+const PEOPLE = [
+  { emoji: "👩", name: "Sarah",  rel: "Sister",  health: "excellent" as HealthLevel,      pct: 88, nextDays: 8,  nextEvent: "Anniversary in 8 days",   nextAction: "Review Draft →" },
+  { emoji: "🧢", name: "Marcus", rel: "Friend",  health: "priority" as HealthLevel,       pct: 42, nextDays: 3,  nextEvent: "Birthday in 3 days",      nextAction: "Write Card →"   },
+  { emoji: "🤝", name: "Steve",  rel: "Friend",  health: "healthy" as HealthLevel,        pct: 74, nextDays: 3,  nextEvent: "Birthday in 3 days",      nextAction: "Review Draft →" },
+  { emoji: "💛", name: "Mom",    rel: "Mother",  health: "needs-attention" as HealthLevel, pct: 54, nextDays: 15, nextEvent: "Mother's Day in 15 days", nextAction: "Add Details →"  },
+  { emoji: "👔", name: "Dad",    rel: "Father",  health: "healthy" as HealthLevel,        pct: 76, nextDays: 28, nextEvent: "Father's Day in 28 days", nextAction: "View →"         },
+  { emoji: "💼", name: "Jenny",  rel: "Client",  health: "excellent" as HealthLevel,      pct: 91, nextDays: 45, nextEvent: "Work Anniv in 45 days",   nextAction: "View →"         },
 ];
 
-function healthColor(h: Person["health"]) {
-  if (h === "Excellent")       return DARK_SAGE;
-  if (h === "Healthy")         return SAGE;
-  if (h === "Needs Attention") return AMBER;
-  return RED;
-}
-
-function MiniRing({ pct, color }: { pct: number; color: string }) {
-  const r = 18, circ = 2 * Math.PI * r, dash = (pct / 100) * circ;
+function SmallRing({ pct, color }: { pct: number; color: string }) {
+  const r = 16; const circ = 2 * Math.PI * r;
   return (
-    <svg width={44} height={44}>
-      <circle cx={22} cy={22} r={r} fill="none" stroke={`${color}22`} strokeWidth={5} />
-      <circle cx={22} cy={22} r={r} fill="none" stroke={color} strokeWidth={5}
-        strokeDasharray={`${dash} ${circ - dash}`} strokeLinecap="round"
-        transform="rotate(-90 22 22)" />
-      <text x={22} y={26} textAnchor="middle" fontSize={9} fontWeight={800} fill={color}>{pct}%</text>
+    <svg width={38} height={38} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={19} cy={19} r={r} fill="none" stroke={`${color}20`} strokeWidth={4} />
+      <circle cx={19} cy={19} r={r} fill="none" stroke={color} strokeWidth={4}
+        strokeDasharray={circ} strokeDashoffset={circ * (1 - pct / 100)} strokeLinecap="round" />
     </svg>
   );
 }
 
-const TABS = [
-  { icon: "👥", label: "People"  },
-  { icon: "🗓", label: "Moments" },
-  { icon: "💌", label: "Cards"   },
-  { icon: "⚙️", label: "Settings"},
-];
-
 export function Mobile() {
-  const [activeTab, setActiveTab] = useState(0);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>("people");
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   return (
-    <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", position: "relative" as const, display: "flex", flexDirection: "column" as const }}>
+    <div style={{ maxWidth: 390, margin: "0 auto", background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", flexDirection: "column" as const }}>
       {/* Header */}
-      <div style={{ background: BLACK, padding: "0 18px", height: 58, display: "flex", alignItems: "center", flexShrink: 0 }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: WHITE, letterSpacing: 3 }}>YOUR PEOPLE</span>
+      <div style={{ background: BLACK, padding: "14px 20px 12px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: WHITE, letterSpacing: "0.08em" }}>YOUR PEOPLE</span>
+          <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)" }}>6 people</span>
+        </div>
+        <p style={{ margin: "4px 0 0", fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Caveat', cursive" }}>5 healthy · 1 needs attention</p>
       </div>
 
-      <div style={{ flex: 1, overflow: "auto", padding: "16px 14px 80px" }}>
-        {PEOPLE.map((p) => {
-          const hc = healthColor(p.health);
-          const expanded = expandedId === p.name;
-          return (
-            <div key={p.name} style={{ background: WHITE, borderRadius: 16, marginBottom: 10, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}>
-              {/* Row */}
-              <div
-                onClick={() => setExpandedId(expanded ? null : p.name)}
-                style={{ display: "flex", alignItems: "center", gap: 13, padding: "14px 16px", cursor: "pointer" }}
-              >
-                <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${hc}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", flexShrink: 0 }}>{p.emoji}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: "0.95rem", color: BLACK }}>{p.name}</div>
-                  <div style={{ fontSize: "0.72rem", color: GRAY }}>{p.rel}</div>
+      <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+        <div style={{ padding: "16px 16px 0", display: "flex", flexDirection: "column" as const, gap: 8 }}>
+          {PEOPLE.map((p) => {
+            const hc = HEALTH_COLOR[p.health];
+            const isExp = expanded === p.name;
+            return (
+              <div key={p.name} style={{ background: WHITE, borderRadius: 14, border: isExp ? `1.5px solid ${hc}40` : `1.5px solid ${BORDER}`, overflow: "hidden", transition: "border-color 0.2s" }}>
+                {/* Row */}
+                <div
+                  onClick={() => setExpanded(isExp ? null : p.name)}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 14px", cursor: "pointer" }}
+                >
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: `${BLACK}08`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>{p.emoji}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>{p.name}</div>
+                    <div style={{ fontSize: "0.7rem", color: GRAY }}>{p.rel}</div>
+                  </div>
+                  {/* Health dot */}
+                  <div style={{ width: 12, height: 12, borderRadius: "50%", background: hc, flexShrink: 0 }} />
+                  {/* Next event badge */}
+                  <div style={{
+                    background: p.nextDays <= 7 ? `${RED}12` : CREAM,
+                    color: p.nextDays <= 7 ? RED : GRAY,
+                    border: `1px solid ${p.nextDays <= 7 ? RED + "30" : BORDER}`,
+                    borderRadius: 20, padding: "3px 9px",
+                    fontSize: "0.68rem", fontWeight: 700, flexShrink: 0,
+                  }}>{p.nextDays}d</div>
+                  <span style={{ fontSize: "0.72rem", color: GRAY, transform: isExp ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▾</span>
                 </div>
-                {/* Health dot */}
-                <div style={{ width: 12, height: 12, borderRadius: "50%", background: hc, flexShrink: 0 }} />
-                {/* Next event badge */}
-                <div style={{
-                  background: p.nextDays <= 7 ? `${RED}12` : CREAM,
-                  color: p.nextDays <= 7 ? RED : GRAY,
-                  fontSize: "0.68rem", fontWeight: 700,
-                  borderRadius: 20, padding: "4px 10px", flexShrink: 0,
-                }}>
-                  {p.nextDays}d
-                </div>
-                <span style={{ color: GRAY, fontSize: "0.8rem" }}>{expanded ? "▲" : "▼"}</span>
-              </div>
 
-              {/* Expanded */}
-              {expanded && (
-                <div style={{ borderTop: `1px solid ${BORDER}`, padding: "16px 16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
-                    <MiniRing pct={p.pct} color={hc} />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: "0.82rem", color: hc }}>{p.health}</div>
-                      <div style={{ fontSize: "0.75rem", color: BLACK, marginTop: 2 }}>Next: {p.nextEvent} in {p.nextDays} days</div>
+                {/* Expanded panel */}
+                {isExp && (
+                  <div style={{ padding: "0 14px 14px", borderTop: `1px solid ${BORDER}` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 0" }}>
+                      {/* Ring */}
+                      <div style={{ position: "relative" as const }}>
+                        <SmallRing pct={p.pct} color={hc} />
+                        <div style={{ position: "absolute" as const, inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: "0.58rem", fontWeight: 800, color: hc }}>{p.pct}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "0.8rem", fontWeight: 600, color: BLACK }}>{p.nextEvent}</div>
+                        <div style={{ fontSize: "0.7rem", color: GRAY, marginTop: 2 }}>Last updated 5 days ago</div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button style={{ flex: 2, padding: "9px", borderRadius: 10, border: "none", background: hc, color: WHITE, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        {p.nextAction}
+                      </button>
+                      <button style={{ flex: 1, padding: "9px", borderRadius: 10, border: `1.5px solid ${BORDER}`, background: "transparent", color: BLACK, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        Profile
+                      </button>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button style={{ flex: 1, padding: "10px", borderRadius: 9, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}>Send Card</button>
-                    <button style={{ flex: 1, padding: "10px", borderRadius: 9, border: `1.5px solid ${SAGE}`, background: "transparent", color: SAGE, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}>Log Moment</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* Add person */}
-        <div style={{ border: `2px dashed ${SAGE}55`, borderRadius: 16, padding: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer", color: SAGE, fontWeight: 700, fontSize: "0.85rem" }}>
-          <span>+</span> Add Person
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Bottom nav */}
-      <div style={{ position: "fixed" as const, bottom: 0, left: "50%", transform: "translateX(-50%)", width: 390, background: BLACK, height: 64, display: "flex", alignItems: "center", justifyContent: "space-around", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-        {TABS.map((t, i) => (
-          <button key={i} onClick={() => setActiveTab(i)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 3, padding: "8px 12px" }}>
-            <span style={{ fontSize: "1.15rem" }}>{t.icon}</span>
-            <span style={{ fontSize: "0.6rem", fontWeight: 700, color: activeTab === i ? RED : "rgba(255,255,255,0.4)", letterSpacing: "0.04em" }}>{t.label.toUpperCase()}</span>
+      <div style={{ position: "fixed" as const, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 390, background: BLACK, display: "flex", height: 64, zIndex: 20 }}>
+        {[
+          { id: "people" as Tab, icon: "👥", label: "People" },
+          { id: "moments" as Tab, icon: "🗓", label: "Moments" },
+          { id: "cards" as Tab, icon: "💌", label: "Cards" },
+          { id: "settings" as Tab, icon: "⚙️", label: "Settings" },
+        ].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", gap: 3 }}>
+            <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
+            <span style={{ fontSize: "0.6rem", fontWeight: 700, color: tab === t.id ? RED : "rgba(255,255,255,0.4)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{t.label}</span>
           </button>
         ))}
       </div>
