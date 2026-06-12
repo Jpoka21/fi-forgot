@@ -365,6 +365,88 @@ export default function CardsReviewPage() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
+/* Quick Edits Block                                                           */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+function QuickEditsBlock({
+  cardId, editActionId, onQuickEdit,
+}: {
+  cardId: string;
+  editActionId: string | null;
+  onQuickEdit: (instruction: string, label: string) => void;
+}) {
+  const [customVal, setCustomVal] = useState("");
+
+  const EDITS = [
+    { label: "Shorter",    instruction: "Make it significantly shorter and more punchy." },
+    { label: "Funnier",    instruction: "Add genuine humor without losing the heart." },
+    { label: "More heart", instruction: "Make it warmer and more emotionally resonant." },
+    { label: "Go deeper",  instruction: "Make this more emotionally raw and vulnerable — really go there." },
+    { label: "Rewrite",    instruction: "Completely rewrite in a fresh way — different opening, different structure." },
+  ] as const;
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <span style={{ fontSize: "0.65rem", fontWeight: 700, color: GRAY, display: "block", marginBottom: 6 }}>AI EDITS</span>
+      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginBottom: 8 }}>
+        {EDITS.map(({ label, instruction }) => {
+          const actionKey = `${cardId}-${label}`;
+          const isLoading = editActionId === actionKey;
+          return (
+            <button key={label}
+              onClick={() => onQuickEdit(instruction, label)}
+              disabled={!!editActionId}
+              style={{
+                fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px", borderRadius: 8,
+                border: `1px solid ${BLACK}16`,
+                background: isLoading ? `${BLACK}06` : WHITE,
+                color: isLoading ? GRAY : BLACK,
+                cursor: editActionId ? "default" : "pointer",
+                display: "flex", alignItems: "center", gap: 5,
+              }}>
+              {isLoading ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} style={{ color: RED }} />}
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", gap: 6 }}>
+        <input
+          value={customVal}
+          onChange={e => setCustomVal(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === "Enter" && customVal.trim() && !editActionId) {
+              onQuickEdit(customVal.trim(), "Custom");
+              setCustomVal("");
+            }
+          }}
+          placeholder="Or type your own instruction…"
+          disabled={!!editActionId}
+          style={{
+            flex: 1, padding: "7px 12px", borderRadius: 8,
+            border: `1px solid ${BLACK}16`, background: WHITE,
+            fontFamily: "'Inter', sans-serif", fontSize: "0.72rem",
+            color: BLACK, outline: "none", boxSizing: "border-box" as const,
+          }}
+        />
+        <button
+          onClick={() => { if (customVal.trim() && !editActionId) { onQuickEdit(customVal.trim(), "Custom"); setCustomVal(""); } }}
+          disabled={!customVal.trim() || !!editActionId}
+          style={{
+            padding: "7px 14px", borderRadius: 8, border: "none",
+            background: customVal.trim() && !editActionId ? RED : `${BLACK}12`,
+            color: customVal.trim() && !editActionId ? WHITE : GRAY,
+            fontSize: "0.72rem", fontWeight: 700,
+            cursor: customVal.trim() && !editActionId ? "pointer" : "default",
+            display: "flex", alignItems: "center", gap: 5,
+          }}>
+          <Sparkles size={11} /> Apply
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 /* Admin Card Component                                                        */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 function AdminCard({
@@ -547,34 +629,11 @@ function PersonalCard({
         />
 
         {/* Quick AI edits */}
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 12 }}>
-          <span style={{ fontSize: "0.65rem", fontWeight: 700, color: GRAY, alignSelf: "center", marginRight: 2 }}>AI edits:</span>
-          {([
-            { label: "Shorter",    instruction: "Make it significantly shorter and more punchy." },
-            { label: "Funnier",    instruction: "Add genuine humor without losing the heart." },
-            { label: "More heart", instruction: "Make it warmer and more emotionally resonant." },
-            { label: "Rewrite",    instruction: "Completely rewrite in a fresh way." },
-          ] as const).map(({ label, instruction }) => {
-            const actionKey = `${card.id}-${label}`;
-            const isLoading = editActionId === actionKey;
-            return (
-              <button key={label}
-                onClick={() => onQuickEdit(instruction, label)}
-                disabled={!!editActionId}
-                style={{
-                  fontSize: "0.72rem", fontWeight: 700, padding: "6px 12px", borderRadius: 8,
-                  border: `1px solid ${BLACK}16`,
-                  background: isLoading ? `${BLACK}06` : WHITE,
-                  color: isLoading ? GRAY : BLACK,
-                  cursor: editActionId ? "default" : "pointer",
-                  display: "flex", alignItems: "center", gap: 5,
-                }}>
-                {isLoading ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} style={{ color: RED }} />}
-                {label}
-              </button>
-            );
-          })}
-        </div>
+        <QuickEditsBlock
+          cardId={card.id}
+          editActionId={editActionId}
+          onQuickEdit={onQuickEdit}
+        />
       </div>
 
       {/* Mailing address */}

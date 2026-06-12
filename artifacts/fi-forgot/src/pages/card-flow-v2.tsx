@@ -202,6 +202,40 @@ function WizardShell({
   );
 }
 
+function CustomAdjustInput({ onAdjust }: { onAdjust: (instruction: string) => void }) {
+  const [val, setVal] = useState("");
+  return (
+    <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+      <input
+        value={val}
+        onChange={e => setVal(e.target.value)}
+        onKeyDown={e => { if (e.key === "Enter" && val.trim()) { onAdjust(val.trim()); setVal(""); } }}
+        placeholder="Or type your own instruction…"
+        style={{
+          flex: 1, padding: "7px 12px", borderRadius: 20,
+          border: `1px solid ${BLACK}18`, background: WHITE,
+          fontFamily: "'Inter', sans-serif", fontSize: "0.72rem",
+          color: BLACK, outline: "none", boxSizing: "border-box" as const,
+        }}
+      />
+      <button
+        onClick={() => { if (val.trim()) { onAdjust(val.trim()); setVal(""); } }}
+        disabled={!val.trim()}
+        style={{
+          padding: "7px 14px", borderRadius: 20, border: "none",
+          background: val.trim() ? RED : `${BLACK}12`,
+          color: val.trim() ? WHITE : GRAY,
+          fontFamily: "'Inter', sans-serif", fontSize: "0.72rem",
+          fontWeight: 600, cursor: val.trim() ? "pointer" : "default",
+          whiteSpace: "nowrap" as const,
+        }}
+      >
+        Apply
+      </button>
+    </div>
+  );
+}
+
 function ShareDraftButton({ text, recipientName }: { text: string; recipientName: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -1026,22 +1060,27 @@ export default function CardFlowV2() {
           {adjusting ? (
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: GRAY, margin: 0 }}>Adjusting draft…</p>
           ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {[
-                { label: "Make it shorter",  instruction: "Shorten this significantly — keep only the most impactful lines." },
-                { label: "Make it warmer",   instruction: "Make this noticeably warmer and more heartfelt." },
-                { label: "Add some humor",   instruction: "Add a genuine touch of humor that still feels warm." },
-                { label: "More personal",    instruction: "Make this feel more personal and specific, less generic." },
-              ].map(({ label, instruction }) => (
-                <button
-                  key={label}
-                  onClick={() => handleQuickAdjust(instruction)}
-                  style={{ padding: "5px 11px", borderRadius: 20, border: `1px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", cursor: "pointer" } as React.CSSProperties}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                {[
+                  { label: "Shorter",       instruction: "Shorten this significantly — keep only the most impactful lines." },
+                  { label: "Warmer",        instruction: "Make this noticeably warmer and more heartfelt." },
+                  { label: "Funnier",       instruction: "Add a genuine touch of humor that still feels warm." },
+                  { label: "More personal", instruction: "Make this feel more personal and specific, less generic." },
+                  { label: "Go deeper",     instruction: "Make this more emotionally raw and vulnerable — really go there." },
+                  { label: "Rewrite",       instruction: "Completely rewrite this in a fresh way — different opening, different structure." },
+                ].map(({ label, instruction }) => (
+                  <button
+                    key={label}
+                    onClick={() => handleQuickAdjust(instruction)}
+                    style={{ padding: "5px 11px", borderRadius: 20, border: `1px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", cursor: "pointer" } as React.CSSProperties}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <CustomAdjustInput onAdjust={handleQuickAdjust} />
+            </>
           )}
         </div>
 
