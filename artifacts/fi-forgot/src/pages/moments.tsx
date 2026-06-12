@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import AppNav from "@/components/layout/AppNav";
-import { getRecipients, getBriefingsForRecipient, Recipient } from "@/lib/data";
+import { getRecipients, getBriefingsForRecipient, getCards, Recipient } from "@/lib/data";
 
 const BEIGE  = "#F2E6D3";
 const RED    = "#E23B2E";
@@ -88,12 +88,14 @@ const FILTERS: { key: Filter; label: string }[] = [
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 export default function MomentsPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [cards, setCards]           = useState(() => getCards());
   const [filter, setFilter]         = useState<Filter>("all");
   const [isMobile, setIsMobile]     = useState(() => window.innerWidth < 768);
   const [, setLocation]             = useLocation();
 
   useEffect(() => {
     setRecipients(getRecipients());
+    setCards(getCards());
   }, []);
 
   useEffect(() => {
@@ -256,25 +258,48 @@ export default function MomentsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 6, alignItems: "flex-end" }}>
-                    <button
-                      onClick={() => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)}
-                      style={{
-                        padding: "6px 12px",
-                        background: isUrgent ? RED : `${INK}09`,
-                        color: isUrgent ? WHITE : INK,
-                        border: "none", borderRadius: 7,
-                        fontSize: "0.74rem", fontWeight: 700,
-                        cursor: "pointer", whiteSpace: "nowrap" as const,
-                      }}>
-                      {ev.briefingDone ? "Update card" : "Generate Card"}
-                    </button>
-                    <Link href={`/recipients/${ev.recipient.id}`} style={{ textDecoration: "none" }}>
-                      <span style={{ fontSize: "0.67rem", color: MID, textDecoration: "underline", textUnderlineOffset: "2px", cursor: "pointer" }}>
-                        View Person
-                      </span>
-                    </Link>
-                  </div>
+                  {(() => {
+                    const hasCard = cards.some(c =>
+                      c.recipientId === ev.recipient.id &&
+                      c.holiday === ev.event &&
+                      (c.status === "Ready for approval" || c.status === "Approved")
+                    );
+                    return (
+                      <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 6, alignItems: "flex-end" }}>
+                        {hasCard ? (
+                          <button
+                            onClick={() => setLocation("/cards")}
+                            style={{
+                              padding: "6px 12px",
+                              background: SAGE, color: WHITE,
+                              border: "none", borderRadius: 7,
+                              fontSize: "0.74rem", fontWeight: 700,
+                              cursor: "pointer", whiteSpace: "nowrap" as const,
+                            }}>
+                            Review card →
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)}
+                            style={{
+                              padding: "6px 12px",
+                              background: isUrgent ? RED : `${INK}09`,
+                              color: isUrgent ? WHITE : INK,
+                              border: "none", borderRadius: 7,
+                              fontSize: "0.74rem", fontWeight: 700,
+                              cursor: "pointer", whiteSpace: "nowrap" as const,
+                            }}>
+                            {ev.briefingDone ? "Generate Card" : "Add details"}
+                          </button>
+                        )}
+                        <Link href={`/recipients/${ev.recipient.id}`} style={{ textDecoration: "none" }}>
+                          <span style={{ fontSize: "0.67rem", color: MID, textDecoration: "underline", textUnderlineOffset: "2px", cursor: "pointer" }}>
+                            View Person
+                          </span>
+                        </Link>
+                      </div>
+                    );
+                  })()}
 
                 </div>
               );
