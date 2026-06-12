@@ -1,68 +1,112 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",CREAM="#FDF7EF";
+const BG = "#F2E6D3";
+const RED = "#E23B2E";
+const BLACK = "#111111";
+const SAGE = "#5B8C6B";
+const GRAY = "#6B6B6B";
+const BORDER = "#E5E0D8";
+const WHITE = "#FFFFFF";
+const CREAM = "#FDF7EF";
+const AMBER = "#D97706";
 
-const nextActions=[
-  {num:2,text:"Answer: How's the new VP role going?",chip:"2 min",chipColor:SAGE},
-  {num:3,text:"Review Sarah's anniversary card draft",chip:"Draft ready",chipColor:"#D97706"},
-];
-const navItems=[
-  {icon:"⚡",label:"Today",active:true},
-  {icon:"👥",label:"People",active:false},
-  {icon:"🗓",label:"Moments",active:false},
-  {icon:"⚙️",label:"Settings",active:false},
+const nextActions = [
+  { num: 2, text: "Answer follow-up about Steve's guitar lessons", tag: "2 min", tagColor: SAGE },
+  { num: 3, text: "Review Sarah's anniversary card draft", tag: "Draft ready", tagColor: AMBER },
 ];
 
 export function Mobile() {
-  const [activeTab,setActiveTab]=useState(0);
+  const [activeTab, setActiveTab] = useState("today");
+
+  const tabs = [
+    { id: "today", label: "Today", icon: "⚡" },
+    { id: "people", label: "People", icon: "👥" },
+    { id: "moments", label: "Moments", icon: "🗓" },
+    { id: "settings", label: "Settings", icon: "⚙️" },
+  ];
+
   return (
-    <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",background:BG,minHeight:"100vh",maxWidth:390,margin:"0 auto",display:"flex",flexDirection:"column"}}>
-      {/* Hero — black, full-height feel */}
-      <div style={{background:BLACK,padding:"24px 24px 28px",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 70% 30%, rgba(91,140,107,0.14) 0%, transparent 65%)",pointerEvents:"none"}}/>
-        <div style={{position:"relative"}}>
-          <span style={{background:RED,color:WHITE,borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:800,letterSpacing:0.5,display:"inline-block",marginBottom:20}}>ACTION 1 OF 4</span>
-          <div style={{fontSize:52,marginBottom:12,lineHeight:1}}>🧢</div>
-          <div style={{fontFamily:"'Bebas Neue',cursive",color:WHITE,fontSize:34,lineHeight:1.05,letterSpacing:0.3,marginBottom:8}}>
-            SEND MARCUS<br/>A BIRTHDAY CARD
+    <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", flexDirection: "column" }}>
+      {/* Full-screen hero action card */}
+      <div style={{
+        background: BLACK, flexShrink: 0,
+        padding: "24px 22px 28px",
+        minHeight: 420,
+        display: "flex", flexDirection: "column",
+        position: "relative",
+      }}>
+        {/* Action chip */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+          <div style={{ background: RED, color: WHITE, borderRadius: 6, padding: "4px 11px", fontSize: "0.65rem", fontWeight: 700, letterSpacing: 1 }}>
+            ACTION 1 OF 4
           </div>
-          <div style={{fontFamily:"'Caveat',cursive",color:"rgba(255,255,255,0.55)",fontSize:17,marginBottom:28}}>
-            Birthday · June 14 · 3 days
-          </div>
-          <button style={{width:"100%",background:RED,color:WHITE,border:"none",borderRadius:14,padding:"16px 0",fontFamily:"'Bebas Neue',cursive",fontSize:22,letterSpacing:1,cursor:"pointer",marginBottom:16}}>
-            Write His Card →
-          </button>
-          <div style={{textAlign:"center",fontFamily:"'Caveat',cursive",color:"rgba(255,255,255,0.28)",fontSize:15}}>
-            swipe for next →
-          </div>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: RED, letterSpacing: 1.5 }}>F.I. FORGOT</span>
+        </div>
+
+        {/* Emoji */}
+        <div style={{ fontSize: "4rem", textAlign: "center", marginBottom: 20, lineHeight: 1 }}>🧢</div>
+
+        {/* Headline */}
+        <h1 style={{
+          fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: WHITE,
+          margin: "0 0 10px 0", letterSpacing: 2, lineHeight: 1.05, textAlign: "center",
+        }}>
+          SEND MARCUS A<br />BIRTHDAY CARD
+        </h1>
+
+        {/* Date line */}
+        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "rgba(255,255,255,0.65)", textAlign: "center", marginBottom: 28 }}>
+          Birthday · June 14 · 3 days
+        </div>
+
+        {/* CTA button */}
+        <button style={{
+          width: "100%", height: 52, borderRadius: 10, border: "none",
+          background: RED, color: WHITE,
+          fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: 1.5,
+          cursor: "pointer", boxShadow: "0 4px 16px rgba(226,59,46,0.4)",
+          marginBottom: 18,
+        }}>
+          Write His Card →
+        </button>
+
+        {/* Swipe hint */}
+        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.9rem", color: "rgba(255,255,255,0.3)", textAlign: "center" }}>
+          swipe for next →
         </div>
       </div>
 
-      {/* Queue */}
-      <div style={{flex:1,padding:"16px 16px 80px"}}>
-        <div style={{fontSize:11,fontWeight:700,color:GRAY,textTransform:"uppercase",letterSpacing:0.6,marginBottom:10}}>Up Next</div>
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          {nextActions.map(q=>(
-            <div key={q.num} style={{background:WHITE,borderRadius:12,padding:"12px 14px",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",gap:12,cursor:"pointer",boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
-              <div style={{width:26,height:26,borderRadius:"50%",background:BLACK,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Bebas Neue',cursive",fontSize:14,flexShrink:0}}>{q.num}</div>
-              <span style={{flex:1,fontSize:13,fontWeight:500,lineHeight:1.4}}>{q.text}</span>
-              <span style={{background:q.chipColor+"20",color:q.chipColor,borderRadius:20,padding:"3px 9px",fontSize:10,fontWeight:700,flexShrink:0}}>{q.chip}</span>
+      {/* Next actions — below fold */}
+      <div style={{ flex: 1, padding: "16px 16px 88px", overflowY: "auto" }}>
+        <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: BLACK, letterSpacing: 1.5, margin: "0 0 10px 0" }}>NEXT UP</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {nextActions.map(a => (
+            <div key={a.num} style={{
+              background: WHITE, borderRadius: 12, padding: "12px 14px",
+              display: "flex", alignItems: "center", gap: 12, border: `1px solid ${BORDER}`, cursor: "pointer",
+            }}>
+              <div style={{ width: 26, height: 26, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", color: WHITE, lineHeight: 1 }}>{a.num}</span>
+              </div>
+              <span style={{ flex: 1, fontSize: "0.82rem", color: BLACK, fontWeight: 500, lineHeight: 1.3 }}>{a.text}</span>
+              <div style={{
+                background: a.tagColor === SAGE ? "rgba(91,140,107,0.12)" : "rgba(217,119,6,0.1)",
+                color: a.tagColor, borderRadius: 20, padding: "3px 9px",
+                fontSize: "0.65rem", fontWeight: 700, flexShrink: 0,
+              }}>{a.tag}</div>
+              <span style={{ color: GRAY, fontSize: "0.9rem" }}>→</span>
             </div>
           ))}
-        </div>
-
-        <div style={{marginTop:16,textAlign:"center",color:GRAY,fontSize:12}}>
-          6 people · <strong style={{color:RED}}>1 priority</strong>
         </div>
       </div>
 
       {/* Bottom nav */}
-      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:390,background:BLACK,display:"flex",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-        {navItems.map((t,i)=>(
-          <button key={i} onClick={()=>setActiveTab(i)} style={{flex:1,background:"none",border:"none",padding:"10px 0 12px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-            <span style={{fontSize:19}}>{t.icon}</span>
-            <span style={{fontSize:10,fontWeight:700,color:activeTab===i?RED:"rgba(255,255,255,0.4)",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{t.label}</span>
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: 390, background: BLACK, display: "flex", borderTop: `1px solid rgba(255,255,255,0.1)` }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ flex: 1, background: "transparent", border: "none", padding: "10px 0 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer" }}>
+            <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
+            <span style={{ fontSize: "0.6rem", fontWeight: 700, color: activeTab === t.id ? RED : "rgba(255,255,255,0.45)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{t.label}</span>
           </button>
         ))}
       </div>

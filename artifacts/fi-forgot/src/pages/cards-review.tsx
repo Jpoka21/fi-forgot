@@ -74,7 +74,8 @@ export default function CardsReviewPage() {
   const [shareUrlIds, setShareUrlIds]         = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const cs = getCards().filter(c => c.status === "Ready for approval");
+    const recipientIds = new Set(getRecipients().map(r => r.id));
+    const cs = getCards().filter(c => c.status === "Ready for approval" && recipientIds.has(c.recipientId));
     setCards(cs);
     if (user?.email) setPending(getCustomerPendingApprovals(user.email));
   }, []);
@@ -111,7 +112,8 @@ export default function CardsReviewPage() {
   const total = allItems.length;
 
   function reload() {
-    const cs = getCards().filter(c => c.status === "Ready for approval");
+    const recipientIds = new Set(getRecipients().map(r => r.id));
+    const cs = getCards().filter(c => c.status === "Ready for approval" && recipientIds.has(c.recipientId));
     setCards(cs);
     if (user?.email) setPending(getCustomerPendingApprovals(user.email));
   }
@@ -606,7 +608,7 @@ function PersonalCard({
                 <button
                   onClick={onRegenDesign}
                   style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.14)", color: WHITE, fontSize: "0.68rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
-                  <RefreshCw size={11} /> Try another
+                  <RefreshCw size={11} /> Change design
                 </button>
               </div>
             </>

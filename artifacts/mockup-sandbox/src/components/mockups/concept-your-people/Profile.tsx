@@ -1,122 +1,137 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",CREAM="#FDF7EF";
-const DARK_SAGE="#3d6b4f";
+const BG = "#F2E6D3";
+const RED = "#E23B2E";
+const BLACK = "#111111";
+const SAGE = "#5B8C6B";
+const DARK_SAGE = "#3d6b4f";
+const GRAY = "#6B6B6B";
+const BORDER = "#E5E0D8";
+const WHITE = "#FFFFFF";
+const CREAM = "#FDF7EF";
 
-function Ring({pct,size,color}:{pct:number;size:number;color:string}){
-  const r=(size-12)/2;
-  const c=2*Math.PI*r;
+function BigHealthRing({ pct }: { pct: number }) {
+  const size = 96;
+  const r = 40;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
   return (
-    <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={BORDER} strokeWidth={8}/>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={8}
-        strokeDasharray={`${c*pct/100} ${c}`} strokeLinecap="round"/>
-    </svg>
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={BORDER} strokeWidth={8} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={SAGE} strokeWidth={8} strokeDasharray={`${dash} ${circ - dash}`} strokeLinecap="round" />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: DARK_SAGE, lineHeight: 1 }}>{pct}%</span>
+        <span style={{ fontSize: "0.58rem", color: SAGE, fontWeight: 700, marginTop: 1 }}>EXCELLENT</span>
+      </div>
+    </div>
   );
 }
 
-const bars=[
-  {label:"Recency",pct:90,color:DARK_SAGE},
-  {label:"Consistency",pct:85,color:SAGE},
-  {label:"Card Quality",pct:78,color:SAGE},
-  {label:"Profile Depth",pct:82,color:SAGE},
-];
-const pastCards=[
-  {label:"Anniversary 2023",excerpt:"Another year of watching you handle everything with grace…"},
-  {label:"Birthday 2023",excerpt:"You somehow manage to be the funniest person in the room…"},
-  {label:"Christmas 2022",excerpt:"Grateful for every loud family dinner you organize…"},
-];
+function MiniBar({ pct, color = SAGE }: { pct: number; color?: string }) {
+  return (
+    <div style={{ flex: 1, height: 6, background: BORDER, borderRadius: 3, overflow: "hidden" }}>
+      <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
+    </div>
+  );
+}
 
 export function Profile() {
-  const [_,set]=useState(0);void set;
+  const cards = [
+    { event: "Anniversary 2023", date: "Jun 19, 2023", excerpt: "Every year with you is better than the last — you make the whole world..." },
+    { event: "Birthday 2023", date: "Mar 4, 2023", excerpt: "Wishing my big sis the most wonderful birthday — so proud of you..." },
+    { event: "Christmas 2022", date: "Dec 25, 2022", excerpt: "You've always been the heart of every holiday gathering, Sarah..." },
+  ];
+
   return (
-    <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",background:BG,minHeight:"100vh",color:BLACK}}>
-      <div style={{background:BLACK,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",height:56}}>
-        <span style={{fontFamily:"'Bebas Neue',cursive",color:WHITE,fontSize:24,letterSpacing:1}}>YOUR PEOPLE</span>
-        <span style={{fontFamily:"'Bebas Neue',cursive",color:RED,fontSize:16}}>F.I. FORGOT</span>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div style={{ background: BLACK, padding: "0 28px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: WHITE, letterSpacing: 2 }}>YOUR PEOPLE</span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: RED, letterSpacing: 1.5 }}>F.I. FORGOT</span>
       </div>
 
-      <div style={{maxWidth:720,margin:"0 auto",padding:"24px 20px"}}>
-        <div style={{color:GRAY,fontSize:13,marginBottom:20,cursor:"pointer"}}>← Back</div>
+      <div style={{ padding: "20px 28px", maxWidth: 760, margin: "0 auto" }}>
+        <div style={{ marginBottom: 18, fontSize: "0.82rem", color: GRAY, cursor: "pointer" }}>← Your People</div>
 
-        {/* Hero card */}
-        <div style={{background:WHITE,borderRadius:20,padding:"28px",border:`1px solid ${BORDER}`,marginBottom:16,boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
-          <div style={{display:"flex",alignItems:"flex-start",gap:24}}>
-            <div style={{position:"relative",flexShrink:0}}>
-              <div style={{width:72,height:72,borderRadius:"50%",background:BLACK,display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)"}}>👩</div>
-              <Ring pct={82} size={96} color={DARK_SAGE}/>
-            </div>
-            <div style={{flex:1}}>
-              <div style={{fontFamily:"'Bebas Neue',cursive",fontSize:38,letterSpacing:1,lineHeight:1}}>SARAH</div>
-              <div style={{display:"flex",gap:8,marginTop:6,flexWrap:"wrap"}}>
-                <span style={{background:BLACK,color:WHITE,borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:700}}>Sister</span>
-                <span style={{background:DARK_SAGE+"20",color:DARK_SAGE,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>82% Excellent</span>
+        {/* Profile header */}
+        <div style={{ background: WHITE, borderRadius: 16, padding: "24px", border: `1px solid ${BORDER}`, marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.2rem" }}>👩</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: BLACK, margin: 0, letterSpacing: 2 }}>SARAH</h1>
+                <span style={{ background: SAGE, color: WHITE, borderRadius: 20, padding: "4px 13px", fontSize: "0.75rem", fontWeight: 700 }}>Sister</span>
               </div>
+              <div style={{ fontSize: "0.78rem", color: GRAY }}>Profile completeness: 88%</div>
+              <div style={{ height: 4, background: BORDER, borderRadius: 2, marginTop: 5, width: 200 }}>
+                <div style={{ width: "88%", height: "100%", background: SAGE, borderRadius: 2 }} />
+              </div>
+              <div style={{ fontSize: "0.65rem", color: GRAY, marginTop: 4 }}>Missing: mailing address</div>
             </div>
+            <BigHealthRing pct={82} />
           </div>
+        </div>
 
-          {/* Health breakdown */}
-          <div style={{marginTop:24,paddingTop:20,borderTop:`1px solid ${BORDER}`}}>
-            <div style={{fontSize:12,fontWeight:700,color:GRAY,textTransform:"uppercase",letterSpacing:0.8,marginBottom:12}}>Health Score Breakdown</div>
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {bars.map(b=>(
-                <div key={b.label} style={{display:"flex",alignItems:"center",gap:12}}>
-                  <span style={{fontSize:13,color:GRAY,width:110,flexShrink:0}}>{b.label}</span>
-                  <div style={{flex:1,height:8,background:BORDER,borderRadius:4,overflow:"hidden"}}>
-                    <div style={{width:`${b.pct}%`,height:"100%",background:b.color,borderRadius:4}}/>
-                  </div>
-                  <span style={{fontSize:12,fontWeight:700,color:b.color,width:34,textAlign:"right"}}>{b.pct}%</span>
-                </div>
-              ))}
-            </div>
+        {/* Health Score Breakdown */}
+        <div style={{ background: WHITE, borderRadius: 14, padding: "20px 22px", border: `1px solid ${BORDER}`, marginBottom: 14 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, letterSpacing: 1.5, margin: "0 0 16px 0" }}>HEALTH SCORE BREAKDOWN</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {[
+              { label: "Recency", pct: 90 },
+              { label: "Consistency", pct: 85 },
+              { label: "Card Quality", pct: 78 },
+              { label: "Profile Depth", pct: 82 },
+            ].map(s => (
+              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <span style={{ fontSize: "0.78rem", color: GRAY, width: 110, flexShrink: 0 }}>{s.label}</span>
+                <MiniBar pct={s.pct} />
+                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: SAGE, width: 38, textAlign: "right", flexShrink: 0 }}>{s.pct}%</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Next Moment */}
-        <div style={{background:WHITE,borderRadius:16,padding:"20px 24px",border:`1px solid ${BORDER}`,marginBottom:14,boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
-          <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:15,letterSpacing:1,margin:"0 0 12px",color:GRAY}}>NEXT MOMENT</h3>
-          <div style={{display:"flex",alignItems:"center",gap:14,background:CREAM,borderRadius:12,padding:"14px 16px",border:`1px solid ${BORDER}`}}>
-            <div>
-              <div style={{fontWeight:700,fontSize:15}}>Anniversary</div>
-              <div style={{color:GRAY,fontSize:13,marginTop:2}}>Jun 19 · 8 days away</div>
+        <div style={{ background: WHITE, borderRadius: 14, padding: "18px 22px", border: `1px solid ${BORDER}`, marginBottom: 14 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, letterSpacing: 1.5, margin: "0 0 14px 0" }}>NEXT MOMENT</h3>
+          <div style={{ background: CREAM, borderRadius: 10, padding: "14px 16px", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, width: 56, textAlign: "center", lineHeight: 1 }}>8<div style={{ fontSize: "0.65rem", color: GRAY, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>DAYS</div></div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: "0.95rem", color: BLACK }}>Anniversary</div>
+              <div style={{ fontSize: "0.78rem", color: GRAY, marginTop: 1 }}>June 19, 2026</div>
             </div>
-            <span style={{background:SAGE+"20",color:SAGE,borderRadius:20,padding:"4px 11px",fontSize:11,fontWeight:700,marginLeft:"auto"}}>On track</span>
-            <button style={{background:SAGE,color:WHITE,border:"none",borderRadius:8,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Review Draft →</button>
+            <span style={{ background: "rgba(91,140,107,0.1)", color: SAGE, borderRadius: 20, padding: "3px 10px", fontSize: "0.68rem", fontWeight: 700 }}>On track</span>
+            <button style={{ background: BLACK, color: WHITE, border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Review Draft →</button>
           </div>
         </div>
 
-        {/* Card history */}
-        <div style={{background:WHITE,borderRadius:16,padding:"20px 24px",border:`1px solid ${BORDER}`,marginBottom:14,boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
-          <h3 style={{fontFamily:"'Bebas Neue',cursive",fontSize:15,letterSpacing:1,margin:"0 0 14px",color:GRAY}}>CARD HISTORY</h3>
-          {pastCards.map((c,i)=>(
-            <div key={i} style={{display:"flex",gap:14,paddingBottom:i<pastCards.length-1?14:0,marginBottom:i<pastCards.length-1?14:0,borderBottom:i<pastCards.length-1?`1px solid ${BORDER}`:"none"}}>
-              <div style={{width:8,height:8,borderRadius:"50%",background:SAGE,marginTop:5,flexShrink:0}}/>
-              <div>
-                <div style={{fontWeight:700,fontSize:13}}>{c.label}</div>
-                <div style={{fontFamily:"'Caveat',cursive",color:GRAY,fontSize:15,marginTop:2,fontStyle:"italic"}}>"{c.excerpt}"</div>
+        {/* Card History */}
+        <div style={{ background: WHITE, borderRadius: 14, padding: "18px 22px", border: `1px solid ${BORDER}`, marginBottom: 14 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, letterSpacing: 1.5, margin: "0 0 14px 0" }}>CARD HISTORY</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {cards.map((c, i) => (
+              <div key={c.event} style={{ display: "flex", gap: 14, paddingBottom: i < cards.length - 1 ? 10 : 0, borderBottom: i < cards.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 14, flexShrink: 0 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: SAGE, marginTop: 5 }} />
+                  {i < cards.length - 1 && <div style={{ width: 1, flex: 1, background: BORDER, marginTop: 4 }} />}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: "0.8rem", color: BLACK }}>{c.event}</div>
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.9rem", color: GRAY, marginTop: 2, lineHeight: 1.4 }}>"{c.excerpt}"</div>
+                  <div style={{ fontSize: "0.65rem", color: GRAY, marginTop: 4 }}>{c.date}</div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Actions + completeness */}
-        <div style={{background:WHITE,borderRadius:16,padding:"18px 24px",border:`1px solid ${BORDER}`,marginBottom:16,boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
-          <div style={{display:"flex",gap:10,marginBottom:14}}>
-            <button style={{flex:1,background:RED,color:WHITE,border:"none",borderRadius:10,padding:"11px 0",fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Send Card</button>
-            <button style={{flex:1,background:"transparent",color:SAGE,border:`2px solid ${SAGE}`,borderRadius:10,padding:"11px 0",fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Log Moment</button>
-            <button style={{flex:1,background:"transparent",color:BLACK,border:`1.5px solid ${BORDER}`,borderRadius:10,padding:"11px 0",fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Ask Question</button>
-          </div>
-          <div style={{borderTop:`1px solid ${BORDER}`,paddingTop:14}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-              <span style={{fontSize:12,color:GRAY}}>Profile completeness</span>
-              <span style={{fontSize:12,fontWeight:700,color:SAGE}}>88%</span>
-            </div>
-            <div style={{height:6,background:BORDER,borderRadius:4,overflow:"hidden",marginBottom:6}}>
-              <div style={{width:"88%",height:"100%",background:SAGE,borderRadius:4}}/>
-            </div>
-            <div style={{fontSize:11,color:"#D97706"}}>Missing: mailing address</div>
-          </div>
+        {/* Quick actions */}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button style={{ padding: "10px 18px", borderRadius: 8, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Send Card</button>
+          <button style={{ padding: "10px 18px", borderRadius: 8, border: `2px solid ${SAGE}`, background: "transparent", color: SAGE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Log Moment</button>
+          <button style={{ padding: "10px 18px", borderRadius: 8, border: `1px solid ${BORDER}`, background: WHITE, color: BLACK, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Ask Question</button>
         </div>
       </div>
     </div>

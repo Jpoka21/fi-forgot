@@ -1,75 +1,114 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG="#F2E6D3",RED="#E23B2E",BLACK="#111111",SAGE="#5B8C6B",GRAY="#6B6B6B",BORDER="#E5E0D8",WHITE="#FFFFFF",CREAM="#FDF7EF";
+const BG = "#F2E6D3";
+const RED = "#E23B2E";
+const BLACK = "#111111";
+const SAGE = "#5B8C6B";
+const GRAY = "#6B6B6B";
+const BORDER = "#E5E0D8";
+const WHITE = "#FFFFFF";
+const CREAM = "#FDF7EF";
+const AMBER = "#D97706";
 
-function AmbientRing(){
-  const r=19;const c=2*Math.PI*r;
+function AmbientRing({ pct, size = 48 }: { pct: number; size?: number }) {
+  const r = (size - 6) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
   return (
-    <svg width={48} height={48} style={{transform:"rotate(-90deg)"}}>
-      <circle cx={24} cy={24} r={r} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth={5}/>
-      <circle cx={24} cy={24} r={r} fill="none" stroke={SAGE} strokeWidth={5}
-        strokeDasharray={`${c*0.76} ${c}`} strokeLinecap="round"/>
-    </svg>
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={4} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={SAGE} strokeWidth={4} strokeDasharray={`${dash} ${circ - dash}`} strokeLinecap="round" />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: "0.55rem", fontWeight: 700, color: SAGE }}>{pct}%</span>
+      </div>
+    </div>
   );
 }
 
-const queue=[
-  {num:2,text:"Answer follow-up about Steve's guitar lessons",chip:"2 min",chipColor:SAGE},
-  {num:3,text:"Review Sarah's anniversary card draft",chip:"Draft ready",chipColor:"#D97706"},
-  {num:4,text:"Add details for Mom's Mother's Day card",chip:"15 days",chipColor:GRAY},
-];
-
 export function Dashboard() {
-  const [_,set]=useState(0);void set;
+  const [_hover] = useState(false);
+
+  const queue = [
+    { num: 2, text: "Answer follow-up about Steve's guitar lessons", tag: "2 min", tagColor: SAGE },
+    { num: 3, text: "Review Sarah's anniversary card draft", tag: "Draft ready", tagColor: AMBER },
+    { num: 4, text: "Add details for Mom's Mother's Day card", tag: "15 days", tagColor: GRAY },
+  ];
+
   return (
-    <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",background:BG,minHeight:"100vh",color:BLACK}}>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Nav */}
-      <div style={{background:BLACK,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",height:56,position:"sticky",top:0,zIndex:10}}>
-        <span style={{fontFamily:"'Bebas Neue',cursive",color:RED,fontSize:26,letterSpacing:1}}>F.I. FORGOT</span>
-        <span style={{fontFamily:"'Caveat',cursive",color:"rgba(255,255,255,0.45)",fontSize:15}}>We got your important people</span>
+      <div style={{ background: BLACK, padding: "0 28px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", color: RED, letterSpacing: 2 }}>F.I. FORGOT</span>
+        <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: "rgba(255,255,255,0.55)" }}>We got your important people</span>
       </div>
 
-      <div style={{maxWidth:860,margin:"0 auto",padding:"24px 20px"}}>
+      <div style={{ padding: "22px 28px", maxWidth: 820, margin: "0 auto" }}>
         {/* Hero action card */}
-        <div style={{background:BLACK,borderRadius:24,padding:"28px 28px 24px",marginBottom:16,position:"relative",overflow:"hidden"}}>
-          {/* subtle texture */}
-          <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 80% 20%, rgba(91,140,107,0.12) 0%, transparent 60%)",pointerEvents:"none"}}/>
-          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:20,position:"relative"}}>
-            <span style={{background:RED,color:WHITE,borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:800,letterSpacing:0.5}}>TODAY · ACTION 1 OF 4</span>
-            <div style={{position:"relative"}}>
-              <AmbientRing/>
-              <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",transform:"rotate(90deg)"}}>
-                <span style={{fontSize:9,fontWeight:800,color:SAGE}}>76%</span>
-              </div>
+        <div style={{
+          background: BLACK, borderRadius: 24, padding: "28px 28px 24px", marginBottom: 14,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+        }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 }}>
+            <div style={{ background: RED, color: WHITE, borderRadius: 6, padding: "4px 11px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: 1 }}>
+              TODAY · ACTION 1 OF 4
             </div>
+            <AmbientRing pct={76} />
           </div>
-          <div style={{position:"relative",marginBottom:8}}>
-            <div style={{fontFamily:"'Bebas Neue',cursive",color:WHITE,fontSize:42,lineHeight:1.05,letterSpacing:0.5}}>
-              SEND MARCUS<br/>A BIRTHDAY CARD
-            </div>
+
+          <h1 style={{
+            fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", color: WHITE,
+            margin: "0 0 8px 0", letterSpacing: 2, lineHeight: 1.05,
+          }}>
+            SEND MARCUS A<br />BIRTHDAY CARD
+          </h1>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "rgba(255,255,255,0.65)", marginBottom: 24 }}>
+            Birthday · June 14 · 3 days away
           </div>
-          <div style={{fontFamily:"'Caveat',cursive",color:"rgba(255,255,255,0.55)",fontSize:17,marginBottom:24}}>Birthday · June 14 · 3 days away</div>
-          <button style={{width:"100%",background:RED,color:WHITE,border:"none",borderRadius:14,padding:"16px 0",fontFamily:"'Bebas Neue',cursive",fontSize:22,letterSpacing:1,cursor:"pointer"}}>
+
+          <button style={{
+            width: "100%", height: 52, borderRadius: 10, border: "none",
+            background: RED, color: WHITE,
+            fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem",
+            letterSpacing: 1.5, cursor: "pointer",
+            boxShadow: "0 4px 16px rgba(226,59,46,0.4)",
+          }}>
             Write His Card →
           </button>
         </div>
 
-        {/* Action queue */}
-        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>
-          {queue.map(q=>(
-            <div key={q.num} style={{background:WHITE,borderRadius:14,padding:"14px 18px",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",gap:14,cursor:"pointer",boxShadow:"0 1px 5px rgba(0,0,0,0.04)"}}>
-              <div style={{width:30,height:30,borderRadius:"50%",background:BLACK,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Bebas Neue',cursive",fontSize:16,flexShrink:0}}>{q.num}</div>
-              <span style={{flex:1,fontSize:14,fontWeight:500}}>{q.text}</span>
-              <span style={{background:q.chipColor+"20",color:q.chipColor,borderRadius:20,padding:"4px 11px",fontSize:11,fontWeight:700,flexShrink:0}}>{q.chip}</span>
-              <span style={{color:GRAY,fontSize:18,fontWeight:300,flexShrink:0}}>→</span>
+        {/* Next 3 actions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+          {queue.map(q => (
+            <div key={q.num} style={{
+              background: WHITE, borderRadius: 12, padding: "13px 16px",
+              display: "flex", alignItems: "center", gap: 14,
+              border: `1px solid ${BORDER}`,
+              cursor: "pointer",
+            }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: "50%", background: BLACK,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+              }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: WHITE, lineHeight: 1 }}>{q.num}</span>
+              </div>
+              <span style={{ flex: 1, fontSize: "0.88rem", color: BLACK, fontWeight: 500 }}>{q.text}</span>
+              <div style={{
+                background: q.tagColor === SAGE ? "rgba(91,140,107,0.12)" : q.tagColor === AMBER ? "rgba(217,119,6,0.1)" : "rgba(0,0,0,0.07)",
+                color: q.tagColor, borderRadius: 20, padding: "3px 10px",
+                fontSize: "0.68rem", fontWeight: 700, flexShrink: 0,
+              }}>{q.tag}</div>
+              <span style={{ color: GRAY, fontSize: "1rem" }}>→</span>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div style={{textAlign:"center",color:GRAY,fontSize:12}}>
-          6 people · 5 healthy · <strong style={{color:RED}}>1 priority</strong>
+        <div style={{ textAlign: "center", fontSize: "0.72rem", color: GRAY }}>
+          6 people · 5 healthy · 1 priority
         </div>
       </div>
     </div>
