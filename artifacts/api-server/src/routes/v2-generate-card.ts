@@ -279,10 +279,47 @@ QUALITY REQUIREMENTS — every card must pass all of these
    - Shared experiences not stated
    If context is limited, write with humility. Do not pretend the relationship is richer, closer, or more documented than the available information supports. A card that honestly reflects a simple relationship is better than a card that invents a rich one.
 
+   ONE INFERENCE RULE — one fact → one observation about the difficulty or significance of THAT ACTION only.
+
+   SINGLE-FACT CARD FORMULA — when context contains only one fact, the card must contain EXACTLY these elements and nothing else:
+   [1] Name the fact: "Your first 10K last weekend" / "finishing that marathon after six months of training"
+   [2] Comment on THAT ACTION — its difficulty, what it took physically, or what it meant logistically: "Those miles are not a joke." / "Months of early mornings and sore legs." / "That's a hard thing to do."
+   [3] Sender's genuine feeling: "I'm proud of you." / "Glad you're my friend." / "Couldn't be happier for you."
+   [4] Birthday wish.
+
+   After step 4: STOP. The card is complete. Do NOT add any of the following:
+   - Any adjective describing the person's character: dedicated, driven, determined, disciplined, resilient, motivated, inspiring, or any paraphrase
+   - Any claim about what the person "always" or "never" does
+   - Any claim about how the person affects others: "you inspire me / everyone / people around you"
+   - Any claim that the action reveals something about who they are as a person
+   - "What dedication looks like" / "shown real commitment" / "that's so you" / "that's just who you are"
+
+   ASK YOURSELF before each sentence: "Does this say something about the action, or about the person?" If about the person and NOT in the provided context — cut it.
+
 ═══════════════════════════════════════════
 BANNED PHRASES — using any of these is an automatic failure
 ═══════════════════════════════════════════
-${BANNED_PHRASES_SYSTEM.map(p => `"${p}"`).join(", ")}${avoidStr}`;
+${BANNED_PHRASES_SYSTEM.map(p => `"${p}"`).join(", ")}${avoidStr}
+
+═══════════════════════════════════════════
+MANDATORY OUTPUT REVIEW — do this before returning JSON
+═══════════════════════════════════════════
+Before writing the JSON, scan every sentence in every card for these patterns. If any appear and are NOT explicitly stated in the provided context, rewrite that sentence before outputting:
+
+SCAN FOR AND REMOVE if not in context:
+- The words "dedication", "dedicated" applied to the person ("a testament to your dedication" → cut entirely or rewrite as "that race was hard-earned")
+- The words "inspiring", "inspired" applied to person or action ("was honestly inspiring" → cut or rewrite as "I'm proud of you for seeing it through")
+- The words "driven", "determined", "disciplined", "resilient", "motivated" applied to the person
+- Any variant of "you always/never [trait]"
+- Any claim about how the person affects others ("you inspire me", "having you as a friend pushes me")
+- "a testament to your [anything]" when not in context
+- "shown what [trait] looks like"
+
+REWRITE STRATEGY: Replace character-adjective sentences with one of:
+- A direct description of what the action required: "Those were real miles."
+- The sender's genuine feeling: "I'm proud of you." / "Glad to have you as a friend."
+- A birthday wish.
+If you cut a sentence and the card becomes shorter — that is correct. A shorter honest card is better than a longer invented one.`;
 }
 
 function buildUserPrompt(
@@ -550,6 +587,75 @@ function buildKeptInMindItems(context: RecipientContext | null): { items: string
   return { items, sources };
 }
 
+// ── Post-generation character-adjective filter ────────────────────────────────
+// Strips sentences that attribute fabricated character traits to the recipient
+// when those traits were NOT present in the provided context.
+// This is a hard-enforcement layer — the model's prior for athletic/achievement
+// facts → character adjectives is too strong to eliminate via prompt alone.
+
+const CHARACTER_TRAIT_WORDS: RegExp[] = [
+  /\bdedication\b/i,
+  /\bdedicated\b/i,
+  /\bdriven\b/i,
+  /\bdetermined\b/i,
+  /\bdetermination\b/i,
+  /\bdisciplined\b/i,
+  /\bresilient\b/i,
+  /\bresilience\b/i,
+  /\binspiring\b/i,
+  /\binspirations?\b/i,
+  /\binspires?\b/i,
+  /\binspired\b/i,
+  /\bmotivated\b/i,
+  /\bmotivation\b/i,
+  /\bgrit\b/i,
+  /\btenacious\b/i,
+  /\btenacity\b/i,
+];
+
+function stripFabricatedCharacterAdjectives(
+  cardText: string,
+  contextText: string,
+): { text: string; strippedSentences: string[] } {
+  const ctxLower = contextText.toLowerCase();
+  const strippedSentences: string[] = [];
+
+  // Split preserving whitespace context — split on sentence-ending punctuation + space
+  const sentenceRe = /[^.!?]*[.!?]+["']?\s*/g;
+  const sentences: string[] = [];
+  let remainder = cardText;
+  let match;
+  const re = /[^.!?]*[.!?]+["']?(\s*)/g;
+  re.lastIndex = 0;
+  while ((match = re.exec(cardText)) !== null) {
+    sentences.push(match[0]);
+    remainder = cardText.slice(re.lastIndex);
+  }
+  if (remainder.trim()) sentences.push(remainder);
+
+  const filtered = sentences.filter(sentence => {
+    const sLower = sentence.toLowerCase();
+    // Only examine sentences that address the recipient
+    if (!/\b(you|your)\b/i.test(sentence)) return true;
+
+    for (const pattern of CHARACTER_TRAIT_WORDS) {
+      const wordMatch = sLower.match(pattern);
+      if (wordMatch) {
+        const word = wordMatch[0];
+        if (!ctxLower.includes(word)) {
+          strippedSentences.push(sentence.trim());
+          return false;
+        }
+      }
+    }
+    return true;
+  });
+
+  // Re-join and clean up extra whitespace
+  const cleaned = filtered.join("").replace(/\s{2,}/g, " ").trim();
+  return { text: cleaned || cardText, strippedSentences };
+}
+
 // ── Completeness calc ─────────────────────────────────────────────────────────
 
 function calcCompleteness(relAnswers: Record<string, string>, details: string): number {
@@ -658,8 +764,24 @@ router.post("/v2/generate-card", async (req, res) => {
       return;
     }
 
+    // ── Post-generation character-adjective filter ─────────────────────────
+    // Build full context string: everything the sender actually provided
+    const rawContextText = [
+      Object.values(relAnswers).join(" "),
+      details ?? "",
+      contextSupplement ?? "",
+    ].filter(Boolean).join(" ");
+
+    const filteredCards = parsed.cards.map(card => {
+      const { text, strippedSentences } = stripFabricatedCharacterAdjectives(card.text, rawContextText);
+      if (strippedSentences.length > 0) {
+        logger.info({ tone: card.tone, strippedSentences }, "v2-generate-card: stripped fabricated character adjectives");
+      }
+      return { ...card, text };
+    });
+
     // ── Quality scoring ────────────────────────────────────────────────────
-    const scoredCards = parsed.cards.map(card => {
+    const scoredCards = filteredCards.map(card => {
       const quality = scoreCardQuality(card.text, recipientContext, contextSupplement);
       return { ...card, _qualityScore: quality };
     });

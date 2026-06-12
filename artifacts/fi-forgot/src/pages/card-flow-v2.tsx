@@ -69,7 +69,7 @@ interface CardOption { tone: string; text: string; }
 interface CardDesign { id: string; name: string; category?: string; imageUrl?: string; }
 interface DraftVersion { id: number; label: string; text: string; original: string; }
 interface DuplicateMatch { id: string; firstName: string; relationshipType: string; }
-type Phase = "who" | "flow" | "generating" | "results" | "final";
+type Phase = "who" | "flow" | "detail-gate" | "generating" | "results" | "final";
 
 // ── Relationship questions ────────────────────────────────────────────────────
 
@@ -129,6 +129,20 @@ const UNIVERSAL_QUESTIONS: QuestionScreen[] = [
   { id: "avoidMentioning",  question: "Anything we should avoid mentioning?", hint: "Optional", kind: "textarea", optional: true },
   { id: "signOff",          question: "How do you want to sign the card?", hint: 'e.g. Love, Sarah  •  XOXO Mom  •  Your friend, Jake', kind: "textarea", optional: true },
 ];
+
+// Fields that constitute "one real thing about this person" — beyond name/relationship/occasion
+const REAL_DETAIL_FIELDS = [
+  "details", "interests",
+  "siblingFact", "parentFact", "spouseSmile",
+  "proudOf", "recognizingFor", "grandFact", "proStrength",
+];
+
+function hasRealDetail(answers: Record<string, string | string[]>): boolean {
+  return REAL_DETAIL_FIELDS.some(f => {
+    const v = answers[f];
+    return typeof v === "string" && v.trim().length >= 4;
+  });
+}
 
 function getRelGroup(rel: string): string {
   const r = rel.toLowerCase();
@@ -314,6 +328,8 @@ export default function CardFlowV2() {
   // Kept In Mind
   const [keptInMind, setKeptInMind]             = useState<string[]>([]);
   const [keptInMindSources, setKeptInMindSources] = useState<string[]>([]);
+  // Detail gate
+  const [detailGateInput, setDetailGateInput]   = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -321,9 +337,10 @@ export default function CardFlowV2() {
 
   const totalSteps = steps.length;
   const progressPct =
-    phase === "who"        ? 0.02 :
-    phase === "flow"       ? 0.05 + (stepIdx / (totalSteps + 1)) * 0.75 :
-    phase === "generating" ? 0.82 :
+    phase === "who"          ? 0.02 :
+    phase === "flow"         ? 0.05 + (stepIdx / (totalSteps + 1)) * 0.75 :
+    phase === "detail-gate"  ? 0.78 :
+    phase === "generating"   ? 0.82 :
     0.98;
 
   // ── WHO handlers ────────────────────────────────────────────────────────────
@@ -411,6 +428,9 @@ export default function CardFlowV2() {
     const next = nextAllowedIdx(stepIdx, withAnswers, 1);
     if (next !== null) {
       setStepIdx(next);
+    } else if (!hasRealDetail(withAnswers)) {
+      setDetailGateInput("");
+      setPhase("detail-gate");
     } else {
       generateCards(withAnswers);
     }
@@ -788,6 +808,91 @@ export default function CardFlowV2() {
             </div>
           </>
         )}
+      </WizardShell>
+    );
+  }
+
+  // ── DETAIL GATE ──────────────────────────────────────────────────────────────
+  if (phase === "detail-gate") {
+    const examples = [
+      "Something they did recently",
+      "A funny memory",
+      "An inside joke",
+      "Something happening in their life right now",
+      "Something they're proud of",
+    ];
+
+    function submitGate() {
+      const detail = detailGateInput.trim();
+      if (!detail) return;
+      const withDetail = { ...answers, details: detail };
+      setAnswers(withDetail);
+      generateCards(withDetail);
+    }
+
+    return (
+      <WizardShell progress={progressPct} onBack={() => { setPhase("flow"); setStepIdx(steps.length - 1); }} showBack>
+        <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.04em", color: BLACK, marginBottom: 4, lineHeight: 1.1 }}>
+          BEFORE WE WRITE THE CARD
+        </p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "1rem", color: BLACK, fontWeight: 600, marginBottom: 6 }}>
+          Tell us one thing about <span style={{ color: RED }}>{firstName}</span> so it sounds like you.
+        </p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", color: GRAY, marginBottom: 20, lineHeight: 1.5 }}>
+          Without at least one real detail, we can't write a card that actually sounds personal.
+        </p>
+
+        {/* Tap-to-fill examples */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 18 }}>
+          {examples.map(ex => (
+            <button
+              key={ex}
+              onClick={() => setDetailGateInput(prev => prev ? `${prev} ${ex.toLowerCase()}` : ex)}
+              style={{
+                padding: "8px 13px", borderRadius: 20,
+                border: `1.5px solid ${BLACK}18`, background: WHITE,
+                fontFamily: "'Inter', sans-serif", fontSize: "0.78rem",
+                color: GRAY, cursor: "pointer", lineHeight: 1.2,
+              }}
+            >
+              {ex}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          autoFocus
+          value={detailGateInput}
+          onChange={e => setDetailGateInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && e.metaKey && detailGateInput.trim()) submitGate(); }}
+          placeholder={`e.g. ${firstName} just got a promotion at work, or We always quote the same movie at each other`}
+          rows={4}
+          style={{
+            width: "100%", padding: "14px 16px", borderRadius: 12,
+            border: `1.5px solid ${detailGateInput.trim() ? RED : BLACK + "18"}`,
+            fontFamily: "'Inter', sans-serif", fontSize: "0.95rem",
+            color: BLACK, background: WHITE, resize: "vertical",
+            boxSizing: "border-box", outline: "none",
+            marginBottom: 16, lineHeight: 1.6,
+            transition: "border-color 0.15s",
+          } as React.CSSProperties}
+        />
+
+        <button
+          onClick={submitGate}
+          disabled={!detailGateInput.trim()}
+          style={{
+            width: "100%", padding: 16, borderRadius: 12, border: "none",
+            background: detailGateInput.trim() ? RED : `${BLACK}20`,
+            color: detailGateInput.trim() ? WHITE : GRAY,
+            fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem",
+            letterSpacing: "0.08em",
+            cursor: detailGateInput.trim() ? "pointer" : "default",
+            transition: "background 0.15s",
+          }}
+        >
+          GENERATE THEIR CARD →
+        </button>
       </WizardShell>
     );
   }

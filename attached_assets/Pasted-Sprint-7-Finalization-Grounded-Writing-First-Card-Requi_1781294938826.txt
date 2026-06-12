@@ -1,0 +1,127 @@
+Sprint 7 Finalization — Grounded Writing + First Card Requirement
+
+Testing has revealed two important conclusions:
+
+1. Grounded Writing improved trust significantly.
+2. One real user-provided detail dramatically improves card quality.
+
+However, the AI still occasionally overreaches after receiving a single memory by inventing personality traits, emotional qualities, or relationship dynamics that were never provided.
+
+Examples still appearing:
+
+* "you always see the good in people"
+* "making everyone feel included and valued"
+* "quietly being there when things get tough"
+* similar inferred personality statements
+
+These are still inventions.
+
+Part 1 — Strengthen Grounded Writing
+
+Update the anti-fabrication framework.
+
+New rule:
+
+A single fact does not grant permission to invent personality traits.
+
+Example:
+
+Allowed:
+
+Fact:
+"Completed a marathon after six months of training."
+
+Inference:
+"That took commitment."
+
+Not allowed:
+
+* "You've always been determined."
+* "You inspire everyone around you."
+* "You never give up."
+* "You always see the good in people."
+
+unless explicitly present in context.
+
+The model may make one logical inference from a fact.
+
+The model may not create a personality profile from a fact.
+
+Part 2 — First Card Requirement
+
+Before generating the first card for a recipient, require at least one real detail beyond:
+
+* name
+* relationship
+* occasion
+
+This detail may be:
+
+* recent accomplishment
+* life update
+* favorite memory
+* inside joke
+* hobby
+* personality trait supplied by the user
+* current challenge
+* important life event
+
+Do not require a memory specifically.
+
+The requirement is:
+
+"One real thing about this person."
+
+Suggested user-facing copy:
+
+Before we write the card, tell us one thing about [Name] so it sounds like you.
+
+Examples:
+
+* Something they did recently
+* A funny memory
+* An inside joke
+* Something happening in their life right now
+* Something they're proud of
+
+Part 3 — Card Generation Gate
+
+If no real detail exists:
+
+Do not generate the card.
+
+Instead show the collection step.
+
+The goal is:
+
+No first card should ever be generated using only:
+
+* name
+* relationship
+* occasion
+
+Part 4 — Verification
+
+After implementation provide examples for:
+
+A.
+Friend + Birthday + no detail
+
+Expected:
+Generation blocked.
+
+B.
+Friend + Birthday + one accomplishment
+
+Expected:
+Card generated and anchored to that accomplishment.
+
+C.
+Friend + Birthday + one funny memory
+
+Expected:
+Card generated and anchored to that memory.
+
+Show how the new rules prevent invented personality traits.
+
+Typecheck required.
