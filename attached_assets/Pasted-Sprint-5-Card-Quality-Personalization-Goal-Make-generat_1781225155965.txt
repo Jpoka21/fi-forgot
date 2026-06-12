@@ -1,0 +1,123 @@
+Sprint 5: Card Quality & Personalization
+
+Goal:
+
+Make generated cards feel like they were written by the sender, not by AI.
+
+Before implementing changes, audit the current card generation pipeline and identify the biggest remaining causes of generic sounding cards.
+
+Focus on the following:
+
+1. Memory Weaving
+
+Today, cards may reference individual memories.
+
+Improve generation so multiple memories are naturally connected together.
+
+Example:
+
+Weak:
+“Congratulations on your promotion. I also remember our Disney trip.”
+
+Strong:
+“Seeing you earn that promotion reminded me of our Disney trip, when you spent the entire week pushing through every challenge with the same determination.”
+
+The card should feel like one story, not a list of facts.
+
+2. Relationship Voice
+
+Strengthen differences between:
+
+* Spouse
+* Parent
+* Child
+* Friend
+* Sibling
+* Coworker
+
+A spouse card should not sound like a friend card with stronger adjectives.
+
+Each relationship should have distinct emotional patterns, structure, and tone.
+
+3. Fresh Update Utilization
+
+Audit whether fresh updates are actually making it into final card content.
+
+If fresh updates exist, they should heavily influence the card.
+
+Recent memories should generally matter more than profile facts.
+
+4. Generic Language Detection
+
+Identify and reduce phrases that sound AI generated.
+
+Examples:
+
+* “Wishing you all the best”
+* “Hope your special day is filled with joy”
+* “You mean so much to everyone around you”
+* Similar generic greeting card language
+
+Create guardrails that discourage generic filler.
+
+5. Opening Lines
+
+Strengthen openings.
+
+Cards should preferably begin with:
+
+* a memory
+* an observation
+* a callback
+* a recent event
+
+Avoid leading with generic occasion statements whenever possible.
+
+6. Ending Lines
+
+Strengthen endings.
+
+Avoid:
+
+* “Have a great day”
+* “Wishing you the best”
+* Generic closings
+
+Prefer endings that reference the relationship, memory, joke, goal, or future event.
+
+7. Card Review Audit
+
+Generate sample cards using:
+
+* spouse
+* parent
+* friend
+* child
+
+For each sample:
+
+* identify strengths
+* identify weaknesses
+* explain what changed
+
+8. No New Features
+
+Do not build:
+
+* new dashboard components
+* new profile sections
+* new memory systems
+* new scores
+* new databases
+
+This sprint is focused entirely on card quality.
+
+Deliverables
+
+1. Current card quality assessment
+2. Proposed prompt improvements
+3. Sample before and after cards
+4. Expected impact
+5. Implementation plan
+
+Wait for approval before changing production prompts.

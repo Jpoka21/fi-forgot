@@ -968,12 +968,16 @@ export default function CardFlowV2() {
         </div>
 
         {/* Card Draft Container — hero */}
-        <div style={{
-          background: BEIGE, borderRadius: 16, padding: "14px 18px 18px", marginBottom: 14,
-          border: editMode ? `2px solid ${RED}30` : `2px solid transparent`,
-          transition: "border-color 0.2s",
-        } as React.CSSProperties}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div
+          onClick={() => { if (!editMode) { setEditMode(true); setTimeout(() => textareaRef.current?.focus(), 0); } }}
+          style={{
+            background: BEIGE, borderRadius: 16, padding: "14px 18px 14px", marginBottom: 14,
+            border: editMode ? `2px solid ${RED}50` : `1.5px dashed ${BLACK}22`,
+            transition: "border-color 0.15s",
+            cursor: editMode ? "text" : "text",
+          } as React.CSSProperties}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: `${BLACK}40`, border: `1px dashed ${BLACK}22`, padding: "2px 7px", borderRadius: 4 }}>
                 Draft
@@ -983,15 +987,24 @@ export default function CardFlowV2() {
                   ✦ Edited
                 </span>
               )}
+              {editMode && !isEdited && (
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", color: GRAY }}>
+                  ✎ Editing…
+                </span>
+              )}
             </div>
-            {isEdited && (
+            {isEdited ? (
               <button
-                onClick={resetCurrentDraft}
+                onClick={e => { e.stopPropagation(); resetCurrentDraft(); }}
                 style={{ background: "none", border: "none", fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", color: GRAY, cursor: "pointer", textDecoration: "underline", padding: 0 }}
               >
                 Reset
               </button>
-            )}
+            ) : !editMode ? (
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.68rem", color: `${BLACK}35` }}>
+                ✎ tap to edit
+              </span>
+            ) : null}
           </div>
           <textarea
             ref={textareaRef}
@@ -1032,17 +1045,11 @@ export default function CardFlowV2() {
         </button>
         <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
           <button
-            onClick={() => { setEditMode(true); setTimeout(() => { textareaRef.current?.focus(); }, 50); }}
-            style={{ flex: 1, padding: "12px 0", borderRadius: 10, border: `1.5px solid ${BLACK}18`, background: WHITE, color: BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
-          >
-            ✏️ Edit Draft
-          </button>
-          <button
             onClick={handleRegenerateDraft}
             disabled={adjusting}
             style={{ flex: 1, padding: "12px 0", borderRadius: 10, border: `1.5px solid ${BLACK}12`, background: "none", color: adjusting ? GRAY : BLACK, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 500, cursor: adjusting ? "default" : "pointer", opacity: adjusting ? 0.55 : 1 } as React.CSSProperties}
           >
-            {adjusting ? "Rewriting…" : "↩ Regenerate"}
+            {adjusting ? "Rewriting…" : "↩ New Version"}
           </button>
         </div>
         <button
