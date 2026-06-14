@@ -1,9 +1,8 @@
 /**
- * RelationshipHealthSection — compact people list
+ * RelationshipHealthSection — compact people list with expandable rows
  *
- * Sections:
- *   WGYBSection (named export) — "We Got Your Back" compact list, ≤3 items
- *   default export             — grouped compact recipient rows
+ * Tap a row body → expand inline quick actions (questions, add event, new update)
+ * Tap the action button directly → immediate primary action
  *
  * Data: GET /api/v2/recipient-health (unchanged)
  */
@@ -66,6 +65,13 @@ function actionDestination(score: RecipientHealthScore): string {
   return `/recipients/${score.recipientId}?from=dashboard`;
 }
 
+function briefingDest(score: RecipientHealthScore): string {
+  if (score.nextEventLabel) {
+    return `/briefings/${score.recipientId}/${encodeURIComponent(score.nextEventLabel)}`;
+  }
+  return `/recipients/${score.recipientId}?from=dashboard`;
+}
+
 function contextLine(score: RecipientHealthScore): string {
   if (score.nextEventDaysAway !== null && score.nextEventLabel && score.nextEventDaysAway <= 60) {
     const d = score.nextEventDaysAway;
@@ -103,6 +109,8 @@ function wgybSentence(s: RecipientHealthScore): string | null {
 /* ── Compact recipient row ───────────────────────────────────────── */
 function RecipientRow({ score }: { score: RecipientHealthScore }) {
   const [, setLocation] = useLocation();
+  const [expanded, setExpanded] = useState(false);
+
   const cfg        = STATUS_CONFIG[score.status];
   const actionLabel = ACTION_LABELS[score.actionType] ?? "View";
   const dest       = actionDestination(score);
@@ -110,69 +118,146 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
   const isUrgent   = score.status === "Priority";
 
   return (
-    <div
-      onClick={() => setLocation(`/recipients/${score.recipientId}?from=dashboard`)}
-      style={{
-        background:   WHITE,
-        borderRadius: 12,
-        padding:      "11px 14px",
-        border:       `1px solid ${BORDER}`,
-        borderLeft:   `3px solid ${cfg.color}`,
-        display:      "flex",
-        alignItems:   "center",
-        gap:          12,
-        cursor:       "pointer",
-        minHeight:    72,
-        boxSizing:    "border-box" as const,
-      }}
-    >
-      {/* Avatar */}
-      <div style={{
-        width: 40, height: 40, borderRadius: "50%", background: INK, flexShrink: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", color: WHITE }}>
-          {avatar(score.name)}
-        </span>
-      </div>
-
-      {/* Text content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Line 1: Name · Relationship */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 3 }}>
-          <span style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{score.name}</span>
-          <span style={{ fontSize: "0.72rem", color: MID }}>· {score.relationshipType}</span>
-        </div>
-        {/* Line 2: Most important context */}
-        <div style={{
-          fontSize: "0.78rem", fontWeight: isUrgent ? 600 : 400,
-          color:    isUrgent ? RED : MID,
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
-        }}>
-          {ctx}
-        </div>
-      </div>
-
-      {/* Single primary action */}
-      <button
-        onClick={e => { e.stopPropagation(); setLocation(dest); }}
+    <div style={{
+      background:   WHITE,
+      borderRadius: 12,
+      border:       `1px solid ${expanded ? INK + "30" : BORDER}`,
+      borderLeft:   `3px solid ${cfg.color}`,
+      overflow:     "hidden",
+      boxSizing:    "border-box" as const,
+    }}>
+      {/* ── Main row ───────────────────────────────────────── */}
+      <div
+        onClick={() => setExpanded(e => !e)}
         style={{
-          flexShrink:   0,
-          padding:      "6px 11px",
-          borderRadius: 7,
-          border:       "none",
-          background:   isUrgent ? RED : BEIGE,
-          color:        isUrgent ? WHITE : INK,
-          fontWeight:   700,
-          fontSize:     "0.72rem",
-          cursor:       "pointer",
-          whiteSpace:   "nowrap" as const,
+          display:    "flex",
+          alignItems: "center",
+          gap:        12,
+          padding:    "11px 14px",
+          cursor:     "pointer",
+          minHeight:  72,
         }}
       >
-        {actionLabel}
-      </button>
+        {/* Avatar */}
+        <div style={{
+          width: 40, height: 40, borderRadius: "50%", background: INK, flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", color: WHITE }}>
+            {avatar(score.name)}
+          </span>
+        </div>
+
+        {/* Text content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 3 }}>
+            <span style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{score.name}</span>
+            <span style={{ fontSize: "0.72rem", color: MID }}>· {score.relationshipType}</span>
+          </div>
+          <div style={{
+            fontSize:     "0.78rem",
+            fontWeight:   isUrgent ? 600 : 400,
+            color:        isUrgent ? RED : MID,
+            overflow:     "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace:   "nowrap" as const,
+          }}>
+            {ctx}
+          </div>
+        </div>
+
+        {/* Expand chevron + primary action */}
+        <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
+          <button
+            onClick={e => { e.stopPropagation(); setLocation(dest); }}
+            style={{
+              padding:      "6px 11px",
+              borderRadius: 7,
+              border:       "none",
+              background:   isUrgent ? RED : BEIGE,
+              color:        isUrgent ? WHITE : INK,
+              fontWeight:   700,
+              fontSize:     "0.72rem",
+              cursor:       "pointer",
+              whiteSpace:   "nowrap" as const,
+            }}
+          >
+            {actionLabel}
+          </button>
+          {/* Chevron */}
+          <span style={{
+            fontSize:   "0.6rem",
+            color:      MID,
+            display:    "inline-block",
+            transform:  expanded ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.18s",
+            userSelect: "none" as const,
+          }}>
+            ▼
+          </span>
+        </div>
+      </div>
+
+      {/* ── Expanded quick-action panel ────────────────────── */}
+      {expanded && (
+        <div style={{
+          borderTop:  `1px solid ${BORDER}`,
+          padding:    "11px 14px 13px",
+          background: BEIGE,
+          display:    "flex",
+          flexWrap:   "wrap" as const,
+          gap:        8,
+        }}>
+          {/* Improve the card — answer questions */}
+          <button
+            onClick={() => setLocation(briefingDest(score))}
+            style={actionPill()}
+          >
+            ✍️ Improve the card
+          </button>
+
+          {/* Add occasion / event */}
+          <button
+            onClick={() => setLocation(`/recipients/${score.recipientId}?from=dashboard&tab=events`)}
+            style={actionPill()}
+          >
+            🗓 Add occasion
+          </button>
+
+          {/* Share something new */}
+          <button
+            onClick={() => setLocation(`/recipients/${score.recipientId}?from=dashboard`)}
+            style={actionPill()}
+          >
+            💬 Share something new
+          </button>
+
+          {/* View full profile */}
+          <button
+            onClick={() => setLocation(`/recipients/${score.recipientId}?from=dashboard`)}
+            style={{ ...actionPill(), background: "transparent", border: `1px solid ${BORDER}`, color: MID }}
+          >
+            View profile →
+          </button>
+        </div>
+      )}
     </div>
   );
+}
+
+function actionPill() {
+  return {
+    padding:      "7px 13px",
+    borderRadius: 20,
+    border:       "none",
+    background:   WHITE,
+    color:        INK,
+    fontWeight:   600,
+    fontSize:     "0.78rem",
+    cursor:       "pointer",
+    whiteSpace:   "nowrap" as const,
+    boxShadow:    "0 1px 3px rgba(0,0,0,0.08)",
+  };
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -194,8 +279,6 @@ export function WGYBSection() {
   if (!scores || scores.length === 0) return null;
 
   const items: string[] = [];
-
-  // Priority items first
   for (const s of scores) {
     if (items.length >= 3) break;
     if (s.status !== "Priority" && s.status !== "NeedsAttention") continue;
