@@ -45,6 +45,18 @@ router.get("/recipients", async (req, res) => {
   res.json({ recipients: rows.map(r => r.data) });
 });
 
+router.get("/recipients/:id", async (req, res) => {
+  const userId = req.headers["x-user-id"] as string;
+  if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }
+  const { id } = req.params;
+  const [row] = await db
+    .select()
+    .from(personalRecipientsTable)
+    .where(and(eq(personalRecipientsTable.id, id), eq(personalRecipientsTable.userId, userId)));
+  if (!row) { res.status(404).json({ error: "not found" }); return; }
+  res.json({ recipient: row.data });
+});
+
 router.put("/recipients/:id", async (req, res) => {
   const userId = req.headers["x-user-id"] as string;
   if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }

@@ -580,13 +580,11 @@ export default function RecipientProfilePage() {
       return undefined;
     }
     const sid = String(params.id);
-    fetch("/api/recipients", { headers })
-      .then(r => r.ok ? r.json() : Promise.reject(r))
-      .then((data: { recipients: Recipient[] }) => {
+    fetch(`/api/recipients/${encodeURIComponent(sid)}`, { headers })
+      .then(r => r.ok ? r.json() : r.status === 404 ? Promise.resolve(null) : Promise.reject(r))
+      .then((data: { recipient: Recipient } | null) => {
         if (cancelled) return;
-        const match = (data.recipients as Recipient[]).find(
-          r => String(r.id) === sid,
-        );
+        const match = data?.recipient ?? null;
         if (match) {
           const normalized: Recipient = { ...match, id: sid };
           // Persist to localStorage so future loads hit the fast path
