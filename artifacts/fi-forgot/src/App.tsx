@@ -109,6 +109,9 @@ function Router() {
       <Route path="/recipients/:id">
         <ProtectedRoute component={RecipientProfilePage} />
       </Route>
+      <Route path="/relationship/:id">
+        <ProtectedRoute component={RelationshipPage} />
+      </Route>
       <Route path="/briefings/:recipientId/:event">
         <ProtectedRoute component={BriefingPage} />
       </Route>

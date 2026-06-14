@@ -82,7 +82,7 @@ function avatar(name: string): string {
 function actionDestination(score: RecipientHealthScore, localMap: Map<string, string>): string {
   const id = resolveId(score, localMap);
   if (score.actionType === "card") return `/try?recipientId=${id}`;
-  return `/recipients/${id}?from=dashboard`;
+  return `/relationship/${id}`;
 }
 
 function briefingDest(score: RecipientHealthScore, localMap: Map<string, string>): string {
