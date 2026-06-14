@@ -733,9 +733,14 @@ const STORAGE_KEY_VERSION = "fi_forgot_data_version";
 function ensureDataVersion() {
   const v = localStorage.getItem(STORAGE_KEY_VERSION);
   if (v !== DATA_VERSION) {
-    localStorage.removeItem(STORAGE_KEY_RECIPIENTS);
-    localStorage.removeItem(STORAGE_KEY_CARDS);
-    localStorage.removeItem(STORAGE_KEY_BRIEFINGS);
+    // Only wipe if there's an explicit old-version tag. A missing version (null)
+    // means data was written by hydrateRecipientsFromServer before version-stamping
+    // was added — treat it as current rather than wiping valid server-synced data.
+    if (v !== null) {
+      localStorage.removeItem(STORAGE_KEY_RECIPIENTS);
+      localStorage.removeItem(STORAGE_KEY_CARDS);
+      localStorage.removeItem(STORAGE_KEY_BRIEFINGS);
+    }
     localStorage.setItem(STORAGE_KEY_VERSION, DATA_VERSION);
   }
 }

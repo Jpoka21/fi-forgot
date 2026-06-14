@@ -4,15 +4,15 @@ import { useState } from "react";
 const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B",
   GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
 
-const momentCards = [
-  { id: 1, emoji: "🤝", name: "Steve",  event: "Birthday",     date: "Jun 14", days: 3,  urgent: true  },
-  { id: 2, emoji: "👩", name: "Sarah",  event: "Anniversary",  date: "Jun 19", days: 8,  urgent: false },
-  { id: 3, emoji: "💛", name: "Mom",    event: "Mother's Day", date: "Jun 26", days: 15, urgent: false },
-  { id: 4, emoji: "🧢", name: "Marcus", event: "Just Because", date: "Jul 3",  days: 22, urgent: false },
-  { id: 5, emoji: "👔", name: "Dad",    event: "Father's Day", date: "Jul 9",  days: 28, urgent: false },
+const moments = [
+  { emoji: "🤝", name: "Steve",  event: "Birthday",     date: "Jun 14", days: 3,  urgent: true  },
+  { emoji: "👩", name: "Sarah",  event: "Anniversary",  date: "Jun 19", days: 8,  urgent: false },
+  { emoji: "💛", name: "Mom",    event: "Mother's Day",  date: "Jun 26", days: 15, urgent: false },
+  { emoji: "🧢", name: "Marcus", event: "Just Because", date: "Jul 3",  days: 22, urgent: false },
+  { emoji: "👔", name: "Dad",    event: "Father's Day", date: "Jul 9",  days: 28, urgent: false },
 ];
 
-const peopleList = [
+const people = [
   { emoji: "🤝", name: "Steve",  rel: "Friend",  nextDays: 3  },
   { emoji: "👩", name: "Sarah",  rel: "Sister",  nextDays: 8  },
   { emoji: "💛", name: "Mom",    rel: "Mother",  nextDays: 15 },
@@ -28,107 +28,66 @@ export function Mobile() {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", minHeight: "100vh", background: "#ddd", padding: "20px 0" }}>
-      <div style={{ width: 390, background: BG, borderRadius: 28, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.18)", position: "relative", minHeight: 780 }}>
+    <div style={{ maxWidth: 390, minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", margin: "0 auto", display: "flex", flexDirection: "column", position: "relative" }}>
+      {/* Header */}
+      <div style={{ background: BLACK, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: RED, letterSpacing: 1 }}>F.I. FORGOT</span>
+        <span style={{ background: RED, color: WHITE, borderRadius: 20, padding: "3px 12px", fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: 0.5 }}>30 DAYS</span>
+      </div>
 
-        {/* Header */}
-        <div style={{ background: BLACK, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", color: RED }}>F.I. FORGOT</span>
-          <div style={{ background: RED, borderRadius: 8, padding: "4px 10px" }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", color: WHITE }}>30 DAYS</span>
-          </div>
-        </div>
-
-        {/* Horizontal scroll moment cards */}
-        <div style={{ padding: "20px 0 4px" }}>
-          <div style={{ paddingLeft: 20, marginBottom: 8 }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, letterSpacing: "0.06em" }}>COMING UP</span>
-          </div>
-          <div style={{ display: "flex", gap: 14, overflowX: "auto", padding: "4px 20px 16px", scrollbarWidth: "none" }}>
-            {momentCards.map((m) => (
-              <div key={m.id} style={{
-                width: 260, flexShrink: 0, background: WHITE, borderRadius: 18,
-                padding: "18px 16px", border: m.urgent ? `2px solid ${RED}` : `1.5px solid ${BORDER}`,
-                boxShadow: m.urgent ? `0 4px 16px ${RED}25` : "0 1px 4px rgba(0,0,0,0.06)",
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                  <div style={{
-                    padding: "6px 12px", borderRadius: 10,
-                    background: m.urgent ? RED : CREAM,
-                    display: "flex", gap: 4, alignItems: "baseline",
-                  }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: m.urgent ? WHITE : BLACK, lineHeight: 1 }}>{m.days}</span>
-                    <span style={{ fontSize: "0.62rem", color: m.urgent ? "rgba(255,255,255,0.75)" : GRAY, fontWeight: 600 }}>days</span>
-                  </div>
-                  <span style={{ fontSize: "0.75rem", color: GRAY }}>{m.date}</span>
+      {/* Horizontal scroll moment cards */}
+      <div style={{ padding: "20px 0 4px 18px" }}>
+        <div style={{ fontSize: "0.72rem", fontWeight: 700, color: GRAY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 }}>Upcoming Moments</div>
+        <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingRight: 18, paddingBottom: 8, scrollbarWidth: "none" }}>
+          {moments.map((m, i) => (
+            <div key={i} style={{ minWidth: 280, background: WHITE, borderRadius: 14, padding: "16px 16px 18px", border: m.urgent ? `2px solid ${RED}` : `1.5px solid ${BORDER}`, boxShadow: m.urgent ? "0 3px 14px rgba(226,59,46,0.16)" : "none", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: m.urgent ? RED : CREAM, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: m.urgent ? WHITE : BLACK, lineHeight: 1 }}>{m.days}</span>
+                  <span style={{ fontSize: "0.56rem", color: m.urgent ? "rgba(255,255,255,0.75)" : GRAY, textTransform: "uppercase" }}>days</span>
                 </div>
-                <div style={{ fontSize: "2.4rem", marginBottom: 8 }}>{m.emoji}</div>
-                <div style={{ fontWeight: 700, fontSize: "1rem", color: BLACK }}>{m.name}</div>
-                <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: 2 }}>{m.event}</div>
-                <button style={{
-                  marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: "none",
-                  background: m.urgent ? RED : SAGE, color: WHITE, fontSize: "0.82rem", fontWeight: 700, cursor: "pointer",
-                }}>
-                  {m.urgent ? "Review Draft" : "View"}
-                </button>
+                <div style={{ fontSize: "2.2rem" }}>{m.emoji}</div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Your People section */}
-        <div style={{ padding: "4px 0 80px" }}>
-          <div style={{ padding: "0 20px 12px" }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, letterSpacing: "0.06em" }}>YOUR PEOPLE</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {peopleList.map((p, i) => (
-              <div key={p.name} style={{
-                display: "flex", alignItems: "center", gap: 14, padding: "13px 20px",
-                borderBottom: i < peopleList.length - 1 ? `1px solid ${BORDER}` : "none",
-                background: WHITE,
-                borderRadius: i === 0 ? "12px 12px 0 0" : i === peopleList.length - 1 ? "0 0 12px 12px" : 0,
-                cursor: "pointer",
-              }}>
-                <div style={{ fontSize: "1.5rem", flexShrink: 0 }}>{p.emoji}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>{p.name}</div>
-                  <div style={{ fontSize: "0.75rem", color: GRAY }}>{p.rel}</div>
-                </div>
-                <div style={{
-                  padding: "4px 10px", borderRadius: 20,
-                  background: p.nextDays <= 7 ? `${RED}12` : `${BLACK}08`,
-                  fontSize: "0.72rem", fontWeight: 700,
-                  color: p.nextDays <= 7 ? RED : GRAY,
-                  flexShrink: 0,
-                }}>
-                  {p.nextDays}d
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom nav */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: BLACK, display: "flex", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-          {tabs.map((icon, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveTab(i)}
-              style={{
-                flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-                padding: "10px 0 12px", border: "none", background: "none", cursor: "pointer",
-                gap: 3,
-              }}
-            >
-              <span style={{ fontSize: "1.2rem" }}>{icon}</span>
-              <span style={{ fontSize: "0.62rem", fontWeight: 600, color: activeTab === i ? RED : "rgba(255,255,255,0.45)" }}>
-                {tabLabels[i]}
-              </span>
-            </button>
+              <div style={{ fontWeight: 700, fontSize: "1rem", color: BLACK }}>{m.name}</div>
+              <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: 3 }}>{m.event}</div>
+              <div style={{ fontSize: "0.76rem", color: GRAY }}>{m.date}</div>
+              <button style={{ width: "100%", background: m.urgent ? RED : "transparent", color: m.urgent ? WHITE : BLACK, border: m.urgent ? "none" : `1.5px solid ${BORDER}`, borderRadius: 8, padding: "9px 0", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", marginTop: 14 }}>
+                {m.urgent ? "Review Draft →" : "View →"}
+              </button>
+            </div>
           ))}
         </div>
+      </div>
 
+      {/* Your People list */}
+      <div style={{ padding: "20px 18px 80px" }}>
+        <div style={{ fontSize: "0.72rem", fontWeight: 700, color: GRAY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 }}>Your People</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {people.map((p, i) => (
+            <div key={i} style={{ background: WHITE, borderRadius: 10, padding: "12px 14px", border: `1.5px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+              <div style={{ fontSize: "1.5rem" }}>{p.emoji}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK }}>{p.name}</div>
+                <div style={{ fontSize: "0.74rem", color: GRAY }}>{p.rel}</div>
+              </div>
+              <div style={{ background: p.nextDays <= 7 ? RED : CREAM, color: p.nextDays <= 7 ? WHITE : BLACK, borderRadius: 20, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700 }}>{p.nextDays}d</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom nav */}
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 390, background: BLACK, display: "flex", borderTop: `1px solid rgba(255,255,255,0.08)` }}>
+        {tabs.map((icon, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveTab(i)}
+            style={{ flex: 1, background: "none", border: "none", cursor: "pointer", padding: "10px 0 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}
+          >
+            <span style={{ fontSize: "1.2rem" }}>{icon}</span>
+            <span style={{ fontSize: "0.62rem", color: activeTab === i ? RED : "rgba(255,255,255,0.45)", fontWeight: activeTab === i ? 700 : 400, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{tabLabels[i]}</span>
+          </button>
+        ))}
       </div>
     </div>
   );

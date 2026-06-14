@@ -566,14 +566,37 @@ export default function RecipientProfilePage() {
   }, [watchRelationship, isNew]);
 
   // If the URL contains a real ID but the recipient isn't in localStorage,
-  // redirect back rather than rendering a blank page.
+  // try fetching all recipients from the server, find the match, save it to
+  // localStorage (so subsequent loads work), then re-navigate to re-mount.
   useEffect(() => {
-    if (!isNew && !existing) {
-      const timer = setTimeout(() => setLocation(backTo), 1500);
-      return () => clearTimeout(timer);
+    if (isNew || existing) return undefined;
+    let cancelled = false;
+    const headers = getApiHeaders() as Record<string, string>;
+    if (!headers["x-user-id"]) {
+      setLocation(backTo);
+      return undefined;
     }
-    return undefined;
-  }, [isNew, existing, backTo, setLocation]);
+    const sid = String(params.id);
+    fetch("/api/recipients", { headers })
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then((data: { recipients: Recipient[] }) => {
+        if (cancelled) return;
+        const match = (data.recipients as Recipient[]).find(
+          r => String(r.id) === sid,
+        );
+        if (match) {
+          // Normalise the ID to a string and persist so getRecipient works next time
+          saveRecipient({ ...match, id: sid });
+          // Re-navigate to the same URL so the component remounts with data in localStorage
+          const search = window.location.search;
+          setLocation(`/recipients/${sid}${search}`);
+        } else {
+          setLocation(backTo);
+        }
+      })
+      .catch(() => { if (!cancelled) setLocation(backTo); });
+    return () => { cancelled = true; };
+  }, [isNew, existing]);
 
   function toggleEvent(event: string) {
     const current = form.getValues("selectedEvents");
