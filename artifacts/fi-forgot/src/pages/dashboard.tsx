@@ -19,7 +19,7 @@ import {
   recordScoreSnapshot, getScoreHistory, CAT_LABELS, CAT_DESCRIPTIONS,
   TIER_WEIGHTS, ScoreSnapshot,
 } from "@/lib/relationship-health";
-import RelationshipHealthSection from "@/components/RelationshipHealthSection";
+import RelationshipHealthSection, { WGYBSection } from "@/components/RelationshipHealthSection";
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
 
@@ -498,262 +498,110 @@ export default function DashboardPage() {
 
         {recipients.length > 0 && !isFirstTimeState && (
           <>
-            {/* Page greeting */}
+            {/* ── Section 1: We Got Your Back ─────────────────────────── */}
+            <WGYBSection />
+
+            {/* ── Section 2: Need a Card Right Now? ───────────────────── */}
             <div style={{ marginBottom: 20 }}>
-              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.8rem" : "2.2rem", letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1 }}>
-                Your Important People
-              </h1>
-              <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: MID, margin: "4px 0 0", lineHeight: 1 }}>
-                We got your back.
-              </p>
+              <div style={{
+                background: WHITE, borderRadius: 12, padding: "16px 18px",
+                border: `1px solid ${BORDER}`,
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "flex-start",
+                  justifyContent: "space-between", gap: 16,
+                  flexWrap: "wrap" as const,
+                }}>
+                  <div style={{ flex: 1, minWidth: 160 }}>
+                    <div style={{
+                      fontFamily: "'Bebas Neue', cursive", fontSize: "1rem",
+                      letterSpacing: "0.08em", color: INK, marginBottom: 3,
+                    }}>
+                      Need a Card Right Now?
+                    </div>
+                    <div style={{ fontSize: "0.8rem", color: MID, marginBottom: 11, lineHeight: 1.4 }}>
+                      Create a personalized card for anyone.
+                    </div>
+                    <Link href="/quick-card">
+                      <button style={{
+                        background: RED, color: WHITE, border: "none", borderRadius: 8,
+                        padding: "8px 16px", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
+                      }}>
+                        Create Quick Card
+                      </button>
+                    </Link>
+                    <div style={{ fontSize: "0.72rem", color: MID, marginTop: 7 }}>
+                      No recipient setup required.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* ── RELATIONSHIP HEALTH — hero position ───────────────────── */}
-            <div style={{ marginBottom: 32 }}>
+            {/* ── Section 3: Your Important People ────────────────────── */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                marginBottom: 14, gap: 12,
+              }}>
+                <h1 style={{
+                  fontFamily: "'Bebas Neue', cursive",
+                  fontSize: isMobile ? "1.6rem" : "1.9rem",
+                  letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1,
+                }}>
+                  Your Important People
+                </h1>
+                <Link href="/recipients/new" style={{ textDecoration: "none", flexShrink: 0 }}>
+                  <button style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: "none", border: `1px solid ${BORDER}`, borderRadius: 8,
+                    padding: "6px 12px", fontSize: "0.76rem", fontWeight: 600,
+                    color: MID, cursor: "pointer",
+                  }}>
+                    <Plus size={12} /> Add Person
+                  </button>
+                </Link>
+              </div>
               <RelationshipHealthSection isMobile={isMobile} />
             </div>
 
-            {/* ── Single-column layout ──────────────────────────────────── */}
-            <div>
-
-              {/* ── UPCOMING MOMENTS ──────────────────────────────── */}
-              <div style={{ marginBottom: 32 }}>
-                <div style={{ marginBottom: 12 }}>
-                  <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "1.6rem" : "1.9rem", letterSpacing: "0.02em", color: INK, margin: 0, lineHeight: 1 }}>
-                    Upcoming Moments
-                  </h2>
-                </div>
-                {allUpcomingEvents.length === 0 ? (
-                  <div style={{ background: WHITE, borderRadius: 18, padding: "36px 28px", textAlign: "center" as const, border: `1px solid ${BORDER}` }}>
-                    <div style={{ fontSize: "2rem", marginBottom: 12 }}>🎉</div>
-                    <p style={{ fontSize: "0.95rem", color: MID, margin: "0 0 18px", lineHeight: 1.65 }}>Nothing in the next 90 days. Add more occasions to stay covered year-round.</p>
-                    <Link href="/people"><button style={{ background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 9, padding: "10px 20px", fontSize: "0.86rem", fontWeight: 700, color: INK, cursor: "pointer" }}>Review people →</button></Link>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                      {heroEvents.map(ev => {
-                        const genKey       = `${ev.recipient.id}:::${ev.event}`;
-                        const isGenerating = generatingFor === genKey;
-                        const matchedCard  = cards.find(c => c.recipientId === ev.recipient.id && c.holiday === ev.event);
-                        const hasCard      = upcomingWithCardKeys.has(genKey);
-                        const isApproved   = matchedCard?.status === "Approved";
-
-                        let statusText = ""; let statusColor = MID; let statusGood = false;
-                        if (isApproved)             { statusText = "Card approved, on its way";       statusColor = SAGE;      statusGood = true; }
-                        else if (hasCard)           { statusText = "Card draft ready to review";      statusColor = "#1d4ed8"; statusGood = true; }
-                        else if (ev.briefingDone)   { statusText = "Personalized and on track";       statusColor = SAGE;      statusGood = true; }
-                        else if (ev.daysAway <= 7)  { statusText = "Needs attention soon";            statusColor = RED; }
-                        else if (ev.daysAway <= 14) { statusText = "Add one more detail to be ready"; statusColor = "#D97706"; }
-                        else                        { statusText = "On track — nothing needed yet";   statusColor = SAGE;      statusGood = true; }
-
-                        let ctaLabel = ""; let ctaRed = false; let ctaAction = () => {};
-                        if (isApproved)           { ctaLabel = "View card";         ctaRed = false; ctaAction = () => setViewingCardId(matchedCard!.id); }
-                        else if (hasCard)         { ctaLabel = "Review card →";     ctaRed = true;  ctaAction = () => setLocation("/cards/review"); }
-                        else if (ev.briefingDone) { ctaLabel = "Update details";    ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
-                        else if (ev.daysAway<=7)  { ctaLabel = "Add details now →"; ctaRed = true;  ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
-                        else                      { ctaLabel = "Add a memory";      ctaRed = false; ctaAction = () => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`); }
-
-                        return (
-                          <div key={genKey} style={{ background: WHITE, borderRadius: 12, padding: isMobile ? "11px 13px" : "12px 16px", border: `1px solid ${ev.daysAway <= 7 ? `${RED}35` : BORDER}`, display: "flex", gap: 12, alignItems: "center" }}>
-                            {/* Avatar */}
-                            <div style={{ width: 40, height: 40, borderRadius: 10, background: BEIGE, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", border: `1px solid ${BORDER}` }}>
-                              {relationshipEmoji(ev.recipient.relationship)}
-                            </div>
-                            {/* Person + event info */}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: "flex", alignItems: "baseline", gap: 5, flexWrap: "wrap" as const, marginBottom: 3 }}>
-                                <span style={{ fontWeight: 800, fontSize: "0.92rem", color: INK, lineHeight: 1 }}>{ev.recipient.name}</span>
-                                <span style={{ fontSize: "0.7rem", color: MID }}>{ev.recipient.relationship}</span>
-                                <Link href={`/recipients/${ev.recipient.id}?from=dashboard`}>
-                                  <span style={{ fontSize: "0.68rem", color: MID, textDecoration: "underline" as const, textUnderlineOffset: "2px", cursor: "pointer", marginLeft: 2 }}>profile</span>
-                                </Link>
-                              </div>
-                              <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" as const }}>
-                                <span style={{ fontSize: "0.85rem" }}>{eventEmoji(ev.event)}</span>
-                                <span style={{ fontWeight: 600, fontSize: "0.8rem", color: INK }}>{ev.event}</span>
-                                <span style={{ fontSize: "0.73rem", color: MID }}>· {new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                                {!statusGood && <span style={{ fontSize: "0.7rem", fontWeight: 600, color: statusColor }}>· {statusText}</span>}
-                              </div>
-                            </div>
-                            {/* Days counter */}
-                            <div style={{ textAlign: "right" as const, flexShrink: 0, marginRight: 6 }}>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: daysColor(ev.daysAway), lineHeight: 1 }}>{ev.daysAway}</div>
-                              <div style={{ fontSize: "0.58rem", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: daysColor(ev.daysAway) }}>days</div>
-                            </div>
-                            {/* Actions */}
-                            <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 5, alignItems: "flex-end" }}>
-                              <button onClick={ctaAction} style={{ padding: "6px 12px", background: ctaRed ? RED : `${INK}09`, color: ctaRed ? WHITE : INK, border: "none", borderRadius: 7, fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" as const }}>
-                                {ctaLabel}
-                              </button>
-                              {!hasCard && !isApproved && !isGenerating && (
-                                <button onClick={() => generateEarly(ev)} disabled={!!generatingFor}
-                                  style={{ padding: "4px 10px", background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.68rem", color: MID, cursor: !!generatingFor ? "default" : "pointer", display: "flex", alignItems: "center", gap: 3 }}>
-                                  <Sparkles size={9} /> Generate
-                                </button>
-                              )}
-                              {isGenerating && (
-                                <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: "0.68rem", color: MID }}>
-                                  <Loader2 size={9} className="animate-spin" /> Writing…
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
-                      {allUpcomingEvents.length > (isMobile ? 3 : 2) && (
-                        <button onClick={() => setHeroExpanded(o => !o)}
-                          style={{ flex: 1, padding: "9px", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 10, fontSize: "0.82rem", color: MID, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                          {heroExpanded
-                            ? <><ChevronUp size={13} /> Show fewer</>
-                            : <><ChevronDown size={13} /> {allUpcomingEvents.length - (isMobile ? 3 : 2)} more upcoming</>}
-                        </button>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* ── YOUR PEOPLE ────────────────────────────────────── */}
-              <div style={{ marginBottom: 28 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 12 }}>
-                  <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.02em", color: INK, margin: 0, lineHeight: 1 }}>Your People</h2>
-                  <Link href="/people" style={{ textDecoration: "none" }}>
-                    <span style={{ fontSize: "0.78rem", color: MID, fontWeight: 600, cursor: "pointer" }}>View all →</span>
-                  </Link>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8 }}>
-                  {recipients.slice(0, 4).map(r => {
-                    const nextEv = allUpcomingEvents.find(ev => ev.recipient.id === r.id);
-                    return (
-                      <Link key={r.id} href={`/recipients/${r.id}?from=dashboard`} style={{ textDecoration: "none" }}>
-                        <div
-                          style={{ background: WHITE, borderRadius: 10, padding: "10px 13px", border: `1px solid ${BORDER}`, cursor: "pointer", boxSizing: "border-box" as const, display: "flex", alignItems: "center", gap: 10, transition: "border-color 0.15s, box-shadow 0.15s" }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = INK; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)"; }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = BORDER; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
-                        >
-                          <span style={{ fontSize: "1.5rem", lineHeight: 1, flexShrink: 0 }}>{relationshipEmoji(r.relationship)}</span>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: "0.88rem", color: INK, lineHeight: 1.2 }}>{r.name}</div>
-                            <div style={{ fontSize: "0.7rem", color: MID }}>{r.relationship}</div>
-                          </div>
-                          {nextEv ? (
-                            <div style={{ display: "inline-flex", alignItems: "center", gap: 3, background: nextEv.daysAway <= 7 ? `${RED}10` : BEIGE, borderRadius: 6, padding: "3px 8px", fontSize: "0.68rem", fontWeight: 600, color: nextEv.daysAway <= 7 ? RED : MID, flexShrink: 0 }}>
-                              {eventEmoji(nextEv.event)} {nextEv.daysAway}d
-                            </div>
-                          ) : (r.selectedEvents?.length ?? 0) > 0 ? (
-                            <div style={{ fontSize: "0.68rem", color: MID, flexShrink: 0 }}>{r.selectedEvents!.length} occ.</div>
-                          ) : null}
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ── WE GOT YOUR BACK — compact status ─────────────── */}
-              {weGotYourBack.length > 0 && (
-                <div style={{ marginBottom: 16, display: "flex", alignItems: "center", flexWrap: "wrap" as const, gap: "6px 16px", padding: "9px 14px", background: WHITE, borderRadius: 10, border: `1px solid ${BORDER}` }}>
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.1em", color: MID, flexShrink: 0 }}>WE GOT YOUR BACK</span>
-                  <div style={{ width: 1, height: 12, background: `${INK}15`, flexShrink: 0 }} />
-                  {weGotYourBack.map((line, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      {line.good
-                        ? <CheckCircle2 size={10} style={{ color: SAGE, flexShrink: 0 }} />
-                        : <span style={{ fontSize: "0.55rem", fontWeight: 900, color: RED }}>!</span>}
-                      <span style={{ fontSize: "0.72rem", color: line.good ? MID : RED, fontWeight: line.good ? 400 : 600 }}>{line.text}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* ── QUICK CARD placeholder ─────────────────────────── */}
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ background: WHITE, borderRadius: 10, padding: "11px 16px", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 11 }}>
-                  <span style={{ fontSize: "1.2rem", lineHeight: 1, flexShrink: 0 }}>⚡</span>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", letterSpacing: "0.06em", color: INK }}>QUICK CARD</span>
-                    <span style={{ fontSize: "0.78rem", color: MID, marginLeft: 8 }}>Generate a card in under 60 seconds.</span>
-                  </div>
-                  <span style={{ display: "inline-block", background: `${INK}07`, color: MID, borderRadius: 20, padding: "3px 11px", fontSize: "0.66rem", fontWeight: 700, letterSpacing: "0.08em", flexShrink: 0 }}>COMING SOON</span>
-                </div>
-              </div>
-
-              {/* ── Bottom row: Recommended Next Step + Plan/Score ─── */}
-              <div style={{ display: isMobile ? "block" : "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 20 }}>
+            {/* ── Plan usage — subtle ──────────────────────────────────── */}
+            <div style={{
+              background: WHITE, borderRadius: 10, padding: "10px 14px",
+              border: `1px solid ${BORDER}`, marginBottom: 16,
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+            }}>
+              <div style={{ flex: 1 }}>
                 <div style={{
-                  background: recommendedAction.urgency === "high" ? "#FFF5F5" : WHITE,
-                  border: `1px solid ${recommendedAction.urgency === "high" ? `${RED}25` : BORDER}`,
-                  borderRadius: 12, padding: "13px 14px",
-                  display: "flex", gap: 11, alignItems: "flex-start",
-                  marginBottom: isMobile ? 12 : 0,
+                  display: "flex", justifyContent: "space-between",
+                  alignItems: "center", marginBottom: 5,
                 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 9, background: recommendedAction.urgency === "high" ? `${RED}12` : `${SAGE}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1rem" }}>
-                    {recommendedAction.type === "approve_card"     ? "📬"
-                    : recommendedAction.type === "answer_briefing" ? "✍️"
-                    : recommendedAction.type === "add_person"      ? "👤"
-                    :                                                "🌱"}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem", letterSpacing: "0.06em", color: MID, marginBottom: 2 }}>RECOMMENDED NEXT STEP</div>
-                    <div style={{ fontWeight: 700, fontSize: "0.88rem", color: INK, marginBottom: 8 }}>{recommendedAction.title}</div>
-                    <button
-                      onClick={() => { if (recommendedAction.href.startsWith("/")) setLocation(recommendedAction.href); else window.location.href = recommendedAction.href; }}
-                      style={{ background: recommendedAction.urgency === "high" ? RED : INK, color: WHITE, border: "none", borderRadius: 7, padding: "6px 13px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}>
-                      {recommendedAction.type === "approve_card"     ? "Review cards"
-                      : recommendedAction.type === "answer_briefing" ? "Add a personal touch"
-                      : recommendedAction.type === "add_person"      ? "Add person"
-                      :                                                "Improve profile"}
-                      <ArrowRight size={11} />
-                    </button>
+                  <span style={{ fontSize: "0.76rem", fontWeight: 600, color: MID }}>
+                    {planConfig.label} · {cardsUsed}/{cardsTotal} cards used
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ fontSize: "0.74rem", fontWeight: 700, color: atLimit ? RED : MID }}>
+                      {cardsLeft} left
+                    </span>
+                    {plan !== "premium" && (
+                      <button onClick={() => setUpgradeOpen(true)}
+                        style={{
+                          padding: "3px 9px", borderRadius: 6, border: "none",
+                          background: atLimit ? RED : `${INK}08`,
+                          color: atLimit ? WHITE : MID,
+                          fontSize: "0.7rem", fontWeight: 700, cursor: "pointer",
+                        }}>
+                        {atLimit ? "Upgrade" : "Plans"}
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                  <div style={{ background: WHITE, borderRadius: 11, padding: "11px 14px", border: `1px solid ${BORDER}` }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-                      <span style={{ fontSize: "0.78rem", fontWeight: 600, color: INK }}>{planConfig.label} · {cardsUsed}/{cardsTotal} cards</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                        <span style={{ fontSize: "0.76rem", fontWeight: 700, color: atLimit ? RED : MID }}>{cardsLeft} left</span>
-                        {plan !== "premium" && (
-                          <button onClick={() => setUpgradeOpen(true)}
-                            style={{ padding: "3px 9px", borderRadius: 6, border: "none", background: atLimit ? RED : `${INK}08`, color: atLimit ? WHITE : MID, fontSize: "0.7rem", fontWeight: 700, cursor: "pointer" }}>
-                            {atLimit ? "Upgrade" : "Plans"}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <ThinBar pct={usagePct} color={atLimit ? RED : usagePct > 75 ? "#F59E0B" : SAGE} h={3} />
-                  </div>
-                  {health.score > 0 && (
-                    <div style={{ background: WHITE, borderRadius: 11, padding: "11px 14px", border: `1px solid ${BORDER}` }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                        <div>
-                          <div style={{ fontSize: "0.68rem", fontWeight: 700, color: MID, letterSpacing: "0.08em", marginBottom: 4 }}>🍪 BROWNIE POINTS</div>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: health.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{displayScore}</div>
-                            <div style={{ fontSize: "0.78rem", fontWeight: 700, color: health.color }}>{health.label}</div>
-                          </div>
-                        </div>
-                        <button onClick={() => {
-                          if (health.topInsight) {
-                            const rh = health.recipientHealths.find(r => r.name === health.topInsight?.recipientName);
-                            setLocation(rh?.topGapHref ?? "/people");
-                          } else setLocation("/people");
-                        }}
-                          style={{ padding: "6px 12px", background: BEIGE, border: `1px solid ${BORDER}`, borderRadius: 7, fontSize: "0.74rem", fontWeight: 600, color: INK, cursor: "pointer", flexShrink: 0 }}>
-                          Earn more →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <ThinBar pct={usagePct} color={atLimit ? RED : usagePct > 75 ? "#F59E0B" : SAGE} h={3} />
               </div>
             </div>
 
             {/* Footer */}
-            <div style={{ textAlign: "center" as const, paddingTop: 20, marginTop: 8 }}>
+            <div style={{ textAlign: "center" as const, paddingTop: 16, marginTop: 8 }}>
               <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: MID }}>
                 Thoughtful cards. Stronger relationships. That's what we're here for. ❤️
               </span>

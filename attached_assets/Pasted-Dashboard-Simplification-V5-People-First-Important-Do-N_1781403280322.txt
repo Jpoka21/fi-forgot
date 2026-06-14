@@ -1,0 +1,347 @@
+Dashboard Simplification V5 — People First
+
+Important
+
+Do NOT change backend logic.
+
+Do NOT change scoring logic.
+
+Do NOT change API responses.
+
+Do NOT modify GET /api/v2/recipient-health.
+
+Do NOT change relationship health calculations.
+
+Do NOT change grouping calculations.
+
+Do NOT change recommended action calculations.
+
+This is a frontend presentation redesign only.
+
+Goal
+
+The dashboard currently exposes too much of the underlying intelligence.
+
+Users should see conclusions, not calculations.
+
+The dashboard should feel like a list of people that matter, not a CRM.
+
+Use the existing API exactly as it exists today.
+
+Keep all business logic.
+
+Simplify the UI dramatically.
+
+Current Audit Findings
+
+The audit confirmed:
+
+• All scoring logic already exists in the API
+• Grouping logic already exists in the API
+• Recommended actions already exist in the API
+• Event urgency already exists in the API
+• Update age already exists in the API
+• Follow up status already exists in the API
+
+Nothing needs to be rebuilt.
+
+Only the presentation layer should change.
+
+Remove From Dashboard UI
+
+Remove visual display of:
+
+• Raw health score numbers
+• Health rings
+• Score history
+• Profile completeness percentages
+• Insight tiles
+• Richest profile cards
+• Most current cards
+• Oldest update cards
+• Large recommendation boxes
+• Large recipient cards
+
+The underlying calculations may remain.
+
+Simply stop showing them.
+
+Keep
+
+Keep:
+
+• Status grouping
+• Recommended actions
+• Event urgency
+• Update age
+• Follow up logic
+• Sorting
+
+These should continue working exactly as they do today.
+
+Dashboard Layout
+
+Section 1
+
+We Got Your Back
+
+Compact list only.
+
+Maximum 3 items.
+
+Examples:
+
+• Stacy’s birthday is in 10 days
+• Dad has not been updated in 4 months
+• Sarah’s anniversary card is ready
+
+No cards.
+
+No metrics.
+
+No visual clutter.
+
+Just concise action items.
+
+Section 2
+
+Need A Card Right Now?
+
+Create a compact Quick Card section.
+
+Do not make it the hero of the page.
+
+Position near the top.
+
+Content:
+
+Need a Card Right Now?
+
+Create a personalized card for anyone.
+
+[Create Quick Card]
+
+Supporting text:
+
+No recipient setup required.
+
+The existing placeholder Quick Card page should be used as the starting point for future implementation.
+
+No need to build the full Quick Card flow in this task.
+
+Section 3
+
+Your Important People
+
+This becomes the primary focus of the page.
+
+Replace large recipient cards with compact recipient rows.
+
+This is not a card based design.
+
+This is a row based design.
+
+Think Apple Contacts.
+
+Think Messages.
+
+Think Mail.
+
+Not Salesforce.
+
+Not HubSpot.
+
+Not CRM dashboards.
+
+Row Requirements
+
+Each recipient should appear as a compact row.
+
+A row should be approximately 72 to 96 pixels tall on mobile.
+
+If a single recipient consumes more than 25% of the visible mobile screen height, the design has failed.
+
+The goal is to display approximately 4 to 6 recipients on screen without scrolling.
+
+Each row should contain:
+
+Line 1
+
+Recipient Name
+
+Small relationship label
+
+Examples:
+
+Stacy • Wife
+
+Dad • Father
+
+Sarah • Friend
+
+Line 2
+
+Most important context.
+
+Examples:
+
+Birthday in 10 days
+
+No updates in 4 months
+
+Anniversary in 28 days
+
+Card draft ready
+
+Line 3
+
+Most recent meaningful update if available.
+
+Examples:
+
+“She loved Alex’s school play.”
+
+“Bought a fishing boat.”
+
+“Started a new job.”
+
+Limit to one line.
+
+Truncate gracefully.
+
+Line 4
+
+Primary action only.
+
+Examples:
+
+Create Birthday Card
+
+Tell Us Something New
+
+Review Draft
+
+Complete Profile
+
+Answer Follow Up
+
+Actions
+
+Do NOT show multiple action buttons.
+
+Do NOT show button rows.
+
+Do NOT show:
+
+Create Card
+
+Add Memory
+
+Add Event
+
+View
+
+Edit
+
+all at once.
+
+Instead:
+
+Show a single primary action.
+
+This should appear as:
+
+• One small button
+or
+• One action link
+
+Never as a large recommendation box.
+
+Never as a large action panel.
+
+Map actionType as follows:
+
+profile → Complete Profile
+
+follow_up → Answer Follow Up
+
+fresh_update → Tell Us Something New
+
+card → Create Card
+
+review → Review Activity
+
+Secondary actions should live behind:
+
+• Row tap
+or
+• Overflow menu
+
+Events
+
+Do not place Add Event buttons on every row.
+
+Event management should primarily live inside the recipient profile.
+
+Future event creation can be surfaced through:
+
+Tell Us Something New
+
+when the user is describing a milestone or life event.
+
+People Grouping
+
+Keep existing API grouping.
+
+Continue using:
+
+Priority
+
+Needs Attention
+
+Healthy
+
+Excellent
+
+However:
+
+Do not emphasize scores.
+
+Emphasize people.
+
+Group headers should be simple.
+
+Examples:
+
+Needs Attention (3)
+
+Healthy (8)
+
+Excellent (4)
+
+Visual Direction
+
+People are the hero.
+
+The dashboard should feel like a list of relationships.
+
+The dashboard should not feel like software.
+
+Success Criteria
+
+Within 5 seconds a user should understand:
+
+• Who needs attention
+• What happened recently
+• What action to take next
+
+Without seeing:
+
+• Scores
+• Percentages
+• Health rings
+• Metrics
+• Large cards
+• Large recommendation panels
+
+The backend should remain completely unchanged.
