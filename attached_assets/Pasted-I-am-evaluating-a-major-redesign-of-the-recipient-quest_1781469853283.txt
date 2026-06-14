@@ -1,0 +1,98 @@
+I am evaluating a major redesign of the recipient question system.
+
+Do not make changes yet.
+
+First perform a complete audit and provide a report.
+
+I need the following:
+
+1. Current Question Inventory
+
+List every question currently used in the system.
+
+For each question show:
+
+* Question text
+* Internal field name
+* Category
+* Required or optional
+* Where it is stored
+* Whether it is considered a permanent profile question or a dated memory/update
+
+2. Profile Completion Logic
+
+Explain exactly how profile completion is currently calculated.
+
+Show:
+
+* Total number of profile questions
+* Which questions count toward completion
+* Whether completion can ever reach 100%
+* How Relationship Health is calculated
+* How Profile Completion differs from Relationship Health
+
+3. Question Engine Flow
+
+Document the entire lifecycle:
+
+* User creates recipient
+* First questions shown
+* What determines next question
+* What happens when all profile questions are completed
+* What follow up questions exist today
+* What recurring questions exist today
+* What fresh update questions exist today
+
+4. Database Structure
+
+Show all tables involved in:
+
+* Recipient profiles
+* Question answers
+* Fresh updates
+* Follow ups
+* Timeline entries
+* Relationship health
+
+For each table provide:
+
+* Table name
+* Purpose
+* Key fields
+* Example record
+
+5. Card Generation Inputs
+
+For a generated card, show every source of information currently used.
+
+Break down:
+
+* Permanent profile data
+* Fresh updates
+* Follow up answers
+* Timeline entries
+* Previous cards
+* Important dates
+
+Explain the priority order.
+
+6. Recommendation Section
+
+Based on the current implementation, answer these questions:
+
+A. Should recipient profiles ever be considered “complete”?
+
+B. Would it be better to have:
+
+* A small Core Profile
+* Unlimited ongoing memory collection
+
+instead of a large profile completion model?
+
+C. If redesigning from scratch today, what would you keep, remove, merge, or simplify?
+
+Provide specific recommendations grounded in the existing codebase and database.
+
+Do not implement anything.
+
+Return a detailed report with file names, database tables, and relevant code locations so we can make architectural decisions before changing anything.
