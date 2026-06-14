@@ -1,0 +1,73 @@
+Please do not make any changes yet.
+
+I want a technical audit of the current FiForgot mobile dashboard and Relationship Health dashboard.
+
+Goal
+
+I need to understand what data and logic currently power the dashboard before we redesign the UI.
+
+Please answer the following:
+
+1. What data fields are currently calculated for each recipient card?
+
+Include anything related to:
+
+• Health score
+• Priority status
+• Recommended next step
+• Event urgency
+• Update age
+• Follow up question status
+• Profile completeness
+• Draft status
+• Card readiness
+• Any other dashboard specific fields
+
+2. Which of these fields are already returned by the API?
+3. Which fields are only presentation layer and can be hidden without breaking functionality?
+4. What exact logic determines each group?
+
+• Priority
+• Needs Attention
+• Healthy
+• Excellent
+
+5. Show an example JSON payload for Stacy exactly as the frontend receives it.
+6. Explain exactly how Recommended Next Step is calculated.
+7. Explain exactly how the health score is calculated.
+8. Tell me which files currently control:
+
+• The mobile dashboard layout
+• The desktop dashboard layout
+• The recipient card component
+• The Relationship Health section
+• The Quick Card flow, if it exists
+• The “Tell Us Something New” or memory update flow, if it exists
+
+9. Estimate how much of the current dashboard code is:
+
+• Business logic
+• API/data fetching
+• UI presentation
+
+10. If we redesign from large recipient cards into compact mobile rows, what existing backend logic can be reused unchanged?
+11. Would anything break if we stopped displaying:
+
+• Health score
+• Health rings
+• Profile completeness percentage
+• Priority badge
+• Large recommendation box
+• Large recipient cards
+
+12. Are the current dashboard and relationship health calculations reusable if the frontend only shows a simplified conclusion such as:
+
+• Stacy, birthday in 10 days, next step: Tell Us Something New
+• Dad, no update in 4 months, next step: Tell Us Something New
+• Sarah, draft ready, next step: Review Draft
+
+Please return this as an audit only.
+
+Do not redesign anything yet.
+Do not edit files yet.
+Do not change behavior yet.
