@@ -35,6 +35,7 @@ import BrowniePointsPage from "@/pages/brownie-points";
 import PeoplePage from "@/pages/people";
 import MomentsPage from "@/pages/moments";
 import QuickCardPage from "@/pages/quick-card";
+import RelationshipPage from "@/pages/relationship";
 import { BrowniePointsProvider } from "@/lib/brownie-points-context";
 import { BrowniePointsToast } from "@/components/BrowniePointsToast";
 

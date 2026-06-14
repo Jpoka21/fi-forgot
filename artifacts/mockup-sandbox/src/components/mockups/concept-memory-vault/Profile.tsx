@@ -1,228 +1,136 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG = "#F2E6D3";
-const RED = "#E23B2E";
-const BLACK = "#111111";
-const SAGE = "#5B8C6B";
-const GRAY = "#6B6B6B";
-const BORDER = "#E5E0D8";
-const WHITE = "#FFFFFF";
-const CREAM = "#FDF7EF";
+const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
+const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
+const AMBER = "#D97706";
 
-type TabId = "all" | "memories" | "cards" | "followups";
+type Tab = "All" | "Memories" | "Cards" | "Follow-ups";
 
-const tabs: { id: TabId; label: string }[] = [
-  { id: "all",       label: "All"         },
-  { id: "memories",  label: "Memories"    },
-  { id: "cards",     label: "Cards"       },
-  { id: "followups", label: "Follow-ups"  },
+const TABS: Tab[] = ["All", "Memories", "Cards", "Follow-ups"];
+
+type TimelineItem =
+  | { type: "card";      event: string; date: string; excerpt: string }
+  | { type: "memory";    text: string;  date: string; followUp?: boolean }
+  | { type: "followup";  question: string; originalMemory: string };
+
+const allItems: TimelineItem[] = [
+  { type: "card",     event: "Mother's Day Card 2024", date: "May 2024", excerpt: "You've always known exactly how to make a house feel like home, and I'm so grateful..." },
+  { type: "memory",   text: "Knee surgery — went really well, recovering at home", date: "May 2025", followUp: true },
+  { type: "followup", question: "You mentioned her recovery — how is she feeling now?", originalMemory: "Knee surgery went well" },
+  { type: "memory",   text: "Started her garden again after years away — planted tomatoes and herbs", date: "Mar 2025" },
+  { type: "card",     event: "Birthday Card 2024", date: "Dec 2024", excerpt: "Mom, every year with you is a gift. You make everything feel like home..." },
+  { type: "memory",   text: "Celebrated 40 years with Dad at their favorite restaurant", date: "Oct 2024" },
 ];
 
-type EntryType = "card" | "memory" | "followup";
-
-interface TimelineEntry {
-  id: number;
-  type: EntryType;
-  date: string;
-  title: string;
-  text: string;
-  showAnswer?: boolean;
-  tabs: TabId[];
+function filterItems(items: TimelineItem[], tab: Tab): TimelineItem[] {
+  if (tab === "All") return items;
+  if (tab === "Memories") return items.filter(i => i.type === "memory");
+  if (tab === "Cards") return items.filter(i => i.type === "card");
+  if (tab === "Follow-ups") return items.filter(i => i.type === "followup" || (i.type === "memory" && (i as any).followUp));
+  return items;
 }
 
-const timeline: TimelineEntry[] = [
-  {
-    id: 1,
-    type: "card",
-    date: "May 2025",
-    title: "Mother's Day Card 2024",
-    text: "You've always known exactly how to make a house feel like home…",
-    tabs: ["all", "cards"],
-  },
-  {
-    id: 2,
-    type: "memory",
-    date: "May 2025",
-    title: "Knee surgery — recovering well at home",
-    text: "",
-    showAnswer: true,
-    tabs: ["all", "memories", "followups"],
-  },
-  {
-    id: 3,
-    type: "followup",
-    date: "May 2025",
-    title: "You mentioned her recovery",
-    text: "How is she feeling now?",
-    showAnswer: true,
-    tabs: ["all", "followups"],
-  },
-  {
-    id: 4,
-    type: "memory",
-    date: "Mar 2025",
-    title: "Started her garden again after years away",
-    text: "",
-    showAnswer: false,
-    tabs: ["all", "memories"],
-  },
-  {
-    id: 5,
-    type: "card",
-    date: "Mar 2025",
-    title: "Birthday Card 2024",
-    text: "Mom, you're one of a kind and we all know it…",
-    tabs: ["all", "cards"],
-  },
-  {
-    id: 6,
-    type: "memory",
-    date: "Oct 2024",
-    title: "Celebrated 40 years with Dad",
-    text: "",
-    showAnswer: false,
-    tabs: ["all", "memories"],
-  },
-];
-
-const typeStyles: Record<EntryType, { dot: string; bg: string; border: string; label: string }> = {
-  card:     { dot: SAGE,       bg: SAGE + "12",     border: SAGE + "44",     label: "💌 Card Sent" },
-  memory:   { dot: BLACK,      bg: CREAM,           border: BORDER,          label: "✎ Memory"     },
-  followup: { dot: "#D97706",  bg: "#FEF3C7",       border: "#FDE68A",       label: "↻ Follow-up" },
-};
-
 export function Profile() {
-  const [activeTab, setActiveTab] = useState<TabId>("all");
-  const [answering, setAnswering] = useState<number | null>(null);
-  void answering;
-
-  const filtered = timeline.filter((e) => e.tabs.includes(activeTab));
+  const [activeTab, setActiveTab] = useState<Tab>("All");
+  const visible = filterItems(allItems, activeTab);
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* Top bar */}
-      <div style={{ background: BLACK, height: 52, display: "flex", alignItems: "center", padding: "0 24px" }}>
-        <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, cursor: "pointer", fontWeight: 500 }}>← What's New</span>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: RED, marginLeft: "auto", letterSpacing: 1.5 }}>F.I. FORGOT</span>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: BG, minHeight: "100vh" }}>
+      {/* Nav */}
+      <div style={{ background: BLACK, height: 56, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <button style={{ background: "none", border: "none", color: "#ffffff80", fontSize: "0.82rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>← Dashboard</button>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: RED }}>F.I. FORGOT</span>
       </div>
 
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "28px 24px" }}>
-        {/* Profile header */}
-        <div style={{ background: WHITE, borderRadius: 18, padding: "24px 24px 20px", border: `1.5px solid ${BORDER}`, marginBottom: 18 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <div style={{ width: 70, height: 70, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, flexShrink: 0 }}>💛</div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <h1 style={{ margin: 0, fontFamily: "'Bebas Neue', cursive", fontSize: 42, color: BLACK, letterSpacing: 2 }}>MOM</h1>
-                <span style={{ background: SAGE + "22", color: SAGE, border: `1px solid ${SAGE}44`, borderRadius: 20, padding: "4px 14px", fontSize: 13, fontWeight: 700 }}>Mother</span>
-              </div>
-              <div style={{ display: "flex", gap: 16, marginTop: 6 }}>
-                <span style={{ fontSize: 12, color: GRAY }}><strong style={{ color: BLACK }}>47</strong> memories</span>
-                <span style={{ fontSize: 12, color: GRAY }}><strong style={{ color: BLACK }}>8</strong> cards sent</span>
-                <span style={{ fontSize: 12, color: "#D97706" }}><strong>3</strong> follow-ups</span>
-              </div>
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px" }}>
+        {/* Hero */}
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 24 }}>
+          <div style={{ width: 68, height: 68, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", flexShrink: 0 }}>💛</div>
+          <div>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, letterSpacing: "0.02em" }}>MOM</div>
+            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+              <span style={{ padding: "3px 12px", borderRadius: 20, background: WHITE, border: `1px solid ${BORDER}`, color: GRAY, fontSize: "0.74rem", fontWeight: 600 }}>Mother</span>
+              <span style={{ padding: "3px 12px", borderRadius: 20, background: `${SAGE}18`, color: SAGE, fontSize: "0.74rem", fontWeight: 700 }}>● 6 memories</span>
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 16, background: WHITE, borderRadius: 12, padding: 5, border: `1.5px solid ${BORDER}` }}>
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              style={{
-                flex: 1,
-                background: activeTab === t.id ? BLACK : "transparent",
-                color: activeTab === t.id ? WHITE : GRAY,
-                border: "none",
-                borderRadius: 9,
-                padding: "9px 0",
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                fontWeight: 700,
-                fontSize: 13,
-                cursor: "pointer",
-                transition: "background 0.15s, color 0.15s",
-              }}
-            >
-              {t.label}
+        {/* Tab bar */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 22, background: WHITE, borderRadius: 10, padding: 4, border: `1px solid ${BORDER}` }}>
+          {TABS.map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)} style={{
+              flex: 1, padding: "8px 12px", borderRadius: 7, border: "none",
+              background: activeTab === tab ? BLACK : "transparent",
+              color: activeTab === tab ? WHITE : GRAY,
+              fontWeight: 700, fontSize: "0.78rem", cursor: "pointer",
+              transition: "background 0.15s",
+            }}>
+              {tab}
             </button>
           ))}
         </div>
 
         {/* Timeline */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 20 }}>
-          {filtered.map((entry, i) => {
-            const ts = typeStyles[entry.type];
-            const isLast = i === filtered.length - 1;
-            return (
-              <div key={entry.id} style={{ display: "flex", gap: 0 }}>
-                {/* Timeline track */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 28, flexShrink: 0 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: "50%", background: ts.dot, border: `2px solid ${WHITE}`, marginTop: 18, flexShrink: 0, zIndex: 1 }} />
-                  {!isLast && <div style={{ width: 2, flex: 1, background: BORDER, minHeight: 20 }} />}
+        <div style={{ position: "relative", marginBottom: 24 }}>
+          {/* Vertical line */}
+          <div style={{ position: "absolute", left: 14, top: 0, bottom: 0, width: 1, background: BORDER }} />
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {visible.map((item, i) => (
+              <div key={i} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                {/* Timeline dot */}
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%", flexShrink: 0, zIndex: 1,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: item.type === "card" ? SAGE : item.type === "followup" ? AMBER : WHITE,
+                  border: `2px solid ${item.type === "card" ? SAGE : item.type === "followup" ? AMBER : BORDER}`,
+                  fontSize: "0.75rem",
+                }}>
+                  {item.type === "card" ? "💌" : item.type === "followup" ? "↻" : "●"}
                 </div>
 
-                {/* Card */}
+                {/* Content */}
                 <div style={{
-                  flex: 1,
-                  background: ts.bg,
-                  borderRadius: 13,
-                  border: `1.5px solid ${ts.border}`,
-                  padding: "14px 16px",
-                  marginBottom: isLast ? 0 : 10,
-                  marginLeft: 10,
+                  flex: 1, borderRadius: 12, padding: "14px 16px",
+                  border: `1px solid ${item.type === "followup" ? AMBER + "40" : BORDER}`,
+                  background: item.type === "followup" ? `${AMBER}08` : WHITE,
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: entry.type === "followup" ? "#92400E" : GRAY, letterSpacing: 0.3 }}>{ts.label}</span>
-                    <span style={{ fontSize: 11, color: GRAY }}>{entry.date}</span>
-                  </div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: BLACK, marginBottom: entry.text ? 6 : 0 }}>{entry.title}</div>
-                  {entry.text && (
-                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: entry.type === "card" ? GRAY : BLACK, fontStyle: entry.type === "card" ? "italic" : "normal", lineHeight: 1.4 }}>
-                      {entry.type === "card" ? `"${entry.text}"` : entry.text}
-                    </div>
+                  {item.type === "card" && (
+                    <>
+                      <div style={{ fontWeight: 700, fontSize: "0.86rem", color: BLACK, marginBottom: 5 }}>💌 {item.event}</div>
+                      <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, lineHeight: 1.6, fontStyle: "italic" }}>"{item.excerpt}"</div>
+                      <div style={{ fontSize: "0.7rem", color: GRAY, marginTop: 6 }}>{item.date}</div>
+                    </>
                   )}
-                  {entry.showAnswer && entry.type === "followup" && (
-                    <button
-                      onClick={() => setAnswering(entry.id)}
-                      style={{ marginTop: 10, background: "#D97706", color: WHITE, border: "none", borderRadius: 8, padding: "7px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                    >
-                      Answer →
-                    </button>
+                  {item.type === "memory" && (
+                    <>
+                      <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: BLACK, lineHeight: 1.6 }}>"{item.text}"</div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
+                        <span style={{ fontSize: "0.7rem", color: GRAY }}>{item.date}</span>
+                        {item.followUp && (
+                          <span style={{ padding: "1px 8px", borderRadius: 20, background: `${AMBER}18`, color: AMBER, fontSize: "0.68rem", fontWeight: 700 }}>↻ Follow-up due</span>
+                        )}
+                      </div>
+                    </>
                   )}
-                  {entry.showAnswer && entry.type === "memory" && (
-                    <div style={{ marginTop: 8 }}>
-                      <span style={{ background: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A", borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>
-                        ↻ Follow-up due
-                      </span>
-                    </div>
+                  {item.type === "followup" && (
+                    <>
+                      <div style={{ fontSize: "0.7rem", color: AMBER, fontWeight: 700, letterSpacing: "0.06em", marginBottom: 5 }}>FOLLOW-UP QUESTION</div>
+                      <div style={{ fontStyle: "italic", fontSize: "0.82rem", color: GRAY, marginBottom: 8 }}>Re: "{item.originalMemory}"</div>
+                      <div style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK, marginBottom: 10 }}>{item.question}</div>
+                      <button style={{ padding: "6px 14px", borderRadius: 7, border: `1px solid ${AMBER}`, background: "transparent", color: AMBER, fontWeight: 700, fontSize: "0.76rem", cursor: "pointer" }}>Answer →</button>
+                    </>
                   )}
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
-        {/* Log button */}
-        <button style={{
-          width: "100%",
-          background: SAGE,
-          color: WHITE,
-          border: "none",
-          borderRadius: 12,
-          padding: "15px",
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontWeight: 700,
-          fontSize: 15,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-        }}>
-          ✎ Log a Moment
+        {/* Log moment CTA */}
+        <button style={{ width: "100%", padding: "13px", borderRadius: 12, border: "none", background: SAGE, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.05em", cursor: "pointer" }}>
+          + LOG A MOMENT
         </button>
       </div>
     </div>

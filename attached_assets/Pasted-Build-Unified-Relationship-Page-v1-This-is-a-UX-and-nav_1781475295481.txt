@@ -1,0 +1,263 @@
+Build Unified Relationship Page v1.
+
+This is a UX and navigation redesign only.
+
+Do not change:
+
+* card generation logic
+* card prompts
+* relationship voice rules
+* banned phrases
+* context priority order
+* event briefing logic
+* fresh update logic
+* follow up scheduling
+* backend routes
+* database schema
+* dashboard layout structure
+
+Do not delete or replace the existing profile page yet.
+
+Build the new unified page alongside the current experience so we can compare both versions before making it the default.
+
+Goal:
+When I open a recipient, it should feel like one relationship page for that person, not separate profile, memory, question, and timeline tools.
+
+Design principle:
+People are the hero.
+
+Use existing data, routes, APIs, and components wherever possible.
+
+Before implementation:
+Recommend the safest route structure for the new page and reuse existing recipient loading logic. Do not create duplicate recipient APIs if existing ones already provide the required data.
+
+PAGE STRUCTURE
+
+1. Hero / Snapshot
+
+This section should immediately answer:
+
+“Who is this person and what matters next?”
+
+Show:
+
+* Recipient name
+* Relationship
+* Avatar or initials
+* Next important date
+* Next card or upcoming occasion
+* Quick actions:
+    * Write Card
+    * Add Memory
+    * Edit Profile
+
+Do not make Relationship Health or Profile Completion the dominant visual element.
+
+Avoid showing profile completion percentage as a headline metric.
+
+2. Recent Memories
+
+Place this near the top of the page.
+
+This is the living relationship section.
+
+Show:
+
+* Fresh updates
+* Follow up answers
+
+Do NOT show permanent profile answers here.
+
+Permanent profile information belongs exclusively in “What We Know.”
+
+Add a prominent:
+
+“Add Recent Memory”
+
+entry area.
+
+Use examples as placeholder text:
+
+* Steve started a new job.
+* We took a trip to Vermont.
+* His daughter graduated.
+* We had a great dinner together last week.
+
+When submitted, reuse the existing endpoint:
+
+POST /api/v2/recipients/:id/answer-question
+
+Payload:
+
+{
+“fieldKey”: “freeform_memory”,
+“questionText”: “What would you like us to remember about [name]?”,
+“answerText”: “”,
+“triggerType”: “fresh_update”
+}
+
+Do not create:
+
+* new storage
+* new tables
+* new backend routes
+
+The memory should automatically:
+
+* appear in timeline
+* be available to card generation
+* participate in existing follow up generation
+
+3. Suggested Question
+
+Place this above the timeline and make it visually important.
+
+This is a key engagement mechanism.
+
+Reuse the existing next-question endpoint.
+
+Support:
+
+* profile gap questions
+* follow up questions
+* fresh update questions
+
+Do not expose technical labels such as:
+
+* profile_gap
+* fresh_update
+* follow_up
+
+Use user-friendly language such as:
+
+“Want to make the next card even better?”
+
+Show only one suggested question at a time.
+
+4. What We Know
+
+Read-only for v1.
+
+Display stable profile information:
+
+* Things to avoid
+* Interests
+* Favorite memories
+* Inside jokes
+* Preferred tone
+* Things to always include
+* Delivery preference
+
+Add an Edit button that links to the existing profile editing experience.
+
+Do not build new inline edit forms during this pass.
+
+Reuse existing edit functionality.
+
+5. Upcoming Moments
+
+Separate upcoming events from history.
+
+Show:
+
+* Birthday
+* Anniversary
+* Next card occasion
+* Upcoming reminders
+
+Focus on future relationship opportunities.
+
+6. Card History
+
+Separate from Upcoming Moments.
+
+Show:
+
+* Draft cards
+* Approved cards
+* Sent cards
+
+Reuse existing data.
+
+Do not create a parallel card history system.
+
+7. Timeline / History
+
+Reuse the existing RelationshipTimeline.tsx component.
+
+Place this lower on the page.
+
+The timeline is supporting information, not the hero.
+
+Reuse the existing endpoint and aggregation logic.
+
+Do not create a second timeline implementation.
+
+8. Relationship Health
+
+Keep using Relationship Health V2.
+
+Do not change the scoring logic.
+
+Display it as supporting information rather than the primary focus of the page.
+
+DASHBOARD CHANGES
+
+Keep the overall dashboard layout structure largely unchanged.
+
+Update recipient card actions so the primary action becomes:
+
+Open Relationship Page
+
+Secondary actions:
+
+* Write Card
+* Add Memory
+
+Reduce emphasis on separate destinations such as:
+
+* Profile
+* Timeline
+* Questions
+* Memories
+
+Those concepts should now live within the unified relationship page.
+
+Do not redesign the full dashboard grid in this pass.
+
+TECHNICAL REQUIREMENTS
+
+Reuse:
+
+* RelationshipTimeline.tsx
+* existing recipient APIs
+* existing profile edit experience
+* existing question engine
+* existing fresh update system
+* existing follow up system
+* existing card history data
+
+No backend changes unless absolutely necessary.
+
+If any backend change is required, stop and explain why before implementing.
+
+DELIVERABLES
+
+After implementation provide:
+
+* Files changed
+* Components added
+* Components reused
+* Routes added or modified
+* Recommended route structure
+* How to access the old profile page
+* How to access the new unified relationship page
+* Confirmation that card generation logic was not changed
+* Screenshots of the new page
+* Risks, limitations, and follow up recommendations
+
+Important:
+
+This is a safe v1 focused on presentation and navigation.
+
+The purpose is to compare user experience and screenshots before replacing the existing profile experience.
