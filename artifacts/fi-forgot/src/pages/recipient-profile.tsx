@@ -565,6 +565,16 @@ export default function RecipientProfilePage() {
     }
   }, [watchRelationship, isNew]);
 
+  // If the URL contains a real ID but the recipient isn't in localStorage,
+  // redirect back rather than rendering a blank page.
+  useEffect(() => {
+    if (!isNew && !existing) {
+      const timer = setTimeout(() => setLocation(backTo), 1500);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [isNew, existing, backTo, setLocation]);
+
   function toggleEvent(event: string) {
     const current = form.getValues("selectedEvents");
     if (current.includes(event)) {
@@ -675,6 +685,18 @@ export default function RecipientProfilePage() {
                   <p className="text-sm mt-0.5" style={{ color: GRAY }}>The more we know, the better the cards get.</p>
                 </div>
               </div>
+            ) : !existing ? (
+              <div className="flex items-center gap-3">
+                <Link href={backTo}>
+                  <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }}>
+                    <ArrowLeft size={18} />
+                  </button>
+                </Link>
+                <div>
+                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>Loading…</h1>
+                  <p className="text-sm mt-0.5" style={{ color: GRAY }}>Redirecting you back…</p>
+                </div>
+              </div>
             ) : (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -686,12 +708,12 @@ export default function RecipientProfilePage() {
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, margin: 0 }}>
-                    {existing?.name?.toUpperCase() ?? "RECIPIENT"}
+                    {existing.name.toUpperCase()}
                   </h1>
                   <span style={{ padding: "4px 13px", borderRadius: 20, background: `${BLACK}08`, fontSize: "0.82rem", fontWeight: 600, color: GRAY }}>
-                    {existing?.relationship}
+                    {existing.relationship}
                   </span>
-                  {existing?.active === false ? (
+                  {existing.active === false ? (
                     <span style={{ padding: "3px 10px", borderRadius: 20, background: `${RED}12`, fontSize: "0.72rem", fontWeight: 700, color: RED }}>Paused</span>
                   ) : (
                     <span style={{ padding: "3px 10px", borderRadius: 20, background: `${SAGE}12`, fontSize: "0.72rem", fontWeight: 700, color: SAGE }}>Active</span>

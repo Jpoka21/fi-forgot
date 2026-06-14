@@ -780,7 +780,8 @@ export function getRecipients(): Recipient[] {
 }
 
 export function getRecipient(id: string): Recipient | undefined {
-  return loadRecipients().find((r) => r.id === id);
+  const sid = String(id);
+  return loadRecipients().find((r) => String(r.id) === sid);
 }
 
 // ─── Server sync ─────────────────────────────────────────────────────────────
@@ -833,7 +834,11 @@ export async function hydrateRecipientsFromServer(userId: string): Promise<void>
     if (!res.ok) return;
     const { recipients: serverRecipients } = await res.json() as { recipients: Recipient[] };
     if (serverRecipients.length > 0) {
-      localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(serverRecipients));
+      // Normalize IDs to strings to guard against legacy numeric IDs stored in server blobs
+      const normalized = serverRecipients.map(r => ({ ...r, id: String(r.id) }));
+      localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(normalized));
+      // Ensure the data version is marked current so ensureDataVersion() won't wipe this data
+      localStorage.setItem(STORAGE_KEY_VERSION, DATA_VERSION);
     } else {
       const local = loadRecipients();
       if (local.length > 0) {
