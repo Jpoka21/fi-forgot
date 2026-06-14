@@ -7,7 +7,7 @@
  * Data: GET /api/v2/recipient-health (unchanged)
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type MouseEvent } from "react";
 import { useLocation } from "wouter";
 import { getApiHeaders } from "@/lib/data";
 
@@ -60,8 +60,7 @@ function avatar(name: string): string {
 }
 
 function actionDestination(score: RecipientHealthScore): string {
-  if (score.actionType === "card")   return `/v2?recipientId=${score.recipientId}`;
-  if (score.actionType === "review") return `/recipients/${score.recipientId}/timeline`;
+  if (score.actionType === "card") return `/try?recipientId=${score.recipientId}`;
   return `/recipients/${score.recipientId}?from=dashboard`;
 }
 
@@ -111,33 +110,34 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
   const [, setLocation] = useLocation();
   const [expanded, setExpanded] = useState(false);
 
-  const cfg        = STATUS_CONFIG[score.status];
+  const cfg         = STATUS_CONFIG[score.status];
   const actionLabel = ACTION_LABELS[score.actionType] ?? "View";
-  const dest       = actionDestination(score);
-  const ctx        = contextLine(score);
-  const isUrgent   = score.status === "Priority";
+  const dest        = actionDestination(score);
+  const ctx         = contextLine(score);
+  const isUrgent    = score.status === "Priority";
+
+  function nav(e: MouseEvent, path: string) {
+    e.stopPropagation();
+    setLocation(path);
+  }
 
   return (
     <div style={{
       background:   WHITE,
       borderRadius: 12,
-      border:       `1px solid ${expanded ? INK + "30" : BORDER}`,
+      border:       `1px solid ${expanded ? INK + "22" : BORDER}`,
       borderLeft:   `3px solid ${cfg.color}`,
       overflow:     "hidden",
       boxSizing:    "border-box" as const,
     }}>
       {/* ── Main row ───────────────────────────────────────── */}
-      <div
-        onClick={() => setExpanded(e => !e)}
-        style={{
-          display:    "flex",
-          alignItems: "center",
-          gap:        12,
-          padding:    "11px 14px",
-          cursor:     "pointer",
-          minHeight:  72,
-        }}
-      >
+      <div style={{
+        display:    "flex",
+        alignItems: "center",
+        gap:        10,
+        padding:    "11px 12px",
+        minHeight:  72,
+      }}>
         {/* Avatar */}
         <div style={{
           width: 40, height: 40, borderRadius: "50%", background: INK, flexShrink: 0,
@@ -148,8 +148,11 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
           </span>
         </div>
 
-        {/* Text content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Text content — tapping this area navigates to profile */}
+        <div
+          onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard`)}
+          style={{ flex: 1, minWidth: 0, cursor: "pointer" }}
+        >
           <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 3 }}>
             <span style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{score.name}</span>
             <span style={{ fontSize: "0.72rem", color: MID }}>· {score.relationshipType}</span>
@@ -166,43 +169,56 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
           </div>
         </div>
 
-        {/* Expand chevron + primary action */}
-        <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
-          <button
-            onClick={e => { e.stopPropagation(); setLocation(dest); }}
-            style={{
-              padding:      "6px 11px",
-              borderRadius: 7,
-              border:       "none",
-              background:   isUrgent ? RED : BEIGE,
-              color:        isUrgent ? WHITE : INK,
-              fontWeight:   700,
-              fontSize:     "0.72rem",
-              cursor:       "pointer",
-              whiteSpace:   "nowrap" as const,
-            }}
-          >
-            {actionLabel}
-          </button>
-          {/* Chevron */}
-          <span style={{
-            fontSize:   "0.6rem",
-            color:      MID,
-            display:    "inline-block",
-            transform:  expanded ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.18s",
-            userSelect: "none" as const,
-          }}>
-            ▼
-          </span>
-        </div>
+        {/* Primary action button */}
+        <button
+          onClick={e => nav(e, dest)}
+          style={{
+            flexShrink:   0,
+            padding:      "6px 11px",
+            borderRadius: 7,
+            border:       "none",
+            background:   isUrgent ? RED : BEIGE,
+            color:        isUrgent ? WHITE : INK,
+            fontWeight:   700,
+            fontSize:     "0.72rem",
+            cursor:       "pointer",
+            whiteSpace:   "nowrap" as const,
+          }}
+        >
+          {actionLabel}
+        </button>
+
+        {/* ⋯ More button — clearly tappable, 40×40 touch target */}
+        <button
+          onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
+          style={{
+            flexShrink:      0,
+            width:           36,
+            height:          36,
+            borderRadius:    8,
+            border:          `1px solid ${expanded ? INK + "30" : BORDER}`,
+            background:      expanded ? `${INK}08` : "transparent",
+            color:           MID,
+            cursor:          "pointer",
+            display:         "flex",
+            alignItems:      "center",
+            justifyContent:  "center",
+            fontSize:        "1rem",
+            letterSpacing:   "0.05em",
+            lineHeight:      1,
+          }}
+          aria-label="More actions"
+          aria-expanded={expanded}
+        >
+          {expanded ? "✕" : "···"}
+        </button>
       </div>
 
       {/* ── Expanded quick-action panel ────────────────────── */}
       {expanded && (
         <div style={{
           borderTop:  `1px solid ${BORDER}`,
-          padding:    "11px 14px 13px",
+          padding:    "12px 14px 14px",
           background: BEIGE,
           display:    "flex",
           flexWrap:   "wrap" as const,
@@ -210,32 +226,32 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
         }}>
           {/* Improve the card — answer questions */}
           <button
-            onClick={() => setLocation(briefingDest(score))}
-            style={actionPill()}
+            onClick={e => nav(e, briefingDest(score))}
+            style={actionPill(false)}
           >
             ✍️ Improve the card
           </button>
 
           {/* Add occasion / event */}
           <button
-            onClick={() => setLocation(`/recipients/${score.recipientId}?from=dashboard&tab=events`)}
-            style={actionPill()}
+            onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard&tab=events`)}
+            style={actionPill(false)}
           >
             🗓 Add occasion
           </button>
 
           {/* Share something new */}
           <button
-            onClick={() => setLocation(`/recipients/${score.recipientId}?from=dashboard`)}
-            style={actionPill()}
+            onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard`)}
+            style={actionPill(false)}
           >
             💬 Share something new
           </button>
 
           {/* View full profile */}
           <button
-            onClick={() => setLocation(`/recipients/${score.recipientId}?from=dashboard`)}
-            style={{ ...actionPill(), background: "transparent", border: `1px solid ${BORDER}`, color: MID }}
+            onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard`)}
+            style={actionPill(true)}
           >
             View profile →
           </button>
@@ -245,18 +261,18 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
   );
 }
 
-function actionPill() {
+function actionPill(ghost: boolean) {
   return {
-    padding:      "7px 13px",
+    padding:      "8px 14px",
     borderRadius: 20,
-    border:       "none",
-    background:   WHITE,
-    color:        INK,
+    border:       ghost ? `1px solid ${BORDER}` : "none",
+    background:   ghost ? "transparent" : WHITE,
+    color:        ghost ? MID : INK,
     fontWeight:   600,
-    fontSize:     "0.78rem",
+    fontSize:     "0.8rem",
     cursor:       "pointer",
     whiteSpace:   "nowrap" as const,
-    boxShadow:    "0 1px 3px rgba(0,0,0,0.08)",
+    boxShadow:    ghost ? "none" : "0 1px 3px rgba(0,0,0,0.07)",
   };
 }
 
