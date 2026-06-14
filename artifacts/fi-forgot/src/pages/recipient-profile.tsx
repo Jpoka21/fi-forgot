@@ -329,6 +329,9 @@ export default function RecipientProfilePage() {
   const [memorySuccess, setMemorySuccess] = useState(false);
   const [memoryError, setMemoryError] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  // Holds a recipient fetched from the server when localStorage lookup misses.
+  // Used as a fallback so the page renders without requiring a full re-mount.
+  const [serverFetched, setServerFetched] = useState<Recipient | null>(null);
 
   const [betterCardOpen, setBetterCardOpen]       = useState(false);
   const [betterCardLoading, setBetterCardLoading] = useState(false);
@@ -451,7 +454,7 @@ export default function RecipientProfilePage() {
   const totalCardsUsed = allRecipients.reduce((sum, r) => sum + (r.selectedEvents?.length ?? 0), 0);
   const cardCap = import.meta.env.DEV ? 9999 : PLANS[plan].maxCardsPerYear;
 
-  const existing = isNew ? undefined : getRecipient(params.id);
+  const existing = isNew ? undefined : (getRecipient(params.id) ?? serverFetched ?? undefined);
   const isInactive = !isNew && existing?.active === false;
 
   // Build initial eventDates from existing recipient fields
@@ -585,11 +588,41 @@ export default function RecipientProfilePage() {
           r => String(r.id) === sid,
         );
         if (match) {
-          // Normalise the ID to a string and persist so getRecipient works next time
-          saveRecipient({ ...match, id: sid });
-          // Re-navigate to the same URL so the component remounts with data in localStorage
-          const search = window.location.search;
-          setLocation(`/recipients/${sid}${search}`);
+          const normalized: Recipient = { ...match, id: sid };
+          // Persist to localStorage so future loads hit the fast path
+          saveRecipient(normalized);
+          // Set state directly — no re-navigation needed, avoids wouter same-URL no-op
+          setServerFetched(normalized);
+          // Reset the form so fields aren't blank (defaultValues frozen at mount time)
+          form.reset({
+            name: normalized.name,
+            relationship: normalized.relationship,
+            eventDates: buildInitialEventDates(normalized),
+            needsMothersDay: normalized.needsMothersDay,
+            needsFathersDay: normalized.needsFathersDay ?? false,
+            needsValentinesDay: normalized.needsValentinesDay,
+            needsChristmasHanukkah: normalized.needsChristmasHanukkah,
+            needsThanksgiving: normalized.needsThanksgiving ?? false,
+            needsNewYears: normalized.needsNewYears ?? false,
+            needsEaster: normalized.needsEaster ?? false,
+            selectedEvents: normalized.selectedEvents ?? [],
+            previewDays: ([14, 21, 30].includes(normalized.previewDays ?? 14) ? normalized.previewDays : 14) as 14 | 21 | 30,
+            tonePreference: normalized.tonePreference,
+            gender: normalized.gender ?? "neutral",
+            senderName: normalized.senderName ?? "",
+            petName: normalized.petName ?? "",
+            yearsTogther: normalized.yearsTogther ?? "",
+            personality: normalized.personality ?? [],
+            interests: normalized.interests ?? [],
+            personalityNotes: normalized.personalityNotes,
+            favoriteMemories: normalized.favoriteMemories,
+            insideJokes: normalized.insideJokes,
+            thingsToAvoid: normalized.thingsToAvoid,
+            emotionalLevel: normalized.emotionalLevel,
+            deliveryPreference: normalized.deliveryPreference,
+            mailingAddress: normalized.mailingAddress ?? { line1: "", line2: "", city: "", state: "", zip: "" },
+          });
+          if (normalized.children) setChildren(normalized.children);
         } else {
           setLocation(backTo);
         }
