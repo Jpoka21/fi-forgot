@@ -1,0 +1,220 @@
+Dashboard Redesign V3 — People First
+
+Goal
+
+Redesign the FiForgot dashboard around people and actions rather than widgets, metrics, scores, and cards.
+
+Core Principle
+
+The dashboard should feel like a list of people the user cares about, not a CRM.
+
+A user should understand what needs attention within 5 seconds.
+
+Design Direction
+
+Think Apple Contacts.
+
+Think Messages.
+
+Think relationship management.
+
+Do NOT think HubSpot, Salesforce, or a widget dashboard.
+
+Avoid large cards, oversized sections, excessive white space, health rings, profile percentages, and dashboard metrics.
+
+Dashboard Layout
+
+Section 1 — We Got Your Back
+
+Very compact.
+
+Maximum 3 items.
+
+Priority order:
+
+1. Upcoming events
+2. Drafts requiring review
+3. Relationships needing updates
+
+Examples:
+
+• Mom’s birthday is in 12 days
+• Sarah’s anniversary card is ready
+• Dad has not been updated in 4 months
+
+No large cards.
+
+No scrolling feed.
+
+Just concise action items.
+
+Section 2 — Quick Card
+
+Compact panel near the top.
+
+Title:
+
+Need a Card Right Now?
+
+Description:
+
+Create a personalized card for anyone, even if they are not one of Your Important People.
+
+Primary CTA:
+
+Create Quick Card
+
+Supporting text:
+
+No recipient setup required.
+
+Quick Card Flow
+
+Collect:
+
+• Recipient name
+• Relationship
+• Occasion
+
+Generate card immediately.
+
+Do NOT automatically create a recipient.
+
+After card generation show:
+
+Make future cards even better.
+
+Add [Recipient Name] to Your Important People and we’ll remember important dates, memories, and updates so every future card becomes more personal.
+
+Buttons:
+
+[Add To My People]
+[Not Now]
+
+If Add To My People is selected:
+
+• Create recipient automatically
+• Prefill name
+• Prefill relationship
+• Open recipient profile
+• Prompt:
+
+“Tell us something new about [Recipient Name].”
+
+No additional setup forms.
+
+Section 3 — Your Important People
+
+Add search.
+
+Add recipient button.
+
+Group people into:
+
+Needs Attention
+
+Healthy Relationships
+
+Each row should be compact.
+
+Each row should contain:
+
+• Name
+• Upcoming event if applicable
+• Most recent meaningful memory/update
+• Recommended next action
+
+Examples:
+
+Mom
+
+Birthday in 12 days
+
+“She loved Alex’s school play.”
+
+Recommended Action:
+Create Birthday Card
+
+⸻
+
+Dad
+
+No updates in 4 months
+
+“Bought a fishing boat.”
+
+Recommended Action:
+Tell Us Something New
+
+⸻
+
+Sarah
+
+Anniversary card ready
+
+Recommended Action:
+Review Draft
+
+Row Actions
+
+Do NOT place 4 to 6 buttons on every row.
+
+Show one primary recommended action.
+
+Allow additional actions from an overflow menu or when opening the profile.
+
+Events
+
+Do NOT place a large Add Event button on every row.
+
+Events should primarily be managed from the recipient profile.
+
+Additionally, the Tell Us Something New workflow should support:
+
+• General update
+• Important event or milestone
+
+Examples:
+
+• Retirement
+• New baby
+• New job
+• Graduation
+• Wedding
+• New home
+• Custom milestone
+
+If an important milestone is entered, save it both as:
+
+• A relationship update
+• A future event where appropriate
+
+Mobile Requirements
+
+Mobile is a first-class experience.
+
+Rows should remain compact.
+
+Show:
+
+• Name
+• One line of context
+• One recommended action
+
+Hide secondary actions behind a menu.
+
+Avoid horizontal scrolling.
+
+Success Criteria
+
+The dashboard should feel significantly simpler than the current version.
+
+The focus should be:
+
+People first.
+
+Memories second.
+
+Cards third.
+
+Everything else should fade into the background.

@@ -1,106 +1,75 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
-const GRAY = "#6B6B6B", WHITE = "#FFFFFF";
+const BG = "#F2E6D3"; const RED = "#E23B2E"; const BLACK = "#111111";
+const SAGE = "#5B8C6B"; const GRAY = "#6B6B6B"; const BORDER = "#E5E0D8";
+const WHITE = "#FFFFFF";
 
-type Tab = "today" | "people" | "moments" | "settings";
+const nextActions = [
+  { num: 2, text: "Answer follow-up about Steve's guitar lessons", tag: "2 min",       tagColor: SAGE },
+  { num: 3, text: "Review Sarah's anniversary draft",              tag: "Draft ready",  tagColor: "#F59E0B" },
+];
 
-const NEXT_ACTIONS = [
-  { num: 2, label: "Answer follow-up about Steve's guitar lessons", chip: "2 min", chipColor: SAGE  },
-  { num: 3, label: "Review Sarah's anniversary card draft",          chip: "Draft", chipColor: "#D97706" },
+const tabs = [
+  { label: "Today",    active: true  },
+  { label: "People",   active: false },
+  { label: "Moments",  active: false },
+  { label: "Settings", active: false },
 ];
 
 export function Mobile() {
-  const [tab, setTab] = useState<Tab>("today");
+  const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <div style={{ maxWidth: 390, margin: "0 auto", fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", flexDirection: "column" as const, height: "100vh", overflow: "hidden" }}>
-      {/* Hero action — full screen minus nav */}
-      <div style={{
-        background: BLACK, flex: 1,
-        display: "flex", flexDirection: "column" as const,
-        alignItems: "center", justifyContent: "center",
-        padding: "24px 28px",
-        position: "relative" as const,
-        overflow: "hidden",
-      }}>
-        {/* Subtle ring decoration */}
-        <div style={{ position: "absolute" as const, top: -80, right: -80, width: 280, height: 280, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.04)", pointerEvents: "none" as const }} />
-        <div style={{ position: "absolute" as const, top: -40, right: -40, width: 180, height: 180, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.06)", pointerEvents: "none" as const }} />
+    <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK, position: "relative" as const, display: "flex", flexDirection: "column" as const }}>
 
+      {/* HERO — full BLACK bg */}
+      <div style={{ background: BLACK, padding: "28px 22px 28px", flex: "0 0 auto", position: "relative" as const }}>
         {/* Action chip */}
-        <div style={{ background: RED, color: WHITE, borderRadius: 20, padding: "5px 14px", fontSize: "0.68rem", fontWeight: 800, letterSpacing: "0.1em", marginBottom: 28 }}>
-          ACTION 1 OF 4
+        <div style={{ display: "inline-block", background: RED, borderRadius: 20, padding: "4px 12px", marginBottom: 28 }}>
+          <span style={{ fontSize: "0.68rem", fontWeight: 800, color: WHITE, letterSpacing: "0.08em" }}>ACTION 1 OF 4</span>
         </div>
-
         {/* Emoji */}
-        <div style={{ fontSize: "4rem", marginBottom: 16, lineHeight: 1 }}>🧢</div>
-
+        <div style={{ fontSize: "4rem", lineHeight: 1, marginBottom: 16, textAlign: "center" as const }}>🧢</div>
         {/* Title */}
-        <h1 style={{
-          fontFamily: "'Bebas Neue', cursive",
-          fontSize: "2.2rem", color: WHITE,
-          letterSpacing: "0.04em", lineHeight: 1.1,
-          textAlign: "center" as const,
-          margin: "0 0 10px",
-        }}>
+        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: WHITE, lineHeight: 1.05, letterSpacing: "0.02em", textAlign: "center" as const, marginBottom: 10 }}>
           SEND MARCUS A<br />BIRTHDAY CARD
-        </h1>
-
-        {/* Subtitle */}
-        <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "rgba(255,255,255,0.55)", textAlign: "center" as const, margin: "0 0 32px" }}>
+        </div>
+        {/* Sub */}
+        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: "rgba(255,255,255,0.6)", textAlign: "center" as const, marginBottom: 24 }}>
           Birthday · June 14 · 3 days
-        </p>
-
-        {/* CTA */}
-        <button style={{
-          width: "100%", height: 52,
-          background: RED, color: WHITE, border: "none",
-          borderRadius: 14, fontFamily: "'Bebas Neue', cursive",
-          fontSize: "1.2rem", letterSpacing: "0.06em",
-          cursor: "pointer", marginBottom: 24,
-          boxShadow: `0 4px 24px ${RED}70`,
-        }}>
+        </div>
+        {/* CTA Button */}
+        <button style={{ width: "100%", height: 54, borderRadius: 14, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.06em", cursor: "pointer" }}>
           Write His Card →
         </button>
-
         {/* Swipe hint */}
-        <p style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: "rgba(255,255,255,0.25)", margin: 0 }}>
-          swipe for next →
-        </p>
+        <div style={{ textAlign: "center" as const, marginTop: 16 }}>
+          <span style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: "rgba(255,255,255,0.3)" }}>swipe for next →</span>
+        </div>
       </div>
 
-      {/* Next actions compact */}
-      <div style={{ background: BG, padding: "16px 16px 0", flexShrink: 0 }}>
-        <div style={{ fontSize: "0.68rem", fontWeight: 700, color: GRAY, letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: 8 }}>Up Next</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
-          {NEXT_ACTIONS.map((a, i) => (
-            <div key={i} style={{
-              display: "flex", alignItems: "center", gap: 12,
-              background: WHITE, borderRadius: 12,
-              padding: "11px 14px",
-              border: "1.5px solid #E5E0D8",
-            }}>
-              <div style={{ width: 24, height: 24, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", color: WHITE, flexShrink: 0 }}>{a.num}</div>
-              <div style={{ flex: 1, fontSize: "0.78rem", fontWeight: 500, color: BLACK, lineHeight: 1.3 }}>{a.label}</div>
-              <div style={{ background: `${a.chipColor}15`, color: a.chipColor, borderRadius: 20, padding: "3px 9px", fontSize: "0.65rem", fontWeight: 700, flexShrink: 0, border: `1px solid ${a.chipColor}30` }}>{a.chip}</div>
+      {/* NEXT ACTIONS */}
+      <div style={{ padding: "20px 14px 80px", flex: 1 }}>
+        <div style={{ fontSize: "0.68rem", fontWeight: 700, color: GRAY, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 10 }}>UP NEXT</div>
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+          {nextActions.map(q => (
+            <div key={q.num} style={{ background: WHITE, borderRadius: 12, padding: "13px 16px", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem", color: WHITE, lineHeight: 1 }}>{q.num}</span>
+              </div>
+              <span style={{ flex: 1, fontSize: "0.83rem", fontWeight: 600, color: BLACK }}>{q.text}</span>
+              <span style={{ fontSize: "0.66rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: `${q.tagColor}18`, color: q.tagColor, flexShrink: 0 }}>{q.tag}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Bottom nav */}
-      <div style={{ background: BLACK, display: "flex", height: 64, flexShrink: 0 }}>
-        {[
-          { id: "today" as Tab,    icon: "⚡", label: "Today"    },
-          { id: "people" as Tab,   icon: "👥", label: "People"   },
-          { id: "moments" as Tab,  icon: "🗓", label: "Moments"  },
-          { id: "settings" as Tab, icon: "⚙️", label: "Settings" },
-        ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", gap: 3 }}>
-            <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
-            <span style={{ fontSize: "0.6rem", fontWeight: 700, color: tab === t.id ? RED : "rgba(255,255,255,0.4)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{t.label}</span>
+      {/* BOTTOM NAV */}
+      <div style={{ position: "fixed" as const, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 390, background: BLACK, height: 64, display: "flex", alignItems: "center", justifyContent: "space-around" }}>
+        {tabs.map((t, i) => (
+          <button key={t.label} onClick={() => setActiveTab(i)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 3, padding: "8px 12px" }}>
+            <span style={{ fontSize: "0.62rem", fontWeight: 700, color: i === activeTab ? RED : "rgba(255,255,255,0.45)", letterSpacing: "0.04em" }}>{t.label.toUpperCase()}</span>
           </button>
         ))}
       </div>

@@ -1,145 +1,112 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
-const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
-const AMBER = "#D97706", BLUE = "#2563EB";
+const BG = "#F2E6D3"; const RED = "#E23B2E"; const BLACK = "#111111";
+const SAGE = "#5B8C6B"; const GRAY = "#6B6B6B"; const BORDER = "#E5E0D8";
+const WHITE = "#FFFFFF"; const CREAM = "#FDF7EF";
 
-type TabType = "all" | "memories" | "cards" | "follow-ups";
+const tabs = ["All", "Memories", "Cards", "Follow-ups"];
 
-const TIMELINE: Array<{
-  type: "card" | "memory" | "follow-up";
-  date: string;
-  title: string;
-  excerpt: string;
-  followUpDue?: boolean;
-  needsAction?: boolean;
-}> = [
-  { type: "card",     date: "May 2024",  title: "Mother's Day Card 2024", excerpt: "You've always known exactly how to make a house feel like home..." },
-  { type: "memory",   date: "May 2025",  title: "Knee surgery — recovering well at home", excerpt: "Went in for the procedure, doctors say it went perfectly.", followUpDue: true },
-  { type: "follow-up",date: "Jun 2025",  title: "You mentioned her recovery", excerpt: "How is she feeling now? Has she been able to get back to normal?", needsAction: true },
-  { type: "memory",   date: "Mar 2025",  title: "Started her garden again after years away", excerpt: "Finally got the plot behind the house cleared out." },
-  { type: "card",     date: "Oct 2024",  title: "Birthday Card 2024", excerpt: "Mom, every year I find a new reason to be grateful you're mine..." },
-  { type: "memory",   date: "Oct 2024",  title: "Celebrated 40 years with Dad", excerpt: "Big anniversary dinner, the whole family came together." },
+type TimelineItem =
+  | { type: "card";    date: string; title: string; excerpt: string }
+  | { type: "memory";  date: string; text: string; followUp?: boolean }
+  | { type: "followup";date: string; question: string };
+
+const timeline: TimelineItem[] = [
+  { type: "card",    date: "May 2024",    title: "Mother's Day Card 2024", excerpt: "You've always known exactly how to make a house feel like home. Happy Mother's Day." },
+  { type: "memory",  date: "May 2025",    text: "Knee surgery — recovering well at home", followUp: true },
+  { type: "followup",date: "May 2025",    question: "You mentioned her recovery — How is she feeling now?" },
+  { type: "memory",  date: "March 2025",  text: "Started her garden again after years away" },
+  { type: "card",    date: "March 2024",  title: "Birthday Card 2024", excerpt: "Here's to you, Mom — another year of being the person everyone leans on." },
+  { type: "memory",  date: "Oct 2024",    text: "Celebrated 40 years with Dad" },
 ];
 
 export function Profile() {
-  const [tab, setTab] = useState<TabType>("all");
-  const [_ , setForce] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
 
-  const filtered = tab === "all" ? TIMELINE
-    : tab === "memories"   ? TIMELINE.filter(t => t.type === "memory")
-    : tab === "cards"      ? TIMELINE.filter(t => t.type === "card")
-    : TIMELINE.filter(t => t.type === "follow-up");
+  const filtered = activeTab === 0 ? timeline
+    : activeTab === 1 ? timeline.filter(t => t.type === "memory")
+    : activeTab === 2 ? timeline.filter(t => t.type === "card")
+    : timeline.filter(t => t.type === "followup");
 
   return (
-    <div style={{ background: BG, minHeight: "100vh", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* Nav */}
-      <div style={{ background: BLACK, padding: "0 24px", height: 52, display: "flex", alignItems: "center" }}>
-        <button onClick={() => setForce(n => n + 1)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "0.82rem", cursor: "pointer" }}>
-          ← What's New
-        </button>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK }}>
+      <div style={{ background: BLACK, padding: "0 24px", height: 56, display: "flex", alignItems: "center" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.55rem", color: RED, letterSpacing: "0.06em" }}>F.I. FORGOT</span>
       </div>
 
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "28px 24px" }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
-          <div style={{ width: 68, height: 68, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem", flexShrink: 0 }}>💛</div>
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "28px 20px 64px", boxSizing: "border-box" as const }}>
+
+        {/* BACK */}
+        <button style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: GRAY, fontSize: "0.83rem", fontWeight: 600, marginBottom: 20, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          ← Dashboard
+        </button>
+
+        {/* HEADER */}
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 22 }}>
+          <div style={{ width: 68, height: 68, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", flexShrink: 0 }}>💛</div>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, margin: 0, letterSpacing: "0.04em", lineHeight: 1 }}>MOM</h1>
-              <span style={{ background: `${BLACK}10`, color: GRAY, fontSize: "0.78rem", fontWeight: 700, padding: "4px 12px", borderRadius: 20 }}>Mother</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 5, flexWrap: "wrap" as const }}>
+              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", letterSpacing: "0.04em", color: BLACK, margin: 0, lineHeight: 1 }}>MOM</h1>
+              <span style={{ padding: "4px 12px", borderRadius: 20, background: `${BLACK}10`, color: BLACK, fontSize: "0.78rem", fontWeight: 700 }}>Mother</span>
             </div>
-            <p style={{ margin: 0, fontSize: "0.8rem", color: GRAY }}>6 cards sent · 8 memories logged · Mother's Day in 15 days</p>
+            <div style={{ fontSize: "0.75rem", color: GRAY }}>3 follow-ups pending · Last updated 1 week ago</div>
           </div>
         </div>
 
-        {/* Tab bar */}
-        <div style={{ display: "flex", gap: 4, background: WHITE, padding: 4, borderRadius: 12, marginBottom: 24, border: `1.5px solid ${BORDER}` }}>
-          {(["all", "memories", "cards", "follow-ups"] as TabType[]).map(t => (
-            <button key={t} onClick={() => setTab(t)} style={{
-              flex: 1, padding: "8px 6px", borderRadius: 9, border: "none",
-              background: tab === t ? BLACK : "transparent",
-              color: tab === t ? WHITE : GRAY,
-              fontWeight: tab === t ? 700 : 500,
-              fontSize: "0.78rem", cursor: "pointer",
+        {/* TAB BAR */}
+        <div style={{ display: "flex", gap: 4, background: WHITE, borderRadius: 12, padding: "4px", border: `1px solid ${BORDER}`, marginBottom: 20 }}>
+          {tabs.map((t, i) => (
+            <button key={t} onClick={() => setActiveTab(i)} style={{
+              flex: 1, padding: "7px 4px", borderRadius: 9, border: "none",
+              background: activeTab === i ? BLACK : "transparent",
+              color: activeTab === i ? WHITE : GRAY,
+              fontWeight: 700, fontSize: "0.75rem", cursor: "pointer",
               fontFamily: "'Plus Jakarta Sans', sans-serif",
-              textTransform: "capitalize" as const,
-              transition: "all 0.15s",
-            }}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
+              transition: "background 0.15s",
+            }}>{t}</button>
           ))}
         </div>
 
-        {/* Timeline */}
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 12, marginBottom: 24 }}>
-          {filtered.map((item, i) => {
-            if (item.type === "card") return (
-              <div key={i} style={{ display: "flex", gap: 16 }}>
-                <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", flexShrink: 0 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE, marginTop: 6 }} />
-                  <div style={{ width: 1, flex: 1, background: BORDER, marginTop: 4 }} />
-                </div>
-                <div style={{ flex: 1, background: WHITE, borderRadius: 12, border: `1.5px solid ${BORDER}`, padding: "14px 16px", marginBottom: 4 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <span>💌</span>
-                    <span style={{ fontWeight: 700, fontSize: "0.85rem", color: BLACK }}>{item.title}</span>
-                    <span style={{ marginLeft: "auto", fontSize: "0.7rem", color: GRAY }}>{item.date}</span>
-                  </div>
-                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, margin: 0, fontStyle: "italic", lineHeight: 1.5 }}>
-                    "{item.excerpt}"
-                  </p>
-                </div>
+        {/* TIMELINE */}
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+          {filtered.map((item, i) => (
+            <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              {/* Spine */}
+              <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 0, flexShrink: 0, paddingTop: 16 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: item.type === "card" ? BLACK : item.type === "followup" ? "#F59E0B" : SAGE, flexShrink: 0, border: `2px solid ${BG}` }} />
+                {i < filtered.length - 1 && <div style={{ width: 1, height: "100%", minHeight: 32, background: BORDER, marginTop: 2 }} />}
               </div>
-            );
-
-            if (item.type === "follow-up") return (
-              <div key={i} style={{ display: "flex", gap: 16 }}>
-                <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", flexShrink: 0 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: AMBER, marginTop: 6 }} />
-                  <div style={{ width: 1, flex: 1, background: BORDER, marginTop: 4 }} />
-                </div>
-                <div style={{ flex: 1, background: `${AMBER}08`, borderRadius: 12, border: `1.5px solid ${AMBER}30`, padding: "14px 16px", marginBottom: 4 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: "0.8rem" }}>↻</span>
-                    <span style={{ fontWeight: 700, fontSize: "0.82rem", color: AMBER }}>{item.title}</span>
-                    <span style={{ marginLeft: "auto", fontSize: "0.7rem", color: GRAY }}>{item.date}</span>
+              {/* Content */}
+              <div style={{ flex: 1, paddingBottom: 16 }}>
+                {item.type === "card" && (
+                  <div style={{ background: WHITE, borderRadius: 12, padding: "14px 16px", border: `1px solid ${BORDER}` }}>
+                    <div style={{ fontSize: "0.68rem", fontWeight: 700, color: GRAY, letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: 6 }}>💌 {item.date} · {item.title}</div>
+                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: BLACK, lineHeight: 1.55, fontStyle: "italic" }}>{item.excerpt}</div>
                   </div>
-                  <p style={{ fontSize: "0.82rem", color: BLACK, margin: "0 0 10px" }}>{item.excerpt}</p>
-                  <button style={{ background: AMBER, color: WHITE, border: "none", borderRadius: 8, padding: "7px 14px", fontWeight: 700, fontSize: "0.75rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                    Answer →
-                  </button>
-                </div>
-              </div>
-            );
-
-            return (
-              <div key={i} style={{ display: "flex", gap: 16 }}>
-                <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", flexShrink: 0 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: `${BLACK}40`, marginTop: 6 }} />
-                  <div style={{ width: 1, flex: 1, background: BORDER, marginTop: 4 }} />
-                </div>
-                <div style={{ flex: 1, background: WHITE, borderRadius: 12, border: `1.5px solid ${BORDER}`, padding: "14px 16px", marginBottom: 4 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontWeight: 700, fontSize: "0.85rem", color: BLACK }}>{item.title}</span>
-                    <span style={{ marginLeft: "auto", fontSize: "0.7rem", color: GRAY }}>{item.date}</span>
+                )}
+                {item.type === "memory" && (
+                  <div>
+                    <div style={{ fontSize: "0.68rem", fontWeight: 700, color: GRAY, letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: 5 }}>{item.date}</div>
+                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.08rem", color: BLACK, lineHeight: 1.5, marginBottom: item.followUp ? 6 : 0 }}>{item.text}</div>
+                    {item.followUp && <span style={{ fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#FEF3C7", color: "#92400E" }}>↻ Follow-up due</span>}
                   </div>
-                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: GRAY, margin: 0, lineHeight: 1.4 }}>{item.excerpt}</p>
-                  {item.followUpDue && (
-                    <div style={{ marginTop: 8 }}>
-                      <span style={{ background: `${AMBER}15`, color: AMBER, borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 700, border: `1px solid ${AMBER}30` }}>↻ Follow-up due</span>
-                    </div>
-                  )}
-                </div>
+                )}
+                {item.type === "followup" && (
+                  <div style={{ background: "#FEF3C7", borderRadius: 12, padding: "12px 16px", border: "1px solid #FDE68A" }}>
+                    <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#92400E", marginBottom: 7 }}>Follow-up question</div>
+                    <div style={{ fontSize: "0.85rem", color: "#78350F", lineHeight: 1.5, marginBottom: 10 }}>"{item.question}"</div>
+                    <button style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "#92400E", color: WHITE, fontWeight: 700, fontSize: "0.75rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Answer →</button>
+                  </div>
+                )}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        {/* Log button */}
-        <button style={{ width: "100%", padding: "13px", background: SAGE, color: WHITE, border: "none", borderRadius: 14, fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", cursor: "pointer" }}>
-          + LOG A MOMENT
+        {/* LOG BUTTON */}
+        <button style={{ width: "100%", padding: "13px", borderRadius: 12, border: "none", background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", marginTop: 8 }}>
+          + Log a Moment
         </button>
       </div>
     </div>
