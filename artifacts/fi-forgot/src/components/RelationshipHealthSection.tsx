@@ -9,7 +9,7 @@
 
 import { useState, useEffect, type MouseEvent } from "react";
 import { useLocation } from "wouter";
-import { getApiHeaders } from "@/lib/data";
+import { getApiHeaders, getRecipients } from "@/lib/data";
 
 /* ── Brand tokens ────────────────────────────────────────────────── */
 const BEIGE  = "#F2E6D3";
@@ -54,21 +54,43 @@ const ACTION_LABELS: Record<string, string> = {
   review:       "Review Activity",
 };
 
+/* ── Local-ID resolver ───────────────────────────────────────────── */
+/**
+ * Build a name → local Recipient ID lookup map from localStorage.
+ * The API's recipientId may drift from localStorage IDs (UUID vs timestamp),
+ * so we always resolve navigation targets through this map.
+ */
+function buildLocalMap(): Map<string, string> {
+  const map = new Map<string, string>();
+  try {
+    for (const r of getRecipients()) {
+      if (r.name && r.id) map.set(r.name.trim().toLowerCase(), r.id);
+    }
+  } catch { /* non-blocking */ }
+  return map;
+}
+
+function resolveId(score: RecipientHealthScore, localMap: Map<string, string>): string {
+  return localMap.get(score.name.trim().toLowerCase()) ?? score.recipientId;
+}
+
 /* ── Helpers ─────────────────────────────────────────────────────── */
 function avatar(name: string): string {
   return name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
 }
 
-function actionDestination(score: RecipientHealthScore): string {
-  if (score.actionType === "card") return `/try?recipientId=${score.recipientId}`;
-  return `/recipients/${score.recipientId}?from=dashboard`;
+function actionDestination(score: RecipientHealthScore, localMap: Map<string, string>): string {
+  const id = resolveId(score, localMap);
+  if (score.actionType === "card") return `/try?recipientId=${id}`;
+  return `/recipients/${id}?from=dashboard`;
 }
 
-function briefingDest(score: RecipientHealthScore): string {
+function briefingDest(score: RecipientHealthScore, localMap: Map<string, string>): string {
+  const id = resolveId(score, localMap);
   if (score.nextEventLabel) {
-    return `/briefings/${score.recipientId}/${encodeURIComponent(score.nextEventLabel)}`;
+    return `/briefings/${id}/${encodeURIComponent(score.nextEventLabel)}`;
   }
-  return `/recipients/${score.recipientId}?from=dashboard`;
+  return `/recipients/${id}?from=dashboard`;
 }
 
 function contextLine(score: RecipientHealthScore): string {
@@ -106,13 +128,14 @@ function wgybSentence(s: RecipientHealthScore): string | null {
 }
 
 /* ── Compact recipient row ───────────────────────────────────────── */
-function RecipientRow({ score }: { score: RecipientHealthScore }) {
+function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localMap: Map<string, string> }) {
   const [, setLocation] = useLocation();
   const [expanded, setExpanded] = useState(false);
 
+  const localId     = resolveId(score, localMap);
   const cfg         = STATUS_CONFIG[score.status];
   const actionLabel = ACTION_LABELS[score.actionType] ?? "View";
-  const dest        = actionDestination(score);
+  const dest        = actionDestination(score, localMap);
   const ctx         = contextLine(score);
   const isUrgent    = score.status === "Priority";
 
@@ -150,7 +173,7 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
 
         {/* Text content — tapping this area navigates to profile */}
         <div
-          onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard`)}
+          onClick={e => nav(e, `/recipients/${localId}?from=dashboard`)}
           style={{ flex: 1, minWidth: 0, cursor: "pointer" }}
         >
           <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 3 }}>
@@ -226,7 +249,7 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
         }}>
           {/* Improve the card — answer questions */}
           <button
-            onClick={e => nav(e, briefingDest(score))}
+            onClick={e => nav(e, briefingDest(score, localMap))}
             style={actionPill(false)}
           >
             ✍️ Improve the card
@@ -234,7 +257,7 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
 
           {/* Add occasion / event */}
           <button
-            onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard&tab=events`)}
+            onClick={e => nav(e, `/recipients/${localId}?from=dashboard&tab=events`)}
             style={actionPill(false)}
           >
             🗓 Add occasion
@@ -242,7 +265,7 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
 
           {/* Share something new */}
           <button
-            onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard`)}
+            onClick={e => nav(e, `/recipients/${localId}?from=dashboard`)}
             style={actionPill(false)}
           >
             💬 Share something new
@@ -250,7 +273,7 @@ function RecipientRow({ score }: { score: RecipientHealthScore }) {
 
           {/* View full profile */}
           <button
-            onClick={e => nav(e, `/recipients/${score.recipientId}?from=dashboard`)}
+            onClick={e => nav(e, `/recipients/${localId}?from=dashboard`)}
             style={actionPill(true)}
           >
             View profile →
@@ -340,8 +363,10 @@ export function WGYBSection() {
 export default function RelationshipHealthSection({ isMobile: _isMobile }: { isMobile: boolean }) {
   const [scores,  setScores]  = useState<RecipientHealthScore[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [localMap, setLocalMap] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
+    setLocalMap(buildLocalMap());
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) { setLoading(false); return; }
     fetch("/api/v2/recipient-health", { headers })
@@ -388,7 +413,7 @@ export default function RelationshipHealthSection({ isMobile: _isMobile }: { isM
             {/* Compact rows */}
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
               {group.map(score => (
-                <RecipientRow key={score.recipientId} score={score} />
+                <RecipientRow key={score.recipientId} score={score} localMap={localMap} />
               ))}
             </div>
           </div>
