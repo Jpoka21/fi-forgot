@@ -781,7 +781,11 @@ function loadBriefings(): EventBriefing[] {
 }
 
 export function getRecipients(): Recipient[] {
-  return loadRecipients();
+  return loadRecipients().filter((r) => r.active !== false);
+}
+
+export function getArchivedRecipients(): Recipient[] {
+  return loadRecipients().filter((r) => r.active === false);
 }
 
 export function getRecipient(id: string): Recipient | undefined {
@@ -879,12 +883,34 @@ export function saveRecipient(recipient: Recipient): void {
 }
 
 export function deleteRecipient(id: string): void {
-  const all = loadRecipients().filter((r) => r.id !== id);
-  localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(all));
+  // Soft-archive locally: keep the record with active=false so it can be restored
+  const all = loadRecipients();
+  const idx = all.findIndex((r) => String(r.id) === String(id));
+  if (idx >= 0) {
+    all[idx] = { ...all[idx], active: false };
+    localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(all));
+  }
 
   if (_serverUserId) {
     fetch(`/api/recipients/${id}`, {
       method: "DELETE",
+      headers: { "x-user-id": _serverUserId },
+    }).catch(() => {});
+  }
+}
+
+export function restoreRecipient(id: string): void {
+  // Restore locally: set active=true
+  const all = loadRecipients();
+  const idx = all.findIndex((r) => String(r.id) === String(id));
+  if (idx >= 0) {
+    all[idx] = { ...all[idx], active: true };
+    localStorage.setItem(STORAGE_KEY_RECIPIENTS, JSON.stringify(all));
+  }
+
+  if (_serverUserId) {
+    fetch(`/api/recipients/${id}/restore`, {
+      method: "PATCH",
       headers: { "x-user-id": _serverUserId },
     }).catch(() => {});
   }

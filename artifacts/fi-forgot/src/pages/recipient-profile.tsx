@@ -5,6 +5,7 @@ import {
   getRecipient,
   getRecipients,
   saveRecipient,
+  deleteRecipient,
   defaultDelivery,
   suggestedEvents,
   availableHolidays,
@@ -342,6 +343,8 @@ export default function RecipientProfilePage() {
   const [betterCardSaving, setBetterCardSaving]   = useState(false);
   const [betterCardError, setBetterCardError]     = useState(false);
   const [betterCardSuccess, setBetterCardSuccess] = useState(false);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [archiving, setArchiving] = useState(false);
 
   // Auto-open memory modal when navigated via ?action=add-memory
   useEffect(() => {
@@ -1689,6 +1692,26 @@ export default function RecipientProfilePage() {
           )}
 
           </>)} {/* end (isNew || formOpen) collapsible */}
+
+          {/* Archive danger zone — visible for existing recipients only */}
+          {!isNew && existing && (
+            <div style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${BEIGE}`, textAlign: "center" as const }}>
+              <button
+                type="button"
+                onClick={() => setShowArchiveConfirm(true)}
+                style={{
+                  background: "none", border: `1px solid ${RED}50`, borderRadius: 10,
+                  padding: "9px 22px", color: RED, fontSize: "0.82rem", fontWeight: 600,
+                  cursor: "pointer", letterSpacing: "0.02em",
+                }}
+              >
+                Archive {existing.name}
+              </button>
+              <p style={{ fontSize: "0.7rem", color: GRAY, marginTop: 6 }}>
+                Archived people can be restored later from Your People.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1952,6 +1975,71 @@ function ProfileUpgradeModal({
           </p>
         </div>
       </div>
+
+      {/* ── Archive confirmation modal ──────────────────────────────────── */}
+      {showArchiveConfirm && existing && (
+        <div
+          onClick={() => { if (!archiving) setShowArchiveConfirm(false); }}
+          style={{
+            position: "fixed", inset: 0, zIndex: 700,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: WHITE, borderRadius: 20, padding: "32px 28px",
+              width: "100%", maxWidth: 380, boxShadow: "0 24px 60px rgba(0,0,0,0.18)",
+            }}
+          >
+            <div style={{ fontSize: "2.2rem", textAlign: "center" as const, marginBottom: 12 }}>🗂️</div>
+            <div style={{
+              fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem",
+              letterSpacing: "0.04em", color: BLACK, textAlign: "center" as const, marginBottom: 8,
+            }}>
+              Archive {existing.name}?
+            </div>
+            <p style={{ fontSize: "0.84rem", color: GRAY, textAlign: "center" as const, lineHeight: 1.5, margin: "0 0 24px" }}>
+              {existing.name} will be removed from your active people. You can restore them any time from the <strong>Your People</strong> page.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                disabled={archiving}
+                onClick={() => setShowArchiveConfirm(false)}
+                style={{
+                  flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${BEIGE}`,
+                  background: "none", color: BLACK, fontWeight: 600, fontSize: "0.9rem",
+                  cursor: archiving ? "not-allowed" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={archiving}
+                onClick={() => {
+                  setArchiving(true);
+                  deleteRecipient(params.id);
+                  setShowArchiveConfirm(false);
+                  setLocation(backTo ?? "/people");
+                }}
+                style={{
+                  flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
+                  background: RED, color: WHITE, fontWeight: 700, fontSize: "0.9rem",
+                  cursor: archiving ? "not-allowed" : "pointer",
+                  fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.06em",
+                  opacity: archiving ? 0.6 : 1,
+                }}
+              >
+                {archiving ? "Archiving…" : "Yes, Archive"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

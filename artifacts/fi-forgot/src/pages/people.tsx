@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import AppNav from "@/components/layout/AppNav";
-import { getRecipients, Recipient } from "@/lib/data";
+import { getRecipients, getArchivedRecipients, restoreRecipient, Recipient } from "@/lib/data";
 import { computeOverallHealth } from "@/lib/relationship-health";
 import { Plus, Search } from "lucide-react";
 
@@ -90,12 +90,20 @@ const FAMILY_REL = new Set(["Wife", "Husband", "Girlfriend", "Boyfriend", "Mom",
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 export default function PeoplePage() {
-  const [recipients, setRecipients] = useState<Recipient[]>([]);
-  const [search, setSearch]         = useState("");
-  const [isMobile, setIsMobile]     = useState(() => window.innerWidth < 768);
+  const [recipients, setRecipients]     = useState<Recipient[]>([]);
+  const [archived, setArchived]         = useState<Recipient[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
+  const [restoring, setRestoring]       = useState<string | null>(null);
+  const [search, setSearch]             = useState("");
+  const [isMobile, setIsMobile]         = useState(() => window.innerWidth < 768);
+
+  function reload() {
+    setRecipients(getRecipients());
+    setArchived(getArchivedRecipients());
+  }
 
   useEffect(() => {
-    setRecipients(getRecipients());
+    reload();
   }, []);
 
   useEffect(() => {
@@ -294,6 +302,68 @@ export default function PeoplePage() {
             <Group title="Friends" people={friends} />
             <Group title="Others" people={other} />
           </>
+        )}
+
+        {/* ── Archived People ─────────────────────────────────────────── */}
+        {archived.length > 0 && (
+          <div style={{ marginTop: 40, borderTop: `1px solid ${BORDER}`, paddingTop: 28 }}>
+            <button
+              onClick={() => setShowArchived(s => !s)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8, background: "none",
+                border: "none", cursor: "pointer", padding: 0, marginBottom: 16,
+              }}
+            >
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.14em", color: MID }}>
+                Archived ({archived.length})
+              </span>
+              <span style={{ fontSize: "0.7rem", color: MID }}>{showArchived ? "▲ hide" : "▼ show"}</span>
+            </button>
+
+            {showArchived && (
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8 }}>
+                {archived.map(r => (
+                  <div
+                    key={r.id}
+                    style={{
+                      background: WHITE, borderRadius: 12, padding: "13px 15px",
+                      border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 12,
+                      opacity: 0.7,
+                    }}
+                  >
+                    <div style={{
+                      width: 46, height: 46, borderRadius: 12, background: BEIGE, flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "1.5rem", border: `1px solid ${BORDER}`,
+                    }}>
+                      {relationshipEmoji(r.relationship)}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{r.name}</div>
+                      <div style={{ fontSize: "0.72rem", color: MID }}>{r.relationship}</div>
+                    </div>
+                    <button
+                      disabled={restoring === r.id}
+                      onClick={() => {
+                        setRestoring(r.id);
+                        restoreRecipient(r.id);
+                        reload();
+                        setRestoring(null);
+                      }}
+                      style={{
+                        background: SAGE, color: WHITE, border: "none", borderRadius: 8,
+                        padding: "7px 14px", fontSize: "0.76rem", fontWeight: 600,
+                        cursor: restoring === r.id ? "wait" : "pointer", flexShrink: 0,
+                        fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.06em",
+                      }}
+                    >
+                      {restoring === r.id ? "Restoring…" : "Restore"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
       </div>

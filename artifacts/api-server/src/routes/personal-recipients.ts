@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, usersTable, personalRecipientsTable, recipientsTable, recipientProfileTable } from "@workspace/db";
-import { eq, and, ilike, ne } from "drizzle-orm";
+import { eq, and, ilike, ne, isNull, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 
@@ -40,9 +40,44 @@ router.get("/recipients", async (req, res) => {
   const rows = await db
     .select()
     .from(personalRecipientsTable)
-    .where(eq(personalRecipientsTable.userId, userId))
+    .where(and(eq(personalRecipientsTable.userId, userId), isNull(personalRecipientsTable.archivedAt)))
     .orderBy(personalRecipientsTable.createdAt);
   res.json({ recipients: rows.map(r => r.data) });
+});
+
+router.get("/recipients/archived", async (req, res) => {
+  const userId = req.headers["x-user-id"] as string;
+  if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }
+  const rows = await db
+    .select()
+    .from(personalRecipientsTable)
+    .where(and(eq(personalRecipientsTable.userId, userId), isNotNull(personalRecipientsTable.archivedAt)))
+    .orderBy(personalRecipientsTable.archivedAt);
+  res.json({ recipients: rows.map(r => r.data) });
+});
+
+router.patch("/recipients/:id/restore", async (req, res) => {
+  const userId = req.headers["x-user-id"] as string;
+  if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }
+  const { id } = req.params;
+  const now = new Date();
+  await db
+    .update(personalRecipientsTable)
+    .set({ archivedAt: null, updatedAt: now })
+    .where(and(eq(personalRecipientsTable.id, id), eq(personalRecipientsTable.userId, userId)));
+  try {
+    await db
+      .update(recipientsTable)
+      .set({ active: true, archivedAt: null, updatedAt: now })
+      .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)));
+  } catch (err) {
+    logger.error({ err, recipientId: id }, "normalized recipient restore failed");
+  }
+  const [row] = await db
+    .select()
+    .from(personalRecipientsTable)
+    .where(and(eq(personalRecipientsTable.id, id), eq(personalRecipientsTable.userId, userId)));
+  res.json({ ok: true, recipient: row?.data ?? null });
 });
 
 router.get("/recipients/:id", async (req, res) => {
@@ -219,25 +254,20 @@ router.delete("/recipients/:id", async (req, res) => {
   const userId = req.headers["x-user-id"] as string;
   if (!userId) { res.status(401).json({ error: "x-user-id required" }); return; }
   const { id } = req.params;
+  const now = new Date();
 
-  // Primary delete — scoped to userId so users cannot delete each other's recipients
+  // Primary: soft-archive the blob row (preserves data for restore)
   await db
-    .delete(personalRecipientsTable)
+    .update(personalRecipientsTable)
+    .set({ archivedAt: now, updatedAt: now })
     .where(and(eq(personalRecipientsTable.id, id), eq(personalRecipientsTable.userId, userId)));
 
-  // ── 2. Normalized tables: soft-archive, not hard-delete ──────────────────────
-  // Keeps the identity and profile rows intact so future intelligence and card
-  // history joins can still reference this recipient's profile.
+  // Normalized tables: soft-archive as well
   try {
-    const now = new Date();
-
-    // recipients: mark as archived, scoped by both id and user_id
     await db
       .update(recipientsTable)
       .set({ active: false, archivedAt: now, updatedAt: now })
       .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)));
-
-    // recipient_profile: left completely intact — no changes
   } catch (err) {
     logger.error({ err, recipientId: id }, "normalized recipient soft-archive failed");
     normalizedSyncErrors++;
