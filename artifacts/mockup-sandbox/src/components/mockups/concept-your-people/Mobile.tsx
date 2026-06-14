@@ -1,105 +1,115 @@
 // DATA_VERSION="5" CONTEXT_VERSION=1
 import { useState } from "react";
 
-const BG = "#F2E6D3"; const RED = "#E23B2E"; const BLACK = "#111111";
-const SAGE = "#5B8C6B"; const GRAY = "#6B6B6B"; const BORDER = "#E5E0D8";
-const WHITE = "#FFFFFF"; const CREAM = "#FDF7EF";
+const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B",
+  GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
+const AMBER = "#D97706";
+const DARK_SAGE = "#3d6b4f";
 
-type Person = {
-  id: number; name: string; rel: string; emoji: string;
-  healthPct: number; healthColor: string; healthLabel: string;
-  nextEvent: string; daysAway: number; urgent: boolean;
-};
-
-const people: Person[] = [
-  { id: 1, name: "Steve",  rel: "Friend",  emoji: "🤝", healthPct: 74, healthColor: SAGE,      healthLabel: "Healthy",    nextEvent: "Birthday",   daysAway: 3,  urgent: true  },
-  { id: 2, name: "Sarah",  rel: "Sister",  emoji: "👩", healthPct: 82, healthColor: SAGE,      healthLabel: "Excellent",  nextEvent: "Anniversary",daysAway: 8,  urgent: false },
-  { id: 3, name: "Mom",    rel: "Mother",  emoji: "💛", healthPct: 55, healthColor: "#F59E0B", healthLabel: "Needs Attn", nextEvent: "Mother's Day",daysAway: 15, urgent: false },
-  { id: 4, name: "Marcus", rel: "Friend",  emoji: "🧢", healthPct: 41, healthColor: RED,       healthLabel: "Priority",   nextEvent: "Birthday",   daysAway: 3,  urgent: true  },
-  { id: 5, name: "Dad",    rel: "Father",  emoji: "👔", healthPct: 68, healthColor: SAGE,      healthLabel: "Healthy",    nextEvent: "Father's Day",daysAway: 28, urgent: false },
-  { id: 6, name: "Jenny",  rel: "Client",  emoji: "💼", healthPct: 88, healthColor: "#1B6B4E", healthLabel: "Excellent",  nextEvent: "Work Anniv", daysAway: 45, urgent: false },
+const people = [
+  { id: 1, emoji: "👩", name: "Sarah",  rel: "Sister",  healthColor: DARK_SAGE, healthPct: 92, nextDays: 8,  nextEvent: "Anniversary in 8 days",   action: "Review Draft"   },
+  { id: 2, emoji: "💛", name: "Mom",    rel: "Mother",  healthColor: AMBER,     healthPct: 54, nextDays: 15, nextEvent: "Mother's Day in 15 days", action: "Add Details"    },
+  { id: 3, emoji: "🤝", name: "Steve",  rel: "Friend",  healthColor: SAGE,      healthPct: 78, nextDays: 3,  nextEvent: "Birthday in 3 days",      action: "Review Draft"   },
+  { id: 4, emoji: "🧢", name: "Marcus", rel: "Friend",  healthColor: RED,       healthPct: 41, nextDays: 3,  nextEvent: "Birthday in 3 days",      action: "Write Card"     },
+  { id: 5, emoji: "👔", name: "Dad",    rel: "Father",  healthColor: SAGE,      healthPct: 75, nextDays: 28, nextEvent: "Father's Day in 28 days", action: "View"           },
+  { id: 6, emoji: "💼", name: "Jenny",  rel: "Client",  healthColor: DARK_SAGE, healthPct: 88, nextDays: 45, nextEvent: "Work Anniv in 45 days",   action: "View"           },
 ];
 
-const tabs = ["People", "Moments", "Cards", "Settings"];
+const tabs = ["👥", "🗓", "💌", "⚙️"];
+const tabLabels = ["People", "Moments", "Cards", "Settings"];
 
-function SmallRing({ pct, color, size = 40 }: { pct: number; color: string; size?: number }) {
-  const r = size * 0.36; const c = 2 * Math.PI * r;
-  const offset = c * (1 - pct / 100);
-  const cx = size / 2; const cy = size / 2;
+function SmallRing({ pct, color, size = 36 }: { pct: number; color: string; size?: number }) {
+  const r = (size - 5) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)", flexShrink: 0 }}>
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke={`${color}22`} strokeWidth={size * 0.1} />
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={size * 0.1}
-        strokeDasharray={`${c}`} strokeDashoffset={`${offset}`} strokeLinecap="round" />
-    </svg>
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`${color}22`} strokeWidth={3.5} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={3.5}
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: "0.52rem", fontWeight: 700, color }}>{pct}%</span>
+      </div>
+    </div>
   );
 }
 
 export function Mobile() {
   const [activeTab, setActiveTab] = useState(0);
-  const [expandedId, setExpandedId] = useState<number | null>(1);
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   return (
-    <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK, position: "relative" as const }}>
-      {/* HEADER */}
-      <div style={{ background: BLACK, padding: "0 18px", height: 54, display: "flex", alignItems: "center" }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.55rem", color: WHITE, letterSpacing: "0.04em" }}>YOUR PEOPLE</span>
-      </div>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", minHeight: "100vh", background: "#ddd", padding: "20px 0" }}>
+      <div style={{ width: 390, background: BG, borderRadius: 28, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.18)", position: "relative", minHeight: 780 }}>
 
-      {/* PEOPLE LIST */}
-      <div style={{ padding: "16px 14px 80px", display: "flex", flexDirection: "column" as const, gap: 8 }}>
-        {people.map(p => {
-          const isExp = expandedId === p.id;
-          return (
-            <div key={p.id} style={{ background: WHITE, borderRadius: 14, border: `1px solid ${p.urgent ? `${RED}40` : BORDER}`, overflow: "hidden" }}>
-              {/* Row */}
-              <div onClick={() => setExpandedId(isExp ? null : p.id)} style={{ padding: "13px 14px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: CREAM, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", border: `1px solid ${BORDER}`, flexShrink: 0 }}>
-                  {p.emoji}
+        {/* Header */}
+        <div style={{ background: BLACK, padding: "16px 20px" }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: WHITE }}>YOUR PEOPLE</span>
+        </div>
+
+        {/* People list */}
+        <div style={{ padding: "12px 16px 80px", display: "flex", flexDirection: "column", gap: 10 }}>
+          {people.map((p) => {
+            const isExp = expanded === p.id;
+            return (
+              <div key={p.id} style={{ background: WHITE, borderRadius: 16, border: `1.5px solid ${BORDER}`, overflow: "hidden" }}>
+                {/* Row */}
+                <div
+                  onClick={() => setExpanded(isExp ? null : p.id)}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", cursor: "pointer" }}
+                >
+                  <div style={{ width: 42, height: 42, borderRadius: "50%", background: CREAM, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", flexShrink: 0 }}>
+                    {p.emoji}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK }}>{p.name}</div>
+                    <div style={{ fontSize: "0.75rem", color: GRAY }}>{p.rel}</div>
+                  </div>
+                  {/* Health dot */}
+                  <div style={{ width: 12, height: 12, borderRadius: "50%", background: p.healthColor, flexShrink: 0 }} />
+                  {/* Next event badge */}
+                  <div style={{ padding: "3px 9px", borderRadius: 20, background: p.nextDays <= 7 ? `${RED}12` : `${BLACK}08`, fontSize: "0.7rem", fontWeight: 700, color: p.nextDays <= 7 ? RED : GRAY, flexShrink: 0 }}>
+                    {p.nextDays}d
+                  </div>
+                  <span style={{ color: GRAY, fontSize: "0.8rem" }}>{isExp ? "▲" : "▼"}</span>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>{p.name}</div>
-                  <div style={{ fontSize: "0.7rem", color: GRAY }}>{p.rel}</div>
-                </div>
-                <SmallRing pct={p.healthPct} color={p.healthColor} size={32} />
-                <div style={{ background: p.urgent ? `${RED}12` : CREAM, borderRadius: 20, padding: "3px 9px", fontSize: "0.68rem", fontWeight: 700, color: p.urgent ? RED : GRAY, flexShrink: 0, marginLeft: 4 }}>
-                  {p.daysAway}d
-                </div>
-                <span style={{ fontSize: "0.7rem", color: GRAY, marginLeft: 2 }}>{isExp ? "▲" : "▼"}</span>
-              </div>
-              {/* Expanded */}
-              {isExp && (
-                <div style={{ padding: "0 14px 14px", borderTop: `1px solid ${BORDER}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0" }}>
-                    <SmallRing pct={p.healthPct} color={p.healthColor} size={52} />
-                    <div>
-                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: p.healthColor, marginBottom: 2 }}>{p.healthLabel} · {p.healthPct}%</div>
-                      <div style={{ fontSize: "0.75rem", color: BLACK, fontWeight: 600 }}>{p.nextEvent}</div>
-                      <div style={{ fontSize: "0.7rem", color: GRAY }}>{p.daysAway} days away</div>
+                {/* Expanded panel */}
+                {isExp && (
+                  <div style={{ borderTop: `1px solid ${BORDER}`, padding: "14px 16px", background: CREAM }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
+                      <SmallRing pct={p.healthPct} color={p.healthColor} size={52} />
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: "0.85rem", color: BLACK, marginBottom: 2 }}>{p.nextEvent}</div>
+                        <div style={{ fontSize: "0.75rem", color: GRAY }}>Last card: 2 months ago</div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button style={{ flex: 1, padding: "9px", borderRadius: 10, background: p.healthColor === RED ? RED : SAGE, color: WHITE, border: "none", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
+                        {p.action}
+                      </button>
+                      <button style={{ flex: 1, padding: "9px", borderRadius: 10, background: WHITE, color: BLACK, border: `1.5px solid ${BORDER}`, fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
+                        View Profile
+                      </button>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button style={{ flex: 1, padding: "9px", borderRadius: 9, border: "none", background: p.urgent ? RED : BLACK, color: WHITE, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                      {p.urgent ? "Write Card" : "View Profile"}
-                    </button>
-                    <button style={{ flex: 1, padding: "9px", borderRadius: 9, border: `1px solid ${BORDER}`, background: WHITE, color: BLACK, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                      Log Moment
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-      {/* BOTTOM NAV */}
-      <div style={{ position: "fixed" as const, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 390, background: BLACK, height: 64, display: "flex", alignItems: "center", justifyContent: "space-around" }}>
-        {tabs.map((t, i) => (
-          <button key={t} onClick={() => setActiveTab(i)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 3, padding: "8px 12px" }}>
-            <span style={{ fontSize: "0.62rem", fontWeight: 700, color: i === activeTab ? RED : "rgba(255,255,255,0.45)", letterSpacing: "0.04em" }}>{t.toUpperCase()}</span>
-          </button>
-        ))}
+        {/* Bottom nav */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: BLACK, display: "flex" }}>
+          {tabs.map((icon, i) => (
+            <button key={i} onClick={() => setActiveTab(i)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "10px 0 12px", border: "none", background: "none", cursor: "pointer", gap: 3 }}>
+              <span style={{ fontSize: "1.2rem" }}>{icon}</span>
+              <span style={{ fontSize: "0.62rem", fontWeight: 600, color: activeTab === i ? RED : "rgba(255,255,255,0.45)" }}>{tabLabels[i]}</span>
+            </button>
+          ))}
+        </div>
+
       </div>
     </div>
   );
