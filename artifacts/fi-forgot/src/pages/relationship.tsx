@@ -689,7 +689,7 @@ export default function RelationshipPage() {
                         <div style={{ fontSize: "0.74rem", color: GRAY, marginTop: 2 }}>{fmtDate(ev.dateStr)}</div>
                       </div>
                       <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                        style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: accent, color: WHITE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                        style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
                         Write Card ✦
                       </button>
                     </div>
