@@ -313,6 +313,7 @@ export default function CardFlowV2() {
   const [stepIdx, setStepIdx]     = useState(0);
   const [answers, setAnswers]     = useState<Record<string, string | string[]>>({});
   const [recipientId, setRecipientId] = useState<string | null>(null);
+  const [scheduledEvents, setScheduledEvents] = useState<string[]>([]);
 
   // Draft state
   const [draftVersions, setDraftVersions]   = useState<DraftVersion[]>([]);
@@ -345,6 +346,7 @@ export default function CardFlowV2() {
     setFirstName(first);
     setRelationship(r.relationship);
     setRecipientId(prefilledId);
+    setScheduledEvents(r.selectedEvents ?? []);
     // Skip ALL relationship profile questions — the user already answered those.
     // Jump straight to the card-specific questions starting with "What is the occasion?"
     setSteps(UNIVERSAL_QUESTIONS);
@@ -751,9 +753,43 @@ export default function CardFlowV2() {
         {/* SELECT */}
         {isSelectKind && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {(currentStep.options ?? []).map(opt => (
-              <PillBtn key={opt} label={opt} selected={selectedStr === opt} onClick={() => setAnswer(opt)} />
-            ))}
+            {/* For the occasion step: show scheduled events first */}
+            {currentStep.id === "occasion" && scheduledEvents.length > 0 && (
+              <>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.07em", color: SAGE, textTransform: "uppercase", marginBottom: 2 }}>
+                  Already scheduled
+                </div>
+                {scheduledEvents.map(evt => (
+                  <button
+                    key={evt}
+                    onClick={() => setAnswer(evt)}
+                    style={{
+                      padding: "13px 16px", borderRadius: 12, textAlign: "left",
+                      border: selectedStr === evt ? `2px solid ${SAGE}` : `1.5px solid ${SAGE}40`,
+                      background: selectedStr === evt ? `${SAGE}18` : `${SAGE}08`,
+                      color: selectedStr === evt ? SAGE : BLACK,
+                      fontFamily: "'Inter', sans-serif", fontSize: "0.9rem",
+                      fontWeight: selectedStr === evt ? 700 : 500,
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between",
+                      transition: "all 0.12s ease",
+                    } as React.CSSProperties}
+                  >
+                    <span>{evt}</span>
+                    <span style={{ fontSize: "0.72rem", color: SAGE, fontWeight: 600 }}>scheduled ✓</span>
+                  </button>
+                ))}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "6px 0" }}>
+                  <div style={{ flex: 1, height: 1, background: `${BLACK}12` }} />
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", color: `${BLACK}40` }}>or add a different occasion</span>
+                  <div style={{ flex: 1, height: 1, background: `${BLACK}12` }} />
+                </div>
+              </>
+            )}
+            {(currentStep.options ?? [])
+              .filter(opt => currentStep.id !== "occasion" || !scheduledEvents.includes(opt))
+              .map(opt => (
+                <PillBtn key={opt} label={opt} selected={selectedStr === opt} onClick={() => setAnswer(opt)} />
+              ))}
           </div>
         )}
 
