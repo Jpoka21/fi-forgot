@@ -683,23 +683,12 @@ export default function RelationshipPage() {
                         <button
                           onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
                           style={{
-                            padding: "5px 11px", borderRadius: 7, cursor: "pointer",
-                            border: `1.5px solid ${accent}`, background: "transparent",
-                            color: accent, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
+                            padding: "6px 13px", borderRadius: 7, cursor: "pointer",
+                            border: "none", background: accent,
+                            color: WHITE, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
                           }}
                         >
-                          Card Briefing ✦
-                        </button>
-                        <button
-                          onClick={() => setLocation(`/try?recipientId=${id}`)}
-                          style={{
-                            padding: "5px 11px", borderRadius: 7, border: "none",
-                            background: near ? RED : BLACK,
-                            color: WHITE, fontWeight: 700, fontSize: "0.7rem",
-                            cursor: "pointer", whiteSpace: "nowrap" as const,
-                          }}
-                        >
-                          Write Card
+                          Write Card ✦
                         </button>
                       </div>
                     </div>
