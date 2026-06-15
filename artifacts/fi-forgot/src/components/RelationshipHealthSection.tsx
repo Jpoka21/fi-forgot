@@ -10,6 +10,7 @@
 import { useState, useEffect, type MouseEvent } from "react";
 import { useLocation } from "wouter";
 import { getApiHeaders, getRecipients } from "@/lib/data";
+import { useAuth } from "@/lib/auth-context";
 
 /* ── Brand tokens ────────────────────────────────────────────────── */
 const BEIGE  = "#F2E6D3";
@@ -221,15 +222,17 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
 ═══════════════════════════════════════════════════════════════════ */
 export function WGYBSection() {
   const [scores, setScores] = useState<RecipientHealthScore[] | null>(null);
+  const { authReady } = useAuth();
 
   useEffect(() => {
+    if (!authReady) return;
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) return;
     fetch("/api/v2/recipient-health", { headers })
       .then(r => r.ok ? r.json() : Promise.reject(r))
       .then((data: { scores: RecipientHealthScore[] }) => setScores(data.scores))
       .catch(() => setScores([]));
-  }, []);
+  }, [authReady]);
 
   if (!scores || scores.length === 0) return null;
 
@@ -280,8 +283,10 @@ export default function RelationshipHealthSection({ isMobile: _isMobile }: { isM
   const [scores,  setScores]  = useState<RecipientHealthScore[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [localMap, setLocalMap] = useState<Map<string, string>>(new Map());
+  const { authReady } = useAuth();
 
   useEffect(() => {
+    if (!authReady) return;
     setLocalMap(buildLocalMap());
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) { setLoading(false); return; }
@@ -290,7 +295,7 @@ export default function RelationshipHealthSection({ isMobile: _isMobile }: { isM
       .then((data: { scores: RecipientHealthScore[] }) => setScores(data.scores))
       .catch(() => setScores([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [authReady]);
 
   if (loading) return (
     <div style={{ padding: "16px 0", fontSize: "0.86rem", color: MID }}>Loading…</div>
