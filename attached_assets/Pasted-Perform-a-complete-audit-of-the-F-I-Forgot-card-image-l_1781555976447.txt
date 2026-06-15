@@ -1,0 +1,98 @@
+Perform a complete audit of the F.I. Forgot card image library.
+
+I need a comprehensive inventory of every card image that currently exists, regardless of whether it is actively used in the UI.
+
+Search all possible sources including:
+
+• Database tables
+• AI card library tables
+• Custom holiday card tables
+• Storage buckets
+• Uploaded assets
+• Generated image folders
+• Test card directories
+• Any other location where card artwork may exist
+
+For every card found, provide:
+
+1. Card ID
+2. Filename
+3. Image URL or storage location
+4. Category / occasion
+5. Any tags or metadata currently attached
+6. Date created
+7. Source (AI generated, uploaded, imported, etc.)
+8. Whether the card is currently active or unused
+
+Then create a summary report showing:
+
+OCCASION COVERAGE
+How many cards exist for:
+• Birthday
+• Anniversary
+• Valentine's Day
+• Mother's Day
+• Father's Day
+• Christmas
+• Holidays
+• Thank You
+• Sympathy
+• Congratulations
+• New Baby
+• Wedding
+• Graduation
+• Retirement
+• Thinking of You
+• Client Appreciation
+• Home Purchase Anniversary
+• Other
+
+STYLE COVERAGE
+How many cards exist for:
+• Funny
+• Elegant
+• Romantic
+• Modern
+• Minimalist
+• Floral
+• Vintage
+• Playful
+• Professional
+• Watercolor
+• Rustic
+• Seasonal
+• Other
+
+QUALITY REVIEW
+Identify:
+• Duplicate cards
+• Near duplicate cards
+• Low quality cards
+• Cards with obvious AI artifacts
+• Cards with text rendering problems
+• Cards that should likely be retired
+
+GAP ANALYSIS
+Based on the existing inventory, identify:
+• Missing occasions
+• Underrepresented occasions
+• Missing styles
+• Missing recipient themes
+• Missing interest themes
+
+Finally, provide:
+
+1. Total card count
+2. Count by occasion
+3. Count by style
+4. Top 10 largest gaps in the library
+5. A recommended tagging schema that can support future AI selection using:
+   • occasion
+   • style
+   • relationship
+   • interests
+   • tone
+   • season
+   • audience
+
+Do not make any changes. Audit and report only.
