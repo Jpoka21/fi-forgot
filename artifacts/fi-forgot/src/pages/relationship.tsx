@@ -592,7 +592,7 @@ export default function RelationshipPage() {
               >
                 🗓 Add Event
               </button>
-              <Link href={`/recipients/${id}`}>
+              <Link href={`/recipients/${id}?edit=1`}>
                 <button style={{
                   padding: "9px 18px", borderRadius: 9,
                   border: `1px solid ${WHITE}20`, background: "transparent",

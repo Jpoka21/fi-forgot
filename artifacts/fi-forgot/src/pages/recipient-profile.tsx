@@ -329,7 +329,8 @@ export default function RecipientProfilePage() {
   const [memorySaving, setMemorySaving] = useState(false);
   const [memorySuccess, setMemorySuccess] = useState(false);
   const [memoryError, setMemoryError] = useState(false);
-  const [formOpen, setFormOpen] = useState(false);
+  const isEditMode = new URLSearchParams(window.location.search).get("edit") === "1";
+  const [formOpen, setFormOpen] = useState(isEditMode);
   // Holds a recipient fetched from the server when localStorage lookup misses.
   // Used as a fallback so the page renders without requiring a full re-mount.
   const [serverFetched, setServerFetched] = useState<Recipient | null>(null);
@@ -757,28 +758,39 @@ export default function RecipientProfilePage() {
             ) : (
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Link href={backTo}>
+                  <Link href={isEditMode ? `/relationship/${params.id}` : backTo}>
                     <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }} data-testid="button-back-recipients">
                       <ArrowLeft size={18} />
                     </button>
                   </Link>
                 </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, margin: 0 }}>
-                    {existing.name.toUpperCase()}
-                  </h1>
-                  <span style={{ padding: "4px 13px", borderRadius: 20, background: `${BLACK}08`, fontSize: "0.82rem", fontWeight: 600, color: GRAY }}>
-                    {existing.relationship}
-                  </span>
-                  {existing.active === false ? (
-                    <span style={{ padding: "3px 10px", borderRadius: 20, background: `${RED}12`, fontSize: "0.72rem", fontWeight: 700, color: RED }}>Paused</span>
-                  ) : (
-                    <span style={{ padding: "3px 10px", borderRadius: 20, background: `${SAGE}12`, fontSize: "0.72rem", fontWeight: 700, color: SAGE }}>Active</span>
-                  )}
-                </div>
-                <p className="text-sm mt-1" style={{ color: GRAY }}>
-                  Your relationship memory — everything that helps us write better cards.
-                </p>
+                {isEditMode ? (
+                  <div>
+                    <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1, margin: "0 0 4px" }}>
+                      Edit {existing.name}'s Profile
+                    </h1>
+                    <p className="text-sm" style={{ color: GRAY }}>The more we know, the better the cards get.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, margin: 0 }}>
+                        {existing.name.toUpperCase()}
+                      </h1>
+                      <span style={{ padding: "4px 13px", borderRadius: 20, background: `${BLACK}08`, fontSize: "0.82rem", fontWeight: 600, color: GRAY }}>
+                        {existing.relationship}
+                      </span>
+                      {existing.active === false ? (
+                        <span style={{ padding: "3px 10px", borderRadius: 20, background: `${RED}12`, fontSize: "0.72rem", fontWeight: 700, color: RED }}>Paused</span>
+                      ) : (
+                        <span style={{ padding: "3px 10px", borderRadius: 20, background: `${SAGE}12`, fontSize: "0.72rem", fontWeight: 700, color: SAGE }}>Active</span>
+                      )}
+                    </div>
+                    <p className="text-sm mt-1" style={{ color: GRAY }}>
+                      Your relationship memory — everything that helps us write better cards.
+                    </p>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -817,8 +829,8 @@ export default function RecipientProfilePage() {
             </div>
           )}
 
-          {/* ── Profile hub for existing recipients ──────────────────────── */}
-          {!isNew && existing && (
+          {/* ── Profile hub for existing recipients (non-edit mode only) ── */}
+          {!isNew && existing && !isEditMode && (
             <>
               {/* Make [Name]'s Next Card Better — primary action */}
               <div style={{ marginBottom: 16 }}>
