@@ -568,22 +568,17 @@ export default function RelationshipPage() {
                   }}>
                     {(recipient as any).relationship}
                   </span>
-                  {allTrackedEventData.map(ev => {
-                    const urgent = ev.daysAway !== null && ev.daysAway <= 7;
-                    const near   = ev.daysAway !== null && ev.daysAway <= 14;
-                    return (
-                      <span key={ev.event} style={{
-                        padding: "2px 10px", borderRadius: 20,
-                        background: urgent ? `${RED}25` : `${WHITE}08`,
-                        border: urgent ? `1px solid ${RED}50` : `1px solid ${WHITE}12`,
-                        color: urgent ? RED : near ? `${WHITE}90` : `${WHITE}55`,
-                        fontSize: "0.72rem", fontWeight: urgent ? 700 : 600,
-                        whiteSpace: "nowrap" as const,
-                      }}>
-                        {ev.event}{ev.daysAway !== null && ev.daysAway <= 30 ? ` · ${daysLabel(ev.daysAway)}` : ""}
-                      </span>
-                    );
-                  })}
+                  {nextEvent && (
+                    <span style={{
+                      padding: "2px 10px", borderRadius: 20,
+                      background: nextEvent.daysAway <= 14 ? `${RED}25` : `${WHITE}08`,
+                      border: nextEvent.daysAway <= 14 ? `1px solid ${RED}50` : "none",
+                      color: nextEvent.daysAway <= 14 ? RED : `${WHITE}60`,
+                      fontSize: "0.74rem", fontWeight: 700,
+                    }}>
+                      {nextEvent.event} · {daysLabel(nextEvent.daysAway)}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
