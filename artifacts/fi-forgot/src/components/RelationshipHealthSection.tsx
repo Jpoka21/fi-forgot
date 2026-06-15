@@ -265,7 +265,7 @@ export function WGYBSection() {
         color:         MID,
         marginBottom:  10,
       }}>
-        WE GOT YOUR BACK
+        OCCASION APPROACHING — WE GOT YOUR BACK
       </div>
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
         {items.map(({ sentence, score: s, isCard }, i) => {
