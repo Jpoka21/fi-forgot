@@ -1,0 +1,92 @@
+Before generating Funny Marketing Batch 1, make these final adjustments.
+
+Do not generate images yet.
+
+1. Add retirement as a first-class category everywhere needed:
+
+• AdminCardLibrary category labels
+• Category filter dropdowns
+• Category counts dashboard
+• Metadata V2 suggestion engine
+• occasion[] mapping
+• Any category display helpers
+
+Retirement cards should map to:
+
+occasion[] = [“retirement”]
+audience = “personal”
+relationship[] = [“friend”,“sibling”,“parent”,“colleague”,“general”]
+season = “year_round”
+
+2. Replace four weaker random animal concepts with stronger interest-based humor cards.
+
+Remove or replace:
+
+• Medieval Hedgehog
+• Fancy Pig
+• Distinguished Duck
+• Sophisticated Llama
+
+Replace with:
+
+A. Golf Goose
+Category: humor
+Subcategory: golf_goose
+Theme: smug goose on an elegant golf course acting like it owns the fairway
+Style: luxury painting
+Tone: playful
+Tags should include: golf, goose, humor, outdoor, sport
+
+B. Fishing Pelican
+Category: humor
+Subcategory: fishing_pelican
+Theme: serious pelican dressed like an old fishing captain on a quiet dock
+Style: oil painting parody
+Tone: playful
+Tags should include: fishing, pelican, water, outdoor, humor
+
+C. BBQ Bulldog
+Category: humor
+Subcategory: bbq_bulldog
+Theme: bulldog proudly guarding a backyard barbecue like a king
+Style: luxury painting
+Tone: playful
+Tags should include: bbq, cooking, dog, humor, outdoor
+
+D. Wine Dachshund
+Category: humor
+Subcategory: wine_dachshund
+Theme: elegant dachshund beside a tasteful wine setup in a warm vineyard scene
+Style: luxury painting
+Tone: playful
+Tags should include: wine, dog, vineyard, humor, warm
+
+3. Keep the remaining 11 designs unchanged:
+
+• Lord Fluffington
+• Coffee Before Humanity
+• Retirement Sloth
+• Judgmental Chicken
+• Motivational Goat
+• Noble Dog
+• Royal Raccoon
+• Vintage Owl
+• Birthday Bear
+• Wise Tortoise
+• Legendary Fox
+
+4. After making these changes, provide a revised 15-card manifest review.
+
+Show:
+
+• Title
+• Category
+• Subcategory
+• Style
+• Tone
+• Tags
+• Primary color
+• Expected V2 metadata mapping
+
+Do not generate yet.
+Do not modify existing older card designs.

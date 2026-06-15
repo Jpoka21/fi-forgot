@@ -33,6 +33,7 @@ const CATEGORY_OCCASION: Record<string, string[]> = {
   get_well:                           ["get_well"],
   miss_you:                           ["thinking_of_you"],
   humor:                              ["just_because", "thinking_of_you", "thank_you"],
+  retirement:                         ["retirement"],
   graduation:                         ["graduation"],
   just_because:                       ["just_because"],
   home_purchase_anniversary:          ["home_purchase_anniversary"],
@@ -67,6 +68,7 @@ const CATEGORY_RELATIONSHIP: Record<string, string[]> = {
   holiday_personal:                   ["spouse", "parent", "child", "sibling", "friend", "general"],
   just_because:                       ["spouse", "friend", "parent", "sibling", "general"],
   humor:                              ["friend", "sibling", "colleague", "general"],
+  retirement:                         ["friend", "sibling", "parent", "colleague", "general"],
   thank_you:                          ["friend", "parent", "colleague", "general"],
   home_purchase_anniversary:          ["client", "colleague", "general"],
   business_relationship_anniversary:  ["client", "colleague", "boss"],
@@ -85,6 +87,7 @@ const CATEGORY_AUDIENCE: Record<string, string> = {
   thinking_of_you:                    "universal",
   encouragement:                      "universal",
   humor:                              "universal",
+  retirement:                         "personal",
   thank_you:                          "universal",
 };
 
@@ -281,6 +284,7 @@ router.get("/admin/card-library/categories", async (_req, res) => {
     { key: "holiday",                           label: "Holiday",                          target: 5  },
     { key: "just_because",                      label: "Just Because",                     target: 10 },
     { key: "humor",                             label: "Humor & Funny",                    target: 15 },
+    { key: "retirement",                        label: "Retirement",                        target: 4  },
     { key: "thinking_of_you",                   label: "Thinking of You",                  target: 8  },
     { key: "encouragement",                     label: "Encouragement",                    target: 8  },
     { key: "congratulations_personal",          label: "Congratulations (Personal)",       target: 6  },
