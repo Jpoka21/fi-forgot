@@ -19,7 +19,7 @@ import {
   recordScoreSnapshot, getScoreHistory, CAT_LABELS, CAT_DESCRIPTIONS,
   TIER_WEIGHTS, ScoreSnapshot,
 } from "@/lib/relationship-health";
-import RelationshipHealthSection, { WGYBSection } from "@/components/RelationshipHealthSection";
+import { WGYBSection } from "@/components/RelationshipHealthSection";
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
 
@@ -715,12 +715,12 @@ export default function DashboardPage() {
                           }}>
                             {/* Avatar */}
                             <div style={{
-                              width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
-                              background: INK, display: "flex", alignItems: "center", justifyContent: "center",
+                              width: 40, height: 40, borderRadius: 11, flexShrink: 0,
+                              background: BEIGE, border: `1px solid ${BORDER}`,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              fontSize: "1.3rem",
                             }}>
-                              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", color: WHITE, letterSpacing: "0.04em" }}>
-                                {ev.recipient.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
-                              </span>
+                              {relationshipEmoji(ev.recipient.relationship)}
                             </div>
                             {/* Name + event + date */}
                             <div style={{ flex: 1, minWidth: 0 }}>
@@ -778,33 +778,6 @@ export default function DashboardPage() {
                 </div>
               );
             })()}
-
-            {/* ── Section 4: Your Important People ────────────────────── */}
-            <div style={{ marginBottom: 28 }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: 14, gap: 12,
-              }}>
-                <h1 style={{
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: isMobile ? "1.6rem" : "1.9rem",
-                  letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1,
-                }}>
-                  Your Important People
-                </h1>
-                <Link href="/recipients/new" style={{ textDecoration: "none", flexShrink: 0 }}>
-                  <button style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    background: "none", border: `1px solid ${BORDER}`, borderRadius: 8,
-                    padding: "6px 12px", fontSize: "0.76rem", fontWeight: 600,
-                    color: MID, cursor: "pointer",
-                  }}>
-                    <Plus size={12} /> Add Person
-                  </button>
-                </Link>
-              </div>
-              <RelationshipHealthSection isMobile={isMobile} />
-            </div>
 
             {/* ── Plan usage — subtle ──────────────────────────────────── */}
             <div style={{

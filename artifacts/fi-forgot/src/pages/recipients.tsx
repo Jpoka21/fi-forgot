@@ -6,10 +6,24 @@ import { Plus, Trash2, ChevronRight, Heart, Lock, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { PLANS, Plan, canActivateRecipient } from "@/lib/plan";
 
-const RED   = "#E23B2E";
-const BLACK = "#111111";
-const BEIGE = "#F2E6D3";
-const GRAY  = "#6B6B6B";
+const RED    = "#E23B2E";
+const BLACK  = "#111111";
+const BEIGE  = "#F2E6D3";
+const GRAY   = "#6B6B6B";
+const BORDER = "#E5E0D8";
+
+function relationshipEmoji(rel: string): string {
+  const map: Record<string, string> = {
+    "Wife": "❤️", "Husband": "❤️", "Girlfriend": "💑", "Boyfriend": "💑",
+    "Mom": "👩", "Dad": "👨", "Mother": "👩", "Father": "👨",
+    "Sister": "👯", "Brother": "🤜", "Son": "👦", "Daughter": "👧",
+    "Friend": "🤝", "Best Friend": "✨",
+    "Grandma": "👵", "Grandpa": "👴", "Grandmother": "👵", "Grandfather": "👴",
+    "Aunt": "🌸", "Uncle": "🧔", "Boss": "💼", "Coworker": "🤝",
+    "Employee": "💼", "Client": "🤝",
+  };
+  return map[rel] ?? "🤝";
+}
 
 export default function RecipientsPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
@@ -153,16 +167,20 @@ export default function RecipientsPage() {
                 >
                   <div className="flex items-center gap-4">
                     {/* Avatar */}
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 relative"
-                      style={{ background: isActive ? BLACK : GRAY }}
-                    >
-                      {r.name.charAt(0)}
+                    <div style={{
+                      width: 46, height: 46, borderRadius: 12, flexShrink: 0,
+                      background: BEIGE, border: `1px solid ${BORDER}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "1.4rem", position: "relative", opacity: isActive ? 1 : 0.6,
+                    }}>
+                      {relationshipEmoji(r.relationship)}
                       {!isActive && (
-                        <div
-                          className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                          style={{ background: "#fff", border: `1.5px solid ${GRAY}40` }}
-                        >
+                        <div style={{
+                          position: "absolute", bottom: -3, right: -3,
+                          width: 18, height: 18, borderRadius: "50%",
+                          background: "#fff", border: `1.5px solid ${BORDER}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
                           <Lock size={9} style={{ color: GRAY }} />
                         </div>
                       )}

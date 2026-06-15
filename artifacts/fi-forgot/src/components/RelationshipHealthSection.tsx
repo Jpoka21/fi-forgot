@@ -80,6 +80,19 @@ function avatar(name: string): string {
   return name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
 }
 
+function relationshipEmoji(rel: string): string {
+  const map: Record<string, string> = {
+    "Wife": "❤️", "Husband": "❤️", "Girlfriend": "💑", "Boyfriend": "💑",
+    "Mom": "👩", "Dad": "👨", "Mother": "👩", "Father": "👨",
+    "Sister": "👯", "Brother": "🤜", "Son": "👦", "Daughter": "👧",
+    "Friend": "🤝", "Best Friend": "✨",
+    "Grandma": "👵", "Grandpa": "👴", "Grandmother": "👵", "Grandfather": "👴",
+    "Aunt": "🌸", "Uncle": "🧔", "Boss": "💼", "Coworker": "🤝",
+    "Employee": "💼", "Client": "🤝",
+  };
+  return map[rel] ?? "🤝";
+}
+
 function actionDestination(score: RecipientHealthScore, localMap: Map<string, string>): string {
   const id = resolveId(score, localMap);
   if (score.actionType === "card") return `/try?recipientId=${id}`;
@@ -166,12 +179,12 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
       }}>
         {/* Avatar */}
         <div style={{
-          width: 40, height: 40, borderRadius: "50%", background: INK, flexShrink: 0,
+          width: 40, height: 40, borderRadius: 11, flexShrink: 0,
+          background: "#F2E6D3", border: "1px solid #E5E0D8",
           display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "1.25rem",
         }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", color: WHITE }}>
-            {avatar(score.name)}
-          </span>
+          {relationshipEmoji(score.relationshipType ?? "")}
         </div>
 
         {/* Name + relationship + context */}
