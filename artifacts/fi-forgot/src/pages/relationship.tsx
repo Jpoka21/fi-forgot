@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import AppNav from "@/components/layout/AppNav";
 import RelationshipTimeline from "@/components/RelationshipTimeline";
+import { useAuth } from "@/lib/auth-context";
 import {
   getRecipient,
   getCards,
@@ -209,6 +210,7 @@ export default function RelationshipPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
   const [, setLocation] = useLocation();
+  const { authReady } = useAuth();
 
   // ── State ───────────────────────────────────────────────────────────────────
   const [recipient, setRecipient]         = useState<Recipient | undefined>();
@@ -267,16 +269,24 @@ export default function RelationshipPage() {
   // ── Next question ───────────────────────────────────────────────────────────
   function loadNextQuestion() {
     const headers = getApiHeaders() as Record<string, string>;
-    if (!headers["x-user-id"] || !id) return;
+    if (!id) return;
+    if (!headers["x-user-id"]) {
+      console.debug("[relationship] loadNextQuestion: x-user-id not ready yet, will retry when authReady");
+      return;
+    }
     fetch(`/api/v2/recipients/${id}/next-question`, { headers })
       .then(r => r.ok ? r.json() : Promise.reject(r))
       .then((d: { nextQuestion: NextQuestion | null; profileComplete: boolean }) => {
         setNextQuestion(d.nextQuestion ?? null);
         setProfileComplete(d.profileComplete ?? false);
       })
-      .catch(() => {});
+      .catch((err: unknown) => {
+        console.warn("[relationship] loadNextQuestion failed:", err);
+      });
   }
-  useEffect(() => { loadNextQuestion(); }, [id]);
+  // Re-run whenever id changes OR authReady flips — authReady becoming true means
+  // _serverUserId has been stamped into data.ts and getApiHeaders() now has x-user-id.
+  useEffect(() => { loadNextQuestion(); }, [id, authReady]);
 
   // ── Health score ────────────────────────────────────────────────────────────
   useEffect(() => {
