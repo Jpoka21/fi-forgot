@@ -724,7 +724,13 @@ export default function DashboardPage() {
                             </div>
                             {/* Name + date */}
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{ev.recipient.name}</div>
+                              <div
+                                onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
+                                style={{ fontWeight: 700, fontSize: "0.92rem", color: INK, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}
+                              >
+                                {ev.recipient.name}
+                                <span style={{ fontSize: "0.7rem", color: MID, fontWeight: 400 }}>↗</span>
+                              </div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3, flexWrap: "wrap" as const }}>
                                 <span style={{
                                   display: "inline-flex", alignItems: "center", gap: 4,
