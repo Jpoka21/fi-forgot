@@ -1,0 +1,273 @@
+Redesign the Upcoming Occasions page with a focus on helping users quickly understand what needs attention and what is already handled.
+
+The goal is not simply to make the page prettier.
+
+The goal is to make the page feel like a personal assistant that tells users exactly what needs action.
+
+Keep the page highly scannable and efficient even with 20–50 upcoming occasions.
+
+CORE DESIGN PRINCIPLE
+
+Prioritize action over information.
+
+A user should immediately understand:
+
+1. Who the person is
+2. What occasion is coming
+3. How soon it is
+4. Whether anything needs to be done
+
+IMPORTANT
+
+Do not turn this into large stacked cards.
+
+Do not dramatically increase row height.
+
+Keep the experience compact and easy to scan.
+
+We are optimizing for speed and clarity, not visual decoration.
+
+--------------------------------------------------
+1. Replace Emoji Avatars
+--------------------------------------------------
+
+Remove the current emoji avatar squares.
+
+Replace them with circular recipient badges containing initials.
+
+Examples:
+
+JM
+ER
+DS
+
+Use subtle brand colors.
+
+Future profile photo support should remain possible.
+
+--------------------------------------------------
+2. Add Relationship Context
+--------------------------------------------------
+
+Display relationship information near the recipient name.
+
+Examples:
+
+ERIC
+Brother
+
+SARAH
+Mom
+
+ALEX
+Son
+
+Use muted styling.
+
+Keep it visually secondary.
+
+If relationship data is missing, do not show an empty placeholder.
+
+--------------------------------------------------
+3. Improve Occasion Visibility
+--------------------------------------------------
+
+Increase prominence of:
+
+• Occasion type
+• Occasion date
+
+Current occasion information is too easy to miss.
+
+Users should instantly recognize:
+
+Birthday
+Anniversary
+Father's Day
+Holiday
+Work Anniversary
+
+Make the date easier to scan as well.
+
+--------------------------------------------------
+4. Make Urgency More Obvious
+--------------------------------------------------
+
+Days remaining should be one of the strongest visual elements on the row.
+
+Examples:
+
+2 DAYS
+6 DAYS
+15 DAYS
+
+Apply urgency states:
+
+Red:
+0–7 days
+
+Orange:
+8–14 days
+
+Neutral:
+15+ days
+
+Urgency should draw attention before users read the row details.
+
+--------------------------------------------------
+5. Add Action Status Hierarchy
+--------------------------------------------------
+
+This is the most important change.
+
+Rows should clearly communicate whether action is needed.
+
+Examples:
+
+🟢 Card Ready
+🟡 Needs Review
+🔴 Missing Information
+🔴 Card Not Started
+
+Users should immediately know what requires attention.
+
+A card due in 2 days without a draft should visually outrank a card due in 15 days that is already ready.
+
+--------------------------------------------------
+6. Consider Action First Sorting
+--------------------------------------------------
+
+Evaluate whether occasions should be grouped by status before date.
+
+Example:
+
+Needs Action
+
+• Card Not Started
+• Missing Information
+• Needs Review
+
+Ready To Go
+
+• Card Ready
+
+Within each section, continue sorting by upcoming date.
+
+The goal is reducing the chance a user misses something important.
+
+--------------------------------------------------
+7. Improve Row Separation
+--------------------------------------------------
+
+Current rows visually blend together.
+
+Increase spacing slightly.
+
+Improve padding.
+
+Add subtle hover states.
+
+Use gentle borders or separators.
+
+Do not dramatically increase row height.
+
+The page should remain compact and easy to scan.
+
+--------------------------------------------------
+8. Refine Background Colors
+--------------------------------------------------
+
+Do not immediately replace the existing warm theme.
+
+Instead, modernize and refine it.
+
+Explore:
+
+• Slightly lighter warm neutral background
+• Better contrast
+• Cleaner white cards
+• Improved border definition
+
+Avoid making the page look like a generic SaaS dashboard.
+
+Maintain warmth and personality.
+
+--------------------------------------------------
+9. Simplify Header Copy
+--------------------------------------------------
+
+Replace:
+
+UPCOMING OCCASIONS — WE GOT YOUR BACK
+
+With:
+
+Upcoming Occasions
+
+or
+
+Coming Up Soon
+
+Use calmer typography.
+
+Reduce visual noise.
+
+--------------------------------------------------
+10. Reduce Quick Card Visual Weight
+--------------------------------------------------
+
+Quick Card is useful but should not dominate the page.
+
+Compress it into a smaller utility section.
+
+It should remain accessible without competing with upcoming occasions.
+
+--------------------------------------------------
+11. Improve Navigation Clarity
+--------------------------------------------------
+
+The active navigation item should be immediately obvious.
+
+Improve contrast and visual hierarchy between:
+
+• Home
+• Your People
+• Upcoming Occasions
+• Brownie Points
+
+Users should instantly know where they are.
+
+--------------------------------------------------
+12. Review Dashboard Metrics
+--------------------------------------------------
+
+Evaluate whether the top metrics are helping users make decisions.
+
+Current metrics:
+
+• People
+• Upcoming
+• Cards Ready
+• At Risk
+
+Consider:
+
+• People
+• Occasions Coming Up
+• Cards Ready
+• Need Attention
+
+Do not remove them without evaluating their usefulness.
+
+--------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------
+
+When a user lands on this page they should instantly know:
+
+• Which occasion is most urgent
+• Which relationships need attention
+• Which cards are already handled
+• Which cards can safely be ignored for now
+
+The page should feel less like a spreadsheet and more like a proactive relationship assistant.
