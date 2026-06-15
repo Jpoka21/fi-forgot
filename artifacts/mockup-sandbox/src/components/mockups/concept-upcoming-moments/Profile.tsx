@@ -3,104 +3,115 @@ import { useState } from "react";
 
 const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
 const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
-const AMBER = "#D97706";
 
 const upcomingEvents = [
-  { days: 3,  date: "Jun 14", event: "Birthday",     status: "Draft ready", sc: SAGE,  urgent: true  },
-  { days: 22, date: "Jul 3",  event: "Just Because", status: "On track",    sc: SAGE,  urgent: false },
+  { event: "Birthday",     date: "Jun 14", days: 3,  urgent: true  },
+  { event: "Just Because", date: "Jul 3",  days: 22, urgent: false },
 ];
 
 const pastCards = [
-  { event: "Christmas 2023",    excerpt: "Merry Christmas brother, wishing you joy..." },
-  { event: "Birthday 2023",     excerpt: "Wishing you the best year yet, Steve..."    },
-  { event: "Just Because · Feb 2024", excerpt: "Thinking of you and hoping life is good..." },
+  { occasion: "Christmas 2023",   excerpt: "Merry Christmas brother, hope this season brings you all the joy..." },
+  { occasion: "Birthday 2023",    excerpt: "Wishing you the absolute best on your day, Steve..." },
+  { occasion: "Just Because — Feb 2024", excerpt: "Thinking of you and hope life is treating you well..." },
 ];
 
 export function Profile() {
-  const [activeAction, setActiveAction] = useState<string | null>(null);
+  const [, setTab] = useState("moments");
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: BG, minHeight: "100vh" }}>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+
       {/* Nav */}
-      <div style={{ background: BLACK, height: 56, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <button style={{ background: "none", border: "none", color: "#ffffff80", fontSize: "0.82rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>← Dashboard</button>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: RED }}>F.I. FORGOT</span>
+      <div style={{ background: BLACK, padding: "0 24px", height: 56, display: "flex", alignItems: "center", gap: 16 }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: RED, letterSpacing: "0.05em" }}>F.I. FORGOT</span>
       </div>
 
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "28px 24px" }}>
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 20px" }}>
+
+        {/* Back */}
+        <div style={{ marginBottom: 20 }}>
+          <span style={{ fontSize: "0.83rem", color: GRAY, cursor: "pointer" }}>← Dashboard</span>
+        </div>
+
         {/* Hero */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 28 }}>
-          <div style={{ width: 68, height: 68, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", flexShrink: 0 }}>🤝</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, letterSpacing: "0.02em" }}>STEVE</div>
-            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-              <span style={{ padding: "3px 12px", borderRadius: 20, background: WHITE, border: `1px solid ${BORDER}`, color: GRAY, fontSize: "0.74rem", fontWeight: 600 }}>Friend</span>
-              <span style={{ padding: "3px 12px", borderRadius: 20, background: `${SAGE}18`, color: SAGE, fontSize: "0.74rem", fontWeight: 700 }}>● Active</span>
-            </div>
+        <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "28px 24px", marginBottom: 20, textAlign: "center" }}>
+          <div style={{
+            width: 68, height: 68, borderRadius: "50%", background: BLACK,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "2rem", margin: "0 auto 14px",
+          }}>🤝</div>
+          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, margin: "0 0 8px", letterSpacing: "0.04em" }}>STEVE</h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <span style={{ background: CREAM, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "3px 12px", fontSize: "0.8rem", fontWeight: 600, color: BLACK }}>Friend</span>
+            <span style={{ background: `${SAGE}20`, borderRadius: 20, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700, color: SAGE }}>Active</span>
           </div>
         </div>
 
         {/* Stats row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 20 }}>
           {[
-            { val: "5",  label: "Cards Sent"       },
-            { val: "2",  label: "Upcoming Events"  },
-            { val: "4",  label: "Years Known"      },
-          ].map((s, i) => (
-            <div key={i} style={{ background: WHITE, borderRadius: 12, padding: "14px 16px", border: `1px solid ${BORDER}`, textAlign: "center" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: BLACK, lineHeight: 1 }}>{s.val}</div>
-              <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 4 }}>{s.label}</div>
+            { label: "Cards Sent",       val: "5" },
+            { label: "Upcoming Events",  val: "2" },
+            { label: "Years Known",      val: "4" },
+          ].map(s => (
+            <div key={s.label} style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "14px 12px", textAlign: "center" }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: BLACK, lineHeight: 1 }}>{s.val}</div>
+              <div style={{ fontSize: "0.7rem", color: GRAY, marginTop: 4 }}>{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Upcoming moments */}
-        <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.06em", color: BLACK, marginBottom: 12 }}>UPCOMING MOMENTS</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Upcoming Moments */}
+        <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "20px", marginBottom: 20 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: BLACK, margin: "0 0 14px", letterSpacing: "0.04em" }}>UPCOMING MOMENTS</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
             {upcomingEvents.map((ev, i) => (
               <div key={i} style={{
-                background: WHITE, borderRadius: 12,
-                border: `1px solid ${ev.urgent ? RED + "40" : BORDER}`,
-                borderLeft: `4px solid ${ev.urgent ? RED : SAGE}`,
-                padding: "14px 16px", display: "flex", alignItems: "center", gap: 14,
-                boxShadow: ev.urgent ? `0 3px 14px ${RED}15` : "none",
+                background: ev.urgent ? `${RED}06` : CREAM,
+                borderRadius: 10,
+                border: `1px solid ${ev.urgent ? RED + "30" : BORDER}`,
+                borderLeft: `3px solid ${ev.urgent ? RED : SAGE}`,
+                padding: "12px 14px",
+                display: "flex", alignItems: "center", gap: 12,
               }}>
                 <div style={{
-                  width: 52, height: 52, borderRadius: 10, background: ev.urgent ? RED : CREAM,
+                  width: 42, height: 42, borderRadius: 8, background: ev.urgent ? RED : WHITE,
                   border: ev.urgent ? "none" : `1px solid ${BORDER}`,
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: ev.urgent ? WHITE : BLACK, lineHeight: 1 }}>{ev.days}</div>
-                  <div style={{ fontSize: "0.58rem", color: ev.urgent ? "#ffffff70" : GRAY, fontWeight: 700, letterSpacing: "0.06em" }}>DAYS</div>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: ev.urgent ? WHITE : BLACK, lineHeight: 1 }}>{ev.days}</span>
+                  <span style={{ fontSize: "0.52rem", color: ev.urgent ? "#ffffff90" : GRAY, textTransform: "uppercase" }}>days</span>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.92rem", color: BLACK }}>{ev.event}</div>
-                  <div style={{ fontSize: "0.76rem", color: GRAY, marginTop: 3 }}>{ev.date}</div>
+                  <div style={{ fontWeight: 700, fontSize: "0.88rem", color: BLACK }}>{ev.event}</div>
+                  <div style={{ fontSize: "0.75rem", color: GRAY }}>{ev.date}</div>
                 </div>
-                <span style={{ padding: "3px 10px", borderRadius: 20, background: `${ev.sc}18`, color: ev.sc, fontSize: "0.7rem", fontWeight: 700 }}>{ev.status}</span>
-                <button style={{ padding: "7px 14px", borderRadius: 8, border: ev.urgent ? "none" : `1px solid ${BORDER}`, background: ev.urgent ? RED : "transparent", color: ev.urgent ? WHITE : BLACK, fontWeight: 700, fontSize: "0.74rem", cursor: "pointer" }}>
-                  {ev.status === "Draft ready" ? "Review Draft" : "View"}
+                <button style={{
+                  padding: "6px 12px", borderRadius: 7, border: "none",
+                  background: ev.urgent ? RED : SAGE, color: WHITE,
+                  fontWeight: 700, fontSize: "0.72rem", cursor: "pointer",
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}>
+                  {ev.urgent ? "Review Draft" : "View"}
                 </button>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Past cards */}
-        <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.06em", color: BLACK, marginBottom: 12 }}>PAST CARDS SENT</h2>
-          <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, overflow: "hidden" }}>
+        {/* Past Cards */}
+        <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "20px", marginBottom: 20 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: BLACK, margin: "0 0 16px", letterSpacing: "0.04em" }}>PAST CARDS SENT</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
             {pastCards.map((c, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "14px 16px", borderBottom: i < pastCards.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-                {/* Timeline dot */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 4 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE, flexShrink: 0 }} />
-                  {i < pastCards.length - 1 && <div style={{ width: 1, height: 28, background: BORDER, marginTop: 4 }} />}
+              <div key={i} style={{ display: "flex", gap: 16, paddingBottom: i < pastCards.length - 1 ? 16 : 0, marginBottom: i < pastCards.length - 1 ? 16 : 0, borderBottom: i < pastCards.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE, flexShrink: 0, marginTop: 4 }} />
+                  {i < pastCards.length - 1 && <div style={{ width: 1, flex: 1, background: BORDER, marginTop: 4 }} />}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.86rem", color: BLACK, marginBottom: 4 }}>💌 {c.event}</div>
-                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.98rem", color: GRAY, lineHeight: 1.55, fontStyle: "italic" }}>{c.excerpt}</div>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: BLACK, marginBottom: 4 }}>{c.occasion}</div>
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, lineHeight: 1.5 }}>"{c.excerpt}"</div>
                 </div>
               </div>
             ))}
@@ -109,14 +120,10 @@ export function Profile() {
 
         {/* Quick actions */}
         <div style={{ display: "flex", gap: 10 }}>
-          <button
-            onClick={() => setActiveAction("moment")}
-            style={{ flex: 1, padding: "11px", borderRadius: 10, border: `2px solid ${SAGE}`, background: activeAction === "moment" ? SAGE : "transparent", color: activeAction === "moment" ? WHITE : SAGE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer" }}>
+          <button onClick={() => setTab("add")} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1.5px solid ${SAGE}`, background: "transparent", color: SAGE, fontWeight: 700, fontSize: "0.83rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             + Add a Moment
           </button>
-          <button
-            onClick={() => setActiveAction("profile")}
-            style={{ flex: 1, padding: "11px", borderRadius: 10, border: `1px solid ${BORDER}`, background: "transparent", color: BLACK, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer" }}>
+          <button style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1.5px solid ${BORDER}`, background: "transparent", color: BLACK, fontWeight: 700, fontSize: "0.83rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Edit Profile
           </button>
         </div>

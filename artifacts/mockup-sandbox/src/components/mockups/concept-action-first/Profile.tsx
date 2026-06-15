@@ -5,136 +5,120 @@ const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
 const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
 const AMBER = "#D97706";
 
-const memoryChips = [
+const chips = [
   "Got promoted to VP",
   "Loves craft beer",
-  "College roommate 10+ yrs",
+  "College roommate 10 yrs",
   "Prefers humor in cards",
-  "Giants fan",
-  "Has a dog named Biscuit",
 ];
 
 const pastCards = [
-  { event: "Birthday 2023",    status: "Sent" },
-  { event: "Just Because 2022", status: "Sent" },
+  { label: "Birthday 2023",    date: "Jun 2023" },
+  { label: "Just Because 2022", date: "Feb 2022" },
+];
+
+const actions = [
+  { label: "Write Birthday Card", bg: RED,  color: WHITE, border: "none",              size: 52 },
+  { label: "Answer: How's the new VP role going?", bg: "transparent", color: AMBER, border: `1.5px solid ${AMBER}`, size: 44 },
+  { label: "Update mailing address",              bg: "transparent", color: GRAY,  border: `1.5px solid ${BORDER}`, size: 40 },
 ];
 
 export function Profile() {
-  const [activeAction, setActiveAction] = useState<number | null>(null);
-
-  const actions = [
-    { label: "Write Birthday Card",                 style: "primary", icon: "🎂" },
-    { label: "Answer: How's the new VP role going?", style: "amber",   icon: "↻" },
-    { label: "Update mailing address",               style: "outline", icon: "📬" },
-  ];
+  const [, setX] = useState(0);
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: BG, minHeight: "100vh" }}>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+
       {/* Nav */}
-      <div style={{ background: BLACK, height: 56, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <button style={{ background: "none", border: "none", color: "#ffffff80", fontSize: "0.82rem", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>← Dashboard</button>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: RED }}>F.I. FORGOT</span>
+      <div style={{ background: BLACK, padding: "0 24px", height: 56, display: "flex", alignItems: "center" }}>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: RED }}>F.I. FORGOT</span>
       </div>
 
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px" }}>
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 20px" }}>
+        <div style={{ marginBottom: 20 }}>
+          <span style={{ fontSize: "0.83rem", color: GRAY, cursor: "pointer" }}>← Dashboard</span>
+        </div>
+
         {/* Hero */}
-        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 8 }}>
-          <div style={{ width: 64, height: 64, borderRadius: "50%", background: BLACK, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem", flexShrink: 0 }}>🧢</div>
-          <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, letterSpacing: "0.02em" }}>MARCUS</div>
-            <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
-              <span style={{ padding: "3px 12px", borderRadius: 20, background: WHITE, border: `1px solid ${BORDER}`, color: GRAY, fontSize: "0.74rem", fontWeight: 600 }}>Friend</span>
-              <span style={{ padding: "3px 10px", borderRadius: 20, background: `${RED}18`, color: RED, fontSize: "0.74rem", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
-                🔴 Birthday in 3 days
-              </span>
-            </div>
+        <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "24px", marginBottom: 16, textAlign: "center" }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: "50%", background: BLACK,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "2rem", margin: "0 auto 12px",
+          }}>🧢</div>
+          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, margin: "0 0 8px", letterSpacing: "0.04em" }}>MARCUS</h1>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+            <span style={{ background: CREAM, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "3px 12px", fontSize: "0.78rem", fontWeight: 600, color: BLACK }}>Friend</span>
+            <span style={{ background: `${RED}12`, borderRadius: 20, padding: "3px 12px", fontSize: "0.78rem", fontWeight: 700, color: RED }}>🔴 Birthday in 3 days</span>
           </div>
         </div>
 
-        {/* Urgency note */}
-        <div style={{ background: `${RED}10`, border: `1px solid ${RED}30`, borderRadius: 10, padding: "10px 14px", marginBottom: 20, fontSize: "0.8rem", color: RED, fontWeight: 600 }}>
-          ⏰ Card needs to be sent in the next 2 days to arrive on time.
-        </div>
-
         {/* Action queue */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", letterSpacing: "0.06em", color: BLACK, marginBottom: 12 }}>WHAT TO DO NEXT</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {actions.map((a, i) => {
-              const isActive = activeAction === i;
-              const bg =
-                a.style === "primary" ? RED :
-                a.style === "amber"   ? "transparent" : "transparent";
-              const border =
-                a.style === "primary" ? "none" :
-                a.style === "amber"   ? `1.5px solid ${AMBER}` : `1px solid ${BORDER}`;
-              const color =
-                a.style === "primary" ? WHITE :
-                a.style === "amber"   ? AMBER : BLACK;
-              const height = a.style === "primary" ? 52 : 42;
-
-              return (
-                <button key={i} onClick={() => setActiveAction(isActive ? null : i)} style={{
-                  width: "100%", height, borderRadius: 10, border, background: bg, color,
-                  fontWeight: 700, fontSize: a.style === "primary" ? "0.96rem" : "0.84rem",
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  boxShadow: a.style === "primary" ? `0 4px 16px ${RED}30` : "none",
-                  opacity: isActive && i !== 0 ? 0.7 : 1,
-                }}>
-                  <span>{a.icon}</span>
-                  <span>{a.label}</span>
-                </button>
-              );
-            })}
+        <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "20px", marginBottom: 16 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", color: BLACK, margin: "0 0 14px", letterSpacing: "0.04em" }}>ACTIONS</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {actions.map((a, i) => (
+              <button
+                key={i}
+                onClick={() => setX(x => x + 1)}
+                style={{
+                  width: "100%", height: a.size, borderRadius: 10,
+                  border: a.border, background: a.bg, color: a.color,
+                  fontWeight: 700, fontSize: a.size >= 52 ? "1rem" : "0.83rem",
+                  cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  textAlign: "left" as const, paddingLeft: 16,
+                }}
+              >
+                {i === 0 ? "✍️ " : i === 1 ? "💬 " : "📍 "}{a.label}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Divider */}
-        <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY }}>— Context —</span>
+        <div style={{ textAlign: "center", margin: "8px 0 16px" }}>
+          <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: GRAY }}>— Context —</span>
         </div>
 
         {/* Memory chips */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK, marginBottom: 10 }}>WHAT WE KNOW</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-            {memoryChips.map((chip, i) => (
-              <span key={i} style={{ padding: "5px 12px", borderRadius: 20, background: WHITE, border: `1px solid ${BORDER}`, color: BLACK, fontSize: "0.78rem", fontWeight: 600 }}>
-                {chip}
+        <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "20px", marginBottom: 12 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, margin: "0 0 12px", letterSpacing: "0.04em" }}>WHAT WE KNOW</h3>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7 }}>
+            {chips.map((c, i) => (
+              <span key={i} style={{ background: CREAM, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "5px 12px", fontSize: "0.78rem", fontWeight: 500, color: BLACK }}>
+                {c}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Notes */}
-        <div style={{ background: CREAM, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "14px 16px", marginBottom: 20 }}>
-          <div style={{ fontSize: "0.7rem", color: GRAY, fontWeight: 700, letterSpacing: "0.06em", marginBottom: 6 }}>PRIVATE NOTE</div>
-          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: BLACK, lineHeight: 1.65, fontStyle: "italic" }}>
-            "Don't mention the divorce. Keep it upbeat and celebratory — focus on the promotion and the friendship."
+        {/* Notes box */}
+        <div style={{ background: CREAM, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "14px 16px", marginBottom: 12 }}>
+          <div style={{ fontSize: "0.7rem", fontWeight: 700, color: GRAY, textTransform: "uppercase" as const, letterSpacing: "0.07em", marginBottom: 6 }}>Notes</div>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: BLACK, fontStyle: "italic", lineHeight: 1.6 }}>
+            Don't mention the divorce. Keep it upbeat and celebratory.
           </div>
         </div>
 
         {/* Past cards */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK, marginBottom: 10 }}>PAST CARDS</div>
-          <div style={{ background: WHITE, borderRadius: 10, border: `1px solid ${BORDER}`, overflow: "hidden" }}>
-            {pastCards.map((c, i) => (
-              <div key={i} style={{ padding: "11px 16px", borderBottom: i < pastCards.length - 1 ? `1px solid ${BORDER}` : "none", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: 600, fontSize: "0.84rem", color: BLACK }}>💌 {c.event}</span>
-                <span style={{ fontSize: "0.72rem", color: SAGE, fontWeight: 600 }}>{c.status}</span>
-              </div>
-            ))}
-          </div>
+        <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, padding: "16px 20px", marginBottom: 12 }}>
+          <h3 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: BLACK, margin: "0 0 10px", letterSpacing: "0.04em" }}>PAST CARDS</h3>
+          {pastCards.map((c, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: i < pastCards.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+              <span style={{ fontSize: "0.82rem", fontWeight: 600, color: BLACK }}>{c.label}</span>
+              <span style={{ fontSize: "0.72rem", color: GRAY }}>{c.date}</span>
+            </div>
+          ))}
         </div>
 
         {/* Completeness */}
-        <div style={{ background: WHITE, borderRadius: 10, padding: "12px 16px", border: `1px solid ${BORDER}` }}>
+        <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "12px 16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-            <span style={{ fontSize: "0.76rem", color: GRAY, fontWeight: 600 }}>Profile completeness</span>
-            <span style={{ fontSize: "0.76rem", color: AMBER, fontWeight: 700 }}>72%</span>
+            <span style={{ fontSize: "0.75rem", color: GRAY }}>Profile completeness</span>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: SAGE }}>72%</span>
           </div>
-          <div style={{ height: 5, background: BORDER, borderRadius: 3, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: "72%", background: AMBER, borderRadius: 3 }} />
+          <div style={{ height: 5, background: BORDER, borderRadius: 4 }}>
+            <div style={{ height: 5, background: SAGE, borderRadius: 4, width: "72%" }} />
           </div>
         </div>
       </div>

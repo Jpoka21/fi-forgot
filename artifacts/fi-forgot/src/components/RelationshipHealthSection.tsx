@@ -47,11 +47,11 @@ const STATUS_CONFIG = {
 
 /* ── Action label map ────────────────────────────────────────────── */
 const ACTION_LABELS: Record<string, string> = {
-  profile:      "Complete Profile",
-  follow_up:    "Answer Follow Up",
-  fresh_update: "Tell Us Something New",
-  card:         "Create Card",
-  review:       "Review Activity",
+  profile:      "Open →",
+  follow_up:    "Open →",
+  fresh_update: "Open →",
+  card:         "Write Card",
+  review:       "Open →",
 };
 
 /* ── Local-ID resolver ───────────────────────────────────────────── */
@@ -130,11 +130,10 @@ function wgybSentence(s: RecipientHealthScore): string | null {
 /* ── Compact recipient row ───────────────────────────────────────── */
 function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localMap: Map<string, string> }) {
   const [, setLocation] = useLocation();
-  const [expanded, setExpanded] = useState(false);
 
   const localId     = resolveId(score, localMap);
   const cfg         = STATUS_CONFIG[score.status];
-  const actionLabel = ACTION_LABELS[score.actionType] ?? "View";
+  const actionLabel = ACTION_LABELS[score.actionType] ?? "Open →";
   const dest        = actionDestination(score, localMap);
   const ctx         = contextLine(score);
   const isUrgent    = score.status === "Priority";
@@ -145,15 +144,18 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
   }
 
   return (
-    <div style={{
-      background:   WHITE,
-      borderRadius: 12,
-      border:       `1px solid ${expanded ? INK + "22" : BORDER}`,
-      borderLeft:   `3px solid ${cfg.color}`,
-      overflow:     "hidden",
-      boxSizing:    "border-box" as const,
-    }}>
-      {/* ── Main row ───────────────────────────────────────── */}
+    <div
+      onClick={e => nav(e, `/relationship/${localId}`)}
+      style={{
+        background:   WHITE,
+        borderRadius: 12,
+        border:       `1px solid ${BORDER}`,
+        borderLeft:   `3px solid ${cfg.color}`,
+        overflow:     "hidden",
+        boxSizing:    "border-box" as const,
+        cursor:       "pointer",
+      }}
+    >
       <div style={{
         display:    "flex",
         alignItems: "center",
@@ -171,11 +173,8 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
           </span>
         </div>
 
-        {/* Text content — tapping this area navigates to profile */}
-        <div
-          onClick={e => nav(e, `/relationship/${localId}`)}
-          style={{ flex: 1, minWidth: 0, cursor: "pointer" }}
-        >
+        {/* Name + relationship + context */}
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 3 }}>
             <span style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{score.name}</span>
             <span style={{ fontSize: "0.72rem", color: MID }}>· {score.relationshipType}</span>
@@ -192,7 +191,7 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
           </div>
         </div>
 
-        {/* Primary action button */}
+        {/* Action button */}
         <button
           onClick={e => nav(e, dest)}
           style={{
@@ -210,94 +209,11 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
         >
           {actionLabel}
         </button>
-
-        {/* ⋯ More button — clearly tappable, 40×40 touch target */}
-        <button
-          onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
-          style={{
-            flexShrink:      0,
-            width:           36,
-            height:          36,
-            borderRadius:    8,
-            border:          `1px solid ${expanded ? INK + "30" : BORDER}`,
-            background:      expanded ? `${INK}08` : "transparent",
-            color:           MID,
-            cursor:          "pointer",
-            display:         "flex",
-            alignItems:      "center",
-            justifyContent:  "center",
-            fontSize:        "1rem",
-            letterSpacing:   "0.05em",
-            lineHeight:      1,
-          }}
-          aria-label="More actions"
-          aria-expanded={expanded}
-        >
-          {expanded ? "✕" : "···"}
-        </button>
       </div>
-
-      {/* ── Expanded quick-action panel ────────────────────── */}
-      {expanded && (
-        <div style={{
-          borderTop:  `1px solid ${BORDER}`,
-          padding:    "12px 14px 14px",
-          background: BEIGE,
-          display:    "flex",
-          flexWrap:   "wrap" as const,
-          gap:        8,
-        }}>
-          {/* Improve the card — answer questions */}
-          <button
-            onClick={e => nav(e, briefingDest(score, localMap))}
-            style={actionPill(false)}
-          >
-            ✍️ Improve the card
-          </button>
-
-          {/* Add occasion / event */}
-          <button
-            onClick={e => nav(e, `/relationship/${localId}`)}
-            style={actionPill(false)}
-          >
-            🗓 Add occasion
-          </button>
-
-          {/* Share something new */}
-          <button
-            onClick={e => nav(e, `/relationship/${localId}`)}
-            style={actionPill(false)}
-          >
-            💬 Share something new
-          </button>
-
-          {/* View full profile */}
-          <button
-            onClick={e => nav(e, `/relationship/${localId}`)}
-            style={actionPill(true)}
-          >
-            View profile →
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
-function actionPill(ghost: boolean) {
-  return {
-    padding:      "8px 14px",
-    borderRadius: 20,
-    border:       ghost ? `1px solid ${BORDER}` : "none",
-    background:   ghost ? "transparent" : WHITE,
-    color:        ghost ? MID : INK,
-    fontWeight:   600,
-    fontSize:     "0.8rem",
-    cursor:       "pointer",
-    whiteSpace:   "nowrap" as const,
-    boxShadow:    ghost ? "none" : "0 1px 3px rgba(0,0,0,0.07)",
-  };
-}
 
 /* ═══════════════════════════════════════════════════════════════════
    WGYBSection — named export
