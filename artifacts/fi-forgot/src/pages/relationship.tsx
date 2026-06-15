@@ -585,27 +585,13 @@ export default function RelationshipPage() {
 
             {/* Quick actions */}
             <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
-              <button
-                onClick={() => {
-                  const el = document.getElementById("add-memory-input");
-                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  setTimeout(() => (el as HTMLTextAreaElement | null)?.focus(), 400);
-                }}
-                style={{
-                  padding: "9px 18px", borderRadius: 9, border: "none",
-                  background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer",
-                }}
-              >
-                ✨ Personalize
-              </button>
               <Link href={`/recipients/${id}?edit=1`}>
                 <button style={{
-                  padding: "9px 18px", borderRadius: 9,
-                  border: `1px solid ${WHITE}20`, background: "transparent",
-                  color: `${WHITE}70`, fontWeight: 600,
+                  padding: "9px 18px", borderRadius: 9, border: "none",
+                  background: SAGE, color: WHITE, fontWeight: 700,
                   fontSize: "0.82rem", cursor: "pointer",
                 }}>
-                  Card Questions
+                  📋 Core Questions
                 </button>
               </Link>
             </div>
