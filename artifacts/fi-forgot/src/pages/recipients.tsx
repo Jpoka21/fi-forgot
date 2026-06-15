@@ -169,7 +169,7 @@ export default function RecipientsPage() {
                     </div>
 
                     {/* Info */}
-                    <Link href={`/recipients/${r.id}`} className="flex-1 min-w-0">
+                    <Link href={`/relationship/${r.id}`} className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-base" style={{ color: BLACK }}>{r.name}</span>
                         {isActive ? (
@@ -229,7 +229,7 @@ export default function RecipientsPage() {
                           <Zap size={11} /> Activate
                         </button>
                       )}
-                      <Link href={`/recipients/${r.id}`}>
+                      <Link href={`/relationship/${r.id}`}>
                         <button className="p-2 rounded-lg transition-colors hover:bg-gray-50">
                           <ChevronRight size={18} style={{ color: GRAY }} />
                         </button>

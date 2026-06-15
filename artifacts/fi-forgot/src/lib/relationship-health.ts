@@ -229,7 +229,7 @@ export function computeRecipientHealth(r: Recipient): RecipientHealth {
 
   const topGapEntry  = allGaps[0];
   const topGap       = topGapEntry?.gap ?? "Profile looks great!";
-  const topGapHref   = `/recipients/${r.id}?from=dashboard`;
+  const topGapHref   = `/relationship/${r.id}`;
   const pointsAvailable = allGaps.reduce((s, g) => s + g.pointsAvail, 0);
 
   return { id: r.id, name: r.name, relationship: r.relationship, tier, score, categories, topGap, topGapHref, pointsAvailable };

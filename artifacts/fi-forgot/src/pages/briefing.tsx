@@ -430,7 +430,7 @@ export default function BriefingPage() {
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Link href={`/recipients/${recipient.id}`}>
+          <Link href={`/relationship/${recipient.id}`}>
             <button className="p-2 hover:bg-[hsl(40,20%,90%)] rounded-lg transition-colors" style={{ color: "#8a9abf" }}>
               <ArrowLeft size={18} />
             </button>
@@ -557,7 +557,7 @@ export default function BriefingPage() {
           >
             {isEditing ? "Save Changes →" : "Generate Card →"}
           </button>
-          <Link href={`/recipients/${recipient.id}`}>
+          <Link href={`/relationship/${recipient.id}`}>
             <button
               className="px-5 py-4 rounded-xl border-2 font-semibold text-sm hover:bg-gray-50 transition-all"
               style={{ borderColor: `${BLACK}20`, color: "#666" }}

@@ -463,7 +463,7 @@ export default function DashboardPage() {
                     <div style={{ fontSize: "0.82rem", color: MID }}>Without one, the card stays in draft. Takes 30 seconds.</div>
                   </div>
                   <button
-                    onClick={() => setLocation(`/recipients/${r.id}`)}
+                    onClick={() => setLocation(`/relationship/${r.id}`)}
                     style={{ flexShrink: 0, padding: "9px 18px", borderRadius: 9, background: RED, color: WHITE, border: "none", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
                     Add it →
                   </button>

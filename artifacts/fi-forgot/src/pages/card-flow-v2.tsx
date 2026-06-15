@@ -1263,7 +1263,7 @@ export default function CardFlowV2() {
               The more we know about {firstName}, the more personal the cards will feel.
             </p>
             <button
-              onClick={() => setLocation(`/recipients/${recipientId}`)}
+              onClick={() => setLocation(`/relationship/${recipientId}`)}
               style={{ padding: "7px 14px", borderRadius: 8, border: `1.5px solid ${SAGE}`, background: "none", color: SAGE, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" } as React.CSSProperties}
             >
               Add Details for {firstName} →

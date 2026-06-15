@@ -1,5 +1,5 @@
 import { Component, ComponentType, ReactNode, useState, useEffect } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation, useRoute } from "wouter";
 import { StampDistressFilter } from "@/components/brand";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -72,6 +72,14 @@ class ErrorBoundary extends Component<{ children: ReactNode; fallback?: ReactNod
   }
 }
 
+// ── Redirect /recipients/:id → /relationship/:id (keep ?edit=1 for edit form) ──
+function RecipientProfileGate() {
+  const [, params] = useRoute("/recipients/:id");
+  const isEdit = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("edit") === "1";
+  if (!isEdit && params?.id) return <Redirect to={`/relationship/${params.id}`} />;
+  return <RecipientProfilePage />;
+}
+
 // ── Route guards ────────────────────────────────────────────────────────────
 function ProtectedRoute({ component: Component }: { component: ComponentType }) {
   const { isLoggedIn, authReady, onboardingComplete } = useAuth();
@@ -107,7 +115,7 @@ function Router() {
         <ProtectedRoute component={() => <Redirect to="/people" />} />
       </Route>
       <Route path="/recipients/:id">
-        <ProtectedRoute component={RecipientProfilePage} />
+        <ProtectedRoute component={RecipientProfileGate} />
       </Route>
       <Route path="/relationship/:id">
         <ProtectedRoute component={RelationshipPage} />

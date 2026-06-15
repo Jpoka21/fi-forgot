@@ -147,7 +147,7 @@ export default function PeoplePage() {
     const urgent  = next && next.daysAway <= 7;
 
     return (
-      <Link href={`/recipients/${r.id}`} style={{ textDecoration: "none" }}>
+      <Link href={`/relationship/${r.id}`} style={{ textDecoration: "none" }}>
         <div
           style={{
             background: WHITE, borderRadius: 12, padding: "13px 15px",

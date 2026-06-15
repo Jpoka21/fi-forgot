@@ -1095,7 +1095,7 @@ export default function RelationshipPage() {
           <div style={{ marginBottom: 24 }}>
             <SectionHead
               title="WHAT WE KNOW"
-              right={<OutlineBtn href={`/recipients/${id}`}>Answer Core Questions</OutlineBtn>}
+              right={<OutlineBtn href={`/recipients/${id}?edit=1`}>Answer Core Questions</OutlineBtn>}
             />
             <Card>
               {profileFields.length === 0 ? (
@@ -1103,7 +1103,7 @@ export default function RelationshipPage() {
                   <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, marginBottom: 12 }}>
                     No profile details yet.
                   </div>
-                  <Link href={`/recipients/${id}`}>
+                  <Link href={`/recipients/${id}?edit=1`}>
                     <button style={{
                       padding: "7px 16px", borderRadius: 8,
                       border: `1px solid ${BORDER}`, background: "none",
