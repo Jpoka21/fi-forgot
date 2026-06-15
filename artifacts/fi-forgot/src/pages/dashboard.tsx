@@ -174,7 +174,7 @@ export default function DashboardPage() {
   const [insightsOpen, setInsightsOpen]         = useState(false);
   const [heroExpanded, setHeroExpanded]         = useState(false);
   const [levelsOpen, setLevelsOpen]             = useState(false);
-  const [expandedEvents, setExpandedEvents]     = useState<Set<string>>(new Set());
+  const [expandedEvents, setExpandedEvents]     = useState<Set<string>>(new Set(["__next30__"]));
 
   const { user, logout, upgradePlan } = useAuth();
   const [, setLocation] = useLocation();
@@ -611,8 +611,17 @@ export default function DashboardPage() {
                 grouped.get(ev.event)!.push(ev);
               }
 
+              const next30 = upcoming60.filter(e => e.daysAway <= 30);
               const activeEvent = expandedEvents.size > 0 ? Array.from(expandedEvents)[0] : null;
-              const activeEntries = activeEvent ? (grouped.get(activeEvent) ?? []) : [];
+              const activeEntries = activeEvent === "__next30__"
+                ? next30
+                : activeEvent ? (grouped.get(activeEvent) ?? []) : [];
+
+              const toggleBubble = (key: string) => setExpandedEvents(() => {
+                const s = new Set<string>();
+                if (!expandedEvents.has(key)) s.add(key);
+                return s;
+              });
 
               return (
                 <div style={{ marginBottom: 28 }}>
@@ -626,6 +635,37 @@ export default function DashboardPage() {
 
                   {/* Bubble row */}
                   <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: activeEvent ? 14 : 0 }}>
+
+                    {/* ── Next 30 Days pill (always first) ── */}
+                    {(() => {
+                      const isActive = expandedEvents.has("__next30__");
+                      const n30ready = next30.filter(ev => upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`)).length;
+                      return (
+                        <button onClick={() => toggleBubble("__next30__")} style={{
+                          display: "inline-flex", alignItems: "center", gap: 7,
+                          padding: "9px 15px", borderRadius: 999, cursor: "pointer",
+                          border: `2px solid ${isActive ? INK : BORDER}`,
+                          background: isActive ? INK : WHITE,
+                          color: isActive ? WHITE : INK,
+                          fontWeight: 700, fontSize: "0.88rem",
+                          boxShadow: isActive ? `0 2px 10px ${INK}30` : "none",
+                        }}>
+                          <span>Next 30 Days</span>
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            width: 22, height: 22, borderRadius: "50%",
+                            background: isActive ? "rgba(255,255,255,0.2)" : `${INK}12`,
+                            color: isActive ? WHITE : INK,
+                            fontSize: "0.75rem", fontWeight: 800,
+                          }}>{next30.length}</span>
+                          {next30.length > 0 && n30ready === next30.length && (
+                            <span style={{ fontSize: "0.78rem", opacity: 0.85 }}>✓</span>
+                          )}
+                        </button>
+                      );
+                    })()}
+
+                    {/* ── Per-event bubbles ── */}
                     {Array.from(grouped.entries()).map(([eventName, entries]) => {
                       const soonest    = entries[0];
                       const urgent     = soonest.daysAway <= 7;
@@ -635,14 +675,8 @@ export default function DashboardPage() {
                       const readyCount = entries.filter(ev => upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`)).length;
                       const isActive   = expandedEvents.has(eventName);
 
-                      const toggle = () => setExpandedEvents(() => {
-                        const next = new Set<string>();
-                        if (!isActive) next.add(eventName);
-                        return next;
-                      });
-
                       return (
-                        <button key={eventName} onClick={toggle} style={{
+                        <button key={eventName} onClick={() => toggleBubble(eventName)} style={{
                           display: "inline-flex", alignItems: "center", gap: 7,
                           padding: "9px 15px", borderRadius: 999, cursor: "pointer",
                           border: `2px solid ${isActive ? accent : BORDER}`,
@@ -653,7 +687,6 @@ export default function DashboardPage() {
                           transition: "all 0.15s",
                         }}>
                           <span>{eventName}</span>
-                          {/* Count badge */}
                           <span style={{
                             display: "inline-flex", alignItems: "center", justifyContent: "center",
                             width: 22, height: 22, borderRadius: "50%",
@@ -678,7 +711,7 @@ export default function DashboardPage() {
                         const accent  = urgent ? RED : near ? AMBER : SAGE;
                         const hasCard = upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`);
                         return (
-                          <div key={ev.recipient.id} style={{
+                          <div key={`${ev.recipient.id}-${ev.event}`} style={{
                             display: "flex", alignItems: "center", gap: 12,
                             padding: "12px 16px",
                             borderBottom: idx < activeEntries.length - 1 ? `1px solid ${BORDER}` : "none",
