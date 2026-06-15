@@ -504,10 +504,37 @@ export default function DashboardPage() {
 
         {recipients.length > 0 && !isFirstTimeState && (
           <>
-            {/* ── Section 1: We Got Your Back ─────────────────────────── */}
-            <WGYBSection />
+            {/* ── Summary banner ───────────────────────────────────────── */}
+            {(() => {
+              const upcoming60 = allUpcomingEvents.filter(e => e.daysAway <= 60);
+              const cardsReady = upcoming60.filter(ev => upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`)).length;
+              const stats = [
+                { label: "People", value: recipients.length, color: INK },
+                { label: "Upcoming", value: upcoming60.length, color: INK },
+                { label: "Cards Ready", value: cardsReady, color: SAGE },
+                { label: "At Risk", value: momentsAtRisk, color: momentsAtRisk > 0 ? RED : SAGE },
+              ];
+              return (
+                <div style={{
+                  background: WHITE, borderRadius: 14, border: `1px solid ${BORDER}`,
+                  padding: "14px 18px", marginBottom: 24,
+                  display: "grid", gridTemplateColumns: `repeat(${stats.length}, 1fr)`, gap: 0,
+                }}>
+                  {stats.map((s, i) => (
+                    <div key={s.label} style={{
+                      textAlign: "center" as const,
+                      borderRight: i < stats.length - 1 ? `1px solid ${BORDER}` : "none",
+                      padding: "2px 8px",
+                    }}>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: s.color, lineHeight: 1 }}>{s.value}</div>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em", color: MID, marginTop: 2, textTransform: "uppercase" as const }}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
-            {/* ── Section 2: Need a Card Right Now? ───────────────────── */}
+            {/* ── Section 1: Need a Card Right Now? ───────────────────── */}
             <div style={{ marginBottom: 20 }}>
               <div style={{
                 background: WHITE, borderRadius: 12, padding: "16px 18px",
@@ -544,34 +571,10 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── Section 3: Your Important People ────────────────────── */}
-            <div style={{ marginBottom: 28 }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: 14, gap: 12,
-              }}>
-                <h1 style={{
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: isMobile ? "1.6rem" : "1.9rem",
-                  letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1,
-                }}>
-                  Your Important People
-                </h1>
-                <Link href="/recipients/new" style={{ textDecoration: "none", flexShrink: 0 }}>
-                  <button style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    background: "none", border: `1px solid ${BORDER}`, borderRadius: 8,
-                    padding: "6px 12px", fontSize: "0.76rem", fontWeight: 600,
-                    color: MID, cursor: "pointer",
-                  }}>
-                    <Plus size={12} /> Add Person
-                  </button>
-                </Link>
-              </div>
-              <RelationshipHealthSection isMobile={isMobile} />
-            </div>
+            {/* ── Section 2: We Got Your Back ──────────────────────────── */}
+            <WGYBSection />
 
-            {/* ── Section 4: Upcoming Moments ──────────────────────────── */}
+            {/* ── Section 3: Upcoming Moments ──────────────────────────── */}
             {(() => {
               const upcoming60 = allUpcomingEvents.filter(e => e.daysAway <= 60);
               if (upcoming60.length === 0) return null;
@@ -701,6 +704,33 @@ export default function DashboardPage() {
                 </div>
               );
             })()}
+
+            {/* ── Section 4: Your Important People ────────────────────── */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                marginBottom: 14, gap: 12,
+              }}>
+                <h1 style={{
+                  fontFamily: "'Bebas Neue', cursive",
+                  fontSize: isMobile ? "1.6rem" : "1.9rem",
+                  letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1,
+                }}>
+                  Your Important People
+                </h1>
+                <Link href="/recipients/new" style={{ textDecoration: "none", flexShrink: 0 }}>
+                  <button style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: "none", border: `1px solid ${BORDER}`, borderRadius: 8,
+                    padding: "6px 12px", fontSize: "0.76rem", fontWeight: 600,
+                    color: MID, cursor: "pointer",
+                  }}>
+                    <Plus size={12} /> Add Person
+                  </button>
+                </Link>
+              </div>
+              <RelationshipHealthSection isMobile={isMobile} />
+            </div>
 
             {/* ── Plan usage — subtle ──────────────────────────────────── */}
             <div style={{
