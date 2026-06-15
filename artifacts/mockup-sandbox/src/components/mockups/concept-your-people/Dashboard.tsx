@@ -5,131 +5,109 @@ const BG = "#F2E6D3", RED = "#E23B2E", BLACK = "#111111", SAGE = "#5B8C6B";
 const GRAY = "#6B6B6B", BORDER = "#E5E0D8", WHITE = "#FFFFFF", CREAM = "#FDF7EF";
 const AMBER = "#D97706";
 
+type HealthStatus = "Excellent" | "Healthy" | "NeedsAttention" | "Priority";
+
 const people = [
-  { name: "Sarah",  rel: "Sister",  emoji: "👩", status: "Excellent",        ring: SAGE,           ringPct: 92, event: "Anniversary",  days: 8,  action: "Review Draft →",  priority: false },
-  { name: "Mom",    rel: "Mother",  emoji: "💛", status: "Needs Attention",  ring: AMBER,          ringPct: 54, event: "Mother's Day", days: 15, action: "Add Details →",   priority: false },
-  { name: "Steve",  rel: "Friend",  emoji: "🤝", status: "Healthy",          ring: SAGE,           ringPct: 76, event: "Birthday",     days: 3,  action: "Review Draft →",  priority: false },
-  { name: "Marcus", rel: "Friend",  emoji: "🧢", status: "Priority",         ring: RED,            ringPct: 48, event: "Birthday",     days: 3,  action: "Write Card →",    priority: true  },
-  { name: "Dad",    rel: "Father",  emoji: "👔", status: "Healthy",          ring: SAGE,           ringPct: 80, event: "Father's Day", days: 28, action: "View →",          priority: false },
-  { name: "Jenny",  rel: "Client",  emoji: "💼", status: "Excellent",        ring: "#166534",      ringPct: 94, event: "Work Anniv",   days: 45, action: "View →",          priority: false },
+  { emoji: "👩", name: "Sarah",  rel: "Sister",  health: "Excellent"      as HealthStatus, score: 91, nextEvent: "Anniversary in 8 days",  action: "Review Draft →",  priority: false },
+  { emoji: "💛", name: "Mom",    rel: "Mother",  health: "NeedsAttention" as HealthStatus, score: 58, nextEvent: "Mother's Day in 15 days", action: "Add Details →",  priority: false },
+  { emoji: "🤝", name: "Steve",  rel: "Friend",  health: "Healthy"        as HealthStatus, score: 74, nextEvent: "Birthday in 3 days",      action: "Review Draft →",  priority: false },
+  { emoji: "🧢", name: "Marcus", rel: "Friend",  health: "Priority"       as HealthStatus, score: 42, nextEvent: "Birthday in 3 days",      action: "Write Card →",    priority: true  },
+  { emoji: "👔", name: "Dad",    rel: "Father",  health: "Healthy"        as HealthStatus, score: 77, nextEvent: "Father's Day in 28 days", action: "View →",          priority: false },
+  { emoji: "💼", name: "Jenny",  rel: "Client",  health: "Excellent"      as HealthStatus, score: 88, nextEvent: "Work Anniv in 45 days",   action: "View →",          priority: false },
 ];
 
-function HealthRing({ pct, color, size = 44 }: { pct: number; color: string; size?: number }) {
-  const r = (size - 6) / 2;
-  const circ = 2 * Math.PI * r;
-  const dash = (pct / 100) * circ;
+const healthRingColor: Record<HealthStatus, string> = {
+  Excellent: "#166534", Healthy: SAGE, NeedsAttention: AMBER, Priority: RED,
+};
+
+function HealthRing({ score, status }: { score: number; status: HealthStatus }) {
+  const r = 20, c = 2 * Math.PI * r;
+  const dash = (score / 100) * c;
   return (
-    <svg width={size} height={size} style={{ flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={BORDER} strokeWidth={4} />
-      <circle
-        cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={4}
-        strokeDasharray={`${dash} ${circ}`}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-      />
-      <text x={size / 2} y={size / 2 + 4} textAnchor="middle" fontSize={9} fontWeight="bold" fill={BLACK}>{pct}%</text>
+    <svg width={52} height={52} viewBox="0 0 52 52">
+      <circle cx={26} cy={26} r={r} fill="none" stroke={BORDER} strokeWidth={4} />
+      <circle cx={26} cy={26} r={r} fill="none" stroke={healthRingColor[status]} strokeWidth={4}
+        strokeDasharray={`${dash} ${c}`} strokeLinecap="round" transform="rotate(-90 26 26)" />
+      <text x={26} y={30} textAnchor="middle" fontSize={10} fontWeight={700} fill={healthRingColor[status]} fontFamily="'Plus Jakarta Sans', sans-serif">{score}%</text>
     </svg>
   );
 }
 
 export function Dashboard() {
-  const [, setHov] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
     <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-
       {/* Nav */}
-      <div style={{ background: BLACK, padding: "0 24px", height: 56, display: "flex", alignItems: "center", gap: 16 }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: WHITE, letterSpacing: "0.04em" }}>YOUR PEOPLE</span>
-        <div style={{ flex: 1 }} />
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", color: RED, letterSpacing: "0.05em" }}>F.I. FORGOT</span>
+      <div style={{ background: BLACK, padding: "0 24px", height: 56, display: "flex", alignItems: "center" }}>
+        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: WHITE, letterSpacing: "0.05em", flex: 1 }}>YOUR PEOPLE</div>
+        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: RED, letterSpacing: "0.05em" }}>F.I. FORGOT</div>
       </div>
 
-      {/* Summary strip */}
-      <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}`, padding: "10px 24px", display: "flex", alignItems: "center", gap: 16 }}>
-        {[
-          { color: SAGE,  label: "5 people healthy" },
-          { color: RED,   label: "1 needs attention" },
-        ].map((s, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.color }} />
-            <span style={{ fontSize: "0.78rem", color: GRAY, fontWeight: 500 }}>{s.label}</span>
+      <div style={{ maxWidth: 860, margin: "0 auto", padding: "20px 20px" }}>
+        {/* Summary strip */}
+        <div style={{ background: WHITE, borderRadius: 10, border: `1px solid ${BORDER}`, padding: "10px 16px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: SAGE }} />
+            <span style={{ fontSize: "0.78rem", color: BLACK, fontWeight: 600 }}>5 people healthy</span>
           </div>
-        ))}
-      </div>
-
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 20px" }}>
+          <div style={{ color: BORDER, fontSize: "0.9rem" }}>·</div>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: RED }} />
+            <span style={{ fontSize: "0.78rem", color: BLACK, fontWeight: 600 }}>1 needs attention</span>
+          </div>
+        </div>
 
         {/* People grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-          {people.map(p => (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 12 }}>
+          {people.map((p, i) => (
             <div
-              key={p.name}
-              onMouseEnter={() => setHov(p.name)}
-              onMouseLeave={() => setHov(null)}
+              key={i}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
               style={{
-                background: WHITE,
-                borderRadius: 14,
+                background: WHITE, borderRadius: 14,
                 border: `1px solid ${p.priority ? RED + "40" : BORDER}`,
-                borderLeft: `4px solid ${p.priority ? RED : "transparent"}`,
-                padding: "18px 18px 14px",
-                cursor: "pointer",
-                boxShadow: p.priority ? `0 2px 16px ${RED}14` : "0 1px 6px rgba(0,0,0,0.04)",
+                borderLeft: p.priority ? `4px solid ${RED}` : `1px solid ${BORDER}`,
+                padding: "16px",
+                boxShadow: p.priority ? `0 3px 14px ${RED}18` : hovered === i ? "0 2px 10px rgba(0,0,0,0.07)" : "none",
+                transition: "box-shadow 0.15s", cursor: "pointer",
               }}
             >
-              {/* Top row: emoji + name + ring */}
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: "50%", background: CREAM,
-                  border: `3px solid ${p.ring}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1.5rem", flexShrink: 0,
-                }}>
-                  {p.emoji}
-                </div>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                {/* Avatar */}
+                <div style={{ width: 48, height: 48, borderRadius: "50%", background: CREAM, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>{p.emoji}</div>
+                {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: BLACK, letterSpacing: "0.04em", lineHeight: 1.1 }}>{p.name}</div>
-                  <span style={{ background: CREAM, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "1px 8px", fontSize: "0.68rem", color: GRAY, fontWeight: 600 }}>{p.rel}</span>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.45rem", color: BLACK, lineHeight: 1, marginBottom: 4 }}>{p.name}</div>
+                  <span style={{ background: BLACK, color: WHITE, fontSize: "0.65rem", fontWeight: 700, borderRadius: 20, padding: "2px 8px" }}>{p.rel}</span>
                 </div>
-                <HealthRing pct={p.ringPct} color={p.ring} size={44} />
+                {/* Health ring */}
+                <HealthRing score={p.score} status={p.health} />
               </div>
 
-              {/* Event chip */}
-              <div style={{
-                background: p.days <= 7 ? `${RED}10` : CREAM,
-                border: `1px solid ${p.days <= 7 ? RED + "30" : BORDER}`,
-                borderRadius: 8, padding: "7px 10px", marginBottom: 8,
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-              }}>
-                <span style={{ fontSize: "0.78rem", fontWeight: 600, color: p.days <= 7 ? RED : BLACK }}>{p.event}</span>
-                <span style={{ fontSize: "0.72rem", color: p.days <= 7 ? RED : GRAY, fontWeight: 600 }}>{p.days}d</span>
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: "0.76rem", color: GRAY, marginBottom: 8 }}>last updated 3 days ago</div>
+                <div style={{
+                  display: "inline-block", padding: "4px 10px", borderRadius: 20,
+                  background: healthRingColor[p.health] + "18",
+                  color: healthRingColor[p.health],
+                  fontSize: "0.7rem", fontWeight: 700, marginBottom: 10,
+                }}>{p.nextEvent}</div>
               </div>
 
-              {/* Last updated */}
-              <div style={{ fontSize: "0.68rem", color: GRAY, marginBottom: 12 }}>
-                Last updated 12 days ago
-              </div>
-
-              {/* Action button */}
               <button style={{
-                width: "100%", padding: "9px 0", borderRadius: 9, border: "none",
+                width: "100%", padding: "9px", borderRadius: 9, border: "none",
                 background: p.priority ? RED : BLACK,
-                color: WHITE, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-              }}>
-                {p.action}
-              </button>
+                color: WHITE, fontWeight: 700, fontSize: "0.78rem",
+                cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif",
+              }}>{p.action}</button>
             </div>
           ))}
-
-          {/* Add person dashed */}
-          <div style={{
-            background: "transparent", borderRadius: 14, border: `2px dashed ${SAGE}55`,
-            padding: "18px", cursor: "pointer", minHeight: 160,
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8,
-          }}>
-            <div style={{ fontSize: "1.8rem", color: SAGE }}>+</div>
-            <div style={{ fontSize: "0.8rem", color: SAGE, fontWeight: 600 }}>Add Person</div>
+          {/* Add person */}
+          <div style={{ background: CREAM, borderRadius: 14, border: `2px dashed ${SAGE}70`, padding: "16px", display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", minHeight: 140, cursor: "pointer" }}>
+            <div style={{ fontSize: "1.8rem", color: SAGE, marginBottom: 6 }}>+</div>
+            <div style={{ fontSize: "0.86rem", fontWeight: 700, color: SAGE }}>Add Person</div>
           </div>
         </div>
       </div>
