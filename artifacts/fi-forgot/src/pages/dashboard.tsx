@@ -596,10 +596,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── Section 2: We Got Your Back ──────────────────────────── */}
-            <WGYBSection />
-
-            {/* ── Section 3: Upcoming Moments ──────────────────────────── */}
+            {/* ── Section 3: Upcoming Occasions ────────────────────────── */}
             {(() => {
               const upcoming60 = allUpcomingEvents.filter(e => e.daysAway <= 60);
               if (upcoming60.length === 0) return null;
@@ -630,7 +627,7 @@ export default function DashboardPage() {
                     fontSize: isMobile ? "1.6rem" : "1.9rem",
                     letterSpacing: "0.03em", color: INK, margin: "0 0 14px", lineHeight: 1,
                   }}>
-                    Upcoming Moments
+                    Upcoming Occasions — We Got Your Back
                   </h2>
 
                   {/* Bubble row */}
@@ -739,7 +736,7 @@ export default function DashboardPage() {
                               alignItems: "center", justifyContent: "center",
                             }}>
                               <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{ev.daysAway}</div>
-                              <div style={{ fontSize: "0.48rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : MID }}>DAYS</div>
+                              <div style={{ fontSize: "0.44rem", fontWeight: 700, letterSpacing: "0.04em", color: urgent ? "#ffffff80" : MID }}>DAYS AWAY</div>
                             </div>
                             {/* Action */}
                             <button
