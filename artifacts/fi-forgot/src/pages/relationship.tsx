@@ -70,6 +70,34 @@ const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
   "Easter":          { month: 4,  day: 20 },
 };
 
+const DATE_SENSITIVE_EVENTS = [
+  { label: "Birthday",         emoji: "🎂" },
+  { label: "Anniversary",      emoji: "💑" },
+  { label: "Work Anniversary", emoji: "💼" },
+  { label: "Graduation",       emoji: "🎓" },
+  { label: "Just Because",     emoji: "💌" },
+] as const;
+
+const HOLIDAY_EVENTS = [
+  { label: "Valentine's Day", emoji: "💝", flag: "needsValentinesDay"    as const },
+  { label: "Mother's Day",    emoji: "👩", flag: "needsMothersDay"       as const },
+  { label: "Father's Day",    emoji: "👔", flag: "needsFathersDay"       as const },
+  { label: "Thanksgiving",    emoji: "🦃", flag: "needsThanksgiving"     as const },
+  { label: "Christmas",       emoji: "🎄", flag: "needsChristmasHanukkah" as const },
+  { label: "New Year's",      emoji: "🥂", flag: "needsNewYears"         as const },
+  { label: "Easter",          emoji: "🐣", flag: "needsEaster"           as const },
+] as const;
+
+function isTrackedEvent(event: string, r: Recipient): boolean {
+  if (event === "Birthday") return !!r.birthday;
+  if (event === "Anniversary") return !!(r.anniversaryDate ?? r.marriageDate);
+  if (event === "Work Anniversary" || event === "Graduation" || event === "Just Because") {
+    return (r.selectedEvents ?? []).includes(event);
+  }
+  const found = HOLIDAY_EVENTS.find(e => e.label === event);
+  return found ? !!r[found.flag] : false;
+}
+
 function getEventDate(event: string, r: Recipient): string | null {
   const now = new Date(); const year = now.getFullYear();
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -195,9 +223,9 @@ export default function RelationshipPage() {
 
   // Add event
   const [showAddEvent, setShowAddEvent]     = useState(false);
-  const [newEventLabel, setNewEventLabel]   = useState("");
-  const [newEventDate, setNewEventDate]     = useState("");
-  const [savingEvent, setSavingEvent]       = useState(false);
+  const [selectedEventChip, setSelectedEventChip] = useState<string | null>(null);
+  const [newEventDate, setNewEventDate]           = useState("");
+  const [savingEvent, setSavingEvent]             = useState(false);
 
   // Add memory
   const [memoryText, setMemoryText]       = useState("");
@@ -266,25 +294,48 @@ export default function RelationshipPage() {
   }, [recipient?.name]);
 
   // ── Add event ────────────────────────────────────────────────────────────────
-  function handleAddEvent() {
-    if (!recipient || !newEventLabel.trim() || !newEventDate) return;
-    setSavingEvent(true);
-    const newCustomDate: CustomDate = {
-      id: `${newEventLabel.trim().toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
-      label: newEventLabel.trim(),
-      date: newEventDate,
-    };
+  function handleAddHolidayEvent(label: string, flag: keyof Recipient) {
+    if (!recipient) return;
+    const sel = recipient.selectedEvents ?? [];
     const updated: Recipient = {
       ...recipient,
-      customDates: [...(recipient.customDates ?? []), newCustomDate],
-      selectedEvents: (recipient.selectedEvents ?? []).includes(newEventLabel.trim())
-        ? (recipient.selectedEvents ?? [])
-        : [...(recipient.selectedEvents ?? []), newEventLabel.trim()],
+      [flag]: true,
+      selectedEvents: sel.includes(label) ? sel : [...sel, label],
     };
     saveRecipient(updated);
     setRecipient(updated);
-    setNewEventLabel("");
+    setShowAddEvent(false);
+    setSelectedEventChip(null);
+  }
+
+  function handleAddDateEvent() {
+    if (!recipient || !selectedEventChip || !newEventDate) return;
+    setSavingEvent(true);
+    const event = selectedEventChip;
+    const sel = recipient.selectedEvents ?? [];
+    let updated: Recipient = { ...recipient };
+
+    if (event === "Birthday") {
+      updated = { ...updated, birthday: newEventDate,
+        selectedEvents: sel.includes("Birthday") ? sel : [...sel, "Birthday"] };
+    } else if (event === "Anniversary") {
+      updated = { ...updated, anniversaryDate: newEventDate, marriageDate: newEventDate,
+        selectedEvents: sel.includes("Anniversary") ? sel : [...sel, "Anniversary"] };
+    } else {
+      const cd: CustomDate = {
+        id: `${event.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
+        label: event, date: newEventDate,
+      };
+      updated = { ...updated,
+        customDates: [...(recipient.customDates ?? []), cd],
+        selectedEvents: sel.includes(event) ? sel : [...sel, event],
+      };
+    }
+
+    saveRecipient(updated);
+    setRecipient(updated);
     setNewEventDate("");
+    setSelectedEventChip(null);
     setShowAddEvent(false);
     setSavingEvent(false);
   }
@@ -830,7 +881,7 @@ export default function RelationshipPage() {
               title="UPCOMING MOMENTS"
               right={
                 <button
-                  onClick={() => { setShowAddEvent(v => !v); setNewEventLabel(""); setNewEventDate(""); }}
+                  onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
                   style={{
                     padding: "5px 12px", borderRadius: 7, border: `1px solid ${showAddEvent ? GRAY : SAGE}`,
                     background: "transparent", color: showAddEvent ? GRAY : SAGE,
@@ -929,51 +980,93 @@ export default function RelationshipPage() {
               </div>
             )}
 
-            {/* Inline add form */}
-            {showAddEvent && (
+            {/* Inline add form — chip picker */}
+            {showAddEvent && recipient && (
               <div style={{
                 background: WHITE, borderRadius: 12,
                 border: `1px solid ${BORDER}`, padding: "16px",
               }}>
-                <div style={{ fontWeight: 700, fontSize: "0.84rem", color: BLACK, marginBottom: 12 }}>
-                  New Event
+                <div style={{
+                  fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.07em",
+                  color: GRAY, marginBottom: 12,
+                }}>
+                  WHAT DO YOU WANT TO TRACK?
                 </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 10, marginBottom: 14 }}>
-                  <input
-                    value={newEventLabel}
-                    onChange={e => setNewEventLabel(e.target.value)}
-                    placeholder="Event name  (e.g. Graduation, Work Anniversary)"
-                    style={{
-                      padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
-                      fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
-                      outline: "none", width: "100%", boxSizing: "border-box" as const,
-                      background: CREAM,
-                    }}
-                  />
-                  <input
-                    type="date"
-                    value={newEventDate}
-                    onChange={e => setNewEventDate(e.target.value)}
-                    style={{
-                      padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
-                      fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
-                      outline: "none", width: "100%", boxSizing: "border-box" as const,
-                      background: CREAM,
-                    }}
-                  />
+
+                {/* Chip grid */}
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 16 : 0 }}>
+                  {/* Date-sensitive events — tap to select, then pick a date */}
+                  {DATE_SENSITIVE_EVENTS
+                    .filter(e => !isTrackedEvent(e.label, recipient))
+                    .map(e => {
+                      const active = selectedEventChip === e.label;
+                      return (
+                        <button
+                          key={e.label}
+                          onClick={() => { setSelectedEventChip(active ? null : e.label); setNewEventDate(""); }}
+                          style={{
+                            padding: "7px 14px", borderRadius: 20,
+                            border: `1.5px solid ${active ? BLACK : BORDER}`,
+                            background: active ? BLACK : CREAM,
+                            color: active ? WHITE : BLACK,
+                            fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                          }}
+                        >
+                          {e.emoji} {e.label}
+                        </button>
+                      );
+                    })}
+
+                  {/* Holiday events — tap to add instantly, no date needed */}
+                  {HOLIDAY_EVENTS
+                    .filter(e => !isTrackedEvent(e.label, recipient))
+                    .map(e => (
+                      <button
+                        key={e.label}
+                        onClick={() => handleAddHolidayEvent(e.label, e.flag)}
+                        style={{
+                          padding: "7px 14px", borderRadius: 20,
+                          border: `1.5px solid ${BORDER}`,
+                          background: CREAM, color: BLACK,
+                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                        }}
+                      >
+                        {e.emoji} {e.label}
+                      </button>
+                    ))}
                 </div>
-                <button
-                  onClick={handleAddEvent}
-                  disabled={!newEventLabel.trim() || !newEventDate || savingEvent}
-                  style={{
-                    width: "100%", padding: "10px", borderRadius: 8, border: "none",
-                    background: !newEventLabel.trim() || !newEventDate ? `${SAGE}50` : SAGE,
-                    color: WHITE, fontWeight: 700, fontSize: "0.84rem",
-                    cursor: !newEventLabel.trim() || !newEventDate ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {savingEvent ? "Saving…" : "Save Event"}
-                </button>
+
+                {/* Date picker — only visible when a date-sensitive chip is selected */}
+                {selectedEventChip && (
+                  <div>
+                    <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>
+                      When is their {selectedEventChip}?
+                    </div>
+                    <input
+                      type="date"
+                      value={newEventDate}
+                      onChange={e => setNewEventDate(e.target.value)}
+                      style={{
+                        padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
+                        fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        outline: "none", width: "100%", boxSizing: "border-box" as const,
+                        background: CREAM, marginBottom: 12,
+                      }}
+                    />
+                    <button
+                      onClick={handleAddDateEvent}
+                      disabled={!newEventDate || savingEvent}
+                      style={{
+                        width: "100%", padding: "10px", borderRadius: 8, border: "none",
+                        background: !newEventDate ? `${SAGE}50` : SAGE,
+                        color: WHITE, fontWeight: 700, fontSize: "0.84rem",
+                        cursor: !newEventDate ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
