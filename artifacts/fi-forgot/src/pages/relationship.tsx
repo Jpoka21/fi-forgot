@@ -552,12 +552,11 @@ export default function RelationshipPage() {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => { const el = document.getElementById("add-memory-input"); el?.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => (el as HTMLTextAreaElement | null)?.focus(), 400); }}
-                style={{ padding: "8px 16px", borderRadius: 9, border: "none", background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}
-              >
-                💬 Add More Memories
-              </button>
+              <Link href={`/recipients/${id}?edit=1`}>
+                <button style={{ padding: "8px 16px", borderRadius: 9, border: "none", background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}>
+                  💬 Add More Memories
+                </button>
+              </Link>
             </div>
 
             {/* Occasions panel */}
@@ -780,28 +779,6 @@ export default function RelationshipPage() {
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL, marginBottom: 10 }}>
               RECENT MEMORIES ABOUT {firstName.toUpperCase()}
-            </div>
-
-            {/* Add memory box */}
-            <div style={{ background: WHITE, borderRadius: 12, border: "1px solid #EDEBE6", padding: "14px 16px", marginBottom: 10 }}>
-              <textarea
-                id="add-memory-input"
-                value={memoryText}
-                onChange={e => setMemoryText(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSaveMemory(); }}
-                placeholder={`${firstName} started a new job.\nWe took a trip to Vermont.\n${firstName}'s daughter graduated.`}
-                rows={2}
-                style={{ width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`, padding: "9px 11px", fontSize: "0.88rem", lineHeight: 1.55, background: CREAM, resize: "vertical" as const, outline: "none", fontFamily: "'Plus Jakarta Sans', sans-serif", color: CHARCOAL, boxSizing: "border-box" as const }}
-              />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 7 }}>
-                <span style={{ fontSize: "0.7rem", color: memorySaved ? SAGE : GRAY, fontWeight: memorySaved ? 600 : 400 }}>
-                  {memorySaved ? `✓ Saved — we'll use this in ${firstName}'s next card.` : "Anything new improves all future cards."}
-                </span>
-                <button onClick={handleSaveMemory} disabled={savingMemory || !memoryText.trim()}
-                  style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: memoryText.trim() ? SAGE : `${SAGE}40`, color: WHITE, fontWeight: 700, fontSize: "0.76rem", cursor: memoryText.trim() ? "pointer" : "default", flexShrink: 0 }}>
-                  {savingMemory ? "Saving…" : "Save"}
-                </button>
-              </div>
             </div>
 
             {/* Memory list */}
