@@ -24,7 +24,7 @@ router.post("/edit-card", async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 800,
       messages: [
         {

@@ -148,7 +148,7 @@ Rules:
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 150,
       messages: [
         {

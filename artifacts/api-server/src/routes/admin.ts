@@ -92,7 +92,7 @@ Keep it to 3–6 sentences. Personal, specific, grounded only in the facts provi
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 500,
       messages: [
         { role: "system", content: systemPrompt },
@@ -192,7 +192,7 @@ Pick the card that best matches the event type first, then secondarily reflects 
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 200,
       messages: [
         { role: "system", content: systemPrompt },
@@ -268,7 +268,7 @@ Rewrite the message applying exactly what the customer asked for.`;
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 400,
       messages: [
         { role: "system", content: systemPrompt },

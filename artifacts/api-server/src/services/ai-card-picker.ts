@@ -89,7 +89,7 @@ async function pickCategories(eventType: string, contextNote: string | null): Pr
   const ctx = contextNote?.trim() || "none";
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 120,
       messages: [
         {
@@ -269,7 +269,7 @@ async function gpxPickFromCandidates(
     }).join("\n");
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 60,
       messages: [
         {

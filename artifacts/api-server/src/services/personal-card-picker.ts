@@ -150,7 +150,7 @@ async function enrichCards(cards: HandwryttenCard[]): Promise<EnrichedCard[]> {
 async function pickCategories(eventType: string): Promise<string[]> {
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 120,
       messages: [
         {
@@ -326,7 +326,7 @@ async function gpxPickFromCandidates(
     }).join("\n");
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 60,
       messages: [
         {

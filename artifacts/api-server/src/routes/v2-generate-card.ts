@@ -763,7 +763,7 @@ router.post("/v2/generate-card", async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 2400,
       messages: [
         { role: "system", content: systemPrompt },
@@ -915,7 +915,7 @@ router.post("/v2/refine-card", async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       max_completion_tokens: 600,
       messages: [
         {
