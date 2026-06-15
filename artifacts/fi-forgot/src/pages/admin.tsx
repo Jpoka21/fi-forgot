@@ -13,12 +13,13 @@ import { AdminAudit } from "./admin/AdminAudit";
 import { AdminBriefings } from "./admin/AdminBriefings";
 import { AdminEvents } from "./admin/AdminEvents";
 import { AdminCardLibrary } from "./admin/AdminCardLibrary";
+import { AdminCardMetadata } from "./admin/AdminCardMetadata";
 import { AdminLeads } from "./admin/AdminLeads";
 import { AdminPrintAudit } from "./admin/AdminPrintAudit";
 import {
   ShieldCheck, LayoutDashboard, Users, UserCheck,
   CalendarDays, CreditCard, MessageSquare, Send, ScrollText,
-  AlertTriangle, ClipboardList, RefreshCw, Trash2, Library, Mail, Printer,
+  AlertTriangle, ClipboardList, RefreshCw, Trash2, Library, Mail, Printer, Tags,
 } from "lucide-react";
 
 const NAVY = "#071A33";
@@ -39,6 +40,7 @@ type AdminTab =
   | "briefings"
   | "audit"
   | "card-library"
+  | "card-metadata"
   | "print-audit"
   | "leads";
 
@@ -52,8 +54,9 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType; description:
   { id: "queue",        label: "Queue",             icon: Send,            description: "Fulfillment and Handwrytten orders" },
   { id: "briefings",    label: "Briefings",         icon: ClipboardList,   description: "Pre-event customer answers" },
   { id: "audit",        label: "Audit Log",         icon: ScrollText,      description: "All admin actions tracked" },
-  { id: "card-library", label: "Card Library",      icon: Library,         description: "AI card library — generate, manage, and track reusable card designs" },
-  { id: "print-audit",  label: "Print Readiness",   icon: Printer,         description: "Verify every card meets Handwrytten's 300 DPI print requirements" },
+  { id: "card-library",  label: "Card Library",      icon: Library,         description: "AI card library — generate, manage, and track reusable card designs" },
+  { id: "card-metadata", label: "Card Metadata V2",  icon: Tags,            description: "Audit and backfill V2 metadata: occasion, relationship, interests, season, audience, gender" },
+  { id: "print-audit",   label: "Print Readiness",   icon: Printer,         description: "Verify every card meets Handwrytten's 300 DPI print requirements" },
   { id: "leads",        label: "Leads",             icon: Mail,            description: "Emails captured from the demo flow" },
 ];
 
@@ -151,8 +154,9 @@ export default function AdminPage() {
       case "queue": return <AdminQueue />;
       case "briefings":    return <AdminBriefings />;
       case "audit":        return <AdminAudit />;
-      case "card-library": return <AdminCardLibrary />;
-      case "print-audit":  return <AdminPrintAudit />;
+      case "card-library":  return <AdminCardLibrary />;
+      case "card-metadata": return <AdminCardMetadata />;
+      case "print-audit":   return <AdminPrintAudit />;
       case "leads":        return <AdminLeads />;
     }
   }

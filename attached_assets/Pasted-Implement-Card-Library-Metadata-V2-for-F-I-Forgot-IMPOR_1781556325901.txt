@@ -1,0 +1,188 @@
+Implement Card Library Metadata V2 for F.I. Forgot.
+
+IMPORTANT:
+
+Do NOT remove or overwrite any existing card metadata.
+Do NOT modify existing card selection behavior yet.
+Do NOT run any destructive migration.
+
+This phase is infrastructure only.
+
+GOAL
+
+Prepare the card library to support intelligent AI card selection based on:
+
+• Occasion
+• Style
+• Tone
+• Relationship
+• Interests
+• Season
+• Audience
+
+NEW STRUCTURED FIELDS
+
+Add support for:
+
+occasion[]
+style
+tone
+relationship[]
+interests[]
+season
+audience
+gender_lean
+
+Definitions:
+
+occasion[] examples:
+birthday
+anniversary
+valentines_day
+mothers_day
+fathers_day
+graduation
+retirement
+sympathy
+wedding
+engagement
+thank_you
+thinking_of_you
+encouragement
+new_baby
+get_well
+holiday
+christmas
+thanksgiving
+client_appreciation
+home_purchase_anniversary
+
+style examples:
+watercolor
+modern_minimal
+cozy_lifestyle
+luxury_painting
+luxury_photography
+illustration
+bold_illustration
+humor_parody
+botanical_floral
+typographic
+
+tone examples:
+warm
+celebratory
+romantic
+playful
+professional
+sophisticated
+tender
+hopeful
+
+relationship[] examples:
+spouse
+parent
+child
+sibling
+friend
+grandparent
+client
+colleague
+boss
+general
+
+interests[] examples:
+outdoor
+pets
+music
+cooking
+travel
+sports
+home
+humor
+wellness
+reading
+wine
+garden
+
+season:
+spring
+summer
+fall
+winter
+year_round
+
+audience:
+personal
+business
+universal
+
+gender_lean:
+masculine
+feminine
+neutral
+
+BACKWARD COMPATIBILITY
+
+Keep all current fields:
+
+category
+subcategory
+style
+tone
+tags[]
+primary_color
+seasonal
+
+Nothing should break.
+
+ADMIN FEATURES
+
+Create a read-only audit page or admin report that shows:
+
+• Total cards
+• Cards missing occasion[]
+• Cards missing relationship[]
+• Cards missing interests[]
+• Cards missing style
+• Cards missing tone
+
+Include filters so we can quickly identify cards needing metadata.
+
+BACKFILL ASSISTANCE
+
+Create a utility that can suggest metadata based on existing:
+
+• category
+• subcategory
+• tags
+• title
+
+The utility should generate recommendations only.
+
+Do not automatically update records.
+
+CARD SELECTION PREP
+
+Add a card search function that can eventually filter by:
+
+occasion
+style
+tone
+relationship
+interest
+season
+audience
+
+but do not replace the current production card selection logic yet.
+
+OUTPUT
+
+After implementation provide:
+
+1. Database/schema changes
+2. New fields added
+3. Any migration scripts created
+4. Admin tools created
+5. Number of cards missing metadata by field
+6. Confirmation that existing card selection remains unchanged
