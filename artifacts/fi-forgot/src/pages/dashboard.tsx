@@ -725,7 +725,7 @@ export default function DashboardPage() {
                             {/* Name + date */}
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{ev.recipient.name}</div>
-                              <div style={{ fontSize: "0.74rem", color: MID, marginTop: 1 }}>{fmtDate(ev.dateStr)} · {ev.daysAway}d away</div>
+                              <div style={{ fontSize: "0.74rem", color: MID, marginTop: 1 }}>{ev.event} · {fmtDate(ev.dateStr)} · {ev.daysAway}d away</div>
                             </div>
                             {/* Day badge */}
                             <div style={{
