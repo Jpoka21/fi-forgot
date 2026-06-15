@@ -1,0 +1,145 @@
+Improve the Recipient Profile page to better match the F* I Forgot value proposition.
+
+Do not change any database structure, logic, card generation, memories, events, or functionality. This is a UI and copy improvement only.
+
+## 1. Move Occasion Tracking Higher
+
+Move the current section:
+
+"What do you want to track?"
+
+from the bottom of the page to directly below the black recipient header card.
+
+New order:
+
+1. Recipient Header
+2. Occasion Tracking
+3. Upcoming Moments
+4. Recent Memories
+5. Everything else
+
+This should make the page flow feel more natural.
+
+The user should first decide which occasions matter, then see what's coming up.
+
+---
+
+## 2. Rename the Section
+
+Replace:
+
+"What do you want to track?"
+
+with:
+
+"WE'LL SEND CARDS FOR THESE OCCASIONS"
+
+This better reflects the actual value of the product.
+
+The user is not configuring tracking settings.
+
+They are telling us which occasions they want help remembering.
+
+---
+
+## 3. Rename Add Event
+
+Replace:
+
+"Add Event"
+
+with:
+
+"Add Occasion"
+
+throughout this section where appropriate.
+
+Use terminology consistently.
+
+Occasions include:
+
+Birthday
+Anniversary
+Father's Day
+Mother's Day
+Christmas
+Graduation
+Valentine's Day
+Thanksgiving
+New Year's
+Just Because
+
+---
+
+## 4. Remove Add Event from Header Actions
+
+Current header actions:
+
+Write Card
+Add Memory
+Add Event
+Answer Core Questions
+
+Remove:
+
+Add Event
+
+The header should focus on actions.
+
+Recommended actions:
+
+Write Card
+Add Memory
+Card Briefing
+
+or equivalent wording already being used.
+
+---
+
+## 5. Rename Answer Core Questions
+
+Replace:
+
+"Answer Core Questions"
+
+with:
+
+"Card Briefing"
+
+or
+
+"Brief This Card"
+
+This should align with the recent briefing redesign and reinforce that all briefing questions are optional.
+
+---
+
+## 6. Improve Visual Hierarchy
+
+The section:
+
+"WE'LL SEND CARDS FOR THESE OCCASIONS"
+
+should feel like a relationship setup area.
+
+Display selected occasions as clean chips/pills.
+
+Include:
+
+* Add Occasion
+
+as a clear action within the section.
+
+---
+
+## 7. Success Criteria
+
+A user should immediately understand:
+
+• These are the occasions F* I Forgot will help me remember.
+• I can add or remove occasions here.
+• Upcoming Moments are generated from these occasions.
+• Write Card, Add Memory, and Card Briefing are my primary actions.
+• The page feels relationship focused, not CRM focused.
+
+Do not modify existing business logic. This is a layout, naming, and UX clarity improvement only.

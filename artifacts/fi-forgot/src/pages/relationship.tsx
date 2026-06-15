@@ -609,42 +609,161 @@ export default function RelationshipPage() {
               >
                 💬 Add Memory
               </button>
-              <button
-                onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
-                style={{
-                  padding: "9px 18px", borderRadius: 9,
-                  border: `1px solid ${WHITE}40`, background: "transparent",
-                  color: WHITE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer",
-                }}
-              >
-                🗓 Add Event
-              </button>
               <Link href={`/recipients/${id}?edit=1`}>
                 <button style={{
                   padding: "9px 18px", borderRadius: 9,
                   border: `1px solid ${WHITE}20`, background: "transparent",
-                  color: `${WHITE}60`, fontWeight: 600,
+                  color: `${WHITE}70`, fontWeight: 600,
                   fontSize: "0.82rem", cursor: "pointer",
                 }}>
-                  Answer Core Questions
+                  Card Briefing
                 </button>
               </Link>
             </div>
           </div>
 
-          {/* ══ 1. UPCOMING MOMENTS ══════════════════════════════════════════════ */}
+          {/* ══ 0. WE'LL SEND CARDS FOR THESE OCCASIONS ═══════════════════════════ */}
           <div style={{ marginBottom: 24 }}>
             <SectionHead
-              title="UPCOMING MOMENTS"
+              title="WE'LL SEND CARDS FOR THESE OCCASIONS"
               right={
                 <button
                   onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
                   style={{ fontSize: "0.76rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}
                 >
-                  {showAddEvent ? "Done" : "Manage →"}
+                  {showAddEvent ? "Done" : "+ Add Occasion"}
                 </button>
               }
             />
+
+            {/* Tracked occasion chips — always visible */}
+            {(() => {
+              const allOccasions = [
+                ...DATE_SENSITIVE_EVENTS,
+                ...HOLIDAY_EVENTS.map(e => ({ label: e.label, emoji: e.emoji })),
+              ];
+              const tracked = allOccasions.filter(e => isTrackedEvent(e.label, recipient));
+              if (tracked.length === 0 && !showAddEvent) {
+                return (
+                  <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
+                    <div style={{ fontSize: "0.84rem", color: GRAY, marginBottom: 10 }}>
+                      No occasions added yet.
+                    </div>
+                    <button
+                      onClick={() => setShowAddEvent(true)}
+                      style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      + Add Occasion
+                    </button>
+                  </div>
+                );
+              }
+              if (tracked.length === 0) return null;
+              return (
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: showAddEvent ? 12 : 0 }}>
+                  {tracked.map(e => (
+                    <div key={e.label} style={{
+                      padding: "7px 14px", borderRadius: 20,
+                      background: SAGE, border: `1.5px solid ${SAGE}`,
+                      color: WHITE, fontWeight: 600, fontSize: "0.82rem",
+                      display: "flex", alignItems: "center", gap: 5,
+                    }}>
+                      {e.emoji} {e.label}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Occasion picker — shown when adding */}
+            {showAddEvent && recipient && (
+              <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "16px", marginTop: 4 }}>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 16 : 0 }}>
+                  {DATE_SENSITIVE_EVENTS.map(e => {
+                    const tracked = isTrackedEvent(e.label, recipient);
+                    const selecting = selectedEventChip === e.label;
+                    return (
+                      <button
+                        key={e.label}
+                        onClick={() => {
+                          if (tracked) { handleRemoveEvent(e.label); }
+                          else { setSelectedEventChip(selecting ? null : e.label); setNewEventDate(""); }
+                        }}
+                        style={{
+                          padding: "7px 14px", borderRadius: 20,
+                          border: `1.5px solid ${tracked ? SAGE : selecting ? BLACK : BORDER}`,
+                          background: tracked ? SAGE : selecting ? BLACK : CREAM,
+                          color: tracked || selecting ? WHITE : BLACK,
+                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 4,
+                        }}
+                      >
+                        {e.emoji} {e.label}
+                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
+                      </button>
+                    );
+                  })}
+                  {HOLIDAY_EVENTS.map(e => {
+                    const tracked = isTrackedEvent(e.label, recipient);
+                    return (
+                      <button
+                        key={e.label}
+                        onClick={() => {
+                          if (tracked) { handleRemoveEvent(e.label); }
+                          else { handleAddHolidayEvent(e.label, e.flag); }
+                        }}
+                        style={{
+                          padding: "7px 14px", borderRadius: 20,
+                          border: `1.5px solid ${tracked ? SAGE : BORDER}`,
+                          background: tracked ? SAGE : CREAM,
+                          color: tracked ? WHITE : BLACK,
+                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 4,
+                        }}
+                      >
+                        {e.emoji} {e.label}
+                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedEventChip && (
+                  <div>
+                    <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>
+                      When is their {selectedEventChip}?
+                    </div>
+                    <input
+                      type="date"
+                      value={newEventDate}
+                      onChange={e => setNewEventDate(e.target.value)}
+                      style={{
+                        padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
+                        fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        outline: "none", width: "100%", boxSizing: "border-box" as const,
+                        background: CREAM, marginBottom: 12,
+                      }}
+                    />
+                    <button
+                      onClick={handleAddDateEvent}
+                      disabled={!newEventDate || savingEvent}
+                      style={{
+                        width: "100%", padding: "10px", borderRadius: 8, border: "none",
+                        background: !newEventDate ? `${SAGE}50` : SAGE,
+                        color: WHITE, fontWeight: 700, fontSize: "0.84rem",
+                        cursor: !newEventDate ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ══ 1. UPCOMING MOMENTS ══════════════════════════════════════════════ */}
+          <div style={{ marginBottom: 24 }}>
+            <SectionHead title="UPCOMING MOMENTS" />
 
             {/* ── Upcoming soon (≤ 60 days) ─────────────────────────────────── */}
             {upcomingEvents.length > 0 && (
@@ -748,105 +867,12 @@ export default function RelationshipPage() {
             )}
 
             {/* ── Empty state ───────────────────────────────────────────────── */}
-            {upcomingEvents.length === 0 && futureEvents.length === 0 && eventsNeedingDate.length === 0 && !showAddEvent && (
+            {upcomingEvents.length === 0 && futureEvents.length === 0 && eventsNeedingDate.length === 0 && (
               <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
-                <div style={{ fontSize: "0.84rem", color: GRAY, marginBottom: 8 }}>No events tracked yet.</div>
-                <button
-                  onClick={() => setShowAddEvent(true)}
-                  style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}
-                >
-                  + Add your first event
-                </button>
+                <div style={{ fontSize: "0.84rem", color: GRAY }}>Add occasions above to see upcoming moments here.</div>
               </div>
             )}
 
-            {/* ── Manage events chip picker ─────────────────────────────────── */}
-            {showAddEvent && recipient && (
-              <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "16px", marginTop: 8 }}>
-                <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.07em", color: GRAY, marginBottom: 12 }}>
-                  WHAT DO YOU WANT TO TRACK?
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 16 : 0 }}>
-                  {DATE_SENSITIVE_EVENTS.map(e => {
-                    const tracked = isTrackedEvent(e.label, recipient);
-                    const selecting = selectedEventChip === e.label;
-                    return (
-                      <button
-                        key={e.label}
-                        onClick={() => {
-                          if (tracked) { handleRemoveEvent(e.label); }
-                          else { setSelectedEventChip(selecting ? null : e.label); setNewEventDate(""); }
-                        }}
-                        style={{
-                          padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${tracked ? SAGE : selecting ? BLACK : BORDER}`,
-                          background: tracked ? SAGE : selecting ? BLACK : CREAM,
-                          color: tracked || selecting ? WHITE : BLACK,
-                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 4,
-                        }}
-                      >
-                        {e.emoji} {e.label}
-                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
-                      </button>
-                    );
-                  })}
-                  {HOLIDAY_EVENTS.map(e => {
-                    const tracked = isTrackedEvent(e.label, recipient);
-                    return (
-                      <button
-                        key={e.label}
-                        onClick={() => {
-                          if (tracked) { handleRemoveEvent(e.label); }
-                          else { handleAddHolidayEvent(e.label, e.flag); }
-                        }}
-                        style={{
-                          padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${tracked ? SAGE : BORDER}`,
-                          background: tracked ? SAGE : CREAM,
-                          color: tracked ? WHITE : BLACK,
-                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 4,
-                        }}
-                      >
-                        {e.emoji} {e.label}
-                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedEventChip && (
-                  <div>
-                    <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>
-                      When is their {selectedEventChip}?
-                    </div>
-                    <input
-                      type="date"
-                      value={newEventDate}
-                      onChange={e => setNewEventDate(e.target.value)}
-                      style={{
-                        padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
-                        fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
-                        outline: "none", width: "100%", boxSizing: "border-box" as const,
-                        background: CREAM, marginBottom: 12,
-                      }}
-                    />
-                    <button
-                      onClick={handleAddDateEvent}
-                      disabled={!newEventDate || savingEvent}
-                      style={{
-                        width: "100%", padding: "10px", borderRadius: 8, border: "none",
-                        background: !newEventDate ? `${SAGE}50` : SAGE,
-                        color: WHITE, fontWeight: 700, fontSize: "0.84rem",
-                        cursor: !newEventDate ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* ══ 2. RECENT MEMORIES ═══════════════════════════════════════════════ */}
@@ -1084,7 +1110,7 @@ export default function RelationshipPage() {
           <div style={{ marginBottom: 24 }}>
             <SectionHead
               title="WHAT WE KNOW"
-              right={<OutlineBtn href={`/recipients/${id}?edit=1`}>Answer Core Questions</OutlineBtn>}
+              right={<OutlineBtn href={`/recipients/${id}?edit=1`}>Edit Profile</OutlineBtn>}
             />
             <Card>
               {profileFields.length === 0 ? (
