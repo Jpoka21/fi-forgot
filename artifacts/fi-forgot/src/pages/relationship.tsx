@@ -600,7 +600,7 @@ export default function RelationshipPage() {
           {/* ── Occasions panel (light bottom of grouped card) ───────────────── */}
           <div style={{ background: WHITE, padding: "16px 22px", borderTop: `1px solid ${BORDER}` }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.08em", color: MID }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.08em", color: GRAY }}>
                 OCCASIONS WE'LL SEND FOR
               </div>
               <button
