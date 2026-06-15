@@ -1,0 +1,96 @@
+Implement Smart Briefing v2.
+
+Goal:
+Reduce event briefing friction while preserving card quality.
+
+Do not change:
+
+* card generation prompt
+* card quality rules
+* relationship voice rules
+* banned phrases
+* context priority order
+* fresh update logic
+* follow up logic
+* database schema
+
+Change only the frontend event briefing question sets and briefing UI logic.
+
+Core rule:
+Each event should ask only 1 to 2 high value questions, plus conditional questions only when needed.
+
+Use existing profile data, fresh updates, follow up answers, prior cards, and timeline context instead of re asking for information we already have.
+
+Implement these reduced briefings:
+
+Birthday:
+
+* Required: Is this a milestone birthday?
+* Conditional if yes: Which milestone?
+* Optional: What did they go through or accomplish this year?
+
+Anniversary:
+
+* Required: Is this a milestone anniversary?
+* Conditional if yes: Which one?
+* Required: What is one moment from this past year you never want to forget?
+
+Mother’s Day:
+
+* Required: What is one specific mom thing she did this year that stuck with you?
+* Conditional: Ask who the kids are only if children are not already on file.
+* Optional: Is this her first Mother’s Day?
+
+Father’s Day:
+
+* Required: What is one standout dad moment from this year?
+* Conditional: Ask who the kids are only if children are not already on file.
+
+Valentine’s Day:
+
+* Required: What is one thing you love about them that you do not say enough?
+* Optional: Any specific memory from this past year?
+
+Christmas:
+
+* Required: Is there a holiday tradition, memory, or feeling that should be included?
+* Optional: Is there anything specific from this year we should reference?
+
+Thanksgiving:
+
+* Required: What are you most grateful for because of them?
+* Optional: What do they bring to the family or your life that does not get said enough?
+
+Just Because:
+
+* Required: What is prompting this card right now?
+* Required: What is the one thing you have not said enough?
+
+Remove or hide questions that duplicate existing profile or memory data:
+
+* tone or vibe questions
+* how do you want them to feel
+* years together when it can be derived from profile
+* children when already on file
+* generic extra catch all questions
+* generic big changes this year questions when fresh updates exist
+
+Add a small context summary near the top:
+“We’ll also use what we already know about this person, including recent memories, profile details, and past cards.”
+
+If recent memories exist, show:
+“We already know:”
+with 1 to 3 short recent memory bullets if available.
+
+Do not require the user to re enter information already collected.
+
+Keep the Skip or Generate Now option.
+
+After implementation, run typecheck and report:
+
+* Files changed
+* Event briefing question changes
+* Questions removed
+* Conditional logic added
+* Confirmation card generation logic was not changed
+* Any risks or follow up recommendations

@@ -219,7 +219,7 @@ export default function BriefingPage() {
   const isEditing = !!params.briefingId;
   const existingBriefing = params.briefingId ? getBriefing(params.briefingId) : undefined;
 
-  const questions = getEventQuestions(eventName, recipient?.gender ?? "neutral");
+  const allQuestions = getEventQuestions(eventName, recipient?.gender ?? "neutral");
 
   // Initialize answers from existing briefing or empty
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
@@ -238,15 +238,15 @@ export default function BriefingPage() {
   const [generating, setGenerating] = useState(false);
   const [generatedCardId, setGeneratedCardId] = useState<string | null>(null);
 
-  // Pre-fill years for anniversary if marriage date exists
-  useEffect(() => {
-    if (eventName === "Anniversary" && recipient?.marriageDate && !answers["years"]) {
-      const years = getYearsTogether(recipient.marriageDate);
-      if (years > 0) {
-        setAnswers((prev) => ({ ...prev, years: `${years} years` }));
-      }
-    }
-  }, []);
+  // Filter questions:
+  // - Skip children question if children are already on file (they're pre-populated anyway)
+  // - Skip showIf questions when the condition isn't met
+  const childrenAlreadyOnFile = (recipient?.children ?? []).length > 0;
+  const questions = allQuestions.filter((q) => {
+    if (q.type === "children" && childrenAlreadyOnFile) return false;
+    if (q.showIf && answers[q.showIf.key] !== q.showIf.value) return false;
+    return true;
+  });
 
   if (!recipient) {
     return (
@@ -411,7 +411,7 @@ export default function BriefingPage() {
     );
   }
 
-  const hasChildrenQuestion = questions.some((q) => q.type === "children");
+  const hasChildrenQuestion = allQuestions.some((q) => q.type === "children");
   const childrenSummaryStr = childrenSummary(editedChildren);
 
   return (
@@ -446,6 +446,35 @@ export default function BriefingPage() {
           </div>
         </div>
 
+        {/* Context summary — what we already know */}
+        {(() => {
+          const knownBullets: string[] = [];
+          if (recipient.personalityNotes?.trim()) knownBullets.push(recipient.personalityNotes.trim());
+          if (recipient.favoriteMemories?.trim())  knownBullets.push(recipient.favoriteMemories.trim());
+          if (recipient.insideJokes?.trim())        knownBullets.push(recipient.insideJokes.trim());
+          const bullets = knownBullets.slice(0, 3);
+          return (
+            <div
+              className="mb-5 px-4 py-3 rounded-xl text-sm"
+              style={{ background: `${NAVY}05`, border: `1px solid ${NAVY}10` }}
+            >
+              <p style={{ color: "#6b7a99", margin: "0 0 4px" }}>
+                We'll also use what we already know about {recipient.name} — recent memories, profile details, and past cards.
+              </p>
+              {bullets.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <span className="font-semibold text-xs" style={{ color: NAVY }}>We already know:</span>
+                  <ul style={{ margin: "6px 0 0", paddingLeft: 16, color: "#6b7a99" }}>
+                    {bullets.map((b, i) => (
+                      <li key={i} style={{ fontSize: 12, marginBottom: 3 }}>{b.length > 90 ? b.slice(0, 88) + "…" : b}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Skip option */}
         {!isEditing && (
           <div
@@ -465,13 +494,13 @@ export default function BriefingPage() {
           </div>
         )}
 
-        {/* Children summary if relevant and already have data */}
-        {hasChildrenQuestion && childrenSummaryStr && (
+        {/* Children on file — show summary when children question is skipped */}
+        {hasChildrenQuestion && childrenAlreadyOnFile && childrenSummaryStr && (
           <div
             className="mb-5 px-4 py-3 rounded-xl text-sm"
             style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}15` }}
           >
-            <span className="font-semibold text-[hsl(221,47%,20%)]">On file: </span>
+            <span className="font-semibold text-[hsl(221,47%,20%)]">Children on file: </span>
             <span className="text-[hsl(221,20%,45%)]">{childrenSummaryStr}</span>
             <span className="text-xs ml-2 text-[hsl(221,20%,60%)]">(ages auto-update from birthdates)</span>
           </div>
