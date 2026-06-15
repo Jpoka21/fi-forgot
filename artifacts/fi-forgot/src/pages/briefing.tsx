@@ -36,29 +36,29 @@ function ChildrenEditor({ children, onChange }: {
       {children.map((child, idx) => (
         <div key={child.id} style={{ background: BEIGE, borderRadius: 10, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "0.78rem", fontWeight: 700, color: MID }}>Child {idx + 1}</span>
+            <span style={{ fontSize: "0.98rem", fontWeight: 700, color: MID }}>Child {idx + 1}</span>
             <button type="button" onClick={() => remove(child.id)} style={{ background: "none", border: "none", cursor: "pointer", color: RED, padding: 4 }}>
-              <Trash2 size={13} />
+              <Trash2 size={15} />
             </button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 600, color: MID, marginBottom: 4 }}>Name</label>
-              <input style={{ width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8, padding: "8px 11px", fontSize: "0.85rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box" }}
+              <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: MID, marginBottom: 4 }}>Name</label>
+              <input style={{ width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8, padding: "9px 12px", fontSize: "1.06rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box" }}
                 placeholder="Emma" value={child.name} onChange={e => update(child.id, { name: e.target.value })} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 600, color: MID, marginBottom: 4 }}>Birthdate</label>
-              <input type="date" style={{ width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8, padding: "8px 11px", fontSize: "0.85rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box" }}
+              <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: MID, marginBottom: 4 }}>Birthdate</label>
+              <input type="date" style={{ width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8, padding: "9px 12px", fontSize: "1.06rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box" }}
                 value={child.birthdate ?? ""} onChange={e => update(child.id, { birthdate: e.target.value })} />
             </div>
           </div>
           <div style={{ display: "flex", gap: 7 }}>
             {GENDER_OPTIONS.map(g => (
               <button key={g.id} type="button" onClick={() => update(child.id, { gender: g.id as Child["gender"] })} style={{
-                padding: "5px 12px", borderRadius: 7, border: `1.5px solid ${child.gender === g.id ? RED : BORDER}`,
+                padding: "6px 13px", borderRadius: 7, border: `1.5px solid ${child.gender === g.id ? RED : BORDER}`,
                 background: child.gender === g.id ? `${RED}10` : WHITE,
-                color: child.gender === g.id ? RED : MID, fontWeight: 600, fontSize: "0.76rem", cursor: "pointer",
+                color: child.gender === g.id ? RED : MID, fontWeight: 600, fontSize: "0.95rem", cursor: "pointer",
               }}>{g.emoji} {g.label}</button>
             ))}
           </div>
@@ -66,9 +66,9 @@ function ChildrenEditor({ children, onChange }: {
       ))}
       <button type="button" onClick={add} style={{
         display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-        padding: "11px 0", borderRadius: 10, border: `1.5px dashed ${BORDER}`,
-        background: "none", color: MID, fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-      }}><Plus size={13} /> Add a child</button>
+        padding: "12px 0", borderRadius: 10, border: `1.5px dashed ${BORDER}`,
+        background: "none", color: MID, fontWeight: 600, fontSize: "1.03rem", cursor: "pointer",
+      }}><Plus size={15} /> Add a child</button>
     </div>
   );
 }
@@ -80,7 +80,7 @@ function QuestionField({ q, value, onChange, children, onChildrenChange }: {
 }) {
   const fieldStyle: React.CSSProperties = {
     width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 10,
-    padding: "11px 14px", fontSize: "0.88rem", outline: "none",
+    padding: "12px 15px", fontSize: "1.1rem", outline: "none",
     background: WHITE, color: INK, fontFamily: "inherit",
     boxSizing: "border-box",
   };
@@ -91,10 +91,10 @@ function QuestionField({ q, value, onChange, children, onChildrenChange }: {
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       {["Yes", "No", "Not sure"].map(opt => (
         <button key={opt} type="button" onClick={() => onChange(opt)} style={{
-          padding: "8px 20px", borderRadius: 8, cursor: "pointer",
+          padding: "9px 22px", borderRadius: 8, cursor: "pointer",
           border: `1.5px solid ${value === opt ? RED : BORDER}`,
           background: value === opt ? `${RED}10` : WHITE,
-          color: value === opt ? RED : MID, fontWeight: 600, fontSize: "0.85rem",
+          color: value === opt ? RED : MID, fontWeight: 600, fontSize: "1.06rem",
         }}>{opt}</button>
       ))}
     </div>
@@ -154,7 +154,7 @@ export default function BriefingPage() {
       <AppNav />
       <div style={{ padding: 32, textAlign: "center" }}>
         <p style={{ color: MID }}>Recipient not found.</p>
-        <Link href="/people" style={{ color: RED, fontSize: "0.85rem", display: "block", marginTop: 8 }}>Back to your people</Link>
+        <Link href="/people" style={{ color: RED, fontSize: "1.06rem", display: "block", marginTop: 8 }}>Back to your people</Link>
       </div>
     </div>
   );
@@ -228,7 +228,7 @@ export default function BriefingPage() {
       <div style={{ minHeight: "100vh", background: BEIGE, display: "flex", flexDirection: "column" }}>
         <AppNav />
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 24px" }}>
-          <div style={{ textAlign: "center", maxWidth: 400 }}>
+          <div style={{ textAlign: "center", maxWidth: 420 }}>
             <div style={{
               width: 72, height: 72, borderRadius: "50%", margin: "0 auto 20px",
               background: generating ? `${RED}12` : `${SAGE}18`,
@@ -239,10 +239,10 @@ export default function BriefingPage() {
                 : <CheckCircle2 size={30} style={{ color: SAGE }} />
               }
             </div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", letterSpacing: "0.03em", color: INK, margin: "0 0 10px", lineHeight: 1.05 }}>
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", letterSpacing: "0.03em", color: INK, margin: "0 0 10px", lineHeight: 1.05 }}>
               {generating ? "Writing the card…" : generatedCardId ? "Card ready for review" : "Briefing saved"}
             </h2>
-            <p style={{ color: MID, fontSize: "0.92rem", lineHeight: 1.6, marginBottom: 28 }}>
+            <p style={{ color: MID, fontSize: "1.15rem", lineHeight: 1.6, marginBottom: 28 }}>
               {generating
                 ? `Using everything we know about ${recipient.name}.`
                 : generatedCardId
@@ -252,7 +252,7 @@ export default function BriefingPage() {
             </p>
             {!generating && (
               <button onClick={() => setLocation(generatedCardId ? `/cards/review?id=${generatedCardId}` : "/dashboard")}
-                style={{ width: "100%", background: RED, color: WHITE, border: "none", borderRadius: 12, padding: "15px 0", fontWeight: 700, fontSize: "0.95rem", cursor: "pointer" }}>
+                style={{ width: "100%", background: RED, color: WHITE, border: "none", borderRadius: 12, padding: "16px 0", fontWeight: 700, fontSize: "1.19rem", cursor: "pointer" }}>
                 {generatedCardId ? "Review the card →" : "Back to dashboard →"}
               </button>
             )}
@@ -278,24 +278,24 @@ export default function BriefingPage() {
     <div style={{ minHeight: "100vh", background: BEIGE }}>
       <AppNav />
 
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "0 20px 80px" }}>
+      <div style={{ maxWidth: 580, margin: "0 auto", padding: "0 20px 80px" }}>
 
         {/* ── Back ─────────────────────────────────────────────── */}
         <div style={{ padding: "16px 0 0" }}>
           <Link href={`/relationship/${recipient.id}`}>
-            <button style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, color: MID, fontSize: "0.82rem", fontWeight: 500, padding: 0 }}>
-              <ArrowLeft size={14} /> Back
+            <button style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, color: MID, fontSize: "1.03rem", fontWeight: 500, padding: 0 }}>
+              <ArrowLeft size={16} /> Back
             </button>
           </Link>
         </div>
 
         {/* ── Person hero ──────────────────────────────────────── */}
         <div style={{ padding: "28px 0 24px", textAlign: "center" }}>
-          <Avatar name={recipient.name} size={64} />
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.9rem, 6vw, 2.5rem)", letterSpacing: "0.03em", color: INK, margin: "14px 0 4px", lineHeight: 1 }}>
+          <Avatar name={recipient.name} size={72} />
+          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(2.38rem, 7.5vw, 3.13rem)", letterSpacing: "0.03em", color: INK, margin: "14px 0 6px", lineHeight: 1 }}>
             {recipient.name}'s {eventName} Card
           </h1>
-          <p style={{ color: MID, fontSize: "0.93rem", margin: "0 0 16px" }}>
+          <p style={{ color: MID, fontSize: "1.16rem", margin: "0 0 16px" }}>
             {recipient.relationshipType ?? recipient.relationship} · {eventName} · {new Date().getFullYear()}
           </p>
 
@@ -304,15 +304,15 @@ export default function BriefingPage() {
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginBottom: 6 }}>
               {chips.map((chip, i) => (
                 <span key={i} style={{
-                  fontSize: "0.74rem", fontWeight: 500, color: SAGE,
+                  fontSize: "0.93rem", fontWeight: 500, color: SAGE,
                   background: `${SAGE}14`, border: `1px solid ${SAGE}30`,
-                  padding: "3px 10px", borderRadius: 20,
+                  padding: "4px 12px", borderRadius: 20,
                 }}>{chip}</span>
               ))}
             </div>
           )}
           {hasChildrenQ && childrenAlreadyOnFile && childrenSummStr && (
-            <p style={{ fontSize: "0.85rem", color: MID, margin: "6px 0 0" }}>
+            <p style={{ fontSize: "1.06rem", color: MID, margin: "6px 0 0" }}>
               Children on file: {childrenSummStr}
             </p>
           )}
@@ -322,12 +322,12 @@ export default function BriefingPage() {
         <div style={{ background: WHITE, borderRadius: 16, padding: "22px 22px 18px", border: `1px solid ${BORDER}`, marginBottom: 28 }}>
           <button onClick={handleSubmit} style={{
             width: "100%", background: RED, color: WHITE, border: "none",
-            borderRadius: 11, padding: "15px 0", fontWeight: 700,
-            fontSize: "1rem", cursor: "pointer", letterSpacing: "0.01em",
+            borderRadius: 11, padding: "16px 0", fontWeight: 700,
+            fontSize: "1.25rem", cursor: "pointer", letterSpacing: "0.01em",
           }}>
             Generate Card →
           </button>
-          <p style={{ textAlign: "center", fontSize: "0.84rem", color: MID, margin: "10px 0 0" }}>
+          <p style={{ textAlign: "center", fontSize: "1.05rem", color: MID, margin: "10px 0 0" }}>
             No details needed — we'll use what we already know.
           </p>
         </div>
@@ -337,26 +337,26 @@ export default function BriefingPage() {
           <>
             {/* Section header */}
             <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: INK, margin: "0 0 6px" }}>
+              <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.63rem", letterSpacing: "0.05em", color: INK, margin: "0 0 6px" }}>
                 Or add a few details first
               </p>
-              <p style={{ fontSize: "0.95rem", color: MID, margin: 0 }}>
+              <p style={{ fontSize: "1.19rem", color: MID, margin: 0 }}>
                 All optional — even one answer makes it more personal.
               </p>
             </div>
 
-            {/* Open-form questions — no individual cards, just clean fields */}
+            {/* Open-form questions */}
             <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, overflow: "hidden" }}>
               {questions.map((q, idx) => (
                 <div key={q.key} style={{
-                  padding: "20px 22px",
+                  padding: "22px 24px",
                   borderBottom: idx < questions.length - 1 ? `1px solid ${BORDER}` : "none",
                 }}>
-                  <label style={{ display: "block", fontWeight: 700, fontSize: "0.91rem", color: INK, marginBottom: q.hint ? 3 : 10 }}>
+                  <label style={{ display: "block", fontWeight: 700, fontSize: "1.14rem", color: INK, marginBottom: q.hint ? 4 : 12 }}>
                     {q.question}
                   </label>
                   {q.hint && (
-                    <p style={{ fontSize: "0.84rem", color: MID, margin: "0 0 10px", lineHeight: 1.5 }}>{q.hint}</p>
+                    <p style={{ fontSize: "1.05rem", color: MID, margin: "0 0 12px", lineHeight: 1.5 }}>{q.hint}</p>
                   )}
                   <QuestionField
                     q={q} value={answers[q.key] ?? ""}
@@ -372,16 +372,16 @@ export default function BriefingPage() {
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
               <button onClick={handleSubmit} style={{
                 flex: 1, background: RED, color: WHITE, border: "none",
-                borderRadius: 12, padding: "15px 0", fontWeight: 700,
-                fontSize: "0.95rem", cursor: "pointer",
+                borderRadius: 12, padding: "16px 0", fontWeight: 700,
+                fontSize: "1.19rem", cursor: "pointer",
               }}>
                 {isEditing ? "Save Changes →" : "Generate Card →"}
               </button>
               <Link href={`/relationship/${recipient.id}`}>
                 <button style={{
-                  padding: "15px 20px", borderRadius: 12, cursor: "pointer",
+                  padding: "16px 22px", borderRadius: 12, cursor: "pointer",
                   border: `1.5px solid ${BORDER}`, background: "none",
-                  color: MID, fontWeight: 600, fontSize: "0.85rem",
+                  color: MID, fontWeight: 600, fontSize: "1.06rem",
                 }}>
                   Cancel
                 </button>
