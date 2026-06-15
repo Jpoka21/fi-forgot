@@ -295,7 +295,7 @@ export default function BriefingPage() {
           <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(1.9rem, 6vw, 2.5rem)", letterSpacing: "0.03em", color: INK, margin: "14px 0 4px", lineHeight: 1 }}>
             {recipient.name}'s {eventName} Card
           </h1>
-          <p style={{ color: MID, fontSize: "0.86rem", margin: "0 0 16px" }}>
+          <p style={{ color: MID, fontSize: "0.93rem", margin: "0 0 16px" }}>
             {recipient.relationshipType ?? recipient.relationship} · {eventName} · {new Date().getFullYear()}
           </p>
 
@@ -312,7 +312,7 @@ export default function BriefingPage() {
             </div>
           )}
           {hasChildrenQ && childrenAlreadyOnFile && childrenSummStr && (
-            <p style={{ fontSize: "0.76rem", color: MID, margin: "6px 0 0" }}>
+            <p style={{ fontSize: "0.85rem", color: MID, margin: "6px 0 0" }}>
               Children on file: {childrenSummStr}
             </p>
           )}
@@ -320,9 +320,6 @@ export default function BriefingPage() {
 
         {/* ── Primary CTA ──────────────────────────────────────── */}
         <div style={{ background: WHITE, borderRadius: 16, padding: "22px 22px 18px", border: `1px solid ${BORDER}`, marginBottom: 28 }}>
-          <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.12em", color: MID, margin: "0 0 10px" }}>
-            WE'LL WRITE A GREAT CARD USING WHAT WE ALREADY KNOW
-          </p>
           <button onClick={handleSubmit} style={{
             width: "100%", background: RED, color: WHITE, border: "none",
             borderRadius: 11, padding: "15px 0", fontWeight: 700,
@@ -330,8 +327,8 @@ export default function BriefingPage() {
           }}>
             Generate Card →
           </button>
-          <p style={{ textAlign: "center", fontSize: "0.74rem", color: "#bbb", margin: "10px 0 0" }}>
-            No details needed. Takes about 10 seconds.
+          <p style={{ textAlign: "center", fontSize: "0.84rem", color: MID, margin: "10px 0 0" }}>
+            No details needed — we'll use what we already know.
           </p>
         </div>
 
@@ -340,10 +337,10 @@ export default function BriefingPage() {
           <>
             {/* Section header */}
             <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.12em", color: MID, margin: "0 0 4px" }}>
-                OR ADD A FEW DETAILS FIRST
+              <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.1em", color: INK, margin: "0 0 4px" }}>
+                Or add a few details first
               </p>
-              <p style={{ fontSize: "0.78rem", color: "#bbb", margin: 0 }}>
+              <p style={{ fontSize: "0.84rem", color: MID, margin: 0 }}>
                 All optional — even one answer makes it more personal.
               </p>
             </div>
@@ -359,7 +356,7 @@ export default function BriefingPage() {
                     {q.question}
                   </label>
                   {q.hint && (
-                    <p style={{ fontSize: "0.76rem", color: MID, margin: "0 0 10px", lineHeight: 1.5 }}>{q.hint}</p>
+                    <p style={{ fontSize: "0.84rem", color: MID, margin: "0 0 10px", lineHeight: 1.5 }}>{q.hint}</p>
                   )}
                   <QuestionField
                     q={q} value={answers[q.key] ?? ""}
