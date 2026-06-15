@@ -145,7 +145,7 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
 
   return (
     <div
-      onClick={e => nav(e, `/relationship/${localId}`)}
+      onClick={e => nav(e, `/recipients/${localId}`)}
       style={{
         background:   WHITE,
         borderRadius: 12,
