@@ -82,7 +82,7 @@ function avatar(name: string): string {
 function actionDestination(score: RecipientHealthScore, localMap: Map<string, string>): string {
   const id = resolveId(score, localMap);
   if (score.actionType === "card") return `/try?recipientId=${id}`;
-  return `/recipients/${id}`;
+  return `/relationship/${id}`;
 }
 
 function briefingDest(score: RecipientHealthScore, localMap: Map<string, string>): string {
@@ -90,7 +90,7 @@ function briefingDest(score: RecipientHealthScore, localMap: Map<string, string>
   if (score.nextEventLabel) {
     return `/briefings/${id}/${encodeURIComponent(score.nextEventLabel)}`;
   }
-  return `/recipients/${id}`;
+  return `/relationship/${id}`;
 }
 
 function contextLine(score: RecipientHealthScore): string {
@@ -145,7 +145,7 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
 
   return (
     <div
-      onClick={e => nav(e, `/recipients/${localId}`)}
+      onClick={e => nav(e, `/relationship/${localId}`)}
       style={{
         background:   WHITE,
         borderRadius: 12,

@@ -41,6 +41,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap, ChevronDown, ChevronUp, Settings } from "lucide-react";
+import RelationshipTimeline from "@/components/RelationshipTimeline";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -757,7 +758,7 @@ export default function RecipientProfilePage() {
             ) : (
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Link href={backTo}>
+                  <Link href={isEditMode ? `/relationship/${params.id}` : backTo}>
                     <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }} data-testid="button-back-recipients">
                       <ArrowLeft size={18} />
                     </button>
@@ -785,6 +786,9 @@ export default function RecipientProfilePage() {
                         <span style={{ padding: "3px 10px", borderRadius: 20, background: `${SAGE}12`, fontSize: "0.72rem", fontWeight: 700, color: SAGE }}>Active</span>
                       )}
                     </div>
+                    <p className="text-sm mt-1" style={{ color: GRAY }}>
+                      Your relationship memory — everything that helps us write better cards.
+                    </p>
                   </>
                 )}
               </div>
@@ -845,6 +849,10 @@ export default function RecipientProfilePage() {
                 )}
               </div>
 
+              {/* Relationship timeline */}
+              <div className="mb-4">
+                <RelationshipTimeline recipientId={params.id} />
+              </div>
 
               {/* Edit Profile Details — secondary settings link */}
               <div className="mb-5" style={{ textAlign: "center" as const }}>

@@ -292,7 +292,7 @@ export default function MomentsPage() {
                             {ev.briefingDone ? "Generate Card" : "Add details"}
                           </button>
                         )}
-                        <Link href={`/recipients/${ev.recipient.id}`} style={{ textDecoration: "none" }}>
+                        <Link href={`/relationship/${ev.recipient.id}`} style={{ textDecoration: "none" }}>
                           <span style={{ fontSize: "0.67rem", color: MID, textDecoration: "underline", textUnderlineOffset: "2px", cursor: "pointer" }}>
                             View Person
                           </span>
