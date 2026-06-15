@@ -582,6 +582,16 @@ export default function RelationshipPage() {
               >
                 💬 Add Memory
               </button>
+              <button
+                onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
+                style={{
+                  padding: "9px 18px", borderRadius: 9,
+                  border: `1px solid ${WHITE}40`, background: "transparent",
+                  color: WHITE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer",
+                }}
+              >
+                🗓 Add Event
+              </button>
               <Link href={`/recipients/${id}`}>
                 <button style={{
                   padding: "9px 18px", borderRadius: 9,
@@ -593,6 +603,155 @@ export default function RelationshipPage() {
                 </button>
               </Link>
             </div>
+          </div>
+
+          {/* ══ 1. UPCOMING MOMENTS ══════════════════════════════════════════════ */}
+          <div style={{ marginBottom: 24 }}>
+            <SectionHead title="UPCOMING MOMENTS" />
+
+            {/* Event rows */}
+            {upcomingEvents.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: showAddEvent ? 10 : 0 }}>
+                {upcomingEvents.map(ev => {
+                  const urgent = ev.daysAway <= 7;
+                  const near   = ev.daysAway <= 14;
+                  const accent = urgent ? RED : near ? AMBER : SAGE;
+                  return (
+                    <div
+                      key={ev.event}
+                      style={{
+                        background: WHITE, borderRadius: 12,
+                        border: `1px solid ${near ? RED + "30" : BORDER}`,
+                        borderLeft: `4px solid ${accent}`,
+                        padding: "12px 16px",
+                        display: "flex", alignItems: "center", gap: 14,
+                        boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
+                      }}
+                    >
+                      <div style={{
+                        width: 50, height: 50, borderRadius: 10, flexShrink: 0,
+                        background: urgent ? RED : CREAM,
+                        border: urgent ? "none" : `1px solid ${BORDER}`,
+                        display: "flex", flexDirection: "column" as const,
+                        alignItems: "center", justifyContent: "center",
+                      }}>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: urgent ? WHITE : BLACK, lineHeight: 1 }}>
+                          {ev.daysAway}
+                        </div>
+                        <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : GRAY }}>
+                          DAYS
+                        </div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: "0.94rem", color: BLACK }}>{ev.event}</div>
+                        <div style={{ fontSize: "0.76rem", color: GRAY, marginTop: 3 }}>{fmtDate(ev.dateStr)}</div>
+                      </div>
+                      <button
+                        onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
+                        style={{
+                          padding: "7px 14px", borderRadius: 8, border: "none",
+                          background: near ? RED : BLACK,
+                          color: WHITE, fontWeight: 700, fontSize: "0.76rem",
+                          cursor: "pointer", flexShrink: 0,
+                        }}
+                      >
+                        Write Card
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Empty state */}
+            {upcomingEvents.length === 0 && !showAddEvent && (
+              <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" }}>
+                <div style={{ fontSize: "0.84rem", color: GRAY, marginBottom: 8 }}>No upcoming events yet.</div>
+                <button
+                  onClick={() => setShowAddEvent(true)}
+                  style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}
+                >
+                  + Add your first event
+                </button>
+              </div>
+            )}
+
+            {/* Inline add form — chip picker */}
+            {showAddEvent && recipient && (
+              <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "16px" }}>
+                <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.07em", color: GRAY, marginBottom: 12 }}>
+                  WHAT DO YOU WANT TO TRACK?
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 16 : 0 }}>
+                  {DATE_SENSITIVE_EVENTS
+                    .filter(e => !isTrackedEvent(e.label, recipient))
+                    .map(e => {
+                      const active = selectedEventChip === e.label;
+                      return (
+                        <button
+                          key={e.label}
+                          onClick={() => { setSelectedEventChip(active ? null : e.label); setNewEventDate(""); }}
+                          style={{
+                            padding: "7px 14px", borderRadius: 20,
+                            border: `1.5px solid ${active ? BLACK : BORDER}`,
+                            background: active ? BLACK : CREAM,
+                            color: active ? WHITE : BLACK,
+                            fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                          }}
+                        >
+                          {e.emoji} {e.label}
+                        </button>
+                      );
+                    })}
+                  {HOLIDAY_EVENTS
+                    .filter(e => !isTrackedEvent(e.label, recipient))
+                    .map(e => (
+                      <button
+                        key={e.label}
+                        onClick={() => handleAddHolidayEvent(e.label, e.flag)}
+                        style={{
+                          padding: "7px 14px", borderRadius: 20,
+                          border: `1.5px solid ${BORDER}`,
+                          background: CREAM, color: BLACK,
+                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                        }}
+                      >
+                        {e.emoji} {e.label}
+                      </button>
+                    ))}
+                </div>
+                {selectedEventChip && (
+                  <div>
+                    <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>
+                      When is their {selectedEventChip}?
+                    </div>
+                    <input
+                      type="date"
+                      value={newEventDate}
+                      onChange={e => setNewEventDate(e.target.value)}
+                      style={{
+                        padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
+                        fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        outline: "none", width: "100%", boxSizing: "border-box" as const,
+                        background: CREAM, marginBottom: 12,
+                      }}
+                    />
+                    <button
+                      onClick={handleAddDateEvent}
+                      disabled={!newEventDate || savingEvent}
+                      style={{
+                        width: "100%", padding: "10px", borderRadius: 8, border: "none",
+                        background: !newEventDate ? `${SAGE}50` : SAGE,
+                        color: WHITE, fontWeight: 700, fontSize: "0.84rem",
+                        cursor: !newEventDate ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* ══ 2. RECENT MEMORIES ═══════════════════════════════════════════════ */}
@@ -873,202 +1032,6 @@ export default function RelationshipPage() {
                 ))
               )}
             </Card>
-          </div>
-
-          {/* ══ 5. UPCOMING MOMENTS ══════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 24 }}>
-            <SectionHead
-              title="UPCOMING MOMENTS"
-              right={
-                <button
-                  onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
-                  style={{
-                    padding: "5px 12px", borderRadius: 7, border: `1px solid ${showAddEvent ? GRAY : SAGE}`,
-                    background: "transparent", color: showAddEvent ? GRAY : SAGE,
-                    fontWeight: 700, fontSize: "0.74rem", cursor: "pointer",
-                  }}
-                >
-                  {showAddEvent ? "✕ Cancel" : "+ Add Event"}
-                </button>
-              }
-            />
-
-            {/* Event rows */}
-            {upcomingEvents.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: showAddEvent ? 10 : 0 }}>
-                {upcomingEvents.map(ev => {
-                  const urgent = ev.daysAway <= 7;
-                  const near   = ev.daysAway <= 14;
-                  const accent = urgent ? RED : near ? AMBER : SAGE;
-                  return (
-                    <div
-                      key={ev.event}
-                      style={{
-                        background: WHITE, borderRadius: 12,
-                        border: `1px solid ${near ? RED + "30" : BORDER}`,
-                        borderLeft: `4px solid ${accent}`,
-                        padding: "12px 16px",
-                        display: "flex", alignItems: "center", gap: 14,
-                        boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
-                      }}
-                    >
-                      {/* Day badge */}
-                      <div style={{
-                        width: 50, height: 50, borderRadius: 10, flexShrink: 0,
-                        background: urgent ? RED : CREAM,
-                        border: urgent ? "none" : `1px solid ${BORDER}`,
-                        display: "flex", flexDirection: "column" as const,
-                        alignItems: "center", justifyContent: "center",
-                      }}>
-                        <div style={{
-                          fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem",
-                          color: urgent ? WHITE : BLACK, lineHeight: 1,
-                        }}>
-                          {ev.daysAway}
-                        </div>
-                        <div style={{
-                          fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em",
-                          color: urgent ? "#ffffff80" : GRAY,
-                        }}>
-                          DAYS
-                        </div>
-                      </div>
-
-                      {/* Info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.94rem", color: BLACK }}>
-                          {ev.event}
-                        </div>
-                        <div style={{ fontSize: "0.76rem", color: GRAY, marginTop: 3 }}>
-                          {fmtDate(ev.dateStr)}
-                        </div>
-                      </div>
-
-                      {/* Write Card */}
-                      <button
-                        onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                        style={{
-                          padding: "7px 14px", borderRadius: 8, border: "none",
-                          background: near ? RED : BLACK,
-                          color: WHITE, fontWeight: 700, fontSize: "0.76rem",
-                          cursor: "pointer", flexShrink: 0,
-                        }}
-                      >
-                        Write Card
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Empty state */}
-            {upcomingEvents.length === 0 && !showAddEvent && (
-              <div style={{
-                background: WHITE, borderRadius: 12,
-                border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center",
-              }}>
-                <div style={{ fontSize: "0.84rem", color: GRAY, marginBottom: 8 }}>
-                  No upcoming events yet.
-                </div>
-                <button
-                  onClick={() => setShowAddEvent(true)}
-                  style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}
-                >
-                  + Add your first event
-                </button>
-              </div>
-            )}
-
-            {/* Inline add form — chip picker */}
-            {showAddEvent && recipient && (
-              <div style={{
-                background: WHITE, borderRadius: 12,
-                border: `1px solid ${BORDER}`, padding: "16px",
-              }}>
-                <div style={{
-                  fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.07em",
-                  color: GRAY, marginBottom: 12,
-                }}>
-                  WHAT DO YOU WANT TO TRACK?
-                </div>
-
-                {/* Chip grid */}
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 16 : 0 }}>
-                  {/* Date-sensitive events — tap to select, then pick a date */}
-                  {DATE_SENSITIVE_EVENTS
-                    .filter(e => !isTrackedEvent(e.label, recipient))
-                    .map(e => {
-                      const active = selectedEventChip === e.label;
-                      return (
-                        <button
-                          key={e.label}
-                          onClick={() => { setSelectedEventChip(active ? null : e.label); setNewEventDate(""); }}
-                          style={{
-                            padding: "7px 14px", borderRadius: 20,
-                            border: `1.5px solid ${active ? BLACK : BORDER}`,
-                            background: active ? BLACK : CREAM,
-                            color: active ? WHITE : BLACK,
-                            fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-                          }}
-                        >
-                          {e.emoji} {e.label}
-                        </button>
-                      );
-                    })}
-
-                  {/* Holiday events — tap to add instantly, no date needed */}
-                  {HOLIDAY_EVENTS
-                    .filter(e => !isTrackedEvent(e.label, recipient))
-                    .map(e => (
-                      <button
-                        key={e.label}
-                        onClick={() => handleAddHolidayEvent(e.label, e.flag)}
-                        style={{
-                          padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${BORDER}`,
-                          background: CREAM, color: BLACK,
-                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-                        }}
-                      >
-                        {e.emoji} {e.label}
-                      </button>
-                    ))}
-                </div>
-
-                {/* Date picker — only visible when a date-sensitive chip is selected */}
-                {selectedEventChip && (
-                  <div>
-                    <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>
-                      When is their {selectedEventChip}?
-                    </div>
-                    <input
-                      type="date"
-                      value={newEventDate}
-                      onChange={e => setNewEventDate(e.target.value)}
-                      style={{
-                        padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
-                        fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
-                        outline: "none", width: "100%", boxSizing: "border-box" as const,
-                        background: CREAM, marginBottom: 12,
-                      }}
-                    />
-                    <button
-                      onClick={handleAddDateEvent}
-                      disabled={!newEventDate || savingEvent}
-                      style={{
-                        width: "100%", padding: "10px", borderRadius: 8, border: "none",
-                        background: !newEventDate ? `${SAGE}50` : SAGE,
-                        color: WHITE, fontWeight: 700, fontSize: "0.84rem",
-                        cursor: !newEventDate ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* ══ 6. CARD HISTORY ══════════════════════════════════════════════════ */}
