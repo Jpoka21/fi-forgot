@@ -729,14 +729,15 @@ export default function DashboardPage() {
                             </div>
                             {/* Day badge */}
                             <div style={{
-                              width: 42, height: 42, borderRadius: 9, flexShrink: 0,
+                              width: 46, height: 46, borderRadius: 9, flexShrink: 0,
                               background: urgent ? RED : "#F8F3EC",
                               border: urgent ? "none" : `1px solid ${BORDER}`,
-                              display: "flex", flexDirection: "column" as const,
-                              alignItems: "center", justifyContent: "center",
+                              display: "flex", alignItems: "center", justifyContent: "center",
                             }}>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{ev.daysAway}</div>
-                              <div style={{ fontSize: "0.5rem", fontWeight: 800, letterSpacing: "0.08em", color: urgent ? "rgba(255,255,255,0.7)" : MID, marginTop: 2, textTransform: "uppercase" as const }}>days</div>
+                              <div style={{ textAlign: "center" as const, lineHeight: 1 }}>
+                                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{ev.daysAway}</div>
+                                <div style={{ fontSize: "0.5rem", fontWeight: 800, letterSpacing: "0.07em", color: urgent ? "rgba(255,255,255,0.7)" : MID, lineHeight: 1, marginTop: 3, textTransform: "uppercase" as const }}>days</div>
+                              </div>
                             </div>
                             {/* Action */}
                             <button
