@@ -735,8 +735,8 @@ export default function DashboardPage() {
                               display: "flex", flexDirection: "column" as const,
                               alignItems: "center", justifyContent: "center",
                             }}>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{ev.daysAway}</div>
-                              <div style={{ fontSize: "0.44rem", fontWeight: 700, letterSpacing: "0.04em", color: urgent ? "#ffffff80" : MID }}>DAYS AWAY</div>
+                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{ev.daysAway}</div>
+                              <div style={{ fontSize: "0.52rem", fontWeight: 700, letterSpacing: "0.05em", color: urgent ? "#ffffff90" : MID, marginTop: 1 }}>days away</div>
                             </div>
                             {/* Action */}
                             <button
