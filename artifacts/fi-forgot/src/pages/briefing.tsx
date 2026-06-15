@@ -123,6 +123,17 @@ function Avatar({ name, size = 52 }: { name: string; size?: number }) {
   );
 }
 
+/* ── Low-context detection ──────────────────────────────────────── */
+function recipientHasStoredContext(r: Recipient): boolean {
+  if (r.personalityNotes?.trim()) return true;
+  if ((r.interests ?? []).length > 0) return true;
+  if ((r.personality ?? []).length > 0) return true;
+  if (r.petName?.trim()) return true;
+  if (r.favoriteMemories?.trim()) return true;
+  if (r.insideJokes?.trim()) return true;
+  return false;
+}
+
 /* ── Page ──────────────────────────────────────────────────────── */
 export default function BriefingPage() {
   const params = useParams<{ recipientId: string; event: string; briefingId?: string }>();
@@ -142,12 +153,18 @@ export default function BriefingPage() {
   const [generating,      setGenerating]      = useState(false);
   const [generatedCardId, setGeneratedCardId] = useState<string | null>(null);
 
+  const [showDetailGate, setShowDetailGate] = useState(false);
+  const [oneDetailText,  setOneDetailText]  = useState("");
+  const [savingDetail,   setSavingDetail]   = useState(false);
+
   const childrenAlreadyOnFile = (recipient?.children ?? []).length > 0;
   const questions = allQuestions.filter(q => {
     if (q.type === "children" && childrenAlreadyOnFile) return false;
     if (q.showIf && answers[q.showIf.key] !== q.showIf.value) return false;
     return true;
   });
+
+  const hasBriefingAnswers = Object.values(answers).some(v => v.trim().length > 5);
 
   if (!recipient) return (
     <div style={{ minHeight: "100vh", background: BEIGE }}>
@@ -161,8 +178,35 @@ export default function BriefingPage() {
 
   function setAnswer(key: string, value: string) { setAnswers(prev => ({ ...prev, [key]: value })); }
 
-  async function handleSubmit() {
+  async function handleDetailAndGenerate() {
+    if (!recipient || !oneDetailText.trim()) return;
+    setSavingDetail(true);
+    try {
+      await fetch(`/api/v2/recipients/${recipient.id}/answer-question`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fieldKey: "first_detail",
+          questionText: "Tell us one real thing about them",
+          answerText: oneDetailText.trim(),
+          triggerType: "fresh_update",
+        }),
+      });
+    } catch { /* non-fatal — proceed anyway */ }
+    setSavingDetail(false);
+    setShowDetailGate(false);
+    handleSubmit(true);
+  }
+
+  async function handleSubmit(skipGate = false) {
     if (!recipient) return;
+
+    // Gate: if no stored context and no briefing answers, ask for one real detail
+    if (!skipGate && !isEditing && !recipientHasStoredContext(recipient) && !hasBriefingAnswers) {
+      setShowDetailGate(true);
+      return;
+    }
+
     saveRecipient({ ...recipient, children: editedChildren });
 
     const briefingAnswers: BriefingAnswer[] = questions
@@ -318,19 +362,58 @@ export default function BriefingPage() {
           )}
         </div>
 
-        {/* ── Primary CTA ──────────────────────────────────────── */}
-        <div style={{ background: WHITE, borderRadius: 16, padding: "22px 22px 18px", border: `1px solid ${BORDER}`, marginBottom: 28 }}>
-          <button onClick={handleSubmit} style={{
-            width: "100%", background: RED, color: WHITE, border: "none",
-            borderRadius: 11, padding: "16px 0", fontWeight: 700,
-            fontSize: "1.25rem", cursor: "pointer", letterSpacing: "0.01em",
-          }}>
-            Generate Card →
-          </button>
-          <p style={{ textAlign: "center", fontSize: "1.05rem", color: MID, margin: "10px 0 0" }}>
-            No details needed — we'll use what we already know.
-          </p>
-        </div>
+        {/* ── Primary CTA / Detail Gate ────────────────────────── */}
+        {showDetailGate ? (
+          <div style={{ background: WHITE, borderRadius: 16, padding: "24px 22px 20px", border: `1.5px solid ${RED}30`, marginBottom: 28 }}>
+            <p style={{ fontWeight: 700, fontSize: "1.06rem", color: INK, margin: "0 0 4px", lineHeight: 1.4 }}>
+              Before we write this card, tell us one real thing about {recipient.name} so it sounds like you.
+            </p>
+            <p style={{ fontSize: "0.9rem", color: MID, margin: "0 0 14px", lineHeight: 1.55 }}>
+              Something they did recently · a funny memory · an inside joke · something happening in their life right now · something they're proud of
+            </p>
+            <textarea
+              autoFocus
+              value={oneDetailText}
+              onChange={e => setOneDetailText(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleDetailAndGenerate(); }}
+              placeholder={`Example: ${recipient.name} finished their first marathon after training for six months.`}
+              rows={3}
+              style={{
+                width: "100%", borderRadius: 9, border: `1.5px solid ${BORDER}`,
+                padding: "10px 13px", fontSize: "1rem", lineHeight: 1.55,
+                background: "#FAF7F4", resize: "none" as const, outline: "none",
+                fontFamily: "'Plus Jakarta Sans', sans-serif", color: INK,
+                boxSizing: "border-box" as const,
+              }}
+            />
+            <button
+              onClick={handleDetailAndGenerate}
+              disabled={!oneDetailText.trim() || savingDetail}
+              style={{
+                width: "100%", marginTop: 12,
+                background: oneDetailText.trim() ? RED : `${RED}50`,
+                color: WHITE, border: "none", borderRadius: 11,
+                padding: "15px 0", fontWeight: 700, fontSize: "1.1rem",
+                cursor: oneDetailText.trim() ? "pointer" : "default",
+              }}
+            >
+              {savingDetail ? "Saving…" : "Use this and write the card"}
+            </button>
+          </div>
+        ) : (
+          <div style={{ background: WHITE, borderRadius: 16, padding: "22px 22px 18px", border: `1px solid ${BORDER}`, marginBottom: 28 }}>
+            <button onClick={() => handleSubmit()} style={{
+              width: "100%", background: RED, color: WHITE, border: "none",
+              borderRadius: 11, padding: "16px 0", fontWeight: 700,
+              fontSize: "1.25rem", cursor: "pointer", letterSpacing: "0.01em",
+            }}>
+              Generate Card →
+            </button>
+            <p style={{ textAlign: "center", fontSize: "1.05rem", color: MID, margin: "10px 0 0" }}>
+              No details needed — we'll use what we already know.
+            </p>
+          </div>
+        )}
 
         {/* ── Optional questions ────────────────────────────────── */}
         {questions.length > 0 && (

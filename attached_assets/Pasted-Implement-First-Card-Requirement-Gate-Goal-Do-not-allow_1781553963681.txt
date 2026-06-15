@@ -1,0 +1,91 @@
+Implement First Card Requirement Gate
+
+Goal:
+
+Do not allow a first card to be generated with only:
+
+* name
+* relationship
+* occasion
+
+A user must provide at least one real detail about the recipient before first card generation.
+
+Valid details include:
+
+* recent accomplishment
+* life update
+* favorite memory
+* inside joke
+* hobby
+* challenge
+* personality trait supplied by the user
+* something happening in their life right now
+
+This should not feel like profile completion.
+
+It should feel like:
+
+"Tell us one real thing so this card sounds like you."
+
+Where to implement:
+
+Start with briefing.tsx, before the Generate Card action fires.
+
+If recipient has no stored details and the briefing form is empty, block generation and show an inline prompt.
+
+Suggested copy:
+
+Before we write this card, tell us one real thing about [Name] so it sounds like you.
+
+Examples:
+
+* Something they did recently
+* A funny memory
+* An inside joke
+* Something happening in their life right now
+* Something they’re proud of
+
+Input placeholder:
+"Example: Bobby finished his first marathon after training for six months."
+
+Button:
+"Use this and write the card"
+
+Behavior:
+
+* User enters one detail.
+* Save it through the existing answer question or fresh update path.
+* Then continue card generation.
+* Do not make the user choose a category.
+* Do not call it a memory requirement.
+* Do not ask 13 profile questions.
+* Do not expose profile completeness.
+
+Important:
+
+If the recipient already has at least one real stored detail, do not block generation.
+
+If the user already answered at least one meaningful briefing field, do not block generation.
+
+The gate should only block truly low context generation.
+
+Acceptance Criteria:
+
+1. Friend + Birthday + only name/relationship/occasion is blocked.
+2. User is asked for one real detail.
+3. After entering the detail, generation proceeds.
+4. The generated card uses that detail.
+5. Existing rich profiles are not blocked.
+6. Existing briefing answers are not blocked.
+7. No new database tables.
+8. Typecheck passes.
+
+After implementation, provide:
+
+* Files changed
+* Exact low context detection logic
+* How the one detail is saved
+* How generation resumes
+* Test example with no detail blocked
+* Test example with one detail allowed
+* Typecheck result
