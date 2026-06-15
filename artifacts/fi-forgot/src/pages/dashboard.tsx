@@ -725,7 +725,17 @@ export default function DashboardPage() {
                             {/* Name + date */}
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{ev.recipient.name}</div>
-                              <div style={{ fontSize: "0.74rem", color: MID, marginTop: 1 }}>{ev.event} · {fmtDate(ev.dateStr)} · {ev.daysAway}d away</div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3, flexWrap: "wrap" as const }}>
+                                <span style={{
+                                  display: "inline-flex", alignItems: "center", gap: 4,
+                                  fontSize: "0.7rem", fontWeight: 600,
+                                  background: BEIGE, border: `1px solid ${BORDER}`,
+                                  borderRadius: 999, padding: "2px 8px", color: INK,
+                                }}>
+                                  {eventEmoji(ev.event)} {ev.event}
+                                </span>
+                                <span style={{ fontSize: "0.74rem", color: MID }}>{fmtDate(ev.dateStr)} · {ev.daysAway}d away</span>
+                              </div>
                             </div>
                             {/* Day badge */}
                             <div style={{
