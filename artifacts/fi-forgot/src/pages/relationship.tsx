@@ -586,28 +586,17 @@ export default function RelationshipPage() {
             {/* Quick actions */}
             <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
               <button
-                onClick={() => setLocation(`/try?recipientId=${id}`)}
-                style={{
-                  padding: "9px 18px", borderRadius: 9, border: "none",
-                  background: RED, color: WHITE, fontWeight: 700,
-                  fontSize: "0.82rem", cursor: "pointer",
-                }}
-              >
-                ✍️ Write Card
-              </button>
-              <button
                 onClick={() => {
                   const el = document.getElementById("add-memory-input");
                   el?.scrollIntoView({ behavior: "smooth", block: "center" });
                   setTimeout(() => (el as HTMLTextAreaElement | null)?.focus(), 400);
                 }}
                 style={{
-                  padding: "9px 18px", borderRadius: 9,
-                  border: `1px solid ${SAGE}70`, background: "transparent",
-                  color: SAGE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer",
+                  padding: "9px 18px", borderRadius: 9, border: "none",
+                  background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer",
                 }}
               >
-                💬 Add Memory
+                ✨ Personalize
               </button>
               <Link href={`/recipients/${id}?edit=1`}>
                 <button style={{
@@ -616,7 +605,7 @@ export default function RelationshipPage() {
                   color: `${WHITE}70`, fontWeight: 600,
                   fontSize: "0.82rem", cursor: "pointer",
                 }}>
-                  Card Briefing
+                  Card Questions
                 </button>
               </Link>
             </div>
