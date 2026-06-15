@@ -308,6 +308,18 @@ export default function RelationshipPage() {
     setSelectedEventChip(null);
   }
 
+  function handleRemoveEvent(label: string) {
+    if (!recipient) return;
+    const holidayEntry = HOLIDAY_EVENTS.find(e => e.label === label);
+    const updated: Recipient = {
+      ...recipient,
+      ...(holidayEntry ? { [holidayEntry.flag]: false } : {}),
+      selectedEvents: (recipient.selectedEvents ?? []).filter(e => e !== label),
+    };
+    saveRecipient(updated);
+    setRecipient(updated);
+  }
+
   function handleAddDateEvent() {
     if (!recipient || !selectedEventChip || !newEventDate) return;
     setSavingEvent(true);
@@ -683,42 +695,53 @@ export default function RelationshipPage() {
                   WHAT DO YOU WANT TO TRACK?
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 16 : 0 }}>
-                  {DATE_SENSITIVE_EVENTS
-                    .filter(e => !isTrackedEvent(e.label, recipient))
-                    .map(e => {
-                      const active = selectedEventChip === e.label;
-                      return (
-                        <button
-                          key={e.label}
-                          onClick={() => { setSelectedEventChip(active ? null : e.label); setNewEventDate(""); }}
-                          style={{
-                            padding: "7px 14px", borderRadius: 20,
-                            border: `1.5px solid ${active ? BLACK : BORDER}`,
-                            background: active ? BLACK : CREAM,
-                            color: active ? WHITE : BLACK,
-                            fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-                          }}
-                        >
-                          {e.emoji} {e.label}
-                        </button>
-                      );
-                    })}
-                  {HOLIDAY_EVENTS
-                    .filter(e => !isTrackedEvent(e.label, recipient))
-                    .map(e => (
+                  {DATE_SENSITIVE_EVENTS.map(e => {
+                    const tracked = isTrackedEvent(e.label, recipient);
+                    const selecting = selectedEventChip === e.label;
+                    return (
                       <button
                         key={e.label}
-                        onClick={() => handleAddHolidayEvent(e.label, e.flag)}
+                        onClick={() => {
+                          if (tracked) { handleRemoveEvent(e.label); }
+                          else { setSelectedEventChip(selecting ? null : e.label); setNewEventDate(""); }
+                        }}
                         style={{
                           padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${BORDER}`,
-                          background: CREAM, color: BLACK,
+                          border: `1.5px solid ${tracked ? "#5B8C6B" : selecting ? BLACK : BORDER}`,
+                          background: tracked ? "#5B8C6B" : selecting ? BLACK : CREAM,
+                          color: tracked || selecting ? WHITE : BLACK,
                           fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 4,
                         }}
                       >
                         {e.emoji} {e.label}
+                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
                       </button>
-                    ))}
+                    );
+                  })}
+                  {HOLIDAY_EVENTS.map(e => {
+                    const tracked = isTrackedEvent(e.label, recipient);
+                    return (
+                      <button
+                        key={e.label}
+                        onClick={() => {
+                          if (tracked) { handleRemoveEvent(e.label); }
+                          else { handleAddHolidayEvent(e.label, e.flag); }
+                        }}
+                        style={{
+                          padding: "7px 14px", borderRadius: 20,
+                          border: `1.5px solid ${tracked ? "#5B8C6B" : BORDER}`,
+                          background: tracked ? "#5B8C6B" : CREAM,
+                          color: tracked ? WHITE : BLACK,
+                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 4,
+                        }}
+                      >
+                        {e.emoji} {e.label}
+                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
+                      </button>
+                    );
+                  })}
                 </div>
                 {selectedEventChip && (
                   <div>
