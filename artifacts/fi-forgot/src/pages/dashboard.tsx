@@ -72,11 +72,26 @@ function personScoreLabel(score: number): { text: string; color: string } {
 }
 
 const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
-  "Valentine's Day": { month: 2,  day: 14 }, "Mother's Day":  { month: 5,  day: 12 },
-  "Father's Day":    { month: 6,  day: 16 }, "Thanksgiving":  { month: 11, day: 28 },
+  "Valentine's Day": { month: 2,  day: 14 },
   "Christmas":       { month: 12, day: 25 }, "Hanukkah":      { month: 12, day: 26 },
   "New Year's":      { month: 1,  day: 1  }, "Easter":        { month: 4,  day: 20 },
 };
+
+/** Returns the date of the Nth occurrence of a weekday in a given month/year.
+ *  weekday: 0=Sun, 1=Mon … 6=Sat */
+function nthWeekday(year: number, month: number, weekday: number, nth: number): Date {
+  const d = new Date(year, month - 1, 1);
+  const first = d.getDay(); // weekday of the 1st
+  const offset = (weekday - first + 7) % 7;
+  return new Date(year, month - 1, 1 + offset + (nth - 1) * 7);
+}
+
+function floatingHolidayDate(event: string, year: number): Date | null {
+  if (event === "Mother's Day")  return nthWeekday(year, 5,  0, 2); // 2nd Sunday of May
+  if (event === "Father's Day")  return nthWeekday(year, 6,  0, 3); // 3rd Sunday of June
+  if (event === "Thanksgiving")  return nthWeekday(year, 11, 4, 4); // 4th Thursday of November
+  return null;
+}
 
 function fmtDate(dateStr: string): string {
   const d = new Date(dateStr + "T12:00:00");
@@ -86,11 +101,12 @@ function fmtDate(dateStr: string): string {
 function getEventDate(event: string, r: Recipient): string | null {
   const now  = new Date(); const year = now.getFullYear();
   const pad  = (n: number) => String(n).padStart(2, "0");
+  const fmt  = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const next = (stored: string) => {
     const p = stored.split("-").map(Number);
     let d   = new Date(year, p[1] - 1, p[2]);
     if (d < now) d = new Date(year + 1, p[1] - 1, p[2]);
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    return fmt(d);
   };
   if (event === "Birthday" && r.birthday)  return next(r.birthday);
   if (event === "Anniversary") {
@@ -99,6 +115,15 @@ function getEventDate(event: string, r: Recipient): string | null {
   }
   const custom = r.customDates?.find(c => c.label === event);
   if (custom?.date) return next(custom.date);
+  // Floating holidays (recalculated each year)
+  const floating = floatingHolidayDate(event, year);
+  if (floating) {
+    if (floating < now) {
+      const next1 = floatingHolidayDate(event, year + 1)!;
+      return fmt(next1);
+    }
+    return fmt(floating);
+  }
   const fixed = HOLIDAY_DATES[event];
   if (fixed) return next(`${year}-${pad(fixed.month)}-${pad(fixed.day)}`);
   return null;
