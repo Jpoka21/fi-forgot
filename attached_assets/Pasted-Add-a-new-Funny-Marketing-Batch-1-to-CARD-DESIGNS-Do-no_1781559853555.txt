@@ -1,0 +1,120 @@
+Add a new Funny Marketing Batch 1 to CARD_DESIGNS.
+
+Do not generate yet.
+Do not remove or modify any existing designs.
+
+Create 15 new CardDesign entries.
+
+GOAL
+
+Create highly shareable, premium-quality humorous greeting card artwork that still feels appropriate for F.I. Forgot and Handwrytten.
+
+Requirements:
+
+• Portrait orientation
+• 5x7 greeting card front
+• No visible text
+• No numbers
+• No watermarks
+• No logos
+• No speech bubbles
+• No people
+• Premium greeting card quality
+• Consistent with existing library aesthetic
+• Humor comes from the imagery itself
+
+STYLE DIRECTION
+
+Think:
+
+• Renaissance portraits
+• Museum-quality animal paintings
+• Elegant watercolor humor
+• Vintage storybook illustrations
+• Premium lifestyle photography parody
+
+Avoid:
+
+• Internet meme style
+• Comic book style
+• Clip art
+• Low-brow novelty cards
+
+Create these 15 cards:
+
+1. Lord Fluffington
+    Category: humor
+    Subcategory: lord_fluffington
+    Theme: regal orange cat seated on a throne in a grand renaissance portrait
+2. Coffee Before Humanity
+    Category: humor
+    Subcategory: coffee_before_humanity
+    Theme: grumpy tabby cat guarding an oversized morning coffee
+3. Retirement Sloth
+    Category: retirement
+    Subcategory: retirement_sloth
+    Theme: relaxed sloth in a hammock overlooking a tropical beach
+4. Judgmental Chicken
+    Category: humor
+    Subcategory: judgmental_chicken
+    Theme: hen staring skeptically from a rustic farm scene
+5. Motivational Goat
+    Category: encouragement
+    Subcategory: motivational_goat
+    Theme: confident mountain goat standing proudly on a dramatic peak
+6. Noble Dog
+    Category: birthday
+    Subcategory: noble_dog
+    Theme: distinguished golden retriever in aristocratic formal portrait
+7. Medieval Hedgehog
+    Category: birthday
+    Subcategory: medieval_hedgehog
+    Theme: whimsical hedgehog painted in illuminated manuscript style
+8. Royal Raccoon
+    Category: humor
+    Subcategory: royal_raccoon
+    Theme: raccoon dressed as nobility in a stately portrait
+9. Vintage Owl
+    Category: thinking_of_you
+    Subcategory: vintage_owl
+    Theme: wise owl in an old-world library
+10. Fancy Pig
+    Category: humor
+    Subcategory: fancy_pig
+    Theme: elegant pig at a formal tea service
+11. Distinguished Duck
+    Category: humor
+    Subcategory: distinguished_duck
+    Theme: duck in a refined gentleman’s portrait
+12. Sophisticated Llama
+    Category: humor
+    Subcategory: sophisticated_llama
+    Theme: stylish llama in a luxury countryside setting
+13. Birthday Bear
+    Category: birthday
+    Subcategory: birthday_bear
+    Theme: cheerful bear celebrating in a refined woodland scene
+14. Wise Tortoise
+    Category: encouragement
+    Subcategory: wise_tortoise
+    Theme: tortoise traveling a beautiful winding path through nature
+15. Legendary Fox
+    Category: birthday
+    Subcategory: legendary_fox
+    Theme: charismatic fox in a dramatic heroic portrait
+
+For each design provide:
+
+• title
+• category
+• subcategory
+• image prompt
+• tags[]
+• style
+• tone
+• primaryColor
+• seasonal
+
+Do not generate images yet.
+
+Only create the CARD_DESIGNS entries and show the complete manifest additions for review.
