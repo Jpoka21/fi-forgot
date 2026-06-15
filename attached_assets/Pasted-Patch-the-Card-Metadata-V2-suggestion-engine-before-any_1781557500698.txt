@@ -1,0 +1,81 @@
+Patch the Card Metadata V2 suggestion engine before any bulk backfill.
+
+Do not run Auto Backfill All yet.
+Do not update any card records yet.
+This is a logic patch only.
+
+Apply these fixes:
+
+1. Fix watercolor false positive
+    The outdoor interest regex is matching “water” inside “watercolor.”
+    Update the outdoor/water detection so it only matches water as a standalone word.
+    For example, use a word boundary around water.
+2. Remove “bold” from masculine detection
+    The word “bold” is an art style descriptor, not a reliable masculine signal.
+    Cards with “bold illustration” should not automatically become masculine.
+3. Add coffee as an interest signal
+    Cards tagged with coffee should receive an interest tag.
+    Add coffee as either:
+    interests[] = [“coffee”]
+    or, if you want to avoid a new category, include coffee under cooking.
+    Preferred: add “coffee” as its own interest value.
+4. Add floral bouquet signals to feminine detection
+    Add these feminine leaning signals:
+    wildflower
+    wildflowers
+    bouquet
+    blossom
+    blossoms
+    floral
+5. Prevent business cards from getting aesthetic based interests
+    If audience = business, do not infer interests from aesthetic tags like:
+    botanical
+    floral
+    bouquet
+    wildflower
+    wildflowers
+    blossom
+    blossoms
+
+Business cards should only receive an interest if the tag clearly represents the recipient’s actual interest, not the visual style.
+
+6. Prevent business cards from getting gender lean from aesthetic tags
+    If audience = business, default gender_lean to neutral unless there is an extremely explicit reason not to.
+7. Add sibling to just_because relationships
+    For just_because cards, relationship[] should include:
+    spouse
+    friend
+    parent
+    sibling
+    general
+8. Preserve all existing safe mappings
+    Do not change the parts that worked well:
+    occasion[]
+    audience
+    season
+    styleCanonical
+    basic category based relationship mapping
+    toneCanonical except where noted below
+9. Tone handling
+    Do not map adventurous to hopeful if a better option is available.
+    If the current canonical tone list does not include adventurous, leave this as-is for now rather than expanding the schema.
+
+After patching, rerun the same 10 sample card report:
+
+• 3 Birthday cards
+• 3 Just Because cards
+• 2 Humor cards
+• 2 Business Relationship Anniversary cards
+
+Show the before vs after suggestions for:
+occasion[]
+relationship[]
+interests[]
+season
+audience
+gender_lean
+styleCanonical
+toneCanonical
+
+Do not update the database.
+This remains review only.

@@ -65,7 +65,7 @@ const CATEGORY_RELATIONSHIP: Record<string, string[]> = {
   congratulations_personal:           ["friend", "parent", "child", "sibling", "general"],
   graduation:                         ["child", "sibling", "friend", "general"],
   holiday_personal:                   ["spouse", "parent", "child", "sibling", "friend", "general"],
-  just_because:                       ["spouse", "friend", "parent", "general"],
+  just_because:                       ["spouse", "friend", "parent", "sibling", "general"],
   humor:                              ["friend", "sibling", "colleague", "general"],
   thank_you:                          ["friend", "parent", "colleague", "general"],
   home_purchase_anniversary:          ["client", "colleague", "general"],
@@ -91,10 +91,11 @@ const CATEGORY_AUDIENCE: Record<string, string> = {
 const TAG_INTEREST_MAP: [RegExp, string][] = [
   [/botanical|roses|garden|flowers|wildflower|bloom|floral|lavender|peony|sunflower/, "garden"],
   [/mountain|adventure|hiking|trail|climbing|outdoor|path|road|summit/, "outdoor"],
-  [/ocean|waves|coastal|beach|water|horizon|sea/, "outdoor"],
+  [/ocean|waves|coastal|beach|\bwater\b|horizon|sea/, "outdoor"],   // \bwater\b: avoids matching "watercolor"
   [/music|vinyl|record/, "music"],
   [/reading|book|nook|library/, "reading"],
   [/cat|dog|pet/, "pets"],
+  [/\bcoffee\b/, "coffee"],                                         // coffee as own interest category
   [/cooking|grill|bbq|farmers.market|kitchen|food/, "cooking"],
   [/wine|champagne|toast|pour|glass/, "wine"],
   [/travel|journey|wanderlust|destination|road.trip/, "travel"],
@@ -104,8 +105,13 @@ const TAG_INTEREST_MAP: [RegExp, string][] = [
   [/calm|serene|wellness|meditation|peace|mindful|gentle/, "wellness"],
 ];
 
-const FEMININE_TAGS = /roses|botanical|blush|floral|pink|lavender|wedding|mothers|bridal|peony|delicate|soft/i;
-const MASCULINE_TAGS = /whiskey|masculine|beer|sports|tool|workshop|bbq|grill|car|vehicle|bold|strong|rugged/i;
+// feminine: added wildflower/wildflowers/bouquet/blossom/blossoms
+// masculine: removed "bold" (art-style descriptor, not a gender signal)
+const FEMININE_TAGS  = /roses|botanical|blush|floral|pink|lavender|wedding|mothers|bridal|peony|delicate|soft|wildflower|wildflowers|bouquet|blossom|blossoms/i;
+const MASCULINE_TAGS = /whiskey|masculine|beer|sports|tool|workshop|bbq|grill|car|vehicle|strong|rugged/i;
+
+// Aesthetic-only tags that should not drive interests or gender on business cards
+const BUSINESS_AESTHETIC_TAGS = /\b(botanical|floral|bouquet|wildflower|wildflowers|blossom|blossoms)\b/gi;
 
 const STYLE_CANONICAL: Record<string, string> = {
   "cozy lifestyle":          "cozy_lifestyle",
@@ -166,12 +172,6 @@ function suggestMetadata(card: {
   // relationship[]
   const rel = CATEGORY_RELATIONSHIP[cat] ?? ["general"];
 
-  // interests[]
-  const interestSet = new Set<string>();
-  for (const [pattern, interest] of TAG_INTEREST_MAP) {
-    if (pattern.test(tagStr) || pattern.test(sub)) interestSet.add(interest);
-  }
-
   // season
   let season = "year_round";
   if (card.seasonal || /christmas|holiday|winter/i.test(sub)) season = "winter";
@@ -179,16 +179,31 @@ function suggestMetadata(card: {
   else if (/fathers.day|summer/i.test(sub)) season = "summer";
   else if (/thanksgiving|fall|autumn/i.test(sub)) season = "fall";
 
-  // audience
+  // audience — computed before interests so the business guard can use it
   let audience = CATEGORY_AUDIENCE[cat] ?? "personal";
   if (cat === "holiday_personal" || cat === "birthday" || cat === "personal_anniversary") {
     audience = "personal";
   }
 
-  // gender_lean
+  // interests[] — business cards: strip aesthetic-only tags before pattern matching
+  // so that visual style choices (botanical, floral, bouquet…) don't imply recipient interests
+  const tagStrForInt = audience === "business"
+    ? tagStr.replace(BUSINESS_AESTHETIC_TAGS, "")
+    : tagStr;
+  const subForInt = audience === "business"
+    ? sub.replace(BUSINESS_AESTHETIC_TAGS, "")
+    : sub;
+  const interestSet = new Set<string>();
+  for (const [pattern, interest] of TAG_INTEREST_MAP) {
+    if (pattern.test(tagStrForInt) || pattern.test(subForInt)) interestSet.add(interest);
+  }
+
+  // gender_lean — business cards always neutral (aesthetic style ≠ recipient gender)
   let genderLean = "neutral";
-  if (FEMININE_TAGS.test(tagStr) || FEMININE_TAGS.test(sub)) genderLean = "feminine";
-  else if (MASCULINE_TAGS.test(tagStr) || MASCULINE_TAGS.test(sub)) genderLean = "masculine";
+  if (audience !== "business") {
+    if (FEMININE_TAGS.test(tagStr) || FEMININE_TAGS.test(sub)) genderLean = "feminine";
+    else if (MASCULINE_TAGS.test(tagStr) || MASCULINE_TAGS.test(sub)) genderLean = "masculine";
+  }
   if (sub === "birthday_masculine") genderLean = "masculine";
 
   // canonical style and tone
