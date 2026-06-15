@@ -758,7 +758,7 @@ export default function RecipientProfilePage() {
             ) : (
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Link href={isEditMode ? `/relationship/${params.id}` : backTo}>
+                  <Link href={backTo}>
                     <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }} data-testid="button-back-recipients">
                       <ArrowLeft size={18} />
                     </button>

@@ -35,7 +35,7 @@ import BrowniePointsPage from "@/pages/brownie-points";
 import PeoplePage from "@/pages/people";
 import MomentsPage from "@/pages/moments";
 import QuickCardPage from "@/pages/quick-card";
-import RelationshipPage from "@/pages/relationship";
+
 import { BrowniePointsProvider } from "@/lib/brownie-points-context";
 import { BrowniePointsToast } from "@/components/BrowniePointsToast";
 
@@ -109,9 +109,7 @@ function Router() {
       <Route path="/recipients/:id">
         <ProtectedRoute component={RecipientProfilePage} />
       </Route>
-      <Route path="/relationship/:id">
-        <ProtectedRoute component={RelationshipPage} />
-      </Route>
+
       <Route path="/briefings/:recipientId/:event">
         <ProtectedRoute component={BriefingPage} />
       </Route>
