@@ -722,25 +722,27 @@ export default function DashboardPage() {
                                 {ev.recipient.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
                               </span>
                             </div>
-                            {/* Name + date */}
+                            {/* Name + event + date */}
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div
-                                onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
-                                style={{ fontWeight: 700, fontSize: "0.92rem", color: INK, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}
-                              >
-                                {ev.recipient.name}
-                                <span style={{ fontSize: "0.7rem", color: MID, fontWeight: 400 }}>↗</span>
-                              </div>
-                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3, flexWrap: "wrap" as const }}>
-                                <span style={{
-                                  display: "inline-flex", alignItems: "center", gap: 4,
-                                  fontSize: "0.7rem", fontWeight: 600,
-                                  background: BEIGE, border: `1px solid ${BORDER}`,
-                                  borderRadius: 999, padding: "2px 8px", color: INK,
-                                }}>
-                                  {eventEmoji(ev.event)} {ev.event}
-                                </span>
-                                <span style={{ fontSize: "0.74rem", color: MID }}>{fmtDate(ev.dateStr)} · {ev.daysAway}d away</span>
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                <div
+                                  onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
+                                  style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", color: INK, cursor: "pointer", letterSpacing: "0.02em", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 5 }}
+                                >
+                                  {ev.recipient.name.toUpperCase()}
+                                  <span style={{ fontSize: "0.7rem", color: MID, fontWeight: 400, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>↗</span>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                                  <span style={{
+                                    display: "inline-flex", alignItems: "center", gap: 3,
+                                    fontSize: "0.68rem", fontWeight: 600,
+                                    background: BEIGE, border: `1px solid ${BORDER}`,
+                                    borderRadius: 999, padding: "2px 7px", color: INK,
+                                  }}>
+                                    {eventEmoji(ev.event)} {ev.event}
+                                  </span>
+                                  <span style={{ fontSize: "0.72rem", color: MID, whiteSpace: "nowrap" as const }}>{fmtDate(ev.dateStr)}</span>
+                                </div>
                               </div>
                             </div>
                             {/* Day badge */}
