@@ -688,7 +688,7 @@ export default function RelationshipPage() {
                             color: accent, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
                           }}
                         >
-                          Prepare ✦
+                          Card Briefing ✦
                         </button>
                         <button
                           onClick={() => setLocation(`/try?recipientId=${id}`)}

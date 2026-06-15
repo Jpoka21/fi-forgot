@@ -414,114 +414,127 @@ export default function BriefingPage() {
   const hasChildrenQuestion = allQuestions.some((q) => q.type === "children");
   const childrenSummaryStr = childrenSummary(editedChildren);
 
+  // Build "We already know" bullets from profile fields — up to 5
+  const knownBullets: string[] = [];
+  (recipient.interests ?? []).forEach((i) => knownBullets.push(i));
+  (recipient.personality ?? []).forEach((p) => knownBullets.push(p));
+  if (recipient.favoriteMemories?.trim()) knownBullets.push(recipient.favoriteMemories.trim().slice(0, 80) + (recipient.favoriteMemories.trim().length > 80 ? "…" : ""));
+  if (recipient.personalityNotes?.trim()) knownBullets.push(recipient.personalityNotes.trim().slice(0, 80) + (recipient.personalityNotes.trim().length > 80 ? "…" : ""));
+  if (recipient.insideJokes?.trim()) knownBullets.push(recipient.insideJokes.trim().slice(0, 80) + (recipient.insideJokes.trim().length > 80 ? "…" : ""));
+  const displayBullets = knownBullets.slice(0, 5);
+
   return (
     <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
       <AppNav />
       <div className="p-6 md:p-8 max-w-2xl mx-auto">
+
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Link href={`/recipients/${recipient.id}`}>
-            <button className="p-2 text-[hsl(221,20%,60%)] hover:text-[hsl(221,47%,20%)] hover:bg-[hsl(40,20%,90%)] rounded-lg transition-colors">
+            <button className="p-2 hover:bg-[hsl(40,20%,90%)] rounded-lg transition-colors" style={{ color: "#8a9abf" }}>
               <ArrowLeft size={18} />
             </button>
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span
-                className="text-xs font-bold px-2.5 py-1 rounded-full text-white"
-                style={{ background: NAVY }}
-              >
-                {eventName}
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: RED }}>
+                Card Briefing
               </span>
-              <span className="text-xs text-[hsl(221,20%,50%)]">
-                {isEditing ? "Editing briefing" : `${new Date().getFullYear()} Briefing`}
-              </span>
+              <span className="text-xs" style={{ color: "#8a9abf" }}>{eventName} · {new Date().getFullYear()}</span>
             </div>
-            <h1 className="font-serif text-2xl font-bold text-[hsl(221,47%,20%)] mt-0.5">
-              {recipient.name}'s {eventName} Brief
+            <h1 className="font-serif text-2xl font-bold mt-0.5" style={{ color: NAVY }}>
+              {recipient.name}'s {eventName} Card
             </h1>
-            <p className="text-sm text-[hsl(221,20%,50%)]">
-              We'll use this to write a card that actually sounds like it came from you.
+            <p className="text-sm" style={{ color: "#8a9abf" }}>
+              Add a detail or two to make it more personal — or skip straight to the card.
             </p>
           </div>
         </div>
 
-        {/* Context summary — what we already know */}
-        {(() => {
-          const knownBullets: string[] = [];
-          if (recipient.personalityNotes?.trim()) knownBullets.push(recipient.personalityNotes.trim());
-          if (recipient.favoriteMemories?.trim())  knownBullets.push(recipient.favoriteMemories.trim());
-          if (recipient.insideJokes?.trim())        knownBullets.push(recipient.insideJokes.trim());
-          const bullets = knownBullets.slice(0, 3);
-          return (
-            <div
-              className="mb-5 px-4 py-3 rounded-xl text-sm"
-              style={{ background: `${NAVY}05`, border: `1px solid ${NAVY}10` }}
-            >
-              <p style={{ color: "#6b7a99", margin: "0 0 4px" }}>
-                We'll also use what we already know about {recipient.name} — recent memories, profile details, and past cards.
-              </p>
-              {bullets.length > 0 && (
-                <div style={{ marginTop: 8 }}>
-                  <span className="font-semibold text-xs" style={{ color: NAVY }}>We already know:</span>
-                  <ul style={{ margin: "6px 0 0", paddingLeft: 16, color: "#6b7a99" }}>
-                    {bullets.map((b, i) => (
-                      <li key={i} style={{ fontSize: 12, marginBottom: 3 }}>{b.length > 90 ? b.slice(0, 88) + "…" : b}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* Skip option */}
-        {!isEditing && (
-          <div
-            className="mb-5 px-4 py-3 rounded-xl flex items-center justify-between gap-3"
-            style={{ background: `${NAVY}06`, border: `1px solid ${NAVY}12` }}
-          >
-            <p className="text-sm" style={{ color: "#6b7a99", margin: 0 }}>
-              <span className="font-semibold" style={{ color: NAVY }}>Optional:</span> Answer what you know, skip the rest. Even one answer makes the card better.
+        {/* ── SECTION A: WE ALREADY KNOW ── */}
+        <div
+          className="mb-2 rounded-2xl p-5"
+          style={{ background: "#EDF4EF", border: "1.5px solid #C8DDD0" }}
+        >
+          <p className="text-xs font-bold tracking-widest mb-3" style={{ color: "#3D6B4F", textTransform: "uppercase" }}>
+            We Already Know About {recipient.name}
+          </p>
+          {displayBullets.length > 0 ? (
+            <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+              {displayBullets.map((b, i) => (
+                <li key={i} className="flex items-start gap-2 mb-2 text-sm" style={{ color: "#3a5c47" }}>
+                  <span style={{ color: "#5B8C6B", marginTop: 2, flexShrink: 0 }}>•</span>
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm" style={{ color: "#6b9a7a" }}>
+              Profile details, recent memories, and past cards will appear here once added.
             </p>
-            <button
-              onClick={handleSubmit}
-              className="text-sm font-bold px-4 py-2 rounded-lg shrink-0"
-              style={{ background: `${NAVY}12`, color: NAVY, border: "none", cursor: "pointer", whiteSpace: "nowrap" }}
-            >
-              Skip → Generate now
-            </button>
-          </div>
-        )}
+          )}
+          {hasChildrenQuestion && childrenAlreadyOnFile && childrenSummaryStr && (
+            <div className="mt-3 pt-3" style={{ borderTop: "1px solid #C8DDD0" }}>
+              <span className="text-xs font-semibold" style={{ color: "#3D6B4F" }}>Children on file: </span>
+              <span className="text-xs" style={{ color: "#5a7a65" }}>{childrenSummaryStr}</span>
+              <span className="text-xs ml-1" style={{ color: "#8ab09a" }}>(ages auto-update)</span>
+            </div>
+          )}
+          <p className="text-xs mt-3 pt-3" style={{ color: "#5B8C6B", borderTop: "1px solid #C8DDD0" }}>
+            We'll automatically use these details when writing the card.
+          </p>
+        </div>
 
-        {/* Children on file — show summary when children question is skipped */}
-        {hasChildrenQuestion && childrenAlreadyOnFile && childrenSummaryStr && (
-          <div
-            className="mb-5 px-4 py-3 rounded-xl text-sm"
-            style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}15` }}
+        {/* Skip & Generate — always visible, prominent */}
+        <div className="mb-6 mt-4">
+          <button
+            onClick={handleSubmit}
+            className="w-full font-bold py-4 rounded-xl text-white hover:opacity-90 transition-all text-base"
+            style={{ background: RED }}
           >
-            <span className="font-semibold text-[hsl(221,47%,20%)]">Children on file: </span>
-            <span className="text-[hsl(221,20%,45%)]">{childrenSummaryStr}</span>
-            <span className="text-xs ml-2 text-[hsl(221,20%,60%)]">(ages auto-update from birthdates)</span>
-          </div>
-        )}
+            Skip &amp; Generate Card →
+          </button>
+          <p className="text-center text-xs mt-2" style={{ color: "#aaa" }}>
+            We'll write a great card using what we already know. No details needed.
+          </p>
+        </div>
 
-        {/* Questions */}
-        <div className="space-y-5">
-          {questions.map((q, i) => (
+        {/* ── SECTION B: OPTIONAL DETAILS ── */}
+        <div className="mb-4">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="flex-1 h-px" style={{ background: "#D8CEBD" }} />
+            <p className="text-xs font-bold tracking-widest shrink-0" style={{ color: "#9a8e7e", textTransform: "uppercase" }}>
+              Optional Details for This Card
+            </p>
+            <div className="flex-1 h-px" style={{ background: "#D8CEBD" }} />
+          </div>
+          <p className="text-center text-xs mt-1" style={{ color: "#aaa" }}>
+            Everything below is optional. Skip anything you don't know. Even one answer makes the card more personal.
+          </p>
+        </div>
+
+        {/* Questions — all marked optional */}
+        <div className="space-y-4">
+          {questions.map((q) => (
             <div
               key={q.key}
-              className="bg-white rounded-xl border border-[hsl(40,20%,85%)] p-6 shadow-sm"
+              className="bg-white rounded-xl p-5 shadow-sm"
+              style={{ border: "1px solid #E5E0D8" }}
             >
               <div className="mb-3">
-                <label className="block font-semibold text-[hsl(221,47%,20%)] mb-0.5">
-                  {q.question}
-                  {q.optional && (
-                    <span className="ml-2 text-xs font-normal text-[hsl(221,20%,60%)]">(optional)</span>
-                  )}
-                </label>
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                  <span
+                    className="text-xs font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: "#F5F0EA", color: "#9a8e7e" }}
+                  >
+                    Optional
+                  </span>
+                  <label className="font-semibold text-sm" style={{ color: NAVY }}>
+                    {q.question}
+                  </label>
+                </div>
                 {q.hint && (
-                  <p className="text-xs text-[hsl(221,20%,55%)] mt-1">{q.hint}</p>
+                  <p className="text-xs mt-1" style={{ color: "#9a8e7e" }}>{q.hint}</p>
                 )}
               </div>
               <QuestionField
@@ -535,14 +548,14 @@ export default function BriefingPage() {
           ))}
         </div>
 
-        {/* Submit */}
-        <div className="mt-8 flex gap-3">
+        {/* Bottom actions */}
+        <div className="mt-7 flex gap-3">
           <button
             onClick={handleSubmit}
             className="flex-1 font-bold py-4 rounded-xl text-white hover:opacity-90 transition-all"
             style={{ background: RED }}
           >
-            {isEditing ? "Save Changes" : "Save Briefing →"}
+            {isEditing ? "Save Changes →" : "Generate Card →"}
           </button>
           <Link href={`/recipients/${recipient.id}`}>
             <button
@@ -554,8 +567,8 @@ export default function BriefingPage() {
           </Link>
         </div>
 
-        <p className="text-center mt-4 text-xs" style={{ color: "#aaa" }}>
-          Your answers are saved to {recipient.name}'s profile and get smarter every year.
+        <p className="text-center mt-3 text-xs" style={{ color: "#ccc" }}>
+          These details help make this card personal. They're not required for a great card.
         </p>
       </div>
     </div>

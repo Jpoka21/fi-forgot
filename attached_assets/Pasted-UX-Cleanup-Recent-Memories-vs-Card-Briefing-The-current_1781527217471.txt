@@ -1,0 +1,133 @@
+UX Cleanup: Recent Memories vs Card Briefing
+
+The current experience is confusing because users can enter similar information in both "Recent Memories" and "Prepare."
+
+Do NOT change the database structure, storage model, card generation logic, timeline logic, scoring, or existing briefing logic.
+
+This is a UX and messaging update only.
+
+GOAL
+
+Make the distinction obvious:
+
+Recent Memories
+= ongoing relationship knowledge that improves future cards
+
+Card Briefing
+= optional event specific context for this card only
+
+Users should never feel like they are answering the same questions twice.
+
+CHANGES
+
+1. Rename "Prepare"
+
+Replace "Prepare" with:
+
+Card Briefing
+
+or
+
+Brief This Card
+
+Choose whichever fits the UI best.
+
+2. Card Briefing Layout
+
+When opened, show:
+
+SECTION A
+
+WE ALREADY KNOW ABOUT [NAME]
+
+Display up to 5 recent memories, profile facts, fresh updates, or timeline items already on file.
+
+Examples:
+
+• Started a new job
+• Took a trip to Vermont
+• Daughter graduated
+• Loves golf
+• Favorite vacation was Maine
+
+Helper text:
+
+"We'll automatically use these details when writing the card."
+
+3. Optional Details Section
+
+Below the summary, add a clearly separated section:
+
+OPTIONAL DETAILS FOR THIS CARD
+
+Helper text:
+
+"Everything below is optional. Skip anything you don't know. Even one answer can make the card more personal."
+
+4. Keep Existing Questions
+
+Keep all current event briefing questions and conditional follow ups.
+
+Do not remove any logic.
+
+However, visually label every question as optional.
+
+Examples:
+
+Optional: Is this a milestone birthday?
+
+Optional: Did they accomplish something important this year?
+
+Optional: Is there anything happening in their life right now that should be mentioned?
+
+Optional: Anything you'd prefer we avoid mentioning?
+
+5. Skip & Generate
+
+Add a prominent:
+
+Skip & Generate Card
+
+button.
+
+This should always be available without answering any questions.
+
+Users should never feel blocked.
+
+6. Remove Completion Language
+
+Replace wording such as:
+
+Answer Core Questions
+Complete Your Briefing
+Required
+
+With:
+
+Add Optional Details
+Make This Card More Personal
+Add Extra Context
+
+7. Visual Hierarchy
+
+Create two clearly separated sections:
+
+WHAT WE ALREADY KNOW
+
+and
+
+OPTIONAL DETAILS FOR THIS CARD
+
+The distinction should be obvious at a glance.
+
+SUCCESS CRITERIA
+
+A first time user should immediately understand:
+
+• Recent Memories improve future cards
+• Card Briefing is only for this specific event
+• Everything in the briefing is optional
+• They can generate a great card without answering anything
+• Adding one or two details simply makes the card better
+
+Do not modify any underlying storage, database schema, card generation logic, memory logic, timeline logic, or scoring systems. This is a UX clarity improvement only.
