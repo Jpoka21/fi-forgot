@@ -170,7 +170,7 @@ function Router() {
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo", "/brownie-points", "/people", "/moments", "/quick-card"];
+const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo", "/brownie-points", "/people", "/moments", "/quick-card", "/relationship"];
 
 function FloatingTryButton() {
   const [location] = useLocation();

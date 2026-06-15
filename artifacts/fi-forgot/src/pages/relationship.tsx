@@ -14,15 +14,16 @@ import {
 } from "@/lib/data";
 
 // ── Brand tokens ──────────────────────────────────────────────────────────────
-const BG     = "#F2E6D3";
-const RED    = "#E23B2E";
-const BLACK  = "#111111";
-const SAGE   = "#5B8C6B";
-const GRAY   = "#6B6B6B";
-const BORDER = "#E5E0D8";
-const WHITE  = "#FFFFFF";
-const CREAM  = "#FDF7EF";
-const AMBER  = "#D97706";
+const BG      = "#FAF7F4";
+const RED     = "#E23B2E";
+const BLACK   = "#111111";
+const CHARCOAL = "#2D2D2D";
+const SAGE    = "#5B8C6B";
+const GRAY    = "#6B6B6B";
+const BORDER  = "#E5E0D8";
+const WHITE   = "#FFFFFF";
+const CREAM   = "#FDF7EF";
+const AMBER   = "#D97706";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -501,13 +502,8 @@ export default function RelationshipPage() {
     return (
       <>
         <AppNav />
-        <div style={{
-          background: BG, minHeight: "100vh", display: "flex",
-          alignItems: "center", justifyContent: "center",
-        }}>
-          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: GRAY }}>
-            Loading…
-          </div>
+        <div style={{ background: BG, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: GRAY }}>Loading…</div>
         </div>
       </>
     );
@@ -520,320 +516,215 @@ export default function RelationshipPage() {
       <div style={{ background: BG, minHeight: "100vh" }}>
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px 80px", boxSizing: "border-box" as const }}>
 
-          {/* ── Back ──────────────────────────────────────────────────────────── */}
-          <div style={{ padding: "16px 0 8px" }}>
+          {/* ── Back ─────────────────────────────────────────────────────────── */}
+          <div style={{ padding: "16px 0 12px" }}>
             <Link href="/dashboard">
-              <button style={{
-                background: "none", border: "none", cursor: "pointer",
-                color: GRAY, fontSize: "0.8rem", fontWeight: 600,
-                display: "flex", alignItems: "center", gap: 4, padding: 0,
-              }}>
+              <button style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "0.8rem", fontWeight: 600, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
                 ← Dashboard
               </button>
             </Link>
           </div>
 
-          {/* ══ 1. HERO + OCCASIONS (grouped card) ══════════════════════════════ */}
-          <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 24, border: `1px solid ${BORDER}` }}>
-          <div style={{
-            background: BLACK, padding: "26px 22px",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-              {/* Avatar */}
-              <div style={{
-                width: 62, height: 62, borderRadius: "50%",
-                background: `${RED}22`, border: `2px solid ${RED}50`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0,
-              }}>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", color: WHITE }}>
-                  {initials(recipient.name)}
-                </span>
-              </div>
+          {/* ══ PROFILE CARD + OCCASIONS ════════════════════════════════════════ */}
+          <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 16, boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid #EDEBE6" }}>
 
-              {/* Name + badges */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontFamily: "'Bebas Neue', cursive", fontSize: "2.1rem",
-                  color: WHITE, lineHeight: 1, letterSpacing: "0.02em",
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
-                }}>
-                  {recipient.name.toUpperCase()}
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 5 }}>
-                  <span style={{
-                    padding: "2px 10px", borderRadius: 20,
-                    background: `${WHITE}10`, color: `${WHITE}80`,
-                    fontSize: "0.76rem", fontWeight: 600,
-                  }}>
-                    {(recipient as any).relationship}
+            {/* White profile panel */}
+            <div style={{ background: WHITE, padding: "20px 22px 18px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
+                <div style={{ width: 58, height: 58, borderRadius: "50%", background: "#EDE8E0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.45rem", color: SAGE }}>
+                    {initials(recipient.name)}
                   </span>
-                  {nextEvent && (
-                    <span style={{
-                      padding: "2px 10px", borderRadius: 20,
-                      background: nextEvent.daysAway <= 14 ? `${RED}25` : `${WHITE}08`,
-                      border: nextEvent.daysAway <= 14 ? `1px solid ${RED}50` : "none",
-                      color: nextEvent.daysAway <= 14 ? RED : `${WHITE}60`,
-                      fontSize: "0.74rem", fontWeight: 700,
-                    }}>
-                      {nextEvent.event} · {daysLabel(nextEvent.daysAway)}
-                    </span>
-                  )}
                 </div>
-              </div>
-            </div>
-
-            {/* Quick actions */}
-            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
-              <Link href={`/recipients/${id}?edit=1`}>
-                <button style={{
-                  padding: "9px 18px", borderRadius: 9, border: "none",
-                  background: SAGE, color: WHITE, fontWeight: 700,
-                  fontSize: "0.82rem", cursor: "pointer",
-                }}>
-                  📋 Core Questions
-                </button>
-              </Link>
-            </div>
-          </div>
-
-          {/* ── Occasions panel (light bottom of grouped card) ───────────────── */}
-          <div style={{ background: WHITE, padding: "16px 22px", borderTop: `1px solid ${BORDER}` }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.08em", color: GRAY }}>
-                OCCASIONS WE'LL SEND FOR
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: CHARCOAL, lineHeight: 1, letterSpacing: "0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+                    {recipient.name.toUpperCase()}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 5 }}>
+                    <span style={{ padding: "2px 10px", borderRadius: 20, background: "#EDE8E0", color: GRAY, fontSize: "0.74rem", fontWeight: 600 }}>
+                      {(recipient as any).relationship}
+                    </span>
+                    {nextEvent && (
+                      <span style={{ padding: "2px 10px", borderRadius: 20, background: nextEvent.daysAway <= 14 ? `${RED}12` : "#EDE8E0", color: nextEvent.daysAway <= 14 ? RED : GRAY, fontSize: "0.74rem", fontWeight: 700, border: nextEvent.daysAway <= 14 ? `1px solid ${RED}30` : "none" }}>
+                        {nextEvent.event} · {daysLabel(nextEvent.daysAway)}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
               <button
-                onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
-                style={{ fontSize: "0.76rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                onClick={() => { const el = document.getElementById("add-memory-input"); el?.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => (el as HTMLTextAreaElement | null)?.focus(), 400); }}
+                style={{ padding: "8px 16px", borderRadius: 9, border: "none", background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}
               >
-                {showAddEvent ? "Done" : "+ Add Occasion"}
+                💬 Add More Memories
               </button>
             </div>
 
-            {/* Tracked occasion chips — always visible */}
-            {(() => {
-              const allOccasions = [
-                ...DATE_SENSITIVE_EVENTS,
-                ...HOLIDAY_EVENTS.map(e => ({ label: e.label, emoji: e.emoji })),
-              ];
-              const tracked = allOccasions.filter(e => isTrackedEvent(e.label, recipient));
-              if (tracked.length === 0 && !showAddEvent) {
-                return (
-                  <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
-                    <div style={{ fontSize: "0.84rem", color: GRAY, marginBottom: 10 }}>
-                      No occasions added yet.
+            {/* Occasions panel */}
+            <div style={{ background: "#FAF7F4", padding: "14px 22px", borderTop: "1px solid #EDEBE6" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em", color: GRAY }}>
+                  WE'LL SEND CARDS FOR THESE OCCASIONS
+                </div>
+                <button onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
+                  style={{ fontSize: "0.74rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                  {showAddEvent ? "Done" : "+ Add Occasion"}
+                </button>
+              </div>
+
+              {/* Tracked chips */}
+              {(() => {
+                const allOccasions = [...DATE_SENSITIVE_EVENTS, ...HOLIDAY_EVENTS.map(e => ({ label: e.label, emoji: e.emoji }))];
+                const tracked = allOccasions.filter(e => isTrackedEvent(e.label, recipient));
+                if (tracked.length === 0 && !showAddEvent) {
+                  return (
+                    <div style={{ borderRadius: 10, border: `1px dashed ${BORDER}`, padding: "14px", textAlign: "center" as const }}>
+                      <div style={{ fontSize: "0.82rem", color: GRAY, marginBottom: 8 }}>No occasions added yet.</div>
+                      <button onClick={() => setShowAddEvent(true)} style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>+ Add Occasion</button>
                     </div>
-                    <button
-                      onClick={() => setShowAddEvent(true)}
-                      style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}
-                    >
-                      + Add Occasion
-                    </button>
+                  );
+                }
+                if (tracked.length === 0) return null;
+                return (
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7, marginBottom: showAddEvent ? 12 : 0 }}>
+                    {tracked.map(e => (
+                      <div key={e.label} style={{ padding: "5px 12px", borderRadius: 20, background: SAGE, color: WHITE, fontWeight: 600, fontSize: "0.78rem", display: "flex", alignItems: "center", gap: 4 }}>
+                        {e.emoji} {e.label}
+                      </div>
+                    ))}
                   </div>
                 );
-              }
-              if (tracked.length === 0) return null;
-              return (
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: showAddEvent ? 12 : 0 }}>
-                  {tracked.map(e => (
-                    <div key={e.label} style={{
-                      padding: "7px 14px", borderRadius: 20,
-                      background: SAGE, border: `1.5px solid ${SAGE}`,
-                      color: WHITE, fontWeight: 600, fontSize: "0.82rem",
-                      display: "flex", alignItems: "center", gap: 5,
-                    }}>
-                      {e.emoji} {e.label}
+              })()}
+
+              {/* Occasion picker */}
+              {showAddEvent && recipient && (
+                <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "14px", marginTop: 4 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7, marginBottom: selectedEventChip ? 14 : 0 }}>
+                    {DATE_SENSITIVE_EVENTS.map(e => {
+                      const tracked = isTrackedEvent(e.label, recipient);
+                      const selecting = selectedEventChip === e.label;
+                      return (
+                        <button key={e.label} onClick={() => { if (tracked) { handleRemoveEvent(e.label); } else { setSelectedEventChip(selecting ? null : e.label); setNewEventDate(""); } }}
+                          style={{ padding: "6px 12px", borderRadius: 20, border: `1.5px solid ${tracked ? SAGE : selecting ? BLACK : BORDER}`, background: tracked ? SAGE : selecting ? BLACK : CREAM, color: tracked || selecting ? WHITE : BLACK, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                          {e.emoji} {e.label}{tracked && <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>✓</span>}
+                        </button>
+                      );
+                    })}
+                    {HOLIDAY_EVENTS.map(e => {
+                      const tracked = isTrackedEvent(e.label, recipient);
+                      return (
+                        <button key={e.label} onClick={() => { if (tracked) { handleRemoveEvent(e.label); } else { handleAddHolidayEvent(e.label, e.flag); } }}
+                          style={{ padding: "6px 12px", borderRadius: 20, border: `1.5px solid ${tracked ? SAGE : BORDER}`, background: tracked ? SAGE : CREAM, color: tracked ? WHITE : BLACK, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                          {e.emoji} {e.label}{tracked && <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedEventChip && (
+                    <div>
+                      <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>When is their {selectedEventChip}?</div>
+                      <input type="date" value={newEventDate} onChange={e => setNewEventDate(e.target.value)}
+                        style={{ padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none", width: "100%", boxSizing: "border-box" as const, background: CREAM, marginBottom: 10 }} />
+                      <button onClick={handleAddDateEvent} disabled={!newEventDate || savingEvent}
+                        style={{ width: "100%", padding: "9px", borderRadius: 8, border: "none", background: !newEventDate ? `${SAGE}50` : SAGE, color: WHITE, fontWeight: 700, fontSize: "0.84rem", cursor: !newEventDate ? "not-allowed" : "pointer" }}>
+                        {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
+                      </button>
                     </div>
-                  ))}
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ══ UPCOMING MOMENTS ════════════════════════════════════════════════ */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL, marginBottom: 10 }}>
+              UPCOMING MOMENTS
+            </div>
+
+            {/* Hero — first upcoming event */}
+            {upcomingEvents[0] && (() => {
+              const ev = upcomingEvents[0];
+              const urgent = ev.daysAway <= 7;
+              return (
+                <div style={{ background: WHITE, borderRadius: 16, padding: "18px", border: `1px solid ${urgent ? RED + "30" : "#EDEBE6"}`, boxShadow: urgent ? `0 2px 14px ${RED}12` : "0 1px 6px rgba(0,0,0,0.05)", marginBottom: upcomingEvents.length > 1 ? 8 : 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
+                    <div style={{ width: 60, height: 60, borderRadius: 14, flexShrink: 0, background: urgent ? RED : "#EDE8E0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ textAlign: "center" as const, lineHeight: 1 }}>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: urgent ? WHITE : CHARCOAL, lineHeight: 1 }}>{ev.daysAway}</div>
+                        <div style={{ fontSize: "0.46rem", fontWeight: 800, letterSpacing: "0.08em", color: urgent ? "rgba(255,255,255,0.7)" : GRAY, lineHeight: 1, marginTop: 3, textTransform: "uppercase" as const }}>days</div>
+                      </div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: CHARCOAL, lineHeight: 1, letterSpacing: "0.02em" }}>{ev.event}</div>
+                      <div style={{ fontSize: "0.78rem", color: GRAY, marginTop: 4 }}>{fmtDate(ev.dateStr)}</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
+                    style={{ width: "100%", padding: "11px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}
+                  >
+                    Write {firstName}'s {ev.event} Card ✦
+                  </button>
                 </div>
               );
             })()}
 
-            {/* Occasion picker — shown when adding */}
-            {showAddEvent && recipient && (
-              <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "16px", marginTop: 4 }}>
-                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 16 : 0 }}>
-                  {DATE_SENSITIVE_EVENTS.map(e => {
-                    const tracked = isTrackedEvent(e.label, recipient);
-                    const selecting = selectedEventChip === e.label;
-                    return (
-                      <button
-                        key={e.label}
-                        onClick={() => {
-                          if (tracked) { handleRemoveEvent(e.label); }
-                          else { setSelectedEventChip(selecting ? null : e.label); setNewEventDate(""); }
-                        }}
-                        style={{
-                          padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${tracked ? SAGE : selecting ? BLACK : BORDER}`,
-                          background: tracked ? SAGE : selecting ? BLACK : CREAM,
-                          color: tracked || selecting ? WHITE : BLACK,
-                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 4,
-                        }}
-                      >
-                        {e.emoji} {e.label}
-                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
-                      </button>
-                    );
-                  })}
-                  {HOLIDAY_EVENTS.map(e => {
-                    const tracked = isTrackedEvent(e.label, recipient);
-                    return (
-                      <button
-                        key={e.label}
-                        onClick={() => {
-                          if (tracked) { handleRemoveEvent(e.label); }
-                          else { handleAddHolidayEvent(e.label, e.flag); }
-                        }}
-                        style={{
-                          padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${tracked ? SAGE : BORDER}`,
-                          background: tracked ? SAGE : CREAM,
-                          color: tracked ? WHITE : BLACK,
-                          fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 4,
-                        }}
-                      >
-                        {e.emoji} {e.label}
-                        {tracked && <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedEventChip && (
-                  <div>
-                    <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>
-                      When is their {selectedEventChip}?
-                    </div>
-                    <input
-                      type="date"
-                      value={newEventDate}
-                      onChange={e => setNewEventDate(e.target.value)}
-                      style={{
-                        padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`,
-                        fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif",
-                        outline: "none", width: "100%", boxSizing: "border-box" as const,
-                        background: CREAM, marginBottom: 12,
-                      }}
-                    />
-                    <button
-                      onClick={handleAddDateEvent}
-                      disabled={!newEventDate || savingEvent}
-                      style={{
-                        width: "100%", padding: "10px", borderRadius: 8, border: "none",
-                        background: !newEventDate ? `${SAGE}50` : SAGE,
-                        color: WHITE, fontWeight: 700, fontSize: "0.84rem",
-                        cursor: !newEventDate ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          </div>{/* end grouped card */}
-
-          {/* ══ 1. UPCOMING MOMENTS ══════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 24 }}>
-            <SectionHead title="UPCOMING MOMENTS" />
-
-            {/* ── Upcoming soon (≤ 60 days) ─────────────────────────────────── */}
-            {upcomingEvents.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: 12 }}>
-                {upcomingEvents.map(ev => {
+            {/* Remaining upcoming */}
+            {upcomingEvents.length > 1 && (
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 7, marginTop: 7 }}>
+                {upcomingEvents.slice(1).map(ev => {
                   const urgent = ev.daysAway <= 7;
                   const near   = ev.daysAway <= 14;
                   const accent = urgent ? RED : near ? AMBER : SAGE;
                   return (
-                    <div key={ev.event} style={{
-                      background: WHITE, borderRadius: 12,
-                      border: `1px solid ${near ? RED + "30" : BORDER}`,
-                      borderLeft: `4px solid ${accent}`,
-                      padding: "12px 16px",
-                      display: "flex", alignItems: "center", gap: 14,
-                      boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
-                    }}>
-                      {/* Day badge */}
-                      <div style={{
-                        width: 50, height: 50, borderRadius: 10, flexShrink: 0,
-                        background: urgent ? RED : CREAM,
-                        border: urgent ? "none" : `1px solid ${BORDER}`,
-                        display: "flex", flexDirection: "column" as const,
-                        alignItems: "center", justifyContent: "center",
-                      }}>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: urgent ? WHITE : BLACK, lineHeight: 1 }}>{ev.daysAway}</div>
-                        <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : GRAY }}>DAYS</div>
+                    <div key={ev.event} style={{ background: WHITE, borderRadius: 12, border: "1px solid #EDEBE6", borderLeft: `3px solid ${accent}`, padding: "11px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 42, height: 42, borderRadius: 9, flexShrink: 0, background: "#F5F1EC", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ textAlign: "center" as const, lineHeight: 1 }}>
+                          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", color: CHARCOAL, lineHeight: 1 }}>{ev.daysAway}</div>
+                          <div style={{ fontSize: "0.42rem", fontWeight: 800, letterSpacing: "0.07em", color: GRAY, lineHeight: 1, marginTop: 2, textTransform: "uppercase" as const }}>days</div>
+                        </div>
                       </div>
-                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.94rem", color: BLACK }}>{ev.event}</div>
-                        <div style={{ fontSize: "0.76rem", color: GRAY, marginTop: 3 }}>{fmtDate(ev.dateStr)}</div>
+                        <div style={{ fontWeight: 700, fontSize: "0.88rem", color: CHARCOAL }}>{ev.event}</div>
+                        <div style={{ fontSize: "0.74rem", color: GRAY, marginTop: 2 }}>{fmtDate(ev.dateStr)}</div>
                       </div>
-                      {/* Actions */}
-                      <div style={{ display: "flex", flexDirection: "column" as const, gap: 5, alignItems: "flex-end", flexShrink: 0 }}>
-                        <button
-                          onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                          style={{
-                            padding: "6px 13px", borderRadius: 7, cursor: "pointer",
-                            border: "none", background: accent,
-                            color: WHITE, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
-                          }}
-                        >
-                          Write Card ✦
-                        </button>
-                      </div>
+                      <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
+                        style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: accent, color: WHITE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                        Write Card ✦
+                      </button>
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {/* ── On the calendar (> 60 days) ───────────────────────────────── */}
+            {/* On the calendar (> 60 days) */}
             {futureEvents.length > 0 && (
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: GRAY, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 7 }}>
-                  On the calendar
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+              <div style={{ marginTop: upcomingEvents.length > 0 ? 12 : 0 }}>
+                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: GRAY, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 6 }}>On the calendar</div>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
                   {futureEvents.map(ev => (
-                    <div key={ev.event} style={{
-                      background: WHITE, borderRadius: 10, border: `1px solid ${BORDER}`,
-                      padding: "9px 14px", display: "flex", alignItems: "center", gap: 12,
-                    }}>
-                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: BLACK }}>{ev.event}</div>
+                    <div key={ev.event} style={{ background: WHITE, borderRadius: 10, border: "1px solid #EDEBE6", padding: "9px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: CHARCOAL }}>{ev.event}</div>
                       <div style={{ fontSize: "0.76rem", color: GRAY }}>{fmtDate(ev.dateStr)}</div>
-                      <div style={{ fontSize: "0.72rem", color: `${BLACK}40`, minWidth: 50, textAlign: "right" as const }}>{ev.daysAway}d</div>
+                      <div style={{ fontSize: "0.72rem", color: `${CHARCOAL}40`, minWidth: 40, textAlign: "right" as const }}>{ev.daysAway}d</div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* ── Needs a date ──────────────────────────────────────────────── */}
+            {/* Needs a date */}
             {eventsNeedingDate.length > 0 && (
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: AMBER, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 7 }}>
-                  Needs a date
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: AMBER, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 6 }}>Needs a date</div>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
                   {eventsNeedingDate.map(ev => (
-                    <div key={ev.event} style={{
-                      background: `${AMBER}08`, borderRadius: 10, border: `1px solid ${AMBER}30`,
-                      padding: "9px 14px", display: "flex", alignItems: "center", gap: 12,
-                    }}>
-                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: BLACK }}>{ev.event}</div>
-                      <button
-                        onClick={() => { setShowAddEvent(true); setSelectedEventChip(ev.event); setNewEventDate(""); }}
-                        style={{
-                          padding: "5px 11px", borderRadius: 7, cursor: "pointer",
-                          border: `1.5px solid ${AMBER}`, background: "transparent",
-                          color: AMBER, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
-                        }}
-                      >
+                    <div key={ev.event} style={{ background: `${AMBER}08`, borderRadius: 10, border: `1px solid ${AMBER}30`, padding: "9px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: CHARCOAL }}>{ev.event}</div>
+                      <button onClick={() => { setShowAddEvent(true); setSelectedEventChip(ev.event); setNewEventDate(""); }}
+                        style={{ padding: "5px 11px", borderRadius: 7, cursor: "pointer", border: `1.5px solid ${AMBER}`, background: "transparent", color: AMBER, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const }}>
                         Set Date →
                       </button>
                     </div>
@@ -842,331 +733,148 @@ export default function RelationshipPage() {
               </div>
             )}
 
-            {/* ── Empty state ───────────────────────────────────────────────── */}
+            {/* Empty */}
             {upcomingEvents.length === 0 && futureEvents.length === 0 && eventsNeedingDate.length === 0 && (
               <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
                 <div style={{ fontSize: "0.84rem", color: GRAY }}>Add occasions above to see upcoming moments here.</div>
               </div>
             )}
-
           </div>
 
-          {/* ══ 2. RECENT MEMORIES ═══════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 24 }}>
-            <SectionHead title="RECENT MEMORIES" />
-
-            {/* Add memory box */}
-            <Card style={{ padding: "16px", marginBottom: 10 }}>
-              <div style={{ fontSize: "0.78rem", fontWeight: 700, color: GRAY, marginBottom: 8, letterSpacing: "0.04em" }}>
-                WHAT'S NEW WITH {firstName.toUpperCase()}?
-              </div>
-              <textarea
-                id="add-memory-input"
-                value={memoryText}
-                onChange={e => setMemoryText(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSaveMemory(); }}
-                placeholder={
-                  `${firstName} started a new job.\n` +
-                  `We took a trip to Vermont.\n` +
-                  `${firstName}'s daughter graduated.\n` +
-                  `We had a great dinner together last week.`
-                }
-                rows={3}
-                style={{
-                  width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`,
-                  padding: "10px 12px", fontSize: "0.9rem", lineHeight: 1.6,
-                  background: CREAM, resize: "vertical" as const, outline: "none",
-                  fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK,
-                  boxSizing: "border-box" as const,
-                }}
-              />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-                <span style={{ fontSize: "0.71rem", color: memorySaved ? SAGE : GRAY, fontWeight: memorySaved ? 600 : 400 }}>
-                  {memorySaved
-                    ? `✓ Saved — we'll use this in ${firstName}'s next card.`
-                    : "This improves all future cards for this person."}
-                </span>
-                <button
-                  onClick={handleSaveMemory}
-                  disabled={savingMemory || !memoryText.trim()}
-                  style={{
-                    padding: "7px 16px", borderRadius: 8, border: "none",
-                    background: memoryText.trim() ? SAGE : `${SAGE}40`,
-                    color: WHITE, fontWeight: 700, fontSize: "0.78rem",
-                    cursor: memoryText.trim() ? "pointer" : "default",
-                    flexShrink: 0,
-                  }}
-                >
-                  {savingMemory ? "Saving…" : "Save"}
-                </button>
-              </div>
-            </Card>
-
-            {/* Memory list */}
-            {freshLoading ? (
-              <div style={{ padding: "12px 0", fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY }}>
-                Loading memories…
-              </div>
-            ) : freshUpdates.length === 0 ? (
-              <Card style={{ padding: "20px 16px", textAlign: "center" as const }}>
-                <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, lineHeight: 1.7 }}>
-                  No memories yet. Add one above<br />and it'll show up in {firstName}'s next card.
-                </div>
-              </Card>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                {displayedMemories.map(m => (
-                  <div
-                    key={m.id}
-                    style={{
-                      background: WHITE, borderRadius: 10,
-                      border: `1px solid ${BORDER}`,
-                      borderLeft: `3px solid ${ageBorderColor(m.ageCategory)}`,
-                      padding: "12px 14px",
-                    }}
-                  >
-                    <div style={{
-                      fontFamily: "'Caveat', cursive",
-                      fontSize: "1rem", color: BLACK, lineHeight: 1.65,
-                    }}>
-                      {m.answerText}
-                    </div>
-                    <div style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      marginTop: 7, fontSize: "0.71rem", color: GRAY,
-                    }}>
-                      <span>{formatDaysAgo(m.daysAgo)}</span>
-                      {m.ageCategory === "recent" && (
-                        <span style={{
-                          padding: "1px 7px", borderRadius: 10,
-                          background: `${SAGE}15`, color: SAGE,
-                          fontWeight: 700, fontSize: "0.67rem",
-                        }}>
-                          Used in cards
-                        </span>
-                      )}
-                      {m.ageCategory === "mid" && (
-                        <span style={{
-                          padding: "1px 7px", borderRadius: 10,
-                          background: `${AMBER}15`, color: AMBER,
-                          fontWeight: 600, fontSize: "0.67rem",
-                        }}>
-                          Aging out soon
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {freshUpdates.length > 4 && (
-                  <button
-                    onClick={() => setShowAllMemories(v => !v)}
-                    style={{
-                      background: "none", border: `1px solid ${BORDER}`,
-                      borderRadius: 8, padding: "8px",
-                      fontSize: "0.78rem", color: GRAY, cursor: "pointer", fontWeight: 600,
-                    }}
-                  >
-                    {showAllMemories
-                      ? "Show fewer"
-                      : `Show all ${freshUpdates.length} memories`}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* ══ 3. SUGGESTED QUESTION ════════════════════════════════════════════ */}
+          {/* ══ SUGGESTED QUESTION ══════════════════════════════════════════════ */}
           {nextQuestion && !questionSkipped && (
-            <div style={{
-              background: WHITE, borderRadius: 14, padding: "18px",
-              border: `1.5px solid ${nextQuestion.mode === "follow_up" ? "#7C3AED35" : `${RED}25`}`,
-              marginBottom: 24,
-            }}>
-              {/* Header row */}
-              <div style={{
-                display: "flex", alignItems: "center",
-                justifyContent: "space-between", marginBottom: 10,
-              }}>
+            <div style={{ background: WHITE, borderRadius: 14, padding: "18px", border: `1.5px solid ${nextQuestion.mode === "follow_up" ? "#7C3AED35" : `${RED}25`}`, marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY }}>
-                  {nextQuestion.mode === "follow_up"
-                    ? "FOLLOW UP"
-                    : profileComplete
-                      ? "KEEP IT FRESH"
-                      : "WANT TO MAKE THE NEXT CARD EVEN BETTER?"}
+                  {nextQuestion.mode === "follow_up" ? "FOLLOW UP" : profileComplete ? "KEEP IT FRESH" : "WANT TO MAKE THE NEXT CARD EVEN BETTER?"}
                 </div>
-                <button
-                  onClick={() => setQuestionSkipped(true)}
-                  style={{
-                    background: "none", border: "none", color: GRAY,
-                    cursor: "pointer", fontSize: "0.78rem", padding: 0, fontWeight: 600,
-                  }}
-                >
-                  Skip
-                </button>
+                <button onClick={() => setQuestionSkipped(true)} style={{ background: "none", border: "none", color: GRAY, cursor: "pointer", fontSize: "0.78rem", padding: 0, fontWeight: 600 }}>Skip</button>
               </div>
-
-              {/* Follow-up context */}
               {nextQuestion.mode === "follow_up" && nextQuestion.followUp && (
-                <div style={{
-                  background: "#7C3AED0A", borderRadius: 8, padding: "8px 12px",
-                  marginBottom: 10, fontSize: "0.78rem",
-                  color: "#7C3AED", fontStyle: "italic", lineHeight: 1.5,
-                }}>
+                <div style={{ background: "#7C3AED0A", borderRadius: 8, padding: "8px 12px", marginBottom: 10, fontSize: "0.78rem", color: "#7C3AED", fontStyle: "italic", lineHeight: 1.5 }}>
                   You mentioned: "{nextQuestion.followUp.originalAnswer.slice(0, 80)}{nextQuestion.followUp.originalAnswer.length > 80 ? "…" : ""}"
                 </div>
               )}
-
-              {/* Question text */}
-              <div style={{
-                fontSize: "1rem", fontWeight: 700, color: BLACK,
-                marginBottom: 5, lineHeight: 1.5,
-              }}>
-                {nextQuestion.question}
-              </div>
-              <div style={{
-                fontSize: "0.77rem", color: GRAY, marginBottom: 12,
-                fontStyle: "italic", lineHeight: 1.5,
-              }}>
-                {nextQuestion.reason}
-              </div>
-
-              {/* Answer input */}
+              <div style={{ fontSize: "1rem", fontWeight: 700, color: CHARCOAL, marginBottom: 5, lineHeight: 1.5 }}>{nextQuestion.question}</div>
+              <div style={{ fontSize: "0.77rem", color: GRAY, marginBottom: 12, fontStyle: "italic", lineHeight: 1.5 }}>{nextQuestion.reason}</div>
               {!answerSaved ? (
                 <>
-                  <textarea
-                    value={answerText}
-                    onChange={e => setAnswerText(e.target.value)}
-                    placeholder="Your answer…"
-                    rows={3}
-                    style={{
-                      width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`,
-                      padding: "10px 12px", fontSize: "0.9rem", lineHeight: 1.6,
-                      background: CREAM, resize: "vertical" as const, outline: "none",
-                      fontFamily: "'Plus Jakarta Sans', sans-serif", color: BLACK,
-                      boxSizing: "border-box" as const, marginBottom: 8,
-                    }}
-                  />
+                  <textarea value={answerText} onChange={e => setAnswerText(e.target.value)} placeholder="Your answer…" rows={3}
+                    style={{ width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`, padding: "10px 12px", fontSize: "0.9rem", lineHeight: 1.6, background: CREAM, resize: "vertical" as const, outline: "none", fontFamily: "'Plus Jakarta Sans', sans-serif", color: CHARCOAL, boxSizing: "border-box" as const, marginBottom: 8 }} />
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                    <button
-                      onClick={() => setQuestionSkipped(true)}
-                      style={{
-                        padding: "7px 14px", borderRadius: 8,
-                        border: `1px solid ${BORDER}`, background: "transparent",
-                        color: GRAY, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer",
-                      }}
-                    >
-                      Not now
-                    </button>
-                    <button
-                      onClick={handleSaveAnswer}
-                      disabled={savingAnswer || !answerText.trim()}
-                      style={{
-                        padding: "7px 16px", borderRadius: 8, border: "none",
-                        background: answerText.trim() ? RED : `${RED}40`,
-                        color: WHITE, fontWeight: 700, fontSize: "0.78rem",
-                        cursor: answerText.trim() ? "pointer" : "default",
-                      }}
-                    >
+                    <button onClick={() => setQuestionSkipped(true)} style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${BORDER}`, background: "transparent", color: GRAY, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer" }}>Not now</button>
+                    <button onClick={handleSaveAnswer} disabled={savingAnswer || !answerText.trim()} style={{ padding: "7px 16px", borderRadius: 8, border: "none", background: answerText.trim() ? RED : `${RED}40`, color: WHITE, fontWeight: 700, fontSize: "0.78rem", cursor: answerText.trim() ? "pointer" : "default" }}>
                       {savingAnswer ? "Saving…" : "Save Answer"}
                     </button>
                   </div>
                 </>
               ) : (
-                <div style={{
-                  padding: "12px", borderRadius: 8, background: `${SAGE}12`,
-                  color: SAGE, fontWeight: 700, fontSize: "0.86rem", textAlign: "center" as const,
-                }}>
+                <div style={{ padding: "12px", borderRadius: 8, background: `${SAGE}12`, color: SAGE, fontWeight: 700, fontSize: "0.86rem", textAlign: "center" as const }}>
                   ✓ Saved — this will improve {firstName}'s next card.
                 </div>
               )}
             </div>
           )}
 
-          {/* ══ 4. WHAT WE KNOW ══════════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 24 }}>
-            <SectionHead
-              title="WHAT WE KNOW"
-              right={<OutlineBtn href={`/recipients/${id}?edit=1`}>Edit Profile</OutlineBtn>}
-            />
+          {/* ══ RECENT MEMORIES ══════════════════════════════════════════════════ */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL, marginBottom: 10 }}>
+              RECENT MEMORIES ABOUT {firstName.toUpperCase()}
+            </div>
+
+            {/* Add memory box */}
+            <div style={{ background: WHITE, borderRadius: 12, border: "1px solid #EDEBE6", padding: "14px 16px", marginBottom: 10 }}>
+              <textarea
+                id="add-memory-input"
+                value={memoryText}
+                onChange={e => setMemoryText(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSaveMemory(); }}
+                placeholder={`${firstName} started a new job.\nWe took a trip to Vermont.\n${firstName}'s daughter graduated.`}
+                rows={2}
+                style={{ width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`, padding: "9px 11px", fontSize: "0.88rem", lineHeight: 1.55, background: CREAM, resize: "vertical" as const, outline: "none", fontFamily: "'Plus Jakarta Sans', sans-serif", color: CHARCOAL, boxSizing: "border-box" as const }}
+              />
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 7 }}>
+                <span style={{ fontSize: "0.7rem", color: memorySaved ? SAGE : GRAY, fontWeight: memorySaved ? 600 : 400 }}>
+                  {memorySaved ? `✓ Saved — we'll use this in ${firstName}'s next card.` : "Anything new improves all future cards."}
+                </span>
+                <button onClick={handleSaveMemory} disabled={savingMemory || !memoryText.trim()}
+                  style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: memoryText.trim() ? SAGE : `${SAGE}40`, color: WHITE, fontWeight: 700, fontSize: "0.76rem", cursor: memoryText.trim() ? "pointer" : "default", flexShrink: 0 }}>
+                  {savingMemory ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+
+            {/* Memory list */}
+            {freshLoading ? (
+              <div style={{ padding: "10px 0", fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY }}>Loading memories…</div>
+            ) : freshUpdates.length === 0 ? (
+              <div style={{ background: WHITE, borderRadius: 10, border: "1px solid #EDEBE6", padding: "18px 16px", textAlign: "center" as const }}>
+                <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, lineHeight: 1.7 }}>
+                  No memories yet. Add one above and it'll show up in {firstName}'s next card.
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
+                {displayedMemories.map(m => (
+                  <div key={m.id} style={{ background: WHITE, borderRadius: 10, border: "1px solid #EDEBE6", borderLeft: `3px solid ${ageBorderColor(m.ageCategory)}`, padding: "11px 14px" }}>
+                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: CHARCOAL, lineHeight: 1.65 }}>{m.answerText}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, fontSize: "0.7rem", color: GRAY }}>
+                      <span>{formatDaysAgo(m.daysAgo)}</span>
+                      {m.ageCategory === "recent" && <span style={{ padding: "1px 7px", borderRadius: 10, background: `${SAGE}15`, color: SAGE, fontWeight: 700, fontSize: "0.66rem" }}>Used in cards</span>}
+                      {m.ageCategory === "mid" && <span style={{ padding: "1px 7px", borderRadius: 10, background: `${AMBER}15`, color: AMBER, fontWeight: 600, fontSize: "0.66rem" }}>Aging out soon</span>}
+                    </div>
+                  </div>
+                ))}
+                {freshUpdates.length > 4 && (
+                  <button onClick={() => setShowAllMemories(v => !v)} style={{ background: "none", border: "1px solid #EDEBE6", borderRadius: 8, padding: "8px", fontSize: "0.78rem", color: GRAY, cursor: "pointer", fontWeight: 600 }}>
+                    {showAllMemories ? "Show fewer" : `Show all ${freshUpdates.length} memories`}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ══ WHAT WE KNOW ════════════════════════════════════════════════════ */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL }}>WHAT WE KNOW</div>
+              <OutlineBtn href={`/recipients/${id}?edit=1`}>Edit Profile</OutlineBtn>
+            </div>
             <Card>
               {profileFields.length === 0 ? (
                 <div style={{ padding: "20px 16px", textAlign: "center" as const }}>
-                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, marginBottom: 12 }}>
-                    No profile details yet.
-                  </div>
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, marginBottom: 12 }}>No profile details yet.</div>
                   <Link href={`/recipients/${id}?edit=1`}>
-                    <button style={{
-                      padding: "7px 16px", borderRadius: 8,
-                      border: `1px solid ${BORDER}`, background: "none",
-                      color: BLACK, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer",
-                    }}>
-                      Add Profile Details →
-                    </button>
+                    <button style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid #EDEBE6", background: "none", color: CHARCOAL, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer" }}>Add Profile Details →</button>
                   </Link>
                 </div>
               ) : (
                 profileFields.map((f, i) => (
-                  <div
-                    key={f.key}
-                    style={{
-                      display: "flex", alignItems: "flex-start", gap: 12,
-                      padding: "12px 16px",
-                      borderBottom: i < profileFields.length - 1 ? `1px solid ${BORDER}` : "none",
-                      background: f.highlight ? `${RED}04` : "transparent",
-                    }}
-                  >
-                    <div style={{
-                      width: 112, flexShrink: 0, fontSize: "0.67rem",
-                      fontWeight: 700, letterSpacing: "0.07em",
-                      color: f.highlight ? RED : GRAY, paddingTop: 2,
-                    }}>
-                      {f.key}
-                    </div>
-                    <div style={{ fontSize: "0.88rem", color: BLACK, lineHeight: 1.6 }}>
-                      {String(f.value)}
-                    </div>
+                  <div key={f.key} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "11px 16px", borderBottom: i < profileFields.length - 1 ? "1px solid #F5F1EC" : "none", background: f.highlight ? `${RED}04` : "transparent" }}>
+                    <div style={{ width: 112, flexShrink: 0, fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.07em", color: f.highlight ? RED : GRAY, paddingTop: 2 }}>{f.key}</div>
+                    <div style={{ fontSize: "0.88rem", color: CHARCOAL, lineHeight: 1.6 }}>{String(f.value)}</div>
                   </div>
                 ))
               )}
             </Card>
           </div>
 
-          {/* ══ 6. CARD HISTORY ══════════════════════════════════════════════════ */}
+          {/* ══ CARD HISTORY ════════════════════════════════════════════════════ */}
           {cards.length > 0 && (
-            <div style={{ marginBottom: 24 }}>
-              <SectionHead title="CARD HISTORY" />
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL, marginBottom: 10 }}>CARD HISTORY</div>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
                 {cards.slice(0, 5).map(card => {
-                  const sc =
-                    card.status === "Approved" ? SAGE :
-                    card.status === "Ready for approval" ? AMBER : GRAY;
+                  const sc = card.status === "Approved" ? SAGE : card.status === "Ready for approval" ? AMBER : GRAY;
                   const msg = (card as any).approvedMessage ?? (card as any).messageOriginal ?? "";
                   return (
                     <Card key={card.id} style={{ padding: "12px 16px" }}>
-                      <div style={{
-                        display: "flex", alignItems: "center",
-                        justifyContent: "space-between", marginBottom: msg ? 6 : 0,
-                      }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.9rem", color: BLACK }}>
-                          {(card as any).holiday}
-                        </div>
-                        <span style={{
-                          padding: "2px 9px", borderRadius: 10, fontSize: "0.67rem",
-                          fontWeight: 700, letterSpacing: "0.04em",
-                          background: `${sc}15`, color: sc,
-                          textTransform: "uppercase" as const,
-                        }}>
-                          {card.status}
-                        </span>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: msg ? 6 : 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: "0.9rem", color: CHARCOAL }}>{(card as any).holiday}</div>
+                        <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.04em", background: `${sc}15`, color: sc, textTransform: "uppercase" as const }}>{card.status}</span>
                       </div>
                       {msg && (
-                        <div style={{
-                          fontFamily: "'Caveat', cursive", fontSize: "0.9rem",
-                          color: GRAY, lineHeight: 1.55,
-                          display: "-webkit-box" as const,
-                          WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const,
-                          overflow: "hidden",
-                        }}>
+                        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.9rem", color: GRAY, lineHeight: 1.55, display: "-webkit-box" as const, WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }}>
                           {msg.slice(0, 140)}
                         </div>
                       )}
@@ -1177,23 +885,12 @@ export default function RelationshipPage() {
             </div>
           )}
 
-          {/* ══ 7. TIMELINE ══════════════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 24 }}>
-            <button
-              onClick={() => setShowTimeline(v => !v)}
-              style={{
-                width: "100%", display: "flex", alignItems: "center",
-                justifyContent: "space-between", background: WHITE,
-                border: `1px solid ${BORDER}`, borderRadius: 12,
-                padding: "14px 16px", cursor: "pointer", marginBottom: showTimeline ? 8 : 0,
-              }}
-            >
+          {/* ══ FULL HISTORY ════════════════════════════════════════════════════ */}
+          <div style={{ marginBottom: 16 }}>
+            <button onClick={() => setShowTimeline(v => !v)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: WHITE, border: "1px solid #EDEBE6", borderRadius: 12, padding: "14px 16px", cursor: "pointer", marginBottom: showTimeline ? 8 : 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: "1rem" }}>📋</span>
-                <span style={{
-                  fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem",
-                  letterSpacing: "0.1em", color: BLACK,
-                }}>FULL HISTORY</span>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: CHARCOAL }}>FULL HISTORY</span>
                 <span style={{ fontSize: "0.74rem", color: GRAY }}>— complete memory ledger</span>
               </div>
               <span style={{ fontSize: "0.8rem", color: GRAY }}>{showTimeline ? "▲ collapse" : "▼ expand"}</span>
@@ -1201,51 +898,24 @@ export default function RelationshipPage() {
             {showTimeline && <RelationshipTimeline recipientId={id} />}
           </div>
 
-          {/* ══ 8. RELATIONSHIP HEALTH (supporting, not hero) ════════════════════ */}
+          {/* ══ RELATIONSHIP HEALTH ════════════════════════════════════════════ */}
           {healthScore && (
-            <div style={{
-              background: WHITE, borderRadius: 12,
-              border: `1px solid ${BORDER}`, padding: "14px 16px",
-              marginBottom: 24,
-            }}>
-              <div style={{
-                fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem",
-                letterSpacing: "0.1em", color: GRAY, marginBottom: 10,
-              }}>
-                RELATIONSHIP HEALTH
-              </div>
+            <div style={{ background: WHITE, borderRadius: 12, border: "1px solid #EDEBE6", padding: "14px 16px", marginBottom: 16 }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", color: GRAY, marginBottom: 10 }}>RELATIONSHIP HEALTH</div>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ flex: 1, height: 5, background: BORDER, borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{
-                    height: "100%", width: `${healthScore.score}%`,
-                    background: statusColor, borderRadius: 3,
-                    transition: "width 0.5s ease",
-                  }} />
+                <div style={{ flex: 1, height: 5, background: "#EDEBE6", borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${healthScore.score}%`, background: statusColor, borderRadius: 3, transition: "width 0.5s ease" }} />
                 </div>
-                <div style={{
-                  fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem",
-                  color: statusColor, flexShrink: 0,
-                }}>
-                  {healthScore.score}
-                </div>
-                <div style={{
-                  padding: "2px 10px", borderRadius: 20,
-                  background: `${statusColor}15`, color: statusColor,
-                  fontSize: "0.72rem", fontWeight: 700,
-                }}>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: statusColor, flexShrink: 0 }}>{healthScore.score}</div>
+                <div style={{ padding: "2px 10px", borderRadius: 20, background: `${statusColor}15`, color: statusColor, fontSize: "0.72rem", fontWeight: 700 }}>
                   {healthScore.status === "NeedsAttention" ? "Needs Attention" : healthScore.status}
                 </div>
               </div>
               {healthScore.pendingFollowUps > 0 && (
-                <div style={{ fontSize: "0.75rem", color: AMBER, marginTop: 8, fontWeight: 600 }}>
-                  ↻ {healthScore.pendingFollowUps} follow-up{healthScore.pendingFollowUps > 1 ? "s" : ""} waiting
-                </div>
+                <div style={{ fontSize: "0.75rem", color: AMBER, marginTop: 8, fontWeight: 600 }}>↻ {healthScore.pendingFollowUps} follow-up{healthScore.pendingFollowUps > 1 ? "s" : ""} waiting</div>
               )}
               {healthScore.lastUpdateDaysAgo !== null && healthScore.lastUpdateDaysAgo > 90 && (
-                <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 6 }}>
-                  No memory update in {Math.round(healthScore.lastUpdateDaysAgo / 30)} months
-                  — add one above to improve cards.
-                </div>
+                <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 6 }}>No memory update in {Math.round(healthScore.lastUpdateDaysAgo / 30)} months — add one above to improve cards.</div>
               )}
             </div>
           )}
