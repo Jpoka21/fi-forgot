@@ -337,10 +337,10 @@ export default function BriefingPage() {
           <>
             {/* Section header */}
             <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.1em", color: INK, margin: "0 0 4px" }}>
+              <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.05em", color: INK, margin: "0 0 6px" }}>
                 Or add a few details first
               </p>
-              <p style={{ fontSize: "0.84rem", color: MID, margin: 0 }}>
+              <p style={{ fontSize: "0.95rem", color: MID, margin: 0 }}>
                 All optional — even one answer makes it more personal.
               </p>
             </div>
