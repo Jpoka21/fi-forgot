@@ -221,11 +221,14 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
    "We Got Your Back" compact list: max 3 action items
 ═══════════════════════════════════════════════════════════════════ */
 export function WGYBSection() {
-  const [scores, setScores] = useState<RecipientHealthScore[] | null>(null);
+  const [scores,   setScores]   = useState<RecipientHealthScore[] | null>(null);
+  const [localMap, setLocalMap] = useState<Map<string, string>>(new Map());
   const { authReady } = useAuth();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (!authReady) return;
+    setLocalMap(buildLocalMap());
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) return;
     fetch("/api/v2/recipient-health", { headers })
@@ -236,23 +239,24 @@ export function WGYBSection() {
 
   if (!scores || scores.length === 0) return null;
 
-  const items: string[] = [];
+  type WGYBItem = { sentence: string; score: RecipientHealthScore; isCard: boolean };
+  const items: WGYBItem[] = [];
   for (const s of scores) {
     if (items.length >= 3) break;
     if (s.status !== "Priority" && s.status !== "NeedsAttention") continue;
     const sentence = wgybSentence(s);
-    if (sentence) items.push(sentence);
+    if (sentence) items.push({ sentence, score: s, isCard: !!(s.nextEventLabel && s.nextEventDaysAway !== null && s.nextEventDaysAway <= 30) });
   }
 
   if (items.length === 0) return null;
 
   return (
     <div style={{
-      marginBottom:  16,
-      background:    WHITE,
-      borderRadius:  12,
-      border:        `1px solid ${BORDER}`,
-      padding:       "14px 18px",
+      marginBottom: 16,
+      background:   WHITE,
+      borderRadius: 12,
+      border:       `1px solid ${BORDER}`,
+      padding:      "14px 18px",
     }}>
       <div style={{
         fontFamily:    "'Bebas Neue', cursive",
@@ -263,13 +267,37 @@ export function WGYBSection() {
       }}>
         WE GOT YOUR BACK
       </div>
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
-        {items.map((item, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-            <span style={{ fontSize: "0.55rem", color: MID, marginTop: 4, flexShrink: 0 }}>●</span>
-            <span style={{ fontSize: "0.86rem", color: INK, lineHeight: 1.45 }}>{item}</span>
-          </div>
-        ))}
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+        {items.map(({ sentence, score: s, isCard }, i) => {
+          const urgent = s.status === "Priority";
+          const dest   = isCard ? briefingDest(s, localMap) : actionDestination(s, localMap);
+          return (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "8px 10px", borderRadius: 8,
+              background: urgent ? `${RED}08` : `${INK}04`,
+            }}>
+              <span style={{
+                fontSize: "0.86rem", color: urgent ? RED : INK,
+                fontWeight: urgent ? 600 : 400, flex: 1, lineHeight: 1.4,
+              }}>
+                {sentence}
+              </span>
+              <button
+                onClick={() => setLocation(dest)}
+                style={{
+                  flexShrink: 0, padding: "5px 11px", borderRadius: 6,
+                  border: "none", cursor: "pointer",
+                  background: isCard ? (urgent ? RED : SAGE) : `${INK}10`,
+                  color:      isCard ? WHITE : INK,
+                  fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
+                }}
+              >
+                {isCard ? "Write Card ✦" : "Open →"}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
