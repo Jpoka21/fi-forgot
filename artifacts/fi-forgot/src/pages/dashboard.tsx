@@ -149,6 +149,7 @@ export default function DashboardPage() {
   const [insightsOpen, setInsightsOpen]         = useState(false);
   const [heroExpanded, setHeroExpanded]         = useState(false);
   const [levelsOpen, setLevelsOpen]             = useState(false);
+  const [expandedEvents, setExpandedEvents]     = useState<Set<string>>(new Set());
 
   const { user, logout, upgradePlan } = useAuth();
   const [, setLocation] = useLocation();
@@ -571,65 +572,138 @@ export default function DashboardPage() {
             </div>
 
             {/* ── Section 4: Upcoming Moments ──────────────────────────── */}
-            {allUpcomingEvents.filter(e => e.daysAway <= 60).length > 0 && (
-              <div style={{ marginBottom: 28 }}>
-                <h2 style={{
-                  fontFamily: "'Bebas Neue', cursive",
-                  fontSize: isMobile ? "1.6rem" : "1.9rem",
-                  letterSpacing: "0.03em", color: INK, margin: "0 0 14px", lineHeight: 1,
-                }}>
-                  Upcoming Moments
-                </h2>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                  {allUpcomingEvents.filter(e => e.daysAway <= 60).map(ev => {
-                    const urgent  = ev.daysAway <= 7;
-                    const near    = ev.daysAway <= 14;
-                    const accent  = urgent ? RED : near ? AMBER : SAGE;
-                    const hasCard = upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`);
-                    return (
-                      <div key={`${ev.recipient.id}-${ev.event}`} style={{
-                        background: WHITE, borderRadius: 12,
-                        border: `1px solid ${near ? RED + "30" : BORDER}`,
-                        borderLeft: `4px solid ${accent}`,
-                        padding: "12px 16px",
-                        display: "flex", alignItems: "center", gap: 14,
-                        boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
-                      }}>
-                        {/* Day badge */}
-                        <div style={{
-                          width: 50, height: 50, borderRadius: 10, flexShrink: 0,
-                          background: urgent ? RED : "#F8F3EC",
-                          border: urgent ? "none" : `1px solid ${BORDER}`,
-                          display: "flex", flexDirection: "column" as const,
-                          alignItems: "center", justifyContent: "center",
+            {(() => {
+              const upcoming60 = allUpcomingEvents.filter(e => e.daysAway <= 60);
+              if (upcoming60.length === 0) return null;
+
+              // Group by event name
+              const grouped = new Map<string, typeof upcoming60>();
+              for (const ev of upcoming60) {
+                if (!grouped.has(ev.event)) grouped.set(ev.event, []);
+                grouped.get(ev.event)!.push(ev);
+              }
+
+              return (
+                <div style={{ marginBottom: 28 }}>
+                  <h2 style={{
+                    fontFamily: "'Bebas Neue', cursive",
+                    fontSize: isMobile ? "1.6rem" : "1.9rem",
+                    letterSpacing: "0.03em", color: INK, margin: "0 0 14px", lineHeight: 1,
+                  }}>
+                    Upcoming Moments
+                  </h2>
+                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
+                    {Array.from(grouped.entries()).map(([eventName, entries]) => {
+                      const soonest   = entries[0];
+                      const urgent    = soonest.daysAway <= 7;
+                      const near      = soonest.daysAway <= 14;
+                      const accent    = urgent ? RED : near ? AMBER : SAGE;
+                      const readyCount = entries.filter(ev => upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`)).length;
+                      const total     = entries.length;
+                      const isOpen    = expandedEvents.has(eventName);
+
+                      const toggleOpen = () => setExpandedEvents(prev => {
+                        const next = new Set(prev);
+                        if (next.has(eventName)) next.delete(eventName); else next.add(eventName);
+                        return next;
+                      });
+
+                      return (
+                        <div key={eventName} style={{
+                          background: WHITE, borderRadius: 14,
+                          border: `1px solid ${near ? RED + "30" : BORDER}`,
+                          borderLeft: `4px solid ${accent}`,
+                          overflow: "hidden",
+                          boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
                         }}>
-                          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{ev.daysAway}</div>
-                          <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : MID }}>DAYS</div>
+                          {/* Group header row — clickable */}
+                          <button onClick={toggleOpen} style={{
+                            width: "100%", background: "none", border: "none", cursor: "pointer",
+                            padding: "13px 16px",
+                            display: "flex", alignItems: "center", gap: 14, textAlign: "left" as const,
+                          }}>
+                            {/* Day badge */}
+                            <div style={{
+                              width: 52, height: 52, borderRadius: 10, flexShrink: 0,
+                              background: urgent ? RED : "#F8F3EC",
+                              border: urgent ? "none" : `1px solid ${BORDER}`,
+                              display: "flex", flexDirection: "column" as const,
+                              alignItems: "center", justifyContent: "center",
+                            }}>
+                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{soonest.daysAway}</div>
+                              <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : MID }}>DAYS</div>
+                            </div>
+                            {/* Event info */}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 700, fontSize: "0.97rem", color: INK }}>{eventName}</div>
+                              <div style={{ fontSize: "0.76rem", color: MID, marginTop: 2 }}>
+                                {total} {total === 1 ? "card" : "cards"} · {readyCount}/{total} ready
+                              </div>
+                            </div>
+                            {/* Expand chevron + pill */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                              <span style={{
+                                fontSize: "0.72rem", fontWeight: 700, padding: "3px 9px",
+                                borderRadius: 20, background: readyCount === total ? `${SAGE}20` : `${accent}18`,
+                                color: readyCount === total ? SAGE : accent,
+                              }}>
+                                {readyCount === total ? "All ready ✓" : `${total - readyCount} to write`}
+                              </span>
+                              <span style={{ fontSize: "1rem", color: MID, transform: isOpen ? "rotate(180deg)" : "none", display: "inline-block", transition: "transform 0.15s" }}>▾</span>
+                            </div>
+                          </button>
+
+                          {/* Expanded recipient rows */}
+                          {isOpen && (
+                            <div style={{ borderTop: `1px solid ${BORDER}` }}>
+                              {entries.map((ev, idx) => {
+                                const hasCard = upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`);
+                                return (
+                                  <div key={ev.recipient.id} style={{
+                                    display: "flex", alignItems: "center", gap: 12,
+                                    padding: "10px 16px",
+                                    borderBottom: idx < entries.length - 1 ? `1px solid ${BORDER}` : "none",
+                                    background: "#FDFAF6",
+                                  }}>
+                                    {/* Avatar */}
+                                    <div style={{
+                                      width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
+                                      background: INK, display: "flex", alignItems: "center", justifyContent: "center",
+                                    }}>
+                                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", color: WHITE, letterSpacing: "0.04em" }}>
+                                        {ev.recipient.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
+                                      </span>
+                                    </div>
+                                    {/* Name + date */}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ fontWeight: 600, fontSize: "0.88rem", color: INK }}>{ev.recipient.name}</div>
+                                      <div style={{ fontSize: "0.72rem", color: MID }}>{fmtDate(ev.dateStr)} · {ev.daysAway}d away</div>
+                                    </div>
+                                    {/* Action button */}
+                                    <button
+                                      onClick={() => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)}
+                                      style={{
+                                        padding: "5px 12px", borderRadius: 7, cursor: "pointer", flexShrink: 0,
+                                        border: "none",
+                                        background: hasCard ? `${SAGE}20` : accent,
+                                        color: hasCard ? SAGE : WHITE,
+                                        fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
+                                      }}
+                                    >
+                                      {hasCard ? "Card Ready ✓" : "Write Card ✦"}
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
-                        {/* Info */}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: "0.94rem", color: INK }}>{ev.recipient.name}</div>
-                          <div style={{ fontSize: "0.76rem", color: MID, marginTop: 2 }}>{ev.event} · {fmtDate(ev.dateStr)}</div>
-                        </div>
-                        {/* Action */}
-                        <button
-                          onClick={() => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)}
-                          style={{
-                            padding: "6px 13px", borderRadius: 7, cursor: "pointer", flexShrink: 0,
-                            border: "none",
-                            background: hasCard ? `${SAGE}20` : accent,
-                            color: hasCard ? SAGE : WHITE,
-                            fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
-                          }}
-                        >
-                          {hasCard ? "Card Ready ✓" : "Write Card ✦"}
-                        </button>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* ── Plan usage — subtle ──────────────────────────────────── */}
             <div style={{
