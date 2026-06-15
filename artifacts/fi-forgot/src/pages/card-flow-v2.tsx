@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { getApiHeaders, saveLastPersonalization } from "@/lib/data";
+import { getApiHeaders, saveLastPersonalization, getRecipient } from "@/lib/data";
 import { dispatchBrownieAward } from "@/lib/brownie-points-context";
 
 const RED   = "#E23B2E";
@@ -332,6 +332,26 @@ export default function CardFlowV2() {
   const [detailGateInput, setDetailGateInput]   = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // ── Pre-fill from ?recipientId= URL param ────────────────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const prefilledId = params.get("recipientId");
+    if (!prefilledId) return;
+    const r = getRecipient(prefilledId);
+    if (!r) return;
+    // Pull the first name from the stored name (first word)
+    const first = r.name.split(" ")[0] ?? r.name;
+    setFirstName(first);
+    setRelationship(r.relationship);
+    // Skip the "who" phase — jump straight into the question flow
+    setRecipientId(prefilledId);
+    const computed = buildSteps(r.relationship);
+    setSteps(computed);
+    setStepIdx(0);
+    setPhase("flow");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Progress ────────────────────────────────────────────────────────────────
 
