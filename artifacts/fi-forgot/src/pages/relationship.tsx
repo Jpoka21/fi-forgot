@@ -533,10 +533,10 @@ export default function RelationshipPage() {
             </Link>
           </div>
 
-          {/* ══ 1. HERO ══════════════════════════════════════════════════════════ */}
+          {/* ══ 1. HERO + OCCASIONS (grouped card) ══════════════════════════════ */}
+          <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 24, border: `1px solid ${BORDER}` }}>
           <div style={{
-            background: BLACK, borderRadius: 20, padding: "26px 22px",
-            marginBottom: 20,
+            background: BLACK, padding: "26px 22px",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
               {/* Avatar */}
@@ -597,19 +597,19 @@ export default function RelationshipPage() {
             </div>
           </div>
 
-          {/* ══ 0. WE'LL SEND CARDS FOR THESE OCCASIONS ═══════════════════════════ */}
-          <div style={{ marginBottom: 24 }}>
-            <SectionHead
-              title="WE'LL SEND CARDS FOR THESE OCCASIONS"
-              right={
-                <button
-                  onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
-                  style={{ fontSize: "0.76rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                >
-                  {showAddEvent ? "Done" : "+ Add Occasion"}
-                </button>
-              }
-            />
+          {/* ── Occasions panel (light bottom of grouped card) ───────────────── */}
+          <div style={{ background: WHITE, padding: "16px 22px", borderTop: `1px solid ${BORDER}` }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.88rem", letterSpacing: "0.08em", color: MID }}>
+                OCCASIONS WE'LL SEND FOR
+              </div>
+              <button
+                onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
+                style={{ fontSize: "0.76rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              >
+                {showAddEvent ? "Done" : "+ Add Occasion"}
+              </button>
+            </div>
 
             {/* Tracked occasion chips — always visible */}
             {(() => {
@@ -735,6 +735,7 @@ export default function RelationshipPage() {
               </div>
             )}
           </div>
+          </div>{/* end grouped card */}
 
           {/* ══ 1. UPCOMING MOMENTS ══════════════════════════════════════════════ */}
           <div style={{ marginBottom: 24 }}>
