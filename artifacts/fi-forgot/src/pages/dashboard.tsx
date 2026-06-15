@@ -78,6 +78,11 @@ const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
   "New Year's":      { month: 1,  day: 1  }, "Easter":        { month: 4,  day: 20 },
 };
 
+function fmtDate(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 function getEventDate(event: string, r: Recipient): string | null {
   const now  = new Date(); const year = now.getFullYear();
   const pad  = (n: number) => String(n).padStart(2, "0");
@@ -564,6 +569,67 @@ export default function DashboardPage() {
               </div>
               <RelationshipHealthSection isMobile={isMobile} />
             </div>
+
+            {/* ── Section 4: Upcoming Moments ──────────────────────────── */}
+            {allUpcomingEvents.filter(e => e.daysAway <= 60).length > 0 && (
+              <div style={{ marginBottom: 28 }}>
+                <h2 style={{
+                  fontFamily: "'Bebas Neue', cursive",
+                  fontSize: isMobile ? "1.6rem" : "1.9rem",
+                  letterSpacing: "0.03em", color: INK, margin: "0 0 14px", lineHeight: 1,
+                }}>
+                  Upcoming Moments
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                  {allUpcomingEvents.filter(e => e.daysAway <= 60).map(ev => {
+                    const urgent  = ev.daysAway <= 7;
+                    const near    = ev.daysAway <= 14;
+                    const accent  = urgent ? RED : near ? AMBER : SAGE;
+                    const hasCard = upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`);
+                    return (
+                      <div key={`${ev.recipient.id}-${ev.event}`} style={{
+                        background: WHITE, borderRadius: 12,
+                        border: `1px solid ${near ? RED + "30" : BORDER}`,
+                        borderLeft: `4px solid ${accent}`,
+                        padding: "12px 16px",
+                        display: "flex", alignItems: "center", gap: 14,
+                        boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
+                      }}>
+                        {/* Day badge */}
+                        <div style={{
+                          width: 50, height: 50, borderRadius: 10, flexShrink: 0,
+                          background: urgent ? RED : "#F8F3EC",
+                          border: urgent ? "none" : `1px solid ${BORDER}`,
+                          display: "flex", flexDirection: "column" as const,
+                          alignItems: "center", justifyContent: "center",
+                        }}>
+                          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: urgent ? WHITE : INK, lineHeight: 1 }}>{ev.daysAway}</div>
+                          <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : MID }}>DAYS</div>
+                        </div>
+                        {/* Info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: "0.94rem", color: INK }}>{ev.recipient.name}</div>
+                          <div style={{ fontSize: "0.76rem", color: MID, marginTop: 2 }}>{ev.event} · {fmtDate(ev.dateStr)}</div>
+                        </div>
+                        {/* Action */}
+                        <button
+                          onClick={() => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)}
+                          style={{
+                            padding: "6px 13px", borderRadius: 7, cursor: "pointer", flexShrink: 0,
+                            border: "none",
+                            background: hasCard ? `${SAGE}20` : accent,
+                            color: hasCard ? SAGE : WHITE,
+                            fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
+                          }}
+                        >
+                          {hasCard ? "Card Ready ✓" : "Write Card ✦"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* ── Plan usage — subtle ──────────────────────────────────── */}
             <div style={{
