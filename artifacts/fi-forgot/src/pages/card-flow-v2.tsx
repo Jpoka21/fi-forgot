@@ -344,10 +344,10 @@ export default function CardFlowV2() {
     const first = r.name.split(" ")[0] ?? r.name;
     setFirstName(first);
     setRelationship(r.relationship);
-    // Skip the "who" phase — jump straight into the question flow
     setRecipientId(prefilledId);
-    const computed = buildSteps(r.relationship);
-    setSteps(computed);
+    // Skip ALL relationship profile questions — the user already answered those.
+    // Jump straight to the card-specific questions starting with "What is the occasion?"
+    setSteps(UNIVERSAL_QUESTIONS);
     setStepIdx(0);
     setPhase("flow");
   // eslint-disable-next-line react-hooks/exhaustive-deps
