@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import AppNav from "@/components/layout/AppNav";
 import {
@@ -19,165 +19,140 @@ import {
 } from "@/lib/data";
 import { ArrowLeft, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
-import { useToast } from "@/hooks/use-toast";
 
-const NAVY = "#071A33";
-const RED = "#E23B2E";
-const CREAM = "#F8EEDC";
-const BLACK = "#111111";
+/* ── Brand tokens ─────────────────────────────────────────────── */
+const BEIGE  = "#F2E6D3";
+const RED    = "#E23B2E";
+const INK    = "#1F1F1F";
+const MID    = "#6B7280";
+const WHITE  = "#FFFFFF";
+const SAGE   = "#5B8C6B";
+const BORDER = "#E5E0D8";
+const SAGE_BG = "#EDF4EF";
+const SAGE_BORDER = "#C8DDD0";
 
+/* ── Children editor ──────────────────────────────────────────── */
 const GENDER_OPTIONS = [
-  { id: "boy", label: "Boy", emoji: "👦" },
-  { id: "girl", label: "Girl", emoji: "👧" },
+  { id: "boy",       label: "Boy",       emoji: "👦" },
+  { id: "girl",      label: "Girl",      emoji: "👧" },
   { id: "nonbinary", label: "Non-binary", emoji: "🧒" },
 ] as const;
 
-function ChildrenEditor({
-  children,
-  onChange,
-}: {
+function ChildrenEditor({ children, onChange }: {
   children: Child[];
-  onChange: (children: Child[]) => void;
+  onChange: (c: Child[]) => void;
 }) {
   function addChild() {
-    onChange([
-      ...children,
-      { id: Date.now().toString(), name: "", gender: "boy", birthdate: "" },
-    ]);
+    onChange([...children, { id: Date.now().toString(), name: "", gender: "boy", birthdate: "" }]);
   }
-
   function updateChild(id: string, patch: Partial<Child>) {
-    onChange(children.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+    onChange(children.map(c => c.id === id ? { ...c, ...patch } : c));
   }
-
   function removeChild(id: string) {
-    onChange(children.filter((c) => c.id !== id));
+    onChange(children.filter(c => c.id !== id));
   }
 
   return (
-    <div className="space-y-3">
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {children.map((child, idx) => (
-        <div
-          key={child.id}
-          className="rounded-xl border-2 p-4 space-y-3"
-          style={{ borderColor: `${BLACK}15`, background: "#fff" }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-bold" style={{ color: NAVY }}>
-              Child {idx + 1}
-            </span>
-            <button
-              type="button"
-              onClick={() => removeChild(child.id)}
-              className="p-1 rounded-lg hover:bg-red-50 transition-colors"
-            >
-              <Trash2 size={14} style={{ color: RED }} />
+        <div key={child.id} style={{
+          background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: 16,
+          display: "flex", flexDirection: "column", gap: 12,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "0.8rem", fontWeight: 700, color: INK }}>Child {idx + 1}</span>
+            <button type="button" onClick={() => removeChild(child.id)}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 6, color: RED }}>
+              <Trash2 size={14} />
             </button>
           </div>
-
-          <div className="grid grid-cols-2 gap-3">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: "#555" }}>
-                Name
-              </label>
-              <input
-                className="w-full border-2 rounded-lg px-3 py-2 text-sm outline-none focus:border-red-400 transition-colors"
-                style={{ borderColor: `${BLACK}20` }}
-                placeholder="Emma"
-                value={child.name}
-                onChange={(e) => updateChild(child.id, { name: e.target.value })}
-              />
+              <label style={{ display: "block", fontSize: "0.73rem", fontWeight: 600, color: MID, marginBottom: 5 }}>Name</label>
+              <input style={{
+                width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8,
+                padding: "8px 12px", fontSize: "0.85rem", outline: "none", background: WHITE,
+                color: INK, boxSizing: "border-box",
+              }} placeholder="Emma" value={child.name}
+                onChange={e => updateChild(child.id, { name: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: "#555" }}>
-                Birthdate <span className="font-normal text-gray-400">(for auto-age)</span>
+              <label style={{ display: "block", fontSize: "0.73rem", fontWeight: 600, color: MID, marginBottom: 5 }}>
+                Birthdate <span style={{ fontWeight: 400, color: "#bbb" }}>(auto-age)</span>
               </label>
-              <input
-                type="date"
-                className="w-full border-2 rounded-lg px-3 py-2 text-sm outline-none focus:border-red-400 transition-colors"
-                style={{ borderColor: `${BLACK}20` }}
-                value={child.birthdate ?? ""}
-                onChange={(e) => updateChild(child.id, { birthdate: e.target.value })}
-              />
+              <input type="date" style={{
+                width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8,
+                padding: "8px 12px", fontSize: "0.85rem", outline: "none", background: WHITE,
+                color: INK, boxSizing: "border-box",
+              }} value={child.birthdate ?? ""}
+                onChange={e => updateChild(child.id, { birthdate: e.target.value })} />
             </div>
           </div>
-
           <div>
-            <label className="block text-xs font-semibold mb-2" style={{ color: "#555" }}>
-              Gender
-            </label>
-            <div className="flex gap-2">
-              {GENDER_OPTIONS.map((g) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => updateChild(child.id, { gender: g.id as Child["gender"] })}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all"
+            <label style={{ display: "block", fontSize: "0.73rem", fontWeight: 600, color: MID, marginBottom: 8 }}>Gender</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              {GENDER_OPTIONS.map(g => (
+                <button key={g.id} type="button" onClick={() => updateChild(child.id, { gender: g.id as Child["gender"] })}
                   style={{
-                    borderColor: child.gender === g.id ? RED : `${BLACK}20`,
-                    background: child.gender === g.id ? `${RED}12` : "#fff",
-                    color: child.gender === g.id ? RED : "#555",
-                  }}
-                >
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "6px 12px", borderRadius: 8, border: `1.5px solid ${child.gender === g.id ? RED : BORDER}`,
+                    background: child.gender === g.id ? `${RED}10` : WHITE,
+                    color: child.gender === g.id ? RED : MID,
+                    fontWeight: 600, fontSize: "0.78rem", cursor: "pointer",
+                  }}>
                   {g.emoji} {g.label}
                 </button>
               ))}
             </div>
           </div>
-
           {child.birthdate && (
-            <p className="text-xs italic" style={{ color: "#888" }}>
-              Age auto-updates each year from their birthdate. No need to update manually.
+            <p style={{ fontSize: "0.73rem", color: "#aaa", fontStyle: "italic", margin: 0 }}>
+              Age auto-updates each year from their birthdate.
             </p>
           )}
         </div>
       ))}
-
-      <button
-        type="button"
-        onClick={addChild}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed text-sm font-semibold transition-all hover:bg-gray-50"
-        style={{ borderColor: `${BLACK}25`, color: "#888" }}
-      >
+      <button type="button" onClick={addChild} style={{
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        padding: "12px 0", borderRadius: 10, border: `1.5px dashed ${BORDER}`,
+        background: "none", color: MID, fontWeight: 600, fontSize: "0.83rem", cursor: "pointer",
+      }}>
         <Plus size={14} /> Add a child
       </button>
     </div>
   );
 }
 
-interface QuestionFieldProps {
+/* ── Question field ───────────────────────────────────────────── */
+function QuestionField({ q, value, onChange, children, onChildrenChange }: {
   q: BriefingQuestion;
   value: string;
   onChange: (v: string) => void;
   children?: Child[];
   onChildrenChange?: (c: Child[]) => void;
-}
+}) {
+  const inputStyle = {
+    width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 10,
+    padding: "11px 14px", fontSize: "0.88rem", outline: "none",
+    background: WHITE, color: INK, boxSizing: "border-box" as const,
+    fontFamily: "inherit", resize: "none" as const,
+  };
 
-function QuestionField({ q, value, onChange, children, onChildrenChange }: QuestionFieldProps) {
   if (q.type === "children") {
-    return (
-      <ChildrenEditor
-        children={children ?? []}
-        onChange={onChildrenChange ?? (() => {})}
-      />
-    );
+    return <ChildrenEditor children={children ?? []} onChange={onChildrenChange ?? (() => {})} />;
   }
 
   if (q.type === "boolean") {
     return (
-      <div className="flex gap-3">
-        {["Yes", "No", "Not sure"].map((opt) => (
-          <button
-            key={opt}
-            type="button"
-            onClick={() => onChange(opt)}
-            className="px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all"
-            style={{
-              borderColor: value === opt ? RED : `${BLACK}20`,
-              background: value === opt ? `${RED}12` : "#fff",
-              color: value === opt ? RED : "#555",
-            }}
-          >
+      <div style={{ display: "flex", gap: 8 }}>
+        {["Yes", "No", "Not sure"].map(opt => (
+          <button key={opt} type="button" onClick={() => onChange(opt)} style={{
+            padding: "8px 16px", borderRadius: 8, cursor: "pointer",
+            border: `1.5px solid ${value === opt ? RED : BORDER}`,
+            background: value === opt ? `${RED}10` : WHITE,
+            color: value === opt ? RED : MID,
+            fontWeight: 600, fontSize: "0.83rem",
+          }}>
             {opt}
           </button>
         ))}
@@ -187,62 +162,44 @@ function QuestionField({ q, value, onChange, children, onChildrenChange }: Quest
 
   if (q.type === "textarea") {
     return (
-      <textarea
-        className="w-full border-2 rounded-xl px-4 py-3 text-sm outline-none focus:border-red-400 transition-colors resize-none"
-        style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
-        placeholder={q.placeholder}
-        rows={3}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <textarea placeholder={q.placeholder} rows={3}
+        value={value} onChange={e => onChange(e.target.value)}
+        style={{ ...inputStyle, lineHeight: 1.55 }} />
     );
   }
 
   return (
-    <input
-      className="w-full border-2 rounded-xl px-4 py-3 text-sm outline-none focus:border-red-400 transition-colors"
-      style={{ borderColor: `${BLACK}20`, background: "#fff", color: BLACK }}
-      placeholder={q.placeholder}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
+    <input placeholder={q.placeholder}
+      value={value} onChange={e => onChange(e.target.value)}
+      style={inputStyle} />
   );
 }
 
+/* ── Main page ────────────────────────────────────────────────── */
 export default function BriefingPage() {
   const params = useParams<{ recipientId: string; event: string; briefingId?: string }>();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
 
-  const recipient = getRecipient(params.recipientId);
-  const eventName = decodeURIComponent(params.event);
-  const isEditing = !!params.briefingId;
+  const recipient       = getRecipient(params.recipientId);
+  const eventName       = decodeURIComponent(params.event);
+  const isEditing       = !!params.briefingId;
   const existingBriefing = params.briefingId ? getBriefing(params.briefingId) : undefined;
+  const allQuestions    = getEventQuestions(eventName, recipient?.gender ?? "neutral");
 
-  const allQuestions = getEventQuestions(eventName, recipient?.gender ?? "neutral");
-
-  // Initialize answers from existing briefing or empty
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
     if (existingBriefing) {
-      return Object.fromEntries(existingBriefing.answers.map((a) => [a.questionKey, a.answer]));
+      return Object.fromEntries(existingBriefing.answers.map(a => [a.questionKey, a.answer]));
     }
     return {};
   });
 
-  // Children state — pre-populated from recipient profile
-  const [editedChildren, setEditedChildren] = useState<Child[]>(
-    () => recipient?.children ?? []
-  );
-
-  const [submitted, setSubmitted] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [editedChildren, setEditedChildren] = useState<Child[]>(() => recipient?.children ?? []);
+  const [submitted,      setSubmitted]      = useState(false);
+  const [generating,     setGenerating]     = useState(false);
   const [generatedCardId, setGeneratedCardId] = useState<string | null>(null);
 
-  // Filter questions:
-  // - Skip children question if children are already on file (they're pre-populated anyway)
-  // - Skip showIf questions when the condition isn't met
   const childrenAlreadyOnFile = (recipient?.children ?? []).length > 0;
-  const questions = allQuestions.filter((q) => {
+  const questions = allQuestions.filter(q => {
     if (q.type === "children" && childrenAlreadyOnFile) return false;
     if (q.showIf && answers[q.showIf.key] !== q.showIf.value) return false;
     return true;
@@ -250,11 +207,11 @@ export default function BriefingPage() {
 
   if (!recipient) {
     return (
-      <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
+      <div style={{ minHeight: "100vh", background: BEIGE }}>
         <AppNav />
-        <div className="p-8 text-center">
-          <p className="text-[hsl(221,20%,50%)]">Recipient not found.</p>
-          <Link href="/people" className="text-sm text-[hsl(6,64%,46%)] underline mt-2 block">
+        <div style={{ padding: 32, textAlign: "center" }}>
+          <p style={{ color: MID }}>Recipient not found.</p>
+          <Link href="/people" style={{ color: RED, fontSize: "0.85rem", display: "block", marginTop: 8 }}>
             Back to your people
           </Link>
         </div>
@@ -263,44 +220,34 @@ export default function BriefingPage() {
   }
 
   function setAnswer(key: string, value: string) {
-    setAnswers((prev) => ({ ...prev, [key]: value }));
+    setAnswers(prev => ({ ...prev, [key]: value }));
   }
 
   async function handleSubmit() {
     if (!recipient) return;
-    // Save children back to recipient profile
-    const updatedRecipient = { ...recipient, children: editedChildren };
-    saveRecipient(updatedRecipient);
+    saveRecipient({ ...recipient, children: editedChildren });
 
-    // Build briefing answers
     const briefingAnswers: BriefingAnswer[] = questions
-      .filter((q) => q.type !== "children")
-      .map((q) => ({
-        questionKey: q.key,
-        question: q.question,
-        answer: answers[q.key] ?? "",
-      }))
-      .filter((a) => a.answer.trim().length > 0);
+      .filter(q => q.type !== "children")
+      .map(q => ({ questionKey: q.key, question: q.question, answer: answers[q.key] ?? "" }))
+      .filter(a => a.answer.trim().length > 0);
 
-    // Add children summary as a synthetic answer
-    if (questions.some((q) => q.type === "children") && editedChildren.length > 0) {
+    if (questions.some(q => q.type === "children") && editedChildren.length > 0) {
       briefingAnswers.unshift({
         questionKey: "children",
         question: "Children",
-        answer: editedChildren
-          .map((c) => {
-            const age = c.birthdate ? ` (${c.birthdate}, age auto-computes)` : "";
-            return `${c.name}${age} — ${c.gender}`;
-          })
-          .join("; "),
+        answer: editedChildren.map(c => {
+          const age = c.birthdate ? ` (${c.birthdate}, age auto-computes)` : "";
+          return `${c.name}${age} — ${c.gender}`;
+        }).join("; "),
       });
     }
 
     const allBriefings = getBriefingsForRecipient(recipient.id);
     const briefing: EventBriefing = {
       id: existingBriefing?.id ?? Date.now().toString(),
-      recipientId: recipient!.id,
-      recipientName: recipient!.name,
+      recipientId: recipient.id,
+      recipientName: recipient.name,
       event: eventName,
       year: new Date().getFullYear(),
       completedAt: new Date().toISOString(),
@@ -311,7 +258,6 @@ export default function BriefingPage() {
     setSubmitted(true);
     setGenerating(true);
 
-    // Generate the card immediately
     try {
       const priorBriefings = allBriefings.filter(b => b.event !== eventName);
       const res = await fetch("/api/generate-card", {
@@ -351,57 +297,72 @@ export default function BriefingPage() {
         saveCard(newCard);
         setGeneratedCardId(newCard.id);
       }
-    } catch {
-      // Card generation failed — that's OK, they can still use the dashboard
-    } finally {
-      setGenerating(false);
-    }
+    } catch { /* card generation failed — dashboard still works */ }
+    finally { setGenerating(false); }
   }
 
+  /* ── Success screen ─────────────────────────────────────────── */
   if (submitted) {
     return (
-      <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
+      <div style={{ minHeight: "100vh", background: BEIGE }}>
         <AppNav />
-        <div className="p-8 max-w-lg mx-auto text-center">
+        <div style={{ padding: "64px 24px", maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
           {generating ? (
             <>
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${RED}15` }}>
-                <Loader2 size={32} style={{ color: RED }} className="animate-spin" />
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", background: `${RED}12`,
+                display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px",
+              }}>
+                <Loader2 size={28} style={{ color: RED }} className="animate-spin" />
               </div>
-              <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: NAVY }}>Writing the card…</h2>
-              <p style={{ color: "#6b7a99" }}>Using everything you just told us about {recipient?.name}.</p>
+              <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: INK, margin: "0 0 8px", letterSpacing: "0.03em" }}>
+                Writing the card…
+              </h2>
+              <p style={{ color: MID, fontSize: "0.92rem", lineHeight: 1.55 }}>
+                Using everything we know about {recipient.name}.
+              </p>
             </>
           ) : generatedCardId ? (
             <>
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#e8f5e9" }}>
-                <CheckCircle2 size={32} className="text-green-600" />
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", background: `${SAGE}18`,
+                display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px",
+              }}>
+                <CheckCircle2 size={28} style={{ color: SAGE }} />
               </div>
-              <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: NAVY }}>Card ready for review!</h2>
-              <p className="mb-6" style={{ color: "#6b7a99" }}>
-                We wrote {recipient?.name}'s {eventName} card. Read it over and approve when you're happy.
+              <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: INK, margin: "0 0 8px", letterSpacing: "0.03em" }}>
+                Card ready for review
+              </h2>
+              <p style={{ color: MID, fontSize: "0.92rem", lineHeight: 1.55, marginBottom: 28 }}>
+                We wrote {recipient.name}'s {eventName} card. Read it over and approve when you're happy.
               </p>
-              <button
-                onClick={() => setLocation(`/cards/review?id=${generatedCardId}`)}
-                className="w-full font-bold py-4 rounded-xl text-white"
-                style={{ background: RED }}
-              >
+              <button onClick={() => setLocation(`/cards/review?id=${generatedCardId}`)} style={{
+                width: "100%", background: RED, color: WHITE, border: "none",
+                borderRadius: 12, padding: "15px 0", fontWeight: 700, fontSize: "0.95rem",
+                cursor: "pointer", letterSpacing: "0.01em",
+              }}>
                 Review the card →
               </button>
             </>
           ) : (
             <>
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#e8f5e9" }}>
-                <CheckCircle2 size={32} className="text-green-600" />
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", background: `${SAGE}18`,
+                display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px",
+              }}>
+                <CheckCircle2 size={28} style={{ color: SAGE }} />
               </div>
-              <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: NAVY }}>Briefing saved.</h2>
-              <p className="mb-6" style={{ color: "#6b7a99" }}>
-                We have everything we need for {recipient?.name}'s {eventName} card.
+              <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: INK, margin: "0 0 8px", letterSpacing: "0.03em" }}>
+                Briefing saved
+              </h2>
+              <p style={{ color: MID, fontSize: "0.92rem", lineHeight: 1.55, marginBottom: 28 }}>
+                We have everything we need for {recipient.name}'s {eventName} card.
               </p>
-              <button
-                onClick={() => setLocation("/dashboard")}
-                className="w-full font-bold py-4 rounded-xl text-white"
-                style={{ background: RED }}
-              >
+              <button onClick={() => setLocation("/dashboard")} style={{
+                width: "100%", background: RED, color: WHITE, border: "none",
+                borderRadius: 12, padding: "15px 0", fontWeight: 700, fontSize: "0.95rem",
+                cursor: "pointer",
+              }}>
                 Back to dashboard →
               </button>
             </>
@@ -411,165 +372,192 @@ export default function BriefingPage() {
     );
   }
 
-  const hasChildrenQuestion = allQuestions.some((q) => q.type === "children");
-  const childrenSummaryStr = childrenSummary(editedChildren);
-
-  // Build "We already know" bullets from profile fields — up to 5
+  /* ── Profile context bullets ────────────────────────────────── */
   const knownBullets: string[] = [];
-  (recipient.interests ?? []).forEach((i) => knownBullets.push(i));
-  (recipient.personality ?? []).forEach((p) => knownBullets.push(p));
-  if (recipient.favoriteMemories?.trim()) knownBullets.push(recipient.favoriteMemories.trim().slice(0, 80) + (recipient.favoriteMemories.trim().length > 80 ? "…" : ""));
-  if (recipient.personalityNotes?.trim()) knownBullets.push(recipient.personalityNotes.trim().slice(0, 80) + (recipient.personalityNotes.trim().length > 80 ? "…" : ""));
-  if (recipient.insideJokes?.trim()) knownBullets.push(recipient.insideJokes.trim().slice(0, 80) + (recipient.insideJokes.trim().length > 80 ? "…" : ""));
+  (recipient.interests ?? []).forEach(i => knownBullets.push(i));
+  (recipient.personality ?? []).forEach(p => knownBullets.push(p));
+  const clip = (s: string) => s.trim().slice(0, 80) + (s.trim().length > 80 ? "…" : "");
+  if (recipient.favoriteMemories?.trim())  knownBullets.push(clip(recipient.favoriteMemories));
+  if (recipient.personalityNotes?.trim())  knownBullets.push(clip(recipient.personalityNotes));
+  if (recipient.insideJokes?.trim())       knownBullets.push(clip(recipient.insideJokes));
   const displayBullets = knownBullets.slice(0, 5);
 
-  return (
-    <div style={{ minHeight: "100vh", background: "#F8EEDC" }}>
-      <AppNav />
-      <div className="p-6 md:p-8 max-w-2xl mx-auto">
+  const hasChildrenQuestion = allQuestions.some(q => q.type === "children");
+  const childrenSummaryStr  = childrenSummary(editedChildren);
 
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+  /* ── Main form ──────────────────────────────────────────────── */
+  return (
+    <div style={{ minHeight: "100vh", background: BEIGE }}>
+      <AppNav />
+      <div style={{ padding: "24px 20px 48px", maxWidth: 580, margin: "0 auto" }}>
+
+        {/* ── Header ───────────────────────────────────────────── */}
+        <div style={{ marginBottom: 28 }}>
           <Link href={`/relationship/${recipient.id}`}>
-            <button className="p-2 hover:bg-[hsl(40,20%,90%)] rounded-lg transition-colors" style={{ color: "#8a9abf" }}>
-              <ArrowLeft size={18} />
+            <button style={{
+              background: "none", border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+              color: MID, fontSize: "0.82rem", fontWeight: 600, padding: "0 0 14px",
+            }}>
+              <ArrowLeft size={15} /> Back
             </button>
           </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: RED }}>
-                Card Briefing
-              </span>
-              <span className="text-xs" style={{ color: "#8a9abf" }}>{eventName} · {new Date().getFullYear()}</span>
-            </div>
-            <h1 className="font-serif text-2xl font-bold mt-0.5" style={{ color: NAVY }}>
-              {recipient.name}'s {eventName} Card
-            </h1>
-            <p className="text-sm" style={{ color: "#8a9abf" }}>
-              Add a detail or two to make it more personal — or skip straight to the card.
-            </p>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <span style={{
+              background: RED, color: WHITE, fontSize: "0.68rem", fontWeight: 700,
+              letterSpacing: "0.06em", padding: "3px 9px", borderRadius: 20, textTransform: "uppercase",
+            }}>
+              Card Briefing
+            </span>
+            <span style={{ fontSize: "0.8rem", color: MID }}>
+              {eventName} · {new Date().getFullYear()}
+            </span>
           </div>
+
+          <h1 style={{
+            fontFamily: "'Bebas Neue', cursive",
+            fontSize: "clamp(1.7rem, 5vw, 2.2rem)",
+            letterSpacing: "0.03em", color: INK, margin: "0 0 6px", lineHeight: 1.05,
+          }}>
+            {recipient.name}'s {eventName} Card
+          </h1>
+          <p style={{ color: MID, fontSize: "0.88rem", margin: 0, lineHeight: 1.5 }}>
+            Add a detail or two — or skip straight to the card.
+          </p>
         </div>
 
-        {/* ── SECTION A: WE ALREADY KNOW ── */}
-        <div
-          className="mb-2 rounded-2xl p-5"
-          style={{ background: "#EDF4EF", border: "1.5px solid #C8DDD0" }}
-        >
-          <p className="text-xs font-bold tracking-widest mb-3" style={{ color: "#3D6B4F", textTransform: "uppercase" }}>
+        {/* ── What we know ─────────────────────────────────────── */}
+        <div style={{
+          background: SAGE_BG, border: `1.5px solid ${SAGE_BORDER}`,
+          borderRadius: 14, padding: "16px 18px", marginBottom: 20,
+        }}>
+          <p style={{
+            fontFamily: "'Bebas Neue', cursive", fontSize: "0.78rem",
+            letterSpacing: "0.12em", color: SAGE, margin: "0 0 10px",
+          }}>
             We Already Know About {recipient.name}
           </p>
+
           {displayBullets.length > 0 ? (
-            <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {displayBullets.map((b, i) => (
-                <li key={i} className="flex items-start gap-2 mb-2 text-sm" style={{ color: "#3a5c47" }}>
-                  <span style={{ color: "#5B8C6B", marginTop: 2, flexShrink: 0 }}>•</span>
-                  <span>{b}</span>
-                </li>
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <span style={{ color: SAGE, fontSize: "0.6rem", marginTop: 4, flexShrink: 0 }}>●</span>
+                  <span style={{ fontSize: "0.85rem", color: "#3a5c47", lineHeight: 1.45 }}>{b}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
-            <p className="text-sm" style={{ color: "#6b9a7a" }}>
-              Profile details, recent memories, and past cards will appear here once added.
+            <p style={{ fontSize: "0.85rem", color: "#6b9a7a", margin: 0 }}>
+              Profile details, memories, and past cards will appear here once added.
             </p>
           )}
+
           {hasChildrenQuestion && childrenAlreadyOnFile && childrenSummaryStr && (
-            <div className="mt-3 pt-3" style={{ borderTop: "1px solid #C8DDD0" }}>
-              <span className="text-xs font-semibold" style={{ color: "#3D6B4F" }}>Children on file: </span>
-              <span className="text-xs" style={{ color: "#5a7a65" }}>{childrenSummaryStr}</span>
-              <span className="text-xs ml-1" style={{ color: "#8ab09a" }}>(ages auto-update)</span>
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${SAGE_BORDER}` }}>
+              <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#3D6B4F" }}>Children on file: </span>
+              <span style={{ fontSize: "0.78rem", color: "#5a7a65" }}>{childrenSummaryStr}</span>
+              <span style={{ fontSize: "0.78rem", color: "#8ab09a" }}> (ages auto-update)</span>
             </div>
           )}
-          <p className="text-xs mt-3 pt-3" style={{ color: "#5B8C6B", borderTop: "1px solid #C8DDD0" }}>
+
+          <p style={{
+            fontSize: "0.78rem", color: SAGE, margin: "10px 0 0",
+            paddingTop: 10, borderTop: `1px solid ${SAGE_BORDER}`,
+          }}>
             We'll automatically use these details when writing the card.
           </p>
         </div>
 
-        {/* Skip & Generate — always visible, prominent */}
-        <div className="mb-6 mt-4">
-          <button
-            onClick={handleSubmit}
-            className="w-full font-bold py-4 rounded-xl text-white hover:opacity-90 transition-all text-base"
-            style={{ background: RED }}
-          >
-            Skip &amp; Generate Card →
-          </button>
-          <p className="text-center text-xs mt-2" style={{ color: "#aaa" }}>
-            We'll write a great card using what we already know. No details needed.
-          </p>
-        </div>
+        {/* ── Skip & generate ───────────────────────────────────── */}
+        <button onClick={handleSubmit} style={{
+          width: "100%", background: RED, color: WHITE, border: "none",
+          borderRadius: 12, padding: "15px 0", fontWeight: 700,
+          fontSize: "0.97rem", cursor: "pointer", marginBottom: 8,
+          letterSpacing: "0.01em",
+        }}>
+          Skip &amp; Generate Card →
+        </button>
+        <p style={{ textAlign: "center", fontSize: "0.76rem", color: "#bbb", margin: "0 0 28px" }}>
+          We'll write a great card using what we already know. No details needed.
+        </p>
 
-        {/* ── SECTION B: OPTIONAL DETAILS ── */}
-        <div className="mb-4">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="flex-1 h-px" style={{ background: "#D8CEBD" }} />
-            <p className="text-xs font-bold tracking-widest shrink-0" style={{ color: "#9a8e7e", textTransform: "uppercase" }}>
-              Optional Details for This Card
-            </p>
-            <div className="flex-1 h-px" style={{ background: "#D8CEBD" }} />
-          </div>
-          <p className="text-center text-xs mt-1" style={{ color: "#aaa" }}>
-            Everything below is optional. Skip anything you don't know. Even one answer makes the card more personal.
-          </p>
-        </div>
-
-        {/* Questions — all marked optional */}
-        <div className="space-y-4">
-          {questions.map((q) => (
-            <div
-              key={q.key}
-              className="bg-white rounded-xl p-5 shadow-sm"
-              style={{ border: "1px solid #E5E0D8" }}
-            >
-              <div className="mb-3">
-                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                  <span
-                    className="text-xs font-bold px-2 py-0.5 rounded-full"
-                    style={{ background: "#F5F0EA", color: "#9a8e7e" }}
-                  >
-                    Optional
-                  </span>
-                  <label className="font-semibold text-sm" style={{ color: NAVY }}>
-                    {q.question}
-                  </label>
-                </div>
-                {q.hint && (
-                  <p className="text-xs mt-1" style={{ color: "#9a8e7e" }}>{q.hint}</p>
-                )}
-              </div>
-              <QuestionField
-                q={q}
-                value={answers[q.key] ?? ""}
-                onChange={(v) => setAnswer(q.key, v)}
-                children={editedChildren}
-                onChildrenChange={setEditedChildren}
-              />
+        {/* ── Optional questions divider ───────────────────────── */}
+        {questions.length > 0 && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+              <div style={{ flex: 1, height: 1, background: BORDER }} />
+              <span style={{
+                fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em",
+                color: "#b0a89a", textTransform: "uppercase", whiteSpace: "nowrap",
+              }}>
+                Optional Details for This Card
+              </span>
+              <div style={{ flex: 1, height: 1, background: BORDER }} />
             </div>
-          ))}
-        </div>
+            <p style={{ textAlign: "center", fontSize: "0.76rem", color: "#bbb", margin: "0 0 18px" }}>
+              Skip anything you don't know. Even one answer makes the card more personal.
+            </p>
 
-        {/* Bottom actions */}
-        <div className="mt-7 flex gap-3">
-          <button
-            onClick={handleSubmit}
-            className="flex-1 font-bold py-4 rounded-xl text-white hover:opacity-90 transition-all"
-            style={{ background: RED }}
-          >
+            {/* ── Questions ──────────────────────────────────────── */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+              {questions.map(q => (
+                <div key={q.key} style={{
+                  background: WHITE, borderRadius: 14,
+                  border: `1px solid ${BORDER}`, padding: "18px 18px 16px",
+                }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" as const }}>
+                      <span style={{
+                        fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px",
+                        borderRadius: 20, background: "#F5F0EA", color: "#9a8e7e",
+                      }}>
+                        Optional
+                      </span>
+                      <span style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>
+                        {q.question}
+                      </span>
+                    </div>
+                    {q.hint && (
+                      <p style={{ fontSize: "0.78rem", color: MID, margin: 0, lineHeight: 1.5 }}>
+                        {q.hint}
+                      </p>
+                    )}
+                  </div>
+                  <QuestionField
+                    q={q}
+                    value={answers[q.key] ?? ""}
+                    onChange={v => setAnswer(q.key, v)}
+                    children={editedChildren}
+                    onChildrenChange={setEditedChildren}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── Bottom actions ────────────────────────────────────── */}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={handleSubmit} style={{
+            flex: 1, background: RED, color: WHITE, border: "none",
+            borderRadius: 12, padding: "15px 0", fontWeight: 700,
+            fontSize: "0.95rem", cursor: "pointer",
+          }}>
             {isEditing ? "Save Changes →" : "Generate Card →"}
           </button>
           <Link href={`/relationship/${recipient.id}`}>
-            <button
-              className="px-5 py-4 rounded-xl border-2 font-semibold text-sm hover:bg-gray-50 transition-all"
-              style={{ borderColor: `${BLACK}20`, color: "#666" }}
-            >
+            <button style={{
+              padding: "15px 20px", borderRadius: 12, cursor: "pointer",
+              border: `1.5px solid ${BORDER}`, background: "none",
+              color: MID, fontWeight: 600, fontSize: "0.85rem",
+            }}>
               Cancel
             </button>
           </Link>
         </div>
 
-        <p className="text-center mt-3 text-xs" style={{ color: "#ccc" }}>
-          These details help make this card personal. They're not required for a great card.
-        </p>
       </div>
     </div>
   );
