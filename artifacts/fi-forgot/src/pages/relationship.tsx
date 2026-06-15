@@ -189,6 +189,7 @@ export default function RelationshipPage() {
   const [profileComplete, setProfileComplete] = useState(false);
   const [healthScore, setHealthScore]     = useState<HealthScore | null>(null);
   const [showAllMemories, setShowAllMemories] = useState(false);
+  const [showTimeline, setShowTimeline]       = useState(false);
 
   // Add memory
   const [memoryText, setMemoryText]       = useState("");
@@ -887,8 +888,26 @@ export default function RelationshipPage() {
 
           {/* ══ 7. TIMELINE ══════════════════════════════════════════════════════ */}
           <div style={{ marginBottom: 24 }}>
-            <SectionHead title="FULL HISTORY" />
-            <RelationshipTimeline recipientId={id} />
+            <button
+              onClick={() => setShowTimeline(v => !v)}
+              style={{
+                width: "100%", display: "flex", alignItems: "center",
+                justifyContent: "space-between", background: WHITE,
+                border: `1px solid ${BORDER}`, borderRadius: 12,
+                padding: "14px 16px", cursor: "pointer", marginBottom: showTimeline ? 8 : 0,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: "1rem" }}>📋</span>
+                <span style={{
+                  fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem",
+                  letterSpacing: "0.1em", color: BLACK,
+                }}>FULL HISTORY</span>
+                <span style={{ fontSize: "0.74rem", color: GRAY }}>— complete memory ledger</span>
+              </div>
+              <span style={{ fontSize: "0.8rem", color: GRAY }}>{showTimeline ? "▲ collapse" : "▼ expand"}</span>
+            </button>
+            {showTimeline && <RelationshipTimeline recipientId={id} />}
           </div>
 
           {/* ══ 8. RELATIONSHIP HEALTH (supporting, not hero) ════════════════════ */}
