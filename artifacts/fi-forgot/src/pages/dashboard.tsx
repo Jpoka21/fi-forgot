@@ -725,12 +725,19 @@ export default function DashboardPage() {
                             {/* Name + event + date */}
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                                <div
-                                  onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
-                                  style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", color: INK, cursor: "pointer", letterSpacing: "0.02em", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 5 }}
-                                >
-                                  {ev.recipient.name.toUpperCase()}
-                                  <span style={{ fontSize: "0.7rem", color: MID, fontWeight: 400, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>↗</span>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                                  <div
+                                    onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
+                                    style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", color: INK, cursor: "pointer", letterSpacing: "0.02em", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 5 }}
+                                  >
+                                    {ev.recipient.name.toUpperCase()}
+                                    <span style={{ fontSize: "0.7rem", color: MID, fontWeight: 400, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>↗</span>
+                                  </div>
+                                  {ev.recipient.relationship && (
+                                    <div style={{ fontSize: "0.68rem", color: MID, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500, lineHeight: 1 }}>
+                                      {ev.recipient.relationship}
+                                    </div>
+                                  )}
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
                                   <span style={{
