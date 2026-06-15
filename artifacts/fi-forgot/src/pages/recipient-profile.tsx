@@ -767,7 +767,7 @@ export default function RecipientProfilePage() {
                 {isEditMode ? (
                   <div>
                     <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1, margin: "0 0 4px" }}>
-                      Edit {existing.name}'s Profile
+                      {existing.name}'s Core Questions
                     </h1>
                     <p className="text-sm" style={{ color: GRAY }}>The more we know, the better the cards get.</p>
                   </div>
@@ -863,7 +863,7 @@ export default function RecipientProfilePage() {
                 >
                   <Settings size={12} style={{ color: `${GRAY}90` }} />
                   <span style={{ fontSize: "0.78rem", color: `${GRAY}bb`, textDecoration: "underline", textDecorationColor: `${GRAY}40` }}>
-                    {formOpen ? "Hide profile details" : "Edit profile details"}
+                    {formOpen ? "Hide core questions" : "Answer core questions"}
                   </span>
                   {formOpen
                     ? <ChevronUp size={11} style={{ color: `${GRAY}90` }} />

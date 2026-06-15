@@ -599,7 +599,7 @@ export default function RelationshipPage() {
                   color: `${WHITE}60`, fontWeight: 600,
                   fontSize: "0.82rem", cursor: "pointer",
                 }}>
-                  Edit Profile
+                  Answer Core Questions
                 </button>
               </Link>
             </div>
@@ -989,7 +989,7 @@ export default function RelationshipPage() {
           <div style={{ marginBottom: 24 }}>
             <SectionHead
               title="WHAT WE KNOW"
-              right={<OutlineBtn href={`/recipients/${id}`}>Edit Profile</OutlineBtn>}
+              right={<OutlineBtn href={`/recipients/${id}`}>Answer Core Questions</OutlineBtn>}
             />
             <Card>
               {profileFields.length === 0 ? (
