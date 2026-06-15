@@ -90,7 +90,7 @@ function briefingDest(score: RecipientHealthScore, localMap: Map<string, string>
   if (score.nextEventLabel) {
     return `/briefings/${id}/${encodeURIComponent(score.nextEventLabel)}`;
   }
-  return `/recipients/${id}?from=dashboard`;
+  return `/relationship/${id}`;
 }
 
 function contextLine(score: RecipientHealthScore): string {
@@ -173,7 +173,7 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
 
         {/* Text content — tapping this area navigates to profile */}
         <div
-          onClick={e => nav(e, `/recipients/${localId}?from=dashboard`)}
+          onClick={e => nav(e, `/relationship/${localId}`)}
           style={{ flex: 1, minWidth: 0, cursor: "pointer" }}
         >
           <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 3 }}>
@@ -257,7 +257,7 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
 
           {/* Add occasion / event */}
           <button
-            onClick={e => nav(e, `/recipients/${localId}?from=dashboard&tab=events`)}
+            onClick={e => nav(e, `/relationship/${localId}`)}
             style={actionPill(false)}
           >
             🗓 Add occasion
@@ -265,7 +265,7 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
 
           {/* Share something new */}
           <button
-            onClick={e => nav(e, `/recipients/${localId}?from=dashboard`)}
+            onClick={e => nav(e, `/relationship/${localId}`)}
             style={actionPill(false)}
           >
             💬 Share something new
@@ -273,7 +273,7 @@ function RecipientRow({ score, localMap }: { score: RecipientHealthScore; localM
 
           {/* View full profile */}
           <button
-            onClick={e => nav(e, `/recipients/${localId}?from=dashboard`)}
+            onClick={e => nav(e, `/relationship/${localId}`)}
             style={actionPill(true)}
           >
             View profile →
