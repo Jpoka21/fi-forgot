@@ -420,22 +420,27 @@ export default function RelationshipPage() {
   // ── Computed ────────────────────────────────────────────────────────────────
   const firstName = recipient?.name.split(" ")[0] ?? "them";
 
-  const upcomingEvents = (() => {
+  const allTrackedEventData = (() => {
     if (!recipient) return [];
     const today = new Date();
-    const cutoff = new Date(today.getTime() + 90 * 86400000);
-    const results: { event: string; dateStr: string; daysAway: number }[] = [];
+    const withDate: { event: string; dateStr: string; daysAway: number }[] = [];
+    const noDate:   { event: string; dateStr: null; daysAway: null }[] = [];
     for (const event of (recipient.selectedEvents ?? [])) {
       const dateStr = getEventDate(event, recipient);
-      if (!dateStr) continue;
+      if (!dateStr) { noDate.push({ event, dateStr: null, daysAway: null }); continue; }
       const d = new Date(dateStr + "T12:00:00");
-      if (d < today || d > cutoff) continue;
-      results.push({ event, dateStr, daysAway: daysUntil(dateStr) });
+      if (d < today) continue;
+      withDate.push({ event, dateStr, daysAway: daysUntil(dateStr) });
     }
-    return results.sort((a, b) => a.daysAway - b.daysAway).slice(0, 5);
+    withDate.sort((a, b) => a.daysAway - b.daysAway);
+    return [...withDate, ...noDate];
   })();
 
-  const nextEvent = upcomingEvents[0] ?? null;
+  const upcomingEvents  = allTrackedEventData.filter((e): e is { event: string; dateStr: string; daysAway: number } => e.daysAway !== null && e.daysAway <= 60);
+  const futureEvents    = allTrackedEventData.filter((e): e is { event: string; dateStr: string; daysAway: number } => e.daysAway !== null && e.daysAway > 60);
+  const eventsNeedingDate = allTrackedEventData.filter(e => e.daysAway === null);
+
+  const nextEvent = upcomingEvents[0] ?? futureEvents[0] ?? null;
 
   const statusColor = healthScore
     ? { Excellent: "#166534", Healthy: SAGE, NeedsAttention: AMBER, Priority: RED }[healthScore.status] ?? SAGE
@@ -619,27 +624,35 @@ export default function RelationshipPage() {
 
           {/* ══ 1. UPCOMING MOMENTS ══════════════════════════════════════════════ */}
           <div style={{ marginBottom: 24 }}>
-            <SectionHead title="UPCOMING MOMENTS" />
+            <SectionHead
+              title="UPCOMING MOMENTS"
+              right={
+                <button
+                  onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
+                  style={{ fontSize: "0.76rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >
+                  {showAddEvent ? "Done" : "Manage →"}
+                </button>
+              }
+            />
 
-            {/* Event rows */}
+            {/* ── Upcoming soon (≤ 60 days) ─────────────────────────────────── */}
             {upcomingEvents.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: showAddEvent ? 10 : 0 }}>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: 12 }}>
                 {upcomingEvents.map(ev => {
                   const urgent = ev.daysAway <= 7;
                   const near   = ev.daysAway <= 14;
                   const accent = urgent ? RED : near ? AMBER : SAGE;
                   return (
-                    <div
-                      key={ev.event}
-                      style={{
-                        background: WHITE, borderRadius: 12,
-                        border: `1px solid ${near ? RED + "30" : BORDER}`,
-                        borderLeft: `4px solid ${accent}`,
-                        padding: "12px 16px",
-                        display: "flex", alignItems: "center", gap: 14,
-                        boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
-                      }}
-                    >
+                    <div key={ev.event} style={{
+                      background: WHITE, borderRadius: 12,
+                      border: `1px solid ${near ? RED + "30" : BORDER}`,
+                      borderLeft: `4px solid ${accent}`,
+                      padding: "12px 16px",
+                      display: "flex", alignItems: "center", gap: 14,
+                      boxShadow: urgent ? `0 2px 10px ${RED}15` : "none",
+                    }}>
+                      {/* Day badge */}
                       <div style={{
                         width: 50, height: 50, borderRadius: 10, flexShrink: 0,
                         background: urgent ? RED : CREAM,
@@ -647,38 +660,98 @@ export default function RelationshipPage() {
                         display: "flex", flexDirection: "column" as const,
                         alignItems: "center", justifyContent: "center",
                       }}>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: urgent ? WHITE : BLACK, lineHeight: 1 }}>
-                          {ev.daysAway}
-                        </div>
-                        <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : GRAY }}>
-                          DAYS
-                        </div>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", color: urgent ? WHITE : BLACK, lineHeight: 1 }}>{ev.daysAway}</div>
+                        <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.06em", color: urgent ? "#ffffff80" : GRAY }}>DAYS</div>
                       </div>
+                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 700, fontSize: "0.94rem", color: BLACK }}>{ev.event}</div>
                         <div style={{ fontSize: "0.76rem", color: GRAY, marginTop: 3 }}>{fmtDate(ev.dateStr)}</div>
                       </div>
-                      <button
-                        onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                        style={{
-                          padding: "7px 14px", borderRadius: 8, border: "none",
-                          background: near ? RED : BLACK,
-                          color: WHITE, fontWeight: 700, fontSize: "0.76rem",
-                          cursor: "pointer", flexShrink: 0,
-                        }}
-                      >
-                        Write Card
-                      </button>
+                      {/* Actions */}
+                      <div style={{ display: "flex", flexDirection: "column" as const, gap: 5, alignItems: "flex-end", flexShrink: 0 }}>
+                        <button
+                          onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
+                          style={{
+                            padding: "5px 11px", borderRadius: 7, cursor: "pointer",
+                            border: `1.5px solid ${accent}`, background: "transparent",
+                            color: accent, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
+                          }}
+                        >
+                          Prepare ✦
+                        </button>
+                        <button
+                          onClick={() => setLocation(`/try?recipientId=${id}`)}
+                          style={{
+                            padding: "5px 11px", borderRadius: 7, border: "none",
+                            background: near ? RED : BLACK,
+                            color: WHITE, fontWeight: 700, fontSize: "0.7rem",
+                            cursor: "pointer", whiteSpace: "nowrap" as const,
+                          }}
+                        >
+                          Write Card
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {/* Empty state */}
-            {upcomingEvents.length === 0 && !showAddEvent && (
-              <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" }}>
-                <div style={{ fontSize: "0.84rem", color: GRAY, marginBottom: 8 }}>No upcoming events yet.</div>
+            {/* ── On the calendar (> 60 days) ───────────────────────────────── */}
+            {futureEvents.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: GRAY, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 7 }}>
+                  On the calendar
+                </div>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                  {futureEvents.map(ev => (
+                    <div key={ev.event} style={{
+                      background: WHITE, borderRadius: 10, border: `1px solid ${BORDER}`,
+                      padding: "9px 14px", display: "flex", alignItems: "center", gap: 12,
+                    }}>
+                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: BLACK }}>{ev.event}</div>
+                      <div style={{ fontSize: "0.76rem", color: GRAY }}>{fmtDate(ev.dateStr)}</div>
+                      <div style={{ fontSize: "0.72rem", color: `${BLACK}40`, minWidth: 50, textAlign: "right" as const }}>{ev.daysAway}d</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Needs a date ──────────────────────────────────────────────── */}
+            {eventsNeedingDate.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: AMBER, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 7 }}>
+                  Needs a date
+                </div>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                  {eventsNeedingDate.map(ev => (
+                    <div key={ev.event} style={{
+                      background: `${AMBER}08`, borderRadius: 10, border: `1px solid ${AMBER}30`,
+                      padding: "9px 14px", display: "flex", alignItems: "center", gap: 12,
+                    }}>
+                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: BLACK }}>{ev.event}</div>
+                      <button
+                        onClick={() => { setShowAddEvent(true); setSelectedEventChip(ev.event); setNewEventDate(""); }}
+                        style={{
+                          padding: "5px 11px", borderRadius: 7, cursor: "pointer",
+                          border: `1.5px solid ${AMBER}`, background: "transparent",
+                          color: AMBER, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const,
+                        }}
+                      >
+                        Set Date →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Empty state ───────────────────────────────────────────────── */}
+            {upcomingEvents.length === 0 && futureEvents.length === 0 && eventsNeedingDate.length === 0 && !showAddEvent && (
+              <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
+                <div style={{ fontSize: "0.84rem", color: GRAY, marginBottom: 8 }}>No events tracked yet.</div>
                 <button
                   onClick={() => setShowAddEvent(true)}
                   style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}
@@ -688,9 +761,9 @@ export default function RelationshipPage() {
               </div>
             )}
 
-            {/* Inline add form — chip picker */}
+            {/* ── Manage events chip picker ─────────────────────────────────── */}
             {showAddEvent && recipient && (
-              <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "16px" }}>
+              <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "16px", marginTop: 8 }}>
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.07em", color: GRAY, marginBottom: 12 }}>
                   WHAT DO YOU WANT TO TRACK?
                 </div>
@@ -707,8 +780,8 @@ export default function RelationshipPage() {
                         }}
                         style={{
                           padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${tracked ? "#5B8C6B" : selecting ? BLACK : BORDER}`,
-                          background: tracked ? "#5B8C6B" : selecting ? BLACK : CREAM,
+                          border: `1.5px solid ${tracked ? SAGE : selecting ? BLACK : BORDER}`,
+                          background: tracked ? SAGE : selecting ? BLACK : CREAM,
                           color: tracked || selecting ? WHITE : BLACK,
                           fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
                           display: "flex", alignItems: "center", gap: 4,
@@ -730,8 +803,8 @@ export default function RelationshipPage() {
                         }}
                         style={{
                           padding: "7px 14px", borderRadius: 20,
-                          border: `1.5px solid ${tracked ? "#5B8C6B" : BORDER}`,
-                          background: tracked ? "#5B8C6B" : CREAM,
+                          border: `1.5px solid ${tracked ? SAGE : BORDER}`,
+                          background: tracked ? SAGE : CREAM,
                           color: tracked ? WHITE : BLACK,
                           fontWeight: 600, fontSize: "0.82rem", cursor: "pointer",
                           display: "flex", alignItems: "center", gap: 4,
