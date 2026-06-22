@@ -30,6 +30,7 @@ const INK    = "#1F1F1F";
 const MID    = "#4B5563";
 const WHITE  = "#FFFFFF";
 const SAGE   = "#5B8C6B";
+const AMBER  = "#C97A0A";
 const BORDER = "#E5E0D8";
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
