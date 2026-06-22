@@ -9,6 +9,7 @@ const GRAY = "#6B6B6B";
 const BORDER = "#E5E0D8";
 const WHITE = "#FFFFFF";
 const CREAM = "#FDF7EF";
+const AMBER = "#D97706";
 
 function BigHealthRing({ pct, color }: { pct: number; color: string }) {
   const size = 100;
