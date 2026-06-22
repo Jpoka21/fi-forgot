@@ -421,10 +421,10 @@ export default function BriefingPage() {
             {/* Section header */}
             <div style={{ textAlign: "center", marginBottom: 20 }}>
               <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.63rem", letterSpacing: "0.05em", color: INK, margin: "0 0 6px" }}>
-                Or add a few details first
+                Or answer a couple questions first
               </p>
-              <p style={{ fontSize: "1.19rem", color: MID, margin: 0 }}>
-                All optional — even one answer makes it more personal.
+              <p style={{ fontSize: "1.05rem", color: MID, margin: 0, lineHeight: 1.55 }}>
+                We'll write it either way — but one or two answers here make it<br />sound like it came from you, not a template.
               </p>
             </div>
 
@@ -458,7 +458,7 @@ export default function BriefingPage() {
                 borderRadius: 12, padding: "16px 0", fontWeight: 700,
                 fontSize: "1.19rem", cursor: "pointer",
               }}>
-                {isEditing ? "Save Changes →" : "Generate Card →"}
+                {isEditing ? "Save Changes →" : "Generate with these answers →"}
               </button>
               <Link href={`/relationship/${recipient.id}`}>
                 <button style={{

@@ -453,6 +453,13 @@ export default function RelationshipPage() {
 
   const nextEvent = upcomingEvents[0] ?? futureEvents[0] ?? null;
 
+  // Map event name → existing ready/approved card for this recipient
+  const cardByEvent = new Map(
+    cards
+      .filter(c => c.status === "Ready for approval" || c.status === "Approved")
+      .map(c => [c.holiday, c])
+  );
+
   const statusColor = healthScore
     ? { Excellent: "#166534", Healthy: SAGE, NeedsAttention: AMBER, Priority: RED }[healthScore.status] ?? SAGE
     : GRAY;
@@ -659,12 +666,24 @@ export default function RelationshipPage() {
                       <div style={{ fontSize: "0.78rem", color: GRAY, marginTop: 4 }}>{fmtDate(ev.dateStr)}</div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                    style={{ width: "100%", padding: "11px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}
-                  >
-                    Write {firstName}'s {ev.event} Card ✦
-                  </button>
+                  {(() => {
+                    const existingCard = cardByEvent.get(ev.event);
+                    return existingCard ? (
+                      <button
+                        onClick={() => setLocation(`/cards/review?id=${existingCard.id}`)}
+                        style={{ width: "100%", padding: "11px", borderRadius: 10, border: `2px solid ${SAGE}`, background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}
+                      >
+                        ✓ Card ready — review it →
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
+                        style={{ width: "100%", padding: "11px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}
+                      >
+                        Write {firstName}'s {ev.event} Card ✦
+                      </button>
+                    );
+                  })()}
                 </div>
               );
             })()}
@@ -688,10 +707,20 @@ export default function RelationshipPage() {
                         <div style={{ fontWeight: 700, fontSize: "0.88rem", color: CHARCOAL }}>{ev.event}</div>
                         <div style={{ fontSize: "0.74rem", color: GRAY, marginTop: 2 }}>{fmtDate(ev.dateStr)}</div>
                       </div>
-                      <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                        style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-                        Write Card ✦
-                      </button>
+                      {(() => {
+                        const existingCard = cardByEvent.get(ev.event);
+                        return existingCard ? (
+                          <button onClick={() => setLocation(`/cards/review?id=${existingCard.id}`)}
+                            style={{ padding: "6px 12px", borderRadius: 7, border: `1.5px solid ${SAGE}`, background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                            ✓ Review →
+                          </button>
+                        ) : (
+                          <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
+                            style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                            Write Card ✦
+                          </button>
+                        );
+                      })()}
                     </div>
                   );
                 })}
