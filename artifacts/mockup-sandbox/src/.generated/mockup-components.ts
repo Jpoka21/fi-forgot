@@ -7,10 +7,10 @@ export const modules: ModuleMap = {
   "./components/mockups/concept-memory-vault/Dashboard.tsx": () => import("../components/mockups/concept-memory-vault/Dashboard.tsx"),
   "./components/mockups/concept-memory-vault/Mobile.tsx": () => import("../components/mockups/concept-memory-vault/Mobile.tsx"),
   "./components/mockups/concept-memory-vault/Profile.tsx": () => import("../components/mockups/concept-memory-vault/Profile.tsx"),
-  "./components/mockups/concept-upcoming-moments/Dashboard.tsx": () => import("../components/mockups/concept-upcoming-moments/Dashboard.tsx"),
-  "./components/mockups/concept-upcoming-moments/Mobile.tsx": () => import("../components/mockups/concept-upcoming-moments/Mobile.tsx"),
-  "./components/mockups/concept-upcoming-moments/Profile.tsx": () => import("../components/mockups/concept-upcoming-moments/Profile.tsx"),
   "./components/mockups/concept-your-people/Dashboard.tsx": () => import("../components/mockups/concept-your-people/Dashboard.tsx"),
   "./components/mockups/concept-your-people/Mobile.tsx": () => import("../components/mockups/concept-your-people/Mobile.tsx"),
-  "./components/mockups/concept-your-people/Profile.tsx": () => import("../components/mockups/concept-your-people/Profile.tsx")
+  "./components/mockups/concept-your-people/Profile.tsx": () => import("../components/mockups/concept-your-people/Profile.tsx"),
+  "./components/mockups/concept-upcoming-moments/Dashboard.tsx": () => import("../components/mockups/concept-upcoming-moments/Dashboard.tsx"),
+  "./components/mockups/concept-upcoming-moments/Mobile.tsx": () => import("../components/mockups/concept-upcoming-moments/Mobile.tsx"),
+  "./components/mockups/concept-upcoming-moments/Profile.tsx": () => import("../components/mockups/concept-upcoming-moments/Profile.tsx")
 };
