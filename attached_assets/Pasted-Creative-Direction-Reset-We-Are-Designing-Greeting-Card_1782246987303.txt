@@ -1,0 +1,111 @@
+Creative Direction Reset: We Are Designing Greeting Cards, Not Artwork
+
+After reviewing the generated humor cards and comparing them to successful retail humor cards, we've identified the core issue.
+
+Current direction:
+Premium artwork with a humorous theme.
+
+Desired direction:
+A greeting card that creates an immediate smile, laugh, or emotional reaction within 1 to 2 seconds.
+
+Important realization:
+
+Customers do not buy greeting cards because the artwork is beautiful.
+
+Customers buy greeting cards because the idea is funny.
+
+The artwork supports the joke.
+
+The joke is the product.
+
+New creative standard:
+
+Every humor card must contain BOTH:
+
+1. A clear visual joke
+2. A short front cover caption
+
+The image and caption should work together.
+
+The customer should immediately understand the joke from several feet away.
+
+Avoid:
+
+• Fine art that requires interpretation
+• Clever concepts without a punchline
+• Beautiful images that are only mildly amusing
+• Cards that feel like artwork first and greeting cards second
+
+Examples:
+
+Lord Fluffington
+
+Image:
+Cat knocking a royal goblet off a banquet table while nobles panic.
+
+Front:
+"I REGRET NOTHING."
+
+Coffee Before Humanity
+
+Image:
+A giant coffee mug being worshipped like a sacred artifact.
+
+Front:
+"COFFEE. THEN WE CAN DISCUSS YOUR PROBLEMS."
+
+Golf Goose
+
+Image:
+Goose aggressively defending a nest full of golf balls.
+
+Front:
+"I'VE INVESTED TOO MUCH TO WALK AWAY NOW."
+
+Wine Dachshund
+
+Image:
+Tiny dachshund judging wine with absurd seriousness.
+
+Front:
+"THIS PAIRS WELL WITH POOR DECISIONS."
+
+BBQ Bulldog
+
+Image:
+Bulldog judging a barbecue competition.
+
+Front:
+"EVERYONE IS WRONG EXCEPT ME."
+
+Creative rules:
+
+• Humor should land immediately.
+• Captions should be short.
+• Captions should be highly relatable.
+• Avoid generic birthday wording.
+• Avoid Hallmark language.
+• Avoid inspirational language.
+• Avoid cute for the sake of cute.
+• Prioritize laugh, smirk, or "that's so true."
+
+Before generating additional cards:
+
+Create 15 humor concepts.
+
+For each concept provide:
+
+• Card title
+• Artwork description
+• Front cover caption
+• Why the joke works
+
+Do NOT generate artwork yet.
+
+First prove the concepts are funny.
+
+Once concepts are approved, generate artwork for the strongest concepts only.
+
+The benchmark is not premium art.
+
+The benchmark is whether someone browsing a card rack would immediately pick it up and show it to a friend.
