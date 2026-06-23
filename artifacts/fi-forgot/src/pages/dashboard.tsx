@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  getCards, getRecipients, getBriefingsForRecipient,
+  getCards, getRecipients, getBriefingsForRecipient, getServerUserId,
   CardOrder, Recipient, saveCard,
   getPersonalSettings, savePersonalSettings, PersonalSettings,
   childrenSummary, getYearsTogether, TONES,
@@ -229,15 +229,24 @@ export default function DashboardPage() {
   }, [recipients]);
 
   const upcomingWithCardKeys = useMemo(() => {
+    const serverUserId = getServerUserId();
     const keys = new Set<string>();
-    for (const c of cards) { if (c.status !== "Needs profile") keys.add(`${c.recipientId}:::${c.holiday}`); }
+    for (const c of cards) {
+      if (c.status !== "Needs profile" && (serverUserId ? c.userId === serverUserId : true)) {
+        keys.add(`${c.recipientId}:::${c.holiday}`);
+      }
+    }
     return keys;
   }, [cards]);
 
   const upcomingCardById = useMemo(() => {
+    const serverUserId = getServerUserId();
     const map = new Map<string, string>();
     for (const c of cards) {
-      if (c.status === "Ready for approval" || c.status === "Approved") {
+      if (
+        (c.status === "Ready for approval" || c.status === "Approved") &&
+        (serverUserId ? c.userId === serverUserId : true)
+      ) {
         map.set(`${c.recipientId}:::${c.holiday}`, c.id);
       }
     }
