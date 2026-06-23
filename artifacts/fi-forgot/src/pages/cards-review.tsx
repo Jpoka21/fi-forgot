@@ -869,6 +869,16 @@ function PersonalCard({
         </button>
       </div>
 
+      {/* Start fresh with guided questions */}
+      <div style={{ margin: "0 22px 16px", textAlign: "center" }}>
+        <a
+          href={`/briefings/${card.recipientId}/${encodeURIComponent(card.holiday)}?rewrite=1`}
+          style={{ fontSize: "0.72rem", color: GRAY, textDecoration: "underline", cursor: "pointer" }}
+        >
+          Start fresh — answer a few questions to generate a new version
+        </a>
+      </div>
+
       {/* Approve / Reject */}
       <div style={{ padding: "0 22px 22px", display: "flex", gap: 10, justifyContent: "flex-end" }}>
         <button

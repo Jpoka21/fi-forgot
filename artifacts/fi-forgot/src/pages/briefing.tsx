@@ -4,7 +4,7 @@ import AppNav from "@/components/layout/AppNav";
 import {
   getRecipient, saveRecipient, saveBriefing, getBriefingsForRecipient,
   getBriefing, getEventQuestions, getYearsTogether, childrenSummary,
-  saveCard, getCards, CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
+  saveCard, getCards, deleteCard, CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
 } from "@/lib/data";
 import { ArrowLeft, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -157,16 +157,19 @@ export default function BriefingPage() {
   const [oneDetailText,  setOneDetailText]  = useState("");
   const [savingDetail,   setSavingDetail]   = useState(false);
 
+  const isRewrite = new URLSearchParams(window.location.search).get("rewrite") === "1";
+
   // If a card is already ready/approved for this event, skip the write flow entirely
+  // (unless the user explicitly chose to start fresh via ?rewrite=1)
   useEffect(() => {
-    if (!recipient || isEditing) return;
+    if (!recipient || isEditing || isRewrite) return;
     const existing = getCards().find(
       c => String(c.recipientId) === String(recipient.id) &&
            c.holiday === eventName &&
            (c.status === "Ready for approval" || c.status === "Approved")
     );
     if (existing) setLocation(`/cards/review?id=${existing.id}`);
-  }, [recipient?.id, eventName, isEditing]);
+  }, [recipient?.id, eventName, isEditing, isRewrite]);
 
   const childrenAlreadyOnFile = (recipient?.children ?? []).length > 0;
   const questions = allQuestions.filter(q => {
@@ -264,6 +267,15 @@ export default function BriefingPage() {
       const generated = data.cards ?? [];
       if (generated.length > 0) {
         const match = generated.find(c => c.tone === recipient.tonePreference) ?? generated[0];
+        // In rewrite mode, remove the previous card for this event so there's only one
+        if (isRewrite) {
+          const prev = getCards().find(
+            c => String(c.recipientId) === String(recipient.id) &&
+                 c.holiday === eventName &&
+                 (c.status === "Ready for approval" || c.status === "Approved")
+          );
+          if (prev) deleteCard(prev.id);
+        }
         const newCard: CardOrder = {
           id: `personal-${Date.now()}`, recipientId: recipient.id,
           recipientName: recipient.name, holiday: eventName,
