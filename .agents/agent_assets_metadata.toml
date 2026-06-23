@@ -197,3 +197,21 @@ id = "Ay4PRYJNObubvWIJz3-I8"
 uri = "file://attached_assets/sprint-2a-onboarding-blueprint.md"
 type = "text"
 title = "Sprint 2A: Final Onboarding UX Blueprint"
+
+[[outputs]]
+id = "KBAvoNrwvwnCTvXfomYp_"
+uri = "file://artifacts/fi-forgot/public/humor-v2/lord_fluffington_v2.png"
+type = "image"
+title = "Lord Fluffington — cat sweeping priceless vase, servants in panic"
+
+[[outputs]]
+id = "dx2sYlTPJ20WRDXwf8PvH"
+uri = "file://artifacts/fi-forgot/public/humor-v2/coffee_before_humanity_v2.png"
+type = "image"
+title = "Coffee Before Humanity — courtiers worshipping coffee on a throne"
+
+[[outputs]]
+id = "DWpt7Wdh5bOSea31gSmrJ"
+uri = "file://artifacts/fi-forgot/public/humor-v2/golf_goose_v2.png"
+type = "image"
+title = "Golf Goose — territorial goose, terrified golfers fleeing"
