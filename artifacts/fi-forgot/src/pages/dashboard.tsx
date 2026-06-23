@@ -740,10 +740,7 @@ export default function DashboardPage() {
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
                                   <div
-                                    onClick={() => cardId
-                                      ? setLocation(`/cards/review?id=${cardId}`)
-                                      : setLocation(`/relationship/${ev.recipient.id}`)
-                                    }
+                                    onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
                                     style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", color: INK, cursor: "pointer", letterSpacing: "0.02em", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 5 }}
                                   >
                                     {ev.recipient.name.toUpperCase()}
