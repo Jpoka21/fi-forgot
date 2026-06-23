@@ -159,6 +159,14 @@ export default function BriefingPage() {
 
   const isRewrite = new URLSearchParams(window.location.search).get("rewrite") === "1";
 
+  const existingCardId = isRewrite && recipient
+    ? (getCards().find(c =>
+        String(c.recipientId) === String(recipient.id) &&
+        c.holiday === eventName &&
+        (c.status === "Ready for approval" || c.status === "Approved")
+      )?.id ?? null)
+    : null;
+
   // If a card is already ready/approved for this event, skip the write flow entirely
   // (unless the user explicitly chose to start fresh via ?rewrite=1)
   useEffect(() => {
@@ -360,10 +368,13 @@ export default function BriefingPage() {
         <div style={{ padding: "28px 0 24px", textAlign: "center" }}>
           <Avatar name={recipient.name} size={72} />
           <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(2.38rem, 7.5vw, 3.13rem)", letterSpacing: "0.03em", color: INK, margin: "14px 0 6px", lineHeight: 1 }}>
-            {recipient.name}'s {eventName} Card
+            {isRewrite ? `Make it more personal?` : `${recipient.name}'s ${eventName} Card`}
           </h1>
-          <p style={{ color: MID, fontSize: "1.16rem", margin: "0 0 16px" }}>
-            {recipient.relationshipType ?? recipient.relationship} · {eventName} · {new Date().getFullYear()}
+          <p style={{ color: MID, fontSize: "1.16rem", margin: "0 0 16px", lineHeight: 1.5 }}>
+            {isRewrite
+              ? `We already wrote ${recipient.name}'s ${eventName} card. Answer a question or two below and we'll rewrite it — or skip straight to the card.`
+              : `${recipient.relationship} · ${eventName} · ${new Date().getFullYear()}`
+            }
           </p>
 
           {/* Context chips */}
@@ -423,6 +434,19 @@ export default function BriefingPage() {
               {savingDetail ? "Saving…" : "Use this and write the card"}
             </button>
           </div>
+        ) : isRewrite ? (
+          /* Rewrite mode: skip button goes straight to the existing card */
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            {existingCardId && (
+              <button onClick={() => setLocation(`/cards/review?id=${existingCardId}`)} style={{
+                background: "none", border: `1.5px solid ${BORDER}`, borderRadius: 11,
+                padding: "12px 28px", fontWeight: 600, fontSize: "1rem",
+                color: MID, cursor: "pointer",
+              }}>
+                Skip — view card as-is →
+              </button>
+            )}
+          </div>
         ) : (
           <div style={{ background: WHITE, borderRadius: 16, padding: "22px 22px 18px", border: `1px solid ${BORDER}`, marginBottom: 28 }}>
             <button onClick={() => handleSubmit()} style={{
@@ -444,10 +468,13 @@ export default function BriefingPage() {
             {/* Section header */}
             <div style={{ textAlign: "center", marginBottom: 20 }}>
               <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.63rem", letterSpacing: "0.05em", color: INK, margin: "0 0 6px" }}>
-                Or answer a couple questions first
+                {isRewrite ? "Answer to improve the card" : "Or answer a couple questions first"}
               </p>
               <p style={{ fontSize: "1.05rem", color: MID, margin: 0, lineHeight: 1.55 }}>
-                We'll write it either way — but one or two answers here make it<br />sound like it came from you, not a template.
+                {isRewrite
+                  ? "Fill in one or two and we'll rewrite it with your personal details."
+                  : <>We'll write it either way — but one or two answers here make it<br />sound like it came from you, not a template.</>
+                }
               </p>
             </div>
 

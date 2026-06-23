@@ -779,10 +779,11 @@ export default function DashboardPage() {
                             </div>
                             {/* Action */}
                             <button
-                              onClick={() => cardId
-                                ? setLocation(`/cards/review?id=${cardId}`)
-                                : setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)
-                              }
+                              onClick={() => setLocation(
+                                cardId
+                                  ? `/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}?rewrite=1`
+                                  : `/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`
+                              )}
                               style={{
                                 padding: "6px 13px", borderRadius: 8, cursor: "pointer", flexShrink: 0,
                                 border: hasCard ? `1.5px solid ${SAGE}` : "none",

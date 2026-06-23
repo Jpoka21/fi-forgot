@@ -670,7 +670,7 @@ export default function RelationshipPage() {
                     const existingCard = cardByEvent.get(ev.event);
                     return existingCard ? (
                       <button
-                        onClick={() => setLocation(`/cards/review?id=${existingCard.id}`)}
+                        onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`)}
                         style={{ width: "100%", padding: "11px", borderRadius: 10, border: `2px solid ${SAGE}`, background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}
                       >
                         ✓ Card ready — review it →
@@ -710,7 +710,7 @@ export default function RelationshipPage() {
                       {(() => {
                         const existingCard = cardByEvent.get(ev.event);
                         return existingCard ? (
-                          <button onClick={() => setLocation(`/cards/review?id=${existingCard.id}`)}
+                          <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`)}
                             style={{ padding: "6px 12px", borderRadius: 7, border: `1.5px solid ${SAGE}`, background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
                             ✓ Review →
                           </button>
