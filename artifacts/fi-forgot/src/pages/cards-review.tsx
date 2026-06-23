@@ -870,12 +870,28 @@ function PersonalCard({
       </div>
 
       {/* Start fresh with guided questions */}
-      <div style={{ margin: "0 22px 16px", textAlign: "center" }}>
+      <div style={{ margin: "0 22px 20px" }}>
         <a
           href={`/briefings/${card.recipientId}/${encodeURIComponent(card.holiday)}?rewrite=1`}
-          style={{ fontSize: "0.72rem", color: GRAY, textDecoration: "underline", cursor: "pointer" }}
+          style={{ display: "block", textDecoration: "none" }}
         >
-          Start fresh — answer a few questions to generate a new version
+          <div style={{
+            borderRadius: 10, border: `1.5px dashed ${BLACK}18`,
+            padding: "12px 16px",
+            display: "flex", alignItems: "center", gap: 12,
+            cursor: "pointer",
+          }}>
+            <span style={{ fontSize: "1.15rem" }}>💬</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "0.82rem", color: BLACK }}>
+                Answer a few questions to make it more personal
+              </div>
+              <div style={{ fontSize: "0.72rem", color: GRAY, marginTop: 2 }}>
+                Is this a milestone? What happened this year? We'll use your answers to rewrite the card.
+              </div>
+            </div>
+            <span style={{ marginLeft: "auto", fontSize: "0.8rem", color: GRAY, flexShrink: 0 }}>→</span>
+          </div>
         </a>
       </div>
 
