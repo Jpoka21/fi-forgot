@@ -299,6 +299,11 @@ export default function BriefingPage() {
         };
         saveCard(newCard);
         setGeneratedCardId(newCard.id);
+        // In rewrite mode, go straight to the card review — no "Briefing Saved" screen
+        if (isRewrite) {
+          setLocation(`/cards/review?id=${newCard.id}`);
+          return;
+        }
       }
     } catch { /* generation failed — that's ok */ }
     finally { setGenerating(false); }
