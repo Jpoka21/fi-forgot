@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import AppNav from "@/components/layout/AppNav";
 import {
   getRecipient, saveRecipient, saveBriefing, getBriefingsForRecipient,
   getBriefing, getEventQuestions, getYearsTogether, childrenSummary,
-  saveCard, CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
+  saveCard, getCards, CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
 } from "@/lib/data";
 import { ArrowLeft, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -156,6 +156,17 @@ export default function BriefingPage() {
   const [showDetailGate, setShowDetailGate] = useState(false);
   const [oneDetailText,  setOneDetailText]  = useState("");
   const [savingDetail,   setSavingDetail]   = useState(false);
+
+  // If a card is already ready/approved for this event, skip the write flow entirely
+  useEffect(() => {
+    if (!recipient || isEditing) return;
+    const existing = getCards().find(
+      c => String(c.recipientId) === String(recipient.id) &&
+           c.holiday === eventName &&
+           (c.status === "Ready for approval" || c.status === "Approved")
+    );
+    if (existing) setLocation(`/cards/review?id=${existing.id}`);
+  }, [recipient?.id, eventName, isEditing]);
 
   const childrenAlreadyOnFile = (recipient?.children ?? []).length > 0;
   const questions = allQuestions.filter(q => {

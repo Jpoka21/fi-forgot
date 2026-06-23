@@ -234,6 +234,16 @@ export default function DashboardPage() {
     return keys;
   }, [cards]);
 
+  const upcomingCardById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of cards) {
+      if (c.status === "Ready for approval" || c.status === "Approved") {
+        map.set(`${c.recipientId}:::${c.holiday}`, c.id);
+      }
+    }
+    return map;
+  }, [cards]);
+
   const recommendedAction = useMemo(() => getRecommendedAction(
     recipients, approvalCount,
     allUpcomingEvents.filter(ev => !ev.briefingDone),
@@ -707,7 +717,9 @@ export default function DashboardPage() {
                         const urgent  = ev.daysAway <= 7;
                         const near    = ev.daysAway <= 14;
                         const accent  = urgent ? RED : near ? AMBER : SAGE;
-                        const hasCard = upcomingWithCardKeys.has(`${ev.recipient.id}:::${ev.event}`);
+                        const evKey   = `${ev.recipient.id}:::${ev.event}`;
+                        const hasCard = upcomingWithCardKeys.has(evKey);
+                        const cardId  = upcomingCardById.get(evKey);
                         return (
                           <div key={`${ev.recipient.id}-${ev.event}`} style={{
                             display: "flex", alignItems: "center", gap: 12,
@@ -728,7 +740,10 @@ export default function DashboardPage() {
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
                                   <div
-                                    onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
+                                    onClick={() => cardId
+                                      ? setLocation(`/cards/review?id=${cardId}`)
+                                      : setLocation(`/relationship/${ev.recipient.id}`)
+                                    }
                                     style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.25rem", color: INK, cursor: "pointer", letterSpacing: "0.02em", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 5 }}
                                   >
                                     {ev.recipient.name.toUpperCase()}
@@ -767,11 +782,14 @@ export default function DashboardPage() {
                             </div>
                             {/* Action */}
                             <button
-                              onClick={() => setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)}
+                              onClick={() => cardId
+                                ? setLocation(`/cards/review?id=${cardId}`)
+                                : setLocation(`/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`)
+                              }
                               style={{
                                 padding: "6px 13px", borderRadius: 8, cursor: "pointer", flexShrink: 0,
-                                border: "none",
-                                background: hasCard ? `${SAGE}20` : accent,
+                                border: hasCard ? `1.5px solid ${SAGE}` : "none",
+                                background: hasCard ? WHITE : accent,
                                 color: hasCard ? SAGE : WHITE,
                                 fontWeight: 700, fontSize: "0.72rem", whiteSpace: "nowrap" as const,
                               }}
