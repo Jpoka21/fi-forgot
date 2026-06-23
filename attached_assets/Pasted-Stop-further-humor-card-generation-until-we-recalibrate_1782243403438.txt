@@ -1,0 +1,100 @@
+Stop further humor card generation until we recalibrate the creative direction.
+
+The artwork quality is strong. The problem is not execution quality, it is humor execution.
+
+Current outputs are producing:
+
+Premium Art + Theme = Interesting
+
+We need:
+
+Premium Art + Absurd Situation = Funny
+
+New creative rule for all cards in the Humor category:
+
+A viewer should understand the joke within 2 seconds without reading a caption.
+
+Every humor card must contain at least one of the following:
+
+• Visual punchline
+• Absurd situation
+• Unexpected contradiction
+• Human behavior performed seriously by an animal
+• Overly dramatic treatment of something mundane
+
+Do NOT create simple portraits, still lifes, or themed artwork.
+
+Do NOT create:
+• Animal wearing clothes and staring at camera
+• Object with a face sitting in a chair
+• Coffee cup under dramatic lighting
+• Generic aristocratic portraits
+
+These are premium illustrations but not comedy.
+
+Target examples:
+
+Lord Fluffington
+Not:
+Cat in royal clothing
+
+Instead:
+Cat being worshipped by servants
+Cat sitting on a throne made of tuna cans
+Cat knocking priceless objects off a royal table while remaining dignified
+
+Coffee Before Humanity
+Not:
+Coffee mug under heavenly light
+
+Instead:
+Coffee being carried through town like royalty
+Exhausted people kneeling before a coffee throne
+Renaissance style painting where coffee is treated as a sacred artifact
+
+Golf Goose
+Not:
+Goose holding golf equipment
+
+Instead:
+Goose aggressively defending a golf ball nest
+Terrified golfers fleeing from an enraged goose
+
+Fishing Pelican
+Not:
+Pelican with fishing gear
+
+Instead:
+Pelican proudly displaying an absurdly oversized catch
+Pelican running a professional fishing tournament
+
+BBQ Bulldog
+Not:
+Bulldog near a grill
+
+Instead:
+Bulldog acting as an overly serious championship pitmaster
+Bulldog judging barbecue entries with ridiculous authority
+
+Wine Dachshund
+Not:
+Dog beside wine
+
+Instead:
+Dachshund conducting a formal wine tasting with extreme sophistication
+Dachshund rejecting wines while surrounded by shocked sommeliers
+
+Creative standard:
+
+The image should feel like a museum quality oil painting of something completely ridiculous.
+
+The viewer should smile or laugh before reading the title.
+
+Before generating the remaining batch:
+
+1. Regenerate 3 humor cards using this new direction.
+2. Present previews.
+3. Wait for approval.
+4. Only after approval generate the rest of the collection.
+
+Humor is now the primary success metric. Premium artistic quality remains required, but visual comedy takes priority over elegance.
