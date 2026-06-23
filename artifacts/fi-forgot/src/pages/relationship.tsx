@@ -8,6 +8,7 @@ import {
   getCards,
   getApiHeaders,
   saveRecipient,
+  getServerUserId,
   Recipient,
   CustomDate,
   CardOrder,
@@ -246,7 +247,11 @@ export default function RelationshipPage() {
     if (!id) return;
     const r = getRecipient(id);
     setRecipient(r);
-    const all = getCards().filter(c => String(c.recipientId) === String(id));
+    const serverUserId = getServerUserId();
+    const all = getCards().filter(c =>
+      String(c.recipientId) === String(id) &&
+      (serverUserId ? c.userId === serverUserId : true)
+    );
     all.sort((a, b) => {
       const o: Record<string, number> = { "Ready for approval": 0, "Approved": 1 };
       return (o[a.status] ?? 2) - (o[b.status] ?? 2);
