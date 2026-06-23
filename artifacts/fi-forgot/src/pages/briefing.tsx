@@ -4,7 +4,8 @@ import AppNav from "@/components/layout/AppNav";
 import {
   getRecipient, saveRecipient, saveBriefing, getBriefingsForRecipient,
   getBriefing, getEventQuestions, getYearsTogether, childrenSummary,
-  saveCard, getCards, deleteCard, CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
+  saveCard, getCards, deleteCard, getServerUserId,
+  CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
 } from "@/lib/data";
 import { ArrowLeft, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -159,13 +160,19 @@ export default function BriefingPage() {
 
   const isRewrite = new URLSearchParams(window.location.search).get("rewrite") === "1";
 
-  const existingCardId = isRewrite && recipient
-    ? (getCards().find(c =>
-        String(c.recipientId) === String(recipient.id) &&
-        c.holiday === eventName &&
-        (c.status === "Ready for approval" || c.status === "Approved")
-      )?.id ?? null)
-    : null;
+  const existingCardId = (() => {
+    if (!isRewrite || !recipient) return null;
+    const serverUserId = getServerUserId();
+    // Use the same filter as cards-review.tsx so the found ID is guaranteed
+    // to actually appear in the review queue (avoiding a ?id= miss → wrong card shown).
+    const card = getCards().find(c =>
+      String(c.recipientId) === String(recipient.id) &&
+      c.holiday === eventName &&
+      (c.status === "Ready for approval" || c.status === "Approved") &&
+      (serverUserId ? c.userId === serverUserId : true)
+    );
+    return card?.id ?? null;
+  })();
 
   // If a card is already ready/approved for this event, skip the write flow entirely
   // (unless the user explicitly chose to start fresh via ?rewrite=1)
