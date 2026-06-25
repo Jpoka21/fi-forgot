@@ -157,10 +157,30 @@ router.post("/personal/briefings", async (req, res) => {
 
   try {
     const now = new Date();
-    const rows = briefing.answers
-      .filter(a => a.answer?.trim())
-      .map(a => ({
-        id: `${briefing.id}_${a.questionKey}`,
+    // A briefing can contain several answers that share a questionKey (e.g. multiple
+    // "dad_moment" notes). The previous code derived each row id solely from the
+    // questionKey, so those collided into a single id and Postgres rejected the whole
+    // batch ("ON CONFLICT DO UPDATE command cannot affect row a second time"),
+    // silently dropping every answer in the briefing. We now:
+    //   1. skip exact-duplicate answers to the same question, and
+    //   2. give each remaining distinct answer a unique, stable id — the first
+    //      occurrence keeps the original `${id}_${questionKey}` id for backward
+    //      compatibility, and subsequent ones get a `_${n}` suffix.
+    const seen = new Set<string>();
+    const occurrences = new Map<string, number>();
+    const rows: (typeof questionAnswersTable.$inferInsert)[] = [];
+    for (const a of briefing.answers) {
+      if (!a.answer?.trim()) continue;
+      const dedupeKey = `${a.questionKey}|${a.answer.trim()}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+      const n = occurrences.get(a.questionKey) ?? 0;
+      occurrences.set(a.questionKey, n + 1);
+      const id = n === 0
+        ? `${briefing.id}_${a.questionKey}`
+        : `${briefing.id}_${a.questionKey}_${n}`;
+      rows.push({
+        id,
         userId,
         recipientId: briefing.recipientId,
         eventType: briefing.event,
@@ -171,7 +191,8 @@ router.post("/personal/briefings", async (req, res) => {
         wasSkipped: false,
         triggerType: "event_briefing" as const,
         createdAt: now,
-      }));
+      });
+    }
 
     if (rows.length > 0) {
       await db
