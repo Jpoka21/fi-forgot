@@ -7,3 +7,4 @@
 - [Card Generation Quality](card-generation-quality.md) — Phase 8: banned phrases, per-relationship voice rules, quality scorer, follow-up answers now surfaced as high-priority memory
 - [Sprint 2B Onboarding](sprint-2b-onboarding.md) — 6-phase first-value onboarding; API call shapes, Recipient type field names, dashboard first-time state condition
 - [Grounded Writing Framework](grounded-writing.md) — Sprint 7: all prompt fabrication drivers identified and fixed; hasContext flag gates option descriptions and memory requirements
+- [localStorage recovery & briefing bug](localstorage-recovery.md) — F.I. Forgot data lives in browser localStorage; replay via sync endpoints; briefing POST 500s on duplicate question keys
