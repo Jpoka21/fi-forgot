@@ -14,17 +14,22 @@ import {
   CardOrder,
 } from "@/lib/data";
 
-// ── Brand tokens ──────────────────────────────────────────────────────────────
-const BG      = "#FAF7F4";
-const RED     = "#E23B2E";
-const BLACK   = "#111111";
-const CHARCOAL = "#2D2D2D";
-const SAGE    = "#5B8C6B";
-const GRAY    = "#6B6B6B";
-const BORDER  = "#E5E0D8";
-const WHITE   = "#FFFFFF";
-const CREAM   = "#FDF7EF";
-const AMBER   = "#D97706";
+import {
+  PB, formatBigDate, occasionPhrase, urgencyAccent,
+  isSensitiveOccasion, recipientHasThinMemory,
+} from "@/lib/personal-brand";
+import { PersonAvatar, SectionTitle, SoftCard, PrimaryBtn } from "@/components/personal-ui";
+
+const BG       = PB.cream;
+const RED      = PB.red;
+const BLACK    = PB.ink;
+const CHARCOAL = PB.ink;
+const SAGE     = PB.sage;
+const GRAY     = PB.mid;
+const BORDER   = PB.border;
+const WHITE    = PB.white;
+const CREAM    = "#FDF7EF";
+const AMBER    = PB.amber;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -149,10 +154,6 @@ function formatDaysAgo(n: number): string {
   return `${Math.round(n / 30)} months ago`;
 }
 
-function initials(name: string): string {
-  return name.split(" ").slice(0, 2).map(n => n[0] ?? "").join("").toUpperCase();
-}
-
 const INTEREST_LABELS: Record<string, string> = {
   family: "Family & kids",  travel: "Travel & adventure", food: "Food & cooking",
   reading: "Reading",       fitness: "Fitness",           music: "Music & arts",
@@ -161,23 +162,6 @@ const INTEREST_LABELS: Record<string, string> = {
 };
 
 // ── Small sub-components ──────────────────────────────────────────────────────
-
-function SectionHead({ title, right }: { title: string; right?: React.ReactNode }) {
-  return (
-    <div style={{
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      marginBottom: 12,
-    }}>
-      <div style={{
-        fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem",
-        letterSpacing: "0.08em", color: BLACK,
-      }}>
-        {title}
-      </div>
-      {right}
-    </div>
-  );
-}
 
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
@@ -477,34 +461,29 @@ export default function RelationshipPage() {
   // ── Profile fields for What We Know ────────────────────────────────────────
   const profileFields = recipient ? [
     {
-      key: "THINGS TO AVOID",
-      value: (recipient as any).thingsToAvoid as string | undefined,
-      highlight: true,
-    },
-    {
-      key: "TONE",
+      key: "Tone",
       value: (recipient as any).tonePreference as string | undefined,
     },
     {
-      key: "INTERESTS",
+      key: "Interests",
       value: Array.isArray((recipient as any).interests) && (recipient as any).interests.length > 0
         ? ((recipient as any).interests as string[]).map(i => INTEREST_LABELS[i] ?? i).join(", ")
         : undefined,
     },
     {
-      key: "FAVORITE MEMORIES",
+      key: "Favorite memories",
       value: (recipient as any).favoriteMemories as string | undefined,
     },
     {
-      key: "INSIDE JOKES",
+      key: "Inside jokes",
       value: (recipient as any).insideJokes as string | undefined,
     },
     {
-      key: "ALWAYS INCLUDE",
+      key: "Always include",
       value: ((recipient as any).alwaysInclude ?? (recipient as any).thingsToAlwaysInclude) as string | undefined,
     },
     {
-      key: "DELIVERY",
+      key: "Delivery",
       value: (recipient as any).deliveryPreference as string | undefined,
     },
   ].filter(f => f.value) : [];
@@ -532,50 +511,75 @@ export default function RelationshipPage() {
           <div style={{ padding: "16px 0 12px" }}>
             <Link href="/dashboard">
               <button style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "0.8rem", fontWeight: 600, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
-                ← Dashboard
+                ← Home
               </button>
             </Link>
           </div>
 
-          {/* ══ PROFILE CARD + OCCASIONS ════════════════════════════════════════ */}
-          <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 16, boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid #EDEBE6" }}>
-
-            {/* White profile panel */}
-            <div style={{ background: WHITE, padding: "20px 22px 18px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-                <div style={{ width: 58, height: 58, borderRadius: "50%", background: "#EDE8E0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.45rem", color: SAGE }}>
-                    {initials(recipient.name)}
-                  </span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", color: CHARCOAL, lineHeight: 1, letterSpacing: "0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
-                    {recipient.name.toUpperCase()}
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 5 }}>
-                    <span style={{ padding: "2px 10px", borderRadius: 20, background: "#EDE8E0", color: GRAY, fontSize: "0.74rem", fontWeight: 600 }}>
-                      {(recipient as any).relationship}
-                    </span>
-                    {nextEvent && (
-                      <span style={{ padding: "2px 10px", borderRadius: 20, background: nextEvent.daysAway <= 14 ? `${RED}12` : "#EDE8E0", color: nextEvent.daysAway <= 14 ? RED : GRAY, fontSize: "0.74rem", fontWeight: 700, border: nextEvent.daysAway <= 14 ? `1px solid ${RED}30` : "none" }}>
-                        {nextEvent.event} · {daysLabel(nextEvent.daysAway)}
-                      </span>
+          {/* ══ HERO ════════════════════════════════════════════════════════ */}
+          <SoftCard style={{ padding: "22px 20px", marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 18 }}>
+              <PersonAvatar name={recipient.name} size={56} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h1 style={{
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontSize: "1.65rem", fontWeight: 700, color: CHARCOAL,
+                  margin: 0, lineHeight: 1.2,
+                }}>
+                  {recipient.name}
+                </h1>
+                <div style={{ fontSize: "0.85rem", color: GRAY, marginTop: 4 }}>{(recipient as any).relationship}</div>
+                {nextEvent && (
+                  <div style={{
+                    marginTop: 10, fontFamily: "'Caveat', cursive", fontSize: "1.05rem",
+                    color: nextEvent.daysAway <= 7 ? RED : CHARCOAL, lineHeight: 1.4,
+                  }}>
+                    {occasionPhrase(
+                      nextEvent.event,
+                      nextEvent.daysAway,
+                      nextEvent.dateStr,
+                      isSensitiveOccasion(nextEvent.event),
                     )}
                   </div>
-                </div>
+                )}
               </div>
-              <Link href={`/recipients/${id}?edit=1`}>
-                <button style={{ padding: "8px 16px", borderRadius: 9, border: "none", background: SAGE, color: WHITE, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}>
-                  💬 Add More Memories
-                </button>
-              </Link>
             </div>
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 10 }}>
+              {upcomingEvents[0] && (() => {
+                const ev = upcomingEvents[0];
+                const existingCard = cardByEvent.get(ev.event);
+                return (
+                  <PrimaryBtn
+                    onClick={() => setLocation(
+                      existingCard
+                        ? `/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`
+                        : `/briefings/${id}/${encodeURIComponent(ev.event)}`,
+                    )}
+                    accent={RED}
+                  >
+                    Write the card
+                  </PrimaryBtn>
+                );
+              })()}
+              <PrimaryBtn
+                variant="outline"
+                accent={SAGE}
+                onClick={() => {
+                  const el = document.getElementById("memory-input");
+                  el?.focus();
+                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+              >
+                Add a memory
+              </PrimaryBtn>
+            </div>
+          </SoftCard>
 
-            {/* Occasions panel */}
-            <div style={{ background: "#FAF7F4", padding: "14px 22px", borderTop: "1px solid #EDEBE6" }}>
+          {/* ══ OCCASIONS ═══════════════════════════════════════════════════ */}
+          <SoftCard style={{ padding: "14px 18px", marginBottom: 20, background: BG }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.08em", color: GRAY }}>
-                  WE'LL SEND CARDS FOR THESE OCCASIONS
+                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: CHARCOAL }}>
+                  Reasons to send a card
                 </div>
                 <button onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
                   style={{ fontSize: "0.74rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -644,52 +648,44 @@ export default function RelationshipPage() {
                   )}
                 </div>
               )}
-            </div>
-          </div>
+          </SoftCard>
 
-          {/* ══ UPCOMING MOMENTS ════════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL, marginBottom: 10 }}>
-              UPCOMING MOMENTS
-            </div>
+          {/* ══ CARDS COMING UP ═════════════════════════════════════════════ */}
+          <div style={{ marginBottom: 20 }}>
+            <SectionTitle title="Cards coming up" sub={`For ${firstName} — we'll nudge you before it's awkward.`} />
 
             {/* Hero — first upcoming event */}
             {upcomingEvents[0] && (() => {
               const ev = upcomingEvents[0];
-              const urgent = ev.daysAway <= 7;
+              const accent = urgencyAccent(ev.daysAway);
+              const big = formatBigDate(ev.dateStr);
+              const existingCard = cardByEvent.get(ev.event);
               return (
-                <div style={{ background: WHITE, borderRadius: 16, padding: "18px", border: `1px solid ${urgent ? RED + "30" : "#EDEBE6"}`, boxShadow: urgent ? `0 2px 14px ${RED}12` : "0 1px 6px rgba(0,0,0,0.05)", marginBottom: upcomingEvents.length > 1 ? 8 : 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-                    <div style={{ width: 60, height: 60, borderRadius: 14, flexShrink: 0, background: urgent ? RED : "#EDE8E0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ textAlign: "center" as const, lineHeight: 1 }}>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: urgent ? WHITE : CHARCOAL, lineHeight: 1 }}>{ev.daysAway}</div>
-                        <div style={{ fontSize: "0.46rem", fontWeight: 800, letterSpacing: "0.08em", color: urgent ? "rgba(255,255,255,0.7)" : GRAY, lineHeight: 1, marginTop: 3, textTransform: "uppercase" as const }}>days</div>
-                      </div>
+                <SoftCard style={{ padding: "18px", borderLeft: `3px solid ${accent}`, marginBottom: upcomingEvents.length > 1 ? 8 : 0 }}>
+                  <div style={{ display: "flex", gap: 14, marginBottom: 14 }}>
+                    <div style={{ width: 64, textAlign: "center" as const, padding: "8px 0", borderRadius: 12, background: `${accent}10` }}>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", color: accent, lineHeight: 1 }}>{big.day}</div>
+                      <div style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.1em", color: GRAY }}>{big.month}</div>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", color: CHARCOAL, lineHeight: 1, letterSpacing: "0.02em" }}>{ev.event}</div>
-                      <div style={{ fontSize: "0.78rem", color: GRAY, marginTop: 4 }}>{fmtDate(ev.dateStr)}</div>
+                      <div style={{ fontWeight: 700, fontSize: "1.05rem", color: CHARCOAL }}>{ev.event}</div>
+                      <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: 4 }}>
+                        {occasionPhrase(ev.event, ev.daysAway, ev.dateStr, isSensitiveOccasion(ev.event))}
+                      </div>
                     </div>
                   </div>
-                  {(() => {
-                    const existingCard = cardByEvent.get(ev.event);
-                    return existingCard ? (
-                      <button
-                        onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`)}
-                        style={{ width: "100%", padding: "11px", borderRadius: 10, border: `2px solid ${SAGE}`, background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}
-                      >
-                        ✓ Card ready — review it →
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                        style={{ width: "100%", padding: "11px", borderRadius: 10, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}
-                      >
-                        Write {firstName}'s {ev.event} Card ✦
-                      </button>
-                    );
-                  })()}
-                </div>
+                  <PrimaryBtn
+                    onClick={() => setLocation(
+                      existingCard
+                        ? `/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`
+                        : `/briefings/${id}/${encodeURIComponent(ev.event)}`,
+                    )}
+                    accent={existingCard ? SAGE : accent}
+                    variant={existingCard ? "outline" : "fill"}
+                  >
+                    {existingCard ? "Review the card" : "Write the card"}
+                  </PrimaryBtn>
+                </SoftCard>
               );
             })()}
 
@@ -717,12 +713,12 @@ export default function RelationshipPage() {
                         return existingCard ? (
                           <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`)}
                             style={{ padding: "6px 12px", borderRadius: 7, border: `1.5px solid ${SAGE}`, background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-                            ✓ Review →
+                            Review →
                           </button>
                         ) : (
                           <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
                             style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-                            Write Card ✦
+                            Write the card
                           </button>
                         );
                       })()}
@@ -769,7 +765,7 @@ export default function RelationshipPage() {
             {/* Empty */}
             {upcomingEvents.length === 0 && futureEvents.length === 0 && eventsNeedingDate.length === 0 && (
               <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
-                <div style={{ fontSize: "0.84rem", color: GRAY }}>Add occasions above to see upcoming moments here.</div>
+                <div style={{ fontSize: "0.84rem", color: GRAY }}>Add an occasion above and we'll watch the calendar for you.</div>
               </div>
             )}
           </div>
@@ -779,7 +775,7 @@ export default function RelationshipPage() {
             <div style={{ background: WHITE, borderRadius: 14, padding: "18px", border: `1.5px solid ${nextQuestion.mode === "follow_up" ? "#7C3AED35" : `${RED}25`}`, marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY }}>
-                  {nextQuestion.mode === "follow_up" ? "FOLLOW UP" : profileComplete ? "KEEP IT FRESH" : "WANT TO MAKE THE NEXT CARD EVEN BETTER?"}
+                  {nextQuestion.mode === "follow_up" ? "Follow up" : profileComplete ? "Keep it fresh" : "Help us nail the card"}
                 </div>
                 <button onClick={() => setQuestionSkipped(true)} style={{ background: "none", border: "none", color: GRAY, cursor: "pointer", fontSize: "0.78rem", padding: 0, fontWeight: 600 }}>Skip</button>
               </div>
@@ -809,11 +805,34 @@ export default function RelationshipPage() {
             </div>
           )}
 
-          {/* ══ RECENT MEMORIES ══════════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL, marginBottom: 10 }}>
-              RECENT MEMORIES ABOUT {firstName.toUpperCase()}
-            </div>
+          {/* ══ STUFF WORTH REMEMBERING ═══════════════════════════════════════ */}
+          <div style={{ marginBottom: 20 }}>
+            <SectionTitle title="Stuff worth remembering" sub={`Details that make ${firstName}'s cards sound personal.`} />
+
+            <SoftCard style={{ padding: "14px 16px", marginBottom: 12 }}>
+              <textarea
+                id="memory-input"
+                value={memoryText}
+                onChange={e => setMemoryText(e.target.value)}
+                placeholder={`Something ${firstName} would love you remembered…`}
+                rows={3}
+                style={{
+                  width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`, padding: "10px 12px",
+                  fontSize: "0.9rem", lineHeight: 1.6, background: CREAM, resize: "vertical" as const,
+                  outline: "none", fontFamily: "'Plus Jakarta Sans', sans-serif", color: CHARCOAL,
+                  boxSizing: "border-box" as const, marginBottom: 10,
+                }}
+              />
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <PrimaryBtn
+                  onClick={handleSaveMemory}
+                  disabled={savingMemory || !memoryText.trim()}
+                  accent={SAGE}
+                >
+                  {savingMemory ? "Saving…" : memorySaved ? "Saved ✓" : "Add a memory"}
+                </PrimaryBtn>
+              </div>
+            </SoftCard>
 
             {/* Memory list */}
             {freshLoading ? (
@@ -821,7 +840,7 @@ export default function RelationshipPage() {
             ) : freshUpdates.length === 0 ? (
               <div style={{ background: WHITE, borderRadius: 10, border: "1px solid #EDEBE6", padding: "18px 16px", textAlign: "center" as const }}>
                 <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, lineHeight: 1.7 }}>
-                  No memories yet. Add one above and it'll show up in {firstName}'s next card.
+                  Nothing saved yet. Add something above — we'll weave it into the next card.
                 </div>
               </div>
             ) : (
@@ -845,24 +864,28 @@ export default function RelationshipPage() {
             )}
           </div>
 
-          {/* ══ WHAT WE KNOW ════════════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 16 }}>
+          {/* ══ WHAT MAKES THEM THEM + THINGS TO NEVER MESS UP ═══════════════ */}
+          <div style={{ marginBottom: 20 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL }}>WHAT WE KNOW</div>
-              <OutlineBtn href={`/recipients/${id}?edit=1`}>Edit Profile</OutlineBtn>
+              <SectionTitle title="What makes them them" style={{ marginBottom: 0 }} />
+              <OutlineBtn href={`/recipients/${id}?edit=1`}>Edit details</OutlineBtn>
             </div>
             <Card>
               {profileFields.length === 0 ? (
                 <div style={{ padding: "20px 16px", textAlign: "center" as const }}>
-                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, marginBottom: 12 }}>No profile details yet.</div>
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, marginBottom: 12 }}>
+                    {recipientHasThinMemory(recipient)
+                      ? "Needs a memory before we can sound charming."
+                      : "Tell us what makes them tick."}
+                  </div>
                   <Link href={`/recipients/${id}?edit=1`}>
-                    <button style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid #EDEBE6", background: "none", color: CHARCOAL, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer" }}>Add Profile Details →</button>
+                    <button style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid #EDEBE6", background: "none", color: CHARCOAL, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer" }}>Add details →</button>
                   </Link>
                 </div>
               ) : (
                 profileFields.map((f, i) => (
-                  <div key={f.key} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "11px 16px", borderBottom: i < profileFields.length - 1 ? "1px solid #F5F1EC" : "none", background: f.highlight ? `${RED}04` : "transparent" }}>
-                    <div style={{ width: 112, flexShrink: 0, fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.07em", color: f.highlight ? RED : GRAY, paddingTop: 2 }}>{f.key}</div>
+                  <div key={f.key} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "11px 16px", borderBottom: i < profileFields.length - 1 ? "1px solid #F5F1EC" : "none" }}>
+                    <div style={{ width: 112, flexShrink: 0, fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.07em", color: GRAY, paddingTop: 2 }}>{f.key}</div>
                     <div style={{ fontSize: "0.88rem", color: CHARCOAL, lineHeight: 1.6 }}>{String(f.value)}</div>
                   </div>
                 ))
@@ -870,10 +893,19 @@ export default function RelationshipPage() {
             </Card>
           </div>
 
-          {/* ══ CARD HISTORY ════════════════════════════════════════════════════ */}
+          {(recipient as any).thingsToAvoid && (
+            <div style={{ marginBottom: 20 }}>
+              <SectionTitle title="Things to never mess up" sub="Sensitive topics — we'll tread carefully." />
+              <SoftCard style={{ padding: "14px 16px", borderLeft: `3px solid ${RED}`, background: `${RED}04` }}>
+                <div style={{ fontSize: "0.9rem", color: CHARCOAL, lineHeight: 1.65 }}>{(recipient as any).thingsToAvoid}</div>
+              </SoftCard>
+            </div>
+          )}
+
+          {/* ══ PAST CARDS ════════════════════════════════════════════════════ */}
           {cards.length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.08em", color: CHARCOAL, marginBottom: 10 }}>CARD HISTORY</div>
+              <SectionTitle title="Past cards" />
               <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
                 {cards.slice(0, 5).map(card => {
                   const sc = card.status === "Approved" ? SAGE : card.status === "Ready for approval" ? AMBER : GRAY;
@@ -901,8 +933,8 @@ export default function RelationshipPage() {
             <button onClick={() => setShowTimeline(v => !v)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: WHITE, border: "1px solid #EDEBE6", borderRadius: 12, padding: "14px 16px", cursor: "pointer", marginBottom: showTimeline ? 8 : 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: "1rem" }}>📋</span>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: CHARCOAL }}>FULL HISTORY</span>
-                <span style={{ fontSize: "0.74rem", color: GRAY }}>— complete memory ledger</span>
+                <span style={{ fontWeight: 700, fontSize: "0.9rem", color: CHARCOAL }}>Full history</span>
+                <span style={{ fontSize: "0.74rem", color: GRAY }}>— everything we've logged</span>
               </div>
               <span style={{ fontSize: "0.8rem", color: GRAY }}>{showTimeline ? "▲ collapse" : "▼ expand"}</span>
             </button>
@@ -911,24 +943,27 @@ export default function RelationshipPage() {
 
           {/* ══ RELATIONSHIP HEALTH ════════════════════════════════════════════ */}
           {healthScore && (
-            <div style={{ background: WHITE, borderRadius: 12, border: "1px solid #EDEBE6", padding: "14px 16px", marginBottom: 16 }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.82rem", letterSpacing: "0.1em", color: GRAY, marginBottom: 10 }}>RELATIONSHIP HEALTH</div>
+            <SoftCard style={{ padding: "14px 16px", marginBottom: 16 }}>
+              <SectionTitle title="Staying out of trouble" sub="How covered you are for upcoming cards." style={{ marginBottom: 10 }} />
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <div style={{ flex: 1, height: 5, background: "#EDEBE6", borderRadius: 3, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${healthScore.score}%`, background: statusColor, borderRadius: 3, transition: "width 0.5s ease" }} />
                 </div>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", color: statusColor, flexShrink: 0 }}>{healthScore.score}</div>
-                <div style={{ padding: "2px 10px", borderRadius: 20, background: `${statusColor}15`, color: statusColor, fontSize: "0.72rem", fontWeight: 700 }}>
-                  {healthScore.status === "NeedsAttention" ? "Needs Attention" : healthScore.status}
+                <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: statusColor, flexShrink: 0 }}>
+                  {healthScore.score >= 70 ? "You're safe for now." : "Needs a little love."}
                 </div>
               </div>
               {healthScore.pendingFollowUps > 0 && (
-                <div style={{ fontSize: "0.75rem", color: AMBER, marginTop: 8, fontWeight: 600 }}>↻ {healthScore.pendingFollowUps} follow-up{healthScore.pendingFollowUps > 1 ? "s" : ""} waiting</div>
+                <div style={{ fontSize: "0.75rem", color: AMBER, marginTop: 8, fontWeight: 600 }}>
+                  {healthScore.pendingFollowUps} follow-up{healthScore.pendingFollowUps > 1 ? "s" : ""} waiting — quick answers help a lot.
+                </div>
               )}
               {healthScore.lastUpdateDaysAgo !== null && healthScore.lastUpdateDaysAgo > 90 && (
-                <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 6 }}>No memory update in {Math.round(healthScore.lastUpdateDaysAgo / 30)} months — add one above to improve cards.</div>
+                <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 6 }}>
+                  Haven't added a memory in a while. Drop one above before the next card.
+                </div>
               )}
-            </div>
+            </SoftCard>
           )}
 
         </div>

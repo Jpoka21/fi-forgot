@@ -739,8 +739,8 @@ export default function RecipientProfilePage() {
                   </button>
                 </Link>
                 <div>
-                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>Add Recipient</h1>
-                  <p className="text-sm mt-0.5" style={{ color: GRAY }}>The more we know, the better the cards get.</p>
+                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>Add a Person</h1>
+                  <p className="text-sm mt-0.5" style={{ color: GRAY }}>We remember who matters. You get the credit.</p>
                 </div>
               </div>
             ) : !existing ? (
@@ -944,7 +944,7 @@ export default function RecipientProfilePage() {
 
               {/* ── WHAT WE KNOW ──────────────────────────────────── */}
               <SectionCard>
-                {sectionHeading("What We Know")}
+                {sectionHeading("What makes them them")}
                 <p className="text-xs mb-4" style={{ color: GRAY }}>The more detail you give us, the more the card sounds like it came from you.</p>
 
                 {/* Personality picker */}
@@ -1143,7 +1143,7 @@ export default function RecipientProfilePage() {
                 <FormField control={form.control} name="thingsToAvoid" render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Things to avoid
+                      Things to never mess up
                       {lastPersonalization?.sources.includes("avoid") && (
                         <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
                           ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
@@ -1482,7 +1482,7 @@ export default function RecipientProfilePage() {
                 <FormField control={form.control} name="thingsToAvoid" render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Things to avoid
+                      Things to never mess up
                       {lastPersonalization?.sources.includes("avoid") && (
                         <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
                           ✓ Helped personalize {lastPersonalization.occasion ? `${lastPersonalization.occasion} card` : "last card"}
@@ -1524,7 +1524,7 @@ export default function RecipientProfilePage() {
                       }}
                       data-testid="button-save-recipient"
                     >
-                      {overBy > 0 ? `Remove ${overBy} to Save` : isNew ? "Save Recipient" : "Save Changes"}
+                      {overBy > 0 ? `Remove ${overBy} to Save` : isNew ? "Save Person" : "Save Changes"}
                     </button>
                   </>
                 );
@@ -1662,7 +1662,7 @@ export default function RecipientProfilePage() {
             style={{ background: "#fff", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, padding: "24px 24px 40px" }}
           >
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, marginBottom: 4, letterSpacing: "0.04em" }}>
-              Add a Recent Memory
+              Add something they'll love
             </div>
             <p className="text-sm mb-4" style={{ color: GRAY }}>
               What is something recent that happened with {existing?.name}?
@@ -1695,7 +1695,7 @@ export default function RecipientProfilePage() {
                 disabled={memorySaving || !memoryText.trim()}
                 style={{ flex: 2, padding: "10px", borderRadius: 12, border: "none", background: !memoryText.trim() ? `${BLACK}20` : SAGE, color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: !memoryText.trim() || memorySaving ? "not-allowed" : "pointer" }}
               >
-                {memorySaving ? "Saving…" : "Save Memory"}
+                {memorySaving ? "Saving…" : "Save memory"}
               </button>
             </div>
           </div>
