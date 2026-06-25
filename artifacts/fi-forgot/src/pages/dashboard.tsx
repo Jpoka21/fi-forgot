@@ -459,6 +459,9 @@ export default function DashboardPage() {
               }}>
                 {heroSubline}
               </p>
+              <p style={{ fontSize: "0.72rem", color: MID, margin: "6px 0 0", letterSpacing: "0.04em" }}>
+                SYNC TEST 1
+              </p>
             </div>
 
             {/* ── Section 1: Cards Coming Up ─────────────────────────────── */}
