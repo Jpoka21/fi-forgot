@@ -1,12 +1,18 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  getCards, getRecipients, getBriefingsForRecipient, getServerUserId,
+  getCards, getRecipients, getBriefingsForRecipient, getServerUserId, getApiHeaders,
   CardOrder, Recipient,
   getPersonalSettings, savePersonalSettings, PersonalSettings,
   TONES,
 } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
+import {
+  PB, buildHomeHeroSubline, getEventDateForRecipient, getNextOccasion,
+  formatBigDate, occasionPhrase, urgencyAccent, personStatusLine, recipientHasThinMemory,
+  isSensitiveOccasion,
+} from "@/lib/personal-brand";
+import { PersonAvatar, SectionTitle, SoftCard, PrimaryBtn } from "@/components/personal-ui";
 import { Plan, PLANS } from "@/lib/plan";
 import {
   Plus, ChevronDown, ChevronUp,
@@ -20,117 +26,25 @@ import {
 
 interface HwFont { id: string; name: string; previewUrl?: string; }
 
-/* ── Brand colours ────────────────────────────────────────────────────────── */
-const BEIGE  = "#F2E6D3";
-const CREAM  = "#FAF7F4";
-const RED    = "#E23B2E";
-const INK    = "#1F1F1F";
-const MID    = "#4B5563";
-const WHITE  = "#FFFFFF";
-const SAGE   = "#5B8C6B";
-const AMBER  = "#C97A0A";
-const BORDER = "#E5E0D8";
-
-const AVATAR_PALETTES = [
-  { bg: "#F2E6D3", fg: "#8B5E3C" },
-  { bg: "#E4EDE7", fg: "#3D6B50" },
-  { bg: "#EDE8F5", fg: "#5E4B8B" },
-  { bg: "#FDEAEA", fg: "#8B3030" },
-  { bg: "#E5EDF8", fg: "#2D5087" },
-  { bg: "#FDF3E1", fg: "#7A5C00" },
-];
-
-/* ── Helpers ──────────────────────────────────────────────────────────────── */
-function initials(name: string): string {
-  return name.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? "").join("");
-}
-
-function avatarPalette(name: string) {
-  return AVATAR_PALETTES[name.charCodeAt(0) % AVATAR_PALETTES.length];
-}
-
-const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
-  "Valentine's Day": { month: 2,  day: 14 },
-  "Christmas":       { month: 12, day: 25 }, "Hanukkah":      { month: 12, day: 26 },
-  "New Year's":      { month: 1,  day: 1  }, "Easter":        { month: 4,  day: 20 },
-};
-
-function nthWeekday(year: number, month: number, weekday: number, nth: number): Date {
-  const d = new Date(year, month - 1, 1);
-  const first = d.getDay();
-  const offset = (weekday - first + 7) % 7;
-  return new Date(year, month - 1, 1 + offset + (nth - 1) * 7);
-}
-
-function floatingHolidayDate(event: string, year: number): Date | null {
-  if (event === "Mother's Day")  return nthWeekday(year, 5,  0, 2);
-  if (event === "Father's Day")  return nthWeekday(year, 6,  0, 3);
-  if (event === "Thanksgiving")  return nthWeekday(year, 11, 4, 4);
-  return null;
-}
-
-function getEventDate(event: string, r: Recipient): string | null {
-  const now  = new Date(); const year = now.getFullYear();
-  const pad  = (n: number) => String(n).padStart(2, "0");
-  const fmt  = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const next = (stored: string) => {
-    const p = stored.split("-").map(Number);
-    let d   = new Date(year, p[1] - 1, p[2]);
-    if (d < now) d = new Date(year + 1, p[1] - 1, p[2]);
-    return fmt(d);
-  };
-  if (event === "Birthday" && r.birthday)  return next(r.birthday);
-  if (event === "Anniversary") {
-    const src = r.anniversaryDate ?? r.marriageDate;
-    if (src) return next(src);
-  }
-  const custom = r.customDates?.find(c => c.label === event);
-  if (custom?.date) return next(custom.date);
-  const floating = floatingHolidayDate(event, year);
-  if (floating) {
-    if (floating < now) {
-      const next1 = floatingHolidayDate(event, year + 1)!;
-      return fmt(next1);
-    }
-    return fmt(floating);
-  }
-  const fixed = HOLIDAY_DATES[event];
-  if (fixed) return next(`${year}-${pad(fixed.month)}-${pad(fixed.day)}`);
-  return null;
-}
+const BEIGE  = PB.beige;
+const CREAM  = PB.cream;
+const RED    = PB.red;
+const INK    = PB.ink;
+const MID    = PB.mid;
+const WHITE  = PB.white;
+const SAGE   = PB.sage;
+const AMBER  = PB.amber;
+const BORDER = PB.border;
 
 type UpcomingEvent = { recipient: Recipient; event: string; daysAway: number; dateStr: string; briefingDone: boolean };
 
-function momentDatePhrase(ev: UpcomingEvent): string {
-  const longDate = new Date(ev.dateStr + "T12:00:00").toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric",
-  });
-  if (ev.daysAway === 0) return `${ev.event} is today`;
-  if (ev.daysAway === 1) return `${ev.event} is tomorrow`;
-  if (ev.daysAway <= 14) return `${ev.event} is in ${ev.daysAway} days`;
-  return `${ev.event} is ${longDate}`;
-}
-
-function buildHeroSubline(upcoming60: UpcomingEvent[]): string {
-  if (upcoming60.length === 0) {
-    return "You're all caught up for now. We'll let you know when someone needs you.";
-  }
-  if (upcoming60.length === 1) {
-    const ev = upcoming60[0];
-    const when = ev.daysAway === 0 ? "today" : ev.daysAway === 1 ? "tomorrow" : `in ${ev.daysAway} days`;
-    return `${ev.recipient.name}'s ${ev.event} is coming up ${when}.`;
-  }
-  if (upcoming60.length <= 3) {
-    return `${upcoming60.length} moments coming up — we've got you.`;
-  }
-  return "A few people could use a little love soon.";
-}
-
-function momentBorderAccent(daysAway: number): string {
-  if (daysAway <= 3) return RED;
-  if (daysAway <= 7) return AMBER;
-  return SAGE;
-}
+type FeedMemory = {
+  id: string;
+  recipientId: string;
+  recipientName: string;
+  answerText: string;
+  daysAgo: number;
+};
 
 /* ── Thin bar ─────────────────────────────────────────────────────────────── */
 function ThinBar({ pct, color = SAGE, h = 4 }: { pct: number; color?: string; h?: number }) {
@@ -153,8 +67,10 @@ export default function DashboardPage() {
   const [viewingCardId, setViewingCardId]       = useState<string | null>(null);
   const [isMobile, setIsMobile]                 = useState(() => window.innerWidth < 768);
   const [upgradeOpen, setUpgradeOpen]           = useState(false);
+  const [feedMemories, setFeedMemories]         = useState<FeedMemory[]>([]);
+  const [memoriesLoading, setMemoriesLoading]   = useState(false);
 
-  const { user, upgradePlan } = useAuth();
+  const { user, upgradePlan, authReady } = useAuth();
   const [, setLocation] = useLocation();
   const plan = (user?.plan ?? "basic") as Plan;
 
@@ -186,7 +102,7 @@ export default function DashboardPage() {
     for (const r of recipients) {
       const briefings = getBriefingsForRecipient(r.id);
       for (const event of r.selectedEvents ?? []) {
-        const dateStr = getEventDate(event, r);
+        const dateStr = getEventDateForRecipient(event, r);
         if (!dateStr) continue;
         const d = new Date(dateStr);
         if (d < today || d > cutoff) continue;
@@ -233,6 +149,55 @@ export default function DashboardPage() {
     return map;
   }, [cards]);
 
+  useEffect(() => {
+    if (!authReady || recipients.length === 0) return;
+    const headers = getApiHeaders() as Record<string, string>;
+    if (!headers["x-user-id"]) return;
+    let cancelled = false;
+    setMemoriesLoading(true);
+    Promise.all(
+      recipients.slice(0, 8).map(async r => {
+        try {
+          const res = await fetch(`/api/v2/recipients/${r.id}/fresh-updates`, { headers });
+          if (!res.ok) return [];
+          const d = await res.json() as { freshUpdates?: { id: string; answerText: string; daysAgo: number }[] };
+          return (d.freshUpdates ?? []).slice(0, 2).map(m => ({
+            id: m.id,
+            recipientId: r.id,
+            recipientName: r.name,
+            answerText: m.answerText,
+            daysAgo: m.daysAgo,
+          }));
+        } catch {
+          return [];
+        }
+      }),
+    ).then(rows => {
+      if (cancelled) return;
+      const merged = rows.flat().sort((a, b) => a.daysAgo - b.daysAgo).slice(0, 5);
+      if (merged.length > 0) {
+        setFeedMemories(merged);
+      } else {
+        const local: FeedMemory[] = [];
+        for (const r of recipients) {
+          const snippet = r.favoriteMemories?.trim() || r.insideJokes?.trim();
+          if (snippet) {
+            local.push({
+              id: `local-${r.id}`,
+              recipientId: r.id,
+              recipientName: r.name,
+              answerText: snippet.slice(0, 120) + (snippet.length > 120 ? "…" : ""),
+              daysAgo: 99,
+            });
+          }
+          if (local.length >= 4) break;
+        }
+        setFeedMemories(local);
+      }
+    }).finally(() => { if (!cancelled) setMemoriesLoading(false); });
+    return () => { cancelled = true; };
+  }, [authReady, recipients]);
+
   function updateSettings<K extends keyof PersonalSettings>(key: K, val: PersonalSettings[K]) {
     setPersonalSettings(prev => { const next = { ...prev, [key]: val }; savePersonalSettings(next); return next; });
   }
@@ -251,7 +216,38 @@ export default function DashboardPage() {
   const usagePct   = Math.min(100, Math.round((cardsUsed / Math.max(cardsTotal, 1)) * 100));
   const px         = isMobile ? 16 : 28;
   const firstName  = user?.name?.split(" ")[0] ?? "there";
-  const heroSubline = buildHeroSubline(upcoming60);
+  const heroSubline = buildHomeHeroSubline(
+    upcoming60.length,
+    upcoming60[0] ? { name: upcoming60[0].recipient.name, event: upcoming60[0].event, daysAway: upcoming60[0].daysAway } : undefined,
+  );
+
+  function recipientHasUpcomingCard(recipientId: string): boolean {
+    for (const key of upcomingWithCardKeys) {
+      if (key.startsWith(`${recipientId}:::`)) return true;
+    }
+    return false;
+  }
+
+  function upcomingCta(ev: UpcomingEvent) {
+    const evKey = `${ev.recipient.id}:::${ev.event}`;
+    const hasCard = upcomingWithCardKeys.has(evKey);
+    const cardId = upcomingCardById.get(evKey);
+    const card = cardId ? cards.find(c => c.id === cardId) : undefined;
+    const briefingPath = cardId
+      ? `/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}?rewrite=1`
+      : `/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`;
+
+    if (hasCard && card?.status === "Approved") {
+      return { label: "Send it", action: () => setViewingCardId(cardId!) };
+    }
+    if (hasCard && card?.status === "Ready for approval") {
+      return { label: "Send it", action: () => setLocation("/cards/review") };
+    }
+    if (ev.briefingDone) {
+      return { label: "Write the card", action: () => setLocation(briefingPath) };
+    }
+    return { label: "Add a detail", action: () => setLocation(briefingPath) };
+  }
 
   const autopilotSettings = (
     <div style={{ background: `${INK}02`, borderTop: `1px solid ${BORDER}` }}>
@@ -320,10 +316,10 @@ export default function DashboardPage() {
           <div style={{ background: WHITE, borderRadius: 24, padding: "72px 36px", textAlign: "center" as const, boxShadow: "0 2px 16px rgba(0,0,0,0.05)", border: `1px solid ${BORDER}` }}>
             <div style={{ fontSize: "3.5rem", marginBottom: 18 }}>💌</div>
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "2rem" : "2.6rem", color: INK, letterSpacing: "0.04em", marginBottom: 12, lineHeight: 1.1 }}>
-              Add the People<br />Who Matter Most
+              Add Your People
             </div>
             <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: MID, maxWidth: 360, margin: "0 auto 32px", lineHeight: 1.6 }}>
-              We'll handle the cards — you get the credit.
+              We remember who matters, write thoughtful cards, and help you not look like a forgetful idiot.
             </p>
             <Link href="/recipients/new">
               <button data-testid="link-add-recipient"
@@ -432,7 +428,7 @@ export default function DashboardPage() {
                   }}
                   style={{ background: "none", border: "none", color: MID, fontSize: "0.82rem", cursor: "pointer",
                     textDecoration: "underline", opacity: 0.6 }}>
-                  Show me the full dashboard
+                  Show me the full home page
                 </button>
               </div>
             </div>
@@ -441,11 +437,11 @@ export default function DashboardPage() {
 
         {recipients.length > 0 && !isFirstTimeState && (
           <>
-            {/* ── Personalized hero ──────────────────────────────────────── */}
+            {/* ── Hero ───────────────────────────────────────────────────── */}
             <div style={{ marginBottom: 28, padding: "4px 0 8px" }}>
               <h1 style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
-                fontSize: isMobile ? "1.55rem" : "1.75rem",
+                fontSize: isMobile ? "1.55rem" : "1.85rem",
                 fontWeight: 700,
                 color: INK,
                 margin: "0 0 8px",
@@ -455,141 +451,170 @@ export default function DashboardPage() {
               </h1>
               <p style={{
                 fontFamily: "'Caveat', cursive",
-                fontSize: "1.15rem",
+                fontSize: "1.2rem",
                 color: MID,
                 margin: 0,
                 lineHeight: 1.5,
-                maxWidth: 480,
+                maxWidth: 520,
               }}>
                 {heroSubline}
               </p>
             </div>
 
-            {/* ── Coming up (max 3 moments) ─────────────────────────────── */}
-            {dashboardMoments.length > 0 && (
-              <div style={{ marginBottom: 28 }}>
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
-                  <h2 style={{
-                    fontFamily: "'Plus Jakarta Sans', sans-serif",
-                    fontSize: "1.05rem",
-                    fontWeight: 700,
-                    color: INK,
-                    margin: 0,
-                  }}>
-                    Coming up
-                  </h2>
-                  {upcoming60.length > 3 && (
-                    <Link href="/moments" style={{ fontSize: "0.8rem", fontWeight: 600, color: SAGE, textDecoration: "none" }}>
-                      See all →
-                    </Link>
-                  )}
-                </div>
+            {/* ── Section 1: Cards Coming Up ─────────────────────────────── */}
+            <div style={{ marginBottom: 28 }}>
+              <SectionTitle
+                title="Cards Coming Up"
+                sub="The next few cards we'll help you nail."
+                right={upcoming60.length > 3 ? (
+                  <Link href="/moments" style={{ fontSize: "0.8rem", fontWeight: 600, color: SAGE, textDecoration: "none", flexShrink: 0 }}>
+                    See all →
+                  </Link>
+                ) : undefined}
+              />
 
+              {dashboardMoments.length > 0 ? (
                 <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
                   {dashboardMoments.map(ev => {
-                    const palette = avatarPalette(ev.recipient.name);
-                    const evKey   = `${ev.recipient.id}:::${ev.event}`;
-                    const hasCard = upcomingWithCardKeys.has(evKey);
-                    const cardId  = upcomingCardById.get(evKey);
-                    const accent  = momentBorderAccent(ev.daysAway);
+                    const big = formatBigDate(ev.dateStr);
+                    const accent = urgencyAccent(ev.daysAway);
+                    const sincere = isSensitiveOccasion(ev.event);
+                    const cta = upcomingCta(ev);
 
                     return (
-                      <div
-                        key={`${ev.recipient.id}-${ev.event}`}
-                        style={{
-                          background: WHITE,
-                          borderRadius: 14,
-                          border: `1px solid ${BORDER}`,
-                          borderLeft: `3px solid ${accent}`,
-                          padding: "16px 18px",
-                          boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                      <SoftCard key={`${ev.recipient.id}-${ev.event}`} style={{ borderLeft: `3px solid ${accent}`, padding: "16px 18px" }}>
+                        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
                           <div style={{
-                            width: 44, height: 44, borderRadius: "50%",
-                            background: palette.bg, color: palette.fg,
-                            flexShrink: 0, display: "flex", alignItems: "center",
-                            justifyContent: "center", fontSize: "0.82rem", fontWeight: 800,
-                            letterSpacing: "0.03em",
+                            width: 64, flexShrink: 0, textAlign: "center" as const,
+                            padding: "8px 0", borderRadius: 12,
+                            background: sincere ? `${SAGE}12` : `${accent}10`,
                           }}>
-                            {initials(ev.recipient.name)}
+                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", color: accent, lineHeight: 1 }}>{big.day}</div>
+                            <div style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.1em", color: MID }}>{big.month}</div>
+                            <div style={{ fontSize: "0.68rem", color: MID, marginTop: 2 }}>{big.weekday}</div>
                           </div>
 
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <button
                               type="button"
                               onClick={() => setLocation(`/relationship/${ev.recipient.id}`)}
-                              style={{
-                                background: "none", border: "none", padding: 0, cursor: "pointer",
-                                textAlign: "left" as const, display: "block", width: "100%",
-                              }}
+                              style={{ background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" as const }}
                             >
-                              <div style={{ fontWeight: 700, fontSize: "1rem", color: INK, lineHeight: 1.2 }}>
-                                {ev.recipient.name}
-                              </div>
-                              {ev.recipient.relationship && (
-                                <div style={{ fontSize: "0.78rem", color: MID, marginTop: 2 }}>
-                                  {ev.recipient.relationship}
-                                </div>
-                              )}
+                              <div style={{ fontWeight: 700, fontSize: "1.05rem", color: INK }}>{ev.recipient.name}</div>
+                              <div style={{ fontSize: "0.78rem", color: MID, marginTop: 2 }}>{ev.recipient.relationship} · {ev.event}</div>
                             </button>
-
-                            <p style={{
-                              fontSize: "0.88rem",
-                              color: INK,
-                              margin: "10px 0 14px",
-                              lineHeight: 1.45,
-                            }}>
-                              {momentDatePhrase(ev)}
+                            <p style={{ fontSize: "0.88rem", color: INK, margin: "10px 0 14px", lineHeight: 1.45 }}>
+                              {occasionPhrase(ev.event, ev.daysAway, ev.dateStr, sincere)}
                             </p>
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (hasCard && cardId) {
-                                  setViewingCardId(cardId);
-                                } else {
-                                  setLocation(
-                                    cardId
-                                      ? `/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}?rewrite=1`
-                                      : `/briefings/${ev.recipient.id}/${encodeURIComponent(ev.event)}`,
-                                  );
-                                }
-                              }}
-                              style={{
-                                padding: "8px 16px",
-                                borderRadius: 9,
-                                cursor: "pointer",
-                                border: hasCard ? `1.5px solid ${SAGE}` : "none",
-                                background: hasCard ? WHITE : accent,
-                                color: hasCard ? SAGE : WHITE,
-                                fontWeight: 700,
-                                fontSize: "0.8rem",
-                              }}
-                            >
-                              {hasCard ? "Read the card" : "Help me write one"}
-                            </button>
+                            <PrimaryBtn onClick={cta.action} accent={accent} variant={cta.label === "Send it" ? "outline" : "fill"}>
+                              {cta.label}
+                            </PrimaryBtn>
                           </div>
                         </div>
-                      </div>
+                      </SoftCard>
                     );
                   })}
                 </div>
-              </div>
-            )}
+              ) : (
+                <SoftCard style={{ padding: "28px 24px", textAlign: "center" as const }}>
+                  <div style={{ fontSize: "2rem", marginBottom: 10 }}>✉️</div>
+                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.15rem", color: MID, margin: 0, lineHeight: 1.5 }}>
+                    Nothing on the calendar. Enjoy the calm — we'll tap you when it's time.
+                  </p>
+                </SoftCard>
+              )}
+            </div>
 
-            {dashboardMoments.length === 0 && upcoming60.length === 0 && (
-              <div style={{
-                background: WHITE, borderRadius: 14, border: `1px solid ${BORDER}`,
-                padding: "28px 24px", marginBottom: 28, textAlign: "center" as const,
-              }}>
-                <div style={{ fontSize: "2rem", marginBottom: 10 }}>✉️</div>
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.15rem", color: MID, margin: 0, lineHeight: 1.5 }}>
-                  Nothing on the calendar right now. We'll nudge you when someone needs you.
-                </p>
+            {/* ── Section 2: Your People ─────────────────────────────────── */}
+            <div style={{ marginBottom: 28 }}>
+              <SectionTitle
+                title="Your People"
+                sub="Everyone you're staying out of trouble with."
+                right={recipients.length > 4 ? (
+                  <Link href="/people" style={{ fontSize: "0.8rem", fontWeight: 600, color: SAGE, textDecoration: "none", flexShrink: 0 }}>
+                    See all →
+                  </Link>
+                ) : undefined}
+              />
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
+                {recipients.slice(0, 4).map(r => {
+                  const next = getNextOccasion(r);
+                  const status = personStatusLine(r, {
+                    daysAway: next?.daysAway ?? null,
+                    hasCard: recipientHasUpcomingCard(r.id),
+                    memoryThin: recipientHasThinMemory(r),
+                  });
+                  return (
+                    <Link key={r.id} href={`/relationship/${r.id}`} style={{ textDecoration: "none" }}>
+                      <SoftCard style={{ padding: "14px 16px", cursor: "pointer", height: "100%" }}>
+                        <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                          <PersonAvatar name={r.name} size={40} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 700, fontSize: "0.95rem", color: INK }}>{r.name}</div>
+                            <div style={{ fontSize: "0.75rem", color: MID, marginTop: 2 }}>{r.relationship}</div>
+                            {next && (
+                              <div style={{ fontSize: "0.78rem", color: INK, marginTop: 8 }}>
+                                {next.event} · {next.daysAway === 0 ? "today" : next.daysAway === 1 ? "tomorrow" : `${next.daysAway}d`}
+                              </div>
+                            )}
+                            <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: SAGE, marginTop: 6, lineHeight: 1.35 }}>
+                              {status}
+                            </div>
+                          </div>
+                        </div>
+                      </SoftCard>
+                    </Link>
+                  );
+                })}
               </div>
-            )}
+              <Link href="/recipients/new">
+                <button style={{
+                  width: "100%", marginTop: 10, padding: "12px", borderRadius: 12,
+                  border: `2px dashed ${BORDER}`, background: "transparent", color: MID,
+                  fontSize: "0.88rem", fontWeight: 600, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}>
+                  <Plus size={16} style={{ color: RED }} /> Add a Person
+                </button>
+              </Link>
+            </div>
+
+            {/* ── Section 3: Stuff Worth Remembering ───────────────────────── */}
+            <div style={{ marginBottom: 28 }}>
+              <SectionTitle
+                title="Stuff Worth Remembering"
+                sub="Little details that make cards sound like you actually know them."
+              />
+              {memoriesLoading ? (
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: MID }}>Loading memories…</p>
+              ) : feedMemories.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                  {feedMemories.map(m => (
+                    <SoftCard key={m.id} style={{ padding: "12px 16px", borderLeft: `3px solid ${SAGE}` }}>
+                      <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: INK, lineHeight: 1.55 }}>{m.answerText}</div>
+                      <div style={{ fontSize: "0.72rem", color: MID, marginTop: 6 }}>
+                        About {m.recipientName}
+                        {m.daysAgo < 30 && m.daysAgo < 90 ? ` · ${m.daysAgo === 0 ? "today" : `${m.daysAgo}d ago`}` : ""}
+                      </div>
+                    </SoftCard>
+                  ))}
+                </div>
+              ) : (
+                <SoftCard style={{ padding: "20px 18px", textAlign: "center" as const }}>
+                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", color: MID, margin: "0 0 12px", lineHeight: 1.5 }}>
+                    No memories saved yet. Drop one on a person's page and we'll use it in their next card.
+                  </p>
+                </SoftCard>
+              )}
+              <Link href={recipients[0] ? `/relationship/${recipients[0].id}` : "/recipients/new"}>
+                <button style={{
+                  marginTop: 10, padding: "10px 18px", borderRadius: 9, border: `1.5px solid ${SAGE}`,
+                  background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
+                }}>
+                  Add something they'll love →
+                </button>
+              </Link>
+            </div>
 
             {/* ── Quick Card (secondary) ─────────────────────────────────── */}
             <div style={{ marginBottom: 24 }}>
@@ -660,7 +685,7 @@ export default function DashboardPage() {
             {/* Footer */}
             <div style={{ textAlign: "center" as const, paddingTop: 8, marginTop: 4 }}>
               <span style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: MID }}>
-                Thoughtful cards. Stronger relationships. That's what we're here for. ❤️
+                Thoughtful cards. Zero panic. That's the whole job. ❤️
               </span>
             </div>
           </>
