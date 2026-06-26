@@ -1,1 +1,1 @@
-Add constitution placeholder
+Add customer placeholder
