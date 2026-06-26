@@ -1,4 +1,4 @@
-# 02_CUSTOMER.md
+# 02_[CUSTOMER.md](http://CUSTOMER.md)
 
 # The Customer
 

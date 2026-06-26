@@ -1,4 +1,4 @@
-# 03_BRAND.md
+# 03_[BRAND.md](http://BRAND.md)
 
 # The Brand
 

@@ -1,4 +1,4 @@
-# 00_READ_ME_FIRST.md
+# 00_READ_ME_[FIRST.md](http://FIRST.md)
 
 # Read This Before You Change Anything
 

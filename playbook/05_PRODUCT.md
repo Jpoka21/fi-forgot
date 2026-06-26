@@ -1,4 +1,4 @@
-# 05_PRODUCT.md
+# 05_[PRODUCT.md](http://PRODUCT.md)
 
 # Product Philosophy
 

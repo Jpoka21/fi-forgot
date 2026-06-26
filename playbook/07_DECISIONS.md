@@ -1,4 +1,4 @@
-# 07_DECISIONS.md
+# 07_[DECISIONS.md](http://DECISIONS.md)
 
 # Product Decision Framework
 

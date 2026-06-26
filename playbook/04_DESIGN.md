@@ -1,4 +1,4 @@
-# 04_DESIGN.md
+# 04_[DESIGN.md](http://DESIGN.md)
 
 # Design Philosophy
 
