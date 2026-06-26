@@ -2,166 +2,396 @@
 
 # The Customer
 
-This document defines who F.I. Forgot is built for.
-
-If a feature does not make life easier for this person, it should not be built.
-
----
-
-# The Core Customer
+F.I. Forgot is built for caring people with busy lives.
 
 Our customer is not careless.
 
-Our customer is busy.
+They are not cold.
 
-They care deeply about the people in their life, but they have too much competing for their attention.
+They are not trying to avoid effort because they do not care.
 
-They are raising children, building careers, caring for parents, running businesses, managing homes, and trying to keep up with everyday life.
+They care deeply. That is why forgetting bothers them.
 
-They do not need another app to manage.
+They have parents, spouses, children, siblings, friends, clients, coworkers, and people who matter to them. They want those people to feel remembered, appreciated, and important.
 
-They need one less thing to manage.
+But life is full.
 
----
+Work gets busy. Kids need attention. Houses need fixing. Bills need paying. Texts pile up. Weeks disappear. Birthdays, anniversaries, thank you notes, sympathy cards, congratulations, and small moments of care slip through the cracks.
+
+The customer does not need to be convinced that relationships matter.
+
+They already know.
+
+They need help making sure life does not crowd out the people they love.
+
+# The Core Belief
+
+People do not forget because they do not care.
+
+They forget because life gets busy.
+
+F.I. Forgot exists to protect caring people from the consequences of normal human overwhelm.
+
+The customer is not hiring software.
+
+They are hiring confidence.
+
+They are hiring relief.
+
+They are hiring someone competent to quietly make sure the important people in their life do not accidentally feel forgotten.
 
 # The Real Problem
 
-The problem is not that people forget dates.
+Forgetting a birthday is not just a missed date.
 
-The problem is what forgetting communicates.
+It creates guilt.
 
-A missed birthday can feel like:
+Embarrassment.
 
-"You did not think of me."
+Regret.
 
-A missed anniversary can feel like:
+Damage.
 
-"This did not matter enough to remember."
+The feeling of being unreliable.
 
-A late card can feel like:
+The fear that someone they love thinks they do not matter.
 
-"I was an afterthought."
+That emotional burden is the real problem.
 
-Cards are only paper, but they carry a hidden meaning.
+The customer is not only trying to send a card.
 
-They signal effort.
+They are trying to avoid the sick feeling of realizing they dropped the ball.
 
-They signal love.
+They are trying to preserve trust.
 
-They signal respect.
+They are trying to be the kind of person they already want to be.
 
-They signal that someone was remembered.
+F.I. Forgot removes that burden.
 
-F.I. Forgot exists because good people should not accidentally make the people they care about feel forgotten.
+# The Customer's Desired Outcome
 
----
+The customer does not want to manage remembering better.
 
-# What The Customer Wants
+They want to stop worrying about remembering.
 
-They want the people they care about to feel remembered.
+The ideal outcome is not:
 
-They want to feel prepared.
+"I use F.I. Forgot all the time."
 
-They want to avoid the last minute panic.
+The ideal outcome is:
 
-They want to stop carrying important dates in their head.
+"I do not even think about it anymore. It is handled."
 
-They want to get credit for thoughtfulness without having to constantly think about it.
+That is the product.
 
-They want a service they can set up once and trust.
+# What We Sell
 
----
+We do not sell AI.
 
-# What The Customer Does Not Want
+We do not sell reminders.
 
-They do not want a CRM.
+We do not sell greeting cards.
 
-They do not want a productivity dashboard.
+We sell confidence.
 
-They do not want another calendar to manage.
+We sell reliability.
 
-They do not want endless choices.
+We sell peace of mind.
 
-They do not want long forms.
+We sell the feeling that important people will not accidentally feel forgotten.
 
-They do not want to feel judged for forgetting.
+The card is the proof.
 
-They do not want to babysit the service.
+The service is the product.
 
----
+# Functional Jobs
 
-# What Success Looks Like
+Customers hire F.I. Forgot to:
 
-Success is not more app usage.
+Remember important dates.
 
-Success is less worry.
+Send thoughtful cards on time.
 
-The customer should spend less time thinking about birthdays, anniversaries, holidays, and important moments.
+Keep track of important people.
 
-The people they care about should consistently feel remembered.
+Help maintain relationships across distance and time.
 
-The customer should feel like F.I. Forgot quietly handled something that mattered.
+Make sure birthdays, anniversaries, holidays, sympathy moments, thank you moments, and life events do not get missed.
 
----
+Handle the details before the customer has to think about them.
 
-# Why They Stay
+Give the customer a simple way to add someone once and trust the system after that.
 
-They stay because F.I. Forgot becomes easier than doing it themselves.
+# Emotional Jobs
 
-They stay because it is more reliable than their memory.
+Customers hire F.I. Forgot to:
 
-They stay because the cards feel more thoughtful than what they would have written at the last minute.
+Feel dependable.
 
-They stay because the service works quietly in the background.
+Feel thoughtful.
 
----
+Feel less guilty.
 
-# Why They Cancel
+Feel less overwhelmed.
 
-They cancel if the service starts to feel like work.
+Feel like someone competent is helping.
 
-They cancel if they believe they can do it themselves just as easily.
+Protect important relationships.
 
-They cancel if the cards feel generic.
+Make loved ones feel seen.
 
-They cancel if we miss important dates.
+Avoid the embarrassment of forgetting.
 
-They cancel if the product feels like software instead of a service.
+Stop carrying the mental load of remembering every occasion.
 
----
+Become the kind of person who always remembers, without having to become the kind of person who manages another app.
 
-# The Recipient Matters Too
+# Who We Are Not Building For
 
-The recipient never sees the software.
+We are not building for productivity hackers.
 
-They only feel the result.
+We are not building for CRM power users.
 
-They receive the card.
+We are not building for people who enjoy organizing every detail of their personal life.
 
-They read the words.
+We are not building for people who want endless customization.
 
-They decide whether it felt thoughtful.
+We are not building for people who want dashboards, feeds, workflows, tags, filters, and configuration panels.
 
-The recipient feeling remembered is the proof that F.I. Forgot worked.
+We are not building for people who want another app to check every day.
 
----
+We are not building for people who love notifications.
 
-# The Transformation
+Our best customer wants to spend almost no time inside F.I. Forgot.
+
+That is not a weakness.
+
+That is the point.
+
+# What Customers Never Want
+
+Customers do not want:
+
+Another inbox.
+
+Another feed.
+
+Another dashboard.
+
+Another CRM.
+
+Another checklist.
+
+Another reminder app.
+
+Another calendar.
+
+Another place to organize people.
+
+Another system to maintain.
+
+Another notification stream.
+
+Another thing to remember to check.
+
+Another app that creates more work than it removes.
+
+A remembering app that they have to remember to use.
+
+# What Customers Actually Want
+
+Customers want to feel:
+
+"I never have to worry about birthdays again."
+
+"My family will feel appreciated."
+
+"My wife will know I remembered."
+
+"My parents will feel loved."
+
+"My friend will not think I forgot."
+
+"My clients will feel valued."
+
+"I fixed this once."
+
+"I trust that it is handled."
+
+"I have less mental load."
+
+"I can stop thinking about this."
+
+The product should repeatedly create that feeling.
+
+# What We Never Make Customers Do
+
+We should never make customers:
+
+Reenter the same information.
+
+Configure complicated automation.
+
+Learn a new system.
+
+Check the app to make sure we are working.
+
+Wonder whether a card was sent.
+
+Wonder whether an important date was missed.
+
+Choose from too many options.
+
+Manage people like database records.
+
+Navigate a CRM.
+
+Read instructions to complete a basic task.
+
+Spend time inside the app for our benefit.
+
+If the customer has to work hard to feel confident, we failed.
+
+# When Customers Should Open F.I. Forgot
+
+Customers should open F.I. Forgot to:
+
+Add someone important.
+
+Answer a few thoughtful questions.
+
+Approve or edit a card when desired.
+
+Check that everything is handled.
+
+Update a relationship when something meaningful changes.
+
+Fix an issue quickly.
+
+Customers should not open F.I. Forgot to browse.
+
+They should not open it to manage.
+
+They should not open it to organize.
+
+They should not open it because the product needs engagement.
+
+They should open it only when doing so creates more confidence and less future work.
+
+# The Emotional Journey
 
 Before F.I. Forgot:
 
-"I hope I did not forget."
+"I hope I did not miss anything."
+
+"I need to remember to send something."
+
+"I forgot again."
+
+"I feel terrible."
 
 After F.I. Forgot:
 
-"I know the people who matter are taken care of."
+"It is handled."
 
----
+"They felt remembered."
+
+"I do not worry about this anymore."
+
+That journey is the business.
+
+# What Success Looks Like
+
+Success is not daily active usage.
+
+Success is trust.
+
+Success is when the customer forgets the app exists, but the people they love never feel forgotten.
+
+Success is when cards arrive on time.
+
+Success is when the customer feels calm instead of guilty.
+
+Success is when the service becomes quieter over time.
+
+Success is when the customer spends less time inside F.I. Forgot every year.
+
+Success is when lower app usage means the system is doing its job.
+
+Most software tries to increase engagement.
+
+F.I. Forgot should reduce the need for engagement.
+
+# Product Implications
+
+Automation is always preferable to manual work.
+
+Confidence is more important than activity.
+
+Clarity is more important than features.
+
+Reliability is more important than cleverness.
+
+A simple completed task is better than a powerful unfinished workflow.
+
+The app is the control panel.
+
+The service is the product.
+
+Every screen should have one primary action.
+
+Every screen should reduce uncertainty.
+
+Every workflow should end with the customer feeling more confident than before.
+
+Every feature should reduce future work.
+
+The product should become quieter as it learns.
+
+If the customer must remember to open F.I. Forgot, we failed.
+
+If the customer must become a power user, we failed.
+
+If Grandma cannot understand the basic flow without instructions, we failed.
+
+If someone cannot complete an urgent task while distracted, it is too complicated.
 
 # The Customer Test
 
-Before building anything, ask:
+Before building any feature, ask:
 
-Would this help a busy person make someone they care about feel remembered with less effort?
+Does this reduce mental load?
 
-If not, keep improving.
+Does this reduce decisions?
+
+Does this increase confidence?
+
+Does this reduce future work?
+
+Does this make the service quieter?
+
+Does this help important people feel remembered?
+
+Can the same outcome happen automatically?
+
+Would a busy customer understand this immediately?
+
+Would Grandma understand it without instructions?
+
+Could someone complete this while distracted?
+
+If this disappeared tomorrow, would customers truly miss it?
+
+If the answer to most of these is no, the feature probably does not belong.
+
+# The Foundational Principle
+
+People do not hire F.I. Forgot to remember more.
+
+They hire F.I. Forgot so they no longer have to remember at all.
+
+The customer's goal is not to use F.I. Forgot.
+
+The customer's goal is to stop worrying that important people will feel forgotten.
+
+Everything we build should serve that goal.
