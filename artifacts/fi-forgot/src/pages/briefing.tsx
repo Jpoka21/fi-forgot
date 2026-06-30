@@ -1,22 +1,52 @@
 import { useState, useEffect } from "react";
 import { useLocation, useParams, Link } from "wouter";
-import AppNav from "@/components/layout/AppNav";
+import AppShell from "@/components/layout/AppShell";
+import PageShell from "@/components/layout/PageShell";
 import {
   getRecipient, saveRecipient, saveBriefing, getBriefingsForRecipient,
   getBriefing, getEventQuestions, getYearsTogether, childrenSummary,
   saveCard, getCards, deleteCard, getServerUserId,
   CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
+  Recipient,
 } from "@/lib/data";
-import { ArrowLeft, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
+import { PB } from "@/lib/personal-brand";
+import { PersonAvatar, SoftCard, PrimaryBtn, SecondaryBtn } from "@/components/personal-ui";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
-/* ── Tokens ────────────────────────────────────────────────────── */
-const BEIGE  = "#F2E6D3";
-const RED    = "#E23B2E";
-const INK    = "#1F1F1F";
-const MID    = "#6B7280";
-const WHITE  = "#FFFFFF";
-const SAGE   = "#5B8C6B";
-const BORDER = "#E5E0D8";
+const CREAM  = PB.cream;
+const RED    = PB.red;
+const INK    = PB.ink;
+const MID    = PB.mid;
+const WHITE  = PB.white;
+const SAGE   = PB.sage;
+const BORDER = PB.border;
+
+const serif = "'Lora', Georgia, serif";
+const sans  = "'Plus Jakarta Sans', sans-serif";
+
+function LoadingWritingIllustration() {
+  return (
+    <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img
+        src="/assets/illustrations/loading/011_loading_writing.webp"
+        alt="Dave thoughtfully writing a handwritten card"
+        style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
+      />
+    </div>
+  );
+}
+
+function LoadingSuccessIllustration() {
+  return (
+    <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img
+        src="/assets/illustrations/loading/015_loading_success.webp"
+        alt="Dave finished taking care of everything, looking calm and satisfied"
+        style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
+      />
+    </div>
+  );
+}
 
 /* ── Children editor ───────────────────────────────────────────── */
 const GENDER_OPTIONS = [
@@ -35,40 +65,41 @@ function ChildrenEditor({ children, onChange }: {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {children.map((child, idx) => (
-        <div key={child.id} style={{ background: BEIGE, borderRadius: 10, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+        <div key={child.id} style={{ background: CREAM, borderRadius: 12, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, border: `1px solid ${BORDER}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "0.98rem", fontWeight: 700, color: MID }}>Child {idx + 1}</span>
+            <span style={{ fontSize: "0.88rem", fontWeight: 600, color: MID, fontFamily: sans }}>Child {idx + 1}</span>
             <button type="button" onClick={() => remove(child.id)} style={{ background: "none", border: "none", cursor: "pointer", color: RED, padding: 4 }}>
               <Trash2 size={15} />
             </button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: MID, marginBottom: 4 }}>Name</label>
-              <input style={{ width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8, padding: "9px 12px", fontSize: "1.06rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box" }}
+              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, color: MID, marginBottom: 4, fontFamily: sans }}>Name</label>
+              <input style={{ width: "100%", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.95rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box", fontFamily: sans }}
                 placeholder="Emma" value={child.name} onChange={e => update(child.id, { name: e.target.value })} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: MID, marginBottom: 4 }}>Birthdate</label>
-              <input type="date" style={{ width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 8, padding: "9px 12px", fontSize: "1.06rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box" }}
+              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, color: MID, marginBottom: 4, fontFamily: sans }}>Birthdate</label>
+              <input type="date" style={{ width: "100%", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.95rem", outline: "none", background: WHITE, color: INK, boxSizing: "border-box", fontFamily: sans }}
                 value={child.birthdate ?? ""} onChange={e => update(child.id, { birthdate: e.target.value })} />
             </div>
           </div>
-          <div style={{ display: "flex", gap: 7 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
             {GENDER_OPTIONS.map(g => (
               <button key={g.id} type="button" onClick={() => update(child.id, { gender: g.id as Child["gender"] })} style={{
-                padding: "6px 13px", borderRadius: 7, border: `1.5px solid ${child.gender === g.id ? RED : BORDER}`,
-                background: child.gender === g.id ? `${RED}10` : WHITE,
-                color: child.gender === g.id ? RED : MID, fontWeight: 600, fontSize: "0.95rem", cursor: "pointer",
-              }}>{g.emoji} {g.label}</button>
+                padding: "8px 14px", borderRadius: 20, cursor: "pointer",
+                border: `1.5px solid ${child.gender === g.id ? RED : BORDER}`,
+                background: child.gender === g.id ? `${RED}08` : WHITE,
+                color: child.gender === g.id ? RED : MID, fontWeight: 600, fontSize: "0.82rem", fontFamily: sans,
+              }}>{g.label}</button>
             ))}
           </div>
         </div>
       ))}
       <button type="button" onClick={add} style={{
         display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-        padding: "12px 0", borderRadius: 10, border: `1.5px dashed ${BORDER}`,
-        background: "none", color: MID, fontWeight: 600, fontSize: "1.03rem", cursor: "pointer",
+        padding: "12px 0", borderRadius: 12, border: `1px dashed ${BORDER}`,
+        background: "none", color: MID, fontWeight: 600, fontSize: "0.88rem", cursor: "pointer", fontFamily: sans,
       }}><Plus size={15} /> Add a child</button>
     </div>
   );
@@ -80,9 +111,9 @@ function QuestionField({ q, value, onChange, children, onChildrenChange }: {
   children?: Child[]; onChildrenChange?: (c: Child[]) => void;
 }) {
   const fieldStyle: React.CSSProperties = {
-    width: "100%", border: `1.5px solid ${BORDER}`, borderRadius: 10,
-    padding: "12px 15px", fontSize: "1.1rem", outline: "none",
-    background: WHITE, color: INK, fontFamily: "inherit",
+    width: "100%", border: `1px solid ${BORDER}`, borderRadius: 12,
+    padding: "12px 14px", fontSize: "0.95rem", outline: "none",
+    background: WHITE, color: INK, fontFamily: sans,
     boxSizing: "border-box",
   };
 
@@ -92,10 +123,10 @@ function QuestionField({ q, value, onChange, children, onChildrenChange }: {
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       {["Yes", "No", "Not sure"].map(opt => (
         <button key={opt} type="button" onClick={() => onChange(opt)} style={{
-          padding: "9px 22px", borderRadius: 8, cursor: "pointer",
+          padding: "10px 20px", borderRadius: 24, cursor: "pointer",
           border: `1.5px solid ${value === opt ? RED : BORDER}`,
-          background: value === opt ? `${RED}10` : WHITE,
-          color: value === opt ? RED : MID, fontWeight: 600, fontSize: "1.06rem",
+          background: value === opt ? `${RED}08` : WHITE,
+          color: value === opt ? RED : MID, fontWeight: 600, fontSize: "0.88rem", fontFamily: sans,
         }}>{opt}</button>
       ))}
     </div>
@@ -107,21 +138,6 @@ function QuestionField({ q, value, onChange, children, onChildrenChange }: {
   );
 
   return <input placeholder={q.placeholder} value={value} onChange={e => onChange(e.target.value)} style={fieldStyle} />;
-}
-
-/* ── Avatar ────────────────────────────────────────────────────── */
-function Avatar({ name, size = 52 }: { name: string; size?: number }) {
-  const initials = name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: "50%", background: INK, flexShrink: 0,
-      display: "flex", alignItems: "center", justifyContent: "center",
-    }}>
-      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: size * 0.34, color: WHITE, letterSpacing: "0.04em" }}>
-        {initials}
-      </span>
-    </div>
-  );
 }
 
 /* ── Low-context detection ──────────────────────────────────────── */
@@ -163,8 +179,6 @@ export default function BriefingPage() {
   const existingCardId = (() => {
     if (!isRewrite || !recipient) return null;
     const serverUserId = getServerUserId();
-    // Use the same filter as cards-review.tsx so the found ID is guaranteed
-    // to actually appear in the review queue (avoiding a ?id= miss → wrong card shown).
     const card = getCards().find(c =>
       String(c.recipientId) === String(recipient.id) &&
       c.holiday === eventName &&
@@ -174,8 +188,6 @@ export default function BriefingPage() {
     return card?.id ?? null;
   })();
 
-  // If a card is already ready/approved for this event, skip the write flow entirely
-  // (unless the user explicitly chose to start fresh via ?rewrite=1)
   useEffect(() => {
     if (!recipient || isEditing || isRewrite) return;
     const existing = getCards().find(
@@ -196,13 +208,14 @@ export default function BriefingPage() {
   const hasBriefingAnswers = Object.values(answers).some(v => v.trim().length > 5);
 
   if (!recipient) return (
-    <div style={{ minHeight: "100vh", background: BEIGE }}>
-      <AppNav />
-      <div style={{ padding: 32, textAlign: "center" }}>
-        <p style={{ color: MID }}>Recipient not found.</p>
-        <Link href="/people" style={{ color: RED, fontSize: "1.06rem", display: "block", marginTop: 8 }}>Back to your people</Link>
+    <AppShell>
+      <div style={{ padding: 32, textAlign: "center", fontFamily: sans }}>
+        <p style={{ color: MID }}>We couldn&apos;t find this person.</p>
+        <Link href="/people" style={{ color: SAGE, fontSize: "0.95rem", display: "block", marginTop: 12, textDecoration: "none", fontWeight: 600 }}>
+          Back to your people
+        </Link>
       </div>
-    </div>
+    </AppShell>
   );
 
   function setAnswer(key: string, value: string) { setAnswers(prev => ({ ...prev, [key]: value })); }
@@ -230,7 +243,6 @@ export default function BriefingPage() {
   async function handleSubmit(skipGate = false) {
     if (!recipient) return;
 
-    // Gate: if no stored context and no briefing answers, ask for one real detail
     if (!skipGate && !isEditing && !recipientHasStoredContext(recipient) && !hasBriefingAnswers) {
       setShowDetailGate(true);
       return;
@@ -282,7 +294,6 @@ export default function BriefingPage() {
       const generated = data.cards ?? [];
       if (generated.length > 0) {
         const match = generated.find(c => c.tone === recipient.tonePreference) ?? generated[0];
-        // In rewrite mode, remove the previous card for this event so there's only one
         if (isRewrite) {
           const prev = getCards().find(
             c => String(c.recipientId) === String(recipient.id) &&
@@ -299,7 +310,6 @@ export default function BriefingPage() {
         };
         saveCard(newCard);
         setGeneratedCardId(newCard.id);
-        // In rewrite mode, go straight to the card review — no "Briefing Saved" screen
         if (isRewrite) {
           setLocation(`/cards/review?id=${newCard.id}`);
           return;
@@ -312,44 +322,43 @@ export default function BriefingPage() {
   /* ── Success state ──────────────────────────────────────────── */
   if (submitted) {
     return (
-      <div style={{ minHeight: "100vh", background: BEIGE, display: "flex", flexDirection: "column" }}>
-        <AppNav />
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 24px" }}>
-          <div style={{ textAlign: "center", maxWidth: 420 }}>
-            <div style={{
-              width: 72, height: 72, borderRadius: "50%", margin: "0 auto 20px",
-              background: generating ? `${RED}12` : `${SAGE}18`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              {generating
-                ? <Loader2 size={30} style={{ color: RED }} className="animate-spin" />
-                : <CheckCircle2 size={30} style={{ color: SAGE }} />
-              }
-            </div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", letterSpacing: "0.03em", color: INK, margin: "0 0 10px", lineHeight: 1.05 }}>
-              {generating ? "Writing the card…" : generatedCardId ? "Card ready for review" : "Briefing saved"}
+      <AppShell>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 24px", minHeight: "60vh", fontFamily: sans }}>
+          <SoftCard style={{ textAlign: "center", maxWidth: 420, padding: "40px 32px" }}>
+            {generating ? (
+              <div style={{ margin: "0 auto 20px" }}>
+                <LoadingWritingIllustration />
+              </div>
+            ) : (
+              <div style={{ margin: "0 auto 20px" }}>
+                <LoadingSuccessIllustration />
+              </div>
+            )}
+            <h2 style={{ fontFamily: serif, fontSize: "1.65rem", fontWeight: 600, color: INK, margin: "0 0 12px", lineHeight: 1.25 }}>
+              {generating ? "Writing the card…" : generatedCardId ? "Your card is ready" : "We're all set"}
             </h2>
-            <p style={{ color: MID, fontSize: "1.15rem", lineHeight: 1.6, marginBottom: 28 }}>
+            <p style={{ color: MID, fontSize: "0.95rem", lineHeight: 1.6, marginBottom: 28 }}>
               {generating
-                ? `Using everything we know about ${recipient.name}.`
+                ? `Using everything we know about ${recipient.name}. This only takes a moment.`
                 : generatedCardId
-                  ? `We wrote ${recipient.name}'s ${eventName} card. Read it over and approve when you're happy.`
-                  : `We have everything we need for ${recipient.name}'s ${eventName} card.`
+                  ? `We wrote ${recipient.name}'s ${eventName} card. Read it over and approve when it feels right.`
+                  : `We have what we need for ${recipient.name}'s ${eventName} card.`
               }
             </p>
             {!generating && (
-              <button onClick={() => setLocation(generatedCardId ? `/cards/review?id=${generatedCardId}` : "/dashboard")}
-                style={{ width: "100%", background: RED, color: WHITE, border: "none", borderRadius: 12, padding: "16px 0", fontWeight: 700, fontSize: "1.19rem", cursor: "pointer" }}>
-                {generatedCardId ? "Review the card →" : "Back to dashboard →"}
-              </button>
+              <PrimaryBtn
+                onClick={() => setLocation(generatedCardId ? `/cards/review?id=${generatedCardId}` : "/dashboard")}
+                style={{ width: "100%" }}
+              >
+                {generatedCardId ? "Review the card" : "Back to home"}
+              </PrimaryBtn>
             )}
-          </div>
+          </SoftCard>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
-  /* ── What we know chips ─────────────────────────────────────── */
   const chips: string[] = [
     ...(recipient.interests ?? []),
     ...(recipient.personality ?? []),
@@ -360,148 +369,154 @@ export default function BriefingPage() {
 
   const hasChildrenQ    = allQuestions.some(q => q.type === "children");
   const childrenSummStr = childrenSummary(editedChildren);
+  const answeredCount   = questions.filter(q => q.type !== "children" && (answers[q.key] ?? "").trim().length > 0).length;
 
   return (
-    <div style={{ minHeight: "100vh", background: BEIGE }}>
-      <AppNav />
+    <AppShell>
+      <PageShell>
 
-      <div style={{ maxWidth: 580, margin: "0 auto", padding: "0 20px 80px" }}>
-
-        {/* ── Back ─────────────────────────────────────────────── */}
+        {/* Back */}
         <div style={{ padding: "16px 0 0" }}>
           <Link href={`/relationship/${recipient.id}`}>
-            <button style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, color: MID, fontSize: "1.03rem", fontWeight: 500, padding: 0 }}>
-              <ArrowLeft size={16} /> Back
+            <button type="button" style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: MID, fontSize: "0.88rem", fontWeight: 500, padding: 0, fontFamily: sans }}>
+              <ArrowLeft size={16} /> Back to {recipient.name}
             </button>
           </Link>
         </div>
 
-        {/* ── Person hero ──────────────────────────────────────── */}
-        <div style={{ padding: "28px 0 24px", textAlign: "center" }}>
-          <Avatar name={recipient.name} size={72} />
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(2.38rem, 7.5vw, 3.13rem)", letterSpacing: "0.03em", color: INK, margin: "14px 0 6px", lineHeight: 1 }}>
-            {isRewrite ? `Make it more personal?` : `${recipient.name}'s ${eventName} Card`}
+        {/* Person + occasion hero */}
+        <div style={{ padding: "28px 0 20px", textAlign: "center" }}>
+          <PersonAvatar name={recipient.name} size={64} />
+          <h1 style={{ fontFamily: serif, fontSize: "clamp(1.65rem, 5vw, 2rem)", fontWeight: 600, color: INK, margin: "16px 0 8px", lineHeight: 1.25 }}>
+            {isRewrite ? `Make it even more personal?` : `${recipient.name}'s ${eventName} card`}
           </h1>
-          <p style={{ color: MID, fontSize: "1.16rem", margin: "0 0 16px", lineHeight: 1.5 }}>
+          <p style={{ color: MID, fontSize: "0.95rem", margin: "0 0 16px", lineHeight: 1.55, maxWidth: 440, marginLeft: "auto", marginRight: "auto" }}>
             {isRewrite
-              ? `We already wrote ${recipient.name}'s ${eventName} card. Answer a question or two below and we'll rewrite it — or skip straight to the card.`
-              : `${recipient.relationship} · ${eventName} · ${new Date().getFullYear()}`
+              ? `We already drafted ${recipient.name}'s ${eventName} card. Share a detail below and we'll weave it in — or skip straight to the card.`
+              : `Help us make the next card sound even more like you. This only takes a few seconds.`
             }
           </p>
 
-          {/* Context chips */}
+          {!isRewrite && (
+            <p style={{ fontSize: "0.84rem", color: SAGE, margin: "0 0 16px", lineHeight: 1.5, fontWeight: 500 }}>
+              We&apos;ll remember what you share for future cards too.
+            </p>
+          )}
+
           {chips.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginBottom: 6 }}>
               {chips.map((chip, i) => (
                 <span key={i} style={{
-                  fontSize: "0.93rem", fontWeight: 500, color: SAGE,
-                  background: `${SAGE}14`, border: `1px solid ${SAGE}30`,
-                  padding: "4px 12px", borderRadius: 20,
+                  fontSize: "0.8rem", fontWeight: 500, color: SAGE,
+                  background: `${SAGE}10`, border: `1px solid ${SAGE}25`,
+                  padding: "4px 12px", borderRadius: 20, fontFamily: sans,
                 }}>{chip}</span>
               ))}
             </div>
           )}
           {hasChildrenQ && childrenAlreadyOnFile && childrenSummStr && (
-            <p style={{ fontSize: "1.06rem", color: MID, margin: "6px 0 0" }}>
-              Children on file: {childrenSummStr}
+            <p style={{ fontSize: "0.88rem", color: MID, margin: "8px 0 0" }}>
+              We already know about: {childrenSummStr}
             </p>
           )}
         </div>
 
-        {/* ── Primary CTA / Detail Gate ────────────────────────── */}
-        {showDetailGate ? (
-          <div style={{ background: WHITE, borderRadius: 16, padding: "24px 22px 20px", border: `1.5px solid ${RED}30`, marginBottom: 28 }}>
-            <p style={{ fontWeight: 700, fontSize: "1.06rem", color: INK, margin: "0 0 4px", lineHeight: 1.4 }}>
-              Before we write this card, tell us one real thing about {recipient.name} so it sounds like you.
+        {/* What happens next — calm reassurance */}
+        {!isRewrite && !showDetailGate && (
+          <SoftCard style={{ padding: "16px 18px", marginBottom: 24, background: `${SAGE}06`, border: `1px solid ${SAGE}18` }}>
+            <p style={{ fontSize: "0.88rem", color: INK, margin: 0, lineHeight: 1.55 }}>
+              <strong style={{ fontWeight: 600 }}>What happens next:</strong> We&apos;ll write a handwritten card for you to review. You can edit or approve it before anything is sent.
             </p>
-            <p style={{ fontSize: "0.9rem", color: MID, margin: "0 0 14px", lineHeight: 1.55 }}>
-              Something they did recently · a funny memory · an inside joke · something happening in their life right now · something they're proud of
+          </SoftCard>
+        )}
+
+        {/* Detail gate */}
+        {showDetailGate ? (
+          <SoftCard style={{ padding: "22px 20px", border: `1px solid ${RED}25`, marginBottom: 28 }}>
+            <p style={{ fontWeight: 600, fontSize: "1rem", color: INK, margin: "0 0 6px", lineHeight: 1.4, fontFamily: serif }}>
+              One quick thing about {recipient.name}
+            </p>
+            <p style={{ fontSize: "0.88rem", color: MID, margin: "0 0 14px", lineHeight: 1.55 }}>
+              A recent moment, a memory, an inside joke, or something happening in their life — anything that helps the card sound like you.
             </p>
             <textarea
               autoFocus
               value={oneDetailText}
               onChange={e => setOneDetailText(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleDetailAndGenerate(); }}
-              placeholder={`Example: ${recipient.name} finished their first marathon after training for six months.`}
+              placeholder={`${recipient.name} finished their first marathon after training for six months.`}
               rows={3}
               style={{
-                width: "100%", borderRadius: 9, border: `1.5px solid ${BORDER}`,
-                padding: "10px 13px", fontSize: "1rem", lineHeight: 1.55,
-                background: "#FAF7F4", resize: "none" as const, outline: "none",
-                fontFamily: "'Plus Jakarta Sans', sans-serif", color: INK,
+                width: "100%", borderRadius: 12, border: `1px solid ${BORDER}`,
+                padding: "12px 14px", fontSize: "0.95rem", lineHeight: 1.55,
+                background: CREAM, resize: "none" as const, outline: "none",
+                fontFamily: sans, color: INK,
                 boxSizing: "border-box" as const,
               }}
             />
-            <button
+            <PrimaryBtn
               onClick={handleDetailAndGenerate}
               disabled={!oneDetailText.trim() || savingDetail}
-              style={{
-                width: "100%", marginTop: 12,
-                background: oneDetailText.trim() ? RED : `${RED}50`,
-                color: WHITE, border: "none", borderRadius: 11,
-                padding: "15px 0", fontWeight: 700, fontSize: "1.1rem",
-                cursor: oneDetailText.trim() ? "pointer" : "default",
-              }}
+              style={{ width: "100%", marginTop: 12 }}
             >
               {savingDetail ? "Saving…" : "Use this and write the card"}
-            </button>
-          </div>
+            </PrimaryBtn>
+          </SoftCard>
         ) : isRewrite ? (
-          /* Rewrite mode: skip button goes straight to the existing card */
           <div style={{ textAlign: "center", marginBottom: 28 }}>
             {existingCardId && (
-              <button onClick={() => setLocation(`/cards/review?id=${existingCardId}`)} style={{
-                background: "none", border: `1.5px solid ${BORDER}`, borderRadius: 11,
-                padding: "12px 28px", fontWeight: 600, fontSize: "1rem",
-                color: MID, cursor: "pointer",
-              }}>
-                Skip — view card as-is →
-              </button>
+              <SecondaryBtn onClick={() => setLocation(`/cards/review?id=${existingCardId}`)}>
+                Skip — view card as-is
+              </SecondaryBtn>
             )}
           </div>
         ) : (
-          <div style={{ background: WHITE, borderRadius: 16, padding: "22px 22px 18px", border: `1px solid ${BORDER}`, marginBottom: 28 }}>
-            <button onClick={() => handleSubmit()} style={{
-              width: "100%", background: RED, color: WHITE, border: "none",
-              borderRadius: 11, padding: "16px 0", fontWeight: 700,
-              fontSize: "1.25rem", cursor: "pointer", letterSpacing: "0.01em",
-            }}>
-              Generate Card →
-            </button>
-            <p style={{ textAlign: "center", fontSize: "1.05rem", color: MID, margin: "10px 0 0" }}>
-              No details needed — we'll use what we already know.
+          <SoftCard style={{ padding: "20px", marginBottom: 28, textAlign: "center" as const }}>
+            <PrimaryBtn onClick={() => handleSubmit()} style={{ width: "100%" }}>
+              Write the card
+            </PrimaryBtn>
+            <p style={{ fontSize: "0.86rem", color: MID, margin: "12px 0 0", lineHeight: 1.5 }}>
+              No extra details needed — we&apos;ll use what we already know. You can always come back later.
             </p>
-          </div>
+          </SoftCard>
         )}
 
-        {/* ── Optional questions ────────────────────────────────── */}
+        {/* Optional conversation prompts */}
         {questions.length > 0 && (
           <>
-            {/* Section header */}
             <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.63rem", letterSpacing: "0.05em", color: INK, margin: "0 0 6px" }}>
-                {isRewrite ? "Answer to improve the card" : "Or answer a couple questions first"}
-              </p>
-              <p style={{ fontSize: "1.05rem", color: MID, margin: 0, lineHeight: 1.55 }}>
+              <h2 style={{ fontFamily: serif, fontSize: "1.2rem", fontWeight: 600, color: INK, margin: "0 0 8px" }}>
+                {isRewrite ? "Share a detail to improve the card" : "Or add a little more context"}
+              </h2>
+              <p style={{ fontSize: "0.9rem", color: MID, margin: 0, lineHeight: 1.55 }}>
                 {isRewrite
-                  ? "Fill in one or two and we'll rewrite it with your personal details."
-                  : <>We'll write it either way — but one or two answers here make it<br />sound like it came from you, not a template.</>
+                  ? "Answer one or two and we'll rewrite the card with your personal touch."
+                  : "Optional — but even one answer helps future cards feel more like you."
                 }
               </p>
+              {questions.length > 1 && answeredCount > 0 && (
+                <p style={{ fontSize: "0.8rem", color: SAGE, margin: "10px 0 0", fontWeight: 500 }}>
+                  {answeredCount} of {questions.filter(q => q.type !== "children").length} shared — nice work.
+                </p>
+              )}
             </div>
 
-            {/* Open-form questions */}
-            <div style={{ background: WHITE, borderRadius: 16, border: `1px solid ${BORDER}`, overflow: "hidden" }}>
+            <SoftCard style={{ overflow: "hidden", padding: 0 }}>
               {questions.map((q, idx) => (
                 <div key={q.key} style={{
-                  padding: "22px 24px",
+                  padding: "22px 22px",
                   borderBottom: idx < questions.length - 1 ? `1px solid ${BORDER}` : "none",
                 }}>
-                  <label style={{ display: "block", fontWeight: 700, fontSize: "1.14rem", color: INK, marginBottom: q.hint ? 4 : 12 }}>
+                  {questions.length > 1 && (
+                    <p style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.08em", color: MID, textTransform: "uppercase" as const, margin: "0 0 8px" }}>
+                      {idx + 1} of {questions.length}
+                    </p>
+                  )}
+                  <label style={{ display: "block", fontWeight: 600, fontSize: "1rem", color: INK, marginBottom: q.hint ? 6 : 12, lineHeight: 1.45, fontFamily: serif }}>
                     {q.question}
                   </label>
                   {q.hint && (
-                    <p style={{ fontSize: "1.05rem", color: MID, margin: "0 0 12px", lineHeight: 1.5 }}>{q.hint}</p>
+                    <p style={{ fontSize: "0.86rem", color: MID, margin: "0 0 12px", lineHeight: 1.5 }}>{q.hint}</p>
                   )}
                   <QuestionField
                     q={q} value={answers[q.key] ?? ""}
@@ -511,31 +526,18 @@ export default function BriefingPage() {
                   />
                 </div>
               ))}
-            </div>
+            </SoftCard>
 
-            {/* Bottom submit */}
-            <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-              <button onClick={handleSubmit} style={{
-                flex: 1, background: RED, color: WHITE, border: "none",
-                borderRadius: 12, padding: "16px 0", fontWeight: 700,
-                fontSize: "1.19rem", cursor: "pointer",
-              }}>
-                {isEditing ? "Save Changes →" : "Generate with these answers →"}
-              </button>
-              <Link href={`/relationship/${recipient.id}`}>
-                <button style={{
-                  padding: "16px 22px", borderRadius: 12, cursor: "pointer",
-                  border: `1.5px solid ${BORDER}`, background: "none",
-                  color: MID, fontWeight: 600, fontSize: "1.06rem",
-                }}>
-                  Cancel
-                </button>
-              </Link>
+            <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" as const }}>
+              <PrimaryBtn onClick={handleSubmit} style={{ flex: 1, minWidth: 200 }}>
+                {isEditing ? "Save and write the card" : "Write the card with these details"}
+              </PrimaryBtn>
+              <SecondaryBtn href={`/relationship/${recipient.id}`}>Come back later</SecondaryBtn>
             </div>
           </>
         )}
 
-      </div>
-    </div>
+      </PageShell>
+    </AppShell>
   );
 }

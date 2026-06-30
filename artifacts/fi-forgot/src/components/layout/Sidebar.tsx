@@ -10,9 +10,18 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { B, CircleStamp } from "@/components/brand";
+import { PB } from "@/lib/personal-brand";
 
-const BUSINESS_NAVY = "#0a1f3d";
+const CREAM  = PB.cream;
+const RED    = PB.red;
+const INK    = PB.ink;
+const MID    = PB.mid;
+const WHITE  = PB.white;
+const BORDER = PB.border;
+const SAGE   = PB.sage;
+
+const serif = "'Lora', Georgia, serif";
+const sans = "'Plus Jakarta Sans', sans-serif";
 
 const navItems = [
   { href: "/dashboard",          label: "Dashboard",  icon: LayoutDashboard },
@@ -45,56 +54,22 @@ export default function Sidebar() {
   }
 
   const NavContent = () => (
-    <div
-      className="flex flex-col h-full"
-      style={{ background: B.black }}
-    >
-      {/* ── Brand ─────────────────────────────────────────────────────────── */}
+    <div className="flex flex-col h-full" style={{ background: CREAM, fontFamily: sans }}>
+      {/* Brand */}
       <div
-        className="px-5 py-5 flex items-center gap-3"
-        style={{ borderBottom: `1px solid rgba(255,255,255,0.07)` }}
+        className="px-5 py-5"
+        style={{ borderBottom: `1px solid ${BORDER}` }}
       >
-        {/* Mini stamp logo */}
-        <div
-          style={{
-            display: "inline-flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            padding: "4px 8px",
-            border: `2px solid ${B.red}`,
-            borderRadius: 4,
-            lineHeight: 1,
-            opacity: 0.92,
-            gap: 1,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "1.25rem",
-              color: B.red,
-              letterSpacing: "0.06em",
-            }}
-          >
-            "F" I FORGOT
-          </span>
-          <span
-            style={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: "0.38rem",
-              fontWeight: 800,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase" as const,
-              color: "rgba(255,255,255,0.5)",
-            }}
-          >
-            Relationship Damage Control
-          </span>
+        <div style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 700, color: INK, letterSpacing: "0.02em" }}>
+          F.I. FORGOT
+        </div>
+        <div style={{ fontFamily: sans, fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.16em", color: MID, marginTop: 4 }}>
+          RELATIONSHIP CONCIERGE
         </div>
       </div>
 
-      {/* ── Nav items ──────────────────────────────────────────────────────── */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5" data-testid="sidebar-nav">
+      {/* Nav items */}
+      <nav className="flex-1 px-3 py-4 space-y-1" data-testid="sidebar-nav">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = location === href || location.startsWith(href + "/");
           return (
@@ -103,80 +78,50 @@ export default function Sidebar() {
               href={href}
               onClick={() => setMobileOpen(false)}
               data-testid={`nav-link-${label.toLowerCase().replace(/\s+/g, "-")}`}
+              style={{ textDecoration: "none" }}
             >
               <div
-                className="flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all cursor-pointer"
-                style={
-                  active
-                    ? {
-                        background: `${B.red}18`,
-                        color: B.white,
-                        borderLeft: `3px solid ${B.red}`,
-                        paddingLeft: "13px",
-                      }
-                    : {
-                        color: "rgba(255,255,255,0.48)",
-                        borderLeft: "3px solid transparent",
-                        paddingLeft: "13px",
-                      }
-                }
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer"
+                style={{
+                  background: active ? WHITE : "transparent",
+                  color: active ? INK : MID,
+                  border: `1px solid ${active ? BORDER : "transparent"}`,
+                  boxShadow: active ? "0 1px 8px rgba(31,31,31,0.05)" : "none",
+                  fontWeight: active ? 600 : 500,
+                }}
               >
                 <Icon
-                  size={16}
-                  style={{ color: active ? B.red : "rgba(255,255,255,0.35)", flexShrink: 0 }}
+                  size={18}
+                  style={{ color: active ? RED : MID, flexShrink: 0 }}
+                  strokeWidth={1.75}
                 />
-                <span
-                  style={{
-                    fontFamily: "'Bebas Neue', cursive",
-                    fontSize: "0.9rem",
-                    letterSpacing: "0.1em",
-                    color: active ? B.white : "rgba(255,255,255,0.48)",
-                  }}
-                >
-                  {label}
-                </span>
-                {active && (
-                  <span
-                    className="ml-auto"
-                    style={{
-                      fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.16em",
-                      color: B.red,
-                      textTransform: "uppercase" as const,
-                      opacity: 0.8,
-                    }}
-                  >
-                    ▶
-                  </span>
-                )}
+                <span style={{ fontSize: "0.88rem" }}>{label}</span>
               </div>
             </Link>
           );
         })}
       </nav>
 
-      {/* ── Workspace toggle ───────────────────────────────────────────────── */}
+      {/* Workspace toggle */}
       {(hasBusiness || true) && (
-        <div className="mx-3 mb-2">
-          <p style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: 6, paddingLeft: 4 }}>
+        <div className="mx-3 mb-3">
+          <p style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: MID, marginBottom: 8, paddingLeft: 4 }}>
             Workspace
           </p>
-          <div style={{ display: "flex", background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3, gap: 2 }}>
-            {/* Personal pill — always active here */}
-            <div style={{ flex: 1, padding: "7px 8px", borderRadius: 6, background: B.red, textAlign: "center", cursor: "default" }}>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.1em", color: "#fff" }}>
+          <div style={{ display: "flex", background: WHITE, borderRadius: 10, padding: 4, gap: 4, border: `1px solid ${BORDER}` }}>
+            <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: RED, textAlign: "center", cursor: "default" }}>
+              <span style={{ fontSize: "0.78rem", fontWeight: 600, color: WHITE, fontFamily: sans }}>
                 Personal
               </span>
             </div>
-            {/* Business pill */}
             <button
+              type="button"
               onClick={goToBusiness}
-              style={{ flex: 1, padding: "7px 8px", borderRadius: 6, background: "transparent", border: "none", textAlign: "center", cursor: "pointer", transition: "background 0.15s" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+              style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: "transparent", border: "none", textAlign: "center", cursor: "pointer", transition: "background 0.15s", fontFamily: sans }}
+              onMouseEnter={e => (e.currentTarget.style.background = `${INK}06`)}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.4)" }}>
+              <span style={{ fontSize: "0.78rem", fontWeight: 500, color: MID }}>
                 {businessWorkspace ? businessWorkspace.name.split(" ")[0] : "Business"}
               </span>
             </button>
@@ -184,101 +129,55 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* ── Autopilot status ───────────────────────────────────────────────── */}
+      {/* Quiet status */}
       <div
-        className="mx-3 mb-3 rounded-md px-4 py-3"
-        style={{
-          background: `${B.red}10`,
-          border: `1px solid ${B.red}25`,
-        }}
+        className="mx-3 mb-3 rounded-xl px-4 py-3"
+        style={{ background: `${SAGE}10`, border: `1px solid ${SAGE}25` }}
       >
         <div className="flex items-center gap-2">
           <span
-            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-            style={{ background: "#4ade80", boxShadow: "0 0 4px #4ade80" }}
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{ background: SAGE }}
           />
-          <span
-            style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "0.7rem",
-              letterSpacing: "0.14em",
-              color: "rgba(255,255,255,0.7)",
-            }}
-          >
-            Autopilot Online
+          <span style={{ fontSize: "0.82rem", fontWeight: 600, color: INK, fontFamily: sans }}>
+            Everything is on track
           </span>
         </div>
-        <div
-          style={{
-            fontFamily: "'Caveat', cursive",
-            fontSize: "0.72rem",
-            color: "rgba(255,255,255,0.35)",
-            marginTop: 2,
-            lineHeight: 1.3,
-          }}
-        >
-          Crisis level: Low
-        </div>
+        <p style={{ fontSize: "0.78rem", color: MID, margin: "6px 0 0", lineHeight: 1.45, fontFamily: sans }}>
+          We're quietly handling your occasions.
+        </p>
       </div>
 
-      {/* ── Decorative stamp ───────────────────────────────────────────────── */}
-      <div className="flex items-center justify-center py-3 opacity-20">
-        <CircleStamp type="averted" size={48} color={B.red} />
-      </div>
-
-      {/* ── User + logout ──────────────────────────────────────────────────── */}
-      <div
-        className="px-4 py-4"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-      >
+      {/* User + logout */}
+      <div className="px-4 py-4" style={{ borderTop: `1px solid ${BORDER}` }}>
         <div className="flex items-center gap-3 mb-3">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-            style={{
-              background: B.red,
-              color: B.white,
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "0.9rem",
-              border: `2px solid ${B.red}55`,
-            }}
+            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: `${RED}12`, color: RED, fontFamily: sans, fontSize: "0.85rem", fontWeight: 600 }}
           >
             {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
           </div>
           <div className="min-w-0 flex-1">
-            <div
-              className="text-xs font-semibold truncate"
-              style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.75rem" }}
-            >
+            <div className="text-sm font-semibold truncate" style={{ color: INK, fontSize: "0.85rem", fontFamily: sans }}>
               {user?.name ?? "User"}
             </div>
-            <div
-              style={{
-                fontFamily: "'Caveat', cursive",
-                fontSize: "0.65rem",
-                color: "rgba(255,255,255,0.3)",
-              }}
-            >
-              Relationship Autopilot
+            <div style={{ fontSize: "0.75rem", color: MID, marginTop: 2, fontFamily: sans }}>
+              Personal workspace
             </div>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.35)" }}
+          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all"
+          style={{ color: MID, background: "transparent", border: "none", cursor: "pointer", fontFamily: sans }}
+          onMouseEnter={e => (e.currentTarget.style.background = `${INK}06`)}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           data-testid="btn-logout"
         >
-          <LogOut size={13} />
-          <span
-            style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "0.75rem",
-              letterSpacing: "0.12em",
-            }}
-          >
-            Sign Out
-          </span>
+          <LogOut size={15} />
+          <span style={{ fontSize: "0.85rem", fontWeight: 500 }}>Sign out</span>
         </button>
       </div>
     </div>
@@ -286,57 +185,60 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
+      {/* Desktop sidebar */}
       <aside
-        className="hidden md:flex flex-col w-56 min-h-screen flex-shrink-0"
-        style={{ background: B.black }}
+        className="hidden md:flex flex-col w-60 min-h-screen flex-shrink-0"
+        style={{ background: CREAM, borderRight: `1px solid ${BORDER}` }}
       >
         <NavContent />
       </aside>
 
-      {/* ── Mobile hamburger ────────────────────────────────────────────────── */}
+      {/* Mobile header */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-14"
-        style={{ background: B.black, borderBottom: `2px solid ${B.red}` }}
+        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4"
+        style={{
+          background: "rgba(250,247,244,0.94)",
+          backdropFilter: "blur(10px)",
+          borderBottom: `1px solid ${BORDER}`,
+          height: 56,
+          fontFamily: sans,
+        }}
       >
-        <div
-          style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "1.1rem",
-            letterSpacing: "0.06em",
-            color: B.red,
-          }}
-        >
-          "F" I FORGOT
+        <div>
+          <div style={{ fontFamily: serif, fontSize: "1.1rem", fontWeight: 700, color: INK }}>
+            F.I. FORGOT
+          </div>
         </div>
         <button
+          type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ color: "rgba(255,255,255,0.7)" }}
+          style={{ color: INK, background: "none", border: "none", cursor: "pointer", padding: 4 }}
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
-      {/* ── Mobile drawer ────────────────────────────────────────────────────── */}
+      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-40">
           <div
             className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.6)" }}
+            style={{ background: "rgba(31,31,31,0.25)" }}
             onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
           />
           <aside
-            className="absolute top-0 left-0 bottom-0 w-64 flex flex-col"
-            style={{ background: B.black }}
+            className="absolute top-0 left-0 bottom-0 w-72 flex flex-col"
+            style={{ background: CREAM, borderRight: `1px solid ${BORDER}`, boxShadow: "4px 0 24px rgba(31,31,31,0.08)" }}
           >
             <NavContent />
           </aside>
         </div>
       )}
 
-      {/* ── Mobile top spacer ────────────────────────────────────────────────── */}
-      <div className="md:hidden h-14" />
+      {/* Mobile top spacer */}
+      <div className="md:hidden" style={{ height: 56 }} />
     </>
   );
 }

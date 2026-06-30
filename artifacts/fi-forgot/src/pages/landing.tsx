@@ -1,17 +1,31 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties, type ReactNode } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import {
-  B,
-  BrandButton,
-  StickyNote,
-  SectionDivider,
-  CtaBanner,
-  TaglineBar,
-  SectionHeading,
-} from "@/components/brand";
+  ChevronDown, ChevronUp, ChevronRight, Menu, X, Lock, Pencil, Users, Shield,
+  Play, Heart, Cake, Gift, TreePine, Star, Mail, MoreHorizontal,
+  MessageCircle, FolderHeart, Send, Coffee, Instagram, Facebook,
+} from "lucide-react";
+import { PB } from "@/lib/personal-brand";
+
+// ─── Tokens (homepage) ────────────────────────────────────────────────────────
+
+const C = {
+  cream: PB.cream,
+  blush: "#FDF6F3",
+  red: PB.red,
+  ink: PB.ink,
+  mid: PB.mid,
+  white: PB.white,
+  border: PB.border,
+  stickyYellow: "#FFF9E6",
+  stickyBlue: "#EEF4FF",
+  softShadow: "0 2px 16px rgba(31,31,31,0.06)",
+} as const;
+
+const serif = "'Lora', Georgia, serif";
+const sans = "'Plus Jakarta Sans', sans-serif";
+const hand = "'Caveat', cursive";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -22,968 +36,912 @@ const faqs = [
   { q: "What if I want to review it before it goes out?", a: "You choose your level of involvement: Full Autopilot (we handle everything), Preview First (we show you the message before mailing), or Require Approval (nothing ships without your sign-off). Most people start on Preview and switch to Autopilot once they trust it." },
   { q: "When does the card arrive?", a: "Cards go out about 7 days before the occasion — enough time to arrive, not so early it's strange. We track each person's mailing address and adjust for holidays and longer delivery windows automatically." },
   { q: "What occasions does it cover?", a: "Birthdays, anniversaries, Mother's Day, Father's Day, Valentine's Day, Christmas, Hanukkah, Thanksgiving, graduations, work anniversaries, 'just because' — and anything else you want to add. If it matters to someone you care about, it can go on the calendar." },
-  { q: "Can I add more people later?", a: "Yes. You can add recipients any time from your dashboard — family members, friends, coworkers, whoever matters. As long as you're within your plan's recipient limit, just add them and we handle everything from there." },
+  { q: "Can I add more people later?", a: "Yes. You can add people any time from your dashboard — family members, friends, coworkers, whoever matters. As long as you're within your plan's recipient limit, just add them and we handle everything from there." },
   { q: "Can I cancel anytime?", a: "Yes. No contracts, no commitments, no cancellation fees. Cancel from your dashboard in one click and you won't be charged again. If you cancel mid-month, you keep access until the end of the billing period." },
 ];
 
 const testimonials = [
-  { name: "Marcus T.", role: "Husband, 8 years", quote: `My wife cried reading the Mother's Day card. I pretended I wrote every word. "F" I Forgot is keeping my marriage intact.` },
-  { name: "James R.", role: "Son, perpetually forgetful", quote: "I forgot my mom's birthday three years in a row. Now she brags about what a thoughtful son I am. Life is good." },
-  { name: "Derek M.", role: "Boyfriend, 2 years", quote: `My girlfriend thinks I'm way more emotionally available than I actually am. "F" I Forgot is doing the Lord's work.` },
+  { name: "Melissa T.", role: "Mom of three", quote: "I used to lie awake wondering if I'd missed someone's birthday. Now I just know it's handled. My sister said my card made her cry — in the best way." },
+  { name: "James P.", role: "Husband, 12 years", quote: "My wife thinks I'm more thoughtful than I actually am. F.I. Forgot quietly makes sure the people I love never feel forgotten. That's worth everything." },
+  { name: "Sarah K.", role: "Daughter & friend", quote: "I set it up once for my parents and closest friends. The cards sound like me. Real cards, on time, every time. One less thing to carry in my head." },
 ];
 
 const plans = [
   {
-    name: "BARE MINIMUM", price: "$6", period: "/month",
-    description: "For the guy trying not to screw this up.",
-    highlight: false, badge: null,
-    btn: "START SAVING YOURSELF",
-    perks: ["6 cards per year", "1 recipient", "Birthday + anniversary coverage", "Personally written messages", "We print and mail them for you"],
+    name: "Essential",
+    price: "$6",
+    period: "/month",
+    description: "Start with one person who matters most.",
+    highlight: false,
+    perks: ["6 cards per year", "1 person", "Birthday + anniversary", "Personally written messages", "We print and mail for you"],
   },
   {
-    name: "DOMESTIC PEACEKEEPER", price: "$15", period: "/month",
-    description: "For wives, moms, kids, and damage control.",
-    highlight: true, badge: "MOST POPULAR",
-    btn: "KEEP THE PEACE",
-    perks: ["18 cards per year", "Up to 5 recipients", "All major occasions covered", "Full autopilot mode", "Personalized, heartfelt messages"],
+    name: "Family",
+    price: "$15",
+    period: "/month",
+    description: "For the people you never want to disappoint.",
+    highlight: true,
+    badge: "Most popular",
+    perks: ["18 cards per year", "Up to 5 people", "All major occasions", "Full autopilot available", "Warm, personal messages"],
   },
   {
-    name: "LEGEND STATUS", price: "$29", period: "/month",
-    description: "For the man determined to never sleep on the couch again.",
-    highlight: false, badge: null,
-    btn: "BECOME A LEGEND",
-    perks: ["40 cards per year", "Unlimited recipients", "Premium card styles", "Gift add-ons", "Emergency save mode", "Concierge reminders"],
+    name: "Everyone",
+    price: "$29",
+    period: "/month",
+    description: "For a full circle of people who matter.",
+    highlight: false,
+    perks: ["40 cards per year", "Unlimited people", "Premium card styles", "Gift add-ons", "Priority support"],
   },
 ];
 
-
-const cardExamples = [
-  {
-    label: "Birthday",
-    recipient: "Dad",
-    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1753826720255_hbd_tiered_cake_a_2_p_front.png",
-    inside: `You never made a big deal out of much — no speeches, no fuss — and somehow that taught me more than anything else ever did.
-
-Happy Birthday, Dad. I don't say it enough. But I mean it every single time I do.
-
-Love,\nMichael`,
-  },
-  {
-    label: "Birthday",
-    recipient: "Wife",
-    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1747262218835_blow_out_the_candles_a_2_front.png",
-    inside: `Another year of somehow making everything look effortless. Watching you do all of it — and still somehow show up for the rest of us — is the thing I'm most grateful for.
-
-Happy Birthday. I love you more than I'll ever say correctly out loud.
-
-Jake`,
-  },
-  {
-    label: "Anniversary",
-    recipient: "Wife, 12 Years",
-    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1726752517024_1710792136753_We%20Heart%20Working%20with%20You%20-%20Script-A2L%20-%20Front%20(1).png",
-    inside: `Twelve years in and I still reach for your hand without thinking. That probably says more than anything I could write in a card.
-
-Happy Anniversary. Let's do at least twelve more before we make any major decisions.
-
-All of me,\nTom`,
-  },
-  {
-    label: "Happy Holidays",
-    recipient: "Family",
-    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1747871147429_gather_together_a_2_front.png",
-    inside: `Some years the holidays feel like something to survive. This year I just want to feel all of it — the noise, the mess, the random hours and too much food and all of it.
-
-Wishing your whole house every bit of warmth it deserves.
-
-Happy Holidays — Sam & family`,
-  },
-  {
-    label: "Happy Holidays",
-    recipient: "Entire Team",
-    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1716229616296_Champagne%20-%20Front.png",
-    inside: `Another year in the books. Whatever it threw at us — and it threw a lot — you showed up every single time.
-
-Grateful for this team every day. Happy Holidays to all of you and everyone at your table.
-
-With appreciation,\nDavid`,
-  },
-  {
-    label: "Work Anniversary",
-    recipient: "Sarah, 3 Years",
-    imageUrl: "https://d3e924qpzqov0g.cloudfront.net/cardimages/1718213934189_New%20Favorite%20Client%20-%20Front.png",
-    inside: `Three years in and I still can't imagine this place without you. Thank you for every problem you solved before I even knew it existed — and for making the work feel lighter just by being here.
-
-We're genuinely lucky to have you.
-
-The team`,
-  },
+const occasions = [
+  { icon: Cake, label: "Birthdays" },
+  { icon: Heart, label: "Anniversaries" },
+  { icon: Gift, label: "Valentine's" },
+  { icon: TreePine, label: "Holidays" },
+  { icon: Star, label: "Milestones" },
+  { icon: Mail, label: "Just because" },
+  { icon: MoreHorizontal, label: "More" },
 ];
+
+const occasionGrid = [
+  "Mother's Day", "Father's Day", "Graduation", "New baby",
+  "New home", "Thank you", "Sympathy", "Congratulations",
+  "Work anniversary", "Get well", "Thinking of you", "Easter",
+];
+
+const stats = [
+  { icon: Heart, value: "10,000+", label: "Happy members" },
+  { icon: Pencil, value: "500,000+", label: "Cards written" },
+  { icon: Star, value: "99%", label: "Would recommend" },
+  { icon: Users, value: "100%", label: "Happiness goal" },
+];
+
+// ─── Small helpers (reused within this page) ────────────────────────────────
+
+function Container({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 20px", ...style }}>
+      {children}
+    </div>
+  );
+}
+
+function PrimaryButton({
+  href,
+  children,
+  testId,
+  style,
+}: {
+  href: string;
+  children: ReactNode;
+  testId?: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <Link
+      href={href}
+      data-testid={testId}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: C.red,
+        color: C.white,
+        fontFamily: sans,
+        fontSize: "0.95rem",
+        fontWeight: 600,
+        padding: "14px 28px",
+        borderRadius: 8,
+        textDecoration: "none",
+        border: "none",
+        cursor: "pointer",
+        boxShadow: "0 4px 14px rgba(226,59,46,0.25)",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        ...style,
+      }}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function TextButton({ href, children, onClick }: { href?: string; children: ReactNode; onClick?: () => void }) {
+  const style: CSSProperties = {
+    fontFamily: sans,
+    fontSize: "0.9rem",
+    fontWeight: 500,
+    color: C.ink,
+    textDecoration: "none",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: 0,
+  };
+  if (onClick) {
+    return <button type="button" onClick={onClick} style={style}>{children}</button>;
+  }
+  return <Link href={href!} style={style}>{children}</Link>;
+}
+
+function SoftCard({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <div style={{
+      background: C.white,
+      borderRadius: 14,
+      border: `1px solid ${C.border}`,
+      boxShadow: C.softShadow,
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function SectionEyebrow({ children }: { children: ReactNode }) {
+  return (
+    <p style={{
+      fontFamily: sans,
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      color: C.red,
+      margin: "0 0 12px",
+    }}>
+      {children}
+    </p>
+  );
+}
+
+function SectionTitle({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <h2 style={{
+      fontFamily: serif,
+      fontSize: "clamp(1.75rem, 4.5vw, 2.5rem)",
+      fontWeight: 600,
+      color: C.ink,
+      lineHeight: 1.2,
+      margin: 0,
+      ...style,
+    }}>
+      {children}
+    </h2>
+  );
+}
+
+function TimelineConnector() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0, color: C.mid, opacity: 0.45, alignSelf: "center",
+      }}
+    >
+      <ChevronRight size={22} strokeWidth={2} />
+    </div>
+  );
+}
+
+// ─── Dave hero illustration ───────────────────────────────────────────────────
+
+function DaveHeroIllustration() {
+  return (
+    <div style={{ width: "100%", minHeight: 320, aspectRatio: "4/3", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img
+        src="/assets/illustrations/homepage/001_homepage_hero_dave.webp"
+        alt="Illustration of Dave sitting in a wooden doghouse beside a calendar with April 27 circled, flowers, and a card that reads We've got you"
+        style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }}
+      />
+    </div>
+  );
+}
 
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
   const { isLoggedIn, logout } = useAuth();
-  const [cardSide, setCardSide] = useState<Record<number, "front" | "inside">>({});
-  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!lightboxImg) return;
-    const close = (e: KeyboardEvent) => { if (e.key === "Escape") setLightboxImg(null); };
-    document.addEventListener("keydown", close);
-    return () => document.removeEventListener("keydown", close);
-  }, [lightboxImg]);
+    if (!menuOpen) return;
+    const close = () => setMenuOpen(false);
+    window.addEventListener("resize", close);
+    return () => window.removeEventListener("resize", close);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!resourcesOpen) return;
+    const close = () => setResourcesOpen(false);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [resourcesOpen]);
+
+  const navLinks = [
+    { label: "How it works", href: "#how-it-works" },
+    { label: "How we learn", href: "#how-we-learn" },
+    { label: "Pricing", href: "#pricing" },
+    { label: "About us", href: "#about" },
+  ];
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: B.beige, color: B.black }}>
+    <div style={{ background: C.cream, color: C.ink, fontFamily: sans, minHeight: "100vh" }}>
 
-      {/* ── Desktop nav ──────────────────────────────────────────────────── */}
-      <nav className="hidden md:flex" style={{
+      {/* ── Navigation ───────────────────────────────────────────────────── */}
+      <header style={{
         position: "sticky", top: 0, zIndex: 50,
-        background: B.beige,
-        borderBottom: `1px solid ${B.black}1A`,
-        alignItems: "center",
-        padding: "0 32px 0 24px",
-        height: 96,
-        gap: 0,
+        background: "rgba(250,247,244,0.92)",
+        backdropFilter: "blur(8px)",
+        borderBottom: `1px solid ${C.border}`,
       }}>
-        {/* Logo */}
-        <Link href="/" style={{ textDecoration: "none", display: "flex", flexDirection: "column", marginRight: 40, flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 1 }}>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: B.red, fontStyle: "italic", letterSpacing: "0.01em" }}>F*</span>
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.6rem", color: B.black, letterSpacing: "0.04em", marginLeft: 8 }}>I FORGOT</span>
-          </div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.22em", color: B.gray, marginTop: -2, fontWeight: 900 }}>
-            RELATIONSHIP DAMAGE CONTROL
-          </div>
-        </Link>
-
-        {/* Nav links */}
-        <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
-          {[
-            { label: "HOW IT WORKS", href: "#how-it-works" },
-            { label: "PLANS",        href: "#pricing" },
-            { label: "EXAMPLES",     href: "#examples" },
-            { label: "REVIEWS",      href: "#reviews" },
-            { label: "FAQ",          href: "#faq" },
-          ].map(link => (
-            <a key={link.href} href={link.href}
-              style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap", opacity: 0.85 }}>
-              {link.label}
-            </a>
-          ))}
-          <Link href="/business"
-            style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "0 18px", whiteSpace: "nowrap" }}>
-            F*I FORGOT FOR BUSINESS
-          </Link>
-        </div>
-
-        {/* Right side: Sign in + CTA */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
-          {isLoggedIn ? (
-            <>
-              <button
-                onClick={() => logout()}
-                style={{ background: "none", border: "none", fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.1em", color: B.black, opacity: 0.5, cursor: "pointer", whiteSpace: "nowrap", padding: 0 }}>
-                SIGN OUT
-              </button>
-              <Link href="/dashboard"
-                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
-                MY DASHBOARD
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/login"
-                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.1em", color: B.black, textDecoration: "none", opacity: 0.75, whiteSpace: "nowrap" }}>
-                SIGN IN
-              </Link>
-              <Link href="/signup" data-testid="link-get-started-nav"
-                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", padding: "14px 22px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap", textAlign: "center" }}>
-                START EARNING<br />BROWNIE POINTS
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
-
-      {/* ── Mobile nav ────────────────────────────────────────────────────── */}
-      <nav className="md:hidden sticky top-0 z-50"
-        style={{ background: B.beige, borderBottom: `1px solid ${B.black}18` }}>
-        <div className="flex items-center justify-between" style={{ padding: "10px 16px" }}>
-          <Link href="/" style={{ textDecoration: "none", paddingLeft: 10 }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", color: B.black, lineHeight: 0.95 }}>
-              <span style={{ color: B.red, fontStyle: "italic" }}>F*</span>{" "}I FORGOT
-            </div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.58rem", letterSpacing: "0.18em", color: B.gray, marginTop: 2 }}>
-              RELATIONSHIP DAMAGE CONTROL
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            {isLoggedIn ? (
-              <Link href="/dashboard" data-testid="link-mobile-nav-cta"
-                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.64rem", letterSpacing: "0.07em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-                MY DASHBOARD
-              </Link>
-            ) : (
-              <Link href="/signup" data-testid="link-mobile-nav-cta"
-                style={{ background: B.red, color: "#fff", fontFamily: "'Bebas Neue', cursive", fontSize: "0.64rem", letterSpacing: "0.07em", padding: "7px 11px", borderRadius: 4, textDecoration: "none", lineHeight: 1.2, whiteSpace: "nowrap" }}>
-                SET IT AND FORGET IT
-              </Link>
-            )}
-            <button
-              onClick={() => setMenuOpen(o => !o)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              style={{ background: "none", border: "none", padding: "6px 4px", cursor: "pointer", color: B.black, display: "flex", alignItems: "center" }}>
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-          </div>
-        </div>
-
-
-        {menuOpen && (
-          <>
-          <div
-            onClick={() => setMenuOpen(false)}
-            style={{ position: "fixed", inset: 0, zIndex: -1 }}
-            aria-hidden="true"
-          />
-          <div style={{ background: B.beige, borderTop: `1px solid ${B.black}12`, padding: "8px 0 12px" }}>
-            {[
-              { label: "How It Works", href: "#how-it-works" },
-              { label: "Plans", href: "#pricing" },
-              { label: "Examples", href: "#examples" },
-              { label: "Reviews", href: "#reviews" },
-              { label: "FAQ", href: "#faq" },
-            ].map(link => (
-              <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
-                style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.12em", color: B.black, padding: "9px 20px", textDecoration: "none" }}>
-                {link.label}
-              </a>
-            ))}
-            <div style={{ borderTop: `1px solid ${B.black}12`, margin: "8px 20px 0", paddingTop: 8 }}>
-              <Link href="/business" onClick={() => setMenuOpen(false)}
-                style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, textDecoration: "none", padding: "8px 0" }}>
-                F*I FORGOT FOR BUSINESS
-                <span style={{ fontSize: "0.55rem", letterSpacing: "0.15em", background: B.red, color: "#fff", padding: "2px 6px", borderRadius: 2 }}>NEW</span>
-              </Link>
-              {isLoggedIn ? (
-                <>
-                  <Link href="/dashboard" onClick={() => setMenuOpen(false)}
-                    style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
-                    MY DASHBOARD
-                  </Link>
-                  <Link href="/recipients" onClick={() => setMenuOpen(false)}
-                    style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
-                    RECIPIENTS
-                  </Link>
-                  <button
-                    onClick={() => { setMenuOpen(false); logout(); }}
-                    style={{ display: "block", width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.red, padding: "6px 0" }}>
-                    SIGN OUT
-                  </button>
-                </>
-              ) : (
-                <Link href="/login" onClick={() => setMenuOpen(false)}
-                  style={{ display: "block", fontFamily: "'Bebas Neue', cursive", fontSize: "0.9rem", letterSpacing: "0.1em", color: B.gray, textDecoration: "none", padding: "6px 0" }}>
-                  SIGN IN
-                </Link>
-              )}
-            </div>
-          </div>
-          </>
-        )}
-      </nav>
-
-      {/* ── MOBILE HERO — top sky cropped, text over remaining sky ─────── */}
-      <section className="md:hidden" style={{ position: "relative", overflow: "hidden", lineHeight: 0 }}>
-
-        {/* Shift image up to crop ~65% of blank sky; overflow:hidden clips the top */}
-        <img
-          src="/hero-dave-mobile.png"
-          alt="Dave forgot birthdays. We fixed it. Real handwritten cards, automatically sent."
-          style={{ width: "100%", height: "auto", display: "block", marginTop: "-29%" }}
-        />
-
-        {/* Text overlay — headline + subheadline only, no CTA */}
-        <div style={{
-          position: "absolute",
-          top: "1%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "92%",
-          textAlign: "center",
-          lineHeight: "normal",
-        }}>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 7.5vw, 36px)",
-            color: B.black,
-            letterSpacing: "0.02em",
-            lineHeight: 0.95,
-          }}>
-            NEVER FORGET
-          </div>
-          <div style={{
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "clamp(26px, 7.5vw, 36px)",
-            color: B.red,
-            letterSpacing: "0.02em",
-            lineHeight: 0.95,
-            marginBottom: 4,
-          }}>
-            THE PEOPLE WHO MATTER
-          </div>
-          <p style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: "clamp(14px, 4vw, 16px)",
-            fontWeight: 500,
-            color: "#333",
-            lineHeight: 1.4,
-            margin: 0,
-          }}>
-            We write and mail real cards before you forget.
-          </p>
-        </div>
-
-      </section>
-
-      {/* ── DESKTOP HERO ─────────────────────────────────────────────────── */}
-      <section
-        aria-label="Hero"
-        className="hidden md:block"
-        style={{ position: "relative", overflow: "hidden", height: "calc(100vh - 96px)", minHeight: 560, maxHeight: 900 }}
-      >
-        {/* Background image — cream fade left, Dave/doghouse right */}
-        <img
-          src="/hero-desktop.png"
-          alt="F* I Forgot — Never forget the people who matter"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center right" }}
-        />
-
-        {/* Left-side overlay content */}
-        <div style={{
-          position: "absolute", inset: 0,
-          display: "flex", alignItems: "center",
-          paddingLeft: "clamp(40px, 6vw, 96px)",
-        }}>
-          <div style={{ maxWidth: "clamp(340px, 42vw, 580px)", display: "flex", flexDirection: "column", gap: 0 }}>
-
-            {/* Headline */}
-            <div style={{
-              fontFamily: "'Bebas Neue', cursive",
-              fontSize: "clamp(3.2rem, 6.5vw, 7.5rem)",
-              color: B.black,
-              letterSpacing: "0.01em",
-              lineHeight: 0.92,
-            }}>
-              NEVER FORGET<br />THE PEOPLE<br />
-              <span style={{ color: B.red }}>WHO MATTER</span>
-            </div>
-
-            {/* Subheadline */}
-            <p style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: "clamp(0.95rem, 1.35vw, 1.2rem)",
-              fontWeight: 500,
-              color: "#333",
-              lineHeight: 1.6,
-              margin: "clamp(14px, 2vw, 22px) 0 0",
-            }}>
-              We write, address, stamp, and mail real cards for you<br />before you forget.
-            </p>
-
-            {/* CTA */}
-            <Link href="/try" data-testid="link-cta-hitzone"
-              style={{
-                display: "inline-block",
-                marginTop: "clamp(16px, 2.2vw, 28px)",
-                alignSelf: "flex-start",
-                background: B.red,
-                color: "#fff",
-                fontFamily: "'Bebas Neue', cursive",
-                fontSize: "clamp(1rem, 1.5vw, 1.4rem)",
-                letterSpacing: "0.12em",
-                padding: "0.7em 1.6em",
-                borderRadius: 6,
-                textDecoration: "none",
-                boxShadow: "0 4px 20px rgba(226,59,46,0.35)",
-              }}>
-              GET STARTED TODAY
+        <Container>
+          <nav className="flex items-center justify-between" style={{ height: 72, gap: 16 }}>
+            {/* Logo */}
+            <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+              <div style={{ fontFamily: serif, fontSize: "1.35rem", fontWeight: 700, color: C.ink, letterSpacing: "0.02em" }}>
+                F.I. FORGOT
+              </div>
+              <div style={{ fontFamily: sans, fontSize: "0.58rem", fontWeight: 600, letterSpacing: "0.18em", color: C.mid, marginTop: 2 }}>
+                RELATIONSHIP CONCIERGE
+              </div>
             </Link>
 
-            {/* Three feature items */}
-            <div style={{
-              display: "flex",
-              gap: "clamp(16px, 2.5vw, 32px)",
-              marginTop: "clamp(22px, 3vw, 36px)",
-              maxWidth: "clamp(240px, 29vw, 400px)",
-            }}>
-              {/* Real Cards */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke={B.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="6" width="24" height="17" rx="2"/>
-                  <path d="M2 9l12 8 12-8"/>
-                </svg>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>Real Cards</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#333", lineHeight: 1.4 }}>Written by real people who care.</div>
-              </div>
-
-              {/* Never Miss */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke={B.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="22" height="22" rx="2"/>
-                  <path d="M19 2v4M9 2v4M3 10h22"/>
-                  <circle cx="9" cy="16" r="1.5" fill={B.red} stroke="none"/>
-                  <circle cx="14" cy="16" r="1.5" fill={B.red} stroke="none"/>
-                  <circle cx="19" cy="16" r="1.5" fill={B.red} stroke="none"/>
-                </svg>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>Never Miss</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#333", lineHeight: 1.4 }}>Birthdays, anniversaries, and important dates.</div>
-              </div>
-
-              {/* We Handle It All */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke={B.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 20h20v4H4z"/>
-                  <path d="M6 20v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8"/>
-                  <path d="M11 10V7a3 3 0 0 1 6 0v3"/>
-                  <path d="M14 14v3"/>
-                </svg>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)", letterSpacing: "0.08em", color: B.black }}>We Handle It All</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(0.7rem, 0.85vw, 0.82rem)", color: "#333", lineHeight: 1.4 }}>You approve, we mail, they smile.</div>
+            {/* Desktop links */}
+            <div className="hidden lg:flex items-center" style={{ gap: 28, flex: 1, justifyContent: "center" }}>
+              {navLinks.map(link => (
+                <a key={link.href} href={link.href}
+                  style={{ fontFamily: sans, fontSize: "0.88rem", fontWeight: 500, color: C.ink, textDecoration: "none", opacity: 0.85 }}>
+                  {link.label}
+                </a>
+              ))}
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setResourcesOpen(o => !o); }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 4,
+                    fontFamily: sans, fontSize: "0.88rem", fontWeight: 500,
+                    color: C.ink, background: "none", border: "none", cursor: "pointer", opacity: 0.85,
+                  }}
+                >
+                  Resources <ChevronDown size={14} />
+                </button>
+                {resourcesOpen && (
+                  <div style={{
+                    position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
+                    marginTop: 8, background: C.white, borderRadius: 10,
+                    border: `1px solid ${C.border}`, boxShadow: C.softShadow, padding: "8px 0", minWidth: 160,
+                  }}>
+                    <a href="#faq" onClick={() => setResourcesOpen(false)}
+                      style={{ display: "block", padding: "10px 18px", fontSize: "0.85rem", color: C.ink, textDecoration: "none" }}>
+                      FAQ
+                    </a>
+                    <Link href="/try" onClick={() => setResourcesOpen(false)}
+                      style={{ display: "block", padding: "10px 18px", fontSize: "0.85rem", color: C.ink, textDecoration: "none" }}>
+                      Try it free
+                    </Link>
+                    <Link href="/business" onClick={() => setResourcesOpen(false)}
+                      style={{ display: "block", padding: "10px 18px", fontSize: "0.85rem", color: C.ink, textDecoration: "none" }}>
+                      For business
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
 
+            {/* Desktop actions */}
+            <div className="hidden lg:flex items-center" style={{ gap: 16, flexShrink: 0 }}>
+              {isLoggedIn ? (
+                <>
+                  <TextButton onClick={() => logout()}>Sign out</TextButton>
+                  <PrimaryButton href="/dashboard" testId="link-get-started-nav">My dashboard</PrimaryButton>
+                </>
+              ) : (
+                <>
+                  <TextButton href="/login">Log in</TextButton>
+                  <PrimaryButton href="/signup" testId="link-get-started-nav">Get started free</PrimaryButton>
+                </>
+              )}
+            </div>
+
+            {/* Mobile menu toggle */}
+            <button
+              type="button"
+              className="lg:hidden"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              style={{ background: "none", border: "none", cursor: "pointer", color: C.ink, padding: 4 }}
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </nav>
+        </Container>
+
+        {menuOpen && (
+          <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 0 20px", background: C.cream }}>
+            <Container>
+              {navLinks.map(link => (
+                <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
+                  style={{ display: "block", padding: "12px 0", fontSize: "1rem", fontWeight: 500, color: C.ink, textDecoration: "none" }}>
+                  {link.label}
+                </a>
+              ))}
+              <a href="#faq" onClick={() => setMenuOpen(false)}
+                style={{ display: "block", padding: "12px 0", fontSize: "1rem", fontWeight: 500, color: C.ink, textDecoration: "none" }}>
+                FAQ
+              </a>
+              <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 12, paddingTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                {isLoggedIn ? (
+                  <>
+                    <PrimaryButton href="/dashboard" testId="link-mobile-nav-cta">My dashboard</PrimaryButton>
+                    <TextButton onClick={() => { setMenuOpen(false); logout(); }}>Sign out</TextButton>
+                  </>
+                ) : (
+                  <>
+                    <PrimaryButton href="/signup" testId="link-mobile-nav-cta">Get started free</PrimaryButton>
+                    <TextButton href="/login">Log in</TextButton>
+                  </>
+                )}
+              </div>
+            </Container>
           </div>
-        </div>
-      </section>
+        )}
+      </header>
 
-      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ background: B.beige }}>
-        {/* Desktop */}
-        <img
-          className="hidden md:block"
-          src="/how-it-works.png"
-          alt="How it works: We remember, We get to know them, We pick the perfect card, We write it for you, We send it on time, You get all the credit"
-          style={{ width: "100%", height: "auto" }}
-        />
-        {/* Mobile: square step panels */}
-        <div className="md:hidden flex flex-col">
-          {[
-            { n: 1, alt: "Step 1: We Remember" },
-            { n: 2, alt: "Step 2: We Get to Know Them" },
-            { n: 3, alt: "Step 3: We Pick the Perfect Card" },
-            { n: 4, alt: "Step 4: We Write It For You" },
-            { n: 5, alt: "Step 5: We Deliver It To Them" },
-            { n: 6, alt: "Step 6: You Get All the Credit" },
-          ].map(({ n, alt }) => (
-            <img key={n} src={`/hiw_mobile/step-${n}.png`} alt={alt} style={{ width: "100%", height: "auto", display: "block" }} />
-          ))}
-        </div>
-      </section>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section style={{ padding: "48px 0 64px" }}>
+        <Container>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p style={{
+                fontFamily: serif,
+                fontSize: "clamp(1.2rem, 3vw, 1.45rem)",
+                fontWeight: 600,
+                lineHeight: 1.35,
+                color: C.ink,
+                margin: "0 0 10px",
+                maxWidth: 480,
+              }}>
+                You don't have to worry about forgetting the people you love anymore.
+              </p>
+              <p style={{
+                fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
+                lineHeight: 1.6,
+                color: C.mid,
+                margin: "0 0 24px",
+                maxWidth: 480,
+              }}>
+                Life gets busy. Dates slip by. We quietly remember what matters—so everyone important feels remembered.
+              </p>
+              <h1 style={{
+                fontFamily: serif,
+                fontSize: "clamp(1.65rem, 4vw, 2.35rem)",
+                fontWeight: 600,
+                lineHeight: 1.2,
+                color: C.ink,
+                margin: "0 0 16px",
+              }}>
+                We quietly learn the people who matter—{" "}
+                <span style={{ color: C.red }}>so every card feels like you.</span>{" "}
+                <span aria-hidden="true">♥</span>
+              </h1>
+              <p style={{
+                fontSize: "clamp(1rem, 2vw, 1.125rem)",
+                lineHeight: 1.65,
+                color: C.mid,
+                margin: "0 0 28px",
+                maxWidth: 480,
+              }}>
+                We check in every now and then, remember the little things, and write beautiful, handwritten cards for any occasion.
+              </p>
 
-      {/* ── STOP FORGETTING BANNER ───────────────────────────────────────── */}
-      <div style={{ position: "relative", lineHeight: 0 }}>
-        <img src="/stop-forgetting.png" alt="Stop Forgetting. Start Earning Brownie Points."
-          style={{ width: "100%", height: "auto", display: "block" }} />
-        <Link href="/signup" data-testid="link-cta-banner"
-          style={{ position: "absolute", top: "10%", right: "2%", width: "18%", height: "80%", display: "block", cursor: "pointer" }} />
-      </div>
-
-      {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
-      <section id="reviews" className="py-24 px-6" style={{ background: "#1a1008" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-
-          {/* Header */}
-          <div className="text-center mb-16">
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(2.8rem, 6vw, 5rem)", letterSpacing: "0.06em", color: B.white, lineHeight: 1 }}>
-              MEN WHO SURVIVED
-            </div>
-            <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: "rgba(255,255,255,0.5)", marginTop: 10 }}>
-              Real stories. Changed names. Relationships still intact.
-            </div>
-          </div>
-
-          {/* Testimonial cards */}
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <div
-                key={t.name}
-                style={{
-                  background: i === 1 ? B.red : "#2a1f12",
-                  borderRadius: 12,
-                  padding: "36px 32px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 20,
-                  transform: i === 0 ? "rotate(-1deg)" : i === 2 ? "rotate(1deg)" : "none",
-                  boxShadow: i === 1 ? `0 16px 48px rgba(226,59,46,0.35)` : "0 8px 32px rgba(0,0,0,0.4)",
-                }}
-              >
-                {/* Big open-quote mark */}
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "5rem", lineHeight: 0.7, color: i === 1 ? "rgba(255,255,255,0.3)" : B.red, userSelect: "none" }}>
-                  "
-                </div>
-
-                {/* Quote text */}
-                <p style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
-                  color: i === 1 ? "#fff" : "rgba(255,255,255,0.9)",
-                  lineHeight: 1.65,
-                  margin: 0,
-                  flex: 1,
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center", marginBottom: 32 }}>
+                {isLoggedIn ? (
+                  <PrimaryButton href="/dashboard" testId="link-cta-hitzone">Go to dashboard</PrimaryButton>
+                ) : (
+                  <PrimaryButton href="/signup" testId="link-cta-hitzone">Get started free</PrimaryButton>
+                )}
+                <Link href="/try" style={{
+                  display: "inline-flex", alignItems: "center", gap: 10,
+                  textDecoration: "none", color: C.ink, fontWeight: 600, fontSize: "0.95rem",
                 }}>
-                  {t.quote}
-                </p>
+                  <span style={{
+                    width: 40, height: 40, borderRadius: "50%",
+                    background: C.red, display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Play size={16} color="#fff" fill="#fff" style={{ marginLeft: 2 }} />
+                  </span>
+                  See how it works
+                </Link>
+              </div>
 
-                {/* Stars + attribution */}
-                <div>
-                  <div className="flex gap-1 mb-3">
-                    {[...Array(5)].map((_, j) => (
-                      <span key={j} style={{ color: i === 1 ? "rgba(255,255,255,0.8)" : B.red, fontSize: "1rem" }}>★</span>
-                    ))}
+              {/* Trust bar */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: 16,
+              }}>
+                {[
+                  { icon: Lock, text: "Secure & private" },
+                  { icon: Pencil, text: "Handwritten & mailed in the USA" },
+                  { icon: Users, text: "10,000+ happy members" },
+                  { icon: Shield, text: "You're always in control" },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <Icon size={16} color={C.red} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ fontSize: "0.78rem", lineHeight: 1.4, color: C.mid }}>{text}</span>
                   </div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.1em", color: i === 1 ? "#fff" : B.white }}>
-                    {t.name}
+                ))}
+              </div>
+            </div>
+
+            <DaveHeroIllustration />
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Occasions selector ───────────────────────────────────────────── */}
+      <section style={{ padding: "56px 0", background: C.white }}>
+        <Container>
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <SectionTitle>For all of life's moments— big and small.</SectionTitle>
+              <p style={{ fontSize: "1rem", lineHeight: 1.65, color: C.mid, marginTop: 16 }}>
+                Birthdays. Anniversaries. Holidays. Valentine's Day. Milestones. Just because. We've got it.
+              </p>
+            </div>
+            <div style={{
+              display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "center",
+            }}>
+              {occasions.map(({ icon: Icon, label }) => (
+                <div key={label} style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                  padding: "16px 12px", minWidth: 72,
+                }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: 14,
+                    background: C.blush, border: `1px solid ${C.border}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Icon size={24} color={C.red} strokeWidth={1.75} />
                   </div>
-                  <div style={{ fontSize: "0.82rem", color: i === 1 ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.45)", marginTop: 2 }}>
-                    {t.role}
-                  </div>
+                  <span style={{ fontSize: "0.72rem", fontWeight: 500, color: C.mid, textAlign: "center" }}>{label}</span>
                 </div>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Process timeline ─────────────────────────────────────────────── */}
+      <section id="how-we-learn" style={{ padding: "64px 0", background: C.cream }}>
+        <Container>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <SectionTitle>Little memories. Meaningful cards.</SectionTitle>
+            <p style={{ fontSize: "1rem", color: C.mid, marginTop: 12, maxWidth: 560, margin: "12px auto 0" }}>
+              The more we learn, the more personal every card becomes.
+            </p>
+          </div>
+
+          <div style={{
+            display: "flex", gap: 0, overflowX: "auto", paddingBottom: 12,
+            scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch",
+          }}>
+            {/* Step 1 */}
+            <SoftCard style={{ minWidth: 200, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start" }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: "50%", background: C.blush,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: serif, fontWeight: 700, color: C.red, marginBottom: 12,
+              }}>S</div>
+              <div style={{ fontWeight: 600, fontSize: "0.95rem", marginBottom: 4 }}>Sarah</div>
+              <p style={{ fontSize: "0.85rem", color: C.mid, margin: 0 }}>You add Sarah</p>
+            </SoftCard>
+
+            <TimelineConnector />
+
+            {/* Step 2 */}
+            <SoftCard style={{ minWidth: 200, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+              <Send size={32} color={C.red} style={{ marginBottom: 12 }} />
+              <p style={{ fontSize: "0.88rem", color: C.ink, margin: 0, lineHeight: 1.5 }}>
+                We send a thoughtful birthday card.
+              </p>
+            </SoftCard>
+
+            <TimelineConnector />
+
+            {/* Step 3 - yellow sticky */}
+            <div style={{
+              minWidth: 220, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start",
+              background: C.stickyYellow, borderRadius: 14,
+              border: `1px solid #E8D9A0`, boxShadow: "2px 3px 0 rgba(0,0,0,0.06)",
+              transform: "rotate(-1deg)",
+            }}>
+              <p style={{ fontFamily: hand, fontSize: "1.15rem", lineHeight: 1.5, color: C.ink, margin: "0 0 12px" }}>
+                A little while later, we check in. What has made Sarah smile lately?
+              </p>
+              <span style={{ color: "#5B8C6B", fontSize: "1.1rem" }}>✓</span>
+            </div>
+
+            <TimelineConnector />
+
+            {/* Step 4 - blue sticky */}
+            <div style={{
+              minWidth: 220, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start",
+              background: C.stickyBlue, borderRadius: 14,
+              border: `1px solid #C5D8F0`, boxShadow: "2px 3px 0 rgba(0,0,0,0.06)",
+              transform: "rotate(1deg)",
+            }}>
+              <p style={{ fontFamily: hand, fontSize: "1.15rem", lineHeight: 1.5, color: C.ink, margin: "0 0 12px" }}>
+                You share a little update. She finally got promoted!
+              </p>
+              <span style={{ color: C.red }}>♥</span>
+            </div>
+
+            <TimelineConnector />
+
+            {/* Step 5 - final card */}
+            <SoftCard style={{ minWidth: 260, flex: "0 0 auto", padding: 24, scrollSnapAlign: "start" }}>
+              <p style={{ fontFamily: sans, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: C.red, margin: "0 0 10px" }}>
+                Next card...
+              </p>
+              <p style={{ fontFamily: hand, fontSize: "1.1rem", lineHeight: 1.65, color: C.ink, margin: 0 }}>
+                Watching you earn that promotion has made me so incredibly proud. Here's to all you'll achieve next!
+              </p>
+            </SoftCard>
+          </div>
+
+          {/* Outcome flow from the final card */}
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center",
+            marginTop: 28, maxWidth: 720, marginLeft: "auto", marginRight: "auto",
+          }}>
+            {[
+              "Promotion update you shared",
+              "Remembers what matters to her",
+              "Written in a tone that feels like you",
+            ].map((label, i) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {i > 0 && <ChevronRight size={14} color={C.mid} style={{ opacity: 0.4 }} aria-hidden="true" />}
+                <span style={{
+                  fontFamily: hand, fontSize: "0.95rem", color: C.ink,
+                  background: C.white, border: `1px solid ${C.border}`,
+                  borderRadius: 20, padding: "6px 14px",
+                }}>
+                  {label}
+                </span>
               </div>
             ))}
           </div>
 
-          {/* Sticky notes — big on desktop, compact on mobile */}
-          <div className="mt-16 flex items-center justify-center flex-wrap"
-            style={{ gap: "clamp(16px, 4vw, 48px)" }}>
-            <StickyNote rotate={-3} style={{ fontSize: "clamp(1.2rem, 2.4vw, 1.9rem)", padding: "clamp(14px, 2vw, 26px) clamp(16px, 2.5vw, 30px) clamp(18px, 2.5vw, 32px)", minWidth: "clamp(120px, 18vw, 200px)" }}>
-              Don't Forget<br />
-              <span style={{ fontSize: "0.85em" }}>(Again)</span>
-            </StickyNote>
-            <StickyNote rotate={2} style={{ fontSize: "clamp(1.2rem, 2.4vw, 1.9rem)", padding: "clamp(14px, 2vw, 26px) clamp(16px, 2.5vw, 30px) clamp(18px, 2.5vw, 32px)", minWidth: "clamp(120px, 18vw, 200px)" }}>
-              Set it once.<br />
-              <span style={{ fontSize: "0.85em" }}>Take credit forever.</span>
-            </StickyNote>
-            <StickyNote rotate={-1} style={{ fontSize: "clamp(1.2rem, 2.4vw, 1.9rem)", padding: "clamp(14px, 2vw, 26px) clamp(16px, 2.5vw, 30px) clamp(18px, 2.5vw, 32px)", minWidth: "clamp(120px, 18vw, 200px)" }}>
-              Approved by<br />
-              <span style={{ fontSize: "0.85em" }}>Husbands™</span>
-            </StickyNote>
-          </div>
-        </div>
+          <p style={{
+            textAlign: "center", fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
+            lineHeight: 1.65, color: C.mid, maxWidth: 560,
+            margin: "28px auto 0",
+          }}>
+            We never ask a lot at once. Just one quick question here and there—so it's effortless.
+            Over time, every card becomes more personal.
+          </p>
+        </Container>
       </section>
 
-      {/* ── COMPARISON ───────────────────────────────────────────────────── */}
-      <section className="py-20 px-6" style={{ background: B.black }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <SectionHeading inverted>WHAT HAPPENS IF YOU DO NOTHING?</SectionHeading>
+      {/* ── How it works ─────────────────────────────────────────────────── */}
+      <section id="how-it-works" style={{ padding: "64px 0", background: C.white }}>
+        <Container>
+          <SectionTitle style={{ marginBottom: 40 }}>
+            How it works <span style={{ color: C.red }}>(without adding to your to-do list)</span> ♥
+          </SectionTitle>
 
-          <div className="grid md:grid-cols-2 gap-8 mt-10">
-            {/* Without */}
-            <div style={{ background: "rgba(226,59,46,0.1)", border: "2px solid rgba(226,59,46,0.3)", borderRadius: 10, padding: "32px 28px" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", color: "#ff6b6b", marginBottom: 20 }}>
-                WITHOUT F* I FORGOT
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
-                {["Forget anniversary", "Panic buy flowers", "Write terrible card in parking lot", "Sleep on couch", "Apologize again"].map(item => (
-                  <li key={item} style={{ display: "flex", alignItems: "center", gap: 12, color: "rgba(255,255,255,0.65)", fontSize: "1rem" }}>
-                    <span style={{ color: "#ff6b6b", fontWeight: 900, fontSize: "1.1rem", flexShrink: 0 }}>✗</span>{item}
-                  </li>
-                ))}
-              </ul>
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            <div className="grid sm:grid-cols-3 lg:grid-cols-1 gap-8">
+              {[
+                {
+                  icon: MessageCircle,
+                  title: "Check-in",
+                  body: "We check in now and then. One quick question when it makes sense. That's it.",
+                },
+                {
+                  icon: FolderHeart,
+                  title: "Remember",
+                  body: "We quietly remember the little things. Your answers become a private story for each person.",
+                },
+                {
+                  icon: Send,
+                  title: "Personalize",
+                  body: "Every card gets more personal. The more we know, the more it will feel like it came from you.",
+                },
+              ].map(({ icon: Icon, title, body }) => (
+                <div key={title}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 12, background: C.blush,
+                    display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14,
+                  }}>
+                    <Icon size={22} color={C.red} />
+                  </div>
+                  <h3 style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 600, margin: "0 0 8px" }}>{title}</h3>
+                  <p style={{ fontSize: "0.92rem", lineHeight: 1.6, color: C.mid, margin: 0 }}>{body}</p>
+                </div>
+              ))}
             </div>
 
-            {/* With */}
-            <div style={{ background: "rgba(0,180,80,0.07)", border: "2px solid rgba(0,160,70,0.3)", borderRadius: 10, padding: "32px 28px" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", color: "#5dde8c", marginBottom: 20 }}>
-                WITH F* I FORGOT
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
-                {["Important dates remembered", "Personal card written for you", "Real card mailed on time", "You look thoughtful", "Relationship survives"].map(item => (
-                  <li key={item} style={{ display: "flex", alignItems: "center", gap: 12, color: "rgba(255,255,255,0.82)", fontSize: "1rem" }}>
-                    <span style={{ color: "#5dde8c", fontWeight: 900, fontSize: "1.1rem", flexShrink: 0 }}>✓</span>{item}
-                  </li>
-                ))}
-              </ul>
+            <div style={{ minHeight: 280, width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img
+                src="/assets/illustrations/homepage/homepage_handwritten_note.webp"
+                alt="A warm handwritten card on a wooden desk with an envelope, fountain pen, coffee mug, and small plant in soft sunlight"
+                style={{ width: "100%", height: "auto", display: "block", objectFit: "contain", borderRadius: 16 }}
+              />
             </div>
           </div>
-
-          <p className="text-center mt-10 italic" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'Caveat', cursive", fontSize: "1.5rem" }}>
-            One missed anniversary costs more than an entire year of Domestic Peacekeeper.
-          </p>
-        </div>
+        </Container>
       </section>
 
-      {/* ── PRICING ──────────────────────────────────────────────────────── */}
-      <section
-        id="pricing"
-        className="py-20 px-6 relative overflow-hidden"
-        style={{ background: B.beige }}
-      >
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute", top: "50%", left: "50%",
-            transform: "translate(-50%, -50%) rotate(-5deg)",
-            fontFamily: "'Bebas Neue', cursive",
-            fontSize: "20vw", color: B.red, opacity: 0.025,
-            lineHeight: 1, pointerEvents: "none", userSelect: "none", whiteSpace: "nowrap",
-          }}
-        >
-          PLANS
-        </div>
+      {/* ── Occasion grid ────────────────────────────────────────────────── */}
+      <section style={{ padding: "64px 0", background: C.blush }}>
+        <Container>
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <SectionTitle>We're here for every kind of moment.</SectionTitle>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 24 }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: 14, background: C.white,
+                  border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <Coffee size={28} color={C.red} />
+                </div>
+                <p style={{ fontFamily: hand, fontSize: "1.2rem", color: C.ink, margin: 0 }}>
+                  Even the small ones count.
+                </p>
+              </div>
+            </div>
+            <div style={{
+              display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 10,
+            }}>
+              {occasionGrid.map(label => (
+                <div key={label} style={{
+                  background: C.white, borderRadius: 10, padding: "12px 10px",
+                  border: `1px solid ${C.border}`, textAlign: "center",
+                  fontSize: "0.78rem", fontWeight: 500, color: C.ink,
+                }}>
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </section>
 
-        <div style={{ maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
-          <SectionHeading sub="Because forgetting once was funny. Repeatedly forgetting becomes a lifestyle.">
-            ✦ Choose Your Survival Plan ✦
-          </SectionHeading>
-
-          <p className="text-center mb-10" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.14em", color: B.gray }}>
-            CHOOSE YOUR SURVIVAL PLAN. CANCEL ANYTIME.
-          </p>
+      {/* ── Testimonials ─────────────────────────────────────────────────── */}
+      <section id="about" style={{ padding: "64px 0", background: C.cream }}>
+        <Container>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <SectionTitle>People who stopped worrying</SectionTitle>
+            <p style={{ fontSize: "1rem", color: C.mid, marginTop: 12 }}>
+              Real stories. Changed names. Relationships still intact.
+            </p>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {plans.map((plan) => (
-              <div
+            {testimonials.map((t, i) => (
+              <SoftCard key={t.name} style={{ padding: "28px 24px", transform: i === 1 ? "rotate(-0.5deg)" : i === 2 ? "rotate(0.5deg)" : undefined }}>
+                <div style={{ display: "flex", gap: 3, marginBottom: 16 }}>
+                  {[...Array(5)].map((_, j) => (
+                    <Star key={j} size={14} fill={C.red} color={C.red} />
+                  ))}
+                </div>
+                <p style={{ fontSize: "0.95rem", lineHeight: 1.65, color: C.ink, margin: "0 0 20px" }}>
+                  "{t.quote}"
+                </p>
+                <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{t.name}</div>
+                <div style={{ fontSize: "0.8rem", color: C.mid, marginTop: 2 }}>{t.role}</div>
+              </SoftCard>
+            ))}
+          </div>
+
+          {/* Stats bar */}
+          <div style={{
+            marginTop: 48, display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: 16, padding: "24px", background: C.white,
+            borderRadius: 14, border: `1px solid ${C.border}`,
+          }}>
+            {stats.map(({ icon: Icon, value, label }) => (
+              <div key={label} style={{ textAlign: "center" }}>
+                <Icon size={20} color={C.red} style={{ margin: "0 auto 8px" }} />
+                <div style={{ fontFamily: serif, fontSize: "1.5rem", fontWeight: 700, color: C.ink }}>{value}</div>
+                <div style={{ fontSize: "0.78rem", color: C.mid }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Pricing ──────────────────────────────────────────────────────── */}
+      <section id="pricing" style={{ padding: "64px 0", background: C.white }}>
+        <Container>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <SectionEyebrow>Simple plans</SectionEyebrow>
+            <SectionTitle>Choose what fits your life</SectionTitle>
+            <p style={{ fontSize: "0.95rem", color: C.mid, marginTop: 12 }}>
+              Cancel anytime. No contracts. No surprises.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {plans.map(plan => (
+              <SoftCard
                 key={plan.name}
-                className="rounded-sm p-8 relative flex flex-col"
-                style={{
-                  background: plan.highlight ? B.white : B.beigeD,
-                  border: plan.highlight ? `2.5px solid ${B.red}` : `1.5px solid ${B.black}14`,
-                  boxShadow: plan.highlight ? `0 8px 32px ${B.red}20` : "none",
-                }}
                 data-testid={`card-plan-${plan.name.toLowerCase()}`}
+                style={{
+                  padding: "32px 28px",
+                  display: "flex", flexDirection: "column",
+                  border: plan.highlight ? `2px solid ${C.red}` : undefined,
+                  position: "relative",
+                }}
               >
                 {plan.badge && (
-                  <div
-                    className="absolute -top-3.5 left-1/2 -translate-x-1/2"
-                    style={{
-                      padding: "2px 14px",
-                      background: B.red, color: B.white,
-                      fontFamily: "'Bebas Neue', cursive",
-                      fontSize: "0.68rem", letterSpacing: "0.16em",
-                      borderRadius: 2, whiteSpace: "nowrap",
-                    }}
-                  >
+                  <div style={{
+                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
+                    background: C.red, color: C.white, fontSize: "0.7rem", fontWeight: 600,
+                    padding: "4px 14px", borderRadius: 20, letterSpacing: "0.06em",
+                    textTransform: "uppercase", whiteSpace: "nowrap",
+                  }}>
                     {plan.badge}
                   </div>
                 )}
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", letterSpacing: "0.1em", color: B.black, marginBottom: 4 }}>
-                  {plan.name}
+                <h3 style={{ fontFamily: serif, fontSize: "1.35rem", fontWeight: 600, margin: "0 0 6px" }}>{plan.name}</h3>
+                <p style={{ fontSize: "0.88rem", color: C.mid, margin: "0 0 20px" }}>{plan.description}</p>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 24 }}>
+                  <span style={{ fontFamily: serif, fontSize: "2.5rem", fontWeight: 700 }}>{plan.price}</span>
+                  <span style={{ fontSize: "0.9rem", color: C.mid }}>{plan.period}</span>
                 </div>
-                <p className="text-sm mb-4" style={{ color: B.gray }}>{plan.description}</p>
-                <div className="flex items-end gap-1 mb-6">
-                  <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "3.5rem", color: B.black, lineHeight: 1 }}>{plan.price}</span>
-                  <span className="mb-1.5 text-sm" style={{ color: B.gray }}>{plan.period}</span>
-                </div>
-                <ul className="space-y-2 mb-8 flex-1">
-                  {plan.perks.map((p) => (
-                    <li key={p} className="flex items-start gap-2 text-sm">
-                      <span style={{ color: B.red, fontWeight: 900 }}>✓</span>
-                      <span style={{ color: "#444" }}>{p}</span>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", flex: 1 }}>
+                  {plan.perks.map(p => (
+                    <li key={p} style={{ display: "flex", gap: 8, fontSize: "0.88rem", marginBottom: 10, color: C.ink }}>
+                      <span style={{ color: C.red, fontWeight: 700 }}>✓</span>{p}
                     </li>
                   ))}
                 </ul>
-                <BrandButton
+                <PrimaryButton
                   href="/signup"
-                  variant={plan.highlight ? "primary" : "outline"}
-                  size="lg"
-                  className="w-full justify-center"
                   testId={`link-plan-${plan.name.toLowerCase()}`}
+                  style={{ width: "100%", textAlign: "center" }}
                 >
-                  {plan.btn}
-                </BrandButton>
-              </div>
+                  Get started
+                </PrimaryButton>
+              </SoftCard>
             ))}
           </div>
-
-          <p className="text-center mt-8 italic" style={{ color: B.gray, fontFamily: "'Caveat', cursive", fontSize: "1.4rem" }}>
-            No relationships were guaranteed in the making of this subscription.
-          </p>
-        </div>
+        </Container>
       </section>
-
-      {/* ── EXAMPLES ─────────────────────────────────────────────────────── */}
-      <section id="examples" className="py-20 px-6" style={{ background: B.black }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <SectionHeading sub="Real card fronts. Real handwritten messages. Made for real people." inverted>
-            What the Cards Look Like
-          </SectionHeading>
-
-          <p className="text-center mb-10" style={{ color: "rgba(255,255,255,0.55)", fontSize: "1rem", lineHeight: 1.6, maxWidth: 700, margin: "0 auto 40px" }}>
-            We don't just send generic cards. We use what you tell us about the person to write messages that feel specific, warm, and real.
-          </p>
-
-          {/* Before / After example */}
-          <div className="grid md:grid-cols-2 gap-0 mb-16" style={{ maxWidth: 960, margin: "0 auto 64px", borderRadius: 14, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
-            {/* BEFORE */}
-            <div style={{ background: "#2a0a0a", padding: "32px 36px 36px", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: "50%", background: "#ff4444", color: "#fff", fontWeight: 900, fontSize: "1rem", flexShrink: 0 }}>✗</span>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.18em", color: "#ff6b6b" }}>WITHOUT F*I FORGOT</span>
-              </div>
-              {/* Paper card */}
-              <div style={{ background: "#fffef9", borderRadius: 8, padding: "28px 24px", position: "relative", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
-                <div style={{
-                  position: "absolute", inset: 0, borderRadius: 8,
-                  backgroundImage: "repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.06) 31px, rgba(0,0,0,0.06) 32px)",
-                  backgroundPositionY: "52px", pointerEvents: "none",
-                }} />
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.5rem", lineHeight: 1.8, color: "#1a1a1a", margin: 0, position: "relative" }}>
-                  Happy Birthday.<br /><br />Love, Dave.
-                </p>
-              </div>
-            </div>
-
-            {/* AFTER */}
-            <div style={{ background: "#0a1f12", padding: "32px 36px 36px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: "50%", background: "#22c55e", color: "#fff", fontWeight: 900, fontSize: "1rem", flexShrink: 0 }}>✓</span>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.4rem", letterSpacing: "0.18em", color: "#5dde8c" }}>WITH F*I FORGOT</span>
-              </div>
-              {/* Paper card */}
-              <div style={{ background: "#fffef9", borderRadius: 8, padding: "28px 24px", position: "relative", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
-                <div style={{
-                  position: "absolute", inset: 0, borderRadius: 8,
-                  backgroundImage: "repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.06) 31px, rgba(0,0,0,0.06) 32px)",
-                  backgroundPositionY: "52px", pointerEvents: "none",
-                }} />
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.5rem", lineHeight: 1.8, color: "#1a1a1a", margin: 0, position: "relative" }}>
-                  Happy Birthday Mom. Thanks for always answering the phone when I call with random questions. I hope today reminds you how loved and appreciated you are.<br /><br />Love, Dave.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
-            {cardExamples.map((ex, i) => {
-              const side = cardSide[i] ?? "front";
-              return (
-                <div key={i} style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1.5px solid rgba(255,255,255,0.1)",
-                  borderRadius: 10,
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                }}>
-                  {/* Label */}
-                  <div style={{ padding: "10px 14px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.72rem", letterSpacing: "0.16em", color: B.red }}>
-                      {ex.label} · {ex.recipient}
-                    </div>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.6rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)" }}>
-                      REAL CARD
-                    </div>
-                  </div>
-
-                  {/* Front / Inside toggle */}
-                  <div style={{ display: "flex", margin: "10px 14px 0", borderRadius: 6, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)" }}>
-                    {(["front", "inside"] as const).map(s => (
-                      <button key={s} onClick={() => setCardSide(prev => ({ ...prev, [i]: s }))}
-                        style={{
-                          flex: 1, padding: "6px 0",
-                          background: side === s ? B.red : "transparent",
-                          color: side === s ? "#fff" : "rgba(255,255,255,0.45)",
-                          border: "none", cursor: "pointer",
-                          fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em",
-                          transition: "all 0.15s",
-                        }}>
-                        {s === "front" ? "CARD FRONT" : "INSIDE →"}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Content area */}
-                  <div style={{ flex: 1, padding: 14 }}>
-                    {side === "front" ? (
-                      <div
-                        onClick={() => setLightboxImg(ex.imageUrl)}
-                        style={{ position: "relative", cursor: "zoom-in", borderRadius: 6, overflow: "hidden", lineHeight: 0 }}
-                      >
-                        <img
-                          src={ex.imageUrl}
-                          alt={`${ex.label} card for ${ex.recipient}`}
-                          style={{ width: "100%", display: "block", borderRadius: 6, objectFit: "contain", background: "#fff" }}
-                          onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                        />
-                        <div style={{
-                          position: "absolute", inset: 0,
-                          background: "linear-gradient(transparent 60%, rgba(0,0,0,0.55))",
-                          display: "flex", alignItems: "flex-end", justifyContent: "flex-end",
-                          padding: "10px 12px",
-                          opacity: 0,
-                          transition: "opacity 0.15s",
-                        }}
-                          className="card-hover-overlay"
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0"; }}
-                        >
-                          <span style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)", borderRadius: 5, padding: "4px 10px", fontSize: "0.7rem", color: "#fff", fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.1em" }}>
-                            🔍 ZOOM
-                          </span>
-                        </div>
-                        {/* Always-visible zoom hint */}
-                        <div style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.5)", borderRadius: 4, padding: "3px 8px", fontSize: "0.62rem", color: "rgba(255,255,255,0.6)", fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.1em", pointerEvents: "none" }}>
-                          CLICK TO ZOOM
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{
-                        background: "#fffef9",
-                        borderRadius: 6, padding: "18px 16px",
-                        minHeight: 180,
-                        position: "relative",
-                      }}>
-                        {/* Ruled lines effect */}
-                        <div style={{
-                          position: "absolute", inset: 0, borderRadius: 6,
-                          backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, rgba(0,0,0,0.07) 27px, rgba(0,0,0,0.07) 28px)",
-                          backgroundPositionY: "48px",
-                          pointerEvents: "none",
-                        }} />
-                        <p style={{
-                          fontFamily: "'Caveat', cursive",
-                          fontSize: "1.05rem",
-                          lineHeight: 1.85,
-                          color: "#1a1a1a",
-                          whiteSpace: "pre-wrap",
-                          position: "relative",
-                          margin: 0,
-                        }}>
-                          {ex.inside}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ padding: "0 14px 12px" }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.62rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
-                      WRITTEN FOR YOU · MAILED IN A REAL ENVELOPE
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-10 text-center">
-            <BrandButton href="/signup" variant="primary" size="lg">
-              Start Earning Brownie Points
-            </BrandButton>
-          </div>
-        </div>
-      </section>
-
-      {/* ── LIGHTBOX ─────────────────────────────────────────────────────── */}
-      {lightboxImg && (
-        <div
-          onClick={() => setLightboxImg(null)}
-          style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.93)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, cursor: "zoom-out" }}
-        >
-          <img
-            src={lightboxImg}
-            alt="Card front — full size"
-            style={{ maxWidth: "90vw", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, boxShadow: "0 0 80px rgba(0,0,0,0.9)" }}
-          />
-          <button
-            onClick={e => { e.stopPropagation(); setLightboxImg(null); }}
-            style={{ position: "absolute", top: 20, right: 20, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#fff", fontSize: "1.2rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-          >✕</button>
-          <div style={{ position: "absolute", bottom: 16, color: "rgba(255,255,255,0.3)", fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.12em" }}>
-            CLICK ANYWHERE OR PRESS ESC TO CLOSE
-          </div>
-        </div>
-      )}
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section id="faq" className="py-20 px-6" style={{ background: B.beigeD }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <SectionHeading>Questions from Men in the Wild</SectionHeading>
+      <section id="faq" style={{ padding: "64px 0", background: C.cream }}>
+        <Container style={{ maxWidth: 720 }}>
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <SectionTitle>Questions you might have</SectionTitle>
+            <p style={{ fontSize: "0.95rem", color: C.mid, marginTop: 12 }}>
+              Clear answers. No jargon.
+            </p>
+          </div>
 
-          <SectionDivider label="Frequently Asked" />
-
-          <div className="space-y-3 mt-8">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {faqs.map((faq, i) => (
-              <div
-                key={i}
-                className="rounded-sm overflow-hidden bg-white"
-                style={{ border: `1.5px solid ${B.black}10` }}
-              >
+              <SoftCard key={i} style={{ overflow: "hidden" }}>
                 <button
-                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-gray-50 transition-colors"
-                  style={{ color: B.black }}
+                  type="button"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   data-testid={`faq-toggle-${i}`}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "18px 22px", background: "none", border: "none", cursor: "pointer",
+                    fontFamily: sans, fontSize: "0.92rem", fontWeight: 600, color: C.ink, textAlign: "left",
+                  }}
                 >
-                  <span style={{ fontWeight: 600, fontSize: "0.9rem", textAlign: "left" }}>{faq.q}</span>
-                  {openFaq === i
-                    ? <ChevronUp size={16} style={{ color: B.red, flexShrink: 0 }} />
-                    : <ChevronDown size={16} style={{ color: "#aaa", flexShrink: 0 }} />}
+                  {faq.q}
+                  {openFaq === i ? <ChevronUp size={18} color={C.red} /> : <ChevronDown size={18} color={C.mid} />}
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-5 text-sm leading-relaxed border-t pt-4" style={{ color: "#555", borderColor: `${B.black}08` }}>
+                  <div style={{
+                    padding: "0 22px 18px", fontSize: "0.9rem", lineHeight: 1.65,
+                    color: C.mid, borderTop: `1px solid ${C.border}`, paddingTop: 16,
+                  }}>
                     {faq.a}
                   </div>
                 )}
-              </div>
+              </SoftCard>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ── FINAL CTA ────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6" style={{ background: B.beige }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <CtaBanner
-            headline="GOOD RELATIONSHIPS DON'T HAPPEN BY ACCIDENT."
-            sub="We remember. We write. We send. You get the credit."
-            primaryLabel="Start Earning Brownie Points"
-            primaryHref="/signup"
-            secondaryLabel="See How It Works For Free"
-            secondaryHref="/try"
-          />
-        </div>
+      {/* ── Final CTA ────────────────────────────────────────────────────── */}
+      <section style={{ padding: "72px 0", background: C.blush, textAlign: "center" }}>
+        <Container>
+          <h2 style={{
+            fontFamily: serif, fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
+            fontWeight: 600, margin: "0 0 12px", color: C.ink,
+          }}>
+            Stop forgetting. Start showing up. <span style={{ color: C.red }}>♥</span>
+          </h2>
+          <p style={{ fontSize: "1rem", color: C.mid, margin: "0 0 28px", maxWidth: 480, marginLeft: "auto", marginRight: "auto" }}>
+            Set it up once. We'll quietly take care of the rest.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
+            <PrimaryButton href="/signup">Get started free</PrimaryButton>
+            <Link href="/try" style={{
+              display: "inline-flex", alignItems: "center", padding: "14px 28px",
+              fontWeight: 600, fontSize: "0.95rem", color: C.ink, textDecoration: "none",
+              border: `1.5px solid ${C.border}`, borderRadius: 8, background: C.white,
+            }}>
+              See how it works
+            </Link>
+          </div>
+        </Container>
       </section>
 
-      {/* ── TAGLINE BAR ──────────────────────────────────────────────────── */}
-      <TaglineBar />
-
-      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-      <footer className="py-10 px-6" style={{ background: B.black }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }} className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.3rem", letterSpacing: "0.08em", color: B.red, lineHeight: 1 }}>
-            F* I FORGOT
-            <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.7rem", color: "rgba(255,255,255,0.3)", fontWeight: 400, letterSpacing: "0.04em", marginTop: 2 }}>
-              Relationship Damage Control
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer style={{ padding: "48px 0 32px", background: C.ink, color: "rgba(255,255,255,0.7)" }}>
+        <Container>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10" style={{ marginBottom: 40 }}>
+            <div>
+              <div style={{ fontFamily: serif, fontSize: "1.2rem", fontWeight: 700, color: C.white, marginBottom: 4 }}>
+                F.I. FORGOT
+              </div>
+              <div style={{ fontSize: "0.7rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.45)" }}>
+                RELATIONSHIP CONCIERGE
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.1em", color: C.white, marginBottom: 14 }}>COMPANY</div>
+              {["About", "Careers", "Contact"].map(label => (
+                <a key={label} href="#about"
+                  style={{ display: "block", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", textDecoration: "none", marginBottom: 10 }}>
+                  {label}
+                </a>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.1em", color: C.white, marginBottom: 14 }}>SUPPORT</div>
+              {[
+                { label: "Help", href: "#faq" },
+                { label: "Privacy", href: "#" },
+                { label: "Terms", href: "#" },
+              ].map(({ label, href }) => (
+                <a key={label} href={href}
+                  style={{ display: "block", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", textDecoration: "none", marginBottom: 10 }}>
+                  {label}
+                </a>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.1em", color: C.white, marginBottom: 14 }}>FOLLOW</div>
+              <div style={{ display: "flex", gap: 14 }}>
+                {[Instagram, Facebook].map((Icon, i) => (
+                  <a key={i} href="#" aria-label="Social link"
+                    style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>
+                    <Icon size={20} />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
 
-          <p className="text-sm italic text-center" style={{ color: "rgba(255,255,255,0.3)", fontFamily: "'Caveat', cursive", fontSize: "0.95rem" }}>
-            Set it once. Never forget again.
-          </p>
-
-          <div className="flex gap-6 flex-wrap justify-center">
-            {[
-              { label: "How It Works", href: "#how-it-works" },
-              { label: "Pricing",      href: "#pricing" },
-              { label: "Sign In",      href: "/login" },
-            ].map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                className="transition-colors hover:text-white"
-                style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.75rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
-              >
-                {l.label}
-              </a>
-            ))}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6" style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 24 }}>
+            <p style={{ fontFamily: hand, fontSize: "1rem", color: "rgba(255,255,255,0.4)", margin: 0 }}>
+              Set it once. Never forget again.
+            </p>
+            <div style={{ width: 120, height: 72, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <img
+                src="/illustrations/homepage/003_homepage_stamped_envelope.webp"
+                alt="A cream envelope with a floral postage stamp and Mailed with Care postmark on a warm wooden desk"
+                style={{ width: "100%", height: "100%", display: "block", objectFit: "contain", borderRadius: 16 }}
+              />
+            </div>
           </div>
-        </div>
+        </Container>
       </footer>
     </div>
   );

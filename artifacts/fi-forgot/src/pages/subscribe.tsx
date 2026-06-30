@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { useLocation } from "wouter";
 import { PLANS, type Plan } from "@/lib/plan";
+import { PB } from "@/lib/personal-brand";
+import { SoftCard, PrimaryBtn, SecondaryBtn } from "@/components/personal-ui";
+import { Check, Heart, Loader2 } from "lucide-react";
 
-const BEIGE = "#F2E6D3";
-const RED   = "#E23B2E";
-const BLACK = "#111111";
-const WHITE = "#ffffff";
-const GRAY  = "#888";
+const serif = "'Lora', Georgia, serif";
+const sans = "'Plus Jakarta Sans', sans-serif";
 
 interface StripePlan {
   planKey: Plan;
@@ -38,15 +38,15 @@ export default function SubscribePage() {
       .then(r => r.json())
       .then(json => {
         const rows: StripePlan[] = (json.data ?? [])
-          .filter((r: any) => r.metadata?.planKey)
-          .map((r: any) => ({
+          .filter((r: { metadata?: { planKey?: string }; price_id?: string; unit_amount?: number }) => r.metadata?.planKey)
+          .map((r: { metadata: { planKey: string }; price_id: string; unit_amount: number }) => ({
             planKey: r.metadata.planKey as Plan,
-            priceId: r.price_id as string,
-            unitAmount: r.unit_amount as number,
+            priceId: r.price_id,
+            unitAmount: r.unit_amount,
           }));
         setStripePlans(rows);
       })
-      .catch(() => setLoadError("Couldn't load plan details — Stripe may not be connected yet."))
+      .catch(() => setLoadError("We couldn't load plan details right now. Please try again in a moment."))
       .finally(() => setLoading(false));
   }, [DEV_BYPASS]);
 
@@ -60,7 +60,6 @@ export default function SubscribePage() {
     setCheckingOut(planKey);
     setCheckoutError(null);
 
-    // Dev bypass: skip Stripe checkout during testing
     if (DEV_BYPASS) {
       upgradePlan(planKey);
       setLocation("/dashboard");
@@ -83,8 +82,8 @@ export default function SubscribePage() {
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Checkout failed");
       window.location.href = data.url;
-    } catch (err: any) {
-      setCheckoutError(err.message ?? "Something went wrong. Try again.");
+    } catch (err: unknown) {
+      setCheckoutError(err instanceof Error ? err.message : "Something went wrong. Try again.");
       setCheckingOut(null);
     }
   }
@@ -95,100 +94,191 @@ export default function SubscribePage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: BEIGE, fontFamily: "'Inter', sans-serif" }}>
-
-      {/* Header */}
-      <div style={{ textAlign: "center", padding: "48px 24px 32px" }}>
-        <a href="/" style={{ textDecoration: "none" }}>
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.2rem", color: BLACK, letterSpacing: "0.12em", margin: 0, cursor: "pointer" }}>
-            F*I FORGOT
-          </h1>
-        </a>
-        <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.1em", color: BLACK, margin: "12px 0 8px" }}>
-          CHOOSE YOUR PLAN
+    <div style={{
+      minHeight: "100vh",
+      background: PB.cream,
+      fontFamily: sans,
+      color: PB.ink,
+    }}>
+      <header style={{
+        textAlign: "center",
+        padding: "48px 24px 28px",
+        maxWidth: 560,
+        margin: "0 auto",
+      }}>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <div style={{ fontFamily: serif, fontSize: "1.35rem", fontWeight: 700, color: PB.ink, letterSpacing: "0.02em" }}>
+            F.I. FORGOT
+          </div>
+          <div style={{ fontFamily: sans, fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.16em", color: PB.mid, marginTop: 4 }}>
+            RELATIONSHIP CONCIERGE
+          </div>
+        </Link>
+        <h1 style={{
+          fontFamily: serif,
+          fontSize: "clamp(1.5rem, 4vw, 1.85rem)",
+          fontWeight: 600,
+          color: PB.ink,
+          margin: "28px 0 10px",
+          lineHeight: 1.25,
+        }}>
+          Choose how much we help
+        </h1>
+        <p style={{ fontSize: "0.95rem", color: PB.mid, margin: 0, lineHeight: 1.6 }}>
+          Every plan includes handwritten cards, gentle reminders, and your approval before anything is sent.
+          Cancel anytime.
         </p>
-        <p style={{ color: GRAY, fontSize: "0.9rem", margin: 0 }}>
-          Cancel anytime. No commitment.
-        </p>
-      </div>
+      </header>
 
-      {/* Plan cards */}
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 20px 48px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
-        {PLAN_ORDER.map((key, i) => {
+      <div style={{
+        maxWidth: 960,
+        margin: "0 auto",
+        padding: "0 20px 48px",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        gap: 16,
+      }}>
+        {PLAN_ORDER.map((key) => {
           const plan = PLANS[key];
           const isPopular = key === "standard";
           const isChecking = checkingOut === key;
           const stripeReady = DEV_BYPASS || stripePlans.some(p => p.planKey === key);
 
           return (
-            <div key={key} style={{ background: WHITE, borderRadius: 16, border: isPopular ? `2.5px solid ${RED}` : `1.5px solid ${BLACK}18`, padding: "32px 28px", display: "flex", flexDirection: "column", position: "relative", boxShadow: isPopular ? "0 8px 32px rgba(226,59,46,0.15)" : "0 2px 12px rgba(0,0,0,0.06)" }}>
-
+            <SoftCard
+              key={key}
+              style={{
+                padding: "28px 24px",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                border: isPopular ? `1.5px solid ${PB.red}` : `1px solid ${PB.border}`,
+                boxShadow: isPopular ? "0 4px 20px rgba(226,59,46,0.08)" : undefined,
+              }}
+            >
               {isPopular && (
-                <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.1em", padding: "4px 18px", borderRadius: 20, whiteSpace: "nowrap" }}>
-                  MOST POPULAR
+                <div style={{
+                  position: "absolute",
+                  top: -12,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: PB.red,
+                  color: PB.white,
+                  fontFamily: sans,
+                  fontSize: "0.72rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                  padding: "5px 14px",
+                  borderRadius: 20,
+                  whiteSpace: "nowrap",
+                }}>
+                  Most chosen
                 </div>
               )}
 
-              <div style={{ marginBottom: 6 }}>
-                <span style={{ background: `${RED}14`, color: RED, fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.1em", padding: "2px 10px", borderRadius: 20, textTransform: "uppercase" }}>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{
+                  background: `${PB.red}10`,
+                  color: PB.red,
+                  fontWeight: 600,
+                  fontSize: "0.72rem",
+                  letterSpacing: "0.04em",
+                  padding: "4px 10px",
+                  borderRadius: 20,
+                }}>
                   {plan.label}
                 </span>
               </div>
 
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.8rem", letterSpacing: "0.04em", color: BLACK, lineHeight: 1.1, margin: "10px 0 4px" }}>
+              <div style={{
+                fontFamily: serif,
+                fontSize: "2rem",
+                fontWeight: 600,
+                color: PB.ink,
+                lineHeight: 1.1,
+                margin: "8px 0 6px",
+              }}>
                 {plan.price}
               </div>
 
-              <p style={{ fontSize: "0.8rem", color: GRAY, margin: "0 0 20px", fontStyle: "italic" }}>
+              <p style={{ fontSize: "0.88rem", color: PB.mid, margin: "0 0 20px", lineHeight: 1.5 }}>
                 {plan.tagline}
               </p>
 
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px", display: "flex", flexDirection: "column", gap: 8, flexGrow: 1 }}>
+              <ul style={{
+                listStyle: "none",
+                padding: 0,
+                margin: "0 0 24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                flexGrow: 1,
+              }}>
                 {plan.perks.map(perk => (
-                  <li key={perk} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.85rem", color: BLACK }}>
-                    <span style={{ color: RED, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>✓</span>
+                  <li key={perk} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: "0.86rem", color: PB.ink }}>
+                    <Check size={16} style={{ color: PB.sage, flexShrink: 0, marginTop: 2 }} strokeWidth={2.5} />
                     {perk}
                   </li>
                 ))}
               </ul>
 
               {loading ? (
-                <div style={{ height: 48, borderRadius: 10, background: `${BLACK}10`, animation: "pulse 1.5s ease-in-out infinite" }} />
+                <div style={{
+                  height: 48,
+                  borderRadius: 24,
+                  background: `${PB.ink}08`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  <Loader2 size={20} color={PB.mid} style={{ animation: "spin 1s linear infinite" }} />
+                </div>
               ) : (
-                <button
+                <PrimaryBtn
                   onClick={() => handleSubscribe(key)}
-                  disabled={isChecking || checkingOut !== null}
-                  style={{ width: "100%", padding: "14px", borderRadius: 10, border: "none", background: isPopular ? RED : BLACK, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.1em", cursor: isChecking || checkingOut !== null ? "not-allowed" : "pointer", opacity: checkingOut !== null && !isChecking ? 0.6 : 1, transition: "opacity 0.2s" }}>
-                  {isChecking ? "REDIRECTING..." : stripeReady ? `GET ${plan.label.toUpperCase()}` : "COMING SOON"}
-                </button>
+                  disabled={isChecking || checkingOut !== null || !stripeReady}
+                  style={{
+                    width: "100%",
+                    padding: "14px 20px",
+                    opacity: checkingOut !== null && !isChecking ? 0.6 : 1,
+                  }}
+                >
+                  {isChecking ? "Taking you to checkout…" : stripeReady ? `Choose ${plan.label}` : "Coming soon"}
+                </PrimaryBtn>
               )}
-            </div>
+            </SoftCard>
           );
         })}
       </div>
 
-      {/* Errors */}
       {(loadError || checkoutError) && (
-        <div style={{ maxWidth: 480, margin: "-24px auto 32px", padding: "0 20px", textAlign: "center" }}>
-          <p style={{ fontSize: "0.85rem", color: RED, background: `${RED}12`, padding: "12px 16px", borderRadius: 8 }}>
+        <div style={{ maxWidth: 480, margin: "-16px auto 24px", padding: "0 20px", textAlign: "center" }}>
+          <p style={{
+            fontSize: "0.88rem",
+            color: PB.red,
+            background: `${PB.red}08`,
+            padding: "12px 16px",
+            borderRadius: 12,
+            border: `1px solid ${PB.red}20`,
+            margin: 0,
+            lineHeight: 1.5,
+          }}>
             {loadError ?? checkoutError}
           </p>
         </div>
       )}
 
-      {/* Skip link */}
-      <div style={{ textAlign: "center", paddingBottom: 48 }}>
-        <button onClick={handleSkip} style={{ background: "none", border: "none", color: GRAY, fontSize: "0.8rem", cursor: "pointer", textDecoration: "underline" }}>
-          Skip for now — explore the dashboard first
-        </button>
+      <div style={{ textAlign: "center", paddingBottom: 48, maxWidth: 400, margin: "0 auto" }}>
+        <SecondaryBtn onClick={handleSkip} style={{ fontSize: "0.86rem" }}>
+          Explore first — decide later
+        </SecondaryBtn>
+        <p style={{ fontSize: "0.8rem", color: PB.mid, marginTop: 14, lineHeight: 1.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <Heart size={14} color={PB.sage} />
+          You can change your plan anytime from Account.
+        </p>
       </div>
 
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

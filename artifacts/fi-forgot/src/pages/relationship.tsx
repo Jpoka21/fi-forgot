@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
-import AppNav from "@/components/layout/AppNav";
+import AppShell from "@/components/layout/AppShell";
+import PageShell from "@/components/layout/PageShell";
 import RelationshipTimeline from "@/components/RelationshipTimeline";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -18,7 +19,8 @@ import {
   PB, formatBigDate, occasionPhrase, urgencyAccent,
   isSensitiveOccasion, recipientHasThinMemory,
 } from "@/lib/personal-brand";
-import { PersonAvatar, SectionTitle, SoftCard, PrimaryBtn } from "@/components/personal-ui";
+import { PersonAvatar, SoftCard, PrimaryBtn, AppSection, SecondaryBtn } from "@/components/personal-ui";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 
 const BG       = PB.cream;
 const RED      = PB.red;
@@ -161,33 +163,41 @@ const INTEREST_LABELS: Record<string, string> = {
   fashion: "Fashion & style",
 };
 
-// ── Small sub-components ──────────────────────────────────────────────────────
+const serif = "'Lora', Georgia, serif";
+const sans  = "'Plus Jakarta Sans', sans-serif";
 
-function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function RelationshipProfileHeaderIllustration() {
   return (
-    <div style={{
-      background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`,
-      ...style,
-    }}>
-      {children}
+    <div style={{ margin: "0 0 20px", width: "100%", maxWidth: 280, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
+      <img
+        src="/illustrations/relationship/009_relationship_profile_header.webp"
+        alt="A warm illustration of shared keepsakes and memories that celebrate an ongoing relationship"
+        style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
+      />
     </div>
   );
 }
 
-function OutlineBtn({ children, onClick, href }: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  href?: string;
-}) {
-  const style: React.CSSProperties = {
-    padding: "5px 12px", borderRadius: 7,
-    border: `1px solid ${BORDER}`, background: "none",
-    color: GRAY, fontSize: "0.75rem", fontWeight: 600, cursor: "pointer",
-  };
-  if (href) {
-    return <Link href={href}><button style={style}>{children}</button></Link>;
-  }
-  return <button style={style} onClick={onClick}>{children}</button>;
+function LoadingRememberingIllustration() {
+  return (
+    <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img
+        src="/assets/illustrations/loading/010_loading_remembering.webp"
+        alt="Dave quietly remembering the details of your relationship"
+        style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
+      />
+    </div>
+  );
+}
+
+// ── Small sub-components ──────────────────────────────────────────────────────
+
+function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <SoftCard style={style}>
+      {children}
+    </SoftCard>
+  );
 }
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -491,483 +501,567 @@ export default function RelationshipPage() {
   // ── Loading state ───────────────────────────────────────────────────────────
   if (!recipient) {
     return (
-      <>
-        <AppNav />
-        <div style={{ background: BG, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem", color: GRAY }}>Loading…</div>
+      <AppShell>
+        <div style={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: sans,
+          gap: 16,
+          padding: "48px 24px",
+        }}>
+          <LoadingRememberingIllustration />
+          <p style={{ fontSize: "0.95rem", color: GRAY, margin: 0 }}>Loading…</p>
         </div>
-      </>
+      </AppShell>
     );
   }
 
+  const questionModeLabel =
+    nextQuestion?.mode === "follow_up"
+      ? "Following up"
+      : profileComplete
+        ? "A quick check-in"
+        : "Help future cards sound more like you";
+
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <>
-      <AppNav />
-      <div style={{ background: BG, minHeight: "100vh" }}>
-        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px 80px", boxSizing: "border-box" as const }}>
+    <AppShell>
+      <PageShell style={{ paddingTop: 16 }}>
 
-          {/* ── Back ─────────────────────────────────────────────────────────── */}
-          <div style={{ padding: "16px 0 12px" }}>
-            <Link href="/dashboard">
-              <button style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "0.8rem", fontWeight: 600, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
-                ← Home
-              </button>
-            </Link>
-          </div>
+        {/* Back */}
+        <div style={{ padding: "16px 0 8px", display: "flex", gap: 16 }}>
+          <Link href="/people">
+            <button type="button" style={{
+              background: "none", border: "none", cursor: "pointer", color: GRAY,
+              fontSize: "0.88rem", fontWeight: 500, display: "flex", alignItems: "center", gap: 6, padding: 0,
+              fontFamily: sans,
+            }}>
+              <ArrowLeft size={16} /> Your people
+            </button>
+          </Link>
+          <Link href="/dashboard">
+            <button type="button" style={{
+              background: "none", border: "none", cursor: "pointer", color: GRAY,
+              fontSize: "0.88rem", fontWeight: 500, padding: 0, fontFamily: sans, opacity: 0.7,
+            }}>
+              Home
+            </button>
+          </Link>
+        </div>
 
-          {/* ══ HERO ════════════════════════════════════════════════════════ */}
-          <SoftCard style={{ padding: "22px 20px", marginBottom: 20 }}>
-            <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 18 }}>
-              <PersonAvatar name={recipient.name} size={56} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h1 style={{
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
-                  fontSize: "1.65rem", fontWeight: 700, color: CHARCOAL,
-                  margin: 0, lineHeight: 1.2,
+        {/* Relationship summary */}
+        <SoftCard style={{ padding: "24px 20px", marginBottom: 24 }}>
+          <RelationshipProfileHeaderIllustration />
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 20 }}>
+            <PersonAvatar name={recipient.name} size={64} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h1 style={{
+                fontFamily: serif, fontSize: "1.75rem", fontWeight: 600, color: CHARCOAL,
+                margin: 0, lineHeight: 1.2,
+              }}>
+                {recipient.name}
+              </h1>
+              <div style={{ fontSize: "0.9rem", color: GRAY, marginTop: 6 }}>
+                {(recipient as any).relationship}
+              </div>
+              {nextEvent && (
+                <p style={{
+                  marginTop: 12, fontSize: "0.95rem", lineHeight: 1.5,
+                  color: nextEvent.daysAway <= 7 ? RED : CHARCOAL, fontWeight: 500,
                 }}>
-                  {recipient.name}
-                </h1>
-                <div style={{ fontSize: "0.85rem", color: GRAY, marginTop: 4 }}>{(recipient as any).relationship}</div>
-                {nextEvent && (
-                  <div style={{
-                    marginTop: 10, fontFamily: "'Caveat', cursive", fontSize: "1.05rem",
-                    color: nextEvent.daysAway <= 7 ? RED : CHARCOAL, lineHeight: 1.4,
-                  }}>
-                    {occasionPhrase(
-                      nextEvent.event,
-                      nextEvent.daysAway,
-                      nextEvent.dateStr,
-                      isSensitiveOccasion(nextEvent.event),
-                    )}
+                  {occasionPhrase(
+                    nextEvent.event,
+                    nextEvent.daysAway,
+                    nextEvent.dateStr,
+                    isSensitiveOccasion(nextEvent.event),
+                  )}
+                </p>
+              )}
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 10 }}>
+            {upcomingEvents[0] && (() => {
+              const ev = upcomingEvents[0];
+              const existingCard = cardByEvent.get(ev.event);
+              return (
+                <PrimaryBtn
+                  onClick={() => setLocation(
+                    existingCard
+                      ? `/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`
+                      : `/briefings/${id}/${encodeURIComponent(ev.event)}`,
+                  )}
+                  accent={RED}
+                  style={{ padding: "11px 20px", borderRadius: 24, fontSize: "0.88rem", fontFamily: sans }}
+                >
+                  {existingCard ? "Review the card" : "Write the card"}
+                </PrimaryBtn>
+              );
+            })()}
+            <PrimaryBtn
+              variant="outline"
+              accent={SAGE}
+              onClick={() => {
+                const el = document.getElementById("memory-input");
+                el?.focus();
+                el?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              style={{ padding: "11px 20px", borderRadius: 24, fontSize: "0.88rem", fontFamily: sans }}
+            >
+              Add a memory
+            </PrimaryBtn>
+            <SecondaryBtn href={`/recipients/${id}?edit=1`}>Edit details</SecondaryBtn>
+          </div>
+        </SoftCard>
+
+        {/* Occasions we remember */}
+        <AppSection title="Occasions we remember" sub="We'll watch the calendar so you don't have to.">
+          <SoftCard style={{ padding: "16px 18px", background: BG }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <span style={{ fontSize: "0.82rem", color: GRAY }}>Tracked occasions</span>
+              <button type="button" onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
+                style={{ fontSize: "0.82rem", fontWeight: 600, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: sans }}>
+                {showAddEvent ? "Done" : "+ Add occasion"}
+              </button>
+            </div>
+
+            {(() => {
+              const allOccasions = [...DATE_SENSITIVE_EVENTS, ...HOLIDAY_EVENTS.map(e => ({ label: e.label, emoji: e.emoji }))];
+              const tracked = allOccasions.filter(e => isTrackedEvent(e.label, recipient));
+              if (tracked.length === 0 && !showAddEvent) {
+                return (
+                  <div style={{ borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
+                    <p style={{ fontSize: "0.88rem", color: GRAY, margin: "0 0 12px", lineHeight: 1.5 }}>
+                      Add a birthday, anniversary, or holiday when you're ready.
+                    </p>
+                    <button type="button" onClick={() => setShowAddEvent(true)} style={{ fontSize: "0.82rem", color: SAGE, fontWeight: 600, background: "none", border: "none", cursor: "pointer", fontFamily: sans }}>
+                      + Add occasion
+                    </button>
+                  </div>
+                );
+              }
+              if (tracked.length === 0) return null;
+              return (
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: showAddEvent ? 14 : 0 }}>
+                  {tracked.map(e => (
+                    <div key={e.label} style={{
+                      padding: "6px 14px", borderRadius: 20, background: `${SAGE}12`,
+                      color: SAGE, fontWeight: 600, fontSize: "0.8rem",
+                      border: `1px solid ${SAGE}25`,
+                    }}>
+                      {e.label}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {showAddEvent && recipient && (
+              <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "16px", marginTop: 8 }}>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: selectedEventChip ? 14 : 0 }}>
+                  {DATE_SENSITIVE_EVENTS.map(e => {
+                    const tracked = isTrackedEvent(e.label, recipient);
+                    const selecting = selectedEventChip === e.label;
+                    return (
+                      <button key={e.label} type="button" onClick={() => { if (tracked) { handleRemoveEvent(e.label); } else { setSelectedEventChip(selecting ? null : e.label); setNewEventDate(""); } }}
+                        style={{
+                          padding: "8px 14px", borderRadius: 20,
+                          border: `1.5px solid ${tracked ? SAGE : selecting ? CHARCOAL : BORDER}`,
+                          background: tracked ? SAGE : selecting ? CHARCOAL : CREAM,
+                          color: tracked || selecting ? WHITE : CHARCOAL,
+                          fontWeight: 600, fontSize: "0.78rem", cursor: "pointer", fontFamily: sans,
+                        }}>
+                        {e.label}{tracked && " ✓"}
+                      </button>
+                    );
+                  })}
+                  {HOLIDAY_EVENTS.map(e => {
+                    const tracked = isTrackedEvent(e.label, recipient);
+                    return (
+                      <button key={e.label} type="button" onClick={() => { if (tracked) { handleRemoveEvent(e.label); } else { handleAddHolidayEvent(e.label, e.flag); } }}
+                        style={{
+                          padding: "8px 14px", borderRadius: 20,
+                          border: `1.5px solid ${tracked ? SAGE : BORDER}`,
+                          background: tracked ? SAGE : CREAM,
+                          color: tracked ? WHITE : CHARCOAL,
+                          fontWeight: 600, fontSize: "0.78rem", cursor: "pointer", fontFamily: sans,
+                        }}>
+                        {e.label}{tracked && " ✓"}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedEventChip && (
+                  <div>
+                    <p style={{ fontSize: "0.82rem", color: GRAY, margin: "0 0 10px" }}>When is their {selectedEventChip}?</p>
+                    <input type="date" value={newEventDate} onChange={e => setNewEventDate(e.target.value)}
+                      style={{ padding: "12px 14px", borderRadius: 10, border: `1px solid ${BORDER}`, fontSize: "0.9rem", fontFamily: sans, outline: "none", width: "100%", boxSizing: "border-box" as const, background: CREAM, marginBottom: 12 }} />
+                    <button type="button" onClick={handleAddDateEvent} disabled={!newEventDate || savingEvent}
+                      style={{ width: "100%", padding: "12px", borderRadius: 24, border: "none", background: !newEventDate ? `${SAGE}50` : SAGE, color: WHITE, fontWeight: 600, fontSize: "0.88rem", cursor: !newEventDate ? "not-allowed" : "pointer", fontFamily: sans }}>
+                      {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
+                    </button>
                   </div>
                 )}
               </div>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 10 }}>
-              {upcomingEvents[0] && (() => {
-                const ev = upcomingEvents[0];
+            )}
+          </SoftCard>
+        </AppSection>
+
+        {/* Coming up next */}
+        <AppSection title="Coming up next" sub={`For ${firstName} — we'll remind you before it matters.`}>
+          {upcomingEvents[0] && (() => {
+            const ev = upcomingEvents[0];
+            const accent = urgencyAccent(ev.daysAway);
+            const big = formatBigDate(ev.dateStr);
+            const existingCard = cardByEvent.get(ev.event);
+            return (
+              <SoftCard style={{ padding: "20px", borderLeft: `3px solid ${accent}`, marginBottom: upcomingEvents.length > 1 ? 10 : 0 }}>
+                <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+                  <div style={{ width: 68, textAlign: "center" as const, padding: "10px 0", borderRadius: 12, background: `${accent}10` }}>
+                    <div style={{ fontFamily: serif, fontSize: "1.65rem", fontWeight: 600, color: accent, lineHeight: 1 }}>{big.day}</div>
+                    <div style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.08em", color: GRAY, marginTop: 2 }}>{big.month}</div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: "1.05rem", color: CHARCOAL, fontFamily: serif }}>{ev.event}</div>
+                    <p style={{ fontSize: "0.88rem", color: GRAY, margin: "6px 0 0", lineHeight: 1.5 }}>
+                      {occasionPhrase(ev.event, ev.daysAway, ev.dateStr, isSensitiveOccasion(ev.event))}
+                    </p>
+                  </div>
+                </div>
+                <PrimaryBtn
+                  onClick={() => setLocation(
+                    existingCard
+                      ? `/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`
+                      : `/briefings/${id}/${encodeURIComponent(ev.event)}`,
+                  )}
+                  accent={existingCard ? SAGE : accent}
+                  variant={existingCard ? "outline" : "fill"}
+                  style={{ padding: "10px 20px", borderRadius: 24, fontSize: "0.86rem", fontFamily: sans }}
+                >
+                  {existingCard ? "Review the card" : "Write the card"}
+                </PrimaryBtn>
+              </SoftCard>
+            );
+          })()}
+
+          {upcomingEvents.length > 1 && (
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginTop: 10 }}>
+              {upcomingEvents.slice(1).map(ev => {
+                const urgent = ev.daysAway <= 7;
+                const near   = ev.daysAway <= 14;
+                const accent = urgent ? RED : near ? AMBER : SAGE;
                 const existingCard = cardByEvent.get(ev.event);
                 return (
-                  <PrimaryBtn
-                    onClick={() => setLocation(
-                      existingCard
-                        ? `/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`
-                        : `/briefings/${id}/${encodeURIComponent(ev.event)}`,
-                    )}
-                    accent={RED}
-                  >
-                    Write the card
-                  </PrimaryBtn>
+                  <SoftCard key={ev.event} style={{ padding: "14px 16px", borderLeft: `3px solid ${accent}`, display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: "0.92rem", color: CHARCOAL }}>{ev.event}</div>
+                      <div style={{ fontSize: "0.8rem", color: GRAY, marginTop: 4 }}>
+                        {fmtDate(ev.dateStr)} · {daysLabel(ev.daysAway)}
+                      </div>
+                    </div>
+                    <PrimaryBtn
+                      onClick={() => setLocation(
+                        existingCard
+                          ? `/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`
+                          : `/briefings/${id}/${encodeURIComponent(ev.event)}`,
+                      )}
+                      variant={existingCard ? "outline" : "fill"}
+                      accent={existingCard ? SAGE : RED}
+                      style={{ padding: "8px 14px", fontSize: "0.76rem", borderRadius: 20, flexShrink: 0, fontFamily: sans }}
+                    >
+                      {existingCard ? "Review" : "Write card"}
+                    </PrimaryBtn>
+                  </SoftCard>
                 );
-              })()}
+              })}
+            </div>
+          )}
+
+          {futureEvents.length > 0 && (
+            <div style={{ marginTop: upcomingEvents.length > 0 ? 14 : 0 }}>
+              <p style={{ fontSize: "0.72rem", fontWeight: 600, color: GRAY, letterSpacing: "0.1em", textTransform: "uppercase" as const, margin: "0 0 8px" }}>
+                On the calendar
+              </p>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                {futureEvents.map(ev => (
+                  <div key={ev.event} style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ flex: 1, fontWeight: 500, fontSize: "0.88rem", color: CHARCOAL }}>{ev.event}</div>
+                    <div style={{ fontSize: "0.8rem", color: GRAY }}>{fmtDate(ev.dateStr)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {eventsNeedingDate.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <p style={{ fontSize: "0.72rem", fontWeight: 600, color: AMBER, letterSpacing: "0.08em", textTransform: "uppercase" as const, margin: "0 0 8px" }}>
+                Add a date when you can
+              </p>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                {eventsNeedingDate.map(ev => (
+                  <div key={ev.event} style={{ background: `${AMBER}06`, borderRadius: 12, border: `1px solid ${AMBER}25`, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ flex: 1, fontWeight: 500, fontSize: "0.88rem", color: CHARCOAL }}>{ev.event}</div>
+                    <button type="button" onClick={() => { setShowAddEvent(true); setSelectedEventChip(ev.event); setNewEventDate(""); }}
+                      style={{ padding: "6px 14px", borderRadius: 20, cursor: "pointer", border: `1px solid ${AMBER}`, background: "transparent", color: AMBER, fontWeight: 600, fontSize: "0.78rem", whiteSpace: "nowrap" as const, fontFamily: sans }}>
+                      Set date
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {upcomingEvents.length === 0 && futureEvents.length === 0 && eventsNeedingDate.length === 0 && (
+            <SoftCard style={{ padding: "24px 20px", textAlign: "center" as const, border: `1px dashed ${BORDER}` }}>
+              <p style={{ fontSize: "0.9rem", color: GRAY, margin: 0, lineHeight: 1.55 }}>
+                Add an occasion above and we'll quietly watch the calendar for you.
+              </p>
+            </SoftCard>
+          )}
+        </AppSection>
+
+        {/* Timeline */}
+        <AppSection title="Your story together" sub="Memories, cards, and moments over time.">
+          <button type="button" onClick={() => setShowTimeline(v => !v)} style={{
+            width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 14,
+            padding: "16px 18px", cursor: "pointer", marginBottom: showTimeline ? 10 : 0,
+            fontFamily: sans,
+          }}>
+            <span style={{ fontWeight: 600, fontSize: "0.9rem", color: CHARCOAL }}>
+              {showTimeline ? "Hide timeline" : "View full timeline"}
+            </span>
+            {showTimeline ? <ChevronUp size={18} color={GRAY} /> : <ChevronDown size={18} color={GRAY} />}
+          </button>
+          {showTimeline && <RelationshipTimeline recipientId={id} />}
+        </AppSection>
+
+        {/* Memories */}
+        <AppSection title="Memories" sub={`Little details that make ${firstName}'s cards feel personal.`}>
+          <SoftCard style={{ padding: "16px 18px", marginBottom: 14 }}>
+            <textarea
+              id="memory-input"
+              value={memoryText}
+              onChange={e => setMemoryText(e.target.value)}
+              placeholder={`Something ${firstName} would love you remembered…`}
+              rows={3}
+              style={{
+                width: "100%", borderRadius: 10, border: `1px solid ${BORDER}`, padding: "12px 14px",
+                fontSize: "0.9rem", lineHeight: 1.6, background: CREAM, resize: "vertical" as const,
+                outline: "none", fontFamily: sans, color: CHARCOAL,
+                boxSizing: "border-box" as const, marginBottom: 12,
+              }}
+            />
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <PrimaryBtn
-                variant="outline"
+                onClick={handleSaveMemory}
+                disabled={savingMemory || !memoryText.trim()}
                 accent={SAGE}
-                onClick={() => {
-                  const el = document.getElementById("memory-input");
-                  el?.focus();
-                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                }}
+                style={{ padding: "10px 20px", borderRadius: 24, fontSize: "0.86rem", fontFamily: sans }}
               >
-                Add a memory
+                {savingMemory ? "Saving…" : memorySaved ? "Saved ✓" : "Save memory"}
               </PrimaryBtn>
             </div>
           </SoftCard>
 
-          {/* ══ OCCASIONS ═══════════════════════════════════════════════════ */}
-          <SoftCard style={{ padding: "14px 18px", marginBottom: 20, background: BG }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: CHARCOAL }}>
-                  Reasons to send a card
-                </div>
-                <button onClick={() => { setShowAddEvent(v => !v); setSelectedEventChip(null); setNewEventDate(""); }}
-                  style={{ fontSize: "0.74rem", fontWeight: 700, color: SAGE, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                  {showAddEvent ? "Done" : "+ Add Occasion"}
+          {freshLoading ? (
+            <p style={{ padding: "8px 0", fontSize: "0.9rem", color: GRAY }}>Loading memories…</p>
+          ) : freshUpdates.length === 0 ? (
+            <SoftCard style={{ padding: "24px 20px", textAlign: "center" as const }}>
+              <p style={{ fontSize: "0.92rem", color: GRAY, lineHeight: 1.6, margin: 0 }}>
+                Every great relationship has stories. Add one above — we'll weave it into the next card.
+              </p>
+            </SoftCard>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+              {displayedMemories.map(m => (
+                <SoftCard key={m.id} style={{ padding: "14px 16px", borderLeft: `3px solid ${ageBorderColor(m.ageCategory)}` }}>
+                  <p style={{ fontSize: "0.95rem", color: CHARCOAL, lineHeight: 1.65, margin: 0, fontFamily: serif }}>
+                    {m.answerText}
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, fontSize: "0.75rem", color: GRAY }}>
+                    <span>{formatDaysAgo(m.daysAgo)}</span>
+                    {m.ageCategory === "recent" && (
+                      <span style={{ padding: "2px 8px", borderRadius: 10, background: `${SAGE}12`, color: SAGE, fontWeight: 600, fontSize: "0.68rem" }}>
+                        In your cards
+                      </span>
+                    )}
+                    {m.ageCategory === "mid" && (
+                      <span style={{ padding: "2px 8px", borderRadius: 10, background: `${AMBER}12`, color: AMBER, fontWeight: 600, fontSize: "0.68rem" }}>
+                        Still fresh
+                      </span>
+                    )}
+                  </div>
+                </SoftCard>
+              ))}
+              {freshUpdates.length > 4 && (
+                <button type="button" onClick={() => setShowAllMemories(v => !v)} style={{
+                  background: "none", border: `1px solid ${BORDER}`, borderRadius: 12,
+                  padding: "10px", fontSize: "0.82rem", color: GRAY, cursor: "pointer", fontWeight: 600, fontFamily: sans,
+                }}>
+                  {showAllMemories ? "Show fewer" : `Show all ${freshUpdates.length} memories`}
+                </button>
+              )}
+            </div>
+          )}
+        </AppSection>
+
+        {/* Improve future cards */}
+        {nextQuestion && !questionSkipped && (
+          <AppSection title="Improve future cards" sub="One thoughtful question — only when it helps.">
+            <SoftCard style={{
+              padding: "20px 18px",
+              border: `1px solid ${nextQuestion.mode === "follow_up" ? "#7C3AED25" : `${RED}20`}`,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <span style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em", color: GRAY, textTransform: "uppercase" as const }}>
+                  {questionModeLabel}
+                </span>
+                <button type="button" onClick={() => setQuestionSkipped(true)} style={{ background: "none", border: "none", color: GRAY, cursor: "pointer", fontSize: "0.8rem", padding: 0, fontWeight: 500, fontFamily: sans }}>
+                  Skip for now
                 </button>
               </div>
-
-              {/* Tracked chips */}
-              {(() => {
-                const allOccasions = [...DATE_SENSITIVE_EVENTS, ...HOLIDAY_EVENTS.map(e => ({ label: e.label, emoji: e.emoji }))];
-                const tracked = allOccasions.filter(e => isTrackedEvent(e.label, recipient));
-                if (tracked.length === 0 && !showAddEvent) {
-                  return (
-                    <div style={{ borderRadius: 10, border: `1px dashed ${BORDER}`, padding: "14px", textAlign: "center" as const }}>
-                      <div style={{ fontSize: "0.82rem", color: GRAY, marginBottom: 8 }}>No occasions added yet.</div>
-                      <button onClick={() => setShowAddEvent(true)} style={{ fontSize: "0.78rem", color: SAGE, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>+ Add Occasion</button>
-                    </div>
-                  );
-                }
-                if (tracked.length === 0) return null;
-                return (
-                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7, marginBottom: showAddEvent ? 12 : 0 }}>
-                    {tracked.map(e => (
-                      <div key={e.label} style={{ padding: "5px 12px", borderRadius: 20, background: SAGE, color: WHITE, fontWeight: 600, fontSize: "0.78rem", display: "flex", alignItems: "center", gap: 4 }}>
-                        {e.emoji} {e.label}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-
-              {/* Occasion picker */}
-              {showAddEvent && recipient && (
-                <div style={{ background: WHITE, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "14px", marginTop: 4 }}>
-                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7, marginBottom: selectedEventChip ? 14 : 0 }}>
-                    {DATE_SENSITIVE_EVENTS.map(e => {
-                      const tracked = isTrackedEvent(e.label, recipient);
-                      const selecting = selectedEventChip === e.label;
-                      return (
-                        <button key={e.label} onClick={() => { if (tracked) { handleRemoveEvent(e.label); } else { setSelectedEventChip(selecting ? null : e.label); setNewEventDate(""); } }}
-                          style={{ padding: "6px 12px", borderRadius: 20, border: `1.5px solid ${tracked ? SAGE : selecting ? BLACK : BORDER}`, background: tracked ? SAGE : selecting ? BLACK : CREAM, color: tracked || selecting ? WHITE : BLACK, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                          {e.emoji} {e.label}{tracked && <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>✓</span>}
-                        </button>
-                      );
-                    })}
-                    {HOLIDAY_EVENTS.map(e => {
-                      const tracked = isTrackedEvent(e.label, recipient);
-                      return (
-                        <button key={e.label} onClick={() => { if (tracked) { handleRemoveEvent(e.label); } else { handleAddHolidayEvent(e.label, e.flag); } }}
-                          style={{ padding: "6px 12px", borderRadius: 20, border: `1.5px solid ${tracked ? SAGE : BORDER}`, background: tracked ? SAGE : CREAM, color: tracked ? WHITE : BLACK, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                          {e.emoji} {e.label}{tracked && <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>✓</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {selectedEventChip && (
-                    <div>
-                      <div style={{ fontSize: "0.78rem", color: GRAY, marginBottom: 8 }}>When is their {selectedEventChip}?</div>
-                      <input type="date" value={newEventDate} onChange={e => setNewEventDate(e.target.value)}
-                        style={{ padding: "9px 12px", borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: "0.86rem", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none", width: "100%", boxSizing: "border-box" as const, background: CREAM, marginBottom: 10 }} />
-                      <button onClick={handleAddDateEvent} disabled={!newEventDate || savingEvent}
-                        style={{ width: "100%", padding: "9px", borderRadius: 8, border: "none", background: !newEventDate ? `${SAGE}50` : SAGE, color: WHITE, fontWeight: 700, fontSize: "0.84rem", cursor: !newEventDate ? "not-allowed" : "pointer" }}>
-                        {savingEvent ? "Saving…" : `Add ${selectedEventChip}`}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-          </SoftCard>
-
-          {/* ══ CARDS COMING UP ═════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 20 }}>
-            <SectionTitle title="Cards coming up" sub={`For ${firstName} — we'll nudge you before it's awkward.`} />
-
-            {/* Hero — first upcoming event */}
-            {upcomingEvents[0] && (() => {
-              const ev = upcomingEvents[0];
-              const accent = urgencyAccent(ev.daysAway);
-              const big = formatBigDate(ev.dateStr);
-              const existingCard = cardByEvent.get(ev.event);
-              return (
-                <SoftCard style={{ padding: "18px", borderLeft: `3px solid ${accent}`, marginBottom: upcomingEvents.length > 1 ? 8 : 0 }}>
-                  <div style={{ display: "flex", gap: 14, marginBottom: 14 }}>
-                    <div style={{ width: 64, textAlign: "center" as const, padding: "8px 0", borderRadius: 12, background: `${accent}10` }}>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem", color: accent, lineHeight: 1 }}>{big.day}</div>
-                      <div style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.1em", color: GRAY }}>{big.month}</div>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: "1.05rem", color: CHARCOAL }}>{ev.event}</div>
-                      <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: 4 }}>
-                        {occasionPhrase(ev.event, ev.daysAway, ev.dateStr, isSensitiveOccasion(ev.event))}
-                      </div>
-                    </div>
-                  </div>
-                  <PrimaryBtn
-                    onClick={() => setLocation(
-                      existingCard
-                        ? `/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`
-                        : `/briefings/${id}/${encodeURIComponent(ev.event)}`,
-                    )}
-                    accent={existingCard ? SAGE : accent}
-                    variant={existingCard ? "outline" : "fill"}
-                  >
-                    {existingCard ? "Review the card" : "Write the card"}
-                  </PrimaryBtn>
-                </SoftCard>
-              );
-            })()}
-
-            {/* Remaining upcoming */}
-            {upcomingEvents.length > 1 && (
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 7, marginTop: 7 }}>
-                {upcomingEvents.slice(1).map(ev => {
-                  const urgent = ev.daysAway <= 7;
-                  const near   = ev.daysAway <= 14;
-                  const accent = urgent ? RED : near ? AMBER : SAGE;
-                  return (
-                    <div key={ev.event} style={{ background: WHITE, borderRadius: 12, border: "1px solid #EDEBE6", borderLeft: `3px solid ${accent}`, padding: "11px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ width: 42, height: 42, borderRadius: 9, flexShrink: 0, background: "#F5F1EC", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ textAlign: "center" as const, lineHeight: 1 }}>
-                          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.15rem", color: CHARCOAL, lineHeight: 1 }}>{ev.daysAway}</div>
-                          <div style={{ fontSize: "0.42rem", fontWeight: 800, letterSpacing: "0.07em", color: GRAY, lineHeight: 1, marginTop: 2, textTransform: "uppercase" as const }}>days</div>
-                        </div>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.88rem", color: CHARCOAL }}>{ev.event}</div>
-                        <div style={{ fontSize: "0.74rem", color: GRAY, marginTop: 2 }}>{fmtDate(ev.dateStr)}</div>
-                      </div>
-                      {(() => {
-                        const existingCard = cardByEvent.get(ev.event);
-                        return existingCard ? (
-                          <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}?rewrite=1`)}
-                            style={{ padding: "6px 12px", borderRadius: 7, border: `1.5px solid ${SAGE}`, background: WHITE, color: SAGE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-                            Review →
-                          </button>
-                        ) : (
-                          <button onClick={() => setLocation(`/briefings/${id}/${encodeURIComponent(ev.event)}`)}
-                            style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: RED, color: WHITE, fontWeight: 700, fontSize: "0.7rem", cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-                            Write the card
-                          </button>
-                        );
-                      })()}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* On the calendar (> 60 days) */}
-            {futureEvents.length > 0 && (
-              <div style={{ marginTop: upcomingEvents.length > 0 ? 12 : 0 }}>
-                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: GRAY, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 6 }}>On the calendar</div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
-                  {futureEvents.map(ev => (
-                    <div key={ev.event} style={{ background: WHITE, borderRadius: 10, border: "1px solid #EDEBE6", padding: "9px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: CHARCOAL }}>{ev.event}</div>
-                      <div style={{ fontSize: "0.76rem", color: GRAY }}>{fmtDate(ev.dateStr)}</div>
-                      <div style={{ fontSize: "0.72rem", color: `${CHARCOAL}40`, minWidth: 40, textAlign: "right" as const }}>{ev.daysAway}d</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Needs a date */}
-            {eventsNeedingDate.length > 0 && (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: "0.66rem", fontWeight: 700, color: AMBER, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 6 }}>Needs a date</div>
-                <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
-                  {eventsNeedingDate.map(ev => (
-                    <div key={ev.event} style={{ background: `${AMBER}08`, borderRadius: 10, border: `1px solid ${AMBER}30`, padding: "9px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ flex: 1, fontWeight: 600, fontSize: "0.86rem", color: CHARCOAL }}>{ev.event}</div>
-                      <button onClick={() => { setShowAddEvent(true); setSelectedEventChip(ev.event); setNewEventDate(""); }}
-                        style={{ padding: "5px 11px", borderRadius: 7, cursor: "pointer", border: `1.5px solid ${AMBER}`, background: "transparent", color: AMBER, fontWeight: 700, fontSize: "0.7rem", whiteSpace: "nowrap" as const }}>
-                        Set Date →
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Empty */}
-            {upcomingEvents.length === 0 && futureEvents.length === 0 && eventsNeedingDate.length === 0 && (
-              <div style={{ background: WHITE, borderRadius: 12, border: `1px dashed ${BORDER}`, padding: "20px 16px", textAlign: "center" as const }}>
-                <div style={{ fontSize: "0.84rem", color: GRAY }}>Add an occasion above and we'll watch the calendar for you.</div>
-              </div>
-            )}
-          </div>
-
-          {/* ══ SUGGESTED QUESTION ══════════════════════════════════════════════ */}
-          {nextQuestion && !questionSkipped && (
-            <div style={{ background: WHITE, borderRadius: 14, padding: "18px", border: `1.5px solid ${nextQuestion.mode === "follow_up" ? "#7C3AED35" : `${RED}25`}`, marginBottom: 16 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", color: GRAY }}>
-                  {nextQuestion.mode === "follow_up" ? "Follow up" : profileComplete ? "Keep it fresh" : "Help us nail the card"}
-                </div>
-                <button onClick={() => setQuestionSkipped(true)} style={{ background: "none", border: "none", color: GRAY, cursor: "pointer", fontSize: "0.78rem", padding: 0, fontWeight: 600 }}>Skip</button>
-              </div>
               {nextQuestion.mode === "follow_up" && nextQuestion.followUp && (
-                <div style={{ background: "#7C3AED0A", borderRadius: 8, padding: "8px 12px", marginBottom: 10, fontSize: "0.78rem", color: "#7C3AED", fontStyle: "italic", lineHeight: 1.5 }}>
-                  You mentioned: "{nextQuestion.followUp.originalAnswer.slice(0, 80)}{nextQuestion.followUp.originalAnswer.length > 80 ? "…" : ""}"
+                <div style={{ background: "#7C3AED08", borderRadius: 10, padding: "10px 14px", marginBottom: 12, fontSize: "0.82rem", color: "#7C3AED", fontStyle: "italic", lineHeight: 1.5 }}>
+                  You mentioned: &ldquo;{nextQuestion.followUp.originalAnswer.slice(0, 80)}{nextQuestion.followUp.originalAnswer.length > 80 ? "…" : ""}&rdquo;
                 </div>
               )}
-              <div style={{ fontSize: "1rem", fontWeight: 700, color: CHARCOAL, marginBottom: 5, lineHeight: 1.5 }}>{nextQuestion.question}</div>
-              <div style={{ fontSize: "0.77rem", color: GRAY, marginBottom: 12, fontStyle: "italic", lineHeight: 1.5 }}>{nextQuestion.reason}</div>
+              <p style={{ fontSize: "1.02rem", fontWeight: 600, color: CHARCOAL, margin: "0 0 8px", lineHeight: 1.5, fontFamily: serif }}>
+                {nextQuestion.question}
+              </p>
+              <p style={{ fontSize: "0.82rem", color: GRAY, margin: "0 0 14px", lineHeight: 1.5 }}>
+                {nextQuestion.reason}
+              </p>
               {!answerSaved ? (
                 <>
                   <textarea value={answerText} onChange={e => setAnswerText(e.target.value)} placeholder="Your answer…" rows={3}
-                    style={{ width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`, padding: "10px 12px", fontSize: "0.9rem", lineHeight: 1.6, background: CREAM, resize: "vertical" as const, outline: "none", fontFamily: "'Plus Jakarta Sans', sans-serif", color: CHARCOAL, boxSizing: "border-box" as const, marginBottom: 8 }} />
+                    style={{ width: "100%", borderRadius: 10, border: `1px solid ${BORDER}`, padding: "12px 14px", fontSize: "0.9rem", lineHeight: 1.6, background: CREAM, resize: "vertical" as const, outline: "none", fontFamily: sans, color: CHARCOAL, boxSizing: "border-box" as const, marginBottom: 10 }} />
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                    <button onClick={() => setQuestionSkipped(true)} style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${BORDER}`, background: "transparent", color: GRAY, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer" }}>Not now</button>
-                    <button onClick={handleSaveAnswer} disabled={savingAnswer || !answerText.trim()} style={{ padding: "7px 16px", borderRadius: 8, border: "none", background: answerText.trim() ? RED : `${RED}40`, color: WHITE, fontWeight: 700, fontSize: "0.78rem", cursor: answerText.trim() ? "pointer" : "default" }}>
-                      {savingAnswer ? "Saving…" : "Save Answer"}
+                    <button type="button" onClick={() => setQuestionSkipped(true)} style={{ padding: "9px 16px", borderRadius: 20, border: `1px solid ${BORDER}`, background: "transparent", color: GRAY, fontWeight: 500, fontSize: "0.82rem", cursor: "pointer", fontFamily: sans }}>
+                      Not now
                     </button>
+                    <PrimaryBtn onClick={handleSaveAnswer} disabled={savingAnswer || !answerText.trim()} style={{ padding: "9px 18px", borderRadius: 20, fontSize: "0.82rem", fontFamily: sans }}>
+                      {savingAnswer ? "Saving…" : "Save answer"}
+                    </PrimaryBtn>
                   </div>
                 </>
               ) : (
-                <div style={{ padding: "12px", borderRadius: 8, background: `${SAGE}12`, color: SAGE, fontWeight: 700, fontSize: "0.86rem", textAlign: "center" as const }}>
-                  ✓ Saved — this will improve {firstName}'s next card.
+                <div style={{ padding: "14px", borderRadius: 10, background: `${SAGE}10`, color: SAGE, fontWeight: 600, fontSize: "0.88rem", textAlign: "center" as const }}>
+                  Saved — this will make {firstName}&apos;s next card feel more like you.
                 </div>
               )}
-            </div>
-          )}
-
-          {/* ══ STUFF WORTH REMEMBERING ═══════════════════════════════════════ */}
-          <div style={{ marginBottom: 20 }}>
-            <SectionTitle title="Stuff worth remembering" sub={`Details that make ${firstName}'s cards sound personal.`} />
-
-            <SoftCard style={{ padding: "14px 16px", marginBottom: 12 }}>
-              <textarea
-                id="memory-input"
-                value={memoryText}
-                onChange={e => setMemoryText(e.target.value)}
-                placeholder={`Something ${firstName} would love you remembered…`}
-                rows={3}
-                style={{
-                  width: "100%", borderRadius: 8, border: `1px solid ${BORDER}`, padding: "10px 12px",
-                  fontSize: "0.9rem", lineHeight: 1.6, background: CREAM, resize: "vertical" as const,
-                  outline: "none", fontFamily: "'Plus Jakarta Sans', sans-serif", color: CHARCOAL,
-                  boxSizing: "border-box" as const, marginBottom: 10,
-                }}
-              />
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                <PrimaryBtn
-                  onClick={handleSaveMemory}
-                  disabled={savingMemory || !memoryText.trim()}
-                  accent={SAGE}
-                >
-                  {savingMemory ? "Saving…" : memorySaved ? "Saved ✓" : "Add a memory"}
-                </PrimaryBtn>
-              </div>
             </SoftCard>
+          </AppSection>
+        )}
 
-            {/* Memory list */}
-            {freshLoading ? (
-              <div style={{ padding: "10px 0", fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY }}>Loading memories…</div>
-            ) : freshUpdates.length === 0 ? (
-              <div style={{ background: WHITE, borderRadius: 10, border: "1px solid #EDEBE6", padding: "18px 16px", textAlign: "center" as const }}>
-                <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, lineHeight: 1.7 }}>
-                  Nothing saved yet. Add something above — we'll weave it into the next card.
-                </div>
+        {/* What we know */}
+        <AppSection
+          title="What we know about them"
+          sub="Thoughtful notes that shape future cards."
+          right={<SecondaryBtn href={`/recipients/${id}?edit=1`}>Edit details</SecondaryBtn>}
+        >
+          <Card>
+            {profileFields.length === 0 ? (
+              <div style={{ padding: "28px 20px", textAlign: "center" as const }}>
+                <p style={{ fontSize: "0.92rem", color: GRAY, margin: "0 0 16px", lineHeight: 1.55 }}>
+                  {recipientHasThinMemory(recipient)
+                    ? "A memory or two helps us write cards that sound like you."
+                    : "Tell us what makes them tick — we'll remember for you."}
+                </p>
+                <SecondaryBtn href={`/recipients/${id}?edit=1`}>Add details</SecondaryBtn>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
-                {displayedMemories.map(m => (
-                  <div key={m.id} style={{ background: WHITE, borderRadius: 10, border: "1px solid #EDEBE6", borderLeft: `3px solid ${ageBorderColor(m.ageCategory)}`, padding: "11px 14px" }}>
-                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: CHARCOAL, lineHeight: 1.65 }}>{m.answerText}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, fontSize: "0.7rem", color: GRAY }}>
-                      <span>{formatDaysAgo(m.daysAgo)}</span>
-                      {m.ageCategory === "recent" && <span style={{ padding: "1px 7px", borderRadius: 10, background: `${SAGE}15`, color: SAGE, fontWeight: 700, fontSize: "0.66rem" }}>Used in cards</span>}
-                      {m.ageCategory === "mid" && <span style={{ padding: "1px 7px", borderRadius: 10, background: `${AMBER}15`, color: AMBER, fontWeight: 600, fontSize: "0.66rem" }}>Aging out soon</span>}
-                    </div>
+              profileFields.map((f, i) => (
+                <div key={f.key} style={{
+                  display: "flex", flexDirection: "column" as const, gap: 4,
+                  padding: "14px 18px",
+                  borderBottom: i < profileFields.length - 1 ? `1px solid ${BORDER}` : "none",
+                }}>
+                  <div style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.08em", color: GRAY, textTransform: "uppercase" as const }}>
+                    {f.key}
                   </div>
-                ))}
-                {freshUpdates.length > 4 && (
-                  <button onClick={() => setShowAllMemories(v => !v)} style={{ background: "none", border: "1px solid #EDEBE6", borderRadius: 8, padding: "8px", fontSize: "0.78rem", color: GRAY, cursor: "pointer", fontWeight: 600 }}>
-                    {showAllMemories ? "Show fewer" : `Show all ${freshUpdates.length} memories`}
-                  </button>
-                )}
-              </div>
+                  <div style={{ fontSize: "0.92rem", color: CHARCOAL, lineHeight: 1.6 }}>{String(f.value)}</div>
+                </div>
+              ))
             )}
-          </div>
+          </Card>
+        </AppSection>
 
-          {/* ══ WHAT MAKES THEM THEM + THINGS TO NEVER MESS UP ═══════════════ */}
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <SectionTitle title="What makes them them" style={{ marginBottom: 0 }} />
-              <OutlineBtn href={`/recipients/${id}?edit=1`}>Edit details</OutlineBtn>
-            </div>
-            <Card>
-              {profileFields.length === 0 ? (
-                <div style={{ padding: "20px 16px", textAlign: "center" as const }}>
-                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: GRAY, marginBottom: 12 }}>
-                    {recipientHasThinMemory(recipient)
-                      ? "Needs a memory before we can sound charming."
-                      : "Tell us what makes them tick."}
-                  </div>
-                  <Link href={`/recipients/${id}?edit=1`}>
-                    <button style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid #EDEBE6", background: "none", color: CHARCOAL, fontWeight: 600, fontSize: "0.78rem", cursor: "pointer" }}>Add details →</button>
-                  </Link>
-                </div>
-              ) : (
-                profileFields.map((f, i) => (
-                  <div key={f.key} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "11px 16px", borderBottom: i < profileFields.length - 1 ? "1px solid #F5F1EC" : "none" }}>
-                    <div style={{ width: 112, flexShrink: 0, fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.07em", color: GRAY, paddingTop: 2 }}>{f.key}</div>
-                    <div style={{ fontSize: "0.88rem", color: CHARCOAL, lineHeight: 1.6 }}>{String(f.value)}</div>
-                  </div>
-                ))
-              )}
-            </Card>
-          </div>
-
-          {(recipient as any).thingsToAvoid && (
-            <div style={{ marginBottom: 20 }}>
-              <SectionTitle title="Things to never mess up" sub="Sensitive topics — we'll tread carefully." />
-              <SoftCard style={{ padding: "14px 16px", borderLeft: `3px solid ${RED}`, background: `${RED}04` }}>
-                <div style={{ fontSize: "0.9rem", color: CHARCOAL, lineHeight: 1.65 }}>{(recipient as any).thingsToAvoid}</div>
-              </SoftCard>
-            </div>
-          )}
-
-          {/* ══ PAST CARDS ════════════════════════════════════════════════════ */}
-          {cards.length > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              <SectionTitle title="Past cards" />
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
-                {cards.slice(0, 5).map(card => {
-                  const sc = card.status === "Approved" ? SAGE : card.status === "Ready for approval" ? AMBER : GRAY;
-                  const msg = (card as any).approvedMessage ?? (card as any).messageOriginal ?? "";
-                  return (
-                    <Card key={card.id} style={{ padding: "12px 16px" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: msg ? 6 : 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.9rem", color: CHARCOAL }}>{(card as any).holiday}</div>
-                        <span style={{ padding: "2px 9px", borderRadius: 10, fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.04em", background: `${sc}15`, color: sc, textTransform: "uppercase" as const }}>{card.status}</span>
-                      </div>
-                      {msg && (
-                        <div style={{ fontFamily: "'Caveat', cursive", fontSize: "0.9rem", color: GRAY, lineHeight: 1.55, display: "-webkit-box" as const, WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }}>
-                          {msg.slice(0, 140)}
-                        </div>
-                      )}
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ══ FULL HISTORY ════════════════════════════════════════════════════ */}
-          <div style={{ marginBottom: 16 }}>
-            <button onClick={() => setShowTimeline(v => !v)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: WHITE, border: "1px solid #EDEBE6", borderRadius: 12, padding: "14px 16px", cursor: "pointer", marginBottom: showTimeline ? 8 : 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: "1rem" }}>📋</span>
-                <span style={{ fontWeight: 700, fontSize: "0.9rem", color: CHARCOAL }}>Full history</span>
-                <span style={{ fontSize: "0.74rem", color: GRAY }}>— everything we've logged</span>
-              </div>
-              <span style={{ fontSize: "0.8rem", color: GRAY }}>{showTimeline ? "▲ collapse" : "▼ expand"}</span>
-            </button>
-            {showTimeline && <RelationshipTimeline recipientId={id} />}
-          </div>
-
-          {/* ══ RELATIONSHIP HEALTH ════════════════════════════════════════════ */}
-          {healthScore && (
-            <SoftCard style={{ padding: "14px 16px", marginBottom: 16 }}>
-              <SectionTitle title="Staying out of trouble" sub="How covered you are for upcoming cards." style={{ marginBottom: 10 }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ flex: 1, height: 5, background: "#EDEBE6", borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${healthScore.score}%`, background: statusColor, borderRadius: 3, transition: "width 0.5s ease" }} />
-                </div>
-                <div style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: statusColor, flexShrink: 0 }}>
-                  {healthScore.score >= 70 ? "You're safe for now." : "Needs a little love."}
-                </div>
-              </div>
-              {healthScore.pendingFollowUps > 0 && (
-                <div style={{ fontSize: "0.75rem", color: AMBER, marginTop: 8, fontWeight: 600 }}>
-                  {healthScore.pendingFollowUps} follow-up{healthScore.pendingFollowUps > 1 ? "s" : ""} waiting — quick answers help a lot.
-                </div>
-              )}
-              {healthScore.lastUpdateDaysAgo !== null && healthScore.lastUpdateDaysAgo > 90 && (
-                <div style={{ fontSize: "0.75rem", color: GRAY, marginTop: 6 }}>
-                  Haven't added a memory in a while. Drop one above before the next card.
-                </div>
-              )}
+        {(recipient as any).thingsToAvoid && (
+          <AppSection title="Handle with care" sub="Sensitive topics — we'll tread gently.">
+            <SoftCard style={{ padding: "16px 18px", borderLeft: `3px solid ${RED}`, background: `${RED}04` }}>
+              <p style={{ fontSize: "0.92rem", color: CHARCOAL, lineHeight: 1.65, margin: 0 }}>
+                {(recipient as any).thingsToAvoid}
+              </p>
             </SoftCard>
-          )}
+          </AppSection>
+        )}
 
-        </div>
-      </div>
-    </>
+        {/* Cards you've sent */}
+        {cards.length > 0 && (
+          <AppSection title="Cards you've sent" sub="Your relationship history — not a transaction log.">
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+              {cards.slice(0, 5).map(card => {
+                const sc = card.status === "Approved" ? SAGE : card.status === "Ready for approval" ? AMBER : GRAY;
+                const msg = (card as any).approvedMessage ?? (card as any).messageOriginal ?? "";
+                const statusLabel = card.status === "Approved" ? "Sent" : card.status === "Ready for approval" ? "Ready for you" : card.status;
+                return (
+                  <Card key={card.id} style={{ padding: "14px 18px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: msg ? 8 : 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: "0.92rem", color: CHARCOAL, fontFamily: serif }}>
+                        {(card as any).holiday}
+                      </div>
+                      <span style={{
+                        padding: "3px 10px", borderRadius: 12, fontSize: "0.68rem", fontWeight: 600,
+                        background: `${sc}12`, color: sc,
+                      }}>
+                        {statusLabel}
+                      </span>
+                    </div>
+                    {msg && (
+                      <p style={{
+                        fontSize: "0.88rem", color: GRAY, lineHeight: 1.55, margin: 0,
+                        display: "-webkit-box" as const, WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden",
+                        fontFamily: serif, fontStyle: "italic",
+                      }}>
+                        {msg.slice(0, 140)}
+                      </p>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+          </AppSection>
+        )}
+
+        {/* Quiet health reassurance */}
+        {healthScore && (
+          <SoftCard style={{ padding: "16px 18px", marginBottom: 16, background: `${SAGE}06`, border: `1px solid ${SAGE}20` }}>
+            <p style={{ fontSize: "0.88rem", fontWeight: 600, color: CHARCOAL, margin: "0 0 10px" }}>
+              {healthScore.score >= 70 ? "We're in good shape for upcoming cards." : "A little more detail would help future cards shine."}
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ flex: 1, height: 4, background: BORDER, borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${healthScore.score}%`, background: statusColor, borderRadius: 2, transition: "width 0.5s ease" }} />
+              </div>
+            </div>
+            {healthScore.pendingFollowUps > 0 && (
+              <p style={{ fontSize: "0.8rem", color: AMBER, margin: "10px 0 0", fontWeight: 500 }}>
+                {healthScore.pendingFollowUps} quick follow-up{healthScore.pendingFollowUps > 1 ? "s" : ""} would help — answer above when you have a moment.
+              </p>
+            )}
+            {healthScore.lastUpdateDaysAgo !== null && healthScore.lastUpdateDaysAgo > 90 && (
+              <p style={{ fontSize: "0.8rem", color: GRAY, margin: "8px 0 0" }}>
+                It's been a while since you added a memory. Drop one above before the next card.
+              </p>
+            )}
+          </SoftCard>
+        )}
+
+      </PageShell>
+    </AppShell>
   );
 }

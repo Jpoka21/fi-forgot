@@ -4,13 +4,17 @@ import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getCards } from "@/lib/data";
 import { getCustomerPendingApprovals } from "@/lib/admin-data";
+import { PB } from "@/lib/personal-brand";
 
-const BEIGE  = "#F2E6D3";
-const RED    = "#E23B2E";
-const INK    = "#1F1F1F";
-const MID    = "#4B5563";
-const WHITE  = "#FFFFFF";
-const BORDER = "#E5E0D8";
+const CREAM  = PB.cream;
+const RED    = PB.red;
+const INK    = PB.ink;
+const MID    = PB.mid;
+const WHITE  = PB.white;
+const BORDER = PB.border;
+
+const serif = "'Lora', Georgia, serif";
+const sans = "'Plus Jakarta Sans', sans-serif";
 
 const NAV = [
   { label: "Home",    path: "/dashboard" },
@@ -31,7 +35,10 @@ function isAdminUser(user: { email?: string; name?: string } | null): boolean {
 
 function isNavActive(location: string, path: string): boolean {
   if (path === "/dashboard") {
-    return location === "/dashboard" || location.startsWith("/relationship/");
+    return location === "/dashboard"
+        || location === "/people"
+        || location.startsWith("/relationship/")
+        || location.startsWith("/briefings/");
   }
   if (path === "/cards/review") {
     return location.startsWith("/cards/");
@@ -69,39 +76,43 @@ function AccountMenu({
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
+        type="button"
         onClick={() => setOpen(o => !o)}
         data-testid="btn-account-menu"
         aria-label="Account menu"
+        aria-expanded={open}
         style={{
-          display: "flex", alignItems: "center", gap: 6,
-          background: "none", border: "none", cursor: "pointer",
-          padding: "4px 6px", borderRadius: 8,
+          display: "flex", alignItems: "center", gap: 8,
+          background: open ? WHITE : "transparent",
+          border: `1px solid ${open ? BORDER : "transparent"}`,
+          cursor: "pointer",
+          padding: "4px 8px 4px 4px", borderRadius: 24,
+          transition: "background 0.15s ease, border-color 0.15s ease",
         }}
       >
         <div style={{
-          width: 32, height: 32, borderRadius: "50%",
-          background: open ? RED : `${INK}12`,
-          color: open ? WHITE : INK,
+          width: 34, height: 34, borderRadius: "50%",
+          background: open ? RED : `${RED}12`,
+          color: open ? WHITE : RED,
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontSize: "0.82rem", fontWeight: 700,
-          transition: "all 0.15s",
+          fontFamily: sans, fontSize: "0.85rem", fontWeight: 600,
+          transition: "all 0.15s ease",
         }}>
           {initial}
         </div>
-        <ChevronDown size={12} style={{ color: MID }} />
+        <ChevronDown size={14} style={{ color: MID, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s ease" }} />
       </button>
 
       {open && (
         <div style={{
-          position: "absolute", top: "calc(100% + 8px)", right: 0,
-          background: WHITE, borderRadius: 12, minWidth: 200,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.12)", zIndex: 300,
-          border: `1px solid ${BORDER}`,
+          position: "absolute", top: "calc(100% + 10px)", right: 0,
+          background: WHITE, borderRadius: 14, minWidth: 220,
+          boxShadow: "0 8px 32px rgba(31,31,31,0.1)", zIndex: 300,
+          border: `1px solid ${BORDER}`, overflow: "hidden",
         }}>
-          <div style={{ padding: "12px 16px 10px", borderBottom: `1px solid ${BORDER}` }}>
-            <p style={{ margin: 0, fontWeight: 700, fontSize: "0.88rem", color: INK }}>{user?.name}</p>
-            <p style={{ margin: "2px 0 0", fontSize: "0.74rem", color: MID }}>{user?.email}</p>
+          <div style={{ padding: "14px 16px 12px", borderBottom: `1px solid ${BORDER}`, background: `${CREAM}80` }}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem", color: INK, fontFamily: sans }}>{user?.name}</p>
+            <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: MID, fontFamily: sans }}>{user?.email}</p>
           </div>
           {[
             { label: "Reminder settings", fn: () => { setOpen(false); navigate("/settings/reminders"); } },
@@ -109,13 +120,15 @@ function AccountMenu({
           ].map(item => (
             <button
               key={item.label}
+              type="button"
               onClick={() => { item.fn(); setOpen(false); }}
               style={{
-                display: "block", width: "100%", padding: "9px 16px",
+                display: "block", width: "100%", padding: "12px 16px",
                 background: "none", border: "none", cursor: "pointer",
-                fontSize: "0.84rem", color: INK, textAlign: "left" as const,
+                fontSize: "0.88rem", color: INK, textAlign: "left" as const,
+                fontFamily: sans, fontWeight: 500,
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = BEIGE)}
+              onMouseEnter={e => (e.currentTarget.style.background = CREAM)}
               onMouseLeave={e => (e.currentTarget.style.background = "none")}
             >
               {item.label}
@@ -123,14 +136,16 @@ function AccountMenu({
           ))}
           <div style={{ borderTop: `1px solid ${BORDER}` }}>
             <button
+              type="button"
               onClick={() => { setOpen(false); onLogout(); }}
               data-testid="btn-logout"
               style={{
-                display: "block", width: "100%", padding: "9px 16px",
+                display: "block", width: "100%", padding: "12px 16px",
                 background: "none", border: "none", cursor: "pointer",
-                fontSize: "0.84rem", color: RED, fontWeight: 700, textAlign: "left" as const,
+                fontSize: "0.88rem", color: RED, fontWeight: 600, textAlign: "left" as const,
+                fontFamily: sans,
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}
+              onMouseEnter={e => (e.currentTarget.style.background = `${RED}08`)}
               onMouseLeave={e => (e.currentTarget.style.background = "none")}
             >
               Sign out
@@ -164,68 +179,76 @@ export default function AppNav() {
     return () => window.removeEventListener("resize", h);
   }, []);
 
-  const px = isMobile ? 14 : 28;
+  const px = isMobile ? 16 : 24;
 
   return (
-    <div style={{
+    <header style={{
       position: "sticky", top: 0, zIndex: 40,
-      background: BEIGE, borderBottom: `1px solid ${BORDER}`,
-      fontFamily: "'Plus Jakarta Sans', sans-serif",
+      background: "rgba(250,247,244,0.94)",
+      backdropFilter: "blur(10px)",
+      borderBottom: `1px solid ${BORDER}`,
+      fontFamily: sans,
     }}>
+      {/* Brand row */}
       <div style={{
-        padding: `0 ${px}px`, height: 54,
+        maxWidth: 720, margin: "0 auto", width: "100%",
+        padding: `0 ${px}px`, height: isMobile ? 56 : 60,
         display: "flex", alignItems: "center", justifyContent: "space-between",
+        boxSizing: "border-box" as const,
       }}>
-        <Link href="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
-          <span style={{
-            fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem",
-            color: RED, fontStyle: "italic", letterSpacing: "0.01em", marginRight: 3,
-          }}>
-            F*
-          </span>
-          <span style={{
-            fontFamily: "'Bebas Neue', cursive", fontSize: "1.75rem",
-            color: INK, letterSpacing: "0.04em",
-          }}>
-            I FORGOT
-          </span>
+        <Link href="/dashboard" style={{ textDecoration: "none", flexShrink: 0 }}>
+          <div style={{ fontFamily: serif, fontSize: isMobile ? "1.1rem" : "1.2rem", fontWeight: 700, color: INK, letterSpacing: "0.02em", lineHeight: 1.1 }}>
+            F.I. FORGOT
+          </div>
+          {!isMobile && (
+            <div style={{ fontFamily: sans, fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.16em", color: MID, marginTop: 3 }}>
+              RELATIONSHIP CONCIERGE
+            </div>
+          )}
         </Link>
 
         <AccountMenu user={user} onLogout={logout} isAdmin={isAdminUser(user)} />
       </div>
 
+      {/* Navigation row */}
       <div style={{
         borderTop: `1px solid ${BORDER}`,
         overflowX: "auto" as const,
         scrollbarWidth: "none" as const,
+        WebkitOverflowScrolling: "touch",
       }}>
         <div style={{
-          display: "flex", padding: `0 ${isMobile ? 6 : 20}px`,
-          gap: 0, minWidth: "fit-content",
+          maxWidth: 720, margin: "0 auto", width: "100%",
+          display: "flex", padding: isMobile ? `8px ${px}px 10px` : `10px ${px}px 12px`,
+          gap: 8, boxSizing: "border-box" as const,
         }}>
           {NAV.map(item => {
             const active = isNavActive(location, item.path);
             const showBadge = item.path === "/cards/review" && approvalCount > 0;
             return (
-              <Link key={item.path} href={item.path} style={{ textDecoration: "none" }}>
+              <Link key={item.path} href={item.path} style={{ textDecoration: "none", flexShrink: 0 }}>
                 <div style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  padding: isMobile ? "10px 12px" : "10px 18px",
-                  fontSize: isMobile ? "0.8rem" : "0.86rem",
-                  fontWeight: active ? 700 : 500,
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: isMobile ? "10px 16px" : "10px 18px",
+                  fontSize: "0.88rem",
+                  fontWeight: active ? 600 : 500,
+                  fontFamily: sans,
                   color: active ? INK : MID,
-                  borderBottom: `2px solid ${active ? RED : "transparent"}`,
+                  background: active ? WHITE : "transparent",
+                  border: `1px solid ${active ? BORDER : "transparent"}`,
+                  borderRadius: 24,
                   cursor: "pointer", whiteSpace: "nowrap" as const,
-                  transition: "color 0.12s, border-color 0.12s",
+                  boxShadow: active ? "0 1px 8px rgba(31,31,31,0.05)" : "none",
+                  transition: "background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease",
                 }}>
                   <span>{item.label}</span>
                   {showBadge && (
                     <span style={{
-                      minWidth: 18, height: 18, borderRadius: 9,
+                      minWidth: 20, height: 20, borderRadius: 10,
                       background: RED, color: WHITE,
-                      fontSize: "0.68rem", fontWeight: 700,
+                      fontSize: "0.7rem", fontWeight: 600,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      padding: "0 5px",
+                      padding: "0 6px", fontFamily: sans,
                     }}>
                       {approvalCount}
                     </span>
@@ -236,6 +259,6 @@ export default function AppNav() {
           })}
         </div>
       </div>
-    </div>
+    </header>
   );
 }

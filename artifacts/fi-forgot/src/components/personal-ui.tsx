@@ -1,5 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
+import { Link } from "wouter";
 import { PB, avatarPalette, personInitials } from "@/lib/personal-brand";
+
+const sans = "'Plus Jakarta Sans', sans-serif";
+const serif = "'Lora', Georgia, serif";
 
 export function PersonAvatar({ name, size = 44 }: { name: string; size?: number }) {
   const palette = avatarPalette(name);
@@ -16,31 +20,111 @@ export function PersonAvatar({ name, size = 44 }: { name: string; size?: number 
   );
 }
 
+/** @deprecated Use SectionHeader or AppSection for authenticated pages. */
 export function SectionTitle({
   title,
   sub,
+  subStyle = "script",
   right,
   style,
 }: {
   title: string;
   sub?: string;
+  subStyle?: "sans" | "script";
   right?: ReactNode;
   style?: CSSProperties;
 }) {
+  const subTypography = subStyle === "sans"
+    ? { fontFamily: sans, fontSize: "0.84rem", color: PB.mid, margin: "4px 0 0", lineHeight: 1.5, fontWeight: 400 as const }
+    : { fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: PB.mid, margin: "4px 0 0", lineHeight: 1.4 };
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14, ...style }}>
       <div>
-        <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "1.05rem", fontWeight: 700, color: PB.ink, margin: 0 }}>
+        <h2 style={{ fontFamily: sans, fontSize: "1.05rem", fontWeight: 700, color: PB.ink, margin: 0 }}>
           {title}
         </h2>
-        {sub && (
-          <p style={{ fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: PB.mid, margin: "4px 0 0", lineHeight: 1.4 }}>
-            {sub}
-          </p>
-        )}
+        {sub && <p style={subTypography}>{sub}</p>}
       </div>
       {right}
     </div>
+  );
+}
+
+export function SectionHeader({
+  title,
+  sub,
+  right,
+  icon,
+  style,
+}: {
+  title: string;
+  sub?: string;
+  right?: ReactNode;
+  icon?: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+      gap: 12, marginBottom: 14, ...style,
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: icon ? 10 : 0, flex: 1, minWidth: 0 }}>
+        {icon && (
+          <div style={{
+            width: 36, height: 36, borderRadius: 10, background: `${PB.sage}10`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, color: PB.sage,
+          }}>
+            {icon}
+          </div>
+        )}
+        <div>
+          <h2 style={{
+            fontFamily: serif, fontSize: "1.2rem", fontWeight: 600,
+            color: PB.ink, margin: 0, lineHeight: 1.3,
+          }}>
+            {title}
+          </h2>
+          {sub && (
+            <p style={{
+              fontFamily: sans, fontSize: "0.88rem", color: PB.mid,
+              margin: "6px 0 0", lineHeight: 1.5,
+            }}>
+              {sub}
+            </p>
+          )}
+        </div>
+      </div>
+      {right}
+    </div>
+  );
+}
+
+export function AppSection({
+  title,
+  sub,
+  right,
+  icon,
+  children,
+  card = false,
+  style,
+}: {
+  title: string;
+  sub?: string;
+  right?: ReactNode;
+  icon?: ReactNode;
+  children: ReactNode;
+  card?: boolean;
+  style?: CSSProperties;
+}) {
+  return (
+    <section style={{ marginBottom: 32, ...style }}>
+      <SectionHeader title={title} sub={sub} right={right} icon={icon} />
+      {card
+        ? <SoftCard style={{ padding: "18px 20px" }}>{children}</SoftCard>
+        : children}
+    </section>
   );
 }
 
@@ -55,33 +139,23 @@ export function SoftCard({ children, style }: { children: ReactNode; style?: CSS
   );
 }
 
-export function PrimaryBtn({
+export function TextLink({
   children,
   onClick,
-  variant = "fill",
-  accent = PB.red,
   style,
-  disabled,
 }: {
   children: ReactNode;
   onClick?: () => void;
-  variant?: "fill" | "outline";
-  accent?: string;
   style?: CSSProperties;
-  disabled?: boolean;
 }) {
-  const fill = variant === "fill";
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
       style={{
-        padding: "8px 16px", borderRadius: 9, cursor: disabled ? "not-allowed" : "pointer",
-        border: fill ? "none" : `1.5px solid ${accent}`,
-        background: fill ? accent : PB.white,
-        color: fill ? PB.white : accent,
-        fontWeight: 700, fontSize: "0.8rem", opacity: disabled ? 0.5 : 1,
+        background: "none", border: "none", padding: 0, cursor: "pointer",
+        fontFamily: sans,
+        fontSize: "0.82rem", fontWeight: 600, color: PB.sage,
         ...style,
       }}
     >
@@ -89,3 +163,99 @@ export function PrimaryBtn({
     </button>
   );
 }
+
+export function PrimaryBtn({
+  children,
+  onClick,
+  variant = "fill",
+  accent = PB.red,
+  style,
+  disabled,
+  type = "button",
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  variant?: "fill" | "outline";
+  accent?: string;
+  style?: CSSProperties;
+  disabled?: boolean;
+  type?: "button" | "submit";
+}) {
+  const fill = variant === "fill";
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        padding: "12px 20px",
+        borderRadius: 24,
+        cursor: disabled ? "not-allowed" : "pointer",
+        border: fill ? "none" : `1.5px solid ${accent}`,
+        background: fill ? accent : PB.white,
+        color: fill ? PB.white : accent,
+        fontWeight: 600,
+        fontSize: "0.9rem",
+        fontFamily: sans,
+        opacity: disabled ? 0.5 : 1,
+        ...style,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Alias for playbook naming. */
+export const PrimaryButton = PrimaryBtn;
+
+export function SecondaryBtn({
+  children,
+  onClick,
+  href,
+  accent = PB.mid,
+  style,
+  disabled,
+  type = "button",
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  href?: string;
+  accent?: string;
+  style?: CSSProperties;
+  disabled?: boolean;
+  type?: "button" | "submit";
+}) {
+  const btnStyle: CSSProperties = {
+    padding: "11px 20px",
+    borderRadius: 24,
+    border: `1px solid ${PB.border}`,
+    background: PB.white,
+    color: accent,
+    fontWeight: 600,
+    fontSize: "0.86rem",
+    fontFamily: sans,
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.5 : 1,
+    ...style,
+  };
+
+  if (href) {
+    return (
+      <Link href={href} style={{ textDecoration: "none" }}>
+        <button type="button" disabled={disabled} style={btnStyle}>
+          {children}
+        </button>
+      </Link>
+    );
+  }
+
+  return (
+    <button type={type} onClick={onClick} disabled={disabled} style={btnStyle}>
+      {children}
+    </button>
+  );
+}
+
+/** Alias for playbook naming. */
+export const SecondaryButton = SecondaryBtn;

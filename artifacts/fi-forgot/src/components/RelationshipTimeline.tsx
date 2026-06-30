@@ -107,9 +107,9 @@ function ConfirmModal({ onConfirm, onCancel }: ConfirmModalProps) {
         <div>
           <h3
             style={{
-              fontFamily:    "'Bebas Neue', cursive",
-              fontSize:      "1.15rem",
-              letterSpacing: "0.06em",
+              fontFamily:    "'Lora', Georgia, serif",
+              fontSize:      "1.1rem",
+              fontWeight:    600,
               color:         BLACK,
             }}
           >
@@ -313,13 +313,13 @@ export default function RelationshipTimeline({ recipientId }: { recipientId: str
         <div>
           <h2
             style={{
-              fontFamily:    "'Bebas Neue', cursive",
-              fontSize:      "1.1rem",
-              letterSpacing: "0.06em",
+              fontFamily:    "'Lora', Georgia, serif",
+              fontSize:      "1.05rem",
+              fontWeight:    600,
               color:         BLACK,
             }}
           >
-            Relationship Timeline
+            Relationship history
           </h2>
           <p className="text-xs mt-0.5" style={{ color: GRAY }}>
             Everything we know about this person — the complete memory ledger.

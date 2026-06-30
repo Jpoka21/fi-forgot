@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { useLocation, useParams, Link } from "wouter";
-import AppNav from "@/components/layout/AppNav";
+import AppShell from "@/components/layout/AppShell";
+import PageShell from "@/components/layout/PageShell";
+import { SoftCard, PrimaryBtn, SecondaryBtn } from "@/components/personal-ui";
+import { PB } from "@/lib/personal-brand";
 import {
   getRecipient,
   getRecipients,
@@ -43,12 +46,37 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Trash2, ClipboardList, Pencil, CalendarDays, Lock, Zap, ChevronDown, ChevronUp, Settings } from "lucide-react";
 import RelationshipTimeline from "@/components/RelationshipTimeline";
 
-const RED   = "#E23B2E";
-const BLACK = "#111111";
-const BEIGE = "#F2E6D3";
-const SAGE  = "#5B8C6B";
-const WHITE = "#FFFFFF";
-const GRAY  = "#6B6B6B";
+const RED    = PB.red;
+const INK    = PB.ink;
+const CREAM  = PB.cream;
+const SAGE   = PB.sage;
+const WHITE  = PB.white;
+const MID    = PB.mid;
+const BORDER = PB.border;
+const GRAY   = PB.mid;
+const BEIGE  = PB.cream;
+
+const serif = "'Lora', Georgia, serif";
+const sans  = "'Plus Jakarta Sans', sans-serif";
+
+function RecipientProfileHeaderIllustration() {
+  return (
+    <div style={{ margin: "0 0 16px", width: "100%", maxWidth: 280, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
+      <img
+        src="/illustrations/recipient/008_recipient_profile_header.webp"
+        alt="A warm illustration of photographs, keepsakes, and everyday moments that celebrate someone who matters"
+        style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
+      />
+    </div>
+  );
+}
+
+const inputOverride: CSSProperties = {
+  borderRadius: 12,
+  border: `1px solid ${BORDER}`,
+  fontFamily: sans,
+  fontSize: "0.95rem",
+};
 
 // Events that require a specific date to be meaningful on the calendar
 const DATE_SENSITIVE = new Set([
@@ -125,19 +153,26 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-function sectionHeading(text: string) {
+function sectionHeading(text: string, sub?: string) {
   return (
-    <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.06em", color: BLACK }}>
-      {text}
-    </h2>
+    <div style={{ marginBottom: sub ? 14 : 0 }}>
+      <h2 style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 600, color: INK, margin: 0, lineHeight: 1.3 }}>
+        {text}
+      </h2>
+      {sub && (
+        <p style={{ fontFamily: sans, fontSize: "0.86rem", color: MID, margin: "6px 0 0", lineHeight: 1.5 }}>
+          {sub}
+        </p>
+      )}
+    </div>
   );
 }
 
-function SectionCard({ children }: { children: React.ReactNode }) {
+function SectionCard({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
-    <div className="rounded-2xl p-6 space-y-4" style={{ background: "#fff", border: `1.5px solid ${BLACK}15`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+    <SoftCard style={{ padding: "22px 20px", marginBottom: 16, ...style }}>
       {children}
-    </div>
+    </SoftCard>
   );
 }
 
@@ -155,9 +190,9 @@ function ChildrenManager({ children, onChange }: { children: Child[]; onChange: 
   return (
     <div className="space-y-3">
       {children.map((child, idx) => (
-        <div key={child.id} className="rounded-xl border-2 p-4 space-y-3" style={{ borderColor: `${BLACK}12`, background: BEIGE }}>
+        <div key={child.id} className="rounded-xl border-2 p-4 space-y-3" style={{ borderColor: `${INK}12`, background: BEIGE }}>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold" style={{ color: BLACK }}>Child {idx + 1}</span>
+            <span className="text-sm font-bold" style={{ color: INK }}>Child {idx + 1}</span>
             <button type="button" onClick={() => remove(child.id)} className="p-1 rounded-lg hover:bg-red-50 transition-colors">
               <Trash2 size={14} style={{ color: RED }} />
             </button>
@@ -181,7 +216,7 @@ function ChildrenManager({ children, onChange }: { children: Child[]; onChange: 
                 onClick={() => update(child.id, { gender: g.id as Child["gender"] })}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all"
                 style={{
-                  borderColor: child.gender === g.id ? RED : `${BLACK}20`,
+                  borderColor: child.gender === g.id ? RED : `${INK}20`,
                   background: child.gender === g.id ? `${RED}12` : "#fff",
                   color: child.gender === g.id ? RED : GRAY,
                 }}
@@ -200,7 +235,7 @@ function ChildrenManager({ children, onChange }: { children: Child[]; onChange: 
       <button
         type="button" onClick={addChild}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed text-sm font-semibold hover:bg-gray-50 transition-all"
-        style={{ borderColor: `${BLACK}20`, color: GRAY }}
+        style={{ borderColor: `${INK}20`, color: GRAY }}
       >
         <Plus size={14} /> Add a child
       </button>
@@ -229,8 +264,7 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
     <SectionCard>
       <div className="flex items-center justify-between">
         <div>
-          {sectionHeading("Card Writing History")}
-          <p className="text-xs mt-0.5" style={{ color: GRAY }}>Everything that's helped us write better cards — editable anytime.</p>
+          {sectionHeading("Past card conversations", "What you've shared before each occasion.")}
         </div>
         <div className="flex flex-wrap gap-1">
           {selectedEvents.map((e) => (
@@ -248,7 +282,7 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
       </div>
 
       {briefings.length === 0 ? (
-        <div className="rounded-xl p-5 text-center" style={{ background: BEIGE, border: `1px dashed ${BLACK}20` }}>
+        <div className="rounded-xl p-5 text-center" style={{ background: BEIGE, border: `1px dashed ${INK}20` }}>
           <ClipboardList size={22} className="mx-auto mb-2" style={{ color: GRAY }} />
           <p className="text-sm" style={{ color: GRAY }}>No briefings yet.</p>
           <p className="text-xs mt-1 opacity-60" style={{ color: GRAY }}>
@@ -258,7 +292,7 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
       ) : (
         <div className="space-y-2">
           {briefings.map((b) => (
-            <div key={b.id} className="rounded-xl border overflow-hidden" style={{ borderColor: `${BLACK}15` }}>
+            <div key={b.id} className="rounded-xl border overflow-hidden" style={{ borderColor: `${INK}15` }}>
               <button
                 className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition-colors"
                 onClick={() => setExpanded(expanded === b.id ? null : b.id)}
@@ -289,17 +323,17 @@ function BriefingHistoryPanel({ recipientId, selectedEvents }: { recipientId: st
               </button>
 
               {expanded === b.id && b.answers.length > 0 && (
-                <div className="border-t px-4 py-4 space-y-3" style={{ borderColor: `${BLACK}10`, background: BEIGE }}>
+                <div className="border-t px-4 py-4 space-y-3" style={{ borderColor: `${INK}10`, background: BEIGE }}>
                   {b.answers.map((a) => (
                     <div key={a.questionKey}>
-                      <div className="text-xs font-bold mb-0.5" style={{ color: BLACK }}>{a.question}</div>
+                      <div className="text-xs font-bold mb-0.5" style={{ color: INK }}>{a.question}</div>
                       <div className="text-sm whitespace-pre-wrap" style={{ color: GRAY }}>{a.answer || "—"}</div>
                     </div>
                   ))}
                 </div>
               )}
               {expanded === b.id && b.answers.length === 0 && (
-                <div className="border-t px-4 py-4 text-sm" style={{ borderColor: `${BLACK}10`, color: GRAY, background: BEIGE }}>
+                <div className="border-t px-4 py-4 text-sm" style={{ borderColor: `${INK}10`, color: GRAY, background: BEIGE }}>
                   No answers recorded.
                 </div>
               )}
@@ -725,69 +759,70 @@ export default function RecipientProfilePage() {
 
   return (
     <>
-      <AppNav />
-      <div className="min-h-screen pb-16" style={{ background: BEIGE }}>
-        <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <AppShell>
+        <PageShell style={{ paddingTop: 8, paddingBottom: 48 }}>
 
           {/* Header */}
-          <div className="mb-6">
+          <div style={{ marginBottom: 24 }}>
             {isNew ? (
-              <div className="flex items-center gap-3">
+              <div>
                 <Link href={backTo}>
-                  <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }} data-testid="button-back-recipients">
-                    <ArrowLeft size={18} />
+                  <button type="button" style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: MID, fontSize: "0.88rem", fontWeight: 500, padding: "8px 0 16px", fontFamily: sans }} data-testid="button-back-recipients">
+                    <ArrowLeft size={16} /> Back
                   </button>
                 </Link>
-                <div>
-                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>Add a Person</h1>
-                  <p className="text-sm mt-0.5" style={{ color: GRAY }}>We remember who matters. You get the credit.</p>
-                </div>
+                <RecipientProfileHeaderIllustration />
+                <h1 style={{ fontFamily: serif, fontSize: "clamp(1.5rem, 5vw, 1.85rem)", fontWeight: 600, color: INK, lineHeight: 1.25, margin: "0 0 8px" }}>
+                  Add someone who matters
+                </h1>
+                <p style={{ fontFamily: sans, fontSize: "0.92rem", color: MID, margin: 0, lineHeight: 1.55 }}>
+                  Start with the basics — you can always add more later.
+                </p>
               </div>
             ) : !existing ? (
-              <div className="flex items-center gap-3">
+              <div>
                 <Link href={backTo}>
-                  <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }}>
-                    <ArrowLeft size={18} />
+                  <button type="button" style={{ background: "none", border: "none", cursor: "pointer", color: MID, padding: "8px 0 16px" }}>
+                    <ArrowLeft size={16} />
                   </button>
                 </Link>
-                <div>
-                  <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1 }}>Loading…</h1>
-                  <p className="text-sm mt-0.5" style={{ color: GRAY }}>Redirecting you back…</p>
-                </div>
+                <h1 style={{ fontFamily: serif, fontSize: "1.5rem", fontWeight: 600, color: INK, margin: 0 }}>Loading…</h1>
+                <p style={{ fontFamily: sans, fontSize: "0.9rem", color: MID, marginTop: 8 }}>One moment…</p>
               </div>
             ) : (
               <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Link href={isEditMode ? `/relationship/${params.id}` : backTo}>
-                    <button className="p-2 rounded-xl hover:bg-white/50 transition-colors" style={{ color: GRAY }} data-testid="button-back-recipients">
-                      <ArrowLeft size={18} />
-                    </button>
-                  </Link>
-                </div>
+                <Link href={isEditMode ? `/relationship/${params.id}` : backTo}>
+                  <button type="button" style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: MID, fontSize: "0.88rem", fontWeight: 500, padding: "8px 0 16px", fontFamily: sans }} data-testid="button-back-recipients">
+                    <ArrowLeft size={16} /> {isEditMode ? `Back to ${existing.name}` : "Your people"}
+                  </button>
+                </Link>
+                <RecipientProfileHeaderIllustration />
                 {isEditMode ? (
                   <div>
-                    <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2rem", color: BLACK, lineHeight: 1, margin: "0 0 4px" }}>
-                      {existing.name}'s Core Questions
+                    <h1 style={{ fontFamily: serif, fontSize: "clamp(1.45rem, 5vw, 1.75rem)", fontWeight: 600, color: INK, lineHeight: 1.25, margin: "0 0 8px" }}>
+                      Tell us a little more about {existing.name}
                     </h1>
-                    <p className="text-sm" style={{ color: GRAY }}>The more we know, the better the cards get.</p>
+                    <p style={{ fontFamily: sans, fontSize: "0.92rem", color: MID, margin: 0, lineHeight: 1.55 }}>
+                      Even small details help future cards sound like you.
+                    </p>
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "2.5rem", color: BLACK, lineHeight: 1, margin: 0 }}>
-                        {existing.name.toUpperCase()}
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" as const, marginBottom: 8 }}>
+                      <h1 style={{ fontFamily: serif, fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 600, color: INK, lineHeight: 1.2, margin: 0 }}>
+                        {existing.name}
                       </h1>
-                      <span style={{ padding: "4px 13px", borderRadius: 20, background: `${BLACK}08`, fontSize: "0.82rem", fontWeight: 600, color: GRAY }}>
+                      <span style={{ padding: "4px 12px", borderRadius: 20, background: `${INK}06`, fontSize: "0.82rem", fontWeight: 600, color: MID, fontFamily: sans }}>
                         {existing.relationship}
                       </span>
                       {existing.active === false ? (
-                        <span style={{ padding: "3px 10px", borderRadius: 20, background: `${RED}12`, fontSize: "0.72rem", fontWeight: 700, color: RED }}>Paused</span>
+                        <span style={{ padding: "4px 12px", borderRadius: 20, background: `${RED}10`, fontSize: "0.72rem", fontWeight: 600, color: RED, fontFamily: sans }}>Paused</span>
                       ) : (
-                        <span style={{ padding: "3px 10px", borderRadius: 20, background: `${SAGE}12`, fontSize: "0.72rem", fontWeight: 700, color: SAGE }}>Active</span>
+                        <span style={{ padding: "4px 12px", borderRadius: 20, background: `${SAGE}12`, fontSize: "0.72rem", fontWeight: 600, color: SAGE, fontFamily: sans }}>Active</span>
                       )}
                     </div>
-                    <p className="text-sm mt-1" style={{ color: GRAY }}>
-                      Your relationship memory — everything that helps us write better cards.
+                    <p style={{ fontFamily: sans, fontSize: "0.92rem", color: MID, margin: 0, lineHeight: 1.55 }}>
+                      Everything that helps us write cards that feel personal.
                     </p>
                   </>
                 )}
@@ -803,7 +838,7 @@ export default function RecipientProfilePage() {
             >
               <Lock size={18} className="flex-shrink-0 mt-0.5" style={{ color: RED }} />
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold" style={{ color: BLACK }}>
+                <div className="text-sm font-semibold" style={{ color: INK }}>
                   Autopilot is paused for {existing?.name}
                 </div>
                 <p className="text-xs mt-0.5" style={{ color: GRAY }}>
@@ -834,14 +869,12 @@ export default function RecipientProfilePage() {
             <>
               {/* Make [Name]'s Next Card Better — primary action */}
               <div style={{ marginBottom: 16 }}>
-                <button
-                  type="button"
+                <PrimaryBtn
                   onClick={openBetterCard}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold transition-all hover:opacity-90"
-                  style={{ background: SAGE, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.05rem", letterSpacing: "0.06em", cursor: "pointer", border: "none" }}
+                  style={{ width: "100%", padding: "14px 20px", background: SAGE }}
                 >
-                  ✦ Make {existing.name}'s Next Card Better
-                </button>
+                  Help {existing.name}&apos;s next card feel even more personal
+                </PrimaryBtn>
                 {betterCardSuccess && (
                   <div className="mt-2 rounded-xl px-4 py-2 text-sm font-semibold text-center" style={{ background: `${SAGE}15`, color: SAGE }}>
                     ✓ Saved — it'll help personalize the next card.
@@ -862,8 +895,8 @@ export default function RecipientProfilePage() {
                   style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}
                 >
                   <Settings size={12} style={{ color: `${GRAY}90` }} />
-                  <span style={{ fontSize: "0.78rem", color: `${GRAY}bb`, textDecoration: "underline", textDecorationColor: `${GRAY}40` }}>
-                    {formOpen ? "Hide core questions" : "Answer core questions"}
+                  <span style={{ fontSize: "0.78rem", color: MID, textDecoration: "underline", textDecorationColor: `${MID}40`, fontFamily: sans }}>
+                    {formOpen ? "Hide details" : "Add more about them"}
                   </span>
                   {formOpen
                     ? <ChevronUp size={11} style={{ color: `${GRAY}90` }} />
@@ -880,7 +913,7 @@ export default function RecipientProfilePage() {
 
               {/* Basic info */}
               <SectionCard>
-                {sectionHeading("Basic Information")}
+                {sectionHeading("Who they are", "The basics we use to write cards that feel personal.")}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
@@ -918,7 +951,7 @@ export default function RecipientProfilePage() {
                             onClick={() => field.onChange(opt.value)}
                             className="flex-1 px-3 py-2 rounded-xl border-2 text-sm font-semibold transition-all"
                             style={{
-                              borderColor: field.value === opt.value ? RED : `${BLACK}20`,
+                              borderColor: field.value === opt.value ? RED : `${INK}20`,
                               background: field.value === opt.value ? `${RED}10` : "#fff",
                               color: field.value === opt.value ? RED : "#555",
                             }}
@@ -944,12 +977,11 @@ export default function RecipientProfilePage() {
 
               {/* ── WHAT WE KNOW ──────────────────────────────────── */}
               <SectionCard>
-                {sectionHeading("What makes them them")}
-                <p className="text-xs mb-4" style={{ color: GRAY }}>The more detail you give us, the more the card sounds like it came from you.</p>
+                {sectionHeading("What makes them them", "The more you share, the more the card sounds like it came from you.")}
 
                 {/* Personality picker */}
                 <div>
-                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                  <Label className="text-sm font-semibold" style={{ color: INK }}>
                     What are they like? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick up to 2)</span>
                     {lastPersonalization?.sources.includes("personality") && (
                       <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
@@ -975,7 +1007,7 @@ export default function RecipientProfilePage() {
                           }}
                           className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
                           style={{
-                            borderColor: selected ? RED : `${BLACK}15`,
+                            borderColor: selected ? RED : `${INK}15`,
                             background: selected ? `${RED}10` : "#fff",
                             opacity: maxed ? 0.4 : 1,
                             cursor: maxed ? "not-allowed" : "pointer",
@@ -992,7 +1024,7 @@ export default function RecipientProfilePage() {
 
                 {/* Interests picker */}
                 <div>
-                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                  <Label className="text-sm font-semibold" style={{ color: INK }}>
                     What do they love? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick all that fit)</span>
                     {lastPersonalization?.sources.includes("interest") && (
                       <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
@@ -1016,7 +1048,7 @@ export default function RecipientProfilePage() {
                           }}
                           className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
                           style={{
-                            borderColor: selected ? RED : `${BLACK}15`,
+                            borderColor: selected ? RED : `${INK}15`,
                             background: selected ? `${RED}10` : "#fff",
                             cursor: "pointer",
                           }}
@@ -1161,8 +1193,7 @@ export default function RecipientProfilePage() {
 
               {/* Preview timing */}
               <SectionCard>
-                {sectionHeading("Preview Email Timing")}
-                <p className="text-xs" style={{ color: GRAY }}>How far ahead should we email you the card draft for approval?</p>
+                {sectionHeading("When we'll check in", "How far ahead should we let you know a card is ready?")}
                 <FormField control={form.control} name="previewDays" render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -1175,14 +1206,14 @@ export default function RecipientProfilePage() {
                               onClick={() => field.onChange(opt.days)}
                               className="w-full flex items-center justify-between py-3 px-4 rounded-xl border-2 text-left transition-all"
                               style={{
-                                borderColor: selected ? RED : `${BLACK}15`,
+                                borderColor: selected ? RED : `${INK}15`,
                                 background: selected ? `${RED}08` : "#fff",
                               }}
                               data-testid={`btn-preview-days-${opt.days}`}
                             >
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-sm" style={{ color: BLACK }}>{opt.label}</span>
+                                  <span className="font-semibold text-sm" style={{ color: INK }}>{opt.label}</span>
                                   {opt.badge && (
                                     <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{ background: RED, fontSize: "0.6rem" }}>{opt.badge}</span>
                                   )}
@@ -1191,7 +1222,7 @@ export default function RecipientProfilePage() {
                               </div>
                               <div
                                 className="w-4 h-4 rounded-full border-2 ml-4 flex-shrink-0"
-                                style={{ borderColor: selected ? RED : `${BLACK}25`, background: selected ? RED : "transparent" }}
+                                style={{ borderColor: selected ? RED : `${INK}25`, background: selected ? RED : "transparent" }}
                               />
                             </button>
                           );
@@ -1205,7 +1236,7 @@ export default function RecipientProfilePage() {
 
               {/* Delivery preference */}
               <SectionCard>
-                {sectionHeading("Card Delivery")}
+                {sectionHeading("How cards reach them", "You stay in control of where every card goes.")}
                 <FormField control={form.control} name="deliveryPreference" render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -1218,16 +1249,16 @@ export default function RecipientProfilePage() {
                               onClick={() => field.onChange(opt)}
                               className="w-full flex items-center gap-3 py-3 px-4 rounded-xl border-2 text-left transition-all"
                               style={{
-                                borderColor: selected ? RED : `${BLACK}15`,
+                                borderColor: selected ? RED : `${INK}15`,
                                 background: selected ? `${RED}08` : "#fff",
                               }}
                             >
                               <div
                                 className="w-4 h-4 rounded-full border-2 flex-shrink-0"
-                                style={{ borderColor: selected ? RED : `${BLACK}25`, background: selected ? RED : "transparent" }}
+                                style={{ borderColor: selected ? RED : `${INK}25`, background: selected ? RED : "transparent" }}
                               />
                               <div>
-                                <div className="text-sm font-semibold" style={{ color: BLACK }}>{opt}</div>
+                                <div className="text-sm font-semibold" style={{ color: INK }}>{opt}</div>
                                 <div className="text-xs" style={{ color: GRAY }}>
                                   {opt === "Mail it to me" ? "We send it to you — you hand it over. Maximum control." : "Straight to their door. Maximum autopilot."}
                                 </div>
@@ -1243,8 +1274,7 @@ export default function RecipientProfilePage() {
 
               {/* Mailing address */}
               <SectionCard>
-                {sectionHeading("Mailing Address")}
-                <p className="text-xs" style={{ color: GRAY }}>Where should the card be mailed?</p>
+                {sectionHeading("Where to send cards", "We'll need this before we can mail anything.")}
                 <div className="space-y-3">
                   <FormField control={form.control} name="mailingAddress.line1" render={({ field }) => (
                     <FormItem>
@@ -1283,12 +1313,11 @@ export default function RecipientProfilePage() {
 
               {/* Personality / tone */}
               <SectionCard>
-                {sectionHeading("Writing Style & Personality")}
-                <p className="text-xs mb-4" style={{ color: GRAY }}>The more detail you give us, the more the card sounds like it came from you.</p>
+                {sectionHeading("Their personality on paper", "Help us match the way you naturally write to them.")}
 
                 {/* Personality picker */}
                 <div>
-                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                  <Label className="text-sm font-semibold" style={{ color: INK }}>
                     What are they like? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick up to 2)</span>
                     {lastPersonalization?.sources.includes("personality") && (
                       <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
@@ -1314,7 +1343,7 @@ export default function RecipientProfilePage() {
                           }}
                           className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
                           style={{
-                            borderColor: selected ? RED : `${BLACK}15`,
+                            borderColor: selected ? RED : `${INK}15`,
                             background: selected ? `${RED}10` : "#fff",
                             opacity: maxed ? 0.4 : 1,
                             cursor: maxed ? "not-allowed" : "pointer",
@@ -1331,7 +1360,7 @@ export default function RecipientProfilePage() {
 
                 {/* Interests picker */}
                 <div>
-                  <Label className="text-sm font-semibold" style={{ color: BLACK }}>
+                  <Label className="text-sm font-semibold" style={{ color: INK }}>
                     What do they love? <span className="font-normal text-xs" style={{ color: GRAY }}>(pick all that fit)</span>
                     {lastPersonalization?.sources.includes("interest") && (
                       <span style={{ marginLeft: 7, padding: "1px 7px", borderRadius: 10, background: `${SAGE}12`, border: `1px solid ${SAGE}28`, fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", fontWeight: 600, color: SAGE, verticalAlign: "middle" }}>
@@ -1355,7 +1384,7 @@ export default function RecipientProfilePage() {
                           }}
                           className="flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all"
                           style={{
-                            borderColor: selected ? RED : `${BLACK}15`,
+                            borderColor: selected ? RED : `${INK}15`,
                             background: selected ? `${RED}10` : "#fff",
                             cursor: "pointer",
                           }}
@@ -1512,20 +1541,15 @@ export default function RecipientProfilePage() {
                         Remove {overBy} occasion{overBy !== 1 ? "s" : ""} marked "over limit" before saving
                       </div>
                     )}
-                    <button
-                      type="submit"
-                      disabled={overBy > 0}
-                      className="w-full py-3.5 rounded-2xl text-white font-bold text-base transition-all"
-                      style={{
-                        background: overBy > 0 ? GRAY : RED,
-                        fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.08em",
-                        cursor: overBy > 0 ? "not-allowed" : "pointer",
-                        opacity: overBy > 0 ? 0.5 : 1,
-                      }}
-                      data-testid="button-save-recipient"
-                    >
-                      {overBy > 0 ? `Remove ${overBy} to Save` : isNew ? "Save Person" : "Save Changes"}
-                    </button>
+                    <span data-testid="button-save-recipient" style={{ display: "block" }}>
+                      <PrimaryBtn
+                        type="submit"
+                        disabled={overBy > 0}
+                        style={{ width: "100%", padding: "14px 20px", marginTop: 8 }}
+                      >
+                        {overBy > 0 ? `Remove ${overBy} occasion${overBy !== 1 ? "s" : ""} to save` : isNew ? "Save and continue" : "Save changes"}
+                      </PrimaryBtn>
+                    </span>
                   </>
                 );
               })()}
@@ -1563,8 +1587,8 @@ export default function RecipientProfilePage() {
               </p>
             </div>
           )}
-        </div>
-      </div>
+        </PageShell>
+      </AppShell>
 
       {/* Make [Name]'s Next Card Better — bottom sheet */}
       {betterCardOpen && (
@@ -1576,8 +1600,8 @@ export default function RecipientProfilePage() {
             onClick={e => e.stopPropagation()}
             style={{ background: "#fff", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, padding: "24px 24px 40px" }}
           >
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, marginBottom: 4, letterSpacing: "0.04em" }}>
-              Make {existing?.name}'s Next Card Better
+            <div style={{ fontFamily: serif, fontSize: "1.25rem", fontWeight: 600, color: INK, marginBottom: 4 }}>
+              Help {existing?.name}&apos;s next card feel personal
             </div>
 
             {betterCardLoading ? (
@@ -1589,10 +1613,10 @@ export default function RecipientProfilePage() {
                 {betterCardQuestion.mode === "follow_up" && betterCardQuestion.followUp?.originalAnswer && (
                   <div style={{ background: "#EEF3FD", borderRadius: 10, padding: "9px 12px", borderLeft: "3px solid #2E6BE260", marginBottom: 12 }}>
                     <p style={{ fontSize: "0.65rem", fontWeight: 700, color: "#2E6BE2aa", textTransform: "uppercase" as const, margin: "0 0 3px" }}>Previously</p>
-                    <p style={{ fontSize: "0.85rem", color: BLACK, margin: 0 }}>{betterCardQuestion.followUp.originalAnswer}</p>
+                    <p style={{ fontSize: "0.85rem", color: INK, margin: 0 }}>{betterCardQuestion.followUp.originalAnswer}</p>
                   </div>
                 )}
-                <p style={{ fontSize: "0.88rem", fontWeight: 600, color: BLACK, marginBottom: 12 }}>
+                <p style={{ fontSize: "0.88rem", fontWeight: 600, color: INK, marginBottom: 12 }}>
                   {betterCardQuestion.question}
                 </p>
                 <textarea
@@ -1601,7 +1625,7 @@ export default function RecipientProfilePage() {
                   placeholder="Share an update…"
                   rows={4}
                   className="w-full rounded-xl border text-sm resize-none px-3 py-2.5 focus:outline-none"
-                  style={{ borderColor: `${BLACK}20`, fontFamily: "'Inter', sans-serif", boxSizing: "border-box" as const }}
+                  style={{ borderColor: `${INK}20`, fontFamily: "'Inter', sans-serif", boxSizing: "border-box" as const }}
                 />
               </>
             ) : (
@@ -1633,7 +1657,7 @@ export default function RecipientProfilePage() {
                   onClick={() => { setBetterCardOpen(false); setBetterCardText(""); setBetterCardError(false); }}
                   disabled={betterCardSaving}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: `${BLACK}08`, color: GRAY, border: "none", cursor: betterCardSaving ? "not-allowed" : "pointer" }}
+                  style={{ background: `${INK}08`, color: GRAY, border: "none", cursor: betterCardSaving ? "not-allowed" : "pointer" }}
                 >
                   Cancel
                 </button>
@@ -1641,7 +1665,7 @@ export default function RecipientProfilePage() {
                   type="button"
                   onClick={saveBetterCard}
                   disabled={betterCardSaving || !betterCardText.trim()}
-                  style={{ flex: 2, padding: "10px", borderRadius: 12, border: "none", background: !betterCardText.trim() ? `${BLACK}20` : SAGE, color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: !betterCardText.trim() || betterCardSaving ? "not-allowed" : "pointer" }}
+                  style={{ flex: 2, padding: "10px", borderRadius: 12, border: "none", background: !betterCardText.trim() ? `${INK}20` : SAGE, color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: !betterCardText.trim() || betterCardSaving ? "not-allowed" : "pointer" }}
                 >
                   {betterCardSaving ? "Saving…" : "Save"}
                 </button>
@@ -1661,8 +1685,8 @@ export default function RecipientProfilePage() {
             onClick={e => e.stopPropagation()}
             style={{ background: "#fff", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, padding: "24px 24px 40px" }}
           >
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem", color: BLACK, marginBottom: 4, letterSpacing: "0.04em" }}>
-              Add something they'll love
+            <div style={{ fontFamily: serif, fontSize: "1.25rem", fontWeight: 600, color: INK, marginBottom: 4 }}>
+              Add something they&apos;ll love
             </div>
             <p className="text-sm mb-4" style={{ color: GRAY }}>
               What is something recent that happened with {existing?.name}?
@@ -1685,7 +1709,7 @@ export default function RecipientProfilePage() {
                 type="button"
                 onClick={() => { setMemoryModalOpen(false); setMemoryText(""); setMemoryError(false); }}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                style={{ background: `${BLACK}08`, color: GRAY, border: "none", cursor: "pointer" }}
+                style={{ background: `${INK}08`, color: GRAY, border: "none", cursor: "pointer" }}
               >
                 Cancel
               </button>
@@ -1693,7 +1717,7 @@ export default function RecipientProfilePage() {
                 type="button"
                 onClick={saveQuickMemory}
                 disabled={memorySaving || !memoryText.trim()}
-                style={{ flex: 2, padding: "10px", borderRadius: 12, border: "none", background: !memoryText.trim() ? `${BLACK}20` : SAGE, color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: !memoryText.trim() || memorySaving ? "not-allowed" : "pointer" }}
+                style={{ flex: 2, padding: "10px", borderRadius: 12, border: "none", background: !memoryText.trim() ? `${INK}20` : SAGE, color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: !memoryText.trim() || memorySaving ? "not-allowed" : "pointer" }}
               >
                 {memorySaving ? "Saving…" : "Save memory"}
               </button>
@@ -1757,10 +1781,10 @@ function ProfileUpgradeModal({
         <div className="p-6">
           <div className="flex items-start justify-between mb-1">
             <div>
-              <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.05em", color: BLACK, lineHeight: 1 }}>
-                {reason === "card-limit" ? "Need More Cards?" : "Upgrade to Activate"}
+              <h2 style={{ fontFamily: serif, fontSize: "1.35rem", fontWeight: 600, color: INK, lineHeight: 1.3, margin: 0 }}>
+                {reason === "card-limit" ? "Room for more cards" : "Expand your circle"}
               </h2>
-              <p className="text-sm mt-1.5" style={{ color: GRAY }}>{subtitle}</p>
+              <p className="text-sm mt-1.5" style={{ color: GRAY, fontFamily: sans, lineHeight: 1.5 }}>{subtitle}</p>
             </div>
             <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 text-xl font-bold leading-none ml-4 flex-shrink-0">×</button>
           </div>
@@ -1776,18 +1800,18 @@ function ProfileUpgradeModal({
                   key={key}
                   className="rounded-xl p-4 border-2 transition-all"
                   style={{
-                    borderColor: isCurrent ? `${BLACK}20` : isUpgrade ? `${RED}25` : `${BLACK}08`,
+                    borderColor: isCurrent ? `${INK}20` : isUpgrade ? `${RED}25` : `${INK}08`,
                     background: isCurrent ? BEIGE : "#fafafa",
                   }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.1rem", letterSpacing: "0.06em", color: BLACK }}>
+                        <span style={{ fontFamily: serif, fontSize: "1.1rem", letterSpacing: "0.06em", color: INK }}>
                           {config.label}
                         </span>
                         {isCurrent && (
-                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${BLACK}10`, color: GRAY }}>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${INK}10`, color: GRAY }}>
                             Current plan
                           </span>
                         )}
@@ -1795,21 +1819,21 @@ function ProfileUpgradeModal({
                       <div className="text-xs mt-0.5 mb-2" style={{ color: GRAY }}>{config.tagline}</div>
                       <ul className="space-y-0.5">
                         {config.perks.map((perk) => (
-                          <li key={perk} className="text-xs flex items-center gap-1.5" style={{ color: BLACK }}>
+                          <li key={perk} className="text-xs flex items-center gap-1.5" style={{ color: INK }}>
                             <span style={{ color: RED, fontWeight: 700 }}>✓</span> {perk}
                           </li>
                         ))}
                       </ul>
                     </div>
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.7rem", color: BLACK, lineHeight: 1 }}>
+                      <span style={{ fontFamily: serif, fontSize: "1.7rem", color: INK, lineHeight: 1 }}>
                         {config.price}
                       </span>
                       {!isCurrent && (
                         <button
                           onClick={() => onUpgrade(key)}
                           className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90 whitespace-nowrap"
-                          style={{ background: isUpgrade ? RED : `${BLACK}10`, color: isUpgrade ? "#fff" : GRAY }}
+                          style={{ background: isUpgrade ? RED : `${INK}10`, color: isUpgrade ? "#fff" : GRAY }}
                         >
                           {isUpgrade ? "Upgrade" : "Downgrade"}
                         </button>
@@ -1821,8 +1845,8 @@ function ProfileUpgradeModal({
             })}
           </div>
 
-          <p className="text-xs text-center mt-4" style={{ color: `${GRAY}80` }}>
-            No relationships were guaranteed in the making of this subscription.
+          <p className="text-xs text-center mt-4" style={{ color: MID, fontFamily: sans }}>
+            Change or cancel anytime from Account.
           </p>
         </div>
       </div>
@@ -1847,8 +1871,8 @@ function ProfileUpgradeModal({
           >
             <div style={{ fontSize: "2.2rem", textAlign: "center" as const, marginBottom: 12 }}>🗂️</div>
             <div style={{
-              fontFamily: "'Bebas Neue', cursive", fontSize: "1.5rem",
-              letterSpacing: "0.04em", color: BLACK, textAlign: "center" as const, marginBottom: 8,
+              fontFamily: serif, fontSize: "1.5rem",
+              letterSpacing: "0.04em", color: INK, textAlign: "center" as const, marginBottom: 8,
             }}>
               Archive {existing.name}?
             </div>
@@ -1862,7 +1886,7 @@ function ProfileUpgradeModal({
                 onClick={() => setShowArchiveConfirm(false)}
                 style={{
                   flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${BEIGE}`,
-                  background: "none", color: BLACK, fontWeight: 600, fontSize: "0.9rem",
+                  background: "none", color: INK, fontWeight: 600, fontSize: "0.9rem",
                   cursor: archiving ? "not-allowed" : "pointer",
                 }}
               >
@@ -1881,7 +1905,7 @@ function ProfileUpgradeModal({
                   flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
                   background: RED, color: WHITE, fontWeight: 700, fontSize: "0.9rem",
                   cursor: archiving ? "not-allowed" : "pointer",
-                  fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.06em",
+                  fontFamily: serif, letterSpacing: "0.06em",
                   opacity: archiving ? 0.6 : 1,
                 }}
               >

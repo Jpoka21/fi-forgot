@@ -1,14 +1,107 @@
-import { useState } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useAuth, OnboardingData } from "@/lib/auth-context";
-import { suggestedEvents, PreviewDays, saveCard } from "@/lib/data";
+import { PreviewDays, saveCard } from "@/lib/data";
 import type { CardOrder } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
+import { PB } from "@/lib/personal-brand";
+import AppShell from "@/components/layout/AppShell";
+import { AUTH_PAGE_MAX_WIDTH } from "@/components/layout/PageShell";
+import { SoftCard, PrimaryBtn, SecondaryBtn } from "@/components/personal-ui";
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 
-const CREAM = "#F8EEDC";
-const RED    = "#E23B2E";
-const BLACK  = "#111111";
-const SAGE   = "#5B8C6B";
+const CREAM  = PB.cream;
+const RED    = PB.red;
+const INK    = PB.ink;
+const MID    = PB.mid;
+const WHITE  = PB.white;
+const SAGE   = PB.sage;
+const BORDER = PB.border;
+
+const serif = "'Lora', Georgia, serif";
+const sans  = "'Plus Jakarta Sans', sans-serif";
+
+function LoadingLearningIllustration() {
+  return (
+    <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img
+        src="/assets/illustrations/loading/012_loading_learning.webp"
+        alt="Dave thoughtfully learning what makes your person special"
+        style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
+      />
+    </div>
+  );
+}
+
+const inputStyle: CSSProperties = {
+  width: "100%",
+  borderRadius: 12,
+  border: `1px solid ${BORDER}`,
+  background: WHITE,
+  color: INK,
+  fontSize: "0.95rem",
+  padding: "12px 14px",
+  outline: "none",
+  fontFamily: sans,
+  boxSizing: "border-box",
+};
+
+const labelStyle: CSSProperties = {
+  display: "block",
+  fontFamily: sans,
+  fontSize: "0.88rem",
+  fontWeight: 600,
+  color: INK,
+  marginBottom: 8,
+};
+
+function fieldLabel(text: string, hint?: string) {
+  return (
+    <label style={labelStyle}>
+      {text}
+      {hint && <span style={{ fontWeight: 400, color: MID }}> {hint}</span>}
+    </label>
+  );
+}
+
+function SelectChip({
+  selected,
+  disabled,
+  onClick,
+  testId,
+  children,
+  style,
+}: {
+  selected: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  testId?: string;
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      data-testid={testId}
+      style={{
+        padding: "12px 10px",
+        borderRadius: 12,
+        border: `1.5px solid ${selected ? RED : BORDER}`,
+        background: selected ? `${RED}08` : WHITE,
+        color: selected ? RED : INK,
+        opacity: disabled ? 0.45 : 1,
+        cursor: disabled ? "not-allowed" : "pointer",
+        transition: "border-color 0.15s ease, background 0.15s ease",
+        fontFamily: sans,
+        ...style,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
 // ── Relationship options ──────────────────────────────────────────────────────
 const RELATIONSHIPS = [
@@ -114,7 +207,7 @@ function getMemoryPrompt(rel: string): string {
 // ── Phase type ────────────────────────────────────────────────────────────────
 type Phase = "who" | "like" | "memory" | "generating" | "draft" | "address" | "done";
 
-const PROGRESS_LABELS = ["Who's First?","What Are They Like?","One Real Thing","Your First Card","All Set"];
+const PROGRESS_LABELS = ["Your first person", "What they're like", "A personal detail", "First card preview", "You're all set"];
 
 function phaseToProgressIdx(p: Phase): number {
   const map: Record<Phase,number> = { who:0,like:1,memory:2,generating:3,draft:3,address:4,done:4 };
@@ -328,187 +421,257 @@ export default function OnboardingPage() {
   }
 
   // ─── Render ────────────────────────────────────────────────────────────────
+  const showProgress = phase !== "done" && phase !== "generating";
+  const showStepHeader = phase === "who" || phase === "like" || phase === "memory";
+
+  const stepTitle =
+    phase === "who"
+      ? (data.recipientName ? `Let's start with ${data.recipientName}` : "Start with one person.")
+      : phase === "like"
+        ? `What should we know about ${data.recipientName || "them"}?`
+        : phase === "memory"
+          ? "A detail that makes it personal"
+          : "";
+
+  const stepSub =
+    phase === "who"
+      ? "Who should we help you remember first? You can add more people later — one is enough to begin."
+      : phase === "like"
+        ? "What should we know so the first card feels like you? We'll help fill in the rest over time."
+        : phase === "memory"
+          ? "Even a sentence helps. Or skip — we'll write something warm and you stay in control."
+          : "";
+
   return (
-    <div style={{ height:"100dvh", display:"flex", flexDirection:"column", overflow:"hidden", background:CREAM, position:"relative" }}>
-
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 md:px-8"
-        style={{ flexShrink:0, paddingTop:14, paddingBottom:14, background:"#fff", borderBottom:`1px solid ${BLACK}10` }}>
-        <div style={{ fontFamily:"'Caveat', cursive", fontSize:"1.75rem", fontWeight:700, color:"#071A33" }}>
-          <span style={{ color:RED }}>"F"</span> I Forgot
-          <div style={{ height:2, background:RED, marginTop:1, borderRadius:2 }}/>
-        </div>
-        {phase !== "done" && (
-          <div style={{ fontSize:"0.9rem", fontWeight:500, color:"#888" }}>
-            Step {progressIdx + 1} of {PROGRESS_LABELS.length}
-          </div>
-        )}
-      </div>
-
-      {/* Progress bar */}
-      {phase !== "done" && (
-        <div className="px-4 md:px-8"
-          style={{ flexShrink:0, background:"#fff", borderBottom:`1px solid ${BLACK}10`, paddingTop:10, paddingBottom:10 }}>
-          <div style={{ display:"flex", gap:6 }}>
-            {PROGRESS_LABELS.map((label, i) => (
-              <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", gap:4 }}>
-                <div style={{ height:9, borderRadius:999,
-                  background: i <= progressIdx ? RED : `${BLACK}15`,
-                  transition:"background 0.4s" }}/>
-                <span className="hidden md:block" style={{
-                  textAlign:"center", fontSize:"0.72rem",
-                  fontWeight: i === progressIdx ? 700 : 400,
-                  color: i <= progressIdx ? RED : `${BLACK}40`,
-                  letterSpacing:"0.03em", whiteSpace:"nowrap",
-                  overflow:"hidden", textOverflow:"ellipsis", textTransform:"uppercase",
-                }}>{label}</span>
+    <AppShell>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "calc(100dvh - 112px)",
+        maxHeight: "calc(100dvh - 112px)",
+        overflow: "hidden",
+      }}>
+        {/* Gentle progress — no step pressure */}
+        {showProgress && (
+          <div style={{
+            flexShrink: 0,
+            padding: "12px 20px 10px",
+            borderBottom: `1px solid ${BORDER}`,
+            background: WHITE,
+          }}>
+            <div style={{ maxWidth: AUTH_PAGE_MAX_WIDTH, margin: "0 auto" }}>
+              <div style={{ display: "flex", gap: 5 }}>
+                {PROGRESS_LABELS.map((label, i) => (
+                  <div
+                    key={label}
+                    title={label}
+                    style={{
+                      flex: 1,
+                      height: 4,
+                      borderRadius: 999,
+                      background: i <= progressIdx ? RED : `${INK}12`,
+                      transition: "background 0.35s ease",
+                    }}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-between mt-1.5 md:hidden">
-            <span style={{ fontSize:"0.72rem", fontWeight:700, color:RED, letterSpacing:"0.06em", textTransform:"uppercase" }}>
-              {PROGRESS_LABELS[progressIdx]}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* ── DONE phase — full page ─────────────────────────────────────── */}
-      {phase === "done" && (
-        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px 16px" }}>
-          <div style={{ maxWidth:500, width:"100%", textAlign:"center" }}>
-            <div style={{ fontSize:"3.5rem", marginBottom:16 }}>🎉</div>
-            <h1 style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"clamp(2rem,7vw,2.8rem)", color:BLACK, letterSpacing:"0.04em", margin:"0 0 8px", lineHeight:1.1 }}>
-              You've got {data.recipientName} covered.
-            </h1>
-            <p style={{ fontFamily:"'Caveat', cursive", fontSize:"1.2rem", color:"#666", marginBottom:32, lineHeight:1.5 }}>
-              Good start. We'll handle the card from here.
-            </p>
-
-            <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-              <button
-                onClick={() => setLocation("/recipients/new")}
-                style={{ background:RED, color:"#fff", border:"none", borderRadius:12, padding:"16px 24px",
-                  fontFamily:"'Bebas Neue', cursive", fontSize:"1.15rem", letterSpacing:"0.06em", cursor:"pointer",
-                  boxShadow:`0 4px 20px ${RED}30` }}>
-                ＋ Add Another Person →
-              </button>
-              <button
-                onClick={() => setLocation("/dashboard")}
-                style={{ background:"transparent", color:BLACK, border:`2px solid ${BLACK}20`, borderRadius:12,
-                  padding:"14px 24px", fontWeight:600, fontSize:"1rem", cursor:"pointer" }}>
-                Go to Dashboard
-              </button>
+              <p style={{
+                fontFamily: sans,
+                fontSize: "0.78rem",
+                color: MID,
+                margin: "8px 0 0",
+                lineHeight: 1.4,
+              }}>
+                {PROGRESS_LABELS[progressIdx]}
+              </p>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Phases with content + navigation ─────────────────────────── */}
-      {phase !== "done" && (
-        <div style={{ flex:1, minHeight:0, display:"flex", justifyContent:"center", padding:"0 16px", overflow:"hidden" }}>
-          <div style={{ width:"100%", maxWidth:700, display:"flex", flexDirection:"column", height:"100%", padding:"20px 0 16px" }}>
-
-            {/* ── Step header (not shown during generating / draft / address) */}
-            {(phase === "who" || phase === "like" || phase === "memory") && (
-              <div style={{ flexShrink:0, marginBottom:18 }}>
-                <p style={{ fontSize:"1rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:6, color:RED }}>
-                  Step {progressIdx + 1} — {PROGRESS_LABELS[progressIdx]}
-                </p>
-                <h1 style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"clamp(2.1rem,7vw,3rem)", color:BLACK, lineHeight:1, margin:0 }}>
-                  {phase === "who"    && (data.recipientName ? `Who's ${data.recipientName}?` : "Who's first?")}
-                  {phase === "like"   && `What's ${data.recipientName || "they"} like?`}
-                  {phase === "memory" && "One real thing."}
-                </h1>
-                <p style={{ fontSize:"1rem", color:"#666", marginTop:6, marginBottom:0 }}>
-                  {phase === "who"    && "Tell us who you need us to remember. You can add more people later."}
-                  {phase === "like"   && "This shapes the vibe of every card we write for them."}
-                  {phase === "memory" && "A single real detail makes the card feel like it could only be for them."}
-                </p>
+        {/* Done */}
+        {phase === "done" && (
+          <div style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "32px 20px",
+          }}>
+            <div style={{ maxWidth: 480, width: "100%", textAlign: "center" }}>
+              <div style={{ margin: "0 auto 20px", width: "100%", maxWidth: 280, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img
+                  src="/illustrations/onboarding/007_onboarding_dave_welcome.webp"
+                  alt="Dave standing calmly beside a mailbox with a handwritten card, reassuring that everything is taken care of"
+                  style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
+                />
               </div>
-            )}
+              <h1 style={{
+                fontFamily: serif,
+                fontSize: "clamp(1.65rem, 5vw, 2.1rem)",
+                fontWeight: 600,
+                color: INK,
+                margin: "0 0 10px",
+                lineHeight: 1.25,
+              }}>
+                {data.recipientName} is on your list.
+              </h1>
+              <p style={{
+                fontFamily: sans,
+                fontSize: "0.95rem",
+                color: MID,
+                marginBottom: 28,
+                lineHeight: 1.6,
+              }}>
+                We'll remind you before {firstOccasion || "their next occasion"}. Nothing gets mailed without your say-so.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "stretch" }}>
+                <PrimaryBtn onClick={() => setLocation("/recipients/new")} style={{ width: "100%", padding: "14px 20px" }}>
+                  Add another person
+                </PrimaryBtn>
+                <SecondaryBtn onClick={() => setLocation("/dashboard")} style={{ width: "100%", padding: "13px 20px" }}>
+                  Go to your dashboard
+                </SecondaryBtn>
+              </div>
+            </div>
+          </div>
+        )}
 
-            {/* Scrollable content */}
-            <div style={{ flex:1, minHeight:0, overflowY:"auto" }}>
+        {/* Active phases */}
+        {phase !== "done" && (
+          <div style={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            justifyContent: "center",
+            padding: "0 20px",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              width: "100%",
+              maxWidth: AUTH_PAGE_MAX_WIDTH,
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+              padding: "20px 0 16px",
+            }}>
+              {showStepHeader && (
+                <div style={{ flexShrink: 0, marginBottom: 18 }}>
+                  <h1 style={{
+                    fontFamily: serif,
+                    fontSize: "clamp(1.5rem, 5vw, 1.85rem)",
+                    fontWeight: 600,
+                    color: INK,
+                    lineHeight: 1.25,
+                    margin: "0 0 8px",
+                  }}>
+                    {stepTitle}
+                  </h1>
+                  <p style={{
+                    fontFamily: sans,
+                    fontSize: "0.92rem",
+                    color: MID,
+                    margin: 0,
+                    lineHeight: 1.55,
+                  }}>
+                    {stepSub}
+                  </p>
+                </div>
+              )}
 
-              {/* ══ STEP 1 — WHO'S FIRST ══════════════════════════════════ */}
+              <div style={{ flex: 1, minHeight: 0, overflowY: "auto", paddingRight: 2 }}>
+
+              {/* WHO */}
               {phase === "who" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
-
-                  {/* Name */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
                   <div>
-                    <label style={{ display:"block", fontSize:"1.1rem", fontWeight:600, marginBottom:8, color:BLACK }}>
-                      Their name
-                    </label>
+                    {fieldLabel("Their name")}
                     <input
-                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor:`${BLACK}20`, background:"#fff", color:BLACK, fontSize:"1.2rem", padding:"13px 18px", fontWeight:500 }}
-                      placeholder="Sarah, Mom, Mike, Dave…"
+                      style={inputStyle}
+                      placeholder="Sarah, Mom, Mike…"
                       value={data.recipientName}
                       onChange={e => setData(d => ({ ...d, recipientName: e.target.value }))}
                       data-testid="input-recipient-name"
                     />
                   </div>
 
-                  {/* Relationship */}
                   <div>
-                    <label style={{ display:"block", fontSize:"1.1rem", fontWeight:600, marginBottom:10, color:BLACK }}>
-                      Your relationship to them
-                    </label>
-                    <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8 }}>
+                    {fieldLabel("Your relationship")}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
                       {RELATIONSHIPS.map(r => (
-                        <button key={r.id}
-                          onClick={() => { setData(d => ({ ...d, relationship:r.id })); setFirstOccasion(""); setFirstOccasionDate(""); }}
-                          style={{ padding:"12px 8px", borderRadius:12,
-                            border:`2px solid ${data.relationship === r.id ? RED : `${BLACK}15`}`,
-                            background: data.relationship === r.id ? `${RED}12` : "#fff",
-                            color: data.relationship === r.id ? RED : "#444",
-                            display:"flex", flexDirection:"column", alignItems:"center", gap:4, cursor:"pointer", transition:"all 0.15s" }}
-                          data-testid={`btn-relationship-${r.id.toLowerCase().replace(/ /g,"-")}`}>
-                          <span style={{ fontSize:"1.5rem" }}>{r.emoji}</span>
-                          <span style={{ fontSize:"0.9rem", fontWeight:600 }}>{r.label}</span>
-                        </button>
+                        <SelectChip
+                          key={r.id}
+                          selected={data.relationship === r.id}
+                          onClick={() => {
+                            setData(d => ({ ...d, relationship: r.id }));
+                            setFirstOccasion("");
+                            setFirstOccasionDate("");
+                          }}
+                          testId={`btn-relationship-${r.id.toLowerCase().replace(/ /g, "-")}`}
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 4,
+                            fontSize: "0.82rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <span style={{ fontSize: "1.25rem", lineHeight: 1 }} aria-hidden>{r.emoji}</span>
+                          <span>{r.label}</span>
+                        </SelectChip>
                       ))}
                     </div>
                   </div>
 
-                  {/* First occasion */}
                   {data.relationship && (
                     <div>
-                      <label style={{ display:"block", fontSize:"1.1rem", fontWeight:600, marginBottom:10, color:BLACK }}>
-                        What's the first occasion we should cover?
-                      </label>
-                      <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                      {fieldLabel("First occasion to cover", "(you can add more later)")}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         {occasions.map(occ => (
                           <div key={occ.event}>
-                            <button
+                            <SelectChip
+                              selected={firstOccasion === occ.event}
                               onClick={() => { setFirstOccasion(occ.event); setFirstOccasionDate(""); }}
-                              style={{ width:"100%", display:"flex", alignItems:"center", gap:14, padding:"14px 18px",
-                                borderRadius: DATE_SENSITIVE.includes(occ.event) && firstOccasion === occ.event ? "12px 12px 0 0" : "12px",
-                                border:`2px solid ${firstOccasion === occ.event ? RED : `${BLACK}15`}`,
-                                background: firstOccasion === occ.event ? `${RED}12` : "#fff",
-                                cursor:"pointer", transition:"all 0.15s" }}
-                              data-testid={`btn-occasion-${occ.event.toLowerCase().replace(/\s+/g,"-")}`}>
-                              <span style={{ fontSize:"1.5rem" }}>{occ.emoji}</span>
-                              <span style={{ fontSize:"1.1rem", fontWeight:600, color: firstOccasion === occ.event ? RED : "#333" }}>
-                                {occ.event}
-                              </span>
-                              {firstOccasion === occ.event && <span style={{ marginLeft:"auto", color:RED, fontWeight:700 }}>✓</span>}
-                            </button>
+                              testId={`btn-occasion-${occ.event.toLowerCase().replace(/\s+/g, "-")}`}
+                              style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 12,
+                                padding: "14px 16px",
+                                borderRadius: DATE_SENSITIVE.includes(occ.event) && firstOccasion === occ.event
+                                  ? "12px 12px 0 0"
+                                  : 12,
+                                fontSize: "0.92rem",
+                                fontWeight: 600,
+                                textAlign: "left",
+                              }}
+                            >
+                              <span style={{ fontSize: "1.25rem" }} aria-hidden>{occ.emoji}</span>
+                              <span style={{ flex: 1 }}>{occ.event}</span>
+                              {firstOccasion === occ.event && (
+                                <span style={{ color: RED, fontSize: "0.85rem" }}>Selected</span>
+                              )}
+                            </SelectChip>
                             {DATE_SENSITIVE.includes(occ.event) && firstOccasion === occ.event && (
-                              <div style={{ padding:"12px 18px", border:`2px solid ${RED}`, borderTop:"none",
-                                borderRadius:"0 0 12px 12px", background:`${RED}08` }}>
-                                <label style={{ display:"block", fontSize:"0.8rem", fontWeight:600, marginBottom:6,
-                                  textTransform:"uppercase", letterSpacing:"0.05em", color:RED }}>
-                                  {occ.event === "Birthday" ? "Their birthday" :
-                                   occ.event === "Anniversary" ? "Anniversary date" :
-                                   occ.event === "Work Anniversary" ? "Work start date" : "Date"}
-                                </label>
-                                <input type="date"
+                              <div style={{
+                                padding: "12px 16px",
+                                border: `1.5px solid ${RED}`,
+                                borderTop: "none",
+                                borderRadius: "0 0 12px 12px",
+                                background: `${RED}06`,
+                              }}>
+                                {fieldLabel(
+                                  occ.event === "Birthday" ? "Their birthday"
+                                    : occ.event === "Anniversary" ? "Anniversary date"
+                                    : occ.event === "Work Anniversary" ? "Work start date"
+                                    : "Date",
+                                )}
+                                <input
+                                  type="date"
                                   value={firstOccasionDate}
                                   onChange={e => setFirstOccasionDate(e.target.value)}
-                                  style={{ width:"100%", borderRadius:8, border:`1px solid ${RED}40`,
-                                    padding:"8px 12px", fontSize:"1rem", background:"#fff", color:BLACK }}
+                                  style={{ ...inputStyle, fontSize: "0.9rem" }}
                                   data-testid="input-occasion-date"
                                 />
                               </div>
@@ -516,61 +679,73 @@ export default function OnboardingPage() {
                           </div>
                         ))}
                       </div>
-                      <p style={{ fontSize:"0.85rem", color:"#aaa", marginTop:8 }}>
-                        You can add more occasions for {data.recipientName || "them"} from their profile later.
+                      <p style={{
+                        fontFamily: sans,
+                        fontSize: "0.82rem",
+                        color: MID,
+                        marginTop: 10,
+                        lineHeight: 1.5,
+                      }}>
+                        No need to remember every date today — we'll help you fill in the rest over time.
                       </p>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* ══ STEP 2 — WHAT ARE THEY LIKE ══════════════════════════ */}
+              {/* LIKE */}
               {phase === "like" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
-
-                  {/* Personality — optional, max 1 */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
                   <div>
-                    <label style={{ display:"block", fontSize:"1.1rem", fontWeight:600, marginBottom:6, color:BLACK }}>
-                      Their vibe <span style={{ fontWeight:400, color:"#aaa" }}>(optional — pick 1)</span>
-                    </label>
-                    <p style={{ fontSize:"0.9rem", color:"#888", marginBottom:10 }}>Skip if you're not sure. We'll default to warm and genuine.</p>
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                    {fieldLabel("Their vibe", "(optional — pick one)")}
+                    <p style={{ fontFamily: sans, fontSize: "0.84rem", color: MID, margin: "0 0 10px", lineHeight: 1.5 }}>
+                      Skip if you're not sure. We'll default to warm and genuine.
+                    </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       {PERSONALITIES.map(p => {
                         const selected = data.personality.includes(p.id);
                         const maxed = data.personality.length >= 1 && !selected;
                         return (
-                          <button key={p.id}
+                          <SelectChip
+                            key={p.id}
+                            selected={selected}
+                            disabled={maxed}
                             onClick={() => {
                               setData(d => ({
                                 ...d,
                                 personality: selected ? [] : [p.id],
                               }));
                             }}
-                            style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", borderRadius:12,
-                              border:`2px solid ${selected ? RED : `${BLACK}15`}`,
-                              background: selected ? `${RED}12` : "#fff",
-                              opacity: maxed ? 0.4 : 1,
-                              cursor: maxed ? "not-allowed" : "pointer", transition:"all 0.15s" }}
-                            data-testid={`btn-personality-${p.id}`}>
-                            <span style={{ fontSize:"1.8rem" }}>{p.emoji}</span>
-                            <span style={{ fontSize:"1rem", fontWeight:600, color: selected ? RED : "#444" }}>{p.label}</span>
-                          </button>
+                            testId={`btn-personality-${p.id}`}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              padding: "14px 14px",
+                              textAlign: "left",
+                              fontSize: "0.86rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            <span style={{ fontSize: "1.2rem" }} aria-hidden>{p.emoji}</span>
+                            <span>{p.label}</span>
+                          </SelectChip>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Interests — required 1-2 */}
                   <div>
-                    <label style={{ display:"block", fontSize:"1.1rem", fontWeight:600, marginBottom:6, color:BLACK }}>
-                      What do they love? <span style={{ fontWeight:400, color:"#aaa" }}>(pick 1–2)</span>
-                    </label>
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                    {fieldLabel("What do they love?", "(pick 1–2)")}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 2 }}>
                       {INTERESTS.map(item => {
                         const selected = data.interests.includes(item.id);
                         const maxed = data.interests.length >= 2 && !selected;
                         return (
-                          <button key={item.id}
+                          <SelectChip
+                            key={item.id}
+                            selected={selected}
+                            disabled={maxed}
                             onClick={() => {
                               if (maxed) return;
                               setData(d => ({
@@ -580,28 +755,29 @@ export default function OnboardingPage() {
                                   : [...d.interests, item.id],
                               }));
                             }}
-                            style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 16px", borderRadius:12,
-                              border:`2px solid ${selected ? RED : `${BLACK}15`}`,
-                              background: selected ? `${RED}12` : "#fff",
-                              opacity: maxed ? 0.4 : 1,
-                              cursor: maxed ? "not-allowed" : "pointer", transition:"all 0.15s" }}
-                            data-testid={`btn-interest-${item.id}`}>
-                            <span style={{ fontSize:"1.5rem" }}>{item.emoji}</span>
-                            <span style={{ fontSize:"1rem", fontWeight:600, color: selected ? RED : "#444" }}>{item.label}</span>
-                          </button>
+                            testId={`btn-interest-${item.id}`}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              padding: "12px 14px",
+                              textAlign: "left",
+                              fontSize: "0.86rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            <span style={{ fontSize: "1.15rem" }} aria-hidden>{item.emoji}</span>
+                            <span>{item.label}</span>
+                          </SelectChip>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Things to avoid — optional */}
                   <div>
-                    <label style={{ display:"block", fontSize:"1rem", fontWeight:600, marginBottom:6, color:BLACK }}>
-                      Anything we should NEVER put in a card? <span style={{ fontWeight:400, color:"#aaa" }}>(optional)</span>
-                    </label>
+                    {fieldLabel("Anything to avoid in a card?", "(optional)")}
                     <textarea
-                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors resize-none"
-                      style={{ borderColor:`${BLACK}20`, background:"#fff", color:BLACK, fontSize:"1rem", padding:"11px 16px" }}
+                      style={{ ...inputStyle, resize: "none", minHeight: 72 }}
                       placeholder="Don't mention her age. No weight jokes. He hates the word 'blessed'."
                       rows={2}
                       value={data.thingsToAvoid}
@@ -612,16 +788,21 @@ export default function OnboardingPage() {
                 </div>
               )}
 
-              {/* ══ STEP 3 — ONE REAL THING ═══════════════════════════════ */}
+              {/* MEMORY */}
               {phase === "memory" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-                  <div style={{ borderRadius:14, padding:"18px 20px", background:"#fff", border:`1.5px solid ${BLACK}12` }}>
-                    <p style={{ fontFamily:"'Caveat', cursive", fontSize:"1.2rem", color:"#444", lineHeight:1.6, margin:"0 0 14px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                  <SoftCard style={{ padding: "18px 20px" }}>
+                    <p style={{
+                      fontFamily: sans,
+                      fontSize: "0.92rem",
+                      color: MID,
+                      lineHeight: 1.6,
+                      margin: "0 0 14px",
+                    }}>
                       {getMemoryPrompt(data.relationship)}
                     </p>
                     <textarea
-                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors resize-none"
-                      style={{ borderColor:`${BLACK}20`, background:`${BLACK}03`, color:BLACK, fontSize:"1.05rem", padding:"13px 16px" }}
+                      style={{ ...inputStyle, resize: "none", minHeight: 100, background: CREAM }}
                       placeholder="Write anything — even a sentence is enough…"
                       rows={4}
                       value={memoryText}
@@ -629,16 +810,12 @@ export default function OnboardingPage() {
                       autoFocus
                       data-testid="input-memory-text"
                     />
-                  </div>
+                  </SoftCard>
 
-                  {/* Nickname */}
                   <div>
-                    <label style={{ display:"block", fontSize:"1rem", fontWeight:600, marginBottom:6, color:BLACK }}>
-                      Nickname or pet name <span style={{ fontWeight:400, color:"#aaa" }}>(optional)</span>
-                    </label>
+                    {fieldLabel("Nickname or pet name", "(optional)")}
                     <input
-                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor:`${BLACK}20`, background:"#fff", color:BLACK, fontSize:"1.05rem", padding:"11px 16px" }}
+                      style={inputStyle}
                       placeholder="Babe, honey, mama bear, big guy…"
                       value={data.petName}
                       onChange={e => setData(d => ({ ...d, petName: e.target.value }))}
@@ -646,89 +823,151 @@ export default function OnboardingPage() {
                     />
                   </div>
 
-                  {/* Error from previous generation attempt */}
                   {genError && (
-                    <div style={{ padding:"12px 16px", borderRadius:10, background:"#fee2e2", border:"1px solid #fca5a5",
-                      fontSize:"0.9rem", color:"#991b1b" }}>
+                    <div style={{
+                      padding: "12px 16px",
+                      borderRadius: 12,
+                      background: "#fef2f2",
+                      border: "1px solid #fecaca",
+                      fontFamily: sans,
+                      fontSize: "0.88rem",
+                      color: "#991b1b",
+                      lineHeight: 1.5,
+                    }}>
                       {genError} — please try again.
                     </div>
                   )}
                 </div>
               )}
 
-              {/* ══ GENERATING ════════════════════════════════════════════ */}
+              {/* GENERATING */}
               {phase === "generating" && (
-                <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 0", gap:20, minHeight:320 }}>
-                  <div style={{ fontSize:"3rem", animation:"spin 1s linear infinite" }}>💌</div>
-                  <h2 style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"2rem", color:BLACK, letterSpacing:"0.04em", margin:0, textAlign:"center" }}>
+                <div style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "48px 0",
+                  gap: 16,
+                  minHeight: 280,
+                }}>
+                  <LoadingLearningIllustration />
+                  <h2 style={{
+                    fontFamily: serif,
+                    fontSize: "1.35rem",
+                    fontWeight: 600,
+                    color: INK,
+                    margin: 0,
+                    textAlign: "center",
+                    lineHeight: 1.35,
+                  }}>
                     Writing {data.recipientName}'s first card…
                   </h2>
-                  <p style={{ fontFamily:"'Caveat', cursive", fontSize:"1.1rem", color:"#888", textAlign:"center" }}>
-                    Using everything you just told us. This takes about 10 seconds.
+                  <p style={{
+                    fontFamily: sans,
+                    fontSize: "0.9rem",
+                    color: MID,
+                    textAlign: "center",
+                    margin: 0,
+                    lineHeight: 1.55,
+                    maxWidth: 320,
+                  }}>
+                    Using what you shared. This usually takes about ten seconds — you'll review before anything is sent.
                   </p>
-                  <style>{`@keyframes spin { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }`}</style>
                 </div>
               )}
 
-              {/* ══ DRAFT ════════════════════════════════════════════════ */}
+              {/* DRAFT */}
               {phase === "draft" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-                  <div style={{ padding:"10px 14px", borderRadius:10, background:`${SAGE}12`, border:`1px solid ${SAGE}30`,
-                    display:"flex", alignItems:"center", gap:8 }}>
-                    <span style={{ fontSize:"1rem" }}>✨</span>
-                    <span style={{ fontSize:"0.9rem", fontWeight:600, color:SAGE }}>
-                      Here's {data.recipientName}'s first card draft — built from what you told us.
-                    </span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div style={{
+                    padding: "12px 14px",
+                    borderRadius: 12,
+                    background: `${SAGE}10`,
+                    border: `1px solid ${SAGE}28`,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 10,
+                  }}>
+                    <Sparkles size={18} color={SAGE} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <p style={{
+                      fontFamily: sans,
+                      fontSize: "0.88rem",
+                      fontWeight: 500,
+                      color: INK,
+                      margin: 0,
+                      lineHeight: 1.5,
+                    }}>
+                      Here's a first draft for {data.recipientName} — built from what you told us. You approve before anything is mailed.
+                    </p>
                   </div>
 
-                  {/* Card text */}
-                  <div style={{ background:"#fff", borderRadius:14, padding:"24px 22px", border:`1.5px solid ${BLACK}12`,
-                    boxShadow:"0 2px 16px rgba(0,0,0,0.06)" }}>
-                    <div style={{ fontSize:"0.72rem", fontWeight:700, letterSpacing:"0.1em", color:"#aaa",
-                      textTransform:"uppercase", marginBottom:12 }}>
+                  <SoftCard style={{ padding: "22px 20px" }}>
+                    <div style={{
+                      fontFamily: sans,
+                      fontSize: "0.72rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                      color: MID,
+                      marginBottom: 12,
+                    }}>
                       {firstOccasion} · {data.recipientName}
                     </div>
-                    <div style={{ fontFamily:"'Caveat', cursive", fontSize:"1.25rem", color:BLACK, lineHeight:1.75,
-                      whiteSpace:"pre-wrap" }}>
+                    <div style={{
+                      fontFamily: serif,
+                      fontSize: "1.1rem",
+                      color: INK,
+                      lineHeight: 1.75,
+                      whiteSpace: "pre-wrap",
+                    }}>
                       {generatedCard}
                     </div>
-                  </div>
+                  </SoftCard>
 
-                  {/* What We Kept In Mind */}
                   {onboardingKeptInMind.length > 0 && (
-                    <div style={{ background:`${SAGE}0C`, border:`1px solid ${SAGE}28`, borderRadius:14, padding:"12px 16px" }}>
-                      <p style={{ fontFamily:"'Inter', sans-serif", fontSize:"0.62rem", fontWeight:700, letterSpacing:"0.08em",
-                        textTransform:"uppercase", color:SAGE, margin:"0 0 9px" }}>
+                    <SoftCard style={{ padding: "14px 16px", background: `${SAGE}06`, borderColor: `${SAGE}28` }}>
+                      <p style={{
+                        fontFamily: sans,
+                        fontSize: "0.72rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.04em",
+                        color: SAGE,
+                        margin: "0 0 10px",
+                      }}>
                         What we kept in mind
                       </p>
-                      <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
                         {onboardingKeptInMind.map((item, i) => (
-                          <span key={i} style={{ padding:"4px 11px", borderRadius:20, background:"#fff",
-                            border:`1px solid ${SAGE}28`, fontFamily:"'Inter', sans-serif", fontSize:"0.73rem",
-                            color:BLACK, display:"inline-flex", alignItems:"center", gap:5 }}>
-                            <span style={{ color:SAGE, fontWeight:700 }}>✓</span>{item}
+                          <span key={i} style={{
+                            padding: "5px 11px",
+                            borderRadius: 20,
+                            background: WHITE,
+                            border: `1px solid ${SAGE}28`,
+                            fontFamily: sans,
+                            fontSize: "0.78rem",
+                            color: INK,
+                          }}>
+                            {item}
                           </span>
                         ))}
                       </div>
-                    </div>
+                    </SoftCard>
                   )}
 
-                  {/* Revision section */}
                   {revisionCount === 0 && !showRevisionInput && (
-                    <button
+                    <SecondaryBtn
                       onClick={() => setShowRevisionInput(true)}
-                      style={{ background:"transparent", color:`${BLACK}70`, border:`1.5px solid ${BLACK}15`,
-                        borderRadius:10, padding:"10px 16px", fontSize:"0.9rem", fontWeight:600, cursor:"pointer",
-                        textAlign:"left" }}>
-                      Something's off — fix one thing
-                    </button>
+                      style={{ width: "100%", textAlign: "left", justifyContent: "flex-start" }}
+                    >
+                      Something's off — suggest one change
+                    </SecondaryBtn>
                   )}
 
                   {revisionCount === 0 && showRevisionInput && (
-                    <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       <textarea
-                        className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors resize-none"
-                        style={{ borderColor:`${BLACK}20`, background:"#fff", color:BLACK, fontSize:"0.95rem", padding:"11px 14px" }}
+                        style={{ ...inputStyle, resize: "none", minHeight: 72 }}
                         placeholder="What's wrong? (e.g. 'too formal', 'mention the Italy trip', 'shorter please')"
                         rows={2}
                         value={revisionInput}
@@ -736,76 +975,89 @@ export default function OnboardingPage() {
                         autoFocus
                         data-testid="input-revision-text"
                       />
-                      <div style={{ display:"flex", gap:8 }}>
-                        <button onClick={() => setShowRevisionInput(false)}
-                          style={{ flex:1, padding:"9px", borderRadius:9, border:`1.5px solid ${BLACK}15`,
-                            background:"transparent", color:"#888", fontSize:"0.85rem", cursor:"pointer" }}>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <SecondaryBtn onClick={() => setShowRevisionInput(false)} style={{ flex: 1 }}>
                           Cancel
-                        </button>
-                        <button onClick={handleRevise} disabled={!revisionInput.trim() || isRevising}
-                          style={{ flex:2, padding:"9px", borderRadius:9, border:"none",
-                            background: revisionInput.trim() && !isRevising ? RED : `${BLACK}15`,
-                            color: revisionInput.trim() && !isRevising ? "#fff" : "#999",
-                            fontSize:"0.9rem", fontWeight:700, cursor: revisionInput.trim() && !isRevising ? "pointer" : "not-allowed" }}
-                          data-testid="btn-submit-revision">
-                          {isRevising ? "Revising…" : "Fix it →"}
-                        </button>
+                        </SecondaryBtn>
+                        <span data-testid="btn-submit-revision" style={{ flex: 2 }}>
+                          <PrimaryBtn
+                            onClick={handleRevise}
+                            disabled={!revisionInput.trim() || isRevising}
+                            style={{ width: "100%" }}
+                          >
+                            {isRevising ? "Revising…" : "Update draft"}
+                          </PrimaryBtn>
+                        </span>
                       </div>
                     </div>
                   )}
 
                   {revisionCount >= 1 && (
-                    <div style={{ padding:"11px 14px", borderRadius:10, background:"#f3f4f6", border:`1px solid ${BLACK}10`,
-                      fontSize:"0.88rem", color:"#666" }}>
-                      Looks good enough to save. You can edit more from your dashboard.
-                    </div>
+                    <p style={{
+                      fontFamily: sans,
+                      fontSize: "0.86rem",
+                      color: MID,
+                      margin: 0,
+                      lineHeight: 1.5,
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      background: `${INK}06`,
+                    }}>
+                      Looks good enough to save. You can edit more from your dashboard anytime.
+                    </p>
                   )}
                 </div>
               )}
 
-              {/* ══ ADDRESS ═══════════════════════════════════════════════ */}
+              {/* ADDRESS */}
               {phase === "address" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-                  <div style={{ flexShrink:0, marginBottom:4 }}>
-                    <p style={{ fontSize:"1rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:6, color:RED }}>
-                      Step 5 — Sending
-                    </p>
-                    <h1 style={{ fontFamily:"'Bebas Neue', cursive", fontSize:"clamp(2rem,7vw,2.8rem)", color:BLACK, lineHeight:1, margin:0 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <h1 style={{
+                      fontFamily: serif,
+                      fontSize: "clamp(1.45rem, 5vw, 1.75rem)",
+                      fontWeight: 600,
+                      color: INK,
+                      lineHeight: 1.25,
+                      margin: "0 0 8px",
+                    }}>
                       Where should we send it?
                     </h1>
-                    <p style={{ fontSize:"1rem", color:"#666", marginTop:6 }}>
-                      We'll mail it to your address. You can also have it sent directly to {data.recipientName}.
+                    <p style={{
+                      fontFamily: sans,
+                      fontSize: "0.92rem",
+                      color: MID,
+                      margin: 0,
+                      lineHeight: 1.55,
+                    }}>
+                      We'll mail it to your address, or directly to {data.recipientName}. You can skip and add this later.
                     </p>
                   </div>
 
-                  <div style={{ borderRadius:12, padding:"18px 20px", background:"#fff", border:`1.5px solid ${BLACK}15`, display:"flex", flexDirection:"column", gap:12 }}>
+                  <SoftCard style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
                     <input
-                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor:`${BLACK}20`, background:"#fafafa", color:BLACK, fontSize:"1rem", padding:"11px 16px" }}
+                      style={inputStyle}
                       placeholder="Street address"
                       value={address.line1}
                       onChange={e => setAddress(a => ({ ...a, line1: e.target.value }))}
                       data-testid="input-address-line1"
                     />
                     <input
-                      className="w-full border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                      style={{ borderColor:`${BLACK}20`, background:"#fafafa", color:BLACK, fontSize:"1rem", padding:"11px 16px" }}
+                      style={inputStyle}
                       placeholder="Apt / Suite (optional)"
                       value={address.line2}
                       onChange={e => setAddress(a => ({ ...a, line2: e.target.value }))}
                     />
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 80px 100px", gap:10 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 72px 96px", gap: 10 }}>
                       <input
-                        className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                        style={{ borderColor:`${BLACK}20`, background:"#fafafa", color:BLACK, fontSize:"1rem", padding:"11px 16px" }}
+                        style={inputStyle}
                         placeholder="City"
                         value={address.city}
                         onChange={e => setAddress(a => ({ ...a, city: e.target.value }))}
                         data-testid="input-address-city"
                       />
                       <input
-                        className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                        style={{ borderColor:`${BLACK}20`, background:"#fafafa", color:BLACK, fontSize:"1rem", padding:"11px 16px" }}
+                        style={inputStyle}
                         placeholder="ST"
                         maxLength={2}
                         value={address.state}
@@ -813,8 +1065,7 @@ export default function OnboardingPage() {
                         data-testid="input-address-state"
                       />
                       <input
-                        className="border-2 rounded-xl outline-none focus:border-red-500 transition-colors"
-                        style={{ borderColor:`${BLACK}20`, background:"#fafafa", color:BLACK, fontSize:"1rem", padding:"11px 16px" }}
+                        style={inputStyle}
                         placeholder="Zip"
                         maxLength={10}
                         value={address.zip}
@@ -822,112 +1073,108 @@ export default function OnboardingPage() {
                         data-testid="input-address-zip"
                       />
                     </div>
-                  </div>
+                  </SoftCard>
                 </div>
               )}
             </div>
 
-            {/* ── Navigation — pinned to bottom ─────────────────────────── */}
-            <div style={{ flexShrink:0, paddingTop:14 }}>
+            {/* Bottom navigation */}
+            <div style={{ flexShrink: 0, paddingTop: 14 }}>
 
-              {/* WHO */}
               {phase === "who" && (
-                <div style={{ display:"flex", justifyContent:"flex-end" }}>
-                  <button onClick={goLike} disabled={!canAdvanceWho()}
-                    style={{ fontSize:"1.1rem", fontWeight:700, padding:"15px 40px", borderRadius:12, border:"none",
-                      background: canAdvanceWho() ? RED : `${BLACK}20`,
-                      color: canAdvanceWho() ? "#fff" : "#999",
-                      cursor: canAdvanceWho() ? "pointer" : "not-allowed", transition:"all 0.15s" }}
-                    data-testid="btn-onboarding-next">
-                    Next →
-                  </button>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <span data-testid="btn-onboarding-next">
+                    <PrimaryBtn onClick={goLike} disabled={!canAdvanceWho()} style={{ padding: "13px 28px" }}>
+                      Continue <ArrowRight size={16} style={{ marginLeft: 6, verticalAlign: "middle" }} />
+                    </PrimaryBtn>
+                  </span>
                 </div>
               )}
 
-              {/* LIKE */}
               {phase === "like" && (
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                  <button onClick={() => setPhase("who")}
-                    style={{ fontSize:"1.1rem", fontWeight:600, padding:"13px 24px", borderRadius:12,
-                      border:`2px solid ${BLACK}20`, color:"#666", background:"transparent", cursor:"pointer" }}>
-                    ← Back
-                  </button>
-                  <button onClick={goMemory} disabled={!canAdvanceLike()}
-                    style={{ fontSize:"1.1rem", fontWeight:700, padding:"15px 40px", borderRadius:12, border:"none",
-                      background: canAdvanceLike() ? RED : `${BLACK}20`,
-                      color: canAdvanceLike() ? "#fff" : "#999",
-                      cursor: canAdvanceLike() ? "pointer" : "not-allowed", transition:"all 0.15s" }}
-                    data-testid="btn-onboarding-next">
-                    Next →
-                  </button>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                  <SecondaryBtn onClick={() => setPhase("who")} style={{ padding: "12px 18px" }}>
+                    <ArrowLeft size={15} style={{ marginRight: 4, verticalAlign: "middle" }} /> Back
+                  </SecondaryBtn>
+                  <span data-testid="btn-onboarding-next">
+                    <PrimaryBtn onClick={goMemory} disabled={!canAdvanceLike()} style={{ padding: "13px 28px" }}>
+                      Continue <ArrowRight size={16} style={{ marginLeft: 6, verticalAlign: "middle" }} />
+                    </PrimaryBtn>
+                  </span>
                 </div>
               )}
 
-              {/* MEMORY */}
               {phase === "memory" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                    <button onClick={() => setPhase("like")}
-                      style={{ fontSize:"1.1rem", fontWeight:600, padding:"13px 24px", borderRadius:12,
-                        border:`2px solid ${BLACK}20`, color:"#666", background:"transparent", cursor:"pointer" }}>
-                      ← Back
-                    </button>
-                    <button onClick={() => goGenerate(false)} disabled={!memoryText.trim()}
-                      style={{ fontSize:"1.1rem", fontWeight:700, padding:"15px 40px", borderRadius:12, border:"none",
-                        background: memoryText.trim() ? RED : `${BLACK}20`,
-                        color: memoryText.trim() ? "#fff" : "#999",
-                        cursor: memoryText.trim() ? "pointer" : "not-allowed", transition:"all 0.15s" }}
-                      data-testid="btn-onboarding-next">
-                      Write the Card →
-                    </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                    <SecondaryBtn onClick={() => setPhase("like")} style={{ padding: "12px 18px" }}>
+                      <ArrowLeft size={15} style={{ marginRight: 4, verticalAlign: "middle" }} /> Back
+                    </SecondaryBtn>
+                    <span data-testid="btn-onboarding-next">
+                      <PrimaryBtn
+                        onClick={() => goGenerate(false)}
+                        disabled={!memoryText.trim()}
+                        style={{ padding: "13px 24px" }}
+                      >
+                        Write the card
+                      </PrimaryBtn>
+                    </span>
                   </div>
-                  <div style={{ textAlign:"right" }}>
-                    <button onClick={() => goGenerate(true)}
-                      style={{ fontSize:"0.9rem", textDecoration:"underline", color:"#aaa", background:"none", border:"none", cursor:"pointer" }}
-                      data-testid="btn-skip-memory">
+                  <div style={{ textAlign: "right" }}>
+                    <button
+                      type="button"
+                      onClick={() => goGenerate(true)}
+                      data-testid="btn-skip-memory"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        padding: 0,
+                        cursor: "pointer",
+                        fontFamily: sans,
+                        fontSize: "0.84rem",
+                        fontWeight: 500,
+                        color: MID,
+                        textDecoration: "underline",
+                        textUnderlineOffset: 3,
+                      }}
+                    >
                       Nothing specific, just write something warm
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* DRAFT */}
               {phase === "draft" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                  <button onClick={handleApproveDraft}
-                    style={{ width:"100%", fontSize:"1.15rem", fontWeight:700, padding:"16px", borderRadius:12, border:"none",
-                      background:RED, color:"#fff", cursor:"pointer", boxShadow:`0 4px 20px ${RED}30`,
-                      fontFamily:"'Bebas Neue', cursive", letterSpacing:"0.06em" }}
-                    data-testid="btn-approve-draft">
-                    APPROVE THIS DRAFT →
-                  </button>
-                  <button onClick={handleSaveToDashboard}
-                    style={{ width:"100%", fontSize:"0.9rem", fontWeight:500, padding:"11px", borderRadius:12,
-                      border:`1.5px solid ${BLACK}15`, background:"transparent", color:"#888", cursor:"pointer" }}
-                    data-testid="btn-save-to-dashboard">
-                    Not now, save it to my dashboard
-                  </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <span data-testid="btn-approve-draft">
+                    <PrimaryBtn onClick={handleApproveDraft} style={{ width: "100%", padding: "14px 20px" }}>
+                      This looks good — continue
+                    </PrimaryBtn>
+                  </span>
+                  <span data-testid="btn-save-to-dashboard">
+                    <SecondaryBtn onClick={handleSaveToDashboard} style={{ width: "100%", padding: "12px 20px" }}>
+                      Save to dashboard for now
+                    </SecondaryBtn>
+                  </span>
                 </div>
               )}
 
-              {/* ADDRESS */}
               {phase === "address" && (
-                <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                  <button onClick={handleSaveAddress} disabled={!address.line1.trim() || !address.city.trim() || !address.state.trim() || !address.zip.trim()}
-                    style={{ width:"100%", fontSize:"1.1rem", fontWeight:700, padding:"15px", borderRadius:12, border:"none",
-                      background: address.line1.trim() && address.city.trim() ? RED : `${BLACK}20`,
-                      color: address.line1.trim() && address.city.trim() ? "#fff" : "#999",
-                      cursor: address.line1.trim() && address.city.trim() ? "pointer" : "not-allowed",
-                      fontFamily:"'Bebas Neue', cursive", letterSpacing:"0.06em" }}
-                    data-testid="btn-save-address">
-                    SAVE ADDRESS →
-                  </button>
-                  <button onClick={handleSkipAddress}
-                    style={{ width:"100%", fontSize:"0.9rem", fontWeight:500, padding:"11px", borderRadius:12,
-                      border:`1.5px solid ${BLACK}15`, background:"transparent", color:"#888", cursor:"pointer" }}
-                    data-testid="btn-skip-address">
-                    Not yet, I'll add this later
-                  </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <span data-testid="btn-save-address">
+                    <PrimaryBtn
+                      onClick={handleSaveAddress}
+                      disabled={!address.line1.trim() || !address.city.trim() || !address.state.trim() || !address.zip.trim()}
+                      style={{ width: "100%", padding: "14px 20px" }}
+                    >
+                      Save address
+                    </PrimaryBtn>
+                  </span>
+                  <span data-testid="btn-skip-address">
+                    <SecondaryBtn onClick={handleSkipAddress} style={{ width: "100%", padding: "12px 20px" }}>
+                      Not yet — I'll add this later
+                    </SecondaryBtn>
+                  </span>
                 </div>
               )}
 
@@ -935,6 +1182,7 @@ export default function OnboardingPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppShell>
   );
 }

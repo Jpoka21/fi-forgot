@@ -1,17 +1,24 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "wouter";
-import AppNav from "@/components/layout/AppNav";
+import AppShell from "@/components/layout/AppShell";
+import PageShell from "@/components/layout/PageShell";
 import { getRecipients, getArchivedRecipients, restoreRecipient, Recipient } from "@/lib/data";
-import { computeOverallHealth } from "@/lib/relationship-health";
-import { Plus, Search } from "lucide-react";
+import { computeOverallHealth, type RecipientHealth } from "@/lib/relationship-health";
+import { PB, recipientHasThinMemory } from "@/lib/personal-brand";
+import { PersonAvatar, SoftCard, PrimaryBtn, AppSection } from "@/components/personal-ui";
+import { Plus, Search, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
 
-const BEIGE  = "#F2E6D3";
-const RED    = "#E23B2E";
-const INK    = "#1F1F1F";
-const MID    = "#4B5563";
-const WHITE  = "#FFFFFF";
-const SAGE   = "#5B8C6B";
-const BORDER = "#E5E0D8";
+const CREAM  = PB.cream;
+const RED    = PB.red;
+const INK    = PB.ink;
+const MID    = PB.mid;
+const WHITE  = PB.white;
+const SAGE   = PB.sage;
+const BORDER = PB.border;
+const AMBER  = PB.amber;
+
+const serif = "'Lora', Georgia, serif";
+const sans = "'Plus Jakarta Sans', sans-serif";
 
 const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
   "Valentine's Day": { month: 2,  day: 14 }, "Mother's Day":  { month: 5,  day: 12 },
@@ -55,33 +62,37 @@ function getNextEventDate(r: Recipient): { event: string; daysAway: number } | n
   return { event: best.event, daysAway };
 }
 
-function relationshipEmoji(rel: string): string {
-  const map: Record<string, string> = {
-    "Wife": "❤️", "Husband": "❤️", "Girlfriend": "💑", "Boyfriend": "💑",
-    "Mom": "👩", "Dad": "👨", "Mother": "👩", "Father": "👨",
-    "Sister": "👯", "Brother": "🤜", "Son": "👦", "Daughter": "👧",
-    "Friend": "🤝", "Best Friend": "✨",
-    "Grandma": "👵", "Grandpa": "👴", "Grandmother": "👵", "Grandfather": "👴",
-    "Aunt": "🌸", "Uncle": "🧔", "Boss": "💼", "Coworker": "🤝",
-  };
-  return map[rel] ?? "🤝";
-}
-
-function eventEmoji(event: string): string {
-  const map: Record<string, string> = {
-    "Birthday": "🎂", "Anniversary": "💕", "Mother's Day": "🌷",
-    "Father's Day": "🎩", "Valentine's Day": "❤️", "Christmas": "🎄",
-    "Hanukkah": "🕎", "Thanksgiving": "🍂", "Easter": "🐣", "New Year's": "🥂",
-  };
-  return map[event] ?? "🎉";
-}
-
 function healthDot(score: number): string {
   if (score >= 80) return SAGE;
   if (score >= 65) return "#26A69A";
-  if (score >= 45) return "#F59E0B";
+  if (score >= 45) return AMBER;
   if (score >= 25) return "#EF6C00";
   return MID;
+}
+
+function occasionLine(event: string, daysAway: number): string {
+  if (daysAway === 0) return `${event} is today`;
+  if (daysAway === 1) return `${event} is tomorrow`;
+  if (daysAway <= 14) return `${event} in ${daysAway} days`;
+  return `Next: ${event}`;
+}
+
+function warmHint(health: RecipientHealth | undefined, r: Recipient): string | null {
+  if (recipientHasThinMemory(r)) {
+    return "Help us make future cards better";
+  }
+  if (!health || health.topGap === "Profile looks great!") return null;
+  const gap = health.topGap.toLowerCase();
+  if (gap.includes("memory") || gap.includes("memories")) {
+    return "A memory or two helps us sound like you";
+  }
+  if (gap.includes("occasion") || gap.includes("event") || gap.includes("birthday")) {
+    return "Add their important dates when you have a moment";
+  }
+  if (gap.includes("address") || gap.includes("mailing")) {
+    return "We'll need an address before we can send";
+  }
+  return "Help us make future cards better";
 }
 
 const FAMILY_REL = new Set(["Wife", "Husband", "Girlfriend", "Boyfriend", "Mom", "Dad", "Mother", "Father",
@@ -112,10 +123,10 @@ export default function PeoplePage() {
     return () => window.removeEventListener("resize", h);
   }, []);
 
-  const healthData = useMemo(() => {
-    if (recipients.length === 0) return new Map<string, number>();
+  const healthById = useMemo(() => {
+    if (recipients.length === 0) return new Map<string, RecipientHealth>();
     const h = computeOverallHealth(recipients);
-    return new Map(h.recipientHealths.map(rh => [rh.id ?? rh.name, rh.score]));
+    return new Map(h.recipientHealths.map(rh => [rh.id ?? rh.name, rh]));
   }, [recipients]);
 
   const filtered = useMemo(() => {
@@ -125,6 +136,14 @@ export default function PeoplePage() {
       r.name.toLowerCase().includes(q) || r.relationship.toLowerCase().includes(q)
     );
   }, [recipients, search]);
+
+  const comingUpSoon = useMemo(() => {
+    return filtered
+      .map(r => ({ r, next: getNextEventDate(r) }))
+      .filter((x): x is { r: Recipient; next: { event: string; daysAway: number } } =>
+        x.next != null && x.next.daysAway <= 14)
+      .sort((a, b) => a.next.daysAway - b.next.daysAway);
+  }, [filtered]);
 
   const { family, friends, other } = useMemo(() => {
     const family:  Recipient[] = [];
@@ -138,74 +157,78 @@ export default function PeoplePage() {
     return { family, friends, other };
   }, [filtered]);
 
-  const px = isMobile ? 16 : 28;
-
   function PersonCard({ r }: { r: Recipient }) {
-    const next    = getNextEventDate(r);
-    const score   = healthData.get(r.id) ?? healthData.get(r.name) ?? 0;
-    const dot     = healthDot(score);
-    const urgent  = next && next.daysAway <= 7;
+    const next   = getNextEventDate(r);
+    const health = healthById.get(r.id) ?? healthById.get(r.name);
+    const score  = health?.score ?? 0;
+    const dot    = healthDot(score);
+    const urgent = next && next.daysAway <= 7;
+    const hint   = warmHint(health, r);
 
     return (
-      <Link href={`/relationship/${r.id}`} style={{ textDecoration: "none" }}>
-        <div
+      <Link href={`/relationship/${r.id}`} style={{ textDecoration: "none", display: "block" }}>
+        <SoftCard
           style={{
-            background: WHITE, borderRadius: 12, padding: "13px 15px",
-            border: `1px solid ${urgent ? `${RED}30` : BORDER}`,
-            cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
-            transition: "box-shadow 0.15s, border-color 0.15s",
-          }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 3px 12px rgba(0,0,0,0.07)";
-            (e.currentTarget as HTMLDivElement).style.borderColor = urgent ? RED : INK;
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-            (e.currentTarget as HTMLDivElement).style.borderColor = urgent ? `${RED}30` : BORDER;
+            padding: isMobile ? "16px" : "18px 20px",
+            cursor: "pointer",
+            border: `1px solid ${urgent ? `${RED}25` : BORDER}`,
+            transition: "box-shadow 0.15s ease, border-color 0.15s ease",
           }}
         >
-          {/* Avatar */}
-          <div style={{
-            width: 46, height: 46, borderRadius: 12, background: BEIGE, flexShrink: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "1.5rem", border: `1px solid ${BORDER}`, position: "relative" as const,
-          }}>
-            {relationshipEmoji(r.relationship)}
-            {/* Health dot */}
-            <div style={{
-              position: "absolute", bottom: -3, right: -3,
-              width: 10, height: 10, borderRadius: "50%",
-              background: dot, border: "2px solid #F2E6D3",
-            }} />
-          </div>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <PersonAvatar name={r.name} size={isMobile ? 52 : 56} />
+              <div style={{
+                position: "absolute", bottom: 0, right: 0,
+                width: 11, height: 11, borderRadius: "50%",
+                background: dot, border: `2px solid ${WHITE}`,
+              }} />
+            </div>
 
-          {/* Info */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: "0.92rem", color: INK, lineHeight: 1.2, marginBottom: 2 }}>
-              {r.name}
-            </div>
-            <div style={{ fontSize: "0.72rem", color: MID }}>{r.relationship}</div>
-          </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontFamily: serif, fontWeight: 600, fontSize: "1.05rem",
+                color: INK, lineHeight: 1.25, marginBottom: 4,
+              }}>
+                {r.name}
+              </div>
+              <div style={{ fontSize: "0.84rem", color: MID, marginBottom: 8 }}>
+                {r.relationship}
+              </div>
 
-          {/* Next event chip */}
-          {next ? (
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 3,
-              background: urgent ? `${RED}10` : BEIGE,
-              borderRadius: 8, padding: "4px 9px",
-              fontSize: "0.7rem", fontWeight: 600,
-              color: urgent ? RED : MID, flexShrink: 0,
-            }}>
-              {eventEmoji(next.event)} {next.daysAway}d
+              {next ? (
+                <div style={{
+                  display: "inline-block",
+                  fontSize: "0.82rem", fontWeight: 500,
+                  color: urgent ? RED : INK,
+                  background: urgent ? `${RED}08` : `${SAGE}10`,
+                  borderRadius: 8, padding: "5px 10px",
+                }}>
+                  {occasionLine(next.event, next.daysAway)}
+                </div>
+              ) : (r.selectedEvents?.length ?? 0) > 0 ? (
+                <div style={{ fontSize: "0.82rem", color: MID }}>
+                  {r.selectedEvents!.length} occasion{r.selectedEvents!.length === 1 ? "" : "s"} on file
+                </div>
+              ) : (
+                <div style={{ fontSize: "0.82rem", color: MID }}>
+                  No occasions yet — easy to add
+                </div>
+              )}
+
+              {hint && (
+                <p style={{
+                  fontSize: "0.78rem", color: SAGE, margin: "10px 0 0",
+                  lineHeight: 1.45, fontWeight: 500,
+                }}>
+                  {hint}
+                </p>
+              )}
             </div>
-          ) : (r.selectedEvents?.length ?? 0) > 0 ? (
-            <div style={{ fontSize: "0.68rem", color: MID, flexShrink: 0 }}>
-              {r.selectedEvents!.length} occasions
-            </div>
-          ) : (
-            <div style={{ fontSize: "0.68rem", color: MID, flexShrink: 0 }}>No events</div>
-          )}
-        </div>
+
+            <ArrowRight size={18} style={{ color: MID, flexShrink: 0, marginTop: 4, opacity: 0.5 }} />
+          </div>
+        </SoftCard>
       </Link>
     );
   }
@@ -213,89 +236,141 @@ export default function PeoplePage() {
   function Group({ title, people }: { title: string; people: Recipient[] }) {
     if (people.length === 0) return null;
     return (
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.14em", color: MID, marginBottom: 10 }}>
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{
+          fontFamily: sans, fontSize: "0.72rem", fontWeight: 600,
+          letterSpacing: "0.12em", textTransform: "uppercase" as const,
+          color: MID, margin: "0 0 12px",
+        }}>
           {title}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8 }}>
+        </h2>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: 12,
+        }}>
           {people.map(r => <PersonCard key={r.id} r={r} />)}
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: BEIGE, fontFamily: "'Inter', sans-serif", color: INK }}>
-      <AppNav />
+    <AppShell>
+      <PageShell>
 
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: `28px ${px}px 64px`, boxSizing: "border-box" as const }}>
-
-        {/* ── Header ──────────────────────────────────────────────────── */}
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 20, gap: 12, flexWrap: "wrap" as const }}>
+        {/* Header */}
+        <header style={{
+          display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+          marginBottom: 28, gap: 16, flexWrap: "wrap" as const,
+        }}>
           <div>
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? "2rem" : "2.4rem", letterSpacing: "0.03em", color: INK, margin: 0, lineHeight: 1 }}>
+            <h1 style={{
+              fontFamily: serif, fontSize: isMobile ? "1.75rem" : "2rem",
+              fontWeight: 600, color: INK, margin: 0, lineHeight: 1.2,
+            }}>
               Your People
             </h1>
-            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", color: MID, margin: "4px 0 0" }}>
-              Everyone who matters to you.
+            <p style={{ fontSize: "0.95rem", color: MID, margin: "8px 0 0", lineHeight: 1.5 }}>
+              The people who matter most.
             </p>
           </div>
           <Link href="/recipients/new">
-            <button data-testid="link-add-recipient"
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                background: RED, color: WHITE, border: "none",
-                borderRadius: 10, padding: "10px 18px",
-                fontFamily: "'Bebas Neue', cursive", fontSize: "0.95rem",
-                letterSpacing: "0.06em", cursor: "pointer", flexShrink: 0,
-              }}>
-              <Plus size={14} /> Add Person
-            </button>
+            <span data-testid="link-add-recipient" style={{ display: "inline-flex" }}>
+              <PrimaryBtn style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <Plus size={16} /> Add someone
+              </PrimaryBtn>
+            </span>
           </Link>
-        </div>
+        </header>
 
-        {/* ── Search ──────────────────────────────────────────────────── */}
-        <div style={{ position: "relative" as const, marginBottom: 24 }}>
-          <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: MID }} />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search your people…"
-            style={{
-              width: "100%", padding: "10px 12px 10px 36px",
-              background: WHITE, border: `1px solid ${BORDER}`,
-              borderRadius: 10, fontSize: "0.84rem", color: INK,
-              outline: "none", boxSizing: "border-box" as const,
-            }}
-          />
-        </div>
+        {/* Search */}
+        {recipients.length > 0 && (
+          <div style={{ position: "relative" as const, marginBottom: 28 }}>
+            <Search size={16} style={{
+              position: "absolute", left: 14, top: "50%",
+              transform: "translateY(-50%)", color: MID, pointerEvents: "none",
+            }} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search by name or relationship…"
+              aria-label="Search your people"
+              style={{
+                width: "100%", padding: "14px 16px 14px 42px",
+                background: WHITE, border: `1px solid ${BORDER}`,
+                borderRadius: 14, fontSize: "0.9rem", color: INK,
+                outline: "none", boxSizing: "border-box" as const,
+                fontFamily: sans,
+              }}
+            />
+          </div>
+        )}
 
-        {/* ── Empty state ─────────────────────────────────────────────── */}
+        {/* Empty state */}
         {recipients.length === 0 && (
-          <div style={{ background: WHITE, borderRadius: 20, padding: "60px 32px", textAlign: "center" as const, border: `1px solid ${BORDER}` }}>
-            <div style={{ fontSize: "3rem", marginBottom: 14 }}>👥</div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.8rem", color: INK, letterSpacing: "0.04em", marginBottom: 10 }}>
-              Add Your First Person
+          <SoftCard style={{ padding: isMobile ? "48px 24px" : "56px 40px", textAlign: "center" as const }}>
+            <div style={{ margin: "0 auto 20px", width: "100%", maxWidth: isMobile ? 220 : 280, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img
+                src="/illustrations/people/005_people_empty_state.webp"
+                alt="A warm illustration of a memory box and keepsakes inviting you to add your first person"
+                style={{ width: "100%", height: "auto", display: "block", objectFit: "contain" }}
+              />
             </div>
-            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "1.1rem", color: MID, maxWidth: 320, margin: "0 auto 24px" }}>
-              We'll help you stay connected and never miss a moment.
+            <h2 style={{
+              fontFamily: serif, fontSize: "1.5rem", fontWeight: 600,
+              color: INK, margin: "0 0 12px",
+            }}>
+              Add your first person
+            </h2>
+            <p style={{
+              fontSize: "0.95rem", color: MID, maxWidth: 320,
+              margin: "0 auto 28px", lineHeight: 1.55,
+            }}>
+              Start with someone you never want to forget. We'll quietly help you stay connected.
             </p>
             <Link href="/recipients/new">
-              <button style={{ background: RED, color: WHITE, border: "none", borderRadius: 10, padding: "12px 28px", fontFamily: "'Bebas Neue', cursive", fontSize: "1rem", letterSpacing: "0.06em", cursor: "pointer" }}>
-                Add Your First Person
-              </button>
+              <PrimaryBtn>Add your first person</PrimaryBtn>
             </Link>
-          </div>
+          </SoftCard>
         )}
 
-        {/* ── No results ──────────────────────────────────────────────── */}
+        {/* No search results */}
         {recipients.length > 0 && filtered.length === 0 && (
-          <div style={{ background: WHITE, borderRadius: 14, padding: "36px 24px", textAlign: "center" as const, border: `1px solid ${BORDER}` }}>
-            <p style={{ color: MID, fontSize: "0.9rem", margin: 0 }}>No one matches "{search}".</p>
-          </div>
+          <SoftCard style={{ padding: "40px 24px", textAlign: "center" as const }}>
+            <p style={{ color: MID, fontSize: "0.92rem", margin: 0, lineHeight: 1.5 }}>
+              No one matches &ldquo;{search}&rdquo;. Try another name or relationship.
+            </p>
+          </SoftCard>
         )}
 
-        {/* ── Grouped lists ───────────────────────────────────────────── */}
+        {/* Coming up soon */}
+        {filtered.length > 0 && comingUpSoon.length > 0 && (
+          <AppSection title="Coming up soon" sub="A few moments on the horizon.">
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {comingUpSoon.map(({ r, next }) => (
+                <Link key={`soon-${r.id}`} href={`/relationship/${r.id}`} style={{ textDecoration: "none" }}>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "12px 14px", borderRadius: 12,
+                    background: WHITE, border: `1px solid ${BORDER}`,
+                  }}>
+                    <PersonAvatar name={r.name} size={40} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: "0.9rem", color: INK }}>{r.name}</div>
+                      <div style={{ fontSize: "0.82rem", color: next.daysAway <= 7 ? RED : MID }}>
+                        {occasionLine(next.event, next.daysAway)}
+                      </div>
+                    </div>
+                    <ArrowRight size={16} style={{ color: MID, opacity: 0.4 }} />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </AppSection>
+        )}
+
+        {/* Grouped lists */}
         {filtered.length > 0 && (
           <>
             <Group title="Family" people={family} />
@@ -304,45 +379,48 @@ export default function PeoplePage() {
           </>
         )}
 
-        {/* ── Archived People ─────────────────────────────────────────── */}
+        {/* Archived */}
         {archived.length > 0 && (
-          <div style={{ marginTop: 40, borderTop: `1px solid ${BORDER}`, paddingTop: 28 }}>
+          <section style={{ marginTop: 40, paddingTop: 28, borderTop: `1px solid ${BORDER}` }}>
             <button
+              type="button"
               onClick={() => setShowArchived(s => !s)}
               style={{
-                display: "flex", alignItems: "center", gap: 8, background: "none",
-                border: "none", cursor: "pointer", padding: 0, marginBottom: 16,
+                display: "flex", alignItems: "center", gap: 8,
+                background: "none", border: "none", cursor: "pointer",
+                padding: 0, marginBottom: 16, fontFamily: sans,
               }}
             >
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "0.85rem", letterSpacing: "0.14em", color: MID }}>
+              <span style={{ fontSize: "0.88rem", fontWeight: 600, color: MID }}>
                 Archived ({archived.length})
               </span>
-              <span style={{ fontSize: "0.7rem", color: MID }}>{showArchived ? "▲ hide" : "▼ show"}</span>
+              {showArchived
+                ? <ChevronUp size={16} style={{ color: MID }} />
+                : <ChevronDown size={16} style={{ color: MID }} />}
             </button>
 
             {showArchived && (
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8 }}>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                gap: 12,
+              }}>
                 {archived.map(r => (
-                  <div
+                  <SoftCard
                     key={r.id}
                     style={{
-                      background: WHITE, borderRadius: 12, padding: "13px 15px",
-                      border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 12,
-                      opacity: 0.7,
+                      padding: "14px 16px", opacity: 0.85,
+                      display: "flex", alignItems: "center", gap: 12,
                     }}
                   >
-                    <div style={{
-                      width: 46, height: 46, borderRadius: 12, background: BEIGE, flexShrink: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: "1.5rem", border: `1px solid ${BORDER}`,
-                    }}>
-                      {relationshipEmoji(r.relationship)}
-                    </div>
+                    <PersonAvatar name={r.name} size={44} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: "0.92rem", color: INK }}>{r.name}</div>
-                      <div style={{ fontSize: "0.72rem", color: MID }}>{r.relationship}</div>
+                      <div style={{ fontWeight: 600, fontSize: "0.9rem", color: INK }}>{r.name}</div>
+                      <div style={{ fontSize: "0.78rem", color: MID }}>{r.relationship}</div>
                     </div>
-                    <button
+                    <PrimaryBtn
+                      variant="outline"
+                      accent={SAGE}
                       disabled={restoring === r.id}
                       onClick={() => {
                         setRestoring(r.id);
@@ -351,22 +429,20 @@ export default function PeoplePage() {
                         setRestoring(null);
                       }}
                       style={{
-                        background: SAGE, color: WHITE, border: "none", borderRadius: 8,
-                        padding: "7px 14px", fontSize: "0.76rem", fontWeight: 600,
-                        cursor: restoring === r.id ? "wait" : "pointer", flexShrink: 0,
-                        fontFamily: "'Bebas Neue', cursive", letterSpacing: "0.06em",
+                        padding: "8px 14px", fontSize: "0.78rem",
+                        borderRadius: 20, flexShrink: 0, fontFamily: sans,
                       }}
                     >
                       {restoring === r.id ? "Restoring…" : "Restore"}
-                    </button>
-                  </div>
+                    </PrimaryBtn>
+                  </SoftCard>
                 ))}
               </div>
             )}
-          </div>
+          </section>
         )}
 
-      </div>
-    </div>
+      </PageShell>
+    </AppShell>
   );
 }

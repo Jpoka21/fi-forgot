@@ -31,7 +31,6 @@ import BusinessApprovePage from "@/pages/business-approve";
 import CardPreviewPage from "@/pages/card-preview";
 import CardFlowV2Page from "@/pages/card-flow-v2";
 import CardsReviewPage from "@/pages/cards-review";
-import BrowniePointsPage from "@/pages/brownie-points";
 import PeoplePage from "@/pages/people";
 import MomentsPage from "@/pages/moments";
 import QuickCardPage from "@/pages/quick-card";
@@ -133,7 +132,7 @@ function Router() {
         <ProtectedRoute component={CardsReviewPage} />
       </Route>
       <Route path="/brownie-points">
-        <ProtectedRoute component={BrowniePointsPage} />
+        <Redirect to="/dashboard" />
       </Route>
       <Route path="/people">
         <ProtectedRoute component={PeoplePage} />
@@ -170,7 +169,7 @@ function Router() {
 }
 
 // ── Floating "Try it free" button ───────────────────────────────────────────
-const HIDE_TRY_BUTTON_ON = ["/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo", "/brownie-points", "/people", "/moments", "/quick-card", "/relationship"];
+const HIDE_TRY_BUTTON_ON = ["/", "/login", "/signup", "/try", "/v2", "/subscribe", "/checkout", "/demo", "/dashboard", "/recipients", "/onboarding", "/cards", "/settings", "/admin", "/briefings", "/business", "/business-demo", "/brownie-points", "/people", "/moments", "/quick-card", "/relationship"];
 
 function FloatingTryButton() {
   const [location] = useLocation();

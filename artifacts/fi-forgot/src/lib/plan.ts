@@ -11,28 +11,28 @@ export interface PlanConfig {
 
 export const PLANS: Record<Plan, PlanConfig> = {
   basic: {
-    label: "Bare Minimum",
-    tagline: "For the guy trying not to screw this up.",
+    label: "Essential",
+    tagline: "Start with one person who matters most.",
     price: "$6/mo",
     maxRecipients: 1,
     maxCardsPerYear: 6,
-    perks: ["6 cards per year", "1 recipient", "Any occasion you want", "Personally written messages", "We print and mail them for you"],
+    perks: ["6 cards per year", "1 person", "Birthday + anniversary", "Personally written messages", "We print and mail for you"],
   },
   standard: {
-    label: "Domestic Peacekeeper",
-    tagline: "For wives, moms, kids, and damage control.",
+    label: "Family",
+    tagline: "For the people you never want to disappoint.",
     price: "$15/mo",
     maxRecipients: 5,
     maxCardsPerYear: 18,
-    perks: ["18 cards per year", "Up to 5 recipients", "All major occasions covered", "Full autopilot mode", "Personalized, heartfelt messages"],
+    perks: ["18 cards per year", "Up to 5 people", "All major occasions", "Full autopilot available", "Warm, personal messages"],
   },
   premium: {
-    label: "Legend Status",
-    tagline: "For the man determined to never sleep on the couch again.",
+    label: "Everyone",
+    tagline: "For a full circle of people who matter.",
     price: "$29/mo",
     maxRecipients: Infinity,
     maxCardsPerYear: 40,
-    perks: ["40 cards per year", "Unlimited recipients", "Premium card styles", "Gift add-ons", "Emergency save mode", "Concierge reminders"],
+    perks: ["40 cards per year", "Unlimited people", "Premium card styles", "Gift add-ons", "Priority support"],
   },
 };
 
