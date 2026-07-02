@@ -1015,7 +1015,7 @@ export default function RecipientProfilePage() {
                           data-testid={`btn-personality-${p.id}`}
                         >
                           <span className="text-xl">{p.emoji}</span>
-                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{p.label}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : INK }}>{p.label}</span>
                         </button>
                       );
                     })}
@@ -1055,7 +1055,7 @@ export default function RecipientProfilePage() {
                           data-testid={`btn-interest-${item.id}`}
                         >
                           <span className="text-xl">{item.emoji}</span>
-                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{item.label}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : INK }}>{item.label}</span>
                         </button>
                       );
                     })}
@@ -1351,7 +1351,7 @@ export default function RecipientProfilePage() {
                           data-testid={`btn-personality-${p.id}`}
                         >
                           <span className="text-xl">{p.emoji}</span>
-                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{p.label}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : INK }}>{p.label}</span>
                         </button>
                       );
                     })}
@@ -1391,7 +1391,7 @@ export default function RecipientProfilePage() {
                           data-testid={`btn-interest-${item.id}`}
                         >
                           <span className="text-xl">{item.emoji}</span>
-                          <span className="text-sm font-semibold" style={{ color: selected ? RED : BLACK }}>{item.label}</span>
+                          <span className="text-sm font-semibold" style={{ color: selected ? RED : INK }}>{item.label}</span>
                         </button>
                       );
                     })}
@@ -1745,6 +1745,71 @@ export default function RecipientProfilePage() {
           onClose={() => setUpgradeOpen(false)}
         />
       )}
+
+      {/* ── Archive confirmation modal ──────────────────────────────────── */}
+      {showArchiveConfirm && existing && (
+        <div
+          onClick={() => { if (!archiving) setShowArchiveConfirm(false); }}
+          style={{
+            position: "fixed", inset: 0, zIndex: 700,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: WHITE, borderRadius: 20, padding: "32px 28px",
+              width: "100%", maxWidth: 380, boxShadow: "0 24px 60px rgba(0,0,0,0.18)",
+            }}
+          >
+            <div style={{ fontSize: "2.2rem", textAlign: "center" as const, marginBottom: 12 }}>🗂️</div>
+            <div style={{
+              fontFamily: serif, fontSize: "1.5rem",
+              letterSpacing: "0.04em", color: INK, textAlign: "center" as const, marginBottom: 8,
+            }}>
+              Archive {existing.name}?
+            </div>
+            <p style={{ fontSize: "0.84rem", color: GRAY, textAlign: "center" as const, lineHeight: 1.5, margin: "0 0 24px" }}>
+              {existing.name} will be removed from your active people. You can restore them any time from the <strong>Your People</strong> page.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                disabled={archiving}
+                onClick={() => setShowArchiveConfirm(false)}
+                style={{
+                  flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${BEIGE}`,
+                  background: "none", color: INK, fontWeight: 600, fontSize: "0.9rem",
+                  cursor: archiving ? "not-allowed" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={archiving}
+                onClick={() => {
+                  setArchiving(true);
+                  deleteRecipient(params.id);
+                  setShowArchiveConfirm(false);
+                  setLocation(backTo ?? "/people");
+                }}
+                style={{
+                  flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
+                  background: RED, color: WHITE, fontWeight: 700, fontSize: "0.9rem",
+                  cursor: archiving ? "not-allowed" : "pointer",
+                  fontFamily: serif, letterSpacing: "0.06em",
+                  opacity: archiving ? 0.6 : 1,
+                }}
+              >
+                {archiving ? "Archiving…" : "Yes, Archive"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -1850,71 +1915,6 @@ function ProfileUpgradeModal({
           </p>
         </div>
       </div>
-
-      {/* ── Archive confirmation modal ──────────────────────────────────── */}
-      {showArchiveConfirm && existing && (
-        <div
-          onClick={() => { if (!archiving) setShowArchiveConfirm(false); }}
-          style={{
-            position: "fixed", inset: 0, zIndex: 700,
-            background: "rgba(0,0,0,0.45)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            padding: 24,
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: WHITE, borderRadius: 20, padding: "32px 28px",
-              width: "100%", maxWidth: 380, boxShadow: "0 24px 60px rgba(0,0,0,0.18)",
-            }}
-          >
-            <div style={{ fontSize: "2.2rem", textAlign: "center" as const, marginBottom: 12 }}>🗂️</div>
-            <div style={{
-              fontFamily: serif, fontSize: "1.5rem",
-              letterSpacing: "0.04em", color: INK, textAlign: "center" as const, marginBottom: 8,
-            }}>
-              Archive {existing.name}?
-            </div>
-            <p style={{ fontSize: "0.84rem", color: GRAY, textAlign: "center" as const, lineHeight: 1.5, margin: "0 0 24px" }}>
-              {existing.name} will be removed from your active people. You can restore them any time from the <strong>Your People</strong> page.
-            </p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                type="button"
-                disabled={archiving}
-                onClick={() => setShowArchiveConfirm(false)}
-                style={{
-                  flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${BEIGE}`,
-                  background: "none", color: INK, fontWeight: 600, fontSize: "0.9rem",
-                  cursor: archiving ? "not-allowed" : "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={archiving}
-                onClick={() => {
-                  setArchiving(true);
-                  deleteRecipient(params.id);
-                  setShowArchiveConfirm(false);
-                  setLocation(backTo ?? "/people");
-                }}
-                style={{
-                  flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
-                  background: RED, color: WHITE, fontWeight: 700, fontSize: "0.9rem",
-                  cursor: archiving ? "not-allowed" : "pointer",
-                  fontFamily: serif, letterSpacing: "0.06em",
-                  opacity: archiving ? 0.6 : 1,
-                }}
-              >
-                {archiving ? "Archiving…" : "Yes, Archive"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
