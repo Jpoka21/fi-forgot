@@ -81,19 +81,6 @@ export function occasionPhrase(event: string, daysAway: number, dateStr: string,
   return `${event} · ${longDate}`;
 }
 
-export function buildHomeHeroSubline(upcomingCount: number, first?: { name: string; event: string; daysAway: number }): string {
-  if (upcomingCount === 0) {
-    return "We remember the people who matter. You get the credit when the card lands.";
-  }
-  if (upcomingCount === 1 && first) {
-    return `${first.name}'s ${first.event} is ${daysLabel(first.daysAway)}. We've got your back.`;
-  }
-  if (upcomingCount <= 3) {
-    return `${upcomingCount} cards coming up. We'll help you not look forgetful.`;
-  }
-  return "A few people need you soon. We'll nudge you before it's awkward.";
-}
-
 const HOLIDAY_DATES: Record<string, { month: number; day: number }> = {
   "Valentine's Day": { month: 2,  day: 14 },
   "Mother's Day":    { month: 5,  day: 12 },
@@ -158,23 +145,6 @@ export function getNextOccasion(r: Recipient): { event: string; daysAway: number
     if (!best || daysAway < best.daysAway) best = { event, daysAway, dateStr };
   }
   return best;
-}
-
-export function personStatusLine(
-  r: Recipient,
-  opts: { daysAway?: number | null; hasCard?: boolean; memoryThin?: boolean },
-): string {
-  if (opts.memoryThin) return "Needs a memory before we can sound charming.";
-  const next = getNextOccasion(r);
-  if (opts.daysAway != null && opts.daysAway <= 7) {
-    const ev = next?.event ?? "Their occasion";
-    if (isSensitiveOccasion(ev)) return "A meaningful moment is coming up soon.";
-    if (ev.toLowerCase().includes("birthday")) return "Birthday danger zone.";
-    return `${ev} is close — don't sleep on it.`;
-  }
-  if (opts.hasCard) return "Card's ready. You're off the hook.";
-  if ((r.selectedEvents?.length ?? 0) === 0) return "Add an occasion so we can watch your back.";
-  return "You're safe for now.";
 }
 
 export function recipientHasThinMemory(r: Recipient): boolean {

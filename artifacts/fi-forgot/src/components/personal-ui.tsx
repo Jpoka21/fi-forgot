@@ -20,37 +20,6 @@ export function PersonAvatar({ name, size = 44 }: { name: string; size?: number 
   );
 }
 
-/** @deprecated Use SectionHeader or AppSection for authenticated pages. */
-export function SectionTitle({
-  title,
-  sub,
-  subStyle = "script",
-  right,
-  style,
-}: {
-  title: string;
-  sub?: string;
-  subStyle?: "sans" | "script";
-  right?: ReactNode;
-  style?: CSSProperties;
-}) {
-  const subTypography = subStyle === "sans"
-    ? { fontFamily: sans, fontSize: "0.84rem", color: PB.mid, margin: "4px 0 0", lineHeight: 1.5, fontWeight: 400 as const }
-    : { fontFamily: "'Caveat', cursive", fontSize: "0.95rem", color: PB.mid, margin: "4px 0 0", lineHeight: 1.4 };
-
-  return (
-    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14, ...style }}>
-      <div>
-        <h2 style={{ fontFamily: sans, fontSize: "1.05rem", fontWeight: 700, color: PB.ink, margin: 0 }}>
-          {title}
-        </h2>
-        {sub && <p style={subTypography}>{sub}</p>}
-      </div>
-      {right}
-    </div>
-  );
-}
-
 export function SectionHeader({
   title,
   sub,

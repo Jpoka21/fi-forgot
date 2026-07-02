@@ -44,8 +44,3 @@ export function canActivateRecipient(plan: Plan, activeCount: number): boolean {
   if (import.meta.env.DEV) return true;
   return activeCount < getRecipientLimit(plan);
 }
-
-export function limitLabel(plan: Plan): string {
-  const limit = PLANS[plan].maxRecipients;
-  return limit === Infinity ? "unlimited" : String(limit);
-}

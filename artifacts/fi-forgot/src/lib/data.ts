@@ -202,17 +202,6 @@ export function childrenSummary(children: Child[]): string {
     .join(", ");
 }
 
-/** Get upcoming anniversary / birthday within N days */
-export function daysUntilNextOccurrence(monthDay: string): number {
-  // monthDay format "MM-DD"
-  const [month, day] = monthDay.split("-").map(Number);
-  const today = new Date();
-  const thisYear = new Date(today.getFullYear(), month - 1, day);
-  const nextYear = new Date(today.getFullYear() + 1, month - 1, day);
-  const target = thisYear >= today ? thisYear : nextYear;
-  return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
-
 // ─── Event-specific briefing questions ──────────────────────────────────────
 
 export const EVENT_QUESTIONS: Record<string, BriefingQuestion[]> = {
