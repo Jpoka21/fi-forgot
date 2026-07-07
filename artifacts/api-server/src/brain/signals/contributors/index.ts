@@ -6,8 +6,10 @@
  */
 
 import type { SignalContributor } from "./types";
+import { contributeEventTimingSignals } from "./eventTimingContributor";
 import { contributeProfileCompletenessSignals } from "./profileCompletenessContributor";
 
 export const signalContributors: SignalContributor[] = [
   contributeProfileCompletenessSignals,
+  contributeEventTimingSignals,
 ];
