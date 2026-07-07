@@ -17,6 +17,7 @@ import { contributeMemoryInventorySignals } from "./memoryInventoryContributor";
 import { contributeProfileCompletenessSignals } from "./profileCompletenessContributor";
 import { contributeRelationshipMomentumSignals } from "./relationshipMomentumContributor";
 import { contributeToneAndGuardrailsSignals } from "./toneAndGuardrailsContributor";
+import { contributeWritingHistorySignals } from "./writingHistoryContributor";
 
 export const signalContributors: SignalContributor[] = [
   contributeProfileCompletenessSignals,
@@ -30,4 +31,5 @@ export const signalContributors: SignalContributor[] = [
   contributeRelationshipMomentumSignals,
   contributeMemoryInventorySignals,
   contributeConversationFreshnessSignals,
+  contributeWritingHistorySignals,
 ];
