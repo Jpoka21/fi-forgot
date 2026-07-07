@@ -1,19 +1,18 @@
 /**
  * Signal extraction — read-only scaffold.
  *
- * Accepts relationship context from loadRelationshipContext() and returns
- * contributor signals for the decision engine. Phase 1 returns an empty array;
- * no scoring, no AI, no recommendations.
+ * Aggregates contributor outputs for a loaded relationship context.
+ * Phase 1 contributors return empty arrays; no scoring, no AI, no recommendations.
  */
 
+import { signalContributors } from "./contributors";
 import type { BrainSignal, RelationshipContextLoadResult } from "../types";
 
 /**
  * Returns extracted signals for a loaded relationship context.
- * Context is accepted to establish the contract; it is not evaluated yet.
  */
 export function extractSignals(
-  _context: RelationshipContextLoadResult,
+  context: RelationshipContextLoadResult,
 ): BrainSignal[] {
-  return [];
+  return signalContributors.flatMap((contributor) => contributor(context));
 }
