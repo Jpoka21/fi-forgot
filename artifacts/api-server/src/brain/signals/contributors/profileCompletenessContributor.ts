@@ -1,14 +1,32 @@
 /**
- * Profile completeness signal contributor — placeholder.
+ * Profile completeness signal contributor.
  *
- * Future: emit signals from relationshipContext.profileCompleteness.
- * Phase 1 does not evaluate context.
+ * Emits read-only facts from relationshipContext.profileCompleteness.
+ * No thresholds, no recommendations, no decisions.
  */
 
 import type { BrainSignal, RelationshipContextLoadResult } from "../../types";
 
 export function contributeProfileCompletenessSignals(
-  _context: RelationshipContextLoadResult,
+  context: RelationshipContextLoadResult,
 ): BrainSignal[] {
-  return [];
+  const { profileCompleteness } = context.relationshipContext;
+
+  return [
+    {
+      source: "profile_completeness",
+      label: "score",
+      value: profileCompleteness.score,
+    },
+    {
+      source: "profile_completeness",
+      label: "filled_fields",
+      value: profileCompleteness.filled,
+    },
+    {
+      source: "profile_completeness",
+      label: "missing_fields",
+      value: profileCompleteness.missing,
+    },
+  ];
 }
