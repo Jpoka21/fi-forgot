@@ -1,0 +1,196 @@
+/**
+ * F.I. Forgot button component styles.
+ * Opt-in — legacy `@/components/ui/button` remains unchanged.
+ */
+
+.fi-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fi-space-2);
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding-inline: var(--fi-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--fi-radius-button);
+  font-family: var(--fi-font-sans);
+  font-size: var(--fi-text-body-sm);
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fi-btn:focus-visible {
+  outline: var(--fi-focus-ring-width) solid var(--fi-color-focus-ring);
+  outline-offset: var(--fi-focus-ring-offset);
+}
+
+.fi-btn:disabled,
+.fi-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--fi-opacity-disabled);
+  pointer-events: none;
+}
+
+/* Sizes */
+.fi-btn--sm {
+  min-height: 2.75rem;
+  padding-inline: var(--fi-space-4);
+  font-size: var(--fi-text-caption);
+}
+
+.fi-btn--md {
+  min-height: 2.75rem;
+  padding-inline: var(--fi-space-6);
+}
+
+.fi-btn--lg {
+  min-height: 3rem;
+  padding-inline: var(--fi-space-8);
+  font-size: var(--fi-text-body);
+}
+
+.fi-btn--icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+}
+
+.fi-btn--full {
+  width: 100%;
+}
+
+/* Variants */
+.fi-btn--primary {
+  background-color: var(--fi-color-primary);
+  border-color: var(--fi-color-primary);
+  color: var(--fi-color-text-inverse);
+}
+
+.fi-btn--primary:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--fi-color-primary-hover);
+  border-color: var(--fi-color-primary-hover);
+}
+
+.fi-btn--secondary {
+  background-color: var(--fi-color-surface);
+  border-color: var(--fi-color-border);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-btn--secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+  border-color: var(--fi-color-border-hover);
+  background-color: var(--fi-color-surface-secondary);
+}
+
+.fi-btn--tertiary {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-btn--tertiary:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--fi-color-hover);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-btn--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--fi-color-text-primary);
+}
+
+.fi-btn--ghost:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--fi-color-hover);
+}
+
+.fi-btn--link {
+  min-height: auto;
+  min-width: auto;
+  padding-inline: var(--fi-space-2);
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--fi-color-link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.fi-btn--link:hover:not(:disabled):not([aria-disabled="true"]) {
+  color: var(--fi-color-primary-hover);
+}
+
+.fi-btn--danger {
+  background-color: var(--fi-color-danger);
+  border-color: var(--fi-color-danger);
+  color: var(--fi-color-text-inverse);
+}
+
+.fi-btn--danger:hover:not(:disabled):not([aria-disabled="true"]) {
+  filter: brightness(0.92);
+}
+
+.fi-btn--success {
+  background-color: var(--fi-color-success);
+  border-color: var(--fi-color-success);
+  color: var(--fi-color-text-inverse);
+}
+
+.fi-btn--success:hover:not(:disabled):not([aria-disabled="true"]) {
+  filter: brightness(0.95);
+}
+
+/* Icons */
+.fi-btn__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+}
+
+.fi-btn__icon--leading {
+  margin-inline-end: calc(var(--fi-space-1) * -1);
+}
+
+.fi-btn__icon--trailing {
+  margin-inline-start: calc(var(--fi-space-1) * -1);
+}
+
+/* Loading */
+.fi-btn--loading {
+  pointer-events: none;
+}
+
+.fi-btn__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fi-space-2);
+}
+
+.fi-btn--loading .fi-btn__label {
+  visibility: hidden;
+}
+
+.fi-btn__spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1rem;
+  height: 1rem;
+  animation: fi-btn-spin 0.8s linear infinite;
+}
+
+@keyframes fi-btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-btn__spinner {
+    animation: none;
+    opacity: 0.8;
+  }
+}

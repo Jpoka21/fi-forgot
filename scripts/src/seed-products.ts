@@ -1,5 +1,20 @@
 import { getStripeClient } from "./stripeClient.js";
 
+/**
+ * Seeds legacy subscription products for local/dev Stripe environments.
+ *
+ * LAUNCH PRICING NOTE: Production marketing now shows Free + Concierge Membership
+ * ($9.99/mo, $99/yr, member cards at $5.99). Existing production Stripe products
+ * still use basic/standard/premium at $6/$15/$29 until manually migrated.
+ *
+ * TODO(stripe-migration): In Stripe Dashboard (production):
+ * 1. Create Concierge Membership product with metadata.planKey = "concierge_member"
+ *    — monthly price $9.99, annual price $99.00
+ * 2. Grandfather or migrate existing basic/standard/premium subscribers before archiving legacy prices
+ * 3. Do NOT change metadata.planKey on active legacy products until migration is complete
+ * 4. Card purchase prices ($9.99 free / $5.99 member) are configured in
+ *    fi-forgot/src/app/pricing/pricingConfig.ts — update Handwrytten checkout separately if needed
+ */
 const PRODUCTS = [
   {
     planKey: "basic",

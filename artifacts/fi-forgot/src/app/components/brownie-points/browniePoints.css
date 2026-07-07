@@ -1,0 +1,193 @@
+/**
+ * F.I. Forgot Brownie Points component styles.
+ * Opt-in — legacy `brownie-points` page remains unchanged.
+ */
+
+.fi-brownie-points {
+  display: grid;
+  gap: var(--fi-space-4);
+  width: 100%;
+}
+
+.fi-brownie-points__header {
+  display: grid;
+  gap: var(--fi-space-2);
+}
+
+.fi-brownie-points__title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h3);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-brownie-points__description {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-brownie-points__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--fi-space-2);
+}
+
+.fi-brownie-points__status {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-brownie-points__hero {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-5);
+  border-radius: var(--fi-radius-lg);
+  background: var(--fi-color-ink-soft);
+  color: var(--fi-color-text-inverse);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.fi-brownie-points__hero-accent {
+  position: absolute;
+  top: -1.25rem;
+  right: -1.25rem;
+  font-size: 8rem;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.fi-brownie-points__balance-label {
+  margin: 0;
+  font-size: var(--fi-text-caption);
+  font-weight: var(--fi-font-weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fi-color-brownie-gold);
+}
+
+.fi-brownie-points__balance-value {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: clamp(3rem, 10vw, 5rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.fi-brownie-points__lifetime {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: color-mix(in srgb, var(--fi-color-text-inverse) 70%, transparent);
+}
+
+.fi-brownie-points__badge-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--fi-space-2);
+}
+
+.fi-brownie-points__milestone,
+.fi-brownie-points__history {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+}
+
+.fi-brownie-points__section-title {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-brownie-points__milestone-copy,
+.fi-brownie-points__history-empty {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-brownie-points__milestone-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--fi-space-2);
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-brownie-points__history-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fi-brownie-points__history-item {
+  display: flex;
+  align-items: center;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-3) 0;
+  border-bottom: 1px solid var(--fi-color-border);
+}
+
+.fi-brownie-points__history-item:last-child {
+  border-bottom: none;
+}
+
+.fi-brownie-points__history-emoji {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.fi-brownie-points__history-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: var(--fi-space-1);
+}
+
+.fi-brownie-points__history-title {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-brownie-points__history-date {
+  margin: 0;
+  font-size: var(--fi-text-caption);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-brownie-points__history-points {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-body);
+  color: var(--fi-color-brownie-gold);
+  flex-shrink: 0;
+}
+
+.fi-brownie-points__skeleton-hero,
+.fi-brownie-points__empty,
+.fi-brownie-points__error {
+  padding: var(--fi-space-4);
+  border: 1px dashed var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-secondary);
+}
+
+@media (min-width: 40rem) {
+  .fi-brownie-points__history-item {
+    padding-inline: var(--fi-space-1);
+  }
+}

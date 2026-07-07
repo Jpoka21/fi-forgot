@@ -81,20 +81,20 @@ export default function CreateBusinessWorkspacePage() {
 
             <form onSubmit={handleSubmit} noValidate>
               <div style={{ marginBottom: 18 }}>
-                <label style={labelStyle}>Business Name *</label>
+                <label htmlFor="create-workspace-business-name" style={labelStyle}>Business Name *</label>
                 <input
+                  id="create-workspace-business-name"
                   value={businessName}
                   onChange={e => { setBusinessName(e.target.value); setNameErr(""); }}
                   placeholder="Smith Realty Group"
                   style={inputStyle}
-                  autoFocus
                 />
                 {nameErr && <p style={{ fontSize: "0.8rem", color: RED, marginTop: 4 }}>{nameErr}</p>}
               </div>
 
               <div style={{ marginBottom: 24 }}>
-                <label style={labelStyle}>What type of business? <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional)</span></label>
-                <select value={businessType} onChange={e => setBusinessType(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+                <label htmlFor="create-workspace-business-type" style={labelStyle}>What type of business? <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional)</span></label>
+                <select id="create-workspace-business-type" value={businessType} onChange={e => setBusinessType(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
                   <option value="">Select one…</option>
                   {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>

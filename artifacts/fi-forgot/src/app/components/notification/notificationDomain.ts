@@ -1,0 +1,17 @@
+export const notificationUiDefaults = {
+  drawerTitle: "Notifications",
+  closeLabel: "Close notifications",
+  markReadLabel: "Mark as read",
+  markUnreadLabel: "Mark as unread",
+  dismissLabel: "Dismiss",
+  restoreLabel: "Restore to inbox",
+  readIndicatorLabel: "Read",
+  unreadIndicatorLabel: "Unread",
+  settingsShortcutLabel: "Notification settings",
+  viewAllLabel: "View all notifications",
+  loadingLabel: "Loading notifications",
+  searchEmptyTitle: "No notifications match that search.",
+  searchEmptyDescription: "Try another keyword or clear your filters.",
+  footerHintDesktop: "Notifications stay calm and actionable",
+  footerHintMobile: "Swipe-friendly notification center",
+} as const;

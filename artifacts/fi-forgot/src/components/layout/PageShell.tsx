@@ -29,13 +29,14 @@ export default function PageShell({
 }) {
   const isMobile = useIsMobile();
   const px = isMobile ? 16 : 24;
+  const bottomPad = isMobile ? `calc(72px + env(safe-area-inset-bottom, 0px))` : "72px";
 
   return (
     <div
       style={{
         maxWidth: AUTH_PAGE_MAX_WIDTH,
         margin: "0 auto",
-        padding: `${isMobile ? 24 : 32}px ${px}px 72px`,
+        padding: `${isMobile ? 24 : 32}px ${px}px ${bottomPad}`,
         boxSizing: "border-box",
         fontFamily: "'Plus Jakarta Sans', sans-serif",
         color: PB.ink,

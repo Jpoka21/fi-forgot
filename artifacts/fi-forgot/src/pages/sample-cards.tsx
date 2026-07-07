@@ -155,11 +155,6 @@ function PreviewModal({ card, onClose }: { card: SampleCard; onClose: () => void
     void generateMessage(newTone);
   };
 
-  // Close on backdrop click
-  const handleBackdrop = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
   // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -168,16 +163,35 @@ function PreviewModal({ card, onClose }: { card: SampleCard; onClose: () => void
   }, [onClose]);
 
   return (
-    <div onClick={handleBackdrop} style={{
+    <div
+      style={{
       position: "fixed", inset: 0, zIndex: 1000,
-      background: "rgba(0,0,0,0.72)", backdropFilter: "blur(4px)",
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: "20px", overflowY: "auto",
     }}>
-      <div style={{
+      <button
+        type="button"
+        aria-label="Close card preview"
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          inset: 0,
+          border: "none",
+          padding: 0,
+          margin: 0,
+          background: "rgba(0,0,0,0.72)",
+          backdropFilter: "blur(4px)",
+          cursor: "default",
+        }}
+      />
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+        position: "relative",
+        zIndex: 1,
         background: DARK, border: `1px solid ${BORDER}`, borderRadius: 16,
         maxWidth: 860, width: "100%", display: "flex", flexWrap: "wrap",
-        overflow: "hidden", position: "relative", maxHeight: "90vh", overflowY: "auto",
+        overflow: "hidden", maxHeight: "90vh", overflowY: "auto",
       }}>
         {/* Close */}
         <button onClick={onClose} style={{

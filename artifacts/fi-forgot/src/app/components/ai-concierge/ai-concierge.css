@@ -1,0 +1,261 @@
+.fi-ai-concierge-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-6, 1.5rem);
+  max-width: 56rem;
+  margin-inline: auto;
+}
+
+.fi-ai-concierge-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-2, 0.5rem);
+}
+
+.fi-ai-concierge-page__title {
+  margin: 0;
+  font-family: var(--fi-font-serif, "Lora", Georgia, serif);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 600;
+  color: var(--fi-color-ink, #1c1410);
+}
+
+.fi-ai-concierge-page__subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--fi-color-mid, #6b5f57);
+  max-width: 44rem;
+}
+
+.fi-ai-concierge-page__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-2, 0.5rem);
+}
+
+.fi-ai-concierge-page__tab {
+  border: 1px solid var(--fi-color-border, #e8e0d8);
+  border-radius: var(--fi-radius-pill, 999px);
+  background: var(--fi-color-surface, #fff);
+  color: var(--fi-color-ink, #1c1410);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.fi-ai-concierge-page__tab[aria-selected="true"] {
+  border-color: var(--fi-color-primary, #8b5e3c);
+  background: color-mix(in srgb, var(--fi-color-primary, #8b5e3c) 10%, white);
+}
+
+.fi-ai-concierge-page__tab:focus-visible {
+  outline: var(--fi-focus-ring-width, 2px) solid var(--fi-color-focus-ring, #8b5e3c);
+  outline-offset: var(--fi-focus-ring-offset, 2px);
+}
+
+.fi-ai-concierge-page__layout {
+  display: grid;
+  gap: var(--fi-space-5, 1.25rem);
+}
+
+@media (min-width: 56rem) {
+  .fi-ai-concierge-page__layout--workspace {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+}
+
+.fi-ai-concierge-page__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-4, 1rem);
+  padding: var(--fi-space-4, 1rem);
+  border: 1px solid var(--fi-color-border, #e8e0d8);
+  border-radius: var(--fi-radius-lg, 12px);
+  background: var(--fi-color-surface, #fff);
+}
+
+.fi-ai-concierge-page__section-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.fi-ai-concierge-page__section-copy {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--fi-color-mid, #6b5f57);
+}
+
+.fi-ai-concierge-page__prompt-grid {
+  display: grid;
+  gap: var(--fi-space-3, 0.75rem);
+}
+
+@media (min-width: 40rem) {
+  .fi-ai-concierge-page__prompt-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.fi-ai-concierge-page__prompt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-2, 0.5rem);
+  padding: var(--fi-space-3, 0.75rem);
+  border: 1px solid var(--fi-color-border, #e8e0d8);
+  border-radius: var(--fi-radius-lg, 12px);
+  background: var(--fi-color-surface-muted, #faf7f4);
+  text-align: left;
+  cursor: pointer;
+}
+
+.fi-ai-concierge-page__prompt:focus-visible {
+  outline: var(--fi-focus-ring-width, 2px) solid var(--fi-color-focus-ring, #8b5e3c);
+  outline-offset: var(--fi-focus-ring-offset, 2px);
+}
+
+.fi-ai-concierge-page__prompt-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.fi-ai-concierge-page__prompt-copy {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--fi-color-mid, #6b5f57);
+}
+
+.fi-ai-concierge-page__insight-list,
+.fi-ai-concierge-page__memory-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-3, 0.75rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fi-ai-concierge-page__insight-item,
+.fi-ai-concierge-page__memory-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-1, 0.25rem);
+  padding: var(--fi-space-3, 0.75rem);
+  border-radius: var(--fi-radius-md, 8px);
+  border: 1px solid var(--fi-color-border, #e8e0d8);
+}
+
+.fi-ai-concierge-page__conversation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-4, 1rem);
+  min-height: 28rem;
+}
+
+.fi-ai-concierge-page__messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-3, 0.75rem);
+  flex: 1;
+  overflow: auto;
+  padding: var(--fi-space-2, 0.5rem);
+}
+
+.fi-ai-concierge-page__message {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-2, 0.5rem);
+  max-width: 42rem;
+  padding: var(--fi-space-3, 0.75rem) var(--fi-space-4, 1rem);
+  border-radius: var(--fi-radius-lg, 12px);
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.fi-ai-concierge-page__message--user {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--fi-color-primary, #8b5e3c) 12%, white);
+}
+
+.fi-ai-concierge-page__message--assistant {
+  align-self: flex-start;
+  background: var(--fi-color-surface-muted, #faf7f4);
+  border: 1px solid var(--fi-color-border, #e8e0d8);
+}
+
+.fi-ai-concierge-page__message-meta {
+  font-size: 0.75rem;
+  color: var(--fi-color-mid, #6b5f57);
+}
+
+.fi-ai-concierge-page__message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-2, 0.5rem);
+}
+
+.fi-ai-concierge-page__composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-space-3, 0.75rem);
+  padding-top: var(--fi-space-3, 0.75rem);
+  border-top: 1px solid var(--fi-color-border, #e8e0d8);
+}
+
+.fi-ai-concierge-page__composer-row {
+  display: flex;
+  gap: var(--fi-space-2, 0.5rem);
+}
+
+.fi-ai-concierge-page__input {
+  flex: 1;
+  min-height: 2.75rem;
+  padding: var(--fi-space-3, 0.75rem);
+  border: 1px solid var(--fi-color-border, #e8e0d8);
+  border-radius: var(--fi-radius-lg, 12px);
+  font-size: 0.95rem;
+}
+
+.fi-ai-concierge-page__input:focus-visible {
+  outline: var(--fi-focus-ring-width, 2px) solid var(--fi-color-focus-ring, #8b5e3c);
+  outline-offset: var(--fi-focus-ring-offset, 2px);
+}
+
+.fi-ai-concierge-page__follow-ups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-2, 0.5rem);
+}
+
+.fi-ai-concierge-page__follow-up {
+  border: 1px solid var(--fi-color-border, #e8e0d8);
+  border-radius: var(--fi-radius-pill, 999px);
+  background: var(--fi-color-surface, #fff);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.fi-ai-concierge-page__status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--fi-color-mid, #6b5f57);
+}
+
+.fi-ai-concierge-page__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--fi-space-2, 0.5rem);
+  flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-ai-concierge-page__tab,
+  .fi-ai-concierge-page__prompt,
+  .fi-ai-concierge-page__follow-up {
+    transition: none;
+  }
+}

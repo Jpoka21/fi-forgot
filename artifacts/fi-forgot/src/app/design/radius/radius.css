@@ -1,0 +1,54 @@
+/**
+ * Border radius foundation styles.
+ *
+ * Opt-in utility classes — legacy `--radius` vars in index.css remain unchanged.
+ */
+
+:root {
+  /* Scale extensions */
+  --fi-radius-xs: max(calc(var(--radius) - 6px), 2px);
+  --fi-radius-pill: var(--fi-radius-full);
+  --fi-radius-circle: 50%;
+
+  /* Component radii — bridge Phase 2 scale */
+  --fi-radius-avatar: var(--fi-radius-circle);
+  --fi-radius-card: var(--fi-radius-lg);
+  --fi-radius-input: var(--fi-radius-md);
+  --fi-radius-dialog: var(--fi-radius-xl);
+  --fi-radius-image: var(--fi-radius-md);
+  --fi-radius-button: var(--fi-radius-lg);
+}
+
+/* Scale utilities */
+.fi-radius-xs { border-radius: var(--fi-radius-xs); }
+.fi-radius-sm { border-radius: var(--fi-radius-sm); }
+.fi-radius-md { border-radius: var(--fi-radius-md); }
+.fi-radius-lg { border-radius: var(--fi-radius-lg); }
+.fi-radius-xl { border-radius: var(--fi-radius-xl); }
+.fi-radius-pill { border-radius: var(--fi-radius-pill); }
+.fi-radius-circle { border-radius: var(--fi-radius-circle); }
+
+/* Component utilities */
+.fi-radius-avatar { border-radius: var(--fi-radius-avatar); }
+.fi-radius-card { border-radius: var(--fi-radius-card); }
+.fi-radius-input { border-radius: var(--fi-radius-input); }
+.fi-radius-dialog { border-radius: var(--fi-radius-dialog); }
+.fi-radius-image { border-radius: var(--fi-radius-image); }
+.fi-radius-button { border-radius: var(--fi-radius-button); }
+
+/* Logical corner helpers for cards with elevation */
+.fi-radius-card-top {
+  border-top-left-radius: var(--fi-radius-card);
+  border-top-right-radius: var(--fi-radius-card);
+}
+
+.fi-radius-card-bottom {
+  border-bottom-left-radius: var(--fi-radius-card);
+  border-bottom-right-radius: var(--fi-radius-card);
+}
+
+/* Avatar clip for images inside circular avatars */
+.fi-radius-avatar-clip {
+  border-radius: var(--fi-radius-avatar);
+  overflow: hidden;
+}

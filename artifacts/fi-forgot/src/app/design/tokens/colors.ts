@@ -1,0 +1,45 @@
+import { cssVar, tokenVar } from "@/app/design/tokens/tokenNames";
+
+/** Raw brand hex values — aligned with existing personal-brand palette. */
+export const brandColors = {
+  cream: "#FAF7F4",
+  beige: "#F2E6D3",
+  paper: "#F2E6D3",
+  ink: "#111111",
+  inkSoft: "#1F1F1F",
+  accent: "#E23B2E",
+  accentHover: "#D32F2F",
+  border: "#E5E0D8",
+  white: "#FFFFFF",
+  sage: "#5B8C6B",
+  amber: "#C97A0A",
+  mid: "#4B5563",
+} as const;
+
+export const colorTokens = {
+  cream: tokenVar(cssVar.color.cream),
+  beige: tokenVar(cssVar.color.beige),
+  paper: tokenVar(cssVar.color.paper),
+  ink: tokenVar(cssVar.color.ink),
+  inkSoft: tokenVar(cssVar.color.inkSoft),
+  accent: tokenVar(cssVar.color.accent),
+  accentHover: tokenVar(cssVar.color.accentHover),
+  border: tokenVar(cssVar.color.border),
+  surface: tokenVar(cssVar.color.surface),
+  surfaceElevated: tokenVar(cssVar.color.surfaceElevated),
+  textPrimary: tokenVar(cssVar.color.textPrimary),
+  textSecondary: tokenVar(cssVar.color.textSecondary),
+  textMuted: tokenVar(cssVar.color.textMuted),
+  success: tokenVar(cssVar.color.success),
+  warning: tokenVar(cssVar.color.warning),
+  danger: tokenVar(cssVar.color.danger),
+  info: tokenVar(cssVar.color.info),
+  focusRing: tokenVar(cssVar.color.focusRing),
+  selectionBg: tokenVar(cssVar.color.selectionBg),
+  selectionFg: tokenVar(cssVar.color.selectionFg),
+  background: "hsl(var(--background))",
+  foreground: "hsl(var(--foreground))",
+  primary: "hsl(var(--primary))",
+  muted: "hsl(var(--muted))",
+  mutedForeground: "hsl(var(--muted-foreground))",
+} as const;

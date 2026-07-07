@@ -3,6 +3,9 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { getApiHeaders, saveLastPersonalization, getRecipient } from "@/lib/data";
 import { dispatchBrownieAward } from "@/lib/brownie-points-context";
+import { FiCardCheckoutPricing } from "@/app/components/pricing";
+import { resolveUserPlan } from "@/lib/plan";
+import { useIsMobile } from "@/components/layout/PageShell";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -169,6 +172,7 @@ function PillBtn({ label, selected, onClick }: { label: string; selected: boolea
       onClick={onClick}
       style={{
         padding: "13px 16px",
+        minHeight: 44,
         borderRadius: 12,
         border: selected ? `2px solid ${RED}` : `1.5px solid ${BLACK}18`,
         background: selected ? `${RED}12` : WHITE,
@@ -197,9 +201,9 @@ function WizardShell({
         <div style={{ height: "100%", background: RED, width: `${Math.round(progress * 100)}%`, transition: "width 0.4s ease" }} />
       </div>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", padding: "14px 20px 0", minHeight: 52 }}>
+      <div style={{ display: "flex", alignItems: "center", padding: "14px 16px 0", minHeight: 52 }}>
         {showBack && onBack && (
-          <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "1.4rem", padding: "4px 8px 4px 0", lineHeight: 1 }}>
+          <button onClick={onBack} aria-label="Go back" style={{ background: "none", border: "none", cursor: "pointer", color: GRAY, fontSize: "1.4rem", minWidth: 44, minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: 0, lineHeight: 1 }}>
             ←
           </button>
         )}
@@ -209,7 +213,7 @@ function WizardShell({
         </span>
       </div>
       {/* Content */}
-      <div style={{ flex: 1, padding: "24px 20px 40px", maxWidth: 520, width: "100%", margin: "0 auto" }}>
+      <div style={{ flex: 1, padding: "24px 16px calc(40px + env(safe-area-inset-bottom, 0px))", maxWidth: 520, width: "100%", margin: "0 auto", boxSizing: "border-box" as const }}>
         {children}
       </div>
     </div>
@@ -299,6 +303,7 @@ function ShareDraftButton({ text, recipientName }: { text: string; recipientName
 export default function CardFlowV2() {
   const { isLoggedIn, user } = useAuth();
   const [, setLocation] = useLocation();
+  const isMobile = useIsMobile(640);
 
   // WHO state
   const [firstName, setFirstName]     = useState("");
@@ -615,10 +620,11 @@ export default function CardFlowV2() {
 
         {/* Name input */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", color: GRAY, textTransform: "uppercase", marginBottom: 6 }}>
+          <label htmlFor="try-first-name" style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", color: GRAY, textTransform: "uppercase", marginBottom: 6 }}>
             First Name
           </label>
           <input
+            id="try-first-name"
             value={firstName}
             onChange={e => setFirstName(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleWhoContinue()}
@@ -628,17 +634,18 @@ export default function CardFlowV2() {
         </div>
 
         {/* Relationship grid */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", color: GRAY, textTransform: "uppercase", marginBottom: 10 }}>
+        <fieldset style={{ margin: "0 0 20px", padding: 0, border: 0 }}>
+          <legend style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", color: GRAY, textTransform: "uppercase", marginBottom: 10 }}>
             Relationship
-          </label>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          </legend>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: 8 }}>
             {RELATIONSHIPS.map(r => (
               <button
                 key={r}
                 onClick={() => setRelationship(r)}
                 style={{
-                  padding: "11px 8px",
+                  padding: "12px 8px",
+                  minHeight: 44,
                   borderRadius: 10,
                   border: relationship === r ? `2px solid ${RED}` : `1.5px solid ${BLACK}15`,
                   background: relationship === r ? `${RED}10` : WHITE,
@@ -654,14 +661,14 @@ export default function CardFlowV2() {
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         {nameError && <p style={{ color: RED, fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", marginBottom: 12 }}>{nameError}</p>}
 
         <button
           onClick={handleWhoContinue}
           disabled={busy}
-          style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: busy ? `${BLACK}30` : RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.08em", cursor: busy ? "default" : "pointer" }}
+          style={{ width: "100%", minHeight: 48, padding: 16, borderRadius: 12, border: "none", background: busy ? `${BLACK}30` : RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.35rem", letterSpacing: "0.08em", cursor: busy ? "default" : "pointer" }}
         >
           {busy ? "CHECKING..." : "CONTINUE →"}
         </button>
@@ -1130,7 +1137,23 @@ export default function CardFlowV2() {
 
         {/* Card Draft Container — hero */}
         <div
-          onClick={() => { if (!editMode) { setEditMode(true); setTimeout(() => textareaRef.current?.focus(), 0); } }}
+          role="button"
+          onClick={() => {
+            if (!editMode) {
+              setEditMode(true);
+              setTimeout(() => textareaRef.current?.focus(), 0);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (editMode) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setEditMode(true);
+              setTimeout(() => textareaRef.current?.focus(), 0);
+            }
+          }}
+          tabIndex={editMode ? -1 : 0}
+          aria-label="Edit card message draft"
           style={{
             background: BEIGE, borderRadius: 16, padding: "14px 18px 14px", marginBottom: 14,
             border: editMode ? `2px solid ${RED}50` : `1.5px dashed ${BLACK}22`,
@@ -1241,7 +1264,7 @@ export default function CardFlowV2() {
                   <button
                     key={label}
                     onClick={() => handleQuickAdjust(instruction)}
-                    style={{ padding: "5px 11px", borderRadius: 20, border: `1px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", cursor: "pointer" } as React.CSSProperties}
+                    style={{ padding: "8px 12px", minHeight: 36, borderRadius: 20, border: `1px solid ${BLACK}15`, background: WHITE, color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", cursor: "pointer" } as React.CSSProperties}
                   >
                     {label}
                   </button>
@@ -1286,8 +1309,15 @@ export default function CardFlowV2() {
           YOU'RE ALL SET
         </h2>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", color: GRAY, marginBottom: 20 }}>
-          Subscribe to send this card and never forget an important date again.
+          Your Relationship Concierge is ready. Choose membership when you want unlimited people — or mail this card pay-as-you-go.
         </p>
+
+        <div style={{ marginBottom: 24 }}>
+          <FiCardCheckoutPricing
+            plan={resolveUserPlan(user?.plan)}
+            showUpgradeOffer={resolveUserPlan(user?.plan) === "free"}
+          />
+        </div>
 
         <div style={{ background: BEIGE, borderRadius: 16, padding: "18px 18px 20px", marginBottom: 24 }}>
           <textarea

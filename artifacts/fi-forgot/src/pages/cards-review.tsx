@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
-  getCards, getRecipients, getServerUserId, getApiHeaders, CardOrder, RecipientAddress,
+  getCards, getRecipients, getServerUserId, CardOrder, RecipientAddress,
   updateCard, deleteCard,
 } from "@/lib/data";
 import {
@@ -9,13 +9,18 @@ import {
   updateDraftApprovedMessage, QueueItem, MessageDraft,
 } from "@/lib/admin-data";
 import { useAuth } from "@/lib/auth-context";
+import { resolveUserPlan, shouldShowMemberCardSavings } from "@/lib/plan";
+import { FiCardCheckoutPricing } from "@/app/components/pricing";
+import { FiMemberCardSavingsPrompt } from "@/app/components/upgrade/FiMemberCardSavingsPrompt";
 import { PB } from "@/lib/personal-brand";
+import { illustrationPaths } from "@/app/design/assets/illustrationPaths";
+import { FiCardEditingWorkspace } from "@/app/components/card-editing";
 import AppShell from "@/components/layout/AppShell";
 import PageShell from "@/components/layout/PageShell";
 import { PersonAvatar, SoftCard, PrimaryBtn, SecondaryBtn } from "@/components/personal-ui";
 import {
-  ThumbsUp, Loader2, Sparkles, ArrowLeft,
-  RefreshCw, Share2, ChevronLeft, ChevronRight,
+  ThumbsUp, Loader2, ArrowLeft,
+  Share2, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 const CREAM  = PB.cream;
@@ -30,23 +35,11 @@ const AMBER  = PB.amber;
 const serif = "'Lora', Georgia, serif";
 const sans  = "'Plus Jakarta Sans', sans-serif";
 
-function LoadingPreparingIllustration() {
-  return (
-    <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <img
-        src="/assets/illustrations/loading/013_loading_preparing.webp"
-        alt="Dave carefully preparing a handwritten card for your review"
-        style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
-      />
-    </div>
-  );
-}
-
 function LoadingSuccessIllustration() {
   return (
     <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <img
-        src="/assets/illustrations/loading/015_loading_success.webp"
+        src={illustrationPaths.loading.success}
         alt="Dave finished taking care of everything, looking calm and satisfied"
         style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
       />
@@ -58,7 +51,7 @@ function LoadingMailboxIllustration() {
   return (
     <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <img
-        src="/assets/illustrations/loading/014_loading_mailbox.webp"
+        src={illustrationPaths.loading.mailbox}
         alt="Dave placing a handwritten card in the mailbox to send on your behalf"
         style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
       />
@@ -105,7 +98,6 @@ export default function CardsReviewPage() {
 
   const [editedMessages, setEditedMessages]   = useState<Record<string, string>>({});
   const [refinedMessages, setRefinedMessages] = useState<Record<string, string>>({});
-  const [editActionId, setEditActionId]       = useState<string | null>(null);
   const [approvingId, setApprovingId]         = useState<string | null>(null);
 
   const [showAddrOverride, setShowAddrOverride] = useState<Record<string, boolean>>({});
@@ -119,26 +111,17 @@ export default function CardsReviewPage() {
   const [shareLoadingIds, setShareLoadingIds] = useState<Record<string, boolean>>({});
   const [shareCopiedIds, setShareCopiedIds]   = useState<Record<string, boolean>>({});
   const [shareUrlIds, setShareUrlIds]         = useState<Record<string, string>>({});
+  const [savingsPromptCardId, setSavingsPromptCardId] = useState<string | null>(null);
+
+  const plan = resolveUserPlan(user?.plan);
+  const mailedCardCount = getCards().filter((card) =>
+    ["Approved", "Mailed to me", "Mailed to her", "Delivered", "Given"].includes(card.status),
+  ).length;
 
   useEffect(() => {
     const serverUserId = getServerUserId();
     const recipientIds = new Set(getRecipients().map(r => r.id));
     const allCards = getCards();
-
-    console.group("[cards-review] All cards in localStorage");
-    allCards.forEach(c => {
-      console.log({
-        id: c.id,
-        recipientId: c.recipientId,
-        recipientName: c.recipientName,
-        holiday: c.holiday,
-        status: c.status,
-        userId: c.userId,
-        deliveryPreference: c.deliveryPreference,
-        approvedMessagePreview: (c.approvedMessage ?? "").slice(0, 60),
-      });
-    });
-    console.groupEnd();
 
     const cs = allCards.filter(c =>
       c.status === "Ready for approval" &&
@@ -147,10 +130,6 @@ export default function CardsReviewPage() {
     );
 
     cs.sort((a, b) => cardTimestamp(b) - cardTimestamp(a));
-
-    console.group("[cards-review] Cards shown in review queue (newest first)");
-    cs.forEach((c, i) => console.log({ idx: i, id: c.id, recipientName: c.recipientName, holiday: c.holiday, userId: c.userId }));
-    console.groupEnd();
 
     setCards(cs);
     if (user?.email) setPending(getCustomerPendingApprovals(user.email));
@@ -220,7 +199,17 @@ export default function CardsReviewPage() {
       : undefined;
     updateCard({ ...card, status: "Approved", approvedMessage: message, overrideAddress });
     setApprovingId(null);
+    setSavingsPromptCardId(null);
     advance();
+  }
+
+  function requestApprovePersonalCard(card: CardOrder) {
+    if (shouldShowMemberCardSavings(plan, mailedCardCount)) {
+      setSavingsPromptCardId(card.id);
+      return;
+    }
+    setApprovingId(card.id);
+    approvePersonalCard(card);
   }
 
   function rejectPersonalCard(card: CardOrder) {
@@ -228,24 +217,9 @@ export default function CardsReviewPage() {
     advance();
   }
 
-  async function quickEditPersonalCard(card: CardOrder, instruction: string, label: string) {
-    const currentText = editedMessages[card.id] ?? card.approvedMessage ?? "";
-    const actionKey = `${card.id}-${label}`;
-    setEditActionId(actionKey);
-    const recipient = getRecipients().find(r => r.id === card.recipientId);
-    const relationship = recipient?.relationship ?? "friend";
-    try {
-      const res = await fetch("/api/edit-card", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipientName: card.recipientName, holiday: card.holiday, relationship, currentCardText: currentText, instruction }),
-      });
-      if (res.ok) {
-        const data = await res.json() as { card?: string };
-        if (data.card) setEditedMessages(prev => ({ ...prev, [card.id]: data.card! }));
-      }
-    } catch { /* non-blocking */ }
-    finally { setEditActionId(null); }
+  function savePersonalDraft(card: CardOrder) {
+    const message = editedMessages[card.id] ?? card.approvedMessage ?? "";
+    updateCard({ ...card, status: "Card being drafted", approvedMessage: message });
   }
 
   async function regenCardDesign(cardId: string, holiday: string, message: string) {
@@ -368,9 +342,7 @@ export default function CardsReviewPage() {
             user={user}
             editedMessages={editedMessages}
             setEditedMessages={setEditedMessages}
-            editActionId={editActionId}
             approvingId={approvingId}
-            setApprovingId={setApprovingId}
             cardDesignMap={cardDesignMap}
             regenLoadingIds={regenLoadingIds}
             lightboxDesignCard={lightboxDesignCard}
@@ -382,9 +354,9 @@ export default function CardsReviewPage() {
             setShowAddrOverride={setShowAddrOverride}
             addrOverride={addrOverride}
             setAddrOverride={setAddrOverride}
-            onApprove={() => { setApprovingId(item.card.id); approvePersonalCard(item.card); }}
+            onApprove={() => requestApprovePersonalCard(item.card)}
             onReject={() => rejectPersonalCard(item.card)}
-            onQuickEdit={(instruction, label) => quickEditPersonalCard(item.card, instruction, label)}
+            onSaveDraft={() => savePersonalDraft(item.card)}
             onRegenDesign={() => regenCardDesign(item.card.id, item.card.holiday, editedMessages[item.card.id] ?? item.card.approvedMessage ?? "")}
             onShare={() => shareCardPreview(item.card)}
             onShareCopy={async () => {
@@ -394,6 +366,9 @@ export default function CardsReviewPage() {
             }}
             onShareClose={() => setShareUrlIds(prev => { const n = { ...prev }; delete n[item.card.id]; return n; })}
             isMobile={isMobile}
+            showSavingsPrompt={savingsPromptCardId === item.card.id}
+            onContinueAtFreePrice={() => { setApprovingId(item.card.id); approvePersonalCard(item.card); }}
+            onDismissSavings={() => setSavingsPromptCardId(null)}
           />
         )}
 
@@ -405,6 +380,7 @@ export default function CardsReviewPage() {
               disabled={currentIdx === 0}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
+                minHeight: 44,
                 padding: "10px 16px", borderRadius: 24, border: `1px solid ${BORDER}`,
                 background: WHITE, color: currentIdx === 0 ? `${GRAY}50` : GRAY,
                 cursor: currentIdx === 0 ? "default" : "pointer",
@@ -419,6 +395,7 @@ export default function CardsReviewPage() {
               disabled={currentIdx === total - 1}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
+                minHeight: 44,
                 padding: "10px 16px", borderRadius: 24, border: `1px solid ${BORDER}`,
                 background: WHITE, color: currentIdx === total - 1 ? `${GRAY}50` : GRAY,
                 cursor: currentIdx === total - 1 ? "default" : "pointer",
@@ -430,82 +407,6 @@ export default function CardsReviewPage() {
         )}
       </PageShell>
     </AppShell>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-function QuickEditsBlock({
-  cardId, editActionId, onQuickEdit,
-}: {
-  cardId: string;
-  editActionId: string | null;
-  onQuickEdit: (instruction: string, label: string) => void;
-}) {
-  const [customVal, setCustomVal] = useState("");
-
-  const EDITS = [
-    { label: "Shorter",    instruction: "Make it significantly shorter and more punchy." },
-    { label: "Funnier",    instruction: "Add genuine humor without losing the heart." },
-    { label: "More heart", instruction: "Make it warmer and more emotionally resonant." },
-    { label: "Go deeper",  instruction: "Make this more emotionally raw and vulnerable — really go there." },
-    { label: "Rewrite",    instruction: "Completely rewrite in a fresh way — different opening, different structure." },
-  ] as const;
-
-  return (
-    <div style={{ marginTop: 16 }}>
-      <p style={{ fontSize: "0.78rem", fontWeight: 600, color: GRAY, margin: "0 0 10px" }}>
-        Quick adjustments
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: 10 }}>
-        {EDITS.map(({ label, instruction }) => {
-          const actionKey = `${cardId}-${label}`;
-          const isLoading = editActionId === actionKey;
-          return (
-            <button key={label} type="button"
-              onClick={() => onQuickEdit(instruction, label)}
-              disabled={!!editActionId}
-              style={{
-                fontSize: "0.78rem", fontWeight: 600, padding: "8px 14px", borderRadius: 20,
-                border: `1px solid ${BORDER}`,
-                background: isLoading ? `${INK}06` : WHITE,
-                color: isLoading ? GRAY : INK,
-                cursor: editActionId ? "default" : "pointer",
-                display: "flex", alignItems: "center", gap: 6, fontFamily: sans,
-              }}>
-              {isLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} style={{ color: RED }} />}
-              {label}
-            </button>
-          );
-        })}
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <input
-          value={customVal}
-          onChange={e => setCustomVal(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === "Enter" && customVal.trim() && !editActionId) {
-              onQuickEdit(customVal.trim(), "Custom");
-              setCustomVal("");
-            }
-          }}
-          placeholder="Or describe a small change…"
-          disabled={!!editActionId}
-          style={{
-            flex: 1, padding: "10px 14px", borderRadius: 12,
-            border: `1px solid ${BORDER}`, background: CREAM,
-            fontFamily: sans, fontSize: "0.82rem",
-            color: INK, outline: "none", boxSizing: "border-box" as const,
-          }}
-        />
-        <PrimaryBtn
-          onClick={() => { if (customVal.trim() && !editActionId) { onQuickEdit(customVal.trim(), "Custom"); setCustomVal(""); } }}
-          disabled={!customVal.trim() || !!editActionId}
-          style={{ padding: "10px 16px", borderRadius: 20, fontSize: "0.8rem", fontFamily: sans, display: "flex", alignItems: "center", gap: 6 }}
-        >
-          <Sparkles size={12} /> Apply
-        </PrimaryBtn>
-      </div>
-    </div>
   );
 }
 
@@ -558,9 +459,9 @@ function AdminCard({
         />
       </div>
 
-      <div style={{ padding: "0 24px 24px", display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" as const }}>
-        <SecondaryBtn onClick={onSkip}>Save for later</SecondaryBtn>
-        <PrimaryBtn onClick={onApprove} style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+      <div style={{ padding: isMobile ? "0 16px 24px" : "0 24px 24px", display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" as const }}>
+        <SecondaryBtn onClick={onSkip} style={isMobile ? { flex: 1, minHeight: 44 } : undefined}>Save for later</SecondaryBtn>
+        <PrimaryBtn onClick={onApprove} style={{ display: "inline-flex", alignItems: "center", gap: 8, ...(isMobile ? { flex: 1, minHeight: 44, justifyContent: "center" } : {}) }}>
           <ThumbsUp size={16} /> Approve &amp; send
         </PrimaryBtn>
       </div>
@@ -572,23 +473,24 @@ function AdminCard({
 function PersonalCard({
   card, user,
   editedMessages, setEditedMessages,
-  editActionId, approvingId, setApprovingId,
+  approvingId,
   cardDesignMap, regenLoadingIds,
   lightboxDesignCard, setLightboxDesignCard,
   shareLoadingIds, shareCopiedIds, shareUrlIds,
   showAddrOverride, setShowAddrOverride,
   addrOverride, setAddrOverride,
-  onApprove, onReject, onQuickEdit, onRegenDesign,
+  onApprove, onReject, onSaveDraft, onRegenDesign,
   onShare, onShareCopy, onShareClose,
   isMobile,
+  showSavingsPrompt = false,
+  onContinueAtFreePrice,
+  onDismissSavings,
 }: {
   card: CardOrder;
-  user: { mailingAddress?: RecipientAddress } | null;
+  user: { mailingAddress?: RecipientAddress; plan?: import("@/lib/plan").Plan } | null;
   editedMessages: Record<string, string>;
   setEditedMessages: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  editActionId: string | null;
   approvingId: string | null;
-  setApprovingId: React.Dispatch<React.SetStateAction<string | null>>;
   cardDesignMap: Record<string, CardDesign>;
   regenLoadingIds: Record<string, boolean>;
   lightboxDesignCard: string | null;
@@ -602,62 +504,31 @@ function PersonalCard({
   setAddrOverride: React.Dispatch<React.SetStateAction<Record<string, Partial<RecipientAddress>>>>;
   onApprove: () => void;
   onReject: () => void;
-  onQuickEdit: (instruction: string, label: string) => void;
+  onSaveDraft: () => void;
   onRegenDesign: () => void;
   onShare: () => void;
   onShareCopy: () => void;
   onShareClose: () => void;
   isMobile: boolean;
+  showSavingsPrompt?: boolean;
+  onContinueAtFreePrice?: () => void;
+  onDismissSavings?: () => void;
 }) {
   const text = editedMessages[card.id] ?? card.approvedMessage ?? "";
+  const originalMessage = card.approvedMessage ?? "";
   const design = cardDesignMap[card.id];
   const isRegenning = regenLoadingIds[card.id];
   const isApproving = approvingId === card.id;
   const recipient = getRecipients().find(r => r.id === card.recipientId);
 
-  const [improveText, setImproveText] = useState("");
-  const [improveSaving, setImproveSaving] = useState(false);
-  const [improveError, setImproveError] = useState(false);
-
-  async function saveAndImprove() {
-    if (!improveText.trim() || improveSaving) return;
-    setImproveSaving(true);
-    setImproveError(false);
-    try {
-      const headers = { ...(getApiHeaders() as Record<string, string>), "Content-Type": "application/json" };
-      const res = await fetch(`/api/v2/recipients/${card.recipientId}/answer-question`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          fieldKey:     "fresh_update_quick",
-          questionText: `What is something recent that happened with ${card.recipientName}?`,
-          answerText:   improveText.trim(),
-          triggerType:  "fresh_update",
-        }),
-      });
-      if (res.ok) {
-        const detail = improveText.trim();
-        setImproveText("");
-        onQuickEdit(
-          `Rewrite this card to weave in the following personal detail about ${card.recipientName}: "${detail}". Make the card feel genuinely personal while keeping the same tone and occasion.`,
-          "Improve"
-        );
-      } else {
-        setImproveError(true);
-      }
-    } catch {
-      setImproveError(true);
-    } finally {
-      setImproveSaving(false);
-    }
-  }
-
   const pad = isMobile ? "18px 16px" : "22px 24px";
+  const deliveryLabel = card.dueDate
+    ? `Mailing ${new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })}`
+    : undefined;
 
   return (
     <>
     <SoftCard style={{ overflow: "hidden" }}>
-      {/* Recipient summary */}
       <div style={{ padding: pad, borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14 }}>
         <PersonAvatar name={card.recipientName} size={56} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -668,71 +539,38 @@ function PersonalCard({
             {recipient?.relationship && <span>{recipient.relationship} · </span>}
             {card.holiday}
           </div>
-          {card.dueDate && (
-            <div style={{ fontSize: "0.82rem", color: GRAY, marginTop: 6 }}>
-              Mailing {new Date(card.dueDate + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })}
-            </div>
-          )}
         </div>
-        <span style={{ fontSize: "0.72rem", fontWeight: 600, background: `${RED}10`, color: RED, borderRadius: 20, padding: "5px 12px", flexShrink: 0 }}>
-          Ready for you
-        </span>
       </div>
 
-      {/* Card design preview */}
-      {(design || isRegenning) && (
-        <div style={{ position: "relative", background: CREAM }}>
-          {isRegenning ? (
-            <div style={{ minHeight: 220, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "32px 16px" }}>
-              <LoadingPreparingIllustration />
-              <span style={{ fontSize: "0.9rem", color: GRAY }}>Finding a card design…</span>
-            </div>
-          ) : design?.imageUrl ? (
-            <>
-              <img
-                src={design.imageUrl}
-                alt={design.name}
-                onClick={() => setLightboxDesignCard(card.id)}
-                style={{ width: "100%", display: "block", maxHeight: 280, objectFit: "contain", background: CREAM, cursor: "zoom-in" }}
-              />
-              <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0,
-                background: "linear-gradient(transparent, rgba(31,31,31,0.55))",
-                padding: "24px 16px 12px", display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-              }}>
-                <span style={{ color: WHITE, fontWeight: 500, fontSize: "0.82rem" }}>{design.name}</span>
-                <button type="button" onClick={onRegenDesign}
-                  style={{
-                    padding: "6px 14px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.3)",
-                    background: "rgba(255,255,255,0.15)", color: WHITE, fontSize: "0.75rem", fontWeight: 600,
-                    cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: sans,
-                  }}>
-                  <RefreshCw size={12} /> Change design
-                </button>
-              </div>
-            </>
-          ) : null}
-        </div>
-      )}
-
-      {/* Message */}
       <div style={{ padding: pad }}>
-        <p style={{ fontSize: "0.78rem", fontWeight: 600, color: GRAY, margin: "0 0 10px" }}>
-          Handwritten message
-        </p>
-        <textarea
-          value={text}
-          onChange={e => setEditedMessages(prev => ({ ...prev, [card.id]: e.target.value }))}
-          style={{
-            width: "100%", minHeight: 170,
-            border: `1px solid ${BORDER}`, borderRadius: 14,
-            padding: "16px 18px", fontSize: "1rem",
-            fontFamily: serif, lineHeight: 1.75, color: INK,
-            background: CREAM, resize: "vertical" as const,
-            boxSizing: "border-box" as const, outline: "none",
-          }}
+        {showSavingsPrompt && onContinueAtFreePrice && onDismissSavings ? (
+          <FiMemberCardSavingsPrompt
+            plan={resolveUserPlan(user?.plan)}
+            onContinue={onContinueAtFreePrice}
+            onDismiss={onDismissSavings}
+          />
+        ) : (
+          <FiCardCheckoutPricing plan={resolveUserPlan(user?.plan)} />
+        )}
+        <FiCardEditingWorkspace
+          recipientName={card.recipientName}
+          occasion={card.holiday}
+          relationship={recipient?.relationship}
+          deliveryLabel={deliveryLabel}
+          statusLabel="Ready for you"
+          message={text}
+          originalMessage={originalMessage}
+          onMessageChange={(value) => setEditedMessages(prev => ({ ...prev, [card.id]: value }))}
+          recipient={recipient}
+          design={design}
+          designLoading={isRegenning}
+          onChangeArtwork={onRegenDesign}
+          onZoomArtwork={design?.imageUrl ? () => setLightboxDesignCard(card.id) : undefined}
+          onSaveDraft={onSaveDraft}
+          onApprove={onApprove}
+          onReject={onReject}
+          approving={isApproving}
         />
-        <QuickEditsBlock cardId={card.id} editActionId={editActionId} onQuickEdit={onQuickEdit} />
       </div>
 
       {/* Mailing address */}
@@ -754,18 +592,18 @@ function PersonalCard({
               </span>
               <button type="button"
                 onClick={() => setShowAddrOverride(prev => ({ ...prev, [card.id]: !isOverriding }))}
-                style={{ fontSize: "0.78rem", fontWeight: 600, color: isOverriding ? GRAY : RED, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0, fontFamily: sans }}>
+                style={{ fontSize: "0.78rem", fontWeight: 600, color: isOverriding ? GRAY : RED, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: "8px 0", minHeight: 44, fontFamily: sans }}>
                 {isOverriding ? "← Use my address" : addr ? "Send somewhere else" : "Add my address"}
               </button>
             </div>
             {isOverriding && (
               <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                <input placeholder="Street address" value={ov.line1 ?? ""} onChange={e => setOv({ line1: e.target.value })} style={{ width: "100%", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", color: INK, outline: "none", boxSizing: "border-box" as const, fontFamily: sans }} />
-                <input placeholder="Apt / Suite (optional)" value={ov.line2 ?? ""} onChange={e => setOv({ line2: e.target.value })} style={{ width: "100%", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", color: INK, outline: "none", boxSizing: "border-box" as const, fontFamily: sans }} />
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 58px 84px", gap: 8 }}>
-                  <input placeholder="City" value={ov.city ?? ""} onChange={e => setOv({ city: e.target.value })} style={{ border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", color: INK, outline: "none", fontFamily: sans }} />
-                  <input placeholder="ST" maxLength={2} value={ov.state ?? ""} onChange={e => setOv({ state: e.target.value.toUpperCase() })} style={{ border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", color: INK, outline: "none", fontFamily: sans }} />
-                  <input placeholder="Zip" maxLength={10} value={ov.zip ?? ""} onChange={e => setOv({ zip: e.target.value })} style={{ border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", fontSize: "0.86rem", color: INK, outline: "none", fontFamily: sans }} />
+                <input placeholder="Street address" value={ov.line1 ?? ""} onChange={e => setOv({ line1: e.target.value })} style={{ width: "100%", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 12px", fontSize: "1rem", color: INK, outline: "none", boxSizing: "border-box" as const, fontFamily: sans }} />
+                <input placeholder="Apt / Suite (optional)" value={ov.line2 ?? ""} onChange={e => setOv({ line2: e.target.value })} style={{ width: "100%", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 12px", fontSize: "1rem", color: INK, outline: "none", boxSizing: "border-box" as const, fontFamily: sans }} />
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 58px 84px", gap: 8 }}>
+                  <input placeholder="City" value={ov.city ?? ""} onChange={e => setOv({ city: e.target.value })} style={{ gridColumn: isMobile ? "1 / -1" : undefined, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 12px", fontSize: "1rem", color: INK, outline: "none", fontFamily: sans }} />
+                  <input placeholder="ST" maxLength={2} value={ov.state ?? ""} onChange={e => setOv({ state: e.target.value.toUpperCase() })} style={{ border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 12px", fontSize: "1rem", color: INK, outline: "none", fontFamily: sans }} />
+                  <input placeholder="Zip" maxLength={10} value={ov.zip ?? ""} onChange={e => setOv({ zip: e.target.value })} style={{ border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 12px", fontSize: "1rem", color: INK, outline: "none", fontFamily: sans }} />
                 </div>
               </div>
             )}
@@ -784,7 +622,7 @@ function PersonalCard({
           {!shareUrlIds[card.id] ? (
             <button type="button" onClick={onShare} disabled={shareLoadingIds[card.id]}
               style={{
-                width: "100%", fontSize: "0.84rem", fontWeight: 600, padding: "12px 16px",
+                width: "100%", fontSize: "0.84rem", fontWeight: 600, minHeight: 44, padding: "12px 16px",
                 borderRadius: 24, border: `1px solid ${BORDER}`,
                 background: WHITE, color: INK,
                 cursor: shareLoadingIds[card.id] ? "default" : "pointer",
@@ -813,56 +651,9 @@ function PersonalCard({
         </div>
       )}
 
-      {/* Make more personal */}
-      <div style={{ margin: `0 ${isMobile ? 16 : 24}px 20px`, paddingTop: 20, borderTop: `1px solid ${BORDER}` }}>
-        <h3 style={{ fontFamily: serif, fontSize: "1.05rem", fontWeight: 600, color: INK, margin: "0 0 6px" }}>
-          Make it more personal
-        </h3>
-        <p style={{ fontSize: "0.84rem", color: GRAY, lineHeight: 1.5, margin: "0 0 12px" }}>
-          Share one real detail about {card.recipientName}, and we'll weave it into the message.
-        </p>
-        <textarea
-          value={improveText}
-          onChange={e => setImproveText(e.target.value)}
-          placeholder="A recent moment, favorite memory, inside joke, or life update…"
-          rows={3}
-          disabled={improveSaving || !!editActionId}
-          style={{
-            width: "100%", borderRadius: 12, border: `1px solid ${BORDER}`,
-            padding: "12px 14px", fontSize: "0.88rem",
-            fontFamily: sans, lineHeight: 1.6, color: INK,
-            background: improveSaving ? `${INK}04` : CREAM,
-            resize: "none" as const, outline: "none",
-            boxSizing: "border-box" as const,
-            opacity: improveSaving ? 0.7 : 1,
-          }}
-        />
-        {improveError && (
-          <p style={{ marginTop: 8, padding: "8px 12px", borderRadius: 10, background: `${RED}08`, border: `1px solid ${RED}20`, fontSize: "0.8rem", fontWeight: 500, color: RED }}>
-            Something went wrong — please try again.
-          </p>
-        )}
-        <PrimaryBtn
-          onClick={saveAndImprove}
-          disabled={!improveText.trim() || improveSaving || !!editActionId}
-          accent={SAGE}
-          style={{
-            marginTop: 10, width: "100%", padding: "12px", borderRadius: 24,
-            fontSize: "0.88rem", fontFamily: sans,
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          }}>
-          {improveSaving
-            ? <><Loader2 size={14} className="animate-spin" /> Saving…</>
-            : editActionId === `${card.id}-Improve`
-              ? <><Loader2 size={14} className="animate-spin" /> Rewriting…</>
-              : "Improve this card"}
-        </PrimaryBtn>
-      </div>
-
-      {/* Approve / Reject */}
       {isApproving && (
         <div style={{
-          padding: `16px ${isMobile ? 16 : 24}px 0`,
+          padding: `16px ${isMobile ? 16 : 24}px 24px`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -871,14 +662,6 @@ function PersonalCard({
           <LoadingMailboxIllustration />
         </div>
       )}
-      <div style={{ padding: `0 ${isMobile ? 16 : 24}px 24px`, display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" as const }}>
-        <SecondaryBtn onClick={onReject}>Start over</SecondaryBtn>
-        <PrimaryBtn onClick={onApprove} disabled={isApproving}
-          style={{ fontSize: "0.88rem", padding: "11px 28px", borderRadius: 24, fontFamily: sans, display: "inline-flex", alignItems: "center", gap: 8 }}>
-          {isApproving ? <Loader2 size={16} className="animate-spin" /> : <ThumbsUp size={16} />}
-          Approve &amp; send
-        </PrimaryBtn>
-      </div>
     </SoftCard>
 
     {lightboxDesignCard === card.id && design?.imageUrl && (

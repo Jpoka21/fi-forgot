@@ -1,0 +1,278 @@
+/**
+ * F.I. Forgot dashboard component styles.
+ * Migrated screen — legacy dashboard page styles remain in personal-ui.
+ */
+
+.fi-dashboard {
+  display: grid;
+  gap: var(--fi-space-6);
+  width: 100%;
+}
+
+.fi-dashboard__status {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-dashboard__hero {
+  display: grid;
+  gap: var(--fi-space-4);
+  padding: var(--fi-space-5);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-lg);
+  background: var(--fi-color-surface-primary);
+}
+
+.fi-dashboard__hero-grid {
+  display: grid;
+  gap: var(--fi-space-4);
+  align-items: center;
+}
+
+.fi-dashboard__date {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.fi-dashboard__headline {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h2);
+  color: var(--fi-color-text-primary);
+  line-height: var(--fi-leading-tight);
+}
+
+.fi-dashboard__subheadline,
+.fi-dashboard__concierge-summary,
+.fi-dashboard__section-copy,
+.fi-dashboard__meta,
+.fi-dashboard__footer-copy {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-dashboard__concierge-summary {
+  padding: var(--fi-space-3) var(--fi-space-4);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-secondary);
+  border: 1px solid var(--fi-color-border);
+}
+
+.fi-dashboard__main-grid {
+  display: grid;
+  gap: var(--fi-space-4);
+}
+
+.fi-dashboard__aside {
+  display: grid;
+  gap: var(--fi-space-4);
+}
+
+.fi-dashboard__section {
+  display: grid;
+  gap: var(--fi-space-3);
+}
+
+.fi-dashboard__section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--fi-space-3);
+}
+
+.fi-dashboard__section-title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h4);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-dashboard__section-subtitle {
+  margin: var(--fi-space-1) 0 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-dashboard__list {
+  display: grid;
+  gap: var(--fi-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fi-dashboard__upcoming-card,
+.fi-dashboard__activity-item,
+.fi-dashboard__attention-item,
+.fi-dashboard__spotlight,
+.fi-dashboard__summary-card,
+.fi-dashboard__footer {
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+}
+
+.fi-dashboard__upcoming-card {
+  display: grid;
+  gap: var(--fi-space-3);
+}
+
+.fi-dashboard__upcoming-header {
+  display: flex;
+  gap: var(--fi-space-3);
+  align-items: flex-start;
+}
+
+.fi-dashboard__upcoming-name {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-dashboard__badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fi-space-2);
+}
+
+.fi-dashboard__actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-3);
+}
+
+.fi-dashboard__quick-actions {
+  display: grid;
+  gap: var(--fi-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fi-dashboard__quick-action {
+  display: grid;
+  gap: var(--fi-space-2);
+  justify-items: center;
+  text-align: center;
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+  text-decoration: none;
+  color: inherit;
+  min-height: 7rem;
+}
+
+.fi-dashboard__quick-action-label {
+  font-size: var(--fi-text-body-sm);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-dashboard__spotlight {
+  display: grid;
+  gap: var(--fi-space-3);
+}
+
+.fi-dashboard__footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-4);
+  margin-top: var(--fi-space-3);
+}
+
+.fi-dashboard__footer-link {
+  font-size: var(--fi-text-body-sm);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-accent);
+  text-decoration: none;
+}
+
+.fi-dashboard__footer-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fi-dashboard__pending-banner {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-4);
+  border-radius: var(--fi-radius-md);
+  border: 1px solid color-mix(in srgb, var(--fi-color-accent) 25%, var(--fi-color-border));
+  background: color-mix(in srgb, var(--fi-color-accent) 6%, var(--fi-color-surface-primary));
+}
+
+@media (min-width: 768px) {
+  .fi-dashboard__hero-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  .fi-dashboard__main-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr);
+    align-items: start;
+  }
+
+  .fi-dashboard__quick-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .fi-dashboard__headline {
+    font-size: var(--fi-text-h3);
+  }
+
+  .fi-dashboard__quick-action,
+  .fi-dashboard__footer-link-button,
+  .fi-dashboard__footer-link {
+    min-height: var(--fi-touch-target-min, 2.75rem);
+  }
+
+  .fi-dashboard__mobile-fab {
+    bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    right: max(20px, env(safe-area-inset-right, 0px));
+    min-height: var(--fi-touch-target-min, 2.75rem);
+    min-width: var(--fi-touch-target-min, 2.75rem);
+  }
+
+  .fi-dashboard__section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fi-dashboard__actions-row .fi-btn {
+    flex: 1 1 auto;
+  }
+}
+
+.fi-dashboard__mobile-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  z-index: 200;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 999px;
+  background: var(--fi-color-accent);
+  color: var(--fi-color-text-on-accent, #fff);
+  font-weight: var(--fi-font-weight-semibold);
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-dashboard__quick-action {
+    transition: none;
+  }
+}

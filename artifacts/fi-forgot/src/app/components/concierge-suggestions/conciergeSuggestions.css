@@ -1,0 +1,131 @@
+/**
+ * F.I. Forgot concierge suggestions component styles.
+ * Opt-in — legacy dashboard guidance remains unchanged.
+ */
+
+.fi-concierge-suggestions {
+  display: grid;
+  gap: var(--fi-space-4);
+  width: 100%;
+}
+
+.fi-concierge-suggestions__header {
+  display: grid;
+  gap: var(--fi-space-2);
+}
+
+.fi-concierge-suggestions__title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h3);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-concierge-suggestions__description {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-concierge-suggestions__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--fi-space-2);
+}
+
+.fi-concierge-suggestions__status {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-concierge-suggestions__list {
+  display: grid;
+  gap: var(--fi-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fi-concierge-suggestions__item {
+  animation: fi-motion-fade-up var(--fi-motion-card) both;
+}
+
+.fi-concierge-suggestions__item--delay-0 { animation-delay: 0ms; }
+.fi-concierge-suggestions__item--delay-1 { animation-delay: 60ms; }
+.fi-concierge-suggestions__item--delay-2 { animation-delay: 120ms; }
+.fi-concierge-suggestions__item--delay-3 { animation-delay: 180ms; }
+.fi-concierge-suggestions__item--delay-4 { animation-delay: 240ms; }
+.fi-concierge-suggestions__item--delay-5 { animation-delay: 300ms; }
+
+.fi-concierge-suggestion-card__body {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-4);
+}
+
+.fi-concierge-suggestion-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fi-space-2);
+}
+
+.fi-concierge-suggestion-card__title {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-concierge-suggestion-card__description {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-concierge-suggestion-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fi-space-2);
+}
+
+.fi-concierge-suggestion-card__context {
+  margin: 0;
+  font-size: var(--fi-text-caption);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-concierge-suggestions__skeleton-list,
+.fi-concierge-suggestions__error {
+  display: grid;
+  gap: var(--fi-space-3);
+}
+
+.fi-concierge-suggestions__error {
+  padding: var(--fi-space-4);
+  border: 1px dashed var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-secondary);
+}
+
+@media (min-width: 48rem) {
+  .fi-concierge-suggestions__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fi-concierge-suggestions__list > li:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-concierge-suggestions__item {
+    animation: none;
+  }
+}

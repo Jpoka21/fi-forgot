@@ -1,0 +1,85 @@
+/**
+ * Spacing system foundation styles.
+ *
+ * Opt-in utility classes — legacy spacing in index.css and tailwind remain unchanged.
+ */
+
+:root {
+  /* Layout spacing */
+  --fi-space-screen-margin: var(--fi-space-page);
+  --fi-space-section-gap: var(--fi-space-section);
+  --fi-space-stack-sm: var(--fi-space-2);
+  --fi-space-stack-md: var(--fi-space-4);
+  --fi-space-stack-lg: var(--fi-space-6);
+  --fi-space-inline-sm: var(--fi-space-2);
+  --fi-space-inline-md: var(--fi-space-4);
+  --fi-space-responsive-stack: clamp(0.75rem, 1.5vw, 1.25rem);
+
+  /* Component spacing */
+  --fi-space-card-padding: var(--fi-space-6);
+  --fi-space-form-gap: var(--fi-space-4);
+  --fi-space-form-field-gap: var(--fi-space-2);
+  --fi-space-nav-gap: var(--fi-space-4);
+  --fi-space-grid-gap: var(--fi-grid-gutter);
+  --fi-space-modal-padding: var(--fi-space-6);
+  --fi-space-modal-gap: var(--fi-space-4);
+  --fi-space-drawer-padding: var(--fi-space-6);
+  --fi-space-timeline-gap: var(--fi-space-8);
+  --fi-space-calendar-cell: var(--fi-space-4);
+  --fi-space-calendar-section: var(--fi-space-6);
+  --fi-space-empty-gap: var(--fi-space-8);
+  --fi-space-error-gap: var(--fi-space-3);
+  --fi-space-success-gap: var(--fi-space-3);
+}
+
+/* Base gap utilities */
+.fi-gap-0 { gap: var(--fi-space-0); }
+.fi-gap-2 { gap: var(--fi-space-2); }
+.fi-gap-4 { gap: var(--fi-space-4); }
+.fi-gap-6 { gap: var(--fi-space-6); }
+.fi-gap-8 { gap: var(--fi-space-8); }
+
+/* Horizontal spacing */
+.fi-gap-x-2 { column-gap: var(--fi-space-2); }
+.fi-gap-x-4 { column-gap: var(--fi-space-4); }
+.fi-gap-x-6 { column-gap: var(--fi-space-6); }
+.fi-px-4 { padding-inline: var(--fi-space-4); }
+.fi-px-6 { padding-inline: var(--fi-space-6); }
+.fi-px-page { padding-inline: var(--fi-space-screen-margin); }
+
+/* Vertical spacing */
+.fi-gap-y-2 { row-gap: var(--fi-space-2); }
+.fi-gap-y-4 { row-gap: var(--fi-space-4); }
+.fi-gap-y-6 { row-gap: var(--fi-space-6); }
+.fi-py-4 { padding-block: var(--fi-space-4); }
+.fi-py-6 { padding-block: var(--fi-space-6); }
+.fi-py-section { padding-block: var(--fi-space-section-gap); }
+
+/* Layout */
+.fi-layout-page { padding-inline: var(--fi-space-screen-margin); }
+.fi-layout-section { margin-block: var(--fi-space-section-gap); }
+.fi-stack-responsive { display: flex; flex-direction: column; gap: var(--fi-space-responsive-stack); }
+.fi-stack-sm { display: flex; flex-direction: column; gap: var(--fi-space-stack-sm); }
+.fi-stack-md { display: flex; flex-direction: column; gap: var(--fi-space-stack-md); }
+.fi-stack-lg { display: flex; flex-direction: column; gap: var(--fi-space-stack-lg); }
+.fi-inline-sm { display: flex; align-items: center; gap: var(--fi-space-inline-sm); }
+.fi-inline-md { display: flex; align-items: center; gap: var(--fi-space-inline-md); }
+
+/* Component spacing utilities */
+.fi-p-card { padding: var(--fi-space-card-padding); }
+.fi-stack-form { display: flex; flex-direction: column; gap: var(--fi-space-form-gap); }
+.fi-stack-form-field { display: flex; flex-direction: column; gap: var(--fi-space-form-field-gap); }
+.fi-gap-nav { gap: var(--fi-space-nav-gap); }
+.fi-gap-grid { gap: var(--fi-space-grid-gap); }
+.fi-p-modal { padding: var(--fi-space-modal-padding); }
+.fi-stack-modal { display: flex; flex-direction: column; gap: var(--fi-space-modal-gap); }
+.fi-p-drawer { padding: var(--fi-space-drawer-padding); }
+.fi-stack-timeline { display: flex; flex-direction: column; gap: var(--fi-space-timeline-gap); }
+.fi-gap-calendar { gap: var(--fi-space-calendar-cell); }
+.fi-stack-calendar { display: flex; flex-direction: column; gap: var(--fi-space-calendar-section); }
+.fi-stack-empty { display: flex; flex-direction: column; align-items: center; gap: var(--fi-space-empty-gap); }
+.fi-stack-error { display: flex; flex-direction: column; gap: var(--fi-space-error-gap); }
+.fi-stack-success { display: flex; flex-direction: column; gap: var(--fi-space-success-gap); }
+
+/* RTL-friendly logical margin helpers */
+.fi-mx-screen { margin-inline: var(--fi-space-screen-margin); }

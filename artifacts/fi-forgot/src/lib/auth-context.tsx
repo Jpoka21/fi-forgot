@@ -373,7 +373,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function signup(name: string, email: string, skipOnboarding = false) {
-    const u = { name, email };
+    const u = { name, email, plan: "free" as Plan };
     setUser(u);
     setIsLoggedIn(true);
     setOnboardingComplete(skipOnboarding);

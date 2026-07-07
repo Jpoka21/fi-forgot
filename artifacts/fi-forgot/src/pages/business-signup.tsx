@@ -128,32 +128,32 @@ export default function BusinessSignupPage() {
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                 <div style={{ marginBottom: 18 }}>
-                  <label style={labelStyle}>Full Name *</label>
-                  <input {...register("name")} placeholder="Jane Smith" style={inputStyle} autoFocus />
+                  <label htmlFor="business-signup-name" style={labelStyle}>Full Name *</label>
+                  <input id="business-signup-name" {...register("name")} placeholder="Jane Smith" style={inputStyle} />
                   {errors.name && <p style={errStyle}>{errors.name.message}</p>}
                 </div>
                 <div style={{ marginBottom: 18 }}>
-                  <label style={labelStyle}>Business Name *</label>
-                  <input {...register("businessName")} placeholder="Smith Realty Group" style={inputStyle} />
+                  <label htmlFor="business-signup-business-name" style={labelStyle}>Business Name *</label>
+                  <input id="business-signup-business-name" {...register("businessName")} placeholder="Smith Realty Group" style={inputStyle} />
                   {errors.businessName && <p style={errStyle}>{errors.businessName.message}</p>}
                 </div>
               </div>
 
               <div style={{ marginBottom: 18 }}>
-                <label style={labelStyle}>Email *</label>
-                <input {...register("email")} type="email" placeholder="jane@smithrealty.com" style={inputStyle} />
+                <label htmlFor="business-signup-email" style={labelStyle}>Email *</label>
+                <input id="business-signup-email" {...register("email")} type="email" placeholder="jane@smithrealty.com" style={inputStyle} />
                 {errors.email && <p style={errStyle}>{errors.email.message}</p>}
               </div>
 
               <div style={{ marginBottom: 18 }}>
-                <label style={labelStyle}>Password *</label>
-                <input {...register("password")} type="password" placeholder="••••••••" style={inputStyle} />
+                <label htmlFor="business-signup-password" style={labelStyle}>Password *</label>
+                <input id="business-signup-password" {...register("password")} type="password" placeholder="••••••••" style={inputStyle} />
                 {errors.password && <p style={errStyle}>{errors.password.message}</p>}
               </div>
 
               <div style={{ marginBottom: 18 }}>
-                <label style={labelStyle}>What type of business? <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional)</span></label>
-                <select {...register("businessType")} style={{ ...inputStyle, cursor: "pointer" }}>
+                <label htmlFor="business-signup-business-type" style={labelStyle}>What type of business? <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional)</span></label>
+                <select id="business-signup-business-type" {...register("businessType")} style={{ ...inputStyle, cursor: "pointer" }}>
                   <option value="">Select one…</option>
                   {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>

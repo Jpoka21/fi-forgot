@@ -2,7 +2,32 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { createRequire } from "node:module";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+
+const require = createRequire(import.meta.url);
+
+function resolveRollupAlias(): Record<string, string> {
+  const nativeCandidates = [
+    "@rollup/rollup-win32-x64-msvc",
+    "@rollup/rollup-linux-x64-gnu",
+    "@rollup/rollup-darwin-arm64",
+    "@rollup/rollup-darwin-x64",
+  ];
+
+  if (nativeCandidates.some((candidate) => {
+    try {
+      require.resolve(candidate);
+      return true;
+    } catch {
+      return false;
+    }
+  })) {
+    return {};
+  }
+
+  return { rollup: "@rollup/wasm-node" };
+}
 
 const rawPort = process.env.PORT;
 
@@ -50,6 +75,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
       "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      ...resolveRollupAlias(),
     },
     dedupe: ["react", "react-dom"],
   },

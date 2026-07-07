@@ -86,7 +86,8 @@ function AccountMenu({
           background: open ? WHITE : "transparent",
           border: `1px solid ${open ? BORDER : "transparent"}`,
           cursor: "pointer",
-          padding: "4px 8px 4px 4px", borderRadius: 24,
+          minHeight: 44,
+          padding: "4px 10px 4px 4px", borderRadius: 24,
           transition: "background 0.15s ease, border-color 0.15s ease",
         }}
       >
@@ -115,6 +116,9 @@ function AccountMenu({
             <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: MID, fontFamily: sans }}>{user?.email}</p>
           </div>
           {[
+            { label: "Account settings", fn: () => { setOpen(false); navigate("/settings/account"); } },
+            { label: "Relationship preferences", fn: () => { setOpen(false); navigate("/settings/relationship"); } },
+            { label: "Billing", fn: () => { setOpen(false); navigate("/settings/billing"); } },
             { label: "Reminder settings", fn: () => { setOpen(false); navigate("/settings/reminders"); } },
             ...(isAdmin ? [{ label: "Admin panel", fn: () => { setOpen(false); navigate("/admin"); } }] : []),
           ].map(item => (
@@ -123,7 +127,7 @@ function AccountMenu({
               type="button"
               onClick={() => { item.fn(); setOpen(false); }}
               style={{
-                display: "block", width: "100%", padding: "12px 16px",
+                display: "block", width: "100%", minHeight: 44, padding: "12px 16px",
                 background: "none", border: "none", cursor: "pointer",
                 fontSize: "0.88rem", color: INK, textAlign: "left" as const,
                 fontFamily: sans, fontWeight: 500,
@@ -140,7 +144,7 @@ function AccountMenu({
               onClick={() => { setOpen(false); onLogout(); }}
               data-testid="btn-logout"
               style={{
-                display: "block", width: "100%", padding: "12px 16px",
+                display: "block", width: "100%", minHeight: 44, padding: "12px 16px",
                 background: "none", border: "none", cursor: "pointer",
                 fontSize: "0.88rem", color: RED, fontWeight: 600, textAlign: "left" as const,
                 fontFamily: sans,
@@ -229,6 +233,7 @@ export default function AppNav() {
               <Link key={item.path} href={item.path} style={{ textDecoration: "none", flexShrink: 0 }}>
                 <div style={{
                   display: "flex", alignItems: "center", gap: 8,
+                  minHeight: 44,
                   padding: isMobile ? "10px 16px" : "10px 18px",
                   fontSize: "0.88rem",
                   fontWeight: active ? 600 : 500,

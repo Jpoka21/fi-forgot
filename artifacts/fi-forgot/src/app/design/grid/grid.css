@@ -1,0 +1,149 @@
+/**
+ * Grid system foundation styles.
+ *
+ * Opt-in utility classes — legacy layout CSS remains unchanged.
+ */
+
+:root {
+  /* Responsive column scale (mobile-first) */
+  --fi-grid-columns-mobile: 4;
+  --fi-grid-columns-tablet: 6;
+  --fi-grid-columns-desktop: 12;
+  --fi-grid-columns: var(--fi-grid-columns-mobile);
+
+  /* Responsive gutters */
+  --fi-grid-gutter-mobile: 1rem;
+  --fi-grid-gutter-tablet: 1.25rem;
+  --fi-grid-gutter-desktop: 1.5rem;
+  --fi-grid-gutter: var(--fi-grid-gutter-mobile);
+
+  /* Responsive outer margins */
+  --fi-grid-margin-mobile: 1rem;
+  --fi-grid-margin-tablet: 1.5rem;
+  --fi-grid-margin-desktop: 2rem;
+  --fi-grid-margin: var(--fi-grid-margin-mobile);
+
+  /* Maximum content widths */
+  --fi-grid-max-standard: var(--fi-container-xl);
+  --fi-grid-max-reading: 45rem;
+  --fi-grid-max-form: var(--fi-container-sm);
+  --fi-grid-max-detail: 65rem;
+  --fi-grid-max-canvas: 90rem;
+
+  /* Sidebar widths */
+  --fi-grid-sidebar-width: 17.5rem;
+  --fi-grid-sidebar-wide: 21.25rem;
+  --fi-grid-sidebar-collapsed: 15rem;
+
+  /* Layout templates */
+  --fi-grid-layout-dashboard: 1fr;
+  --fi-grid-layout-card: 1fr;
+  --fi-grid-layout-form: 1fr;
+  --fi-grid-layout-calendar: repeat(7, minmax(0, 1fr));
+  --fi-grid-layout-admin: var(--fi-grid-sidebar-collapsed) minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --fi-grid-columns: var(--fi-grid-columns-tablet);
+    --fi-grid-gutter: var(--fi-grid-gutter-tablet);
+    --fi-grid-margin: var(--fi-grid-margin-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --fi-grid-columns: var(--fi-grid-columns-desktop);
+    --fi-grid-gutter: var(--fi-grid-gutter-desktop);
+    --fi-grid-margin: var(--fi-grid-margin-desktop);
+    --fi-grid-layout-dashboard: repeat(2, minmax(0, 1fr));
+    --fi-grid-layout-admin: var(--fi-grid-sidebar-width) minmax(0, 1fr);
+  }
+}
+
+/* Base grid */
+.fi-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--fi-grid-columns), minmax(0, 1fr));
+  gap: var(--fi-grid-gutter);
+}
+
+.fi-grid-inline {
+  display: grid;
+  gap: var(--fi-grid-gutter);
+}
+
+/* Content width containers */
+.fi-container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--fi-grid-margin);
+}
+
+.fi-container-standard { max-width: var(--fi-grid-max-standard); }
+.fi-container-reading { max-width: var(--fi-grid-max-reading); }
+.fi-container-form { max-width: var(--fi-grid-max-form); }
+.fi-container-detail { max-width: var(--fi-grid-max-detail); }
+.fi-container-canvas { max-width: var(--fi-grid-max-canvas); }
+
+/* Sidebar utilities */
+.fi-sidebar { width: var(--fi-grid-sidebar-width); flex-shrink: 0; }
+.fi-sidebar-wide { width: var(--fi-grid-sidebar-wide); flex-shrink: 0; }
+.fi-sidebar-collapsed { width: var(--fi-grid-sidebar-collapsed); flex-shrink: 0; }
+
+/* Layout templates */
+.fi-layout-dashboard {
+  display: grid;
+  grid-template-columns: var(--fi-grid-layout-dashboard);
+  gap: var(--fi-grid-gutter);
+}
+
+.fi-layout-card {
+  display: grid;
+  grid-template-columns: var(--fi-grid-layout-card);
+  gap: var(--fi-grid-gutter);
+}
+
+.fi-layout-form {
+  display: grid;
+  grid-template-columns: var(--fi-grid-layout-form);
+  gap: var(--fi-grid-gutter);
+  max-width: var(--fi-grid-max-form);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.fi-layout-calendar {
+  display: grid;
+  grid-template-columns: var(--fi-grid-layout-calendar);
+  gap: var(--fi-space-2);
+}
+
+.fi-layout-admin {
+  display: grid;
+  grid-template-columns: var(--fi-grid-layout-admin);
+  gap: var(--fi-grid-gutter);
+  min-height: 100%;
+}
+
+@media (max-width: 767px) {
+  .fi-layout-admin {
+    grid-template-columns: 1fr;
+  }
+
+  .fi-layout-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Span helpers for 12-column desktop grid */
+.fi-col-span-full { grid-column: 1 / -1; }
+.fi-col-span-half { grid-column: span 6; }
+.fi-col-span-third { grid-column: span 4; }
+
+@media (max-width: 1023px) {
+  .fi-col-span-half,
+  .fi-col-span-third {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,0 +1,107 @@
+/**
+ * Shadows and elevation foundation styles.
+ *
+ * Opt-in utility classes — legacy shadow vars in index.css remain unchanged.
+ */
+
+:root {
+  /* Shadow aliases */
+  --fi-shadow-none: none;
+  --fi-shadow-floating: var(--fi-shadow-lg);
+  --fi-shadow-modal: var(--fi-shadow-xl);
+
+  /* Elevation levels 0–5 */
+  --fi-elevation-level-0: none;
+  --fi-elevation-level-1: var(--fi-shadow-sm);
+  --fi-elevation-level-2: var(--fi-shadow-md);
+  --fi-elevation-level-3: var(--fi-shadow-lg);
+  --fi-elevation-level-4: var(--fi-shadow-xl);
+  --fi-elevation-level-5: var(--fi-shadow-xl);
+
+  /* Component elevations */
+  --fi-elevation-card: var(--fi-elevation-level-1);
+  --fi-elevation-modal: var(--fi-elevation-level-4);
+  --fi-elevation-drawer: var(--fi-elevation-level-3);
+  --fi-elevation-navigation: var(--fi-elevation-level-2);
+  --fi-elevation-floating-action: var(--fi-shadow-floating);
+  --fi-elevation-dropdown: var(--fi-elevation-level-2);
+  --fi-elevation-tooltip: var(--fi-elevation-level-3);
+  --fi-elevation-toast: var(--fi-elevation-level-4);
+
+  /* Overlay backdrop */
+  --fi-elevation-overlay-bg: hsl(0 0% 0% / var(--fi-opacity-overlay));
+
+  /* Semantic z-index layers */
+  --fi-z-layer-navigation: var(--fi-z-sticky);
+  --fi-z-layer-floating-action: calc(var(--fi-z-sticky) + 10);
+  --fi-z-layer-dropdown: var(--fi-z-dropdown);
+  --fi-z-layer-drawer: 5000;
+  --fi-z-layer-popover: 6000;
+  --fi-z-layer-modal: var(--fi-z-overlay);
+  --fi-z-layer-toast: var(--fi-z-toast);
+  --fi-z-layer-tooltip: var(--fi-z-max);
+}
+
+.dark {
+  --fi-elevation-overlay-bg: hsl(0 0% 0% / calc(var(--fi-opacity-overlay) + 0.08));
+}
+
+/* Shadow scale utilities */
+.fi-shadow-none { box-shadow: var(--fi-shadow-none); }
+.fi-shadow-sm { box-shadow: var(--fi-shadow-sm); }
+.fi-shadow-md { box-shadow: var(--fi-shadow-md); }
+.fi-shadow-lg { box-shadow: var(--fi-shadow-lg); }
+.fi-shadow-xl { box-shadow: var(--fi-shadow-xl); }
+
+/* Component elevation utilities */
+.fi-elev-card { box-shadow: var(--fi-elevation-card); }
+.fi-elev-modal { box-shadow: var(--fi-elevation-modal); }
+.fi-elev-drawer { box-shadow: var(--fi-elevation-drawer); }
+.fi-elev-navigation { box-shadow: var(--fi-elevation-navigation); }
+.fi-elev-floating-action { box-shadow: var(--fi-elevation-floating-action); }
+.fi-elev-dropdown { box-shadow: var(--fi-elevation-dropdown); }
+.fi-elev-tooltip { box-shadow: var(--fi-elevation-tooltip); }
+.fi-elev-toast { box-shadow: var(--fi-elevation-toast); }
+
+/* Layer utilities */
+.fi-layer-navigation { z-index: var(--fi-z-layer-navigation); }
+.fi-layer-floating-action { z-index: var(--fi-z-layer-floating-action); }
+.fi-layer-dropdown { z-index: var(--fi-z-layer-dropdown); }
+.fi-layer-drawer { z-index: var(--fi-z-layer-drawer); }
+.fi-layer-popover { z-index: var(--fi-z-layer-popover); }
+.fi-layer-modal { z-index: var(--fi-z-layer-modal); }
+.fi-layer-toast { z-index: var(--fi-z-layer-toast); }
+.fi-layer-tooltip { z-index: var(--fi-z-layer-tooltip); }
+
+/* Overlay layering */
+.fi-layer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--fi-z-layer-modal);
+  background-color: var(--fi-elevation-overlay-bg);
+}
+
+.fi-layer-overlay-below-modal {
+  z-index: calc(var(--fi-z-layer-modal) - 1);
+}
+
+/* Elevation level utilities */
+.fi-elev-0 { box-shadow: var(--fi-elevation-level-0); }
+.fi-elev-1 { box-shadow: var(--fi-elevation-level-1); }
+.fi-elev-2 { box-shadow: var(--fi-elevation-level-2); }
+.fi-elev-3 { box-shadow: var(--fi-elevation-level-3); }
+.fi-elev-4 { box-shadow: var(--fi-elevation-level-4); }
+.fi-elev-5 { box-shadow: var(--fi-elevation-level-5); }
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-elev-card,
+  .fi-elev-modal,
+  .fi-elev-drawer,
+  .fi-elev-navigation,
+  .fi-elev-floating-action,
+  .fi-elev-dropdown,
+  .fi-elev-tooltip,
+  .fi-elev-toast {
+    transition: none;
+  }
+}

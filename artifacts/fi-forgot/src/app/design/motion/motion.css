@@ -1,0 +1,217 @@
+/**
+ * Motion system foundation styles.
+ *
+ * Opt-in utility classes — legacy animations in index.css remain unchanged.
+ */
+
+:root {
+  /* Extended timing scale */
+  --fi-motion-duration-instant: 0ms;
+  --fi-motion-duration-extra-slow: 400ms;
+
+  /* Extended easing curves */
+  --fi-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --fi-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --fi-motion-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --fi-motion-ease-quick-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Component motion shorthand tokens */
+  --fi-motion-hover: var(--fi-motion-duration-fast) var(--fi-motion-ease-standard);
+  --fi-motion-focus: var(--fi-motion-duration-fast) var(--fi-motion-ease-out);
+  --fi-motion-button: var(--fi-motion-duration-fast) var(--fi-motion-ease-standard);
+  --fi-motion-card: var(--fi-motion-duration-base) var(--fi-motion-ease-concierge);
+  --fi-motion-input: var(--fi-motion-duration-fast) var(--fi-motion-ease-out);
+  --fi-motion-dialog: var(--fi-motion-duration-base) var(--fi-motion-ease-concierge);
+  --fi-motion-drawer: var(--fi-motion-duration-slow) var(--fi-motion-ease-concierge);
+  --fi-motion-navigation: var(--fi-motion-duration-fast) var(--fi-motion-ease-standard);
+  --fi-motion-screen: var(--fi-motion-duration-base) var(--fi-motion-ease-concierge);
+  --fi-motion-loading: var(--fi-motion-duration-slow) var(--fi-motion-ease-in-out);
+  --fi-motion-skeleton: var(--fi-motion-duration-slow) var(--fi-motion-ease-in-out);
+  --fi-motion-ai: var(--fi-motion-duration-base) var(--fi-motion-ease-in-out);
+  --fi-motion-timeline: var(--fi-motion-duration-base) var(--fi-motion-ease-out);
+  --fi-motion-notification: var(--fi-motion-duration-base) var(--fi-motion-ease-concierge);
+  --fi-motion-calendar: var(--fi-motion-duration-fast) var(--fi-motion-ease-standard);
+}
+
+/* Keyframes */
+@keyframes fi-motion-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fi-motion-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fi-motion-slide-in-end {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fi-motion-drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fi-motion-skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes fi-motion-ai-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes fi-motion-loading-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.85; }
+}
+
+/* Transition utilities */
+.fi-motion-hover {
+  transition:
+    transform var(--fi-motion-hover),
+    box-shadow var(--fi-motion-hover),
+    background-color var(--fi-motion-hover),
+    border-color var(--fi-motion-hover);
+}
+
+.fi-motion-focus {
+  transition:
+    outline-color var(--fi-motion-focus),
+    outline-offset var(--fi-motion-focus),
+    border-color var(--fi-motion-focus),
+    box-shadow var(--fi-motion-focus);
+}
+
+.fi-motion-button {
+  transition:
+    transform var(--fi-motion-button),
+    background-color var(--fi-motion-button),
+    border-color var(--fi-motion-button),
+    color var(--fi-motion-button),
+    opacity var(--fi-motion-button);
+}
+
+.fi-motion-card {
+  transition:
+    transform var(--fi-motion-card),
+    box-shadow var(--fi-motion-card),
+    opacity var(--fi-motion-card);
+}
+
+.fi-motion-input {
+  transition:
+    border-color var(--fi-motion-input),
+    box-shadow var(--fi-motion-input),
+    background-color var(--fi-motion-input);
+}
+
+/* Enter animations */
+.fi-motion-dialog-enter {
+  animation: fi-motion-fade-up var(--fi-motion-dialog) both;
+}
+
+.fi-motion-drawer-enter {
+  animation: fi-motion-drawer-in var(--fi-motion-drawer) both;
+}
+
+.fi-motion-nav-enter {
+  animation: fi-motion-fade-in var(--fi-motion-navigation) both;
+}
+
+.fi-motion-screen-enter {
+  animation: fi-route-fade-in var(--fi-motion-screen) both;
+}
+
+.fi-motion-loading {
+  animation: fi-motion-loading-pulse var(--fi-motion-loading) ease-in-out infinite;
+}
+
+.fi-motion-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--fi-color-surface-secondary) 25%,
+    var(--fi-color-surface-tertiary) 50%,
+    var(--fi-color-surface-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: fi-motion-skeleton-shimmer var(--fi-motion-skeleton) linear infinite;
+}
+
+.fi-motion-ai {
+  animation: fi-motion-ai-pulse var(--fi-motion-ai) ease-in-out infinite;
+}
+
+.fi-motion-timeline-enter {
+  animation: fi-motion-fade-up var(--fi-motion-timeline) both;
+}
+
+.fi-motion-notification-enter {
+  animation: fi-motion-slide-in-end var(--fi-motion-notification) both;
+}
+
+.fi-motion-calendar-enter {
+  animation: fi-motion-fade-in var(--fi-motion-calendar) both;
+}
+
+/* Reduced motion — opacity-only fallbacks */
+@media (prefers-reduced-motion: reduce) {
+  .fi-motion-hover,
+  .fi-motion-focus,
+  .fi-motion-button,
+  .fi-motion-card,
+  .fi-motion-input {
+    transition:
+      opacity var(--fi-motion-duration-instant),
+      background-color var(--fi-motion-duration-instant),
+      border-color var(--fi-motion-duration-instant),
+      color var(--fi-motion-duration-instant);
+  }
+
+  .fi-motion-dialog-enter,
+  .fi-motion-drawer-enter,
+  .fi-motion-nav-enter,
+  .fi-motion-screen-enter,
+  .fi-motion-timeline-enter,
+  .fi-motion-notification-enter,
+  .fi-motion-calendar-enter {
+    animation: fi-motion-fade-in var(--fi-motion-duration-instant) both;
+  }
+
+  .fi-motion-loading,
+  .fi-motion-skeleton,
+  .fi-motion-ai {
+    animation: none;
+    opacity: 0.72;
+  }
+
+  .fi-motion-drawer-enter {
+    transform: none;
+  }
+}
+
+/* Safe class for intentional reduced-motion opacity transitions */
+.fi-motion-reduced-safe {
+  transition: opacity var(--fi-motion-duration-fast) var(--fi-motion-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-motion-reduced-safe {
+    transition: opacity var(--fi-motion-duration-instant);
+  }
+}

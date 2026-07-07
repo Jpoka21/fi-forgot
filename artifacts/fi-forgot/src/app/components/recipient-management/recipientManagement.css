@@ -1,0 +1,5 @@
+.fi-recipient-management {
+  display: grid;
+  gap: var(--fi-space-4);
+  width: 100%;
+}

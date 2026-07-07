@@ -1,0 +1,180 @@
+.fi-concierge-question {
+  width: 100%;
+}
+
+.fi-concierge-question__paper {
+  display: grid;
+  gap: var(--fi-space-4);
+  padding: var(--fi-space-6);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-lg);
+  background: linear-gradient(
+    165deg,
+    var(--fi-color-surface-secondary) 0%,
+    var(--fi-color-surface-primary) 58%
+  );
+  box-shadow: var(--fi-shadow-sm);
+}
+
+.fi-concierge-question__paper--mature {
+  text-align: center;
+  justify-items: center;
+}
+
+.fi-concierge-question__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fi-space-4);
+}
+
+.fi-concierge-question__illustration {
+  width: 72px;
+  height: auto;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.fi-concierge-question__eyebrow {
+  margin: 0;
+  font-size: var(--fi-text-caption);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-concierge-question__progress {
+  margin: var(--fi-space-1) 0 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-brand-primary);
+  font-weight: 600;
+}
+
+.fi-concierge-question__confidence {
+  margin: var(--fi-space-1) 0 0;
+  font-size: var(--fi-text-caption);
+  color: var(--fi-color-text-secondary);
+  font-weight: 500;
+}
+
+.fi-concierge-surprise {
+  margin-bottom: var(--fi-space-4);
+  padding: var(--fi-space-5);
+  border-radius: var(--fi-radius-lg);
+  border: 1px solid var(--fi-color-border);
+  background: color-mix(in srgb, var(--fi-color-brand-primary) 5%, var(--fi-color-surface-secondary));
+}
+
+.fi-concierge-surprise__message {
+  margin: 0 0 var(--fi-space-2);
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-body);
+  color: var(--fi-color-text-primary);
+  font-weight: 600;
+}
+
+.fi-concierge-surprise__excerpt {
+  margin: 0;
+  padding-left: var(--fi-space-4);
+  border-left: 3px solid var(--fi-color-brand-primary);
+  font-family: var(--fi-font-stack-serif);
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  font-style: italic;
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-concierge-question__context {
+  margin: 0;
+  padding: var(--fi-space-3) var(--fi-space-4);
+  border-radius: var(--fi-radius-md);
+  border: 1px solid var(--fi-color-border);
+  background: color-mix(in srgb, var(--fi-color-brand-primary) 6%, var(--fi-color-surface-primary));
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-concierge-question__title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  line-height: 1.25;
+  color: var(--fi-color-text-primary);
+  font-weight: 600;
+}
+
+.fi-concierge-question__reason {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-concierge-question__textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+  color: var(--fi-color-text-primary);
+  font-family: var(--fi-font-stack-serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.fi-concierge-question__textarea:focus {
+  outline: 2px solid var(--fi-color-brand-primary);
+  outline-offset: 2px;
+}
+
+.fi-concierge-question__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.fi-concierge-question__affirmation {
+  margin: 0;
+  padding: var(--fi-space-4);
+  border-radius: var(--fi-radius-md);
+  background: color-mix(in srgb, var(--fi-color-brand-primary) 8%, var(--fi-color-surface-primary));
+  border: 1px solid var(--fi-color-border);
+  font-size: var(--fi-text-body);
+  color: var(--fi-color-text-primary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+@media (max-width: 640px) {
+  .fi-concierge-question__paper {
+    padding: var(--fi-space-5);
+  }
+
+  .fi-concierge-question__header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .fi-concierge-question__actions {
+    justify-content: stretch;
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .fi-concierge-question__actions .fi-btn {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-concierge-question__paper {
+    transition: none;
+  }
+}

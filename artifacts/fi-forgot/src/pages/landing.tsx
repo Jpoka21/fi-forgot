@@ -3,9 +3,11 @@ import { Link } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import {
   ChevronDown, ChevronUp, ChevronRight, Menu, X, Lock, Pencil, Users, Shield,
-  Play, Heart, Cake, Gift, TreePine, Star, Mail, MoreHorizontal,
-  MessageCircle, FolderHeart, Send, Coffee, Instagram, Facebook,
+  Play, Heart, Star, MessageCircle, FolderHeart, Send, UserPlus, CheckCircle2,
+  Instagram, Facebook,
 } from "lucide-react";
+import { illustrationPaths } from "@/app/design/assets/illustrationPaths";
+import { FiPricingPlans } from "@/app/components/pricing";
 import { PB } from "@/lib/personal-brand";
 
 // ─── Tokens (homepage) ────────────────────────────────────────────────────────
@@ -46,58 +48,42 @@ const testimonials = [
   { name: "Sarah K.", role: "Daughter & friend", quote: "I set it up once for my parents and closest friends. The cards sound like me. Real cards, on time, every time. One less thing to carry in my head." },
 ];
 
-const plans = [
+const conciergeSteps = [
   {
-    name: "Essential",
-    price: "$6",
-    period: "/month",
-    description: "Start with one person who matters most.",
-    highlight: false,
-    perks: ["6 cards per year", "1 person", "Birthday + anniversary", "Personally written messages", "We print and mail for you"],
+    icon: UserPlus,
+    title: "Add the people who matter",
+    body: "Mom, your partner, your best friend — whoever deserves to feel remembered.",
   },
   {
-    name: "Family",
-    price: "$15",
-    period: "/month",
-    description: "For the people you never want to disappoint.",
-    highlight: true,
-    badge: "Most popular",
-    perks: ["18 cards per year", "Up to 5 people", "All major occasions", "Full autopilot available", "Warm, personal messages"],
+    icon: MessageCircle,
+    title: "We learn over time",
+    body: "Quick check-ins now and then. One question when it makes sense — never a survey.",
   },
   {
-    name: "Everyone",
-    price: "$29",
-    period: "/month",
-    description: "For a full circle of people who matter.",
-    highlight: false,
-    perks: ["40 cards per year", "Unlimited people", "Premium card styles", "Gift add-ons", "Priority support"],
+    icon: Pencil,
+    title: "Handwritten cards, written for them",
+    body: "Every message is specific to that person, in your voice, for that moment.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "You approve — or let autopilot handle it",
+    body: "Preview every card, or trust us completely. You're always in control.",
+  },
+  {
+    icon: Send,
+    title: "Mailed to their door",
+    body: "Real card stock, hand-addressed envelope, real stamp. Not an email. Not a notification.",
+  },
+  {
+    icon: FolderHeart,
+    title: "More personal every year",
+    body: "Stories, milestones, and personalities build quietly. Each card feels more like you.",
   },
 ];
 
-const occasions = [
-  { icon: Cake, label: "Birthdays" },
-  { icon: Heart, label: "Anniversaries" },
-  { icon: Gift, label: "Valentine's" },
-  { icon: TreePine, label: "Holidays" },
-  { icon: Star, label: "Milestones" },
-  { icon: Mail, label: "Just because" },
-  { icon: MoreHorizontal, label: "More" },
-];
+const yourPeople = ["Mom", "Sarah", "James", "Dad", "Emma"];
 
-const occasionGrid = [
-  "Mother's Day", "Father's Day", "Graduation", "New baby",
-  "New home", "Thank you", "Sympathy", "Congratulations",
-  "Work anniversary", "Get well", "Thinking of you", "Easter",
-];
-
-const stats = [
-  { icon: Heart, value: "10,000+", label: "Happy members" },
-  { icon: Pencil, value: "500,000+", label: "Cards written" },
-  { icon: Star, value: "99%", label: "Would recommend" },
-  { icon: Users, value: "100%", label: "Happiness goal" },
-];
-
-// ─── Small helpers (reused within this page) ────────────────────────────────
+// ─── Small helpers ────────────────────────────────────────────────────────────
 
 function Container({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
@@ -224,20 +210,6 @@ function TimelineConnector() {
   );
 }
 
-// ─── Dave hero illustration ───────────────────────────────────────────────────
-
-function DaveHeroIllustration() {
-  return (
-    <div style={{ width: "100%", minHeight: 320, aspectRatio: "4/3", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <img
-        src="/assets/illustrations/homepage/001_homepage_hero_dave.webp"
-        alt="Illustration of Dave sitting in a wooden doghouse beside a calendar with April 27 circled, flowers, and a card that reads We've got you"
-        style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }}
-      />
-    </div>
-  );
-}
-
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
@@ -262,13 +234,16 @@ export default function LandingPage() {
 
   const navLinks = [
     { label: "How it works", href: "#how-it-works" },
-    { label: "How we learn", href: "#how-we-learn" },
+    { label: "Why it's different", href: "#relationship-memory" },
     { label: "Pricing", href: "#pricing" },
-    { label: "About us", href: "#about" },
+    { label: "Stories", href: "#about" },
   ];
 
+  const signupHref = isLoggedIn ? "/dashboard" : "/signup";
+  const signupLabel = isLoggedIn ? "Go to dashboard" : "Add your first person — free";
+
   return (
-    <div style={{ background: C.cream, color: C.ink, fontFamily: sans, minHeight: "100vh" }}>
+    <div className="landing-page" style={{ background: C.cream, color: C.ink, fontFamily: sans, minHeight: "100vh" }}>
 
       {/* ── Navigation ───────────────────────────────────────────────────── */}
       <header style={{
@@ -279,7 +254,6 @@ export default function LandingPage() {
       }}>
         <Container>
           <nav className="flex items-center justify-between" style={{ height: 72, gap: 16 }}>
-            {/* Logo */}
             <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
               <div style={{ fontFamily: serif, fontSize: "1.35rem", fontWeight: 700, color: C.ink, letterSpacing: "0.02em" }}>
                 F.I. FORGOT
@@ -289,7 +263,6 @@ export default function LandingPage() {
               </div>
             </Link>
 
-            {/* Desktop links */}
             <div className="hidden lg:flex items-center" style={{ gap: 28, flex: 1, justifyContent: "center" }}>
               {navLinks.map(link => (
                 <a key={link.href} href={link.href}
@@ -332,7 +305,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Desktop actions */}
             <div className="hidden lg:flex items-center" style={{ gap: 16, flexShrink: 0 }}>
               {isLoggedIn ? (
                 <>
@@ -347,13 +319,17 @@ export default function LandingPage() {
               )}
             </div>
 
-            {/* Mobile menu toggle */}
             <button
               type="button"
               className="lg:hidden"
               onClick={() => setMenuOpen(o => !o)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              style={{ background: "none", border: "none", cursor: "pointer", color: C.ink, padding: 4 }}
+              aria-expanded={menuOpen}
+              style={{
+                background: "none", border: "none", cursor: "pointer", color: C.ink,
+                minWidth: 44, minHeight: 44, padding: 10,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
             >
               {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -365,12 +341,12 @@ export default function LandingPage() {
             <Container>
               {navLinks.map(link => (
                 <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
-                  style={{ display: "block", padding: "12px 0", fontSize: "1rem", fontWeight: 500, color: C.ink, textDecoration: "none" }}>
+                  style={{ display: "flex", alignItems: "center", minHeight: 44, padding: "10px 0", fontSize: "1rem", fontWeight: 500, color: C.ink, textDecoration: "none" }}>
                   {link.label}
                 </a>
               ))}
               <a href="#faq" onClick={() => setMenuOpen(false)}
-                style={{ display: "block", padding: "12px 0", fontSize: "1rem", fontWeight: 500, color: C.ink, textDecoration: "none" }}>
+                style={{ display: "flex", alignItems: "center", minHeight: 44, padding: "10px 0", fontSize: "1rem", fontWeight: 500, color: C.ink, textDecoration: "none" }}>
                 FAQ
               </a>
               <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 12, paddingTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -391,59 +367,59 @@ export default function LandingPage() {
         )}
       </header>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section style={{ padding: "48px 0 64px" }}>
+      {/* ── Hero: user relationships are the star ───────────────────────── */}
+      <section style={{ padding: "56px 0 48px" }}>
         <Container>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <p style={{
-                fontFamily: serif,
-                fontSize: "clamp(1.2rem, 3vw, 1.45rem)",
-                fontWeight: 600,
-                lineHeight: 1.35,
-                color: C.ink,
-                margin: "0 0 10px",
-                maxWidth: 480,
-              }}>
-                You don't have to worry about forgetting the people you love anymore.
-              </p>
-              <p style={{
-                fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
-                lineHeight: 1.6,
-                color: C.mid,
-                margin: "0 0 24px",
-                maxWidth: 480,
-              }}>
-                Life gets busy. Dates slip by. We quietly remember what matters—so everyone important feels remembered.
-              </p>
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            <div className="landing-rise" style={{ animationDelay: "0ms" }}>
+              <SectionEyebrow>Premium Relationship Concierge</SectionEyebrow>
               <h1 style={{
                 fontFamily: serif,
-                fontSize: "clamp(1.65rem, 4vw, 2.35rem)",
+                fontSize: "clamp(2rem, 5vw, 2.85rem)",
                 fontWeight: 600,
-                lineHeight: 1.2,
+                lineHeight: 1.15,
                 color: C.ink,
-                margin: "0 0 16px",
+                margin: "0 0 20px",
+                maxWidth: 520,
               }}>
-                We quietly learn the people who matter—{" "}
-                <span style={{ color: C.red }}>so every card feels like you.</span>{" "}
-                <span aria-hidden="true">♥</span>
+                Become the person who never forgets{" "}
+                <span style={{ color: C.red }}>the people who matter.</span>
               </h1>
               <p style={{
                 fontSize: "clamp(1rem, 2vw, 1.125rem)",
                 lineHeight: 1.65,
                 color: C.mid,
-                margin: "0 0 28px",
+                margin: "0 0 16px",
                 maxWidth: 480,
               }}>
-                We check in every now and then, remember the little things, and write beautiful, handwritten cards for any occasion.
+                Life gets busy. The people you love deserve more than guilt and last-minute scrambles.
+                Your concierge quietly remembers — so you show up thoughtfully, without carrying it all in your head.
               </p>
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center", marginBottom: 32 }}>
-                {isLoggedIn ? (
-                  <PrimaryButton href="/dashboard" testId="link-cta-hitzone">Go to dashboard</PrimaryButton>
-                ) : (
-                  <PrimaryButton href="/signup" testId="link-cta-hitzone">Get started free</PrimaryButton>
-                )}
+              {/* User's people as hero — not Dave */}
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 28,
+              }}>
+                {yourPeople.map((name, i) => (
+                  <span key={name} style={{
+                    fontFamily: sans,
+                    fontSize: "0.82rem",
+                    fontWeight: 500,
+                    color: C.ink,
+                    background: C.white,
+                    border: `1px solid ${C.border}`,
+                    borderRadius: 20,
+                    padding: "6px 14px",
+                    boxShadow: i === 0 ? "0 2px 8px rgba(226,59,46,0.12)" : undefined,
+                  }}>
+                    <Heart size={12} color={C.red} style={{ display: "inline", marginRight: 6, verticalAlign: "-2px" }} />
+                    {name}
+                  </span>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center", marginBottom: 28 }}>
+                <PrimaryButton href={signupHref} testId="link-cta-hitzone">{signupLabel}</PrimaryButton>
                 <Link href="/try" style={{
                   display: "inline-flex", alignItems: "center", gap: 10,
                   textDecoration: "none", color: C.ink, fontWeight: 600, fontSize: "0.95rem",
@@ -458,17 +434,15 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              {/* Trust bar */}
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                gap: 16,
+                gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                gap: 12,
               }}>
                 {[
                   { icon: Lock, text: "Secure & private" },
-                  { icon: Pencil, text: "Handwritten & mailed in the USA" },
-                  { icon: Users, text: "10,000+ happy members" },
-                  { icon: Shield, text: "You're always in control" },
+                  { icon: Pencil, text: "Handwritten & mailed" },
+                  { icon: Shield, text: "You're in control" },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                     <Icon size={16} color={C.red} style={{ flexShrink: 0, marginTop: 2 }} />
@@ -478,51 +452,116 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <DaveHeroIllustration />
+            <div className="landing-rise" style={{ animationDelay: "80ms" }}>
+              <div style={{ width: "100%", minHeight: 280, aspectRatio: "4/3", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img
+                  src={illustrationPaths.homepage.heroDave}
+                  alt="Illustration of Dave sitting in a wooden doghouse beside a calendar with a circled date, flowers, and a card that reads We've got you"
+                  style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }}
+                />
+              </div>
+            </div>
           </div>
         </Container>
       </section>
 
-      {/* ── Occasions selector ───────────────────────────────────────────── */}
-      <section style={{ padding: "56px 0", background: C.white }}>
+      {/* ── Dave bridge: recognition, then pivot ─────────────────────────── */}
+      <section style={{ padding: "40px 0 56px", background: C.white, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
         <Container>
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <SectionTitle>For all of life's moments— big and small.</SectionTitle>
-              <p style={{ fontSize: "1rem", lineHeight: 1.65, color: C.mid, marginTop: 16 }}>
-                Birthdays. Anniversaries. Holidays. Valentine's Day. Milestones. Just because. We've got it.
-              </p>
-            </div>
-            <div style={{
-              display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "center",
+          <div className="grid md:grid-cols-[1fr_auto_1fr] gap-8 items-center" style={{ maxWidth: 880, margin: "0 auto" }}>
+            <p style={{
+              fontFamily: hand,
+              fontSize: "clamp(1.35rem, 3vw, 1.65rem)",
+              lineHeight: 1.45,
+              color: C.ink,
+              margin: 0,
+              textAlign: "right",
             }}>
-              {occasions.map(({ icon: Icon, label }) => (
-                <div key={label} style={{
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-                  padding: "16px 12px", minWidth: 72,
+              We've all forgotten someone who matters.
+            </p>
+            <div style={{ width: 2, height: 48, background: C.border, margin: "0 auto" }} aria-hidden="true" className="hidden md:block" />
+            <p style={{
+              fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
+              lineHeight: 1.65,
+              color: C.mid,
+              margin: 0,
+            }}>
+              That sinking feeling isn't about being a bad person — it's about being human.
+              F.I. Forgot exists so you never have to sit in the doghouse again.
+              <span style={{ display: "block", marginTop: 8, color: C.ink, fontWeight: 500 }}>
+                Your relationships become the hero. We quietly handle the rest.
+              </span>
+            </p>
+          </div>
+        </Container>
+      </section>
+
+      {/* ── How it works: unified concierge flow ─────────────────────────── */}
+      <section id="how-it-works" style={{ padding: "72px 0", background: C.cream }}>
+        <Container>
+          <div style={{ textAlign: "center", marginBottom: 48, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
+            <SectionEyebrow>How your concierge works</SectionEyebrow>
+            <SectionTitle>Thoughtful without adding to your to-do list</SectionTitle>
+            <p style={{ fontSize: "1rem", lineHeight: 1.65, color: C.mid, marginTop: 14 }}>
+              Set it up once. We remember the dates, learn the stories, write the cards, and mail them —
+              so the people who matter always feel remembered.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" style={{ marginBottom: 48 }}>
+            {conciergeSteps.map(({ icon: Icon, title, body }, i) => (
+              <SoftCard key={title} style={{ padding: "24px 22px", position: "relative" }}>
+                <div style={{
+                  position: "absolute", top: 16, right: 18,
+                  fontFamily: serif, fontSize: "0.75rem", fontWeight: 700,
+                  color: C.red, opacity: 0.35,
                 }}>
-                  <div style={{
-                    width: 52, height: 52, borderRadius: 14,
-                    background: C.blush, border: `1px solid ${C.border}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <Icon size={24} color={C.red} strokeWidth={1.75} />
-                  </div>
-                  <span style={{ fontSize: "0.72rem", fontWeight: 500, color: C.mid, textAlign: "center" }}>{label}</span>
+                  {String(i + 1).padStart(2, "0")}
                 </div>
-              ))}
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12, background: C.blush,
+                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14,
+                }}>
+                  <Icon size={20} color={C.red} />
+                </div>
+                <h3 style={{ fontFamily: serif, fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px" }}>{title}</h3>
+                <p style={{ fontSize: "0.88rem", lineHeight: 1.6, color: C.mid, margin: 0 }}>{body}</p>
+              </SoftCard>
+            ))}
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div style={{ minHeight: 240, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img
+                src={illustrationPaths.homepage.handwrittenNote}
+                alt="A warm handwritten card on a wooden desk with an envelope, fountain pen, coffee mug, and small plant in soft sunlight"
+                style={{ width: "100%", height: "auto", display: "block", objectFit: "contain", borderRadius: 16 }}
+              />
+            </div>
+            <div>
+              <SectionTitle style={{ fontSize: "clamp(1.5rem, 3.5vw, 2rem)", marginBottom: 16 }}>
+                Always knows what to say
+              </SectionTitle>
+              <p style={{ fontSize: "0.95rem", lineHeight: 1.65, color: C.mid, margin: "0 0 20px" }}>
+                This isn't a greeting card app or an AI writing tool.
+                It's a concierge that builds a living understanding of each person —
+                their humor, their milestones, the stories only you two share.
+              </p>
+              <PrimaryButton href={signupHref}>{signupLabel}</PrimaryButton>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* ── Process timeline ─────────────────────────────────────────────── */}
-      <section id="how-we-learn" style={{ padding: "64px 0", background: C.cream }}>
+      {/* ── Relationship memory: why we're different ─────────────────────── */}
+      <section id="relationship-memory" style={{ padding: "72px 0", background: C.white }}>
         <Container>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <SectionTitle>Little memories. Meaningful cards.</SectionTitle>
+            <SectionEyebrow>Why it's different</SectionEyebrow>
+            <SectionTitle>Relationship memory that builds over time</SectionTitle>
             <p style={{ fontSize: "1rem", color: C.mid, marginTop: 12, maxWidth: 560, margin: "12px auto 0" }}>
-              The more we learn, the more personal every card becomes.
+              Not reminders. Not templates. A quiet understanding of each person —
+              their stories, milestones, and personality — that deepens every year.
             </p>
           </div>
 
@@ -530,7 +569,6 @@ export default function LandingPage() {
             display: "flex", gap: 0, overflowX: "auto", paddingBottom: 12,
             scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch",
           }}>
-            {/* Step 1 */}
             <SoftCard style={{ minWidth: 200, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start" }}>
               <div style={{
                 width: 48, height: 48, borderRadius: "50%", background: C.blush,
@@ -543,7 +581,6 @@ export default function LandingPage() {
 
             <TimelineConnector />
 
-            {/* Step 2 */}
             <SoftCard style={{ minWidth: 200, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
               <Send size={32} color={C.red} style={{ marginBottom: 12 }} />
               <p style={{ fontSize: "0.88rem", color: C.ink, margin: 0, lineHeight: 1.5 }}>
@@ -553,7 +590,6 @@ export default function LandingPage() {
 
             <TimelineConnector />
 
-            {/* Step 3 - yellow sticky */}
             <div style={{
               minWidth: 220, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start",
               background: C.stickyYellow, borderRadius: 14,
@@ -568,7 +604,6 @@ export default function LandingPage() {
 
             <TimelineConnector />
 
-            {/* Step 4 - blue sticky */}
             <div style={{
               minWidth: 220, flex: "0 0 auto", padding: 20, scrollSnapAlign: "start",
               background: C.stickyBlue, borderRadius: 14,
@@ -583,7 +618,6 @@ export default function LandingPage() {
 
             <TimelineConnector />
 
-            {/* Step 5 - final card */}
             <SoftCard style={{ minWidth: 260, flex: "0 0 auto", padding: 24, scrollSnapAlign: "start" }}>
               <p style={{ fontFamily: sans, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: C.red, margin: "0 0 10px" }}>
                 Next card...
@@ -594,7 +628,6 @@ export default function LandingPage() {
             </SoftCard>
           </div>
 
-          {/* Outcome flow from the final card */}
           <div style={{
             display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center",
             marginTop: 28, maxWidth: 720, marginLeft: "auto", marginRight: "auto",
@@ -608,7 +641,7 @@ export default function LandingPage() {
                 {i > 0 && <ChevronRight size={14} color={C.mid} style={{ opacity: 0.4 }} aria-hidden="true" />}
                 <span style={{
                   fontFamily: hand, fontSize: "0.95rem", color: C.ink,
-                  background: C.white, border: `1px solid ${C.border}`,
+                  background: C.cream, border: `1px solid ${C.border}`,
                   borderRadius: 20, padding: "6px 14px",
                 }}>
                   {label}
@@ -619,104 +652,44 @@ export default function LandingPage() {
 
           <p style={{
             textAlign: "center", fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
-            lineHeight: 1.65, color: C.mid, maxWidth: 560,
+            lineHeight: 1.65, color: C.mid, maxWidth: 520,
             margin: "28px auto 0",
           }}>
-            We never ask a lot at once. Just one quick question here and there—so it's effortless.
-            Over time, every card becomes more personal.
+            One quick question here and there — effortless for you, unforgettable for them.
           </p>
         </Container>
       </section>
 
-      {/* ── How it works ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ padding: "64px 0", background: C.white }}>
+      {/* ── Mailed with care ─────────────────────────────────────────────── */}
+      <section style={{ padding: "64px 0", background: C.blush }}>
         <Container>
-          <SectionTitle style={{ marginBottom: 40 }}>
-            How it works <span style={{ color: C.red }}>(without adding to your to-do list)</span> ♥
-          </SectionTitle>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div className="grid sm:grid-cols-3 lg:grid-cols-1 gap-8">
-              {[
-                {
-                  icon: MessageCircle,
-                  title: "Check-in",
-                  body: "We check in now and then. One quick question when it makes sense. That's it.",
-                },
-                {
-                  icon: FolderHeart,
-                  title: "Remember",
-                  body: "We quietly remember the little things. Your answers become a private story for each person.",
-                },
-                {
-                  icon: Send,
-                  title: "Personalize",
-                  body: "Every card gets more personal. The more we know, the more it will feel like it came from you.",
-                },
-              ].map(({ icon: Icon, title, body }) => (
-                <div key={title}>
-                  <div style={{
-                    width: 48, height: 48, borderRadius: 12, background: C.blush,
-                    display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14,
-                  }}>
-                    <Icon size={22} color={C.red} />
-                  </div>
-                  <h3 style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 600, margin: "0 0 8px" }}>{title}</h3>
-                  <p style={{ fontSize: "0.92rem", lineHeight: 1.6, color: C.mid, margin: 0 }}>{body}</p>
-                </div>
-              ))}
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <SectionEyebrow>Real cards, really mailed</SectionEyebrow>
+              <SectionTitle style={{ fontSize: "clamp(1.5rem, 3.5vw, 2rem)" }}>
+                Something they'll actually hold
+              </SectionTitle>
+              <p style={{ fontSize: "0.95rem", lineHeight: 1.65, color: C.mid, marginTop: 16 }}>
+                Thick card stock. Hand-addressed envelope. A real stamp.
+                Arriving about a week before the occasion — thoughtful timing, not a surprise scramble.
+              </p>
             </div>
-
-            <div style={{ minHeight: 280, width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 180 }}>
               <img
-                src="/assets/illustrations/homepage/homepage_handwritten_note.webp"
-                alt="A warm handwritten card on a wooden desk with an envelope, fountain pen, coffee mug, and small plant in soft sunlight"
-                style={{ width: "100%", height: "auto", display: "block", objectFit: "contain", borderRadius: 16 }}
+                src={illustrationPaths.homepage.stampedEnvelope}
+                alt="A cream envelope with a floral postage stamp and Mailed with Care postmark on a warm wooden desk"
+                style={{ width: "100%", maxWidth: 280, height: "auto", display: "block", objectFit: "contain" }}
               />
             </div>
           </div>
         </Container>
       </section>
 
-      {/* ── Occasion grid ────────────────────────────────────────────────── */}
-      <section style={{ padding: "64px 0", background: C.blush }}>
-        <Container>
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <SectionTitle>We're here for every kind of moment.</SectionTitle>
-              <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 24 }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: 14, background: C.white,
-                  border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  <Coffee size={28} color={C.red} />
-                </div>
-                <p style={{ fontFamily: hand, fontSize: "1.2rem", color: C.ink, margin: 0 }}>
-                  Even the small ones count.
-                </p>
-              </div>
-            </div>
-            <div style={{
-              display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 10,
-            }}>
-              {occasionGrid.map(label => (
-                <div key={label} style={{
-                  background: C.white, borderRadius: 10, padding: "12px 10px",
-                  border: `1px solid ${C.border}`, textAlign: "center",
-                  fontSize: "0.78rem", fontWeight: 500, color: C.ink,
-                }}>
-                  {label}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
-
       {/* ── Testimonials ─────────────────────────────────────────────────── */}
-      <section id="about" style={{ padding: "64px 0", background: C.cream }}>
+      <section id="about" style={{ padding: "72px 0", background: C.cream }}>
         <Container>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <SectionEyebrow>Peace of mind</SectionEyebrow>
             <SectionTitle>People who stopped worrying</SectionTitle>
             <p style={{ fontSize: "1rem", color: C.mid, marginTop: 12 }}>
               Real stories. Changed names. Relationships still intact.
@@ -739,86 +712,18 @@ export default function LandingPage() {
               </SoftCard>
             ))}
           </div>
-
-          {/* Stats bar */}
-          <div style={{
-            marginTop: 48, display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-            gap: 16, padding: "24px", background: C.white,
-            borderRadius: 14, border: `1px solid ${C.border}`,
-          }}>
-            {stats.map(({ icon: Icon, value, label }) => (
-              <div key={label} style={{ textAlign: "center" }}>
-                <Icon size={20} color={C.red} style={{ margin: "0 auto 8px" }} />
-                <div style={{ fontFamily: serif, fontSize: "1.5rem", fontWeight: 700, color: C.ink }}>{value}</div>
-                <div style={{ fontSize: "0.78rem", color: C.mid }}>{label}</div>
-              </div>
-            ))}
-          </div>
         </Container>
       </section>
 
       {/* ── Pricing ──────────────────────────────────────────────────────── */}
-      <section id="pricing" style={{ padding: "64px 0", background: C.white }}>
+      <section id="pricing" style={{ padding: "64px 0", background: C.cream }}>
         <Container>
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <SectionEyebrow>Simple plans</SectionEyebrow>
-            <SectionTitle>Choose what fits your life</SectionTitle>
-            <p style={{ fontSize: "0.95rem", color: C.mid, marginTop: 12 }}>
-              Cancel anytime. No contracts. No surprises.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {plans.map(plan => (
-              <SoftCard
-                key={plan.name}
-                data-testid={`card-plan-${plan.name.toLowerCase()}`}
-                style={{
-                  padding: "32px 28px",
-                  display: "flex", flexDirection: "column",
-                  border: plan.highlight ? `2px solid ${C.red}` : undefined,
-                  position: "relative",
-                }}
-              >
-                {plan.badge && (
-                  <div style={{
-                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
-                    background: C.red, color: C.white, fontSize: "0.7rem", fontWeight: 600,
-                    padding: "4px 14px", borderRadius: 20, letterSpacing: "0.06em",
-                    textTransform: "uppercase", whiteSpace: "nowrap",
-                  }}>
-                    {plan.badge}
-                  </div>
-                )}
-                <h3 style={{ fontFamily: serif, fontSize: "1.35rem", fontWeight: 600, margin: "0 0 6px" }}>{plan.name}</h3>
-                <p style={{ fontSize: "0.88rem", color: C.mid, margin: "0 0 20px" }}>{plan.description}</p>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 24 }}>
-                  <span style={{ fontFamily: serif, fontSize: "2.5rem", fontWeight: 700 }}>{plan.price}</span>
-                  <span style={{ fontSize: "0.9rem", color: C.mid }}>{plan.period}</span>
-                </div>
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", flex: 1 }}>
-                  {plan.perks.map(p => (
-                    <li key={p} style={{ display: "flex", gap: 8, fontSize: "0.88rem", marginBottom: 10, color: C.ink }}>
-                      <span style={{ color: C.red, fontWeight: 700 }}>✓</span>{p}
-                    </li>
-                  ))}
-                </ul>
-                <PrimaryButton
-                  href="/signup"
-                  testId={`link-plan-${plan.name.toLowerCase()}`}
-                  style={{ width: "100%", textAlign: "center" }}
-                >
-                  Get started
-                </PrimaryButton>
-              </SoftCard>
-            ))}
-          </div>
+          <FiPricingPlans variant="landing" showDisclaimer />
         </Container>
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section id="faq" style={{ padding: "64px 0", background: C.cream }}>
+      <section id="faq" style={{ padding: "64px 0", background: C.white }}>
         <Container style={{ maxWidth: 720 }}>
           <div style={{ textAlign: "center", marginBottom: 36 }}>
             <SectionTitle>Questions you might have</SectionTitle>
@@ -833,6 +738,7 @@ export default function LandingPage() {
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  aria-expanded={openFaq === i}
                   data-testid={`faq-toggle-${i}`}
                   style={{
                     width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -861,16 +767,16 @@ export default function LandingPage() {
       <section style={{ padding: "72px 0", background: C.blush, textAlign: "center" }}>
         <Container>
           <h2 style={{
-            fontFamily: serif, fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
-            fontWeight: 600, margin: "0 0 12px", color: C.ink,
+            fontFamily: serif, fontSize: "clamp(1.75rem, 4vw, 2.35rem)",
+            fontWeight: 600, margin: "0 0 12px", color: C.ink, maxWidth: 560, marginLeft: "auto", marginRight: "auto",
           }}>
-            Stop forgetting. Start showing up. <span style={{ color: C.red }}>♥</span>
+            Never unintentionally let down someone who matters.
           </h2>
-          <p style={{ fontSize: "1rem", color: C.mid, margin: "0 0 28px", maxWidth: 480, marginLeft: "auto", marginRight: "auto" }}>
-            Set it up once. We'll quietly take care of the rest.
+          <p style={{ fontSize: "1rem", color: C.mid, margin: "0 0 28px", maxWidth: 440, marginLeft: "auto", marginRight: "auto" }}>
+            Add your first person free. Your concierge takes it from there.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
-            <PrimaryButton href="/signup">Get started free</PrimaryButton>
+            <PrimaryButton href={signupHref}>{signupLabel}</PrimaryButton>
             <Link href="/try" style={{
               display: "inline-flex", alignItems: "center", padding: "14px 28px",
               fontWeight: 600, fontSize: "0.95rem", color: C.ink, textDecoration: "none",
@@ -931,13 +837,14 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6" style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 24 }}>
             <p style={{ fontFamily: hand, fontSize: "1rem", color: "rgba(255,255,255,0.4)", margin: 0 }}>
-              Set it once. Never forget again.
+              Quietly thoughtful. Always on time.
             </p>
             <div style={{ width: 120, height: 72, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <img
-                src="/illustrations/homepage/003_homepage_stamped_envelope.webp"
-                alt="A cream envelope with a floral postage stamp and Mailed with Care postmark on a warm wooden desk"
-                style={{ width: "100%", height: "100%", display: "block", objectFit: "contain", borderRadius: 16 }}
+                src={illustrationPaths.homepage.stampedEnvelope}
+                alt=""
+                aria-hidden="true"
+                style={{ width: "100%", height: "100%", display: "block", objectFit: "contain", borderRadius: 16, opacity: 0.6 }}
               />
             </div>
           </div>

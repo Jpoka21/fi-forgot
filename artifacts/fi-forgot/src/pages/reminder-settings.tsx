@@ -9,7 +9,8 @@ import {
   RecipientAddress,
 } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
-import { PLANS, type Plan } from "@/lib/plan";
+import { hasConciergeMembership, PLANS, resolveUserPlan, type Plan } from "@/lib/plan";
+import { getHandwrittenCardPriceLabel, resolvePlanDisplayPrice } from "@/app/pricing";
 import { Bell, Check, LogOut, MapPin, PenLine, CreditCard } from "lucide-react";
 
 const CREAM  = PB.cream;
@@ -77,7 +78,7 @@ function OptionButton({
 export default function ReminderSettingsPage() {
   const { user, logout, updateMailingAddress } = useAuth();
   const [, setLocation] = useLocation();
-  const plan = (user?.plan ?? "basic") as Plan;
+  const plan = resolveUserPlan(user?.plan);
   const planConfig = PLANS[plan];
 
   /* Reminder preferences — preserved as-is */
@@ -439,12 +440,19 @@ export default function ReminderSettingsPage() {
               </div>
               <div style={{ fontSize: "0.82rem", color: MID }}>
                 {planConfig.maxRecipients === Infinity ? "Unlimited people" : `Up to ${planConfig.maxRecipients} people`}
-                {" · "}
-                {planConfig.maxCardsPerYear} cards per year
+                {!Number.isFinite(planConfig.maxCardsPerYear) ? null : (
+                  <>
+                    {" · "}
+                    {planConfig.maxCardsPerYear} cards per year
+                  </>
+                )}
+              </div>
+              <div style={{ fontSize: "0.82rem", color: MID, marginTop: 6 }}>
+                {getHandwrittenCardPriceLabel(hasConciergeMembership(plan))}
               </div>
             </div>
             <div style={{ fontFamily: serif, fontSize: "1.4rem", fontWeight: 600, color: INK, flexShrink: 0 }}>
-              {planConfig.price}
+              {resolvePlanDisplayPrice(plan)}
             </div>
           </div>
           <Link href="/subscribe">

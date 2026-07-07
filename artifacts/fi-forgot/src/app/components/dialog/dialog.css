@@ -1,0 +1,165 @@
+/**
+ * F.I. Forgot dialog component styles.
+ * Opt-in — legacy `@/components/ui/dialog` and `alert-dialog` remain unchanged.
+ */
+
+.fi-dialog {
+  width: min(calc(100vw - var(--fi-space-8)), 32rem);
+  max-height: calc(100vh - var(--fi-space-8));
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--fi-color-border);
+  background: transparent;
+  color: var(--fi-color-text-primary);
+  overflow: visible;
+}
+
+.fi-dialog::backdrop {
+  background-color: color-mix(in srgb, var(--fi-color-ink) 45%, transparent);
+}
+
+.fi-dialog--sm { width: min(calc(100vw - var(--fi-space-8)), 24rem); }
+.fi-dialog--md { width: min(calc(100vw - var(--fi-space-8)), 32rem); }
+.fi-dialog--lg { width: min(calc(100vw - var(--fi-space-8)), 40rem); }
+
+.fi-dialog__panel {
+  position: relative;
+  display: grid;
+  gap: var(--fi-space-4);
+  padding: var(--fi-space-6);
+  background-color: var(--fi-color-surface);
+  border-radius: inherit;
+  box-shadow: var(--fi-elevation-level-3, var(--fi-elevation-level-2));
+}
+
+.fi-dialog__header {
+  display: grid;
+  gap: var(--fi-space-2);
+  padding-inline-end: var(--fi-space-8);
+}
+
+.fi-dialog__title {
+  margin: 0;
+  font-size: var(--fi-text-h3);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--fi-color-text-primary);
+}
+
+.fi-dialog__description {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: 1.45;
+}
+
+.fi-dialog__body {
+  display: grid;
+  gap: var(--fi-space-3);
+}
+
+.fi-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--fi-space-2);
+}
+
+.fi-dialog__close {
+  position: absolute;
+  inset-block-start: var(--fi-space-4);
+  inset-inline-end: var(--fi-space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--fi-radius-sm);
+  background: transparent;
+  color: var(--fi-color-text-secondary);
+  cursor: pointer;
+}
+
+.fi-dialog__close:hover {
+  background-color: var(--fi-color-surface-secondary);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-dialog__close:focus-visible {
+  outline: var(--fi-focus-ring-width) solid var(--fi-color-focus-ring);
+  outline-offset: var(--fi-focus-ring-offset);
+}
+
+.fi-dialog--delete .fi-dialog__title,
+.fi-dialog--error .fi-dialog__title {
+  color: var(--fi-color-danger);
+}
+
+.fi-dialog--upgrade .fi-dialog__title {
+  color: var(--fi-color-primary);
+}
+
+.fi-dialog--loading .fi-dialog__panel {
+  text-align: center;
+}
+
+.fi-dialog--loading .fi-dialog__body {
+  justify-items: center;
+}
+
+.fi-dialog[open] {
+  animation: fi-dialog-enter var(--fi-motion-duration-base) var(--fi-motion-ease-concierge) both;
+}
+
+.fi-dialog[open]::backdrop {
+  animation: fi-dialog-backdrop-enter var(--fi-motion-duration-fast) var(--fi-motion-ease-out) both;
+}
+
+@keyframes fi-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fi-dialog-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 767px) {
+  .fi-dialog {
+    width: calc(100vw - var(--fi-space-4));
+    max-height: calc(100dvh - var(--fi-space-4));
+  }
+
+  .fi-dialog__panel {
+    padding: var(--fi-space-5);
+  }
+
+  .fi-dialog__close {
+    width: var(--fi-touch-target-min, 2.75rem);
+    height: var(--fi-touch-target-min, 2.75rem);
+  }
+
+  .fi-dialog__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .fi-dialog__footer .fi-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-dialog[open],
+  .fi-dialog[open]::backdrop {
+    animation: none;
+  }
+}

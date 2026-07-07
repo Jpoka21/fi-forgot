@@ -1,0 +1,194 @@
+/**
+ * Typography foundation styles.
+ *
+ * Opt-in utility classes — legacy global styles in index.css remain unchanged.
+ */
+
+:root {
+  /* Font fallback stacks */
+  --fi-font-stack-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont,
+    "Segoe UI", sans-serif;
+  --fi-font-stack-display: "Bebas Neue", "Arial Narrow", sans-serif;
+  --fi-font-stack-handwriting: "Caveat", "Segoe Script", cursive;
+  --fi-font-stack-serif: "Lora", georgia, "Times New Roman", serif;
+  --fi-font-stack-legacy-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --fi-font-stack-mono: menlo, ui-monospace, "Cascadia Code", monospace;
+
+  /* Semantic line heights */
+  --fi-type-line-tight: 1.2;
+  --fi-type-line-snug: 1.35;
+  --fi-type-line-normal: 1.5;
+  --fi-type-line-relaxed: 1.65;
+
+  /* Content spacing */
+  --fi-type-paragraph-gap: var(--fi-space-4);
+  --fi-type-list-gap: var(--fi-space-2);
+  --fi-type-list-indent: var(--fi-space-6);
+  --fi-type-heading-margin-top: var(--fi-space-6);
+  --fi-type-heading-margin-bottom: var(--fi-space-2);
+
+  /* Feedback text colors */
+  --fi-type-helper-color: var(--fi-color-text-muted);
+  --fi-type-error-color: var(--fi-color-danger);
+  --fi-type-success-color: var(--fi-color-success);
+}
+
+/* Bridge legacy app font vars to full stacks without removing legacy definitions. */
+:root {
+  --app-font-sans: var(--fi-font-stack-sans);
+  --app-font-serif: var(--fi-font-stack-display);
+  --app-font-display: var(--fi-font-stack-display);
+  --app-font-handwriting: var(--fi-font-stack-handwriting);
+  --app-font-mono: var(--fi-font-stack-mono);
+}
+
+/* Heading hierarchy utilities */
+.fi-type-display-lg,
+.fi-type-display-md,
+.fi-type-h1,
+.fi-type-h2,
+.fi-type-h3 {
+  font-family: var(--fi-font-display);
+  color: var(--fi-color-text-primary);
+  text-wrap: balance;
+}
+
+.fi-type-display-lg {
+  font-size: var(--fi-text-display-lg);
+  line-height: var(--fi-type-line-tight);
+  letter-spacing: 0.04em;
+}
+
+.fi-type-display-md {
+  font-size: var(--fi-text-display-md);
+  line-height: var(--fi-type-line-tight);
+  letter-spacing: 0.04em;
+}
+
+.fi-type-h1 {
+  font-size: var(--fi-text-h1);
+  line-height: var(--fi-type-line-tight);
+  letter-spacing: 0.04em;
+}
+
+.fi-type-h2 {
+  font-size: var(--fi-text-h2);
+  line-height: var(--fi-type-line-snug);
+  letter-spacing: 0.04em;
+}
+
+.fi-type-h3 {
+  font-size: var(--fi-text-h3);
+  line-height: var(--fi-type-line-snug);
+  letter-spacing: 0.02em;
+}
+
+/* Body copy */
+.fi-type-body-lg,
+.fi-type-body,
+.fi-type-body-sm,
+.fi-type-caption,
+.fi-type-label,
+.fi-type-helper,
+.fi-type-error,
+.fi-type-success {
+  font-family: var(--fi-font-sans);
+}
+
+.fi-type-body-lg {
+  font-size: var(--fi-text-body-lg);
+  line-height: var(--fi-type-line-relaxed);
+}
+
+.fi-type-body {
+  font-size: var(--fi-text-body);
+  line-height: var(--fi-type-line-normal);
+}
+
+.fi-type-body-sm {
+  font-size: var(--fi-text-body-sm);
+  line-height: var(--fi-type-line-normal);
+}
+
+.fi-type-caption {
+  font-size: var(--fi-text-caption);
+  line-height: var(--fi-type-line-snug);
+  letter-spacing: 0.08em;
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-type-label {
+  font-size: var(--fi-text-label);
+  line-height: var(--fi-type-line-snug);
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-type-helper {
+  font-size: var(--fi-text-body-sm);
+  line-height: var(--fi-type-line-normal);
+  color: var(--fi-type-helper-color);
+}
+
+.fi-type-error {
+  font-size: var(--fi-text-body-sm);
+  line-height: var(--fi-type-line-normal);
+  font-weight: 500;
+  color: var(--fi-type-error-color);
+}
+
+.fi-type-success {
+  font-size: var(--fi-text-body-sm);
+  line-height: var(--fi-type-line-normal);
+  font-weight: 500;
+  color: var(--fi-type-success-color);
+}
+
+/* Prose rhythm container */
+.fi-type-prose {
+  font-family: var(--fi-font-sans);
+  font-size: var(--fi-text-body);
+  line-height: var(--fi-type-line-normal);
+  color: var(--fi-color-text-primary);
+  max-inline-size: 65ch;
+}
+
+.fi-type-prose > * + * {
+  margin-block-start: var(--fi-type-paragraph-gap);
+}
+
+.fi-type-prose :is(h1, h2, h3, h4, h5, h6) {
+  margin-block: var(--fi-type-heading-margin-top) var(--fi-type-heading-margin-bottom);
+}
+
+.fi-type-prose ul,
+.fi-type-prose ol {
+  margin-block: 0;
+  padding-inline-start: var(--fi-type-list-indent);
+}
+
+.fi-type-prose li + li {
+  margin-block-start: var(--fi-type-list-gap);
+}
+
+/* Localization: relative units and RTL-friendly spacing */
+:where([dir="rtl"]) .fi-type-prose ul,
+:where([dir="rtl"]) .fi-type-prose ol {
+  padding-inline-start: 0;
+  padding-inline-end: var(--fi-type-list-indent);
+}
+
+:lang(ja) .fi-type-prose,
+:lang(zh) .fi-type-prose,
+:lang(ko) .fi-type-prose {
+  line-height: 1.75;
+}
+
+/* Responsive scaling verification hook */
+@media (max-width: 640px) {
+  .fi-type-body,
+  .fi-type-prose {
+    font-size: max(var(--fi-text-body), 1rem);
+  }
+}

@@ -1,0 +1,313 @@
+/**
+ * F.I. Forgot card creation component styles.
+ * Migrated screen — legacy card-generator page styles remain inline in personal-ui.
+ */
+
+.fi-card-creation {
+  display: grid;
+  gap: var(--fi-space-6);
+  width: 100%;
+}
+
+.fi-card-creation__header {
+  display: grid;
+  gap: var(--fi-space-2);
+}
+
+.fi-card-creation__title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h2);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-card-creation__subtitle {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-card-creation__section {
+  display: grid;
+  gap: var(--fi-space-4);
+}
+
+.fi-card-creation__panel {
+  display: grid;
+  gap: var(--fi-space-4);
+  padding: var(--fi-space-6);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-lg);
+  background: var(--fi-color-surface-primary);
+  box-shadow: var(--fi-shadow-sm);
+}
+
+.fi-card-creation__panel-title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h4);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-card-creation__panel-copy {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-card-creation__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-3);
+  align-items: center;
+}
+
+.fi-card-creation__recipient-list {
+  display: grid;
+  gap: var(--fi-space-3);
+}
+
+.fi-card-creation__recipient-option {
+  display: flex;
+  align-items: center;
+  gap: var(--fi-space-4);
+  width: 100%;
+  padding: var(--fi-space-4);
+  border: 2px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--fi-duration-fast) var(--fi-ease-standard),
+    background-color var(--fi-duration-fast) var(--fi-ease-standard);
+}
+
+.fi-card-creation__recipient-option:hover {
+  border-color: var(--fi-color-border-strong);
+}
+
+.fi-card-creation__recipient-option--selected {
+  border-color: var(--fi-color-brand-primary);
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-card-creation__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--fi-radius-full);
+  background: var(--fi-color-brand-primary);
+  color: var(--fi-color-text-on-brand);
+  font-weight: var(--fi-font-weight-bold);
+  font-size: var(--fi-text-body-sm);
+  flex-shrink: 0;
+}
+
+.fi-card-creation__recipient-name {
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-card-creation__recipient-meta {
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-card-creation__occasion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--fi-space-3);
+}
+
+@media (min-width: 640px) {
+  .fi-card-creation__occasion-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.fi-card-creation__occasion-option {
+  padding: var(--fi-space-4);
+  border: 2px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+  font-size: var(--fi-text-body-sm);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-secondary);
+  cursor: pointer;
+  transition: border-color var(--fi-duration-fast) var(--fi-ease-standard),
+    background-color var(--fi-duration-fast) var(--fi-ease-standard),
+    color var(--fi-duration-fast) var(--fi-ease-standard);
+}
+
+.fi-card-creation__occasion-option--selected {
+  border-color: var(--fi-color-brand-primary);
+  background: var(--fi-color-surface-secondary);
+  color: var(--fi-color-brand-primary);
+}
+
+.fi-card-creation__tone-note {
+  padding: var(--fi-space-3) var(--fi-space-4);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-secondary);
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-card-creation__draft-list {
+  display: grid;
+  gap: var(--fi-space-4);
+}
+
+.fi-card-creation__draft-card {
+  display: grid;
+  gap: var(--fi-space-4);
+  padding: var(--fi-space-5);
+  border: 2px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-lg);
+  background: var(--fi-color-surface-primary);
+  transition: border-color var(--fi-duration-fast) var(--fi-ease-standard);
+}
+
+.fi-card-creation__draft-card--selected {
+  border-color: var(--fi-color-brand-primary);
+}
+
+.fi-card-creation__draft-card--approved {
+  border-color: var(--fi-color-success-border);
+}
+
+.fi-card-creation__draft-label {
+  font-size: var(--fi-text-caption);
+  font-weight: var(--fi-font-weight-bold);
+  letter-spacing: var(--fi-tracking-wide);
+  text-transform: uppercase;
+  color: var(--fi-color-text-tertiary);
+}
+
+.fi-card-creation__draft-text {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-body-sm);
+  line-height: var(--fi-leading-relaxed);
+  color: var(--fi-color-text-primary);
+  white-space: pre-wrap;
+}
+
+.fi-card-creation__enhancement-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-2);
+}
+
+.fi-card-creation__enhancement-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fi-space-1);
+  padding: var(--fi-space-2) var(--fi-space-3);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-sm);
+  background: var(--fi-color-surface-primary);
+  font-size: var(--fi-text-caption);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-secondary);
+  cursor: pointer;
+}
+
+.fi-card-creation__enhancement-button:hover {
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-card-creation__review-grid {
+  display: grid;
+  gap: var(--fi-space-3);
+}
+
+.fi-card-creation__review-item {
+  display: grid;
+  gap: var(--fi-space-1);
+  padding: var(--fi-space-3) var(--fi-space-4);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-card-creation__review-label {
+  font-size: var(--fi-text-caption);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--fi-tracking-wide);
+}
+
+.fi-card-creation__review-value {
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-card-creation__success-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-success-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-success-surface);
+}
+
+.fi-card-creation__success-title {
+  margin: 0;
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-success-text);
+}
+
+.fi-card-creation__success-copy {
+  margin: var(--fi-space-1) 0 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-success-text);
+}
+
+.fi-card-creation__empty {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-6);
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .fi-card-creation__title {
+    font-size: var(--fi-text-h3);
+  }
+
+  .fi-card-creation__panel {
+    padding: var(--fi-space-5);
+  }
+
+  .fi-card-creation__recipient-option,
+  .fi-card-creation__occasion-option {
+    min-height: var(--fi-touch-target-min, 2.75rem);
+  }
+
+  .fi-card-creation__enhancement-button {
+    min-height: var(--fi-touch-target-min, 2.75rem);
+    padding: var(--fi-space-2) var(--fi-space-4);
+  }
+
+  .fi-card-creation__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fi-card-creation__actions .fi-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-card-creation__recipient-option,
+  .fi-card-creation__occasion-option,
+  .fi-card-creation__draft-card {
+    transition: none;
+  }
+}

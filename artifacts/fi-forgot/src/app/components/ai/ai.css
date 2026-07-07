@@ -1,0 +1,200 @@
+/**
+ * F.I. Forgot AI component styles.
+ * Opt-in — legacy briefing and card generation pages remain unchanged.
+ */
+
+.fi-ai {
+  display: grid;
+  gap: var(--fi-space-4);
+  width: 100%;
+}
+
+.fi-ai__header {
+  display: grid;
+  gap: var(--fi-space-2);
+}
+
+.fi-ai__title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h3);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-ai__description,
+.fi-ai__status,
+.fi-ai__copy,
+.fi-ai__context {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-ai__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--fi-space-2);
+}
+
+.fi-ai__list {
+  display: grid;
+  gap: var(--fi-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fi-ai__item {
+  animation: fi-motion-fade-up var(--fi-motion-card) both;
+}
+
+.fi-ai__item--delay-0 { animation-delay: 0ms; }
+.fi-ai__item--delay-1 { animation-delay: 60ms; }
+.fi-ai__item--delay-2 { animation-delay: 120ms; }
+.fi-ai__item--delay-3 { animation-delay: 180ms; }
+.fi-ai__item--delay-4 { animation-delay: 240ms; }
+.fi-ai__item--delay-5 { animation-delay: 300ms; }
+
+.fi-ai__recommendation-body {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-4);
+}
+
+.fi-ai__recommendation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fi-space-2);
+}
+
+.fi-ai__recommendation-title {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-ai__recommendation-description {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-ai__recommendation-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fi-space-3);
+}
+
+.fi-ai__generation-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fi-space-2);
+  padding: var(--fi-space-2) var(--fi-space-3);
+  border-radius: var(--fi-radius-full);
+  border: 1px solid var(--fi-color-border);
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-ai__drafting {
+  display: grid;
+  gap: var(--fi-space-4);
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+}
+
+.fi-ai__drafting-headline {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h4);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-ai__drafting-support {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-ai__confidence {
+  display: grid;
+  gap: var(--fi-space-2);
+  padding: var(--fi-space-3) var(--fi-space-4);
+  border-radius: var(--fi-radius-md);
+  border: 1px solid var(--fi-color-border);
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-ai__confidence--high {
+  border-color: color-mix(in srgb, var(--fi-color-success) 35%, var(--fi-color-border));
+}
+
+.fi-ai__confidence--medium {
+  border-color: color-mix(in srgb, var(--fi-color-warning) 35%, var(--fi-color-border));
+}
+
+.fi-ai__confidence--low {
+  border-color: color-mix(in srgb, var(--fi-color-accent) 25%, var(--fi-color-border));
+}
+
+.fi-ai__confidence-label {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-ai__retry {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+}
+
+.fi-ai__retry-title {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-ai__layout {
+  display: grid;
+  gap: var(--fi-space-4);
+}
+
+@media (min-width: 768px) {
+  .fi-ai__layout {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .fi-ai__recommendation-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fi-ai__generation-indicator {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-ai__item {
+    animation: none;
+  }
+}

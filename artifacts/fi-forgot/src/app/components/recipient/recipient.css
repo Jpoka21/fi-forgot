@@ -1,0 +1,186 @@
+/**
+ * F.I. Forgot recipient component styles.
+ * Opt-in — legacy relationship pages remain unchanged.
+ */
+
+.fi-recipient {
+  display: grid;
+  gap: var(--fi-space-4);
+  width: 100%;
+}
+
+.fi-recipient__header,
+.fi-recipient__toolbar {
+  display: grid;
+  gap: var(--fi-space-2);
+}
+
+.fi-recipient__title {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h3);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-recipient__description,
+.fi-recipient__status,
+.fi-recipient__meta,
+.fi-recipient__copy {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  color: var(--fi-color-text-secondary);
+  line-height: var(--fi-leading-relaxed);
+}
+
+.fi-recipient__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.fi-recipient__hero,
+.fi-recipient__section {
+  display: grid;
+  gap: var(--fi-space-3);
+  padding: var(--fi-space-4);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-primary);
+}
+
+.fi-recipient__hero {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--fi-space-4);
+}
+
+.fi-recipient__summary-name {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h4);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-recipient__section-title {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  font-weight: var(--fi-font-weight-semibold);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-recipient__quick-actions,
+.fi-recipient__status-list,
+.fi-recipient__milestones,
+.fi-recipient__memory-list,
+.fi-recipient__card-history,
+.fi-recipient__timeline-preview {
+  display: grid;
+  gap: var(--fi-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fi-recipient__quick-action {
+  display: grid;
+  gap: var(--fi-space-1);
+  padding: var(--fi-space-3);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-secondary);
+  color: inherit;
+  text-decoration: none;
+}
+
+.fi-recipient__quick-action:hover,
+.fi-recipient__quick-action:focus-visible {
+  text-decoration: underline;
+}
+
+.fi-recipient__quick-action-title {
+  margin: 0;
+  font-size: var(--fi-text-body);
+  font-weight: var(--fi-font-weight-medium);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-recipient__status {
+  display: grid;
+  gap: var(--fi-space-1);
+  padding: var(--fi-space-3);
+  border-radius: var(--fi-radius-sm);
+  border: 1px solid var(--fi-color-border);
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-recipient__status--positive {
+  border-color: color-mix(in srgb, var(--fi-color-success) 30%, var(--fi-color-border));
+}
+
+.fi-recipient__status--attention {
+  border-color: color-mix(in srgb, var(--fi-color-warning) 30%, var(--fi-color-border));
+}
+
+.fi-recipient__status-label {
+  margin: 0;
+  font-size: var(--fi-text-body-sm);
+  font-weight: var(--fi-font-weight-medium);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-recipient__milestone-item,
+.fi-recipient__card-item,
+.fi-recipient__memory-item,
+.fi-recipient__timeline-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fi-space-2);
+  padding: var(--fi-space-3);
+  border: 1px solid var(--fi-color-border);
+  border-radius: var(--fi-radius-sm);
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-recipient__activity-grid {
+  display: grid;
+  gap: var(--fi-space-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fi-recipient__activity-stat {
+  display: grid;
+  gap: var(--fi-space-1);
+  padding: var(--fi-space-3);
+  border-radius: var(--fi-radius-sm);
+  background: var(--fi-color-surface-secondary);
+}
+
+.fi-recipient__activity-value {
+  margin: 0;
+  font-family: var(--fi-font-display);
+  font-size: var(--fi-text-h4);
+  color: var(--fi-color-text-primary);
+}
+
+.fi-recipient__error {
+  padding: var(--fi-space-4);
+  border: 1px dashed var(--fi-color-border);
+  border-radius: var(--fi-radius-md);
+  background: var(--fi-color-surface-secondary);
+}
+
+@media (min-width: 48rem) {
+  .fi-recipient__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: var(--fi-space-4);
+    align-items: start;
+  }
+
+  .fi-recipient__quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

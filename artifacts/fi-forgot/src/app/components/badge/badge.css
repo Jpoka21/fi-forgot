@@ -1,0 +1,238 @@
+/**
+ * F.I. Forgot badge component styles.
+ * Opt-in — legacy `@/components/ui/badge` remains unchanged.
+ */
+
+.fi-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fi-space-1);
+  max-width: 100%;
+  border: 1px solid transparent;
+  font-family: var(--fi-font-sans);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+}
+
+.fi-badge--sm {
+  min-height: 1.25rem;
+  padding-inline: var(--fi-space-2);
+}
+
+.fi-badge--md {
+  min-height: 1.5rem;
+  padding-inline: calc(var(--fi-space-2) + 2px);
+}
+
+.fi-badge--lg {
+  min-height: 1.75rem;
+  padding-inline: var(--fi-space-3);
+}
+
+.fi-badge__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.fi-badge__icon svg {
+  width: 0.875em;
+  height: 0.875em;
+}
+
+/* Status tones */
+.fi-badge--success {
+  background-color: var(--fi-color-success-subtle);
+  color: var(--fi-color-success);
+  border-color: color-mix(in srgb, var(--fi-color-success) 24%, transparent);
+}
+
+.fi-badge--warning {
+  background-color: var(--fi-color-warning-subtle);
+  color: var(--fi-color-warning);
+  border-color: color-mix(in srgb, var(--fi-color-warning) 24%, transparent);
+}
+
+.fi-badge--info {
+  background-color: var(--fi-color-info-subtle);
+  color: var(--fi-color-info);
+  border-color: color-mix(in srgb, var(--fi-color-info) 24%, transparent);
+}
+
+.fi-badge--error {
+  background-color: var(--fi-color-danger-subtle);
+  color: var(--fi-color-danger);
+  border-color: color-mix(in srgb, var(--fi-color-danger) 24%, transparent);
+}
+
+.fi-badge--neutral {
+  background-color: var(--fi-color-surface-tertiary);
+  color: var(--fi-color-text-secondary);
+  border-color: var(--fi-color-border);
+}
+
+.fi-badge--primary {
+  background-color: var(--fi-color-primary);
+  color: var(--fi-color-text-inverse);
+  border-color: var(--fi-color-primary);
+}
+
+/* Brownie Points */
+.fi-badge--brownie {
+  background-color: color-mix(in srgb, var(--fi-color-brownie-gold) 14%, var(--fi-color-surface));
+  color: var(--fi-color-brownie-gold);
+  border-color: color-mix(in srgb, var(--fi-color-brownie-gold) 28%, transparent);
+}
+
+/* Relationship Health */
+.fi-badge--health-excellent {
+  background-color: color-mix(in srgb, var(--fi-color-health-excellent) 12%, var(--fi-color-surface));
+  color: var(--fi-color-health-excellent);
+  border-color: color-mix(in srgb, var(--fi-color-health-excellent) 24%, transparent);
+}
+
+.fi-badge--health-healthy {
+  background-color: color-mix(in srgb, var(--fi-color-health-healthy) 12%, var(--fi-color-surface));
+  color: var(--fi-color-health-healthy);
+  border-color: color-mix(in srgb, var(--fi-color-health-healthy) 24%, transparent);
+}
+
+.fi-badge--health-needs-attention {
+  background-color: color-mix(in srgb, var(--fi-color-health-needs-attention) 12%, var(--fi-color-surface));
+  color: var(--fi-color-health-needs-attention);
+  border-color: color-mix(in srgb, var(--fi-color-health-needs-attention) 24%, transparent);
+}
+
+.fi-badge--health-priority {
+  background-color: color-mix(in srgb, var(--fi-color-health-priority) 12%, var(--fi-color-surface));
+  color: var(--fi-color-health-priority);
+  border-color: color-mix(in srgb, var(--fi-color-health-priority) 24%, transparent);
+}
+
+/* Calendar */
+.fi-badge--calendar-upcoming {
+  background-color: color-mix(in srgb, var(--fi-color-calendar-upcoming) 14%, var(--fi-color-surface));
+  color: var(--fi-color-calendar-upcoming);
+  border-color: color-mix(in srgb, var(--fi-color-calendar-upcoming) 28%, transparent);
+}
+
+.fi-badge--calendar-sent {
+  background-color: color-mix(in srgb, var(--fi-color-calendar-sent) 12%, var(--fi-color-surface));
+  color: var(--fi-color-calendar-sent);
+  border-color: color-mix(in srgb, var(--fi-color-calendar-sent) 24%, transparent);
+}
+
+.fi-badge--calendar-draft {
+  background-color: color-mix(in srgb, var(--fi-color-calendar-draft) 12%, var(--fi-color-surface));
+  color: var(--fi-color-calendar-draft);
+  border-color: color-mix(in srgb, var(--fi-color-calendar-draft) 24%, transparent);
+}
+
+.fi-badge--calendar-missed {
+  background-color: color-mix(in srgb, var(--fi-color-calendar-missed) 12%, var(--fi-color-surface));
+  color: var(--fi-color-calendar-missed);
+  border-color: color-mix(in srgb, var(--fi-color-calendar-missed) 24%, transparent);
+}
+
+.fi-badge--calendar-autopilot {
+  background-color: color-mix(in srgb, var(--fi-color-calendar-autopilot) 12%, var(--fi-color-surface));
+  color: var(--fi-color-calendar-autopilot);
+  border-color: color-mix(in srgb, var(--fi-color-calendar-autopilot) 24%, transparent);
+}
+
+/* Priority */
+.fi-badge--priority-high {
+  background-color: var(--fi-color-danger-subtle);
+  color: var(--fi-color-danger);
+  border-color: color-mix(in srgb, var(--fi-color-danger) 24%, transparent);
+}
+
+.fi-badge--priority-medium {
+  background-color: var(--fi-color-warning-subtle);
+  color: var(--fi-color-warning);
+  border-color: color-mix(in srgb, var(--fi-color-warning) 24%, transparent);
+}
+
+.fi-badge--priority-low {
+  background-color: var(--fi-color-surface-tertiary);
+  color: var(--fi-color-text-secondary);
+  border-color: var(--fi-color-border);
+}
+
+/* Subscription */
+.fi-badge--subscription-active {
+  background-color: color-mix(in srgb, var(--fi-color-billing-accent) 12%, var(--fi-color-surface));
+  color: var(--fi-color-billing-accent);
+  border-color: color-mix(in srgb, var(--fi-color-billing-accent) 24%, transparent);
+}
+
+.fi-badge--subscription-trial {
+  background-color: var(--fi-color-info-subtle);
+  color: var(--fi-color-info);
+  border-color: color-mix(in srgb, var(--fi-color-info) 24%, transparent);
+}
+
+.fi-badge--subscription-paused {
+  background-color: var(--fi-color-warning-subtle);
+  color: var(--fi-color-warning);
+  border-color: color-mix(in srgb, var(--fi-color-warning) 24%, transparent);
+}
+
+.fi-badge--subscription-canceled {
+  background-color: var(--fi-color-surface-tertiary);
+  color: var(--fi-color-text-muted);
+  border-color: var(--fi-color-border);
+}
+
+/* AI Concierge */
+.fi-badge--ai {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--fi-color-beige) 80%, var(--fi-color-surface)) 0%,
+    var(--fi-color-surface-secondary) 100%
+  );
+  color: var(--fi-color-primary);
+  border-color: var(--fi-color-border);
+  font-family: var(--fi-font-display);
+  letter-spacing: 0.04em;
+}
+
+/* Verification */
+.fi-badge--verification {
+  background-color: color-mix(in srgb, var(--fi-color-success) 12%, var(--fi-color-surface));
+  color: var(--fi-color-success);
+  border-color: color-mix(in srgb, var(--fi-color-success) 24%, transparent);
+}
+
+/* Notification indicators */
+.fi-badge--dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  min-height: 0;
+  padding: 0;
+  border-radius: var(--fi-radius-circle);
+  background-color: var(--fi-color-primary);
+  border-color: var(--fi-color-surface);
+  box-shadow: 0 0 0 1px var(--fi-color-surface);
+}
+
+.fi-badge--count {
+  min-width: 1.25rem;
+  padding-inline: var(--fi-space-1);
+  background-color: var(--fi-color-primary);
+  color: var(--fi-color-text-inverse);
+  border-color: var(--fi-color-primary);
+}
+
+.fi-badge--count.fi-badge--md {
+  min-width: 1.375rem;
+}
+
+.fi-badge--count.fi-badge--lg {
+  min-width: 1.5rem;
+}

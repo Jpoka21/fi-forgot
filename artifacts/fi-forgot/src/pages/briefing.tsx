@@ -9,6 +9,7 @@ import {
   CardOrder, Child, EventBriefing, BriefingQuestion, BriefingAnswer,
   Recipient,
 } from "@/lib/data";
+import { illustrationPaths } from "@/app/design/assets/illustrationPaths";
 import { PB } from "@/lib/personal-brand";
 import { PersonAvatar, SoftCard, PrimaryBtn, SecondaryBtn } from "@/components/personal-ui";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
@@ -28,7 +29,7 @@ function LoadingWritingIllustration() {
   return (
     <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <img
-        src="/assets/illustrations/loading/011_loading_writing.webp"
+        src={illustrationPaths.loading.writing}
         alt="Dave thoughtfully writing a handwritten card"
         style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
       />
@@ -40,7 +41,7 @@ function LoadingSuccessIllustration() {
   return (
     <div style={{ width: "100%", maxWidth: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <img
-        src="/assets/illustrations/loading/015_loading_success.webp"
+        src={illustrationPaths.loading.success}
         alt="Dave finished taking care of everything, looking calm and satisfied"
         style={{ width: "100%", height: "auto", maxHeight: 220, display: "block", objectFit: "contain" }}
       />

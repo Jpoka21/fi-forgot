@@ -1,0 +1,163 @@
+/**
+ * F.I. Forgot design token CSS custom properties.
+ *
+ * Prefixed with --fi- to coexist with legacy shadcn/tailwind variables in index.css.
+ * Values align with the existing Relationship Concierge palette and light-mode defaults.
+ */
+
+:root {
+  /* Brand colors */
+  --fi-color-cream: #faf7f4;
+  --fi-color-beige: #f2e6d3;
+  --fi-color-paper: #f2e6d3;
+  --fi-color-ink: #111111;
+  --fi-color-ink-soft: #1f1f1f;
+  --fi-color-accent: #e23b2e;
+  --fi-color-accent-hover: #d32f2f;
+  --fi-color-border: #e5e0d8;
+  --fi-color-surface: #ffffff;
+  --fi-color-surface-elevated: #ffffff;
+  --fi-color-text-primary: #1f1f1f;
+  --fi-color-text-secondary: #4b5563;
+  --fi-color-text-muted: #6b7280;
+  --fi-color-success: #5b8c6b;
+  --fi-color-warning: #c97a0a;
+  --fi-color-danger: #d32f2f;
+  --fi-color-info: #2d5087;
+  --fi-color-focus-ring: hsl(var(--ring));
+  --fi-color-selection-bg: hsl(var(--primary) / 0.16);
+  --fi-color-selection-fg: hsl(var(--foreground));
+
+  /* Spacing */
+  --fi-space-0: 0;
+  --fi-space-1: 0.25rem;
+  --fi-space-2: 0.5rem;
+  --fi-space-3: 0.75rem;
+  --fi-space-4: 1rem;
+  --fi-space-5: 1.25rem;
+  --fi-space-6: 1.5rem;
+  --fi-space-8: 2rem;
+  --fi-space-10: 2.5rem;
+  --fi-space-12: 3rem;
+  --fi-space-16: 4rem;
+  --fi-space-page: clamp(1rem, 2vw, 2rem);
+  --fi-space-section: clamp(1.5rem, 3vw, 3rem);
+
+  /* Radius — aligned with existing --radius (.4rem) */
+  --fi-radius-sm: calc(var(--radius) - 4px);
+  --fi-radius-md: calc(var(--radius) - 2px);
+  --fi-radius-lg: var(--radius);
+  --fi-radius-xl: calc(var(--radius) + 4px);
+  --fi-radius-full: 9999px;
+
+  /* Shadows — reference existing shadow scale */
+  --fi-shadow-sm: var(--shadow-sm);
+  --fi-shadow-md: var(--shadow-md);
+  --fi-shadow-lg: var(--shadow-lg);
+  --fi-shadow-xl: var(--shadow-xl);
+
+  /* Elevation overlays */
+  --fi-elevation-1: var(--elevate-1);
+  --fi-elevation-2: var(--elevate-2);
+
+  /* Typography families — bridge to existing app font vars */
+  --fi-font-sans: var(--app-font-sans);
+  --fi-font-display: var(--app-font-display);
+  --fi-font-handwriting: var(--app-font-handwriting);
+  --fi-font-mono: var(--app-font-mono);
+
+  /* Type scale */
+  --fi-text-display-lg: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  --fi-text-display-md: clamp(2rem, 1.7rem + 1.2vw, 2.75rem);
+  --fi-text-h1: clamp(1.75rem, 1.5rem + 0.8vw, 2.25rem);
+  --fi-text-h2: clamp(1.375rem, 1.2rem + 0.5vw, 1.75rem);
+  --fi-text-h3: clamp(1.125rem, 1.05rem + 0.3vw, 1.375rem);
+  --fi-text-body-lg: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --fi-text-body: 1rem;
+  --fi-text-body-sm: 0.875rem;
+  --fi-text-caption: 0.75rem;
+  --fi-text-label: 0.8125rem;
+
+  /* Motion */
+  --fi-motion-duration-fast: 120ms;
+  --fi-motion-duration-base: 180ms;
+  --fi-motion-duration-slow: 280ms;
+  --fi-motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --fi-motion-ease-emphasized: cubic-bezier(0.2, 0, 0, 1.2);
+  --fi-motion-ease-concierge: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Z-index */
+  --fi-z-base: 0;
+  --fi-z-sticky: 100;
+  --fi-z-dropdown: 1000;
+  --fi-z-overlay: 9999;
+  --fi-z-toast: 10000;
+  --fi-z-max: 11000;
+
+  /* Opacity */
+  --fi-opacity-disabled: 0.45;
+  --fi-opacity-muted: 0.72;
+  --fi-opacity-overlay: 0.72;
+
+  /* Blur */
+  --fi-blur-sm: 4px;
+  --fi-blur-md: 8px;
+  --fi-blur-lg: 16px;
+
+  /* Layout */
+  --fi-container-sm: 640px;
+  --fi-container-md: 768px;
+  --fi-container-lg: 1024px;
+  --fi-container-xl: 1200px;
+  --fi-grid-columns: 12;
+  --fi-grid-gutter: 1.5rem;
+
+  /* Icons */
+  --fi-icon-sm: 16px;
+  --fi-icon-md: 20px;
+  --fi-icon-lg: 24px;
+
+  /* Focus */
+  --fi-focus-ring-width: 2px;
+  --fi-focus-ring-offset: 2px;
+}
+
+.dark {
+  --fi-color-surface: hsl(var(--card));
+  --fi-color-surface-elevated: hsl(var(--popover));
+  --fi-color-text-primary: hsl(var(--foreground));
+  --fi-color-text-secondary: hsl(var(--muted-foreground));
+  --fi-color-border: hsl(var(--border));
+  --fi-color-selection-bg: hsl(var(--primary) / 0.28);
+  --fi-color-selection-fg: hsl(var(--foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fi-motion-duration-fast: 0ms;
+    --fi-motion-duration-base: 0ms;
+    --fi-motion-duration-slow: 0ms;
+  }
+}
+
+@layer base {
+  :where(:focus-visible) {
+    outline: var(--fi-focus-ring-width) solid var(--fi-color-focus-ring);
+    outline-offset: var(--fi-focus-ring-offset);
+  }
+
+  ::selection {
+    background: var(--fi-color-selection-bg);
+    color: var(--fi-color-selection-fg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-try-btn {
+    animation: none !important;
+  }
+
+  .fi-route-transition {
+    animation: none !important;
+  }
+}

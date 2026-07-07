@@ -1,0 +1,184 @@
+/**
+ * F.I. Forgot avatar component styles.
+ * Opt-in — legacy `@/components/ui/avatar` remains unchanged.
+ */
+
+:root {
+  --fi-avatar-size-xs: 1.5rem;
+  --fi-avatar-size-sm: 2rem;
+  --fi-avatar-size-md: 2.5rem;
+  --fi-avatar-size-lg: 3rem;
+  --fi-avatar-size-xl: 4rem;
+  --fi-avatar-size-hero: 5rem;
+}
+
+.fi-avatar {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--fi-avatar-size-md);
+  height: var(--fi-avatar-size-md);
+  border-radius: var(--fi-radius-avatar);
+  overflow: hidden;
+  background-color: var(--fi-color-surface-secondary);
+  color: var(--fi-color-text-primary);
+  user-select: none;
+}
+
+.fi-avatar--xs { width: var(--fi-avatar-size-xs); height: var(--fi-avatar-size-xs); font-size: 0.625rem; }
+.fi-avatar--sm { width: var(--fi-avatar-size-sm); height: var(--fi-avatar-size-sm); font-size: 0.75rem; }
+.fi-avatar--md { width: var(--fi-avatar-size-md); height: var(--fi-avatar-size-md); font-size: 0.8125rem; }
+.fi-avatar--lg { width: var(--fi-avatar-size-lg); height: var(--fi-avatar-size-lg); font-size: 0.9375rem; }
+.fi-avatar--xl { width: var(--fi-avatar-size-xl); height: var(--fi-avatar-size-xl); font-size: 1.125rem; }
+.fi-avatar--hero { width: var(--fi-avatar-size-hero); height: var(--fi-avatar-size-hero); font-size: 1.375rem; }
+
+.fi-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fi-avatar__initials {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.fi-avatar__placeholder {
+  display: inline-flex;
+  color: var(--fi-color-text-muted);
+}
+
+.fi-avatar__placeholder-icon {
+  width: 55%;
+  height: 55%;
+}
+
+.fi-avatar--concierge {
+  background: linear-gradient(
+    145deg,
+    var(--fi-color-beige) 0%,
+    var(--fi-color-surface-secondary) 100%
+  );
+  border: 1px solid var(--fi-color-border);
+  color: var(--fi-color-primary);
+  font-family: var(--fi-font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.fi-avatar--system {
+  background-color: var(--fi-color-surface-tertiary);
+  color: var(--fi-color-text-secondary);
+}
+
+.fi-avatar--loading {
+  background-color: var(--fi-color-surface-secondary);
+}
+
+.fi-avatar--loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    color-mix(in srgb, var(--fi-color-surface-tertiary) 80%, transparent) 50%,
+    transparent 75%
+  );
+  animation: fi-avatar-shimmer 1.2s linear infinite;
+}
+
+.fi-avatar--uploading {
+  outline: 2px dashed var(--fi-color-primary);
+  outline-offset: 2px;
+}
+
+.fi-avatar__upload-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--fi-color-ink) 45%, transparent);
+  color: var(--fi-color-text-inverse);
+}
+
+.fi-avatar__upload-icon {
+  width: 40%;
+  height: 40%;
+}
+
+.fi-avatar__status {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: var(--fi-radius-circle);
+  border: 2px solid var(--fi-color-surface);
+  box-sizing: content-box;
+}
+
+.fi-avatar--lg .fi-avatar__status,
+.fi-avatar--xl .fi-avatar__status,
+.fi-avatar--hero .fi-avatar__status {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.fi-avatar__status--online { background-color: var(--fi-color-success); }
+.fi-avatar__status--away { background-color: var(--fi-color-warning); }
+.fi-avatar__status--offline { background-color: var(--fi-color-text-muted); }
+
+/* Avatar group */
+.fi-avatar-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.fi-avatar-group__item {
+  margin-inline-start: calc(var(--fi-space-2) * -1);
+  border: 2px solid var(--fi-color-surface);
+  border-radius: var(--fi-radius-circle);
+}
+
+.fi-avatar-group__item:first-child {
+  margin-inline-start: 0;
+}
+
+.fi-avatar-group__overflow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: calc(var(--fi-space-2) * -1);
+  border: 2px solid var(--fi-color-surface);
+  border-radius: var(--fi-radius-circle);
+  background-color: var(--fi-color-surface-tertiary);
+  color: var(--fi-color-text-secondary);
+  font-size: var(--fi-text-caption);
+  font-weight: 600;
+  width: var(--fi-avatar-size-md);
+  height: var(--fi-avatar-size-md);
+}
+
+.fi-avatar-group__overflow--xs { width: var(--fi-avatar-size-xs); height: var(--fi-avatar-size-xs); font-size: 0.5625rem; }
+.fi-avatar-group__overflow--sm { width: var(--fi-avatar-size-sm); height: var(--fi-avatar-size-sm); font-size: 0.625rem; }
+.fi-avatar-group__overflow--md { width: var(--fi-avatar-size-md); height: var(--fi-avatar-size-md); }
+.fi-avatar-group__overflow--lg { width: var(--fi-avatar-size-lg); height: var(--fi-avatar-size-lg); }
+.fi-avatar-group__overflow--xl { width: var(--fi-avatar-size-xl); height: var(--fi-avatar-size-xl); }
+.fi-avatar-group__overflow--hero { width: var(--fi-avatar-size-hero); height: var(--fi-avatar-size-hero); }
+
+@keyframes fi-avatar-shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-avatar--loading::after {
+    animation: none;
+    opacity: 0.5;
+  }
+}

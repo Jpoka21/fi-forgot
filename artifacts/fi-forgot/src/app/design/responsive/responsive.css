@@ -1,0 +1,61 @@
+/**
+ * F.I. Forgot responsive foundation.
+ * Mobile-first utilities aligned with playbook breakpoints (sm 640, md 768, lg 1024).
+ */
+
+:root {
+  --fi-touch-target-min: 2.75rem; /* 44px — accessibility minimum */
+  --fi-safe-area-top: env(safe-area-inset-top, 0px);
+  --fi-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --fi-safe-area-left: env(safe-area-inset-left, 0px);
+  --fi-safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: clip;
+}
+
+/* Sticky primary-action footer for mobile wizards and editors */
+.fi-mobile-sticky-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fi-space-2);
+  padding: var(--fi-space-3) 0;
+  padding-bottom: max(var(--fi-space-3), var(--fi-safe-area-bottom));
+  margin-top: var(--fi-space-4);
+  background: color-mix(in srgb, var(--fi-color-surface-primary, #fff) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--fi-color-border, #e8e0d8);
+}
+
+.fi-mobile-sticky-footer > .fi-btn,
+.fi-mobile-sticky-footer > button,
+.fi-mobile-sticky-footer > a {
+  flex: 1 1 auto;
+  min-height: var(--fi-touch-target-min);
+}
+
+@media (max-width: 767px) {
+  .fi-mobile-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fi-space-2);
+  }
+
+  .fi-mobile-stack > .fi-btn,
+  .fi-mobile-stack > button {
+    width: 100%;
+    min-height: var(--fi-touch-target-min);
+  }
+
+  .fi-mobile-full-width {
+    width: 100%;
+  }
+}

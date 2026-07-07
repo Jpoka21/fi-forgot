@@ -1,0 +1,178 @@
+/**
+ * Color system foundation styles.
+ *
+ * Opt-in utility classes — legacy shadcn/tailwind vars in index.css remain unchanged.
+ */
+
+:root {
+  /* Primary / secondary — bridge Phase 2 primitives */
+  --fi-color-primary: var(--fi-color-accent);
+  --fi-color-primary-hover: var(--fi-color-accent-hover);
+  --fi-color-secondary: var(--fi-color-ink-soft);
+
+  /* Canvas / surfaces */
+  --fi-color-canvas: var(--fi-color-cream);
+  --fi-color-surface-secondary: #f7f4ef;
+  --fi-color-surface-tertiary: #ece6dd;
+
+  /* Text */
+  --fi-color-text-disabled: #bfaf9a;
+  --fi-color-text-inverse: #ffffff;
+  --fi-color-link: var(--fi-color-accent);
+
+  /* Dividers / borders */
+  --fi-color-divider: var(--fi-color-border);
+  --fi-color-border-hover: #ddd4c7;
+  --fi-color-border-active: var(--fi-color-accent);
+  --fi-color-focus: var(--fi-color-focus-ring);
+  --fi-color-hover: color-mix(in srgb, var(--fi-color-ink) 8%, transparent);
+
+  /* Disabled */
+  --fi-color-disabled-bg: #ece6dd;
+  --fi-color-disabled-fg: #988775;
+
+  /* Feedback subtle backgrounds */
+  --fi-color-success-subtle: #e4ede7;
+  --fi-color-warning-subtle: #fdf3e1;
+  --fi-color-danger-subtle: #fdeaea;
+  --fi-color-info-subtle: #e5edf8;
+
+  /* Neutral scale (playbook) */
+  --fi-color-neutral-50: #fcfbf9;
+  --fi-color-neutral-100: #f7f4ef;
+  --fi-color-neutral-200: #ece6dd;
+  --fi-color-neutral-300: #ddd4c7;
+  --fi-color-neutral-400: #bfaf9a;
+  --fi-color-neutral-500: #988775;
+  --fi-color-neutral-600: #746659;
+  --fi-color-neutral-700: #5b4f45;
+  --fi-color-neutral-800: #403832;
+  --fi-color-neutral-900: #2e2a27;
+
+  /* Relationship Health */
+  --fi-color-health-excellent: #166534;
+  --fi-color-health-healthy: var(--fi-color-success);
+  --fi-color-health-needs-attention: var(--fi-color-warning);
+  --fi-color-health-priority: var(--fi-color-danger);
+
+  /* Brownie Points */
+  --fi-color-brownie-gold: #b8860b;
+  --fi-color-brownie-progress: var(--fi-color-warning);
+
+  /* Calendar status */
+  --fi-color-calendar-upcoming: #b8860b;
+  --fi-color-calendar-sent: var(--fi-color-success);
+  --fi-color-calendar-draft: #6b7c8f;
+  --fi-color-calendar-missed: var(--fi-color-danger);
+  --fi-color-calendar-autopilot: #6b9e7a;
+
+  /* Notifications */
+  --fi-color-notification-info: var(--fi-color-info);
+  --fi-color-notification-success: var(--fi-color-success);
+  --fi-color-notification-warning: var(--fi-color-warning);
+  --fi-color-notification-danger: var(--fi-color-danger);
+
+  /* Billing */
+  --fi-color-billing-surface: #fffcf8;
+  --fi-color-billing-accent: var(--fi-color-success);
+  --fi-color-billing-muted: var(--fi-color-neutral-500);
+
+  /* Admin console */
+  --fi-color-admin-surface: #0d2444;
+  --fi-color-admin-text: #ffffff;
+  --fi-color-admin-accent: #93c5fd;
+}
+
+.dark {
+  --fi-color-canvas: #1f1b18;
+  --fi-color-surface-secondary: #2a2521;
+  --fi-color-surface-tertiary: #342e29;
+  --fi-color-text-disabled: #746659;
+  --fi-color-text-inverse: #f7f3ed;
+  --fi-color-divider: #4b433d;
+  --fi-color-border-hover: #5b4f45;
+  --fi-color-disabled-bg: #342e29;
+  --fi-color-disabled-fg: #988775;
+  --fi-color-success-subtle: color-mix(in srgb, var(--fi-color-success) 18%, #1f1b18);
+  --fi-color-warning-subtle: color-mix(in srgb, var(--fi-color-warning) 18%, #1f1b18);
+  --fi-color-danger-subtle: color-mix(in srgb, var(--fi-color-danger) 18%, #1f1b18);
+  --fi-color-info-subtle: color-mix(in srgb, var(--fi-color-info) 18%, #1f1b18);
+}
+
+/* Background utilities */
+.fi-bg-canvas { background-color: var(--fi-color-canvas); }
+.fi-bg-surface { background-color: var(--fi-color-surface); }
+.fi-bg-surface-secondary { background-color: var(--fi-color-surface-secondary); }
+.fi-bg-surface-tertiary { background-color: var(--fi-color-surface-tertiary); }
+.fi-bg-surface-elevated { background-color: var(--fi-color-surface-elevated); }
+.fi-bg-primary { background-color: var(--fi-color-primary); color: var(--fi-color-text-inverse); }
+.fi-bg-primary-hover:hover { background-color: var(--fi-color-primary-hover); }
+.fi-bg-disabled { background-color: var(--fi-color-disabled-bg); }
+
+/* Text utilities */
+.fi-text-primary { color: var(--fi-color-text-primary); }
+.fi-text-secondary { color: var(--fi-color-text-secondary); }
+.fi-text-muted { color: var(--fi-color-text-muted); }
+.fi-text-disabled { color: var(--fi-color-text-disabled); }
+.fi-text-inverse { color: var(--fi-color-text-inverse); }
+.fi-text-link { color: var(--fi-color-link); }
+.fi-text-success { color: var(--fi-color-success); }
+.fi-text-warning { color: var(--fi-color-warning); }
+.fi-text-error { color: var(--fi-color-danger); }
+.fi-text-info { color: var(--fi-color-info); }
+
+/* Border / divider utilities */
+.fi-border-default { border-color: var(--fi-color-border); }
+.fi-border-hover:hover { border-color: var(--fi-color-border-hover); }
+.fi-border-active { border-color: var(--fi-color-border-active); }
+.fi-border-focus:focus-visible { border-color: var(--fi-color-focus); }
+.fi-divider { border-color: var(--fi-color-divider); }
+
+/* Interactive state utilities */
+.fi-state-hover:hover { background-color: var(--fi-color-hover); }
+.fi-state-disabled {
+  background-color: var(--fi-color-disabled-bg);
+  color: var(--fi-color-disabled-fg);
+  opacity: var(--fi-opacity-disabled);
+  pointer-events: none;
+}
+
+/* Feedback subtle surfaces */
+.fi-bg-success-subtle { background-color: var(--fi-color-success-subtle); color: var(--fi-color-success); }
+.fi-bg-warning-subtle { background-color: var(--fi-color-warning-subtle); color: var(--fi-color-warning); }
+.fi-bg-error-subtle { background-color: var(--fi-color-danger-subtle); color: var(--fi-color-danger); }
+.fi-bg-info-subtle { background-color: var(--fi-color-info-subtle); color: var(--fi-color-info); }
+
+/* Domain: Relationship Health */
+.fi-color-health-excellent { color: var(--fi-color-health-excellent); }
+.fi-color-health-healthy { color: var(--fi-color-health-healthy); }
+.fi-color-health-needs-attention { color: var(--fi-color-health-needs-attention); }
+.fi-color-health-priority { color: var(--fi-color-health-priority); }
+
+/* Domain: Brownie Points */
+.fi-color-brownie { color: var(--fi-color-brownie-gold); }
+.fi-bg-brownie-subtle {
+  background-color: #fdf6e3;
+  color: var(--fi-color-brownie-gold);
+}
+
+/* Domain: Calendar */
+.fi-color-calendar-upcoming { color: var(--fi-color-calendar-upcoming); }
+.fi-color-calendar-sent { color: var(--fi-color-calendar-sent); }
+.fi-color-calendar-draft { color: var(--fi-color-calendar-draft); }
+.fi-color-calendar-missed { color: var(--fi-color-calendar-missed); }
+.fi-color-calendar-autopilot { color: var(--fi-color-calendar-autopilot); }
+
+/* Domain: Notifications */
+.fi-bg-notification-info { background-color: var(--fi-color-info-subtle); color: var(--fi-color-notification-info); }
+.fi-bg-notification-success { background-color: var(--fi-color-success-subtle); color: var(--fi-color-notification-success); }
+.fi-bg-notification-warning { background-color: var(--fi-color-warning-subtle); color: var(--fi-color-notification-warning); }
+.fi-bg-notification-danger { background-color: var(--fi-color-danger-subtle); color: var(--fi-color-notification-danger); }
+
+/* Domain: Billing */
+.fi-bg-billing { background-color: var(--fi-color-billing-surface); }
+.fi-text-billing-accent { color: var(--fi-color-billing-accent); }
+
+/* Domain: Admin */
+.fi-bg-admin { background-color: var(--fi-color-admin-surface); color: var(--fi-color-admin-text); }
+.fi-text-admin-accent { color: var(--fi-color-admin-accent); }

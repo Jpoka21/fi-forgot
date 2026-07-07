@@ -109,12 +109,12 @@ export default function BusinessLoginPage() {
           }}>
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <div style={{ marginBottom: 20 }}>
-                <label style={labelStyle}>Email</label>
+                <label htmlFor="business-login-email" style={labelStyle}>Email</label>
                 <input
+                  id="business-login-email"
                   {...register("email")}
                   type="email"
                   placeholder="you@yourcompany.com"
-                  autoFocus
                   style={inputStyle}
                   onFocus={e => (e.target.style.borderColor = "rgba(255,255,255,0.35)")}
                   onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
@@ -123,8 +123,9 @@ export default function BusinessLoginPage() {
               </div>
 
               <div style={{ marginBottom: 28 }}>
-                <label style={labelStyle}>Password</label>
+                <label htmlFor="business-login-password" style={labelStyle}>Password</label>
                 <input
+                  id="business-login-password"
                   {...register("password")}
                   type="password"
                   placeholder="••••••••"
