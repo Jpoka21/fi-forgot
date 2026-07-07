@@ -7,6 +7,7 @@
 
 import type { SignalContributor } from "./types";
 import { contributeBriefingEngagementSignals } from "./briefingEngagementContributor";
+import { contributeCardHistorySignals } from "./cardHistoryContributor";
 import { contributeEventTimingSignals } from "./eventTimingContributor";
 import { contributeFollowUpRecencySignals } from "./followUpRecencyContributor";
 import { contributeFreshUpdateRecencySignals } from "./freshUpdateRecencyContributor";
@@ -16,6 +17,7 @@ export const signalContributors: SignalContributor[] = [
   contributeProfileCompletenessSignals,
   contributeEventTimingSignals,
   contributeFreshUpdateRecencySignals,
+  contributeCardHistorySignals,
   contributeFollowUpRecencySignals,
   contributeBriefingEngagementSignals,
 ];
