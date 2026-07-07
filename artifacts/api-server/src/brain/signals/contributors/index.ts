@@ -12,6 +12,7 @@ import { contributeDeliveryPreferencesSignals } from "./deliveryPreferencesContr
 import { contributeEventTimingSignals } from "./eventTimingContributor";
 import { contributeFollowUpRecencySignals } from "./followUpRecencyContributor";
 import { contributeFreshUpdateRecencySignals } from "./freshUpdateRecencyContributor";
+import { contributeMemoryInventorySignals } from "./memoryInventoryContributor";
 import { contributeProfileCompletenessSignals } from "./profileCompletenessContributor";
 import { contributeRelationshipMomentumSignals } from "./relationshipMomentumContributor";
 import { contributeToneAndGuardrailsSignals } from "./toneAndGuardrailsContributor";
@@ -26,4 +27,5 @@ export const signalContributors: SignalContributor[] = [
   contributeDeliveryPreferencesSignals,
   contributeToneAndGuardrailsSignals,
   contributeRelationshipMomentumSignals,
+  contributeMemoryInventorySignals,
 ];
