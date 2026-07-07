@@ -7,6 +7,7 @@
 
 import type { SignalContributor } from "./types";
 import { contributeEventTimingSignals } from "./eventTimingContributor";
+import { contributeFollowUpRecencySignals } from "./followUpRecencyContributor";
 import { contributeFreshUpdateRecencySignals } from "./freshUpdateRecencyContributor";
 import { contributeProfileCompletenessSignals } from "./profileCompletenessContributor";
 
@@ -14,4 +15,5 @@ export const signalContributors: SignalContributor[] = [
   contributeProfileCompletenessSignals,
   contributeEventTimingSignals,
   contributeFreshUpdateRecencySignals,
+  contributeFollowUpRecencySignals,
 ];
