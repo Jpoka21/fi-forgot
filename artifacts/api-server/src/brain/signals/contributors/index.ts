@@ -13,6 +13,7 @@ import { contributeEventTimingSignals } from "./eventTimingContributor";
 import { contributeFollowUpRecencySignals } from "./followUpRecencyContributor";
 import { contributeFreshUpdateRecencySignals } from "./freshUpdateRecencyContributor";
 import { contributeProfileCompletenessSignals } from "./profileCompletenessContributor";
+import { contributeRelationshipMomentumSignals } from "./relationshipMomentumContributor";
 import { contributeToneAndGuardrailsSignals } from "./toneAndGuardrailsContributor";
 
 export const signalContributors: SignalContributor[] = [
@@ -24,4 +25,5 @@ export const signalContributors: SignalContributor[] = [
   contributeBriefingEngagementSignals,
   contributeDeliveryPreferencesSignals,
   contributeToneAndGuardrailsSignals,
+  contributeRelationshipMomentumSignals,
 ];
