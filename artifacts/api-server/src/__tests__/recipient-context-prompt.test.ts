@@ -19,6 +19,7 @@ import {
   extractContextAvoids,
 } from "../services/recipient-context-prompt.js";
 import type { RecipientContext } from "../services/recipient-context.js";
+import { CONTEXT_VERSION } from "../services/recipient-context.js";
 
 // ─── Harness ─────────────────────────────────────────────────────────────────
 
@@ -79,7 +80,7 @@ const now = new Date().toISOString();
 
 function makeContext(overrides: Partial<RecipientContext> = {}): RecipientContext {
   return {
-    contextVersion: 1,
+    contextVersion: CONTEXT_VERSION,
     generatedAt: now,
     recipientId: "r-1",
     userId: "u-1",
@@ -127,6 +128,7 @@ function makeContext(overrides: Partial<RecipientContext> = {}): RecipientContex
       eventTypes: [],
       mostRecentCard: null,
     },
+    writingHistory: { cards: [] },
     briefingSummary: {
       totalAnswers: 0,
       byEvent: {},

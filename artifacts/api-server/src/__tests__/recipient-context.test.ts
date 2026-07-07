@@ -17,6 +17,7 @@ import {
   buildTone,
   buildDelivery,
   buildCardHistorySummary,
+  buildWritingHistoryInventory,
   buildBriefingSummary,
   buildProfileCompleteness,
   CONTEXT_VERSION,
@@ -144,7 +145,7 @@ const baseAnswer: QuestionAnswer = {
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 section("CONTEXT_VERSION");
-expect("is 1", CONTEXT_VERSION, 1);
+expect("is 2", CONTEXT_VERSION, 2);
 
 section("buildIdentity — full name");
 {
@@ -271,6 +272,50 @@ section("buildCardHistorySummary — multiple cards, deduplicates eventTypes");
   expect("rejectedCount=1", h.rejectedCount, 1);
   expect("two distinct eventTypes", h.eventTypes.length, 2);
   expect("mostRecentCard is the newer one (Birthday)", h.mostRecentCard?.eventType, "Birthday");
+}
+
+section("buildWritingHistoryInventory — empty");
+{
+  const inventory = buildWritingHistoryInventory([]);
+  expect("cards=[]", JSON.stringify(inventory.cards), JSON.stringify([]));
+}
+
+section("buildWritingHistoryInventory — one card");
+{
+  const referenceTime = new Date("2024-06-01T12:00:00.000Z");
+  const cardCreatedAt = new Date("2024-05-01T12:00:00.000Z");
+  const inventory = buildWritingHistoryInventory(
+    [{ ...baseCard, createdAt: cardCreatedAt }],
+    referenceTime,
+  );
+  expect("one card", inventory.cards.length, 1);
+  const card = inventory.cards[0]!;
+  expect("eventType", card.eventType, "Birthday");
+  expect("hasMessageFinal", card.hasMessageFinal, true);
+  expect("hasMessageOriginal", card.hasMessageOriginal, true);
+  expect("messageWordCount", card.messageWordCount, 4);
+  expect("daysAgo", card.daysAgo, 31);
+  expect("no messageFinal text field", "messageFinal" in card, false);
+  expect("no messageOriginal text field", "messageOriginal" in card, false);
+}
+
+section("buildWritingHistoryInventory — newest first");
+{
+  const older = new Date("2024-01-01T12:00:00.000Z");
+  const newer = new Date("2024-06-01T12:00:00.000Z");
+  const card2: PersonalCard = {
+    ...baseCard,
+    id: "card-2",
+    eventType: "Anniversary",
+    createdAt: older,
+  };
+  const inventory = buildWritingHistoryInventory([
+    { ...baseCard, createdAt: newer },
+    card2,
+  ]);
+  expect("two cards", inventory.cards.length, 2);
+  expect("newest first", inventory.cards[0]?.eventType, "Birthday");
+  expect("older second", inventory.cards[1]?.eventType, "Anniversary");
 }
 
 section("buildBriefingSummary — empty");

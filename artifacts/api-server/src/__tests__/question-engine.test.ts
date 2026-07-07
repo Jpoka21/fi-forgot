@@ -11,6 +11,7 @@
 import { getNextQuestion, getAllPendingQuestions, getNextFreshUpdateQuestion, FRESH_UPDATE_BANK } from "../services/question-engine.js";
 import type { FreshUpdateRecord } from "../services/question-engine.js";
 import type { RecipientContext } from "../services/recipient-context.js";
+import { CONTEXT_VERSION } from "../services/recipient-context.js";
 
 // ─── Harness ─────────────────────────────────────────────────────────────────
 
@@ -64,7 +65,7 @@ function makeContext(missing: string[], firstName = "Sarah"): RecipientContext {
   const score = Math.round((filled.length / allLabels.length) * 100);
 
   return {
-    contextVersion: 1,
+    contextVersion: CONTEXT_VERSION,
     generatedAt: now,
     recipientId: "r-test",
     userId: "u-test",
@@ -78,6 +79,7 @@ function makeContext(missing: string[], firstName = "Sarah"): RecipientContext {
     tone: { preferred: null, emotionalOpenness: null, thingsToAvoid: null, thingsToAlwaysInclude: null },
     delivery: { preference: null, previewDays: null, senderNickname: null, signOff: null },
     cardHistory: { totalSent: 0, approvedCount: 0, rejectedCount: 0, editedCount: 0, eventTypes: [], mostRecentCard: null },
+    writingHistory: { cards: [] },
     briefingSummary: { totalAnswers: 0, byEvent: {}, allAnswers: [] },
     profileCompleteness: { score, filled, missing },
     freshUpdates: [],

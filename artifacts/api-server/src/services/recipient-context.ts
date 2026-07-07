@@ -27,7 +27,7 @@ import type { RecipientRow, RecipientProfileRow } from "@workspace/db";
 import type { QuestionAnswer } from "@workspace/db";
 import type { PersonalCard } from "@workspace/db";
 
-export const CONTEXT_VERSION = 1 as const;
+export const CONTEXT_VERSION = 2 as const;
 
 // ─── Output types ─────────────────────────────────────────────────────────────
 
@@ -83,6 +83,33 @@ export interface CardHistorySummary {
     eventDate: string | null;
     status: string;
   } | null;
+}
+
+/**
+ * Metadata-only inventory of personal card writing history.
+ * No message body text — counts and flags only.
+ */
+export interface WritingHistoryCard {
+  id: string;
+  eventType: string;
+  eventDate: string | null;
+  status: string;
+  wasEdited: boolean;
+  createdAt: string;
+  daysAgo: number;
+  hasMessageFinal: boolean;
+  hasMessageOriginal: boolean;
+  messageWordCount: number | null;
+  archetype: string | null;
+  generationVersion: string;
+  approvedAt: string | null;
+  rejectedAt: string | null;
+  mailedAt: string | null;
+}
+
+export interface WritingHistoryInventory {
+  /** All cards for this recipient, newest first. */
+  cards: WritingHistoryCard[];
 }
 
 export interface BriefingAnswer {
@@ -145,6 +172,7 @@ export interface RecipientContext {
   tone: RecipientTone;
   delivery: RecipientDelivery;
   cardHistory: CardHistorySummary;
+  writingHistory: WritingHistoryInventory;
   briefingSummary: BriefingSummary;
   profileCompleteness: ProfileCompleteness;
   freshUpdates: FreshUpdate[];
@@ -242,6 +270,50 @@ export function buildCardHistorySummary(cards: PersonalCard[]): CardHistorySumma
       eventDate: latest.eventDate ?? null,
       status: latest.status,
     },
+  };
+}
+
+const MS_PER_DAY = 86_400_000;
+
+function toIsoTimestamp(value: Date | null | undefined): string | null {
+  if (!value) return null;
+  return new Date(value).toISOString();
+}
+
+function countMessageWords(text: string | null | undefined): number | null {
+  if (!text?.trim()) return null;
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+export function buildWritingHistoryInventory(
+  cards: PersonalCard[],
+  referenceTime: Date = new Date(),
+): WritingHistoryInventory {
+  const referenceMs = referenceTime.getTime();
+  const sorted = [...cards].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
+  return {
+    cards: sorted.map((card) => ({
+      id: card.id,
+      eventType: card.eventType,
+      eventDate: card.eventDate ?? null,
+      status: card.status,
+      wasEdited: card.wasEdited,
+      createdAt: new Date(card.createdAt).toISOString(),
+      daysAgo: Math.floor(
+        (referenceMs - new Date(card.createdAt).getTime()) / MS_PER_DAY,
+      ),
+      hasMessageFinal: !!card.messageFinal?.trim(),
+      hasMessageOriginal: !!card.messageOriginal?.trim(),
+      messageWordCount: countMessageWords(card.messageFinal ?? card.messageOriginal),
+      archetype: card.archetype ?? null,
+      generationVersion: card.generationVersion,
+      approvedAt: toIsoTimestamp(card.approvedAt),
+      rejectedAt: toIsoTimestamp(card.rejectedAt),
+      mailedAt: toIsoTimestamp(card.mailedAt),
+    })),
   };
 }
 
@@ -450,6 +522,7 @@ export async function assembleRecipientContext(
   const tone = buildTone(profile);
   const delivery = buildDelivery(profile);
   const cardHistory = buildCardHistorySummary(cardRows);
+  const writingHistory = buildWritingHistoryInventory(cardRows);
   const briefingSummary = buildBriefingSummary(regularAnswerRows);
   const freshUpdates = buildFreshUpdates(freshAnswerRows);
   const followUpAnswers = buildFollowUpAnswers(followUpAnswerRows);
@@ -476,6 +549,7 @@ export async function assembleRecipientContext(
     tone,
     delivery,
     cardHistory,
+    writingHistory,
     briefingSummary,
     freshUpdates,
     followUpAnswers,
