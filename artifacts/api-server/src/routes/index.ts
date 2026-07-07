@@ -25,6 +25,7 @@ import v2RecipientsRouter from "./v2-recipients";
 import v2GenerateCardRouter from "./v2-generate-card";
 import personalHistoryRouter from "./personal-history";
 import debugRouter from "./debug";
+import brainDebugRouter from "../brain/debug/brainDebugRoute";
 import browniePointsRouter from "./brownie-points";
 import v2RecipientHealthRouter from "./v2-recipient-health";
 
@@ -56,6 +57,7 @@ router.use(v2RecipientsRouter);
 router.use(v2GenerateCardRouter);
 router.use(personalHistoryRouter);
 router.use(debugRouter);
+router.use(brainDebugRouter);
 router.use(browniePointsRouter);
 router.use(stripeRouter);
 
