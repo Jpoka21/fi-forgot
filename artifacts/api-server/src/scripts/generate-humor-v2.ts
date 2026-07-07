@@ -49,6 +49,9 @@ function downloadImage(url: string, dest: string): Promise<void> {
       n: 1,
     });
 
+    if (!response.data || response.data.length === 0) {
+      throw new Error("Image generation returned no data");
+    }
     const imgData = response.data[0];
     const filePath = path.join(outDir, `${card.id}.png`);
 
