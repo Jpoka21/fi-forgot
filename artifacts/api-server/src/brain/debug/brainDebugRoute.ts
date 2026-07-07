@@ -9,7 +9,8 @@
  */
 
 import { Router } from "express";
-import { runBrain } from "../index";
+import { executeBrain, toBrainResponse } from "../orchestrator";
+import { buildBrainInspector } from "./buildBrainInspector";
 import { logger } from "../../lib/logger";
 
 const router = Router();
@@ -37,7 +38,7 @@ function requireUserId(
 /**
  * GET /api/debug/brain/:recipientId
  *
- * Returns the raw BrainResponse from runBrain().
+ * Returns BrainResponse plus dev-only inspector metadata.
  */
 router.get("/debug/brain/:recipientId", async (req, res) => {
   if (!requireDev(res)) return;
@@ -47,11 +48,24 @@ router.get("/debug/brain/:recipientId", async (req, res) => {
   const { recipientId } = req.params;
 
   try {
-    const response = await runBrain(recipientId, userId);
+    const execution = await executeBrain(recipientId, userId);
+    const response = toBrainResponse(
+      execution.loadResult,
+      execution.extraction,
+      execution.decideResult,
+    );
+    const inspector = buildBrainInspector(execution);
 
-    logger.info({ recipientId, outcome: response.decision.outcome }, "debug/brain");
+    logger.info(
+      {
+        recipientId,
+        outcome: response.decision.outcome,
+        signalCount: response.availableSignals.length,
+      },
+      "debug/brain",
+    );
 
-    res.json(response);
+    res.json({ ...response, inspector });
   } catch (err) {
     logger.error({ err, recipientId }, "debug/brain failed");
     res.status(500).json({ error: "Failed to run brain" });
