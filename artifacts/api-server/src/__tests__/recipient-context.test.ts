@@ -18,6 +18,7 @@ import {
   buildDelivery,
   buildCardHistorySummary,
   buildWritingHistoryInventory,
+  buildRelationshipTimelineInventory,
   buildBriefingSummary,
   buildProfileCompleteness,
   CONTEXT_VERSION,
@@ -145,7 +146,7 @@ const baseAnswer: QuestionAnswer = {
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 section("CONTEXT_VERSION");
-expect("is 2", CONTEXT_VERSION, 2);
+expect("is 3", CONTEXT_VERSION, 3);
 
 section("buildIdentity — full name");
 {
@@ -316,6 +317,101 @@ section("buildWritingHistoryInventory — newest first");
   expect("two cards", inventory.cards.length, 2);
   expect("newest first", inventory.cards[0]?.eventType, "Birthday");
   expect("older second", inventory.cards[1]?.eventType, "Anniversary");
+}
+
+section("buildRelationshipTimelineInventory — empty");
+{
+  const timeline = buildRelationshipTimelineInventory([], []);
+  expect("events=[]", JSON.stringify(timeline.events), JSON.stringify([]));
+}
+
+section("buildRelationshipTimelineInventory — activity events only");
+{
+  const referenceTime = new Date("2024-06-01T12:00:00.000Z");
+  const fresh: QuestionAnswer = {
+    ...baseAnswer,
+    id: "qa-fresh",
+    triggerType: "fresh_update",
+    questionKey: "recent_memory",
+    createdAt: new Date("2024-05-20T12:00:00.000Z"),
+  };
+  const followUp: QuestionAnswer = {
+    ...baseAnswer,
+    id: "qa-follow",
+    triggerType: "follow_up",
+    questionKey: "follow_up",
+    createdAt: new Date("2024-05-10T12:00:00.000Z"),
+  };
+  const briefingA: QuestionAnswer = {
+    ...baseAnswer,
+    id: "qa-brief-1",
+    triggerType: "event_briefing",
+    eventType: "Birthday",
+    eventYear: 2024,
+    createdAt: new Date("2024-04-01T12:00:00.000Z"),
+  };
+  const briefingB: QuestionAnswer = {
+    ...baseAnswer,
+    id: "qa-brief-2",
+    triggerType: "event_briefing",
+    eventType: "Birthday",
+    eventYear: 2024,
+    createdAt: new Date("2024-04-12T12:00:00.000Z"),
+  };
+  const profileGap: QuestionAnswer = {
+    ...baseAnswer,
+    id: "qa-profile",
+    triggerType: "profile_gap",
+    questionKey: "interests",
+    createdAt: new Date("2024-03-01T12:00:00.000Z"),
+  };
+  const draftCard: PersonalCard = {
+    ...baseCard,
+    id: "card-draft",
+    status: "draft",
+    createdAt: new Date("2024-05-25T12:00:00.000Z"),
+  };
+  const approvedCard: PersonalCard = {
+    ...baseCard,
+    id: "card-1",
+    status: "Approved",
+    createdAt: new Date("2024-05-01T12:00:00.000Z"),
+    approvedAt: new Date("2024-05-02T12:00:00.000Z"),
+    mailedAt: null,
+  };
+
+  const timeline = buildRelationshipTimelineInventory(
+    [fresh, followUp, briefingA, briefingB, profileGap],
+    [draftCard, approvedCard],
+    referenceTime,
+  );
+
+  expect("five events (draft excluded, briefing grouped)", timeline.events.length, 5);
+  expect("newest is fresh_update", timeline.events[0]?.type, "fresh_update");
+  expect("fresh label", timeline.events[0]?.label, "Recent memory");
+  expect("no answer text field", "summary" in (timeline.events[0] ?? {}), false);
+  expect("no message text field", "message" in (timeline.events[0] ?? {}), false);
+
+  const types = timeline.events.map((event) => event.type).sort();
+  expect(
+    "includes expected types",
+    JSON.stringify(types),
+    JSON.stringify([
+      "card",
+      "event_briefing",
+      "follow_up_answer",
+      "fresh_update",
+      "profile_gap",
+    ]),
+  );
+
+  const briefing = timeline.events.find((event) => event.type === "event_briefing");
+  expect("briefing label", briefing?.label, "Birthday 2024");
+  expect("briefing uses latest group date", briefing?.occurredAt, "2024-04-12T12:00:00.000Z");
+
+  const card = timeline.events.find((event) => event.type === "card");
+  expect("card label", card?.label, "Birthday card");
+  expect("card uses approvedAt when present", card?.occurredAt, "2024-05-02T12:00:00.000Z");
 }
 
 section("buildBriefingSummary — empty");

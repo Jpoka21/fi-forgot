@@ -27,7 +27,7 @@ import type { RecipientRow, RecipientProfileRow } from "@workspace/db";
 import type { QuestionAnswer } from "@workspace/db";
 import type { PersonalCard } from "@workspace/db";
 
-export const CONTEXT_VERSION = 2 as const;
+export const CONTEXT_VERSION = 3 as const;
 
 // ─── Output types ─────────────────────────────────────────────────────────────
 
@@ -112,6 +112,30 @@ export interface WritingHistoryInventory {
   cards: WritingHistoryCard[];
 }
 
+/**
+ * Metadata-only relationship activity timeline.
+ * No answer text, no card message bodies — labels and timestamps only.
+ */
+export type RelationshipTimelineEventType =
+  | "fresh_update"
+  | "follow_up_answer"
+  | "profile_gap"
+  | "event_briefing"
+  | "card";
+
+export interface RelationshipTimelineEvent {
+  id: string;
+  type: RelationshipTimelineEventType;
+  occurredAt: string; // ISO 8601
+  daysAgo: number;
+  label: string;
+}
+
+export interface RelationshipTimelineInventory {
+  /** Historical relationship activity, newest first. */
+  events: RelationshipTimelineEvent[];
+}
+
 export interface BriefingAnswer {
   questionKey: string;
   question: string;
@@ -173,6 +197,7 @@ export interface RecipientContext {
   delivery: RecipientDelivery;
   cardHistory: CardHistorySummary;
   writingHistory: WritingHistoryInventory;
+  relationshipTimeline: RelationshipTimelineInventory;
   briefingSummary: BriefingSummary;
   profileCompleteness: ProfileCompleteness;
   freshUpdates: FreshUpdate[];
@@ -315,6 +340,110 @@ export function buildWritingHistoryInventory(
       mailedAt: toIsoTimestamp(card.mailedAt),
     })),
   };
+}
+
+const TIMELINE_QUESTION_KEY_LABELS: Record<string, string> = {
+  things_to_avoid: "Things to avoid",
+  interests: "Interests",
+  favorite_memories: "Favorite memories",
+  inside_jokes: "Inside jokes",
+  personality_notes: "Personality notes",
+  personality_traits: "Personality traits",
+  preferred_tone: "Preferred tone",
+  emotional_openness: "Emotional openness",
+  always_include: "Always include",
+  birthday: "Birthday",
+  anniversary: "Anniversary",
+  delivery_preference: "Delivery preference",
+  briefing_answers: "General notes",
+  recent_memory: "Recent memory",
+  current_excitement: "Current excitement",
+  current_challenge: "Current challenge",
+  recent_accomplishment: "Recent accomplishment",
+  family_news: "Family & home life",
+  new_hobby: "New hobby or interest",
+  anything_to_remember: "Anything to remember",
+};
+
+function cardOccurredAt(card: PersonalCard): Date {
+  return new Date(card.mailedAt ?? card.approvedAt ?? card.createdAt);
+}
+
+/**
+ * Builds a metadata-only activity timeline from already-loaded answer and card rows.
+ * No answer text, no message bodies, no important_date profile placeholders.
+ */
+export function buildRelationshipTimelineInventory(
+  answers: QuestionAnswer[],
+  cards: PersonalCard[],
+  referenceTime: Date = new Date(),
+): RelationshipTimelineInventory {
+  const referenceMs = referenceTime.getTime();
+  const events: RelationshipTimelineEvent[] = [];
+
+  const briefingGroups = new Map<string, QuestionAnswer[]>();
+
+  for (const answer of answers) {
+    if (answer.triggerType === "event_briefing") {
+      const key = `${answer.eventType}_${answer.eventYear}`;
+      if (!briefingGroups.has(key)) briefingGroups.set(key, []);
+      briefingGroups.get(key)!.push(answer);
+      continue;
+    }
+
+    const type: RelationshipTimelineEventType =
+      answer.triggerType === "fresh_update"
+        ? "fresh_update"
+        : answer.triggerType === "follow_up"
+          ? "follow_up_answer"
+          : "profile_gap";
+
+    const occurredAt = new Date(answer.createdAt);
+    events.push({
+      id: answer.id,
+      type,
+      occurredAt: occurredAt.toISOString(),
+      daysAgo: Math.floor((referenceMs - occurredAt.getTime()) / MS_PER_DAY),
+      label:
+        type === "follow_up_answer"
+          ? "Follow Up"
+          : (TIMELINE_QUESTION_KEY_LABELS[answer.questionKey] ?? answer.questionKey),
+    });
+  }
+
+  for (const [groupKey, group] of briefingGroups) {
+    const first = group[0]!;
+    const latestDate = group.reduce(
+      (max, row) => (row.createdAt > max ? row.createdAt : max),
+      group[0]!.createdAt,
+    );
+    const occurredAt = new Date(latestDate);
+    events.push({
+      id: `briefing_${groupKey}`,
+      type: "event_briefing",
+      occurredAt: occurredAt.toISOString(),
+      daysAgo: Math.floor((referenceMs - occurredAt.getTime()) / MS_PER_DAY),
+      label: `${first.eventType} ${first.eventYear}`,
+    });
+  }
+
+  for (const card of cards) {
+    if (card.status === "draft") continue;
+    const occurredAt = cardOccurredAt(card);
+    events.push({
+      id: `card_${card.id}`,
+      type: "card",
+      occurredAt: occurredAt.toISOString(),
+      daysAgo: Math.floor((referenceMs - occurredAt.getTime()) / MS_PER_DAY),
+      label: `${card.eventType} card`,
+    });
+  }
+
+  events.sort(
+    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
+  );
+
+  return { events };
 }
 
 export function buildBriefingSummary(answers: QuestionAnswer[]): BriefingSummary {
@@ -523,6 +652,7 @@ export async function assembleRecipientContext(
   const delivery = buildDelivery(profile);
   const cardHistory = buildCardHistorySummary(cardRows);
   const writingHistory = buildWritingHistoryInventory(cardRows);
+  const relationshipTimeline = buildRelationshipTimelineInventory(answerRows, cardRows);
   const briefingSummary = buildBriefingSummary(regularAnswerRows);
   const freshUpdates = buildFreshUpdates(freshAnswerRows);
   const followUpAnswers = buildFollowUpAnswers(followUpAnswerRows);
@@ -550,6 +680,7 @@ export async function assembleRecipientContext(
     delivery,
     cardHistory,
     writingHistory,
+    relationshipTimeline,
     briefingSummary,
     freshUpdates,
     followUpAnswers,

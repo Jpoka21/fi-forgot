@@ -80,6 +80,7 @@ function makeContext(missing: string[], firstName = "Sarah"): RecipientContext {
     delivery: { preference: null, previewDays: null, senderNickname: null, signOff: null },
     cardHistory: { totalSent: 0, approvedCount: 0, rejectedCount: 0, editedCount: 0, eventTypes: [], mostRecentCard: null },
     writingHistory: { cards: [] },
+    relationshipTimeline: { events: [] },
     briefingSummary: { totalAnswers: 0, byEvent: {}, allAnswers: [] },
     profileCompleteness: { score, filled, missing },
     freshUpdates: [],

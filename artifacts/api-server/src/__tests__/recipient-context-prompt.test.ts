@@ -129,6 +129,7 @@ function makeContext(overrides: Partial<RecipientContext> = {}): RecipientContex
       mostRecentCard: null,
     },
     writingHistory: { cards: [] },
+    relationshipTimeline: { events: [] },
     briefingSummary: {
       totalAnswers: 0,
       byEvent: {},
