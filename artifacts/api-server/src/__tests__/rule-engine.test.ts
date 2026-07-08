@@ -89,7 +89,7 @@ section("runRuleEngine preserves scaffold for rich DecisionContext");
   expect("serialized scaffold", JSON.stringify(result), JSON.stringify(SCAFFOLD));
 }
 
-section("decide() serialized output matches scaffold");
+section("decide() serialized output matches scaffold for non-stale contexts");
 {
   const empty = buildDecisionContext(normalized());
   const rich = buildDecisionContext(
@@ -105,6 +105,33 @@ section("decide() serialized output matches scaffold");
   expect("decide empty serialized", JSON.stringify(decide(empty)), JSON.stringify(SCAFFOLD));
   expect("decide rich serialized", JSON.stringify(decide(rich)), JSON.stringify(SCAFFOLD));
   expect("decide empty === decide rich", JSON.stringify(decide(empty)), JSON.stringify(decide(rich)));
+}
+
+const FRESH_UPDATE_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 52,
+  reasons: ["information_stale", "fresh_update_due"],
+  debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+};
+
+section("runRuleEngine returns ask_question for stale freshness");
+{
+  const context = buildDecisionContext(normalized({ freshness: "stale" }));
+  const result = runRuleEngine(context);
+  expect("result", result, FRESH_UPDATE_RESULT);
+  expect(
+    "serialized fresh update",
+    JSON.stringify(result),
+    JSON.stringify(FRESH_UPDATE_RESULT),
+  );
+}
+
+section("decide() returns ask_question only for stale freshness");
+{
+  const stale = buildDecisionContext(normalized({ freshness: "stale" }));
+  const unknown = buildDecisionContext(normalized({ freshness: "unknown" }));
+  expect("stale serialized", JSON.stringify(decide(stale)), JSON.stringify(FRESH_UPDATE_RESULT));
+  expect("unknown serialized", JSON.stringify(decide(unknown)), JSON.stringify(SCAFFOLD));
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

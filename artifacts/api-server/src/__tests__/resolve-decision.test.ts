@@ -53,6 +53,33 @@ section("single candidate maps to DecideResult");
   expect("serialized scaffold", JSON.stringify(result), JSON.stringify(SCAFFOLD));
 }
 
+section("fresh update candidate beats wait");
+{
+  const result = resolveDecision([
+    waitCandidate,
+    {
+      ruleId: "fresh_update",
+      priority: 40,
+      confidence: 52,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["information_stale", "fresh_update_due"],
+      debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+    },
+  ]);
+  expect("outcome", result.decision.outcome, "ask_question");
+  expect("confidence", result.confidence, 52);
+  expect(
+    "serialized result",
+    JSON.stringify(result),
+    JSON.stringify({
+      decision: { outcome: "ask_question" },
+      confidence: 52,
+      reasons: ["information_stale", "fresh_update_due"],
+      debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+    }),
+  );
+}
+
 section("highest priority wins");
 {
   const result = resolveDecision([

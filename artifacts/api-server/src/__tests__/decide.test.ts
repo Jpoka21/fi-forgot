@@ -97,7 +97,7 @@ section("rich DecisionContext → identical scaffold");
   expect("full DecideResult", result, SCAFFOLD);
 }
 
-section("empty and rich DecisionContext return identical results");
+section("empty and rich non-stale DecisionContext return identical wait results");
 {
   const emptyResult = decide(buildDecisionContext(normalized()));
   const richResult = decide(
@@ -114,6 +114,38 @@ section("empty and rich DecisionContext return identical results");
     ),
   );
   expect("empty === rich", emptyResult, richResult);
+}
+
+const FRESH_UPDATE_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 52,
+  reasons: ["information_stale", "fresh_update_due"],
+  debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+};
+
+section("stale DecisionContext → ask_question");
+{
+  const stale = buildDecisionContext(normalized({ freshness: "stale" }));
+  const result = decide(stale);
+  expect("outcome ask_question", result.decision.outcome, "ask_question");
+  expect("confidence 52", result.confidence, 52);
+  expect("reasons", result.reasons, FRESH_UPDATE_RESULT.reasons);
+  expect("debugNotes", result.debugNotes, FRESH_UPDATE_RESULT.debugNotes);
+  expect("full DecideResult", result, FRESH_UPDATE_RESULT);
+  expect(
+    "serialized fresh update",
+    JSON.stringify(result),
+    JSON.stringify(FRESH_UPDATE_RESULT),
+  );
+}
+
+section("stale vs unknown freshness produce different outcomes");
+{
+  const staleResult = decide(buildDecisionContext(normalized({ freshness: "stale" })));
+  const unknownResult = decide(buildDecisionContext(normalized({ freshness: "unknown" })));
+  expect("stale is ask_question", staleResult.decision.outcome, "ask_question");
+  expect("unknown is wait", unknownResult.decision.outcome, "wait");
+  expect("outcomes differ", staleResult.decision.outcome !== unknownResult.decision.outcome, true);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

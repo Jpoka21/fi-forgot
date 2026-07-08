@@ -57,12 +57,23 @@ function normalized(
   };
 }
 
-section("Step D registry collects WaitRule candidate");
+section("live registry collects WaitRule for unknown freshness");
 {
   const context = buildDecisionContext(normalized());
   const candidates = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 1);
   expect("ruleId", candidates[0]?.ruleId, "wait");
+}
+
+section("live registry collects FreshUpdateRule and WaitRule for stale freshness");
+{
+  const context = buildDecisionContext(normalized({ freshness: "stale" }));
+  const candidates = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "fresh_update",
+    "wait",
+  ]);
 }
 
 section("non-matching rules are omitted");
