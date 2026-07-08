@@ -219,6 +219,46 @@ section("valentines_day ActionPlan");
   );
 }
 
+const INACTIVITY_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 48,
+  reasons: ["relationship_inactive"],
+  debugNotes: [
+    "InactivityRule matched",
+    "last relationship activity days ago: 365",
+    "threshold days: 180",
+  ],
+};
+
+const INACTIVITY_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "follow_up",
+  priority: "medium",
+  sourceRuleId: "inactivity",
+  primaryReason: "relationship_inactive",
+  reasons: ["relationship_inactive"],
+  confidence: 48,
+  debugNotes: [
+    "InactivityRule matched",
+    "last relationship activity days ago: 365",
+    "threshold days: 180",
+  ],
+};
+
+section("inactivity ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: INACTIVITY_DECIDE_RESULT,
+    sourceRuleId: "inactivity",
+  });
+  expect("full plan", plan, INACTIVITY_ACTION_PLAN);
+  expect(
+    "serialized inactivity plan",
+    JSON.stringify(plan),
+    JSON.stringify(INACTIVITY_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;

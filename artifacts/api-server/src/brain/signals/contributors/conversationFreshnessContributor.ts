@@ -7,6 +7,10 @@
  */
 
 import type { BrainSignal, RelationshipContextLoadResult } from "../../types";
+import {
+  RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS,
+  RELATIONSHIP_RECENT_ACTIVITY_DAYS,
+} from "../../config/relationshipThresholds";
 
 type FreshnessState = "none" | "current" | "aging" | "stale";
 
@@ -32,14 +36,16 @@ function computeFreshnessState(
 
   if (
     mostRecentFreshUpdateAgeCategory === "recent" ||
-    (latestConversationDaysAgo != null && latestConversationDaysAgo <= 90)
+    (latestConversationDaysAgo != null &&
+      latestConversationDaysAgo <= RELATIONSHIP_RECENT_ACTIVITY_DAYS)
   ) {
     return "current";
   }
 
   if (
     mostRecentFreshUpdateAgeCategory === "older" ||
-    (latestConversationDaysAgo != null && latestConversationDaysAgo > 180)
+    (latestConversationDaysAgo != null &&
+      latestConversationDaysAgo > RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS)
   ) {
     return "stale";
   }
@@ -72,7 +78,8 @@ export function contributeConversationFreshnessSignals(
   const hasRecentUpdates =
     recentUpdateCount > 0 ||
     mostRecentFreshUpdate?.ageCategory === "recent" ||
-    (latestFollowUpDaysAgo != null && latestFollowUpDaysAgo <= 90);
+    (latestFollowUpDaysAgo != null &&
+      latestFollowUpDaysAgo <= RELATIONSHIP_RECENT_ACTIVITY_DAYS);
 
   const freshnessState = computeFreshnessState(
     freshUpdates.length,

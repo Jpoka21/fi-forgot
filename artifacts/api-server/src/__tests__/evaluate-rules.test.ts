@@ -80,6 +80,27 @@ section("live registry collects FreshUpdateRule and WaitRule for stale freshness
   ]);
 }
 
+section("live registry collects InactivityRule when relationship timeline is inactive");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-1",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 365,
+      label: "card",
+    },
+  ];
+  const context = buildDecisionContext(normalized(), relationshipContext);
+  const candidates = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "inactivity",
+    "wait",
+  ]);
+}
+
 section("live registry collects BirthdayRule, FreshUpdateRule, and WaitRule when both match");
 {
   const context = buildDecisionContext(

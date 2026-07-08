@@ -86,6 +86,30 @@ section("fresh update candidate beats wait");
   );
 }
 
+section("inactivity candidate beats fresh_update");
+{
+  const result = resolveDecision([
+    waitCandidate,
+    {
+      ruleId: "fresh_update",
+      priority: 40,
+      confidence: 52,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["information_stale", "fresh_update_due"],
+      debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+    },
+    {
+      ruleId: "inactivity",
+      priority: 41,
+      confidence: 48,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["relationship_inactive"],
+      debugNotes: ["InactivityRule matched"],
+    },
+  ]);
+  expect("sourceRuleId", result.sourceRuleId, "inactivity");
+}
+
 section("birthday candidate beats fresh_update");
 {
   const result = resolveDecision([

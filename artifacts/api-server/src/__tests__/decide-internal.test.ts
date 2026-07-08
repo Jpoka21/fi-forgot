@@ -85,6 +85,26 @@ section("stale freshness → fresh_update rule result");
   expect("decideResult", result.decideResult, FRESH_UPDATE_DECIDE);
 }
 
+section("inactive relationship timeline → inactivity rule result");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-1",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 365,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(normalized({ freshness: "stale" }), relationshipContext),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "inactivity");
+  expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["relationship_inactive"]);
+}
+
 section("birthday in window → birthday rule result");
 {
   const result = decideInternal(

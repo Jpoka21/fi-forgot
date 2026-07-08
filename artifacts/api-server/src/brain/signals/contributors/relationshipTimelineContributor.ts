@@ -7,6 +7,7 @@
  */
 
 import type { BrainSignal, RelationshipContextLoadResult } from "../../types";
+import { RELATIONSHIP_RECENT_ACTIVITY_DAYS } from "../../config/relationshipThresholds";
 
 type TimelineDepth = "none" | "light" | "moderate" | "rich";
 
@@ -24,7 +25,9 @@ export function contributeRelationshipTimelineSignals(
 
   const totalEventCount = events.length;
   const latestEventDaysAgo = events[0]?.daysAgo ?? null;
-  const eventsLast90Days = events.filter((event) => event.daysAgo <= 90).length;
+  const eventsLast90Days = events.filter(
+    (event) => event.daysAgo <= RELATIONSHIP_RECENT_ACTIVITY_DAYS,
+  ).length;
   const eventsLast365Days = events.filter((event) => event.daysAgo <= 365).length;
 
   const freshUpdateEventCount = events.filter(

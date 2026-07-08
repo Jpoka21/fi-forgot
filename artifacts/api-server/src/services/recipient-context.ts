@@ -26,6 +26,10 @@ import { eq, and, isNull } from "drizzle-orm";
 import type { RecipientRow, RecipientProfileRow } from "@workspace/db";
 import type { QuestionAnswer } from "@workspace/db";
 import type { PersonalCard } from "@workspace/db";
+import {
+  RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS,
+  RELATIONSHIP_RECENT_ACTIVITY_DAYS,
+} from "../brain/config/relationshipThresholds";
 
 export const CONTEXT_VERSION = 3 as const;
 
@@ -167,7 +171,7 @@ export interface FreshUpdate {
   answer: string;
   createdAt: string;                          // ISO string
   daysAgo: number;
-  ageCategory: "recent" | "mid" | "older";   // <90d | <180d | ≥180d
+  ageCategory: "recent" | "mid" | "older";   // <recent | <inactive | ≥inactive
 }
 
 /**
@@ -474,9 +478,9 @@ export function buildBriefingSummary(answers: QuestionAnswer[]): BriefingSummary
 /**
  * Converts raw question_answers rows (triggerType === "fresh_update") into
  * FreshUpdate objects sorted newest-first, with recency age categories:
- *   recent  = last 90 days
- *   mid     = 90–180 days
- *   older   = 180+ days
+ *   recent  = last RELATIONSHIP_RECENT_ACTIVITY_DAYS days
+ *   mid     = RELATIONSHIP_RECENT_ACTIVITY_DAYS–RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS days
+ *   older   = RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS+ days
  */
 export function buildFreshUpdates(rows: QuestionAnswer[]): FreshUpdate[] {
   const now = Date.now();
@@ -487,8 +491,11 @@ export function buildFreshUpdates(rows: QuestionAnswer[]): FreshUpdate[] {
         (now - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24),
       );
       const ageCategory: FreshUpdate["ageCategory"] =
-        daysAgo < 90  ? "recent" :
-        daysAgo < 180 ? "mid"    : "older";
+        daysAgo < RELATIONSHIP_RECENT_ACTIVITY_DAYS
+          ? "recent"
+          : daysAgo < RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS
+            ? "mid"
+            : "older";
       return {
         id:          r.id,
         questionKey: r.questionKey,

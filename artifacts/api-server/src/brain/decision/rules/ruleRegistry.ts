@@ -5,6 +5,7 @@
 import { anniversaryRule } from "./anniversaryRule";
 import { birthdayRule } from "./birthdayRule";
 import { freshUpdateRule } from "./freshUpdateRule";
+import { inactivityRule } from "./inactivityRule";
 import type { DecisionRule } from "./types";
 import { valentinesDayRule } from "./valentinesDayRule";
 import { waitRule } from "./waitRule";
@@ -13,6 +14,7 @@ export const ruleRegistry: DecisionRule[] = [
   birthdayRule,
   anniversaryRule,
   valentinesDayRule,
+  inactivityRule,
   freshUpdateRule,
   waitRule,
 ];

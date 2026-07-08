@@ -66,6 +66,8 @@ export interface DecisionContext {
   relationshipType: string | null;
   /** Configured preview window from RelationshipContext.delivery.previewDays. */
   preparationWindowDays: number | null;
+  /** Days since the most recent relationship timeline activity. Null when unknown or empty. */
+  lastRelationshipActivityDaysAgo: number | null;
 
   derivedFrom: DecisionContextDerivedFrom;
 }

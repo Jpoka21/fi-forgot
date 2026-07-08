@@ -78,6 +78,11 @@ section("conservative defaults from empty normalized state");
   expect("relationshipType from relationship", ctx.relationshipType, "Friend");
   expect("valentinesDaysAway computed", ctx.valentinesDaysAway, 228);
   expect("preparationWindowDays from delivery", ctx.preparationWindowDays, 14);
+  expect(
+    "lastRelationshipActivityDaysAgo null when timeline empty",
+    ctx.lastRelationshipActivityDaysAgo,
+    null,
+  );
 }
 
 section("full rich state maps decision vocabulary 1:1");
@@ -266,6 +271,22 @@ section("missing relationship → relationshipType null");
   relationshipContext.relationship = null;
   const ctx = buildDecisionContext(normalized(), relationshipContext);
   expect("relationshipType null", ctx.relationshipType, null);
+}
+
+section("relationship timeline activity is exposed as lastRelationshipActivityDaysAgo");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-1",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 42,
+      label: "Fresh Update",
+    },
+  ];
+  const ctx = buildDecisionContext(normalized(), relationshipContext);
+  expect("lastRelationshipActivityDaysAgo 42", ctx.lastRelationshipActivityDaysAgo, 42);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

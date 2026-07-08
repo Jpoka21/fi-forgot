@@ -7,6 +7,10 @@
  */
 
 import type { BrainSignal, RelationshipContextLoadResult } from "../../types";
+import {
+  RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS,
+  RELATIONSHIP_RECENT_ACTIVITY_DAYS,
+} from "../../config/relationshipThresholds";
 
 type MomentumState = "new" | "active" | "quiet" | "dormant";
 
@@ -141,7 +145,10 @@ function computeMomentumState(
     return "active";
   }
 
-  if (lastInteraction != null && lastInteraction <= 90) {
+  if (
+    lastInteraction != null &&
+    lastInteraction <= RELATIONSHIP_RECENT_ACTIVITY_DAYS
+  ) {
     return "active";
   }
 
@@ -151,7 +158,8 @@ function computeMomentumState(
 
   if (
     freshUpdateAgeCategory === "older" ||
-    (lastInteraction != null && lastInteraction > 180)
+    (lastInteraction != null &&
+      lastInteraction > RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS)
   ) {
     return "dormant";
   }
