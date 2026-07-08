@@ -45,6 +45,7 @@ export function buildDecisionContext(
     relationshipContext.relationshipTimeline.events.find(
       (event) => event.type === "card",
     )?.daysAgo ?? null;
+  const mostRecentFreshUpdate = relationshipContext.freshUpdates[0] ?? null;
 
   return {
     identity,
@@ -68,6 +69,8 @@ export function buildDecisionContext(
     preparationWindowDays,
     lastRelationshipActivityDaysAgo,
     lastCardActivityDaysAgo,
+    mostRecentFreshUpdateDaysAgo: mostRecentFreshUpdate?.daysAgo ?? null,
+    mostRecentFreshUpdateQuestionKey: mostRecentFreshUpdate?.questionKey ?? null,
 
     derivedFrom: {
       signalCount: derivedFrom.signalCount,

@@ -198,6 +198,50 @@ section("memory_accumulation evaluation entry records match");
   expect("reasons", memoryAccumulation?.reasons, ["memory_inventory_thin"]);
 }
 
+section("accomplishment_follow_up evaluation entry records match");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.freshUpdates = [
+    {
+      id: "fresh-1",
+      questionKey: "recent_accomplishment",
+      question: "What accomplishment would make them proud right now?",
+      answer: "Promoted",
+      createdAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      ageCategory: "recent",
+    },
+  ];
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      label: "Recent accomplishment",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2026-05-01T00:00:00.000Z",
+      daysAgo: 60,
+      label: "card",
+    },
+  ];
+  const result = runRuleEngine(
+    buildDecisionContext(
+      normalized({ freshness: "current", history: "rich" }),
+      relationshipContext,
+    ),
+  );
+  const accomplishmentFollowUp = result.ruleEvaluation.entries.find(
+    (entry) => entry.ruleId === "accomplishment_follow_up",
+  );
+  expect("accomplishment_follow_up matched", accomplishmentFollowUp?.matched, true);
+  expect("accomplishment_follow_up winner", accomplishmentFollowUp?.resolutionStatus, "winner");
+  expect("reasons", accomplishmentFollowUp?.reasons, ["accomplishment_follow_up_due"]);
+}
+
 section("decideResult unchanged from pre-explanation behavior for wait scaffold");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());

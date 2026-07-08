@@ -349,6 +349,52 @@ section("memory_accumulation ActionPlan");
   );
 }
 
+const ACCOMPLISHMENT_FOLLOW_UP_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 43,
+  reasons: ["accomplishment_follow_up_due"],
+  debugNotes: [
+    "AccomplishmentFollowUpRule matched",
+    "most recent fresh update question key: recent_accomplishment",
+    "most recent fresh update days ago: 15",
+    "accomplishment follow up threshold days: 30",
+    "freshness: current",
+    "last relationship activity days ago: 15",
+  ],
+};
+
+const ACCOMPLISHMENT_FOLLOW_UP_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "follow_up",
+  priority: "medium",
+  sourceRuleId: "accomplishment_follow_up",
+  primaryReason: "accomplishment_follow_up_due",
+  reasons: ["accomplishment_follow_up_due"],
+  confidence: 43,
+  debugNotes: [
+    "AccomplishmentFollowUpRule matched",
+    "most recent fresh update question key: recent_accomplishment",
+    "most recent fresh update days ago: 15",
+    "accomplishment follow up threshold days: 30",
+    "freshness: current",
+    "last relationship activity days ago: 15",
+  ],
+};
+
+section("accomplishment_follow_up ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: ACCOMPLISHMENT_FOLLOW_UP_DECIDE_RESULT,
+    sourceRuleId: "accomplishment_follow_up",
+  });
+  expect("full plan", plan, ACCOMPLISHMENT_FOLLOW_UP_ACTION_PLAN);
+  expect(
+    "serialized accomplishment follow up plan",
+    JSON.stringify(plan),
+    JSON.stringify(ACCOMPLISHMENT_FOLLOW_UP_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;

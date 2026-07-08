@@ -36,6 +36,9 @@ const PLAN_MAPPINGS: Record<string, Partial<Record<BrainDecisionOutcome, PlanMap
     memory_accumulation: {
       ask_question: { type: "ask_question", category: "profile_information" },
     },
+    accomplishment_follow_up: {
+      ask_question: { type: "ask_question", category: "follow_up" },
+    },
   };
 
 export function mapDecisionToPlan(

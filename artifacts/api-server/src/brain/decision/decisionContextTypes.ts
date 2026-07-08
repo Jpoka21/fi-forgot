@@ -70,6 +70,10 @@ export interface DecisionContext {
   lastRelationshipActivityDaysAgo: number | null;
   /** Days since the most recent card event on the relationship timeline. Null when none. */
   lastCardActivityDaysAgo: number | null;
+  /** Days since the most recent fresh update. Null when none. */
+  mostRecentFreshUpdateDaysAgo: number | null;
+  /** Question key of the most recent fresh update. Null when none. */
+  mostRecentFreshUpdateQuestionKey: string | null;
 
   derivedFrom: DecisionContextDerivedFrom;
 }

@@ -84,6 +84,12 @@ section("conservative defaults from empty normalized state");
     null,
   );
   expect("lastCardActivityDaysAgo null when no card events", ctx.lastCardActivityDaysAgo, null);
+  expect("mostRecentFreshUpdateDaysAgo null when no fresh updates", ctx.mostRecentFreshUpdateDaysAgo, null);
+  expect(
+    "mostRecentFreshUpdateQuestionKey null when no fresh updates",
+    ctx.mostRecentFreshUpdateQuestionKey,
+    null,
+  );
 }
 
 section("full rich state maps decision vocabulary 1:1");
@@ -322,6 +328,38 @@ section("lastCardActivityDaysAgo uses newest card timeline event");
   );
   expect("lastCardActivityDaysAgo 150", ctx.lastCardActivityDaysAgo, 150);
   expect("lastRelationshipActivityDaysAgo 30", ctx.lastRelationshipActivityDaysAgo, 30);
+}
+
+section("most recent fresh update facts come from freshUpdates array");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.freshUpdates = [
+    {
+      id: "fresh-newer",
+      questionKey: "recent_accomplishment",
+      question: "What accomplishment would make them proud right now?",
+      answer: "Promoted",
+      createdAt: "2026-06-20T00:00:00.000Z",
+      daysAgo: 11,
+      ageCategory: "recent",
+    },
+    {
+      id: "fresh-older",
+      questionKey: "current_excitement",
+      question: "What are they excited about?",
+      answer: "Vacation",
+      createdAt: "2026-05-01T00:00:00.000Z",
+      daysAgo: 61,
+      ageCategory: "recent",
+    },
+  ];
+  const ctx = buildDecisionContext(normalized(), relationshipContext);
+  expect("mostRecentFreshUpdateDaysAgo 11", ctx.mostRecentFreshUpdateDaysAgo, 11);
+  expect(
+    "mostRecentFreshUpdateQuestionKey recent_accomplishment",
+    ctx.mostRecentFreshUpdateQuestionKey,
+    "recent_accomplishment",
+  );
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

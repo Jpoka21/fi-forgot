@@ -395,6 +395,118 @@ section("card gap beats memory accumulation");
   expect("sourceRuleId", result.sourceRuleId, "card_gap");
 }
 
+section("accomplishment follow up → accomplishment_follow_up rule result");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.freshUpdates = [
+    {
+      id: "fresh-1",
+      questionKey: "recent_accomplishment",
+      question: "What accomplishment would make them proud right now?",
+      answer: "Promoted",
+      createdAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      ageCategory: "recent",
+    },
+  ];
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      label: "Recent accomplishment",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2026-05-01T00:00:00.000Z",
+      daysAgo: 60,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ freshness: "current", history: "rich" }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "accomplishment_follow_up");
+  expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["accomplishment_follow_up_due"]);
+}
+
+section("card gap beats accomplishment follow up");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.freshUpdates = [
+    {
+      id: "fresh-1",
+      questionKey: "recent_accomplishment",
+      question: "What accomplishment would make them proud right now?",
+      answer: "Promoted",
+      createdAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      ageCategory: "recent",
+    },
+  ];
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      label: "Recent accomplishment",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ identity: "established", freshness: "current", history: "rich" }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "card_gap");
+}
+
+section("stale freshness beats accomplishment follow up");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.freshUpdates = [
+    {
+      id: "fresh-1",
+      questionKey: "recent_accomplishment",
+      question: "What accomplishment would make them proud right now?",
+      answer: "Promoted",
+      createdAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      ageCategory: "recent",
+    },
+  ];
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      label: "Recent accomplishment",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ freshness: "stale", history: "rich" }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "fresh_update");
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

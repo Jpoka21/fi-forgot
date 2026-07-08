@@ -2,6 +2,7 @@
  * Rule Registry — static list of registered deterministic rules.
  */
 
+import { accomplishmentFollowUpRule } from "./accomplishmentFollowUpRule";
 import { anniversaryRule } from "./anniversaryRule";
 import { birthdayRule } from "./birthdayRule";
 import { cardGapRule } from "./cardGapRule";
@@ -20,5 +21,6 @@ export const ruleRegistry: DecisionRule[] = [
   freshUpdateRule,
   cardGapRule,
   memoryAccumulationRule,
+  accomplishmentFollowUpRule,
   waitRule,
 ];

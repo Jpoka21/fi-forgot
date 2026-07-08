@@ -274,6 +274,48 @@ section("live registry collects MemoryAccumulationRule and WaitRule when memory 
   ]);
 }
 
+section("live registry collects AccomplishmentFollowUpRule and WaitRule when accomplishment is recent");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.freshUpdates = [
+    {
+      id: "fresh-1",
+      questionKey: "recent_accomplishment",
+      question: "What accomplishment would make them proud right now?",
+      answer: "Promoted",
+      createdAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      ageCategory: "recent",
+    },
+  ];
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 15,
+      label: "Recent accomplishment",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2026-05-01T00:00:00.000Z",
+      daysAgo: 60,
+      label: "card",
+    },
+  ];
+  const context = buildDecisionContext(
+    normalized({ freshness: "current", history: "rich" }),
+    relationshipContext,
+  );
+  const { candidates } = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "accomplishment_follow_up",
+    "wait",
+  ]);
+}
+
 section("evaluation entries cover full registry");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());
