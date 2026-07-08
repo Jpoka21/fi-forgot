@@ -1,11 +1,12 @@
 /**
  * Unit tests for brain/debug/buildBrainInspector.
  *
- * Proves inspector pass-through of normalized and decisionContext from execution.
+ * Proves inspector pass-through of normalized, decisionContext, and actionPlan.
  * Run with:
  *   npx tsx artifacts/api-server/src/__tests__/build-brain-inspector.test.ts
  */
 
+import type { ActionPlan } from "../brain/action/actionPlanTypes.js";
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { buildBrainInspector } from "../brain/debug/buildBrainInspector.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
@@ -56,6 +57,28 @@ function normalizedState(
     },
   };
 }
+
+const WAIT_ACTION_PLAN: ActionPlan = {
+  type: "wait",
+  category: "none",
+  priority: "low",
+  sourceRuleId: "wait",
+  primaryReason: "read_only_scaffold",
+  reasons: ["read_only_scaffold", "no_behavior_change"],
+  confidence: 0,
+  debugNotes: ["Phase 1 read-only scaffold — decision engine not yet active"],
+};
+
+const FRESH_UPDATE_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "fresh_update",
+  priority: "medium",
+  sourceRuleId: "fresh_update",
+  primaryReason: "information_stale",
+  reasons: ["information_stale", "fresh_update_due"],
+  confidence: 52,
+  debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+};
 
 const normalized = normalizedState({
   identity: "established",
@@ -115,24 +138,75 @@ const decideResult = {
   debugNotes: ["Phase 1 read-only scaffold — decision engine not yet active"],
 };
 
-section("pass-through normalized and decisionContext from execution");
+section("pass-through normalized, decisionContext, and actionPlan from execution");
 {
+  const actionPlan = WAIT_ACTION_PLAN;
   const inspector = buildBrainInspector({
     loadResult,
     extraction,
     normalized,
     decisionContext,
     decideResult,
+    actionPlan,
   });
 
   expect("normalized is same reference", inspector.normalized, normalized);
   expect("decisionContext is same reference", inspector.decisionContext, decisionContext);
+  expect("actionPlan is same reference", inspector.actionPlan, actionPlan);
   expect("decisionContext identity", inspector.decisionContext.identity, "established");
   expect("derivedFrom signalCount", inspector.decisionContext.derivedFrom.signalCount, 70);
   expect(
     "derivedFrom sourcesPresent",
     inspector.decisionContext.derivedFrom.sourcesPresent,
     ["profile_completeness", "relationship_timeline"],
+  );
+}
+
+section("wait actionPlan pass-through");
+{
+  const actionPlan = WAIT_ACTION_PLAN;
+  const inspector = buildBrainInspector({
+    loadResult,
+    extraction,
+    normalized,
+    decisionContext,
+    decideResult,
+    actionPlan,
+  });
+
+  expect("actionPlan", inspector.actionPlan, WAIT_ACTION_PLAN);
+  expect(
+    "serialized wait actionPlan",
+    JSON.stringify(inspector.actionPlan),
+    JSON.stringify(WAIT_ACTION_PLAN),
+  );
+}
+
+section("fresh_update actionPlan pass-through");
+{
+  const staleNormalized = normalizedState({ freshness: "stale" });
+  const staleDecisionContext = buildDecisionContext(staleNormalized);
+  const actionPlan = FRESH_UPDATE_ACTION_PLAN;
+  const inspector = buildBrainInspector({
+    loadResult,
+    extraction,
+    normalized: staleNormalized,
+    decisionContext: staleDecisionContext,
+    decideResult: {
+      decision: { outcome: "ask_question" },
+      confidence: 52,
+      reasons: ["information_stale", "fresh_update_due"],
+      debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+    },
+    actionPlan,
+  });
+
+  expect("actionPlan is same reference", inspector.actionPlan, actionPlan);
+  expect("actionPlan", inspector.actionPlan, FRESH_UPDATE_ACTION_PLAN);
+  expect(
+    "serialized fresh update actionPlan",
+    JSON.stringify(inspector.actionPlan),
+    JSON.stringify(FRESH_UPDATE_ACTION_PLAN),
   );
 }
 
@@ -144,6 +218,7 @@ section("inspector summary still derived from extraction and decide result");
     normalized,
     decisionContext,
     decideResult,
+    actionPlan: WAIT_ACTION_PLAN,
   });
 
   expect("signalCount", inspector.summary.signalCount, 1);

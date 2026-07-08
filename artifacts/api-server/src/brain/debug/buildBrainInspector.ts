@@ -5,6 +5,7 @@
  * normalize signals, or build decision context.
  */
 
+import type { ActionPlan } from "../action/actionPlanTypes";
 import type { DecisionContext } from "../decision/decisionContextTypes";
 import type { DecideResult } from "../decision/decide";
 import type { NormalizedRelationshipState } from "../normalization";
@@ -18,10 +19,11 @@ export interface BrainInspectorInput {
   normalized: NormalizedRelationshipState;
   decisionContext: DecisionContext;
   decideResult: DecideResult;
+  actionPlan: ActionPlan;
 }
 
 export function buildBrainInspector(input: BrainInspectorInput): BrainInspector {
-  const { loadResult, extraction, normalized, decisionContext, decideResult } =
+  const { loadResult, extraction, normalized, decisionContext, decideResult, actionPlan } =
     input;
 
   const signalsBySource: Record<string, BrainInspector["signalsBySource"][string]> =
@@ -55,5 +57,6 @@ export function buildBrainInspector(input: BrainInspectorInput): BrainInspector 
     registryOrder: extraction.contributorGroups.map((group) => group.key),
     normalized,
     decisionContext,
+    actionPlan,
   };
 }

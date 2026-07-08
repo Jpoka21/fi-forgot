@@ -5,6 +5,7 @@
  * Not part of BrainResponse or any production API contract.
  */
 
+import type { ActionPlan } from "../action/actionPlanTypes";
 import type { DecisionContext } from "../decision/decisionContextTypes";
 import type { NormalizedRelationshipState } from "../normalization";
 import type { BrainSignal } from "../types";
@@ -38,4 +39,6 @@ export interface BrainInspector {
   normalized: NormalizedRelationshipState;
   /** Decision-facing context from executeBrain() — same object passed to decide(). */
   decisionContext: DecisionContext;
+  /** Action categorization from executeBrain() — same object from planFromDecisionContext(). */
+  actionPlan: ActionPlan;
 }
