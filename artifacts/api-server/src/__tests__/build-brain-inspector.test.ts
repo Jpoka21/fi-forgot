@@ -10,6 +10,7 @@ import type { ActionPlan } from "../brain/action/actionPlanTypes.js";
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { buildBrainInspector } from "../brain/debug/buildBrainInspector.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { planFromDecisionContext } from "../brain/planFromDecisionContext.js";
 import type { RelationshipContextLoadResult } from "../brain/types.js";
 import { BRAIN_CONTEXT_VERSION } from "../brain/types.js";
 import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
@@ -95,6 +96,7 @@ const normalized = normalizedState({
 });
 
 const decisionContext = buildDecisionContext(normalized, minimalRelationshipContext());
+const waitPlan = planFromDecisionContext(decisionContext);
 
 const loadResult = {
   brainContextVersion: BRAIN_CONTEXT_VERSION,
@@ -147,8 +149,9 @@ section("pass-through normalized, decisionContext, and actionPlan from execution
     extraction,
     normalized,
     decisionContext,
-    decideResult,
-    actionPlan,
+    decideResult: waitPlan.decideResult,
+    actionPlan: WAIT_ACTION_PLAN,
+    ruleEvaluation: waitPlan.ruleEvaluation,
   });
 
   expect("normalized is same reference", inspector.normalized, normalized);
@@ -171,8 +174,9 @@ section("wait actionPlan pass-through");
     extraction,
     normalized,
     decisionContext,
-    decideResult,
-    actionPlan,
+    decideResult: waitPlan.decideResult,
+    actionPlan: WAIT_ACTION_PLAN,
+    ruleEvaluation: waitPlan.ruleEvaluation,
   });
 
   expect("actionPlan", inspector.actionPlan, WAIT_ACTION_PLAN);
@@ -190,19 +194,16 @@ section("fresh_update actionPlan pass-through");
     staleNormalized,
     minimalRelationshipContext(),
   );
+  const stalePlan = planFromDecisionContext(staleDecisionContext);
   const actionPlan = FRESH_UPDATE_ACTION_PLAN;
   const inspector = buildBrainInspector({
     loadResult,
     extraction,
     normalized: staleNormalized,
     decisionContext: staleDecisionContext,
-    decideResult: {
-      decision: { outcome: "ask_question" },
-      confidence: 52,
-      reasons: ["information_stale", "fresh_update_due"],
-      debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
-    },
+    decideResult: stalePlan.decideResult,
     actionPlan,
+    ruleEvaluation: stalePlan.ruleEvaluation,
   });
 
   expect("actionPlan is same reference", inspector.actionPlan, actionPlan);
@@ -214,6 +215,25 @@ section("fresh_update actionPlan pass-through");
   );
 }
 
+section("ruleEvaluation pass-through and winner alignment");
+{
+  const inspector = buildBrainInspector({
+    loadResult,
+    extraction,
+    normalized,
+    decisionContext,
+    decideResult: waitPlan.decideResult,
+    actionPlan: WAIT_ACTION_PLAN,
+    ruleEvaluation: waitPlan.ruleEvaluation,
+  });
+
+  expect("ruleEvaluation same reference", inspector.ruleEvaluation, waitPlan.ruleEvaluation);
+  const winner = inspector.ruleEvaluation.entries.find(
+    (entry) => entry.resolutionStatus === "winner",
+  );
+  expect("winner ruleId", winner?.ruleId, WAIT_ACTION_PLAN.sourceRuleId);
+}
+
 section("inspector summary still derived from extraction and decide result");
 {
   const inspector = buildBrainInspector({
@@ -221,8 +241,9 @@ section("inspector summary still derived from extraction and decide result");
     extraction,
     normalized,
     decisionContext,
-    decideResult,
+    decideResult: waitPlan.decideResult,
     actionPlan: WAIT_ACTION_PLAN,
+    ruleEvaluation: waitPlan.ruleEvaluation,
   });
 
   expect("signalCount", inspector.summary.signalCount, 1);

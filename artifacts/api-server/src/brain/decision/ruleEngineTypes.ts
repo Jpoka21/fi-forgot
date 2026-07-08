@@ -5,8 +5,14 @@
  */
 
 import type { DecideResult } from "./decide";
+import type { RuleEvaluationSummary } from "./rules/ruleEvaluationTypes";
 
-export interface RuleEngineResult {
+export interface ResolvedDecision {
   decideResult: DecideResult;
   sourceRuleId: string;
+}
+
+export interface RuleEngineResult extends ResolvedDecision {
+  /** Development-only evaluation trace. Not part of BrainResponse. */
+  ruleEvaluation: RuleEvaluationSummary;
 }

@@ -7,6 +7,7 @@
 
 import type { DecisionContext } from "../decisionContextTypes";
 import { isEventWithinPreparationWindow } from "../eventWindow";
+import type { RuleEvaluationTrace } from "./internal/ruleEvaluationTrace";
 import type { DecisionRule, RuleCandidate } from "./types";
 
 const ANNIVERSARY_CANDIDATE: RuleCandidate = {
@@ -20,9 +21,16 @@ const ANNIVERSARY_CANDIDATE: RuleCandidate = {
 
 export const anniversaryRule: DecisionRule = {
   id: "anniversary",
-  evaluate(context: DecisionContext): RuleCandidate | null {
+  evaluate(context: DecisionContext, trace?: RuleEvaluationTrace): RuleCandidate | null {
     const { anniversaryDaysAway, preparationWindowDays } = context;
     if (!isEventWithinPreparationWindow(anniversaryDaysAway, preparationWindowDays)) {
+      trace?.recordNoMatch({
+        reasons: ["outside_preparation_window"],
+        debugNotes: [
+          `anniversary days away: ${anniversaryDaysAway}`,
+          `preparation window: ${preparationWindowDays}`,
+        ],
+      });
       return null;
     }
 

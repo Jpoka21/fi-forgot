@@ -8,6 +8,7 @@
 import type { ActionPlan } from "../action/actionPlanTypes";
 import type { DecisionContext } from "../decision/decisionContextTypes";
 import type { DecideResult } from "../decision/decide";
+import type { RuleEvaluationSummary } from "../decision/rules/ruleEvaluationTypes";
 import type { NormalizedRelationshipState } from "../normalization";
 import type { SignalExtractionResult } from "../signals/extractionTypes";
 import type { RelationshipContextLoadResult } from "../types";
@@ -20,10 +21,11 @@ export interface BrainInspectorInput {
   decisionContext: DecisionContext;
   decideResult: DecideResult;
   actionPlan: ActionPlan;
+  ruleEvaluation: RuleEvaluationSummary;
 }
 
 export function buildBrainInspector(input: BrainInspectorInput): BrainInspector {
-  const { loadResult, extraction, normalized, decisionContext, decideResult, actionPlan } =
+  const { loadResult, extraction, normalized, decisionContext, decideResult, actionPlan, ruleEvaluation } =
     input;
 
   const signalsBySource: Record<string, BrainInspector["signalsBySource"][string]> =
@@ -58,5 +60,6 @@ export function buildBrainInspector(input: BrainInspectorInput): BrainInspector 
     normalized,
     decisionContext,
     actionPlan,
+    ruleEvaluation,
   };
 }

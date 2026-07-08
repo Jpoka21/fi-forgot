@@ -7,6 +7,7 @@
 
 import type { ActionPlan } from "../action/actionPlanTypes";
 import type { DecisionContext } from "../decision/decisionContextTypes";
+import type { RuleEvaluationSummary } from "../decision/rules/ruleEvaluationTypes";
 import type { NormalizedRelationshipState } from "../normalization";
 import type { BrainSignal } from "../types";
 
@@ -41,4 +42,6 @@ export interface BrainInspector {
   decisionContext: DecisionContext;
   /** Action categorization from executeBrain() — same object from planFromDecisionContext(). */
   actionPlan: ActionPlan;
+  /** Development-only rule evaluation trace from executeBrain(). */
+  ruleEvaluation: RuleEvaluationSummary;
 }

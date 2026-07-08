@@ -61,7 +61,7 @@ function normalized(
 section("live registry collects WaitRule for unknown freshness");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());
-  const candidates = evaluateRules(context, ruleRegistry);
+  const { candidates } = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 1);
   expect("ruleId", candidates[0]?.ruleId, "wait");
 }
@@ -72,7 +72,7 @@ section("live registry collects FreshUpdateRule and WaitRule for stale freshness
     normalized({ freshness: "stale" }),
     minimalRelationshipContext(),
   );
-  const candidates = evaluateRules(context, ruleRegistry);
+  const { candidates } = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 2);
   expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
     "fresh_update",
@@ -93,7 +93,7 @@ section("live registry collects InactivityRule when relationship timeline is ina
     },
   ];
   const context = buildDecisionContext(normalized(), relationshipContext);
-  const candidates = evaluateRules(context, ruleRegistry);
+  const { candidates } = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 2);
   expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
     "inactivity",
@@ -111,7 +111,7 @@ section("live registry collects BirthdayRule, FreshUpdateRule, and WaitRule when
       previewDays: 14,
     }),
   );
-  const candidates = evaluateRules(context, ruleRegistry);
+  const { candidates } = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 3);
   expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
     "birthday",
@@ -130,7 +130,7 @@ section("live registry collects AnniversaryRule and WaitRule when anniversary in
       previewDays: 14,
     }),
   );
-  const candidates = evaluateRules(context, ruleRegistry);
+  const { candidates } = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 2);
   expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
     "anniversary",
@@ -149,7 +149,7 @@ section("live registry collects all event rules when birthday, anniversary, and 
       previewDays: 14,
     }),
   );
-  const candidates = evaluateRules(context, ruleRegistry);
+  const { candidates } = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 4);
   expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
     "anniversary",
@@ -169,7 +169,7 @@ section("live registry collects ValentinesDayRule and WaitRule when in window");
       previewDays: 14,
     }),
   );
-  const candidates = evaluateRules(context, ruleRegistry);
+  const { candidates } = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 2);
   expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
     "valentines_day",
@@ -184,7 +184,7 @@ section("non-matching rules are omitted");
     evaluate: () => null,
   };
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());
-  const candidates = evaluateRules(context, [noMatchRule, waitRule]);
+  const { candidates } = evaluateRules(context, [noMatchRule, waitRule]);
   expect("only WaitRule matches", candidates.length, 1);
   expect("ruleId", candidates[0]?.ruleId, "wait");
 }
@@ -203,8 +203,16 @@ section("multiple matching rules are all collected");
     }),
   };
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());
-  const candidates = evaluateRules(context, [waitRule, highPriorityRule]);
+  const { candidates } = evaluateRules(context, [waitRule, highPriorityRule]);
   expect("candidate count", candidates.length, 2);
+}
+
+section("evaluation entries cover full registry");
+{
+  const context = buildDecisionContext(normalized(), minimalRelationshipContext());
+  const { candidates, entries } = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 1);
+  expect("entry count", entries.length, ruleRegistry.length);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

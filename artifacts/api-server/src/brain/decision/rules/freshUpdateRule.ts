@@ -6,6 +6,7 @@
  */
 
 import type { DecisionContext } from "../decisionContextTypes";
+import type { RuleEvaluationTrace } from "./internal/ruleEvaluationTrace";
 import type { DecisionRule, RuleCandidate } from "./types";
 
 const FRESH_UPDATE_CANDIDATE: RuleCandidate = {
@@ -19,8 +20,12 @@ const FRESH_UPDATE_CANDIDATE: RuleCandidate = {
 
 export const freshUpdateRule: DecisionRule = {
   id: "fresh_update",
-  evaluate(context: DecisionContext): RuleCandidate | null {
+  evaluate(context: DecisionContext, trace?: RuleEvaluationTrace): RuleCandidate | null {
     if (context.freshness !== "stale") {
+      trace?.recordNoMatch({
+        reasons: ["freshness_not_stale"],
+        debugNotes: [`freshness: ${context.freshness}`],
+      });
       return null;
     }
     return FRESH_UPDATE_CANDIDATE;
