@@ -1,15 +1,13 @@
 /**
  * Decision Engine — read-only scaffold.
  *
- * Accepts relationship context from loadRelationshipContext() and returns a
- * fixed placeholder decision. No scoring, no AI, no side effects.
- * Phase 1 always waits — the Brain is not yet authorized to act.
+ * Accepts DecisionContext as the decision-facing input contract.
+ * Phase 1 still returns a fixed placeholder — DecisionContext fields are not read.
+ * The Brain is not yet authorized to act.
  */
 
-import type {
-  BrainDecision,
-  RelationshipContextLoadResult,
-} from "../types";
+import type { BrainDecision } from "../types";
+import type { DecisionContext } from "./decisionContextTypes";
 
 export interface DecideResult {
   decision: BrainDecision;
@@ -26,9 +24,9 @@ const SCAFFOLD_DECISION: DecideResult = {
 };
 
 /**
- * Returns the Phase 1 placeholder decision for any relationship context.
- * Context is accepted to establish the contract; it is not evaluated yet.
+ * Returns the Phase 1 placeholder decision for any DecisionContext.
+ * Context establishes the contract; it is not evaluated yet.
  */
-export function decide(_context: RelationshipContextLoadResult): DecideResult {
+export function decide(_decisionContext: DecisionContext): DecideResult {
   return SCAFFOLD_DECISION;
 }
