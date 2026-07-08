@@ -267,6 +267,61 @@ section("birthday in window beats anniversary when both match");
   expect("birthday wins over anniversary", result, BIRTHDAY_RESULT);
 }
 
+const VALENTINES_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["valentines_preparation_window"],
+  debugNotes: [
+    "ValentinesDayRule matched",
+    "valentines days away: 13",
+    "preparation window: 14",
+  ],
+};
+
+section("valentines day in preparation window → ask_question");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-02-01T00:00:00.000Z",
+      relationshipType: "Wife",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("outcome ask_question", result.decision.outcome, "ask_question");
+  expect("full DecideResult", result, VALENTINES_RESULT);
+}
+
+section("valentines day beats stale freshness");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-02-01T00:00:00.000Z",
+      relationshipType: "Wife",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("valentines wins over fresh_update", result, VALENTINES_RESULT);
+}
+
+section("birthday still beats valentines day when both match");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      relationshipType: "Wife",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("birthday wins over valentines", result, BIRTHDAY_RESULT);
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

@@ -65,3 +65,9 @@ export function computeAnniversaryDaysAway(
 ): number | null {
   return daysUntilNextOccurrence(anniversary, new Date(generatedAt));
 }
+
+const VALENTINES_MONTH_DAY = "02-14";
+
+export function computeValentinesDaysAway(generatedAt: string): number | null {
+  return daysUntilNextOccurrence(VALENTINES_MONTH_DAY, new Date(generatedAt));
+}

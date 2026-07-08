@@ -75,6 +75,8 @@ section("conservative defaults from empty normalized state");
   expect("sourcesPresent []", ctx.derivedFrom.sourcesPresent, []);
   expect("birthdayDaysAway null without birthday", ctx.birthdayDaysAway, null);
   expect("anniversaryDaysAway null without anniversary", ctx.anniversaryDaysAway, null);
+  expect("relationshipType from relationship", ctx.relationshipType, "Friend");
+  expect("valentinesDaysAway computed", ctx.valentinesDaysAway, 228);
   expect("preparationWindowDays from delivery", ctx.preparationWindowDays, 14);
 }
 
@@ -225,6 +227,45 @@ section("no anniversary → anniversaryDaysAway null");
     minimalRelationshipContext({ anniversary: null }),
   );
   expect("anniversaryDaysAway null", ctx.anniversaryDaysAway, null);
+}
+
+section("relationshipType pass-through from RelationshipContext");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({ relationshipType: "Wife" }),
+  );
+  expect("relationshipType Wife", ctx.relationshipType, "Wife");
+}
+
+section("valentinesDaysAway computed from generatedAt");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-02-01T00:00:00.000Z",
+    }),
+  );
+  expect("valentines 13 days away", ctx.valentinesDaysAway, 13);
+}
+
+section("valentinesDaysAway outside window distance");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-01-01T00:00:00.000Z",
+    }),
+  );
+  expect("valentines 44 days away", ctx.valentinesDaysAway, 44);
+}
+
+section("missing relationship → relationshipType null");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationship = null;
+  const ctx = buildDecisionContext(normalized(), relationshipContext);
+  expect("relationshipType null", ctx.relationshipType, null);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

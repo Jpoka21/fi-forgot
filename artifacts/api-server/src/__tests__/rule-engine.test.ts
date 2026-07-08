@@ -259,6 +259,46 @@ section("birthday beats anniversary when both in window");
   expect("sourceRuleId", result.sourceRuleId, "birthday");
 }
 
+const VALENTINES_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["valentines_preparation_window"],
+  debugNotes: [
+    "ValentinesDayRule matched",
+    "valentines days away: 13",
+    "preparation window: 14",
+  ],
+};
+
+section("runRuleEngine returns valentines ask_question when in preparation window");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-02-01T00:00:00.000Z",
+      relationshipType: "Wife",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  expect("sourceRuleId", result.sourceRuleId, "valentines_day");
+  expect("decideResult", result.decideResult, VALENTINES_RESULT);
+}
+
+section("valentines beats stale freshness in runRuleEngine");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-02-01T00:00:00.000Z",
+      relationshipType: "Wife",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  expect("sourceRuleId", result.sourceRuleId, "valentines_day");
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

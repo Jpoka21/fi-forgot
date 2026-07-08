@@ -8,7 +8,7 @@
 import type { NormalizedRelationshipState } from "../normalization";
 import type { RelationshipContext } from "../types";
 import type { DecisionContext } from "./decisionContextTypes";
-import { computeAnniversaryDaysAway, computeBirthdayDaysAway } from "./eventTimingUtils";
+import { computeAnniversaryDaysAway, computeBirthdayDaysAway, computeValentinesDaysAway } from "./eventTimingUtils";
 
 /**
  * Builds a DecisionContext from normalized relationship state and loaded context.
@@ -36,6 +36,8 @@ export function buildDecisionContext(
     relationshipContext.relationship?.anniversary,
     relationshipContext.generatedAt,
   );
+  const valentinesDaysAway = computeValentinesDaysAway(relationshipContext.generatedAt);
+  const relationshipType = relationshipContext.relationship?.type ?? null;
   const preparationWindowDays = relationshipContext.delivery.previewDays;
 
   return {
@@ -55,6 +57,8 @@ export function buildDecisionContext(
 
     birthdayDaysAway,
     anniversaryDaysAway,
+    valentinesDaysAway,
+    relationshipType,
     preparationWindowDays,
 
     derivedFrom: {

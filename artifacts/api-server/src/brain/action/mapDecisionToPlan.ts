@@ -24,6 +24,9 @@ const PLAN_MAPPINGS: Record<string, Partial<Record<BrainDecisionOutcome, PlanMap
     anniversary: {
       ask_question: { type: "ask_question", category: "anniversary" },
     },
+    valentines_day: {
+      ask_question: { type: "ask_question", category: "holiday" },
+    },
   };
 
 export function mapDecisionToPlan(

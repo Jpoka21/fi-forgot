@@ -181,6 +181,37 @@ section("planFromDecisionContext → anniversary action plan");
   );
 }
 
+const VALENTINES_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "holiday",
+  priority: "medium",
+  sourceRuleId: "valentines_day",
+  primaryReason: "valentines_preparation_window",
+  reasons: ["valentines_preparation_window"],
+  confidence: 60,
+  debugNotes: [
+    "ValentinesDayRule matched",
+    "valentines days away: 13",
+    "preparation window: 14",
+  ],
+};
+
+section("planFromDecisionContext → valentines_day action plan");
+{
+  const { decideResult, actionPlan } = planFromDecisionContext(
+    buildDecisionContext(
+      normalized(),
+      minimalRelationshipContext({
+        generatedAt: "2026-02-01T00:00:00.000Z",
+        relationshipType: "Wife",
+        previewDays: 14,
+      }),
+    ),
+  );
+  expect("outcome ask_question", decideResult.decision.outcome, "ask_question");
+  expect("actionPlan", actionPlan, VALENTINES_ACTION_PLAN);
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

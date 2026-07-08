@@ -138,6 +138,24 @@ section("live registry collects all event rules when birthday, anniversary, and 
   ]);
 }
 
+section("live registry collects ValentinesDayRule and WaitRule when in window");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-02-01T00:00:00.000Z",
+      relationshipType: "Wife",
+      previewDays: 14,
+    }),
+  );
+  const candidates = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "valentines_day",
+    "wait",
+  ]);
+}
+
 section("non-matching rules are omitted");
 {
   const noMatchRule: DecisionRule = {

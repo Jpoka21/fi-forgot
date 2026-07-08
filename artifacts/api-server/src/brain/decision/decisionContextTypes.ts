@@ -60,6 +60,10 @@ export interface DecisionContext {
   birthdayDaysAway: number | null;
   /** Days until next anniversary from RelationshipContext.generatedAt. Null when unknown. */
   anniversaryDaysAway: number | null;
+  /** Days until next Valentine's Day from RelationshipContext.generatedAt. */
+  valentinesDaysAway: number | null;
+  /** Relationship type fact from RelationshipContext.relationship.type. */
+  relationshipType: string | null;
   /** Configured preview window from RelationshipContext.delivery.previewDays. */
   preparationWindowDays: number | null;
 

@@ -179,6 +179,46 @@ section("anniversary ActionPlan");
   );
 }
 
+const VALENTINES_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["valentines_preparation_window"],
+  debugNotes: [
+    "ValentinesDayRule matched",
+    "valentines days away: 13",
+    "preparation window: 14",
+  ],
+};
+
+const VALENTINES_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "holiday",
+  priority: "medium",
+  sourceRuleId: "valentines_day",
+  primaryReason: "valentines_preparation_window",
+  reasons: ["valentines_preparation_window"],
+  confidence: 60,
+  debugNotes: [
+    "ValentinesDayRule matched",
+    "valentines days away: 13",
+    "preparation window: 14",
+  ],
+};
+
+section("valentines_day ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: VALENTINES_DECIDE_RESULT,
+    sourceRuleId: "valentines_day",
+  });
+  expect("full plan", plan, VALENTINES_ACTION_PLAN);
+  expect(
+    "serialized valentines plan",
+    JSON.stringify(plan),
+    JSON.stringify(VALENTINES_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;

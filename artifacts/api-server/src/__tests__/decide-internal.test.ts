@@ -165,6 +165,37 @@ section("birthday in window beats anniversary when both match");
   expect("sourceRuleId", result.sourceRuleId, "birthday");
 }
 
+section("valentines day in window → valentines_day rule result");
+{
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized(),
+      minimalRelationshipContext({
+        generatedAt: "2026-02-01T00:00:00.000Z",
+        relationshipType: "Wife",
+        previewDays: 14,
+      }),
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "valentines_day");
+  expect("reasons", result.decideResult.reasons, ["valentines_preparation_window"]);
+}
+
+section("valentines day in window beats stale freshness");
+{
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ freshness: "stale" }),
+      minimalRelationshipContext({
+        generatedAt: "2026-02-01T00:00:00.000Z",
+        relationshipType: "Wife",
+        previewDays: 14,
+      }),
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "valentines_day");
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));
