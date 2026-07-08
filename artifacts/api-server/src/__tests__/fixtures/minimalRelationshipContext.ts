@@ -11,6 +11,7 @@ const CONTEXT_VERSION = 3 as const;
 export interface MinimalRelationshipContextOptions {
   generatedAt?: string;
   birthday?: string | null;
+  anniversary?: string | null;
   previewDays?: number | null;
 }
 
@@ -20,6 +21,7 @@ export function minimalRelationshipContext(
   const {
     generatedAt = "2026-07-01T00:00:00.000Z",
     birthday = null,
+    anniversary = null,
     previewDays = 14,
   } = options;
 
@@ -33,7 +35,7 @@ export function minimalRelationshipContext(
       type: "Friend",
       label: null,
       birthday,
-      anniversary: null,
+      anniversary,
     },
     personality: { notes: null, traits: [] },
     interests: [],

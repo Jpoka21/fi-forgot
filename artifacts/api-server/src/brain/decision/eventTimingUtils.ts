@@ -58,3 +58,10 @@ export function computeBirthdayDaysAway(
 ): number | null {
   return daysUntilNextOccurrence(birthday, new Date(generatedAt));
 }
+
+export function computeAnniversaryDaysAway(
+  anniversary: string | null | undefined,
+  generatedAt: string,
+): number | null {
+  return daysUntilNextOccurrence(anniversary, new Date(generatedAt));
+}

@@ -139,6 +139,46 @@ section("birthday ActionPlan");
   );
 }
 
+const ANNIVERSARY_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["anniversary_preparation_window"],
+  debugNotes: [
+    "AnniversaryRule matched",
+    "anniversary days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+const ANNIVERSARY_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "anniversary",
+  priority: "medium",
+  sourceRuleId: "anniversary",
+  primaryReason: "anniversary_preparation_window",
+  reasons: ["anniversary_preparation_window"],
+  confidence: 60,
+  debugNotes: [
+    "AnniversaryRule matched",
+    "anniversary days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+section("anniversary ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: ANNIVERSARY_DECIDE_RESULT,
+    sourceRuleId: "anniversary",
+  });
+  expect("full plan", plan, ANNIVERSARY_ACTION_PLAN);
+  expect(
+    "serialized anniversary plan",
+    JSON.stringify(plan),
+    JSON.stringify(ANNIVERSARY_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;

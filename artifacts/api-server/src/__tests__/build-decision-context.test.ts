@@ -74,6 +74,7 @@ section("conservative defaults from empty normalized state");
   expect("signalCount 0", ctx.derivedFrom.signalCount, 0);
   expect("sourcesPresent []", ctx.derivedFrom.sourcesPresent, []);
   expect("birthdayDaysAway null without birthday", ctx.birthdayDaysAway, null);
+  expect("anniversaryDaysAway null without anniversary", ctx.anniversaryDaysAway, null);
   expect("preparationWindowDays from delivery", ctx.preparationWindowDays, 14);
 }
 
@@ -189,6 +190,41 @@ section("year rollover uses next calendar occurrence");
     }),
   );
   expect("birthday rolls to next year", ctx.birthdayDaysAway, 132);
+}
+
+section("anniversaryDaysAway computed from RelationshipContext");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: PINNED_GENERATED_AT,
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  expect("anniversary 7 days away", ctx.anniversaryDaysAway, 7);
+}
+
+section("anniversary outside window");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: PINNED_GENERATED_AT,
+      anniversary: "2015-08-01",
+      previewDays: 14,
+    }),
+  );
+  expect("anniversary 31 days away", ctx.anniversaryDaysAway, 31);
+}
+
+section("no anniversary → anniversaryDaysAway null");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({ anniversary: null }),
+  );
+  expect("anniversaryDaysAway null", ctx.anniversaryDaysAway, null);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

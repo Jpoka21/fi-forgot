@@ -145,6 +145,42 @@ section("planFromDecisionContext → birthday action plan");
   );
 }
 
+const ANNIVERSARY_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "anniversary",
+  priority: "medium",
+  sourceRuleId: "anniversary",
+  primaryReason: "anniversary_preparation_window",
+  reasons: ["anniversary_preparation_window"],
+  confidence: 60,
+  debugNotes: [
+    "AnniversaryRule matched",
+    "anniversary days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+section("planFromDecisionContext → anniversary action plan");
+{
+  const { decideResult, actionPlan } = planFromDecisionContext(
+    buildDecisionContext(
+      normalized(),
+      minimalRelationshipContext({
+        generatedAt: "2026-07-01T00:00:00.000Z",
+        anniversary: "2015-07-08",
+        previewDays: 14,
+      }),
+    ),
+  );
+  expect("outcome ask_question", decideResult.decision.outcome, "ask_question");
+  expect("actionPlan", actionPlan, ANNIVERSARY_ACTION_PLAN);
+  expect(
+    "serialized anniversary action plan",
+    JSON.stringify(actionPlan),
+    JSON.stringify(ANNIVERSARY_ACTION_PLAN),
+  );
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

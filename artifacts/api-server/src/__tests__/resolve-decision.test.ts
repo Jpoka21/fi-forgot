@@ -112,6 +112,57 @@ section("birthday candidate beats fresh_update");
   expect("reasons", result.decideResult.reasons, ["birthday_preparation_window"]);
 }
 
+section("anniversary candidate beats fresh_update");
+{
+  const result = resolveDecision([
+    waitCandidate,
+    {
+      ruleId: "fresh_update",
+      priority: 40,
+      confidence: 52,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["information_stale", "fresh_update_due"],
+      debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+    },
+    {
+      ruleId: "anniversary",
+      priority: 45,
+      confidence: 60,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["anniversary_preparation_window"],
+      debugNotes: ["AnniversaryRule matched"],
+    },
+  ]);
+  expect("sourceRuleId", result.sourceRuleId, "anniversary");
+  expect("outcome", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["anniversary_preparation_window"]);
+}
+
+section("birthday candidate beats anniversary when both match");
+{
+  const result = resolveDecision([
+    waitCandidate,
+    {
+      ruleId: "anniversary",
+      priority: 45,
+      confidence: 60,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["anniversary_preparation_window"],
+      debugNotes: ["AnniversaryRule matched"],
+    },
+    {
+      ruleId: "birthday",
+      priority: 50,
+      confidence: 60,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["birthday_preparation_window"],
+      debugNotes: ["BirthdayRule matched"],
+    },
+  ]);
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
+  expect("reasons", result.decideResult.reasons, ["birthday_preparation_window"]);
+}
+
 section("highest priority wins");
 {
   const result = resolveDecision([

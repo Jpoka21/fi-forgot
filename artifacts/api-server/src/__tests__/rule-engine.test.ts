@@ -204,6 +204,61 @@ section("birthday beats stale freshness in runRuleEngine");
   expect("sourceRuleId", result.sourceRuleId, "birthday");
 }
 
+const ANNIVERSARY_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["anniversary_preparation_window"],
+  debugNotes: [
+    "AnniversaryRule matched",
+    "anniversary days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+section("runRuleEngine returns anniversary ask_question when in preparation window");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  expect("sourceRuleId", result.sourceRuleId, "anniversary");
+  expect("decideResult", result.decideResult, ANNIVERSARY_RESULT);
+}
+
+section("anniversary beats stale freshness in runRuleEngine");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  expect("sourceRuleId", result.sourceRuleId, "anniversary");
+}
+
+section("birthday beats anniversary when both in window");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

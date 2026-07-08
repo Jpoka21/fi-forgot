@@ -58,6 +58,8 @@ export interface DecisionContext {
 
   /** Days until next birthday from RelationshipContext.generatedAt. Null when unknown. */
   birthdayDaysAway: number | null;
+  /** Days until next anniversary from RelationshipContext.generatedAt. Null when unknown. */
+  anniversaryDaysAway: number | null;
   /** Configured preview window from RelationshipContext.delivery.previewDays. */
   preparationWindowDays: number | null;
 

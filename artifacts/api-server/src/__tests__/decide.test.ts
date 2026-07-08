@@ -209,6 +209,64 @@ section("birthday in window beats stale freshness");
   expect("birthday wins over fresh_update", result, BIRTHDAY_RESULT);
 }
 
+const ANNIVERSARY_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["anniversary_preparation_window"],
+  debugNotes: [
+    "AnniversaryRule matched",
+    "anniversary days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+section("anniversary in preparation window → ask_question");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("outcome ask_question", result.decision.outcome, "ask_question");
+  expect("confidence 60", result.confidence, 60);
+  expect("reasons", result.reasons, ANNIVERSARY_RESULT.reasons);
+  expect("debugNotes", result.debugNotes, ANNIVERSARY_RESULT.debugNotes);
+  expect("full DecideResult", result, ANNIVERSARY_RESULT);
+}
+
+section("anniversary in window beats stale freshness");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("anniversary wins over fresh_update", result, ANNIVERSARY_RESULT);
+}
+
+section("birthday in window beats anniversary when both match");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("birthday wins over anniversary", result, BIRTHDAY_RESULT);
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

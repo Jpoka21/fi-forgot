@@ -99,6 +99,45 @@ section("live registry collects BirthdayRule, FreshUpdateRule, and WaitRule when
   ]);
 }
 
+section("live registry collects AnniversaryRule and WaitRule when anniversary in window");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const candidates = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "anniversary",
+    "wait",
+  ]);
+}
+
+section("live registry collects all event rules when birthday, anniversary, and stale match");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      anniversary: "2015-07-08",
+      previewDays: 14,
+    }),
+  );
+  const candidates = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 4);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "anniversary",
+    "birthday",
+    "fresh_update",
+    "wait",
+  ]);
+}
+
 section("non-matching rules are omitted");
 {
   const noMatchRule: DecisionRule = {
