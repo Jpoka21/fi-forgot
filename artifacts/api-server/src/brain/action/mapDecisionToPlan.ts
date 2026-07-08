@@ -18,6 +18,9 @@ const PLAN_MAPPINGS: Record<string, Partial<Record<BrainDecisionOutcome, PlanMap
     fresh_update: {
       ask_question: { type: "ask_question", category: "fresh_update" },
     },
+    birthday: {
+      ask_question: { type: "ask_question", category: "birthday" },
+    },
   };
 
 export function mapDecisionToPlan(

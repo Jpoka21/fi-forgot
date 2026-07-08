@@ -8,6 +8,7 @@
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { freshUpdateRule } from "../brain/decision/rules/freshUpdateRule.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -65,10 +66,10 @@ const STALE_CANDIDATE = {
 
 section("FreshUpdateRule matches only stale freshness");
 {
-  const stale = buildDecisionContext(normalized({ freshness: "stale" }));
-  const unknown = buildDecisionContext(normalized({ freshness: "unknown" }));
-  const aging = buildDecisionContext(normalized({ freshness: "aging" }));
-  const current = buildDecisionContext(normalized({ freshness: "current" }));
+  const stale = buildDecisionContext(normalized({ freshness: "stale" }), minimalRelationshipContext());
+  const unknown = buildDecisionContext(normalized({ freshness: "unknown" }), minimalRelationshipContext());
+  const aging = buildDecisionContext(normalized({ freshness: "aging" }), minimalRelationshipContext());
+  const current = buildDecisionContext(normalized({ freshness: "current" }), minimalRelationshipContext());
 
   expect("stale matches", freshUpdateRule.evaluate(stale), STALE_CANDIDATE);
   expect("unknown does not match", freshUpdateRule.evaluate(unknown), null);
@@ -80,9 +81,11 @@ section("FreshUpdateRule ignores other DecisionContext dimensions");
 {
   const thinStale = buildDecisionContext(
     normalized({ identity: "thin", freshness: "stale", engagement: "high" }),
+    minimalRelationshipContext(),
   );
   const establishedStale = buildDecisionContext(
     normalized({ identity: "established", freshness: "stale", writing: "high" }),
+    minimalRelationshipContext(),
   );
 
   expect("thin stale", freshUpdateRule.evaluate(thinStale), STALE_CANDIDATE);

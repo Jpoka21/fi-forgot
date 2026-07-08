@@ -86,6 +86,32 @@ section("fresh update candidate beats wait");
   );
 }
 
+section("birthday candidate beats fresh_update");
+{
+  const result = resolveDecision([
+    waitCandidate,
+    {
+      ruleId: "fresh_update",
+      priority: 40,
+      confidence: 52,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["information_stale", "fresh_update_due"],
+      debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+    },
+    {
+      ruleId: "birthday",
+      priority: 50,
+      confidence: 60,
+      decision: { outcome: "ask_question" as const },
+      reasons: ["birthday_preparation_window"],
+      debugNotes: ["BirthdayRule matched"],
+    },
+  ]);
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
+  expect("outcome", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["birthday_preparation_window"]);
+}
+
 section("highest priority wins");
 {
   const result = resolveDecision([

@@ -9,6 +9,7 @@
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { decide } from "../brain/decision/decide.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -64,7 +65,7 @@ const SCAFFOLD = {
 
 section("empty DecisionContext → frozen scaffold");
 {
-  const empty = buildDecisionContext(normalized());
+  const empty = buildDecisionContext(normalized(), minimalRelationshipContext());
   const result = decide(empty);
   expect("outcome wait", result.decision.outcome, "wait");
   expect("confidence 0", result.confidence, 0);
@@ -88,6 +89,7 @@ section("rich DecisionContext → identical scaffold");
         sourcesPresent: ["profile_completeness", "relationship_timeline"],
       },
     }),
+    minimalRelationshipContext(),
   );
   const result = decide(rich);
   expect("outcome wait", result.decision.outcome, "wait");
@@ -99,7 +101,9 @@ section("rich DecisionContext → identical scaffold");
 
 section("empty and rich non-stale DecisionContext return identical wait results");
 {
-  const emptyResult = decide(buildDecisionContext(normalized()));
+  const emptyResult = decide(
+    buildDecisionContext(normalized(), minimalRelationshipContext()),
+  );
   const richResult = decide(
     buildDecisionContext(
       normalized({
@@ -111,6 +115,7 @@ section("empty and rich non-stale DecisionContext return identical wait results"
         momentum: "active",
         derivedFrom: { signalCount: 70, sourcesPresent: ["engagement"] },
       }),
+      minimalRelationshipContext(),
     ),
   );
   expect("empty === rich", emptyResult, richResult);
@@ -125,7 +130,10 @@ const FRESH_UPDATE_RESULT = {
 
 section("stale DecisionContext → ask_question");
 {
-  const stale = buildDecisionContext(normalized({ freshness: "stale" }));
+  const stale = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext(),
+  );
   const result = decide(stale);
   expect("outcome ask_question", result.decision.outcome, "ask_question");
   expect("confidence 52", result.confidence, 52);
@@ -141,11 +149,64 @@ section("stale DecisionContext → ask_question");
 
 section("stale vs unknown freshness produce different outcomes");
 {
-  const staleResult = decide(buildDecisionContext(normalized({ freshness: "stale" })));
-  const unknownResult = decide(buildDecisionContext(normalized({ freshness: "unknown" })));
+  const staleResult = decide(
+    buildDecisionContext(
+      normalized({ freshness: "stale" }),
+      minimalRelationshipContext(),
+    ),
+  );
+  const unknownResult = decide(
+    buildDecisionContext(
+      normalized({ freshness: "unknown" }),
+      minimalRelationshipContext(),
+    ),
+  );
   expect("stale is ask_question", staleResult.decision.outcome, "ask_question");
   expect("unknown is wait", unknownResult.decision.outcome, "wait");
   expect("outcomes differ", staleResult.decision.outcome !== unknownResult.decision.outcome, true);
+}
+
+const BIRTHDAY_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["birthday_preparation_window"],
+  debugNotes: [
+    "BirthdayRule matched",
+    "birthday days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+section("birthday in preparation window → ask_question");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("outcome ask_question", result.decision.outcome, "ask_question");
+  expect("confidence 60", result.confidence, 60);
+  expect("reasons", result.reasons, BIRTHDAY_RESULT.reasons);
+  expect("debugNotes", result.debugNotes, BIRTHDAY_RESULT.debugNotes);
+  expect("full DecideResult", result, BIRTHDAY_RESULT);
+}
+
+section("birthday in window beats stale freshness");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = decide(context);
+  expect("birthday wins over fresh_update", result, BIRTHDAY_RESULT);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

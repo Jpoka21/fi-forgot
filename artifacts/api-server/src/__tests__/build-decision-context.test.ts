@@ -7,6 +7,7 @@
 
 import { buildDecisionContext } from "../brain/decision/index.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -53,9 +54,11 @@ function normalized(
   };
 }
 
+const PINNED_GENERATED_AT = "2026-07-01T00:00:00.000Z";
+
 section("conservative defaults from empty normalized state");
 {
-  const ctx = buildDecisionContext(normalized());
+  const ctx = buildDecisionContext(normalized(), minimalRelationshipContext());
   expect("identity empty", ctx.identity, "empty");
   expect("freshness unknown", ctx.freshness, "unknown");
   expect("history none", ctx.history, "none");
@@ -70,6 +73,8 @@ section("conservative defaults from empty normalized state");
   expect("timelineHistory mirrors history", ctx.timelineHistory, "none");
   expect("signalCount 0", ctx.derivedFrom.signalCount, 0);
   expect("sourcesPresent []", ctx.derivedFrom.sourcesPresent, []);
+  expect("birthdayDaysAway null without birthday", ctx.birthdayDaysAway, null);
+  expect("preparationWindowDays from delivery", ctx.preparationWindowDays, 14);
 }
 
 section("full rich state maps decision vocabulary 1:1");
@@ -86,7 +91,7 @@ section("full rich state maps decision vocabulary 1:1");
       sourcesPresent: ["profile_completeness", "relationship_timeline"],
     },
   });
-  const ctx = buildDecisionContext(input);
+  const ctx = buildDecisionContext(input, minimalRelationshipContext());
 
   expect("identity established", ctx.identity, "established");
   expect("relationshipMaturity established", ctx.relationshipMaturity, "established");
@@ -121,11 +126,69 @@ section("sourcesPresent is a copy (mutation safe)");
   const input = normalized({
     derivedFrom: { signalCount: 1, sourcesPresent: sources },
   });
-  const ctx = buildDecisionContext(input);
+  const ctx = buildDecisionContext(input, minimalRelationshipContext());
   sources.push("mutated");
   expect("builder does not retain caller array", ctx.derivedFrom.sourcesPresent, [
     "engagement",
   ]);
+}
+
+section("birthdayDaysAway computed from RelationshipContext");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: PINNED_GENERATED_AT,
+      birthday: "1988-07-08",
+      previewDays: 14,
+    }),
+  );
+  expect("birthday 7 days away", ctx.birthdayDaysAway, 7);
+  expect("preparationWindowDays", ctx.preparationWindowDays, 14);
+}
+
+section("birthday outside window");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: PINNED_GENERATED_AT,
+      birthday: "1988-08-01",
+      previewDays: 14,
+    }),
+  );
+  expect("birthday 31 days away", ctx.birthdayDaysAway, 31);
+}
+
+section("no birthday → birthdayDaysAway null");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({ birthday: null }),
+  );
+  expect("birthdayDaysAway null", ctx.birthdayDaysAway, null);
+}
+
+section("missing previewDays → preparationWindowDays null");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({ previewDays: null }),
+  );
+  expect("preparationWindowDays null", ctx.preparationWindowDays, null);
+}
+
+section("year rollover uses next calendar occurrence");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-12-01T00:00:00.000Z",
+      birthday: "1988-04-12",
+      previewDays: 14,
+    }),
+  );
+  expect("birthday rolls to next year", ctx.birthdayDaysAway, 132);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

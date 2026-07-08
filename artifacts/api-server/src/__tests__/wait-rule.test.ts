@@ -8,6 +8,7 @@
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { waitRule } from "../brain/decision/rules/waitRule.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -65,7 +66,7 @@ const SCAFFOLD = {
 
 section("WaitRule always matches");
 {
-  const empty = buildDecisionContext(normalized());
+  const empty = buildDecisionContext(normalized(), minimalRelationshipContext());
   const rich = buildDecisionContext(
     normalized({
       identity: "established",
@@ -75,6 +76,7 @@ section("WaitRule always matches");
       engagement: "high",
       momentum: "active",
     }),
+    minimalRelationshipContext(),
   );
 
   const emptyCandidate = waitRule.evaluate(empty);

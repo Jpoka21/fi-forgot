@@ -38,7 +38,7 @@ export async function executeBrain(
   const loadResult = await loadRelationshipContext(recipientId, userId);
   const extraction = extractSignals(loadResult);
   const normalized = normalizeSignals(extraction.availableSignals);
-  const decisionContext = buildDecisionContext(normalized);
+  const decisionContext = buildDecisionContext(normalized, loadResult.relationshipContext);
   const { decideResult, actionPlan } = planFromDecisionContext(decisionContext);
 
   return { loadResult, extraction, normalized, decisionContext, decideResult, actionPlan };

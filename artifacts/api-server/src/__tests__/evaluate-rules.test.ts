@@ -11,6 +11,7 @@ import { ruleRegistry } from "../brain/decision/rules/ruleRegistry.js";
 import type { DecisionRule } from "../brain/decision/rules/types.js";
 import { waitRule } from "../brain/decision/rules/waitRule.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -59,7 +60,7 @@ function normalized(
 
 section("live registry collects WaitRule for unknown freshness");
 {
-  const context = buildDecisionContext(normalized());
+  const context = buildDecisionContext(normalized(), minimalRelationshipContext());
   const candidates = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 1);
   expect("ruleId", candidates[0]?.ruleId, "wait");
@@ -67,10 +68,32 @@ section("live registry collects WaitRule for unknown freshness");
 
 section("live registry collects FreshUpdateRule and WaitRule for stale freshness");
 {
-  const context = buildDecisionContext(normalized({ freshness: "stale" }));
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext(),
+  );
   const candidates = evaluateRules(context, ruleRegistry);
   expect("candidate count", candidates.length, 2);
   expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "fresh_update",
+    "wait",
+  ]);
+}
+
+section("live registry collects BirthdayRule, FreshUpdateRule, and WaitRule when both match");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      previewDays: 14,
+    }),
+  );
+  const candidates = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 3);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "birthday",
     "fresh_update",
     "wait",
   ]);
@@ -82,7 +105,7 @@ section("non-matching rules are omitted");
     id: "never",
     evaluate: () => null,
   };
-  const context = buildDecisionContext(normalized());
+  const context = buildDecisionContext(normalized(), minimalRelationshipContext());
   const candidates = evaluateRules(context, [noMatchRule, waitRule]);
   expect("only WaitRule matches", candidates.length, 1);
   expect("ruleId", candidates[0]?.ruleId, "wait");
@@ -101,7 +124,7 @@ section("multiple matching rules are all collected");
       debugNotes: ["alpha"],
     }),
   };
-  const context = buildDecisionContext(normalized());
+  const context = buildDecisionContext(normalized(), minimalRelationshipContext());
   const candidates = evaluateRules(context, [waitRule, highPriorityRule]);
   expect("candidate count", candidates.length, 2);
 }

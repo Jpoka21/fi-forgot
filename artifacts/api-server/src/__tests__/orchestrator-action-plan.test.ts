@@ -9,6 +9,7 @@ import { planFromDecisionContext } from "../brain/planFromDecisionContext.js";
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import type { ActionPlan } from "../brain/action/actionPlanTypes.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -77,10 +78,25 @@ const FRESH_UPDATE_ACTION_PLAN: ActionPlan = {
   debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
 };
 
+const BIRTHDAY_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "birthday",
+  priority: "medium",
+  sourceRuleId: "birthday",
+  primaryReason: "birthday_preparation_window",
+  reasons: ["birthday_preparation_window"],
+  confidence: 60,
+  debugNotes: [
+    "BirthdayRule matched",
+    "birthday days away: 7",
+    "preparation window: 14",
+  ],
+};
+
 section("planFromDecisionContext → wait action plan");
 {
   const { decideResult, actionPlan } = planFromDecisionContext(
-    buildDecisionContext(normalized()),
+    buildDecisionContext(normalized(), minimalRelationshipContext()),
   );
   expect("outcome wait", decideResult.decision.outcome, "wait");
   expect("actionPlan", actionPlan, WAIT_ACTION_PLAN);
@@ -94,7 +110,10 @@ section("planFromDecisionContext → wait action plan");
 section("planFromDecisionContext → fresh_update action plan");
 {
   const { decideResult, actionPlan } = planFromDecisionContext(
-    buildDecisionContext(normalized({ freshness: "stale" })),
+    buildDecisionContext(
+      normalized({ freshness: "stale" }),
+      minimalRelationshipContext(),
+    ),
   );
   expect("outcome ask_question", decideResult.decision.outcome, "ask_question");
   expect("actionPlan", actionPlan, FRESH_UPDATE_ACTION_PLAN);
@@ -102,6 +121,27 @@ section("planFromDecisionContext → fresh_update action plan");
     "serialized fresh update action plan",
     JSON.stringify(actionPlan),
     JSON.stringify(FRESH_UPDATE_ACTION_PLAN),
+  );
+}
+
+section("planFromDecisionContext → birthday action plan");
+{
+  const { decideResult, actionPlan } = planFromDecisionContext(
+    buildDecisionContext(
+      normalized(),
+      minimalRelationshipContext({
+        generatedAt: "2026-07-01T00:00:00.000Z",
+        birthday: "1988-07-08",
+        previewDays: 14,
+      }),
+    ),
+  );
+  expect("outcome ask_question", decideResult.decision.outcome, "ask_question");
+  expect("actionPlan", actionPlan, BIRTHDAY_ACTION_PLAN);
+  expect(
+    "serialized birthday action plan",
+    JSON.stringify(actionPlan),
+    JSON.stringify(BIRTHDAY_ACTION_PLAN),
   );
 }
 

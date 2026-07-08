@@ -99,6 +99,46 @@ section("fresh_update ActionPlan");
   );
 }
 
+const BIRTHDAY_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["birthday_preparation_window"],
+  debugNotes: [
+    "BirthdayRule matched",
+    "birthday days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+const BIRTHDAY_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "birthday",
+  priority: "medium",
+  sourceRuleId: "birthday",
+  primaryReason: "birthday_preparation_window",
+  reasons: ["birthday_preparation_window"],
+  confidence: 60,
+  debugNotes: [
+    "BirthdayRule matched",
+    "birthday days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+section("birthday ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: BIRTHDAY_DECIDE_RESULT,
+    sourceRuleId: "birthday",
+  });
+  expect("full plan", plan, BIRTHDAY_ACTION_PLAN);
+  expect(
+    "serialized birthday plan",
+    JSON.stringify(plan),
+    JSON.stringify(BIRTHDAY_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;

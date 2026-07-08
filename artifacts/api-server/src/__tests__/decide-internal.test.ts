@@ -8,6 +8,7 @@
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { decideInternal } from "../brain/decision/decideInternal.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -70,16 +71,50 @@ const FRESH_UPDATE_DECIDE = {
 
 section("non-stale freshness → wait rule result");
 {
-  const result = decideInternal(buildDecisionContext(normalized()));
+  const result = decideInternal(buildDecisionContext(normalized(), minimalRelationshipContext()));
   expect("sourceRuleId", result.sourceRuleId, "wait");
   expect("decideResult", result.decideResult, SCAFFOLD);
 }
 
 section("stale freshness → fresh_update rule result");
 {
-  const result = decideInternal(buildDecisionContext(normalized({ freshness: "stale" })));
+  const result = decideInternal(
+    buildDecisionContext(normalized({ freshness: "stale" }), minimalRelationshipContext()),
+  );
   expect("sourceRuleId", result.sourceRuleId, "fresh_update");
   expect("decideResult", result.decideResult, FRESH_UPDATE_DECIDE);
+}
+
+section("birthday in window → birthday rule result");
+{
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized(),
+      minimalRelationshipContext({
+        generatedAt: "2026-07-01T00:00:00.000Z",
+        birthday: "1988-07-08",
+        previewDays: 14,
+      }),
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
+  expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["birthday_preparation_window"]);
+}
+
+section("birthday in window beats stale freshness");
+{
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ freshness: "stale" }),
+      minimalRelationshipContext({
+        generatedAt: "2026-07-01T00:00:00.000Z",
+        birthday: "1988-07-08",
+        previewDays: 14,
+      }),
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

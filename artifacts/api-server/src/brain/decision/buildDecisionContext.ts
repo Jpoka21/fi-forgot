@@ -1,19 +1,22 @@
 /**
  * DecisionContext builder — pure, read-only.
  *
- * Maps NormalizedRelationshipState into decision-facing vocabulary.
- * Does not call normalizeSignals, decide, contributors, or load context.
+ * Fuses NormalizedRelationshipState with RelationshipContext into the complete
+ * decision model. Does not call normalizeSignals, decide, or contributors.
  */
 
 import type { NormalizedRelationshipState } from "../normalization";
+import type { RelationshipContext } from "../types";
 import type { DecisionContext } from "./decisionContextTypes";
+import { computeBirthdayDaysAway } from "./eventTimingUtils";
 
 /**
- * Builds a DecisionContext from already-normalized relationship state.
- * Deterministic pass-through / alias mapping only.
+ * Builds a DecisionContext from normalized relationship state and loaded context.
+ * Deterministic mapping only — no rule evaluation.
  */
 export function buildDecisionContext(
   normalized: NormalizedRelationshipState,
+  relationshipContext: RelationshipContext,
 ): DecisionContext {
   const {
     identity,
@@ -24,6 +27,12 @@ export function buildDecisionContext(
     momentum,
     derivedFrom,
   } = normalized;
+
+  const birthdayDaysAway = computeBirthdayDaysAway(
+    relationshipContext.relationship?.birthday,
+    relationshipContext.generatedAt,
+  );
+  const preparationWindowDays = relationshipContext.delivery.previewDays;
 
   return {
     identity,
@@ -39,6 +48,9 @@ export function buildDecisionContext(
     engagementLevel: engagement,
     relationshipMomentum: momentum,
     timelineHistory: history,
+
+    birthdayDaysAway,
+    preparationWindowDays,
 
     derivedFrom: {
       signalCount: derivedFrom.signalCount,

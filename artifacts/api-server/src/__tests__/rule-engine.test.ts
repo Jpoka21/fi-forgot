@@ -10,6 +10,7 @@ import { decide } from "../brain/decision/decide.js";
 import { decideInternal } from "../brain/decision/decideInternal.js";
 import { runRuleEngine } from "../brain/decision/rules/runRuleEngine.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -65,7 +66,7 @@ const SCAFFOLD = {
 
 section("runRuleEngine preserves scaffold for empty DecisionContext");
 {
-  const context = buildDecisionContext(normalized());
+  const context = buildDecisionContext(normalized(), minimalRelationshipContext());
   const result = runRuleEngine(context);
   expect("sourceRuleId", result.sourceRuleId, "wait");
   expect("decideResult", result.decideResult, SCAFFOLD);
@@ -88,6 +89,7 @@ section("runRuleEngine preserves scaffold for rich DecisionContext");
       momentum: "active",
       derivedFrom: { signalCount: 70, sourcesPresent: ["engagement"] },
     }),
+    minimalRelationshipContext(),
   );
   const result = runRuleEngine(context);
   expect("sourceRuleId", result.sourceRuleId, "wait");
@@ -96,7 +98,10 @@ section("runRuleEngine preserves scaffold for rich DecisionContext");
 
 section("decideInternal matches runRuleEngine decideResult");
 {
-  const context = buildDecisionContext(normalized({ freshness: "stale" }));
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext(),
+  );
   const internal = decideInternal(context);
   const engine = runRuleEngine(context);
   expect("decideResult parity", internal.decideResult, engine.decideResult);
@@ -105,7 +110,7 @@ section("decideInternal matches runRuleEngine decideResult");
 
 section("decide() serialized output matches scaffold for non-stale contexts");
 {
-  const empty = buildDecisionContext(normalized());
+  const empty = buildDecisionContext(normalized(), minimalRelationshipContext());
   const rich = buildDecisionContext(
     normalized({
       identity: "established",
@@ -115,6 +120,7 @@ section("decide() serialized output matches scaffold for non-stale contexts");
       engagement: "moderate",
       momentum: "active",
     }),
+    minimalRelationshipContext(),
   );
   expect("decide empty serialized", JSON.stringify(decide(empty)), JSON.stringify(SCAFFOLD));
   expect("decide rich serialized", JSON.stringify(decide(rich)), JSON.stringify(SCAFFOLD));
@@ -130,7 +136,10 @@ const FRESH_UPDATE_RESULT = {
 
 section("runRuleEngine returns ask_question for stale freshness");
 {
-  const context = buildDecisionContext(normalized({ freshness: "stale" }));
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext(),
+  );
   const result = runRuleEngine(context);
   expect("sourceRuleId", result.sourceRuleId, "fresh_update");
   expect("decideResult", result.decideResult, FRESH_UPDATE_RESULT);
@@ -143,10 +152,56 @@ section("runRuleEngine returns ask_question for stale freshness");
 
 section("decide() returns ask_question only for stale freshness");
 {
-  const stale = buildDecisionContext(normalized({ freshness: "stale" }));
-  const unknown = buildDecisionContext(normalized({ freshness: "unknown" }));
+  const stale = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext(),
+  );
+  const unknown = buildDecisionContext(
+    normalized({ freshness: "unknown" }),
+    minimalRelationshipContext(),
+  );
   expect("stale serialized", JSON.stringify(decide(stale)), JSON.stringify(FRESH_UPDATE_RESULT));
   expect("unknown serialized", JSON.stringify(decide(unknown)), JSON.stringify(SCAFFOLD));
+}
+
+const BIRTHDAY_RESULT = {
+  decision: { outcome: "ask_question" },
+  confidence: 60,
+  reasons: ["birthday_preparation_window"],
+  debugNotes: [
+    "BirthdayRule matched",
+    "birthday days away: 7",
+    "preparation window: 14",
+  ],
+};
+
+section("runRuleEngine returns birthday ask_question when in preparation window");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
+  expect("decideResult", result.decideResult, BIRTHDAY_RESULT);
+}
+
+section("birthday beats stale freshness in runRuleEngine");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "stale" }),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-07-08",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

@@ -12,6 +12,7 @@ import { buildBrainInspector } from "../brain/debug/buildBrainInspector.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
 import type { RelationshipContextLoadResult } from "../brain/types.js";
 import { BRAIN_CONTEXT_VERSION } from "../brain/types.js";
+import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
 let passed = 0;
 let failed = 0;
@@ -93,7 +94,7 @@ const normalized = normalizedState({
   },
 });
 
-const decisionContext = buildDecisionContext(normalized);
+const decisionContext = buildDecisionContext(normalized, minimalRelationshipContext());
 
 const loadResult = {
   brainContextVersion: BRAIN_CONTEXT_VERSION,
@@ -185,7 +186,10 @@ section("wait actionPlan pass-through");
 section("fresh_update actionPlan pass-through");
 {
   const staleNormalized = normalizedState({ freshness: "stale" });
-  const staleDecisionContext = buildDecisionContext(staleNormalized);
+  const staleDecisionContext = buildDecisionContext(
+    staleNormalized,
+    minimalRelationshipContext(),
+  );
   const actionPlan = FRESH_UPDATE_ACTION_PLAN;
   const inspector = buildBrainInspector({
     loadResult,
