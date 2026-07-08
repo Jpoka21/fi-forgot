@@ -1,8 +1,8 @@
 /**
- * Resolves competing rule candidates into a single DecideResult.
+ * Resolves competing rule candidates into a RuleEngineResult.
  */
 
-import type { DecideResult } from "../decide";
+import type { RuleEngineResult } from "../ruleEngineTypes";
 import type { RuleCandidate } from "./types";
 
 /** Positive when `a` outranks `b` by priority, confidence, then ruleId. */
@@ -16,7 +16,7 @@ function compareCandidates(a: RuleCandidate, b: RuleCandidate): number {
   return b.ruleId.localeCompare(a.ruleId);
 }
 
-export function resolveDecision(candidates: RuleCandidate[]): DecideResult {
+export function resolveDecision(candidates: RuleCandidate[]): RuleEngineResult {
   if (candidates.length === 0) {
     throw new Error(
       "Rule Engine resolution failed: no rule candidates were produced",
@@ -28,9 +28,12 @@ export function resolveDecision(candidates: RuleCandidate[]): DecideResult {
   );
 
   return {
-    decision: winner.decision,
-    confidence: winner.confidence,
-    reasons: winner.reasons,
-    debugNotes: winner.debugNotes,
+    decideResult: {
+      decision: winner.decision,
+      confidence: winner.confidence,
+      reasons: winner.reasons,
+      debugNotes: winner.debugNotes,
+    },
+    sourceRuleId: winner.ruleId,
   };
 }

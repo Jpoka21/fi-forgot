@@ -1,13 +1,13 @@
 /**
- * Unit tests for brain/decision/rules/runRuleEngine.
+ * Unit tests for brain/decision/rules/runRuleEngine and public decide().
  *
- * Proves serialized decide() scaffold output is unchanged via the Rule Engine.
  * Run with:
  *   npx tsx artifacts/api-server/src/__tests__/rule-engine.test.ts
  */
 
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { decide } from "../brain/decision/decide.js";
+import { decideInternal } from "../brain/decision/decideInternal.js";
 import { runRuleEngine } from "../brain/decision/rules/runRuleEngine.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
 
@@ -67,8 +67,13 @@ section("runRuleEngine preserves scaffold for empty DecisionContext");
 {
   const context = buildDecisionContext(normalized());
   const result = runRuleEngine(context);
-  expect("result", result, SCAFFOLD);
-  expect("serialized scaffold", JSON.stringify(result), JSON.stringify(SCAFFOLD));
+  expect("sourceRuleId", result.sourceRuleId, "wait");
+  expect("decideResult", result.decideResult, SCAFFOLD);
+  expect(
+    "serialized decideResult",
+    JSON.stringify(result.decideResult),
+    JSON.stringify(SCAFFOLD),
+  );
 }
 
 section("runRuleEngine preserves scaffold for rich DecisionContext");
@@ -85,8 +90,17 @@ section("runRuleEngine preserves scaffold for rich DecisionContext");
     }),
   );
   const result = runRuleEngine(context);
-  expect("result", result, SCAFFOLD);
-  expect("serialized scaffold", JSON.stringify(result), JSON.stringify(SCAFFOLD));
+  expect("sourceRuleId", result.sourceRuleId, "wait");
+  expect("decideResult", result.decideResult, SCAFFOLD);
+}
+
+section("decideInternal matches runRuleEngine decideResult");
+{
+  const context = buildDecisionContext(normalized({ freshness: "stale" }));
+  const internal = decideInternal(context);
+  const engine = runRuleEngine(context);
+  expect("decideResult parity", internal.decideResult, engine.decideResult);
+  expect("sourceRuleId parity", internal.sourceRuleId, engine.sourceRuleId);
 }
 
 section("decide() serialized output matches scaffold for non-stale contexts");
@@ -118,10 +132,11 @@ section("runRuleEngine returns ask_question for stale freshness");
 {
   const context = buildDecisionContext(normalized({ freshness: "stale" }));
   const result = runRuleEngine(context);
-  expect("result", result, FRESH_UPDATE_RESULT);
+  expect("sourceRuleId", result.sourceRuleId, "fresh_update");
+  expect("decideResult", result.decideResult, FRESH_UPDATE_RESULT);
   expect(
     "serialized fresh update",
-    JSON.stringify(result),
+    JSON.stringify(result.decideResult),
     JSON.stringify(FRESH_UPDATE_RESULT),
   );
 }

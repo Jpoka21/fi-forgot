@@ -46,11 +46,16 @@ const waitCandidate: RuleCandidate = {
   ...SCAFFOLD,
 };
 
-section("single candidate maps to DecideResult");
+section("single candidate maps to RuleEngineResult");
 {
   const result = resolveDecision([waitCandidate]);
-  expect("result", result, SCAFFOLD);
-  expect("serialized scaffold", JSON.stringify(result), JSON.stringify(SCAFFOLD));
+  expect("sourceRuleId", result.sourceRuleId, "wait");
+  expect("decideResult", result.decideResult, SCAFFOLD);
+  expect(
+    "serialized decideResult",
+    JSON.stringify(result.decideResult),
+    JSON.stringify(SCAFFOLD),
+  );
 }
 
 section("fresh update candidate beats wait");
@@ -66,11 +71,12 @@ section("fresh update candidate beats wait");
       debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
     },
   ]);
-  expect("outcome", result.decision.outcome, "ask_question");
-  expect("confidence", result.confidence, 52);
+  expect("sourceRuleId", result.sourceRuleId, "fresh_update");
+  expect("outcome", result.decideResult.decision.outcome, "ask_question");
+  expect("confidence", result.decideResult.confidence, 52);
   expect(
-    "serialized result",
-    JSON.stringify(result),
+    "serialized decideResult",
+    JSON.stringify(result.decideResult),
     JSON.stringify({
       decision: { outcome: "ask_question" },
       confidence: 52,
@@ -93,8 +99,9 @@ section("highest priority wins");
       debugNotes: ["birthday"],
     },
   ]);
-  expect("outcome", result.decision.outcome, "prepare_card");
-  expect("confidence", result.confidence, 98);
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
+  expect("outcome", result.decideResult.decision.outcome, "prepare_card");
+  expect("confidence", result.decideResult.confidence, 98);
 }
 
 section("equal priority uses confidence");
@@ -117,7 +124,8 @@ section("equal priority uses confidence");
       debugNotes: ["high"],
     },
   ]);
-  expect("outcome", result.decision.outcome, "ask_question");
+  expect("sourceRuleId", result.sourceRuleId, "high");
+  expect("outcome", result.decideResult.decision.outcome, "ask_question");
 }
 
 section("equal priority and confidence uses ruleId tie-break");
@@ -140,7 +148,8 @@ section("equal priority and confidence uses ruleId tie-break");
       debugNotes: ["alpha"],
     },
   ]);
-  expect("alpha wins lexicographically", result.reasons, ["alpha"]);
+  expect("sourceRuleId", result.sourceRuleId, "alpha");
+  expect("alpha wins lexicographically", result.decideResult.reasons, ["alpha"]);
 }
 
 section("empty candidate list throws");

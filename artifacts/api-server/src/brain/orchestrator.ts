@@ -2,15 +2,16 @@
  * Brain orchestrator — read-only scaffold.
  *
  * Connects loadRelationshipContext() → extractSignals() → normalize →
- * buildDecisionContext → decide() → BrainResponse.
- * Decision output remains the Phase 1 wait scaffold.
+ * buildDecisionContext → decideInternal() → buildActionPlan() → BrainResponse.
  * No scoring, no AI, no side effects beyond existing context reads.
  */
 
+import type { ActionPlan } from "./action/actionPlanTypes";
 import { loadRelationshipContext } from "./context/loadRelationshipContext";
 import { buildDecisionContext } from "./decision/buildDecisionContext";
 import type { DecisionContext } from "./decision/decisionContextTypes";
-import { decide, type DecideResult } from "./decision/decide";
+import type { DecideResult } from "./decision/decide";
+import { planFromDecisionContext } from "./planFromDecisionContext";
 import { normalizeSignals } from "./normalization";
 import type { NormalizedRelationshipState } from "./normalization";
 import { extractSignals } from "./signals/extractSignals";
@@ -23,10 +24,11 @@ export interface BrainExecutionResult {
   normalized: NormalizedRelationshipState;
   decisionContext: DecisionContext;
   decideResult: DecideResult;
+  actionPlan: ActionPlan;
 }
 
 /**
- * Runs the Brain pipeline once: load → extract → normalize → decision context → decide.
+ * Runs the Brain pipeline once: load → extract → normalize → decision → action plan.
  * Not re-exported from brain/index.ts — intended for dev debug use.
  */
 export async function executeBrain(
@@ -37,9 +39,9 @@ export async function executeBrain(
   const extraction = extractSignals(loadResult);
   const normalized = normalizeSignals(extraction.availableSignals);
   const decisionContext = buildDecisionContext(normalized);
-  const decideResult = decide(decisionContext);
+  const { decideResult, actionPlan } = planFromDecisionContext(decisionContext);
 
-  return { loadResult, extraction, normalized, decisionContext, decideResult };
+  return { loadResult, extraction, normalized, decisionContext, decideResult, actionPlan };
 }
 
 export function toBrainResponse(
