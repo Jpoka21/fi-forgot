@@ -83,6 +83,7 @@ section("conservative defaults from empty normalized state");
     ctx.lastRelationshipActivityDaysAgo,
     null,
   );
+  expect("lastCardActivityDaysAgo null when no card events", ctx.lastCardActivityDaysAgo, null);
 }
 
 section("full rich state maps decision vocabulary 1:1");
@@ -287,6 +288,40 @@ section("relationship timeline activity is exposed as lastRelationshipActivityDa
   ];
   const ctx = buildDecisionContext(normalized(), relationshipContext);
   expect("lastRelationshipActivityDaysAgo 42", ctx.lastRelationshipActivityDaysAgo, 42);
+}
+
+section("lastCardActivityDaysAgo uses newest card timeline event");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-1",
+      type: "fresh_update",
+      occurredAt: "2026-06-15T00:00:00.000Z",
+      daysAgo: 30,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-2",
+      type: "card",
+      occurredAt: "2026-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "birthday card",
+    },
+    {
+      id: "event-3",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 500,
+      label: "older card",
+    },
+  ];
+  const ctx = buildDecisionContext(
+    normalized({ identity: "established", freshness: "current" }),
+    relationshipContext,
+  );
+  expect("lastCardActivityDaysAgo 150", ctx.lastCardActivityDaysAgo, 150);
+  expect("lastRelationshipActivityDaysAgo 30", ctx.lastRelationshipActivityDaysAgo, 30);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

@@ -137,6 +137,29 @@ section("summary has no winnerRuleId or evaluatedAt fields");
   expect("no evaluatedAt", "evaluatedAt" in result.ruleEvaluation, false);
 }
 
+section("card_gap evaluation entry records no-match reasons");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "Fresh Update",
+    },
+  ];
+  const result = runRuleEngine(
+    buildDecisionContext(
+      normalized({ identity: "established", freshness: "current", writing: "none" }),
+      relationshipContext,
+    ),
+  );
+  const cardGap = result.ruleEvaluation.entries.find((entry) => entry.ruleId === "card_gap");
+  expect("card_gap not matched", cardGap?.matched, false);
+  expect("no card reason", cardGap?.reasons, ["no_card_history_and_no_writing"]);
+}
+
 section("decideResult unchanged from pre-explanation behavior for wait scaffold");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());

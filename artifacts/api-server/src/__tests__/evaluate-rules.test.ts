@@ -207,6 +207,37 @@ section("multiple matching rules are all collected");
   expect("candidate count", candidates.length, 2);
 }
 
+section("live registry collects CardGapRule and WaitRule when card channel is quiet");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "card",
+    },
+  ];
+  const context = buildDecisionContext(
+    normalized({ identity: "established", freshness: "current" }),
+    relationshipContext,
+  );
+  const { candidates } = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "card_gap",
+    "wait",
+  ]);
+}
+
 section("evaluation entries cover full registry");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());

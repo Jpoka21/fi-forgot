@@ -259,6 +259,48 @@ section("inactivity ActionPlan");
   );
 }
 
+const CARD_GAP_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 45,
+  reasons: ["card_channel_quiet"],
+  debugNotes: [
+    "CardGapRule matched",
+    "last card activity days ago: 150",
+    "card gap threshold days: 120",
+    "last relationship activity days ago: 30",
+  ],
+};
+
+const CARD_GAP_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "card_opportunity",
+  priority: "medium",
+  sourceRuleId: "card_gap",
+  primaryReason: "card_channel_quiet",
+  reasons: ["card_channel_quiet"],
+  confidence: 45,
+  debugNotes: [
+    "CardGapRule matched",
+    "last card activity days ago: 150",
+    "card gap threshold days: 120",
+    "last relationship activity days ago: 30",
+  ],
+};
+
+section("card_gap ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: CARD_GAP_DECIDE_RESULT,
+    sourceRuleId: "card_gap",
+  });
+  expect("full plan", plan, CARD_GAP_ACTION_PLAN);
+  expect(
+    "serialized card gap plan",
+    JSON.stringify(plan),
+    JSON.stringify(CARD_GAP_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;

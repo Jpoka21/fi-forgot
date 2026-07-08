@@ -216,6 +216,117 @@ section("valentines day in window beats stale freshness");
   expect("sourceRuleId", result.sourceRuleId, "valentines_day");
 }
 
+section("card gap → card_gap rule result");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ identity: "established", freshness: "current" }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "card_gap");
+  expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["card_channel_quiet"]);
+}
+
+section("stale freshness beats card gap");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ identity: "established", freshness: "stale" }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "fresh_update");
+}
+
+section("inactive relationship beats card gap");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 365,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ identity: "established", freshness: "current" }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "inactivity");
+}
+
+section("birthday in window beats card gap");
+{
+  const relationshipContext = minimalRelationshipContext({
+    generatedAt: "2026-07-01T00:00:00.000Z",
+    birthday: "1988-07-08",
+    previewDays: 14,
+  });
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ identity: "established", freshness: "current" }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "birthday");
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

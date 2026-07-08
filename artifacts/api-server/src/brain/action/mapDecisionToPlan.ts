@@ -30,6 +30,9 @@ const PLAN_MAPPINGS: Record<string, Partial<Record<BrainDecisionOutcome, PlanMap
     inactivity: {
       ask_question: { type: "ask_question", category: "follow_up" },
     },
+    card_gap: {
+      ask_question: { type: "ask_question", category: "card_opportunity" },
+    },
   };
 
 export function mapDecisionToPlan(

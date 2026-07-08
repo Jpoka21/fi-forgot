@@ -68,6 +68,8 @@ export interface DecisionContext {
   preparationWindowDays: number | null;
   /** Days since the most recent relationship timeline activity. Null when unknown or empty. */
   lastRelationshipActivityDaysAgo: number | null;
+  /** Days since the most recent card event on the relationship timeline. Null when none. */
+  lastCardActivityDaysAgo: number | null;
 
   derivedFrom: DecisionContextDerivedFrom;
 }

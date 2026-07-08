@@ -41,6 +41,10 @@ export function buildDecisionContext(
   const preparationWindowDays = relationshipContext.delivery.previewDays;
   const lastRelationshipActivityDaysAgo =
     relationshipContext.relationshipTimeline.events[0]?.daysAgo ?? null;
+  const lastCardActivityDaysAgo =
+    relationshipContext.relationshipTimeline.events.find(
+      (event) => event.type === "card",
+    )?.daysAgo ?? null;
 
   return {
     identity,
@@ -63,6 +67,7 @@ export function buildDecisionContext(
     relationshipType,
     preparationWindowDays,
     lastRelationshipActivityDaysAgo,
+    lastCardActivityDaysAgo,
 
     derivedFrom: {
       signalCount: derivedFrom.signalCount,
