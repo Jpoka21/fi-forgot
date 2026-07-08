@@ -5,6 +5,7 @@
  * Not part of BrainResponse or any production API contract.
  */
 
+import type { NormalizedRelationshipState } from "../normalization";
 import type { BrainSignal } from "../types";
 
 export interface BrainInspectorContributorView {
@@ -32,4 +33,6 @@ export interface BrainInspector {
   contributors: BrainInspectorContributorView[];
   signalsBySource: Record<string, BrainSignal[]>;
   registryOrder: string[];
+  /** Read-only elevated states from availableSignals — display only, not decide(). */
+  normalized: NormalizedRelationshipState;
 }
