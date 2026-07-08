@@ -6,6 +6,7 @@
  */
 
 import type { DecisionContext } from "../decisionContextTypes";
+import { isEventWithinPreparationWindow } from "../eventWindow";
 import type { DecisionRule, RuleCandidate } from "./types";
 
 const ANNIVERSARY_CANDIDATE: RuleCandidate = {
@@ -21,11 +22,7 @@ export const anniversaryRule: DecisionRule = {
   id: "anniversary",
   evaluate(context: DecisionContext): RuleCandidate | null {
     const { anniversaryDaysAway, preparationWindowDays } = context;
-    if (
-      anniversaryDaysAway == null ||
-      preparationWindowDays == null ||
-      anniversaryDaysAway > preparationWindowDays
-    ) {
+    if (!isEventWithinPreparationWindow(anniversaryDaysAway, preparationWindowDays)) {
       return null;
     }
 
