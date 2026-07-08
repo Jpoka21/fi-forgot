@@ -24,6 +24,8 @@ It is a historical record of intentional decisions.
 
 ---
 
+
+
 # Guiding Principle
 
 The Playbook remains the single source of truth.
@@ -34,11 +36,15 @@ This log exists only for implementation details that do not alter product behavi
 
 ---
 
+
+
 # Decision Entry Format
 
 Every decision should follow the same structure.
 
 ---
+
+
 
 ## Decision ID
 
@@ -54,11 +60,15 @@ FDL-001
 
 ---
 
+
+
 ## Date
 
 Record the implementation date.
 
 ---
+
+
 
 ## Area
 
@@ -90,11 +100,15 @@ Design System
 
 ---
 
+
+
 ## Decision
 
 Describe the implementation decision.
 
 ---
+
+
 
 ## Reason
 
@@ -102,11 +116,15 @@ Explain why this approach was selected.
 
 ---
 
+
+
 ## Alternatives Considered
 
 Briefly describe any meaningful alternatives.
 
 ---
+
+
 
 ## Impact
 
@@ -128,17 +146,23 @@ Testing
 
 ---
 
+
+
 ## Related Playbook Files
 
 Reference applicable specification documents.
 
 ---
 
+
+
 ## Approved By
 
 Record the approving stakeholder.
 
 ---
+
+
 
 # Decision Status
 
@@ -158,9 +182,13 @@ Only Approved decisions should influence implementation.
 
 ---
 
+
+
 # Decision Categories
 
 ---
+
+
 
 ## Architecture
 
@@ -178,6 +206,8 @@ API structure.
 
 ---
 
+
+
 ## Design System
 
 Component implementation.
@@ -191,6 +221,8 @@ Animation implementation.
 Styling approach.
 
 ---
+
+
 
 ## Performance
 
@@ -206,6 +238,8 @@ Prefetching.
 
 ---
 
+
+
 ## Accessibility
 
 Keyboard navigation.
@@ -219,6 +253,8 @@ Reduced motion.
 Color accessibility.
 
 ---
+
+
 
 ## User Experience
 
@@ -234,6 +270,8 @@ Interaction polish.
 
 ---
 
+
+
 ## Testing
 
 Testing strategy.
@@ -247,6 +285,8 @@ Performance testing.
 Accessibility testing.
 
 ---
+
+
 
 ## Infrastructure
 
@@ -262,11 +302,15 @@ Environment configuration.
 
 ---
 
+
+
 # Active Decisions
 
 No implementation decisions have been recorded.
 
 ---
+
+
 
 # Superseded Decisions
 
@@ -274,13 +318,19 @@ None.
 
 ---
 
+
+
 # Rejected Decisions
 
 None.
 
 ---
 
+
+
 # Decision History
+
+
 
 ## FDL-001
 
@@ -334,6 +384,8 @@ Related Playbook Files
 
 ---
 
+
+
 ## FDL-002
 
 Status
@@ -378,6 +430,8 @@ Related Playbook Files
 
 ---
 
+
+
 ## FDL-003
 
 Status
@@ -415,6 +469,8 @@ Related Playbook Files
 99
 
 ---
+
+
 
 ## FDL-004
 
@@ -455,6 +511,8 @@ Related Playbook Files
 81 through 99
 
 ---
+
+
 
 ## FDL-005
 
@@ -498,6 +556,8 @@ Related Playbook Files
 
 ---
 
+
+
 # Decision Review Process
 
 Every new decision should be reviewed before implementation.
@@ -515,6 +575,8 @@ Will future developers understand why this decision was made?
 If the answer to any of these questions is uncertain, the decision should be discussed before implementation.
 
 ---
+
+
 
 # Decision Retirement
 
@@ -536,6 +598,8 @@ Historical context should always be preserved.
 
 ---
 
+
+
 # Success Criteria
 
 A successful Decision Log should ensure:
@@ -552,20 +616,28 @@ The frontend can continue evolving confidently without repeating past debates or
 
 ---
 
+
+
 # Phase 1 — Implementation Log
 
 Living record of Phase 1 repository-preparation steps. Earlier steps (Entries 001–005) are summarized in `101_IMPLEMENTATION_PROGRESS_TRACKER.md` Recently Completed.
 
 ---
 
+
+
 ## Entry 006 — Phase 1: Replit/Linux build + typecheck confirmed
 
-| Field | Value |
-|-------|-------|
-| **Date** | 2026-06-29 |
-| **Phase** | 1 — Repository Preparation |
-| **Step** | Build verification on Replit/Linux (confirmed) |
-| **Branch** | `frontend-rebuild` |
+
+| Field      | Value                                          |
+| ---------- | ---------------------------------------------- |
+| **Date**   | 2026-06-29                                     |
+| **Phase**  | 1 — Repository Preparation                     |
+| **Step**   | Build verification on Replit/Linux (confirmed) |
+| **Branch** | `frontend-rebuild`                             |
+
+
+
 
 ### Context
 
@@ -578,24 +650,32 @@ pnpm --filter @workspace/fi-forgot run typecheck
 PORT=25460 BASE_PATH=/ pnpm --filter @workspace/fi-forgot run build
 ```
 
+
+
 ### Results
 
-| Check | Exit code | Result |
-|-------|-----------|--------|
-| `pnpm --filter @workspace/fi-forgot run typecheck` | **0** | **Passed** |
-| `PORT=25460 BASE_PATH=/ pnpm --filter @workspace/fi-forgot run build` | **0** | **Passed** |
+
+| Check                                                                 | Exit code | Result     |
+| --------------------------------------------------------------------- | --------- | ---------- |
+| `pnpm --filter @workspace/fi-forgot run typecheck`                    | **0**     | **Passed** |
+| `PORT=25460 BASE_PATH=/ pnpm --filter @workspace/fi-forgot run build` | **0**     | **Passed** |
+
 
 **Build Verified:** Yes — typecheck and production build both confirmed on Replit/Linux.
 
 ### Backend untouched confirmation
 
-- **No files modified** under `artifacts/api-server/**` in this verification step
+- **No files modified** under `artifacts/api-server/`** in this verification step
 - Playbook documentation only
+
+
 
 ### Tracker impact
 
 - **Build Verified:** Marked complete.
 - **Development Ready:** Not marked — environment/lint/dev-server gates remain.
+
+
 
 ### Next recommended action
 
@@ -603,14 +683,20 @@ Continue Phase 1: **Repository Cleaned** (next unchecked tracker gate).
 
 ---
 
+
+
 ## Entry 007 — Phase 1: Repository Cleaned (legacy quarantine)
 
-| Field | Value |
-|-------|-------|
-| **Date** | 2026-06-29 |
-| **Phase** | 1 — Repository Preparation |
-| **Step** | Repository Cleaned — safest hygiene (quarantine, no permanent legacy deletion) |
-| **Branch** | `frontend-rebuild` |
+
+| Field      | Value                                                                          |
+| ---------- | ------------------------------------------------------------------------------ |
+| **Date**   | 2026-06-29                                                                     |
+| **Phase**  | 1 — Repository Preparation                                                     |
+| **Step**   | Repository Cleaned — safest hygiene (quarantine, no permanent legacy deletion) |
+| **Branch** | `frontend-rebuild`                                                             |
+
+
+
 
 ### Approach
 
@@ -618,41 +704,57 @@ Orphan pages and components moved to `src/_legacy/` (not deleted). Confirmed dea
 
 ### Files moved to `src/_legacy/pages/`
 
-| From | To |
-|------|-----|
-| `src/pages/login.tsx` | `src/_legacy/pages/login.tsx` |
-| `src/pages/signup.tsx` | `src/_legacy/pages/signup.tsx` |
-| `src/pages/try.tsx` | `src/_legacy/pages/try.tsx` |
-| `src/pages/recipients.tsx` | `src/_legacy/pages/recipients.tsx` |
+
+| From                           | To                                     |
+| ------------------------------ | -------------------------------------- |
+| `src/pages/login.tsx`          | `src/_legacy/pages/login.tsx`          |
+| `src/pages/signup.tsx`         | `src/_legacy/pages/signup.tsx`         |
+| `src/pages/try.tsx`            | `src/_legacy/pages/try.tsx`            |
+| `src/pages/recipients.tsx`     | `src/_legacy/pages/recipients.tsx`     |
 | `src/pages/brownie-points.tsx` | `src/_legacy/pages/brownie-points.tsx` |
+
+
+
 
 ### Files moved to `src/_legacy/components/`
 
-| From | To |
-|------|-----|
-| `src/components/ProfileQuestionCard.tsx` | `src/_legacy/components/ProfileQuestionCard.tsx` |
+
+| From                                           | To                                                     |
+| ---------------------------------------------- | ------------------------------------------------------ |
+| `src/components/ProfileQuestionCard.tsx`       | `src/_legacy/components/ProfileQuestionCard.tsx`       |
 | `src/components/RelationshipHealthSection.tsx` | `src/_legacy/components/RelationshipHealthSection.tsx` |
-| `src/components/demo-form.tsx` | `src/_legacy/components/demo-form.tsx` |
-| `src/components/brand/DaveBackground.tsx` | `src/_legacy/components/DaveBackground.tsx` |
+| `src/components/demo-form.tsx`                 | `src/_legacy/components/demo-form.tsx`                 |
+| `src/components/brand/DaveBackground.tsx`      | `src/_legacy/components/DaveBackground.tsx`            |
+
+
+
 
 ### Dead exports removed (zero references confirmed)
 
-| Export | File |
-|--------|------|
-| `SectionTitle` | `src/components/personal-ui.tsx` |
-| `limitLabel()` | `src/lib/plan.ts` |
-| `buildHomeHeroSubline()` | `src/lib/personal-brand.ts` |
-| `personStatusLine()` | `src/lib/personal-brand.ts` |
-| `daysUntilNextOccurrence()` | `src/lib/data.ts` |
+
+| Export                      | File                             |
+| --------------------------- | -------------------------------- |
+| `SectionTitle`              | `src/components/personal-ui.tsx` |
+| `limitLabel()`              | `src/lib/plan.ts`                |
+| `buildHomeHeroSubline()`    | `src/lib/personal-brand.ts`      |
+| `personStatusLine()`        | `src/lib/personal-brand.ts`      |
+| `daysUntilNextOccurrence()` | `src/lib/data.ts`                |
+
+
+
 
 ### Files deleted (dev-only, zero runtime references)
 
-| File |
-|------|
-| `public/card-gallery.html` |
-| `public/humor-v2/index.html` |
-| `public/humor-v2/with-text.html` |
+
+| File                                   |
+| -------------------------------------- |
+| `public/card-gallery.html`             |
+| `public/humor-v2/index.html`           |
+| `public/humor-v2/with-text.html`       |
 | `public/humor-v2/` (directory removed) |
+
+
+
 
 ### Commands run
 
@@ -660,18 +762,26 @@ Orphan pages and components moved to `src/_legacy/` (not deleted). Confirmed dea
 pnpm --filter @workspace/fi-forgot run typecheck
 ```
 
+
+
 ### Results
 
-| Check | Environment | Exit code | Result |
-|-------|-------------|-----------|--------|
-| `pnpm --filter @workspace/fi-forgot run typecheck` | Local (Windows) | **0** | **Passed** |
-| `pnpm --filter @workspace/fi-forgot run typecheck` | Replit/Linux | — | Agent SSH blocked; re-run after sync |
-| `PORT=25460 BASE_PATH=/ pnpm --filter @workspace/fi-forgot run build` | Replit/Linux | — | Agent SSH blocked; re-run after sync |
+
+| Check                                                                 | Environment     | Exit code | Result                               |
+| --------------------------------------------------------------------- | --------------- | --------- | ------------------------------------ |
+| `pnpm --filter @workspace/fi-forgot run typecheck`                    | Local (Windows) | **0**     | **Passed**                           |
+| `pnpm --filter @workspace/fi-forgot run typecheck`                    | Replit/Linux    | —         | Agent SSH blocked; re-run after sync |
+| `PORT=25460 BASE_PATH=/ pnpm --filter @workspace/fi-forgot run build` | Replit/Linux    | —         | Agent SSH blocked; re-run after sync |
+
+
+
 
 ### Backend untouched confirmation
 
-- **No files modified** under `artifacts/api-server/**`
+- **No files modified** under `artifacts/api-server/`**
 - No route, redirect, or API client changes
+
+
 
 ### Tracker impact
 
@@ -679,30 +789,42 @@ pnpm --filter @workspace/fi-forgot run typecheck
 - **Environment Configured:** Not marked — next gate.
 - **Development Ready:** Not marked.
 
+
+
 ### Next recommended action
 
 Sync to Replit and re-run typecheck + build. Continue Phase 1: **Environment Configured**.
 
 ---
 
+
+
 ## Entry 008 — Phase 1: Environment Configured
 
-| Field | Value |
-|-------|-------|
-| **Date** | 2026-06-29 |
-| **Phase** | 1 — Repository Preparation |
-| **Step** | Development environment tooling (smallest safe setup) |
-| **Branch** | `frontend-rebuild` |
+
+| Field      | Value                                                 |
+| ---------- | ----------------------------------------------------- |
+| **Date**   | 2026-06-29                                            |
+| **Phase**  | 1 — Repository Preparation                            |
+| **Step**   | Development environment tooling (smallest safe setup) |
+| **Branch** | `frontend-rebuild`                                    |
+
+
+
 
 ### Implemented
 
-| Item | Path / detail |
-|------|----------------|
-| Env template | `artifacts/fi-forgot/.env.example` — `PORT=25460`, `BASE_PATH=/` |
-| Dev docs | `artifacts/fi-forgot/README.md` — Replit workflow, Windows limits, build commands |
-| ESLint | `artifacts/fi-forgot/eslint.config.js` — flat config; TypeScript; React Hooks; jsx-a11y (warn-level); ignores `src/_legacy/**` |
-| Prettier | `artifacts/fi-forgot/.prettierrc`, `.prettierignore` |
-| Scripts | `lint`, `lint:fix`, `format`, `format:check` in `package.json` |
+
+| Item         | Path / detail                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Env template | `artifacts/fi-forgot/.env.example` — `PORT=25460`, `BASE_PATH=/`                                                               |
+| Dev docs     | `artifacts/fi-forgot/README.md` — Replit workflow, Windows limits, build commands                                              |
+| ESLint       | `artifacts/fi-forgot/eslint.config.js` — flat config; TypeScript; React Hooks; jsx-a11y (warn-level); ignores `src/_legacy/**` |
+| Prettier     | `artifacts/fi-forgot/.prettierrc`, `.prettierignore`                                                                           |
+| Scripts      | `lint`, `lint:fix`, `format`, `format:check` in `package.json`                                                                 |
+
+
+
 
 ### ESLint baseline policy
 
@@ -715,27 +837,92 @@ pnpm --filter @workspace/fi-forgot run lint
 pnpm --filter @workspace/fi-forgot run typecheck
 ```
 
+
+
 ### Results
 
-| Check | Environment | Exit code | Result |
-|-------|-------------|-----------|--------|
-| `pnpm --filter @workspace/fi-forgot run lint` | Local | **0** | **Passed** — 0 errors, 403 warnings |
-| `pnpm --filter @workspace/fi-forgot run typecheck` | Local | **0** | **Passed** |
-| `pnpm --filter @workspace/fi-forgot run typecheck` | Replit/Linux | — | Agent SSH blocked; re-run after sync |
-| `PORT=25460 BASE_PATH=/ pnpm --filter @workspace/fi-forgot run build` | Replit/Linux | — | Agent SSH blocked; config-only changes — build unaffected |
+
+| Check                                                                 | Environment  | Exit code | Result                                                    |
+| --------------------------------------------------------------------- | ------------ | --------- | --------------------------------------------------------- |
+| `pnpm --filter @workspace/fi-forgot run lint`                         | Local        | **0**     | **Passed** — 0 errors, 403 warnings                       |
+| `pnpm --filter @workspace/fi-forgot run typecheck`                    | Local        | **0**     | **Passed**                                                |
+| `pnpm --filter @workspace/fi-forgot run typecheck`                    | Replit/Linux | —         | Agent SSH blocked; re-run after sync                      |
+| `PORT=25460 BASE_PATH=/ pnpm --filter @workspace/fi-forgot run build` | Replit/Linux | —         | Agent SSH blocked; config-only changes — build unaffected |
+
+
+
 
 ### Backend untouched confirmation
 
-- **No files modified** under `artifacts/api-server/**`
+- **No files modified** under `artifacts/api-server/`**
 - No route, API client, or application logic changes
+
+
 
 ### Tracker impact
 
 - **Environment Configured:** Marked complete.
 - **Development Ready:** Not marked — next gate.
 
+
+
 ### Next recommended action
 
 Sync to Replit; run `lint`, `typecheck`, and `build`. Complete **Development Ready** gate (dev server + lint/format CI readiness).
 
+
+
 ---
+
+## Entry 009 — Relationship Intelligence: DecisionContext Integration
+
+| Field | Value |
+
+|-------|-------|
+
+| Date | 2026-07-08 |
+
+| Phase | Relationship Intelligence Engine |
+
+| Step | DecisionContext wired into Decision Engine |
+
+| Branch | frontend-rebuild |
+
+| Commit | a95a90e |
+
+### Decision
+
+DecisionContext is now the canonical input to the Decision Engine.
+
+### Rationale
+
+The Brain should make decisions from an abstracted relationship state rather than consuming RelationshipContext or raw Brain Signals directly.
+
+### Implemented
+
+| Item | Result |
+
+|------|--------|
+
+| decide() input | Updated to accept DecisionContext |
+
+| Decision behavior | Unchanged |
+
+| Outcome | Still wait |
+
+| Confidence | Still 0 |
+
+| BrainResponse | Unchanged |
+
+| Production behavior | Unchanged |
+
+### Verification
+
+TypeScript compile passed.
+
+```bash
+
+npx tsc -p artifacts/api-server/tsconfig.json --noEmit
+
+---
+
