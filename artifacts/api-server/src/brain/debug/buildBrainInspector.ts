@@ -1,13 +1,13 @@
 /**
  * Brain Inspector builder — development-only viewer.
  *
- * Consumes already-produced extraction output. Does not invoke contributors
- * or recompute signal values. Calls normalizeSignals() exactly once on the
- * existing availableSignals array.
+ * Consumes already-produced orchestrator output. Does not invoke contributors,
+ * normalize signals, or build decision context.
  */
 
+import type { DecisionContext } from "../decision/decisionContextTypes";
 import type { DecideResult } from "../decision/decide";
-import { normalizeSignals } from "../normalization";
+import type { NormalizedRelationshipState } from "../normalization";
 import type { SignalExtractionResult } from "../signals/extractionTypes";
 import type { RelationshipContextLoadResult } from "../types";
 import type { BrainInspector } from "./inspectorTypes";
@@ -15,11 +15,14 @@ import type { BrainInspector } from "./inspectorTypes";
 export interface BrainInspectorInput {
   loadResult: RelationshipContextLoadResult;
   extraction: SignalExtractionResult;
+  normalized: NormalizedRelationshipState;
+  decisionContext: DecisionContext;
   decideResult: DecideResult;
 }
 
 export function buildBrainInspector(input: BrainInspectorInput): BrainInspector {
-  const { loadResult, extraction, decideResult } = input;
+  const { loadResult, extraction, normalized, decisionContext, decideResult } =
+    input;
 
   const signalsBySource: Record<string, BrainInspector["signalsBySource"][string]> =
     {};
@@ -28,7 +31,6 @@ export function buildBrainInspector(input: BrainInspectorInput): BrainInspector 
   }
 
   const sources = [...new Set(extraction.availableSignals.map((signal) => signal.source))];
-  const normalized = normalizeSignals(extraction.availableSignals);
 
   return {
     generatedAt: new Date().toISOString(),
@@ -52,5 +54,6 @@ export function buildBrainInspector(input: BrainInspectorInput): BrainInspector 
     signalsBySource,
     registryOrder: extraction.contributorGroups.map((group) => group.key),
     normalized,
+    decisionContext,
   };
 }

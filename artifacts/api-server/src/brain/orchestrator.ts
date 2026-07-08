@@ -9,8 +9,10 @@
 
 import { loadRelationshipContext } from "./context/loadRelationshipContext";
 import { buildDecisionContext } from "./decision/buildDecisionContext";
+import type { DecisionContext } from "./decision/decisionContextTypes";
 import { decide, type DecideResult } from "./decision/decide";
 import { normalizeSignals } from "./normalization";
+import type { NormalizedRelationshipState } from "./normalization";
 import { extractSignals } from "./signals/extractSignals";
 import type { SignalExtractionResult } from "./signals/extractionTypes";
 import type { BrainResponse, RelationshipContextLoadResult } from "./types";
@@ -18,6 +20,8 @@ import type { BrainResponse, RelationshipContextLoadResult } from "./types";
 export interface BrainExecutionResult {
   loadResult: RelationshipContextLoadResult;
   extraction: SignalExtractionResult;
+  normalized: NormalizedRelationshipState;
+  decisionContext: DecisionContext;
   decideResult: DecideResult;
 }
 
@@ -35,7 +39,7 @@ export async function executeBrain(
   const decisionContext = buildDecisionContext(normalized);
   const decideResult = decide(decisionContext);
 
-  return { loadResult, extraction, decideResult };
+  return { loadResult, extraction, normalized, decisionContext, decideResult };
 }
 
 export function toBrainResponse(

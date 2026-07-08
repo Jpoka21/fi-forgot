@@ -5,6 +5,7 @@
  * Not part of BrainResponse or any production API contract.
  */
 
+import type { DecisionContext } from "../decision/decisionContextTypes";
 import type { NormalizedRelationshipState } from "../normalization";
 import type { BrainSignal } from "../types";
 
@@ -33,6 +34,8 @@ export interface BrainInspector {
   contributors: BrainInspectorContributorView[];
   signalsBySource: Record<string, BrainSignal[]>;
   registryOrder: string[];
-  /** Read-only elevated states from availableSignals — display only, not decide(). */
+  /** Read-only elevated states from executeBrain() — display only, not decide(). */
   normalized: NormalizedRelationshipState;
+  /** Decision-facing context from executeBrain() — same object passed to decide(). */
+  decisionContext: DecisionContext;
 }
