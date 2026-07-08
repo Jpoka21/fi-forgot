@@ -1,13 +1,14 @@
 /**
- * Decision Engine — read-only scaffold.
+ * Decision Engine — deterministic Rule Engine entry point.
  *
  * Accepts DecisionContext as the decision-facing input contract.
- * Phase 1 still returns a fixed placeholder — DecisionContext fields are not read.
- * The Brain is not yet authorized to act.
+ * Phase 1 still returns the frozen wait scaffold via WaitRule only.
+ * The Brain is not yet authorized to act beyond waiting.
  */
 
 import type { BrainDecision } from "../types";
 import type { DecisionContext } from "./decisionContextTypes";
+import { runRuleEngine } from "./rules/runRuleEngine";
 
 export interface DecideResult {
   decision: BrainDecision;
@@ -16,17 +17,9 @@ export interface DecideResult {
   debugNotes: string[];
 }
 
-const SCAFFOLD_DECISION: DecideResult = {
-  decision: { outcome: "wait" },
-  confidence: 0,
-  reasons: ["read_only_scaffold", "no_behavior_change"],
-  debugNotes: ["Phase 1 read-only scaffold — decision engine not yet active"],
-};
-
 /**
- * Returns the Phase 1 placeholder decision for any DecisionContext.
- * Context establishes the contract; it is not evaluated yet.
+ * Returns the Phase 1 decision for any DecisionContext via the Rule Engine.
  */
-export function decide(_decisionContext: DecisionContext): DecideResult {
-  return SCAFFOLD_DECISION;
+export function decide(decisionContext: DecisionContext): DecideResult {
+  return runRuleEngine(decisionContext);
 }
