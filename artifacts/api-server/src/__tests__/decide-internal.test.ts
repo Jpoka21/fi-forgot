@@ -327,6 +327,74 @@ section("birthday in window beats card gap");
   expect("sourceRuleId", result.sourceRuleId, "birthday");
 }
 
+section("memory accumulation → memory_accumulation rule result");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 45,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({
+        identity: "developing",
+        history: "moderate",
+        freshness: "current",
+        momentum: "quiet",
+      }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "memory_accumulation");
+  expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["memory_inventory_thin"]);
+}
+
+section("card gap beats memory accumulation");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 45,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({
+        identity: "developing",
+        history: "moderate",
+        freshness: "current",
+        momentum: "quiet",
+      }),
+      relationshipContext,
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "card_gap");
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

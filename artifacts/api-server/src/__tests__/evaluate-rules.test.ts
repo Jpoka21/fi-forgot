@@ -238,6 +238,42 @@ section("live registry collects CardGapRule and WaitRule when card channel is qu
   ]);
 }
 
+section("live registry collects MemoryAccumulationRule and WaitRule when memory opportunity exists");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 45,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "card",
+    },
+  ];
+  const context = buildDecisionContext(
+    normalized({
+      identity: "developing",
+      history: "moderate",
+      freshness: "current",
+      momentum: "quiet",
+    }),
+    relationshipContext,
+  );
+  const { candidates } = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "memory_accumulation",
+    "wait",
+  ]);
+}
+
 section("evaluation entries cover full registry");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());

@@ -160,6 +160,44 @@ section("card_gap evaluation entry records no-match reasons");
   expect("no card reason", cardGap?.reasons, ["no_card_history_and_no_writing"]);
 }
 
+section("memory_accumulation evaluation entry records match");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 45,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "card",
+    },
+  ];
+  const result = runRuleEngine(
+    buildDecisionContext(
+      normalized({
+        identity: "developing",
+        history: "moderate",
+        freshness: "current",
+        momentum: "quiet",
+      }),
+      relationshipContext,
+    ),
+  );
+  const memoryAccumulation = result.ruleEvaluation.entries.find(
+    (entry) => entry.ruleId === "memory_accumulation",
+  );
+  expect("memory_accumulation matched", memoryAccumulation?.matched, true);
+  expect("memory_accumulation winner", memoryAccumulation?.resolutionStatus, "winner");
+  expect("reasons", memoryAccumulation?.reasons, ["memory_inventory_thin"]);
+}
+
 section("decideResult unchanged from pre-explanation behavior for wait scaffold");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());

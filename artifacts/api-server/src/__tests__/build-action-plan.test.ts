@@ -301,6 +301,54 @@ section("card_gap ActionPlan");
   );
 }
 
+const MEMORY_ACCUMULATION_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 44,
+  reasons: ["memory_inventory_thin"],
+  debugNotes: [
+    "MemoryAccumulationRule matched",
+    "identity: developing",
+    "history: moderate",
+    "writing: none",
+    "freshness: current",
+    "momentum: quiet",
+    "last relationship activity days ago: 45",
+  ],
+};
+
+const MEMORY_ACCUMULATION_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "profile_information",
+  priority: "medium",
+  sourceRuleId: "memory_accumulation",
+  primaryReason: "memory_inventory_thin",
+  reasons: ["memory_inventory_thin"],
+  confidence: 44,
+  debugNotes: [
+    "MemoryAccumulationRule matched",
+    "identity: developing",
+    "history: moderate",
+    "writing: none",
+    "freshness: current",
+    "momentum: quiet",
+    "last relationship activity days ago: 45",
+  ],
+};
+
+section("memory_accumulation ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: MEMORY_ACCUMULATION_DECIDE_RESULT,
+    sourceRuleId: "memory_accumulation",
+  });
+  expect("full plan", plan, MEMORY_ACCUMULATION_ACTION_PLAN);
+  expect(
+    "serialized memory accumulation plan",
+    JSON.stringify(plan),
+    JSON.stringify(MEMORY_ACCUMULATION_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;
