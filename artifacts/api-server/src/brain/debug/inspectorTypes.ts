@@ -9,6 +9,7 @@ import type { ActionPlan } from "../action/actionPlanTypes";
 import type { DecisionContext } from "../decision/decisionContextTypes";
 import type { RuleEvaluationSummary } from "../decision/rules/ruleEvaluationTypes";
 import type { NormalizedRelationshipState } from "../normalization";
+import type { SelectedFollowUpQuestion } from "../questions/selectedFollowUpQuestionTypes";
 import type { BrainSignal } from "../types";
 
 export interface BrainInspectorContributorView {
@@ -44,4 +45,6 @@ export interface BrainInspector {
   actionPlan: ActionPlan;
   /** Development-only rule evaluation trace from executeBrain(). */
   ruleEvaluation: RuleEvaluationSummary;
+  /** Development-only follow-up question selection from executeBrain(). */
+  selectedFollowUpQuestion: SelectedFollowUpQuestion | null;
 }

@@ -11,6 +11,7 @@ import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js"
 import { buildBrainInspector } from "../brain/debug/buildBrainInspector.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
 import { planFromDecisionContext } from "../brain/planFromDecisionContext.js";
+import { selectQuestionForActionPlan } from "../brain/questions/index.js";
 import type { RelationshipContextLoadResult } from "../brain/types.js";
 import { BRAIN_CONTEXT_VERSION } from "../brain/types.js";
 import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
@@ -152,6 +153,7 @@ section("pass-through normalized, decisionContext, and actionPlan from execution
     decideResult: waitPlan.decideResult,
     actionPlan: WAIT_ACTION_PLAN,
     ruleEvaluation: waitPlan.ruleEvaluation,
+    selectedFollowUpQuestion: null,
   });
 
   expect("normalized is same reference", inspector.normalized, normalized);
@@ -177,6 +179,7 @@ section("wait actionPlan pass-through");
     decideResult: waitPlan.decideResult,
     actionPlan: WAIT_ACTION_PLAN,
     ruleEvaluation: waitPlan.ruleEvaluation,
+    selectedFollowUpQuestion: null,
   });
 
   expect("actionPlan", inspector.actionPlan, WAIT_ACTION_PLAN);
@@ -204,6 +207,11 @@ section("fresh_update actionPlan pass-through");
     decideResult: stalePlan.decideResult,
     actionPlan,
     ruleEvaluation: stalePlan.ruleEvaluation,
+    selectedFollowUpQuestion: selectQuestionForActionPlan({
+      decisionContext: staleDecisionContext,
+      decideResult: stalePlan.decideResult,
+      actionPlan,
+    }),
   });
 
   expect("actionPlan is same reference", inspector.actionPlan, actionPlan);
@@ -225,6 +233,7 @@ section("ruleEvaluation pass-through and winner alignment");
     decideResult: waitPlan.decideResult,
     actionPlan: WAIT_ACTION_PLAN,
     ruleEvaluation: waitPlan.ruleEvaluation,
+    selectedFollowUpQuestion: null,
   });
 
   expect("ruleEvaluation same reference", inspector.ruleEvaluation, waitPlan.ruleEvaluation);
@@ -244,11 +253,63 @@ section("inspector summary still derived from extraction and decide result");
     decideResult: waitPlan.decideResult,
     actionPlan: WAIT_ACTION_PLAN,
     ruleEvaluation: waitPlan.ruleEvaluation,
+    selectedFollowUpQuestion: null,
   });
 
   expect("signalCount", inspector.summary.signalCount, 1);
   expect("decisionOutcome", inspector.summary.decisionOutcome, "wait");
   expect("confidence", inspector.summary.confidence, 0);
+}
+
+section("selectedFollowUpQuestion is null for wait action");
+{
+  const inspector = buildBrainInspector({
+    loadResult,
+    extraction,
+    normalized,
+    decisionContext,
+    decideResult: waitPlan.decideResult,
+    actionPlan: WAIT_ACTION_PLAN,
+    ruleEvaluation: waitPlan.ruleEvaluation,
+    selectedFollowUpQuestion: null,
+  });
+
+  expect("selectedFollowUpQuestion null", inspector.selectedFollowUpQuestion, null);
+}
+
+section("selectedFollowUpQuestion pass-through when present");
+{
+  const staleNormalized = normalizedState({ freshness: "stale" });
+  const staleDecisionContext = buildDecisionContext(
+    staleNormalized,
+    minimalRelationshipContext(),
+  );
+  const stalePlan = planFromDecisionContext(staleDecisionContext);
+  const actionPlan = FRESH_UPDATE_ACTION_PLAN;
+  const selectedFollowUpQuestion = selectQuestionForActionPlan({
+    decisionContext: staleDecisionContext,
+    decideResult: stalePlan.decideResult,
+    actionPlan,
+  });
+  const inspector = buildBrainInspector({
+    loadResult,
+    extraction,
+    normalized: staleNormalized,
+    decisionContext: staleDecisionContext,
+    decideResult: stalePlan.decideResult,
+    actionPlan,
+    ruleEvaluation: stalePlan.ruleEvaluation,
+    selectedFollowUpQuestion,
+  });
+
+  expect("selectedFollowUpQuestion same reference", inspector.selectedFollowUpQuestion, selectedFollowUpQuestion);
+  expect("questionId", inspector.selectedFollowUpQuestion?.questionId, "fresh_update_follow_up_01");
+  expect("questionText", inspector.selectedFollowUpQuestion?.questionText, selectedFollowUpQuestion?.questionText);
+  expect("category", inspector.selectedFollowUpQuestion?.category, "fresh_update_follow_up");
+  expect("sourceRuleId", inspector.selectedFollowUpQuestion?.sourceRuleId, "fresh_update");
+  expect("reason", inspector.selectedFollowUpQuestion?.reason, "information_stale");
+  expect("sensitivity", inspector.selectedFollowUpQuestion?.sensitivity, "low");
+  expect("rotationKey", inspector.selectedFollowUpQuestion?.rotationKey, "fresh_update_follow_up");
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
