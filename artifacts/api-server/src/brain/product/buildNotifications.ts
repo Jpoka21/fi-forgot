@@ -2,8 +2,10 @@
  * Builds ranked relationship notifications for all owned recipients.
  */
 
+import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
+import { shouldIncludeOpportunity } from "../attention/shouldIncludeOpportunity";
+import type { BrainExecutionResult } from "../orchestrator";
 import { buildNotificationItem } from "./buildNotificationItem";
-import { buildProductBrainDecision } from "./buildProductBrainDecision";
 import {
   NOTIFICATIONS_MAX,
   NOTIFICATIONS_VERSION,
@@ -14,8 +16,6 @@ import {
   rankNotifications,
   type RankableNotification,
 } from "./rankNotifications";
-import { shouldIncludeNotification } from "./shouldIncludeNotification";
-import type { BrainExecutionResult } from "../orchestrator";
 
 export interface NotificationRecipientInput {
   recipientId: string;
@@ -50,12 +50,18 @@ export async function buildNotifications(
 ): Promise<NotificationsResponse> {
   const { userId, recipients, runBrain, generatedAt = new Date().toISOString() } = options;
 
+  const decisions = await collectProductBrainDecisions({
+    userId,
+    recipients,
+    runBrain,
+  });
+
   const rankable: RankableNotification[] = [];
 
-  for (const recipient of recipients) {
-    const execution = await runBrain(recipient.recipientId, userId);
-    const decision = buildProductBrainDecision(recipient.recipientId, execution);
-    if (!shouldIncludeNotification(decision)) continue;
+  for (let index = 0; index < recipients.length; index++) {
+    const recipient = recipients[index]!;
+    const decision = decisions[index]!;
+    if (!shouldIncludeOpportunity(decision)) continue;
     rankable.push(toRankable(decision, recipient));
   }
 

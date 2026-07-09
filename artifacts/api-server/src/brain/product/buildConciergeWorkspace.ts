@@ -2,9 +2,11 @@
  * Builds ranked Concierge workspace payload for all owned recipients.
  */
 
+import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
+import { shouldIncludeOpportunity } from "../attention/shouldIncludeOpportunity";
+import type { BrainExecutionResult } from "../orchestrator";
 import { buildConciergeInsight } from "./buildConciergeInsight";
 import { buildConciergeRecommendation } from "./buildConciergeRecommendation";
-import { buildProductBrainDecision } from "./buildProductBrainDecision";
 import {
   CONCIERGE_INSIGHTS_MAX,
   CONCIERGE_RECOMMENDATIONS_MAX,
@@ -16,8 +18,6 @@ import {
   rankRelationshipOpportunities,
   type RankableRelationshipOpportunity,
 } from "./rankRelationshipOpportunities";
-import { shouldIncludeConciergeOpportunity } from "./shouldIncludeConciergeOpportunity";
-import type { BrainExecutionResult } from "../orchestrator";
 
 export interface ConciergeRecipientInput {
   recipientId: string;
@@ -52,12 +52,18 @@ export async function buildConciergeWorkspace(
 ): Promise<ConciergeWorkspaceResponse> {
   const { userId, recipients, runBrain, generatedAt = new Date().toISOString() } = options;
 
+  const decisions = await collectProductBrainDecisions({
+    userId,
+    recipients,
+    runBrain,
+  });
+
   const rankable: RankableRelationshipOpportunity[] = [];
 
-  for (const recipient of recipients) {
-    const execution = await runBrain(recipient.recipientId, userId);
-    const decision = buildProductBrainDecision(recipient.recipientId, execution);
-    if (!shouldIncludeConciergeOpportunity(decision)) continue;
+  for (let index = 0; index < recipients.length; index++) {
+    const recipient = recipients[index]!;
+    const decision = decisions[index]!;
+    if (!shouldIncludeOpportunity(decision)) continue;
     rankable.push(toRankable(decision, recipient));
   }
 

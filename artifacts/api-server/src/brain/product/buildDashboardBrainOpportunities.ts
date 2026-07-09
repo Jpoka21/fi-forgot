@@ -2,7 +2,9 @@
  * Builds ranked DashboardBrainOpportunities for all owned recipients.
  */
 
-import { buildProductBrainDecision } from "./buildProductBrainDecision";
+import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
+import { shouldIncludeOpportunity } from "../attention/shouldIncludeOpportunity";
+import type { BrainExecutionResult } from "../orchestrator";
 import { buildDashboardBrainOpportunity } from "./buildDashboardBrainOpportunity";
 import {
   DASHBOARD_BRAIN_OPPORTUNITIES_MAX,
@@ -14,8 +16,6 @@ import {
   rankDashboardOpportunities,
   type RankableDashboardOpportunity,
 } from "./rankDashboardOpportunities";
-import { shouldIncludeDashboardOpportunity } from "./shouldIncludeDashboardOpportunity";
-import type { BrainExecutionResult } from "../orchestrator";
 
 export interface DashboardRecipientInput {
   recipientId: string;
@@ -50,12 +50,18 @@ export async function buildDashboardBrainOpportunities(
 ): Promise<DashboardBrainOpportunities> {
   const { userId, recipients, runBrain, generatedAt = new Date().toISOString() } = options;
 
+  const decisions = await collectProductBrainDecisions({
+    userId,
+    recipients,
+    runBrain,
+  });
+
   const rankable: RankableDashboardOpportunity[] = [];
 
-  for (const recipient of recipients) {
-    const execution = await runBrain(recipient.recipientId, userId);
-    const decision = buildProductBrainDecision(recipient.recipientId, execution);
-    if (!shouldIncludeDashboardOpportunity(decision)) continue;
+  for (let index = 0; index < recipients.length; index++) {
+    const recipient = recipients[index]!;
+    const decision = decisions[index]!;
+    if (!shouldIncludeOpportunity(decision)) continue;
     rankable.push(toRankable(decision, recipient));
   }
 
