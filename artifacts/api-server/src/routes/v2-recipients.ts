@@ -8,6 +8,8 @@ import { getNextQuestion, getNextFreshUpdateQuestion } from "../services/questio
 import { awardPoints } from "../services/brownie-points";
 import { scheduleFollowUp, getDueFollowUpQuestion, markFollowUpAnswered } from "../services/follow-up-questions";
 import type { FreshUpdateRecord } from "../services/question-engine";
+import { executeBrain } from "../brain/orchestrator";
+import { buildProductBrainDecision } from "../brain/product";
 
 const router = Router();
 
@@ -266,6 +268,42 @@ router.get("/v2/recipients/:id/next-question", async (req, res) => {
   } catch (err) {
     logger.error({ err, recipientId: id }, "v2-recipients: next-question failed");
     res.status(500).json({ error: "Failed to determine next question" });
+  }
+});
+
+// ── Product Brain decision ────────────────────────────────────────────────────
+
+router.get("/v2/recipients/:id/brain", async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { id } = req.params;
+
+  const [row] = await db
+    .select({ id: recipientsTable.id })
+    .from(recipientsTable)
+    .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)))
+    .limit(1);
+
+  if (!row) { res.status(404).json({ error: "Recipient not found" }); return; }
+
+  try {
+    const execution = await executeBrain(id, userId);
+    const decision = buildProductBrainDecision(id, execution, {
+      includeDebug: process.env.NODE_ENV === "development",
+    });
+
+    logger.info({
+      recipientId: id,
+      sourceRuleId: decision.sourceRuleId,
+      outcome: decision.decision.outcome,
+      version: decision.version,
+    }, "v2-recipients: brain");
+
+    res.json(decision);
+  } catch (err) {
+    logger.error({ err, recipientId: id }, "v2-recipients: brain failed");
+    res.status(500).json({ error: "Failed to run brain" });
   }
 });
 
