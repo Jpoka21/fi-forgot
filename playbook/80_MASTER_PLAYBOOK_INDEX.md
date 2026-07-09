@@ -190,7 +190,9 @@ These documents define the Brain and deterministic opportunity rules.
 
 |----------|---------|
 
-| 117_OPPORTUNITY_[RULES.md](http://RULES.md) | Canonical reference for all implemented and planned Brain Opportunity Rules, including priorities, triggers, outputs, lifecycle, and future rule candidates. |
+| 117_OPPORTUNITY_RULES.md | Canonical reference for all implemented and planned Brain Opportunity Rules, including priorities, triggers, outputs, lifecycle, and future rule candidates. |
+
+| 118_LIFE_EVENT_FOLLOW_UP_ARCHITECTURE.md | Architecture blueprint for Life Event based conversational opportunities, including event lifecycle, classification, DecisionContext facts, follow up windows, rule behavior, implementation strategy, and future expansion. |
 
 ---
 
