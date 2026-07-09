@@ -182,6 +182,18 @@ These documents define how the experience is built.
 
 ---
 
+# Relationship Intelligence Documents
+
+These documents define the Brain and deterministic opportunity rules.
+
+| Document | Purpose |
+
+|----------|---------|
+
+| 117_OPPORTUNITY_[RULES.md](http://RULES.md) | Canonical reference for all implemented and planned Brain Opportunity Rules, including priorities, triggers, outputs, lifecycle, and future rule candidates. |
+
+---
+
 # Execution Documents
 
 These documents define how the product is delivered.
