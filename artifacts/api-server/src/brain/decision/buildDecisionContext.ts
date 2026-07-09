@@ -1,11 +1,13 @@
 /**
  * DecisionContext builder — pure, read-only.
  *
- * Fuses NormalizedRelationshipState with RelationshipContext into the complete
- * decision model. Does not call normalizeSignals, decide, or contributors.
+ * Fuses NormalizedRelationshipState with RelationshipContext and life event
+ * classifications into the complete decision model. Does not call normalizeSignals,
+ * decide, contributors, or classifyLifeEvents.
  */
 
 import type { NormalizedRelationshipState } from "../normalization";
+import type { LifeEventClassification } from "../lifeEvents/lifeEventTypes";
 import type { RelationshipContext } from "../types";
 import type { DecisionContext } from "./decisionContextTypes";
 import { computeAnniversaryDaysAway, computeBirthdayDaysAway, computeValentinesDaysAway } from "./eventTimingUtils";
@@ -17,6 +19,7 @@ import { computeAnniversaryDaysAway, computeBirthdayDaysAway, computeValentinesD
 export function buildDecisionContext(
   normalized: NormalizedRelationshipState,
   relationshipContext: RelationshipContext,
+  lifeEventClassifications: LifeEventClassification[] = [],
 ): DecisionContext {
   const {
     identity,
@@ -71,6 +74,7 @@ export function buildDecisionContext(
     lastCardActivityDaysAgo,
     mostRecentFreshUpdateDaysAgo: mostRecentFreshUpdate?.daysAgo ?? null,
     mostRecentFreshUpdateQuestionKey: mostRecentFreshUpdate?.questionKey ?? null,
+    lifeEvent: lifeEventClassifications[0] ?? null,
 
     derivedFrom: {
       signalCount: derivedFrom.signalCount,

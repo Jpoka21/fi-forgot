@@ -17,6 +17,7 @@ import { normalizeSignals } from "./normalization";
 import type { NormalizedRelationshipState } from "./normalization";
 import { extractSignals } from "./signals/extractSignals";
 import type { SignalExtractionResult } from "./signals/extractionTypes";
+import { classifyLifeEvents } from "./lifeEvents";
 import type { BrainResponse, RelationshipContextLoadResult } from "./types";
 import { toBrainResponse } from "./toBrainResponse";
 
@@ -42,7 +43,12 @@ export async function executeBrain(
   const loadResult = await loadRelationshipContext(recipientId, userId);
   const extraction = extractSignals(loadResult);
   const normalized = normalizeSignals(extraction.availableSignals);
-  const decisionContext = buildDecisionContext(normalized, loadResult.relationshipContext);
+  const lifeEventClassifications = classifyLifeEvents(loadResult.relationshipContext);
+  const decisionContext = buildDecisionContext(
+    normalized,
+    loadResult.relationshipContext,
+    lifeEventClassifications,
+  );
   const { decideResult, actionPlan, ruleEvaluation } = planFromDecisionContext(decisionContext);
 
   return {

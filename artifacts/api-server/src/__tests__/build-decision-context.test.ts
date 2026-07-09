@@ -6,6 +6,7 @@
  */
 
 import { buildDecisionContext } from "../brain/decision/index.js";
+import { classifyLifeEvents } from "../brain/lifeEvents/index.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
 import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
 
@@ -90,6 +91,7 @@ section("conservative defaults from empty normalized state");
     ctx.mostRecentFreshUpdateQuestionKey,
     null,
   );
+  expect("lifeEvent null when no classifications", ctx.lifeEvent, null);
 }
 
 section("full rich state maps decision vocabulary 1:1");
@@ -360,6 +362,82 @@ section("most recent fresh update facts come from freshUpdates array");
     ctx.mostRecentFreshUpdateQuestionKey,
     "recent_accomplishment",
   );
+}
+
+const SAMPLE_CLASSIFICATION = {
+  type: "family_update",
+  category: "family" as const,
+  daysAgo: 12,
+  followUpWindowDays: 30,
+  followUpReady: false,
+  source: "fresh_update" as const,
+  capturedAt: "2026-06-18T00:00:00.000Z",
+  classified: true,
+  supported: true,
+};
+
+const OLDER_CLASSIFICATION = {
+  type: "family_update",
+  category: "family" as const,
+  daysAgo: 40,
+  followUpWindowDays: 30,
+  followUpReady: true,
+  source: "fresh_update" as const,
+  capturedAt: "2026-05-01T00:00:00.000Z",
+  classified: true,
+  supported: true,
+};
+
+section("lifeEvent is null when classifications are empty");
+{
+  const ctx = buildDecisionContext(normalized(), minimalRelationshipContext(), []);
+  expect("lifeEvent null", ctx.lifeEvent, null);
+}
+
+section("lifeEvent projects the newest classification");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext(),
+    [SAMPLE_CLASSIFICATION],
+  );
+  expect("lifeEvent", ctx.lifeEvent, SAMPLE_CLASSIFICATION);
+  expect("identity unchanged", ctx.identity, "empty");
+  expect("freshness unchanged", ctx.freshness, "unknown");
+}
+
+section("lifeEvent projects only index 0 when multiple classifications exist");
+{
+  const ctx = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext(),
+    [SAMPLE_CLASSIFICATION, OLDER_CLASSIFICATION],
+  );
+  expect("primary lifeEvent", ctx.lifeEvent, SAMPLE_CLASSIFICATION);
+}
+
+section("classifyLifeEvents integration projects family_news onto lifeEvent");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.freshUpdates = [
+    {
+      id: "fresh-1",
+      questionKey: "family_news",
+      question: "Family news?",
+      answer: "Moved to a new house",
+      createdAt: "2026-06-18T00:00:00.000Z",
+      daysAgo: 12,
+      ageCategory: "recent",
+    },
+  ];
+  const ctx = buildDecisionContext(
+    normalized(),
+    relationshipContext,
+    classifyLifeEvents(relationshipContext),
+  );
+  expect("lifeEvent type", ctx.lifeEvent?.type, "family_update");
+  expect("lifeEvent category", ctx.lifeEvent?.category, "family");
+  expect("lifeEvent daysAgo", ctx.lifeEvent?.daysAgo, 12);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

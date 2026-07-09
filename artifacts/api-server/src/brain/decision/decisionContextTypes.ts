@@ -14,6 +14,7 @@ import type {
   NormalizedRelationshipState,
   WritingState,
 } from "../normalization";
+import type { LifeEventClassification } from "../lifeEvents/lifeEventTypes";
 
 /** Decision vocabulary aliases for normalized dimensions. */
 export type RelationshipMaturity = IdentityState;
@@ -74,6 +75,8 @@ export interface DecisionContext {
   mostRecentFreshUpdateDaysAgo: number | null;
   /** Question key of the most recent fresh update. Null when none. */
   mostRecentFreshUpdateQuestionKey: string | null;
+  /** Primary classified life event, when present. Null when none. */
+  lifeEvent: LifeEventClassification | null;
 
   derivedFrom: DecisionContextDerivedFrom;
 }
