@@ -2,10 +2,59 @@
 
 ## Document Status
 
-Status: Architecture proposal  
-Phase: Relationship Intelligence, Question Intelligence  
-Implementation: Not started  
-Depends on: 114, 115, 116, 117, 118
+| Attribute | Value |
+|-----------|-------|
+| Status | Implemented (Phases A–C) |
+| Phase | Relationship Intelligence, Question Intelligence |
+| Implementation | Phases A–C complete |
+| Depends on | 114, 115, 116, 117, 118 |
+| BrainResponse changed | No |
+| Frontend / database / public APIs changed | No |
+
+---
+
+## Implementation Status
+
+**Phases A through C are complete.** Phases D and E (BrainResponse integration and persistent question history) are not started.
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase A — Static Question Catalog | ✅ Complete | Typed catalog + `selectFollowUpQuestion()` |
+| Phase B — Action Plan Integration | ✅ Complete | `selectQuestionForActionPlan()` on `BrainExecutionResult` |
+| Phase C — Brain Inspector Visibility | ✅ Complete | `inspector.selectedFollowUpQuestion` (dev only) |
+| Phase D — BrainResponse Integration | ⬜ Not started | Add selected question to production response surface |
+| Phase E — Persistent Question History | ⬜ Not started | Rotation, cooldowns, asked/answered tracking |
+
+### Module location
+
+```text
+artifacts/api-server/src/brain/questions/
+├── questionTypes.ts
+├── questionCatalog.ts
+├── selectFollowUpQuestion.ts
+├── ruleIdQuestionCategoryMapping.ts
+├── selectedFollowUpQuestionTypes.ts
+├── selectQuestionForActionPlan.ts
+└── index.ts
+```
+
+### Unchanged surfaces
+
+| Surface | Status |
+|---------|--------|
+| BrainResponse shape | Unchanged |
+| Frontend | Unchanged |
+| Database schema | Unchanged |
+| Public APIs | Unchanged |
+| Rule Engine behavior | Unchanged |
+| Action Planner behavior | Unchanged |
+
+### Not yet implemented
+
+- Persistence or question history
+- Rotation beyond first question per category
+- Personalization or relationship-depth-aware selection
+- AI-assisted selection
 
 ---
 
@@ -47,7 +96,7 @@ ask_question
 
 ```
 
-But the current architecture does not yet define which question should be asked.
+But the architecture now defines which question should be asked through the Follow Up Question Engine — without pushing wording into rules or the Action Planner.
 
 Without a dedicated question engine, each rule would eventually need to know its own question text. That would create duplication, make rotation harder, and mix rule logic with conversation logic.
 
@@ -97,7 +146,7 @@ These responsibilities must remain separate.
 
 ## 4. Placement In The Brain
 
-Current pipeline:
+Current pipeline (with question selection — internal only):
 
 ```text
 RelationshipContext
@@ -114,31 +163,21 @@ Rule Engine
         ↓
 Action Planner
         ↓
-BrainResponse
-
+Follow Up Question Engine   ← selectQuestionForActionPlan()
+        ↓
+BrainExecutionResult.selectedFollowUpQuestion (internal)
+        ↓
+BrainResponse               ← shape unchanged; no selected question yet
 ```
 
-Future pipeline with question selection:
+Development pipeline additionally exposes selection in the Brain Inspector:
 
 ```text
-RelationshipContext
+executeBrain()
         ↓
-Signal Extraction
-        ↓
-NormalizedRelationshipState
-        ↓
-Life Event Intelligence
-        ↓
-DecisionContext
-        ↓
-Rule Engine
-        ↓
-Action Planner
-        ↓
-Follow Up Question Engine
-        ↓
-BrainResponse
-
+BrainExecutionResult
+        ├── toBrainResponse()     → production contract (unchanged)
+        └── buildBrainInspector() → inspector.selectedFollowUpQuestion (dev only)
 ```
 
 The Follow Up Question Engine runs **after** a winning rule has produced an action plan.
@@ -174,24 +213,29 @@ It may not consume:
 
 ## 6. Output
 
-The engine returns a structured selected question.
+The engine returns a structured `SelectedFollowUpQuestion` (or `null`).
 
-Conceptual shape:
+Implemented shape (`selectedFollowUpQuestionTypes.ts`):
 
-```text
+```typescript
 SelectedFollowUpQuestion {
   questionId: string
   questionText: string
-  category: string
+  category: FollowUpQuestionCategory
   sourceRuleId: string
   reason: string
   sensitivity: "low" | "medium" | "high"
   rotationKey: string
 }
-
 ```
 
-This is not a Decision Rule result.
+**Where it appears today:**
+
+| Surface | Field | Visibility |
+|---------|-------|------------|
+| `BrainExecutionResult` | `selectedFollowUpQuestion` | Internal / dev execution only |
+| `BrainInspector` | `selectedFollowUpQuestion` | Dev debug route only |
+| `BrainResponse` | — | Not exposed (Phase D) |
 
 This is not a Brain Signal.
 
@@ -201,9 +245,9 @@ This is a conversation selection object.
 
 ## 7. Question Catalog
 
-Questions should live in a deterministic catalog.
+**Status: ✅ Implemented** — static deterministic catalog in `questionCatalog.ts`.
 
-Example categories:
+### Supported categories
 
 ```text
 life_event_follow_up
@@ -212,10 +256,21 @@ accomplishment_follow_up
 inactivity_reconnect
 memory_collection
 card_gap_context
-
 ```
 
-Example life event questions:
+### Catalog size (v1)
+
+| Category | Questions |
+|----------|----------:|
+| `life_event_follow_up` | 4 |
+| `fresh_update_follow_up` | 4 |
+| `accomplishment_follow_up` | 4 |
+| `inactivity_reconnect` | 4 |
+| `memory_collection` | 3 |
+| `card_gap_context` | 3 |
+| **Total** | **22** |
+
+Each `FollowUpQuestion` entry includes: `id`, `category`, `text`, `sensitivity`, `rotationOrder`. No AI fields, embeddings, or templates.
 
 ```text
 How has everything been going with that family update lately?
@@ -254,9 +309,45 @@ Is there something recent I should know before writing for them again?
 
 ## 8. Selection Rules
 
-Question selection should be deterministic.
+Question selection is deterministic.
 
-Selection should consider:
+### Implemented v1 flow
+
+```text
+ActionPlan.sourceRuleId
+        ↓
+ruleIdQuestionCategoryMapping
+        ↓
+selectFollowUpQuestion({ category })
+        ↓
+first question by rotationOrder
+        ↓
+SelectedFollowUpQuestion | null
+```
+
+### Rule id → question category mapping
+
+| `sourceRuleId` | Question category |
+|----------------|-------------------|
+| `life_event_follow_up` | `life_event_follow_up` |
+| `fresh_update` | `fresh_update_follow_up` |
+| `accomplishment_follow_up` | `accomplishment_follow_up` |
+| `inactivity` | `inactivity_reconnect` |
+| `memory_accumulation` | `memory_collection` |
+| `card_gap` | `card_gap_context` |
+
+Calendar preparation rules (`birthday`, `anniversary`, `valentines_day`) and `wait` are unmapped.
+
+### Entry points
+
+| Function | Role |
+|----------|------|
+| `selectFollowUpQuestion({ category })` | Returns first catalog question for category |
+| `selectQuestionForActionPlan({ decisionContext, decideResult, actionPlan })` | Maps action plan → selected question; returns `null` when `actionPlan.type !== "ask_question"`, rule unmapped, or category missing |
+
+### Future selection inputs (not implemented)
+
+Selection may eventually consider:
 
 - Winning rule id
 - Opportunity category
@@ -270,26 +361,13 @@ Selection should consider:
 - Time since event
 - Whether this is a reconnect or a deeper follow up
 
-The first version can be simple:
-
-```text
-sourceRuleId
-        ↓
-question category
-        ↓
-candidate questions
-        ↓
-exclude recently asked
-        ↓
-choose first deterministic match
-
-```
+v1 does **not** yet use these inputs. It returns the first question per category only.
 
 ---
 
 ## 9. Rotation And Repetition
 
-The engine must avoid repeatedly asking the same question.
+**Not implemented in v1.** The catalog defines `rotationOrder` for future use; selection always picks `rotationOrder: 1`.
 
 Future question history should track:
 
@@ -433,11 +511,14 @@ The Action Planner should not contain question text.
 
 ## 14. BrainResponse Boundary
 
-BrainResponse may eventually include the selected question.
+**BrainResponse shape remains unchanged.** The selected question is not part of the production contract.
 
-However, BrainResponse shape should not change until the engine is implemented and reviewed.
+`selectedFollowUpQuestion` is available only on:
 
-Possible future addition:
+- `BrainExecutionResult` (internal orchestrator output)
+- `BrainInspector` (dev debug route: `GET /api/debug/brain/:recipientId`)
+
+Possible future addition (Phase D):
 
 ```text
 recommendedQuestion
@@ -457,7 +538,7 @@ That should be handled in a later implementation step.
 
 ## 15. Initial Supported Rules
 
-v1 should support question selection for:
+**Implemented** — question selection for:
 
 ```text
 fresh_update
@@ -475,38 +556,41 @@ Birthday, Anniversary, and Valentine rules may not need follow up questions in v
 
 ## 16. Deterministic First Version
 
-The first implementation should be intentionally simple.
+**Status: ✅ Implemented (Phases A–C)**
 
-No AI.
+No AI, embeddings, semantic scoring, personalization model, or free text parsing.
 
-No embeddings.
+Implemented functions:
 
-No semantic scoring.
+```typescript
+selectFollowUpQuestion({ category }): FollowUpQuestion | null
 
-No personalization model.
-
-No free text parsing.
-
-The engine should be pure and testable.
-
-Initial conceptual function:
-
-```text
-selectFollowUpQuestion({
+selectQuestionForActionPlan({
   decisionContext,
   decideResult,
-  actionPlan
+  actionPlan,
 }): SelectedFollowUpQuestion | null
-
 ```
 
-Returns `null` when the action is not an ask question action.
+Returns `null` when the action is not `ask_question`, the source rule is unmapped, or the category has no catalog entries.
 
 ---
 
 ## 17. Testing Strategy
 
-Tests should verify:
+**Implemented tests** (`follow-up-question-catalog.test.ts`, `select-question-for-action-plan.test.ts`, `build-brain-inspector.test.ts`):
+
+- Each category returns a question
+- Unknown category returns null
+- Each mapped `ask_question` rule selects correct category
+- Non `ask_question` action returns null
+- Unknown source rule returns null
+- Deterministic repeatability
+- Catalog integrity and unique ids
+- `selectedFollowUpQuestion` in Brain Inspector (present and null cases)
+- BrainResponse isolation unchanged
+
+**Future tests** (when Phase E ships):
 
 - No question for non ask question actions
 - Correct question category by source rule id
@@ -562,31 +646,37 @@ This engine does not:
 
 ## 20. Recommended Implementation Phases
 
-### Phase 1: Static Question Catalog
+### Phase A: Static Question Catalog
 
-Create typed question catalog and selection function.
+**Status: ✅ Complete**
 
-No integration.
+Typed question catalog (`FOLLOW_UP_QUESTION_CATALOG`) and `selectFollowUpQuestion()`. No pipeline integration.
 
-### Phase 2: Action Plan Integration
+### Phase B: Action Plan Integration
 
-Run question selection after Action Planner for ask question actions.
+**Status: ✅ Complete**
 
-Keep BrainResponse unchanged unless explicitly approved.
+`selectQuestionForActionPlan()` runs after Action Planner in `executeBrain()`. Result attached to `BrainExecutionResult.selectedFollowUpQuestion`. BrainResponse unchanged.
 
-### Phase 3: Brain Inspector Visibility
+### Phase C: Brain Inspector Visibility
 
-Expose selected question in development inspection.
+**Status: ✅ Complete**
 
-### Phase 4: BrainResponse Integration
+`buildBrainInspector()` pass-through exposes `selectedFollowUpQuestion` on the dev inspector payload.
 
-Add selected question to the internal response surface.
+### Phase D: BrainResponse Integration
+
+**Status: ⬜ Not started**
+
+Add selected question to the production response surface when explicitly approved.
 
 Frontend changes remain separate.
 
-### Phase 5: Persistent Question History
+### Phase E: Persistent Question History
 
-Track asked and answered questions to prevent repetition.
+**Status: ⬜ Not started**
+
+Track asked and answered questions to prevent repetition. Enable rotation beyond first question per category.
 
 ---
 

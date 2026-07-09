@@ -208,6 +208,16 @@ BrainResponse shape, frontend, database schema, and public APIs unchanged.
 
 v1 mapping: `family_news` → `family_update`. Excluded keys: `recent_accomplishment`, `current_excitement`, `current_challenge`.
 
+Follow Up Question Engine completed (Phases A–C).
+
+Static catalog in `brain/questions/` with 22 questions across 6 categories.
+
+`selectQuestionForActionPlan()` maps ask question action plans to deterministic selected questions.
+
+`selectedFollowUpQuestion` on `BrainExecutionResult` and Brain Inspector (dev only).
+
+BrainResponse shape unchanged. No persistence, rotation history, personalization, or AI selection yet.
+
 # Completed Infrastructure
 
 The foundational architecture of the Relationship Intelligence Engine has been completed.
@@ -267,6 +277,18 @@ Decision Engine
         ▼
 
 Action Planner
+
+        │
+
+        ▼
+
+selectQuestionForActionPlan()
+
+        │
+
+        ▼
+
+selectedFollowUpQuestion (internal)
 
         │
 
@@ -347,6 +369,8 @@ No duplicate DecisionContext construction occurs.
 | DecisionContext Builder | ✅ Complete |
 
 | Life Event Intelligence | ✅ Complete (v1) |
+
+| Follow Up Question Engine | ✅ Complete (Phases A–C) |
 
 | Decision Engine Wiring | ✅ Complete |
 
@@ -634,6 +658,61 @@ BrainResponse shape, frontend, database schema, and public APIs remain unchanged
 
 ---
 
+# Follow Up Question Engine
+
+Status:
+
+**Complete (Phases A–C)**
+
+Determines which follow-up question to ask after the Action Planner produces an `ask_question` action. Does not detect opportunities, modify rules, or change BrainResponse.
+
+| Component | Location | Status |
+|-----------|----------|--------|
+| Types | `brain/questions/questionTypes.ts` | ✅ |
+| Catalog | `brain/questions/questionCatalog.ts` | ✅ |
+| Category selection | `brain/questions/selectFollowUpQuestion.ts` | ✅ |
+| Rule id mapping | `brain/questions/ruleIdQuestionCategoryMapping.ts` | ✅ |
+| Selected question type | `brain/questions/selectedFollowUpQuestionTypes.ts` | ✅ |
+| Action plan integration | `brain/questions/selectQuestionForActionPlan.ts` | ✅ |
+| Orchestrator wiring | `BrainExecutionResult.selectedFollowUpQuestion` | ✅ |
+| Inspector exposure | `BrainInspector.selectedFollowUpQuestion` | ✅ |
+
+### Supported question categories
+
+```text
+life_event_follow_up
+fresh_update_follow_up
+accomplishment_follow_up
+inactivity_reconnect
+memory_collection
+card_gap_context
+```
+
+### Rule id → category mapping
+
+| `sourceRuleId` | Question category |
+|----------------|-------------------|
+| `life_event_follow_up` | `life_event_follow_up` |
+| `fresh_update` | `fresh_update_follow_up` |
+| `accomplishment_follow_up` | `accomplishment_follow_up` |
+| `inactivity` | `inactivity_reconnect` |
+| `memory_accumulation` | `memory_collection` |
+| `card_gap` | `card_gap_context` |
+
+### Not yet implemented
+
+- BrainResponse integration (Phase D)
+- Persistent question history and rotation (Phase E)
+- Personalization or AI-assisted selection
+
+### Unchanged surfaces
+
+BrainResponse shape, frontend, database schema, public APIs, Rule Engine behavior, and Action Planner behavior remain unchanged.
+
+See `119_FOLLOW_UP_QUESTION_ENGINE.md`.
+
+---
+
 # Development Brain Inspector
 
 Status:
@@ -661,6 +740,12 @@ The Development Brain Inspector currently exposes:
 * Decision outcome
 
 * Confidence
+
+* Action plan
+
+* Selected follow-up question (`selectedFollowUpQuestion`)
+
+* Rule evaluation trace
 
 * Summary statistics
 
@@ -710,7 +795,15 @@ Action Planner
 
 ↓
 
-BrainResponse
+selectQuestionForActionPlan()
+
+↓
+
+selectedFollowUpQuestion (internal — BrainExecutionResult + Inspector)
+
+↓
+
+BrainResponse (shape unchanged)
 
 ```
 
