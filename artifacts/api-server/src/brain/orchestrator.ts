@@ -18,6 +18,8 @@ import type { NormalizedRelationshipState } from "./normalization";
 import { extractSignals } from "./signals/extractSignals";
 import type { SignalExtractionResult } from "./signals/extractionTypes";
 import { classifyLifeEvents } from "./lifeEvents";
+import { selectQuestionForActionPlan } from "./questions";
+import type { SelectedFollowUpQuestion } from "./questions";
 import type { BrainResponse, RelationshipContextLoadResult } from "./types";
 import { toBrainResponse } from "./toBrainResponse";
 
@@ -30,6 +32,8 @@ export interface BrainExecutionResult {
   actionPlan: ActionPlan;
   /** Development-only rule evaluation trace. Not part of BrainResponse. */
   ruleEvaluation: RuleEvaluationSummary;
+  /** Internal follow-up question selection. Not part of BrainResponse. */
+  selectedFollowUpQuestion: SelectedFollowUpQuestion | null;
 }
 
 /**
@@ -50,6 +54,11 @@ export async function executeBrain(
     lifeEventClassifications,
   );
   const { decideResult, actionPlan, ruleEvaluation } = planFromDecisionContext(decisionContext);
+  const selectedFollowUpQuestion = selectQuestionForActionPlan({
+    decisionContext,
+    decideResult,
+    actionPlan,
+  });
 
   return {
     loadResult,
@@ -59,6 +68,7 @@ export async function executeBrain(
     decideResult,
     actionPlan,
     ruleEvaluation,
+    selectedFollowUpQuestion,
   };
 }
 

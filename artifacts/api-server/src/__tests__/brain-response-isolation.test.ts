@@ -85,6 +85,7 @@ section("toBrainResponse does not expose ruleEvaluation");
   const response = toBrainResponse(loadResult, extraction, decideResult);
   expect("no ruleEvaluation key", "ruleEvaluation" in response, false);
   expect("no inspector key", "inspector" in response, false);
+  expect("no selectedFollowUpQuestion key", "selectedFollowUpQuestion" in response, false);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
