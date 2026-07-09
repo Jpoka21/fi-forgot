@@ -9,6 +9,7 @@ import {
   SearchPage,
   ConciergePage,
   SystemVerificationPage,
+  BrainPlaygroundPage,
   LaunchReadinessPage,
   BriefingPage,
   BusinessApprovePage,
@@ -159,6 +160,9 @@ export function AppRoutes() {
       </Route>
       <Route path={ROUTE_PATHS.systemVerification}>
         <ProtectedRoute component={SystemVerificationPage} />
+      </Route>
+      <Route path={ROUTE_PATHS.brainPlayground}>
+        <ProtectedRoute component={BrainPlaygroundPage} />
       </Route>
       <Route path={ROUTE_PATHS.launchReadiness}>
         <ProtectedRoute component={LaunchReadinessPage} />

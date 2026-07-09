@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@/app/api/endpoints";
 import { apiFetch } from "@/app/api/shared/request";
+import type { ProductBrainDecision } from "@/app/product-brain/productBrainDecisionTypes";
 import type { Recipient } from "@/lib/data";
 
 export {
@@ -79,5 +80,9 @@ export const recipientService = {
 
   getHealth() {
     return apiFetch(API_ENDPOINTS.recipients.health);
+  },
+
+  getBrainDecision(recipientId: string) {
+    return apiFetch<ProductBrainDecision>(API_ENDPOINTS.recipients.brain(recipientId));
   },
 };

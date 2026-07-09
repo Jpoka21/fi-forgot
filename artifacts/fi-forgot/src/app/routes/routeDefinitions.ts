@@ -44,6 +44,7 @@ export const ROUTE_DEFINITIONS: RouteDefinition[] = [
   { path: ROUTE_PATHS.search, access: "protected", description: "Global search and discovery" },
   { path: ROUTE_PATHS.concierge, access: "protected", description: "AI Relationship Concierge workspace" },
   { path: ROUTE_PATHS.systemVerification, access: "protected", description: "Phase 9 system verification dashboard" },
+  { path: ROUTE_PATHS.brainPlayground, access: "protected", description: "Internal Brain Playground — developer and QA console" },
   { path: ROUTE_PATHS.launchReadiness, access: "protected", description: "Phase 10 launch readiness dashboard" },
   { path: ROUTE_PATHS.admin, access: "protected", description: "Admin console" },
   { path: ROUTE_PATHS.try, access: "public", description: "Try it free card flow" },

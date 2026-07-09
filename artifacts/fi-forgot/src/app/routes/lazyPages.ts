@@ -29,6 +29,7 @@ export const AutopilotPage = lazy(() => import("@/pages/autopilot"));
 export const SearchPage = lazy(() => import("@/pages/search"));
 export const ConciergePage = lazy(() => import("@/pages/concierge"));
 export const SystemVerificationPage = lazy(() => import("@/pages/system-verification"));
+export const BrainPlaygroundPage = lazy(() => import("@/pages/brain-playground"));
 export const LaunchReadinessPage = lazy(() => import("@/pages/launch-readiness"));
 export const NotificationsPage = lazy(() => import("@/pages/notifications"));
 export const BillingSettingsPage = lazy(() => import("@/pages/billing-settings"));

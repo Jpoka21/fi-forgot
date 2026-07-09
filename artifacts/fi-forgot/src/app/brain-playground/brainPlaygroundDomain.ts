@@ -1,0 +1,20 @@
+export const brainPlaygroundDefaults = {
+  title: "Brain Playground",
+  subtitle: "Internal developer console — run the Brain for a recipient and inspect ProductBrainDecision v1.",
+  recipientSelectLabel: "Recipient",
+  recipientSelectPlaceholder: "Select a recipient…",
+  refreshLabel: "Refresh",
+  noRecipientsMessage: "No recipients found. Add someone from People, then return here.",
+  noRecipientSelectedMessage: "Select a recipient to load a Product Brain decision.",
+  loadingMessage: "Loading Product Brain decision…",
+  noQuestionMessage: "No question selected.",
+  peopleLinkLabel: "Go to People",
+  sections: {
+    contract: "Contract",
+    decision: "Decision",
+    actionPlan: "Action Plan",
+    display: "Display",
+    question: "Question",
+    debug: "Development debug (optional)",
+  },
+} as const;
