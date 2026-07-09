@@ -14,8 +14,10 @@ import {
   type ConciergeRelationshipInsight,
 } from "@/app/ai-concierge/aiConciergeDomain";
 import { buildConciergeWorkspaceForDisplay } from "@/app/concierge-brain/buildConciergeWorkspaceForDisplay";
+import { useAuth } from "@/lib/auth-context";
 
 export function useAiConciergeWorkspace() {
+  const { user } = useAuth();
   const [section, setSection] = useState<ConciergePageSection>("workspace");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function useAiConciergeWorkspace() {
 
   const loadWorkspace = useCallback(async () => {
     try {
-      const workspace = await buildConciergeWorkspaceForDisplay();
+      const workspace = await buildConciergeWorkspaceForDisplay({ userEmail: user?.email });
       setRecommendations(workspace.recommendations);
       setInsights(workspace.insights);
       setError(null);
@@ -40,7 +42,7 @@ export function useAiConciergeWorkspace() {
         console.error(loadError);
       }
     }
-  }, []);
+  }, [user?.email]);
 
   useEffect(() => {
     setIsLoading(true);

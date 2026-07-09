@@ -1,5 +1,5 @@
 /**
- * Unit tests for Concierge workspace Brain wiring (Step 3c).
+ * Unit tests for Concierge workspace Brain wiring (Step 3c–3e).
  *
  * Run with:
  *   npx tsx --tsconfig tsconfig.json src/__tests__/concierge-workspace-wiring.test.ts
@@ -14,6 +14,8 @@ import { buildConciergeWorkspaceForDisplay } from "../app/concierge-brain/buildC
 import { fetchConciergeWorkspace } from "../app/concierge-brain/fetchConciergeWorkspace.js";
 import type { ConciergeWorkspaceResponse } from "../app/concierge-brain/conciergeWorkspaceTypes.js";
 import type { ApiResult } from "../app/api/shared/types.js";
+import type { ConciergeRelationshipInsight } from "../app/ai-concierge/aiConciergeDomain.js";
+import type { FiAiRecommendation } from "../app/ai/aiDomain.js";
 
 let passed = 0;
 let failed = 0;
@@ -79,6 +81,28 @@ const WORKSPACE_RESPONSE: ConciergeWorkspaceResponse = {
   ],
 };
 
+const LEGACY_RECOMMENDATIONS: FiAiRecommendation[] = [
+  {
+    id: "legacy-1",
+    title: "Legacy recommendation",
+    description: "From concierge suggestions engine.",
+    href: "/relationship/legacy",
+    actionLabel: "Open profile",
+    confidence: "medium",
+    sourceType: "improve_profile",
+  },
+];
+
+const LEGACY_INSIGHTS: ConciergeRelationshipInsight[] = [
+  {
+    id: "legacy-insight-1",
+    title: "Legacy insight",
+    description: "From relationship health.",
+    href: "/relationship/legacy",
+    recipientName: "Legacy Person",
+  },
+];
+
 function okResult(data: ConciergeWorkspaceResponse): ApiResult<ConciergeWorkspaceResponse> {
   return {
     ok: true,
@@ -105,15 +129,51 @@ section("API client endpoint");
   expectTrue("fetchConciergeWorkspace is defined", typeof fetchConciergeWorkspace === "function");
 }
 
-section("buildConciergeWorkspaceForDisplay uses Brain API");
+section("flag off uses legacy workspace path");
+{
+  let legacyCalled = false;
+  let fetchCalled = false;
+
+  const display = await buildConciergeWorkspaceForDisplay(
+    { userEmail: "user@example.com" },
+    {
+      brainEnabled: false,
+      fetchConciergeWorkspace: async () => {
+        fetchCalled = true;
+        return okResult(WORKSPACE_RESPONSE);
+      },
+      loadLegacyWorkspace: () => {
+        legacyCalled = true;
+        return {
+          recommendations: LEGACY_RECOMMENDATIONS,
+          insights: LEGACY_INSIGHTS,
+        };
+      },
+    },
+  );
+
+  expectTrue("legacy loader called", legacyCalled);
+  expectTrue("fetch not called", !fetchCalled);
+  expect("returns legacy recommendations", display.recommendations, LEGACY_RECOMMENDATIONS);
+  expect("returns legacy insights", display.insights, LEGACY_INSIGHTS);
+}
+
+section("flag on uses Brain API");
 {
   let fetchCalled = false;
-  const display = await buildConciergeWorkspaceForDisplay({
-    fetchConciergeWorkspace: async () => {
-      fetchCalled = true;
-      return okResult(WORKSPACE_RESPONSE);
+  const display = await buildConciergeWorkspaceForDisplay(
+    {},
+    {
+      brainEnabled: true,
+      fetchConciergeWorkspace: async () => {
+        fetchCalled = true;
+        return okResult(WORKSPACE_RESPONSE);
+      },
+      loadLegacyWorkspace: () => {
+        throw new Error("legacy workspace should not be used");
+      },
     },
-  });
+  );
 
   expectTrue("fetch called", fetchCalled);
   expect("one recommendation", display.recommendations.length, 1);
@@ -122,37 +182,58 @@ section("buildConciergeWorkspaceForDisplay uses Brain API");
   expect("insight description from body", display.insights[0]?.description, WORKSPACE_RESPONSE.insights[0]?.body);
 }
 
+section("flag on does not fallback to legacy on fetch failure");
+{
+  let legacyCalled = false;
+  const display = await buildConciergeWorkspaceForDisplay(
+    {},
+    {
+      brainEnabled: true,
+      fetchConciergeWorkspace: async () => failedResult(),
+      loadLegacyWorkspace: () => {
+        legacyCalled = true;
+        return {
+          recommendations: LEGACY_RECOMMENDATIONS,
+          insights: LEGACY_INSIGHTS,
+        };
+      },
+    },
+  );
+
+  expectTrue("legacy loader not called", !legacyCalled);
+  expect("empty recommendations on failure", display.recommendations, []);
+  expect("empty insights on failure", display.insights, []);
+}
+
 section("empty recommendations and insights");
 {
-  const display = await buildConciergeWorkspaceForDisplay({
-    fetchConciergeWorkspace: async () =>
-      okResult({
-        version: 1,
-        generatedAt: "2026-07-09T12:00:00.000Z",
-        recommendations: [],
-        insights: [],
-      }),
-  });
+  const display = await buildConciergeWorkspaceForDisplay(
+    {},
+    {
+      brainEnabled: true,
+      fetchConciergeWorkspace: async () =>
+        okResult({
+          version: 1,
+          generatedAt: "2026-07-09T12:00:00.000Z",
+          recommendations: [],
+          insights: [],
+        }),
+    },
+  );
 
   expect("empty recommendations", display.recommendations, []);
   expect("empty insights", display.insights, []);
 }
 
-section("fetch failure returns safe empty display model");
-{
-  const display = await buildConciergeWorkspaceForDisplay({
-    fetchConciergeWorkspace: async () => failedResult(),
-  });
-
-  expect("empty recommendations on failure", display.recommendations, []);
-  expect("empty insights on failure", display.insights, []);
-}
-
 section("no Brain internals on adapted display model");
 {
-  const display = await buildConciergeWorkspaceForDisplay({
-    fetchConciergeWorkspace: async () => okResult(WORKSPACE_RESPONSE),
-  });
+  const display = await buildConciergeWorkspaceForDisplay(
+    {},
+    {
+      brainEnabled: true,
+      fetchConciergeWorkspace: async () => okResult(WORKSPACE_RESPONSE),
+    },
+  );
 
   const recommendation = display.recommendations[0]!;
   expectTrue("no sourceRuleId", !("sourceRuleId" in recommendation));
@@ -160,7 +241,7 @@ section("no Brain internals on adapted display model");
   expectTrue("no ruleEvaluation", !("ruleEvaluation" in recommendation));
 }
 
-section("legacy workspace hook no longer uses relationship-health suggestions");
+section("workspace hook delegates to buildConciergeWorkspaceForDisplay");
 {
   const hookPath = join(
     dirname(fileURLToPath(import.meta.url)),
@@ -169,6 +250,7 @@ section("legacy workspace hook no longer uses relationship-health suggestions");
   const source = readFileSync(hookPath, "utf8");
 
   expectTrue("uses buildConciergeWorkspaceForDisplay", source.includes("buildConciergeWorkspaceForDisplay"));
+  expectTrue("passes userEmail for legacy fallback", source.includes("userEmail: user?.email"));
   expectTrue("does not import loadAiRecommendations", !source.includes("loadAiRecommendations"));
   expectTrue("does not import buildRelationshipInsights", !source.includes("buildRelationshipInsights"));
   expectTrue("does not import relationship-health", !source.includes("relationship-health"));

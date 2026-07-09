@@ -1,9 +1,12 @@
-export { buildConciergeWorkspaceForDisplay } from "@/app/concierge-brain/buildConciergeWorkspaceForDisplay";
+export { buildConciergeWorkspaceForDisplay, loadLegacyConciergeWorkspace } from "@/app/concierge-brain/buildConciergeWorkspaceForDisplay";
 export type {
   BuildConciergeWorkspaceForDisplayDeps,
+  BuildConciergeWorkspaceForDisplayOptions,
   ConciergeWorkspaceDisplayModel,
   FetchConciergeWorkspace,
+  LoadLegacyConciergeWorkspace,
 } from "@/app/concierge-brain/buildConciergeWorkspaceForDisplay";
+export { isBrainConciergeEnabled } from "@/app/concierge-brain/conciergeBrainConfig";
 export { fetchConciergeWorkspace } from "@/app/concierge-brain/fetchConciergeWorkspace";
 export {
   adaptConciergeInsightToRelationshipInsight,
