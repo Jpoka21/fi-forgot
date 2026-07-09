@@ -9,6 +9,7 @@ import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js"
 import {
   collectProductBrainDecisions,
 } from "../brain/attention/collectProductBrainDecisions.js";
+import { planAttentionOrder } from "../brain/attention/planAttentionOrder.js";
 import { shouldIncludeOpportunity } from "../brain/attention/shouldIncludeOpportunity.js";
 import type { BrainExecutionResult } from "../brain/orchestrator.js";
 import { buildConciergeWorkspace } from "../brain/product/buildConciergeWorkspace.js";
@@ -35,9 +36,6 @@ import type { ProductBrainDecision } from "../brain/product/productBrainDecision
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
 import { planFromDecisionContext } from "../brain/planFromDecisionContext.js";
 import { selectQuestionForActionPlan } from "../brain/questions/index.js";
-import { rankDashboardOpportunities } from "../brain/product/rankDashboardOpportunities.js";
-import { rankNotifications } from "../brain/product/rankNotifications.js";
-import { rankRelationshipOpportunities } from "../brain/product/rankRelationshipOpportunities.js";
 import { shouldIncludeConciergeOpportunity } from "../brain/product/shouldIncludeConciergeOpportunity.js";
 import { shouldIncludeDashboardOpportunity } from "../brain/product/shouldIncludeDashboardOpportunity.js";
 import { shouldIncludeNotification } from "../brain/product/shouldIncludeNotification.js";
@@ -298,22 +296,16 @@ async function runAsyncTests(): Promise<void> {
   {
     const actual = await buildDashboardBrainOpportunities(parityOptions);
     const decisions = await collectProductBrainDecisions(parityOptions);
-    const rankable = [];
-
-    for (let index = 0; index < parityRecipients.length; index++) {
-      const recipient = parityRecipients[index]!;
-      const decision = decisions[index]!;
-      if (!shouldIncludeOpportunity(decision)) continue;
-      rankable.push({
-        decision,
-        recipientId: recipient.recipientId,
-        recipientName: recipient.recipientName,
-      });
-    }
-
-    const opportunities = rankDashboardOpportunities(rankable)
+    const ranked = planAttentionOrder({ decisions, recipients: parityRecipients });
+    const opportunities = ranked
       .slice(0, DASHBOARD_BRAIN_OPPORTUNITIES_MAX)
-      .map((item, index) => buildDashboardBrainOpportunity(item.decision, item, index + 1));
+      .map((item, index) =>
+        buildDashboardBrainOpportunity(
+          item.decision,
+          { recipientId: item.recipientId, recipientName: item.recipientName },
+          item.globalRank ?? index + 1,
+        ),
+      );
 
     const expected = {
       version: DASHBOARD_BRAIN_OPPORTUNITIES_VERSION,
@@ -333,22 +325,16 @@ async function runAsyncTests(): Promise<void> {
   {
     const actual = await buildNotifications(parityOptions);
     const decisions = await collectProductBrainDecisions(parityOptions);
-    const rankable = [];
-
-    for (let index = 0; index < parityRecipients.length; index++) {
-      const recipient = parityRecipients[index]!;
-      const decision = decisions[index]!;
-      if (!shouldIncludeOpportunity(decision)) continue;
-      rankable.push({
-        decision,
-        recipientId: recipient.recipientId,
-        recipientName: recipient.recipientName,
-      });
-    }
-
-    const notifications = rankNotifications(rankable)
+    const ranked = planAttentionOrder({ decisions, recipients: parityRecipients });
+    const notifications = ranked
       .slice(0, NOTIFICATIONS_MAX)
-      .map((item) => buildNotificationItem(item.decision, item, parityGeneratedAt));
+      .map((item) =>
+        buildNotificationItem(
+          item.decision,
+          { recipientId: item.recipientId, recipientName: item.recipientName },
+          parityGeneratedAt,
+        ),
+      );
 
     const expected = {
       version: NOTIFICATIONS_VERSION,
@@ -368,26 +354,23 @@ async function runAsyncTests(): Promise<void> {
   {
     const actual = await buildConciergeWorkspace(parityOptions);
     const decisions = await collectProductBrainDecisions(parityOptions);
-    const rankable = [];
-
-    for (let index = 0; index < parityRecipients.length; index++) {
-      const recipient = parityRecipients[index]!;
-      const decision = decisions[index]!;
-      if (!shouldIncludeOpportunity(decision)) continue;
-      rankable.push({
-        decision,
-        recipientId: recipient.recipientId,
-        recipientName: recipient.recipientName,
-      });
-    }
-
-    const ranked = rankRelationshipOpportunities(rankable);
+    const ranked = planAttentionOrder({ decisions, recipients: parityRecipients });
     const recommendations = ranked
       .slice(0, CONCIERGE_RECOMMENDATIONS_MAX)
-      .map((item) => buildConciergeRecommendation(item.decision, item));
+      .map((item) =>
+        buildConciergeRecommendation(item.decision, {
+          recipientId: item.recipientId,
+          recipientName: item.recipientName,
+        }),
+      );
     const insights = ranked
       .slice(0, CONCIERGE_INSIGHTS_MAX)
-      .map((item) => buildConciergeInsight(item.decision, item));
+      .map((item) =>
+        buildConciergeInsight(item.decision, {
+          recipientId: item.recipientId,
+          recipientName: item.recipientName,
+        }),
+      );
 
     const expected = {
       version: 1,

@@ -3,7 +3,7 @@
  */
 
 import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
-import { shouldIncludeOpportunity } from "../attention/shouldIncludeOpportunity";
+import { planAttentionOrder } from "../attention/planAttentionOrder";
 import type { BrainExecutionResult } from "../orchestrator";
 import { buildNotificationItem } from "./buildNotificationItem";
 import {
@@ -11,11 +11,6 @@ import {
   NOTIFICATIONS_VERSION,
   type NotificationsResponse,
 } from "./notificationTypes";
-import type { ProductBrainDecision } from "./productBrainDecisionTypes";
-import {
-  rankNotifications,
-  type RankableNotification,
-} from "./rankNotifications";
 
 export interface NotificationRecipientInput {
   recipientId: string;
@@ -34,17 +29,6 @@ export interface BuildNotificationsOptions {
   generatedAt?: string;
 }
 
-function toRankable(
-  decision: ProductBrainDecision,
-  recipient: NotificationRecipientInput,
-): RankableNotification {
-  return {
-    decision,
-    recipientId: recipient.recipientId,
-    recipientName: recipient.recipientName,
-  };
-}
-
 export async function buildNotifications(
   options: BuildNotificationsOptions,
 ): Promise<NotificationsResponse> {
@@ -56,19 +40,14 @@ export async function buildNotifications(
     runBrain,
   });
 
-  const rankable: RankableNotification[] = [];
-
-  for (let index = 0; index < recipients.length; index++) {
-    const recipient = recipients[index]!;
-    const decision = decisions[index]!;
-    if (!shouldIncludeOpportunity(decision)) continue;
-    rankable.push(toRankable(decision, recipient));
-  }
-
-  const ranked = rankNotifications(rankable);
+  const ranked = planAttentionOrder({ decisions, recipients });
   const capped = ranked.slice(0, NOTIFICATIONS_MAX);
   const notifications = capped.map((item) =>
-    buildNotificationItem(item.decision, item, generatedAt),
+    buildNotificationItem(
+      item.decision,
+      { recipientId: item.recipientId, recipientName: item.recipientName },
+      generatedAt,
+    ),
   );
 
   return {

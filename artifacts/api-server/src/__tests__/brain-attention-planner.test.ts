@@ -6,6 +6,9 @@
  */
 
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { buildGlobalOpportunityPool } from "../brain/attention/buildGlobalOpportunityPool.js";
 import { computeAttentionScore } from "../brain/attention/computeAttentionScore.js";
 import { planAttentionOrder } from "../brain/attention/planAttentionOrder.js";
@@ -362,6 +365,66 @@ section("compareGlobalOpportunities parity with compareRankableRelationshipOppor
 
   expectTrue("birthday ranks before fresh_update", legacyCompare > 0);
   expect("planner puts birthday first", rankedPair[0]?.recipientId, "a");
+}
+
+const TEST_DIR = dirname(fileURLToPath(import.meta.url));
+const BRAIN_ROOT = join(TEST_DIR, "../brain");
+
+function readBrainSource(relativePath: string): string {
+  return readFileSync(join(BRAIN_ROOT, relativePath), "utf8");
+}
+
+section("product builders consume planAttentionOrder");
+{
+  const dashboardSource = readBrainSource("product/buildDashboardBrainOpportunities.ts");
+  const notificationsSource = readBrainSource("product/buildNotifications.ts");
+  const conciergeSource = readBrainSource("product/buildConciergeWorkspace.ts");
+
+  expectTrue("dashboard uses planAttentionOrder", dashboardSource.includes("planAttentionOrder"));
+  expectTrue("notifications uses planAttentionOrder", notificationsSource.includes("planAttentionOrder"));
+  expectTrue("concierge uses planAttentionOrder", conciergeSource.includes("planAttentionOrder"));
+
+  expectTrue(
+    "dashboard does not call rankRelationshipOpportunities",
+    !dashboardSource.includes("rankRelationshipOpportunities"),
+  );
+  expectTrue(
+    "dashboard does not call rankDashboardOpportunities",
+    !dashboardSource.includes("rankDashboardOpportunities"),
+  );
+  expectTrue(
+    "notifications does not call rankNotifications",
+    !notificationsSource.includes("rankNotifications"),
+  );
+  expectTrue(
+    "notifications does not call rankRelationshipOpportunities",
+    !notificationsSource.includes("rankRelationshipOpportunities"),
+  );
+  expectTrue(
+    "concierge does not call rankRelationshipOpportunities",
+    !conciergeSource.includes("rankRelationshipOpportunities"),
+  );
+}
+
+section("planner remains product agnostic");
+{
+  const plannerSource = [
+    readBrainSource("attention/planAttentionOrder.ts"),
+    readBrainSource("attention/rankGlobalOpportunities.ts"),
+    readBrainSource("attention/computeAttentionScore.ts"),
+  ].join("\n");
+
+  for (const token of [
+    "Dashboard",
+    "Notifications",
+    "Concierge",
+    "DASHBOARD_",
+    "NOTIFICATIONS_",
+    "CONCIERGE_",
+    "slice(",
+  ]) {
+    expectTrue(`planner layer has no ${token}`, !plannerSource.includes(token));
+  }
 }
 
 async function runAsyncTests(): Promise<void> {

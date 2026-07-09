@@ -3,7 +3,7 @@
  */
 
 import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
-import { shouldIncludeOpportunity } from "../attention/shouldIncludeOpportunity";
+import { planAttentionOrder } from "../attention/planAttentionOrder";
 import type { BrainExecutionResult } from "../orchestrator";
 import { buildDashboardBrainOpportunity } from "./buildDashboardBrainOpportunity";
 import {
@@ -11,11 +11,6 @@ import {
   DASHBOARD_BRAIN_OPPORTUNITIES_VERSION,
   type DashboardBrainOpportunities,
 } from "./dashboardBrainOpportunitiesTypes";
-import type { ProductBrainDecision } from "./productBrainDecisionTypes";
-import {
-  rankDashboardOpportunities,
-  type RankableDashboardOpportunity,
-} from "./rankDashboardOpportunities";
 
 export interface DashboardRecipientInput {
   recipientId: string;
@@ -34,17 +29,6 @@ export interface BuildDashboardBrainOpportunitiesOptions {
   generatedAt?: string;
 }
 
-function toRankable(
-  decision: ProductBrainDecision,
-  recipient: DashboardRecipientInput,
-): RankableDashboardOpportunity {
-  return {
-    decision,
-    recipientId: recipient.recipientId,
-    recipientName: recipient.recipientName,
-  };
-}
-
 export async function buildDashboardBrainOpportunities(
   options: BuildDashboardBrainOpportunitiesOptions,
 ): Promise<DashboardBrainOpportunities> {
@@ -56,19 +40,14 @@ export async function buildDashboardBrainOpportunities(
     runBrain,
   });
 
-  const rankable: RankableDashboardOpportunity[] = [];
-
-  for (let index = 0; index < recipients.length; index++) {
-    const recipient = recipients[index]!;
-    const decision = decisions[index]!;
-    if (!shouldIncludeOpportunity(decision)) continue;
-    rankable.push(toRankable(decision, recipient));
-  }
-
-  const ranked = rankDashboardOpportunities(rankable);
+  const ranked = planAttentionOrder({ decisions, recipients });
   const capped = ranked.slice(0, DASHBOARD_BRAIN_OPPORTUNITIES_MAX);
   const opportunities = capped.map((item, index) =>
-    buildDashboardBrainOpportunity(item.decision, item, index + 1),
+    buildDashboardBrainOpportunity(
+      item.decision,
+      { recipientId: item.recipientId, recipientName: item.recipientName },
+      item.globalRank ?? index + 1,
+    ),
   );
 
   return {
