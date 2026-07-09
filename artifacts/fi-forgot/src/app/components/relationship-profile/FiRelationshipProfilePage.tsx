@@ -4,6 +4,7 @@ import { useRelationshipProfilePage } from "@/app/relationship-profile/hooks/use
 import { FiRelationshipProfileCards } from "@/app/components/relationship-profile/FiRelationshipProfileCards";
 import { FiRelationshipProfileComingUp } from "@/app/components/relationship-profile/FiRelationshipProfileComingUp";
 import { FiConciergeQuestionExperience } from "@/app/components/concierge-questions";
+import { FiProfileQuestionExperience } from "@/app/components/relationship-profile/FiProfileQuestionExperience";
 import { FiRelationshipProfileHeader } from "@/app/components/relationship-profile/FiRelationshipProfileHeader";
 import { FiRelationshipProfileHealthBar } from "@/app/components/relationship-profile/FiRelationshipProfileHealthBar";
 import { FiRelationshipProfileInsights } from "@/app/components/relationship-profile/FiRelationshipProfileInsights";
@@ -102,7 +103,27 @@ export function FiRelationshipProfilePage() {
             onToggleShowAll={() => profile.setShowAllMemories((value) => !value)}
           />
 
-          {profile.nextQuestion && !profile.questionSkipped && profile.recipient ? (
+          {profile.brainProfileQuestionsEnabled
+            && profile.activeProfileQuestion
+            && !profile.questionSkipped
+            && profile.recipient ? (
+              <FiProfileQuestionExperience
+                recipientName={profile.recipient.name}
+                profileQuestion={profile.activeProfileQuestion}
+                answerText={profile.answerText}
+                savingAnswer={profile.savingAnswer}
+                answerSaved={profile.answerSaved}
+                onAnswerTextChange={profile.setAnswerText}
+                onSaveAnswer={() => void profile.handleSaveAnswer()}
+                onSkip={() => profile.setQuestionSkipped(true)}
+                onRememberLater={() => profile.setQuestionSkipped(true)}
+              />
+            ) : null}
+
+          {!profile.brainProfileQuestionsEnabled
+            && profile.nextQuestion
+            && !profile.questionSkipped
+            && profile.recipient ? (
             <FiConciergeQuestionExperience
               recipient={profile.recipient}
               serverQuestion={profile.nextQuestion}

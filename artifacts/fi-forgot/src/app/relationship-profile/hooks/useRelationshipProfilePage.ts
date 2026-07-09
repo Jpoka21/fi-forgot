@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { trackRelationshipProfileEvent } from "@/app/relationship-profile/relationshipProfileAnalytics";
+import { useProfileQuestion } from "@/app/relationship-profile/hooks/useProfileQuestion";
+import { isBrainProfileQuestionsEnabled } from "@/app/relationship-profile/relationshipProfileBrainConfig";
+import type { ProfileQuestionViewModel } from "@/app/relationship-profile/profileQuestionViewModel";
 import {
   buildProfileFields,
   sortCardsForProfile,
@@ -24,6 +27,13 @@ import { HOLIDAY_EVENTS } from "@/app/relationship-profile/relationshipProfileEn
 
 export function useRelationshipProfilePage(recipientId: string) {
   const { authReady } = useAuth();
+  const brainProfileQuestionsEnabled = isBrainProfileQuestionsEnabled();
+
+  const brainProfileQuestion = useProfileQuestion(
+    recipientId,
+    brainProfileQuestionsEnabled,
+    authReady,
+  );
 
   const [recipient, setRecipient] = useState<Recipient | undefined>();
   const [cards, setCards] = useState<CardOrder[]>([]);
@@ -119,8 +129,10 @@ export function useRelationshipProfilePage(recipientId: string) {
   }, [recipientId]);
 
   useEffect(() => {
-    loadNextQuestion();
-  }, [loadNextQuestion, authReady]);
+    if (!brainProfileQuestionsEnabled) {
+      loadNextQuestion();
+    }
+  }, [brainProfileQuestionsEnabled, loadNextQuestion, authReady]);
 
   useEffect(() => {
     const generation = fetchGenerationRef.current;
@@ -259,38 +271,70 @@ export function useRelationshipProfilePage(recipientId: string) {
     question: string;
     mode: NextQuestion["mode"];
     followUp?: NextQuestion["followUp"];
-  }) => {
-    const question = questionPayload ?? nextQuestion;
-    if (!answerText.trim() || !question || !recipientId) return;
+  } | ProfileQuestionViewModel) => {
+    const viewModel =
+      brainProfileQuestionsEnabled && brainProfileQuestion.profileQuestion
+        ? (questionPayload as ProfileQuestionViewModel | undefined) ?? brainProfileQuestion.profileQuestion
+        : null;
+
+    const legacyQuestion =
+      !brainProfileQuestionsEnabled
+        ? (questionPayload as { fieldKey: string; question: string; mode: NextQuestion["mode"]; followUp?: NextQuestion["followUp"] } | undefined) ?? nextQuestion
+        : null;
+
+    if (!answerText.trim() || !recipientId) return;
+    if (!viewModel && !legacyQuestion) return;
+
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) return;
 
     setSavingAnswer(true);
     try {
-      const body: Record<string, string> = {
-        fieldKey: question.fieldKey,
-        questionText: question.question,
-        answerText: answerText.trim(),
-        triggerType:
-          question.mode === "follow_up" ? "follow_up" : question.mode,
-      };
-      if (question.mode === "follow_up" && question.followUp?.id) {
-        body.followUpId = question.followUp.id;
+      const body: Record<string, string> = viewModel
+        ? {
+            fieldKey: viewModel.saveFieldKey,
+            questionText: viewModel.question,
+            answerText: answerText.trim(),
+            triggerType: viewModel.saveTriggerType,
+          }
+        : {
+            fieldKey: legacyQuestion!.fieldKey,
+            questionText: legacyQuestion!.question,
+            answerText: answerText.trim(),
+            triggerType:
+              legacyQuestion!.mode === "follow_up" ? "follow_up" : legacyQuestion!.mode,
+          };
+
+      if (viewModel?.followUpId) {
+        body.followUpId = viewModel.followUpId;
+      } else if (legacyQuestion?.mode === "follow_up" && legacyQuestion.followUp?.id) {
+        body.followUpId = legacyQuestion.followUp.id;
       }
+
       const response = await fetch(`/api/v2/recipients/${recipientId}/answer-question`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       if (response.ok) {
+        const refreshFreshUpdates =
+          viewModel
+            ? viewModel.saveTriggerType === "fresh_update" || viewModel.saveTriggerType === "follow_up"
+            : legacyQuestion?.mode === "fresh_update";
+
         setAnswerSaved(true);
         setTimeout(() => {
           setAnswerText("");
           setAnswerSaved(false);
-          setNextQuestion(null);
           setQuestionSkipped(false);
-          loadNextQuestion();
-          if (question.mode === "fresh_update") loadFreshUpdates();
+          if (brainProfileQuestionsEnabled) {
+            setNextQuestion(null);
+            void brainProfileQuestion.refresh();
+          } else {
+            setNextQuestion(null);
+            loadNextQuestion();
+          }
+          if (refreshFreshUpdates) loadFreshUpdates();
           window.dispatchEvent(new Event("recipient-answer-saved"));
           trackRelationshipProfileEvent("relationship_profile_answer_saved", { recipientId });
         }, 1400);
@@ -300,7 +344,15 @@ export function useRelationshipProfilePage(recipientId: string) {
     } finally {
       setSavingAnswer(false);
     }
-  }, [answerText, loadFreshUpdates, loadNextQuestion, nextQuestion, recipientId]);
+  }, [
+    answerText,
+    brainProfileQuestion,
+    brainProfileQuestionsEnabled,
+    loadFreshUpdates,
+    loadNextQuestion,
+    nextQuestion,
+    recipientId,
+  ]);
 
   const firstName = recipient?.name.split(" ")[0] ?? "them";
   const allTrackedEventData = useMemo(
@@ -329,21 +381,37 @@ export function useRelationshipProfilePage(recipientId: string) {
   const profileFields = recipient ? buildProfileFields(recipient) : [];
   const displayedMemories = showAllMemories ? freshUpdates : freshUpdates.slice(0, 4);
 
+  const activeProfileQuestion = brainProfileQuestionsEnabled
+    ? brainProfileQuestion.profileQuestion
+    : null;
+
+  const legacyProfileComplete = brainProfileQuestionsEnabled
+    ? brainProfileQuestion.profileComplete
+    : profileComplete;
+
+  const legacyProfileScore = brainProfileQuestionsEnabled
+    ? brainProfileQuestion.profileScore
+    : profileScore;
+
   const questionModeLabel =
     nextQuestion?.mode === "follow_up"
       ? "Following up"
-      : profileComplete
+      : legacyProfileComplete
         ? "A quick check-in"
         : "Help future cards sound more like you";
 
   return {
+    brainProfileQuestionsEnabled,
+    activeProfileQuestion,
+    profileQuestionStatus: brainProfileQuestion.status,
+    profileQuestionError: brainProfileQuestion.errorMessage,
     recipient,
     cards,
     freshUpdates,
     freshLoading,
     nextQuestion,
-    profileComplete,
-    profileScore,
+    profileComplete: legacyProfileComplete,
+    profileScore: legacyProfileScore,
     healthScore,
     showAllMemories,
     showTimeline,
