@@ -144,6 +144,7 @@ Complete Phase 1 — Development Ready gate
 - Phase 1: Replit/Linux typecheck + production build **confirmed** (both exit 0) — Entry 006
 - Phase 1: Repository hygiene — legacy quarantine, dead exports removed, dev previews deleted — Entry 007
 - Phase 1: Environment tooling configured (ESLint, Prettier, `.env.example`, README) — Entry 008
+- `/try` public demo cleanup (2026-07-09): `/try` now has two intentional modes — unauthenticated visitors get the shortened demo (name, relationship, occasion, smile prompt, tone, then generation); authenticated users keep the full card creation flow. Backend, Brain, APIs, database, and landing page remain unchanged. This is intentional and should not be treated as a regression.
 
 ---
 
