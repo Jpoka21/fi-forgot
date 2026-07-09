@@ -67,6 +67,9 @@ export const API_ENDPOINTS = {
     demoPreviewRefine: "/api/demo-preview/refine-message",
     demoEmail: "/api/demo-email",
   },
+  dashboard: {
+    brainOpportunities: "/api/v2/dashboard/brain-opportunities",
+  },
   handwrytten: {
     fonts: "/api/handwrytten-fonts",
   },

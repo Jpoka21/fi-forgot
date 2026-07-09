@@ -58,6 +58,17 @@ export interface FiDashboardActivityItem {
   sortKey: number;
 }
 
+export interface FiDashboardSuggestedAction {
+  id: string;
+  title: string;
+  detail: string;
+  actionLabel: string;
+  href: string;
+  recipientId: string;
+  recipientName: string;
+  priority: string;
+}
+
 export interface FiDashboardSpotlight {
   recipient: Recipient;
   summary: string;
@@ -89,6 +100,8 @@ export interface FiDashboardSnapshot {
   pendingReviewCount: number;
   attentionItems: FiDashboardAttentionItem[];
   highlights: FiDashboardHighlight[];
+  /** Brain-ranked relationship opportunities when dashboard Brain flag is on. */
+  suggestedActions?: FiDashboardSuggestedAction[];
   recentActivity: FiDashboardActivityItem[];
   spotlight: FiDashboardSpotlight | null;
   welcome: FiDashboardWelcome;

@@ -142,7 +142,7 @@ export function FiDashboardPage() {
             upcomingCardById={upcomingCardById}
           />
           <FiDashboardPendingReview pendingReviewCount={snapshot.pendingReviewCount} />
-          <FiDashboardSuggestedActions />
+          <FiDashboardSuggestedActions suggestedActions={snapshot.suggestedActions} />
           <FiDashboardQuickActions actions={snapshot.quickActions} />
           <FiDashboardRecentActivity items={snapshot.recentActivity} />
         </div>

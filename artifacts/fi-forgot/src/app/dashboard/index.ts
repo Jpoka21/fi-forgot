@@ -11,6 +11,7 @@ export type {
   FiDashboardQuickAction,
   FiDashboardSnapshot,
   FiDashboardSpotlight,
+  FiDashboardSuggestedAction,
   FiDashboardUpcomingCta,
   FiDashboardUpcomingEvent,
   FiDashboardUpcomingOutcome,

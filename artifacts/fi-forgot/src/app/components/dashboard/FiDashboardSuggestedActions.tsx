@@ -1,12 +1,72 @@
-import { loadConciergeSuggestions } from "@/app/concierge-suggestions/conciergeSuggestionsEngine";
-import { useAuth } from "@/lib/auth-context";
+import { Link } from "wouter";
+
+import { FiPriorityBadge } from "@/app/components/badge/FiBadge";
+import type { FiPriorityLevel } from "@/app/components/badge/badgeDomain";
+import { FiButton } from "@/app/components/button/FiButton";
+import { FiAiRecommendationCard } from "@/app/components/card/FiCard";
 import { FiConciergeSuggestionCard } from "@/app/components/concierge-suggestions/FiConciergeSuggestionCard";
+import { getFiConciergeSuggestionCardClassName } from "@/app/components/concierge-suggestions/conciergeSuggestionsVariants";
 import { FiDashboardCard } from "@/app/components/card/FiCard";
 import { getFiDashboardSectionClassName } from "@/app/components/dashboard/dashboardVariants";
+import { isBrainDashboardEnabled } from "@/app/dashboard-brain/dashboardBrainConfig";
+import {
+  limitDashboardSuggestedActions,
+  resolveDashboardSuggestedActions,
+} from "@/app/dashboard-brain/resolveDashboardSuggestedActions";
+import type { FiDashboardSuggestedAction } from "@/app/dashboard/dashboardDomain";
+import { useAuth } from "@/lib/auth-context";
 
-export function FiDashboardSuggestedActions() {
+export interface FiDashboardSuggestedActionsProps {
+  suggestedActions?: FiDashboardSuggestedAction[];
+}
+
+function priorityToBadgeLevel(priority: string): FiPriorityLevel {
+  if (priority === "high" || priority === "medium" || priority === "low") {
+    return priority;
+  }
+  return "medium";
+}
+
+function FiDashboardBrainSuggestedActionCard({
+  action,
+  index = 0,
+}: {
+  action: FiDashboardSuggestedAction;
+  index?: number;
+}) {
+  return (
+    <FiAiRecommendationCard className={getFiConciergeSuggestionCardClassName({ index })}>
+      <div className="fi-concierge-suggestion-card__body">
+        <div className="fi-concierge-suggestion-card__meta">
+          <FiPriorityBadge level={priorityToBadgeLevel(action.priority)} />
+        </div>
+        <h3 className="fi-concierge-suggestion-card__title">{action.title}</h3>
+        <p className="fi-concierge-suggestion-card__description">{action.detail}</p>
+        <div className="fi-concierge-suggestion-card__footer">
+          <p className="fi-concierge-suggestion-card__context">For {action.recipientName}</p>
+          <FiButton asChild variant="secondary" size="sm">
+            <Link href={action.href}>{action.actionLabel}</Link>
+          </FiButton>
+        </div>
+      </div>
+    </FiAiRecommendationCard>
+  );
+}
+
+export function FiDashboardSuggestedActions({
+  suggestedActions,
+}: FiDashboardSuggestedActionsProps) {
   const { user } = useAuth();
-  const suggestions = loadConciergeSuggestions(user?.email).slice(0, 3);
+  const brainEnabled = isBrainDashboardEnabled();
+  const renderModel = resolveDashboardSuggestedActions({
+    brainEnabled,
+    snapshotSuggestedActions: suggestedActions,
+    userEmail: user?.email,
+  });
+
+  const brainActions = limitDashboardSuggestedActions(renderModel.brainActions);
+  const legacyActions = renderModel.legacyActions;
+  const hasActions = brainEnabled ? brainActions.length > 0 : legacyActions.length > 0;
 
   return (
     <section
@@ -22,13 +82,19 @@ export function FiDashboardSuggestedActions() {
         </div>
       </div>
 
-      {suggestions.length > 0 ? (
+      {hasActions ? (
         <ul className="fi-dashboard__list">
-          {suggestions.map((suggestion, index) => (
-            <li key={suggestion.id}>
-              <FiConciergeSuggestionCard suggestion={suggestion} index={index} />
-            </li>
-          ))}
+          {brainEnabled
+            ? brainActions.map((action, index) => (
+                <li key={action.id}>
+                  <FiDashboardBrainSuggestedActionCard action={action} index={index} />
+                </li>
+              ))
+            : legacyActions.map((suggestion, index) => (
+                <li key={suggestion.id}>
+                  <FiConciergeSuggestionCard suggestion={suggestion} index={index} />
+                </li>
+              ))}
         </ul>
       ) : (
         <FiDashboardCard className="fi-dashboard__summary-card">

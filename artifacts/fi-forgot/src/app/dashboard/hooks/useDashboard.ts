@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { buildDashboardSnapshotForDisplay } from "@/app/dashboard-brain/buildDashboardSnapshotForDisplay";
 import { trackDashboardEvent } from "@/app/dashboard/dashboardAnalytics";
 import { dashboardDefaults, type FiDashboardSnapshot } from "@/app/dashboard/dashboardDomain";
-import { buildDashboardSnapshot } from "@/app/dashboard/dashboardEngine";
 import { useAuth } from "@/lib/auth-context";
 import { Plan, PLANS, resolveUserPlan } from "@/lib/plan";
 
@@ -33,7 +33,7 @@ export function useDashboard() {
       }
 
       try {
-        const nextSnapshot = buildDashboardSnapshot({
+        const nextSnapshot = await buildDashboardSnapshotForDisplay({
           userName: user?.name,
           userEmail: user?.email,
           cardsUsed,
