@@ -94,6 +94,49 @@ No database schema changes.
 
 ---
 
+# Implementation Status
+
+**Life Event Follow Up Phases 1 through 3 are complete**, plus minimal Action Planner support for `life_event_follow_up`.
+
+| Phase | Status | Implementation |
+|-------|--------|----------------|
+| Phase 1 — Life Event Classification | ✅ Complete | `brain/lifeEvents/classifyLifeEvents.ts` |
+| Phase 2 — DecisionContext Integration | ✅ Complete | `DecisionContext.lifeEvent` |
+| Phase 3 — Life Event Follow Up Rule | ✅ Complete | `life_event_follow_up` at priority 38 |
+| Phase 4 — Action Planning | ✅ Minimal | `mapDecisionToPlan` mapping for `life_event_follow_up` |
+| Phase 5 — Validation | ✅ Complete | Unit tests for classifier, context, rule, and Action Planner |
+
+### Unchanged surfaces
+
+| Surface | Status |
+|---------|--------|
+| BrainResponse shape | Unchanged |
+| Frontend | Unchanged |
+| Database schema | Unchanged |
+| Public APIs | Unchanged |
+
+### Current Brain pipeline (with Life Events)
+
+```text
+RelationshipContext
+        ↓
+Signal Extraction → Normalized Relationship State
+        ↓
+classifyLifeEvents()  →  LifeEventClassification[]
+        ↓
+buildDecisionContext()  →  DecisionContext.lifeEvent (newest or null)
+        ↓
+Rule Engine  →  life_event_follow_up (38) when eligible
+        ↓
+Action Planner  →  ask_question / follow_up
+        ↓
+BrainResponse  (shape unchanged)
+```
+
+Life Event Intelligence is a **structured Brain component**, not a Brain Signal. See `112_BRAIN_SIGNAL_TAXONOMY.md`.
+
+---
+
 # Design Philosophy
 
 Life Event Follow Up exists because relationships naturally evolve over time.
@@ -264,37 +307,56 @@ The system simply records that an event occurred.
 
 ## Stage 2: Event Classification
 
-Captured events are classified into a deterministic Life Event category.
+Captured events are classified by `classifyLifeEvents()`, which returns `LifeEventClassification[]`.
 
-Examples:
+The function is deterministic. It does not evaluate whether a follow-up opportunity exists — it only prepares structured metadata.
 
-* New Job
+**v1 question-key mapping (intentionally narrow):**
 
-* Move
+| Fresh-update question key | Life event type | Category |
+|---------------------------|-----------------|----------|
+| `family_news` | `family_update` | `family` |
 
-* Surgery
+**Excluded question keys** (not classified as life events):
 
-* New Baby
+| Question key | Reason |
+|--------------|--------|
+| `recent_accomplishment` | Owned by `accomplishment_follow_up` (33) |
+| `current_excitement` | Future dedicated rule |
+| `current_challenge` | Future dedicated rule |
 
-* Marriage
+Configuration lives in:
 
-* Engagement
+- `brain/config/lifeEventQuestionKeyMapping.ts` — key → type/category mapping
+- `brain/config/lifeEventFollowUpWindows.ts` — follow-up window by event type (`family_update`: 30 days)
 
-* Retirement
-
-* Business Launch
-
-Classification produces structured metadata.
-
-It does not decide whether a follow up should occur.
+Future categories (not yet mapped in v1) include examples such as:
 
 ---
 
 ## Stage 3: DecisionContext
 
-Classification results become reusable factual fields exposed through `DecisionContext`.
+`buildDecisionContext()` projects the newest classification onto a single field:
 
-The Rule Engine consumes these facts just like every other rule.
+```typescript
+lifeEvent: LifeEventClassification | null
+```
+
+`LifeEventClassification` includes:
+
+| Field | Purpose |
+|-------|---------|
+| `type` | Classified event type (e.g. `family_update`) |
+| `category` | Broad category (`family`, `career`, `health`, …) |
+| `daysAgo` | Days since the event was captured |
+| `followUpWindowDays` | Configured follow-up window for this type |
+| `followUpReady` | Whether the window has been reached |
+| `source` | Origin of the event (v1: `fresh_update`) |
+| `capturedAt` | ISO timestamp of capture |
+| `classified` | Whether classification succeeded |
+| `supported` | Whether the event type is supported in v1 |
+
+The Rule Engine consumes `DecisionContext.lifeEvent` just like every other rule consumes `DecisionContext` facts.
 
 The Decision Rule never parses raw timeline data.
 
@@ -316,9 +378,18 @@ The Rule Engine remains responsible for conflict resolution.
 
 ## Stage 5: Action Planning
 
-If the Life Event Follow Up Rule wins, the Action Planner determines the appropriate follow up action.
+If the Life Event Follow Up Rule wins, the Action Planner maps `life_event_follow_up` to a factual `ActionPlan`:
 
-The rule itself does not choose wording or user interface behavior.
+| Field | Value |
+|-------|-------|
+| `type` | `ask_question` |
+| `category` | `follow_up` |
+| `sourceRuleId` | `life_event_follow_up` |
+| `primaryReason` | `life_event_follow_up_ready` |
+
+The Action Planner does not generate user-facing card copy. The rule itself does not choose wording or user interface behavior.
+
+Mapping location: `brain/action/mapDecisionToPlan.ts`.
 
 ---
 
@@ -464,33 +535,29 @@ Keeping these responsibilities separate prevents duplicated logic and allows eac
 
 The Rule Engine should never depend on raw relationship data.
 
-Instead, Life Event information should be exposed through reusable facts added to `DecisionContext`.
+Life Event information is exposed through a single structured field on `DecisionContext`:
+
+```typescript
+lifeEvent: LifeEventClassification | null
+```
+
+`classifyLifeEvents()` returns `LifeEventClassification[]`. `buildDecisionContext()` projects the **newest** classification (index 0) onto `lifeEvent`, or `null` when no classification exists.
 
 This continues the Brain's existing architectural pattern of separating data preparation from decision making.
 
-The exact implementation may evolve, but the following conceptual facts illustrate the intended design.
+| Field | Purpose |
+|-------|---------|
+| `lifeEvent` | Newest supported life event classification, or `null` |
 
-| Fact | Purpose |
+The `life_event_follow_up` rule reads **only** `DecisionContext.lifeEvent`. It does not read flat derived fields or raw relationship data.
 
-|------|---------|
+These values are deterministic.
 
-| `latestLifeEventType` | Identifies the most recent classified life event |
+They do not contain generated text.
 
-| `latestLifeEventCategory` | Broad category such as Career, Family, Health, Home, or Business |
+They do not contain emotional interpretations.
 
-| `latestLifeEventDaysAgo` | Number of days since the event occurred |
-
-| `latestLifeEventFollowUpWindow` | Recommended follow up timing for this event type |
-
-| `latestLifeEventEligible` | Indicates whether the event is currently eligible for follow up |
-
-These values should be deterministic.
-
-They should not contain generated text.
-
-They should not contain emotional interpretations.
-
-They should not require the Rule Engine to inspect timeline events or free form user input.
+They do not require the Rule Engine to inspect timeline events or free form user input.
 
 ---
 
@@ -544,19 +611,16 @@ The rule simply evaluates factual inputs exposed through `DecisionContext`.
 
 ## Rule Inputs
 
-Conceptually, the rule evaluates facts similar to:
+The rule evaluates only `DecisionContext.lifeEvent`:
 
-* Latest Life Event Type
+| Field | Role |
+|-------|------|
+| `lifeEvent.classified` | Classification succeeded |
+| `lifeEvent.supported` | Event type is supported in v1 |
+| `lifeEvent.followUpReady` | Follow-up window has been reached |
+| `lifeEvent.type`, `lifeEvent.category`, `lifeEvent.daysAgo`, … | Factual debug context only |
 
-* Latest Life Event Category
-
-* Days Since Event
-
-* Follow Up Window
-
-* Event Eligibility
-
-These facts are prepared before rule evaluation.
+These facts are prepared before rule evaluation by `classifyLifeEvents()` and `buildDecisionContext()`.
 
 The rule itself performs no additional data preparation.
 
@@ -564,19 +628,17 @@ The rule itself performs no additional data preparation.
 
 ## Match Conditions
 
-A Life Event Follow Up opportunity exists only when all required conditions are satisfied.
+A Life Event Follow Up opportunity exists only when all required conditions are satisfied:
 
-Conceptually:
+* `lifeEvent !== null`
 
-* A classified Life Event exists.
+* `lifeEvent.classified === true`
 
-* The event is eligible for follow up.
+* `lifeEvent.supported === true`
 
-* The recommended follow up window has been reached.
+* `lifeEvent.followUpReady === true`
 
-* The event has not already been acknowledged by another completed follow up.
-
-* No higher priority Opportunity Rule wins.
+* No higher priority Opportunity Rule wins (Rule Engine resolution)
 
 If any required condition is missing, the rule does not match.
 
@@ -586,31 +648,22 @@ If any required condition is missing, the rule does not match.
 
 Life Event Follow Up belongs between freshness management and long term relationship maintenance.
 
-Proposed priority:
+**Implemented priority: 38**
 
-```
-
+```text
 Birthday                  50
-
 Anniversary               45
-
 Valentine's Day           42
-
 Inactivity                41
-
 Fresh Update              40
-
-Life Event Follow Up      38
-
+Life Event Follow Up      38   ← implemented
 Card Gap                  35
-
 Memory Accumulation       34
-
 Accomplishment Follow Up  33
-
 Wait                       0
-
 ```
+
+Rule id: `life_event_follow_up`. Registry location: `brain/decision/rules/lifeEventFollowUpRule.ts`.
 
 This ordering reflects the relative importance of opportunities while preserving deterministic conflict resolution.
 
@@ -772,19 +825,21 @@ Instead, each implementation step should extend the current architecture in a na
 
 ## Phase 1: Life Event Classification
 
-Introduce a deterministic classification component responsible for recognizing supported Life Event categories from existing relationship information.
+**Status: ✅ Complete**
+
+Deterministic classification component: `brain/lifeEvents/classifyLifeEvents.ts`.
 
 Responsibilities:
 
-* Identify supported Life Events.
+* Identify supported Life Events from structured fresh-update question keys.
 
-* Assign an Event Category.
+* Assign an Event Category and type.
 
-* Determine the appropriate follow up window.
+* Determine the appropriate follow up window from configuration.
 
-* Produce reusable structured metadata.
+* Produce `LifeEventClassification[]`.
 
-This component should not evaluate whether a follow up opportunity exists.
+This component does not evaluate whether a follow up opportunity exists.
 
 Its only responsibility is preparing factual event data.
 
@@ -792,45 +847,47 @@ Its only responsibility is preparing factual event data.
 
 ## Phase 2: DecisionContext Integration
 
-Expose Life Event metadata through `DecisionContext`.
+**Status: ✅ Complete**
 
-This follows the existing Brain pattern of preparing reusable facts before Rule Engine evaluation.
+`buildDecisionContext()` exposes `lifeEvent: LifeEventClassification | null` — the newest classification from `classifyLifeEvents()`, or `null`.
 
-The Rule Engine should receive only structured facts.
+The orchestrator calls `classifyLifeEvents()` after normalization and before `buildDecisionContext()`.
 
-It should never inspect raw relationship data or free form text.
+The Rule Engine receives only structured facts.
+
+It never inspects raw relationship data or free form text.
 
 ---
 
 ## Phase 3: Life Event Follow Up Rule
 
-Implement a new Opportunity Rule that evaluates only the Life Event facts exposed through `DecisionContext`.
+**Status: ✅ Complete**
+
+Opportunity Rule `life_event_follow_up` at priority 38.
 
 Responsibilities:
 
-* Determine whether an eligible Life Event exists.
+* Read only `DecisionContext.lifeEvent`.
 
-* Verify that the follow up window has been reached.
+* Verify `classified`, `supported`, and `followUpReady`.
 
 * Respect Rule Engine priority ordering.
 
-* Produce a standard `DecideResult`.
+* Produce a standard `DecideResult` with reason `life_event_follow_up_ready`.
 
-The rule should remain intentionally small and deterministic.
+The rule remains intentionally small and deterministic.
 
 ---
 
 ## Phase 4: Action Planning
 
-If the Life Event Follow Up Rule wins, the Action Planner determines the next user action.
+**Status: ✅ Minimal support complete**
 
-The Action Planner remains responsible for:
+`mapDecisionToPlan` maps `life_event_follow_up` + `ask_question` → `category: follow_up`.
 
-* Selecting the appropriate follow up workflow.
+The Action Planner does not generate user-facing copy.
 
-* Choosing the question strategy.
-
-* Producing the standard BrainResponse.
+Full question strategy and card workflow selection remain future work.
 
 The Rule itself does not determine user experience behavior.
 
@@ -838,21 +895,19 @@ The Rule itself does not determine user experience behavior.
 
 ## Phase 5: Validation
 
-Every implementation should include deterministic unit tests covering:
+**Status: ✅ Complete**
 
-* Matching conditions.
+Deterministic unit tests cover:
 
-* Non matching conditions.
+* Classification match and exclusion (`classify-life-events.test.ts`)
 
-* Priority interactions.
+* `DecisionContext.lifeEvent` projection (`build-decision-context.test.ts`)
 
-* Follow up window boundaries.
+* Rule match, guards, and priority (`life-event-follow-up-rule.test.ts`, `decide-internal.test.ts`)
 
-* Decision trace output.
+* Action Planner mapping (`build-action-plan.test.ts`, `orchestrator-action-plan.test.ts`)
 
-* Action Planner integration.
-
-No implementation should bypass the existing Rule Engine architecture.
+No implementation bypasses the existing Rule Engine architecture.
 
 ---
 
@@ -998,13 +1053,13 @@ The result is a Brain that becomes more capable over time while remaining unders
 
 |-----------|-------|
 
-| Status | Architecture Approved |
+| Status | Implemented — Phases 1–3 + minimal Action Planner |
 
 | Last Updated | 2026-07-09 |
 
 | Related Epic | Opportunity Engine |
 
-| Next Implementation | Life Event Classification Contributor |
+| Next Implementation | Expand v1 question-key mapping and event types |
 
 | Public APIs Changed | No |
 
@@ -1013,6 +1068,10 @@ The result is a Brain that becomes more capable over time while remaining unders
 | Frontend Changed | No |
 
 | Database Schema Changed | No |
+
+| Classifier behavior | v1 only — `family_news` → `family_update` |
+
+| Excluded question keys | `recent_accomplishment`, `current_excitement`, `current_challenge` |
 
 This document serves as the architectural blueprint for implementing Life Event based conversational opportunities within the F.I. Forgot Brain.
 

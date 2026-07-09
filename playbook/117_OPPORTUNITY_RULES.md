@@ -65,6 +65,7 @@ anniversary (45)
 valentines_day (42)
 inactivity (41)
 fresh_update (40)
+life_event_follow_up (38)
 card_gap (35)
 memory_accumulation (34)
 accomplishment_follow_up (33)
@@ -347,6 +348,81 @@ No recent fresh updates or follow-ups; normalized freshness is `stale`. Rule mat
 
 - Does not distinguish which profile field is missing
 - Question selection remains outside the rule (Action Planner / question engine)
+
+---
+
+### 38 — Life Event Follow Up
+
+**`ruleId`:** `life_event_follow_up`
+
+#### Purpose
+
+Recommend follow-up when a supported, classified life event has reached its configured follow-up window.
+
+#### Trigger
+
+All of the following:
+
+- `lifeEvent !== null`
+- `lifeEvent.classified === true`
+- `lifeEvent.supported === true`
+- `lifeEvent.followUpReady === true`
+
+#### Priority
+
+`38` | Confidence `46`
+
+#### Inputs
+
+| Fact | Role |
+|------|------|
+| `lifeEvent` | Newest `LifeEventClassification` projected from `classifyLifeEvents()` into `DecisionContext` |
+
+The rule reads **only** `DecisionContext.lifeEvent`. It does not read `RelationshipContext`, call `classifyLifeEvents()`, or parse free text.
+
+#### Output
+
+| Field | Value |
+|-------|-------|
+| Outcome | `ask_question` |
+| Reasons | `life_event_follow_up_ready` |
+| Action category | `follow_up` |
+
+#### Why It Exists
+
+Life events captured during conversation have predictable follow-up windows. The Brain should surface those opportunities factually — without interpreting emotions or generating user-facing copy.
+
+#### Example
+
+A `family_news` fresh update was classified as `family_update` 30 days ago. Follow-up window is 30 days. `followUpReady` is true. Freshness is `current`. Rule matches and beats `card_gap` (35) but loses to `fresh_update` (40) when information is stale.
+
+#### Life Event Classification (v1)
+
+Life Event Intelligence is a **structured Brain component**, not a Brain Signal. Classification runs before `buildDecisionContext()`:
+
+```text
+RelationshipContext → classifyLifeEvents() → LifeEventClassification[]
+                                              ↓
+                              DecisionContext.lifeEvent (newest or null)
+```
+
+**v1 question-key mapping (intentionally narrow):**
+
+| Question key | Life event type | Category |
+|--------------|-----------------|----------|
+| `family_news` | `family_update` | `family` |
+
+**Excluded question keys** (owned by separate rules or future dedicated rules):
+
+- `recent_accomplishment` — `accomplishment_follow_up` (33)
+- `current_excitement` — future dedicated rule
+- `current_challenge` — future dedicated rule
+
+#### Future Considerations
+
+- Additional question keys and event types extend `classifyLifeEvents()` configuration — not this rule's match logic
+- Follow-up windows are owned by Brain configuration (`lifeEventFollowUpWindows.ts`), not embedded in the rule
+- See `118_LIFE_EVENT_FOLLOW_UP_ARCHITECTURE.md` for the full Life Event lifecycle
 
 ---
 
@@ -683,7 +759,7 @@ Known overlaps, deferred facts, thresholds to tune, or rules it must not own.
 |-----------|-------|
 | Status | Active reference |
 | Last updated | 2026-07-09 |
-| Implemented rules | 9 |
+| Implemented rules | 10 |
 | Registry location | `artifacts/api-server/src/brain/decision/rules/ruleRegistry.ts` |
 
 This document should be updated whenever a rule is added, narrowed, re-prioritized, or removed.

@@ -485,12 +485,65 @@ Note: Health scoring is currently inline in `v2-recipient-health.ts`. Migration 
 | Label | Level | Description |
 |-------|-------|-------------|
 | `spontaneous_gesture_candidate` | 3 | Detected non-calendar opportunity |
-| `life_event_detected` | 3 | Fresh update suggests a life event worth acknowledging |
+| `life_event_detected` | 3 | **Planned signal — not implemented.** Life Event Intelligence uses a separate structured component (`classifyLifeEvents()`), not Brain Signals. See [Life Event Intelligence](#life-event-intelligence-not-brain-signals). |
 | `gesture_timing_window` | 3 | Optimal window for a thoughtful gesture |
 
 Note: Opportunity signals are Level 3. They must not be implemented until the decision engine is authorized to consume signals.
 
-### Risk (`risk`)
+**Exception:** Life Event Follow Up does **not** use this signal taxonomy. It is implemented as a structured Brain component parallel to signal extraction. See below.
+
+---
+
+## Life Event Intelligence (Not Brain Signals)
+
+Life Event Intelligence is implemented as a **structured Brain component**, not as Brain Signals or a signal contributor.
+
+| Attribute | Value |
+|-----------|-------|
+| Location | `brain/lifeEvents/` |
+| Entry point | `classifyLifeEvents(relationshipContext)` |
+| Return type | `LifeEventClassification[]` |
+| DecisionContext field | `lifeEvent: LifeEventClassification \| null` (newest classification) |
+| Opportunity rule | `life_event_follow_up` (priority 38) |
+| Action Planner | `ask_question` → `follow_up` category |
+
+### Pipeline position
+
+```text
+RelationshipContext
+        ↓
+normalizeSignals()
+        ↓
+classifyLifeEvents()  →  LifeEventClassification[]
+        ↓
+buildDecisionContext()  →  lifeEvent (newest or null)
+        ↓
+Rule Engine  →  life_event_follow_up when eligible
+```
+
+Life events are **not** emitted through `extractSignals()`. They do not appear in the Brain Signal inventory. This separation keeps classification reusable without conflating Level 3 opportunity signals with structured domain objects.
+
+### v1 classification scope (intentionally narrow)
+
+| Fresh-update question key | Life event type | Category |
+|---------------------------|-----------------|----------|
+| `family_news` | `family_update` | `family` |
+
+**Excluded question keys** (not classified as life events):
+
+- `recent_accomplishment` — owned by `accomplishment_follow_up`
+- `current_excitement` — future dedicated rule
+- `current_challenge` — future dedicated rule
+
+Configuration: `brain/config/lifeEventQuestionKeyMapping.ts`, `brain/config/lifeEventFollowUpWindows.ts`.
+
+### Unchanged surfaces
+
+BrainResponse shape, frontend, database schema, and public APIs remain unchanged.
+
+See `118_LIFE_EVENT_FOLLOW_UP_ARCHITECTURE.md` and `117_OPPORTUNITY_RULES.md` (rule 38).
+
+---
 
 | Label | Level | Description |
 |-------|-------|-------------|
@@ -609,6 +662,7 @@ No commit should alter this output unless it is explicitly approved as a decisio
 | 110 — Relationship Intelligence Framework | Destination — what F.I. Forgot should become |
 | 111 — Architectural Audit | Current state — what exists and migration strategy |
 | 112 — Brain Signal Taxonomy (this document) | Signal vocabulary — how Brain contributors communicate |
+| 118 — Life Event Follow Up Architecture | Structured life event classification — **not** Brain Signals |
 | Implementation Tracker | Progress — what has been committed |
 
 Implementation should reference 110, 111, and 112 together before adding contributors or activating the decision engine.
@@ -639,6 +693,7 @@ This document succeeds when:
 |----------|-------|
 | Created | Phase 1, post-Commit 9 |
 | Implemented signals documented | 7 |
+| Life Event Intelligence | Implemented separately — not Brain Signals (see above) |
 | Authorized implementations | None — taxonomy only |
 | Decision authority | Frozen |
 

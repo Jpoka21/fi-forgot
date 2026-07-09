@@ -194,6 +194,20 @@ Confidence:
 
 No production behavior changes.
 
+Life Event Intelligence completed (Phases 1–3 + minimal Action Planner support).
+
+`classifyLifeEvents()` returns `LifeEventClassification[]`.
+
+`DecisionContext.lifeEvent` carries the newest classification.
+
+`life_event_follow_up` rule implemented at priority 38.
+
+Action Planner maps `life_event_follow_up` → `ask_question` / `follow_up`.
+
+BrainResponse shape, frontend, database schema, and public APIs unchanged.
+
+v1 mapping: `family_news` → `family_update`. Excluded keys: `recent_accomplishment`, `current_excitement`, `current_challenge`.
+
 # Completed Infrastructure
 
 The foundational architecture of the Relationship Intelligence Engine has been completed.
@@ -234,6 +248,12 @@ Normalized Relationship State
 
         ▼
 
+classifyLifeEvents()
+
+        │
+
+        ▼
+
 DecisionContext
 
         │
@@ -241,6 +261,12 @@ DecisionContext
         ▼
 
 Decision Engine
+
+        │
+
+        ▼
+
+Action Planner
 
         │
 
@@ -319,6 +345,8 @@ No duplicate DecisionContext construction occurs.
 | Signal Normalization | ✅ Complete |
 
 | DecisionContext Builder | ✅ Complete |
+
+| Life Event Intelligence | ✅ Complete (v1) |
 
 | Decision Engine Wiring | ✅ Complete |
 
@@ -562,9 +590,47 @@ Current DecisionContext includes:
 
 * Normalized Snapshot
 
+## Life Event
+
+* `lifeEvent` — newest `LifeEventClassification` from `classifyLifeEvents()`, or `null`
+
+Life Event Intelligence is a structured Brain component (`brain/lifeEvents/`), not a Brain Signal. See `118_LIFE_EVENT_FOLLOW_UP_ARCHITECTURE.md`.
+
 DecisionContext is constructed exactly once during Brain execution.
 
 It is never rebuilt elsewhere.
+
+---
+
+# Life Event Intelligence
+
+Status:
+
+**Complete (v1)**
+
+Life Event Follow Up Phases 1 through 3 are complete, plus minimal Action Planner support.
+
+| Component | Location | Status |
+|-----------|----------|--------|
+| Classifier | `brain/lifeEvents/classifyLifeEvents.ts` | ✅ |
+| Types | `brain/lifeEvents/lifeEventTypes.ts` | ✅ |
+| Question-key mapping | `brain/config/lifeEventQuestionKeyMapping.ts` | ✅ |
+| Follow-up windows | `brain/config/lifeEventFollowUpWindows.ts` | ✅ |
+| DecisionContext field | `lifeEvent: LifeEventClassification \| null` | ✅ |
+| Opportunity rule | `life_event_follow_up` (priority 38) | ✅ |
+| Action Planner mapping | `mapDecisionToPlan` → `follow_up` | ✅ |
+
+### v1 classification scope
+
+| Question key | Life event type |
+|--------------|-----------------|
+| `family_news` | `family_update` |
+
+**Excluded keys:** `recent_accomplishment`, `current_excitement`, `current_challenge`
+
+### Unchanged surfaces
+
+BrainResponse shape, frontend, database schema, and public APIs remain unchanged.
 
 ---
 
@@ -628,11 +694,19 @@ Normalized Relationship State
 
 ↓
 
-DecisionContext
+classifyLifeEvents()
+
+↓
+
+DecisionContext (includes lifeEvent)
 
 ↓
 
 Decision Engine
+
+↓
+
+Action Planner
 
 ↓
 
