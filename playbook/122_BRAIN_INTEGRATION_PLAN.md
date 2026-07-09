@@ -4,9 +4,9 @@
 
 Status: Living integration plan
 
-Phase: Product Integration — Sprint 1 complete
+Phase: Product Integration — Sprint 4 complete
 
-Implementation: Integration Sprint 1 shipped (feature-flagged)
+Implementation: Integration Sprints 1–4 shipped (feature-flagged where noted)
 
 Depends on:
 
@@ -18,6 +18,7 @@ Depends on:
 - 119 Follow Up Question Engine
 - 120 Question Memory Engine
 - 121 Brain Execution Pipeline
+- 123 Brain Attention Planner
 
 ---
 
@@ -55,6 +56,62 @@ See **Dashboard Brain Migration (Sprint 1)** below.
 
 ---
 
+# Integration Sprint 2 — Complete
+
+Notifications Brain migration shipped behind `VITE_BRAIN_NOTIFICATIONS`.
+
+| Item | Detail |
+|------|--------|
+| Route | `GET /api/v2/notifications` |
+| Contract | `NotificationsResponse` (v1) |
+| Execution | Server-side Brain → product builder → DTO |
+| Rollback | `VITE_BRAIN_NOTIFICATIONS=false` restores legacy notification seeds |
+
+---
+
+# Integration Sprint 3 — Complete
+
+Concierge workspace Brain migration shipped behind `VITE_BRAIN_CONCIERGE`.
+
+| Item | Detail |
+|------|--------|
+| Route | `GET /api/v2/concierge` |
+| Contract | `ConciergeWorkspaceResponse` (v1) |
+| Surfaces | Workspace recommendations + insights |
+| Not migrated | Conversation tab (legacy `aiConciergeEngine`) |
+| Rollback | `VITE_BRAIN_CONCIERGE=false` restores legacy workspace path |
+
+---
+
+# Integration Sprint 4 — Complete
+
+Brain Attention Planner — cross-recipient ranking layer.
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| 4b | Extract `collectProductBrainDecisions`, `shouldIncludeOpportunity` | Done |
+| 4c | Internal `GlobalOpportunity` pool | Done |
+| 4d | `planAttentionOrder()` parity ranking | Done |
+| 4e | Dashboard, Notifications, Concierge wired to planner | Done |
+| 4f | Documentation + architecture guard tests | Done |
+
+See **123_BRAIN_ATTENTION_PLANNER.md** for full architecture.
+
+### Production ranking path (all three products)
+
+```text
+collectProductBrainDecisions
+  → planAttentionOrder()
+  → ranked GlobalOpportunity[]   (internal)
+  → product cap (slice)
+  → product DTO mapper
+  → route
+```
+
+Legacy `rankRelationshipOpportunities` remains for tests and parity comparison only — not used by product builders.
+
+---
+
 ## Dashboard Brain Migration (Sprint 1)
 
 The Dashboard does **not** consume `ProductBrainDecision[]` directly from the client. It uses a dedicated dashboard-shaped API that runs the Brain server-side and returns ranked opportunities.
@@ -65,7 +122,7 @@ The Dashboard does **not** consume `ProductBrainDecision[]` directly from the cl
 |------|--------|
 | Route | `GET /api/v2/dashboard/brain-opportunities` |
 | Contract | `DashboardBrainOpportunities` (v1) |
-| Execution | `executeBrain` per owned recipient → `buildProductBrainDecision` → inclusion rules → **server-side ranking** → cap |
+| Execution | `executeBrain` per owned recipient → `buildProductBrainDecision` → **planAttentionOrder** → cap |
 | DTO fields | `version`, `generatedAt`, `opportunities[]`, `spotlight` |
 | Opportunity fields | `recipientId`, `recipientName`, `sourceRuleId`, `outcome`, `priority`, `title`, `explanation`, `profileHref`, `actionLabel`, `rank` |
 | `actionLabel` | Server-provided (static map by `sourceRuleId`) — not inferred by frontend |
@@ -126,12 +183,13 @@ Set `VITE_BRAIN_DASHBOARD=false`. Dashboard reverts to legacy:
 
 ## Next Integration Targets
 
-Recommended order for Integration Sprint 2 and beyond:
+Recommended order after Sprint 4:
 
-1. **Notifications** — Brain-driven notification candidates and delivery surfaces
-2. **Concierge workspace** — unified concierge experience consuming Brain opportunities
+1. **Fatigue Engine** — exposure history, cooldowns, cross-surface dismiss sync (between planner and product mappers)
+2. **Concierge Conversation** — migrate keyword/conversation path to Brain-fed opportunities
 3. **Relationship Health** — migrate health scoring and gaps to Brain-derived signals
-4. **Legacy engine retirement** — remove duplicate decision paths after migrations are stable
+4. **Legacy engine retirement** — remove duplicate client decision paths after migrations are stable
+5. **Single batch execution** — optional shared `executeBrain` pass per request (performance)
 
 ---
 
@@ -256,6 +314,8 @@ BrainResponse
 
 Integration work should consume this pipeline rather than bypass it.
 
+Cross-recipient attention ordering uses **Brain Attention Planner** (`planAttentionOrder`) — see **123_BRAIN_ATTENTION_PLANNER.md**.
+
 ---
 
 # 6. Integration Areas
@@ -285,6 +345,24 @@ Current responsibility (flag on)
 Brain-first profile questions via `GET /api/v2/recipients/:id/brain`; profile-gap `next-question` fallback only when Brain has no follow-up question.
 
 `ProfileQuestionViewModel` presentation layer; no Brain→NextQuestion adapter chain.
+
+---
+
+## Notifications
+
+**Sprint 2 status: Complete** (feature-flagged via `VITE_BRAIN_NOTIFICATIONS`)
+
+Brain-powered relationship notifications via `GET /api/v2/notifications`. Global ranking via `planAttentionOrder()` (Sprint 4e).
+
+---
+
+## Concierge Workspace
+
+**Sprint 3 status: Complete** (feature-flagged via `VITE_BRAIN_CONCIERGE`)
+
+Brain-powered workspace recommendations and insights via `GET /api/v2/concierge`. Global ranking via `planAttentionOrder()` (Sprint 4e).
+
+Conversation tab remains legacy until a future sprint.
 
 ---
 
@@ -673,23 +751,48 @@ Those are covered by separate architecture documents.
 | 3 | Recipient profile questions (`VITE_BRAIN_PROFILE_QUESTIONS`) | Done |
 | 4 | Dashboard Brain migration (`VITE_BRAIN_DASHBOARD`) | Done |
 
-Each milestone is independently testable and reversible via feature flags.
+## Sprint 2 — Complete
 
-## Sprint 2+ (planned)
+| # | Milestone | Status |
+|---|-----------|--------|
+| 1 | Notifications Brain API (`GET /api/v2/notifications`) | Done |
+| 2 | `VITE_BRAIN_NOTIFICATIONS` rollback flag | Done |
+
+## Sprint 3 — Complete
+
+| # | Milestone | Status |
+|---|-----------|--------|
+| 1 | Concierge workspace API (`GET /api/v2/concierge`) | Done |
+| 2 | `VITE_BRAIN_CONCIERGE` rollback flag | Done |
+
+## Sprint 4 — Complete
+
+| # | Milestone | Status |
+|---|-----------|--------|
+| 1 | Extract phase — collector + shared inclusion (4b) | Done |
+| 2 | GlobalOpportunity pool (4c) | Done |
+| 3 | Brain Attention Planner — `planAttentionOrder()` (4d) | Done |
+| 4 | Product builders wired to planner (4e) | Done |
+| 5 | Documentation + architecture guards (4f) | Done |
+
+Each milestone is independently testable. Product surfaces remain rollback-capable via feature flags.
+
+## Sprint 5+ (planned)
 
 See **Next Integration Targets**:
 
-1. Notifications
-2. Concierge workspace
+1. Fatigue Engine
+2. Concierge Conversation migration
 3. Relationship Health
 4. Legacy engine retirement
+5. Single batch Brain execution (performance)
 
 Remaining original milestones
 
-5. Card workflow integration
-6. Brain Inspector improvements
-7. Administrative reporting
-8. Legacy cleanup
+6. Card workflow integration
+7. Brain Inspector improvements
+8. Administrative reporting
+9. Legacy cleanup (rank utilities, client engines)
 
 ---
 
@@ -718,15 +821,23 @@ User
 
 ↓
 
-Frontend
+Frontend (ViewModels)
 
 ↓
 
-Brain
+Product APIs (Dashboard / Notifications / Concierge DTOs)
 
 ↓
 
-Decision
+Product builders (cap + map)
+
+↓
+
+Brain Attention Planner (planAttentionOrder — global rank)
+
+↓
+
+Per-recipient Brain (executeBrain → ProductBrainDecision)
 
 ↓
 

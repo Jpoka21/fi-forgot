@@ -713,6 +713,51 @@ See `119_FOLLOW_UP_QUESTION_ENGINE.md`.
 
 ---
 
+# Brain Attention Planner (Integration Sprint 4)
+
+Status:
+
+**Complete (4b–4f)**
+
+Cross-recipient attention ordering layer. Product-agnostic. See `123_BRAIN_ATTENTION_PLANNER.md`.
+
+| Step | Component | Status |
+|------|-----------|--------|
+| 4b | `collectProductBrainDecisions`, `shouldIncludeOpportunity` | ✅ |
+| 4c | `GlobalOpportunity` pool (`buildGlobalOpportunityPool`) | ✅ |
+| 4d | `planAttentionOrder()` — parity ranking | ✅ |
+| 4e | Dashboard, Notifications, Concierge wired to planner | ✅ |
+| 4f | Playbook + architecture guard tests | ✅ |
+
+### Module location
+
+```text
+artifacts/api-server/src/brain/attention/
+```
+
+### Production path (Dashboard, Notifications, Concierge)
+
+```text
+collectProductBrainDecisions → planAttentionOrder → slice(cap) → product DTO
+```
+
+### Internal only
+
+- `GlobalOpportunity`, `attentionScore`, `globalRank`, `suppressionReason`
+- Not exported from `brain/index.ts`
+- Not exposed in public HTTP DTOs
+
+### Future
+
+- **Fatigue Engine** — between planner and product mappers
+- **Allocation Engine** — optional surface policy (future)
+
+### Guard tests
+
+`artifacts/api-server/src/__tests__/brain-attention-architecture.test.ts`
+
+---
+
 # Development Brain Inspector
 
 Status:
