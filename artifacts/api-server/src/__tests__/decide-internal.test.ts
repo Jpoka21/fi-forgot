@@ -507,6 +507,73 @@ section("stale freshness beats accomplishment follow up");
   expect("sourceRuleId", result.sourceRuleId, "fresh_update");
 }
 
+const READY_LIFE_EVENT = {
+  type: "family_update",
+  category: "family" as const,
+  daysAgo: 30,
+  followUpWindowDays: 30,
+  followUpReady: true,
+  source: "fresh_update" as const,
+  capturedAt: "2026-06-01T00:00:00.000Z",
+  classified: true,
+  supported: true,
+};
+
+section("life event follow up → life_event_follow_up rule result");
+{
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ freshness: "current" }),
+      minimalRelationshipContext(),
+      [READY_LIFE_EVENT],
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "life_event_follow_up");
+  expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
+  expect("reasons", result.decideResult.reasons, ["life_event_follow_up_ready"]);
+}
+
+section("life event follow up beats card gap");
+{
+  const relationshipContext = minimalRelationshipContext();
+  relationshipContext.relationshipTimeline.events = [
+    {
+      id: "event-fresh",
+      type: "fresh_update",
+      occurredAt: "2026-06-01T00:00:00.000Z",
+      daysAgo: 30,
+      label: "Fresh Update",
+    },
+    {
+      id: "event-card",
+      type: "card",
+      occurredAt: "2025-01-01T00:00:00.000Z",
+      daysAgo: 150,
+      label: "card",
+    },
+  ];
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ identity: "established", freshness: "current" }),
+      relationshipContext,
+      [READY_LIFE_EVENT],
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "life_event_follow_up");
+}
+
+section("stale freshness beats life event follow up");
+{
+  const result = decideInternal(
+    buildDecisionContext(
+      normalized({ freshness: "stale" }),
+      minimalRelationshipContext(),
+      [READY_LIFE_EVENT],
+    ),
+  );
+  expect("sourceRuleId", result.sourceRuleId, "fresh_update");
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

@@ -395,6 +395,54 @@ section("accomplishment_follow_up ActionPlan");
   );
 }
 
+const LIFE_EVENT_FOLLOW_UP_DECIDE_RESULT: DecideResult = {
+  decision: { outcome: "ask_question" },
+  confidence: 46,
+  reasons: ["life_event_follow_up_ready"],
+  debugNotes: [
+    "LifeEventFollowUpRule matched",
+    "type: family_update",
+    "category: family",
+    "days ago: 30",
+    "follow up window days: 30",
+    "followUpReady: true",
+    "source: fresh_update",
+  ],
+};
+
+const LIFE_EVENT_FOLLOW_UP_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "follow_up",
+  priority: "medium",
+  sourceRuleId: "life_event_follow_up",
+  primaryReason: "life_event_follow_up_ready",
+  reasons: ["life_event_follow_up_ready"],
+  confidence: 46,
+  debugNotes: [
+    "LifeEventFollowUpRule matched",
+    "type: family_update",
+    "category: family",
+    "days ago: 30",
+    "follow up window days: 30",
+    "followUpReady: true",
+    "source: fresh_update",
+  ],
+};
+
+section("life_event_follow_up ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: LIFE_EVENT_FOLLOW_UP_DECIDE_RESULT,
+    sourceRuleId: "life_event_follow_up",
+  });
+  expect("full plan", plan, LIFE_EVENT_FOLLOW_UP_ACTION_PLAN);
+  expect(
+    "serialized life event follow up plan",
+    JSON.stringify(plan),
+    JSON.stringify(LIFE_EVENT_FOLLOW_UP_ACTION_PLAN),
+  );
+}
+
 section("unknown sourceRuleId throws");
 {
   let threw = false;

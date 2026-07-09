@@ -212,6 +212,56 @@ section("planFromDecisionContext → valentines_day action plan");
   expect("actionPlan", actionPlan, VALENTINES_ACTION_PLAN);
 }
 
+const READY_LIFE_EVENT = {
+  type: "family_update",
+  category: "family" as const,
+  daysAgo: 30,
+  followUpWindowDays: 30,
+  followUpReady: true,
+  source: "fresh_update" as const,
+  capturedAt: "2026-06-01T00:00:00.000Z",
+  classified: true,
+  supported: true,
+};
+
+const LIFE_EVENT_FOLLOW_UP_ACTION_PLAN: ActionPlan = {
+  type: "ask_question",
+  category: "follow_up",
+  priority: "medium",
+  sourceRuleId: "life_event_follow_up",
+  primaryReason: "life_event_follow_up_ready",
+  reasons: ["life_event_follow_up_ready"],
+  confidence: 46,
+  debugNotes: [
+    "LifeEventFollowUpRule matched",
+    "type: family_update",
+    "category: family",
+    "days ago: 30",
+    "follow up window days: 30",
+    "followUpReady: true",
+    "source: fresh_update",
+  ],
+};
+
+section("planFromDecisionContext → life_event_follow_up action plan");
+{
+  const { decideResult, actionPlan } = planFromDecisionContext(
+    buildDecisionContext(
+      normalized({ freshness: "current" }),
+      minimalRelationshipContext(),
+      [READY_LIFE_EVENT],
+    ),
+  );
+  expect("outcome ask_question", decideResult.decision.outcome, "ask_question");
+  expect("sourceRuleId", actionPlan.sourceRuleId, "life_event_follow_up");
+  expect("actionPlan", actionPlan, LIFE_EVENT_FOLLOW_UP_ACTION_PLAN);
+  expect(
+    "serialized life event follow up action plan",
+    JSON.stringify(actionPlan),
+    JSON.stringify(LIFE_EVENT_FOLLOW_UP_ACTION_PLAN),
+  );
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {
   console.log("Failures:", failures.join(", "));

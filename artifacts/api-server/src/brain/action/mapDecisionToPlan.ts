@@ -39,6 +39,9 @@ const PLAN_MAPPINGS: Record<string, Partial<Record<BrainDecisionOutcome, PlanMap
     accomplishment_follow_up: {
       ask_question: { type: "ask_question", category: "follow_up" },
     },
+    life_event_follow_up: {
+      ask_question: { type: "ask_question", category: "follow_up" },
+    },
   };
 
 export function mapDecisionToPlan(

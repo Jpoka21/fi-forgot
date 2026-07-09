@@ -8,6 +8,7 @@ import { birthdayRule } from "./birthdayRule";
 import { cardGapRule } from "./cardGapRule";
 import { freshUpdateRule } from "./freshUpdateRule";
 import { inactivityRule } from "./inactivityRule";
+import { lifeEventFollowUpRule } from "./lifeEventFollowUpRule";
 import { memoryAccumulationRule } from "./memoryAccumulationRule";
 import type { DecisionRule } from "./types";
 import { valentinesDayRule } from "./valentinesDayRule";
@@ -19,6 +20,7 @@ export const ruleRegistry: DecisionRule[] = [
   valentinesDayRule,
   inactivityRule,
   freshUpdateRule,
+  lifeEventFollowUpRule,
   cardGapRule,
   memoryAccumulationRule,
   accomplishmentFollowUpRule,

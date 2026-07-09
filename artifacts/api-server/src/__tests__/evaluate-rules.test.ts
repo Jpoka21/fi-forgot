@@ -316,6 +316,33 @@ section("live registry collects AccomplishmentFollowUpRule and WaitRule when acc
   ]);
 }
 
+const READY_LIFE_EVENT = {
+  type: "family_update",
+  category: "family" as const,
+  daysAgo: 30,
+  followUpWindowDays: 30,
+  followUpReady: true,
+  source: "fresh_update" as const,
+  capturedAt: "2026-06-01T00:00:00.000Z",
+  classified: true,
+  supported: true,
+};
+
+section("live registry collects LifeEventFollowUpRule and WaitRule when life event is ready");
+{
+  const context = buildDecisionContext(
+    normalized({ freshness: "current" }),
+    minimalRelationshipContext(),
+    [READY_LIFE_EVENT],
+  );
+  const { candidates } = evaluateRules(context, ruleRegistry);
+  expect("candidate count", candidates.length, 2);
+  expect("rule ids", candidates.map((candidate) => candidate.ruleId).sort(), [
+    "life_event_follow_up",
+    "wait",
+  ]);
+}
+
 section("evaluation entries cover full registry");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());

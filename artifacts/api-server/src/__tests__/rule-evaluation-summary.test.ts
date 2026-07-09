@@ -242,6 +242,36 @@ section("accomplishment_follow_up evaluation entry records match");
   expect("reasons", accomplishmentFollowUp?.reasons, ["accomplishment_follow_up_due"]);
 }
 
+const READY_LIFE_EVENT = {
+  type: "family_update",
+  category: "family" as const,
+  daysAgo: 30,
+  followUpWindowDays: 30,
+  followUpReady: true,
+  source: "fresh_update" as const,
+  capturedAt: "2026-06-01T00:00:00.000Z",
+  classified: true,
+  supported: true,
+};
+
+section("life_event_follow_up evaluation entry records match");
+{
+  const result = runRuleEngine(
+    buildDecisionContext(
+      normalized({ freshness: "current" }),
+      minimalRelationshipContext(),
+      [READY_LIFE_EVENT],
+    ),
+  );
+  const lifeEventFollowUp = result.ruleEvaluation.entries.find(
+    (entry) => entry.ruleId === "life_event_follow_up",
+  );
+  expect("life_event_follow_up matched", lifeEventFollowUp?.matched, true);
+  expect("life_event_follow_up winner", lifeEventFollowUp?.resolutionStatus, "winner");
+  expect("reasons", lifeEventFollowUp?.reasons, ["life_event_follow_up_ready"]);
+  expect("sourceRuleId", result.sourceRuleId, "life_event_follow_up");
+}
+
 section("decideResult unchanged from pre-explanation behavior for wait scaffold");
 {
   const context = buildDecisionContext(normalized(), minimalRelationshipContext());
