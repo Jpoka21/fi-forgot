@@ -8,11 +8,10 @@ import {
 } from "@/app/notification/notificationDomain";
 import {
   dismissNotificationId,
-  getDismissedNotificationIds,
-  getNotificationReadStateMap,
   restoreNotificationId,
   setNotificationReadState,
 } from "@/app/notification/notificationStorage";
+import { applyLocalNotificationOverrides } from "@/app/notifications-brain/applyLocalNotificationOverrides";
 
 function startOfDay(date: Date): Date {
   const next = new Date(date);
@@ -34,16 +33,9 @@ export function resolveNotificationTimeGroup(createdAt: string): FiNotificationT
 }
 
 export function loadNotificationInbox(): FiNotification[] {
-  const readStateMap = getNotificationReadStateMap();
-  const dismissed = new Set(getDismissedNotificationIds());
-
-  return seedNotifications
-    .filter((notification) => !dismissed.has(notification.id))
-    .map((notification) => ({
-      ...notification,
-      readState: readStateMap[notification.id] ?? notification.readState,
-    }))
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  return applyLocalNotificationOverrides(seedNotifications).sort(
+    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+  );
 }
 
 export function filterNotifications(
@@ -109,16 +101,9 @@ export function restoreNotification(id: string): void {
 }
 
 export function loadArchivedNotifications(): FiNotification[] {
-  const readStateMap = getNotificationReadStateMap();
-  const dismissed = new Set(getDismissedNotificationIds());
-
-  return seedNotifications
-    .filter((notification) => dismissed.has(notification.id))
-    .map((notification) => ({
-      ...notification,
-      readState: readStateMap[notification.id] ?? notification.readState,
-    }))
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  return applyLocalNotificationOverrides(seedNotifications, { archive: true }).sort(
+    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+  );
 }
 
 export function markAllNotificationsRead(notifications: FiNotification[]): void {

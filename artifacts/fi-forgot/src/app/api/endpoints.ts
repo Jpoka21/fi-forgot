@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
     stripeCheckout: "/api/stripe/checkout",
   },
   notifications: {
+    inbox: "/api/v2/notifications",
     brownieBalance: "/api/v2/brownie-points/balance",
     brownieAward: "/api/v2/brownie-points/award",
   },

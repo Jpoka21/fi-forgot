@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useNotifications } from "@/app/providers/NotificationProvider";
 import { useDebouncedValue } from "@/app/search/hooks/useDebouncedValue";
+import { buildNotificationInboxForDisplay } from "@/app/notifications-brain/buildNotificationInboxForDisplay";
 import { trackNotificationEvent } from "@/app/notification/notificationAnalytics";
 import {
   countUnreadNotifications,
   dismissNotification,
   filterNotifications,
   groupNotifications,
-  loadNotificationInbox,
   markAllNotificationsRead,
   markNotificationRead,
   markNotificationUnread,
@@ -38,13 +38,15 @@ export function useNotificationCenter(options: UseNotificationCenterOptions = {}
 
   const debouncedQuery = useDebouncedValue(query, notificationDefaults.debounceMs);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     try {
-      const inbox = loadNotificationInbox();
+      const inbox = await buildNotificationInboxForDisplay();
       setNotifications(inbox);
       setUnreadCount(countUnreadNotifications(inbox));
       setError(null);
     } catch (refreshError) {
+      setNotifications([]);
+      setUnreadCount(0);
       setError(notificationDefaults.errorLabel);
       trackNotificationEvent("notification_error");
       if (import.meta.env.DEV) {
@@ -58,8 +60,7 @@ export function useNotificationCenter(options: UseNotificationCenterOptions = {}
 
     setIsLoading(true);
     const timer = window.setTimeout(() => {
-      refresh();
-      setIsLoading(false);
+      void refresh().finally(() => setIsLoading(false));
     }, 150);
 
     return () => window.clearTimeout(timer);

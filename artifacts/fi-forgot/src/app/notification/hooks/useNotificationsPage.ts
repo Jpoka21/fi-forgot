@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useDebouncedValue } from "@/app/search/hooks/useDebouncedValue";
+import { buildNotificationInboxForDisplay } from "@/app/notifications-brain/buildNotificationInboxForDisplay";
 import { trackNotificationEvent } from "@/app/notification/notificationAnalytics";
 import {
   countUnreadNotifications,
   dismissNotification,
   filterNotifications,
   groupNotifications,
-  loadArchivedNotifications,
-  loadNotificationInbox,
   markAllNotificationsRead,
   markNotificationRead,
   markNotificationUnread,
@@ -40,15 +39,19 @@ export function useNotificationsPage() {
   const debouncedQuery = useDebouncedValue(query, notificationDefaults.debounceMs);
   const isArchive = section === "archive";
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     try {
-      const inbox = isArchive ? loadArchivedNotifications() : loadNotificationInbox();
+      const inbox = await buildNotificationInboxForDisplay({ archive: isArchive });
       setNotifications(inbox);
       if (!isArchive) {
-        setUnreadCount(countUnreadNotifications(loadNotificationInbox()));
+        setUnreadCount(countUnreadNotifications(inbox));
       }
       setError(null);
     } catch (refreshError) {
+      setNotifications([]);
+      if (!isArchive) {
+        setUnreadCount(0);
+      }
       setError(notificationDefaults.errorLabel);
       trackNotificationEvent("notification_error");
       if (import.meta.env.DEV) {
@@ -60,8 +63,7 @@ export function useNotificationsPage() {
   useEffect(() => {
     setIsLoading(true);
     const timer = window.setTimeout(() => {
-      refresh();
-      setIsLoading(false);
+      void refresh().finally(() => setIsLoading(false));
     }, 120);
     return () => window.clearTimeout(timer);
   }, [refresh, version, section]);

@@ -2,6 +2,13 @@ export {
   buildProductBrainDecision,
 } from "./buildProductBrainDecision";
 export {
+  buildNotifications,
+} from "./buildNotifications";
+export {
+  buildNotificationItem,
+  buildNotificationId,
+} from "./buildNotificationItem";
+export {
   buildDashboardBrainOpportunities,
 } from "./buildDashboardBrainOpportunities";
 export {
@@ -23,6 +30,19 @@ export {
   RULE_PRIORITY_BY_ID,
 } from "./rankDashboardOpportunities";
 export { shouldIncludeDashboardOpportunity } from "./shouldIncludeDashboardOpportunity";
+export { shouldIncludeNotification } from "./shouldIncludeNotification";
+export {
+  NOTIFICATIONS_MAX,
+  NOTIFICATIONS_VERSION,
+  NOTIFICATION_SOURCE_BRAIN,
+  type NotificationItem,
+  type NotificationsResponse,
+  type NotificationSource,
+} from "./notificationTypes";
+export {
+  compareRankableNotifications,
+  rankNotifications,
+} from "./rankNotifications";
 export {
   PRODUCT_BRAIN_DISPLAY_BY_RULE_ID,
   resolveProductBrainDisplay,
