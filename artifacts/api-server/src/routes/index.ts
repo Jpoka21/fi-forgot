@@ -30,6 +30,7 @@ import browniePointsRouter from "./brownie-points";
 import v2RecipientHealthRouter from "./v2-recipient-health";
 import v2DashboardBrainRouter from "./v2-dashboard-brain";
 import v2NotificationsRouter from "./v2-notifications";
+import v2ConciergeRouter from "./v2-concierge";
 
 const router: IRouter = Router();
 
@@ -57,6 +58,7 @@ router.use(cardPreviewRouter);
 router.use(v2RecipientHealthRouter);
 router.use(v2DashboardBrainRouter);
 router.use(v2NotificationsRouter);
+router.use(v2ConciergeRouter);
 router.use(v2RecipientsRouter);
 router.use(v2GenerateCardRouter);
 router.use(personalHistoryRouter);

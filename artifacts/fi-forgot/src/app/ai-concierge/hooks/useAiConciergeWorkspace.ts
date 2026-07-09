@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { loadAiRecommendations } from "@/app/ai/aiEngine";
 import { aiDefaults } from "@/app/ai/aiDomain";
+import type { FiAiRecommendation } from "@/app/ai/aiDomain";
 import {
   buildMemorySnippets,
-  buildRelationshipInsights,
   getSuggestedConversations,
 } from "@/app/ai-concierge/aiConciergeEngine";
 import { trackConciergeEvent } from "@/app/ai-concierge/aiConciergeAnalytics";
@@ -12,34 +11,47 @@ import {
   aiConciergeDefaults,
   conciergePageSections,
   type ConciergePageSection,
+  type ConciergeRelationshipInsight,
 } from "@/app/ai-concierge/aiConciergeDomain";
-import { useAuth } from "@/lib/auth-context";
+import { buildConciergeWorkspaceForDisplay } from "@/app/concierge-brain/buildConciergeWorkspaceForDisplay";
 
 export function useAiConciergeWorkspace() {
-  const { user } = useAuth();
   const [section, setSection] = useState<ConciergePageSection>("workspace");
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [recommendations, setRecommendations] = useState<FiAiRecommendation[]>([]);
+  const [insights, setInsights] = useState<ConciergeRelationshipInsight[]>([]);
   const refreshTimerRef = useRef<number | null>(null);
 
-  const recommendations = useMemo(() => {
-    try {
-      return loadAiRecommendations(user?.email);
-    } catch {
-      return [];
-    }
-  }, [user?.email]);
-
-  const insights = useMemo(() => buildRelationshipInsights(), []);
   const memories = useMemo(() => buildMemorySnippets(), []);
   const suggestedConversations = useMemo(() => getSuggestedConversations(), []);
 
+  const loadWorkspace = useCallback(async () => {
+    try {
+      const workspace = await buildConciergeWorkspaceForDisplay();
+      setRecommendations(workspace.recommendations);
+      setInsights(workspace.insights);
+      setError(null);
+    } catch (loadError) {
+      setRecommendations([]);
+      setInsights([]);
+      setError(aiDefaults.errorLabel);
+      if (import.meta.env.DEV) {
+        console.error(loadError);
+      }
+    }
+  }, []);
+
   useEffect(() => {
+    setIsLoading(true);
     const timer = window.setTimeout(() => {
-      setIsLoading(false);
-      trackConciergeEvent("concierge_page_viewed", { section });
+      void loadWorkspace().finally(() => {
+        setIsLoading(false);
+        trackConciergeEvent("concierge_page_viewed", { section });
+      });
     }, 120);
     return () => window.clearTimeout(timer);
-  }, [section]);
+  }, [loadWorkspace, section]);
 
   useEffect(() => {
     return () => {
@@ -59,8 +71,10 @@ export function useAiConciergeWorkspace() {
     if (refreshTimerRef.current !== null) {
       window.clearTimeout(refreshTimerRef.current);
     }
-    refreshTimerRef.current = window.setTimeout(() => setIsLoading(false), 120);
-  }, []);
+    refreshTimerRef.current = window.setTimeout(() => {
+      void loadWorkspace().finally(() => setIsLoading(false));
+    }, 120);
+  }, [loadWorkspace]);
 
   return {
     defaults: aiConciergeDefaults,
@@ -72,6 +86,7 @@ export function useAiConciergeWorkspace() {
     memories,
     suggestedConversations,
     isLoading,
+    error,
     aiDefaults,
     refresh,
   };

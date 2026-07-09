@@ -1,4 +1,32 @@
 export {
+  buildConciergeWorkspace,
+} from "./buildConciergeWorkspace";
+export {
+  buildConciergeRecommendation,
+  buildConciergeRecommendationId,
+} from "./buildConciergeRecommendation";
+export {
+  buildConciergeInsight,
+  buildConciergeInsightId,
+} from "./buildConciergeInsight";
+export {
+  CONCIERGE_INSIGHTS_MAX,
+  CONCIERGE_RECOMMENDATIONS_MAX,
+  CONCIERGE_RECOMMENDATION_KIND_RELATIONSHIP,
+  CONCIERGE_WORKSPACE_VERSION,
+  type ConciergeInsight,
+  type ConciergeRecommendation,
+  type ConciergeRecommendationKind,
+  type ConciergeWorkspaceResponse,
+} from "./conciergeTypes";
+export { shouldIncludeConciergeOpportunity } from "./shouldIncludeConciergeOpportunity";
+export {
+  compareRankableRelationshipOpportunities,
+  rankRelationshipOpportunities,
+  RULE_PRIORITY_BY_ID,
+  type RankableRelationshipOpportunity,
+} from "./rankRelationshipOpportunities";
+export {
   buildProductBrainDecision,
 } from "./buildProductBrainDecision";
 export {
@@ -27,7 +55,6 @@ export {
 export {
   compareRankableDashboardOpportunities,
   rankDashboardOpportunities,
-  RULE_PRIORITY_BY_ID,
 } from "./rankDashboardOpportunities";
 export { shouldIncludeDashboardOpportunity } from "./shouldIncludeDashboardOpportunity";
 export { shouldIncludeNotification } from "./shouldIncludeNotification";

@@ -1,63 +1,27 @@
 /**
  * Deterministic ranking for dashboard Brain opportunities.
  *
- * Uses rule registry priority order, then action plan priority, then recipient id.
+ * Delegates to shared rankRelationshipOpportunities.
  */
 
-import type { ActionPriority } from "../action/actionPlanTypes";
 import type { DashboardBrainOpportunity } from "./dashboardBrainOpportunitiesTypes";
-import type { ProductBrainDecision } from "./productBrainDecisionTypes";
+import {
+  compareRankableRelationshipOpportunities,
+  rankRelationshipOpportunities,
+  RULE_PRIORITY_BY_ID,
+  type RankableRelationshipOpportunity,
+} from "./rankRelationshipOpportunities";
 
-/** Rule priorities aligned with brain/decision/rules/*Rule.ts candidates. */
-export const RULE_PRIORITY_BY_ID: Record<string, number> = {
-  birthday: 50,
-  anniversary: 45,
-  valentines_day: 42,
-  inactivity: 41,
-  fresh_update: 40,
-  life_event_follow_up: 38,
-  card_gap: 35,
-  memory_accumulation: 34,
-  accomplishment_follow_up: 33,
-  wait: 0,
-};
+export { RULE_PRIORITY_BY_ID };
 
-const ACTION_PRIORITY_RANK: Record<ActionPriority, number> = {
-  high: 0,
-  medium: 1,
-  low: 2,
-};
+export type RankableDashboardOpportunity = RankableRelationshipOpportunity;
 
-export interface RankableDashboardOpportunity {
-  decision: ProductBrainDecision;
-  recipientId: string;
-  recipientName: string;
-}
-
-function rulePriority(sourceRuleId: string): number {
-  return RULE_PRIORITY_BY_ID[sourceRuleId] ?? -1;
-}
-
-export function compareRankableDashboardOpportunities(
-  left: RankableDashboardOpportunity,
-  right: RankableDashboardOpportunity,
-): number {
-  const ruleDelta =
-    rulePriority(right.decision.sourceRuleId) - rulePriority(left.decision.sourceRuleId);
-  if (ruleDelta !== 0) return ruleDelta;
-
-  const actionDelta =
-    ACTION_PRIORITY_RANK[left.decision.actionPlan.priority]
-    - ACTION_PRIORITY_RANK[right.decision.actionPlan.priority];
-  if (actionDelta !== 0) return actionDelta;
-
-  return left.recipientId.localeCompare(right.recipientId);
-}
+export const compareRankableDashboardOpportunities = compareRankableRelationshipOpportunities;
 
 export function rankDashboardOpportunities(
   items: RankableDashboardOpportunity[],
 ): RankableDashboardOpportunity[] {
-  return [...items].sort(compareRankableDashboardOpportunities);
+  return rankRelationshipOpportunities(items);
 }
 
 export function assignOpportunityRanks(

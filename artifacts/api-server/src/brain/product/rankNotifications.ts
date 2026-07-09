@@ -1,45 +1,19 @@
 /**
  * Deterministic ranking for relationship Brain notifications.
  *
- * Uses rule registry priority order, then action plan priority, then recipient id.
+ * Delegates to shared rankRelationshipOpportunities.
  */
 
-import type { ActionPriority } from "../action/actionPlanTypes";
-import type { ProductBrainDecision } from "./productBrainDecisionTypes";
-import { RULE_PRIORITY_BY_ID } from "./rankDashboardOpportunities";
+import {
+  compareRankableRelationshipOpportunities,
+  rankRelationshipOpportunities,
+  type RankableRelationshipOpportunity,
+} from "./rankRelationshipOpportunities";
 
-const ACTION_PRIORITY_RANK: Record<ActionPriority, number> = {
-  high: 0,
-  medium: 1,
-  low: 2,
-};
+export type RankableNotification = RankableRelationshipOpportunity;
 
-export interface RankableNotification {
-  decision: ProductBrainDecision;
-  recipientId: string;
-  recipientName: string;
-}
-
-function rulePriority(sourceRuleId: string): number {
-  return RULE_PRIORITY_BY_ID[sourceRuleId] ?? -1;
-}
-
-export function compareRankableNotifications(
-  left: RankableNotification,
-  right: RankableNotification,
-): number {
-  const ruleDelta =
-    rulePriority(right.decision.sourceRuleId) - rulePriority(left.decision.sourceRuleId);
-  if (ruleDelta !== 0) return ruleDelta;
-
-  const actionDelta =
-    ACTION_PRIORITY_RANK[left.decision.actionPlan.priority]
-    - ACTION_PRIORITY_RANK[right.decision.actionPlan.priority];
-  if (actionDelta !== 0) return actionDelta;
-
-  return left.recipientId.localeCompare(right.recipientId);
-}
+export const compareRankableNotifications = compareRankableRelationshipOpportunities;
 
 export function rankNotifications(items: RankableNotification[]): RankableNotification[] {
-  return [...items].sort(compareRankableNotifications);
+  return rankRelationshipOpportunities(items);
 }
