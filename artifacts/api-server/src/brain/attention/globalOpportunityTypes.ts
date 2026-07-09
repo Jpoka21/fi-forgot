@@ -18,8 +18,8 @@ export interface GlobalOpportunity {
   recipientId: string;
   recipientName: string;
   decision: ProductBrainDecision;
-  attentionScore: null;
-  globalRank: null;
+  attentionScore: number | null;
+  globalRank: number | null;
   suppressionReason: null;
   metadata: GlobalOpportunityMetadata;
 }
