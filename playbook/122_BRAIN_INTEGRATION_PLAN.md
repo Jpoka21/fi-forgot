@@ -4,9 +4,9 @@
 
 Status: Living integration plan
 
-Phase: Product Integration — Sprint 4 complete
+Phase: Product Integration — Sprint 5 complete
 
-Implementation: Integration Sprints 1–4 shipped (feature-flagged where noted)
+Implementation: Integration Sprints 1–5 shipped (feature-flagged where noted)
 
 Depends on:
 
@@ -19,6 +19,7 @@ Depends on:
 - 120 Question Memory Engine
 - 121 Brain Execution Pipeline
 - 123 Brain Attention Planner
+- 124 Brain Fatigue Engine
 
 ---
 
@@ -183,13 +184,13 @@ Set `VITE_BRAIN_DASHBOARD=false`. Dashboard reverts to legacy:
 
 ## Next Integration Targets
 
-Recommended order after Sprint 4:
+Recommended order after Sprint 5:
 
-1. **Fatigue Engine** — exposure history, cooldowns, cross-surface dismiss sync (between planner and product mappers)
-2. **Concierge Conversation** — migrate keyword/conversation path to Brain-fed opportunities
-3. **Relationship Health** — migrate health scoring and gaps to Brain-derived signals
-4. **Legacy engine retirement** — remove duplicate client decision paths after migrations are stable
-5. **Single batch execution** — optional shared `executeBrain` pass per request (performance)
+1. **Concierge Conversation** — migrate keyword/conversation path to Brain-fed opportunities
+2. **Relationship Health** — migrate health scoring and gaps to Brain-derived signals
+3. **Legacy engine retirement** — remove duplicate client decision paths after migrations are stable
+4. **Single batch execution** — optional shared `executeBrain` pass per request (performance)
+5. **Fatigue rule expansion** — `recently_dismissed`, `completed` producers, enforcement rollout (see 124)
 
 ---
 
@@ -777,15 +778,38 @@ Those are covered by separate architecture documents.
 
 Each milestone is independently testable. Product surfaces remain rollback-capable via feature flags.
 
-## Sprint 5+ (planned)
+## Sprint 5 — Complete
+
+| # | Milestone | Status |
+|---|-----------|--------|
+| 1 | Fatigue Engine architecture plan (5a) | Done |
+| 2 | Internal types + pass-through `applyFatigue()` (5b) | Done |
+| 3 | Exposure model (5c) | Done |
+| 4 | Persistence — append-only events + repository (5d) | Done |
+| 5 | Product integration via `orchestrateProductBrainFatigue` (5e) | Done |
+| 6 | `recently_surfaced` rule — shadow on, enforcement off (5f) | Done |
+| 7 | Documentation + architecture guards (5g) | Done |
+
+See `124_BRAIN_FATIGUE_ENGINE.md` for full architecture reference.
+
+**Current fatigue rollout:**
+
+| Flag | Default | Production |
+|------|---------|------------|
+| `BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED` | `true` | Enabled |
+| `BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED` | `false` | Disabled |
+
+Product DTO output unchanged until enforcement is explicitly enabled.
+
+## Sprint 6+ (planned)
 
 See **Next Integration Targets**:
 
-1. Fatigue Engine
-2. Concierge Conversation migration
-3. Relationship Health
-4. Legacy engine retirement
-5. Single batch Brain execution (performance)
+1. Concierge Conversation migration
+2. Relationship Health
+3. Legacy engine retirement
+4. Single batch Brain execution (performance)
+5. Fatigue rule expansion and enforcement rollout
 
 Remaining original milestones
 
@@ -829,7 +853,11 @@ Product APIs (Dashboard / Notifications / Concierge DTOs)
 
 ↓
 
-Product builders (cap + map)
+Product builders (cap + map via orchestrateProductBrainFatigue)
+
+↓
+
+Brain Fatigue Engine (applyFatigue — exposure-aware filtering)
 
 ↓
 

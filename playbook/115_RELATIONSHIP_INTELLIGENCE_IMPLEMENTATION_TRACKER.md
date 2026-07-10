@@ -738,7 +738,11 @@ artifacts/api-server/src/brain/attention/
 ### Production path (Dashboard, Notifications, Concierge)
 
 ```text
-collectProductBrainDecisions → planAttentionOrder → slice(cap) → product DTO
+collectProductBrainDecisions
+  → orchestrateProductBrainFatigue
+      → planAttentionOrder → applyFatigue → visible filter
+      → slice(cap) → product DTO
+      → recordSurfacedOpportunities (delivered only)
 ```
 
 ### Internal only
@@ -747,14 +751,65 @@ collectProductBrainDecisions → planAttentionOrder → slice(cap) → product D
 - Not exported from `brain/index.ts`
 - Not exposed in public HTTP DTOs
 
+### Guard tests
+
+`artifacts/api-server/src/__tests__/brain-attention-architecture.test.ts`
+
+---
+
+# Brain Fatigue Engine (Integration Sprint 5)
+
+Status:
+
+**Complete (5a–5g)**
+
+Exposure-aware filtering between planner and product mappers. Product-agnostic. See `124_BRAIN_FATIGUE_ENGINE.md`.
+
+| Step | Component | Status |
+|------|-----------|--------|
+| 5a | Architecture plan | ✅ |
+| 5b | `FatigueContext`, `FatigueOpportunity`, pass-through `applyFatigue()` | ✅ |
+| 5c | Exposure model (`ExposureSnapshot`, event types) | ✅ |
+| 5d | Persistence — `brain_opportunity_exposure_events`, repository | ✅ |
+| 5e | `orchestrateProductBrainFatigue` — Dashboard, Notifications, Concierge | ✅ |
+| 5f | `recently_surfaced` rule (24h cooldown, shadow on, enforcement off) | ✅ |
+| 5g | Playbook + architecture guard tests | ✅ |
+
+### Completed capabilities
+
+- **Fatigue Engine** — `applyFatigue()`, rule evaluation, visible filtering
+- **Exposure persistence** — append-only events, materialized snapshot reads
+- **Product integration** — shared orchestration for all three Brain products
+- **First fatigue rule** — `recently_surfaced` (enforcement disabled by default)
+
+### Module location
+
+```text
+artifacts/api-server/src/brain/fatigue/
+artifacts/api-server/src/brain/product/orchestrateProductBrainFatigue.ts
+```
+
+### Current production rollout
+
+| Setting | Value |
+|---------|-------|
+| Shadow evaluation | Enabled (`BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED` default `true`) |
+| Rule enforcement | Disabled (`BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED` default `false`) |
+| Active rule | `recently_surfaced` (24 hour cooldown) |
+| Surfaced event recording | Active (delivered opportunities only) |
+
 ### Future
 
-- **Fatigue Engine** — between planner and product mappers
+- **Additional fatigue rules** — `recently_dismissed`, `recently_completed`, `repeatedly_surfaced`
+- **Enforcement rollout** — enable after shadow validation (see 124 deployment checklist)
 - **Allocation Engine** — optional surface policy (future)
 
 ### Guard tests
 
-`artifacts/api-server/src/__tests__/brain-attention-architecture.test.ts`
+- `artifacts/api-server/src/__tests__/brain-fatigue-architecture.test.ts`
+- `artifacts/api-server/src/__tests__/brain-fatigue-rules.test.ts`
+- `artifacts/api-server/src/__tests__/brain-fatigue-product-integration.test.ts`
+- `artifacts/api-server/src/__tests__/brain-fatigue-exposure-persistence.test.ts`
 
 ---
 
