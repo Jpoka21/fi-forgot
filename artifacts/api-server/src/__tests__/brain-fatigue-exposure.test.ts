@@ -126,6 +126,8 @@ section("architecture — exposure module is product agnostic");
     "fatigueScore",
     "recentDismissalKeys",
     "lastUserActionAt",
+    '"read"',
+    '"deferred"',
   ]) {
     expectTrue(`exposure source has no ${token}`, !source.includes(token));
   }

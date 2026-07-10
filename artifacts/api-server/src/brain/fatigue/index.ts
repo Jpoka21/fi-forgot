@@ -4,11 +4,20 @@ export type {
   ExposureEventType,
   ExposureRecord,
   ExposureSnapshot,
+  ExposureEventRepository,
+  InsertExposureEventInput,
+  ListExposureEventsForUserOptions,
   LoadExposureSnapshotInput,
+  RecordExposureEventInput,
 } from "./exposure";
 export {
+  assertValidExposureOpportunityIdentity,
+  buildExposureOpportunityKey,
   createEmptyExposureSnapshot,
+  createInMemoryExposureEventRepository,
   loadExposureSnapshot,
+  materializeExposureSnapshot,
+  recordExposureEvent,
 } from "./exposure";
 export type {
   FatigueContext,
