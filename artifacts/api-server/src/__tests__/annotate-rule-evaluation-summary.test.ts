@@ -57,7 +57,7 @@ const birthdayCandidate: RuleCandidate = {
   priority: 50,
   confidence: 60,
   decision: { outcome: "ask_question" },
-  reasons: ["birthday_preparation_window"],
+  reasons: ["event_briefing_incomplete"],
   debugNotes: ["BirthdayRule matched"],
 };
 

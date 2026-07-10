@@ -1,14 +1,12 @@
 /**
  * Unit tests for brain/decision/rules/anniversaryRule.
- *
- * Run with:
- *   npx tsx artifacts/api-server/src/__tests__/anniversary-rule.test.ts
  */
 
-import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { anniversaryRule } from "../brain/decision/rules/anniversaryRule.js";
-import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
-import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
+import {
+  buildCalendarDecisionContext,
+  briefingSummaryFor,
+} from "./fixtures/calendarEventRuleFixtures.js";
 
 let passed = 0;
 let failed = 0;
@@ -35,94 +33,37 @@ function section(name: string) {
   console.log(`\n${name}`);
 }
 
-function normalized(
-  overrides: Partial<NormalizedRelationshipState> = {},
-): NormalizedRelationshipState {
-  const { derivedFrom: derivedOverride, ...rest } = overrides;
-  return {
-    identity: "empty",
-    freshness: "unknown",
-    history: "none",
-    writing: "none",
-    engagement: "none",
-    momentum: "new",
-    ...rest,
-    derivedFrom: {
-      signalCount: 0,
-      sourcesPresent: [],
-      ...derivedOverride,
-    },
-  };
-}
-
-function contextForAnniversary(
-  anniversary: string | null,
-  previewDays: number | null = 14,
-  generatedAt = "2026-07-01T00:00:00.000Z",
-  normalizedOverrides: Partial<NormalizedRelationshipState> = {},
-) {
-  return buildDecisionContext(
-    normalized(normalizedOverrides),
-    minimalRelationshipContext({ generatedAt, anniversary, previewDays }),
-  );
-}
-
-const IN_WINDOW_CANDIDATE = {
-  ruleId: "anniversary",
-  priority: 45,
-  confidence: 60,
-  decision: { outcome: "ask_question" },
-  reasons: ["anniversary_preparation_window"],
-  debugNotes: [
-    "AnniversaryRule matched",
-    "anniversary days away: 7",
-    "preparation window: 14",
-  ],
-};
-
-section("AnniversaryRule matches when anniversary is inside preparation window");
+section("AnniversaryRule matches ask_question when briefing is incomplete");
 {
-  const context = contextForAnniversary("2015-07-08");
-  expect("in window matches", anniversaryRule.evaluate(context), IN_WINDOW_CANDIDATE);
+  const context = buildCalendarDecisionContext({
+    relationship: { birthday: null, anniversary: "2015-07-08", previewDays: 14 },
+  });
+  expect("outcome", anniversaryRule.evaluate(context)?.decision.outcome, "ask_question");
 }
 
 section("AnniversaryRule does not match outside preparation window");
 {
-  const context = contextForAnniversary("2015-08-01");
+  const context = buildCalendarDecisionContext({
+    relationship: { birthday: null, anniversary: "2015-08-01", previewDays: 14 },
+  });
   expect("outside window", anniversaryRule.evaluate(context), null);
 }
 
 section("AnniversaryRule does not match without anniversary");
 {
-  const context = contextForAnniversary(null);
+  const context = buildCalendarDecisionContext({
+    relationship: { birthday: null, anniversary: null, previewDays: 14 },
+  });
   expect("no anniversary", anniversaryRule.evaluate(context), null);
 }
 
-section("AnniversaryRule matches on window edge and today");
+section("AnniversaryRule matches prepare_card when briefing complete");
 {
-  const today = contextForAnniversary("2015-07-01");
-  expect("today matches", anniversaryRule.evaluate(today)?.ruleId, "anniversary");
-
-  const edge = contextForAnniversary("2015-07-15");
-  expect("edge matches", anniversaryRule.evaluate(edge)?.ruleId, "anniversary");
-}
-
-section("AnniversaryRule ignores stale freshness when in window");
-{
-  const context = contextForAnniversary("2015-07-08", 14, "2026-07-01T00:00:00.000Z", {
-    freshness: "stale",
+  const context = buildCalendarDecisionContext({
+    relationship: { birthday: null, anniversary: "2015-07-08", previewDays: 14 },
+    briefingSummary: briefingSummaryFor("Anniversary", 2026),
   });
-  expect(
-    "stale but in window still matches",
-    anniversaryRule.evaluate(context)?.ruleId,
-    "anniversary",
-  );
-}
-
-section("AnniversaryRule does not match when previewDays missing");
-{
-  const context = contextForAnniversary("2015-07-08", null);
-  expect("missing previewDays", anniversaryRule.evaluate(context), null);
+  expect("prepare_card", anniversaryRule.evaluate(context)?.decision.outcome, "prepare_card");
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

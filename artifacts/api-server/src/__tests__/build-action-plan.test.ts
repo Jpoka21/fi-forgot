@@ -69,6 +69,7 @@ const FRESH_UPDATE_ACTION_PLAN: ActionPlan = {
   reasons: ["information_stale", "fresh_update_due"],
   confidence: 52,
   debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 section("wait ActionPlan");
@@ -102,11 +103,14 @@ section("fresh_update ActionPlan");
 const BIRTHDAY_DECIDE_RESULT: DecideResult = {
   decision: { outcome: "ask_question" },
   confidence: 60,
-  reasons: ["birthday_preparation_window"],
+  reasons: ["event_briefing_incomplete"],
   debugNotes: [
     "BirthdayRule matched",
-    "birthday days away: 7",
-    "preparation window: 14",
+    "targetEventId: birthday",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
 };
 
@@ -115,14 +119,22 @@ const BIRTHDAY_ACTION_PLAN: ActionPlan = {
   category: "birthday",
   priority: "medium",
   sourceRuleId: "birthday",
-  primaryReason: "birthday_preparation_window",
-  reasons: ["birthday_preparation_window"],
+  primaryReason: "event_briefing_incomplete",
+  reasons: ["event_briefing_incomplete"],
   confidence: 60,
   debugNotes: [
     "BirthdayRule matched",
-    "birthday days away: 7",
-    "preparation window: 14",
+    "targetEventId: birthday",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
+  routing: {
+    experience: "event_briefing",
+    eventId: "birthday",
+    briefingEventLabel: "Birthday",
+  },
 };
 
 section("birthday ActionPlan");
@@ -142,11 +154,14 @@ section("birthday ActionPlan");
 const ANNIVERSARY_DECIDE_RESULT: DecideResult = {
   decision: { outcome: "ask_question" },
   confidence: 60,
-  reasons: ["anniversary_preparation_window"],
+  reasons: ["event_briefing_incomplete"],
   debugNotes: [
     "AnniversaryRule matched",
-    "anniversary days away: 7",
-    "preparation window: 14",
+    "targetEventId: anniversary",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
 };
 
@@ -155,14 +170,22 @@ const ANNIVERSARY_ACTION_PLAN: ActionPlan = {
   category: "anniversary",
   priority: "medium",
   sourceRuleId: "anniversary",
-  primaryReason: "anniversary_preparation_window",
-  reasons: ["anniversary_preparation_window"],
+  primaryReason: "event_briefing_incomplete",
+  reasons: ["event_briefing_incomplete"],
   confidence: 60,
   debugNotes: [
     "AnniversaryRule matched",
-    "anniversary days away: 7",
-    "preparation window: 14",
+    "targetEventId: anniversary",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
+  routing: {
+    experience: "event_briefing",
+    eventId: "anniversary",
+    briefingEventLabel: "Anniversary",
+  },
 };
 
 section("anniversary ActionPlan");
@@ -182,11 +205,14 @@ section("anniversary ActionPlan");
 const VALENTINES_DECIDE_RESULT: DecideResult = {
   decision: { outcome: "ask_question" },
   confidence: 60,
-  reasons: ["valentines_preparation_window"],
+  reasons: ["event_briefing_incomplete"],
   debugNotes: [
     "ValentinesDayRule matched",
-    "valentines days away: 13",
-    "preparation window: 14",
+    "targetEventId: valentines_day",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
 };
 
@@ -195,14 +221,22 @@ const VALENTINES_ACTION_PLAN: ActionPlan = {
   category: "holiday",
   priority: "medium",
   sourceRuleId: "valentines_day",
-  primaryReason: "valentines_preparation_window",
-  reasons: ["valentines_preparation_window"],
+  primaryReason: "event_briefing_incomplete",
+  reasons: ["event_briefing_incomplete"],
   confidence: 60,
   debugNotes: [
     "ValentinesDayRule matched",
-    "valentines days away: 13",
-    "preparation window: 14",
+    "targetEventId: valentines_day",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
+  routing: {
+    experience: "event_briefing",
+    eventId: "valentines_day",
+    briefingEventLabel: "Valentine's Day",
+  },
 };
 
 section("valentines_day ActionPlan");
@@ -243,6 +277,7 @@ const INACTIVITY_ACTION_PLAN: ActionPlan = {
     "last relationship activity days ago: 365",
     "threshold days: 180",
   ],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 section("inactivity ActionPlan");
@@ -285,6 +320,7 @@ const CARD_GAP_ACTION_PLAN: ActionPlan = {
     "card gap threshold days: 120",
     "last relationship activity days ago: 30",
   ],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 section("card_gap ActionPlan");
@@ -333,6 +369,7 @@ const MEMORY_ACCUMULATION_ACTION_PLAN: ActionPlan = {
     "momentum: quiet",
     "last relationship activity days ago: 45",
   ],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 section("memory_accumulation ActionPlan");
@@ -379,6 +416,7 @@ const ACCOMPLISHMENT_FOLLOW_UP_ACTION_PLAN: ActionPlan = {
     "freshness: current",
     "last relationship activity days ago: 15",
   ],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 section("accomplishment_follow_up ActionPlan");
@@ -427,6 +465,7 @@ const LIFE_EVENT_FOLLOW_UP_ACTION_PLAN: ActionPlan = {
     "followUpReady: true",
     "source: fresh_update",
   ],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 section("life_event_follow_up ActionPlan");
@@ -441,6 +480,66 @@ section("life_event_follow_up ActionPlan");
     JSON.stringify(plan),
     JSON.stringify(LIFE_EVENT_FOLLOW_UP_ACTION_PLAN),
   );
+}
+
+section("birthday prepare_card ActionPlan");
+{
+  const decideResult: DecideResult = {
+    decision: { outcome: "prepare_card" },
+    confidence: 60,
+    reasons: ["event_ready_for_card_preparation"],
+    debugNotes: [
+      "BirthdayRule matched",
+      "targetEventId: birthday",
+      "outcome: prepare_card",
+      "cycleYear: 2026",
+      "briefingComplete: true",
+      "cardCycleStatus: none",
+    ],
+  };
+  const plan = buildActionPlan({
+    decideResult,
+    sourceRuleId: "birthday",
+  });
+  expect("type prepare_card", plan.type, "prepare_card");
+  expect("category birthday", plan.category, "birthday");
+  expect("routing experience", plan.routing?.experience, "card_preparation_briefing");
+  expect("routing eventId", plan.routing?.eventId, "birthday");
+  expect("routing label", plan.routing?.briefingEventLabel, "Birthday");
+}
+
+section("anniversary prepare_card ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: {
+      decision: { outcome: "prepare_card" },
+      confidence: 60,
+      reasons: ["event_ready_for_card_preparation"],
+      debugNotes: ["AnniversaryRule matched"],
+    },
+    sourceRuleId: "anniversary",
+  });
+  expect("type prepare_card", plan.type, "prepare_card");
+  expect("category anniversary", plan.category, "anniversary");
+  expect("routing experience", plan.routing?.experience, "card_preparation_briefing");
+  expect("routing eventId", plan.routing?.eventId, "anniversary");
+}
+
+section("valentines_day prepare_card ActionPlan");
+{
+  const plan = buildActionPlan({
+    decideResult: {
+      decision: { outcome: "prepare_card" },
+      confidence: 60,
+      reasons: ["event_ready_for_card_preparation"],
+      debugNotes: ["ValentinesDayRule matched"],
+    },
+    sourceRuleId: "valentines_day",
+  });
+  expect("type prepare_card", plan.type, "prepare_card");
+  expect("category holiday", plan.category, "holiday");
+  expect("routing eventId uses targetEventId", plan.routing?.eventId, "valentines_day");
+  expect("routing label from catalog", plan.routing?.briefingEventLabel, "Valentine's Day");
 }
 
 section("unknown sourceRuleId throws");

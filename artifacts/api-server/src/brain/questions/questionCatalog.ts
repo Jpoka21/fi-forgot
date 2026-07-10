@@ -173,3 +173,7 @@ export const FOLLOW_UP_QUESTION_CATALOG: readonly FollowUpQuestion[] = [
     rotationOrder: 3,
   },
 ] as const;
+
+export function findFollowUpCatalogQuestionById(questionId: string) {
+  return FOLLOW_UP_QUESTION_CATALOG.find((question) => question.id === questionId) ?? null;
+}

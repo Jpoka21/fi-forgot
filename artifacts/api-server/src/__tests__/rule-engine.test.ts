@@ -167,11 +167,14 @@ section("decide() returns ask_question only for stale freshness");
 const BIRTHDAY_RESULT = {
   decision: { outcome: "ask_question" },
   confidence: 60,
-  reasons: ["birthday_preparation_window"],
+  reasons: ["event_briefing_incomplete"],
   debugNotes: [
     "BirthdayRule matched",
-    "birthday days away: 7",
-    "preparation window: 14",
+    "targetEventId: birthday",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
 };
 
@@ -207,11 +210,14 @@ section("birthday beats stale freshness in runRuleEngine");
 const ANNIVERSARY_RESULT = {
   decision: { outcome: "ask_question" },
   confidence: 60,
-  reasons: ["anniversary_preparation_window"],
+  reasons: ["event_briefing_incomplete"],
   debugNotes: [
     "AnniversaryRule matched",
-    "anniversary days away: 7",
-    "preparation window: 14",
+    "targetEventId: anniversary",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
 };
 
@@ -262,11 +268,14 @@ section("birthday beats anniversary when both in window");
 const VALENTINES_RESULT = {
   decision: { outcome: "ask_question" },
   confidence: 60,
-  reasons: ["valentines_preparation_window"],
+  reasons: ["event_briefing_incomplete"],
   debugNotes: [
     "ValentinesDayRule matched",
-    "valentines days away: 13",
-    "preparation window: 14",
+    "targetEventId: valentines_day",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
 };
 

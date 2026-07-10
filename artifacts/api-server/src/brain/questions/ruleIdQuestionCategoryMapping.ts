@@ -20,3 +20,17 @@ export function questionCategoryForSourceRuleId(
 ): FollowUpQuestionCategory | null {
   return RULE_ID_TO_QUESTION_CATEGORY[sourceRuleId] ?? null;
 }
+
+const QUESTION_CATEGORY_TO_SOURCE_RULE_ID: Partial<Record<FollowUpQuestionCategory, string>> =
+  Object.fromEntries(
+    Object.entries(RULE_ID_TO_QUESTION_CATEGORY).flatMap(([sourceRuleId, category]) =>
+      category ? [[category, sourceRuleId]] : [],
+    ),
+  );
+
+/** Canonical inverse of RULE_ID_TO_QUESTION_CATEGORY — one source rule per catalog category. */
+export function sourceRuleIdForQuestionCategory(
+  category: FollowUpQuestionCategory,
+): string | null {
+  return QUESTION_CATEGORY_TO_SOURCE_RULE_ID[category] ?? null;
+}

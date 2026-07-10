@@ -801,7 +801,31 @@ See `124_BRAIN_FATIGUE_ENGINE.md` for full architecture reference.
 
 Product DTO output unchanged until enforcement is explicitly enabled.
 
-## Sprint 6+ (planned)
+## Sprint 6 — Complete (Card Preparation Authorization)
+
+| # | Milestone | Status |
+|---|-----------|--------|
+| 1 | 6f.2A — Card provenance transport correction | Done |
+| 2 | 6f.3A–6f.3C — Architecture (event catalog, preparation context, identity model) | Done |
+| 3 | 6f.3D — Event catalog + empty `eventPreparation` | Done |
+| 4 | 6f.3E–6f.3E.1 — Populate `eventPreparation` + card projection correction | Done |
+| 5 | 6f.3F — Calendar rules → `ask_question` / `prepare_card` | Done |
+| 6 | 6f.3G — Action Planner routing + `prepare_card` mapping | Done |
+| 7 | 6f.3H — Server authoritative URLs (Dashboard, Notifications, Concierge) | Done |
+| 8 | 6f.3I — Attention activation for `prepare_card` | Done |
+| 9 | 6f.3J — Documentation + architecture guards | Done |
+
+See `125_BRAIN_CARD_PREPARATION_AUTHORIZATION.md` for full architecture reference.
+
+**Production behavior:**
+
+- Calendar `ask_question` surfaces with event briefing URLs (no provenance)
+- Calendar `prepare_card` surfaces with provenance briefing URLs
+- Shared opportunity key `recipientId:sourceRuleId` across question and card stages
+- Fatigue `recently_surfaced` applies across stage transition (no stage-specific exceptions)
+- Frontend passive link rendering only — no relationship intelligence
+
+## Sprint 7+ (planned)
 
 See **Next Integration Targets**:
 
@@ -813,7 +837,7 @@ See **Next Integration Targets**:
 
 Remaining original milestones
 
-6. Card workflow integration
+6. Card workflow integration (resume, briefing bypass — deferred)
 7. Brain Inspector improvements
 8. Administrative reporting
 9. Legacy cleanup (rank utilities, client engines)

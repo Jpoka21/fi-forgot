@@ -10,6 +10,12 @@ import { scheduleFollowUp, getDueFollowUpQuestion, markFollowUpAnswered } from "
 import type { FreshUpdateRecord } from "../services/question-engine";
 import { executeBrain } from "../brain/orchestrator";
 import { buildProductBrainDecision } from "../brain/product";
+import { recordQuestionAnsweredBrainOutcomeForProduction } from "../brain/outcomes/producers/recordQuestionAnsweredBrainOutcomeForProduction";
+import type { QuestionAnsweredOutcomeMetadata } from "../brain/outcomes/outcomeTypes";
+import {
+  buildFreshUpdateAnswerId,
+  buildProfileGapAnswerId,
+} from "../services/answer-question-ids";
 
 const router = Router();
 
@@ -341,11 +347,14 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
 
   try {
     const now = new Date();
+    let answerId: string;
+    let persistedTriggerType: QuestionAnsweredOutcomeMetadata["triggerType"];
 
     if (isFreshUpdate) {
       // Fresh updates are always new dated entries — never upserted.
       // Each answer is an independent memory with its own timestamp.
-      const answerId = `fresh_update_${id}_${fieldKey.trim()}_${now.getTime()}`;
+      answerId = buildFreshUpdateAnswerId(id, fieldKey.trim(), now);
+      persistedTriggerType = "fresh_update";
       await db
         .insert(questionAnswersTable)
         .values({
@@ -365,7 +374,8 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
       logger.info({ recipientId: id, fieldKey: fieldKey.trim() }, "v2-recipients: fresh-update saved");
     } else {
       // Profile-gap answers upsert — one canonical answer per field.
-      const answerId = `profile_gap_${id}_${fieldKey.trim()}`;
+      answerId = buildProfileGapAnswerId(id, fieldKey.trim());
+      persistedTriggerType = "profile_gap";
       await db
         .insert(questionAnswersTable)
         .values({
@@ -404,8 +414,39 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
         .from(recipientsV2Table)
         .where(eq(recipientsV2Table.id, id))
         .limit(1);
-      const answerId = `fresh_update_${id}_${fieldKey.trim()}_${now.getTime()}`;
       scheduleFollowUp(userId, id, answerId, answerText.trim(), recipient?.firstName ?? "them").catch(() => {});
+    }
+
+    try {
+      const brainOutcomeResult = await recordQuestionAnsweredBrainOutcomeForProduction({
+        persistedAnswer: {
+          answerId,
+          userId,
+          recipientId: id,
+          fieldKey: fieldKey.trim(),
+          triggerType: persistedTriggerType,
+          followUpId: isFollowUp && followUpId ? followUpId : undefined,
+          createdAt: now,
+        },
+        authenticatedUserId: userId,
+      });
+
+      if (brainOutcomeResult.status === "recorded_projection_failed") {
+        logger.error(
+          {
+            answerId,
+            recipientId: id,
+            outcomeEventId: brainOutcomeResult.outcomeEventId,
+            err: brainOutcomeResult.projectionError,
+          },
+          "v2-recipients: brain question_answered projection failed after answer saved",
+        );
+      }
+    } catch (err) {
+      logger.error(
+        { err, answerId, recipientId: id },
+        "v2-recipients: brain question_answered outcome append failed after answer saved",
+      );
     }
 
     // Award brownie points

@@ -10,10 +10,17 @@ export {
 } from "./exposureTypes";
 export {
   createInMemoryExposureEventRepository,
+  type AppendExposureEventResult,
   type ExposureEventRepository,
   type InsertExposureEventInput,
   type ListExposureEventsForUserOptions,
 } from "./exposureRepository";
+export {
+  appendExposureEvent,
+  createPgExposureEventRepository,
+  insertExposureEvent,
+  listExposureEventsForUser,
+} from "./pgExposureRepository";
 export { materializeExposureSnapshot } from "./materializeExposureSnapshot";
 export {
   createEmptyExposureSnapshot,

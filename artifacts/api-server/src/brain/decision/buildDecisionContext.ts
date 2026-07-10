@@ -6,6 +6,7 @@
  * decide, contributors, or classifyLifeEvents.
  */
 
+import { buildEventPreparationContext } from "../events/buildEventPreparationContext";
 import type { NormalizedRelationshipState } from "../normalization";
 import type { LifeEventClassification } from "../lifeEvents/lifeEventTypes";
 import type { RelationshipContext } from "../types";
@@ -75,6 +76,11 @@ export function buildDecisionContext(
     mostRecentFreshUpdateDaysAgo: mostRecentFreshUpdate?.daysAgo ?? null,
     mostRecentFreshUpdateQuestionKey: mostRecentFreshUpdate?.questionKey ?? null,
     lifeEvent: lifeEventClassifications[0] ?? null,
+    eventPreparation: buildEventPreparationContext({
+      relationshipContext,
+      referenceDate: new Date(relationshipContext.generatedAt),
+      preparationWindowDays,
+    }),
 
     derivedFrom: {
       signalCount: derivedFrom.signalCount,

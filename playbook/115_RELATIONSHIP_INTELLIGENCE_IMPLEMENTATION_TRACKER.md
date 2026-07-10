@@ -813,6 +813,62 @@ artifacts/api-server/src/brain/product/orchestrateProductBrainFatigue.ts
 
 ---
 
+# Brain Card Preparation Authorization (Integration Sprint 6)
+
+Status:
+
+**Complete (6f.2A correction, 6f.3A–6f.3J)**
+
+Authoritative Brain-authorized calendar card preparation. Frontend rule inference removed. See `125_BRAIN_CARD_PREPARATION_AUTHORIZATION.md`.
+
+| Step | Component | Status |
+|------|-----------|--------|
+| 6f.2A | Provenance transport correction | ✅ |
+| 6f.3A–6f.3C | Architecture (catalog, preparation, identity) | ✅ |
+| 6f.3D | Event catalog + `eventPreparation` contract | ✅ |
+| 6f.3E–6f.3E.1 | Preparation projection + card status correction | ✅ |
+| 6f.3F | Calendar rules (`ask_question` / `prepare_card`) | ✅ |
+| 6f.3G | Action Planner routing + aligned `actionPlan.type` | ✅ |
+| 6f.3H | Server authoritative URLs (all product surfaces) | ✅ |
+| 6f.3I | Attention activation for `prepare_card` | ✅ |
+| 6f.3J | Documentation + architecture guards | ✅ |
+
+### Completed capabilities
+
+- **EventPreparationContext** — normalized briefing + card cycle facts on `DecisionContext`
+- **Calendar rules** — consume preparation facts only; emit generic outcomes
+- **Action Planner routing** — `event_briefing` / `card_preparation_briefing` experiences
+- **Product URL builder** — authoritative briefing destinations with provenance only for card preparation
+- **Attention inclusion** — `prepare_card` in global opportunity pool
+- **Shared fatigue key** — `recipientId:sourceRuleId` across ask_question → prepare_card transition
+- **Provenance** — write-once backend; consume-once frontend; manual cards unattributed
+
+### Production surfacing
+
+| Outcome | Surfaces | URL | Provenance |
+|---------|----------|-----|------------|
+| Calendar `ask_question` | Dashboard, Notifications, Concierge | Event briefing | No |
+| Calendar `prepare_card` | Dashboard, Notifications, Concierge | Event briefing | Yes (`brainSourceRuleId`) |
+
+No frontend relationship intelligence. No frontend event inference.
+
+### Deferred (not marked complete)
+
+- Resume support for all `in_progress` card states
+- Briefing skip / auto-bypass when server briefing complete
+- Stage-sensitive fatigue policy
+- Token service, link tables, BrainExecutionId
+
+### Guard tests
+
+- `artifacts/api-server/src/__tests__/brain-card-preparation-architecture.test.ts`
+- `artifacts/api-server/src/__tests__/prepare-card-activation.test.ts`
+- `artifacts/api-server/src/__tests__/calendar-event-rules.test.ts`
+- `artifacts/api-server/src/__tests__/brain-event-action-href.test.ts`
+- `artifacts/fi-forgot/src/__tests__/brain-card-provenance-transport.test.ts`
+
+---
+
 # Development Brain Inspector
 
 Status:

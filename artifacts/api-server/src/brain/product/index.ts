@@ -1,4 +1,9 @@
 export {
+  buildBrainEventActionHref,
+  buildRelationshipProfileHref,
+  resolveProductBrainActionHref,
+} from "./buildBrainEventActionHref";
+export {
   buildConciergeWorkspace,
 } from "./buildConciergeWorkspace";
 export {

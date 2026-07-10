@@ -119,7 +119,7 @@ section("birthday in window → birthday rule result");
   );
   expect("sourceRuleId", result.sourceRuleId, "birthday");
   expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
-  expect("reasons", result.decideResult.reasons, ["birthday_preparation_window"]);
+  expect("reasons", result.decideResult.reasons, ["event_briefing_incomplete"]);
 }
 
 section("birthday in window beats stale freshness");
@@ -151,7 +151,7 @@ section("anniversary in window → anniversary rule result");
   );
   expect("sourceRuleId", result.sourceRuleId, "anniversary");
   expect("outcome ask_question", result.decideResult.decision.outcome, "ask_question");
-  expect("reasons", result.decideResult.reasons, ["anniversary_preparation_window"]);
+  expect("reasons", result.decideResult.reasons, ["event_briefing_incomplete"]);
 }
 
 section("anniversary in window beats stale freshness");
@@ -198,7 +198,7 @@ section("valentines day in window → valentines_day rule result");
     ),
   );
   expect("sourceRuleId", result.sourceRuleId, "valentines_day");
-  expect("reasons", result.decideResult.reasons, ["valentines_preparation_window"]);
+  expect("reasons", result.decideResult.reasons, ["event_briefing_incomplete"]);
 }
 
 section("valentines day in window beats stale freshness");

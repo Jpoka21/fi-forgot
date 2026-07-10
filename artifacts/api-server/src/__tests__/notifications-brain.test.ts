@@ -213,8 +213,8 @@ section("shouldIncludeNotification");
     ),
   );
   expectTrue(
-    "excludes prepare_card",
-    !shouldIncludeNotification(
+    "includes prepare_card",
+    shouldIncludeNotification(
       decisionFixture({ sourceRuleId: "birthday", outcome: "prepare_card" }),
     ),
   );
@@ -228,6 +228,17 @@ section("buildNotificationItem");
     priority: "high",
     title: "Birthday preparation",
     explanation: "Their birthday is inside the preparation window.",
+    actionPlan: {
+      type: "ask_question",
+      category: "birthday",
+      priority: "high",
+      primaryReason: "event_briefing_incomplete",
+      routing: {
+        experience: "event_briefing",
+        eventId: "birthday",
+        briefingEventLabel: "Birthday",
+      },
+    },
   });
   const item = buildNotificationItem(
     decision,
@@ -239,8 +250,8 @@ section("buildNotificationItem");
   expect("recipientName", item.recipientName, "Alice");
   expect("title", item.title, "Birthday preparation");
   expect("body", item.body, "Their birthday is inside the preparation window.");
-  expect("href", item.href, "/relationship/r-42");
-  expect("actionLabel server-provided", item.actionLabel, "Prepare for birthday");
+  expect("href", item.href, "/briefings/r-42/Birthday");
+  expect("actionLabel server-provided", item.actionLabel, "Add birthday details");
   expect("priority", item.priority, "high");
   expect("createdAt", item.createdAt, "2026-07-09T12:00:00.000Z");
   expect("source", item.source, NOTIFICATION_SOURCE_BRAIN);

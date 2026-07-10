@@ -2,6 +2,7 @@
  * Maps ProductBrainDecision + recipient display data to NotificationItem.
  */
 
+import { resolveProductBrainActionHref } from "./buildBrainEventActionHref";
 import { resolveDashboardBrainActionLabel } from "./dashboardBrainActionLabels";
 import {
   NOTIFICATION_SOURCE_BRAIN,
@@ -29,8 +30,10 @@ export function buildNotificationItem(
     recipientName: recipient.recipientName,
     title: decision.display.title,
     body: decision.display.explanation,
-    href: `/relationship/${recipient.recipientId}`,
-    actionLabel: resolveDashboardBrainActionLabel(decision.sourceRuleId),
+    href: resolveProductBrainActionHref(decision, recipient.recipientId),
+    actionLabel: resolveDashboardBrainActionLabel(decision.sourceRuleId, {
+      routingExperience: decision.actionPlan.routing?.experience,
+    }),
     priority: decision.actionPlan.priority,
     createdAt,
     source: NOTIFICATION_SOURCE_BRAIN,

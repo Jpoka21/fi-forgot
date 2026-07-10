@@ -10,6 +10,10 @@ import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js"
 import type { ActionPlan } from "../brain/action/actionPlanTypes.js";
 import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
 import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
+import {
+  briefingSummaryFor,
+  buildCalendarDecisionContext,
+} from "./fixtures/calendarEventRuleFixtures.js";
 
 let passed = 0;
 let failed = 0;
@@ -76,6 +80,7 @@ const FRESH_UPDATE_ACTION_PLAN: ActionPlan = {
   reasons: ["information_stale", "fresh_update_due"],
   confidence: 52,
   debugNotes: ["FreshUpdateRule matched", "freshness: stale"],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 const BIRTHDAY_ACTION_PLAN: ActionPlan = {
@@ -83,14 +88,22 @@ const BIRTHDAY_ACTION_PLAN: ActionPlan = {
   category: "birthday",
   priority: "medium",
   sourceRuleId: "birthday",
-  primaryReason: "birthday_preparation_window",
-  reasons: ["birthday_preparation_window"],
+  primaryReason: "event_briefing_incomplete",
+  reasons: ["event_briefing_incomplete"],
   confidence: 60,
   debugNotes: [
     "BirthdayRule matched",
-    "birthday days away: 7",
-    "preparation window: 14",
+    "targetEventId: birthday",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
+  routing: {
+    experience: "event_briefing",
+    eventId: "birthday",
+    briefingEventLabel: "Birthday",
+  },
 };
 
 section("planFromDecisionContext → wait action plan");
@@ -150,14 +163,22 @@ const ANNIVERSARY_ACTION_PLAN: ActionPlan = {
   category: "anniversary",
   priority: "medium",
   sourceRuleId: "anniversary",
-  primaryReason: "anniversary_preparation_window",
-  reasons: ["anniversary_preparation_window"],
+  primaryReason: "event_briefing_incomplete",
+  reasons: ["event_briefing_incomplete"],
   confidence: 60,
   debugNotes: [
     "AnniversaryRule matched",
-    "anniversary days away: 7",
-    "preparation window: 14",
+    "targetEventId: anniversary",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
+  routing: {
+    experience: "event_briefing",
+    eventId: "anniversary",
+    briefingEventLabel: "Anniversary",
+  },
 };
 
 section("planFromDecisionContext → anniversary action plan");
@@ -186,14 +207,22 @@ const VALENTINES_ACTION_PLAN: ActionPlan = {
   category: "holiday",
   priority: "medium",
   sourceRuleId: "valentines_day",
-  primaryReason: "valentines_preparation_window",
-  reasons: ["valentines_preparation_window"],
+  primaryReason: "event_briefing_incomplete",
+  reasons: ["event_briefing_incomplete"],
   confidence: 60,
   debugNotes: [
     "ValentinesDayRule matched",
-    "valentines days away: 13",
-    "preparation window: 14",
+    "targetEventId: valentines_day",
+    "outcome: ask_question",
+    "cycleYear: 2026",
+    "briefingComplete: false",
+    "cardCycleStatus: none",
   ],
+  routing: {
+    experience: "event_briefing",
+    eventId: "valentines_day",
+    briefingEventLabel: "Valentine's Day",
+  },
 };
 
 section("planFromDecisionContext → valentines_day action plan");
@@ -241,6 +270,7 @@ const LIFE_EVENT_FOLLOW_UP_ACTION_PLAN: ActionPlan = {
     "followUpReady: true",
     "source: fresh_update",
   ],
+  routing: { experience: "catalog_follow_up_question" },
 };
 
 section("planFromDecisionContext → life_event_follow_up action plan");
@@ -260,6 +290,21 @@ section("planFromDecisionContext → life_event_follow_up action plan");
     JSON.stringify(actionPlan),
     JSON.stringify(LIFE_EVENT_FOLLOW_UP_ACTION_PLAN),
   );
+}
+
+section("planFromDecisionContext → birthday prepare_card action plan");
+{
+  const context = buildCalendarDecisionContext({
+    briefingSummary: briefingSummaryFor("Birthday", 2026),
+  });
+  const { decideResult, actionPlan } = planFromDecisionContext(context);
+  expect("outcome prepare_card", decideResult.decision.outcome, "prepare_card");
+  expect("actionPlan type prepare_card", actionPlan.type, "prepare_card");
+  expect("actionPlan category birthday", actionPlan.category, "birthday");
+  expect("actionPlan sourceRuleId birthday", actionPlan.sourceRuleId, "birthday");
+  expect("routing experience", actionPlan.routing?.experience, "card_preparation_briefing");
+  expect("routing eventId", actionPlan.routing?.eventId, "birthday");
+  expect("not deferred to wait", actionPlan.type !== "wait", true);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

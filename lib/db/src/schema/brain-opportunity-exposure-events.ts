@@ -1,4 +1,4 @@
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { index, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 export type BrainOpportunityExposureEventType = "surfaced" | "dismissed" | "completed";
 
@@ -12,11 +12,13 @@ export const brainOpportunityExposureEventsTable = pgTable(
     sourceRuleId: text("source_rule_id").notNull(),
     eventType: text("event_type").$type<BrainOpportunityExposureEventType>().notNull(),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+    sourceOutcomeEventId: text("source_outcome_event_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index("brain_opp_exposure_user_key_idx").on(table.userId, table.opportunityKey),
     index("brain_opp_exposure_user_occurred_idx").on(table.userId, table.occurredAt),
+    uniqueIndex("brain_opp_exposure_source_outcome_uidx").on(table.sourceOutcomeEventId),
   ],
 );
 

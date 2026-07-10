@@ -2,6 +2,7 @@
  * Maps ProductBrainDecision + recipient display data to DashboardBrainOpportunity.
  */
 
+import { resolveProductBrainActionHref } from "./buildBrainEventActionHref";
 import { resolveDashboardBrainActionLabel } from "./dashboardBrainActionLabels";
 import type { DashboardBrainOpportunity } from "./dashboardBrainOpportunitiesTypes";
 import type { ProductBrainDecision } from "./productBrainDecisionTypes";
@@ -24,8 +25,10 @@ export function buildDashboardBrainOpportunity(
     priority: decision.actionPlan.priority,
     title: decision.display.title,
     explanation: decision.display.explanation,
-    profileHref: `/relationship/${recipient.recipientId}`,
-    actionLabel: resolveDashboardBrainActionLabel(decision.sourceRuleId),
+    profileHref: resolveProductBrainActionHref(decision, recipient.recipientId),
+    actionLabel: resolveDashboardBrainActionLabel(decision.sourceRuleId, {
+      routingExperience: decision.actionPlan.routing?.experience,
+    }),
     rank,
   };
 }

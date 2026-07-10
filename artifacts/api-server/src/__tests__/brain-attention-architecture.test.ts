@@ -161,6 +161,17 @@ section("GlobalOpportunity is not exposed in public DTO types");
   }
 }
 
+section("prepare_card inclusion and stable opportunity key");
+{
+  const inclusionSource = readBrainSource("attention/shouldIncludeOpportunity.ts");
+  const keySource = readBrainSource("attention/buildOpportunityKey.ts");
+
+  expectTrue("prepare_card in INCLUDED_OUTCOMES", inclusionSource.includes('"prepare_card"'));
+  expectTrue("no prepare_card exclusion branch", !inclusionSource.includes('outcome === "prepare_card"'));
+  expectTrue("opportunity key is recipientId:sourceRuleId", keySource.includes('`${recipientId}:${sourceRuleId}`'));
+  expectTrue("key builder has no outcome parameter", !keySource.includes("outcome"));
+}
+
 section("globalOpportunityTypes is not imported by routes");
 {
   const routeFiles = [

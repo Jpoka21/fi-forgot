@@ -31,6 +31,7 @@ export function buildProductBrainDecision(
       category: actionPlan.category,
       priority: actionPlan.priority,
       primaryReason: actionPlan.primaryReason,
+      ...(actionPlan.routing != null ? { routing: actionPlan.routing } : {}),
     },
     selectedFollowUpQuestion: selectedFollowUpQuestion
       ? {

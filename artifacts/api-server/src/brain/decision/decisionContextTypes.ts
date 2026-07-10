@@ -14,6 +14,7 @@ import type {
   NormalizedRelationshipState,
   WritingState,
 } from "../normalization";
+import type { EventPreparationContext } from "../events/eventPreparationTypes";
 import type { LifeEventClassification } from "../lifeEvents/lifeEventTypes";
 
 /** Decision vocabulary aliases for normalized dimensions. */
@@ -77,6 +78,9 @@ export interface DecisionContext {
   mostRecentFreshUpdateQuestionKey: string | null;
   /** Primary classified life event, when present. Null when none. */
   lifeEvent: LifeEventClassification | null;
+
+  /** Calendar occasion preparation facts keyed by catalog eventId. */
+  eventPreparation: EventPreparationContext;
 
   derivedFrom: DecisionContextDerivedFrom;
 }

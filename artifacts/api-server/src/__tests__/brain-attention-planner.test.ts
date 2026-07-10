@@ -293,8 +293,8 @@ section("included outcomes match shouldIncludeOpportunity");
   );
   expect("excluded wait", ranked.some((item) => item.recipientId === "wait-1"), false);
   expect("excluded do_nothing", ranked.some((item) => item.recipientId === "dn-1"), false);
-  expect("excluded prepare_card", ranked.some((item) => item.recipientId === "pc-1"), false);
-  expect("only included decisions ranked", ranked.length, 3);
+  expect("included prepare_card", ranked.some((item) => item.recipientId === "pc-1"), true);
+  expect("only included decisions ranked", ranked.length, 4);
 }
 
 section("globalRank assigned 1..n");

@@ -5,9 +5,24 @@
  */
 
 import type { DecideResult } from "../decision/decide";
+import type { BrainEventId } from "../events/brainEventCatalogTypes";
 import type { BrainDecisionOutcome } from "../types";
 
 export type ActionPlanType = BrainDecisionOutcome;
+
+/** Server-side product experience vocabulary — no URLs. */
+export type ProductExperienceKind =
+  | "catalog_follow_up_question"
+  | "event_briefing"
+  | "card_preparation_briefing"
+  | "profile_navigation"
+  | "none";
+
+export interface ActionPlanRouting {
+  experience: ProductExperienceKind;
+  eventId?: BrainEventId;
+  briefingEventLabel?: string;
+}
 
 export type ActionCategory =
   | "none"
@@ -37,4 +52,5 @@ export interface ActionPlan {
   reasons: string[];
   confidence: number;
   debugNotes: string[];
+  routing?: ActionPlanRouting;
 }

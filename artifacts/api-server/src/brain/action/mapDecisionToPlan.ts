@@ -20,12 +20,15 @@ const PLAN_MAPPINGS: Record<string, Partial<Record<BrainDecisionOutcome, PlanMap
     },
     birthday: {
       ask_question: { type: "ask_question", category: "birthday" },
+      prepare_card: { type: "prepare_card", category: "birthday" },
     },
     anniversary: {
       ask_question: { type: "ask_question", category: "anniversary" },
+      prepare_card: { type: "prepare_card", category: "anniversary" },
     },
     valentines_day: {
       ask_question: { type: "ask_question", category: "holiday" },
+      prepare_card: { type: "prepare_card", category: "holiday" },
     },
     inactivity: {
       ask_question: { type: "ask_question", category: "follow_up" },

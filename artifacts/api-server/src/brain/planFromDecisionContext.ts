@@ -22,6 +22,7 @@ export function planFromDecisionContext(decisionContext: DecisionContext): {
     decideResult: ruleResult.decideResult,
     sourceRuleId: ruleResult.sourceRuleId,
   });
+
   return {
     decideResult: ruleResult.decideResult,
     actionPlan,

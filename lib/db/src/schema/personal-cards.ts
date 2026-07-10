@@ -14,6 +14,8 @@ export const personalCardsTable = pgTable("personal_cards", {
   generationVersion: text("generation_version").notNull().default("v1"),
   archetype: text("archetype"),
   handwryttenCardId: text("handwrytten_card_id"),
+  /** Brain-internal provenance — write-once on insert, never exposed in product APIs. */
+  brainSourceRuleId: text("brain_source_rule_id"),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   rejectedAt: timestamp("rejected_at", { withTimezone: true }),
   mailedAt: timestamp("mailed_at", { withTimezone: true }),

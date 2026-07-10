@@ -4,6 +4,7 @@
 
 import { randomUUID } from "node:crypto";
 
+import { assertValidExposureOpportunityIdentity } from "./exposureTypes";
 import type { ExposureEvent, ExposureEventType } from "./exposureTypes";
 
 export interface InsertExposureEventInput {
@@ -13,13 +14,26 @@ export interface InsertExposureEventInput {
   sourceRuleId: string;
   eventType: ExposureEventType;
   occurredAt: string;
+  /** Set when exposure is derived from a Brain outcome projection. */
+  sourceOutcomeEventId?: string;
 }
 
 export interface ListExposureEventsForUserOptions {
   since?: string;
 }
 
+export type AppendExposureEventResult =
+  | {
+      status: "appended";
+      event: ExposureEvent;
+    }
+  | {
+      status: "already_exists";
+      event: ExposureEvent;
+    };
+
 export interface ExposureEventRepository {
+  appendExposureEvent(input: InsertExposureEventInput): Promise<AppendExposureEventResult>;
   insertExposureEvent(input: InsertExposureEventInput): Promise<void>;
   listExposureEventsForUser(
     userId: string,
@@ -27,12 +41,46 @@ export interface ExposureEventRepository {
   ): Promise<ExposureEvent[]>;
 }
 
+type StoredExposureEvent = InsertExposureEventInput & { id: string };
+
+function toExposureEvent(stored: StoredExposureEvent): ExposureEvent {
+  return {
+    id: stored.id,
+    opportunityKey: stored.opportunityKey,
+    recipientId: stored.recipientId,
+    sourceRuleId: stored.sourceRuleId,
+    eventType: stored.eventType,
+    occurredAt: stored.occurredAt,
+    sourceOutcomeEventId: stored.sourceOutcomeEventId,
+  };
+}
+
 export function createInMemoryExposureEventRepository(): ExposureEventRepository {
-  const events: Array<InsertExposureEventInput & { id: string }> = [];
+  const events: StoredExposureEvent[] = [];
 
   return {
+    async appendExposureEvent(input: InsertExposureEventInput): Promise<AppendExposureEventResult> {
+      assertValidExposureOpportunityIdentity(input);
+
+      if (input.sourceOutcomeEventId) {
+        const existing = events.find(
+          (event) => event.sourceOutcomeEventId === input.sourceOutcomeEventId,
+        );
+        if (existing) {
+          return { status: "already_exists", event: toExposureEvent(existing) };
+        }
+      }
+
+      const stored: StoredExposureEvent = {
+        ...input,
+        id: randomUUID(),
+      };
+      events.push(stored);
+      return { status: "appended", event: toExposureEvent(stored) };
+    },
+
     async insertExposureEvent(input: InsertExposureEventInput): Promise<void> {
-      events.push({ ...input, id: randomUUID() });
+      await this.appendExposureEvent(input);
     },
 
     async listExposureEventsForUser(
@@ -42,14 +90,7 @@ export function createInMemoryExposureEventRepository(): ExposureEventRepository
       return events
         .filter((event) => event.userId === userId)
         .filter((event) => !options.since || event.occurredAt >= options.since)
-        .map((event) => ({
-          id: event.id,
-          opportunityKey: event.opportunityKey,
-          recipientId: event.recipientId,
-          sourceRuleId: event.sourceRuleId,
-          eventType: event.eventType,
-          occurredAt: event.occurredAt,
-        }));
+        .map(toExposureEvent);
     },
   };
 }

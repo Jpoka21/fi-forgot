@@ -119,6 +119,7 @@ const baseCard: PersonalCard = {
   generationVersion: "v1",
   archetype: null,
   handwryttenCardId: null,
+  brainSourceRuleId: null,
   approvedAt: now,
   rejectedAt: null,
   mailedAt: null,

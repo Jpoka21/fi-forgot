@@ -1,7 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import AppShell from "@/components/layout/AppShell";
 import PageShell from "@/components/layout/PageShell";
+import {
+  readBrainSourceRuleIdFromSearch,
+  stripBrainSourceRuleIdFromSearch,
+} from "@/app/brain-cards/brainCardProvenance";
 import {
   getRecipient, saveRecipient, saveBriefing, getBriefingsForRecipient,
   getBriefing, getEventQuestions, getYearsTogether, childrenSummary,
@@ -176,6 +180,23 @@ export default function BriefingPage() {
   const [savingDetail,   setSavingDetail]   = useState(false);
 
   const isRewrite = new URLSearchParams(window.location.search).get("rewrite") === "1";
+  const brainSourceRuleIdRef = useRef<string | null>(
+    readBrainSourceRuleIdFromSearch(window.location.search),
+  );
+
+  function consumeBrainSourceRuleIdForCreate(): string | undefined {
+    if (isRewrite) {
+      return undefined;
+    }
+    const value = brainSourceRuleIdRef.current;
+    if (!value) {
+      return undefined;
+    }
+    brainSourceRuleIdRef.current = null;
+    const nextSearch = stripBrainSourceRuleIdFromSearch(window.location.search);
+    window.history.replaceState(null, "", `${window.location.pathname}${nextSearch}`);
+    return value;
+  }
 
   const existingCardId = (() => {
     if (!isRewrite || !recipient) return null;
@@ -309,7 +330,8 @@ export default function BriefingPage() {
           dueDate: "", status: "Ready for approval",
           approvedMessage: match.text, deliveryPreference: recipient.deliveryPreference,
         };
-        saveCard(newCard);
+        const brainSourceRuleId = consumeBrainSourceRuleIdForCreate();
+        saveCard(newCard, brainSourceRuleId ? { brainSourceRuleId } : undefined);
         setGeneratedCardId(newCard.id);
         if (isRewrite) {
           setLocation(`/cards/review?id=${newCard.id}`);

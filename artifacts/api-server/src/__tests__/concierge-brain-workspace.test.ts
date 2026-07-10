@@ -233,8 +233,8 @@ section("shouldIncludeConciergeOpportunity");
     ),
   );
   expectTrue(
-    "excludes prepare_card",
-    !shouldIncludeConciergeOpportunity(
+    "includes prepare_card",
+    shouldIncludeConciergeOpportunity(
       decisionFixture({ sourceRuleId: "birthday", outcome: "prepare_card" }),
     ),
   );
@@ -248,19 +248,31 @@ section("buildConciergeRecommendation and buildConciergeInsight");
     priority: "high",
     title: "Birthday preparation",
     explanation: "Their birthday is inside the preparation window.",
+    actionPlan: {
+      type: "ask_question",
+      category: "birthday",
+      priority: "high",
+      primaryReason: "event_briefing_incomplete",
+      routing: {
+        experience: "event_briefing",
+        eventId: "birthday",
+        briefingEventLabel: "Birthday",
+      },
+    },
   });
   const recipient = { recipientId: "r-42", recipientName: "Alice" };
 
   const recommendation = buildConciergeRecommendation(decision, recipient);
   expect("recommendation id", recommendation.id, buildConciergeRecommendationId("r-42", "birthday"));
   expect("kind relationship", recommendation.kind, CONCIERGE_RECOMMENDATION_KIND_RELATIONSHIP);
-  expect("actionLabel server-provided", recommendation.actionLabel, "Prepare for birthday");
+  expect("recommendation href", recommendation.href, "/briefings/r-42/Birthday");
+  expect("actionLabel server-provided", recommendation.actionLabel, "Add birthday details");
   expect("priority", recommendation.priority, "high");
 
   const insight = buildConciergeInsight(decision, recipient);
   expect("insight id", insight.id, buildConciergeInsightId("r-42", "birthday"));
   expect("insight title", insight.title, "Birthday preparation");
-  expect("insight href", insight.href, "/relationship/r-42");
+  expect("insight href", insight.href, "/briefings/r-42/Birthday");
 
   for (const field of FORBIDDEN_PUBLIC_FIELDS) {
     expectTrue(`recommendation has no ${field}`, !(field in recommendation));

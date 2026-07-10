@@ -2,6 +2,7 @@
  * Maps ProductBrainDecision + recipient display data to ConciergeInsight.
  */
 
+import { resolveProductBrainActionHref } from "./buildBrainEventActionHref";
 import { buildConciergeRecommendationId } from "./buildConciergeRecommendation";
 import type { ConciergeInsight } from "./conciergeTypes";
 import type { ProductBrainDecision } from "./productBrainDecisionTypes";
@@ -21,6 +22,6 @@ export function buildConciergeInsight(
     recipientName: recipient.recipientName,
     title: decision.display.title,
     body: decision.display.explanation,
-    href: `/relationship/${recipient.recipientId}`,
+    href: resolveProductBrainActionHref(decision, recipient.recipientId),
   };
 }

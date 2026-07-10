@@ -5,10 +5,11 @@
  *   npx tsx artifacts/api-server/src/__tests__/birthday-rule.test.ts
  */
 
-import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
 import { birthdayRule } from "../brain/decision/rules/birthdayRule.js";
-import type { NormalizedRelationshipState } from "../brain/normalization/index.js";
-import { minimalRelationshipContext } from "./fixtures/minimalRelationshipContext.js";
+import {
+  buildCalendarDecisionContext,
+  briefingSummaryFor,
+} from "./fixtures/calendarEventRuleFixtures.js";
 
 let passed = 0;
 let failed = 0;
@@ -35,89 +36,42 @@ function section(name: string) {
   console.log(`\n${name}`);
 }
 
-function normalized(
-  overrides: Partial<NormalizedRelationshipState> = {},
-): NormalizedRelationshipState {
-  const { derivedFrom: derivedOverride, ...rest } = overrides;
-  return {
-    identity: "empty",
-    freshness: "unknown",
-    history: "none",
-    writing: "none",
-    engagement: "none",
-    momentum: "new",
-    ...rest,
-    derivedFrom: {
-      signalCount: 0,
-      sourcesPresent: [],
-      ...derivedOverride,
-    },
-  };
-}
-
-function contextForBirthday(
-  birthday: string | null,
-  previewDays: number | null = 14,
-  generatedAt = "2026-07-01T00:00:00.000Z",
-  normalizedOverrides: Partial<NormalizedRelationshipState> = {},
-) {
-  return buildDecisionContext(
-    normalized(normalizedOverrides),
-    minimalRelationshipContext({ generatedAt, birthday, previewDays }),
-  );
-}
-
-const IN_WINDOW_CANDIDATE = {
-  ruleId: "birthday",
-  priority: 50,
-  confidence: 60,
-  decision: { outcome: "ask_question" },
-  reasons: ["birthday_preparation_window"],
-  debugNotes: [
-    "BirthdayRule matched",
-    "birthday days away: 7",
-    "preparation window: 14",
-  ],
-};
-
-section("BirthdayRule matches when birthday is inside preparation window");
+section("BirthdayRule matches ask_question when briefing is incomplete");
 {
-  const context = contextForBirthday("1988-07-08");
-  expect("in window matches", birthdayRule.evaluate(context), IN_WINDOW_CANDIDATE);
+  const context = buildCalendarDecisionContext();
+  expect("outcome", birthdayRule.evaluate(context)?.decision.outcome, "ask_question");
+  expect("reason", birthdayRule.evaluate(context)?.reasons[0], "event_briefing_incomplete");
 }
 
 section("BirthdayRule does not match outside preparation window");
 {
-  const context = contextForBirthday("1988-08-01");
+  const context = buildCalendarDecisionContext({
+    relationship: { birthday: "1988-08-01", previewDays: 14 },
+  });
   expect("outside window", birthdayRule.evaluate(context), null);
 }
 
 section("BirthdayRule does not match without birthday");
 {
-  const context = contextForBirthday(null);
+  const context = buildCalendarDecisionContext({
+    relationship: { birthday: null, previewDays: 14 },
+  });
   expect("no birthday", birthdayRule.evaluate(context), null);
 }
 
-section("BirthdayRule matches on window edge and today");
+section("BirthdayRule matches prepare_card when briefing complete and no card");
 {
-  const today = contextForBirthday("1988-07-01");
-  expect("today matches", birthdayRule.evaluate(today)?.ruleId, "birthday");
-
-  const edge = contextForBirthday("1988-07-15");
-  expect("edge matches", birthdayRule.evaluate(edge)?.ruleId, "birthday");
-}
-
-section("BirthdayRule ignores stale freshness when in window");
-{
-  const context = contextForBirthday("1988-07-08", 14, "2026-07-01T00:00:00.000Z", {
-    freshness: "stale",
+  const context = buildCalendarDecisionContext({
+    briefingSummary: briefingSummaryFor("Birthday", 2026),
   });
-  expect("stale but in window still matches", birthdayRule.evaluate(context)?.ruleId, "birthday");
+  expect("prepare_card", birthdayRule.evaluate(context)?.decision.outcome, "prepare_card");
 }
 
 section("BirthdayRule does not match when previewDays missing");
 {
-  const context = contextForBirthday("1988-07-08", null);
+  const context = buildCalendarDecisionContext({
+    relationship: { previewDays: null },
+  });
   expect("missing previewDays", birthdayRule.evaluate(context), null);
 }
 

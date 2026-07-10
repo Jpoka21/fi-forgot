@@ -194,6 +194,18 @@ These documents define the Brain and deterministic opportunity rules.
 
 | 118_LIFE_EVENT_FOLLOW_UP_ARCHITECTURE.md | Architecture blueprint for Life Event based conversational opportunities, including event lifecycle, classification, DecisionContext facts, follow up windows, rule behavior, implementation strategy, and future expansion. |
 
+| 121_BRAIN_EXECUTION_PIPELINE.md | Per-recipient Brain execution flow from RelationshipContext through ProductBrainDecision. |
+
+| 122_BRAIN_INTEGRATION_PLAN.md | Brain integration milestones, sprint tracker, and product migration status. |
+
+| 123_BRAIN_ATTENTION_PLANNER.md | Global cross-recipient attention ordering via `planAttentionOrder()`. |
+
+| 124_BRAIN_FATIGUE_ENGINE.md | Exposure-aware fatigue filtering between planner and product builders. |
+
+| 125_BRAIN_CARD_PREPARATION_AUTHORIZATION.md | Authoritative calendar card preparation: event preparation, rules, routing, URLs, provenance, attention activation, and frontend passive boundary. |
+
+| 115_RELATIONSHIP_INTELLIGENCE_IMPLEMENTATION_TRACKER.md | Living implementation tracker for Brain infrastructure and integration sprints. |
+
 ---
 
 # Execution Documents

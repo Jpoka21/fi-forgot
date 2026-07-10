@@ -1,6 +1,10 @@
 import { Router } from "express";
-import { db, personalCardsTable, questionAnswersTable } from "@workspace/db";
+import { db, personalCardsTable, questionAnswersTable, recipientsTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
+import { assertValidBrainSourceRuleIdForCardProvenance } from "../brain/cards/validateBrainSourceRuleId";
+import { buildOpportunityKey } from "../brain/attention/buildOpportunityKey";
+import { assertValidBrainOutcomeOpportunityIdentity } from "../brain/outcomes/outcomeTypes";
+import { recordCardBrainOutcomesForProduction } from "../brain/outcomes/producers/recordCardBrainOutcomesForProduction";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -12,6 +16,11 @@ function requireUserId(req: import("express").Request, res: import("express").Re
     return null;
   }
   return userId;
+}
+
+function cardPayloadFromBody(body: Record<string, unknown>): Record<string, unknown> {
+  const { brainSourceRuleId: _brainSourceRuleId, ...card } = body;
+  return card;
 }
 
 // ── Cards ─────────────────────────────────────────────────────────────────────
@@ -38,7 +47,10 @@ router.post("/personal/cards", async (req, res) => {
   const userId = requireUserId(req, res);
   if (!userId) return;
 
-  const card = req.body as {
+  const body = req.body as Record<string, unknown>;
+  const brainSourceRuleIdInput =
+    typeof body.brainSourceRuleId === "string" ? body.brainSourceRuleId.trim() : undefined;
+  const card = cardPayloadFromBody(body) as {
     id: string;
     recipientId?: string;
     recipientName?: string;
@@ -55,22 +67,70 @@ router.post("/personal/cards", async (req, res) => {
     return;
   }
 
+  const recipientId = (card.recipientId as string) ?? "";
   const now = new Date();
   const statusStr = (card.status as string) ?? "draft";
 
   try {
+    const [existingRow] = await db
+      .select({
+        id: personalCardsTable.id,
+        status: personalCardsTable.status,
+        brainSourceRuleId: personalCardsTable.brainSourceRuleId,
+      })
+      .from(personalCardsTable)
+      .where(and(eq(personalCardsTable.id, card.id), eq(personalCardsTable.userId, userId)))
+      .limit(1);
+
+    const isInsert = !existingRow;
+    let brainSourceRuleIdForInsert: string | null = null;
+
+    if (isInsert && brainSourceRuleIdInput) {
+      try {
+        assertValidBrainSourceRuleIdForCardProvenance(brainSourceRuleIdInput);
+      } catch (validationError) {
+        res.status(400).json({
+          error: validationError instanceof Error ? validationError.message : "Invalid brainSourceRuleId",
+        });
+        return;
+      }
+
+      if (!recipientId) {
+        res.status(400).json({ error: "recipientId required when brainSourceRuleId is provided" });
+        return;
+      }
+
+      const [recipientRow] = await db
+        .select({ id: recipientsTable.id })
+        .from(recipientsTable)
+        .where(and(eq(recipientsTable.id, recipientId), eq(recipientsTable.userId, userId)))
+        .limit(1);
+
+      if (!recipientRow) {
+        res.status(404).json({ error: "Recipient not found" });
+        return;
+      }
+
+      const opportunityKey = buildOpportunityKey(recipientId, brainSourceRuleIdInput);
+      assertValidBrainOutcomeOpportunityIdentity({ opportunityKey, recipientId });
+      brainSourceRuleIdForInsert = brainSourceRuleIdInput;
+    }
+
+    const cardForStorage = cardPayloadFromBody(body);
+
     await db
       .insert(personalCardsTable)
       .values({
         id: card.id,
         userId,
-        recipientId: (card.recipientId as string) ?? "",
+        recipientId,
         recipientName: (card.recipientName as string) ?? "",
         eventType: (card.holiday as string) ?? "",
         eventDate: (card.dueDate as string) ?? null,
         status: statusStr,
         messageFinal: (card.approvedMessage as string) ?? null,
-        data: card,
+        brainSourceRuleId: brainSourceRuleIdForInsert,
+        data: cardForStorage,
         createdAt: now,
         updatedAt: now,
       })
@@ -82,10 +142,59 @@ router.post("/personal/cards", async (req, res) => {
           approvedAt: statusStr === "Approved" ? now : undefined,
           rejectedAt: statusStr === "Rejected" ? now : undefined,
           mailedAt: statusStr === "Mailed to me" || statusStr === "Mailed to her" ? now : undefined,
-          data: card,
+          data: cardForStorage,
           updatedAt: now,
         },
       });
+
+    const [persistedRow] = await db
+      .select({
+        id: personalCardsTable.id,
+        userId: personalCardsTable.userId,
+        recipientId: personalCardsTable.recipientId,
+        status: personalCardsTable.status,
+        brainSourceRuleId: personalCardsTable.brainSourceRuleId,
+      })
+      .from(personalCardsTable)
+      .where(and(eq(personalCardsTable.id, card.id), eq(personalCardsTable.userId, userId)))
+      .limit(1);
+
+    if (persistedRow) {
+      try {
+        const brainOutcomeResult = await recordCardBrainOutcomesForProduction({
+          persistedCard: {
+            id: persistedRow.id,
+            userId: persistedRow.userId,
+            recipientId: persistedRow.recipientId,
+            status: persistedRow.status,
+            brainSourceRuleId: persistedRow.brainSourceRuleId,
+            occurredAt: now,
+          },
+          authenticatedUserId: userId,
+          isInsert,
+          previousStatus: existingRow?.status ?? null,
+        });
+
+        for (const result of brainOutcomeResult.results) {
+          if (result.status === "recorded_projection_failed") {
+            logger.error(
+              {
+                cardId: persistedRow.id,
+                outcomeType: result.outcomeType,
+                outcomeEventId: result.outcomeEventId,
+                err: result.projectionError,
+              },
+              "personal/cards: brain card outcome projection failed after card saved",
+            );
+          }
+        }
+      } catch (err) {
+        logger.error(
+          { err, cardId: persistedRow.id },
+          "personal/cards: brain card outcome append failed after card saved",
+        );
+      }
+    }
 
     res.json({ ok: true });
   } catch (err) {

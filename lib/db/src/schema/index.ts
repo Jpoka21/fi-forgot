@@ -36,3 +36,4 @@ export * from "./recipients-normalized";
 export * from "./brownie-points";
 export * from "./follow-up-questions";
 export * from "./brain-opportunity-exposure-events";
+export * from "./brain-outcome-events";

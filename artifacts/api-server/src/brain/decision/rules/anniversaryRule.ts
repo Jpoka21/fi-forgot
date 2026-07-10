@@ -1,46 +1,32 @@
 /**
- * AnniversaryRule — recommends anniversary preparation when inside the preview window.
- *
- * Decides WHAT is needed (ask_question). Wording and execution belong to the
- * future Action Planner.
+ * AnniversaryRule — event preparation branching for anniversary occasions.
  */
 
 import type { DecisionContext } from "../decisionContextTypes";
-import { isEventWithinPreparationWindow } from "../eventWindow";
+import { ruleTargetEventId } from "../../events/ruleEventTargeting";
+import {
+  evaluateCalendarEventRule,
+  type CalendarEventRuleConfig,
+} from "./calendarEventRuleEvaluation";
 import type { RuleEvaluationTrace } from "./internal/ruleEvaluationTrace";
-import type { DecisionRule, RuleCandidate } from "./types";
+import type { DecisionRule } from "./types";
 
-const ANNIVERSARY_CANDIDATE: RuleCandidate = {
+const TARGET_EVENT_ID = ruleTargetEventId("anniversary");
+if (!TARGET_EVENT_ID) {
+  throw new Error("AnniversaryRule requires a calendar event target mapping");
+}
+
+const ANNIVERSARY_RULE_CONFIG: CalendarEventRuleConfig = {
   ruleId: "anniversary",
+  targetEventId: TARGET_EVENT_ID,
   priority: 45,
   confidence: 60,
-  decision: { outcome: "ask_question" },
-  reasons: ["anniversary_preparation_window"],
-  debugNotes: ["AnniversaryRule matched"],
+  debugLabel: "AnniversaryRule",
 };
 
 export const anniversaryRule: DecisionRule = {
   id: "anniversary",
-  evaluate(context: DecisionContext, trace?: RuleEvaluationTrace): RuleCandidate | null {
-    const { anniversaryDaysAway, preparationWindowDays } = context;
-    if (!isEventWithinPreparationWindow(anniversaryDaysAway, preparationWindowDays)) {
-      trace?.recordNoMatch({
-        reasons: ["outside_preparation_window"],
-        debugNotes: [
-          `anniversary days away: ${anniversaryDaysAway}`,
-          `preparation window: ${preparationWindowDays}`,
-        ],
-      });
-      return null;
-    }
-
-    return {
-      ...ANNIVERSARY_CANDIDATE,
-      debugNotes: [
-        "AnniversaryRule matched",
-        `anniversary days away: ${anniversaryDaysAway}`,
-        `preparation window: ${preparationWindowDays}`,
-      ],
-    };
+  evaluate(context: DecisionContext, trace?: RuleEvaluationTrace) {
+    return evaluateCalendarEventRule(context, ANNIVERSARY_RULE_CONFIG, trace);
   },
 };

@@ -26,6 +26,10 @@ import {
   minimalRelationshipContext,
   type MinimalRelationshipContextOptions,
 } from "./fixtures/minimalRelationshipContext.js";
+import {
+  briefingSummaryFor,
+  buildCalendarDecisionContext,
+} from "./fixtures/calendarEventRuleFixtures.js";
 
 let passed = 0;
 let failed = 0;
@@ -290,6 +294,39 @@ section("actionPlan projection includes only public fields");
     decision.actionPlan.primaryReason,
     execution.actionPlan.primaryReason,
   );
+  expect(
+    "routing from execution",
+    decision.actionPlan.routing,
+    execution.actionPlan.routing,
+  );
+}
+
+section("birthday prepare_card carries routing on ProductBrainDecision");
+{
+  const decisionContext = buildCalendarDecisionContext({
+    briefingSummary: briefingSummaryFor("Birthday", 2026),
+  });
+  const { decideResult, actionPlan, ruleEvaluation } = planFromDecisionContext(decisionContext);
+  const execution: BrainExecutionResult = {
+    loadResult: {
+      brainContextVersion: BRAIN_CONTEXT_VERSION,
+      relationshipId: "recipient-1",
+      userId: "user-1",
+      loadedAt: "2026-01-01T00:00:00.000Z",
+      relationshipContext: minimalRelationshipContext(),
+    },
+    extraction: { availableSignals: [], contributorGroups: [] },
+    normalized: normalized(),
+    decisionContext,
+    decideResult,
+    actionPlan,
+    ruleEvaluation,
+    selectedFollowUpQuestion: null,
+  };
+  const decision = buildProductBrainDecision("recipient-1", execution);
+  expect("outcome prepare_card", decision.decision.outcome, "prepare_card");
+  expect("actionPlan type", decision.actionPlan.type, "prepare_card");
+  expect("routing experience", decision.actionPlan.routing?.experience, "card_preparation_briefing");
 }
 
 section("all 10 rule ids have factual static display copy");

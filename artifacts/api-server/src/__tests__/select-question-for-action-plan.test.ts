@@ -252,8 +252,8 @@ section("unknown source rule returns null");
     category: "birthday",
     priority: "medium",
     sourceRuleId: "birthday",
-    primaryReason: "birthday_preparation_window",
-    reasons: ["birthday_preparation_window"],
+  primaryReason: "event_briefing_incomplete",
+  reasons: ["event_briefing_incomplete"],
     confidence: 60,
     debugNotes: ["BirthdayRule matched"],
   };

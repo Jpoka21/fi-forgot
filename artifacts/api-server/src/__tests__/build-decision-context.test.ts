@@ -92,6 +92,7 @@ section("conservative defaults from empty normalized state");
     null,
   );
   expect("lifeEvent null when no classifications", ctx.lifeEvent, null);
+  expect("eventPreparation has byEventId object", typeof ctx.eventPreparation.byEventId, "object");
 }
 
 section("full rich state maps decision vocabulary 1:1");

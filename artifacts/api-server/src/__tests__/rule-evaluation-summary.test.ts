@@ -114,6 +114,22 @@ section("no-match entries include rule-authored reasons");
   const result = runRuleEngine(context);
   const birthday = result.ruleEvaluation.entries.find((entry) => entry.ruleId === "birthday");
   expect("birthday not matched", birthday?.matched, false);
+  expect("birthday reason without date", birthday?.reasons, ["event_not_applicable"]);
+}
+
+section("outside window entries include outside_preparation_window reason");
+{
+  const context = buildDecisionContext(
+    normalized(),
+    minimalRelationshipContext({
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      birthday: "1988-08-01",
+      previewDays: 14,
+    }),
+  );
+  const result = runRuleEngine(context);
+  const birthday = result.ruleEvaluation.entries.find((entry) => entry.ruleId === "birthday");
+  expect("birthday not matched outside window", birthday?.matched, false);
   expect("birthday reason", birthday?.reasons, ["outside_preparation_window"]);
 }
 

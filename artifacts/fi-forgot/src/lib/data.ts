@@ -1,3 +1,5 @@
+import { buildPersonalCardCreateRequestBody } from "../app/brain-cards/brainCardProvenance";
+
 export type Relationship =
   | "Wife"
   | "Girlfriend"
@@ -723,7 +725,7 @@ export function updateCard(card: CardOrder): void {
   }
 }
 
-export function saveCard(card: CardOrder): void {
+export function saveCard(card: CardOrder, options?: { brainSourceRuleId?: string }): void {
   // Stamp with current auth userId so stale pre-auth cards can be filtered out
   const stamped: CardOrder = _serverUserId ? { ...card, userId: _serverUserId } : card;
 
@@ -758,7 +760,11 @@ export function saveCard(card: CardOrder): void {
     fetch("/api/personal/cards", {
       method: "POST",
       headers: syncHeaders(),
-      body: JSON.stringify(stamped),
+      body: JSON.stringify(
+        buildPersonalCardCreateRequestBody(stamped, {
+          brainSourceRuleId: options?.brainSourceRuleId,
+        }),
+      ),
     }).catch(() => {});
   }
 }

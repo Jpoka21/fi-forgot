@@ -37,6 +37,20 @@ export function daysUntilNextOccurrence(
   dateStr: string | null | undefined,
   referenceDate: Date,
 ): number | null {
+  const next = resolveNextOccurrenceDate(dateStr, referenceDate);
+  if (!next) return null;
+
+  const today = startOfUtcDay(referenceDate);
+  return Math.ceil((next.getTime() - today.getTime()) / MS_PER_DAY);
+}
+
+/**
+ * UTC calendar date of the next occurrence for a month/day or full date string.
+ */
+export function resolveNextOccurrenceDate(
+  dateStr: string | null | undefined,
+  referenceDate: Date,
+): Date | null {
   if (!dateStr) return null;
 
   const monthDay = parseMonthDay(dateStr);
@@ -49,7 +63,17 @@ export function daysUntilNextOccurrence(
     next = new Date(Date.UTC(year + 1, monthDay.month, monthDay.day));
   }
 
-  return Math.ceil((next.getTime() - today.getTime()) / MS_PER_DAY);
+  return next;
+}
+
+/**
+ * Calendar year of the next occurrence — the active preparation cycle year.
+ */
+export function resolveEventCycleYear(
+  dateStr: string | null | undefined,
+  referenceDate: Date,
+): number | null {
+  return resolveNextOccurrenceDate(dateStr, referenceDate)?.getUTCFullYear() ?? null;
 }
 
 export function computeBirthdayDaysAway(

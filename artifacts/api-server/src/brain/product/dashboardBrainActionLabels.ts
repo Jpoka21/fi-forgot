@@ -4,6 +4,8 @@
  * Server-provided CTA copy — not inferred by clients.
  */
 
+import type { ProductExperienceKind } from "../action/actionPlanTypes";
+
 const ACTION_LABEL_BY_RULE_ID: Record<string, string> = {
   birthday: "Prepare for birthday",
   anniversary: "Prepare for anniversary",
@@ -16,9 +18,22 @@ const ACTION_LABEL_BY_RULE_ID: Record<string, string> = {
   card_gap: "Review card channel",
 };
 
+const EVENT_BRIEFING_LABEL_BY_RULE_ID: Record<string, string> = {
+  birthday: "Add birthday details",
+  anniversary: "Add anniversary details",
+  valentines_day: "Add Valentine's Day details",
+};
+
 const FALLBACK_ACTION_LABEL = "Open profile";
 
-export function resolveDashboardBrainActionLabel(sourceRuleId: string): string {
+export function resolveDashboardBrainActionLabel(
+  sourceRuleId: string,
+  options?: { routingExperience?: ProductExperienceKind },
+): string {
+  if (options?.routingExperience === "event_briefing") {
+    return EVENT_BRIEFING_LABEL_BY_RULE_ID[sourceRuleId] ?? FALLBACK_ACTION_LABEL;
+  }
+
   return ACTION_LABEL_BY_RULE_ID[sourceRuleId] ?? FALLBACK_ACTION_LABEL;
 }
 

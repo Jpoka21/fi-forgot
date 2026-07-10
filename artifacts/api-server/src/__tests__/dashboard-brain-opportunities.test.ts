@@ -197,8 +197,8 @@ section("shouldIncludeDashboardOpportunity");
     ),
   );
   expectTrue(
-    "excludes prepare_card",
-    !shouldIncludeDashboardOpportunity(
+    "includes prepare_card",
+    shouldIncludeDashboardOpportunity(
       decisionFixture({ sourceRuleId: "birthday", outcome: "prepare_card" }),
     ),
   );
@@ -212,6 +212,17 @@ section("buildDashboardBrainOpportunity");
     priority: "high",
     title: "Birthday preparation",
     explanation: "Their birthday is inside the preparation window.",
+    actionPlan: {
+      type: "ask_question",
+      category: "birthday",
+      priority: "high",
+      primaryReason: "event_briefing_incomplete",
+      routing: {
+        experience: "event_briefing",
+        eventId: "birthday",
+        briefingEventLabel: "Birthday",
+      },
+    },
   });
   const opportunity = buildDashboardBrainOpportunity(
     decision,
@@ -221,10 +232,25 @@ section("buildDashboardBrainOpportunity");
   expect("recipientId", opportunity.recipientId, "r-42");
   expect("recipientName", opportunity.recipientName, "Alice");
   expect("title", opportunity.title, "Birthday preparation");
-  expect("profileHref", opportunity.profileHref, "/relationship/r-42");
-  expect("actionLabel server-provided", opportunity.actionLabel, "Prepare for birthday");
+  expect("profileHref", opportunity.profileHref, "/briefings/r-42/Birthday");
+  expect("actionLabel server-provided", opportunity.actionLabel, "Add birthday details");
   expect("rank", opportunity.rank, 1);
   expectTrue("no confidence field", !("confidence" in opportunity));
+  expectTrue("no routing field on public DTO", !("routing" in opportunity));
+}
+
+section("buildDashboardBrainOpportunity falls back without routing");
+{
+  const decision = decisionFixture({
+    sourceRuleId: "birthday",
+    outcome: "ask_question",
+  });
+  const opportunity = buildDashboardBrainOpportunity(
+    decision,
+    { recipientId: "r-42", recipientName: "Alice" },
+    1,
+  );
+  expect("profileHref fallback", opportunity.profileHref, "/relationship/r-42");
 }
 
 section("resolveDashboardBrainActionLabel fallback");

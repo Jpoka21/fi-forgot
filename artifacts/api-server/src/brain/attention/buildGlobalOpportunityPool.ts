@@ -4,6 +4,7 @@
  */
 
 import type { ProductBrainDecision } from "../product/productBrainDecisionTypes";
+import { buildOpportunityKey } from "./buildOpportunityKey";
 import type { GlobalOpportunity } from "./globalOpportunityTypes";
 
 export interface GlobalOpportunityRecipientDisplay {
@@ -16,9 +17,7 @@ export interface BuildGlobalOpportunityPoolInput {
   recipients: GlobalOpportunityRecipientDisplay[];
 }
 
-export function buildOpportunityKey(recipientId: string, sourceRuleId: string): string {
-  return `${recipientId}:${sourceRuleId}`;
-}
+export { buildOpportunityKey } from "./buildOpportunityKey";
 
 export function buildGlobalOpportunityPool(
   input: BuildGlobalOpportunityPoolInput,

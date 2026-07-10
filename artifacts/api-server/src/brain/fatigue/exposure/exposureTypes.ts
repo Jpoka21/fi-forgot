@@ -14,6 +14,8 @@ export interface ExposureEvent {
   sourceRuleId: string;
   eventType: ExposureEventType;
   occurredAt: string;
+  /** Present when derived from a Brain outcome projection. */
+  sourceOutcomeEventId?: string;
 }
 
 /** Per-opportunity exposure state derived from events. */

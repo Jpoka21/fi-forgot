@@ -3,6 +3,7 @@
  */
 
 import type { ActionPlan, ActionPlanningInput } from "./actionPlanTypes";
+import { enrichActionPlanRouting } from "./enrichActionPlanRouting";
 import { confidenceToPriority, mapDecisionToPlan } from "./mapDecisionToPlan";
 
 /**
@@ -16,14 +17,17 @@ export function buildActionPlan(input: ActionPlanningInput): ActionPlan {
     decideResult.decision.outcome,
   );
 
-  return {
-    type,
-    category,
-    priority: confidenceToPriority(decideResult.confidence),
-    sourceRuleId,
-    primaryReason: decideResult.reasons[0] ?? "",
-    reasons: decideResult.reasons,
-    confidence: decideResult.confidence,
-    debugNotes: decideResult.debugNotes,
-  };
+  return enrichActionPlanRouting(
+    {
+      type,
+      category,
+      priority: confidenceToPriority(decideResult.confidence),
+      sourceRuleId,
+      primaryReason: decideResult.reasons[0] ?? "",
+      reasons: decideResult.reasons,
+      confidence: decideResult.confidence,
+      debugNotes: decideResult.debugNotes,
+    },
+    decideResult.decision.outcome,
+  );
 }

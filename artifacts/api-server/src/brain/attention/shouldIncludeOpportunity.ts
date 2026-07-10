@@ -8,6 +8,7 @@ import type { BrainDecisionOutcome } from "../types";
 
 const INCLUDED_OUTCOMES = new Set<BrainDecisionOutcome>([
   "ask_question",
+  "prepare_card",
   "recommend_action",
   "show_dashboard_insight",
 ]);
@@ -17,7 +18,6 @@ export function shouldIncludeOpportunity(decision: ProductBrainDecision): boolea
 
   const outcome = decision.decision.outcome;
   if (outcome === "wait" || outcome === "do_nothing") return false;
-  if (outcome === "prepare_card") return false;
 
   return INCLUDED_OUTCOMES.has(outcome);
 }

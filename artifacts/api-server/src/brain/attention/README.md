@@ -25,9 +25,9 @@ Product builders then `slice(cap)` and map to DTOs.
 | This module | Not this module |
 |-------------|-----------------|
 | Global attention ordering | Product caps |
-| Inclusion via `shouldIncludeOpportunity` | Dashboard / Notifications / Concierge names |
+| Inclusion via `shouldIncludeOpportunity` (includes `prepare_card`) | Dashboard / Notifications / Concierge names |
 | `attentionScore` + `globalRank` (internal) | DTO mapping |
-| Stable `opportunityKey` | Fatigue / exposure history (future) |
+| Stable `opportunityKey` | Stage-specific fatigue keys |
 
 ## Module boundaries
 
@@ -44,6 +44,10 @@ Do not re-export `brain/attention` from `brain/index.ts`.
 3. **Do not expose `GlobalOpportunity`** through routes or public API types.
 4. **Do not mutate `ProductBrainDecision`** when ranking — wrap in new `GlobalOpportunity` objects.
 5. **Fatigue and allocation** belong in future layers between planner and product mappers (see `playbook/123_BRAIN_ATTENTION_PLANNER.md`).
+
+## Calendar stage transition
+
+Calendar `ask_question` and `prepare_card` share the same opportunity key (`recipientId:sourceRuleId`). The existing `recently_surfaced` cooldown applies across that transition — a recently surfaced briefing-collection opportunity can suppress a later `prepare_card` for the same rule until the cooldown expires. No stage-specific fatigue exceptions.
 
 ## Tests
 

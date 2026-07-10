@@ -97,6 +97,8 @@ export interface WritingHistoryCard {
   id: string;
   eventType: string;
   eventDate: string | null;
+  dueDateFromData: string | null;
+  storedEventYear: number | null;
   status: string;
   wasEdited: boolean;
   createdAt: string;
@@ -314,6 +316,24 @@ function countMessageWords(text: string | null | undefined): number | null {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
+function extractCardDataFields(data: unknown): {
+  dueDateFromData: string | null;
+  storedEventYear: number | null;
+} {
+  if (!data || typeof data !== "object") {
+    return { dueDateFromData: null, storedEventYear: null };
+  }
+
+  const record = data as Record<string, unknown>;
+  const dueDateFromData =
+    typeof record.dueDate === "string" && record.dueDate.trim().length > 0
+      ? record.dueDate.trim()
+      : null;
+  const storedEventYear = typeof record.year === "number" ? record.year : null;
+
+  return { dueDateFromData, storedEventYear };
+}
+
 export function buildWritingHistoryInventory(
   cards: PersonalCard[],
   referenceTime: Date = new Date(),
@@ -324,10 +344,14 @@ export function buildWritingHistoryInventory(
   );
 
   return {
-    cards: sorted.map((card) => ({
+    cards: sorted.map((card) => {
+      const dataFields = extractCardDataFields(card.data);
+      return {
       id: card.id,
       eventType: card.eventType,
       eventDate: card.eventDate ?? null,
+      dueDateFromData: dataFields.dueDateFromData,
+      storedEventYear: dataFields.storedEventYear,
       status: card.status,
       wasEdited: card.wasEdited,
       createdAt: new Date(card.createdAt).toISOString(),
@@ -342,7 +366,8 @@ export function buildWritingHistoryInventory(
       approvedAt: toIsoTimestamp(card.approvedAt),
       rejectedAt: toIsoTimestamp(card.rejectedAt),
       mailedAt: toIsoTimestamp(card.mailedAt),
-    })),
+    };
+    }),
   };
 }
 

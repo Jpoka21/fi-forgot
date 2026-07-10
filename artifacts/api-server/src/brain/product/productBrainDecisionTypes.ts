@@ -5,6 +5,7 @@
 import type { BrainDecisionOutcome } from "../types";
 import type {
   ActionCategory,
+  ActionPlanRouting,
   ActionPlanType,
   ActionPriority,
 } from "../action/actionPlanTypes";
@@ -29,6 +30,7 @@ export interface ProductBrainActionPlan {
   category: ActionCategory;
   priority: ActionPriority;
   primaryReason: string;
+  routing?: ActionPlanRouting;
 }
 
 export interface ProductBrainDisplay {
