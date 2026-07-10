@@ -284,7 +284,7 @@ async function run(): Promise<void> {
     }
   }
 
-  section("architecture — product builders remain unwired");
+  section("architecture — product builders do not own exposure recording");
   {
     const builders = [
       "product/buildDashboardBrainOpportunities.ts",
@@ -294,7 +294,9 @@ async function run(): Promise<void> {
 
     for (const builderPath of builders) {
       const source = readFileSync(join(BRAIN_ROOT, builderPath), "utf8");
+      expectTrue(`${builderPath} uses orchestrateProductBrainFatigue`, source.includes("orchestrateProductBrainFatigue"));
       expectTrue(`${builderPath} does not import recordExposureEvent`, !source.includes("recordExposureEvent"));
+      expectTrue(`${builderPath} does not import recordSurfacedOpportunities`, !source.includes("recordSurfacedOpportunities"));
       expectTrue(`${builderPath} does not import applyFatigue`, !source.includes("applyFatigue"));
     }
   }

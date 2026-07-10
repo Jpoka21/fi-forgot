@@ -1,7 +1,7 @@
 /**
  * Architecture guard tests for Brain Attention Planner (Step 4f).
  *
- * Prevents product builders from bypassing planAttentionOrder().
+ * Prevents product builders from bypassing orchestrateProductBrainFatigue().
  * Does not assert runtime behavior — source and export boundaries only.
  *
  * Run with:
@@ -75,13 +75,30 @@ function readBrainSource(relativePath: string): string {
   return readFileSync(join(BRAIN_ROOT, relativePath), "utf8");
 }
 
-section("product builders use planAttentionOrder()");
+section("product builders use orchestrateProductBrainFatigue");
 {
   for (const builderPath of PRODUCT_BUILDERS) {
     const source = readBrainSource(builderPath);
-    expectTrue(`${builderPath} imports planAttentionOrder`, source.includes("planAttentionOrder"));
-    expectTrue(`${builderPath} calls planAttentionOrder`, /planAttentionOrder\s*\(/.test(source));
+    expectTrue(`${builderPath} imports orchestrateProductBrainFatigue`, source.includes("orchestrateProductBrainFatigue"));
+    expectTrue(`${builderPath} calls orchestrateProductBrainFatigue`, /orchestrateProductBrainFatigue\s*\(/.test(source));
+    expectTrue(`${builderPath} does not call planAttentionOrder`, !source.includes("planAttentionOrder"));
+    expectTrue(`${builderPath} does not call recordSurfacedOpportunities`, !source.includes("recordSurfacedOpportunities"));
   }
+}
+
+section("product fatigue orchestration uses fatigue pipeline");
+{
+  const orchestrationSource = readBrainSource("product/orchestrateProductBrainFatigue.ts");
+  expectTrue("orchestration imports runAttentionFatiguePipeline", orchestrationSource.includes("runAttentionFatiguePipeline"));
+  expectTrue("orchestration imports recordSurfacedOpportunities", orchestrationSource.includes("recordSurfacedOpportunities"));
+}
+
+section("fatigue pipeline uses planAttentionOrder");
+{
+  const pipelineSource = readBrainSource("fatigue/runAttentionFatiguePipeline.ts");
+  expectTrue("pipeline imports planAttentionOrder", pipelineSource.includes("planAttentionOrder"));
+  expectTrue("pipeline calls planAttentionOrder", /planAttentionOrder\s*\(/.test(pipelineSource));
+  expectTrue("pipeline imports applyFatigue", pipelineSource.includes("applyFatigue"));
 }
 
 section("product builders do not import legacy rankers");

@@ -1,7 +1,5 @@
 /**
  * Append-only exposure event write entry point.
- *
- * Not activated in production until Step 5e+.
  */
 
 import { assertValidExposureOpportunityIdentity } from "./exposureTypes";

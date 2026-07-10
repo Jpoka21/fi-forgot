@@ -1,4 +1,7 @@
 export { applyFatigue } from "./applyFatigue";
+export { buildFatigueContext } from "./buildFatigueContext";
+export { getVisibleFatigueOpportunities } from "./getVisibleFatigueOpportunities";
+export { runAttentionFatiguePipeline } from "./runAttentionFatiguePipeline";
 export type {
   ExposureEvent,
   ExposureEventType,
@@ -9,6 +12,7 @@ export type {
   ListExposureEventsForUserOptions,
   LoadExposureSnapshotInput,
   RecordExposureEventInput,
+  RecordSurfacedOpportunitiesInput,
 } from "./exposure";
 export {
   assertValidExposureOpportunityIdentity,
@@ -18,6 +22,7 @@ export {
   loadExposureSnapshot,
   materializeExposureSnapshot,
   recordExposureEvent,
+  recordSurfacedOpportunities,
 } from "./exposure";
 export type {
   FatigueContext,
@@ -25,3 +30,4 @@ export type {
   FatigueOpportunity,
   FatigueSuppressionReason,
 } from "./fatigueTypes";
+export type { RunAttentionFatiguePipelineInput } from "./runAttentionFatiguePipeline";

@@ -1,20 +1,25 @@
 /**
  * PostgreSQL append-only exposure event repository.
  *
- * Loaded lazily so tests and no-op fatigue paths do not require DATABASE_URL.
+ * Database modules are loaded lazily so tests and no-op fatigue paths do not
+ * require DATABASE_URL until a write or read is attempted.
  */
 
 import { randomUUID } from "node:crypto";
-
-import { and, eq, gte } from "drizzle-orm";
-import { db } from "@workspace/db";
-import { brainOpportunityExposureEventsTable } from "@workspace/db/schema";
 
 import type { ExposureEvent, ExposureEventType } from "./exposureTypes";
 import type {
   InsertExposureEventInput,
   ListExposureEventsForUserOptions,
 } from "./exposureRepository";
+
+async function loadDb() {
+  const [{ db }, { brainOpportunityExposureEventsTable }] = await Promise.all([
+    import("@workspace/db"),
+    import("@workspace/db/schema"),
+  ]);
+  return { db, brainOpportunityExposureEventsTable };
+}
 
 function rowToExposureEvent(row: {
   id: string;
@@ -35,6 +40,8 @@ function rowToExposureEvent(row: {
 }
 
 export async function insertExposureEvent(input: InsertExposureEventInput): Promise<void> {
+  const { db, brainOpportunityExposureEventsTable } = await loadDb();
+
   await db.insert(brainOpportunityExposureEventsTable).values({
     id: randomUUID(),
     userId: input.userId,
@@ -50,6 +57,9 @@ export async function listExposureEventsForUser(
   userId: string,
   options: ListExposureEventsForUserOptions = {},
 ): Promise<ExposureEvent[]> {
+  const { and, eq, gte } = await import("drizzle-orm");
+  const { db, brainOpportunityExposureEventsTable } = await loadDb();
+
   const predicates = [eq(brainOpportunityExposureEventsTable.userId, userId)];
 
   if (options.since) {

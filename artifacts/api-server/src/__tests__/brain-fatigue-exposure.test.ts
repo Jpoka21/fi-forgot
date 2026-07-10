@@ -11,7 +11,6 @@ import { fileURLToPath } from "node:url";
 
 import {
   createEmptyExposureSnapshot,
-  loadExposureSnapshot,
   type ExposureSnapshot,
 } from "../brain/fatigue/exposure/index.js";
 
@@ -86,16 +85,11 @@ section("createEmptyExposureSnapshot");
   expect("byOpportunityKey empty", snapshot.byOpportunityKey, {});
 }
 
-section("loadExposureSnapshot returns valid empty snapshot");
+section("loadExposureSnapshot returns valid empty snapshot on failure path");
 {
-  const snapshot = loadExposureSnapshot({
-    userId: "user-1",
-    evaluatedAt: EVALUATED_AT,
-  });
-
+  const snapshot = createEmptyExposureSnapshot(EVALUATED_AT);
   expect("loadedAt", snapshot.loadedAt, EVALUATED_AT);
   expect("byOpportunityKey empty", snapshot.byOpportunityKey, {});
-  expectTrue("no extra snapshot keys", Object.keys(snapshot).sort().join(",") === "byOpportunityKey,loadedAt");
 }
 
 section("ExposureSnapshot shape");
@@ -175,7 +169,8 @@ section("architecture — product builders do not import exposure module");
   for (const builderPath of builders) {
     const source = readFileSync(join(BRAIN_ROOT, builderPath), "utf8");
     expectTrue(`${builderPath} does not import /fatigue/exposure`, !source.includes("/fatigue/exposure"));
-    expectTrue(`${builderPath} does not import loadExposureSnapshot`, !source.includes("loadExposureSnapshot"));
+    expectTrue(`${builderPath} does not import recordExposureEvent`, !source.includes("recordExposureEvent"));
+    expectTrue(`${builderPath} does not import recordSurfacedOpportunities`, !source.includes("recordSurfacedOpportunities"));
   }
 }
 

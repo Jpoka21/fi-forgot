@@ -3,7 +3,6 @@
  */
 
 import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
-import { planAttentionOrder } from "../attention/planAttentionOrder";
 import type { BrainExecutionResult } from "../orchestrator";
 import { buildDashboardBrainOpportunity } from "./buildDashboardBrainOpportunity";
 import {
@@ -11,6 +10,7 @@ import {
   DASHBOARD_BRAIN_OPPORTUNITIES_VERSION,
   type DashboardBrainOpportunities,
 } from "./dashboardBrainOpportunitiesTypes";
+import { orchestrateProductBrainFatigue } from "./orchestrateProductBrainFatigue";
 
 export interface DashboardRecipientInput {
   recipientId: string;
@@ -40,20 +40,33 @@ export async function buildDashboardBrainOpportunities(
     runBrain,
   });
 
-  const ranked = planAttentionOrder({ decisions, recipients });
-  const capped = ranked.slice(0, DASHBOARD_BRAIN_OPPORTUNITIES_MAX);
-  const opportunities = capped.map((item, index) =>
-    buildDashboardBrainOpportunity(
-      item.decision,
-      { recipientId: item.recipientId, recipientName: item.recipientName },
-      item.globalRank ?? index + 1,
-    ),
-  );
-
-  return {
-    version: DASHBOARD_BRAIN_OPPORTUNITIES_VERSION,
+  return orchestrateProductBrainFatigue({
+    userId,
     generatedAt,
-    opportunities,
-    spotlight: opportunities[0] ?? null,
-  };
+    decisions,
+    recipients,
+    buildFromVisible: (visibleFatigueOpportunities, buildGeneratedAt) => {
+      const capped = visibleFatigueOpportunities.slice(0, DASHBOARD_BRAIN_OPPORTUNITIES_MAX);
+      const opportunities = capped.map((item, index) =>
+        buildDashboardBrainOpportunity(
+          item.opportunity.decision,
+          {
+            recipientId: item.opportunity.recipientId,
+            recipientName: item.opportunity.recipientName,
+          },
+          item.opportunity.globalRank ?? index + 1,
+        ),
+      );
+
+      return {
+        product: {
+          version: DASHBOARD_BRAIN_OPPORTUNITIES_VERSION,
+          generatedAt: buildGeneratedAt,
+          opportunities,
+          spotlight: opportunities[0] ?? null,
+        },
+        deliveredFatigueOpportunities: capped,
+      };
+    },
+  });
 }

@@ -21,3 +21,8 @@ export {
   type LoadExposureSnapshotInput,
 } from "./loadExposureSnapshot";
 export { recordExposureEvent, type RecordExposureEventInput } from "./recordExposureEvent";
+export {
+  dedupeSurfacedFatigueOpportunities,
+  recordSurfacedOpportunities,
+  type RecordSurfacedOpportunitiesInput,
+} from "./recordSurfacedOpportunities";

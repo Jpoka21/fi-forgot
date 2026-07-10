@@ -3,7 +3,6 @@
  */
 
 import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
-import { planAttentionOrder } from "../attention/planAttentionOrder";
 import type { BrainExecutionResult } from "../orchestrator";
 import { buildConciergeInsight } from "./buildConciergeInsight";
 import { buildConciergeRecommendation } from "./buildConciergeRecommendation";
@@ -13,6 +12,8 @@ import {
   CONCIERGE_WORKSPACE_VERSION,
   type ConciergeWorkspaceResponse,
 } from "./conciergeTypes";
+import { orchestrateProductBrainFatigue } from "./orchestrateProductBrainFatigue";
+import type { FatigueOpportunity } from "../fatigue/fatigueTypes";
 
 export interface ConciergeRecipientInput {
   recipientId: string;
@@ -31,6 +32,23 @@ export interface BuildConciergeWorkspaceOptions {
   generatedAt?: string;
 }
 
+function dedupeDeliveredConciergeOpportunities(
+  recommendationItems: FatigueOpportunity[],
+  insightItems: FatigueOpportunity[],
+): FatigueOpportunity[] {
+  const seen = new Set<string>();
+  const delivered: FatigueOpportunity[] = [];
+
+  for (const item of [...recommendationItems, ...insightItems]) {
+    const key = item.opportunity.opportunityKey;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    delivered.push(item);
+  }
+
+  return delivered;
+}
+
 export async function buildConciergeWorkspace(
   options: BuildConciergeWorkspaceOptions,
 ): Promise<ConciergeWorkspaceResponse> {
@@ -42,27 +60,40 @@ export async function buildConciergeWorkspace(
     runBrain,
   });
 
-  const ranked = planAttentionOrder({ decisions, recipients });
-  const recommendationItems = ranked.slice(0, CONCIERGE_RECOMMENDATIONS_MAX);
-  const insightItems = ranked.slice(0, CONCIERGE_INSIGHTS_MAX);
-
-  const recommendations = recommendationItems.map((item) =>
-    buildConciergeRecommendation(item.decision, {
-      recipientId: item.recipientId,
-      recipientName: item.recipientName,
-    }),
-  );
-  const insights = insightItems.map((item) =>
-    buildConciergeInsight(item.decision, {
-      recipientId: item.recipientId,
-      recipientName: item.recipientName,
-    }),
-  );
-
-  return {
-    version: CONCIERGE_WORKSPACE_VERSION,
+  return orchestrateProductBrainFatigue({
+    userId,
     generatedAt,
-    recommendations,
-    insights,
-  };
+    decisions,
+    recipients,
+    buildFromVisible: (visibleFatigueOpportunities, buildGeneratedAt) => {
+      const recommendationItems = visibleFatigueOpportunities.slice(0, CONCIERGE_RECOMMENDATIONS_MAX);
+      const insightItems = visibleFatigueOpportunities.slice(0, CONCIERGE_INSIGHTS_MAX);
+
+      const recommendations = recommendationItems.map((item) =>
+        buildConciergeRecommendation(item.opportunity.decision, {
+          recipientId: item.opportunity.recipientId,
+          recipientName: item.opportunity.recipientName,
+        }),
+      );
+      const insights = insightItems.map((item) =>
+        buildConciergeInsight(item.opportunity.decision, {
+          recipientId: item.opportunity.recipientId,
+          recipientName: item.opportunity.recipientName,
+        }),
+      );
+
+      return {
+        product: {
+          version: CONCIERGE_WORKSPACE_VERSION,
+          generatedAt: buildGeneratedAt,
+          recommendations,
+          insights,
+        },
+        deliveredFatigueOpportunities: dedupeDeliveredConciergeOpportunities(
+          recommendationItems,
+          insightItems,
+        ),
+      };
+    },
+  });
 }

@@ -6,6 +6,7 @@
  */
 
 import { buildDecisionContext } from "../brain/decision/buildDecisionContext.js";
+
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -32,6 +33,23 @@ import {
   minimalRelationshipContext,
   type MinimalRelationshipContextOptions,
 } from "./fixtures/minimalRelationshipContext.js";
+
+const ORIGINAL_ENFORCE = process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"];
+const ORIGINAL_SHADOW = process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"];
+
+function restoreFatigueEnv(): void {
+  if (ORIGINAL_ENFORCE === undefined) {
+    delete process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"];
+  } else {
+    process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"] = ORIGINAL_ENFORCE;
+  }
+
+  if (ORIGINAL_SHADOW === undefined) {
+    delete process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"];
+  } else {
+    process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"] = ORIGINAL_SHADOW;
+  }
+}
 
 const GLOBAL_OPPORTUNITY_FIELDS = [
   "opportunityKey",
@@ -185,6 +203,10 @@ const SAMPLE_RECIPIENTS = [
   { recipientId: "a", recipientName: "Alice" },
   { recipientId: "c", recipientName: "Cara" },
 ];
+
+try {
+process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"] = "false";
+process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"] = "true";
 
 section("computeAttentionScore is deterministic");
 {
@@ -374,15 +396,15 @@ function readBrainSource(relativePath: string): string {
   return readFileSync(join(BRAIN_ROOT, relativePath), "utf8");
 }
 
-section("product builders consume planAttentionOrder");
+section("product builders consume orchestrateProductBrainFatigue");
 {
   const dashboardSource = readBrainSource("product/buildDashboardBrainOpportunities.ts");
   const notificationsSource = readBrainSource("product/buildNotifications.ts");
   const conciergeSource = readBrainSource("product/buildConciergeWorkspace.ts");
 
-  expectTrue("dashboard uses planAttentionOrder", dashboardSource.includes("planAttentionOrder"));
-  expectTrue("notifications uses planAttentionOrder", notificationsSource.includes("planAttentionOrder"));
-  expectTrue("concierge uses planAttentionOrder", conciergeSource.includes("planAttentionOrder"));
+  expectTrue("dashboard uses orchestrateProductBrainFatigue", dashboardSource.includes("orchestrateProductBrainFatigue"));
+  expectTrue("notifications uses orchestrateProductBrainFatigue", notificationsSource.includes("orchestrateProductBrainFatigue"));
+  expectTrue("concierge uses orchestrateProductBrainFatigue", conciergeSource.includes("orchestrateProductBrainFatigue"));
 
   expectTrue(
     "dashboard does not call rankRelationshipOpportunities",
@@ -494,6 +516,10 @@ async function runAsyncTests(): Promise<void> {
 }
 
 await runAsyncTests();
+
+} finally {
+  restoreFatigueEnv();
+}
 
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) {

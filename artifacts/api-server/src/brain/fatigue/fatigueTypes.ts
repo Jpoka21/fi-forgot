@@ -17,8 +17,7 @@ export interface FatigueContext {
 
 export type FatigueDecision = "visible" | "suppressed" | "deferred";
 
-/** Reserved for future suppression rules (Sprint 5f+). */
-export type FatigueSuppressionReason = string;
+export type FatigueSuppressionReason = "recently_surfaced";
 
 /**
  * Internal wrapper after fatigue evaluation.

@@ -14,7 +14,7 @@ import type { GlobalOpportunity } from "../brain/attention/globalOpportunityType
 import { applyFatigue } from "../brain/fatigue/applyFatigue.js";
 import {
   createEmptyExposureSnapshot,
-  loadExposureSnapshot,
+  materializeExposureSnapshot,
   type FatigueContext,
   type FatigueOpportunity,
 } from "../brain/fatigue/index.js";
@@ -23,6 +23,23 @@ import type { ProductBrainDecision } from "../brain/product/productBrainDecision
 const TEST_DIR = dirname(fileURLToPath(import.meta.url));
 const BRAIN_ROOT = join(TEST_DIR, "../brain");
 const FATIGUE_ROOT = join(BRAIN_ROOT, "fatigue");
+
+const ORIGINAL_ENFORCE = process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"];
+const ORIGINAL_SHADOW = process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"];
+
+function restoreFatigueEnv(): void {
+  if (ORIGINAL_ENFORCE === undefined) {
+    delete process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"];
+  } else {
+    process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"] = ORIGINAL_ENFORCE;
+  }
+
+  if (ORIGINAL_SHADOW === undefined) {
+    delete process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"];
+  } else {
+    process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"] = ORIGINAL_SHADOW;
+  }
+}
 
 const PLANNER_FIELD_NAMES = [
   "opportunityKey",
@@ -120,7 +137,7 @@ function fatigueContext(userId = "user-1"): FatigueContext {
   return {
     userId,
     evaluatedAt,
-    exposureSnapshot: loadExposureSnapshot({ userId, evaluatedAt }),
+    exposureSnapshot: createEmptyExposureSnapshot(evaluatedAt),
   };
 }
 
@@ -136,6 +153,10 @@ function snapshotGlobalOpportunity(opportunity: GlobalOpportunity): string {
     decision: opportunity.decision,
   });
 }
+
+try {
+process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"] = "false";
+process.env["BRAIN_FATIGUE_SHADOW_RECENTLY_SURFACED"] = "true";
 
 section("one output per input with identical ordering");
 {
@@ -253,6 +274,36 @@ section("empty input");
   expect("empty output", fatigued, []);
 }
 
+section("enforcement off preserves visible within recently_surfaced cooldown window");
+{
+  const ranked = planAttentionOrder({ decisions: SAMPLE_DECISIONS, recipients: SAMPLE_RECIPIENTS });
+  const evaluatedAt = "2026-07-10T14:00:00.000Z";
+  const context: FatigueContext = {
+    userId: "user-1",
+    evaluatedAt,
+    exposureSnapshot: materializeExposureSnapshot(
+      [
+        {
+          opportunityKey: "a:birthday",
+          recipientId: "a",
+          sourceRuleId: "birthday",
+          eventType: "surfaced",
+          occurredAt: "2026-07-10T12:00:00.000Z",
+        },
+      ],
+      evaluatedAt,
+    ),
+  };
+
+  process.env["BRAIN_FATIGUE_ENFORCE_RECENTLY_SURFACED"] = "false";
+  const fatigued = applyFatigue(ranked, context);
+
+  expectTrue(
+    "all visible when enforcement off",
+    fatigued.every((item) => item.fatigueDecision === "visible"),
+  );
+}
+
 section("applyFatigue ignores ExposureSnapshot — pass-through with loaded snapshot");
 {
   const ranked = planAttentionOrder({ decisions: SAMPLE_DECISIONS, recipients: SAMPLE_RECIPIENTS });
@@ -320,20 +371,31 @@ section("architecture — fatigue module has no product names");
   }
 }
 
-section("architecture — fatigue does not import planner ranking internals");
+section("architecture — fatigue pipeline owns planner handoff, not ranking internals");
 {
+  const pipelineSource = readFileSync(join(FATIGUE_ROOT, "runAttentionFatiguePipeline.ts"), "utf8");
+  const applyFatigueSource = readFileSync(join(FATIGUE_ROOT, "applyFatigue.ts"), "utf8");
   const source = listFatigueSources();
+  const sourceWithoutPipeline = source.replace(pipelineSource, "");
+
+  expectTrue("pipeline imports planAttentionOrder", pipelineSource.includes("planAttentionOrder"));
+  expectTrue("pipeline calls planAttentionOrder", /planAttentionOrder\s*\(/.test(pipelineSource));
+  expectTrue("applyFatigue does not import planAttentionOrder", !applyFatigueSource.includes("planAttentionOrder"));
 
   for (const token of [
-    "planAttentionOrder",
     "rankGlobalOpportunities",
     "computeAttentionScore",
     "collectProductBrainDecisions",
     "shouldIncludeOpportunity",
-    "buildGlobalOpportunityPool",
   ]) {
     expectTrue(`fatigue source has no ${token}`, !source.includes(token));
   }
+
+  expectTrue(
+    "only pipeline imports buildGlobalOpportunityPool recipient type",
+    pipelineSource.includes("buildGlobalOpportunityPool") &&
+      !sourceWithoutPipeline.includes("buildGlobalOpportunityPool"),
+  );
 
   expectTrue(
     "fatigue imports GlobalOpportunity type only from attention",
@@ -359,7 +421,7 @@ section("architecture — fatigue does not import product surfaces or DTO mapper
   }
 }
 
-section("architecture — product builders do not import fatigue module");
+section("architecture — product builders use orchestrateProductBrainFatigue");
 {
   const builders = [
     "product/buildDashboardBrainOpportunities.ts",
@@ -369,9 +431,14 @@ section("architecture — product builders do not import fatigue module");
 
   for (const builderPath of builders) {
     const source = readFileSync(join(BRAIN_ROOT, builderPath), "utf8");
+    expectTrue(`${builderPath} imports orchestrateProductBrainFatigue`, source.includes("orchestrateProductBrainFatigue"));
     expectTrue(`${builderPath} does not import applyFatigue`, !source.includes("applyFatigue"));
-    expectTrue(`${builderPath} does not import fatigue module`, !source.includes("/fatigue"));
+    expectTrue(`${builderPath} does not import recordSurfacedOpportunities`, !source.includes("recordSurfacedOpportunities"));
   }
+}
+
+} finally {
+  restoreFatigueEnv();
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

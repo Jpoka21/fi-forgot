@@ -3,7 +3,6 @@
  */
 
 import { collectProductBrainDecisions } from "../attention/collectProductBrainDecisions";
-import { planAttentionOrder } from "../attention/planAttentionOrder";
 import type { BrainExecutionResult } from "../orchestrator";
 import { buildNotificationItem } from "./buildNotificationItem";
 import {
@@ -11,6 +10,7 @@ import {
   NOTIFICATIONS_VERSION,
   type NotificationsResponse,
 } from "./notificationTypes";
+import { orchestrateProductBrainFatigue } from "./orchestrateProductBrainFatigue";
 
 export interface NotificationRecipientInput {
   recipientId: string;
@@ -40,20 +40,33 @@ export async function buildNotifications(
     runBrain,
   });
 
-  const ranked = planAttentionOrder({ decisions, recipients });
-  const capped = ranked.slice(0, NOTIFICATIONS_MAX);
-  const notifications = capped.map((item) =>
-    buildNotificationItem(
-      item.decision,
-      { recipientId: item.recipientId, recipientName: item.recipientName },
-      generatedAt,
-    ),
-  );
-
-  return {
-    version: NOTIFICATIONS_VERSION,
+  return orchestrateProductBrainFatigue({
+    userId,
     generatedAt,
-    unreadCount: notifications.length,
-    notifications,
-  };
+    decisions,
+    recipients,
+    buildFromVisible: (visibleFatigueOpportunities, buildGeneratedAt) => {
+      const capped = visibleFatigueOpportunities.slice(0, NOTIFICATIONS_MAX);
+      const notifications = capped.map((item) =>
+        buildNotificationItem(
+          item.opportunity.decision,
+          {
+            recipientId: item.opportunity.recipientId,
+            recipientName: item.opportunity.recipientName,
+          },
+          buildGeneratedAt,
+        ),
+      );
+
+      return {
+        product: {
+          version: NOTIFICATIONS_VERSION,
+          generatedAt: buildGeneratedAt,
+          unreadCount: notifications.length,
+          notifications,
+        },
+        deliveredFatigueOpportunities: capped,
+      };
+    },
+  });
 }
