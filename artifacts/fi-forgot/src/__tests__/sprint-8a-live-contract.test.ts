@@ -148,7 +148,7 @@ section("wizard + API + auth compatibility source checks");
   expectTrue("no old objective chip logic", !FLOW_SOURCE.includes("getA(\"objective\")"));
   expectTrue("PRIMARY REASON RULE", ROUTE_SOURCE.includes("PRIMARY REASON RULE"));
   expectTrue("no label leak instruction", ROUTE_SOURCE.includes('Never print internal labels'));
-  expectTrue("objective default kept", ROUTE_SOURCE.includes('objective = "Tell Them I Appreciate Them"'));
+  expectTrue("objective default kept", ROUTE_SOURCE.includes('"Tell Them I Appreciate Them"'));
   expectTrue("auth path unchanged", USE_CARD.includes("/api/generate-card"));
   expectTrue("auth path no primary", !USE_CARD.includes("primaryOccasionContext"));
   expectTrue("no events import in flow", !FLOW_SOURCE.includes("@workspace/events"));

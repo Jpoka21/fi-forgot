@@ -8,7 +8,13 @@ import { assembleRecipientContext } from "../services/recipient-context";
 import { buildContextSupplement, extractContextAvoids } from "../services/recipient-context-prompt";
 import { awardPoints } from "../services/brownie-points";
 import type { RecipientContext } from "../services/recipient-context";
-import { appendPrimaryAndSupportingDetailLines } from "./v2GenerateCardContextLines";
+import {
+  buildAuthenticatedContextRules,
+  buildMemoryDensityRequirement,
+  buildOrderedBodyContextLines,
+  buildPrimaryContentPriorityBlock,
+  formatMainObjectiveLine,
+} from "./v2GenerateCardContextLines";
 
 const router = Router();
 
@@ -337,19 +343,18 @@ function buildUserPrompt(
   signOff: string | undefined,
   contextSupplement: string | null,
   primaryOccasionContext?: string,
+  objectiveProvided = false,
 ): string {
-  const contextLines: string[] = [];
   const rel = relationship.toLowerCase();
+  const primary = primaryOccasionContext?.trim() || "";
+  const hasPrimary = primary.length > 0;
 
-  if (relAnswers && Object.keys(relAnswers).length > 0) {
-    contextLines.push("--- Relationship profile (use as raw material) ---");
-    for (const [key, val] of Object.entries(relAnswers)) {
-      if (val?.trim()) contextLines.push(`  ${key}: ${val}`);
-    }
-  }
-  const primary = primaryOccasionContext?.trim();
-  appendPrimaryAndSupportingDetailLines(contextLines, primaryOccasionContext, details);
-  if (avoidMentioning?.trim()) contextLines.push(`NEVER mention any of these: ${avoidMentioning}`);
+  const contextLines = buildOrderedBodyContextLines({
+    relAnswers,
+    primaryOccasionContext,
+    details,
+    avoidMentioning,
+  });
 
   const bodyContext = contextLines.length > 0
     ? `${contextLines.join("\n")}`
@@ -370,11 +375,22 @@ function buildUserPrompt(
 
   const isPro = PROFESSIONAL_RELS.includes(rel);
   const hasContext = !!(bodyContext || contextSupplement);
+  const hasContextSupplement = !!contextSupplement?.trim();
 
-  const options = isPro ? [
-    { label: "Best Match",      desc: `Professional, warm, specific to the work relationship with ${firstName}.` },
-    { label: "More Casual",     desc: `Warmer and slightly more personal — still appropriate for work. Keep all specific references from Best Match; only the register changes.` },
-    { label: "More Heartfelt",  desc: `More genuinely human — the version that actually means something. Keep all specific references from Best Match; go deeper on the emotional weight behind them.` },
+  const options = isPro ? (
+    hasPrimary ? [
+      { label: "Best Match",      desc: `Professional and warm. Center the primary reason for this card. Supporting memories are optional enrichment only — keep the work-appropriate register.` },
+      { label: "More Casual",     desc: `Same primary reason as Best Match; slightly warmer register. Do not change what the card is about; only the delivery.` },
+      { label: "More Heartfelt",  desc: `Same primary reason as Best Match; more genuinely human. Supporting detail stays optional and brief.` },
+    ] : [
+      { label: "Best Match",      desc: `Professional, warm, specific to the work relationship with ${firstName}.` },
+      { label: "More Casual",     desc: `Warmer and slightly more personal — still appropriate for work. Keep all specific references from Best Match; only the register changes.` },
+      { label: "More Heartfelt",  desc: `More genuinely human — the version that actually means something. Keep all specific references from Best Match; go deeper on the emotional weight behind them.` },
+    ]
+  ) : hasPrimary ? [
+    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Center the primary reason. Supporting memories are optional enrichment — use lightly only if they strengthen that reason. Do not invent extra memories.` },
+    { label: "More Casual",     desc: `Same primary reason and facts as Best Match — looser, more conversational voice. Casual means HOW you say it, not a different subject. Supporting detail remains optional. ${emotionGuide}` },
+    { label: "More Heartfelt",  desc: `Same primary reason and facts as Best Match — deeper emotional weight behind that reason. Do not replace the primary reason with supporting color or new invented details. ${emotionGuide}` },
   ] : hasContext ? [
     { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Opens with and uses the most personally relevant facts and memories from the context provided.` },
     { label: "More Casual",     desc: `Same specific content as Best Match — same facts, same memories from context — delivered in looser, more conversational voice. Think: the text you'd actually send. Casual means HOW you say it, not LESS of what you know about them. May lead with humor or a casual callback. ${emotionGuide}` },
@@ -387,32 +403,30 @@ function buildUserPrompt(
 
   const optionBlock = options.map(o => `Option: "${o.label}" — ${o.desc}`).join("\n");
 
-  const primaryReasonRule = primary
-    ? `\nPRIMARY REASON RULE: A primary reason for this card was provided above. Every card version must clearly address that primary reason as the main point of the message — lead with it or keep it as the central focus. Supporting memories or personal details are optional color only; do not let them replace or overshadow the primary reason, and do not repeat a supporting detail so often that it becomes the card's focus. Never print internal labels such as "Primary reason" or "Supporting memory" in the card text.\n`
+  const primaryBlocks = hasPrimary
+    ? `\n${buildPrimaryContentPriorityBlock()}
+
+PRIMARY REASON RULE: Every card version must clearly address the primary reason as the main point — lead with it or keep it as the central focus. Supporting memories are optional color only; do not let them replace or overshadow the primary reason. Never print internal labels such as "Primary reason" or "Supporting memory" in the card text.
+`
     : "";
+
+  const objectiveLine = formatMainObjectiveLine(objectiveProvided, objective);
+  const densityBlock = buildMemoryDensityRequirement(hasPrimary);
+  const authRules = buildAuthenticatedContextRules({
+    hasContextSupplement,
+    hasPrimary,
+  });
 
   return `Write 3 versions of a ${occasion} card for ${firstName} (${relationship}).
 ${context}
 Occasion: ${occasion}
-Main objective: ${objective}
-Requested tone: ${tone}
+${objectiveLine}Requested tone: ${tone}
 Emotional level: ${emotionGuide}
-${primaryReasonRule}
+${primaryBlocks}
 ${optionBlock}
 
-MEMORY DENSITY REQUIREMENT: If context is provided above, every card must contain at least 2 specific personal references from that context. Do not write a generic card when context exists. Weave multiple memories or facts together naturally rather than listing them. If no context is provided, write a shorter, honest, occasion-appropriate card — 3 to 5 sentences is correct. Do not invent context to satisfy this requirement.
-
-PRIORITY ORDER for context when space is limited:
-1. Event Briefing Answers (most specific to this card)
-2. Fresh Updates — last 90 days (most recent life moments)
-3. Follow-Up Answers (recent conversations)
-4. Profile Question Answers
-5. Fresh Updates — 90–180 days old
-6. Older context
-7. Card history (to avoid repetition)
-
-FRESH UPDATE OPENING RULE: If a fresh update dated within the last 45 days exists in the context above, at least one of the 3 card versions MUST open with a direct reference to it — not as a footnote or supporting detail, but as the emotional entry point. Connect it to what you know about this person's character or the relationship. A recent life moment is almost always the strongest possible opening hook.
-${!hasContext ? `
+${densityBlock}
+${authRules}${!hasContext ? `
 LOW-CONTEXT CONSTRAINT — no context was provided for this person. These phrases are banned in all 3 versions. Using any one of them is an automatic failure:
 "adventure", "adventures", "another adventure in the books", "shared moments", "shared so many moments", "we've been through", "been through a lot", "fun times and the hard ones", "the hard ones", "unforgettable memories", "unforgettable", "endless laughs", "always there for me", "always been there", "through thick and thin", "every step of the way", "road trip", "inside jokes", "gaming", "playlists", "family chaos", "unwavering support", "kindness", "what we've built", "how far we've come", "memories we've made"
 Each card must be 3–5 sentences. Warm, honest, and simple. No invented history. No implied past.
@@ -695,22 +709,7 @@ function calcCompleteness(relAnswers: Record<string, string>, details: string): 
 // ── Route ─────────────────────────────────────────────────────────────────────
 
 router.post("/v2/generate-card", async (req, res) => {
-  const {
-    firstName,
-    relationship,
-    occasion,
-    objective = "Tell Them I Appreciate Them",
-    tone = "Heartfelt",
-    emotionalOpenness = "Meaningful But Not Mushy",
-    avoidList = [],
-    details,
-    primaryOccasionContext,
-    avoidMentioning,
-    relAnswers = {},
-    senderName = "Me",
-    signOff,
-    recipientId,
-  } = req.body as {
+  const body = req.body as {
     firstName: string;
     relationship: string;
     occasion: string;
@@ -726,6 +725,28 @@ router.post("/v2/generate-card", async (req, res) => {
     signOff?: string;
     recipientId?: string;
   };
+
+  const {
+    firstName,
+    relationship,
+    occasion,
+    tone = "Heartfelt",
+    emotionalOpenness = "Meaningful But Not Mushy",
+    avoidList = [],
+    details,
+    primaryOccasionContext,
+    avoidMentioning,
+    relAnswers = {},
+    senderName = "Me",
+    signOff,
+    recipientId,
+  } = body;
+
+  const objectiveProvided =
+    typeof body.objective === "string" && body.objective.trim().length > 0;
+  const objective = objectiveProvided
+    ? body.objective!.trim()
+    : "Tell Them I Appreciate Them";
 
   if (!firstName || !relationship || !occasion) {
     res.status(400).json({ error: "firstName, relationship, and occasion are required" });
@@ -768,7 +789,7 @@ router.post("/v2/generate-card", async (req, res) => {
   logger.info({ firstName, relationship, occasion, archetypes, contextUsed: !!recipientContext }, "v2-generate-card: archetypes determined");
 
   const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList);
-  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement, primaryOccasionContext);
+  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement, primaryOccasionContext, objectiveProvided);
 
   try {
     const completion = await openai.chat.completions.create({

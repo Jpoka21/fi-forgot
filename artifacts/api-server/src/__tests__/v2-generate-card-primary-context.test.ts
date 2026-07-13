@@ -96,8 +96,8 @@ section("route accepts primaryOccasionContext and keeps objective default");
     ROUTE_SOURCE.includes("primaryOccasionContext?: string"),
   );
   expectTrue(
-    "objective default preserved",
-    ROUTE_SOURCE.includes('objective = "Tell Them I Appreciate Them"'),
+    "objective fallback string preserved",
+    ROUTE_SOURCE.includes('"Tell Them I Appreciate Them"'),
   );
   expectTrue(
     "PRIMARY REASON RULE present",
@@ -109,8 +109,7 @@ section("route accepts primaryOccasionContext and keeps objective default");
   );
   expectTrue(
     "passes primary into buildUserPrompt",
-    ROUTE_SOURCE.includes("primaryOccasionContext);") ||
-      ROUTE_SOURCE.includes(", primaryOccasionContext)"),
+    ROUTE_SOURCE.includes("primaryOccasionContext, objectiveProvided)"),
   );
 }
 
