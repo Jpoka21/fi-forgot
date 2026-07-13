@@ -69,22 +69,28 @@ export const FiButton = forwardRef<HTMLButtonElement, FiButtonProps>(
         aria-labelledby={ariaLabelledby}
         {...props}
       >
-        {loading ? (
-          <Loader2 className="fi-btn__spinner" aria-hidden />
-        ) : null}
-        <span className="fi-btn__label">
-          {leftIcon ? (
-            <span className="fi-btn__icon fi-btn__icon--leading" aria-hidden>
-              {leftIcon}
+        {asChild ? (
+          children
+        ) : (
+          <>
+            {loading ? (
+              <Loader2 className="fi-btn__spinner" aria-hidden />
+            ) : null}
+            <span className="fi-btn__label">
+              {leftIcon ? (
+                <span className="fi-btn__icon fi-btn__icon--leading" aria-hidden>
+                  {leftIcon}
+                </span>
+              ) : null}
+              {children}
+              {rightIcon ? (
+                <span className="fi-btn__icon fi-btn__icon--trailing" aria-hidden>
+                  {rightIcon}
+                </span>
+              ) : null}
             </span>
-          ) : null}
-          {children}
-          {rightIcon ? (
-            <span className="fi-btn__icon fi-btn__icon--trailing" aria-hidden>
-              {rightIcon}
-            </span>
-          ) : null}
-        </span>
+          </>
+        )}
       </Comp>
     );
   },
