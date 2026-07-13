@@ -825,7 +825,30 @@ See `125_BRAIN_CARD_PREPARATION_AUTHORIZATION.md` for full architecture referenc
 - Fatigue `recently_surfaced` applies across stage transition (no stage-specific exceptions)
 - Frontend passive link rendering only — no relationship intelligence
 
-## Sprint 7+ (planned)
+## Sprint 7 — Complete (Unified Event Domain)
+
+| # | Milestone | Status |
+|---|-----------|--------|
+| 1 | 7B.1 — Unified Event Domain foundation (`@workspace/events`) | Done |
+| 2 | 7B.2 — Architecture hardening | Done |
+| 3 | 7C.1 — Thin Brain adapter | Done |
+| 4 | 7C.2 — Preparation static metadata migration | Done |
+| 5 | 7C.3 — Briefing reference migration | Done |
+| 6 | 7C.4 — Availability metadata migration | Done |
+| 7 | 7C.5 — Integration metadata inspection (no forced Brain migration) | Done |
+| 8 | 7C.6 — Presentation metadata inspection (no forced Brain migration) | Done |
+| 9 | Final verification + documentation (`126_UNIFIED_EVENT_DOMAIN.md`) | Done |
+
+See `126_UNIFIED_EVENT_DOMAIN.md` for ownership, adapter APIs, and contributor rules.
+
+**Production behavior:**
+
+- Brain consumes static event facts only through `brain/events/eventDomain/adapter.ts`
+- Event Domain scheduling resolver remains stubbed and unused by production Brain
+- Sprint 6 pipeline ownership unchanged (rules, routing, URLs, provenance, fatigue, attention, outcomes)
+- Integration and presentation metadata remain in `@workspace/events` but are not exposed to Brain
+
+## Sprint 8+ (planned)
 
 See **Next Integration Targets**:
 
@@ -834,6 +857,7 @@ See **Next Integration Targets**:
 3. Legacy engine retirement
 4. Single batch Brain execution (performance)
 5. Fatigue rule expansion and enforcement rollout
+6. Event Domain scheduling activation / additional consumer migrations (when approved)
 
 Remaining original milestones
 

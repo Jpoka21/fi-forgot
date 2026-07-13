@@ -1,6 +1,5 @@
 export { buildEventPreparationContext } from "./buildEventPreparationContext";
 export type {
-  BrainEventConstraints,
   BrainEventDefinition,
   BrainEventFixedCalendarMonthDay,
   BrainEventId,
@@ -27,3 +26,32 @@ export {
   CALENDAR_EVENT_RULE_TARGETS,
   ruleTargetEventId,
 } from "./ruleEventTargeting";
+export type {
+  BrainAdapterTiming,
+  BrainBriefingQuestionSetId,
+  BrainCanonicalEventId,
+  BrainEventAvailabilityMetadata,
+  BrainEventBriefingMetadata,
+  BrainEventPreparationMetadata,
+  BrainEventSurface,
+  BrainEventTimingMetadata,
+  BrainEventView,
+} from "./eventDomain/index.js";
+export {
+  getBrainEventAvailabilityMetadata,
+  getBrainEventBriefingMetadata,
+  getBrainEventPreparationMetadata,
+  getBrainEventTimingMetadata,
+  getBrainEventView,
+  getCanonicalEventDisplayLabel,
+  isBrainEventAvailableOnSurface,
+  isEventAvailableForRelationship,
+  isSupportedBrainEventId,
+  listBrainEventAvailabilityMetadata,
+  listBrainEventBriefingMetadata,
+  listBrainEventPreparationMetadata,
+  listBrainEventViews,
+  listSupportedBrainEventIds,
+  requireCanonicalEventId,
+  toCanonicalEventId,
+} from "./eventDomain/index.js";

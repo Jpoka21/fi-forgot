@@ -2,9 +2,10 @@
  * Enriches a mapped ActionPlan with server-side product routing metadata.
  *
  * Pure enrichment after mapDecisionToPlan — no URLs or side effects.
+ * Briefing labels come from Event Domain briefing refs via the Brain adapter.
  */
 
-import { getBrainEventDefinition } from "../events/brainEventCatalog";
+import { getBrainEventBriefingMetadata } from "../events/eventDomain/index.js";
 import { ruleTargetEventId } from "../events/ruleEventTargeting";
 import type { BrainDecisionOutcome } from "../types";
 import { RULE_ID_TO_QUESTION_CATEGORY } from "../questions/ruleIdQuestionCategoryMapping";
@@ -33,13 +34,13 @@ function resolveActionPlanRouting(
   const targetEventId = ruleTargetEventId(sourceRuleId);
 
   if (targetEventId != null) {
-    const definition = getBrainEventDefinition(targetEventId);
+    const briefing = getBrainEventBriefingMetadata(targetEventId);
 
     if (outcome === "ask_question") {
       return {
         experience: "event_briefing",
         eventId: targetEventId,
-        briefingEventLabel: definition.briefingEventLabel,
+        briefingEventLabel: briefing.questionSetTitle,
       };
     }
 
@@ -47,7 +48,7 @@ function resolveActionPlanRouting(
       return {
         experience: "card_preparation_briefing",
         eventId: targetEventId,
-        briefingEventLabel: definition.briefingEventLabel,
+        briefingEventLabel: briefing.questionSetTitle,
       };
     }
   }

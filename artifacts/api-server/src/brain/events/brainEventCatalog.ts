@@ -1,50 +1,66 @@
 /**
- * Brain event catalog — canonical server-side calendar occasion definitions.
+ * Brain event catalog — Brain-facing definitions assembled from the Event Domain adapter.
+ *
+ * Canonical identity, labels, and static timing metadata come from `@workspace/events`
+ * via `eventDomain` preparation metadata. This module is a compatibility facade for
+ * existing Brain consumers — not an independent identity authority.
+ *
+ * Rule registration, sourceRuleId, priority, and confidence remain Brain-owned.
  */
 
 import type {
   BrainEventDefinition,
   BrainEventId,
+  BrainEventTimingDefinition,
 } from "./brainEventCatalogTypes";
+import {
+  getBrainEventPreparationMetadata,
+  isSupportedBrainEventId,
+  listSupportedBrainEventIds,
+  type BrainAdapterTiming,
+} from "./eventDomain/index.js";
 
-export const BRAIN_EVENT_IDS = [
-  "birthday",
-  "anniversary",
-  "valentines_day",
-] as const satisfies readonly BrainEventId[];
+/**
+ * Compatibility export — values must match Event Domain EVENT_IDS.
+ * Sourced from the adapter (not an independent catalog).
+ */
+export const BRAIN_EVENT_IDS: readonly BrainEventId[] = listSupportedBrainEventIds();
 
-const BIRTHDAY_EVENT: BrainEventDefinition = {
-  eventId: "birthday",
-  briefingEventLabel: "Birthday",
-  timing: { kind: "recipient_date", field: "birthday" },
-};
+function mapTiming(timing: BrainAdapterTiming): BrainEventTimingDefinition {
+  if (timing.kind === "recipient_date") {
+    return { kind: "recipient_date", field: timing.field };
+  }
+  return { kind: "fixed_calendar", monthDay: timing.monthDay };
+}
 
-const ANNIVERSARY_EVENT: BrainEventDefinition = {
-  eventId: "anniversary",
-  briefingEventLabel: "Anniversary",
-  timing: { kind: "recipient_date", field: "anniversary" },
-};
+function buildDefinition(eventId: BrainEventId): BrainEventDefinition {
+  const prep = getBrainEventPreparationMetadata(eventId);
 
-const VALENTINES_DAY_EVENT: BrainEventDefinition = {
-  eventId: "valentines_day",
-  briefingEventLabel: "Valentine's Day",
-  timing: { kind: "fixed_calendar", monthDay: "02-14" },
-  constraints: {
-    relationshipTypes: ["Wife", "Girlfriend", "Husband", "Boyfriend"],
-  },
-};
+  return Object.freeze({
+    eventId: prep.eventId,
+    briefingEventLabel: prep.briefingEventLabel,
+    timing: mapTiming(prep.timing),
+  });
+}
 
-export const BRAIN_EVENT_CATALOG: Readonly<Record<BrainEventId, BrainEventDefinition>> = {
-  birthday: BIRTHDAY_EVENT,
-  anniversary: ANNIVERSARY_EVENT,
-  valentines_day: VALENTINES_DAY_EVENT,
-};
+/**
+ * Compatibility catalog map — built from Event Domain via adapter preparation metadata.
+ */
+export const BRAIN_EVENT_CATALOG: Readonly<Record<BrainEventId, BrainEventDefinition>> =
+  Object.freeze(
+    Object.fromEntries(
+      BRAIN_EVENT_IDS.map((eventId) => [eventId, buildDefinition(eventId)]),
+    ) as Record<BrainEventId, BrainEventDefinition>,
+  );
 
 export function isBrainEventId(value: string): value is BrainEventId {
-  return value in BRAIN_EVENT_CATALOG;
+  return isSupportedBrainEventId(value);
 }
 
 export function getBrainEventDefinition(eventId: BrainEventId): BrainEventDefinition {
+  if (!isBrainEventId(eventId)) {
+    throw new Error(`Unknown Brain eventId: ${eventId}`);
+  }
   return BRAIN_EVENT_CATALOG[eventId];
 }
 

@@ -1,6 +1,10 @@
 /**
  * Builds normalized event preparation facts for all applicable catalog events.
  *
+ * Static labels/timing descriptors come from the Event Domain adapter.
+ * Occurrence calculation, preparation windows, and briefing/card projection
+ * remain Brain-owned.
+ *
  * Events that do not apply (missing recipient date, failed relationship constraints)
  * are omitted from byEventId rather than populated with placeholder facts.
  */
@@ -9,9 +13,10 @@ import { evaluateEventBriefingCompletion } from "../../services/event-briefing";
 import { projectEventCardCycleStatus } from "../../services/event-cards";
 import type { RelationshipContext } from "../types";
 import { isEventWithinPreparationWindow } from "../decision/eventWindow";
-import { BRAIN_EVENT_IDS, getBrainEventDefinition } from "./brainEventCatalog";
+import { BRAIN_EVENT_IDS } from "./brainEventCatalog";
 import type { BrainEventId } from "./brainEventCatalogTypes";
 import type { EventPreparationContext, EventPreparationFacts } from "./eventPreparationTypes";
+import { getBrainEventPreparationMetadata } from "./eventDomain/index.js";
 import { resolveCatalogEventTiming } from "./resolveCatalogEventTiming";
 import { resolveOccurrenceDateStr } from "./resolveOccurrenceDateStr";
 
@@ -24,8 +29,8 @@ export function buildEventPreparationContext(input: {
   const byEventId: Partial<Record<BrainEventId, EventPreparationFacts>> = {};
 
   for (const eventId of BRAIN_EVENT_IDS) {
-    const definition = getBrainEventDefinition(eventId);
-    const timing = resolveCatalogEventTiming(definition, relationshipContext, referenceDate);
+    const prep = getBrainEventPreparationMetadata(eventId);
+    const timing = resolveCatalogEventTiming(eventId, relationshipContext, referenceDate);
 
     if (!timing.applicable || timing.cycleYear == null) {
       continue;
@@ -33,16 +38,16 @@ export function buildEventPreparationContext(input: {
 
     const briefingComplete = evaluateEventBriefingCompletion({
       eventId,
-      briefingEventLabel: definition.briefingEventLabel,
+      briefingEventLabel: prep.briefingEventLabel,
       cycleYear: timing.cycleYear,
       briefingSummary: relationshipContext.briefingSummary,
     }).complete;
 
     const cardCycleStatus = projectEventCardCycleStatus({
       eventId,
-      briefingEventLabel: definition.briefingEventLabel,
+      briefingEventLabel: prep.briefingEventLabel,
       cycleYear: timing.cycleYear,
-      occurrenceDateStr: resolveOccurrenceDateStr(definition, relationshipContext),
+      occurrenceDateStr: resolveOccurrenceDateStr(eventId, relationshipContext),
       briefingSummary: relationshipContext.briefingSummary,
       cards: relationshipContext.writingHistory.cards,
       referenceDate,

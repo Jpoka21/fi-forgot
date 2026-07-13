@@ -1,0 +1,16 @@
+{
+  "name": "@workspace/events",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx src/__tests__/events-domain.test.ts && tsx src/__tests__/events-architecture.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "catalog:"
+  }
+}

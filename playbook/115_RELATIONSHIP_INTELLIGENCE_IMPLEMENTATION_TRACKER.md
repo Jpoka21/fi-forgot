@@ -869,6 +869,54 @@ No frontend relationship intelligence. No frontend event inference.
 
 ---
 
+# Unified Event Domain (Integration Sprint 7)
+
+Status:
+
+**Complete (7B.1–7C.6 + final verification)**
+
+Authoritative shared event knowledge package `@workspace/events` with thin Brain adapter. See `126_UNIFIED_EVENT_DOMAIN.md`.
+
+| Phase | Component | Status |
+|-------|-----------|--------|
+| 7B.1 | Unified Event Domain foundation (`lib/events`) | ✅ |
+| 7B.2 | Architecture hardening (closed IDs, completeness, stub scheduling) | ✅ |
+| 7C.1 | Thin Brain adapter (`brain/events/eventDomain`) | ✅ |
+| 7C.2 | Preparation static metadata migration | ✅ |
+| 7C.3 | Briefing reference migration | ✅ |
+| 7C.4 | Availability metadata migration | ✅ |
+| 7C.5 | Integration metadata inspection (no forced Brain migration) | ✅ |
+| 7C.6 | Presentation metadata inspection (no forced Brain migration) | ✅ |
+| Final | Verification, architecture guards, playbook consolidation | ✅ |
+
+### Completed capabilities
+
+- **`@workspace/events`** — identity, scheduling metadata (stubbed resolver), availability, briefing refs, integration metadata, presentation metadata, projections
+- **Brain adapter** — sole production importer of `@workspace/events`
+- **Migrated Brain facts** — identity, preparation labels/timing descriptors, briefing refs, availability surfaces/roles
+- **Unexposed to Brain** — integration + presentation metadata (no consumer)
+- **Preserved Sprint 6 pipeline** — occurrence execution, rules, routing, URLs, provenance, fatigue, attention, outcomes unchanged in ownership
+
+### Deferred (not marked complete)
+
+- Activate Event Domain occurrence resolution
+- Frontend / Handwrytten / AI / admin projection migrations
+- Additional events beyond birthday, anniversary, Valentine’s Day
+
+### Guard tests
+
+- `lib/events/src/__tests__/events-domain.test.ts`
+- `lib/events/src/__tests__/events-architecture.test.ts`
+- `artifacts/api-server/src/__tests__/event-domain-adapter.test.ts`
+- `artifacts/api-server/src/__tests__/brain-event-domain-architecture.test.ts`
+- `artifacts/api-server/src/__tests__/event-preparation-metadata.test.ts`
+- `artifacts/api-server/src/__tests__/event-briefing-metadata.test.ts`
+- `artifacts/api-server/src/__tests__/event-availability-metadata.test.ts`
+- `artifacts/api-server/src/__tests__/event-integration-metadata.test.ts`
+- `artifacts/api-server/src/__tests__/event-presentation-metadata.test.ts`
+
+---
+
 # Development Brain Inspector
 
 Status:

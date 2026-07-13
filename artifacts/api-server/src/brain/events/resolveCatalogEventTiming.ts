@@ -1,8 +1,10 @@
 /**
  * Resolves timing inputs for a catalog event from RelationshipContext.
+ *
+ * Occurrence calculation remains Brain-owned (Event Domain scheduling stub unused).
+ * Static timing descriptors and romantic eligibility come from the Event Domain adapter.
  */
 
-import { isRomanticRelationshipType } from "../decision/relationshipTypeMatchers";
 import {
   computeAnniversaryDaysAway,
   computeBirthdayDaysAway,
@@ -10,9 +12,12 @@ import {
   resolveEventCycleYear,
 } from "../decision/eventTimingUtils";
 import type { RelationshipContext } from "../types";
-import type { BrainEventDefinition } from "./brainEventCatalogTypes";
-
-const VALENTINES_MONTH_DAY = "02-14";
+import type { BrainEventId } from "./brainEventCatalogTypes";
+import {
+  getBrainEventTimingMetadata,
+  isEventAvailableForRelationship,
+  isSupportedBrainEventId,
+} from "./eventDomain/index.js";
 
 export interface ResolvedEventTiming {
   applicable: boolean;
@@ -21,15 +26,27 @@ export interface ResolvedEventTiming {
 }
 
 export function resolveCatalogEventTiming(
-  definition: BrainEventDefinition,
+  eventId: BrainEventId,
   relationshipContext: RelationshipContext,
   referenceDate: Date,
 ): ResolvedEventTiming {
-  const generatedAt = relationshipContext.generatedAt;
+  if (!isSupportedBrainEventId(eventId)) {
+    return { applicable: false, daysUntilEvent: null, cycleYear: null };
+  }
 
-  if (definition.timing.kind === "recipient_date") {
+  const generatedAt = relationshipContext.generatedAt;
+  const relationshipType = relationshipContext.relationship?.type ?? null;
+
+  // Declarative Event Domain availability, translated by Brain adapter.
+  if (!isEventAvailableForRelationship(eventId, relationshipType)) {
+    return { applicable: false, daysUntilEvent: null, cycleYear: null };
+  }
+
+  const { timing } = getBrainEventTimingMetadata(eventId);
+
+  if (timing.kind === "recipient_date") {
     const dateStr =
-      definition.timing.field === "birthday"
+      timing.field === "birthday"
         ? relationshipContext.relationship?.birthday
         : relationshipContext.relationship?.anniversary;
 
@@ -38,7 +55,7 @@ export function resolveCatalogEventTiming(
     }
 
     const daysUntilEvent =
-      definition.timing.field === "birthday"
+      timing.field === "birthday"
         ? computeBirthdayDaysAway(dateStr, generatedAt)
         : computeAnniversaryDaysAway(dateStr, generatedAt);
 
@@ -49,14 +66,10 @@ export function resolveCatalogEventTiming(
     };
   }
 
-  const relationshipType = relationshipContext.relationship?.type ?? null;
-  if (!isRomanticRelationshipType(relationshipType)) {
-    return { applicable: false, daysUntilEvent: null, cycleYear: null };
-  }
-
+  // Fixed-calendar: monthDay from Event Domain via adapter; days-away remains Brain-owned.
   return {
     applicable: true,
     daysUntilEvent: computeValentinesDaysAway(generatedAt),
-    cycleYear: resolveEventCycleYear(VALENTINES_MONTH_DAY, referenceDate),
+    cycleYear: resolveEventCycleYear(timing.monthDay, referenceDate),
   };
 }

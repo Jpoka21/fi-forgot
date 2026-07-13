@@ -204,6 +204,8 @@ These documents define the Brain and deterministic opportunity rules.
 
 | 125_BRAIN_CARD_PREPARATION_AUTHORIZATION.md | Authoritative calendar card preparation: event preparation, rules, routing, URLs, provenance, attention activation, and frontend passive boundary. |
 
+| 126_UNIFIED_EVENT_DOMAIN.md | Unified Event Domain (`@workspace/events`): ownership, modules, Brain adapter boundary, Sprint 7 migration status, and contributor rules. |
+
 | 115_RELATIONSHIP_INTELLIGENCE_IMPLEMENTATION_TRACKER.md | Living implementation tracker for Brain infrastructure and integration sprints. |
 
 ---

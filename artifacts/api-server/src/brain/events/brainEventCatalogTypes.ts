@@ -1,16 +1,28 @@
 /**
  * Brain event catalog types — server-only calendar occasion definitions.
  *
- * Event identity (`eventId`) is stable across rules. Rule identity (`sourceRuleId`)
- * remains independent for attribution, opportunity keys, and fatigue.
+ * Event identity (`eventId`) is stable across rules and sourced from
+ * `@workspace/events` via the Brain eventDomain adapter.
+ *
+ * Rule identity (`sourceRuleId`) remains independent for attribution,
+ * opportunity keys, and fatigue. eventId !== sourceRuleId by contract.
  */
 
-/** Registered calendar occasion ids in the Brain event catalog. */
-export type BrainEventId = "birthday" | "anniversary" | "valentines_day";
+import type { BrainCanonicalEventId } from "./eventDomain/index.js";
+
+/**
+ * Compatibility alias — must remain identical to Event Domain EVENT_IDS.
+ * Authoritative source: `@workspace/events` via eventDomain adapter.
+ */
+export type BrainEventId = BrainCanonicalEventId;
 
 export type BrainEventRecipientDateField = "birthday" | "anniversary";
 
-export type BrainEventFixedCalendarMonthDay = "02-14";
+/**
+ * Fixed-calendar month-day string from Event Domain timing metadata.
+ * Not an independent Brain calendar catalog — values come from the adapter.
+ */
+export type BrainEventFixedCalendarMonthDay = string;
 
 export type BrainEventTimingDefinition =
   | {
@@ -22,14 +34,12 @@ export type BrainEventTimingDefinition =
       monthDay: BrainEventFixedCalendarMonthDay;
     };
 
-export interface BrainEventConstraints {
-  /** When set, the occasion applies only to matching relationship types. */
-  relationshipTypes?: readonly string[];
-}
-
+/**
+ * Compatibility facade shape for existing Brain consumers.
+ * Static fields are populated from eventDomain preparation metadata.
+ */
 export interface BrainEventDefinition {
   eventId: BrainEventId;
   briefingEventLabel: string;
   timing: BrainEventTimingDefinition;
-  constraints?: BrainEventConstraints;
 }
