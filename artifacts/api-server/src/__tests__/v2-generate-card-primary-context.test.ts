@@ -101,15 +101,20 @@ section("route accepts primaryOccasionContext and keeps objective default");
   );
   expectTrue(
     "PRIMARY REASON RULE present",
-    ROUTE_SOURCE.includes("PRIMARY REASON RULE"),
+    ROUTE_SOURCE.includes("buildPrimaryReasonRule") || ROUTE_SOURCE.includes("PRIMARY REASON RULE"),
   );
   expectTrue(
     "label leak guard present",
-    ROUTE_SOURCE.includes("Never print internal labels"),
+    ROUTE_SOURCE.includes("buildPrimaryReasonRule") ||
+      ROUTE_SOURCE.includes("Never print internal labels"),
   );
   expectTrue(
     "passes primary into buildUserPrompt",
     ROUTE_SOURCE.includes("primaryOccasionContext, objectiveProvided)"),
+  );
+  expectTrue(
+    "system prompt gated on primary presence",
+    ROUTE_SOURCE.includes("!!primaryOccasionContext?.trim()"),
   );
 }
 

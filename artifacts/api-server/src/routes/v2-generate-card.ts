@@ -13,6 +13,7 @@ import {
   buildMemoryDensityRequirement,
   buildOrderedBodyContextLines,
   buildPrimaryContentPriorityBlock,
+  buildPrimaryReasonRule,
   formatMainObjectiveLine,
 } from "./v2GenerateCardContextLines";
 
@@ -196,6 +197,7 @@ function buildSystemPrompt(
   occasion: string,
   archetypes: string[],
   avoidList: string[],
+  hasPrimary = false,
 ): string {
   const relRules = buildRelRules(relationship, occasion);
   const archetypeStr = archetypes.join(" + ");
@@ -203,17 +205,23 @@ function buildSystemPrompt(
     ? `\n\nHARD AVOIDS (from sender preferences — absolute, no exceptions):\n${avoidList.map(p => `- "${p}"`).join("\n")}`
     : "";
 
-  return `You are a professional card writer for F*I Forgot — a high-end card service that writes cards people would have written themselves if they'd had the time.
+  const specificityBlock = hasPrimary
+    ? `1. SPECIFICITY
+   A primary reason for this card is provided in the user message. That primary reason is the required subject and alone satisfies specificity — do NOT require a second unrelated personal reference merely to satisfy this section.
+   Keep important concrete nouns and named subjects from the primary reason visible in the card. Do not replace them with vague stand-ins ("what I needed", "everything you did", "being there for me", "your help").
+   Supporting memories are optional enrichment only. A vivid supporting memory must never outrank or replace the primary subject.
+   If a card could be sent to 100 people without modification, it has failed.
+   Good: name the concrete deed from the primary reason.
+   Bad: vague gratitude that could apply to any favor.
 
-Relationship: ${relationship} (${archetypeStr} occasion: ${occasion})
+   PROHIBITED — do NOT use any of these, even abstractly:
+   - Implied shared history: "adventures", "another adventure", "shared moments", "we've been through", "shared so many moments", "fun times and the hard ones", "memories we've made", "unforgettable memories", "all we've shared"
+   - Abstract emotional claims: "endless laughs", "always there for me", "always been there", "through thick and thin", "every step of the way"
+   - Invented traits or qualities: "your kindness", "your warmth", "your humor", "your steady presence", "your integrity", "your support"
+   - Anything implying a documented past: road trips, inside jokes, playlists, gaming, family chaos, "what we've built", "how far we've come"
 
-${relRules}
-
-═══════════════════════════════════════════
-QUALITY REQUIREMENTS — every card must pass all of these
-═══════════════════════════════════════════
-
-1. SPECIFICITY
+   A simple truthful card that keeps the primary subject passes. A card that invents history or erases the primary subject fails.`
+    : `1. SPECIFICITY
    IF context is provided above (profile answers, memories, fresh updates):
    Every card must contain at least 2 specific personal references drawn from that context.
    If a card could be sent to 100 people without modification, it has failed.
@@ -237,21 +245,47 @@ QUALITY REQUIREMENTS — every card must pass all of these
    CORRECT (no context): "Matty, birthdays are a good excuse to say I'm glad to have you as a friend. I hope this year brings you good things, good people, and plenty worth looking forward to. Happy Birthday."
    WRONG (no context): "Here's to another adventure in the books — so many memories, endless laughs, the fun times and the hard ones."
 
-   A simple truthful card passes. A card that invents or implies history fails.
+   A simple truthful card passes. A card that invents or implies history fails.`;
 
-2. MEMORY WEAVING
+  const memoryWeavingBlock = hasPrimary
+    ? `2. MEMORY WEAVING
+   When a primary reason exists: center the card on that primary subject. Supporting details may add how they acted or one brief scene — woven as color around the primary, never as a replacement subject.
+   Do not invent additional memories to weave. Write warmly without invented history.`
+    : `2. MEMORY WEAVING
    IF multiple memories are present in context: Weave them together naturally rather than listing them.
    Good: "Between the kitchen renovation finally wrapping up and your new pickleball phase, it feels like you've turned this year into two completely different adventures."
    Bad: "Congrats on finishing your kitchen." / "You enjoy pickleball."
    IF one memory is present: Build the card around that single anchor — do not invent additional memories to weave.
-   IF no memories are present: Do not invent memories to weave. Write warmly without invented history.
+   IF no memories are present: Do not invent memories to weave. Write warmly without invented history.`;
 
-3. OPENING LINES
+  const openingBlock = hasPrimary
+    ? `3. OPENING LINES
+   The first sentence must feel personal. Never open with a generic greeting.
+   Do NOT open with: "Happy Birthday", "Just wanted to wish you", "Hope you have", any holiday greeting phrase.
+   Open with or immediately center the primary reason for this card. Supporting memories may follow as color, but must not lead the card into a different subject.
+   Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle — while keeping the same primary subject.`
+    : `3. OPENING LINES
    The first sentence must feel personal. Never open with a generic greeting.
    Do NOT open with: "Happy Birthday", "Just wanted to wish you", "Hope you have", any holiday greeting phrase.
    When context exists, open with: a memory, an observation, a callback, a joke, a recent life update, a reflection.
    When no context exists, open with: a relationship reflection, an occasion reflection, or honest appreciation — NOT an invented memory or invented shared experience.
-   Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle.
+   Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle.`;
+
+  return `You are a professional card writer for F*I Forgot — a high-end card service that writes cards people would have written themselves if they'd had the time.
+
+Relationship: ${relationship} (${archetypeStr} occasion: ${occasion})
+
+${relRules}
+
+═══════════════════════════════════════════
+QUALITY REQUIREMENTS — every card must pass all of these
+═══════════════════════════════════════════
+
+${specificityBlock}
+
+${memoryWeavingBlock}
+
+${openingBlock}
 
 4. CLOSING LINES
    End with something memorable: appreciation, a shared memory, optimism about something happening in their life, or a relationship-specific sentiment.
@@ -406,7 +440,7 @@ function buildUserPrompt(
   const primaryBlocks = hasPrimary
     ? `\n${buildPrimaryContentPriorityBlock()}
 
-PRIMARY REASON RULE: Every card version must clearly address the primary reason as the main point — lead with it or keep it as the central focus. Supporting memories are optional color only; do not let them replace or overshadow the primary reason. Never print internal labels such as "Primary reason" or "Supporting memory" in the card text.
+${buildPrimaryReasonRule()}
 `
     : "";
 
@@ -788,7 +822,7 @@ router.post("/v2/generate-card", async (req, res) => {
   const archetypes = determineArchetypes(relationship, occasion, objective, tone);
   logger.info({ firstName, relationship, occasion, archetypes, contextUsed: !!recipientContext }, "v2-generate-card: archetypes determined");
 
-  const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList);
+  const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList, !!primaryOccasionContext?.trim());
   const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement, primaryOccasionContext, objectiveProvided);
 
   try {

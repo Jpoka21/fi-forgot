@@ -1,5 +1,5 @@
 /**
- * Pure helpers for v2 card user-prompt context assembly (Sprint 8A / 8B).
+ * Pure helpers for v2 card user-prompt context assembly (Sprint 8A / 8B / 8D.2B).
  * Kept separate from the Express route so unit tests do not load OpenAI/DB.
  */
 
@@ -75,18 +75,33 @@ export function buildOrderedBodyContextLines(opts: {
 export function buildPrimaryContentPriorityBlock(): string {
   return `CONTENT PRIORITY (order of importance):
 1. Occasion
-2. Primary reason — mandatory center of every version
+2. Primary reason — mandatory center of every version; the explicit subject of the card
 3. Relationship voice
 4. Tone and emotional level
-5. Supporting memories — optional enrichment only
+5. Supporting memories — optional enrichment only; never the subject
 
 All three versions must revolve around the same primary occasion reason. They may differ in voice, warmth, pacing, or phrasing — not in what the card is fundamentally about.
-Relationship profile answers are background characterization only — they shape how the card feels (voice, warmth, perspective), not what the card is about. Use them to reinforce the primary reason when they naturally fit; never let traits, habits, or long-term descriptions replace the primary reason as the central story.`;
+Relationship profile answers are background characterization only — they shape how the card feels (voice, warmth, perspective), not what the card is about. Use them to reinforce the primary reason when they naturally fit; never let traits, habits, or long-term descriptions replace the primary reason as the central story.
+
+STRUCTURE WHEN A PRIMARY REASON EXISTS:
+Primary subject → optional supporting how/color → appreciation.
+Supporting may explain how they acted or deepen feeling. It must not replace, outrank, or erase the primary subject.`;
+}
+
+/**
+ * User-prompt rule that forces retention of concrete primary subject nouns.
+ */
+export function buildPrimaryReasonRule(): string {
+  return `PRIMARY REASON RULE: The primary reason is the explicit subject of every card version. Every version must clearly name that concrete reason — keep its important concrete nouns and named subjects visible in the text. Do not replace them with vague stand-ins such as "what I needed", "everything you did", "being there for me", "your help", or "all you've done".
+Supporting memories are optional color only — how they acted or one brief scene — and must not become the main subject, replace the primary reason, or turn the card into a different event.
+Slight rewording is fine when the concrete subject still remains (e.g. "new health insurance" may become "health insurance coverage"). Vague substitution that drops the deed is not (e.g. "health insurance" → "what I needed" is forbidden).
+Never print internal labels such as "Primary reason" or "Supporting memory" in the card text.`;
 }
 
 export function buildMemoryDensityRequirement(hasPrimary: boolean): string {
   if (hasPrimary) {
-    return `PRIMARY-CENTERED SPECIFICITY: A primary reason was provided. Every card must clearly address that primary reason — that alone is enough specificity. Do not require a second personal reference. Do not invent a supporting memory to satisfy density. Supporting memories or personal details are optional; use them only briefly when they naturally strengthen the primary reason, and never let them become the main subject. Natural paraphrasing of the primary reason is allowed — keep cards warm and human, not stiff or mechanical. Do not expand a small supporting detail into a fabricated story.`;
+    return `PRIMARY-CENTERED SPECIFICITY: A primary reason was provided. That primary reason alone satisfies the specificity requirement — do not require a second personal reference, and do not invent a supporting memory to satisfy density. Supporting memories or personal details are optional enrichment only; use them briefly when they strengthen the primary reason, and never let a vivid supporting memory outrank or become the main subject.
+SUBJECT-PRESERVING PARAPHRASE ONLY: You may lightly rephrase the primary reason for warmth, but the concrete subject must remain intact and recognizable. Do not generalize concrete nouns into vague placeholders (forbidden pattern: health insurance → "what I needed"; hospital visit → "what happened"; new job → "everything"). Do not expand a small supporting detail into a fabricated story that displaces the primary subject.`;
   }
 
   return `MEMORY DENSITY REQUIREMENT: If context is provided above, every card must contain at least 2 specific personal references from that context. Do not write a generic card when context exists. Weave multiple memories or facts together naturally rather than listing them. If no context is provided, write a shorter, honest, occasion-appropriate card — 3 to 5 sentences is correct. Do not invent context to satisfy this requirement.`;

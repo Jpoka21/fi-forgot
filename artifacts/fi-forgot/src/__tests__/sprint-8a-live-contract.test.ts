@@ -23,6 +23,10 @@ const ROUTE_SOURCE = readFileSync(
   join(TEST_DIR, "../../../api-server/src/routes/v2-generate-card.ts"),
   "utf8",
 );
+const PROMPT_HELPER_SOURCE = readFileSync(
+  join(TEST_DIR, "../../../api-server/src/routes/v2GenerateCardContextLines.ts"),
+  "utf8",
+);
 const USE_CARD = readFileSync(
   join(TEST_DIR, "../app/card-creation/hooks/useCardCreation.ts"),
   "utf8",
@@ -146,8 +150,15 @@ section("wizard + API + auth compatibility source checks");
   expectTrue("primary in REAL_DETAIL_FIELDS", FLOW_SOURCE.includes('"primaryOccasionContext"'));
   expectTrue("results chip not full answer", FLOW_SOURCE.includes('"primary reason"'));
   expectTrue("no old objective chip logic", !FLOW_SOURCE.includes("getA(\"objective\")"));
-  expectTrue("PRIMARY REASON RULE", ROUTE_SOURCE.includes("PRIMARY REASON RULE"));
-  expectTrue("no label leak instruction", ROUTE_SOURCE.includes('Never print internal labels'));
+  expectTrue(
+    "PRIMARY REASON RULE",
+    PROMPT_HELPER_SOURCE.includes("PRIMARY REASON RULE") &&
+      ROUTE_SOURCE.includes("buildPrimaryReasonRule"),
+  );
+  expectTrue(
+    "no label leak instruction",
+    PROMPT_HELPER_SOURCE.includes("Never print internal labels"),
+  );
   expectTrue("objective default kept", ROUTE_SOURCE.includes('"Tell Them I Appreciate Them"'));
   expectTrue("auth path unchanged", USE_CARD.includes("/api/generate-card"));
   expectTrue("auth path no primary", !USE_CARD.includes("primaryOccasionContext"));

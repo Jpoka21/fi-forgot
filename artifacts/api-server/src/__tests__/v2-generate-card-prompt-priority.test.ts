@@ -14,6 +14,7 @@ import {
   buildMemoryDensityRequirement,
   buildOrderedBodyContextLines,
   buildPrimaryContentPriorityBlock,
+  buildPrimaryReasonRule,
   formatMainObjectiveLine,
 } from "../routes/v2GenerateCardContextLines.js";
 
@@ -103,7 +104,9 @@ section("content priority and same-reason instruction");
   expectTrue("has CONTENT PRIORITY", block.includes("CONTENT PRIORITY"));
   expectTrue("occasion first", block.includes("1. Occasion"));
   expectTrue("primary mandatory", block.includes("Primary reason — mandatory center"));
+  expectTrue("primary is explicit subject", block.includes("the explicit subject of the card"));
   expectTrue("supporting optional", block.includes("Supporting memories — optional"));
+  expectTrue("supporting never the subject", block.includes("never the subject"));
   expectTrue(
     "same reason across versions",
     block.includes("revolve around the same primary occasion reason"),
@@ -115,6 +118,10 @@ section("content priority and same-reason instruction");
   expectTrue(
     "profile must not replace primary as central story",
     block.includes("never let traits, habits, or long-term descriptions replace the primary reason"),
+  );
+  expectTrue(
+    "structure primary then supporting then appreciation",
+    block.includes("Primary subject → optional supporting how/color → appreciation"),
   );
 }
 
@@ -170,14 +177,113 @@ section("memory density gated on primary");
 {
   const withPrimary = buildMemoryDensityRequirement(true);
   expectTrue("primary-centered label", withPrimary.includes("PRIMARY-CENTERED SPECIFICITY"));
-  expectTrue("no second reference required", withPrimary.includes("Do not require a second personal reference"));
-  expectTrue("do not invent supporting", withPrimary.includes("Do not invent a supporting memory"));
-  expectTrue("primary alone enough", withPrimary.includes("that alone is enough specificity"));
+  expectTrue(
+    "no second reference required",
+    withPrimary.includes("do not require a second personal reference"),
+  );
+  expectTrue("do not invent supporting", withPrimary.includes("Do not invent a supporting memory") || withPrimary.includes("do not invent a supporting memory"));
+  expectTrue(
+    "primary alone enough",
+    withPrimary.includes("alone satisfies the specificity requirement"),
+  );
   expectTrue("no legacy two-ref force", !withPrimary.includes("at least 2 specific personal references"));
+  expectTrue(
+    "broad natural paraphrasing removed",
+    !withPrimary.includes("Natural paraphrasing of the primary reason is allowed"),
+  );
+  expectTrue(
+    "subject-preserving paraphrase only",
+    withPrimary.includes("SUBJECT-PRESERVING PARAPHRASE ONLY"),
+  );
+  expectTrue(
+    "forbids generalizing concrete nouns",
+    withPrimary.includes('health insurance → "what I needed"') &&
+      withPrimary.includes("concrete subject must remain intact"),
+  );
+  expectTrue(
+    "supporting must not outrank primary",
+    withPrimary.includes("never let a vivid supporting memory outrank"),
+  );
 
   const legacy = buildMemoryDensityRequirement(false);
   expectTrue("legacy density preserved", legacy.includes("MEMORY DENSITY REQUIREMENT"));
   expectTrue("legacy two refs", legacy.includes("at least 2 specific personal references"));
+}
+
+section("8D.2B live QA: Mom thank-you health insurance subject retention");
+{
+  const PRIMARY =
+    "Helping me by going out of her way to find me new health insurance";
+  const SUPPORTING = "She fought with everyone until she got what I needed";
+
+  const lines = buildOrderedBodyContextLines({
+    primaryOccasionContext: PRIMARY,
+    details: SUPPORTING,
+  });
+  const priority = buildPrimaryContentPriorityBlock();
+  const reasonRule = buildPrimaryReasonRule();
+  const density = buildMemoryDensityRequirement(true);
+  const assembled = [
+    ...lines,
+    priority,
+    reasonRule,
+    density,
+  ].join("\n");
+
+  const primaryIdx = lines.findIndex((l) => l.startsWith("Primary reason for this card:"));
+  const supportingIdx = lines.findIndex((l) =>
+    l.startsWith("Supporting memory or personal detail:"),
+  );
+
+  expectTrue("primary before supporting", primaryIdx >= 0 && supportingIdx > primaryIdx);
+  expectTrue("exact primary text in prompt", lines[primaryIdx]!.includes(PRIMARY));
+  expectTrue("exact supporting text in prompt", lines[supportingIdx]!.includes(SUPPORTING));
+  expectTrue(
+    "requires concrete subject retention",
+    reasonRule.includes("important concrete nouns and named subjects visible"),
+  );
+  expectTrue(
+    "forbids vague substitution phrases",
+    reasonRule.includes('"what I needed"') &&
+      reasonRule.includes('"everything you did"') &&
+      reasonRule.includes('"being there for me"'),
+  );
+  expectTrue(
+    "supporting cannot become the subject",
+    reasonRule.includes("must not become the main subject") &&
+      priority.includes("never the subject"),
+  );
+  expectTrue(
+    "no conflicting two-reference density with primary",
+    !density.includes("at least 2 specific personal references"),
+  );
+  expectTrue(
+    "assembled prompt still names health insurance in primary",
+    assembled.includes("new health insurance"),
+  );
+  expectTrue(
+    "no broad paraphrasing loophole that erases insurance",
+    !assembled.includes("Natural paraphrasing of the primary reason is allowed"),
+  );
+  expectTrue(
+    "example forbids insurance → what I needed",
+    assembled.includes('health insurance → "what I needed"') ||
+      reasonRule.includes('"what I needed"'),
+  );
+
+  // Legacy path without primary unchanged
+  const legacyDensity = buildMemoryDensityRequirement(false);
+  expectTrue(
+    "without primary still requires two refs when context exists",
+    legacyDensity.includes("at least 2 specific personal references"),
+  );
+  const noPrimaryLines = buildOrderedBodyContextLines({
+    details: SUPPORTING,
+  });
+  expectTrue(
+    "without primary uses legacy details label",
+    noPrimaryLines.some((l) => l.startsWith("Extra details / memories to include:")),
+  );
 }
 
 section("guest omits auth rules; auth preserves and yields to primary");
@@ -248,12 +354,26 @@ section("route wiring and option descriptors");
     ROUTE_SOURCE.includes("buildMemoryDensityRequirement"),
   );
   expectTrue(
+    "uses buildPrimaryReasonRule",
+    ROUTE_SOURCE.includes("buildPrimaryReasonRule"),
+  );
+  expectTrue(
+    "system prompt receives hasPrimary gate",
+    ROUTE_SOURCE.includes("buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList, !!primaryOccasionContext?.trim())") ||
+      (ROUTE_SOURCE.includes("hasPrimary = false") &&
+        ROUTE_SOURCE.includes("alone satisfies specificity")),
+  );
+  expectTrue(
     "uses auth rules helper",
     ROUTE_SOURCE.includes("buildAuthenticatedContextRules"),
   );
   expectTrue(
     "internal objective fallback string retained",
     ROUTE_SOURCE.includes('"Tell Them I Appreciate Them"'),
+  );
+  expectTrue(
+    "legacy two-ref specificity preserved for no-primary system path",
+    ROUTE_SOURCE.includes("Every card must contain at least 2 specific personal references drawn from that context."),
   );
 }
 
