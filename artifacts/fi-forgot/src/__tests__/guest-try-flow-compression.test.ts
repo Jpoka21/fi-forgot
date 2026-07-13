@@ -358,6 +358,34 @@ section("Sprint 8C.3 guest Tone screen hosts optional avoidMentioning");
   );
 }
 
+section("select CONTINUE vs guest Tone GENERATE (rebase resolution)");
+{
+  expectTrue(
+    "select no longer auto-advances in setAnswer",
+    !/kind === "select"\)\s*advanceStep/.test(FLOW_SOURCE) &&
+      !FLOW_SOURCE.includes('if (currentStep.kind === "select") advanceStep'),
+  );
+  expectTrue(
+    "non-guest-tone select shows CONTINUE",
+    FLOW_SOURCE.includes("isSelectKind && !isGuestToneStep") &&
+      FLOW_SOURCE.includes("CONTINUE →"),
+  );
+  expectTrue(
+    "guest Tone still uses GENERATE not CONTINUE auto path",
+    FLOW_SOURCE.includes("advanceGuestTone") &&
+      FLOW_SOURCE.includes("GENERATE →") &&
+      FLOW_SOURCE.includes("isGuestToneStep"),
+  );
+  expectTrue(
+    "guest Tone still has intensity / avoid / signOff / sticky",
+    FLOW_SOURCE.includes("GUEST_INTENSITY_CHOICES") &&
+      FLOW_SOURCE.includes("Anything we should avoid mentioning?") &&
+      FLOW_SOURCE.includes("How should we sign it?") &&
+      FLOW_SOURCE.includes('position: "sticky"') &&
+      FLOW_SOURCE.includes("scroll clear of sticky GENERATE"),
+  );
+}
+
 section("Sprint 8C.6 guest Who copy, signature, sticky GENERATE");
 {
   expect(

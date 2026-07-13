@@ -455,7 +455,7 @@ export default function CardFlowV2() {
       next = clearPrimaryOccasionContextOnOccasionChange(next);
     }
     setAnswers(next);
-    if (currentStep.kind === "select") advanceStep(next);
+    // Select steps stay on screen until CONTINUE (Replit UX). Guest Tone uses GENERATE instead.
   }
 
   function toggleMulti(option: string) {
@@ -913,6 +913,29 @@ export default function CardFlowV2() {
                   }}
                 />
               ))}
+            {isSelectKind && !isGuestToneStep && (
+              <button
+                type="button"
+                disabled={!selectedStr.trim()}
+                onClick={() => advanceStep()}
+                style={{
+                  width: "100%",
+                  marginTop: 16,
+                  minHeight: 48,
+                  padding: 14,
+                  borderRadius: 12,
+                  border: "none",
+                  background: selectedStr.trim() ? RED : `${BLACK}20`,
+                  color: selectedStr.trim() ? WHITE : GRAY,
+                  fontFamily: "'Bebas Neue', cursive",
+                  fontSize: "1.2rem",
+                  letterSpacing: "0.08em",
+                  cursor: selectedStr.trim() ? "pointer" : "default",
+                }}
+              >
+                CONTINUE →
+              </button>
+            )}
             {isGuestToneStep && (
               <div style={{ marginTop: 16, marginBottom: 8 }}>
                 <button
