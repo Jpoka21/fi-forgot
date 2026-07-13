@@ -90,7 +90,6 @@ overrides:
   esbuild>@esbuild/sunos-x64: '-'
   esbuild>@esbuild/win32-arm64: '-'
   esbuild>@esbuild/win32-ia32: '-'
-  esbuild>@esbuild/win32-x64: '-'
   esbuild>@esbuild/aix-ppc64: '-'
   esbuild>@esbuild/android-arm: '-'
   esbuild>@esbuild/android-arm64: '-'
@@ -252,6 +251,10 @@ importers:
       thread-stream:
         specifier: 3.1.0
         version: 3.1.0
+    optionalDependencies:
+      '@esbuild/win32-x64':
+        specifier: 0.27.3
+        version: 0.27.3
 
   artifacts/fi-forgot:
     devDependencies:
@@ -469,6 +472,9 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
     optionalDependencies:
+      '@esbuild/win32-x64':
+        specifier: 0.27.3
+        version: 0.27.3
       '@rollup/rollup-darwin-arm64':
         specifier: 4.59.0
         version: 4.59.0
@@ -867,6 +873,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [linux]
+
+  '@esbuild/win32-x64@0.27.3':
+    resolution: {integrity: sha512-4uJGhsxuptu3OcpVAzli+/gWusVGwZZHTlS63hh++ehExkVT8SgiEf7/uC/PclrPPkLhZqGgCTjd0VWLo6xMqA==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [win32]
 
   '@eslint-community/eslint-utils@4.9.1':
     resolution: {integrity: sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==}
@@ -4506,6 +4518,9 @@ snapshots:
   '@esbuild/linux-x64@0.27.3':
     optional: true
 
+  '@esbuild/win32-x64@0.27.3':
+    optional: true
+
   '@eslint-community/eslint-utils@4.9.1(eslint@9.39.4(jiti@2.6.1))':
     dependencies:
       eslint: 9.39.4(jiti@2.6.1)
@@ -6450,6 +6465,7 @@ snapshots:
   esbuild@0.27.3:
     optionalDependencies:
       '@esbuild/linux-x64': 0.27.3
+      '@esbuild/win32-x64': 0.27.3
 
   escalade@3.2.0: {}
 

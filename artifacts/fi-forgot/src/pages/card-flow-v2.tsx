@@ -6,6 +6,13 @@ import { dispatchBrownieAward } from "@/lib/brownie-points-context";
 import { FiCardCheckoutPricing } from "@/app/components/pricing";
 import { resolveUserPlan } from "@/lib/plan";
 import { useIsMobile } from "@/components/layout/PageShell";
+import {
+  TRY_OCCASIONS,
+  clearPrimaryOccasionContextOnOccasionChange,
+  isValidPrimaryOccasionContext,
+  resolveGuestPrimaryOccasionQuestion,
+} from "@/app/card-creation/guestOccasionPrimaryQuestions";
+import { packTryGenerateCardBody } from "@/app/card-creation/packTryGenerateCardBody";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -23,18 +30,7 @@ const RELATIONSHIPS = [
   "Neighbor","Teacher","Coach","Other",
 ];
 
-const OCCASIONS = [
-  "Birthday","Anniversary","Thank You","Congratulations","Get Well",
-  "Sympathy","Apology","Thinking Of You","Just Because","Holiday",
-  "Encouragement","Retirement","New Baby","Wedding","Graduation","Other",
-];
-
-const OBJECTIVES = [
-  "Make Them Laugh","Bring Back A Memory","Tell Them I Appreciate Them",
-  "Tell Them I'm Proud Of Them","Encourage Them","Comfort Them",
-  "Celebrate Them","Say Something I Normally Don't Say",
-  "Roast Them Affectionately","Keep It Short And Simple",
-];
+const OCCASIONS = [...TRY_OCCASIONS];
 
 const TONES = [
   "Funny","Roast","Heartfelt","Nostalgic","Simple","Romantic",
@@ -123,7 +119,7 @@ const UNIVERSAL_QUESTIONS: QuestionScreen[] = [
   { id: "holidayName",      question: "Which holiday?", kind: "select",
     options: ["Christmas","Hanukkah","Diwali","Eid","Easter","Thanksgiving","Mother's Day","Father's Day","Valentine's Day","New Year's","4th of July","Halloween","Other"],
     condition: (a) => a["occasion"] === "Holiday" },
-  { id: "objective",        question: "What should this card mainly do?", kind: "select", options: OBJECTIVES },
+  { id: "primaryOccasionContext", question: "What is the main thing this card should say?", kind: "textarea" },
   { id: "tone",             question: "What tone should this card have?", kind: "select", options: TONES },
   { id: "emotionalOpenness",question: "How openly emotional should it sound?", kind: "select", options: EMOTIONAL_OPTIONS },
   { id: "avoidList",        question: "What should this card NEVER sound like?", hint: "Select all that apply — or skip", kind: "multiselect", options: AVOID_OPTIONS, optional: true },
@@ -135,6 +131,7 @@ const UNIVERSAL_QUESTIONS: QuestionScreen[] = [
 
 // Fields that constitute "one real thing about this person" — beyond name/relationship/occasion
 const REAL_DETAIL_FIELDS = [
+  "primaryOccasionContext",
   "details", "interests",
   "siblingFact", "parentFact", "spouseSmile",
   "proudOf", "recognizingFor", "grandFact", "proStrength",
@@ -430,7 +427,10 @@ export default function CardFlowV2() {
 
   function setAnswer(value: string | string[]) {
     if (!currentStep) return;
-    const next = { ...answers, [currentStep.id]: value };
+    let next = { ...answers, [currentStep.id]: value };
+    if (currentStep.id === "occasion") {
+      next = clearPrimaryOccasionContextOnOccasionChange(next);
+    }
     setAnswers(next);
     if (currentStep.kind === "select") advanceStep(next);
   }
@@ -502,27 +502,29 @@ export default function CardFlowV2() {
     const get = (id: string) => { const v = withAnswers[id]; return Array.isArray(v) ? v.join(", ") : (v ?? ""); };
 
     const occasionForPicker = get("occasion") === "Holiday" && get("holidayName") ? `Holiday - ${get("holidayName")}` : get("occasion");
+    const generateBody = packTryGenerateCardBody({
+      firstName: firstName.trim(),
+      relationship,
+      occasion: occasionForPicker,
+      primaryOccasionContext: get("primaryOccasionContext"),
+      tone: get("tone"),
+      emotionalOpenness: get("emotionalOpenness"),
+      avoidList: (withAnswers["avoidList"] as string[] | undefined) ?? [],
+      birthday: get("birthday") || undefined,
+      interests: get("interests") || undefined,
+      details: get("details") || undefined,
+      avoidMentioning: get("avoidMentioning") || undefined,
+      relAnswers,
+      senderName: user?.name ?? "Me",
+      signOff: get("signOff") || undefined,
+      recipientId,
+    });
 
     try {
       const [res, pickRes] = await Promise.all([
         fetch("/api/v2/generate-card", {
           method: "POST", headers: getApiHeaders(),
-          body: JSON.stringify({
-            firstName: firstName.trim(),
-            relationship,
-            occasion:          occasionForPicker,
-            objective:         get("objective"),
-            tone:              get("tone"),
-            emotionalOpenness: get("emotionalOpenness"),
-            avoidList:         (withAnswers["avoidList"] as string[] | undefined) ?? [],
-            birthday:          get("birthday"),
-            details:           [get("interests") ? `Their interests: ${get("interests")}` : "", get("details")].filter(Boolean).join("\n\n"),
-            avoidMentioning:   get("avoidMentioning"),
-            relAnswers,
-            senderName:        user?.name ?? "Me",
-            signOff:           get("signOff") || undefined,
-            recipientId,
-          }),
+          body: JSON.stringify(generateBody),
         }),
         fetch(`/api/personal-cards/pick-card?eventType=${encodeURIComponent(occasionForPicker)}`),
       ]);
@@ -738,6 +740,18 @@ export default function CardFlowV2() {
     const isMultiKind    = currentStep.kind === "multiselect";
     const isTextKind     = currentStep.kind === "textarea";
     const isDateKind     = currentStep.kind === "date";
+    const holidayNameAnswer =
+      typeof answers["holidayName"] === "string" ? answers["holidayName"] : undefined;
+    const displayQuestion =
+      currentStep.id === "primaryOccasionContext"
+        ? resolveGuestPrimaryOccasionQuestion(
+            String(answers["occasion"] ?? ""),
+            firstName,
+            holidayNameAnswer,
+          )
+        : currentStep.question;
+    const isPrimaryStep = currentStep.id === "primaryOccasionContext";
+    const primaryReady = !isPrimaryStep || isValidPrimaryOccasionContext(textVal);
 
     return (
       <WizardShell progress={progressPct} onBack={goBack}>
@@ -745,7 +759,7 @@ export default function CardFlowV2() {
           {firstName.toUpperCase()} · {relationship.toUpperCase()}
         </div>
         <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.03em", color: BLACK, lineHeight: 1.15, marginBottom: currentStep.hint ? 6 : 22 }}>
-          {currentStep.question}
+          {displayQuestion}
         </h2>
         {currentStep.hint && (
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY, marginBottom: 20 }}>{currentStep.hint}</p>
@@ -855,8 +869,20 @@ export default function CardFlowV2() {
             />
             <div style={{ display: "flex", gap: 10 }}>
               <button
-                onClick={() => { setAnswers({ ...answers, [currentStep.id]: textVal }); advanceStep(); }}
-                style={{ flex: 1, padding: 14, borderRadius: 12, border: "none", background: RED, color: WHITE, fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em", cursor: "pointer" }}
+                onClick={() => {
+                  if (isPrimaryStep && !isValidPrimaryOccasionContext(textVal)) return;
+                  const next = { ...answers, [currentStep.id]: textVal };
+                  setAnswers(next);
+                  advanceStep(next);
+                }}
+                disabled={isPrimaryStep && !primaryReady}
+                style={{
+                  flex: 1, padding: 14, borderRadius: 12, border: "none",
+                  background: isPrimaryStep && !primaryReady ? `${BLACK}20` : RED,
+                  color: isPrimaryStep && !primaryReady ? GRAY : WHITE,
+                  fontFamily: "'Bebas Neue', cursive", fontSize: "1.2rem", letterSpacing: "0.08em",
+                  cursor: isPrimaryStep && !primaryReady ? "default" : "pointer",
+                }}
               >
                 CONTINUE →
               </button>
@@ -973,16 +999,18 @@ export default function CardFlowV2() {
     const personalTouches: string[] = [];
     const occ = getA("occasion");
     const ton = getA("tone");
-    const obj = getA("objective");
     if (occ) personalTouches.push(occ + " occasion");
     if (ton) personalTouches.push(ton.toLowerCase() + " tone");
-    if (obj && !obj.toLowerCase().includes("simple")) personalTouches.push(obj.replace(/^Tell Them /i, "").toLowerCase());
+    if (getA("primaryOccasionContext").trim()) personalTouches.push("primary reason");
     if (getA("interests").trim()) personalTouches.push("hobbies & interests");
     if (getA("details").trim()) personalTouches.push("personal details");
     if (getA("signOff").trim()) personalTouches.push("custom sign-off");
     if (getA("avoidMentioning").trim()) personalTouches.push("sensitive topics excluded");
 
-    const hasRichContext = getA("details").trim() || getA("interests").trim();
+    const hasRichContext =
+      getA("primaryOccasionContext").trim() ||
+      getA("details").trim() ||
+      getA("interests").trim();
     const showImprove = !!recipientId && !hasRichContext;
 
     // ── Confirmation screen ──────────────────────────────────────────────────

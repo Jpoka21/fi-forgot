@@ -45,7 +45,7 @@ Output: `artifacts/fi-forgot/dist/public/`
 ## Local Windows limitations
 
 - Root `pnpm install` may fail: `preinstall` script requires `sh` (use Git Bash, WSL, or `pnpm install --ignore-scripts`).
-- `@rollup/rollup-win32-x64-msvc` may be missing after `--ignore-scripts`, blocking local `build`.
+- Replit `pnpm-workspace.yaml` overrides historically stripped most native platform packages. Local Windows builds need `@esbuild/win32-x64` (and the existing rollup/lightningcss/oxide optional deps). Prefer `pnpm install` with Git `sh` on `PATH`.
 - **Use Replit/Linux for production build verification** when Windows native deps are absent.
 
 PowerShell env for local commands:

@@ -8,6 +8,7 @@ import { assembleRecipientContext } from "../services/recipient-context";
 import { buildContextSupplement, extractContextAvoids } from "../services/recipient-context-prompt";
 import { awardPoints } from "../services/brownie-points";
 import type { RecipientContext } from "../services/recipient-context";
+import { appendPrimaryAndSupportingDetailLines } from "./v2GenerateCardContextLines";
 
 const router = Router();
 
@@ -335,6 +336,7 @@ function buildUserPrompt(
   senderName: string,
   signOff: string | undefined,
   contextSupplement: string | null,
+  primaryOccasionContext?: string,
 ): string {
   const contextLines: string[] = [];
   const rel = relationship.toLowerCase();
@@ -345,7 +347,8 @@ function buildUserPrompt(
       if (val?.trim()) contextLines.push(`  ${key}: ${val}`);
     }
   }
-  if (details?.trim()) contextLines.push(`Extra details / memories to include: ${details}`);
+  const primary = primaryOccasionContext?.trim();
+  appendPrimaryAndSupportingDetailLines(contextLines, primaryOccasionContext, details);
   if (avoidMentioning?.trim()) contextLines.push(`NEVER mention any of these: ${avoidMentioning}`);
 
   const bodyContext = contextLines.length > 0
@@ -384,13 +387,17 @@ function buildUserPrompt(
 
   const optionBlock = options.map(o => `Option: "${o.label}" — ${o.desc}`).join("\n");
 
+  const primaryReasonRule = primary
+    ? `\nPRIMARY REASON RULE: A primary reason for this card was provided above. Every card version must clearly address that primary reason as the main point of the message — lead with it or keep it as the central focus. Supporting memories or personal details are optional color only; do not let them replace or overshadow the primary reason, and do not repeat a supporting detail so often that it becomes the card's focus. Never print internal labels such as "Primary reason" or "Supporting memory" in the card text.\n`
+    : "";
+
   return `Write 3 versions of a ${occasion} card for ${firstName} (${relationship}).
 ${context}
 Occasion: ${occasion}
 Main objective: ${objective}
 Requested tone: ${tone}
 Emotional level: ${emotionGuide}
-
+${primaryReasonRule}
 ${optionBlock}
 
 MEMORY DENSITY REQUIREMENT: If context is provided above, every card must contain at least 2 specific personal references from that context. Do not write a generic card when context exists. Weave multiple memories or facts together naturally rather than listing them. If no context is provided, write a shorter, honest, occasion-appropriate card — 3 to 5 sentences is correct. Do not invent context to satisfy this requirement.
@@ -697,6 +704,7 @@ router.post("/v2/generate-card", async (req, res) => {
     emotionalOpenness = "Meaningful But Not Mushy",
     avoidList = [],
     details,
+    primaryOccasionContext,
     avoidMentioning,
     relAnswers = {},
     senderName = "Me",
@@ -711,6 +719,7 @@ router.post("/v2/generate-card", async (req, res) => {
     emotionalOpenness?: string;
     avoidList?: string[];
     details?: string;
+    primaryOccasionContext?: string;
     avoidMentioning?: string;
     relAnswers?: Record<string, string>;
     senderName?: string;
@@ -759,7 +768,7 @@ router.post("/v2/generate-card", async (req, res) => {
   logger.info({ firstName, relationship, occasion, archetypes, contextUsed: !!recipientContext }, "v2-generate-card: archetypes determined");
 
   const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList);
-  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement);
+  const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement, primaryOccasionContext);
 
   try {
     const completion = await openai.chat.completions.create({
