@@ -11,8 +11,14 @@ export const GUEST_WHO_SUBTITLE =
  * Sprint 8C.2: emotionalOpenness is collected on the Tone screen (not a separate step).
  * Sprint 8C.3: avoidMentioning is an optional control on the Tone screen (not a separate step).
  * Sprint 8C.4: birthday date is deferred for guests; holidayName remains when Occasion is Holiday.
- * Sprint 8C.6: guest Who copy + optional signOff on the Tone screen.
+ * Sprint 8C.6: guest Who copy + signOff on the Tone screen.
+ * Sprint 8D.2A: guest signOff is required before GENERATE (still on Tone; no extra screen).
  */
+
+/** Guest Tone GENERATE readiness: tone selected and trimmed signOff non-empty. */
+export function isGuestToneGenerateReady(tone: string, signOff: string): boolean {
+  return tone.trim().length > 0 && signOff.trim().length > 0;
+}
 
 /** Existing API default — keep in sync with v2-generate-card destructuring default. */
 export const GUEST_DEFAULT_EMOTIONAL_OPENNESS = "Meaningful But Not Mushy";

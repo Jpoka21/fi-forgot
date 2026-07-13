@@ -17,6 +17,7 @@ import {
   GUEST_INTENSITY_CHOICES,
   GUEST_WHO_SUBTITLE,
   buildGuestTrySteps,
+  isGuestToneGenerateReady,
   resolveEmotionalOpennessOrDefault,
   resolveGuestIntensityLabel,
 } from "@/app/card-creation/guestTryFlowSteps";
@@ -170,9 +171,9 @@ function buildAuthenticatedSteps(rel: string): QuestionScreen[] {
 }
 
 /**
- * Guest /try (Sprint 8C.1–8C.6): skip REL_QUESTIONS; compressed universal order.
+ * Guest /try (Sprint 8C.1–8C.6 / 8D.2A): skip REL_QUESTIONS; compressed universal order.
  * Who → Occasion (+ holidayName if Holiday) → Primary → Supporting →
- * Tone+Intensity+optional Avoid+optional signOff → Generate.
+ * Tone+Intensity+optional Avoid+required signOff → Generate.
  * Guest Birthday skips the birthday date step (deferred; no placeholder date).
  */
 function buildGuestSteps(): QuestionScreen[] {
@@ -353,6 +354,7 @@ export default function CardFlowV2() {
   const [detailGateInput, setDetailGateInput]   = useState("");
   /** Guest Tone screen: optional avoid-mentioning field starts collapsed (Sprint 8C.3). */
   const [guestAvoidOpen, setGuestAvoidOpen]     = useState(false);
+  const [guestGenerateAttempted, setGuestGenerateAttempted] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -782,7 +784,7 @@ export default function CardFlowV2() {
       ? "How should this card sound?"
       : displayQuestion;
     const guestToneHint = isGuestToneStep
-      ? "Pick a tone, then generate. Intensity, avoid-mentioning, and signature are optional — Warm is the default."
+      ? "Pick a tone and how to sign the card, then generate. Intensity and avoid-mentioning are optional — Warm is the default."
       : currentStep.hint;
     const currentIntensityValue = resolveEmotionalOpennessOrDefault(
       typeof answers["emotionalOpenness"] === "string"
@@ -793,9 +795,16 @@ export default function CardFlowV2() {
       typeof answers["avoidMentioning"] === "string" ? answers["avoidMentioning"] : "";
     const guestSignOffText =
       typeof answers["signOff"] === "string" ? answers["signOff"] : "";
-    const guestToneReady = isGuestToneStep && selectedStr.trim().length > 0;
+    const guestToneReady =
+      isGuestToneStep && isGuestToneGenerateReady(selectedStr, guestSignOffText);
+    const guestSignOffMissing =
+      isGuestToneStep && selectedStr.trim().length > 0 && !guestSignOffText.trim();
 
     function advanceGuestTone() {
+      if (!isGuestToneGenerateReady(selectedStr, guestSignOffText)) {
+        setGuestGenerateAttempted(true);
+        return;
+      }
       const next = {
         ...answers,
         tone: selectedStr,
@@ -807,6 +816,7 @@ export default function CardFlowV2() {
       };
       setAnswers(next);
       setGuestAvoidOpen(false);
+      setGuestGenerateAttempted(false);
       advanceStep(next);
     }
 
@@ -897,7 +907,7 @@ export default function CardFlowV2() {
                   selected={selectedStr === opt}
                   onClick={() => {
                     if (isGuestToneStep) {
-                      // Stay on screen so optional avoid-mentioning / signature remain usable (8C.3–8C.6).
+                      // Stay on screen so optional avoid + required signature remain usable (8C.3–8D.2A).
                       setAnswers({
                         ...answers,
                         tone: opt,
@@ -1004,16 +1014,21 @@ export default function CardFlowV2() {
                 <input
                   id="guest-try-signoff"
                   value={guestSignOffText}
-                  onChange={(e) =>
-                    setAnswers({ ...answers, signOff: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setAnswers({ ...answers, signOff: e.target.value });
+                    if (e.target.value.trim()) setGuestGenerateAttempted(false);
+                  }}
                   placeholder="Your name"
                   autoComplete="name"
+                  required
+                  aria-required="true"
                   style={{
                     width: "100%",
                     padding: "12px 14px",
                     borderRadius: 12,
-                    border: `1.5px solid ${BLACK}18`,
+                    border: `1.5px solid ${
+                      guestGenerateAttempted && guestSignOffMissing ? RED : `${BLACK}18`
+                    }`,
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "0.95rem",
                     color: BLACK,
@@ -1023,9 +1038,18 @@ export default function CardFlowV2() {
                     marginBottom: 8,
                   } as React.CSSProperties}
                 />
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: `${GRAY}aa`, margin: "0 0 4px" }}>
-                  Optional — leave blank if you prefer.
-                </p>
+                {guestGenerateAttempted && guestSignOffMissing && (
+                  <p
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.75rem",
+                      color: RED,
+                      margin: "0 0 4px",
+                    }}
+                  >
+                    Add a signature before generating.
+                  </p>
+                )}
                 {/* Spacer so Avoid / signature can scroll clear of sticky GENERATE (8C.6). */}
                 <div aria-hidden style={{ height: 72 }} />
               </div>
@@ -1048,7 +1072,7 @@ export default function CardFlowV2() {
           >
             <button
               type="button"
-              disabled={!guestToneReady}
+              aria-disabled={!guestToneReady}
               onClick={advanceGuestTone}
               style={{
                 width: "100%",
@@ -1062,6 +1086,7 @@ export default function CardFlowV2() {
                 fontSize: "1.2rem",
                 letterSpacing: "0.08em",
                 cursor: guestToneReady ? "pointer" : "default",
+                opacity: guestToneReady ? 1 : 0.85,
                 boxShadow: guestToneReady ? "0 4px 16px rgba(226,59,46,0.28)" : "none",
               }}
             >

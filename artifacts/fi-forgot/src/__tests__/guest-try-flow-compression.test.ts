@@ -16,6 +16,7 @@ import {
   GUEST_TRY_STEP_IDS,
   GUEST_WHO_SUBTITLE,
   buildGuestTrySteps,
+  isGuestToneGenerateReady,
   isGuestTryExcludedStepId,
   resolveEmotionalOpennessOrDefault,
   resolveGuestIntensityLabel,
@@ -317,7 +318,7 @@ section("Sprint 8C.3 guest Tone screen hosts optional avoidMentioning");
   );
   expectTrue(
     "tone selection stays on screen (no auto-advance)",
-    FLOW_SOURCE.includes("Stay on screen so optional avoid-mentioning"),
+    FLOW_SOURCE.includes("Stay on screen so optional avoid"),
   );
   expectTrue(
     "explicit GENERATE advances after tone",
@@ -433,6 +434,35 @@ section("Sprint 8C.6 guest Who copy, signature, sticky GENERATE");
     "auth still has dedicated signOff in UNIVERSAL",
     extractBlockIds(FLOW_SOURCE, "UNIVERSAL_QUESTIONS").includes("signOff"),
   );
+  expectTrue(
+    "optional signature helper copy removed",
+    !FLOW_SOURCE.includes("Optional — leave blank if you prefer."),
+  );
+  expectTrue(
+    "guest hint does not say signature is optional",
+    !FLOW_SOURCE.includes("signature are optional"),
+  );
+  expectTrue(
+    "guest readiness helper wired",
+    FLOW_SOURCE.includes("isGuestToneGenerateReady"),
+  );
+  expectTrue(
+    "guest GENERATE blocked without signature message",
+    FLOW_SOURCE.includes("Add a signature before generating."),
+  );
+
+  expectTrue(
+    "GENERATE disabled without tone",
+    !isGuestToneGenerateReady("", "Alex") && !isGuestToneGenerateReady("   ", "Alex"),
+  );
+  expectTrue(
+    "GENERATE disabled without signature",
+    !isGuestToneGenerateReady("Simple", "") && !isGuestToneGenerateReady("Simple", "   "),
+  );
+  expectTrue(
+    "GENERATE enabled only with both tone and signature",
+    isGuestToneGenerateReady("Simple", "Alex"),
+  );
 
   const withSign = packTryGenerateCardBody({
     firstName: "Mom",
@@ -462,8 +492,12 @@ section("Sprint 8C.6 guest Who copy, signature, sticky GENERATE");
     senderName: "Me",
   });
   expectTrue(
-    "blank signature not invented",
+    "blank signature not invented by packer",
     blankSign.signOff === undefined || blankSign.signOff === "",
+  );
+  expectTrue(
+    "guest flow rejects blank signOff at readiness",
+    !isGuestToneGenerateReady("Heartfelt", blankSign.signOff ?? ""),
   );
 
   // Screen counts unchanged: 5 standard / 6 holiday (+ Who outside flow steps)
@@ -474,6 +508,23 @@ section("Sprint 8C.6 guest Who copy, signature, sticky GENERATE");
     "details",
     "tone",
   ]);
+}
+
+section("Sprint 8D.2A guest signature required; auth signOff unchanged");
+{
+  expectTrue(
+    "auth UNIVERSAL signOff still optional flag in source",
+    /id:\s*"signOff"[\s\S]*?optional:\s*true/.test(FLOW_SOURCE),
+  );
+  expectTrue(
+    "guest readiness only applies on guest Tone",
+    FLOW_SOURCE.includes('!isLoggedIn && currentStep.id === "tone"') &&
+      FLOW_SOURCE.includes("isGuestToneGenerateReady(selectedStr, guestSignOffText)"),
+  );
+  expectTrue(
+    "no extra guest signOff wizard step",
+    !(GUEST_TRY_STEP_IDS as readonly string[]).includes("signOff"),
+  );
 }
 
 section("guest payload still sends valid emotionalOpenness");
