@@ -15,6 +15,7 @@ export function useSearchKeyboardShortcut(onToggle: () => void, enabled = true):
     if (!enabled) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (typeof event.key !== "string") return;
       const key = event.key.toLowerCase();
       const isShortcut = key === "k" && (event.metaKey || event.ctrlKey);
       if (!isShortcut) return;
