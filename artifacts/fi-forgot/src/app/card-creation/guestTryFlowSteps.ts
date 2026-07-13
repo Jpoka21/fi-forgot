@@ -4,9 +4,9 @@
  * Guests skip relationship-profile questions (REL_QUESTIONS).
  * Authenticated /try continues to use the full wizard in card-flow-v2.
  *
- * Birthday / holidayName remain as occasion conditionals only.
  * Sprint 8C.2: emotionalOpenness is collected on the Tone screen (not a separate step).
  * Sprint 8C.3: avoidMentioning is an optional control on the Tone screen (not a separate step).
+ * Sprint 8C.4: birthday date is deferred for guests; holidayName remains when Occasion is Holiday.
  */
 
 /** Existing API default — keep in sync with v2-generate-card destructuring default. */
@@ -33,7 +33,6 @@ export const GUEST_INTENSITY_CHOICES = [
 
 export const GUEST_TRY_STEP_IDS = [
   "occasion",
-  "birthday",
   "holidayName",
   "primaryOccasionContext",
   "details",
@@ -67,6 +66,8 @@ export const GUEST_TRY_EXCLUDED_STEP_IDS = [
   // Sprint 8C.2 / 8C.3 — folded into Tone screen for guests only
   "emotionalOpenness",
   "avoidMentioning",
+  // Sprint 8C.4 — birthday date deferred until after generation (auth keeps it)
+  "birthday",
 ] as const;
 
 type StepLike = { id: string };

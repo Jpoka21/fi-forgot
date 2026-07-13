@@ -65,7 +65,7 @@ function extractBlockIds(source: string, constName: string): string[] {
   return [...block.matchAll(/id:\s*"([^"]+)"/g)].map((m) => m[1]!);
 }
 
-section("guest step order matches Sprint 8C.1–8C.3");
+section("guest step order matches Sprint 8C.1–8C.4");
 {
   const universalIds = extractBlockIds(FLOW_SOURCE, "UNIVERSAL_QUESTIONS");
   const guestSteps = buildGuestTrySteps(universalIds.map((id) => ({ id })));
@@ -89,7 +89,81 @@ section("guest step order matches Sprint 8C.1–8C.3");
     "no dedicated avoidMentioning step",
     !guestIds.includes("avoidMentioning"),
   );
+  expectTrue("no birthday date step for guests", !guestIds.includes("birthday"));
+  expectTrue("holidayName still in guest catalog", guestIds.includes("holidayName"));
   expectTrue("tone is last guest step", guestIds[guestIds.length - 1] === "tone");
+}
+
+section("Sprint 8C.4 occasion paths: Birthday vs Holiday vs Thank You");
+{
+  type Step = {
+    id: string;
+    condition?: (a: Record<string, string | string[]>) => boolean;
+  };
+
+  // Mirror UNIVERSAL conditions used by the wizard for guest filtering.
+  const guestCatalog: Step[] = buildGuestTrySteps([
+    { id: "occasion" },
+    {
+      id: "holidayName",
+      condition: (a) => a["occasion"] === "Holiday",
+    },
+    { id: "primaryOccasionContext" },
+    { id: "details" },
+    { id: "tone" },
+  ]);
+
+  function visibleIds(occasion: string): string[] {
+    const answers = { occasion };
+    return guestCatalog
+      .filter((s) => !s.condition || s.condition(answers))
+      .map((s) => s.id);
+  }
+
+  expect("Thank You path", visibleIds("Thank You"), [
+    "occasion",
+    "primaryOccasionContext",
+    "details",
+    "tone",
+  ]);
+  expect("Birthday path skips date", visibleIds("Birthday"), [
+    "occasion",
+    "primaryOccasionContext",
+    "details",
+    "tone",
+  ]);
+  expect("Holiday path keeps holidayName", visibleIds("Holiday"), [
+    "occasion",
+    "holidayName",
+    "primaryOccasionContext",
+    "details",
+    "tone",
+  ]);
+
+  expectTrue("birthday excluded for guests", isGuestTryExcludedStepId("birthday"));
+
+  const birthdayBody = packTryGenerateCardBody({
+    firstName: "Mom",
+    relationship: "Mom",
+    occasion: "Birthday",
+    primaryOccasionContext: "Her kindness this year.",
+    tone: "Heartfelt",
+    emotionalOpenness: resolveEmotionalOpennessOrDefault(undefined),
+    avoidList: [],
+    details: "",
+    relAnswers: {},
+    senderName: "Me",
+  });
+  expectTrue(
+    "no birthday packed when omitted",
+    !("birthday" in birthdayBody) || birthdayBody.birthday === undefined,
+  );
+  expectTrue(
+    "no placeholder birthday date",
+    birthdayBody.birthday !== "1970-01-01" &&
+      birthdayBody.birthday !== "01/01" &&
+      !(birthdayBody.birthday ?? "").includes("TBD"),
+  );
 }
 
 section("guest skips relationship profile and deferred prefs");
@@ -115,6 +189,7 @@ section("guest skips relationship profile and deferred prefs");
     "signOff",
     "emotionalOpenness",
     "avoidMentioning",
+    "birthday",
   ]) {
     expectTrue(`excludes ${id}`, isGuestTryExcludedStepId(id));
     expectTrue(
@@ -123,8 +198,8 @@ section("guest skips relationship profile and deferred prefs");
     );
   }
   expectTrue(
-    "excluded list covers profile + deferred + folded tone fields",
-    GUEST_TRY_EXCLUDED_STEP_IDS.length >= 20,
+    "excluded list covers profile + deferred + folded + birthday",
+    GUEST_TRY_EXCLUDED_STEP_IDS.length >= 21,
   );
 }
 
@@ -173,6 +248,14 @@ section("authenticated UNIVERSAL order unchanged (8A contract)");
   expectTrue(
     "auth universal still has dedicated avoidMentioning",
     ids.includes("avoidMentioning"),
+  );
+  expectTrue(
+    "auth universal still has birthday date step",
+    ids.includes("birthday"),
+  );
+  expectTrue(
+    "auth birthday still follows occasion",
+    ids.indexOf("birthday") === ids.indexOf("occasion") + 1,
   );
 }
 

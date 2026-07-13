@@ -169,9 +169,10 @@ function buildAuthenticatedSteps(rel: string): QuestionScreen[] {
 }
 
 /**
- * Guest /try (Sprint 8C.1–8C.3): skip REL_QUESTIONS; compressed universal order.
- * Who → Occasion (+ birthday/holiday if needed) → Primary → Supporting →
+ * Guest /try (Sprint 8C.1–8C.4): skip REL_QUESTIONS; compressed universal order.
+ * Who → Occasion (+ holidayName if Holiday) → Primary → Supporting →
  * Tone+Intensity+optional Avoid → Generate.
+ * Guest Birthday skips the birthday date step (deferred; no placeholder date).
  */
 function buildGuestSteps(): QuestionScreen[] {
   return buildGuestTrySteps(UNIVERSAL_QUESTIONS);
