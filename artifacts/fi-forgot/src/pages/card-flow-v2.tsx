@@ -13,7 +13,12 @@ import {
   resolveGuestPrimaryOccasionQuestion,
 } from "@/app/card-creation/guestOccasionPrimaryQuestions";
 import { packTryGenerateCardBody } from "@/app/card-creation/packTryGenerateCardBody";
-import { buildGuestTrySteps } from "@/app/card-creation/guestTryFlowSteps";
+import {
+  GUEST_INTENSITY_CHOICES,
+  buildGuestTrySteps,
+  resolveEmotionalOpennessOrDefault,
+  resolveGuestIntensityLabel,
+} from "@/app/card-creation/guestTryFlowSteps";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -164,9 +169,9 @@ function buildAuthenticatedSteps(rel: string): QuestionScreen[] {
 }
 
 /**
- * Guest /try (Sprint 8C.1): skip REL_QUESTIONS; compressed universal order.
- * Who → Occasion (+ birthday/holiday if needed) → Primary → Supporting → Tone →
- * Emotional → Avoid mentioning → Generate.
+ * Guest /try (Sprint 8C.1–8C.2): skip REL_QUESTIONS; compressed universal order.
+ * Who → Occasion (+ birthday/holiday if needed) → Primary → Supporting →
+ * Tone+Intensity → Avoid mentioning → Generate.
  */
 function buildGuestSteps(): QuestionScreen[] {
   return buildGuestTrySteps(UNIVERSAL_QUESTIONS);
@@ -522,7 +527,7 @@ export default function CardFlowV2() {
       occasion: occasionForPicker,
       primaryOccasionContext: get("primaryOccasionContext"),
       tone: get("tone"),
-      emotionalOpenness: get("emotionalOpenness"),
+      emotionalOpenness: resolveEmotionalOpennessOrDefault(get("emotionalOpenness")),
       avoidList: (withAnswers["avoidList"] as string[] | undefined) ?? [],
       birthday: get("birthday") || undefined,
       interests: get("interests") || undefined,
@@ -766,17 +771,29 @@ export default function CardFlowV2() {
         : currentStep.question;
     const isPrimaryStep = currentStep.id === "primaryOccasionContext";
     const primaryReady = !isPrimaryStep || isValidPrimaryOccasionContext(textVal);
+    const isGuestToneStep = !isLoggedIn && currentStep.id === "tone";
+    const guestToneQuestion = isGuestToneStep
+      ? "How should this card sound?"
+      : displayQuestion;
+    const guestToneHint = isGuestToneStep
+      ? "Pick a tone. Intensity is optional — Warm is the default."
+      : currentStep.hint;
+    const currentIntensityValue = resolveEmotionalOpennessOrDefault(
+      typeof answers["emotionalOpenness"] === "string"
+        ? answers["emotionalOpenness"]
+        : undefined,
+    );
 
     return (
       <WizardShell progress={progressPct} onBack={goBack}>
         <div style={{ marginBottom: 8, fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: `${GRAY}90`, letterSpacing: "0.06em" }}>
           {firstName.toUpperCase()} · {relationship.toUpperCase()}
         </div>
-        <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.03em", color: BLACK, lineHeight: 1.15, marginBottom: currentStep.hint ? 6 : 22 }}>
-          {displayQuestion}
+        <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.9rem", letterSpacing: "0.03em", color: BLACK, lineHeight: 1.15, marginBottom: guestToneHint ? 6 : 22 }}>
+          {guestToneQuestion}
         </h2>
-        {currentStep.hint && (
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY, marginBottom: 20 }}>{currentStep.hint}</p>
+        {guestToneHint && (
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY, marginBottom: 20 }}>{guestToneHint}</p>
         )}
 
         {genError && (
@@ -788,6 +805,31 @@ export default function CardFlowV2() {
         {/* SELECT */}
         {isSelectKind && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {isGuestToneStep && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.07em", color: GRAY, textTransform: "uppercase", marginBottom: 8 }}>
+                  Intensity · {resolveGuestIntensityLabel(currentIntensityValue)}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+                  {GUEST_INTENSITY_CHOICES.map((choice) => (
+                    <PillBtn
+                      key={choice.label}
+                      label={choice.label}
+                      selected={currentIntensityValue === choice.emotionalOpenness}
+                      onClick={() =>
+                        setAnswers({
+                          ...answers,
+                          emotionalOpenness: choice.emotionalOpenness,
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.07em", color: GRAY, textTransform: "uppercase", marginBottom: 2 }}>
+                  Tone
+                </div>
+              </div>
+            )}
             {/* For the occasion step: show scheduled events first */}
             {currentStep.id === "occasion" && scheduledEvents.length > 0 && (
               <>
@@ -823,7 +865,28 @@ export default function CardFlowV2() {
             {(currentStep.options ?? [])
               .filter(opt => currentStep.id !== "occasion" || !scheduledEvents.includes(opt))
               .map(opt => (
-                <PillBtn key={opt} label={opt} selected={selectedStr === opt} onClick={() => setAnswer(opt)} />
+                <PillBtn
+                  key={opt}
+                  label={opt}
+                  selected={selectedStr === opt}
+                  onClick={() => {
+                    if (isGuestToneStep) {
+                      const next = {
+                        ...answers,
+                        tone: opt,
+                        emotionalOpenness: resolveEmotionalOpennessOrDefault(
+                          typeof answers["emotionalOpenness"] === "string"
+                            ? answers["emotionalOpenness"]
+                            : undefined,
+                        ),
+                      };
+                      setAnswers(next);
+                      advanceStep(next);
+                      return;
+                    }
+                    setAnswer(opt);
+                  }}
+                />
               ))}
           </div>
         )}

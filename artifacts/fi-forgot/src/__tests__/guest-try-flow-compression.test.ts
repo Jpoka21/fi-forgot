@@ -10,10 +10,14 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+  GUEST_DEFAULT_EMOTIONAL_OPENNESS,
+  GUEST_INTENSITY_CHOICES,
   GUEST_TRY_EXCLUDED_STEP_IDS,
   GUEST_TRY_STEP_IDS,
   buildGuestTrySteps,
   isGuestTryExcludedStepId,
+  resolveEmotionalOpennessOrDefault,
+  resolveGuestIntensityLabel,
 } from "../app/card-creation/guestTryFlowSteps.js";
 import { packTryGenerateCardBody } from "../app/card-creation/packTryGenerateCardBody.js";
 
@@ -61,7 +65,7 @@ function extractBlockIds(source: string, constName: string): string[] {
   return [...block.matchAll(/id:\s*"([^"]+)"/g)].map((m) => m[1]!);
 }
 
-section("guest step order matches Sprint 8C.1");
+section("guest step order matches Sprint 8C.1–8C.2");
 {
   const universalIds = extractBlockIds(FLOW_SOURCE, "UNIVERSAL_QUESTIONS");
   const guestSteps = buildGuestTrySteps(universalIds.map((id) => ({ id })));
@@ -78,12 +82,12 @@ section("guest step order matches Sprint 8C.1");
     guestIds.indexOf("details") < guestIds.indexOf("tone"),
   );
   expectTrue(
-    "tone before emotional",
-    guestIds.indexOf("tone") < guestIds.indexOf("emotionalOpenness"),
+    "no separate emotionalOpenness step",
+    !guestIds.includes("emotionalOpenness"),
   );
   expectTrue(
-    "emotional before avoidMentioning",
-    guestIds.indexOf("emotionalOpenness") < guestIds.indexOf("avoidMentioning"),
+    "tone before avoidMentioning",
+    guestIds.indexOf("tone") < guestIds.indexOf("avoidMentioning"),
   );
   expectTrue("avoidMentioning last", guestIds[guestIds.length - 1] === "avoidMentioning");
 }
@@ -109,6 +113,7 @@ section("guest skips relationship profile and deferred prefs");
     "avoidList",
     "interests",
     "signOff",
+    "emotionalOpenness",
   ]) {
     expectTrue(`excludes ${id}`, isGuestTryExcludedStepId(id));
     expectTrue(
@@ -117,8 +122,8 @@ section("guest skips relationship profile and deferred prefs");
     );
   }
   expectTrue(
-    "excluded list covers profile + deferred",
-    GUEST_TRY_EXCLUDED_STEP_IDS.length >= 18,
+    "excluded list covers profile + deferred + emotional step",
+    GUEST_TRY_EXCLUDED_STEP_IDS.length >= 19,
   );
 }
 
@@ -156,6 +161,80 @@ section("authenticated UNIVERSAL order unchanged (8A contract)");
   expectTrue("auth universal still has avoidList", ids.includes("avoidList"));
   expectTrue("auth universal still has interests", ids.includes("interests"));
   expectTrue("auth universal still has signOff", ids.includes("signOff"));
+  expectTrue(
+    "auth universal still has separate emotionalOpenness step",
+    ids.includes("emotionalOpenness"),
+  );
+  expectTrue(
+    "auth emotionalOpenness still follows tone",
+    ids.indexOf("emotionalOpenness") === toneIdx + 1,
+  );
+}
+
+section("Sprint 8C.2 guest tone+intensity maps to existing emotionalOpenness values");
+{
+  expect(
+    "default matches API default",
+    GUEST_DEFAULT_EMOTIONAL_OPENNESS,
+    "Meaningful But Not Mushy",
+  );
+  expect(
+    "empty defaults to Meaningful But Not Mushy",
+    resolveEmotionalOpennessOrDefault(""),
+    "Meaningful But Not Mushy",
+  );
+  expect(
+    "undefined defaults",
+    resolveEmotionalOpennessOrDefault(undefined),
+    "Meaningful But Not Mushy",
+  );
+  expect(
+    "preserves explicit Deep",
+    resolveEmotionalOpennessOrDefault("Deep And Emotional"),
+    "Deep And Emotional",
+  );
+  expect(
+    "preserves auth Clearly Heartfelt",
+    resolveEmotionalOpennessOrDefault("Clearly Heartfelt"),
+    "Clearly Heartfelt",
+  );
+  expect("Light maps to existing value", GUEST_INTENSITY_CHOICES[0]!.emotionalOpenness, "A Little Appreciation At The End");
+  expect("Warm maps to default", GUEST_INTENSITY_CHOICES[1]!.emotionalOpenness, "Meaningful But Not Mushy");
+  expect("Deep maps to existing value", GUEST_INTENSITY_CHOICES[2]!.emotionalOpenness, "Deep And Emotional");
+  expect("unset intensity label is Warm", resolveGuestIntensityLabel(undefined), "Warm");
+  expect("Deep label", resolveGuestIntensityLabel("Deep And Emotional"), "Deep");
+
+  expectTrue(
+    "guest tone UI assigns both fields",
+    FLOW_SOURCE.includes("emotionalOpenness: resolveEmotionalOpennessOrDefault") &&
+      FLOW_SOURCE.includes("isGuestToneStep"),
+  );
+  expectTrue(
+    "guest intensity choices rendered",
+    FLOW_SOURCE.includes("GUEST_INTENSITY_CHOICES"),
+  );
+}
+
+section("guest payload still sends valid emotionalOpenness");
+{
+  const body = packTryGenerateCardBody({
+    firstName: "Mom",
+    relationship: "Mom",
+    occasion: "Thank You",
+    primaryOccasionContext: "Helping me get new insurance.",
+    tone: "Heartfelt",
+    emotionalOpenness: resolveEmotionalOpennessOrDefault(undefined),
+    avoidList: [],
+    details: "",
+    relAnswers: {},
+    senderName: "Me",
+  });
+  expect(
+    "payload emotionalOpenness defaulted",
+    body.emotionalOpenness,
+    "Meaningful But Not Mushy",
+  );
+  expect("payload tone preserved", body.tone, "Heartfelt");
 }
 
 section("payload contract still valid without relAnswers / deferred fields");
