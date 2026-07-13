@@ -1,3 +1,7 @@
+/** Guest Who-screen subtitle (Sprint 8C.6) — first-card focused, not profile onboarding. */
+export const GUEST_WHO_SUBTITLE =
+  "We'll use their name and your relationship to personalize this card.";
+
 /**
  * Sprint 8C — compressed guest /try step order and tone+intensity helpers.
  *
@@ -7,6 +11,7 @@
  * Sprint 8C.2: emotionalOpenness is collected on the Tone screen (not a separate step).
  * Sprint 8C.3: avoidMentioning is an optional control on the Tone screen (not a separate step).
  * Sprint 8C.4: birthday date is deferred for guests; holidayName remains when Occasion is Holiday.
+ * Sprint 8C.6: guest Who copy + optional signOff on the Tone screen.
  */
 
 /** Existing API default — keep in sync with v2-generate-card destructuring default. */

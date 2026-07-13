@@ -14,6 +14,7 @@ import {
   GUEST_INTENSITY_CHOICES,
   GUEST_TRY_EXCLUDED_STEP_IDS,
   GUEST_TRY_STEP_IDS,
+  GUEST_WHO_SUBTITLE,
   buildGuestTrySteps,
   isGuestTryExcludedStepId,
   resolveEmotionalOpennessOrDefault,
@@ -316,7 +317,7 @@ section("Sprint 8C.3 guest Tone screen hosts optional avoidMentioning");
   );
   expectTrue(
     "tone selection stays on screen (no auto-advance)",
-    FLOW_SOURCE.includes("Stay on screen so optional avoid-mentioning remains usable"),
+    FLOW_SOURCE.includes("Stay on screen so optional avoid-mentioning"),
   );
   expectTrue(
     "explicit GENERATE advances after tone",
@@ -355,6 +356,96 @@ section("Sprint 8C.3 guest Tone screen hosts optional avoidMentioning");
     "blank avoid omits or empty field ok",
     blankAvoid.avoidMentioning === undefined || blankAvoid.avoidMentioning === "",
   );
+}
+
+section("Sprint 8C.6 guest Who copy, signature, sticky GENERATE");
+{
+  expect(
+    "guest Who subtitle constant",
+    GUEST_WHO_SUBTITLE,
+    "We'll use their name and your relationship to personalize this card.",
+  );
+  expectTrue("guest Who uses GUEST_WHO_SUBTITLE", FLOW_SOURCE.includes("GUEST_WHO_SUBTITLE"));
+  expectTrue(
+    "no smarter-profile guest promise",
+    !GUEST_WHO_SUBTITLE.toLowerCase().includes("profile that gets smarter") &&
+      !GUEST_WHO_SUBTITLE.toLowerCase().includes("every card"),
+  );
+  expectTrue(
+    "stale smarter-profile copy removed from page",
+    !FLOW_SOURCE.includes("build a profile that gets smarter with every card"),
+  );
+  expectTrue(
+    "guest signature label",
+    FLOW_SOURCE.includes("How should we sign it?"),
+  );
+  expectTrue(
+    "guest signature placeholder",
+    FLOW_SOURCE.includes('placeholder="Your name"') ||
+      FLOW_SOURCE.includes("placeholder=\"Your name\""),
+  );
+  expectTrue(
+    "stores signOff on guest Tone screen",
+    FLOW_SOURCE.includes("signOff: e.target.value"),
+  );
+  expectTrue(
+    "signOff remains excluded as dedicated guest step",
+    isGuestTryExcludedStepId("signOff") &&
+      !(GUEST_TRY_STEP_IDS as readonly string[]).includes("signOff"),
+  );
+  expectTrue(
+    "sticky GENERATE for mobile reachability",
+    FLOW_SOURCE.includes('position: "sticky"') && FLOW_SOURCE.includes("advanceGuestTone"),
+  );
+  expectTrue(
+    "scroll spacer above sticky GENERATE",
+    FLOW_SOURCE.includes("scroll clear of sticky GENERATE"),
+  );
+  expectTrue(
+    "auth still has dedicated signOff in UNIVERSAL",
+    extractBlockIds(FLOW_SOURCE, "UNIVERSAL_QUESTIONS").includes("signOff"),
+  );
+
+  const withSign = packTryGenerateCardBody({
+    firstName: "Mom",
+    relationship: "Mom",
+    occasion: "Thank You",
+    primaryOccasionContext: "Helping me get new insurance.",
+    tone: "Heartfelt",
+    emotionalOpenness: resolveEmotionalOpennessOrDefault(undefined),
+    avoidList: [],
+    details: "",
+    signOff: "Love, Alex",
+    relAnswers: {},
+    senderName: "Me",
+  });
+  expect("packs guest signOff", withSign.signOff, "Love, Alex");
+
+  const blankSign = packTryGenerateCardBody({
+    firstName: "Mom",
+    relationship: "Mom",
+    occasion: "Thank You",
+    primaryOccasionContext: "Helping me get new insurance.",
+    tone: "Heartfelt",
+    emotionalOpenness: "Meaningful But Not Mushy",
+    avoidList: [],
+    details: "",
+    relAnswers: {},
+    senderName: "Me",
+  });
+  expectTrue(
+    "blank signature not invented",
+    blankSign.signOff === undefined || blankSign.signOff === "",
+  );
+
+  // Screen counts unchanged: 5 standard / 6 holiday (+ Who outside flow steps)
+  expect("standard guest flow step ids", [...GUEST_TRY_STEP_IDS], [
+    "occasion",
+    "holidayName",
+    "primaryOccasionContext",
+    "details",
+    "tone",
+  ]);
 }
 
 section("guest payload still sends valid emotionalOpenness");

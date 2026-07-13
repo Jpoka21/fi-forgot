@@ -15,6 +15,7 @@ import {
 import { packTryGenerateCardBody } from "@/app/card-creation/packTryGenerateCardBody";
 import {
   GUEST_INTENSITY_CHOICES,
+  GUEST_WHO_SUBTITLE,
   buildGuestTrySteps,
   resolveEmotionalOpennessOrDefault,
   resolveGuestIntensityLabel,
@@ -169,9 +170,9 @@ function buildAuthenticatedSteps(rel: string): QuestionScreen[] {
 }
 
 /**
- * Guest /try (Sprint 8C.1–8C.4): skip REL_QUESTIONS; compressed universal order.
+ * Guest /try (Sprint 8C.1–8C.6): skip REL_QUESTIONS; compressed universal order.
  * Who → Occasion (+ holidayName if Holiday) → Primary → Supporting →
- * Tone+Intensity+optional Avoid → Generate.
+ * Tone+Intensity+optional Avoid+optional signOff → Generate.
  * Guest Birthday skips the birthday date step (deferred; no placeholder date).
  */
 function buildGuestSteps(): QuestionScreen[] {
@@ -639,7 +640,9 @@ export default function CardFlowV2() {
           WHO IS THIS CARD FOR?
         </h1>
         <p style={{ color: GRAY, fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", marginBottom: 28 }}>
-          We use this to build a profile that gets smarter with every card.
+          {isLoggedIn
+            ? "We'll use their name and your relationship to personalize this card — and remember them for next time."
+            : GUEST_WHO_SUBTITLE}
         </p>
 
         {/* Name input */}
@@ -779,7 +782,7 @@ export default function CardFlowV2() {
       ? "How should this card sound?"
       : displayQuestion;
     const guestToneHint = isGuestToneStep
-      ? "Pick a tone, then generate. Intensity and avoid-mentioning are optional — Warm is the default."
+      ? "Pick a tone, then generate. Intensity, avoid-mentioning, and signature are optional — Warm is the default."
       : currentStep.hint;
     const currentIntensityValue = resolveEmotionalOpennessOrDefault(
       typeof answers["emotionalOpenness"] === "string"
@@ -788,7 +791,24 @@ export default function CardFlowV2() {
     );
     const guestAvoidText =
       typeof answers["avoidMentioning"] === "string" ? answers["avoidMentioning"] : "";
+    const guestSignOffText =
+      typeof answers["signOff"] === "string" ? answers["signOff"] : "";
     const guestToneReady = isGuestToneStep && selectedStr.trim().length > 0;
+
+    function advanceGuestTone() {
+      const next = {
+        ...answers,
+        tone: selectedStr,
+        emotionalOpenness: resolveEmotionalOpennessOrDefault(
+          typeof answers["emotionalOpenness"] === "string"
+            ? answers["emotionalOpenness"]
+            : undefined,
+        ),
+      };
+      setAnswers(next);
+      setGuestAvoidOpen(false);
+      advanceStep(next);
+    }
 
     return (
       <WizardShell progress={progressPct} onBack={goBack}>
@@ -877,7 +897,7 @@ export default function CardFlowV2() {
                   selected={selectedStr === opt}
                   onClick={() => {
                     if (isGuestToneStep) {
-                      // Stay on screen so optional avoid-mentioning remains usable (8C.3).
+                      // Stay on screen so optional avoid-mentioning / signature remain usable (8C.3–8C.6).
                       setAnswers({
                         ...answers,
                         tone: opt,
@@ -894,7 +914,7 @@ export default function CardFlowV2() {
                 />
               ))}
             {isGuestToneStep && (
-              <div style={{ marginTop: 16 }}>
+              <div style={{ marginTop: 16, marginBottom: 8 }}>
                 <button
                   type="button"
                   onClick={() => setGuestAvoidOpen((open) => !open)}
@@ -943,40 +963,87 @@ export default function CardFlowV2() {
                     } as React.CSSProperties}
                   />
                 )}
-                <button
-                  type="button"
-                  disabled={!guestToneReady}
-                  onClick={() => {
-                    const next = {
-                      ...answers,
-                      tone: selectedStr,
-                      emotionalOpenness: resolveEmotionalOpennessOrDefault(
-                        typeof answers["emotionalOpenness"] === "string"
-                          ? answers["emotionalOpenness"]
-                          : undefined,
-                      ),
-                    };
-                    setAnswers(next);
-                    setGuestAvoidOpen(false);
-                    advanceStep(next);
-                  }}
+                <label
+                  htmlFor="guest-try-signoff"
                   style={{
-                    width: "100%",
-                    padding: 14,
-                    borderRadius: 12,
-                    border: "none",
-                    background: guestToneReady ? RED : `${BLACK}20`,
-                    color: guestToneReady ? WHITE : GRAY,
-                    fontFamily: "'Bebas Neue', cursive",
-                    fontSize: "1.2rem",
-                    letterSpacing: "0.08em",
-                    cursor: guestToneReady ? "pointer" : "default",
+                    display: "block",
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.07em",
+                    color: GRAY,
+                    textTransform: "uppercase",
+                    marginBottom: 8,
                   }}
                 >
-                  GENERATE →
-                </button>
+                  How should we sign it?
+                </label>
+                <input
+                  id="guest-try-signoff"
+                  value={guestSignOffText}
+                  onChange={(e) =>
+                    setAnswers({ ...answers, signOff: e.target.value })
+                  }
+                  placeholder="Your name"
+                  autoComplete="name"
+                  style={{
+                    width: "100%",
+                    padding: "12px 14px",
+                    borderRadius: 12,
+                    border: `1.5px solid ${BLACK}18`,
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: "0.95rem",
+                    color: BLACK,
+                    background: WHITE,
+                    outline: "none",
+                    boxSizing: "border-box",
+                    marginBottom: 8,
+                  } as React.CSSProperties}
+                />
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", color: `${GRAY}aa`, margin: "0 0 4px" }}>
+                  Optional — leave blank if you prefer.
+                </p>
+                {/* Spacer so Avoid / signature can scroll clear of sticky GENERATE (8C.6). */}
+                <div aria-hidden style={{ height: 72 }} />
               </div>
             )}
+          </div>
+        )}
+
+        {isGuestToneStep && (
+          <div
+            style={{
+              position: "sticky",
+              bottom: 0,
+              zIndex: 5,
+              marginTop: 12,
+              marginLeft: -16,
+              marginRight: -16,
+              padding: "12px 16px calc(12px + env(safe-area-inset-bottom, 0px))",
+              background: `linear-gradient(180deg, transparent 0%, ${WHITE} 28%, ${WHITE} 100%)`,
+            }}
+          >
+            <button
+              type="button"
+              disabled={!guestToneReady}
+              onClick={advanceGuestTone}
+              style={{
+                width: "100%",
+                minHeight: 48,
+                padding: 14,
+                borderRadius: 12,
+                border: "none",
+                background: guestToneReady ? RED : `${BLACK}20`,
+                color: guestToneReady ? WHITE : GRAY,
+                fontFamily: "'Bebas Neue', cursive",
+                fontSize: "1.2rem",
+                letterSpacing: "0.08em",
+                cursor: guestToneReady ? "pointer" : "default",
+                boxShadow: guestToneReady ? "0 4px 16px rgba(226,59,46,0.28)" : "none",
+              }}
+            >
+              GENERATE →
+            </button>
           </div>
         )}
 
