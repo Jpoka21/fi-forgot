@@ -13,6 +13,7 @@ import {
   resolveGuestPrimaryOccasionQuestion,
 } from "@/app/card-creation/guestOccasionPrimaryQuestions";
 import { packTryGenerateCardBody } from "@/app/card-creation/packTryGenerateCardBody";
+import { buildGuestTrySteps } from "@/app/card-creation/guestTryFlowSteps";
 
 const RED   = "#E23B2E";
 const BLACK = "#111111";
@@ -156,9 +157,19 @@ function getRelGroup(rel: string): string {
   return "other";
 }
 
-function buildSteps(rel: string): QuestionScreen[] {
+/** Authenticated /try: relationship profile + full universal list. */
+function buildAuthenticatedSteps(rel: string): QuestionScreen[] {
   const group = getRelGroup(rel);
   return [...(REL_QUESTIONS[group] ?? []), ...UNIVERSAL_QUESTIONS];
+}
+
+/**
+ * Guest /try (Sprint 8C.1): skip REL_QUESTIONS; compressed universal order.
+ * Who → Occasion (+ birthday/holiday if needed) → Primary → Supporting → Tone →
+ * Emotional → Avoid mentioning → Generate.
+ */
+function buildGuestSteps(): QuestionScreen[] {
+  return buildGuestTrySteps(UNIVERSAL_QUESTIONS);
 }
 
 // ── Shared UI helpers ─────────────────────────────────────────────────────────
@@ -415,7 +426,10 @@ export default function CardFlowV2() {
     }
 
     setRecipientId(rId);
-    const computed = buildSteps(relationship);
+    // Guests skip relationship-profile onboarding; authenticated keep full wizard.
+    const computed = isLoggedIn
+      ? buildAuthenticatedSteps(relationship)
+      : buildGuestSteps();
     setSteps(computed);
     setStepIdx(0);
     setPhase("flow");
