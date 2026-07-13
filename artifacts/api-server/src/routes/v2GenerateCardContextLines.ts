@@ -24,11 +24,17 @@ export function appendPrimaryAndSupportingDetailLines(
 function appendRelationshipProfileLines(
   contextLines: string[],
   relAnswers?: Record<string, string>,
+  /** When primary exists, profile is voice/warmth only — not the subject. */
+  asBackgroundCharacterization = false,
 ): void {
   if (!relAnswers || Object.keys(relAnswers).length === 0) return;
   const entries = Object.entries(relAnswers).filter(([, val]) => val?.trim());
   if (entries.length === 0) return;
-  contextLines.push("--- Relationship profile (use as raw material) ---");
+  contextLines.push(
+    asBackgroundCharacterization
+      ? "--- Relationship profile (background characterization — shapes voice and warmth, not the subject) ---"
+      : "--- Relationship profile (use as raw material) ---",
+  );
   for (const [key, val] of entries) {
     contextLines.push(`  ${key}: ${val}`);
   }
@@ -36,7 +42,7 @@ function appendRelationshipProfileLines(
 
 /**
  * Body context line order:
- * - With primary: Primary → Relationship profile → Supporting → avoids
+ * - With primary: Primary → Relationship profile (background) → Supporting → avoids
  * - Without primary: Relationship profile → Extra details → avoids (legacy)
  */
 export function buildOrderedBodyContextLines(opts: {
@@ -50,7 +56,7 @@ export function buildOrderedBodyContextLines(opts: {
 
   if (primary) {
     lines.push(`Primary reason for this card:\n${primary}`);
-    appendRelationshipProfileLines(lines, opts.relAnswers);
+    appendRelationshipProfileLines(lines, opts.relAnswers, true);
     if (opts.details?.trim()) {
       lines.push(`Supporting memory or personal detail:\n${opts.details.trim()}`);
     }
@@ -74,7 +80,8 @@ export function buildPrimaryContentPriorityBlock(): string {
 4. Tone and emotional level
 5. Supporting memories — optional enrichment only
 
-All three versions must revolve around the same primary occasion reason. They may differ in voice, warmth, pacing, or phrasing — not in what the card is fundamentally about.`;
+All three versions must revolve around the same primary occasion reason. They may differ in voice, warmth, pacing, or phrasing — not in what the card is fundamentally about.
+Relationship profile answers are background characterization only — they shape how the card feels (voice, warmth, perspective), not what the card is about. Use them to reinforce the primary reason when they naturally fit; never let traits, habits, or long-term descriptions replace the primary reason as the central story.`;
 }
 
 export function buildMemoryDensityRequirement(hasPrimary: boolean): string {

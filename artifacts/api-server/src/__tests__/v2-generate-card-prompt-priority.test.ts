@@ -108,6 +108,62 @@ section("content priority and same-reason instruction");
     "same reason across versions",
     block.includes("revolve around the same primary occasion reason"),
   );
+  expectTrue(
+    "profile is background characterization",
+    block.includes("background characterization only"),
+  );
+  expectTrue(
+    "profile must not replace primary as central story",
+    block.includes("never let traits, habits, or long-term descriptions replace the primary reason"),
+  );
+}
+
+section("8B.1 live QA: insurance primary vs profile vs college supporting");
+{
+  // Exact live-QA payload shape (prompt assembly only — not OpenAI behavior).
+  const lines = buildOrderedBodyContextLines({
+    relAnswers: {
+      parentPersonality: "Tough",
+      parentFact:
+        "Mom was always there for me when I needed her. Dropped anything for me.",
+    },
+    primaryOccasionContext: "Helping me get new insurance.",
+    details:
+      "That time she flew to my college to visit me because I was upset.",
+  });
+  const priority = buildPrimaryContentPriorityBlock();
+
+  const primaryIdx = lines.findIndex((l) => l.startsWith("Primary reason for this card:"));
+  const profileIdx = lines.findIndex((l) =>
+    l.startsWith("--- Relationship profile (background characterization"),
+  );
+  const supportingIdx = lines.findIndex((l) =>
+    l.startsWith("Supporting memory or personal detail:"),
+  );
+
+  expectTrue("primary subject first", primaryIdx === 0);
+  expectTrue("primary is insurance", lines[primaryIdx]!.includes("new insurance"));
+  expectTrue("background profile after primary", profileIdx > primaryIdx);
+  expectTrue(
+    "profile labeled background characterization",
+    lines[profileIdx]!.includes("background characterization"),
+  );
+  expectTrue("profile not raw-material when primary set", !lines[profileIdx]!.includes("raw material"));
+  expectTrue("Tough in profile", lines.some((l) => l.includes("Tough")));
+  expectTrue(
+    "always-there / dropped-everything in profile",
+    lines.some((l) => l.includes("Dropped anything")),
+  );
+  expectTrue("supporting after profile", supportingIdx > profileIdx);
+  expectTrue("college memory is supporting only", lines[supportingIdx]!.includes("college"));
+  expectTrue(
+    "insurance not buried in supporting",
+    !lines[supportingIdx]!.includes("insurance"),
+  );
+  expectTrue(
+    "hierarchy clarification present in CONTENT PRIORITY",
+    priority.includes("not what the card is about"),
+  );
 }
 
 section("memory density gated on primary");
