@@ -169,9 +169,9 @@ function buildAuthenticatedSteps(rel: string): QuestionScreen[] {
 }
 
 /**
- * Guest /try (Sprint 8C.1–8C.2): skip REL_QUESTIONS; compressed universal order.
+ * Guest /try (Sprint 8C.1–8C.3): skip REL_QUESTIONS; compressed universal order.
  * Who → Occasion (+ birthday/holiday if needed) → Primary → Supporting →
- * Tone+Intensity → Avoid mentioning → Generate.
+ * Tone+Intensity+optional Avoid → Generate.
  */
 function buildGuestSteps(): QuestionScreen[] {
   return buildGuestTrySteps(UNIVERSAL_QUESTIONS);
@@ -349,6 +349,8 @@ export default function CardFlowV2() {
   const [keptInMindSources, setKeptInMindSources] = useState<string[]>([]);
   // Detail gate
   const [detailGateInput, setDetailGateInput]   = useState("");
+  /** Guest Tone screen: optional avoid-mentioning field starts collapsed (Sprint 8C.3). */
+  const [guestAvoidOpen, setGuestAvoidOpen]     = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -776,13 +778,16 @@ export default function CardFlowV2() {
       ? "How should this card sound?"
       : displayQuestion;
     const guestToneHint = isGuestToneStep
-      ? "Pick a tone. Intensity is optional — Warm is the default."
+      ? "Pick a tone, then generate. Intensity and avoid-mentioning are optional — Warm is the default."
       : currentStep.hint;
     const currentIntensityValue = resolveEmotionalOpennessOrDefault(
       typeof answers["emotionalOpenness"] === "string"
         ? answers["emotionalOpenness"]
         : undefined,
     );
+    const guestAvoidText =
+      typeof answers["avoidMentioning"] === "string" ? answers["avoidMentioning"] : "";
+    const guestToneReady = isGuestToneStep && selectedStr.trim().length > 0;
 
     return (
       <WizardShell progress={progressPct} onBack={goBack}>
@@ -871,7 +876,8 @@ export default function CardFlowV2() {
                   selected={selectedStr === opt}
                   onClick={() => {
                     if (isGuestToneStep) {
-                      const next = {
+                      // Stay on screen so optional avoid-mentioning remains usable (8C.3).
+                      setAnswers({
                         ...answers,
                         tone: opt,
                         emotionalOpenness: resolveEmotionalOpennessOrDefault(
@@ -879,15 +885,97 @@ export default function CardFlowV2() {
                             ? answers["emotionalOpenness"]
                             : undefined,
                         ),
-                      };
-                      setAnswers(next);
-                      advanceStep(next);
+                      });
                       return;
                     }
                     setAnswer(opt);
                   }}
                 />
               ))}
+            {isGuestToneStep && (
+              <div style={{ marginTop: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setGuestAvoidOpen((open) => !open)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    border: `1px dashed ${BLACK}22`,
+                    background: guestAvoidOpen || guestAvoidText.trim() ? `${BLACK}04` : "transparent",
+                    color: GRAY,
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: "0.82rem",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    marginBottom: guestAvoidOpen ? 10 : 14,
+                  } as React.CSSProperties}
+                >
+                  {guestAvoidOpen
+                    ? "▾ Anything we should avoid mentioning?"
+                    : guestAvoidText.trim()
+                      ? `▸ Avoid mentioning · ${guestAvoidText.trim().slice(0, 40)}${guestAvoidText.trim().length > 40 ? "…" : ""}`
+                      : "+ Anything we should avoid mentioning? (optional)"}
+                </button>
+                {guestAvoidOpen && (
+                  <textarea
+                    value={guestAvoidText}
+                    onChange={(e) =>
+                      setAnswers({ ...answers, avoidMentioning: e.target.value })
+                    }
+                    placeholder="e.g. divorce, money, health — leave blank if nothing"
+                    rows={3}
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      border: `1.5px solid ${BLACK}18`,
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.9rem",
+                      color: BLACK,
+                      background: WHITE,
+                      resize: "vertical",
+                      boxSizing: "border-box",
+                      outline: "none",
+                      marginBottom: 14,
+                      lineHeight: 1.5,
+                    } as React.CSSProperties}
+                  />
+                )}
+                <button
+                  type="button"
+                  disabled={!guestToneReady}
+                  onClick={() => {
+                    const next = {
+                      ...answers,
+                      tone: selectedStr,
+                      emotionalOpenness: resolveEmotionalOpennessOrDefault(
+                        typeof answers["emotionalOpenness"] === "string"
+                          ? answers["emotionalOpenness"]
+                          : undefined,
+                      ),
+                    };
+                    setAnswers(next);
+                    setGuestAvoidOpen(false);
+                    advanceStep(next);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: 14,
+                    borderRadius: 12,
+                    border: "none",
+                    background: guestToneReady ? RED : `${BLACK}20`,
+                    color: guestToneReady ? WHITE : GRAY,
+                    fontFamily: "'Bebas Neue', cursive",
+                    fontSize: "1.2rem",
+                    letterSpacing: "0.08em",
+                    cursor: guestToneReady ? "pointer" : "default",
+                  }}
+                >
+                  GENERATE →
+                </button>
+              </div>
+            )}
           </div>
         )}
 

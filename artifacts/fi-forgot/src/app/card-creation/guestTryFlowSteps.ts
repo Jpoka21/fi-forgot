@@ -6,6 +6,7 @@
  *
  * Birthday / holidayName remain as occasion conditionals only.
  * Sprint 8C.2: emotionalOpenness is collected on the Tone screen (not a separate step).
+ * Sprint 8C.3: avoidMentioning is an optional control on the Tone screen (not a separate step).
  */
 
 /** Existing API default — keep in sync with v2-generate-card destructuring default. */
@@ -37,7 +38,6 @@ export const GUEST_TRY_STEP_IDS = [
   "primaryOccasionContext",
   "details",
   "tone",
-  "avoidMentioning",
 ] as const;
 
 export type GuestTryStepId = (typeof GUEST_TRY_STEP_IDS)[number];
@@ -64,8 +64,9 @@ export const GUEST_TRY_EXCLUDED_STEP_IDS = [
   "avoidList",
   "interests",
   "signOff",
-  // Sprint 8C.2 — folded into Tone screen for guests only
+  // Sprint 8C.2 / 8C.3 — folded into Tone screen for guests only
   "emotionalOpenness",
+  "avoidMentioning",
 ] as const;
 
 type StepLike = { id: string };

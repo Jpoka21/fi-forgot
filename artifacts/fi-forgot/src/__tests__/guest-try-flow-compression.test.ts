@@ -65,7 +65,7 @@ function extractBlockIds(source: string, constName: string): string[] {
   return [...block.matchAll(/id:\s*"([^"]+)"/g)].map((m) => m[1]!);
 }
 
-section("guest step order matches Sprint 8C.1–8C.2");
+section("guest step order matches Sprint 8C.1–8C.3");
 {
   const universalIds = extractBlockIds(FLOW_SOURCE, "UNIVERSAL_QUESTIONS");
   const guestSteps = buildGuestTrySteps(universalIds.map((id) => ({ id })));
@@ -86,10 +86,10 @@ section("guest step order matches Sprint 8C.1–8C.2");
     !guestIds.includes("emotionalOpenness"),
   );
   expectTrue(
-    "tone before avoidMentioning",
-    guestIds.indexOf("tone") < guestIds.indexOf("avoidMentioning"),
+    "no dedicated avoidMentioning step",
+    !guestIds.includes("avoidMentioning"),
   );
-  expectTrue("avoidMentioning last", guestIds[guestIds.length - 1] === "avoidMentioning");
+  expectTrue("tone is last guest step", guestIds[guestIds.length - 1] === "tone");
 }
 
 section("guest skips relationship profile and deferred prefs");
@@ -114,6 +114,7 @@ section("guest skips relationship profile and deferred prefs");
     "interests",
     "signOff",
     "emotionalOpenness",
+    "avoidMentioning",
   ]) {
     expectTrue(`excludes ${id}`, isGuestTryExcludedStepId(id));
     expectTrue(
@@ -122,8 +123,8 @@ section("guest skips relationship profile and deferred prefs");
     );
   }
   expectTrue(
-    "excluded list covers profile + deferred + emotional step",
-    GUEST_TRY_EXCLUDED_STEP_IDS.length >= 19,
+    "excluded list covers profile + deferred + folded tone fields",
+    GUEST_TRY_EXCLUDED_STEP_IDS.length >= 20,
   );
 }
 
@@ -169,6 +170,10 @@ section("authenticated UNIVERSAL order unchanged (8A contract)");
     "auth emotionalOpenness still follows tone",
     ids.indexOf("emotionalOpenness") === toneIdx + 1,
   );
+  expectTrue(
+    "auth universal still has dedicated avoidMentioning",
+    ids.includes("avoidMentioning"),
+  );
 }
 
 section("Sprint 8C.2 guest tone+intensity maps to existing emotionalOpenness values");
@@ -212,6 +217,60 @@ section("Sprint 8C.2 guest tone+intensity maps to existing emotionalOpenness val
   expectTrue(
     "guest intensity choices rendered",
     FLOW_SOURCE.includes("GUEST_INTENSITY_CHOICES"),
+  );
+}
+
+section("Sprint 8C.3 guest Tone screen hosts optional avoidMentioning");
+{
+  expectTrue(
+    "collapsed avoid control present",
+    FLOW_SOURCE.includes("Anything we should avoid mentioning?"),
+  );
+  expectTrue(
+    "stores avoidMentioning answer",
+    FLOW_SOURCE.includes('avoidMentioning: e.target.value') ||
+      FLOW_SOURCE.includes("avoidMentioning: e.target.value"),
+  );
+  expectTrue(
+    "tone selection stays on screen (no auto-advance)",
+    FLOW_SOURCE.includes("Stay on screen so optional avoid-mentioning remains usable"),
+  );
+  expectTrue(
+    "explicit GENERATE advances after tone",
+    FLOW_SOURCE.includes("GENERATE →") && FLOW_SOURCE.includes("guestToneReady"),
+  );
+  expectTrue("guestAvoidOpen state", FLOW_SOURCE.includes("guestAvoidOpen"));
+
+  const withAvoid = packTryGenerateCardBody({
+    firstName: "Mom",
+    relationship: "Mom",
+    occasion: "Thank You",
+    primaryOccasionContext: "Helping me get new insurance.",
+    tone: "Heartfelt",
+    emotionalOpenness: resolveEmotionalOpennessOrDefault(undefined),
+    avoidList: [],
+    details: "",
+    avoidMentioning: "divorce",
+    relAnswers: {},
+    senderName: "Me",
+  });
+  expect("packs avoidMentioning", withAvoid.avoidMentioning, "divorce");
+
+  const blankAvoid = packTryGenerateCardBody({
+    firstName: "Mom",
+    relationship: "Mom",
+    occasion: "Thank You",
+    primaryOccasionContext: "Helping me get new insurance.",
+    tone: "Heartfelt",
+    emotionalOpenness: "Meaningful But Not Mushy",
+    avoidList: [],
+    details: "",
+    relAnswers: {},
+    senderName: "Me",
+  });
+  expectTrue(
+    "blank avoid omits or empty field ok",
+    blankAvoid.avoidMentioning === undefined || blankAvoid.avoidMentioning === "",
   );
 }
 
