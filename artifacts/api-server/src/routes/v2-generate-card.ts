@@ -14,6 +14,7 @@ import {
   buildOrderedBodyContextLines,
   buildPrimaryContentPriorityBlock,
   buildPrimaryReasonRule,
+  buildPrimarySubjectOutputContract,
   formatMainObjectiveLine,
 } from "./v2GenerateCardContextLines";
 
@@ -450,6 +451,9 @@ ${buildPrimaryReasonRule()}
     hasContextSupplement,
     hasPrimary,
   });
+  const primaryOutputContract = hasPrimary
+    ? buildPrimarySubjectOutputContract(primaryOccasionContext, details)
+    : "";
 
   return `Write 3 versions of a ${occasion} card for ${firstName} (${relationship}).
 ${context}
@@ -469,7 +473,7 @@ Write as ${senderName} speaking directly to ${firstName}.
 Each version must open completely differently — different angle, different voice, different structure.
 Never write a specific number of years (e.g. "seven years", "3 years") — use the depth of history to inform emotional familiarity, not as literal text.
 ${signOff ? `End every card with exactly this sign-off on its own line: "${signOff}" — do not alter, rephrase, or add anything to it.` : `End every card with the sender's name on its own line — use "${senderName}" unless it is "Me", in which case write "[Your Name]".`}
-
+${primaryOutputContract ? `\n${primaryOutputContract}\n` : ""}
 Return valid JSON only:
 {
   "cards": [

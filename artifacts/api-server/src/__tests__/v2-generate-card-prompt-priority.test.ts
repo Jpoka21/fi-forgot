@@ -15,6 +15,7 @@ import {
   buildOrderedBodyContextLines,
   buildPrimaryContentPriorityBlock,
   buildPrimaryReasonRule,
+  buildPrimarySubjectOutputContract,
   formatMainObjectiveLine,
 } from "../routes/v2GenerateCardContextLines.js";
 
@@ -246,7 +247,9 @@ section("8D.2B live QA: Mom thank-you health insurance subject retention");
     "forbids vague substitution phrases",
     reasonRule.includes('"what I needed"') &&
       reasonRule.includes('"everything you did"') &&
-      reasonRule.includes('"being there for me"'),
+      reasonRule.includes('"being there for me"') &&
+      reasonRule.includes('"this one"') &&
+      reasonRule.includes('"helping me out"'),
   );
   expectTrue(
     "supporting cannot become the subject",
@@ -283,6 +286,69 @@ section("8D.2B live QA: Mom thank-you health insurance subject retention");
   expectTrue(
     "without primary uses legacy details label",
     noPrimaryLines.some((l) => l.startsWith("Extra details / memories to include:")),
+  );
+}
+
+section("8D.2C live QA: required primary output contract");
+{
+  const PRIMARY = "Helping me out with finding new health insurance";
+  const SUPPORTING = "She fought with everyone until she got what I needed";
+
+  const contract = buildPrimarySubjectOutputContract(PRIMARY, SUPPORTING);
+  const empty = buildPrimarySubjectOutputContract(undefined, SUPPORTING);
+  const whitespace = buildPrimarySubjectOutputContract("   ", SUPPORTING);
+
+  expectTrue("contract present when primary set", contract.includes("REQUIRED CONTENT CHECKLIST"));
+  expectTrue("REQUIRED SUBJECT present", contract.includes("REQUIRED SUBJECT"));
+  expectTrue("PRIMARY FACT verbatim", contract.includes(PRIMARY));
+  expectTrue(
+    "health insurance appears via primary fact only",
+    contract.includes("health insurance") && contract.includes(`PRIMARY FACT`),
+  );
+  expectTrue(
+    "OPTIONAL SUPPORT labeled explanation/color",
+    contract.includes("OPTIONAL SUPPORT (explanation / color only"),
+  );
+  expectTrue("supporting text in optional support", contract.includes(SUPPORTING));
+  expectTrue(
+    "forbids this / this one as primary substitutes",
+    contract.includes('"this"') && contract.includes('"this one"'),
+  );
+  expectTrue(
+    "forbids what I needed as primary substitute",
+    contract.includes('"what I needed"'),
+  );
+  expectTrue(
+    "forbids making me happy / helping me out alone",
+    contract.includes('"making me happy"') && contract.includes('"helping me out"'),
+  );
+  expectTrue(
+    "OUTPUT VALIDATION before JSON",
+    contract.includes("OUTPUT VALIDATION") &&
+      contract.includes("Before returning JSON") &&
+      contract.includes("concrete noun phrase from PRIMARY FACT"),
+  );
+  expectTrue(
+    "cannot satisfy primary via support alone",
+    contract.includes("Do not satisfy the primary requirement by expanding only the optional support"),
+  );
+  expectTrue("no contract without primary", empty === "");
+  expectTrue("no contract for whitespace primary", whitespace === "");
+  expectTrue(
+    "no dedicated insurance special-case function",
+    !HELPER_SOURCE.includes("healthInsurance") &&
+      !HELPER_SOURCE.includes("isHealthInsurance") &&
+      !ROUTE_SOURCE.includes("healthInsurance"),
+  );
+  expectTrue(
+    "route injects output contract near return",
+    ROUTE_SOURCE.includes("buildPrimarySubjectOutputContract") &&
+      ROUTE_SOURCE.includes("primaryOutputContract"),
+  );
+  expectTrue(
+    "contract placed before Return valid JSON",
+    ROUTE_SOURCE.indexOf("primaryOutputContract") <
+      ROUTE_SOURCE.indexOf("Return valid JSON only"),
   );
 }
 
@@ -356,6 +422,10 @@ section("route wiring and option descriptors");
   expectTrue(
     "uses buildPrimaryReasonRule",
     ROUTE_SOURCE.includes("buildPrimaryReasonRule"),
+  );
+  expectTrue(
+    "uses buildPrimarySubjectOutputContract",
+    ROUTE_SOURCE.includes("buildPrimarySubjectOutputContract"),
   );
   expectTrue(
     "system prompt receives hasPrimary gate",

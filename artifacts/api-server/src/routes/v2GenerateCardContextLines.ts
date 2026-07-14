@@ -1,5 +1,5 @@
 /**
- * Pure helpers for v2 card user-prompt context assembly (Sprint 8A / 8B / 8D.2B).
+ * Pure helpers for v2 card user-prompt context assembly (Sprint 8A / 8B / 8D.2B / 8D.2C).
  * Kept separate from the Express route so unit tests do not load OpenAI/DB.
  */
 
@@ -92,15 +92,45 @@ Supporting may explain how they acted or deepen feeling. It must not replace, ou
  * User-prompt rule that forces retention of concrete primary subject nouns.
  */
 export function buildPrimaryReasonRule(): string {
-  return `PRIMARY REASON RULE: The primary reason is the explicit subject of every card version. Every version must clearly name that concrete reason — keep its important concrete nouns and named subjects visible in the text. Do not replace them with vague stand-ins such as "what I needed", "everything you did", "being there for me", "your help", or "all you've done".
-Supporting memories are optional color only — how they acted or one brief scene — and must not become the main subject, replace the primary reason, or turn the card into a different event.
-Slight rewording is fine when the concrete subject still remains (e.g. "new health insurance" may become "health insurance coverage"). Vague substitution that drops the deed is not (e.g. "health insurance" → "what I needed" is forbidden).
+  return `PRIMARY REASON RULE: The primary reason is the explicit subject of every card version. Every version must clearly name that concrete reason — keep its important concrete nouns and named subjects visible in the text. Do not replace them with vague stand-ins used alone as the deed, including: "this", "this one", "that", "what I needed", "everything you did", "making me happy", "being there for me", "helping me out", "your help", or "all you've done".
+Supporting memories are optional color / explanation only — how they acted or one brief scene — and must not become the main subject, replace the primary reason, or turn the card into a different event.
+Slight rewording is fine when the concrete subject still remains (e.g. "new health insurance" may become "health insurance coverage"). Vague substitution that drops the deed is not (e.g. "health insurance" → "what I needed" or "this one" is forbidden).
 Never print internal labels such as "Primary reason" or "Supporting memory" in the card text.`;
+}
+
+/**
+ * Hard output contract placed near generation / JSON instructions (Sprint 8D.2C).
+ * Restates the primary fact verbatim and requires a concrete noun phrase in every version.
+ * Returns "" when primary is absent (legacy path unchanged).
+ */
+export function buildPrimarySubjectOutputContract(
+  primaryOccasionContext?: string,
+  details?: string,
+): string {
+  const primary = primaryOccasionContext?.trim();
+  if (!primary) return "";
+
+  const support = details?.trim()
+    ? details.trim()
+    : "(none)";
+
+  return `REQUIRED CONTENT CHECKLIST (primary provided — applies to every version):
+REQUIRED SUBJECT — Every card must explicitly state what the sender is thanking the recipient for using a concrete noun phrase from the primary fact (not a vague pointer).
+PRIMARY FACT (restate concretely in the card; do not replace with a pronoun or stand-in):
+${primary}
+OPTIONAL SUPPORT (explanation / color only — must not become the subject):
+${support}
+FORBIDDEN PRIMARY STAND-INS when used alone as substitutes for the primary deed:
+"this", "this one", "that", "what I needed", "everything you did", "making me happy", "being there for me", "helping me out"
+OUTPUT VALIDATION — Before returning JSON, for each of the 3 card versions:
+1) Confirm a concrete noun phrase from PRIMARY FACT is explicitly present in the card text.
+2) If the primary subject is missing, or only a forbidden stand-in remains, or the card is about OPTIONAL SUPPORT instead of PRIMARY FACT, revise that version now before returning.
+Do not satisfy the primary requirement by expanding only the optional support.`;
 }
 
 export function buildMemoryDensityRequirement(hasPrimary: boolean): string {
   if (hasPrimary) {
-    return `PRIMARY-CENTERED SPECIFICITY: A primary reason was provided. That primary reason alone satisfies the specificity requirement — do not require a second personal reference, and do not invent a supporting memory to satisfy density. Supporting memories or personal details are optional enrichment only; use them briefly when they strengthen the primary reason, and never let a vivid supporting memory outrank or become the main subject.
+    return `PRIMARY-CENTERED SPECIFICITY: A primary reason was provided. That primary reason alone satisfies the specificity requirement — do not require a second personal reference, and do not invent a supporting memory to satisfy density. Supporting memories or personal details are optional enrichment / explanation / color only; use them briefly when they strengthen the primary reason, and never let a vivid supporting memory outrank or become the main subject.
 SUBJECT-PRESERVING PARAPHRASE ONLY: You may lightly rephrase the primary reason for warmth, but the concrete subject must remain intact and recognizable. Do not generalize concrete nouns into vague placeholders (forbidden pattern: health insurance → "what I needed"; hospital visit → "what happened"; new job → "everything"). Do not expand a small supporting detail into a fabricated story that displaces the primary subject.`;
   }
 

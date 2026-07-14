@@ -116,6 +116,10 @@ section("route accepts primaryOccasionContext and keeps objective default");
     "system prompt gated on primary presence",
     ROUTE_SOURCE.includes("!!primaryOccasionContext?.trim()"),
   );
+  expectTrue(
+    "primary output contract wired",
+    ROUTE_SOURCE.includes("buildPrimarySubjectOutputContract"),
+  );
 }
 
 section("authenticated generation path unchanged");
