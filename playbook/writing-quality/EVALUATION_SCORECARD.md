@@ -1,5 +1,6 @@
 # Evaluation Scorecard — Writing Quality Pilot
 
+**Framework:** Writing Evaluation Framework V1, frozen  
 **Use one scorecard row per successful scenario's first-returned card.**  
 **Scale:** 1 = broken · 2 = weak · 3 = acceptable · 4 = strong · 5 = send / keep.  
 **Hard Fails:** binary. Any HF = do not treat as “shippable good,” even if soft scores are high.
@@ -54,7 +55,7 @@ If Yes → still score soft dims for diagnostics, but mark **Overall: Hard Fail*
 | 10 | Tone fidelity | | |
 | 11 | Emotional level fidelity | | |
 | 12 | Primary subject clarity | | |
-| 13 | Supporting-detail use | | |
+| 13 | Supporting-detail use† | | |
 | 14 | Specificity | | |
 | 15 | Warmth | | |
 | 16 | Humor (N/A if not requested) | | |
@@ -63,7 +64,8 @@ If Yes → still score soft dims for diagnostics, but mark **Overall: Hard Fail*
 | 19 | Anti-AI texture | | |
 | 20 | Overall send-readiness (holistic)* | | |
 
-\*Dim 20 is a holistic send-readiness judgment for the single first-returned draft (no sibling-version comparison). Use N/A only if the card could not be generated.
+\*Dim 20 means **send readiness** for the one-card baseline (holistic judgment of the single first-returned draft). It is not a multi-version differentiation score. Use N/A only if the card could not be generated.  
+†Dim 13 is **N/A** when no supporting detail was supplied in the scenario inputs. Do not penalize sparse/primary-only cards for missing support use.
 
 **Mean soft score (exclude N/A):** ______
 

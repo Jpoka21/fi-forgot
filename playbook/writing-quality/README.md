@@ -1,14 +1,13 @@
 # Sprint 9 — Writing Quality Roadmap
 
-**Status:** 9A.1 assets (this folder)  
-**Branch context:** `frontend-rebuild` (docs only; Sprint 8 generation frozen)  
-**Rule:** No prompt, architecture, or production-code changes until measured patterns justify them.
+**Framework status:** Writing Evaluation Framework V1, frozen  
+**Sprint 9A status:** **Complete**  
+**Branch context:** `frontend-rebuild` (docs / evaluation only; Sprint 8 generation frozen)  
+**Rule:** No prompt, architecture, or production-code changes until measured patterns justify them (Sprint 9B planning only until kickoff).
 
 ---
 
-## 9A.1 — Evaluation assets (current)
-
-**Goal:** Create reusable, frozen evaluation instruments.
+## Writing Evaluation Framework V1 (frozen)
 
 | Asset | File |
 |-------|------|
@@ -16,9 +15,23 @@
 | Evaluation Scorecard | `EVALUATION_SCORECARD.md` |
 | Pattern Ledger | `PATTERN_LEDGER.md` |
 | Review Workflow | `REVIEW_WORKFLOW.md` |
+| Pilot scores | `SCORES_TEMPLATE.csv` |
+| Pilot findings | `PILOT_FINDINGS_9A2.md` |
+| Pilot corpus | `pilot-9A.2/CORPUS.json` + `CORPUS.md` |
 | This roadmap | `README.md` |
 
-**Exit criteria:** Assets ready for pilot; no generation behavior changed.
+**V1 clarifications (scoring unchanged):**
+- Dimension 13 is **N/A** when no supporting detail was supplied.
+- Dimension 20 means **send readiness** for the one-card baseline (not version differentiation).
+- Multi-draft comparison tags (`P-TRIPLE-ECHO`, `Q-VERSION-ANGLES`) are outside one-card baseline scope.
+- `authenticated_body` means relAnswers body-path only, not full recipient memory.
+
+---
+
+## 9A.1 — Evaluation assets
+
+**Goal:** Create reusable, frozen evaluation instruments.  
+**Exit criteria:** Assets ready for pilot; no generation behavior changed. **Met.**
 
 ---
 
@@ -26,25 +39,33 @@
 
 **Goal:** Score **20 golden scenarios × 1 first-returned card = 20 cards**.
 
-1. Generate using frozen post–Sprint 8E prompts and the golden set payloads via `pilot-9A.2/run-pilot.mjs`.
-2. Run one calibration round (shared sample of ~3–6 cards).
-3. Score each successful first-returned card (`SCORES_TEMPLATE.csv`).
-4. Tag patterns; fill frequency on the ledger.
-5. Produce / update **`PILOT_FINDINGS_9A2.md`** (top patterns, HF rates, soft dims).
+**Status:** **Complete.** Corpus at `b213acf`; scoring frozen with Framework V1.
 
-**Status (2026-07-14):** First attempt **blocked** (no API key / local generate-card server). Asset review + corrections: `ASSET_REVIEW_9A2.md`. Re-run generation before freeze or 9B.
+| Metric | Value |
+|--------|--------|
+| Scored | 20 / 20 |
+| Soft mean | 4.38 |
+| Soft median | 4.49 |
+| Hard Fails | 0 |
+| Would Send | 18 / 20 (90%) |
+| Guest mean | 4.35 |
+| Authenticated_body mean | 4.48 |
 
-**Exit criteria:** Data-driven priority list for writing work — still no prompt edits until 9B kickoff.
+See `PILOT_FINDINGS_9A2.md`.
+
+**Exit criteria:** Data-driven priority list for writing work — still no prompt edits until 9B kickoff. **Met.**
 
 ---
 
-## 9B — Prompt improvements from measured patterns only
+## 9B — Prompt improvements from measured patterns only (not started)
 
 **Goal:** Change writing prompts **only** for patterns that clear the workflow’s “deserve prompt work” bar.
 
 - Treat golden scenarios G01–G20 as the regression panel.
 - Re-score the same fixtures after each change family.
 - Do not expand scope into performance, Brain, Event Domain, or frontend flow.
+
+**Planning candidates (do not implement until 9B kickoff):** professional thank-you rhythm / template (`P-UNIFORM-SENTENCES`, length); rich heartfelt essay / AI-claim closings (`P-GRATITUDE-ESSAY`, `P-AI-CLAIMS`). Protect `Q-DEED-EARLY`, `Q-SUPPORT-AS-COLOR`, `Q-REGISTER-TIGHT`.
 
 ---
 
@@ -64,4 +85,4 @@
 - Evaluation first; anecdotes do not unlock prompt work.
 - Sprint 8E production baseline: one card per generate; refine actions must stay factually grounded.
 - Birthday date collection is a separate product follow-up (`BIRTHDAY_DATE_FOLLOWUP.md`) — not part of 9A.2 generation.
-- No production behavior changes in 9A.1 asset creation; 8E corrected production before the 9A.2 pilot.
+- No production behavior changes in Sprint 9A.

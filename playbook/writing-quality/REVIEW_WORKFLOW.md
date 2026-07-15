@@ -1,8 +1,12 @@
 # Review Workflow — Writing Quality (Sprint 9A+)
 
+**Framework:** Writing Evaluation Framework V1, frozen  
 **Purpose:** Make writing review repeatable and gate prompt work behind measured patterns.  
 **Applies to:** Golden Scenario Set v1 and later golden set versions.  
 **Does not authorize:** Production code, architecture, packing, Brain, Event Domain, or performance changes.
+
+**One-card baseline scope:** Score each successful first-returned card only. Multi-draft comparison tags (`P-TRIPLE-ECHO`, `Q-VERSION-ANGLES`) are outside one-card baseline scope — use them only when evaluating Rewrite / New Version / multi-draft sets.  
+**`authenticated_body`:** Means relAnswers body-path only (request body), not full recipient-memory assembly.
 
 ---
 
@@ -50,9 +54,9 @@ If reviewers diverge by >1.0 soft mean on >30% of calibration cards, stop and re
 For each successful first-returned card (up to 20):
 
 1. Complete Hard Fail checklist.  
-2. Score soft dims 1–20 (N/A humor when not requested).  
+2. Score soft dims 1–20 (N/A humor when not requested; N/A dim 13 when no supporting detail was supplied; dim 20 = send readiness).  
 3. Answer **Would I actually send this?**  
-4. Apply pattern tags (negative and positive).  
+4. Apply pattern tags (negative and positive). Omit multi-draft tags on one-card baseline runs.  
 5. Capture short notes + optional opening/closing quotes.
 
 **Pilot expectation:** Score **every successful first-returned card** (20 when all succeed). Do not regenerate. Do not score manual Rewrite / New Version paths in the baseline corpus.

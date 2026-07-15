@@ -1,0 +1,164 @@
+{
+  "verify": {
+    "status": "complete",
+    "n": 20,
+    "ok": 20,
+    "attemptsUnique": [
+      1
+    ]
+  },
+  "overall": {
+    "mean": 4.38454678362573,
+    "median": 4.4868421052631575,
+    "send_rate": 0.9,
+    "hf_any": 0
+  },
+  "dimAvgs": [
+    4.4,
+    4.2,
+    3.95,
+    4.35,
+    4.5,
+    3.75,
+    4.65,
+    4.85,
+    4.85,
+    4.6,
+    4.35,
+    4.85,
+    5,
+    4.55,
+    4.05,
+    5,
+    4.05,
+    4.35,
+    4,
+    4.35
+  ],
+  "byFlow": {
+    "guest": 4.345509607351713,
+    "authenticated_body": 4.475633528265107
+  },
+  "byOcc": {
+    "Thank You": 3.99,
+    "Birthday": 4.34,
+    "Anniversary": 4.89,
+    "Holiday": 4.67,
+    "Sympathy": 4.78,
+    "Congratulations": 4.64,
+    "Apology": 4.63,
+    "Just Because": 4.17,
+    "Thinking Of You": 3.67,
+    "Get Well": 4.22,
+    "Graduation": 4.89
+  },
+  "byRel": {
+    "Mom": 3.83,
+    "Friend": 4.58,
+    "Wife": 4.89,
+    "Dad": 4.44,
+    "Son": 4.79,
+    "Husband": 4.68,
+    "Daughter": 4.53,
+    "Grandparent": 3.67,
+    "Coworker": 3.86,
+    "Boss": 4.5,
+    "Teacher": 4.95,
+    "Sister": 4.65
+  },
+  "strongest": [
+    {
+      "id": "G13",
+      "mean": 4.95
+    },
+    {
+      "id": "G04",
+      "mean": 4.89
+    },
+    {
+      "id": "G17",
+      "mean": 4.89
+    },
+    {
+      "id": "G19",
+      "mean": 4.89
+    },
+    {
+      "id": "G07",
+      "mean": 4.79
+    }
+  ],
+  "weakest": [
+    {
+      "id": "G02",
+      "mean": 3.28,
+      "send": "Yes"
+    },
+    {
+      "id": "G11",
+      "mean": 3.5,
+      "send": "No"
+    },
+    {
+      "id": "G10",
+      "mean": 3.67,
+      "send": "Yes"
+    },
+    {
+      "id": "G16",
+      "mean": 3.84,
+      "send": "No"
+    },
+    {
+      "id": "G03",
+      "mean": 4.16,
+      "send": "Yes"
+    }
+  ],
+  "tags": [
+    [
+      "Q-DEED-EARLY",
+      17
+    ],
+    [
+      "Q-REGISTER-TIGHT",
+      12
+    ],
+    [
+      "Q-SUPPORT-AS-COLOR",
+      11
+    ],
+    [
+      "Q-EARNED-CLOSE",
+      10
+    ],
+    [
+      "Q-HONEST-SPARSE",
+      8
+    ],
+    [
+      "Q-SPOKEN-RHYTHM",
+      8
+    ],
+    [
+      "P-LENGTH-BLOAT",
+      4
+    ],
+    [
+      "P-AI-CLAIMS",
+      3
+    ],
+    [
+      "P-UNIFORM-SENTENCES",
+      2
+    ],
+    [
+      "Q-HUMOR-LANDS",
+      2
+    ],
+    [
+      "P-GRATITUDE-ESSAY",
+      1
+    ]
+  ]
+}
