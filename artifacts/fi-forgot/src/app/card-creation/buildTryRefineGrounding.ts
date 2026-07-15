@@ -53,17 +53,20 @@ export function buildTryRefineGrounding(input: {
   return grounding;
 }
 
-/** Grounded rewrite / new-version / more-personal instructions for /try quick adjust. */
+/** Grounded rewrite / new-version / more-personal instructions for /try quick adjust (Sprint 8G). */
 export const TRY_REFINE_INSTRUCTIONS = {
-  shorter: "Shorten this significantly — keep only the most impactful lines. Do not remove or invent personal facts.",
-  warmer: "Make this noticeably warmer and more heartfelt using only the facts already present. Do not invent memories.",
-  funnier: "Add a genuine touch of humor that still feels warm, using only existing facts. Do not invent new anecdotes.",
+  shorter:
+    "Shorten this significantly — keep only the most impactful lines. Keep the primary reason visible. Normally retain supplied supporting detail as a brief recognizable callback unless omitting or softening it clearly produces a more appropriate, tactful, or user-compliant card. Do not invent personal facts. Do not replace a supplied supporting detail with an unrelated generic joke, metaphor, or invented anecdote.",
+  warmer:
+    "Make this noticeably warmer and more heartfelt using only the facts already present. Keep the primary reason dominant and normally retain supplied supporting detail. Do not invent memories.",
+  funnier:
+    "Add a genuine touch of humor that still feels warm, preferring humor from supplied supporting details when present and retained. Keep the primary reason dominant. Do not invent new anecdotes. Do not replace a supplied supporting detail with an unrelated generic joke.",
   morePersonal:
-    "Make this feel more personal by emphasizing the supplied primary reason and supporting details already present. Do not invent any new personal details, memories, places, or events.",
+    "Make this feel more personal by using the supplied primary reason and supporting details more effectively — emphasize existing facts, keep the primary dominant, and normally retain a brief recognizable callback to supplied support unless a tactful/user-compliant omission reason applies. Do not invent any new personal details, memories, places, or events.",
   goDeeper:
-    "Make this more emotionally raw and vulnerable using only the facts already present. Do not invent new memories or events.",
+    "Make this more emotionally raw and vulnerable using only the facts already present. Keep the primary reason dominant and normally retain supplied supporting detail. Do not invent new memories or events.",
   rewrite:
-    "Completely rewrite with a fresh opening, fresh structure, and fresh wording, while retaining every supplied personal fact — recipient, occasion, primary reason, supporting personal details, and sign-off. Do not invent new personal facts, memories, places, or events.",
+    "Completely rewrite with a genuinely different opening, a different sentence progression or structural beat order, and substantially fresh wording and rhythm, while retaining the recipient, occasion, primary reason, and sign-off. When a meaningful supporting detail was supplied, normally include one brief recognizable callback to it while keeping the primary reason dominant; omit or soften only when that clearly produces a more appropriate, tactful, or user-compliant card. Do not reuse distinctive metaphors, punchlines, invented jokes, or framing from the original card unless they came from authoritative user-supplied facts. Do not invent new personal facts, memories, places, or events. Do not replace a supplied supporting detail with an unrelated generic joke, metaphor, or invented anecdote. Do not produce a sentence-by-sentence paraphrase.",
   newVersion:
-    "Write a completely different expression of the same facts — fresh angle, different opening, different structure and wording — same recipient, relationship, occasion, primary reason, supporting details, and sign-off. Do not invent new personal facts or memories.",
+    "Write a clearly different take using the same authoritative facts — different opening, different structure and wording — same recipient, relationship, occasion, primary reason, tone constraints, and sign-off. Normally retain a brief recognizable callback to any supplied supporting detail while keeping the primary dominant, unless a tactful/user-compliant omission reason applies. Do not reuse distinctive original metaphors unless they are authoritative user-supplied facts. Do not invent new personal facts or memories.",
 } as const;

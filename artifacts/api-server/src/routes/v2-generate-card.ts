@@ -205,6 +205,7 @@ function buildSystemPrompt(
   archetypes: string[],
   avoidList: string[],
   hasPrimary = false,
+  hasSupport = false,
 ): string {
   const relRules = buildRelRules(relationship, occasion);
   const archetypeStr = archetypes.join(" + ");
@@ -213,10 +214,26 @@ function buildSystemPrompt(
     : "";
 
   const specificityBlock = hasPrimary
-    ? `1. SPECIFICITY
-   A primary reason for this card is provided in the user message. That primary reason is the required subject and alone satisfies specificity — do NOT require a second unrelated personal reference merely to satisfy this section.
+    ? (hasSupport
+      ? `1. SPECIFICITY
+   A primary reason for this card is provided in the user message. That primary reason is the required subject.
    Keep important concrete nouns and named subjects from the primary reason visible in the card. Do not replace them with vague stand-ins ("what I needed", "everything you did", "being there for me", "your help").
-   Supporting memories are optional enrichment only. A vivid supporting memory must never outrank or replace the primary subject.
+   A supporting memory is also provided. When retained, keep one brief recognizable callback subordinate to the primary, normally once. The card should normally contain that callback while keeping the primary reason dominant. The model may omit or soften the supporting detail only when doing so clearly produces a more appropriate, tactful, or user-compliant card, such as when the user explicitly requests removing or replacing it, an avoid instruction conflicts with it, repeating it would materially reduce the quality of the card, or the detail is inappropriate for the occasion. Paraphrasing is encouraged. The factual core should remain recognizable whenever the supporting detail is retained. Do not invent additional memories. Do not replace the supplied supporting memory with an unrelated generic joke, metaphor, or invented anecdote. A vivid supporting memory must never outrank or replace the primary subject.
+   If a card could be sent to 100 people without modification, it has failed.
+   Good: name the concrete deed from the primary reason and a brief recognizable callback to the supplied support (when retained).
+   Bad: vague gratitude that could apply to any favor, or a generic joke that displaces the supplied personal detail.
+
+   PROHIBITED — do NOT use any of these, even abstractly:
+   - Implied shared history: "adventures", "another adventure", "shared moments", "we've been through", "shared so many moments", "fun times and the hard ones", "memories we've made", "unforgettable memories", "all we've shared"
+   - Abstract emotional claims: "endless laughs", "always there for me", "always been there", "through thick and thin", "every step of the way"
+   - Invented traits or qualities: "your kindness", "your warmth", "your humor", "your steady presence", "your integrity", "your support"
+   - Anything implying a documented past: road trips, inside jokes, playlists, gaming, family chaos, "what we've built", "how far we've come"
+
+   A simple truthful card that keeps the primary subject (and normally retains supplied support when appropriate) passes. A card that invents history or erases the primary subject fails.`
+      : `1. SPECIFICITY
+   A primary reason for this card is provided in the user message. That primary reason is the required subject.
+   Keep important concrete nouns and named subjects from the primary reason visible in the card. Do not replace them with vague stand-ins ("what I needed", "everything you did", "being there for me", "your help").
+   No supporting memory was provided — do not invent one.
    If a card could be sent to 100 people without modification, it has failed.
    Good: name the concrete deed from the primary reason.
    Bad: vague gratitude that could apply to any favor.
@@ -227,7 +244,7 @@ function buildSystemPrompt(
    - Invented traits or qualities: "your kindness", "your warmth", "your humor", "your steady presence", "your integrity", "your support"
    - Anything implying a documented past: road trips, inside jokes, playlists, gaming, family chaos, "what we've built", "how far we've come"
 
-   A simple truthful card that keeps the primary subject passes. A card that invents history or erases the primary subject fails.`
+   A simple truthful card that keeps the primary subject passes. A card that invents history or erases the primary subject fails.`)
     : `1. SPECIFICITY
    IF context is provided above (profile answers, memories, fresh updates):
    The card must contain at least 2 specific personal references drawn from that context.
@@ -255,9 +272,11 @@ function buildSystemPrompt(
    A simple truthful card passes. A card that invents or implies history fails.`;
 
   const memoryWeavingBlock = hasPrimary
-    ? `2. MEMORY WEAVING
-   When a primary reason exists: center the card on that primary subject. Supporting details may add how they acted or one brief scene — woven as color around the primary, never as a replacement subject.
-   Do not invent additional memories to weave. Write warmly without invented history.`
+    ? (hasSupport
+      ? `2. MEMORY WEAVING
+   Center the card on the primary subject. Normally weave the supplied supporting detail once as brief subordinate color — recognizable, not overexplained. Omit or soften only when that clearly produces a more appropriate, tactful, or user-compliant card (explicit remove/replace request, avoid conflict, material quality harm, or occasion-inappropriate detail). Do not invent additional memories. Prefer the supplied support for humor/color over inventing an unrelated joke.`
+      : `2. MEMORY WEAVING
+   When a primary reason exists: center the card on that primary subject. No supporting detail was supplied — do not invent one to weave. Write warmly without invented history.`)
     : `2. MEMORY WEAVING
    IF multiple memories are present in context: Weave them together naturally rather than listing them.
    Good: "Between the kitchen renovation finally wrapping up and your new pickleball phase, it feels like you've turned this year into two completely different adventures."
@@ -387,6 +406,7 @@ function buildUserPrompt(
   const rel = relationship.toLowerCase();
   const primary = primaryOccasionContext?.trim() || "";
   const hasPrimary = primary.length > 0;
+  const hasSupport = !!(details?.trim());
 
   const contextLines = buildOrderedBodyContextLines({
     relAnswers,
@@ -416,25 +436,29 @@ function buildUserPrompt(
   const hasContext = !!(bodyContext || contextSupplement);
   const hasContextSupplement = !!contextSupplement?.trim();
 
+  const supportBrief = hasSupport
+    ? `Normally include one brief recognizable callback to the supplied supporting detail while keeping the primary reason dominant. Omit or soften only when that clearly produces a more appropriate, tactful, or user-compliant card (explicit remove/replace request, avoid conflict, material quality harm, or occasion-inappropriate detail). Prefer that detail for humor/color when retained over inventing an unrelated joke. Do not invent extra memories. Do not replace a supplied supporting detail with an unrelated generic joke, metaphor, or invented anecdote.`
+    : `No supporting detail was supplied — do not invent one.`;
+
   const polishGuide = isPro
     ? (hasPrimary
-      ? `Write one polished professional card. ${tone} tone. ${emotionGuide} Center the primary reason. Supporting memories are optional enrichment only.`
+      ? `Write one polished professional card. ${tone} tone. ${emotionGuide} Center the primary reason. ${supportBrief}`
       : `Write one polished professional card for ${firstName}. ${tone} tone. ${emotionGuide}`)
     : hasPrimary
-      ? `Write one polished card. ${tone} tone. ${emotionGuide} Center the primary reason. Supporting memories are optional enrichment — use lightly only if they strengthen that reason. Do not invent extra memories.`
+      ? `Write one polished card. ${tone} tone. ${emotionGuide} Center the primary reason. ${supportBrief}`
       : hasContext
         ? `Write one polished card. ${tone} tone. ${emotionGuide} Open with and use the most personally relevant facts from the provided context. Do not invent facts.`
         : `Write one polished card. ${tone} tone. ${emotionGuide} Warm, honest, and genuine — no specific memories to invent. Write 3–5 sentences that feel real for this relationship and occasion.`;
 
   const primaryBlocks = hasPrimary
-    ? `\n${buildPrimaryContentPriorityBlock()}
+    ? `\n${buildPrimaryContentPriorityBlock(hasSupport)}
 
-${buildPrimaryReasonRule()}
+${buildPrimaryReasonRule(hasSupport)}
 `
     : "";
 
   const objectiveLine = formatMainObjectiveLine(objectiveProvided, objective);
-  const densityBlock = buildMemoryDensityRequirement(hasPrimary);
+  const densityBlock = buildMemoryDensityRequirement(hasPrimary, hasSupport);
   const authRules = buildAuthenticatedContextRules({
     hasContextSupplement,
     hasPrimary,
@@ -811,7 +835,7 @@ router.post("/v2/generate-card", async (req, res) => {
   const archetypes = determineArchetypes(relationship, occasion, objective, tone);
   logger.info({ firstName, relationship, occasion, archetypes, contextUsed: !!recipientContext }, "v2-generate-card: archetypes determined");
 
-  const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList, !!primaryOccasionContext?.trim());
+  const systemPrompt = buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList, !!primaryOccasionContext?.trim(), !!details?.trim());
   const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement, primaryOccasionContext, objectiveProvided);
 
   try {

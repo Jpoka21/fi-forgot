@@ -72,21 +72,33 @@ section("refine action instructions preserve facts");
 {
   expectTrue(
     "rewrite asks fresh opening/structure/wording",
-    /fresh opening/i.test(TRY_REFINE_INSTRUCTIONS.rewrite) &&
-      /fresh structure/i.test(TRY_REFINE_INSTRUCTIONS.rewrite) &&
-      /fresh wording/i.test(TRY_REFINE_INSTRUCTIONS.rewrite),
+    /genuinely different opening/i.test(TRY_REFINE_INSTRUCTIONS.rewrite) &&
+      /structural beat order/i.test(TRY_REFINE_INSTRUCTIONS.rewrite) &&
+      /substantially fresh wording/i.test(TRY_REFINE_INSTRUCTIONS.rewrite),
   );
-  expectTrue("rewrite keeps facts", /retaining every supplied personal fact/i.test(TRY_REFINE_INSTRUCTIONS.rewrite));
+  expectTrue(
+    "rewrite forbids non-authoritative metaphor reuse",
+    /Do not reuse distinctive metaphors/i.test(TRY_REFINE_INSTRUCTIONS.rewrite),
+  );
+  expectTrue("rewrite keeps facts", /primary reason/i.test(TRY_REFINE_INSTRUCTIONS.rewrite) && /sign-off/i.test(TRY_REFINE_INSTRUCTIONS.rewrite));
   expectTrue("rewrite no invent", /Do not invent/i.test(TRY_REFINE_INSTRUCTIONS.rewrite));
   expectTrue(
-    "morePersonal uses existing details",
-    /emphasizing the supplied/i.test(TRY_REFINE_INSTRUCTIONS.morePersonal) &&
-      /Do not invent/i.test(TRY_REFINE_INSTRUCTIONS.morePersonal),
+    "rewrite normally retains support",
+    /normally include one brief recognizable callback/i.test(TRY_REFINE_INSTRUCTIONS.rewrite),
   );
   expectTrue(
-    "newVersion same facts",
-    /same facts/i.test(TRY_REFINE_INSTRUCTIONS.newVersion) &&
+    "morePersonal uses existing details",
+    /supporting details more effectively/i.test(TRY_REFINE_INSTRUCTIONS.morePersonal) &&
+      /do not invent/i.test(TRY_REFINE_INSTRUCTIONS.morePersonal),
+  );
+  expectTrue(
+    "newVersion same facts different take",
+    /same authoritative facts/i.test(TRY_REFINE_INSTRUCTIONS.newVersion) &&
       /Do not invent/i.test(TRY_REFINE_INSTRUCTIONS.newVersion),
+  );
+  expectTrue(
+    "newVersion normally retains support",
+    /Normally retain a brief recognizable callback/i.test(TRY_REFINE_INSTRUCTIONS.newVersion),
   );
 }
 

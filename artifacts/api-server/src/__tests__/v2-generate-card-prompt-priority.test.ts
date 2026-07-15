@@ -101,28 +101,43 @@ section("legacy order without primary");
 
 section("content priority and same-reason instruction");
 {
-  const block = buildPrimaryContentPriorityBlock();
-  expectTrue("has CONTENT PRIORITY", block.includes("CONTENT PRIORITY"));
-  expectTrue("occasion first", block.includes("1. Occasion"));
-  expectTrue("primary mandatory", block.includes("Primary reason — mandatory center"));
-  expectTrue("primary is explicit subject", block.includes("the explicit subject of the card"));
-  expectTrue("supporting optional", block.includes("Supporting memories — optional"));
-  expectTrue("supporting never the subject", block.includes("never the subject"));
+  const noSupport = buildPrimaryContentPriorityBlock(false);
+  expectTrue("has CONTENT PRIORITY", noSupport.includes("CONTENT PRIORITY"));
+  expectTrue("occasion first", noSupport.includes("1. Occasion"));
+  expectTrue("primary mandatory", noSupport.includes("Primary reason — mandatory center"));
+  expectTrue("primary is explicit subject", noSupport.includes("the explicit subject of the card"));
+  expectTrue("no support → invent none", noSupport.includes("none supplied; do not invent any"));
   expectTrue(
     "card revolves around primary reason",
-    block.includes("revolve around the primary occasion reason"),
+    noSupport.includes("revolve around the primary occasion reason"),
   );
   expectTrue(
     "profile is background characterization",
-    block.includes("background characterization only"),
+    noSupport.includes("background characterization only"),
   );
   expectTrue(
     "profile must not replace primary as central story",
-    block.includes("never let traits, habits, or long-term descriptions replace the primary reason"),
+    noSupport.includes("never let traits, habits, or long-term descriptions replace the primary reason"),
   );
   expectTrue(
-    "structure primary then supporting then appreciation",
-    block.includes("Primary subject → optional supporting how/color → appreciation"),
+    "structure primary then appreciation when no support",
+    noSupport.includes("Primary subject → appreciation / occasion close"),
+  );
+
+  const withSupport = buildPrimaryContentPriorityBlock(true);
+  expectTrue(
+    "supplied support normally retain brief callback",
+    withSupport.includes("normally retain with one brief recognizable callback"),
+  );
+  expectTrue("supporting never the subject", withSupport.includes("never the subject"));
+  expectTrue(
+    "structure primary then support then appreciation",
+    withSupport.includes("Primary subject → normally one brief supplied-support callback → appreciation"),
+  );
+  expectTrue("avoid wins over conflicting support", withSupport.includes("AVOID CONFLICT"));
+  expectTrue(
+    "shared support behavior rule present",
+    withSupport.includes("should normally contain one brief recognizable callback"),
   );
 }
 
@@ -139,7 +154,7 @@ section("8B.1 live QA: insurance primary vs profile vs college supporting");
     details:
       "That time she flew to my college to visit me because I was upset.",
   });
-  const priority = buildPrimaryContentPriorityBlock();
+  const priority = buildPrimaryContentPriorityBlock(true);
 
   const primaryIdx = lines.findIndex((l) => l.startsWith("Primary reason for this card:"));
   const profileIdx = lines.findIndex((l) =>
@@ -176,15 +191,11 @@ section("8B.1 live QA: insurance primary vs profile vs college supporting");
 
 section("memory density gated on primary");
 {
-  const withPrimary = buildMemoryDensityRequirement(true);
+  const withPrimary = buildMemoryDensityRequirement(true, false);
   expectTrue("primary-centered label", withPrimary.includes("PRIMARY-CENTERED SPECIFICITY"));
-  expectTrue(
-    "no second reference required",
-    withPrimary.includes("do not require a second personal reference"),
-  );
   expectTrue("do not invent supporting", withPrimary.includes("Do not invent a supporting memory") || withPrimary.includes("do not invent a supporting memory"));
   expectTrue(
-    "primary alone enough",
+    "primary alone enough when no support",
     withPrimary.includes("alone satisfies the specificity requirement"),
   );
   expectTrue("no legacy two-ref force", !withPrimary.includes("at least 2 specific personal references"));
@@ -201,9 +212,13 @@ section("memory density gated on primary");
     withPrimary.includes('health insurance → "what I needed"') &&
       withPrimary.includes("concrete subject must remain intact"),
   );
+
+  const withBoth = buildMemoryDensityRequirement(true, true);
+  expectTrue("primary+support density label", withBoth.includes("PRIMARY + SUPPLIED SUPPORT SPECIFICITY"));
+  expectTrue("requires brief recognizable callback", withBoth.includes("brief recognizable callback"));
   expectTrue(
-    "supporting must not outrank primary",
-    withPrimary.includes("never let a vivid supporting memory outrank"),
+    "forbids replacing support with generic joke",
+    withBoth.includes("unrelated generic joke, metaphor, or invented anecdote"),
   );
 
   const legacy = buildMemoryDensityRequirement(false);
@@ -221,9 +236,9 @@ section("8D.2B live QA: Mom thank-you health insurance subject retention");
     primaryOccasionContext: PRIMARY,
     details: SUPPORTING,
   });
-  const priority = buildPrimaryContentPriorityBlock();
-  const reasonRule = buildPrimaryReasonRule();
-  const density = buildMemoryDensityRequirement(true);
+  const priority = buildPrimaryContentPriorityBlock(true);
+  const reasonRule = buildPrimaryReasonRule(true);
+  const density = buildMemoryDensityRequirement(true, true);
   const assembled = [
     ...lines,
     priority,
@@ -306,10 +321,10 @@ section("8D.2C live QA: required primary output contract");
     contract.includes("health insurance") && contract.includes(`PRIMARY FACT`),
   );
   expectTrue(
-    "OPTIONAL SUPPORT labeled explanation/color",
-    contract.includes("OPTIONAL SUPPORT (explanation / color only"),
+    "SUPPLIED SUPPORT labeled normally retain",
+    contract.includes("SUPPLIED SUPPORT (normally retain"),
   );
-  expectTrue("supporting text in optional support", contract.includes(SUPPORTING));
+  expectTrue("supporting text in supplied support", contract.includes(SUPPORTING));
   expectTrue(
     "forbids this / this one as primary substitutes",
     contract.includes('"this"') && contract.includes('"this one"'),
@@ -329,8 +344,21 @@ section("8D.2C live QA: required primary output contract");
       contract.includes("concrete noun phrase from PRIMARY FACT"),
   );
   expectTrue(
+    "support retention validation present",
+    contract.includes("Prefer a recognizable reference to SUPPLIED SUPPORT"),
+  );
+  expectTrue(
+    "forbids generic joke displacing support",
+    contract.includes("unrelated generic joke"),
+  );
+  expectTrue(
+    "omission reasons present",
+    contract.includes("inappropriate for the occasion") &&
+      contract.includes("materially reduce the quality"),
+  );
+  expectTrue(
     "cannot satisfy primary via support alone",
-    contract.includes("Do not satisfy the primary requirement by expanding only the optional support"),
+    contract.includes("Do not satisfy the primary requirement by expanding only the support"),
   );
   expectTrue("no contract without primary", empty === "");
   expectTrue("no contract for whitespace primary", whitespace === "");
@@ -408,8 +436,14 @@ section("route wiring and option descriptors");
     ROUTE_SOURCE.includes("Center the primary reason"),
   );
   expectTrue(
-    "supporting optional in options",
-    ROUTE_SOURCE.includes("Supporting memories are optional enrichment"),
+    "supporting conditional when present",
+    ROUTE_SOURCE.includes("Normally include one brief recognizable callback to the supplied supporting detail") ||
+      ROUTE_SOURCE.includes("SUPPLIED SUPPORT (normally retain"),
+  );
+  expectTrue(
+    "blank support invents nothing",
+    ROUTE_SOURCE.includes("No supporting detail was supplied — do not invent one") ||
+      ROUTE_SOURCE.includes("No supporting memory was provided — do not invent one"),
   );
   expectTrue(
     "uses buildOrderedBodyContextLines",
@@ -428,10 +462,10 @@ section("route wiring and option descriptors");
     ROUTE_SOURCE.includes("buildPrimarySubjectOutputContract"),
   );
   expectTrue(
-    "system prompt receives hasPrimary gate",
-    ROUTE_SOURCE.includes("buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList, !!primaryOccasionContext?.trim())") ||
+    "system prompt receives hasPrimary/hasSupport gates",
+    ROUTE_SOURCE.includes("buildSystemPrompt(firstName, relationship, occasion, archetypes, mergedAvoidList, !!primaryOccasionContext?.trim(), !!details?.trim())") ||
       (ROUTE_SOURCE.includes("hasPrimary = false") &&
-        ROUTE_SOURCE.includes("alone satisfies specificity")),
+        ROUTE_SOURCE.includes("hasSupport = false")),
   );
   expectTrue(
     "uses auth rules helper",

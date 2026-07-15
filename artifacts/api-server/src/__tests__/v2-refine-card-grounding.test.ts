@@ -98,6 +98,9 @@ section("refine system prompt grounding contract");
   expectTrue("style ≠ invention", /do NOT authorize factual invention/i.test(sys));
   expectTrue("specificity without new facts", /EXISTING facts/i.test(sys));
   expectTrue("sign-off exact once", /exact sign-off once/i.test(sys));
+  expectTrue("visible retention", /VISIBLE FACT RETENTION/i.test(sys));
+  expectTrue("recover omitted support", /absent from the ORIGINAL CARD/i.test(sys));
+  expectTrue("rewrite differentiation", /genuinely different opening/i.test(sys));
   expectTrue("return only revised text", /Return ONLY the revised card text/i.test(sys));
 }
 
@@ -119,6 +122,11 @@ section("refine user prompt structure");
   expectTrue("includes instruction", user.includes("fresh opening"));
   expectTrue("primary in facts", user.includes("Another year of being great friends"));
   expectTrue("supporting memory in facts", /five seconds/i.test(user));
+  expectTrue("visible retention contract in user", /VISIBLE RETENTION CONTRACT/i.test(user));
+  expectTrue(
+    "requires weaving support",
+    /should normally contain one brief recognizable callback/i.test(user),
+  );
 }
 
 section("legacy thin context still works");
