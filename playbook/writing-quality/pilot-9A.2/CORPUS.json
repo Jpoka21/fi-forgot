@@ -1,128 +1,1098 @@
 {
-  "corpusId": "pilot-9A.2-20260714",
-  "generatedAt": "2026-07-14T21:17:19.467Z",
-  "status": "blocked",
-  "blocker": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+  "corpusId": "pilot-9A.2-20260715",
+  "generatedAt": "2026-07-15T18:32:07.808Z",
+  "status": "complete",
+  "baseUrl": "http://127.0.0.1:8080",
+  "endpoint": "/api/v2/generate-card",
+  "notes": [
+    "One successful generation per scenario; exactly one first-returned card preserved.",
+    "20 scenarios → up to 20 scored texts (failed requests recorded separately).",
+    "authenticated_body scenarios use request body only (no recipient context assembly).",
+    "No scoring or filtering in the runner."
+  ],
   "scenarios": [
     {
       "id": "G01",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Mom thank-you — primary + vivid support (8D regression writing face)",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Thank You",
+      "relationship": "Mom",
+      "request": {
+        "firstName": "Mom",
+        "relationship": "Mom",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping me out with finding new health insurance",
+        "details": "She fought with everyone until she got what I needed",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, James"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Mom, Thank you for helping me find new health insurance. You took on whoever you had to until the right coverage was in place. Knowing I’m covered is a real relief, and I won’t forget that you made it happen. Love, James"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Mom, Thank you for helping me find new health insurance. You took on whoever you had to until the right coverage was in place. Knowing I’m covered is a real relief, and I won’t forget that you made it happen. Love, James",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G02",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Mom thank-you — primary only, Simple tone",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Thank You",
+      "relationship": "Mom",
+      "request": {
+        "firstName": "Mom",
+        "relationship": "Mom",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping me out with finding new health insurance",
+        "details": "",
+        "tone": "Simple",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": [
+          "Too Sweet",
+          "Too Emotional"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, James"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Mom, thank you for helping me find new health insurance.\nSorting through plans and deadlines is a headache, and you helped me get to a clear decision.\nI’m really grateful for your help finding new health insurance. Love, James"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Mom, thank you for helping me find new health insurance.\nSorting through plans and deadlines is a headache, and you helped me get to a clear decision.\nI’m really grateful for your help finding new health insurance. Love, James",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G03",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Friend birthday — sparse guest, Funny",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "sparse",
+      "occasion": "Birthday",
+      "relationship": "Friend",
+      "request": {
+        "firstName": "Alex",
+        "relationship": "Friend",
+        "occasion": "Birthday",
+        "primaryOccasionContext": "Just saying happy birthday and that I'm glad we're friends",
+        "details": "",
+        "tone": "Funny",
+        "emotionalOpenness": "Not Emotional, Just Funny",
+        "avoidList": [
+          "Too Sweet",
+          "Too Emotional"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "— Jamie"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Alex, quick status update: it’s your birthday, and I’m glad we’re friends.\nThis card has exactly two jobs: say “happy birthday” and confirm I’m glad we’re friends. Consider both officially handled.\nProceed with whatever combo of cake and chaos your day requires.\nHappy birthday, Alex. Still glad we’re friends. — Jamie"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Alex, quick status update: it’s your birthday, and I’m glad we’re friends.\nThis card has exactly two jobs: say “happy birthday” and confirm I’m glad we’re friends. Consider both officially handled.\nProceed with whatever combo of cake and chaos your day requires.\nHappy birthday, Alex. Still glad we’re friends. — Jamie",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G04",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Wife anniversary — romantic + deep",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Anniversary",
+      "relationship": "Wife",
+      "request": {
+        "firstName": "Sara",
+        "relationship": "Wife",
+        "occasion": "Anniversary",
+        "primaryOccasionContext": "Ten years of choosing each other on ordinary Tuesdays, not just the big days",
+        "details": "You still save me the last piece of toast without making a speech about it",
+        "tone": "Romantic",
+        "emotionalOpenness": "Deep And Emotional",
+        "avoidList": [
+          "Too Cheesy",
+          "Too Formal"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Forever, Michael"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Sara, this anniversary, for me, is about choosing each other on ordinary Tuesdays—not just the big days. It’s the quiet yes in the middle of real life, the way we meet each other where we are. And it shows up in the smallest places—like you still saving me the last piece of toast without making a speech about it. I notice. I carry it with me. Thank you for all those ordinary Tuesdays. I choose you next Tuesday, and the one after, and the one after that. I love you, Sara. Forever, Michael"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Sara, this anniversary, for me, is about choosing each other on ordinary Tuesdays—not just the big days. It’s the quiet yes in the middle of real life, the way we meet each other where we are. And it shows up in the smallest places—like you still saving me the last piece of toast without making a speech about it. I notice. I carry it with me. Thank you for all those ordinary Tuesdays. I choose you next Tuesday, and the one after, and the one after that. I love you, Sara. Forever, Michael",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G05",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Dad Christmas holiday — warm",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Holiday",
+      "relationship": "Dad",
+      "request": {
+        "firstName": "Dad",
+        "relationship": "Dad",
+        "occasion": "Holiday - Christmas",
+        "primaryOccasionContext": "Thanks for driving through that storm so we could all be home for Christmas dinner",
+        "details": "",
+        "tone": "Warm",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [
+          "Too Sweet"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love you, Chris"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Dad,\nThank you for driving through that storm so we could all be home for Christmas dinner. That was a tough drive, and because you took it on, we got to sit at the table together. It meant more than I said. I'll remember that when I think about this Christmas. Merry Christmas, Dad. Love you, Chris"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Dad,\nThank you for driving through that storm so we could all be home for Christmas dinner. That was a tough drive, and because you took it on, we got to sit at the table together. It meant more than I said. I'll remember that when I think about this Christmas. Merry Christmas, Dad. Love you, Chris",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G06",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Friend sympathy — careful heartfelt",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Sympathy",
+      "relationship": "Friend",
+      "request": {
+        "firstName": "Morgan",
+        "relationship": "Friend",
+        "occasion": "Sympathy",
+        "primaryOccasionContext": "I'm sorry about your dad — I've been thinking about you every day this week",
+        "details": "",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": [
+          "Too Cheesy"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "With love, Priya"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Morgan, I'm so sorry about your dad. I've been thinking about you every day this week. I hate that you're going through this. If you want someone to sit with you, run an errand, or help make a call, I'm here for whatever part feels hardest right now. No pressure to respond — I'll keep checking in, and you can lean on me however you need, whenever you need. With love, Priya"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Morgan, I'm so sorry about your dad. I've been thinking about you every day this week. I hate that you're going through this. If you want someone to sit with you, run an errand, or help make a call, I'm here for whatever part feels hardest right now. No pressure to respond — I'll keep checking in, and you can lean on me however you need, whenever you need. With love, Priya",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G07",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Son congratulations — graduation-like win",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Congratulations",
+      "relationship": "Son",
+      "request": {
+        "firstName": "Noah",
+        "relationship": "Son",
+        "occasion": "Congratulations",
+        "primaryOccasionContext": "You finished your first marathon after six months of early-morning training",
+        "details": "I still remember you texting me after mile 18 saying your legs were done and then finishing anyway",
+        "tone": "Encouraging",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [
+          "Too Formal",
+          "Too Childish"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Proud of you — Dad"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Noah, your first marathon is in the books—after six months of early‑morning training. Congratulations. I still have your mile‑18 text that your legs were done—and then you finished anyway. Those last miles are no joke. You earned that finish. Take it in and enjoy the recovery; every early alarm added up to this. Proud of you — Dad"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Noah, your first marathon is in the books—after six months of early‑morning training. Congratulations. I still have your mile‑18 text that your legs were done—and then you finished anyway. Those last miles are no joke. You earned that finish. Take it in and enjoy the recovery; every early alarm added up to this. Proud of you — Dad",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G08",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Husband apology — direct",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Apology",
+      "relationship": "Husband",
+      "request": {
+        "firstName": "David",
+        "relationship": "Husband",
+        "occasion": "Apology",
+        "primaryOccasionContext": "I snapped at you about the weekend plans and you didn't deserve that",
+        "details": "You were only trying to make Saturday easier for both of us",
+        "tone": "Bold And Honest",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": [
+          "Too Generic",
+          "Too Formal"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "I'm sorry — Lena"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "David, I’m owning it: I snapped at you about the weekend plans, and you didn’t deserve that. You were only trying to make Saturday easier for both of us, and I made it harder. I let my stress do the talking. That wasn’t fair to you. Can we reset and look at Saturday together—no edge, just us figuring it out? I appreciate that you tried to help with Saturday. I see it, and I’m sorry for how I came at you. I'm sorry — Lena"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "David, I’m owning it: I snapped at you about the weekend plans, and you didn’t deserve that. You were only trying to make Saturday easier for both of us, and I made it harder. I let my stress do the talking. That wasn’t fair to you. Can we reset and look at Saturday together—no edge, just us figuring it out? I appreciate that you tried to help with Saturday. I see it, and I’m sorry for how I came at you. I'm sorry — Lena",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G09",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Daughter just because — nostalgic",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Just Because",
+      "relationship": "Daughter",
+      "request": {
+        "firstName": "Ellie",
+        "relationship": "Daughter",
+        "occasion": "Just Because",
+        "primaryOccasionContext": "No big reason — I just miss our Sunday pancake mornings since you moved out",
+        "details": "",
+        "tone": "Nostalgic",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [
+          "Too Long"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, Mom"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Ellie, I keep thinking about our Sunday pancake mornings—and I miss them now that you’ve moved out.\nThank you for our Sunday pancake mornings; they were simple and ours.\nSeeing you on your own is a big step, and I’m proud of you.\nStill, when Sunday rolls around, the kitchen feels a little too quiet without you.\nNext time Sunday comes around, let’s make pancakes together again. Love, Mom"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Ellie, I keep thinking about our Sunday pancake mornings—and I miss them now that you’ve moved out.\nThank you for our Sunday pancake mornings; they were simple and ours.\nSeeing you on your own is a big step, and I’m proud of you.\nStill, when Sunday rolls around, the kitchen feels a little too quiet without you.\nNext time Sunday comes around, let’s make pancakes together again. Love, Mom",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G10",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Grandparent thinking of you — simple sparse",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "sparse",
+      "occasion": "Thinking Of You",
+      "relationship": "Grandparent",
+      "request": {
+        "firstName": "Nana",
+        "relationship": "Grandparent",
+        "occasion": "Thinking Of You",
+        "primaryOccasionContext": "I keep thinking about you this week and wanted you to know",
+        "details": "",
+        "tone": "Simple",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": [
+          "Too Long"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, Jordan"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Nana,\nI've been thinking about you this week and wanted you to know. You’ve been on my mind in the middle of regular days, and I just felt like saying it out loud.\nI appreciate you, Nana.\nLove, Jordan"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Nana,\nI've been thinking about you this week and wanted you to know. You’ve been on my mind in the middle of regular days, and I just felt like saying it out loud.\nI appreciate you, Nana.\nLove, Jordan",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G11",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Coworker thank-you — respectful",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Thank You",
+      "relationship": "Coworker",
+      "request": {
+        "firstName": "Sam",
+        "relationship": "Coworker",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Covering my client calls last Thursday so I could make the school pickup",
+        "details": "",
+        "tone": "Respectful",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": [
+          "Too Emotional",
+          "Too Romantic"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Thanks again — Taylor"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Sam, thank you for covering my client calls last Thursday so I could make the school pickup.\nPicking up extra client calls takes real focus, and you kept everything on track while I was out.\nIt made a real difference for Thursday’s schedule and for our clients.\nI really appreciate you stepping in on those client calls so I could make the school pickup.\nThanks again — Taylor"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Sam, thank you for covering my client calls last Thursday so I could make the school pickup.\nPicking up extra client calls takes real focus, and you kept everything on track while I was out.\nIt made a real difference for Thursday’s schedule and for our clients.\nI really appreciate you stepping in on those client calls so I could make the school pickup.\nThanks again — Taylor",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G12",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Boss congratulations — promotion",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Congratulations",
+      "relationship": "Boss",
+      "request": {
+        "firstName": "Patricia",
+        "relationship": "Boss",
+        "occasion": "Congratulations",
+        "primaryOccasionContext": "Your promotion to VP — the team is lucky to keep learning from how you run a room",
+        "details": "",
+        "tone": "Respectful",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [
+          "Too Emotional",
+          "Too Mean"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Congratulations — Avery Chen"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Patricia, congratulations on your promotion to VP. The team is lucky to keep learning from how you run a room, and I’m glad we’ll continue to benefit from that in your new role. Looking forward to what we’ll accomplish with you as VP. Congratulations — Avery Chen"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Patricia, congratulations on your promotion to VP. The team is lucky to keep learning from how you run a room, and I’m glad we’ll continue to benefit from that in your new role. Looking forward to what we’ll accomplish with you as VP. Congratulations — Avery Chen",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G13",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Teacher thank-you — warm",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Thank You",
+      "relationship": "Teacher",
+      "request": {
+        "firstName": "Ms. Alvarez",
+        "relationship": "Teacher",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping my daughter get confident at reading this year",
+        "details": "She used to hide behind her hair when it was her turn — now she volunteers",
+        "tone": "Warm",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": [
+          "Too Romantic"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Grateful — The Park family"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Ms. Alvarez, thank you for helping my daughter gain confidence in reading this year. Seeing her go from hiding behind her hair when it was her turn to raising her hand to volunteer says so much about the progress you’ve guided in your class. We’re truly grateful—this confidence will stay with her well beyond this year. Thank you for making reading a place she wants to be. Grateful — The Park family"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Ms. Alvarez, thank you for helping my daughter gain confidence in reading this year. Seeing her go from hiding behind her hair when it was her turn to raising her hand to volunteer says so much about the progress you’ve guided in your class. We’re truly grateful—this confidence will stay with her well beyond this year. Thank you for making reading a place she wants to be. Grateful — The Park family",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G14",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Sister birthday — Funny with roast pressure",
+      "flow": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Birthday",
+      "relationship": "Sister",
+      "request": {
+        "firstName": "Casey",
+        "relationship": "Sister",
+        "occasion": "Birthday",
+        "primaryOccasionContext": "Another trip around the sun — still somehow the person I call when my life is sideways",
+        "details": "You once showed up with tacos and zero advice, which was perfect",
+        "tone": "Funny",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": [
+          "Too Mean",
+          "Too Sweet"
+        ],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Don't age too hard — Riley"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Casey, it’s your birthday, and you’re still the person I call when my life is sideways.\nExhibit A: you once showed up with tacos and zero advice — exactly the move.\nPlease keep accepting my chaos calls; I’ll pay in tacos and unfiltered updates.\nI appreciate that you’re the one I can call when my life is sideways. Don't age too hard — Riley"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Casey, it’s your birthday, and you’re still the person I call when my life is sideways.\nExhibit A: you once showed up with tacos and zero advice — exactly the move.\nPlease keep accepting my chaos calls; I’ll pay in tacos and unfiltered updates.\nI appreciate that you’re the one I can call when my life is sideways. Don't age too hard — Riley",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G15",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Auth-shaped Dad birthday — rich relationship profile (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Birthday",
+      "relationship": "Dad",
+      "request": {
+        "firstName": "Steve",
+        "relationship": "Dad",
+        "occasion": "Birthday",
+        "primaryOccasionContext": "Happy birthday — thank you for teaching me how to fix things without making me feel stupid",
+        "details": "Last fall when the sink flooded and you talked me through it on speaker",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [
+          "Too Sweet",
+          "Too Long"
+        ],
+        "relAnswers": {
+          "parentPersonality": "Quiet, practical, dry humor",
+          "parentFact": "Loves early coffee and Saturday hardware-store runs"
+        },
+        "senderName": "Jordan",
+        "signOff": "Love you, Dad — Jordan"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Dad, thanks for teaching me how to fix things without making me feel stupid.\nHappy birthday.\nLast fall when the sink flooded, you talked me through it on speaker, step by step—that’s exactly what I mean.\nIt’s changed the way I handle stuff around the house.\nI hope the morning coffee’s strong and your next hardware-store run is a good one. Love you, Dad — Jordan"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Dad, thanks for teaching me how to fix things without making me feel stupid.\nHappy birthday.\nLast fall when the sink flooded, you talked me through it on speaker, step by step—that’s exactly what I mean.\nIt’s changed the way I handle stuff around the house.\nI hope the morning coffee’s strong and your next hardware-store run is a good one. Love you, Dad — Jordan",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G16",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Auth-shaped Mom thank-you — rich + primary subject stress (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Thank You",
+      "relationship": "Mom",
+      "request": {
+        "firstName": "Linda",
+        "relationship": "Mom",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping me navigate the paperwork for new health insurance this month",
+        "details": "You sat on hold for almost two hours so I wouldn't have to",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": [],
+        "relAnswers": {
+          "parentPersonality": "Tough, supportive, stubborn in the best way",
+          "parentFact": "Always drops anything if one of us needs her"
+        },
+        "senderName": "James",
+        "signOff": "Love, James"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Mom, thank you for helping me navigate the paperwork for my new health insurance this month. You even sat on hold for almost two hours so I wouldn’t have to — that tough, stubborn-in-the-best-way side of you put to work for me. I know that cost real time and patience. You took a confusing, draining process and made it manageable, and I felt the stress drop the moment you stepped in. I’m grateful not just that the coverage is getting squared away, but for the example you set of pushing through the hard, necessary things. I see it, I appreciate it, and I won’t forget it. Love, James"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Mom, thank you for helping me navigate the paperwork for my new health insurance this month. You even sat on hold for almost two hours so I wouldn’t have to — that tough, stubborn-in-the-best-way side of you put to work for me. I know that cost real time and patience. You took a confusing, draining process and made it manageable, and I felt the stress drop the moment you stepped in. I’m grateful not just that the coverage is getting squared away, but for the example you set of pushing through the hard, necessary things. I see it, I appreciate it, and I won’t forget it. Love, James",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G17",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Auth-shaped Husband anniversary — romantic rich (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Anniversary",
+      "relationship": "Husband",
+      "request": {
+        "firstName": "Marcus",
+        "relationship": "Husband",
+        "occasion": "Anniversary",
+        "primaryOccasionContext": "Eight years in — still my favorite person to run errands with",
+        "details": "Our terrible first apartment with the leaning stove still makes me laugh",
+        "tone": "Romantic",
+        "emotionalOpenness": "Deep And Emotional",
+        "avoidList": [
+          "Too Cheesy"
+        ],
+        "relAnswers": {
+          "timeTogether": "8 years",
+          "spouseSmile": "When you steal fries and deny it with a straight face"
+        },
+        "senderName": "Ava",
+        "signOff": "Still choosing you — Ava"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Marcus, you're still my favorite person to run errands with.\nOn our anniversary, that's the truest thing I know: grocery lists, returns, the slow aisle loops—ordinary minutes that feel right because it's you next to me.\nI still laugh about that terrible first apartment with the leaning stove; somehow that kind of crooked start made me love our everyday even more.\nAnd when you steal fries and deny it with a straight face, it gets me every time—because even the smallest moments with you are the ones I want.\nIf the rest of our days are carts, receipts, and picking the \"fast\" line together, I'm in. With you, the in‑between is the point. Still choosing you — Ava"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Marcus, you're still my favorite person to run errands with.\nOn our anniversary, that's the truest thing I know: grocery lists, returns, the slow aisle loops—ordinary minutes that feel right because it's you next to me.\nI still laugh about that terrible first apartment with the leaning stove; somehow that kind of crooked start made me love our everyday even more.\nAnd when you steal fries and deny it with a straight face, it gets me every time—because even the smallest moments with you are the ones I want.\nIf the rest of our days are carts, receipts, and picking the \"fast\" line together, I'm in. With you, the in‑between is the point. Still choosing you — Ava",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G18",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Auth-shaped coworker get well — sparse relAnswers (body only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "sparse",
+      "occasion": "Get Well",
+      "relationship": "Coworker",
+      "request": {
+        "firstName": "Chris",
+        "relationship": "Coworker",
+        "occasion": "Get Well",
+        "primaryOccasionContext": "Hope your recovery from surgery is smoother than the waiting room coffee",
+        "details": "",
+        "tone": "Warm",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": [
+          "Too Emotional",
+          "Too Romantic"
+        ],
+        "relAnswers": {
+          "proStrength": "Reliable on deadlines"
+        },
+        "senderName": "Kim",
+        "signOff": "Get well soon — Kim"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Chris, here’s to a recovery from surgery that’s a lot smoother than the waiting room coffee.\nRest up and take the time you need—we’ll keep things moving on our end and look forward to having you back when you’re ready.\nI really appreciate how reliably you keep our deadlines on track. Get well soon — Kim"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Chris, here’s to a recovery from surgery that’s a lot smoother than the waiting room coffee.\nRest up and take the time you need—we’ll keep things moving on our end and look forward to having you back when you’re ready.\nI really appreciate how reliably you keep our deadlines on track. Get well soon — Kim",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G19",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Auth-shaped Daughter graduation — rich encouraging (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Graduation",
+      "relationship": "Daughter",
+      "request": {
+        "firstName": "Maya",
+        "relationship": "Daughter",
+        "occasion": "Graduation",
+        "primaryOccasionContext": "You earned this diploma after nights of doubt and still showing up",
+        "details": "Watching you present your senior project without shaking was a full-circle moment",
+        "tone": "Encouraging",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": [
+          "Too Formal"
+        ],
+        "relAnswers": {
+          "childAge": "18",
+          "proudOf": "How she builds community around quieter classmates"
+        },
+        "senderName": "Dad",
+        "signOff": "So proud — Dad"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Maya,\nYou earned this diploma the real way — through nights of doubt and still showing up.\nWatching you present your senior project without shaking was a full-circle moment.\nI see how you build community around quieter classmates — and I see that same choice to show up in how you earned this diploma. This diploma carries all of that.\nAs you step into what’s next, trust what you’ve already proven to yourself: you can meet the day, even when it’s hard. I’m so proud of the person I’m seeing right now. So proud — Dad"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Maya,\nYou earned this diploma the real way — through nights of doubt and still showing up.\nWatching you present your senior project without shaking was a full-circle moment.\nI see how you build community around quieter classmates — and I see that same choice to show up in how you earned this diploma. This diploma carries all of that.\nAs you step into what’s next, trust what you’ve already proven to yourself: you can meet the day, even when it’s hard. I’m so proud of the person I’m seeing right now. So proud — Dad",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     },
     {
       "id": "G20",
-      "ok": false,
-      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
-      "cards": []
+      "title": "Auth-shaped Friend apology — simple + rich memory (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Apology",
+      "relationship": "Friend",
+      "request": {
+        "firstName": "Dee",
+        "relationship": "Friend",
+        "occasion": "Apology",
+        "primaryOccasionContext": "I canceled on your birthday dinner last-minute and that was selfish",
+        "details": "You had already reserved the noisy corner table we like",
+        "tone": "Simple",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [
+          "Too Long"
+        ],
+        "relAnswers": {
+          "friendType": "Best Friend",
+          "commStyle": "Direct, funny, honest"
+        },
+        "senderName": "Sam",
+        "signOff": "Sorry — and thank you for still picking up — Sam"
+      },
+      "ok": true,
+      "error": null,
+      "attempts": 1,
+      "firstAttemptError": null,
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Dee, I’m sorry I canceled on your birthday dinner last-minute — that was selfish.\nYou’d already locked down the noisy corner table we like, and I still bailed. I get that it put you in a crappy spot on your own birthday.\nI’m owning it, and I won’t do that again. If you’re up for it, dinner’s on me at that same loud corner — your call on timing. Sorry — and thank you for still picking up — Sam"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Dee, I’m sorry I canceled on your birthday dinner last-minute — that was selfish.\nYou’d already locked down the noisy corner table we like, and I still bailed. I get that it put you in a crappy spot on your own birthday.\nI’m owning it, and I won’t do that again. If you’re up for it, dinner’s on me at that same loud corner — your call on timing. Sorry — and thank you for still picking up — Sam",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      }
     }
   ]
 }
