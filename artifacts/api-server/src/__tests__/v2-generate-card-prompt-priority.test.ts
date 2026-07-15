@@ -481,6 +481,50 @@ section("route wiring and option descriptors");
   );
 }
 
+section("9B.1 closing discipline — earned concrete endings");
+{
+  expectTrue(
+    "closing no longer models abstract 'I see it' current-moment thesis",
+    !ROUTE_SOURCE.includes("I just want you to know I see it"),
+  );
+  expectTrue(
+    "closing asks for one short final thought from deed/occasion",
+    ROUTE_SOURCE.includes(
+      "one short final thought that grows directly from that deed, occasion, or supplied detail",
+    ),
+  );
+  expectTrue(
+    "closing discourages relationship-summary / abstract gratitude restatement",
+    ROUTE_SOURCE.includes("summarize the whole relationship") &&
+      ROUTE_SOURCE.includes("restate gratitude in abstract language") &&
+      ROUTE_SOURCE.includes("broad life lesson or character thesis"),
+  );
+  expectTrue(
+    "closing discourages second emotional layer after appreciation lands",
+    ROUTE_SOURCE.includes(
+      "Do NOT add a second emotional layer after the main thanks or point is already complete",
+    ),
+  );
+  expectTrue(
+    "closing prefers one clean ending beat over escalating final paragraph",
+    ROUTE_SOURCE.includes("Prefer one clean ending beat over an escalating final paragraph"),
+  );
+  expectTrue(
+    "closing still forbids legacy generic-wish endings",
+    ROUTE_SOURCE.includes('Do NOT end with: "Have a great day"'),
+  );
+  expectTrue(
+    "8G support retention language still present",
+    ROUTE_SOURCE.includes(
+      "Normally include one brief recognizable callback to the supplied supporting detail",
+    ) || HELPER_SOURCE.includes("SUPPLIED_SUPPORT_BEHAVIOR_RULE"),
+  );
+  expectTrue(
+    "primary centering language still present",
+    ROUTE_SOURCE.includes("Center the primary reason"),
+  );
+}
+
 section("compatibility and ownership");
 {
   expectTrue("8A packing unchanged — has primaryOccasionContext", PACK_SOURCE.includes("primaryOccasionContext"));

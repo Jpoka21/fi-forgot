@@ -312,15 +312,17 @@ ${memoryWeavingBlock}
 ${openingBlock}
 
 4. CLOSING LINES
-   End with something memorable: appreciation, a shared memory, optimism about something happening in their life, or a relationship-specific sentiment.
+   Once the concrete appreciation or primary point has landed, end with one short final thought that grows directly from that deed, occasion, or supplied detail — then stop.
+   Prefer a natural, specific landing: a practical effect of what they did, a light forward look tied to the same subject, or a quiet personal note that still points at the same deed/occasion.
    Do NOT end with: "Have a great day", "Have a wonderful day", "Hope your day is amazing", "Wishing you the best", or any of the banned phrases below.
-   The final paragraph should feel like it could only be written by someone who actually knows this person.
-   GOOD closing examples — use these as models, adapted to the specific person and context:
-   - Forward reference: "Next time you're on that court, I'll be thinking of you." (ties the ending to something active in their life)
-   - Callback to shared history: "I keep thinking about how far you've come from that first tiny apartment."
-   - Relationship anchor: "Being your dad is still the best thing I've done."
-   - Current-moment tie-in: "With everything you've got going on this year, I just want you to know I see it."
-   A strong closing references something specific about this person's life right now, not a generic wish.
+   Do NOT add a second emotional layer after the main thanks or point is already complete.
+   Avoid closings that summarize the whole relationship, restate gratitude in abstract language, explain what the recipient "means" to the sender, or turn the ending into a broad life lesson or character thesis.
+   The close should feel earned and personally written because it finishes the story of this card's subject — not because it philosophizes about the relationship.
+   GOOD closing shape — adapt to what this card already named (examples are structural, not phrases to copy):
+   - Forward look that stays on the same subject: next time that same activity or obligation comes up, a brief concrete nod.
+   - Concrete callback already established earlier in the card (only if that detail was supplied or already used).
+   - Relationship-true note that still points at the same deed or occasion, without restating appreciation as a summary.
+   Prefer one clean ending beat over an escalating final paragraph.
 
 5. RELATIONSHIP VOICE
    A card to a spouse must read completely differently from a card to a parent, which reads completely differently from a card to a friend.
