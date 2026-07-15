@@ -417,8 +417,21 @@ export function FiOnboardingLegacyFlow() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cardText:    generatedCard,
-          instruction: revisionInput.trim(),
+          instruction: `${revisionInput.trim()} Do not invent personal facts, memories, or events not already present.`,
           context:     `${data.relationship} • ${firstOccasion} • ${data.recipientName}`,
+          groundingContext: {
+            firstName: data.recipientName.trim() || undefined,
+            relationship: data.relationship || undefined,
+            occasion: firstOccasion || undefined,
+            details: [
+              data.interests?.length
+                ? `Their interests: ${data.interests.map((i: string) => INTEREST_LABELS[i] ?? i).join(", ")}`
+                : "",
+              data.favoriteMemories || "",
+            ].filter(Boolean).join("\n\n") || undefined,
+            tone: data.tone || undefined,
+            avoidMentioning: data.thingsToAvoid || undefined,
+          },
         }),
       });
       const json = await res.json() as { text?: string };

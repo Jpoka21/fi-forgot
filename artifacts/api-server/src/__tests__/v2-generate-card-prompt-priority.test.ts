@@ -109,8 +109,8 @@ section("content priority and same-reason instruction");
   expectTrue("supporting optional", block.includes("Supporting memories — optional"));
   expectTrue("supporting never the subject", block.includes("never the subject"));
   expectTrue(
-    "same reason across versions",
-    block.includes("revolve around the same primary occasion reason"),
+    "card revolves around primary reason",
+    block.includes("revolve around the primary occasion reason"),
   );
   expectTrue(
     "profile is background characterization",
@@ -443,7 +443,7 @@ section("route wiring and option descriptors");
   );
   expectTrue(
     "legacy two-ref specificity preserved for no-primary system path",
-    ROUTE_SOURCE.includes("Every card must contain at least 2 specific personal references drawn from that context."),
+    ROUTE_SOURCE.includes("The card must contain at least 2 specific personal references drawn from that context."),
   );
 }
 

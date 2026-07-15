@@ -14,6 +14,10 @@ import {
 } from "@/app/card-creation/guestOccasionPrimaryQuestions";
 import { packTryGenerateCardBody } from "@/app/card-creation/packTryGenerateCardBody";
 import {
+  TRY_REFINE_INSTRUCTIONS,
+  buildTryRefineGrounding,
+} from "@/app/card-creation/buildTryRefineGrounding";
+import {
   GUEST_INTENSITY_CHOICES,
   GUEST_WHO_SUBTITLE,
   buildGuestTrySteps,
@@ -558,13 +562,14 @@ export default function CardFlowV2() {
       const pickData = await pickRes.json() as { card?: CardDesign };
 
       if (!data.cards?.length) throw new Error(data.error ?? "No cards returned");
-      const DRAFT_LABELS = ["Draft 1", "Draft 2", "Draft 3"];
-      setDraftVersions((data.cards as CardOption[]).map((c, i) => ({
-        id: i + 1,
-        label: DRAFT_LABELS[i] ?? `Draft ${i + 1}`,
-        text: c.text,
-        original: c.text,
-      })));
+      // Product contract: one initial draft. Extra cards (legacy) are ignored.
+      const first = (data.cards as CardOption[])[0];
+      setDraftVersions([{
+        id: 1,
+        label: "Draft 1",
+        text: first.text,
+        original: first.text,
+      }]);
       setActiveDraftId(1);
       setEditMode(false);
       setShowConfirm(false);
@@ -588,6 +593,21 @@ export default function CardFlowV2() {
     setDraftVersions(prev => prev.map(d => d.id === activeDraftId ? { ...d, text: d.original } : d));
   }
 
+  function refinePayload(cardText: string, instruction: string) {
+    const groundingContext = buildTryRefineGrounding({
+      firstName,
+      relationship,
+      answers,
+    });
+    return {
+      cardText,
+      instruction,
+      groundingContext,
+      // Thin legacy context retained for older API deployments / observability.
+      context: `${relationship} • ${answers["occasion"] ?? ""} • ${firstName}`,
+    };
+  }
+
   async function handleRegenerateDraft() {
     if (adjusting) return;
     const activeDraft = draftVersions.find(d => d.id === activeDraftId);
@@ -596,11 +616,7 @@ export default function CardFlowV2() {
     try {
       const res = await fetch("/api/v2/refine-card", {
         method: "POST", headers: getApiHeaders(),
-        body: JSON.stringify({
-          cardText:    activeDraft.text,
-          instruction: "Write a completely different version from scratch — same recipient, relationship, and occasion, but a fresh angle, different opening, and different structure.",
-          context:     `${relationship} • ${answers["occasion"] ?? ""} • ${firstName}`,
-        }),
+        body: JSON.stringify(refinePayload(activeDraft.text, TRY_REFINE_INSTRUCTIONS.newVersion)),
       });
       const data = await res.json() as { text?: string };
       if (data.text) {
@@ -620,11 +636,7 @@ export default function CardFlowV2() {
     try {
       const res = await fetch("/api/v2/refine-card", {
         method: "POST", headers: getApiHeaders(),
-        body: JSON.stringify({
-          cardText:    activeDraft.text,
-          instruction,
-          context:     `${relationship} • ${answers["occasion"] ?? ""} • ${firstName}`,
-        }),
+        body: JSON.stringify(refinePayload(activeDraft.text, instruction)),
       });
       const data = await res.json() as { text?: string };
       if (data.text) updateCurrentDraft(data.text);
@@ -745,10 +757,10 @@ export default function CardFlowV2() {
           <div style={{ width: 56, height: 56, borderRadius: "50%", border: `3px solid ${BEIGE}`, borderTopColor: RED, animation: "fi-spin 0.9s linear infinite" }} />
           <div style={{ textAlign: "center" }}>
             <p style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "1.6rem", letterSpacing: "0.06em", color: BLACK, marginBottom: 8 }}>
-              WRITING YOUR CARDS
+              WRITING YOUR CARD
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", color: GRAY }}>
-              Building 3 versions for {firstName}...
+              Writing a card for {firstName}...
             </p>
           </div>
         </div>
@@ -1389,7 +1401,7 @@ export default function CardFlowV2() {
             REVIEW YOUR DRAFT
           </h2>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", color: GRAY, margin: 0 }}>
-            Edit, personalize, or pick a different version below.
+            Edit, personalize, or create a New Version below.
           </p>
         </div>
 
@@ -1409,7 +1421,7 @@ export default function CardFlowV2() {
                 cursor: "pointer", letterSpacing: "0.03em",
               } as React.CSSProperties}
             >
-              {v.id > 3 ? `↩ ${v.label}` : v.label}
+              {v.id > 1 ? `↩ ${v.label}` : v.label}
             </button>
           ))}
         </div>
@@ -1563,12 +1575,12 @@ export default function CardFlowV2() {
             <>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                 {[
-                  { label: "Shorter",       instruction: "Shorten this significantly — keep only the most impactful lines." },
-                  { label: "Warmer",        instruction: "Make this noticeably warmer and more heartfelt." },
-                  { label: "Funnier",       instruction: "Add a genuine touch of humor that still feels warm." },
-                  { label: "More personal", instruction: "Make this feel more personal and specific, less generic." },
-                  { label: "Go deeper",     instruction: "Make this more emotionally raw and vulnerable — really go there." },
-                  { label: "Rewrite",       instruction: "Completely rewrite this in a fresh way — different opening, different structure." },
+                  { label: "Shorter",       instruction: TRY_REFINE_INSTRUCTIONS.shorter },
+                  { label: "Warmer",        instruction: TRY_REFINE_INSTRUCTIONS.warmer },
+                  { label: "Funnier",       instruction: TRY_REFINE_INSTRUCTIONS.funnier },
+                  { label: "More personal", instruction: TRY_REFINE_INSTRUCTIONS.morePersonal },
+                  { label: "Go deeper",     instruction: TRY_REFINE_INSTRUCTIONS.goDeeper },
+                  { label: "Rewrite",       instruction: TRY_REFINE_INSTRUCTIONS.rewrite },
                 ].map(({ label, instruction }) => (
                   <button
                     key={label}

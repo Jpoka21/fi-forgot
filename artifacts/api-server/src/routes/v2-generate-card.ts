@@ -17,6 +17,12 @@ import {
   buildPrimarySubjectOutputContract,
   formatMainObjectiveLine,
 } from "./v2GenerateCardContextLines";
+import {
+  buildRefineSystemPrompt,
+  buildRefineUserPrompt,
+  normalizeRefineGrounding,
+  type RefineGroundingContext,
+} from "./v2RefineCardGrounding";
 
 const router = Router();
 
@@ -224,7 +230,7 @@ function buildSystemPrompt(
    A simple truthful card that keeps the primary subject passes. A card that invents history or erases the primary subject fails.`
     : `1. SPECIFICITY
    IF context is provided above (profile answers, memories, fresh updates):
-   Every card must contain at least 2 specific personal references drawn from that context.
+   The card must contain at least 2 specific personal references drawn from that context.
    If a card could be sent to 100 people without modification, it has failed.
    Good: "Six months of training and a finish line later — that's not a small thing."
    Bad: "Hope you have a wonderful birthday."
@@ -263,14 +269,12 @@ function buildSystemPrompt(
     ? `3. OPENING LINES
    The first sentence must feel personal. Never open with a generic greeting.
    Do NOT open with: "Happy Birthday", "Just wanted to wish you", "Hope you have", any holiday greeting phrase.
-   Open with or immediately center the primary reason for this card. Supporting memories may follow as color, but must not lead the card into a different subject.
-   Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle — while keeping the same primary subject.`
+   Open with or immediately center the primary reason for this card. Supporting memories may follow as color, but must not lead the card into a different subject.`
     : `3. OPENING LINES
    The first sentence must feel personal. Never open with a generic greeting.
    Do NOT open with: "Happy Birthday", "Just wanted to wish you", "Hope you have", any holiday greeting phrase.
    When context exists, open with: a memory, an observation, a callback, a joke, a recent life update, a reflection.
-   When no context exists, open with: a relationship reflection, an occasion reflection, or honest appreciation — NOT an invented memory or invented shared experience.
-   Each of the 3 versions must have a COMPLETELY different opening line — different structure, different angle.`;
+   When no context exists, open with: a relationship reflection, an occasion reflection, or honest appreciation — NOT an invented memory or invented shared experience.`;
 
   return `You are a professional card writer for F*I Forgot — a high-end card service that writes cards people would have written themselves if they'd had the time.
 
@@ -279,7 +283,7 @@ Relationship: ${relationship} (${archetypeStr} occasion: ${occasion})
 ${relRules}
 
 ═══════════════════════════════════════════
-QUALITY REQUIREMENTS — every card must pass all of these
+QUALITY REQUIREMENTS — the card must pass all of these
 ═══════════════════════════════════════════
 
 ${specificityBlock}
@@ -346,7 +350,7 @@ ${BANNED_PHRASES_SYSTEM.map(p => `"${p}"`).join(", ")}${avoidStr}
 ═══════════════════════════════════════════
 MANDATORY OUTPUT REVIEW — do this before returning JSON
 ═══════════════════════════════════════════
-Before writing the JSON, scan every sentence in every card for these patterns. If any appear and are NOT explicitly stated in the provided context, rewrite that sentence before outputting:
+Before writing the JSON, scan every sentence in the card for these patterns. If any appear and are NOT explicitly stated in the provided context, rewrite that sentence before outputting:
 
 SCAN FOR AND REMOVE if not in context:
 - The words "dedication", "dedicated" applied to the person ("a testament to your dedication" → cut entirely or rewrite as "that race was hard-earned")
@@ -412,31 +416,15 @@ function buildUserPrompt(
   const hasContext = !!(bodyContext || contextSupplement);
   const hasContextSupplement = !!contextSupplement?.trim();
 
-  const options = isPro ? (
-    hasPrimary ? [
-      { label: "Best Match",      desc: `Professional and warm. Center the primary reason for this card. Supporting memories are optional enrichment only — keep the work-appropriate register.` },
-      { label: "More Casual",     desc: `Same primary reason as Best Match; slightly warmer register. Do not change what the card is about; only the delivery.` },
-      { label: "More Heartfelt",  desc: `Same primary reason as Best Match; more genuinely human. Supporting detail stays optional and brief.` },
-    ] : [
-      { label: "Best Match",      desc: `Professional, warm, specific to the work relationship with ${firstName}.` },
-      { label: "More Casual",     desc: `Warmer and slightly more personal — still appropriate for work. Keep all specific references from Best Match; only the register changes.` },
-      { label: "More Heartfelt",  desc: `More genuinely human — the version that actually means something. Keep all specific references from Best Match; go deeper on the emotional weight behind them.` },
-    ]
-  ) : hasPrimary ? [
-    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Center the primary reason. Supporting memories are optional enrichment — use lightly only if they strengthen that reason. Do not invent extra memories.` },
-    { label: "More Casual",     desc: `Same primary reason and facts as Best Match — looser, more conversational voice. Casual means HOW you say it, not a different subject. Supporting detail remains optional. ${emotionGuide}` },
-    { label: "More Heartfelt",  desc: `Same primary reason and facts as Best Match — deeper emotional weight behind that reason. Do not replace the primary reason with supporting color or new invented details. ${emotionGuide}` },
-  ] : hasContext ? [
-    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Opens with and uses the most personally relevant facts and memories from the context provided.` },
-    { label: "More Casual",     desc: `Same specific content as Best Match — same facts, same memories from context — delivered in looser, more conversational voice. Think: the text you'd actually send. Casual means HOW you say it, not LESS of what you know about them. May lead with humor or a casual callback. ${emotionGuide}` },
-    { label: "More Heartfelt",  desc: `Same specific content as Best Match — same facts, same memories from context — but with deeper reflection behind each one. The version they might keep. Heartfelt means the emotional weight you put behind the specifics, not replacing them with declarations. ${emotionGuide}` },
-  ] : [
-    { label: "Best Match",      desc: `Closest to inputs. ${tone} tone. ${emotionGuide} Warm, honest, and genuine — no specific memories or details to work with, so do not invent any. Write 3–5 sentences that feel real for this relationship and occasion.` },
-    { label: "More Casual",     desc: `Same honest warmth as Best Match, delivered in a looser, more conversational voice. Think: what you'd actually say out loud. Do not introduce new invented details. ${emotionGuide}` },
-    { label: "More Heartfelt",  desc: `Same honest warmth as Best Match — deeper emotional reflection on the relationship and occasion, but still no invented specifics. The feeling comes from sincerity, not from fabricated memories. ${emotionGuide}` },
-  ];
-
-  const optionBlock = options.map(o => `Option: "${o.label}" — ${o.desc}`).join("\n");
+  const polishGuide = isPro
+    ? (hasPrimary
+      ? `Write one polished professional card. ${tone} tone. ${emotionGuide} Center the primary reason. Supporting memories are optional enrichment only.`
+      : `Write one polished professional card for ${firstName}. ${tone} tone. ${emotionGuide}`)
+    : hasPrimary
+      ? `Write one polished card. ${tone} tone. ${emotionGuide} Center the primary reason. Supporting memories are optional enrichment — use lightly only if they strengthen that reason. Do not invent extra memories.`
+      : hasContext
+        ? `Write one polished card. ${tone} tone. ${emotionGuide} Open with and use the most personally relevant facts from the provided context. Do not invent facts.`
+        : `Write one polished card. ${tone} tone. ${emotionGuide} Warm, honest, and genuine — no specific memories to invent. Write 3–5 sentences that feel real for this relationship and occasion.`;
 
   const primaryBlocks = hasPrimary
     ? `\n${buildPrimaryContentPriorityBlock()}
@@ -455,34 +443,31 @@ ${buildPrimaryReasonRule()}
     ? buildPrimarySubjectOutputContract(primaryOccasionContext, details)
     : "";
 
-  return `Write 3 versions of a ${occasion} card for ${firstName} (${relationship}).
+  return `Write one ${occasion} card for ${firstName} (${relationship}).
 ${context}
 Occasion: ${occasion}
 ${objectiveLine}Requested tone: ${tone}
 Emotional level: ${emotionGuide}
 ${primaryBlocks}
-${optionBlock}
+CARD BRIEF: ${polishGuide}
 
 ${densityBlock}
 ${authRules}${!hasContext ? `
-LOW-CONTEXT CONSTRAINT — no context was provided for this person. These phrases are banned in all 3 versions. Using any one of them is an automatic failure:
+LOW-CONTEXT CONSTRAINT — no context was provided for this person. These phrases are banned. Using any one of them is an automatic failure:
 "adventure", "adventures", "another adventure in the books", "shared moments", "shared so many moments", "we've been through", "been through a lot", "fun times and the hard ones", "the hard ones", "unforgettable memories", "unforgettable", "endless laughs", "always there for me", "always been there", "through thick and thin", "every step of the way", "road trip", "inside jokes", "gaming", "playlists", "family chaos", "unwavering support", "kindness", "what we've built", "how far we've come", "memories we've made"
-Each card must be 3–5 sentences. Warm, honest, and simple. No invented history. No implied past.
+The card must be 3–5 sentences. Warm, honest, and simple. No invented history. No implied past.
 ` : ""}
 Write as ${senderName} speaking directly to ${firstName}.
-Each version must open completely differently — different angle, different voice, different structure.
 Never write a specific number of years (e.g. "seven years", "3 years") — use the depth of history to inform emotional familiarity, not as literal text.
-${signOff ? `End every card with exactly this sign-off on its own line: "${signOff}" — do not alter, rephrase, or add anything to it.` : `End every card with the sender's name on its own line — use "${senderName}" unless it is "Me", in which case write "[Your Name]".`}
+${signOff ? `End the card with exactly this sign-off on its own line: "${signOff}" — do not alter, rephrase, or add anything to it.` : `End the card with the sender's name on its own line — use "${senderName}" unless it is "Me", in which case write "[Your Name]".`}
 ${primaryOutputContract ? `\n${primaryOutputContract}\n` : ""}
 Return valid JSON only:
 {
   "cards": [
-    { "tone": "Best Match", "text": "..." },
-    { "tone": "More Casual", "text": "..." },
-    { "tone": "More Heartfelt", "text": "..." }
+    { "tone": "Draft", "text": "..." }
   ]
 }
-Use \\n for line breaks. No markdown. JSON only.`;
+Use \\n for line breaks. No markdown. JSON only. The cards array must contain exactly one card.`;
 }
 
 // ── Internal quality scorer ───────────────────────────────────────────────────
@@ -832,7 +817,7 @@ router.post("/v2/generate-card", async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-5",
-      max_completion_tokens: 2400,
+      max_completion_tokens: 900,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -851,6 +836,15 @@ router.post("/v2/generate-card", async (req, res) => {
       return;
     }
 
+    if (!Array.isArray(parsed.cards) || parsed.cards.length === 0) {
+      logger.error({ raw }, "v2-generate-card: empty cards array");
+      res.status(500).json({ error: "Failed to parse card response" });
+      return;
+    }
+
+    // Product contract: exactly one card. Truncate if the model returns extras.
+    const singleCard = parsed.cards.slice(0, 1);
+
     // ── Post-generation character-adjective filter ─────────────────────────
     // Build full context string: everything the sender actually provided
     const rawContextText = [
@@ -859,7 +853,7 @@ router.post("/v2/generate-card", async (req, res) => {
       contextSupplement ?? "",
     ].filter(Boolean).join(" ");
 
-    const filteredCards = parsed.cards.map(card => {
+    const filteredCards = singleCard.map(card => {
       const { text, strippedSentences } = stripFabricatedCharacterAdjectives(card.text, rawContextText, firstName);
       if (strippedSentences.length > 0) {
         logger.info({ tone: card.tone, strippedSentences }, "v2-generate-card: stripped fabricated character adjectives");
@@ -971,15 +965,20 @@ router.post("/v2/card-feedback", async (req, res) => {
 // ── Single-card refine ────────────────────────────────────────────────────────
 
 router.post("/v2/refine-card", async (req, res) => {
-  const { cardText, instruction, context } = req.body as {
+  const body = req.body as {
     cardText: string;
     instruction: string;
     context?: string;
+    groundingContext?: RefineGroundingContext;
+    facts?: RefineGroundingContext;
   };
+  const { cardText, instruction, context } = body;
   if (!cardText || !instruction) {
     res.status(400).json({ error: "cardText and instruction required" });
     return;
   }
+
+  const grounding = normalizeRefineGrounding(body.groundingContext ?? body.facts);
 
   try {
     const completion = await openai.chat.completions.create({
@@ -988,15 +987,16 @@ router.post("/v2/refine-card", async (req, res) => {
       messages: [
         {
           role: "system",
-          content:
-            "You are refining a greeting card. Apply the requested change while preserving the sender's personal voice and core message. " +
-            "Do NOT add clichés or generic greeting-card language. " +
-            `These phrases are banned: ${BANNED_PHRASES_SYSTEM.slice(0, 15).join(", ")}. ` +
-            "Return ONLY the refined card text — no labels, no explanation.",
+          content: buildRefineSystemPrompt(),
         },
         {
           role: "user",
-          content: `Context: ${context ?? "personal card"}\n\nOriginal card:\n${cardText}\n\nChange requested: ${instruction}\n\nReturn only the refined card text.`,
+          content: buildRefineUserPrompt({
+            grounding,
+            cardText,
+            instruction,
+            legacyContext: context,
+          }),
         },
       ],
     });

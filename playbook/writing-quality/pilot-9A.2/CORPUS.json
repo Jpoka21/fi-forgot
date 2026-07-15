@@ -1,0 +1,128 @@
+{
+  "corpusId": "pilot-9A.2-20260714",
+  "generatedAt": "2026-07-14T21:17:19.467Z",
+  "status": "blocked",
+  "blocker": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+  "scenarios": [
+    {
+      "id": "G01",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G02",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G03",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G04",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G05",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G06",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G07",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G08",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G09",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G10",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G11",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G12",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G13",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G14",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G15",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G16",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G17",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G18",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G19",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    },
+    {
+      "id": "G20",
+      "ok": false,
+      "error": "BLOCKER: OPENAI_API_KEY and AI_INTEGRATIONS_OPENAI_API_KEY absent (process/user/machine). No .env/.env.local with key. Localhost :3000/:5000/:8080 OPTIONS to /api/v2/generate-card timed out. Cannot call production generate-card path.",
+      "cards": []
+    }
+  ]
+}

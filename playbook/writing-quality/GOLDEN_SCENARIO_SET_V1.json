@@ -1,0 +1,457 @@
+{
+  "version": "1.0",
+  "sprint": "9A.1",
+  "purpose": "Frozen golden payloads for writing-quality pilot (no production coupling)",
+  "notes": [
+    "Each request mirrors POST /api/v2/generate-card body fields used by /try packing.",
+    "Guest scenarios: empty relAnswers; required signOff per Sprint 8D.2A.",
+    "Scenarios with flow=authenticated_body use richer relAnswers only. They do NOT send recipientId or x-user-id, so assembleRecipientContext / contextSupplement is not exercised (same generate-card route, body-path only).",
+    "avoidList values must be product AVOID_OPTIONS only.",
+    "Always score the single first-returned card per successful scenario (20 cards total). No three-version aggregation."
+  ],
+  "scenarios": [
+    {
+      "id": "G01",
+      "title": "Mom thank-you — primary + vivid support (8D regression writing face)",
+      "flow": "guest",
+      "contextRichness": "primary_plus_support",
+      "axes": { "occasion": "Thank You", "relationship": "Mom" },
+      "reviewFocus": ["subject_retention", "support_hijack", "opening", "naturalness"],
+      "request": {
+        "firstName": "Mom",
+        "relationship": "Mom",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping me out with finding new health insurance",
+        "details": "She fought with everyone until she got what I needed",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": [],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, James"
+      }
+    },
+    {
+      "id": "G02",
+      "title": "Mom thank-you — primary only, Simple tone",
+      "flow": "guest",
+      "contextRichness": "primary_only",
+      "axes": { "occasion": "Thank You", "relationship": "Mom" },
+      "reviewFocus": ["economy", "simple_tone_fidelity", "subject_clarity"],
+      "request": {
+        "firstName": "Mom",
+        "relationship": "Mom",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping me out with finding new health insurance",
+        "details": "",
+        "tone": "Simple",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": ["Too Sweet", "Too Emotional"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, James"
+      }
+    },
+    {
+      "id": "G03",
+      "title": "Friend birthday — sparse guest, Funny",
+      "flow": "guest",
+      "contextRichness": "sparse",
+      "axes": { "occasion": "Birthday", "relationship": "Friend" },
+      "reviewFocus": ["low_context_honesty", "humor", "anti_fabrication"],
+      "request": {
+        "firstName": "Alex",
+        "relationship": "Friend",
+        "occasion": "Birthday",
+        "primaryOccasionContext": "Just saying happy birthday and that I'm glad we're friends",
+        "details": "",
+        "tone": "Funny",
+        "emotionalOpenness": "Not Emotional, Just Funny",
+        "avoidList": ["Too Sweet", "Too Emotional"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "— Jamie"
+      }
+    },
+    {
+      "id": "G04",
+      "title": "Wife anniversary — romantic + deep",
+      "flow": "guest",
+      "contextRichness": "primary_plus_support",
+      "axes": { "occasion": "Anniversary", "relationship": "Wife" },
+      "reviewFocus": ["romantic_fit", "warmth", "emotional_progression"],
+      "request": {
+        "firstName": "Sara",
+        "relationship": "Wife",
+        "occasion": "Anniversary",
+        "primaryOccasionContext": "Ten years of choosing each other on ordinary Tuesdays, not just the big days",
+        "details": "You still save me the last piece of toast without making a speech about it",
+        "tone": "Romantic",
+        "emotionalOpenness": "Deep And Emotional",
+        "avoidList": ["Too Cheesy", "Too Formal"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Forever, Michael"
+      }
+    },
+    {
+      "id": "G05",
+      "title": "Dad Christmas holiday — warm",
+      "flow": "guest",
+      "contextRichness": "primary_only",
+      "axes": { "occasion": "Holiday", "relationship": "Dad", "holidayName": "Christmas" },
+      "reviewFocus": ["occasion_fit", "relationship_distance", "naturalness"],
+      "request": {
+        "firstName": "Dad",
+        "relationship": "Dad",
+        "occasion": "Holiday - Christmas",
+        "primaryOccasionContext": "Thanks for driving through that storm so we could all be home for Christmas dinner",
+        "details": "",
+        "tone": "Warm",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": ["Too Sweet"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love you, Chris"
+      }
+    },
+    {
+      "id": "G06",
+      "title": "Friend sympathy — careful heartfelt",
+      "flow": "guest",
+      "contextRichness": "primary_only",
+      "axes": { "occasion": "Sympathy", "relationship": "Friend" },
+      "reviewFocus": ["sympathy_restraint", "authenticity", "closing"],
+      "request": {
+        "firstName": "Morgan",
+        "relationship": "Friend",
+        "occasion": "Sympathy",
+        "primaryOccasionContext": "I'm sorry about your dad — I've been thinking about you every day this week",
+        "details": "",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": ["Too Cheesy"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "With love, Priya"
+      }
+    },
+    {
+      "id": "G07",
+      "title": "Son congratulations — graduation-like win",
+      "flow": "guest",
+      "contextRichness": "primary_plus_support",
+      "axes": { "occasion": "Congratulations", "relationship": "Son" },
+      "reviewFocus": ["pride_without_lecture", "supporting_color", "opening"],
+      "request": {
+        "firstName": "Noah",
+        "relationship": "Son",
+        "occasion": "Congratulations",
+        "primaryOccasionContext": "You finished your first marathon after six months of early-morning training",
+        "details": "I still remember you texting me after mile 18 saying your legs were done and then finishing anyway",
+        "tone": "Encouraging",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": ["Too Formal", "Too Childish"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Proud of you — Dad"
+      }
+    },
+    {
+      "id": "G08",
+      "title": "Husband apology — direct",
+      "flow": "guest",
+      "contextRichness": "primary_plus_support",
+      "axes": { "occasion": "Apology", "relationship": "Husband" },
+      "reviewFocus": ["apology_sincerity", "bold_honest_tone", "economy"],
+      "request": {
+        "firstName": "David",
+        "relationship": "Husband",
+        "occasion": "Apology",
+        "primaryOccasionContext": "I snapped at you about the weekend plans and you didn't deserve that",
+        "details": "You were only trying to make Saturday easier for both of us",
+        "tone": "Bold And Honest",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": ["Too Generic", "Too Formal"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "I'm sorry — Lena"
+      }
+    },
+    {
+      "id": "G09",
+      "title": "Daughter just because — nostalgic",
+      "flow": "guest",
+      "contextRichness": "primary_only",
+      "axes": { "occasion": "Just Because", "relationship": "Daughter" },
+      "reviewFocus": ["just_because_fit", "nostalgia", "memorability"],
+      "request": {
+        "firstName": "Ellie",
+        "relationship": "Daughter",
+        "occasion": "Just Because",
+        "primaryOccasionContext": "No big reason — I just miss our Sunday pancake mornings since you moved out",
+        "details": "",
+        "tone": "Nostalgic",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": ["Too Long"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, Mom"
+      }
+    },
+    {
+      "id": "G10",
+      "title": "Grandparent thinking of you — simple sparse",
+      "flow": "guest",
+      "contextRichness": "sparse",
+      "axes": { "occasion": "Thinking Of You", "relationship": "Grandparent" },
+      "reviewFocus": ["grandparent_voice", "simple_warmth", "anti_fabrication"],
+      "request": {
+        "firstName": "Nana",
+        "relationship": "Grandparent",
+        "occasion": "Thinking Of You",
+        "primaryOccasionContext": "I keep thinking about you this week and wanted you to know",
+        "details": "",
+        "tone": "Simple",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": ["Too Long"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Love, Jordan"
+      }
+    },
+    {
+      "id": "G11",
+      "title": "Coworker thank-you — respectful",
+      "flow": "guest",
+      "contextRichness": "primary_only",
+      "axes": { "occasion": "Thank You", "relationship": "Coworker" },
+      "reviewFocus": ["professional_register", "specificity", "anti_romance"],
+      "request": {
+        "firstName": "Sam",
+        "relationship": "Coworker",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Covering my client calls last Thursday so I could make the school pickup",
+        "details": "",
+        "tone": "Respectful",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": ["Too Emotional", "Too Romantic"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Thanks again — Taylor"
+      }
+    },
+    {
+      "id": "G12",
+      "title": "Boss congratulations — promotion",
+      "flow": "guest",
+      "contextRichness": "primary_only",
+      "axes": { "occasion": "Congratulations", "relationship": "Boss" },
+      "reviewFocus": ["boss_distance", "professional_warmth", "opening"],
+      "request": {
+        "firstName": "Patricia",
+        "relationship": "Boss",
+        "occasion": "Congratulations",
+        "primaryOccasionContext": "Your promotion to VP — the team is lucky to keep learning from how you run a room",
+        "details": "",
+        "tone": "Respectful",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": ["Too Emotional", "Too Mean"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Congratulations — Avery Chen"
+      }
+    },
+    {
+      "id": "G13",
+      "title": "Teacher thank-you — warm",
+      "flow": "guest",
+      "contextRichness": "primary_plus_support",
+      "axes": { "occasion": "Thank You", "relationship": "Teacher" },
+      "reviewFocus": ["teacher_register", "support_as_color", "warmth"],
+      "request": {
+        "firstName": "Ms. Alvarez",
+        "relationship": "Teacher",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping my daughter get confident at reading this year",
+        "details": "She used to hide behind her hair when it was her turn — now she volunteers",
+        "tone": "Warm",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": ["Too Romantic"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Grateful — The Park family"
+      }
+    },
+    {
+      "id": "G14",
+      "title": "Sister birthday — Funny with roast pressure",
+      "flow": "guest",
+      "contextRichness": "primary_plus_support",
+      "axes": { "occasion": "Birthday", "relationship": "Sister" },
+      "reviewFocus": ["humor_quality", "roast_boundary", "version_differentiation"],
+      "request": {
+        "firstName": "Casey",
+        "relationship": "Sister",
+        "occasion": "Birthday",
+        "primaryOccasionContext": "Another trip around the sun — still somehow the person I call when my life is sideways",
+        "details": "You once showed up with tacos and zero advice, which was perfect",
+        "tone": "Funny",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": ["Too Mean", "Too Sweet"],
+        "relAnswers": {},
+        "senderName": "Me",
+        "signOff": "Don't age too hard — Riley"
+      }
+    },
+    {
+      "id": "G15",
+      "title": "Auth-shaped Dad birthday — rich relationship profile (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "axes": { "occasion": "Birthday", "relationship": "Dad" },
+      "reviewFocus": ["rich_context_weave", "dad_understatement", "voice"],
+      "request": {
+        "firstName": "Steve",
+        "relationship": "Dad",
+        "occasion": "Birthday",
+        "primaryOccasionContext": "Happy birthday — thank you for teaching me how to fix things without making me feel stupid",
+        "details": "Last fall when the sink flooded and you talked me through it on speaker",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": ["Too Sweet", "Too Long"],
+        "relAnswers": {
+          "parentPersonality": "Quiet, practical, dry humor",
+          "parentFact": "Loves early coffee and Saturday hardware-store runs"
+        },
+        "senderName": "Jordan",
+        "signOff": "Love you, Dad — Jordan"
+      }
+    },
+    {
+      "id": "G16",
+      "title": "Auth-shaped Mom thank-you — rich + primary subject stress (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "axes": { "occasion": "Thank You", "relationship": "Mom" },
+      "reviewFocus": ["profile_vs_primary", "support_hijack", "subject_clarity"],
+      "request": {
+        "firstName": "Linda",
+        "relationship": "Mom",
+        "occasion": "Thank You",
+        "primaryOccasionContext": "Helping me navigate the paperwork for new health insurance this month",
+        "details": "You sat on hold for almost two hours so I wouldn't have to",
+        "tone": "Heartfelt",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": [],
+        "relAnswers": {
+          "parentPersonality": "Tough, supportive, stubborn in the best way",
+          "parentFact": "Always drops anything if one of us needs her"
+        },
+        "senderName": "James",
+        "signOff": "Love, James"
+      }
+    },
+    {
+      "id": "G17",
+      "title": "Auth-shaped Husband anniversary — romantic rich (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "axes": { "occasion": "Anniversary", "relationship": "Husband" },
+      "reviewFocus": ["romantic_specifics", "emotional_progression", "memorability"],
+      "request": {
+        "firstName": "Marcus",
+        "relationship": "Husband",
+        "occasion": "Anniversary",
+        "primaryOccasionContext": "Eight years in — still my favorite person to run errands with",
+        "details": "Our terrible first apartment with the leaning stove still makes me laugh",
+        "tone": "Romantic",
+        "emotionalOpenness": "Deep And Emotional",
+        "avoidList": ["Too Cheesy"],
+        "relAnswers": {
+          "timeTogether": "8 years",
+          "spouseSmile": "When you steal fries and deny it with a straight face"
+        },
+        "senderName": "Ava",
+        "signOff": "Still choosing you — Ava"
+      }
+    },
+    {
+      "id": "G18",
+      "title": "Auth-shaped coworker get well — sparse relAnswers (body only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "sparse",
+      "axes": { "occasion": "Get Well", "relationship": "Coworker" },
+      "reviewFocus": ["professional_care", "anti_fabrication", "economy"],
+      "request": {
+        "firstName": "Chris",
+        "relationship": "Coworker",
+        "occasion": "Get Well",
+        "primaryOccasionContext": "Hope your recovery from surgery is smoother than the waiting room coffee",
+        "details": "",
+        "tone": "Warm",
+        "emotionalOpenness": "A Little Appreciation At The End",
+        "avoidList": ["Too Emotional", "Too Romantic"],
+        "relAnswers": {
+          "proStrength": "Reliable on deadlines"
+        },
+        "senderName": "Kim",
+        "signOff": "Get well soon — Kim"
+      }
+    },
+    {
+      "id": "G19",
+      "title": "Auth-shaped Daughter graduation — rich encouraging (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "axes": { "occasion": "Graduation", "relationship": "Daughter" },
+      "reviewFocus": ["pride_seen", "occasion_fit", "closing"],
+      "request": {
+        "firstName": "Maya",
+        "relationship": "Daughter",
+        "occasion": "Graduation",
+        "primaryOccasionContext": "You earned this diploma after nights of doubt and still showing up",
+        "details": "Watching you present your senior project without shaking was a full-circle moment",
+        "tone": "Encouraging",
+        "emotionalOpenness": "Clearly Heartfelt",
+        "avoidList": ["Too Formal"],
+        "relAnswers": {
+          "childAge": "18",
+          "proudOf": "How she builds community around quieter classmates"
+        },
+        "senderName": "Dad",
+        "signOff": "So proud — Dad"
+      }
+    },
+    {
+      "id": "G20",
+      "title": "Auth-shaped Friend apology — simple + rich memory (body relAnswers only)",
+      "flow": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "axes": { "occasion": "Apology", "relationship": "Friend" },
+      "reviewFocus": ["simple_tone", "apology_clarity", "support_as_color"],
+      "request": {
+        "firstName": "Dee",
+        "relationship": "Friend",
+        "occasion": "Apology",
+        "primaryOccasionContext": "I canceled on your birthday dinner last-minute and that was selfish",
+        "details": "You had already reserved the noisy corner table we like",
+        "tone": "Simple",
+        "emotionalOpenness": "Meaningful But Not Mushy",
+        "avoidList": ["Too Long"],
+        "relAnswers": {
+          "friendType": "Best Friend",
+          "commStyle": "Direct, funny, honest"
+        },
+        "senderName": "Sam",
+        "signOff": "Sorry — and thank you for still picking up — Sam"
+      }
+    }
+  ]
+}
