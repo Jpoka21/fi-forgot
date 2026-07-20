@@ -1,59 +1,51 @@
-# Sprint 9B.2 evaluation harness
+# Sprint 9B.2 evaluation — FAIL (historical evidence)
 
-Evaluation-only. Does **not** change production prompts.
+**Determination: FAIL**  
+**Implementation rejected.** Do **not** treat commit `0d47a18163c52a5c9f8773c86ccc3414c24b2e47` as accepted production writing behavior.
 
-**Does not write into** `playbook/writing-quality/pilot-9B.1-v2/` (frozen Framework V2 / Sprint 9B.1 PASS results).
+This directory preserves a completed controlled evaluation of a temporary professional Thank You anti-gratitude-stack tip. Sprint 9B.2 remains open as a problem statement; this first implementation is closed as rejected.
 
-## Production implementation under evaluation
+## Evaluated production tip (rejected)
 
-Pinned in `run-pilot.mjs` as:
+`productionImplementationCommit = 0d47a18163c52a5c9f8773c86ccc3414c24b2e47`
 
-`PRODUCTION_IMPLEMENTATION_COMMIT = 0d47a18163c52a5c9f8773c86ccc3414c24b2e47`
+Harness commit at generation: `f4493899a8016df98b7a8277c3972a18528f9124`
 
-That SHA is the Sprint 9B.2 temporary evaluation tip (professional Thank You anti-gratitude-stack). Later harness-only commits may advance `HEAD`; corpus metadata still records **0d47a18…** as the writing implementation under evaluation.
+## Evaluation contract (honored)
 
-## Established tests (required before generation)
+- Frozen golden scenarios from `GOLDEN_SCENARIO_SET_V1.json` (G01–G20)
+- One request per scenario
+- First returned card only
+- Zero retries / no regeneration
+- No Rewrite / New Version / cherry-picking
+- Guest vs `authenticated_body` fidelity preserved
+- Framework V1 scorecard unchanged
+- Outputs only under this directory (never overwrote `pilot-9B.1-v2/`)
 
-```bash
-node playbook/writing-quality/pilot-9B.2-v1/run-established-tests.mjs
-```
+## Result summary
 
-Expected: **316** unit assertions + existing harness self-checks + this Sprint 9B.2 harness self-check, all exit 0.
+| Metric | 9B.2 | 9B.1 V2 baseline |
+|--------|------|------------------|
+| Soft mean | 4.42 | 4.43 |
+| Would Send | 19/20 (95%) | 19/20 (95%) |
+| Hard Fails | 0 | 0 |
+| G11 Would Send | **No** (target miss) | No |
+| G11 `P-UNIFORM-SENTENCES` | **Still present** | Present |
 
-## Generate corpus (Replit)
+Acceptance gate failed: G11 did not flip to Would Send Yes / did not lose `P-UNIFORM-SENTENCES`; soft protect dips on G07/G17.
 
-```bash
-git fetch origin
-git checkout frontend-rebuild
-git pull origin frontend-rebuild
+## Artifacts
 
-git rev-parse HEAD
-# expect: at least the harness commit that added pilot-9B.2-v1/ (API writing tip remains 0d47a18…)
+| File | Role |
+|------|------|
+| `CORPUS.json` / `CORPUS.md` | Frozen live generation (complete, evaluationEligible) |
+| `SCORES_9B2.csv` | Per-scenario Framework V1 scores |
+| `SCORING_AGGREGATES_9B2.json` | Aggregates + acceptance flags |
+| `PILOT_FINDINGS_9B2.md` | Full findings |
+| `V2_9B2_COMPARISON.md` | Direct comparison to accepted 9B.1 V2 |
 
-node -e "import('./playbook/writing-quality/pilot-9B.2-v1/run-pilot.mjs').then(m => console.log(m.PRODUCTION_IMPLEMENTATION_COMMIT))"
-# expect: 0d47a18163c52a5c9f8773c86ccc3414c24b2e47
+## Production baseline after rejection
 
-pnpm --filter @workspace/api-server build
-# restart API / Replit Run so generate-card is built from 0d47a18 writing tip
+Production writing was restored to the accepted Sprint 9B.1 baseline via `git revert` of `0d47a18…`. Do not reintroduce this tip without a new implementation and a fresh harness run.
 
-# optional:
-# export PILOT_BASE_URL=http://127.0.0.1:PORT
-
-node playbook/writing-quality/pilot-9B.2-v1/run-pilot.mjs --self-check
-node playbook/writing-quality/pilot-9B.2-v1/run-pilot.mjs
-```
-
-Outputs write only under `playbook/writing-quality/pilot-9B.2-v1/`.
-
-## Completion gate
-
-`CORPUS.json` is evaluation-eligible only when:
-
-- `status === "complete"`
-- `evaluationEligible === true`
-- `notForScoring === false`
-- all 20 scenarios have `attempts === 1` and exactly one nonempty card
-- IDs G01–G20 in order
-- `provenance.productionImplementationCommit === 0d47a18163c52a5c9f8773c86ccc3414c24b2e47`
-
-Blocked / partial outputs set `notForScoring: true` and must not be scored.
+Harness runners (`run-pilot.mjs`, `run-established-tests.mjs`) remain for historical reproduction / self-check only. After the production tip was reverted, use `playbook/writing-quality/pilot-9B.1-v2/run-established-tests.mjs` (expected **290** unit assertions) for the restored Sprint 9B.1 production baseline. The 9B.2 runner’s **316** expectation reflected the temporary tip’s extra unit asserts and is historical. Do not treat a new local generation against current `HEAD` as a re-score of this rejected tip unless `HEAD` again implements that exact SHA.

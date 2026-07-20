@@ -1,0 +1,1119 @@
+{
+  "corpusId": "pilot-9B.2-v1-20260720",
+  "title": "Sprint 9B.2 Evaluation Corpus",
+  "generatedAt": "2026-07-20T20:11:46.463Z",
+  "status": "complete",
+  "baseUrl": "http://127.0.0.1:8080",
+  "panelIds": [
+    "G01",
+    "G02",
+    "G03",
+    "G04",
+    "G05",
+    "G06",
+    "G07",
+    "G08",
+    "G09",
+    "G10",
+    "G11",
+    "G12",
+    "G13",
+    "G14",
+    "G15",
+    "G16",
+    "G17",
+    "G18",
+    "G19",
+    "G20"
+  ],
+  "provenance": {
+    "branch": "frontend-rebuild",
+    "productionImplementationCommit": "0d47a18163c52a5c9f8773c86ccc3414c24b2e47",
+    "productionImplementationNote": "Sprint 9B.2 temporary evaluation tip (professional Thank You anti-gratitude-stack). Harness commits after this SHA evaluate this implementation; they are not a new writing tip unless production changes land.",
+    "harnessCommit": "f4493899a8016df98b7a8277c3972a18528f9124",
+    "harnessCommitNote": "Git HEAD when this corpus was generated. May be newer than productionImplementationCommit when only evaluation assets changed.",
+    "goldenScenarioSetPath": "playbook/writing-quality/GOLDEN_SCENARIO_SET_V1.json",
+    "goldenScenarioSetNote": "Read-only frozen V1 payloads; not duplicated in this directory."
+  },
+  "semantics": {
+    "oneRequestPerScenario": true,
+    "retries": 0,
+    "firstReturnedCardOnly": true,
+    "noRewrite": true,
+    "noNewVersion": true,
+    "noCherryPick": true,
+    "postsRequestBodyOnly": true,
+    "noUserIdHeader": true,
+    "noRecipientIdInjection": true
+  },
+  "writingContractNote": "Evaluates production writing at 0d47a18163c52a5c9f8773c86ccc3414c24b2e47 (Sprint 9B.2 professional Thank You anti-gratitude-stack). Harness commits after that SHA are evaluation assets only.",
+  "responseContractNote": "Expects HTTP 200 { cards:[{ tone, text }] }. Zero retries. Failed scenarios recorded; not regenerated. status complete only if completion gate passes.",
+  "scenarios": [
+    {
+      "id": "G01",
+      "title": "Mom thank-you — primary + vivid support (8D regression writing face)",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Thank You",
+      "relationship": "Mom",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Mom, thank you for stepping in and helping me find new health insurance.\\nYou went toe-to-toe with whoever you had to until the right coverage was in place.\\nYou turned a stressful mess into something solid I can count on, and I won’t forget it.\\nHaving that coverage set means I can finally breathe a little easier. Love, James\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Mom, thank you for stepping in and helping me find new health insurance.\nYou went toe-to-toe with whoever you had to until the right coverage was in place.\nYou turned a stressful mess into something solid I can count on, and I won’t forget it.\nHaving that coverage set means I can finally breathe a little easier. Love, James"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Mom, thank you for stepping in and helping me find new health insurance.\nYou went toe-to-toe with whoever you had to until the right coverage was in place.\nYou turned a stressful mess into something solid I can count on, and I won’t forget it.\nHaving that coverage set means I can finally breathe a little easier. Love, James",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G02",
+      "title": "Mom thank-you — primary only, Simple tone",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Thank You",
+      "relationship": "Mom",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Mom, Thank you for helping me find new health insurance. Sorting through plans and coverage is a maze, and you made it manageable. Because of your help, I’ve got coverage that fits and one less thing to worry about. I’m really grateful for you. Love, James\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Mom, Thank you for helping me find new health insurance. Sorting through plans and coverage is a maze, and you made it manageable. Because of your help, I’ve got coverage that fits and one less thing to worry about. I’m really grateful for you. Love, James"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Mom, Thank you for helping me find new health insurance. Sorting through plans and coverage is a maze, and you made it manageable. Because of your help, I’ve got coverage that fits and one less thing to worry about. I’m really grateful for you. Love, James",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G03",
+      "title": "Friend birthday — sparse guest, Funny",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "sparse",
+      "occasion": "Birthday",
+      "relationship": "Friend",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Alex, I checked the calendar—confirmed it's your birthday.\\nHappy Birthday. I'm glad we're friends—solid decision by both of us.\\nNow go use 'birthday rules' to justify cake for breakfast.\\n— Jamie\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Alex, I checked the calendar—confirmed it's your birthday.\nHappy Birthday. I'm glad we're friends—solid decision by both of us.\nNow go use 'birthday rules' to justify cake for breakfast.\n— Jamie"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Alex, I checked the calendar—confirmed it's your birthday.\nHappy Birthday. I'm glad we're friends—solid decision by both of us.\nNow go use 'birthday rules' to justify cake for breakfast.\n— Jamie",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G04",
+      "title": "Wife anniversary — romantic + deep",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Anniversary",
+      "relationship": "Wife",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Sara, This anniversary, for me, is about the years of choosing each other on ordinary Tuesdays—not just the big days. The quiet, no-audience kind of choosing. The kind that looks like you sliding the last piece of toast onto my plate and not making a speech about it. That’s the heart of us I fall in love with—steady, daily, real. It’s where I feel seen, and where love feels like a promise we keep in the middle of the unremarkable hours. I’m grateful for every Tuesday we’ve kept that promise, and I choose you again today. Forever, Michael\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Sara, This anniversary, for me, is about the years of choosing each other on ordinary Tuesdays—not just the big days. The quiet, no-audience kind of choosing. The kind that looks like you sliding the last piece of toast onto my plate and not making a speech about it. That’s the heart of us I fall in love with—steady, daily, real. It’s where I feel seen, and where love feels like a promise we keep in the middle of the unremarkable hours. I’m grateful for every Tuesday we’ve kept that promise, and I choose you again today. Forever, Michael"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Sara, This anniversary, for me, is about the years of choosing each other on ordinary Tuesdays—not just the big days. The quiet, no-audience kind of choosing. The kind that looks like you sliding the last piece of toast onto my plate and not making a speech about it. That’s the heart of us I fall in love with—steady, daily, real. It’s where I feel seen, and where love feels like a promise we keep in the middle of the unremarkable hours. I’m grateful for every Tuesday we’ve kept that promise, and I choose you again today. Forever, Michael",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G05",
+      "title": "Dad Christmas holiday — warm",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Holiday",
+      "relationship": "Dad",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Dad, thank you for driving through that storm so we could all be home for Christmas dinner.\\nThat drive was no joke, and you got us there.\\nBeing at the table together because you pushed through that weather meant a lot to me.\\nMerry Christmas. Love you, Chris\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Dad, thank you for driving through that storm so we could all be home for Christmas dinner.\nThat drive was no joke, and you got us there.\nBeing at the table together because you pushed through that weather meant a lot to me.\nMerry Christmas. Love you, Chris"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Dad, thank you for driving through that storm so we could all be home for Christmas dinner.\nThat drive was no joke, and you got us there.\nBeing at the table together because you pushed through that weather meant a lot to me.\nMerry Christmas. Love you, Chris",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G06",
+      "title": "Friend sympathy — careful heartfelt",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Sympathy",
+      "relationship": "Friend",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Morgan,\\nI'm so sorry about your dad. I've been thinking about you every day this week.\\nI know there aren’t words that make this easier. If you want company, a quiet walk, help with errands, or just someone on the phone saying nothing with you, I’m here.\\nHowever this week unfolds, I’m here for you. With love, Priya\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Morgan,\nI'm so sorry about your dad. I've been thinking about you every day this week.\nI know there aren’t words that make this easier. If you want company, a quiet walk, help with errands, or just someone on the phone saying nothing with you, I’m here.\nHowever this week unfolds, I’m here for you. With love, Priya"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Morgan,\nI'm so sorry about your dad. I've been thinking about you every day this week.\nI know there aren’t words that make this easier. If you want company, a quiet walk, help with errands, or just someone on the phone saying nothing with you, I’m here.\nHowever this week unfolds, I’m here for you. With love, Priya",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G07",
+      "title": "Son congratulations — graduation-like win",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Congratulations",
+      "relationship": "Son",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Noah, your first marathon is in the books — after six months of early‑morning training, that finish was earned.\\nI still remember your mile‑18 text saying your legs were done — and you finished anyway.\\nCongratulations — let it sink in.\\nProud of you — Dad\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Noah, your first marathon is in the books — after six months of early‑morning training, that finish was earned.\nI still remember your mile‑18 text saying your legs were done — and you finished anyway.\nCongratulations — let it sink in.\nProud of you — Dad"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Noah, your first marathon is in the books — after six months of early‑morning training, that finish was earned.\nI still remember your mile‑18 text saying your legs were done — and you finished anyway.\nCongratulations — let it sink in.\nProud of you — Dad",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G08",
+      "title": "Husband apology — direct",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Apology",
+      "relationship": "Husband",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"David, I was wrong to snap at you about the weekend plans — you didn’t deserve that. You were only trying to make Saturday easier for both of us, and I made it harder. That was my stress talking, not you. Can we reset and plan the weekend together, minus the edge? I'm sorry — Lena\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "David, I was wrong to snap at you about the weekend plans — you didn’t deserve that. You were only trying to make Saturday easier for both of us, and I made it harder. That was my stress talking, not you. Can we reset and plan the weekend together, minus the edge? I'm sorry — Lena"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "David, I was wrong to snap at you about the weekend plans — you didn’t deserve that. You were only trying to make Saturday easier for both of us, and I made it harder. That was my stress talking, not you. Can we reset and plan the weekend together, minus the edge? I'm sorry — Lena",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G09",
+      "title": "Daughter just because — nostalgic",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Just Because",
+      "relationship": "Daughter",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Ellie,\\nI miss our Sunday pancake mornings since you moved out. No big reason—I just miss that little rhythm in the house. Moving out is a big step, and I'm proud of you; I just miss those pancakes with you. Next time you're here on a Sunday, let's bring pancake morning back. Love, Mom\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Ellie,\nI miss our Sunday pancake mornings since you moved out. No big reason—I just miss that little rhythm in the house. Moving out is a big step, and I'm proud of you; I just miss those pancakes with you. Next time you're here on a Sunday, let's bring pancake morning back. Love, Mom"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Ellie,\nI miss our Sunday pancake mornings since you moved out. No big reason—I just miss that little rhythm in the house. Moving out is a big step, and I'm proud of you; I just miss those pancakes with you. Next time you're here on a Sunday, let's bring pancake morning back. Love, Mom",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G10",
+      "title": "Grandparent thinking of you — simple sparse",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "sparse",
+      "occasion": "Thinking Of You",
+      "relationship": "Grandparent",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Nana, I keep thinking about you this week and wanted you to know.\\nJust a quick note to say you’re on my mind and I’m sending love your way.\\nI’m grateful to be your grandchild. Love, Jordan\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Nana, I keep thinking about you this week and wanted you to know.\nJust a quick note to say you’re on my mind and I’m sending love your way.\nI’m grateful to be your grandchild. Love, Jordan"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Nana, I keep thinking about you this week and wanted you to know.\nJust a quick note to say you’re on my mind and I’m sending love your way.\nI’m grateful to be your grandchild. Love, Jordan",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G11",
+      "title": "Coworker thank-you — respectful",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Thank You",
+      "relationship": "Coworker",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Sam—thank you for covering my client calls last Thursday so I could make the school pickup.\\nThat coverage took real pressure off a tight afternoon on my end.\\nIf you ever need coverage, I’m glad to return the favor.\\nI really appreciate it. Thanks again — Taylor\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Sam—thank you for covering my client calls last Thursday so I could make the school pickup.\nThat coverage took real pressure off a tight afternoon on my end.\nIf you ever need coverage, I’m glad to return the favor.\nI really appreciate it. Thanks again — Taylor"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Sam—thank you for covering my client calls last Thursday so I could make the school pickup.\nThat coverage took real pressure off a tight afternoon on my end.\nIf you ever need coverage, I’m glad to return the favor.\nI really appreciate it. Thanks again — Taylor",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G12",
+      "title": "Boss congratulations — promotion",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_only",
+      "occasion": "Congratulations",
+      "relationship": "Boss",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Patricia, congratulations on your promotion to VP.\\nThe team is lucky to keep learning from how you run a room, and it’s great to see that recognized.\\nLooking forward to what’s ahead with you in the VP role. Congratulations — Avery Chen\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Patricia, congratulations on your promotion to VP.\nThe team is lucky to keep learning from how you run a room, and it’s great to see that recognized.\nLooking forward to what’s ahead with you in the VP role. Congratulations — Avery Chen"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Patricia, congratulations on your promotion to VP.\nThe team is lucky to keep learning from how you run a room, and it’s great to see that recognized.\nLooking forward to what’s ahead with you in the VP role. Congratulations — Avery Chen",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G13",
+      "title": "Teacher thank-you — warm",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Thank You",
+      "relationship": "Teacher",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Ms. Alvarez, thank you for helping my daughter get confident at reading this year. Watching her go from hiding behind her hair when it was her turn to volunteering to read has been remarkable. Your work has changed how she approaches the page, and we’re deeply grateful. We’re excited to see her carry this confidence forward. Grateful — The Park family\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Ms. Alvarez, thank you for helping my daughter get confident at reading this year. Watching her go from hiding behind her hair when it was her turn to volunteering to read has been remarkable. Your work has changed how she approaches the page, and we’re deeply grateful. We’re excited to see her carry this confidence forward. Grateful — The Park family"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Ms. Alvarez, thank you for helping my daughter get confident at reading this year. Watching her go from hiding behind her hair when it was her turn to volunteering to read has been remarkable. Your work has changed how she approaches the page, and we’re deeply grateful. We’re excited to see her carry this confidence forward. Grateful — The Park family",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G14",
+      "title": "Sister birthday — Funny with roast pressure",
+      "flow": "guest",
+      "requestMode": "guest",
+      "authFidelity": null,
+      "contextRichness": "primary_plus_support",
+      "occasion": "Birthday",
+      "relationship": "Sister",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"One more year, and you’re still the person I call when my life is sideways.\\nCase in point: you once showed up with tacos and zero advice—perfect.\\nHappy birthday, Casey.\\nFor real, thanks for being the person I call when my life is sideways.\\nDon't age too hard — Riley\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "One more year, and you’re still the person I call when my life is sideways.\nCase in point: you once showed up with tacos and zero advice—perfect.\nHappy birthday, Casey.\nFor real, thanks for being the person I call when my life is sideways.\nDon't age too hard — Riley"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "One more year, and you’re still the person I call when my life is sideways.\nCase in point: you once showed up with tacos and zero advice—perfect.\nHappy birthday, Casey.\nFor real, thanks for being the person I call when my life is sideways.\nDon't age too hard — Riley",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G15",
+      "title": "Auth-shaped Dad birthday — rich relationship profile (body relAnswers only)",
+      "flow": "authenticated_body",
+      "requestMode": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Birthday",
+      "relationship": "Dad",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Dad, thanks for teaching me how to fix things without making me feel stupid.\\nLast fall when the sink flooded, you talked me through it on speaker—step by step until it worked.\\nHappy birthday—next time something springs a leak, I’ll put you on speaker again. Love you, Dad — Jordan\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Dad, thanks for teaching me how to fix things without making me feel stupid.\nLast fall when the sink flooded, you talked me through it on speaker—step by step until it worked.\nHappy birthday—next time something springs a leak, I’ll put you on speaker again. Love you, Dad — Jordan"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Dad, thanks for teaching me how to fix things without making me feel stupid.\nLast fall when the sink flooded, you talked me through it on speaker—step by step until it worked.\nHappy birthday—next time something springs a leak, I’ll put you on speaker again. Love you, Dad — Jordan",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G16",
+      "title": "Auth-shaped Mom thank-you — rich + primary subject stress (body relAnswers only)",
+      "flow": "authenticated_body",
+      "requestMode": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Thank You",
+      "relationship": "Mom",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Mom, thank you for helping me navigate the paperwork for my new health insurance this month. You even sat on hold for almost two hours so I wouldn’t have to — that’s you in the best way: tough, stubborn, and all-in when one of us needs it. It made a confusing mess feel manageable, and it reminded me how much of me you’ve shaped. Because of you, I’m covered and can breathe easier. Love, James\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Mom, thank you for helping me navigate the paperwork for my new health insurance this month. You even sat on hold for almost two hours so I wouldn’t have to — that’s you in the best way: tough, stubborn, and all-in when one of us needs it. It made a confusing mess feel manageable, and it reminded me how much of me you’ve shaped. Because of you, I’m covered and can breathe easier. Love, James"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Mom, thank you for helping me navigate the paperwork for my new health insurance this month. You even sat on hold for almost two hours so I wouldn’t have to — that’s you in the best way: tough, stubborn, and all-in when one of us needs it. It made a confusing mess feel manageable, and it reminded me how much of me you’ve shaped. Because of you, I’m covered and can breathe easier. Love, James",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G17",
+      "title": "Auth-shaped Husband anniversary — romantic rich (body relAnswers only)",
+      "flow": "authenticated_body",
+      "requestMode": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Anniversary",
+      "relationship": "Husband",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Marcus, after all this time, you’re still my favorite person to run errands with. The lists, the returns, the lines—when it’s us, the ordinary feels like the good stuff. I still laugh about that first apartment with the leaning stove, and I love that even now the everyday is where I most want to be with you. Happy anniversary. Next errand run, same team. Still choosing you — Ava\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Marcus, after all this time, you’re still my favorite person to run errands with. The lists, the returns, the lines—when it’s us, the ordinary feels like the good stuff. I still laugh about that first apartment with the leaning stove, and I love that even now the everyday is where I most want to be with you. Happy anniversary. Next errand run, same team. Still choosing you — Ava"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Marcus, after all this time, you’re still my favorite person to run errands with. The lists, the returns, the lines—when it’s us, the ordinary feels like the good stuff. I still laugh about that first apartment with the leaning stove, and I love that even now the everyday is where I most want to be with you. Happy anniversary. Next errand run, same team. Still choosing you — Ava",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G18",
+      "title": "Auth-shaped coworker get well — sparse relAnswers (body only)",
+      "flow": "authenticated_body",
+      "requestMode": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "sparse",
+      "occasion": "Get Well",
+      "relationship": "Coworker",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Chris, I’m hoping your recovery from surgery is smoother than the waiting room coffee.\\nFocus on rest; we’ve got the deadlines covered and projects moving.\\nYour health comes first—pick things back up only when you’re ready.\\nI appreciate how reliably you keep our deadlines on track.\\nGet well soon — Kim\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Chris, I’m hoping your recovery from surgery is smoother than the waiting room coffee.\nFocus on rest; we’ve got the deadlines covered and projects moving.\nYour health comes first—pick things back up only when you’re ready.\nI appreciate how reliably you keep our deadlines on track.\nGet well soon — Kim"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Chris, I’m hoping your recovery from surgery is smoother than the waiting room coffee.\nFocus on rest; we’ve got the deadlines covered and projects moving.\nYour health comes first—pick things back up only when you’re ready.\nI appreciate how reliably you keep our deadlines on track.\nGet well soon — Kim",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G19",
+      "title": "Auth-shaped Daughter graduation — rich encouraging (body relAnswers only)",
+      "flow": "authenticated_body",
+      "requestMode": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Graduation",
+      "relationship": "Daughter",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Maya, you earned this diploma after nights of doubt and still showing up. That isn’t luck; it’s the quiet kind of work I watched you do. Seeing you deliver your senior project without shaking felt full-circle. I also see the way you build community around the quieter classmates. I’m so proud of you. Hold this diploma and remember exactly how you got it. So proud — Dad\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Maya, you earned this diploma after nights of doubt and still showing up. That isn’t luck; it’s the quiet kind of work I watched you do. Seeing you deliver your senior project without shaking felt full-circle. I also see the way you build community around the quieter classmates. I’m so proud of you. Hold this diploma and remember exactly how you got it. So proud — Dad"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Maya, you earned this diploma after nights of doubt and still showing up. That isn’t luck; it’s the quiet kind of work I watched you do. Seeing you deliver your senior project without shaking felt full-circle. I also see the way you build community around the quieter classmates. I’m so proud of you. Hold this diploma and remember exactly how you got it. So proud — Dad",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    },
+    {
+      "id": "G20",
+      "title": "Auth-shaped Friend apology — simple + rich memory (body relAnswers only)",
+      "flow": "authenticated_body",
+      "requestMode": "authenticated_body",
+      "authFidelity": "relAnswers_only",
+      "contextRichness": "rich",
+      "occasion": "Apology",
+      "relationship": "Friend",
+      "ok": true,
+      "error": null,
+      "failureKind": null,
+      "diagnostic": {
+        "httpStatus": 200,
+        "contentType": "application/json; charset=utf-8",
+        "rawBody": "{\"cards\":[{\"tone\":\"Draft\",\"text\":\"Dee,\\nI’m sorry I canceled on your birthday dinner last-minute. That was selfish. You’d already reserved the noisy corner table we like, and I left you hanging. I get if you’re mad. If you’re up for a do-over, name the night and I’m there. Sorry — and thank you for still picking up — Sam\",\"_qualityScore\":{\"total\":50,\"specificity\":0,\"memoryUsage\":0,\"openingQuality\":20,\"closingQuality\":15,\"aiPhraseDetection\":15}}],\"browniePoints\":null,\"keptInMind\":[],\"keptInMindSources\":[]}",
+        "routeError": null,
+        "jsonParseError": null,
+        "topLevelKeys": [
+          "cards",
+          "browniePoints",
+          "keptInMind",
+          "keptInMindSources"
+        ]
+      },
+      "cards": [
+        {
+          "tone": "Draft",
+          "text": "Dee,\nI’m sorry I canceled on your birthday dinner last-minute. That was selfish. You’d already reserved the noisy corner table we like, and I left you hanging. I get if you’re mad. If you’re up for a do-over, name the night and I’m there. Sorry — and thank you for still picking up — Sam"
+        }
+      ],
+      "raw": {
+        "cards": [
+          {
+            "tone": "Draft",
+            "text": "Dee,\nI’m sorry I canceled on your birthday dinner last-minute. That was selfish. You’d already reserved the noisy corner table we like, and I left you hanging. I get if you’re mad. If you’re up for a do-over, name the night and I’m there. Sorry — and thank you for still picking up — Sam",
+            "_qualityScore": {
+              "total": 50,
+              "specificity": 0,
+              "memoryUsage": 0,
+              "openingQuality": 20,
+              "closingQuality": 15,
+              "aiPhraseDetection": 15
+            }
+          }
+        ],
+        "browniePoints": null,
+        "keptInMind": [],
+        "keptInMindSources": []
+      },
+      "attempts": 1,
+      "httpStatus": 200
+    }
+  ],
+  "evaluationEligible": true,
+  "notForScoring": false,
+  "completionValidation": {
+    "ok": true,
+    "reasons": []
+  }
+}

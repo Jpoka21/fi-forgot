@@ -1,8 +1,2 @@
-# Transient generation outputs — commit completed corpus/scores only after PASS review.
-CORPUS.json
-CORPUS.md
+# Keep BLOCKER.md local only. Completed FAIL evaluation evidence is committed.
 BLOCKER.md
-SCORES_V2.csv
-SCORING_AGGREGATES.json
-PILOT_FINDINGS_V2.md
-V1_V2_COMPARISON.md

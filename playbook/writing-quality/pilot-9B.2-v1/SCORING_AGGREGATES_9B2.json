@@ -1,0 +1,429 @@
+{
+  "verify": {
+    "status": "complete",
+    "evaluationEligible": true,
+    "notForScoring": false,
+    "productionImplementationCommit": "0d47a18163c52a5c9f8773c86ccc3414c24b2e47",
+    "harnessCommit": "f4493899a8016df98b7a8277c3972a18528f9124",
+    "n": 20,
+    "ok": 20,
+    "attemptsUnique": [
+      1
+    ],
+    "oneCardEach": true,
+    "scenarioIds": [
+      "G01",
+      "G02",
+      "G03",
+      "G04",
+      "G05",
+      "G06",
+      "G07",
+      "G08",
+      "G09",
+      "G10",
+      "G11",
+      "G12",
+      "G13",
+      "G14",
+      "G15",
+      "G16",
+      "G17",
+      "G18",
+      "G19",
+      "G20"
+    ]
+  },
+  "baseline_9B1_v2": {
+    "mean": 4.43,
+    "median": 4.59,
+    "hf_any": 0,
+    "send_rate": 0.95,
+    "send_yes": 19,
+    "guest": 4.36,
+    "authenticated_body": 4.61
+  },
+  "overall": {
+    "mean": 4.419298245614035,
+    "median": 4.5131578947368425,
+    "send_rate": 0.95,
+    "send_yes": 19,
+    "send_no": 1,
+    "hf_any": 0
+  },
+  "dimAvgs": [
+    4.55,
+    4.35,
+    3.9,
+    4.45,
+    4.6,
+    3.9,
+    4.75,
+    4.85,
+    4.85,
+    4.6,
+    4.35,
+    4.85,
+    4.909090909090909,
+    4.4,
+    4.05,
+    5,
+    3.9,
+    4.4,
+    4.15,
+    4.45
+  ],
+  "byFlow": {
+    "guest": 4.353801169590644,
+    "authenticated_body": 4.572124756335283
+  },
+  "byOcc": {
+    "Thank You": 4.19,
+    "Birthday": 4.31,
+    "Anniversary": 4.82,
+    "Holiday": 4.72,
+    "Sympathy": 4.78,
+    "Congratulations": 4.57,
+    "Apology": 4.82,
+    "Just Because": 4.22,
+    "Thinking Of You": 3.28,
+    "Get Well": 4.22,
+    "Graduation": 4.89
+  },
+  "byRel": {
+    "Mom": 4.08,
+    "Friend": 4.58,
+    "Wife": 4.89,
+    "Dad": 4.49,
+    "Son": 4.63,
+    "Husband": 4.79,
+    "Daughter": 4.56,
+    "Grandparent": 3.28,
+    "Coworker": 4.03,
+    "Boss": 4.5,
+    "Teacher": 4.89,
+    "Sister": 4.5
+  },
+  "strongest": [
+    {
+      "id": "G04",
+      "mean": 4.89
+    },
+    {
+      "id": "G13",
+      "mean": 4.89
+    },
+    {
+      "id": "G19",
+      "mean": 4.89
+    },
+    {
+      "id": "G08",
+      "mean": 4.84
+    },
+    {
+      "id": "G20",
+      "mean": 4.79
+    }
+  ],
+  "weakest": [
+    {
+      "id": "G02",
+      "mean": 3.28,
+      "send": "Yes"
+    },
+    {
+      "id": "G10",
+      "mean": 3.28,
+      "send": "Yes"
+    },
+    {
+      "id": "G11",
+      "mean": 3.83,
+      "send": "No"
+    },
+    {
+      "id": "G03",
+      "mean": 4.16,
+      "send": "Yes"
+    },
+    {
+      "id": "G09",
+      "mean": 4.22,
+      "send": "Yes"
+    }
+  ],
+  "tags": [
+    [
+      "Q-DEED-EARLY",
+      17
+    ],
+    [
+      "Q-EARNED-CLOSE",
+      14
+    ],
+    [
+      "Q-REGISTER-TIGHT",
+      14
+    ],
+    [
+      "Q-SUPPORT-AS-COLOR",
+      11
+    ],
+    [
+      "Q-HONEST-SPARSE",
+      8
+    ],
+    [
+      "Q-SPOKEN-RHYTHM",
+      8
+    ],
+    [
+      "P-UNIFORM-SENTENCES",
+      2
+    ],
+    [
+      "Q-HUMOR-LANDS",
+      2
+    ]
+  ],
+  "deltas_v2_9b2": [
+    {
+      "id": "G01",
+      "v2": 4.42,
+      "b9": 4.42,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G02",
+      "v2": 3.28,
+      "b9": 3.28,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G03",
+      "v2": 4.16,
+      "b9": 4.16,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G04",
+      "v2": 4.89,
+      "b9": 4.89,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G05",
+      "v2": 4.72,
+      "b9": 4.72,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G06",
+      "v2": 4.78,
+      "b9": 4.78,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G07",
+      "v2": 4.79,
+      "b9": 4.63,
+      "delta": -0.16,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G08",
+      "v2": 4.84,
+      "b9": 4.84,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G09",
+      "v2": 4.22,
+      "b9": 4.22,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G10",
+      "v2": 3.28,
+      "b9": 3.28,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G11",
+      "v2": 3.56,
+      "b9": 3.83,
+      "delta": 0.27,
+      "send_v2": "No",
+      "send_9b2": "No"
+    },
+    {
+      "id": "G12",
+      "v2": 4.5,
+      "b9": 4.5,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G13",
+      "v2": 4.95,
+      "b9": 4.89,
+      "delta": -0.06,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G14",
+      "v2": 4.65,
+      "b9": 4.5,
+      "delta": -0.15,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G15",
+      "v2": 4.26,
+      "b9": 4.26,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G16",
+      "v2": 4.53,
+      "b9": 4.53,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G17",
+      "v2": 4.89,
+      "b9": 4.74,
+      "delta": -0.15,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G18",
+      "v2": 4.22,
+      "b9": 4.22,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G19",
+      "v2": 4.95,
+      "b9": 4.89,
+      "delta": -0.06,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    },
+    {
+      "id": "G20",
+      "v2": 4.79,
+      "b9": 4.79,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_9b2": "Yes"
+    }
+  ],
+  "g11": {
+    "soft_mean": 3.83,
+    "send_yes": "No",
+    "tags": "Q-DEED-EARLY,Q-REGISTER-TIGHT,P-UNIFORM-SENTENCES",
+    "lost_P_UNIFORM_SENTENCES": false,
+    "dims": {
+      "opening": 4,
+      "closing": 3,
+      "emotion_prog": 3,
+      "naturalness": 4,
+      "authenticity": 4,
+      "rhythm": 4,
+      "voice": 4,
+      "occasion": 5,
+      "relationship": 5,
+      "tone": 4,
+      "emotional_level": 4,
+      "primary_clarity": 5,
+      "support_use": "N/A",
+      "specificity": 4,
+      "warmth": 3,
+      "humor": "N/A",
+      "memorability": 3,
+      "read_aloud": 4,
+      "anti_ai": 3,
+      "send_readiness": 3
+    }
+  },
+  "protected": {
+    "G13": {
+      "v2": 4.95,
+      "b9": 4.89,
+      "send": "Yes",
+      "warmth": 5,
+      "support_use": 5,
+      "send_readiness": 5,
+      "result": "HOLD soft (−0.06)"
+    },
+    "G07": {
+      "v2": 4.79,
+      "b9": 4.63,
+      "send": "Yes",
+      "result": "SOFT DIP (−0.16); thinner close"
+    },
+    "G04": {
+      "v2": 4.89,
+      "b9": 4.89,
+      "send": "Yes",
+      "result": "HOLD"
+    },
+    "G17": {
+      "v2": 4.89,
+      "b9": 4.74,
+      "send": "Yes",
+      "result": "SOFT DIP (−0.15); fries color lost"
+    },
+    "G16": {
+      "v2": 4.53,
+      "b9": 4.53,
+      "send": "Yes",
+      "result": "HOLD send Yes"
+    }
+  },
+  "p_ai_claims": 0,
+  "determination": "FAIL",
+  "acceptance": {
+    "g11_send_yes": false,
+    "g11_lost_P_UNIFORM": false,
+    "hf_zero": true,
+    "protect_hold_all": false,
+    "g16_send_yes": true,
+    "p_ai_claims_zero": true,
+    "no_material_new_regression": false
+  },
+  "recommend_accept_9B2": false,
+  "recommend_make_permanent": false,
+  "further_tuning_justified": true
+}
