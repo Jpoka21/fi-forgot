@@ -15,7 +15,9 @@ import {
   buildPrimaryContentPriorityBlock,
   buildPrimaryReasonRule,
   buildPrimarySubjectOutputContract,
+  buildProfessionalThankYouAntiStackBrief,
   formatMainObjectiveLine,
+  isProfessionalThankYouOccasion,
 } from "./v2GenerateCardContextLines";
 import {
   buildRefineSystemPrompt,
@@ -425,16 +427,21 @@ function buildUserPrompt(
     ? `\nWhat we know about ${firstName}:\n${bodyContext}${bodyContext && contextSupplement ? "\n" : ""}${contextSupplement ?? ""}\n`
     : "";
 
+  const isPro = PROFESSIONAL_RELS.includes(rel);
+  const isProThankYou = isProfessionalThankYouOccasion(isPro, occasion);
+
   const emotional = emotionalOpenness.toLowerCase();
+  // Sprint 9B.2: on professional Thank You, "little appreciation" must not demand a second thank synonym.
   const emotionGuide =
     emotional.includes("just funny")        ? "Keep emotion to zero — pure humor." :
+    isProThankYou && emotional.includes("little appreciation")
+      ? "After one clear thank for the deed, add one genuine practical-effect or enabled-outcome line — not a second gratitude synonym. Keep warmth." :
     emotional.includes("little appreciation") ? "Add just one genuine line of appreciation at the very end." :
     emotional.includes("not mushy")          ? "Be meaningful but keep it grounded — no over-the-top sentiment." :
     emotional.includes("heartfelt")          ? "Go clearly heartfelt — let the real feeling show." :
     emotional.includes("deep")               ? "Go deep and emotional — this is the full version." :
     "Be genuine but not excessive.";
 
-  const isPro = PROFESSIONAL_RELS.includes(rel);
   const hasContext = !!(bodyContext || contextSupplement);
   const hasContextSupplement = !!contextSupplement?.trim();
 
@@ -469,6 +476,10 @@ ${buildPrimaryReasonRule(hasSupport)}
     ? buildPrimarySubjectOutputContract(primaryOccasionContext, details)
     : "";
 
+  const proThankYouRhythm = isProThankYou
+    ? `\n${buildProfessionalThankYouAntiStackBrief(hasSupport, signOff)}\n`
+    : "";
+
   return `Write one ${occasion} card for ${firstName} (${relationship}).
 ${context}
 Occasion: ${occasion}
@@ -476,7 +487,7 @@ ${objectiveLine}Requested tone: ${tone}
 Emotional level: ${emotionGuide}
 ${primaryBlocks}
 CARD BRIEF: ${polishGuide}
-
+${proThankYouRhythm}
 ${densityBlock}
 ${authRules}${!hasContext ? `
 LOW-CONTEXT CONSTRAINT — no context was provided for this person. These phrases are banned. Using any one of them is an automatic failure:

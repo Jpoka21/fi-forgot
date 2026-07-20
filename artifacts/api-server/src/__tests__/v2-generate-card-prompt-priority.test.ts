@@ -16,7 +16,9 @@ import {
   buildPrimaryContentPriorityBlock,
   buildPrimaryReasonRule,
   buildPrimarySubjectOutputContract,
+  buildProfessionalThankYouAntiStackBrief,
   formatMainObjectiveLine,
+  isProfessionalThankYouOccasion,
 } from "../routes/v2GenerateCardContextLines.js";
 
 const TEST_DIR = dirname(fileURLToPath(import.meta.url));
@@ -522,6 +524,151 @@ section("9B.1 closing discipline — earned concrete endings");
   expectTrue(
     "primary centering language still present",
     ROUTE_SOURCE.includes("Center the primary reason"),
+  );
+}
+
+section("9B.2 professional Thank You anti gratitude-stack");
+{
+  const MARKER = "PROFESSIONAL THANK-YOU RHYTHM (anti gratitude-stack)";
+
+  // G11-shaped: Coworker (canonical isPro) + Thank You + primary only + Thanks again sign-off
+  expectTrue(
+    "G11-shaped gate matches (isPro + Thank You)",
+    isProfessionalThankYouOccasion(true, "Thank You") === true,
+  );
+  const g11Brief = buildProfessionalThankYouAntiStackBrief(
+    false,
+    "Thanks again — Taylor",
+  );
+  expectTrue("G11-shaped brief includes anti-stack marker", g11Brief.includes(MARKER));
+  expectTrue(
+    "G11-shaped brief allows one clear thank",
+    g11Brief.includes("Thank the recipient once for the specific deed"),
+  );
+  expectTrue(
+    "G11-shaped brief bans appreciation synonym stack",
+    g11Brief.includes("I really appreciate") &&
+      g11Brief.includes("I am grateful") &&
+      g11Brief.includes("thank you again") &&
+      g11Brief.includes("thanks again"),
+  );
+  expectTrue(
+    "G11-shaped brief requires deed → effect → sign-off shape",
+    g11Brief.includes("specific deed acknowledgment") &&
+      g11Brief.includes("practical effect"),
+  );
+  expectTrue(
+    "G11-shaped brief warns when sign-off already thanks",
+    g11Brief.includes("sign-off already contains thank"),
+  );
+  expectTrue(
+    "G11-shaped brief forbids inventing support for variety",
+    g11Brief.includes("Do not invent supporting facts or extra history"),
+  );
+  expectTrue(
+    "route gates via canonical isPro (PROFESSIONAL_RELS) then isProfessionalThankYouOccasion(isPro, occasion); no duplicate membership list",
+    ROUTE_SOURCE.includes('const PROFESSIONAL_RELS = ["coworker","employee","boss","client","teacher","coach"]') &&
+      ROUTE_SOURCE.includes("const isPro = PROFESSIONAL_RELS.includes(rel)") &&
+      ROUTE_SOURCE.includes("isProfessionalThankYouOccasion(isPro, occasion)") &&
+      !HELPER_SOURCE.includes("PROFESSIONAL_THANK_YOU_RELS"),
+  );
+  expectTrue(
+    "route inserts buildProfessionalThankYouAntiStackBrief when gated",
+    ROUTE_SOURCE.includes("buildProfessionalThankYouAntiStackBrief(hasSupport, signOff)"),
+  );
+  expectTrue(
+    "route specializes little-appreciation emotionGuide for pro Thank You",
+    ROUTE_SOURCE.includes(
+      "After one clear thank for the deed, add one genuine practical-effect or enabled-outcome line",
+    ),
+  );
+
+  // G04-shaped: Wife (not pro) + Anniversary — rule absent
+  expectTrue(
+    "G04-shaped gate absent (not pro + Anniversary)",
+    isProfessionalThankYouOccasion(false, "Anniversary") === false,
+  );
+
+  // G07-shaped: Son + Congratulations — rule absent
+  expectTrue(
+    "G07-shaped gate absent (not pro + Congratulations)",
+    isProfessionalThankYouOccasion(false, "Congratulations") === false,
+  );
+
+  // G16-shaped: Mom + Thank You — personal, rule absent
+  expectTrue(
+    "G16-shaped gate absent (not pro + Thank You)",
+    isProfessionalThankYouOccasion(false, "Thank You") === false,
+  );
+
+  // G13-shaped: Teacher (isPro) + Thank You + support — rule present but must protect support/warmth
+  expectTrue(
+    "G13-shaped gate matches (isPro + Thank You)",
+    isProfessionalThankYouOccasion(true, "Thank You") === true,
+  );
+  const g13Brief = buildProfessionalThankYouAntiStackBrief(
+    true,
+    "Grateful — The Park family",
+  );
+  expectTrue("G13-shaped brief still has anti-stack marker", g13Brief.includes(MARKER));
+  expectTrue(
+    "G13-shaped brief retains support proof/color/warmth guidance",
+    g13Brief.includes("keep its brief recognizable proof, color, and warmth") &&
+      g13Brief.includes("does not remove supporting detail") &&
+      g13Brief.includes("does not require shortening a rich card into a sterile note"),
+  );
+  expectTrue(
+    "G13-shaped brief still preserves exact sign-off",
+    g13Brief.includes("Preserve the exact required sign-off"),
+  );
+  expectTrue(
+    "8G support retention still present alongside 9B.2",
+    HELPER_SOURCE.includes("SUPPLIED_SUPPORT_BEHAVIOR_RULE") ||
+      ROUTE_SOURCE.includes(
+        "Normally include one brief recognizable callback to the supplied supporting detail",
+      ),
+  );
+
+  // G12 / G18-shaped: professional but not Thank You — rule absent
+  expectTrue(
+    "G12-shaped gate absent (isPro + Congratulations)",
+    isProfessionalThankYouOccasion(true, "Congratulations") === false,
+  );
+  expectTrue(
+    "G18-shaped gate absent (isPro + Get Well)",
+    isProfessionalThankYouOccasion(true, "Get Well") === false,
+  );
+
+  // G17 partner anniversary — absent
+  expectTrue(
+    "G17-shaped gate absent (not pro + Anniversary)",
+    isProfessionalThankYouOccasion(false, "Anniversary") === false,
+  );
+
+  // Preserve prior contracts (closing / primary / support / tokens / diagnostics)
+  expectTrue(
+    "9B.1 closing discipline text unchanged",
+    ROUTE_SOURCE.includes(
+      "one short final thought that grows directly from that deed, occasion, or supplied detail",
+    ) && !ROUTE_SOURCE.includes("I just want you to know I see it"),
+  );
+  expectTrue(
+    "primary subject enforcement helpers still imported/used",
+    ROUTE_SOURCE.includes("buildPrimarySubjectOutputContract") &&
+      ROUTE_SOURCE.includes("buildPrimaryReasonRule"),
+  );
+  expectTrue(
+    "support retention language still present",
+    HELPER_SOURCE.includes("SUPPLIED_SUPPORT_BEHAVIOR_RULE"),
+  );
+  expectTrue(
+    "token budget generate path still present in route",
+    ROUTE_SOURCE.includes("max_completion_tokens"),
+  );
+  expectTrue(
+    "parseFailureDiagnostic still present",
+    ROUTE_SOURCE.includes("parseFailureDiagnostic") ||
+      ROUTE_SOURCE.includes("buildGenerateCardParseFailureDiagnostic"),
   );
 }
 
