@@ -245,50 +245,6 @@ export function formatMainObjectiveLine(
 }
 
 /**
- * Sprint 9B.2 gate: professional relationship + Thank You occasion only.
- * `isPro` must come from the canonical PROFESSIONAL_RELS check in v2-generate-card
- * (single source — no duplicate membership list here).
- */
-export function isProfessionalThankYouOccasion(
-  isPro: boolean,
-  occasion: string,
-): boolean {
-  return isPro && occasion.toLowerCase() === "thank you";
-}
-
-/**
- * Sprint 9B.2 — anti gratitude-stack brief for professional Thank You cards.
- * One clear thank for the deed is allowed; stacked thank synonyms are not.
- * When support is supplied, retain proof/color/warmth (protect G13).
- */
-export function buildProfessionalThankYouAntiStackBrief(
-  hasSupport: boolean,
-  signOff?: string | null,
-): string {
-  const signOffText = signOff?.trim() ?? "";
-  const signOffAlreadyThanks = /\b(thank|thanks|appreciate|grateful)\b/i.test(
-    signOffText,
-  );
-
-  const signOffGuidance = signOffAlreadyThanks
-    ? `The required sign-off already contains thank / thanks / appreciate / grateful language — do not add another gratitude restatement in the body immediately before it. Preserve the exact required sign-off unchanged.`
-    : `Preserve the exact required sign-off unchanged.`;
-
-  const supportGuidance = hasSupport
-    ? `A supporting detail was supplied — keep its brief recognizable proof, color, and warmth. This rule forbids stacking gratitude synonyms; it does not remove supporting detail, storytelling, or heartfelt professional warmth, and it does not require shortening a rich card into a sterile note.`
-    : `Do not invent supporting facts or extra history to create sentence variety.`;
-
-  return `PROFESSIONAL THANK-YOU RHYTHM (anti gratitude-stack):
-Thank the recipient once for the specific deed — that first gratitude expression is allowed and expected.
-After that first gratitude expression, do not restate the same gratitude using phrases such as "I really appreciate", "I am grateful", "thank you again", or "thanks again".
-Shape the body as: specific deed acknowledgment → practical effect, what the deed enabled, or the burden they took on → exact sign-off.
-Avoid: thank → appreciation synonym → thanks-again close.
-${signOffGuidance}
-${supportGuidance}
-Do not suppress the primary deed. Do not make the card cold, abrupt, or purely transactional.`;
-}
-
-/**
  * Soft fixture helper for Sprint 8G tests — flags drafts that omit support
  * while relying only on a generic battery-style joke (not a model runtime gate).
  */
