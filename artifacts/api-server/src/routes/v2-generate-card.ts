@@ -25,6 +25,7 @@ import {
   normalizeRefineGrounding,
   type RefineGroundingContext,
 } from "./v2RefineCardGrounding";
+import { applyProfessionalThankYouPostProcess } from "./v2ProfessionalThankYouPostProcess";
 
 const router = Router();
 
@@ -981,12 +982,34 @@ router.post("/v2/generate-card", async (req, res) => {
       contextSupplement ?? "",
     ].filter(Boolean).join(" ");
 
+    const relLower = relationship.toLowerCase();
+    const isProThankYou = isProfessionalThankYouOccasion(
+      PROFESSIONAL_RELS.includes(relLower),
+      occasion,
+    );
+
     const filteredCards = singleCard.map(card => {
-      const { text, strippedSentences } = stripFabricatedCharacterAdjectives(card.text, rawContextText, firstName);
+      const { text: strippedText, strippedSentences } = stripFabricatedCharacterAdjectives(
+        card.text,
+        rawContextText,
+        firstName,
+      );
       if (strippedSentences.length > 0) {
         logger.info({ tone: card.tone, strippedSentences }, "v2-generate-card: stripped fabricated character adjectives");
       }
-      return { ...card, text };
+
+      const postProcessed = applyProfessionalThankYouPostProcess(strippedText, {
+        isProThankYou,
+        signOff,
+      });
+      if (postProcessed.removedSentence) {
+        logger.info(
+          { tone: card.tone, removedSentence: postProcessed.removedSentence },
+          "v2-generate-card: stripped professional thank-you gratitude stack",
+        );
+      }
+
+      return { ...card, text: postProcessed.text };
     });
 
     // ── Quality scoring ────────────────────────────────────────────────────

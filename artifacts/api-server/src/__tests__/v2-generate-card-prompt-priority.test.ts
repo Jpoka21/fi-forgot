@@ -657,6 +657,40 @@ section("9B.2 attempt 2 — professional Thank You body / sign-off boundary");
   );
 }
 
+section("9B.2 attempt 3 — professional Thank You post-process wiring");
+{
+  const POST_SOURCE = readFileSync(
+    join(TEST_DIR, "../routes/v2ProfessionalThankYouPostProcess.ts"),
+    "utf8",
+  );
+
+  expectTrue(
+    "route imports applyProfessionalThankYouPostProcess",
+    ROUTE_SOURCE.includes("applyProfessionalThankYouPostProcess"),
+  );
+  expectTrue(
+    "route calls post-process after stripFabricatedCharacterAdjectives",
+    ROUTE_SOURCE.includes("const postProcessed = applyProfessionalThankYouPostProcess(strippedText") &&
+      ROUTE_SOURCE.includes("stripFabricatedCharacterAdjectives"),
+  );
+  expectTrue(
+    "post-process module exports stripProfessionalThankYouGratitudeStack",
+    POST_SOURCE.includes("export function stripProfessionalThankYouGratitudeStack"),
+  );
+  expectTrue(
+    "post-process skips when isProThankYou false",
+    POST_SOURCE.includes("if (!opts.isProThankYou)"),
+  );
+  expectTrue(
+    "post-process fail-safe when sign-off not found",
+    POST_SOURCE.includes("if (!split) return unchanged(cardText)"),
+  );
+  expectTrue(
+    "post-process never invents replacement text",
+    !POST_SOURCE.includes("openai") && !POST_SOURCE.match(/replace.*with/i),
+  );
+}
+
 section("compatibility and ownership");
 {
   expectTrue("8A packing unchanged — has primaryOccasionContext", PACK_SOURCE.includes("primaryOccasionContext"));
