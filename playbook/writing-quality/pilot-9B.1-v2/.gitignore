@@ -1,0 +1,8 @@
+# Generated Framework V2 artifacts — do not commit unfinished corpora.
+CORPUS.json
+CORPUS.md
+BLOCKER.md
+SCORES_V2.csv
+SCORING_AGGREGATES.json
+PILOT_FINDINGS_V2.md
+V1_V2_COMPARISON.md
