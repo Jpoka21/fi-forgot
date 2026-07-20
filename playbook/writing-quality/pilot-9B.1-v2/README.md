@@ -54,10 +54,16 @@ node playbook/writing-quality/pilot-9B.1-v2/run-pilot.mjs
 
 Blocked / partial outputs set `notForScoring: true` and must not be scored.
 
-## Outputs (local / Replit only — do not commit until reviewed)
+## Framework V2 results (Sprint 9B.1 closed — PASS)
+
+Committed evaluation artifacts (do not regenerate or rescore for 9B.1 closure):
 
 - `CORPUS.json` / `CORPUS.md`
-- `BLOCKER.md` when blocked/partial
-- later: `SCORES_V2.csv`, `SCORING_AGGREGATES.json`, `PILOT_FINDINGS_V2.md`, `V1_V2_COMPARISON.md`
+- `SCORES_V2.csv`
+- `SCORING_AGGREGATES.json`
+- `PILOT_FINDINGS_V2.md`
+- `V1_V2_COMPARISON.md`
 
-Never writes into `playbook/writing-quality/pilot-9A.2/`.
+`BLOCKER.md` is gitignored (transient only). Never writes into `playbook/writing-quality/pilot-9A.2/`.
+
+**Sprint 9B.1 officially closed as PASS.** Sprint 9B.2 may begin after this closure is on `frontend-rebuild` (professional thank-you rhythm / `P-UNIFORM-SENTENCES`, especially G11 — no further 9B.1 closing-prompt tuning).
