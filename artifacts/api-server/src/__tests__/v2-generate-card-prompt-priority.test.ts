@@ -510,6 +510,13 @@ section("9B.1 closing discipline — earned concrete endings");
     ROUTE_SOURCE.includes("Prefer one clean ending beat over an escalating final paragraph"),
   );
   expectTrue(
+    "closing treats final two sentences as one movement without pre-final character thesis",
+    ROUTE_SOURCE.includes("Treat the final two sentences as one closing movement") &&
+      ROUTE_SOURCE.includes("sentence immediately before the last line") &&
+      ROUTE_SOURCE.includes("personality interpretation") &&
+      ROUTE_SOURCE.includes("what this says about you"),
+  );
+  expectTrue(
     "closing still forbids legacy generic-wish endings",
     ROUTE_SOURCE.includes('Do NOT end with: "Have a great day"'),
   );
