@@ -7,13 +7,16 @@
  *   $env:PILOT_BASE_URL = "http://127.0.0.1:PORT"   # optional
  *   node playbook/writing-quality/pilot-9B.1/run-panel.mjs
  *   node playbook/writing-quality/pilot-9B.1/run-panel.mjs --self-check
+ *   node playbook/writing-quality/pilot-9B.1/run-panel.mjs --ids=G16,G19,G04,G17 --out-dir=... --corpus-prefix=pilot-9B.1A-panel
  *
  * Semantics:
- *   - Panel only: G08, G16, G19, G13, G07, G04, G17
+ *   - Default panel: G08, G16, G19, G13, G07, G04, G17
+ *   - Optional --ids= filters to an explicit subset (frozen golden requests only)
  *   - Exactly one HTTP request per scenario (no retries)
  *   - Exactly one first-returned card per successful scenario
  *   - No Rewrite / New Version / cherry-pick / regeneration after success
- *   - Writes only under pilot-9B.1/ — never touches pilot-9A.2/
+ *   - Default writes under pilot-9B.1/; --out-dir redirects corpus output
+ *   - Never touches pilot-9A.2/
  *
  * Response contract (must match Sprint 9A.2 known-good / route tests):
  *   HTTP 200 JSON: { cards: [{ tone, text, ... }], ... }
@@ -32,12 +35,63 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../../..");
 const goldenPath = path.join(root, "playbook", "writing-quality", "GOLDEN_SCENARIO_SET_V1.json");
-const outDir = __dirname;
 const ENDPOINT = "/api/v2/generate-card";
 
-const PANEL_IDS = ["G08", "G16", "G19", "G13", "G07", "G04", "G17"];
+const DEFAULT_PANEL_IDS = ["G08", "G16", "G19", "G13", "G07", "G04", "G17"];
 const TARGET_IDS = new Set(["G08", "G16", "G19"]);
 const PROTECT_IDS = new Set(["G13", "G07", "G04", "G17"]);
+
+/** Parse optional CLI flags; defaults preserve the original seven-scenario 9B.1 panel. */
+export function parsePanelCliArgs(argv = process.argv.slice(2)) {
+  let ids = null;
+  let outDir = __dirname;
+  let corpusPrefix = "pilot-9B.1-panel";
+  let title = "Sprint 9B.1 Evaluation Panel";
+  let writingContractNote =
+    "Requires api-server built/running from sprint-9b1-evaluation with Sprint 9B.1 closing discipline.";
+  let selfCheck = false;
+
+  for (const arg of argv) {
+    if (arg === "--self-check") {
+      selfCheck = true;
+      continue;
+    }
+    if (arg.startsWith("--ids=")) {
+      ids = arg
+        .slice("--ids=".length)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      continue;
+    }
+    if (arg.startsWith("--out-dir=")) {
+      outDir = path.resolve(arg.slice("--out-dir=".length));
+      continue;
+    }
+    if (arg.startsWith("--corpus-prefix=")) {
+      corpusPrefix = arg.slice("--corpus-prefix=".length).trim() || corpusPrefix;
+      continue;
+    }
+    if (arg.startsWith("--title=")) {
+      title = arg.slice("--title=".length).trim() || title;
+      continue;
+    }
+    if (arg.startsWith("--writing-note=")) {
+      writingContractNote = arg.slice("--writing-note=".length).trim() || writingContractNote;
+      continue;
+    }
+    throw new Error(`Unknown panel runner argument: ${arg}`);
+  }
+
+  return {
+    selfCheck,
+    panelIds: ids && ids.length > 0 ? ids : [...DEFAULT_PANEL_IDS],
+    outDir,
+    corpusPrefix,
+    title,
+    writingContractNote,
+  };
+}
 
 /** Known-good one-card body shape from frozen Sprint 9A.2 CORPUS.json (G01 raw). */
 const KNOWN_GOOD_GENERATE_CARD_BODY = {
@@ -371,12 +425,13 @@ async function postOnce(base, body) {
 
 function toMd(corpus) {
   const lines = [
-    `# Sprint 9B.1 Evaluation Panel`,
+    `# ${corpus.title || "Sprint 9B.1 Evaluation Panel"}`,
     ``,
     `- corpusId: ${corpus.corpusId}`,
     `- generatedAt: ${corpus.generatedAt}`,
     `- baseUrl: ${corpus.baseUrl || "(none)"}`,
     `- status: ${corpus.status}`,
+    `- panelIds: ${(corpus.panelIds || []).join(", ")}`,
     `- succeeded: ${corpus.scenarios.filter((s) => s.ok).length} / ${corpus.scenarios.length}`,
     `- failed: ${corpus.scenarios.filter((s) => !s.ok).map((s) => s.id).join(", ") || "(none)"}`,
     `- semantics: one request per scenario, no retries, one first-returned card`,
@@ -414,7 +469,10 @@ function toMd(corpus) {
 }
 
 async function main() {
-  if (process.argv.includes("--self-check")) {
+  const cli = parsePanelCliArgs();
+  const { panelIds, outDir, corpusPrefix, title, writingContractNote } = cli;
+
+  if (cli.selfCheck) {
     runSelfCheck();
     return;
   }
@@ -422,15 +480,19 @@ async function main() {
   // Always run parser self-check before live generation.
   if (!runSelfCheck()) return;
 
+  fs.mkdirSync(outDir, { recursive: true });
+
   const keyPresent = Boolean(
     process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   );
   console.log("Key present in this runner process:", keyPresent);
-  console.log("(api-server process must also have the key and load the 9B.1 closing prompt)");
+  console.log("(api-server process must also have the key and load the evaluation closing prompt)");
+  console.log("Panel IDs:", panelIds.join(", "));
+  console.log("Output dir:", outDir);
 
   const golden = JSON.parse(fs.readFileSync(goldenPath, "utf8"));
   const date = yyyymmdd();
-  const selected = PANEL_IDS.map((id) => {
+  const selected = panelIds.map((id) => {
     const s = golden.scenarios.find((x) => x.id === id);
     if (!s) throw new Error(`Missing golden scenario ${id}`);
     return s;
@@ -439,17 +501,18 @@ async function main() {
   const base = await probeBase();
   if (!base) {
     const blocker =
-      "BLOCKER: No reachable server for POST /api/v2/generate-card on PILOT_BASE_URL or ports 3000/5000/8080. Cannot generate Sprint 9B.1 panel.";
+      "BLOCKER: No reachable server for POST /api/v2/generate-card on PILOT_BASE_URL or ports 3000/5000/8080. Cannot generate evaluation panel.";
     console.error(blocker);
     process.exitCode = 2;
     const corpus = {
-      corpusId: `pilot-9B.1-panel-${date}`,
+      corpusId: `${corpusPrefix}-${date}`,
+      title,
       generatedAt: new Date().toISOString(),
       status: "blocked",
       blocker,
-      panelIds: PANEL_IDS,
-      targetIds: [...TARGET_IDS],
-      protectIds: [...PROTECT_IDS],
+      panelIds,
+      targetIds: panelIds.filter((id) => TARGET_IDS.has(id)),
+      protectIds: panelIds.filter((id) => PROTECT_IDS.has(id)),
       semantics: {
         oneRequestPerScenario: true,
         retries: 0,
@@ -458,6 +521,7 @@ async function main() {
         noNewVersion: true,
         noCherryPick: true,
       },
+      writingContractNote,
       scenarios: selected.map((s) => ({
         id: s.id,
         title: s.title,
@@ -528,13 +592,14 @@ async function main() {
 
   const okCount = results.filter((r) => r.ok).length;
   const corpus = {
-    corpusId: `pilot-9B.1-panel-${date}`,
+    corpusId: `${corpusPrefix}-${date}`,
+    title,
     generatedAt: new Date().toISOString(),
     status: okCount === results.length ? "complete" : "partial",
     baseUrl: base,
-    panelIds: PANEL_IDS,
-    targetIds: [...TARGET_IDS],
-    protectIds: [...PROTECT_IDS],
+    panelIds,
+    targetIds: panelIds.filter((id) => TARGET_IDS.has(id)),
+    protectIds: panelIds.filter((id) => PROTECT_IDS.has(id)),
     semantics: {
       oneRequestPerScenario: true,
       retries: 0,
@@ -543,7 +608,7 @@ async function main() {
       noNewVersion: true,
       noCherryPick: true,
     },
-    writingContractNote: "Requires api-server built/running from sprint-9b1-evaluation with Sprint 9B.1 closing discipline.",
+    writingContractNote,
     responseContractNote:
       "Expects HTTP 200 { cards:[{ tone, text }] } (Sprint 8E / 9A.2). Route 500 { error: 'Failed to parse card response' } is a route/model failure, not a harness shape mismatch.",
     scenarios: results,
@@ -565,10 +630,14 @@ async function main() {
     fs.unlinkSync(path.join(outDir, "BLOCKER.md"));
   }
 
-  console.log(`Done: ${okCount}/${results.length}. Wrote CORPUS.json / CORPUS.md under pilot-9B.1/`);
+  console.log(`Done: ${okCount}/${results.length}. Wrote CORPUS.json / CORPUS.md under ${outDir}`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
