@@ -755,6 +755,78 @@ function calcCompleteness(relAnswers: Record<string, string>, details: string): 
   return Math.min(score, 100);
 }
 
+/**
+ * Temporary Sprint 9B.1 evaluation-only parse-failure diagnostics.
+ * Log-only; never returned to clients. Truncates raw content; no secrets/prompts/IDs.
+ */
+export type GenerateCardParseBranch = "json_parse_failed" | "empty_cards";
+
+export function buildGenerateCardParseFailureDiagnostic(opts: {
+  model: string;
+  completion: {
+    choices?: Array<{
+      finish_reason?: string | null;
+      message?: {
+        content?: string | null;
+        refusal?: string | null;
+      } | null;
+    }>;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    } | null;
+  } | null | undefined;
+  raw: string;
+  parseBranch: GenerateCardParseBranch;
+  jsonErrorMessage?: string | null;
+  parsed?: unknown;
+}): Record<string, unknown> {
+  const completion = opts.completion ?? null;
+  const choices = completion?.choices ?? [];
+  const first = choices[0];
+  const refusal = first?.message?.refusal ?? null;
+  const usage = completion?.usage ?? null;
+  const raw = typeof opts.raw === "string" ? opts.raw : "";
+  const headLen = Math.min(200, raw.length);
+  const tailLen = Math.min(200, raw.length);
+  const rawHead = raw.slice(0, headLen);
+  const rawTail = raw.length <= 200 ? raw : raw.slice(-tailLen);
+
+  let parsedTopLevelKeys: string[] | null = null;
+  let parsedCardsExists = false;
+  let parsedCardsIsArray = false;
+  let parsedCardsLength: number | null = null;
+
+  if (opts.parsed !== undefined && opts.parsed !== null && typeof opts.parsed === "object") {
+    parsedTopLevelKeys = Object.keys(opts.parsed as object);
+    const cards = (opts.parsed as { cards?: unknown }).cards;
+    parsedCardsExists = Object.prototype.hasOwnProperty.call(opts.parsed, "cards");
+    parsedCardsIsArray = Array.isArray(cards);
+    parsedCardsLength = Array.isArray(cards) ? cards.length : null;
+  }
+
+  return {
+    model: opts.model,
+    choiceCount: choices.length,
+    finishReason: first?.finish_reason ?? null,
+    refusal: typeof refusal === "string" ? refusal.slice(0, 200) : refusal,
+    promptTokens: usage?.prompt_tokens ?? null,
+    completionTokens: usage?.completion_tokens ?? null,
+    totalTokens: usage?.total_tokens ?? null,
+    hasContent: raw.length > 0,
+    rawContentLength: raw.length,
+    rawHead,
+    rawTail,
+    parseBranch: opts.parseBranch,
+    jsonErrorMessage: opts.jsonErrorMessage ?? null,
+    parsedTopLevelKeys,
+    parsedCardsExists,
+    parsedCardsIsArray,
+    parsedCardsLength,
+  };
+}
+
 // ── Route ─────────────────────────────────────────────────────────────────────
 
 router.post("/v2/generate-card", async (req, res) => {
@@ -841,8 +913,9 @@ router.post("/v2/generate-card", async (req, res) => {
   const userPrompt = buildUserPrompt(firstName, relationship, occasion, objective, emotionalOpenness, tone, details, avoidMentioning, relAnswers, senderName, signOff, contextSupplement, primaryOccasionContext, objectiveProvided);
 
   try {
+    const GENERATE_CARD_MODEL = "gpt-5";
     const completion = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: GENERATE_CARD_MODEL,
       max_completion_tokens: 900,
       messages: [
         { role: "system", content: systemPrompt },
@@ -856,14 +929,38 @@ router.post("/v2/generate-card", async (req, res) => {
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
-    } catch {
-      logger.error({ raw }, "v2-generate-card: JSON parse failed");
+    } catch (parseErr) {
+      // Temporary Sprint 9B.1 eval diagnostics — log only; client body unchanged.
+      logger.error(
+        {
+          parseFailureDiagnostic: buildGenerateCardParseFailureDiagnostic({
+            model: GENERATE_CARD_MODEL,
+            completion,
+            raw,
+            parseBranch: "json_parse_failed",
+            jsonErrorMessage: parseErr instanceof Error ? parseErr.message : String(parseErr),
+          }),
+        },
+        "v2-generate-card: JSON parse failed",
+      );
       res.status(500).json({ error: "Failed to parse card response" });
       return;
     }
 
     if (!Array.isArray(parsed.cards) || parsed.cards.length === 0) {
-      logger.error({ raw }, "v2-generate-card: empty cards array");
+      // Temporary Sprint 9B.1 eval diagnostics — log only; client body unchanged.
+      logger.error(
+        {
+          parseFailureDiagnostic: buildGenerateCardParseFailureDiagnostic({
+            model: GENERATE_CARD_MODEL,
+            completion,
+            raw,
+            parseBranch: "empty_cards",
+            parsed,
+          }),
+        },
+        "v2-generate-card: empty cards array",
+      );
       res.status(500).json({ error: "Failed to parse card response" });
       return;
     }

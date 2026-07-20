@@ -61,6 +61,30 @@ section("response truncates to one card");
   );
 }
 
+section("9B.1 temporary parse-failure diagnostics (log-only)");
+{
+  expectTrue(
+    "diagnostic helper exported",
+    ROUTE_SOURCE.includes("buildGenerateCardParseFailureDiagnostic"),
+  );
+  expectTrue(
+    "json_parse_failed branch wired",
+    ROUTE_SOURCE.includes('parseBranch: "json_parse_failed"'),
+  );
+  expectTrue(
+    "empty_cards branch wired",
+    ROUTE_SOURCE.includes('parseBranch: "empty_cards"'),
+  );
+  expectTrue(
+    "client error body unchanged",
+    (ROUTE_SOURCE.match(/Failed to parse card response/g) || []).length >= 2,
+  );
+  expectTrue(
+    "does not return parseFailureDiagnostic to client",
+    !ROUTE_SOURCE.includes("res.status(500).json({ error: \"Failed to parse card response\", parseFailureDiagnostic"),
+  );
+}
+
 section("Sprint 8 grounding contracts retained");
 {
   expectTrue(
