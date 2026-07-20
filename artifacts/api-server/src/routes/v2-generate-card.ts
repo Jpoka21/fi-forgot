@@ -756,8 +756,8 @@ function calcCompleteness(relAnswers: Record<string, string>, details: string): 
 }
 
 /**
- * Temporary Sprint 9B.1 evaluation-only parse-failure diagnostics.
- * Log-only; never returned to clients. Truncates raw content; no secrets/prompts/IDs.
+ * Safe parse-failure diagnostics for v2 generate-card.
+ * Log-only; never returned to clients. No secrets, prompts, full output, or IDs.
  */
 export type GenerateCardParseBranch = "json_parse_failed" | "empty_cards";
 
@@ -788,10 +788,6 @@ export function buildGenerateCardParseFailureDiagnostic(opts: {
   const refusal = first?.message?.refusal ?? null;
   const usage = completion?.usage ?? null;
   const raw = typeof opts.raw === "string" ? opts.raw : "";
-  const headLen = Math.min(200, raw.length);
-  const tailLen = Math.min(200, raw.length);
-  const rawHead = raw.slice(0, headLen);
-  const rawTail = raw.length <= 200 ? raw : raw.slice(-tailLen);
 
   let parsedTopLevelKeys: string[] | null = null;
   let parsedCardsExists = false;
@@ -816,8 +812,6 @@ export function buildGenerateCardParseFailureDiagnostic(opts: {
     totalTokens: usage?.total_tokens ?? null,
     hasContent: raw.length > 0,
     rawContentLength: raw.length,
-    rawHead,
-    rawTail,
     parseBranch: opts.parseBranch,
     jsonErrorMessage: opts.jsonErrorMessage ?? null,
     parsedTopLevelKeys,
@@ -916,7 +910,7 @@ router.post("/v2/generate-card", async (req, res) => {
     const GENERATE_CARD_MODEL = "gpt-5";
     const completion = await openai.chat.completions.create({
       model: GENERATE_CARD_MODEL,
-      max_completion_tokens: 900,
+      max_completion_tokens: 8000,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -930,7 +924,7 @@ router.post("/v2/generate-card", async (req, res) => {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
     } catch (parseErr) {
-      // Temporary Sprint 9B.1 eval diagnostics — log only; client body unchanged.
+      // Safe parse-failure diagnostics — log only; client body unchanged.
       logger.error(
         {
           parseFailureDiagnostic: buildGenerateCardParseFailureDiagnostic({
@@ -948,7 +942,7 @@ router.post("/v2/generate-card", async (req, res) => {
     }
 
     if (!Array.isArray(parsed.cards) || parsed.cards.length === 0) {
-      // Temporary Sprint 9B.1 eval diagnostics — log only; client body unchanged.
+      // Safe parse-failure diagnostics — log only; client body unchanged.
       logger.error(
         {
           parseFailureDiagnostic: buildGenerateCardParseFailureDiagnostic({

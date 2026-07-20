@@ -1,5 +1,5 @@
 /**
- * Temporary Sprint 9B.1 parse-failure diagnostic helper tests.
+ * Safe parse-failure diagnostic helper tests.
  * Does not import the Express route (avoids openai/db load).
  * Mirrors buildGenerateCardParseFailureDiagnostic and asserts route wiring via source.
  *
@@ -42,10 +42,6 @@ function buildGenerateCardParseFailureDiagnostic(opts: {
   const refusal = first?.message?.refusal ?? null;
   const usage = completion?.usage ?? null;
   const raw = typeof opts.raw === "string" ? opts.raw : "";
-  const headLen = Math.min(200, raw.length);
-  const tailLen = Math.min(200, raw.length);
-  const rawHead = raw.slice(0, headLen);
-  const rawTail = raw.length <= 200 ? raw : raw.slice(-tailLen);
 
   let parsedTopLevelKeys: string[] | null = null;
   let parsedCardsExists = false;
@@ -70,8 +66,6 @@ function buildGenerateCardParseFailureDiagnostic(opts: {
     totalTokens: usage?.total_tokens ?? null,
     hasContent: raw.length > 0,
     rawContentLength: raw.length,
-    rawHead,
-    rawTail,
     parseBranch: opts.parseBranch,
     jsonErrorMessage: opts.jsonErrorMessage ?? null,
     parsedTopLevelKeys,
@@ -98,7 +92,7 @@ function section(name: string) {
   console.log(`\n${name}`);
 }
 
-section("route wires temporary parse-failure diagnostics");
+section("route wires safe parse-failure diagnostics");
 {
   expectTrue("helper present", ROUTE_SOURCE.includes("buildGenerateCardParseFailureDiagnostic"));
   expectTrue("json_parse_failed", ROUTE_SOURCE.includes('parseBranch: "json_parse_failed"'));
@@ -109,6 +103,8 @@ section("route wires temporary parse-failure diagnostics");
     "no full-raw-only error log",
     !ROUTE_SOURCE.includes('logger.error({ raw }, "v2-generate-card: JSON parse failed")'),
   );
+  expectTrue("no rawHead in route helper", !ROUTE_SOURCE.includes("rawHead"));
+  expectTrue("no rawTail in route helper", !ROUTE_SOURCE.includes("rawTail"));
 }
 
 section("json_parse_failed diagnostic construction");
@@ -139,8 +135,8 @@ section("json_parse_failed diagnostic construction");
   expectTrue("totalTokens", d.totalTokens === 30);
   expectTrue("hasContent", d.hasContent === true);
   expectTrue("rawContentLength", d.rawContentLength === long.length);
-  expectTrue("rawHead truncated to 200", (d.rawHead as string).length === 200);
-  expectTrue("rawTail truncated to 200", (d.rawTail as string).length === 200);
+  expectTrue("no rawHead field", !("rawHead" in d));
+  expectTrue("no rawTail field", !("rawTail" in d));
   expectTrue("parseBranch", d.parseBranch === "json_parse_failed");
   expectTrue("jsonErrorMessage set", d.jsonErrorMessage === "Unexpected end of JSON input");
   expectTrue("no full raw field", !("raw" in d));
