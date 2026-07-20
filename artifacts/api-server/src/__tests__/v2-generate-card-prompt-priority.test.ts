@@ -16,7 +16,10 @@ import {
   buildPrimaryContentPriorityBlock,
   buildPrimaryReasonRule,
   buildPrimarySubjectOutputContract,
+  buildProfessionalThankYouBodySignOffBoundaryBrief,
   formatMainObjectiveLine,
+  isProfessionalThankYouOccasion,
+  signOffContainsGratitudeLanguage,
 } from "../routes/v2GenerateCardContextLines.js";
 
 const TEST_DIR = dirname(fileURLToPath(import.meta.url));
@@ -522,6 +525,135 @@ section("9B.1 closing discipline — earned concrete endings");
   expectTrue(
     "primary centering language still present",
     ROUTE_SOURCE.includes("Center the primary reason"),
+  );
+}
+
+section("9B.2 attempt 2 — professional Thank You body / sign-off boundary");
+{
+  const MARKER = "HARD BODY / SIGN-OFF BOUNDARY";
+  const FINAL_SENTENCE_RULE =
+    "The final body sentence before the exact sign-off must not contain thank, thanks, appreciate, or grateful";
+  const PRACTICAL_EMOTION =
+    "After one clear thank for the deed, end the body with one genuine practical-effect or enabled-outcome line — not a second gratitude synonym. Keep warmth.";
+  const LEGACY_APPRECIATION_END =
+    "Add just one genuine line of appreciation at the very end.";
+
+  // G11-shaped: Coworker × Thank You × primary only × little appreciation × Thanks again sign-off
+  expectTrue(
+    "G11 gate on (coworker × Thank You)",
+    isProfessionalThankYouOccasion(true, "Thank You") === true,
+  );
+  expectTrue(
+    "G11 sign-off detected as gratitude-bearing",
+    signOffContainsGratitudeLanguage("Thanks again — Taylor") === true,
+  );
+  const g11Brief = buildProfessionalThankYouBodySignOffBoundaryBrief(
+    false,
+    "Thanks again — Taylor",
+  );
+  expectTrue("G11 brief includes hard boundary marker", g11Brief.includes(MARKER));
+  expectTrue(
+    "G11 brief includes hard final body sentence rule",
+    g11Brief.includes(FINAL_SENTENCE_RULE),
+  );
+  expectTrue(
+    "G11 brief allows one earlier deed thank",
+    g11Brief.includes("One clear thank for the specific deed may appear earlier in the body"),
+  );
+  expectTrue(
+    "G11 brief keeps exact sign-off mandatory",
+    g11Brief.includes("exact required sign-off unchanged"),
+  );
+  expectTrue(
+    "G11 brief forbids inventing support",
+    g11Brief.includes("do not invent support, history, cost, or burden"),
+  );
+  expectTrue(
+    "G11 brief names banned final-sentence gratitude restatements",
+    g11Brief.includes("I really appreciate it") &&
+      g11Brief.includes("I am grateful") &&
+      g11Brief.includes("thank you again") &&
+      g11Brief.includes("thanks again"),
+  );
+  expectTrue(
+    "route emotionGuide uses practical-effect branch for pro Thank You + little appreciation",
+    ROUTE_SOURCE.includes(PRACTICAL_EMOTION),
+  );
+  expectTrue(
+    "route still retains legacy appreciation-at-end string for non-pro path",
+    ROUTE_SOURCE.includes(LEGACY_APPRECIATION_END),
+  );
+  expectTrue(
+    "route practical branch is gated ahead of legacy little-appreciation branch",
+    ROUTE_SOURCE.indexOf("isProThankYou && emotional.includes(\"little appreciation\")") <
+      ROUTE_SOURCE.indexOf(LEGACY_APPRECIATION_END) &&
+      ROUTE_SOURCE.includes("isProThankYou && emotional.includes(\"little appreciation\")"),
+  );
+  expectTrue(
+    "route gates via canonical isPro then isProfessionalThankYouOccasion(isPro, occasion)",
+    ROUTE_SOURCE.includes("isProfessionalThankYouOccasion(isPro, occasion)") &&
+      !HELPER_SOURCE.includes("PROFESSIONAL_THANK_YOU_RELS") &&
+      !HELPER_SOURCE.includes('["coworker"'),
+  );
+  expectTrue(
+    "route inserts body/sign-off boundary brief when gated",
+    ROUTE_SOURCE.includes(
+      "buildProfessionalThankYouBodySignOffBoundaryBrief(hasSupport, signOff)",
+    ),
+  );
+
+  // G13-shaped: Teacher × Thank You × support × Grateful sign-off
+  expectTrue(
+    "G13 gate on (teacher is pro × Thank You)",
+    isProfessionalThankYouOccasion(true, "Thank You") === true,
+  );
+  expectTrue(
+    "G13 sign-off detected as gratitude-bearing",
+    signOffContainsGratitudeLanguage("Grateful — The Park family") === true,
+  );
+  const g13Brief = buildProfessionalThankYouBodySignOffBoundaryBrief(
+    true,
+    "Grateful — The Park family",
+  );
+  expectTrue("G13 brief still has hard boundary marker", g13Brief.includes(MARKER));
+  expectTrue(
+    "G13 brief keeps support proof/color/warmth",
+    g13Brief.includes("proof, color, and warmth"),
+  );
+  expectTrue(
+    "G13 brief keeps primary dominance explicit",
+    g13Brief.includes("primary deed stays dominant"),
+  );
+  expectTrue(
+    "G13 brief does not instruct removing support or sterile shortening",
+    g13Brief.includes("does not remove supporting detail") &&
+      g13Brief.includes("does not require shortening a rich card into a sterile note"),
+  );
+
+  // Gate off
+  expectTrue(
+    "G01/G16-shaped Mom Thank You gate off",
+    isProfessionalThankYouOccasion(false, "Thank You") === false,
+  );
+  expectTrue(
+    "G02-shaped Mom Thank You gate off",
+    isProfessionalThankYouOccasion(false, "Thank You") === false,
+  );
+  expectTrue(
+    "G04 Wife Anniversary gate off",
+    isProfessionalThankYouOccasion(false, "Anniversary") === false,
+  );
+  expectTrue(
+    "G07 Son Congratulations gate off",
+    isProfessionalThankYouOccasion(false, "Congratulations") === false,
+  );
+  expectTrue(
+    "G12 Boss Congratulations gate off (pro but not Thank You)",
+    isProfessionalThankYouOccasion(true, "Congratulations") === false,
+  );
+  expectTrue(
+    "G18 Coworker Get Well gate off (pro but not Thank You)",
+    isProfessionalThankYouOccasion(true, "Get Well") === false,
   );
 }
 

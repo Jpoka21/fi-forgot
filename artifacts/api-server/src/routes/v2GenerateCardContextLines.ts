@@ -245,6 +245,51 @@ export function formatMainObjectiveLine(
 }
 
 /**
+ * Sprint 9B.2 attempt 2 gate: professional relationship + Thank You occasion only.
+ * `isPro` must come from the canonical PROFESSIONAL_RELS check in v2-generate-card
+ * (single source — no duplicate membership list here).
+ */
+export function isProfessionalThankYouOccasion(
+  isPro: boolean,
+  occasion: string,
+): boolean {
+  return isPro && occasion.toLowerCase() === "thank you";
+}
+
+/** True when the exact required sign-off already carries gratitude language. */
+export function signOffContainsGratitudeLanguage(
+  signOff?: string | null,
+): boolean {
+  return /\b(thank|thanks|appreciate|grateful)\b/i.test(signOff?.trim() ?? "");
+}
+
+/**
+ * Sprint 9B.2 attempt 2 — hard body vs exact sign-off boundary for professional Thank You.
+ * Position-specific: the final body sentence before the exact sign-off.
+ * Not a broad sentence-variety rule. Not runtime validation.
+ */
+export function buildProfessionalThankYouBodySignOffBoundaryBrief(
+  hasSupport: boolean,
+  signOff?: string | null,
+): string {
+  const exactSignOff = signOff?.trim() ?? "";
+  const signOffHasGratitude = signOffContainsGratitudeLanguage(exactSignOff);
+
+  const boundaryRule = signOffHasGratitude
+    ? `HARD BODY / SIGN-OFF BOUNDARY: The exact required sign-off already contains thank, thanks, appreciate, or grateful language. One clear thank for the specific deed may appear earlier in the body. The final body sentence before the exact sign-off must not contain thank, thanks, appreciate, or grateful — and must not use "I really appreciate it," "I am grateful," "thank you again," "thanks again," or equivalent gratitude restatements. That final body sentence should instead state the practical effect, what the deed enabled, the burden the recipient took on, or a simple offer of reciprocity grounded only in supplied facts. Then end with the exact required sign-off unchanged on its own line.`
+    : `One clear thank for the specific deed may appear in the body. Preserve the exact required sign-off unchanged on its own line. Do not stack a second gratitude restatement immediately before the sign-off.`;
+
+  const supportGuidance = hasSupport
+    ? `A supporting detail was supplied — keep its brief recognizable proof, color, and warmth while the primary deed stays dominant. This boundary forbids a gratitude restatement in the final body sentence before a gratitude-bearing sign-off; it does not remove supporting detail, storytelling, or warm professional tone, and it does not require shortening a rich card into a sterile note.`
+    : `No supporting detail was supplied — do not invent support, history, cost, or burden to create variety.`;
+
+  return `PROFESSIONAL THANK-YOU BODY / SIGN-OFF BOUNDARY:
+${boundaryRule}
+${supportGuidance}
+Do not suppress or generalize the primary deed. Do not make the note cold, abrupt, sterile, or purely transactional.`;
+}
+
+/**
  * Soft fixture helper for Sprint 8G tests — flags drafts that omit support
  * while relying only on a generic battery-style joke (not a model runtime gate).
  */

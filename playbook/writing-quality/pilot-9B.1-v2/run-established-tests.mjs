@@ -5,7 +5,7 @@
  * Usage:
  *   node playbook/writing-quality/pilot-9B.1-v2/run-established-tests.mjs
  *
- * Expected: 290 unit assertions + harness self-checks, all exit 0.
+ * Expected: 315 unit assertions + harness self-checks, all exit 0.
  */
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -82,9 +82,9 @@ for (const r of results) {
 }
 
 console.log(`\nUnit assertion total: ${unitPassed} passed, ${unitFailed} failed`);
-console.log(`Expected unit total: 290 passed, 0 failed`);
-if (unitPassed !== 290 || unitFailed !== 0) {
-  console.log("WARNING: unit total differs from established 290.");
+console.log(`Expected unit total: 315 passed, 0 failed`);
+if (unitPassed !== 315 || unitFailed !== 0) {
+  console.log("WARNING: unit total differs from established 315.");
   hardFail = true;
 }
 
