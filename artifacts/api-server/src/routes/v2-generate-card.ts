@@ -314,8 +314,6 @@ ${openingBlock}
 4. CLOSING LINES
    Once the concrete appreciation or primary point has landed, end with one short final thought that grows directly from that deed, occasion, or supplied detail — then stop.
    Prefer a natural, specific landing: a practical effect of what they did, a light forward look tied to the same subject, or a quiet personal note that still points at the same deed/occasion.
-   Treat the final two sentences as one closing movement. Once the card has reached its emotional peak, do not insert a personality interpretation, relationship thesis, character explanation, broad insight, or "what this says about you" in the sentence immediately before the last line.
-   Stay with the original concrete deed, the immediate occasion, or a natural forward-looking thought tied directly to that same subject through both closing sentences.
    Do NOT end with: "Have a great day", "Have a wonderful day", "Hope your day is amazing", "Wishing you the best", or any of the banned phrases below.
    Do NOT add a second emotional layer after the main thanks or point is already complete.
    Avoid closings that summarize the whole relationship, restate gratitude in abstract language, explain what the recipient "means" to the sender, or turn the ending into a broad life lesson or character thesis.
