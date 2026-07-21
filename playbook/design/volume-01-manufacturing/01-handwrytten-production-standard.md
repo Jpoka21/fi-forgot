@@ -289,14 +289,14 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 | Candidate Area | Final Disposition | Proposed Standard Name | Reserved Standard ID | Supporting Fact IDs | Related Vendor Questions | Company Judgment Required | Blocking Dependency | Drafting Readiness | Rationale | Notes |
 |----------------|-------------------|------------------------|----------------------|---------------------|--------------------------|---------------------------|---------------------|--------------------|-----------|-------|
 | Physical Ink Authenticity | Manufacturing Principle | Real Pen Production Method Principle | FI-MFG-PRN-001 | HW-MFG-004 | — | Yes | — | READY WITH QUALIFICATION | HW-MFG-004 confirms real-pen production method. F.I. Forgot may adopt a governing principle that production uses physical ink via real pens, but must not claim automatic realism, quality superiority, or recipient perception outcomes. | Principle guides standards; it is not an enforceable production specification. |
-| Envelope Fulfillment Handling | Manufacturing Constraint | Envelope Fulfillment Handling Boundary | FI-MFG-CON-001 | HW-MFG-005 | HW-VQ-014 | Yes | HW-VQ-014 (envelope addressing method undisclosed) | READY WITH QUALIFICATION | HW-MFG-005 confirms envelope handling as part of fulfillment, not handwritten addressing. Constraint must preserve envelope-handling language only and prohibit assumptions about addressing method or envelope-production path. | Drafted in Section 8.5; pending freeze review. |
+| Envelope Fulfillment Handling | Manufacturing Constraint | Envelope Fulfillment Handling Boundary | FI-MFG-CON-001 | HW-MFG-005 | HW-VQ-014 | Yes | HW-VQ-014 (envelope addressing method undisclosed) | READY WITH QUALIFICATION | HW-MFG-005 confirms envelope handling as part of fulfillment, not handwritten addressing. Constraint must preserve envelope-handling language only and prohibit assumptions about addressing method or envelope-production path. | Frozen in Section 8.5 (July 21, 2026). |
 | Custom Signature Governance | Operational Policy | Custom Signature Governance Policy | FI-MFG-POL-001 | HW-MFG-006 | HW-VQ-011 | Yes | HW-VQ-011 (personalization and signature workflow detail) | READY WITH QUALIFICATION | HW-MFG-006 confirms capability, fee, turnaround, and robotic execution. Policy must govern authorization, authenticity, ownership, and approval — all company decisions beyond vendor disclosure. | Qualification requires fee and turnaround visibility in any future policy. |
 | Delivery Confirmation Policy | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-011 | — | Yes | — | NOT APPLICABLE | Optional delivery confirmation is one element of customer promise boundaries, not a standalone Volume 01 policy. Consolidated into FI-MFG-POL-003. API field presence proves capability only; universal support must not be assumed. | Absorbed candidate; no separate Standard ID reserved. |
 | Add-On Matching | Manufacturing Constraint | Add-On Fulfillment Boundary | FI-MFG-CON-002 | HW-MFG-012; HW-MFG-018 | HW-VQ-007 | Yes | HW-VQ-007 (pick/pack and matching operations undisclosed) | READY WITH QUALIFICATION | HW-MFG-012 and HW-MFG-018 support optional inserts, gift cards, and vendor guarantee matching language. Internal matching controls remain unknown. Constraint governs what F.I. Forgot may claim or assume about add-on fulfillment. | Related to envelope fulfillment but distinct; matching operations are a separate unknown. |
 | API Capability Boundaries | Excluded From Volume 01 | Vendor Capability Validation Constraint (consolidated) | — | HW-MFG-013 | — | Yes | Detailed API engineering deferred to later research volume | NOT APPLICABLE | HW-MFG-013 supports documented capability only. Detailed API integration standards belong in a later research volume, not Volume 01. Boundary-setting inputs are absorbed into FI-MFG-CON-003. | Excluded as standalone standard area; inputs retained in vendor capability constraint. |
 | Bulk Workflow Compatibility | Manufacturing Constraint | Bulk Workflow Compatibility Boundary | FI-MFG-CON-004 | HW-MFG-014 | — | Yes | — | READY WITH QUALIFICATION | HW-MFG-014 supports documented bulk workflows by address book or Excel with merge fields. Constraint must not become a Volume 01 integration specification or imply hidden manufacturing steps. | Company adoption of bulk workflows remains a separate decision. |
 | Queue Semantics and Customer Timing Communication | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-015 | HW-VQ-012 | Yes | HW-MFG-010 HOLD; HW-VQ-012 | NOT APPLICABLE | HW-MFG-015 confirms queue-entry semantics only. HW-MFG-010 remains on HOLD. No production timeline or delivery promise may be created from queue semantics. Consolidated into FI-MFG-POL-003 with timing elements blocked. | Absorbed candidate; timing portions remain blocked pending vendor confirmation. |
-| Order Modification and Cancellation Boundaries | Operational Policy | Order Modification and Cancellation Policy | FI-MFG-POL-002 | HW-MFG-016 | — | Yes | — | READY FOR DRAFTING | HW-MFG-016 establishes a verified operational boundary: cancellation before writing only; no post-placement edits. Sufficient to support an internal customer experience and operational boundary policy. | Drafted in Section 8.4; pending freeze review. |
+| Order Modification and Cancellation Boundaries | Operational Policy | Order Modification and Cancellation Policy | FI-MFG-POL-002 | HW-MFG-016 | — | Yes | — | READY FOR DRAFTING | HW-MFG-016 establishes a verified operational boundary: cancellation before writing only; no post-placement edits. Sufficient to support an internal customer experience and operational boundary policy. | Frozen in Section 8.4 (July 21, 2026). |
 | International Availability | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-017 | — | Yes | International fulfillment architecture (deferred research) | NOT APPLICABLE | HW-MFG-017 confirms broad FAQ reach only. Country-level service quality, transit reliability, and customs behavior are not established. Consolidated into FI-MFG-POL-003 as reach-limit discipline, not performance promise. | Absorbed candidate; no separate Standard ID reserved. |
 | Customer Promise Discipline | Operational Policy | Customer Promise Discipline Policy | FI-MFG-POL-003 | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | HW-VQ-012 | Yes | HW-MFG-010 HOLD (timing and queue promise elements); HW-VQ-012 | READY WITH QUALIFICATION | Overarching policy consolidating delivery confirmation boundaries, queue semantics communication limits, international reach limits, and vendor guarantee-informed promise discipline. Non-timing elements may be drafted; timing and delivery promise language remain blocked while HW-MFG-010 is on HOLD. | Absorbs Delivery Confirmation Policy, Queue Semantics and Customer Timing Communication, and International Availability. Vendor guarantee timing language does not override HW-MFG-010 HOLD. |
 | Vendor Liability and Resend Handling | Operational Policy | Vendor Liability and Resend Handling Policy | FI-MFG-POL-004 | HW-MFG-018; HW-MFG-019 | HW-VQ-009 | Yes | — | READY WITH QUALIFICATION | HW-MFG-018 and HW-MFG-019 establish vendor guarantee and USPS handoff liability boundaries. F.I. Forgot resend, recovery, and escalation policy remains a company decision and must not adopt vendor guarantees as F.I. Forgot promises. | Related to Customer Promise Discipline but retained as separate policy for liability and resend obligations. |
@@ -408,7 +408,7 @@ The main risks of translating verified facts into standards prematurely are:
 
 This section contains **company decisions** about how F.I. Forgot chooses to manufacture, design for production, and govern the physical product experience.
 
-**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Two standards drafted, pending individual freeze (FI-MFG-POL-002, FI-MFG-CON-001); remaining reserved standards not yet authored.
+**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Two standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, July 21, 2026); remaining reserved standards not yet authored.
 
 Standards in this section must be deliberate F.I. Forgot decisions. They may be informed by verified facts but must not be confused with vendor disclosures.
 
@@ -571,17 +571,34 @@ Known dependencies, HOLD interactions, and conditions that would trigger revisio
 
 **Disposition key:** PRN = Manufacturing Principle; STD = Permanent Standard; CON = Manufacturing Constraint; POL = Operational Policy.
 
+#### 8.1.16 Individual standard freeze gate
+
+A standard in Status **Drafted, Pending Freeze** may be promoted to **Frozen** only after individual freeze review confirms all applicable criteria below.
+
+| Criterion | Requirement |
+|-----------|-------------|
+| Identity and planning alignment | Standard ID, name, and disposition match the approved Standard Planning Register |
+| Template compliance | All required Template v1.0 sections are present; optional sections are used appropriately |
+| Normative requirements | Stable globally unique Req IDs; SHALL or SHALL NOT language; allowed Source values only; every Source supports its requirement |
+| Evidence discipline | Verified facts not expanded beyond evidence; qualifications preserved; company judgment disclosed and not represented as vendor evidence |
+| Scope and dependencies | Exceptions and out-of-scope boundaries explicit; HOLD items not converted to requirements; cross-standard references accurate |
+| Validation | References Req IDs; remains implementation independent |
+| Prohibitions | No API, UI, code, workflow, architecture, or engineering requirements; no unresolved substantive defect; future revision notes do not weaken the current standard |
+| Stability | Standard does not rely on undocumented vendor behavior |
+
+Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze record. Revisions require documented Design Library change control per Section 15.
+
 ### 8.2 Reserved standard index
 
 | Reserved ID | Name | Disposition | Drafting Readiness | Supporting Fact IDs | Status |
 |-------------|------|-------------|--------------------|---------------------|--------|
 | FI-MFG-PRN-001 | Real Pen Production Method Principle | Manufacturing Principle | READY WITH QUALIFICATION | HW-MFG-004 | Reserved, Not Drafted |
-| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-005 | Drafted, Pending Freeze |
+| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-005 | Frozen (July 21, 2026) |
 | FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-012; HW-MFG-018 | Reserved, Not Drafted |
 | FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Reserved, Not Drafted |
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-014 | Reserved, Not Drafted |
 | FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-006 | Reserved, Not Drafted |
-| FI-MFG-POL-002 | Order Modification and Cancellation Policy | Operational Policy | READY FOR DRAFTING | HW-MFG-016 | Drafted, Pending Freeze |
+| FI-MFG-POL-002 | Order Modification and Cancellation Policy | Operational Policy | READY FOR DRAFTING | HW-MFG-016 | Frozen (July 21, 2026) |
 | FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Reserved, Not Drafted |
 | FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-018; HW-MFG-019 | Reserved, Not Drafted |
 
@@ -589,8 +606,8 @@ Known dependencies, HOLD interactions, and conditions that would trigger revisio
 
 | Standard ID | Standard Statement | Supporting Fact IDs | Status |
 |-------------|-------------------|---------------------|--------|
-| FI-MFG-POL-002 | Placed Handwrytten manufacturing orders SHALL NOT be represented as editable; cancellation SHALL be treated as available only before the writing process begins. | HW-MFG-016 | Drafted, Pending Freeze |
-| FI-MFG-CON-001 | F.I. Forgot SHALL treat envelope handling as confirmed Handwrytten fulfillment scope and SHALL NOT assume handwritten envelope addressing or an undisclosed envelope-production path. | HW-MFG-005 | Drafted, Pending Freeze |
+| FI-MFG-POL-002 | Placed Handwrytten manufacturing orders SHALL NOT be represented as editable; cancellation SHALL be treated as available only before the writing process begins. | HW-MFG-016 | Frozen (July 21, 2026) |
+| FI-MFG-CON-001 | F.I. Forgot SHALL treat envelope handling as confirmed Handwrytten fulfillment scope and SHALL NOT assume handwritten envelope addressing or an undisclosed envelope-production path. | HW-MFG-005 | Frozen (July 21, 2026) |
 
 ### 8.4 FI-MFG-POL-002 — Order Modification and Cancellation Policy
 
@@ -601,10 +618,26 @@ Known dependencies, HOLD interactions, and conditions that would trigger revisio
 | **Standard ID** | FI-MFG-POL-002 |
 | **Standard name** | Order Modification and Cancellation Policy |
 | **Disposition** | Operational Policy |
-| **Status** | Drafted, Pending Freeze |
+| **Status** | Frozen |
+| **Freeze date** | July 21, 2026 |
 | **Supporting Fact IDs** | HW-MFG-016 |
 | **Related vendor questions** | None |
 | **Governing qualification** | HW-MFG-016 is an operational boundary (Support Documentation). |
+
+#### Standard freeze gate
+
+FI-MFG-POL-002 passed individual freeze review on July 21, 2026.
+
+| Criterion | Result |
+|-----------|--------|
+| Identity and planning alignment | Pass |
+| Template v1.0 compliance | Pass |
+| Normative requirements (R01–R07) | Pass |
+| Evidence discipline | Pass |
+| Scope and dependencies | Pass |
+| Validation method | Pass |
+| Prohibitions | Pass |
+| Stability | Pass |
 
 #### Standard statement
 
@@ -713,10 +746,26 @@ A material statement violates this standard if it contradicts any normative requ
 | **Standard ID** | FI-MFG-CON-001 |
 | **Standard name** | Envelope Fulfillment Handling Boundary |
 | **Disposition** | Manufacturing Constraint |
-| **Status** | Drafted, Pending Freeze |
+| **Status** | Frozen |
+| **Freeze date** | July 21, 2026 |
 | **Supporting Fact IDs** | HW-MFG-005 |
 | **Related vendor questions** | HW-VQ-014 |
 | **Governing qualification** | Use envelope-handling wording; specific addressing method not disclosed. |
+
+#### Standard freeze gate
+
+FI-MFG-CON-001 passed individual freeze review on July 21, 2026.
+
+| Criterion | Result |
+|-----------|--------|
+| Identity and planning alignment | Pass |
+| Template v1.0 compliance | Pass |
+| Normative requirements (R01–R05) | Pass |
+| Evidence discipline | Pass |
+| Scope and dependencies | Pass |
+| Validation method | Pass |
+| Prohibitions | Pass |
+| Stability | Pass |
 
 #### Standard statement
 
