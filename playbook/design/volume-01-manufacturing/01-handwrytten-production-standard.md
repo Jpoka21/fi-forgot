@@ -300,7 +300,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 | International Availability | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-017 | — | Yes | International fulfillment architecture (deferred research) | NOT APPLICABLE | HW-MFG-017 confirms broad FAQ reach only. Country-level service quality, transit reliability, and customs behavior are not established. Consolidated into FI-MFG-POL-003 as reach-limit discipline, not performance promise. | Absorbed candidate; no separate Standard ID reserved. |
 | Customer Promise Discipline | Operational Policy | Customer Promise Discipline Policy | FI-MFG-POL-003 | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | HW-VQ-012 | Yes | HW-MFG-010 HOLD (timing and queue promise elements); HW-VQ-012 | READY WITH QUALIFICATION | Overarching policy consolidating delivery confirmation boundaries, queue semantics communication limits, international reach limits, and vendor guarantee-informed promise discipline. Non-timing elements may be drafted; timing and delivery promise language remain blocked while HW-MFG-010 is on HOLD. | Absorbs Delivery Confirmation Policy, Queue Semantics and Customer Timing Communication, and International Availability. Vendor guarantee timing language does not override HW-MFG-010 HOLD. |
 | Vendor Liability and Resend Handling | Operational Policy | Vendor Liability and Resend Handling Policy | FI-MFG-POL-004 | HW-MFG-018; HW-MFG-019 | HW-VQ-009 | Yes | — | READY WITH QUALIFICATION | HW-MFG-018 and HW-MFG-019 establish vendor guarantee and USPS handoff liability boundaries. F.I. Forgot resend, recovery, and escalation policy remains a company decision and must not adopt vendor guarantees as F.I. Forgot promises. | Related to Customer Promise Discipline but retained as separate policy for liability and resend obligations. |
-| Vendor Capability Validation | Manufacturing Constraint | Vendor Capability Validation Constraint | FI-MFG-CON-003 | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | HW-VQ-003 | Yes | API and integration engineering (later research volume) | READY WITH QUALIFICATION | Overarching constraint requiring F.I. Forgot to validate vendor capability before assuming operational use. Absorbs API capability boundary inputs from HW-MFG-013. Application-specific controls (HW-MFG-008) and deployment capability (HW-MFG-020) must not be assumed universal. | Absorbs API Capability Boundaries as boundary input; detailed API standards excluded from Volume 01. |
+| Vendor Capability Validation | Manufacturing Constraint | Vendor Capability Validation Constraint | FI-MFG-CON-003 | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | HW-VQ-003 | Yes | API and integration engineering (later research volume) | READY WITH QUALIFICATION | Overarching constraint requiring F.I. Forgot to validate vendor capability before assuming operational use. Absorbs API capability boundary inputs from HW-MFG-013. Application-specific controls (HW-MFG-008) and deployment capability (HW-MFG-020) must not be assumed universal. | Frozen in Section 8.8 (July 21, 2026). |
 | Operational Continuity | Vendor Diligence Only | — | — | HW-MFG-009; HW-MFG-020 | HW-VQ-001; HW-VQ-003; HW-VQ-008 | Yes | HW-VQ-001; HW-VQ-003; HW-VQ-008; insufficient continuity evidence | BLOCKED | Current evidence is insufficient for continuity or fulfillment-network standards. Tempe address and 3PL deployment capability do not prove customer-order fulfillment topology or disaster recovery. Remains vendor diligence until HW-VQ responses resolve. | No Standard ID reserved; related inputs partially inform FI-MFG-CON-003 diligence posture. |
 
 #### 7.8.2 Standard ID governance
@@ -337,13 +337,12 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| — | — | — | — | — | — | FI-MFG-CON-002 frozen — see Section 8.7. No standards currently queued for initial drafting. |
+| — | — | — | — | — | — | FI-MFG-CON-003 frozen — see Section 8.8. No standards currently queued for initial drafting. |
 
 ##### Ready With Qualification
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | API integration detail deferred to later volume | HW-VQ-003 | Draft constraint requiring validation before assuming vendor capability in production. |
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | HW-MFG-014 | Must not become integration specification | — | Draft boundary for documented bulk workflow compatibility without hidden manufacturing claims. |
 | FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | HW-MFG-006 | Authorization and approval rules undecided | HW-VQ-011 | Draft policy with company judgment on signature authorization, authenticity, and ownership. |
 | FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Timing and queue promise elements blocked by HW-MFG-010 HOLD | HW-VQ-012 | Draft non-timing promise boundaries first; defer timing language until HW-VQ-012 resolves. |
@@ -406,7 +405,7 @@ The main risks of translating verified facts into standards prematurely are:
 
 This section contains **company decisions** about how F.I. Forgot chooses to manufacture, design for production, and govern the physical product experience.
 
-**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Four standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, July 21, 2026); remaining reserved standards not yet authored.
+**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Five standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, FI-MFG-CON-003, July 21, 2026); remaining reserved standards not yet authored.
 
 Standards in this section must be deliberate F.I. Forgot decisions. They may be informed by verified facts but must not be confused with vendor disclosures.
 
@@ -593,7 +592,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 | FI-MFG-PRN-001 | Real Pen Production Method Principle | Manufacturing Principle | READY WITH QUALIFICATION | HW-MFG-004 | Frozen (July 21, 2026) |
 | FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-005 | Frozen (July 21, 2026) |
 | FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-012; HW-MFG-018 | Frozen (July 21, 2026) |
-| FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Reserved, Not Drafted |
+| FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Frozen (July 21, 2026) |
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-014 | Reserved, Not Drafted |
 | FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-006 | Reserved, Not Drafted |
 | FI-MFG-POL-002 | Order Modification and Cancellation Policy | Operational Policy | READY FOR DRAFTING | HW-MFG-016 | Frozen (July 21, 2026) |
@@ -604,6 +603,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 
 | Standard ID | Standard Statement | Supporting Fact IDs | Status |
 |-------------|-------------------|---------------------|--------|
+| FI-MFG-CON-003 | F.I. Forgot SHALL validate Handwrytten vendor capability against verified disclosure before assuming operational use and SHALL NOT treat documented platform capability, application-specific controls, deployment capability, or per-machine capacity as universal operational practice. | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Frozen (July 21, 2026) |
 | FI-MFG-CON-002 | F.I. Forgot SHALL treat optional gift cards and inserts as confirmed Handwrytten add-on capability and SHALL NOT assume undisclosed pick/pack, matching, or operational-sequencing mechanics. | HW-MFG-012; HW-MFG-018 | Frozen (July 21, 2026) |
 | FI-MFG-PRN-001 | F.I. Forgot SHALL adopt verified real-pen robotic writing as the governing Handwrytten production method for Volume 01 and SHALL NOT treat that disclosure as evidence of handwriting realism, quality superiority, or recipient perception outcomes. | HW-MFG-004 | Frozen (July 21, 2026) |
 | FI-MFG-POL-002 | Placed Handwrytten manufacturing orders SHALL NOT be represented as editable; cancellation SHALL be treated as available only before the writing process begins. | HW-MFG-016 | Frozen (July 21, 2026) |
@@ -1130,6 +1130,145 @@ A material assumption, boundary statement, or dependency violates this standard 
 - If the verified facts baseline changes HW-MFG-012 or HW-MFG-018 or their qualifications, this standard requires revision before F.I. Forgot constraint boundaries may change.
 - HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
 - Vendor guarantee timing language in HW-MFG-018 does not override HW-MFG-010 HOLD.
+
+### 8.8 FI-MFG-CON-003 — Vendor Capability Validation Constraint
+
+#### Standard record
+
+| Field | Value |
+|-------|-------|
+| **Standard ID** | FI-MFG-CON-003 |
+| **Standard name** | Vendor Capability Validation Constraint |
+| **Disposition** | Manufacturing Constraint |
+| **Status** | Frozen |
+| **Freeze date** | July 21, 2026 |
+| **Supporting Fact IDs** | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 |
+| **Related vendor questions** | HW-VQ-003 |
+| **Governing qualification** | HW-MFG-002: per-machine capacity statement, not fleet-average throughput. HW-MFG-008: application-specific wording required. HW-MFG-013: platform capability, not utilization proof. HW-MFG-020: deployment capability only. |
+
+#### Standard freeze gate
+
+FI-MFG-CON-003 passed individual freeze review on July 21, 2026.
+
+| Criterion | Result |
+|-----------|--------|
+| Identity and planning alignment | Pass |
+| Template v1.0 compliance | Pass |
+| Normative requirements (R01–R07) | Pass |
+| Evidence discipline | Pass |
+| Scope and dependencies | Pass |
+| Validation method | Pass |
+| Prohibitions | Pass |
+| Stability | Pass |
+
+#### Standard statement
+
+F.I. Forgot SHALL validate Handwrytten vendor capability against verified disclosure before assuming operational use and SHALL NOT treat documented platform capability, application-specific controls, deployment capability, or per-machine capacity as universal operational practice.
+
+#### Purpose
+
+Define the manufacturing constraint that requires F.I. Forgot to validate Handwrytten vendor capability before assuming operational use in Volume 01 design, product, operational, and planning decisions.
+
+This constraint prevents documented capability, capacity, application-specific controls, or deployment disclosures from being treated as confirmed F.I. Forgot operational practice without validation.
+
+#### Scope
+
+This standard applies to:
+
+- All F.I. Forgot Volume 01 design, product, operational, and planning decisions that depend on assumed Handwrytten vendor capability, capacity, platform features, or deployment characteristics.
+- All internal materials that bound, classify, or depend on vendor capability assumptions for Handwrytten manufacturing or fulfillment.
+
+This standard does not define API integration specifications, engineering architecture, customer messaging, operational workflows, vendor diligence procedures, or vendor performance guarantees.
+
+#### Definitions
+
+| Term | Definition |
+|------|------------|
+| **Vendor capability validation** | F.I. Forgot confirmation that an assumed Handwrytten capability is supported by verified disclosure before the capability is treated as operational fact in an in-scope decision. |
+| **Platform capability** | Handwrytten API-documented capability as confirmed by HW-MFG-013. This standard does not expand platform capability beyond verified disclosure. |
+| **Application-specific controls** | Barcode scanning and client metadata integration controls described by HW-MFG-008. This standard does not expand these controls beyond verified disclosure. |
+| **Deployment capability** | Handwrytten 3PL robot integration disclosure as confirmed by HW-MFG-020. This standard does not expand deployment capability beyond verified disclosure. |
+
+#### Normative requirements
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| FI-MFG-CON-003-R01 | F.I. Forgot SHALL adopt vendor capability validation as a permanent manufacturing constraint for Volume 01 decisions that depend on Handwrytten vendor capability. | Company judgment |
+| FI-MFG-CON-003-R02 | F.I. Forgot SHALL validate Handwrytten vendor capability against verified disclosure before assuming operational use in any in-scope decision. | Company judgment |
+| FI-MFG-CON-003-R03 | F.I. Forgot SHALL treat Handwrytten API v3.15.0 documentation as platform capability disclosure only within Volume 01. | HW-MFG-013 |
+| FI-MFG-CON-003-R04 | F.I. Forgot SHALL NOT assume operational utilization, production-path use, or universal applicability from documented platform capability alone. | HW-MFG-013 qualification |
+| FI-MFG-CON-003-R05 | F.I. Forgot SHALL NOT assume application-specific barcode or metadata integration controls apply to F.I. Forgot orders without separate confirmation. | HW-MFG-008 qualification |
+| FI-MFG-CON-003-R06 | F.I. Forgot SHALL NOT assume global 3PL robot integration proves customer-order fulfillment topology or distributed fulfillment for F.I. Forgot orders. | HW-MFG-020 qualification |
+| FI-MFG-CON-003-R07 | F.I. Forgot SHALL NOT treat per-machine capacity statements as fleet-average throughput, utilization, or service-level commitments. | Company judgment |
+
+#### Company judgment
+
+The following decisions are F.I. Forgot company judgments. They are not established by vendor disclosure alone:
+
+- F.I. Forgot adopts vendor capability validation as a permanent manufacturing constraint for Volume 01.
+- F.I. Forgot applies this constraint to design, product, operational, and planning decisions — not only to engineering artifacts.
+- F.I. Forgot requires validation against verified disclosure before treating any Handwrytten capability as operational fact (FI-MFG-CON-003-R02).
+- F.I. Forgot prohibits treating per-machine capacity statements as fleet-average throughput, utilization, or service-level commitments (FI-MFG-CON-003-R07).
+- Vendor capability validation is a boundary discipline; it is not an API integration specification or engineering architecture requirement.
+
+#### Exceptions
+
+No exceptions are defined in this standard.
+
+Any future exception requires a documented standard revision supported by verified evidence or explicit company judgment recorded in the revision.
+
+#### Out of scope
+
+The following subjects are explicitly out of scope for FI-MFG-CON-003:
+
+| Subject | Reason |
+|---------|--------|
+| API integration specifications or endpoint implementation | Deferred to later research volume; not a Volume 01 manufacturing constraint subject |
+| Engineering architecture, code, or system workflows | Implementation; not defined in this constraint |
+| Customer promise or outward-facing messaging | Operational policy domain; not a manufacturing constraint subject |
+| Operational continuity or fulfillment-network topology | Vendor diligence only; insufficient evidence for a standard |
+| Fleet throughput, utilization, or capacity commitments beyond verified disclosure | HW-MFG-002 qualification limits use to per-machine capacity statement only |
+| Production timing, mailing timing, or delivery promises | HW-MFG-010 remains on HOLD |
+| Vendor diligence procedures for HW-VQ-003 | Vendor diligence; not defined in this constraint |
+| Detailed platform feature utilization requirements | Capability disclosure only; utilization requires separate F.I. Forgot validation |
+
+#### Supporting evidence
+
+| Fact ID | Verified statement used by this standard | Qualification preserved |
+|---------|------------------------------------------|-------------------------|
+| HW-MFG-002 | Handwrytten’s current company page states the patented Handwrytten robot is capable of autonomously writing nearly 750 notes a day. | Per-machine capacity statement, not fleet-average throughput. |
+| HW-MFG-008 | Handwrytten’s robot page states barcode scanning can help ensure the correct cardstock and that client metadata can be integrated for tracking or cardstock assurance in custom install applications. | Application-specific wording required. |
+| HW-MFG-013 | Handwrytten API v3.15.0 documents cards, custom cards, address book, fonts, gift cards, inserts, signatures, QR codes, shipping, and order endpoints, including a single-step order endpoint with the cited order fields. | Platform capability, not utilization proof. |
+| HW-MFG-020 | Handwrytten’s robot page states Handwrytten robots are integrated in 3PL facilities globally. | Deployment capability only. |
+
+No additional verified facts are cited by this standard.
+
+#### Engineering implications
+
+Not defined in this manufacturing constraint.
+
+Engineering specifications, if required, SHALL be derived separately from this standard upon freeze review. This standard does not authorize engineering requirements.
+
+#### Validation method
+
+Compliance with FI-MFG-CON-003 SHALL be verified by review of in-scope design, product, operational, and planning materials against FI-MFG-CON-003-R01 through FI-MFG-CON-003-R07.
+
+A material assumption, boundary statement, or capability dependency violates this standard if it contradicts any normative requirement in this standard.
+
+#### Related standards
+
+| Standard ID | Relationship |
+|-------------|--------------|
+| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary — related manufacturing domain; distinct subject; not superseded by this standard |
+| FI-MFG-CON-002 | Add-On Fulfillment Boundary — related manufacturing domain; distinct subject; not superseded by this standard |
+| FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary — related workflow domain; distinct subject; not superseded by this standard |
+
+#### Future revision notes
+
+- If HW-VQ-003 resolves vendor operations or deployment questions, this standard requires revision only where verified disclosure changes capability-validation boundaries.
+- If the verified facts baseline changes HW-MFG-002, HW-MFG-008, HW-MFG-013, or HW-MFG-020 or their qualifications, this standard requires revision before F.I. Forgot constraint boundaries may change.
+- Detailed API integration standards remain excluded from Volume 01 and deferred to a later research volume.
+- HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
 
 ---
 
