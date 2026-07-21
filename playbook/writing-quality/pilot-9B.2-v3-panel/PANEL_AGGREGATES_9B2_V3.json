@@ -1,0 +1,193 @@
+{
+  "verify": {
+    "status": "complete",
+    "evaluationEligible": true,
+    "notForScoring": false,
+    "productionImplementationCommit": "38e1d74fd3a2825703b78d9638877bf8743fd395",
+    "harnessCommit": "8edb1df9ea1410f13c97cef0d744553a9167df1c",
+    "n": 7,
+    "panelIds": [
+      "G11",
+      "G13",
+      "G02",
+      "G04",
+      "G07",
+      "G17",
+      "G16"
+    ],
+    "attempts_all_one": true,
+    "guest_count": 5,
+    "authenticated_body_count": 2,
+    "auth_fidelity": "relAnswers_only for G16/G17"
+  },
+  "baseline_9B1_v2": {
+    "panel_means": {
+      "G11": 3.56,
+      "G13": 4.95,
+      "G02": 3.28,
+      "G04": 4.89,
+      "G07": 4.79,
+      "G17": 4.89,
+      "G16": 4.53
+    }
+  },
+  "attempt2_panel_reference": {
+    "g11_soft_mean": 3.83,
+    "g11_send": "No",
+    "panel_mean": 4.4,
+    "note": "Attempt 2 scored evidence preserved in PANEL_*_9B2_V2; raw CORPUS.json lost (historical incident)."
+  },
+  "overall": {
+    "panel_mean": 4.452857142857143,
+    "send_yes": 7,
+    "send_no": 0,
+    "hf_any": 0
+  },
+  "g11_analysis": {
+    "exact_text": "Sam — thank you for covering my client calls last Thursday so I could make the school pickup.\nIt let me get there on time while knowing those clients weren’t left waiting. Thanks again — Taylor",
+    "sign_off": "Thanks again — Taylor",
+    "sign_off_on_same_line_as_final_body": true,
+    "final_body_sentence_before_signoff": "It let me get there on time while knowing those clients weren’t left waiting.",
+    "final_body_contains_thank": false,
+    "final_body_contains_thanks": false,
+    "final_body_contains_appreciate": false,
+    "final_body_contains_grateful": false,
+    "final_body_has_any_gratitude_synonym": false,
+    "body_gratitude_stack": "cleared — deed thank + practical effect + sign-off only (no redundant final-body gratitude)",
+    "body_gratitude_line_count": 1,
+    "p_uniform_sentences": false,
+    "post_process_evidence": "grateful/appreciate line absent vs attempt 2 raw; reciprocity line also absent in shorter output",
+    "would_send": "Yes",
+    "soft_mean": 4.06,
+    "vs_v2_delta": 0.5,
+    "vs_attempt2_delta": 0.23
+  },
+  "g13_review": {
+    "soft_mean": 4.84,
+    "warmth": 5,
+    "support_use": 5,
+    "send_readiness": 5,
+    "send": "Yes"
+  },
+  "hold_band_review": {
+    "G02": {
+      "v2": 3.28,
+      "panel": 3.28,
+      "delta": 0,
+      "send": "Yes",
+      "note": "gate-off control"
+    },
+    "G04": {
+      "v2": 4.89,
+      "panel": 4.89,
+      "delta": 0,
+      "hold_band": 0.1,
+      "pass": true
+    },
+    "G07": {
+      "v2": 4.79,
+      "panel": 4.63,
+      "delta": -0.16,
+      "hold_band": 0.15,
+      "pass": false
+    },
+    "G17": {
+      "v2": 4.89,
+      "panel": 4.89,
+      "delta": 0,
+      "hold_band": 0.15,
+      "pass": true
+    },
+    "G16": {
+      "v2": 4.53,
+      "panel": 4.58,
+      "delta": 0.05,
+      "send": "Yes",
+      "pass": true
+    },
+    "G13": {
+      "v2": 4.95,
+      "panel": 4.84,
+      "delta": -0.11,
+      "hold_band": 0.1,
+      "pass": false
+    }
+  },
+  "deltas_v2_panel": [
+    {
+      "id": "G11",
+      "v2": 3.56,
+      "panel": 4.06,
+      "delta": 0.5,
+      "send_v2": "No",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G13",
+      "v2": 4.95,
+      "panel": 4.84,
+      "delta": -0.11,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G02",
+      "v2": 3.28,
+      "panel": 3.28,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G04",
+      "v2": 4.89,
+      "panel": 4.89,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G07",
+      "v2": 4.79,
+      "panel": 4.63,
+      "delta": -0.16,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G17",
+      "v2": 4.89,
+      "panel": 4.89,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G16",
+      "v2": 4.53,
+      "panel": 4.58,
+      "delta": 0.05,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    }
+  ],
+  "p_ai_claims": 0,
+  "targeted_panel_gate": {
+    "g11_send_yes": true,
+    "g11_final_body_no_gratitude": true,
+    "g11_body_stack_gone": true,
+    "g13_warm_send": true,
+    "g04_hold": true,
+    "g13_hold": false,
+    "g07_hold": false,
+    "g17_hold": true,
+    "g16_send_yes": true,
+    "hf_zero": true,
+    "p_ai_claims_zero": true
+  },
+  "determination": "FAIL",
+  "recommend_full_20": false,
+  "recommend_abandon_sprint_9b2": true,
+  "recommend_attempt_4": false,
+  "keep_baseline": "Sprint 9B.1 V2 (2aab24385168438b12500e33d23443d662d75a63)"
+}

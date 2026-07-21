@@ -1,0 +1,185 @@
+{
+  "verify": {
+    "status": "complete",
+    "evaluationEligible": true,
+    "notForScoring": false,
+    "productionImplementationCommit": "b9bc2ac50437d480a519eb5d0a55dc8b3d1861e4",
+    "harnessCommit": "c71eddca015f99f213e9fbff393c3756b2c5e6a7",
+    "n": 7,
+    "panelIds": [
+      "G11",
+      "G13",
+      "G02",
+      "G04",
+      "G07",
+      "G17",
+      "G16"
+    ]
+  },
+  "baseline_9B1_v2": {
+    "panel_means": {
+      "G11": 3.56,
+      "G13": 4.95,
+      "G02": 3.28,
+      "G04": 4.89,
+      "G07": 4.79,
+      "G17": 4.89,
+      "G16": 4.53
+    }
+  },
+  "attempt1_g11": {
+    "soft_mean": 3.83,
+    "send": "No"
+  },
+  "overall": {
+    "panel_mean": 4.3993316624895575,
+    "send_yes": 6,
+    "send_no": 1,
+    "hf_any": 0
+  },
+  "g11_analysis": {
+    "exact_text": "Sam—thank you for covering my client calls last Thursday so I could make the school pickup.\nKnowing the calls were handled let me take care of that pickup without scrambling, and everything stayed on track.\nIf you ever need coverage, I’m glad to return the favor.\nI’m genuinely grateful you took those calls. Thanks again — Taylor",
+    "sign_off": "Thanks again — Taylor",
+    "sign_off_on_same_line_as_final_body": true,
+    "final_body_sentence_before_signoff": "I’m genuinely grateful you took those calls.",
+    "final_body_contains_thank": false,
+    "final_body_contains_thanks": false,
+    "final_body_contains_appreciate": false,
+    "final_body_contains_grateful": true,
+    "final_body_has_any_gratitude_synonym": true,
+    "body_gratitude_stack": "opening thank-you + final-body grateful + sign-off thanks-again (P-UNIFORM-SENTENCES)",
+    "body_gratitude_line_count": 2,
+    "p_uniform_sentences": true,
+    "would_send": "No",
+    "soft_mean": 3.8333333333333335,
+    "vs_v2_delta": 0.27,
+    "vs_attempt1_delta": 0
+  },
+  "g13_review": {
+    "soft_mean": 4.842105263157895,
+    "warmth": 5,
+    "support_use": 5,
+    "send_readiness": 5,
+    "send": "Yes"
+  },
+  "hold_band_review": {
+    "G02": {
+      "v2": 3.28,
+      "panel": 3.2777777777777777,
+      "delta": 0,
+      "send": "Yes",
+      "note": "gate-off control"
+    },
+    "G04": {
+      "v2": 4.89,
+      "panel": 4.894736842105263,
+      "delta": 0,
+      "hold_band": 0.1,
+      "pass": true
+    },
+    "G07": {
+      "v2": 4.79,
+      "panel": 4.631578947368421,
+      "delta": -0.16,
+      "hold_band": 0.15,
+      "pass": false
+    },
+    "G17": {
+      "v2": 4.89,
+      "panel": 4.7894736842105265,
+      "delta": -0.1,
+      "hold_band": 0.15,
+      "pass": true
+    },
+    "G16": {
+      "v2": 4.53,
+      "panel": 4.526315789473684,
+      "delta": 0,
+      "send": "Yes",
+      "pass": true
+    },
+    "G13": {
+      "v2": 4.95,
+      "panel": 4.842105263157895,
+      "delta": -0.11,
+      "hold_band": 0.1,
+      "pass": false
+    }
+  },
+  "deltas_v2_panel": [
+    {
+      "id": "G11",
+      "v2": 3.56,
+      "panel": 3.83,
+      "delta": 0.27,
+      "send_v2": "No",
+      "send_panel": "No"
+    },
+    {
+      "id": "G13",
+      "v2": 4.95,
+      "panel": 4.84,
+      "delta": -0.11,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G02",
+      "v2": 3.28,
+      "panel": 3.28,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G04",
+      "v2": 4.89,
+      "panel": 4.89,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G07",
+      "v2": 4.79,
+      "panel": 4.63,
+      "delta": -0.16,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G17",
+      "v2": 4.89,
+      "panel": 4.79,
+      "delta": -0.1,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    },
+    {
+      "id": "G16",
+      "v2": 4.53,
+      "panel": 4.53,
+      "delta": 0,
+      "send_v2": "Yes",
+      "send_panel": "Yes"
+    }
+  ],
+  "p_ai_claims": 0,
+  "targeted_panel_gate": {
+    "g11_send_yes": false,
+    "g11_final_body_no_gratitude": false,
+    "g11_body_stack_gone": false,
+    "g13_warm_send": true,
+    "g04_hold": true,
+    "g13_hold": false,
+    "g07_hold": false,
+    "g17_hold": true,
+    "g16_send_yes": true,
+    "hf_zero": true,
+    "p_ai_claims_zero": true
+  },
+  "determination": "FAIL",
+  "recommend_full_20": false,
+  "recommend_abandon_attempt2_if_fail": true,
+  "recommend_another_prompt_attempt": false
+}
