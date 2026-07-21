@@ -288,7 +288,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 
 | Candidate Area | Final Disposition | Proposed Standard Name | Reserved Standard ID | Supporting Fact IDs | Related Vendor Questions | Company Judgment Required | Blocking Dependency | Drafting Readiness | Rationale | Notes |
 |----------------|-------------------|------------------------|----------------------|---------------------|--------------------------|---------------------------|---------------------|--------------------|-----------|-------|
-| Physical Ink Authenticity | Manufacturing Principle | Real Pen Production Method Principle | FI-MFG-PRN-001 | HW-MFG-004 | — | Yes | — | READY WITH QUALIFICATION | HW-MFG-004 confirms real-pen production method. F.I. Forgot may adopt a governing principle that production uses physical ink via real pens, but must not claim automatic realism, quality superiority, or recipient perception outcomes. | Principle guides standards; it is not an enforceable production specification. |
+| Physical Ink Authenticity | Manufacturing Principle | Real Pen Production Method Principle | FI-MFG-PRN-001 | HW-MFG-004 | — | Yes | — | READY WITH QUALIFICATION | HW-MFG-004 confirms real-pen production method. F.I. Forgot may adopt a governing principle that production uses physical ink via real pens, but must not claim automatic realism, quality superiority, or recipient perception outcomes. | Frozen in Section 8.6 (July 21, 2026). |
 | Envelope Fulfillment Handling | Manufacturing Constraint | Envelope Fulfillment Handling Boundary | FI-MFG-CON-001 | HW-MFG-005 | HW-VQ-014 | Yes | HW-VQ-014 (envelope addressing method undisclosed) | READY WITH QUALIFICATION | HW-MFG-005 confirms envelope handling as part of fulfillment, not handwritten addressing. Constraint must preserve envelope-handling language only and prohibit assumptions about addressing method or envelope-production path. | Frozen in Section 8.5 (July 21, 2026). |
 | Custom Signature Governance | Operational Policy | Custom Signature Governance Policy | FI-MFG-POL-001 | HW-MFG-006 | HW-VQ-011 | Yes | HW-VQ-011 (personalization and signature workflow detail) | READY WITH QUALIFICATION | HW-MFG-006 confirms capability, fee, turnaround, and robotic execution. Policy must govern authorization, authenticity, ownership, and approval — all company decisions beyond vendor disclosure. | Qualification requires fee and turnaround visibility in any future policy. |
 | Delivery Confirmation Policy | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-011 | — | Yes | — | NOT APPLICABLE | Optional delivery confirmation is one element of customer promise boundaries, not a standalone Volume 01 policy. Consolidated into FI-MFG-POL-003. API field presence proves capability only; universal support must not be assumed. | Absorbed candidate; no separate Standard ID reserved. |
@@ -337,13 +337,12 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| — | — | — | — | — | — | FI-MFG-POL-002 drafted — see Section 8.4. No standards currently queued for initial drafting. |
+| — | — | — | — | — | — | FI-MFG-PRN-001 frozen — see Section 8.6. No standards currently queued for initial drafting. |
 
 ##### Ready With Qualification
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| FI-MFG-PRN-001 | Real Pen Production Method Principle | Manufacturing Principle | HW-MFG-004 | Must not claim realism, quality superiority, or recipient perception | — | Draft principle with production-method qualification preserved. |
 | FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | HW-MFG-012; HW-MFG-018 | Pick/pack operations undisclosed | HW-VQ-007 | Draft constraint governing add-on claims and matching assumptions. |
 | FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | API integration detail deferred to later volume | HW-VQ-003 | Draft constraint requiring validation before assuming vendor capability in production. |
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | HW-MFG-014 | Must not become integration specification | — | Draft boundary for documented bulk workflow compatibility without hidden manufacturing claims. |
@@ -408,7 +407,7 @@ The main risks of translating verified facts into standards prematurely are:
 
 This section contains **company decisions** about how F.I. Forgot chooses to manufacture, design for production, and govern the physical product experience.
 
-**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Two standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, July 21, 2026); remaining reserved standards not yet authored.
+**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Three standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, July 21, 2026); remaining reserved standards not yet authored.
 
 Standards in this section must be deliberate F.I. Forgot decisions. They may be informed by verified facts but must not be confused with vendor disclosures.
 
@@ -592,7 +591,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 
 | Reserved ID | Name | Disposition | Drafting Readiness | Supporting Fact IDs | Status |
 |-------------|------|-------------|--------------------|---------------------|--------|
-| FI-MFG-PRN-001 | Real Pen Production Method Principle | Manufacturing Principle | READY WITH QUALIFICATION | HW-MFG-004 | Reserved, Not Drafted |
+| FI-MFG-PRN-001 | Real Pen Production Method Principle | Manufacturing Principle | READY WITH QUALIFICATION | HW-MFG-004 | Frozen (July 21, 2026) |
 | FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-005 | Frozen (July 21, 2026) |
 | FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-012; HW-MFG-018 | Reserved, Not Drafted |
 | FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Reserved, Not Drafted |
@@ -606,6 +605,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 
 | Standard ID | Standard Statement | Supporting Fact IDs | Status |
 |-------------|-------------------|---------------------|--------|
+| FI-MFG-PRN-001 | F.I. Forgot SHALL adopt verified real-pen robotic writing as the governing Handwrytten production method for Volume 01 and SHALL NOT treat that disclosure as evidence of handwriting realism, quality superiority, or recipient perception outcomes. | HW-MFG-004 | Frozen (July 21, 2026) |
 | FI-MFG-POL-002 | Placed Handwrytten manufacturing orders SHALL NOT be represented as editable; cancellation SHALL be treated as available only before the writing process begins. | HW-MFG-016 | Frozen (July 21, 2026) |
 | FI-MFG-CON-001 | F.I. Forgot SHALL treat envelope handling as confirmed Handwrytten fulfillment scope and SHALL NOT assume handwritten envelope addressing or an undisclosed envelope-production path. | HW-MFG-005 | Frozen (July 21, 2026) |
 
@@ -862,6 +862,139 @@ A material assumption, boundary statement, or dependency violates this standard 
 
 - If HW-VQ-014 resolves the envelope addressing method, this standard requires revision before F.I. Forgot may treat addressing method as verified.
 - If the verified facts baseline changes HW-MFG-005 or its qualification, this standard requires revision before F.I. Forgot constraint boundaries may change.
+- HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
+
+### 8.6 FI-MFG-PRN-001 — Real Pen Production Method Principle
+
+#### Standard record
+
+| Field | Value |
+|-------|-------|
+| **Standard ID** | FI-MFG-PRN-001 |
+| **Standard name** | Real Pen Production Method Principle |
+| **Disposition** | Manufacturing Principle |
+| **Status** | Frozen |
+| **Freeze date** | July 21, 2026 |
+| **Supporting Fact IDs** | HW-MFG-004 |
+| **Related vendor questions** | None |
+| **Governing qualification** | Core production-method disclosure. |
+
+#### Standard freeze gate
+
+FI-MFG-PRN-001 passed individual freeze review on July 21, 2026.
+
+| Criterion | Result |
+|-----------|--------|
+| Identity and planning alignment | Pass |
+| Template v1.0 compliance | Pass |
+| Normative requirements (R01–R07) | Pass |
+| Evidence discipline | Pass |
+| Scope and dependencies | Pass |
+| Validation method | Pass |
+| Prohibitions | Pass |
+| Stability | Pass |
+
+#### Standard statement
+
+F.I. Forgot SHALL adopt verified real-pen robotic writing as the governing Handwrytten production method for Volume 01 and SHALL NOT treat that disclosure as evidence of handwriting realism, quality superiority, or recipient perception outcomes.
+
+#### Purpose
+
+Define the permanent manufacturing principle by which F.I. Forgot adopts the verified Handwrytten real-pen production method for Volume 01.
+
+This principle establishes what F.I. Forgot treats as confirmed production-method disclosure and what F.I. Forgot SHALL NOT infer from that disclosure in manufacturing decisions.
+
+#### Scope
+
+This standard applies to:
+
+- All F.I. Forgot Volume 01 design, product, operational, and planning decisions that depend on Handwrytten card production-method characteristics.
+- All internal materials that describe, bound, classify, or depend on Handwrytten production-method assumptions for Volume 01 manufacturing.
+
+This standard does not define customer messaging, marketing claims, engineering specifications, production workflows, API behavior, user-interface behavior, or vendor performance statements.
+
+#### Definitions
+
+| Term | Definition |
+|------|------------|
+| **Real-pen production method** | Handwrytten card production using custom-designed handwriting robots that hold real pens to write notes, as confirmed by HW-MFG-004. This standard does not expand the production method beyond verified disclosure. |
+| **Production-method language** | Language that describes verified production-method characteristics without quality, realism, perception, or performance claims. |
+
+#### Normative requirements
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| FI-MFG-PRN-001-R01 | F.I. Forgot SHALL adopt verified real-pen robotic writing as the governing Handwrytten production method for Volume 01 manufacturing decisions. | Company judgment |
+| FI-MFG-PRN-001-R02 | F.I. Forgot SHALL treat Handwrytten card production as using custom-designed handwriting robots that hold real pens to write notes in the handwriting style of the customer’s choice, as confirmed by HW-MFG-004. | HW-MFG-004 |
+| FI-MFG-PRN-001-R03 | F.I. Forgot SHALL use production-method language grounded in HW-MFG-004 when bounding in-scope manufacturing decisions. | HW-MFG-004 qualification |
+| FI-MFG-PRN-001-R04 | F.I. Forgot SHALL NOT represent the real-pen production method as evidence of handwriting realism, authenticity outcomes, or recipient perception results. | Company judgment |
+| FI-MFG-PRN-001-R05 | F.I. Forgot SHALL NOT represent the real-pen production method as evidence of quality superiority, premium quality, or measured production quality. | Company judgment |
+| FI-MFG-PRN-001-R06 | F.I. Forgot SHALL NOT infer undocumented Handwrytten robot capabilities, ink characteristics, pen specifications, or production sub-stages beyond HW-MFG-004. | HW-MFG-004 qualification |
+| FI-MFG-PRN-001-R07 | F.I. Forgot SHALL align in-scope materials describing Handwrytten production method with FI-MFG-PRN-001-R02 through FI-MFG-PRN-001-R06. | Company judgment |
+
+#### Company judgment
+
+The following decisions are F.I. Forgot company judgments. They are not established by vendor disclosure alone:
+
+- F.I. Forgot adopts the HW-MFG-004 verified production-method disclosure as a permanent governing manufacturing principle for Volume 01.
+- F.I. Forgot applies this principle to design, product, operational, and planning decisions — not only to engineering artifacts.
+- F.I. Forgot prohibits realism, authenticity-outcome, recipient-perception, and quality-superiority claims derived from the production-method disclosure (FI-MFG-PRN-001-R04, FI-MFG-PRN-001-R05).
+- This principle guides downstream standards and decisions; it is not an enforceable production specification.
+
+#### Exceptions
+
+No exceptions are defined in this standard.
+
+Any future exception requires a documented standard revision supported by verified evidence or explicit company judgment recorded in the revision.
+
+#### Out of scope
+
+The following subjects are explicitly out of scope for FI-MFG-PRN-001:
+
+| Subject | Reason |
+|---------|--------|
+| Handwriting realism, authenticity outcomes, or recipient perception | Not established by HW-MFG-004; prohibited expansion |
+| Quality superiority, premium quality, or emotional impact claims | Not verified beyond production-method disclosure |
+| Ink characteristics or pen specifications beyond HW-MFG-004 | Not disclosed in the verified facts baseline |
+| Robot fleet size, throughput, capacity, or production speed | HW-MFG-002 and HW-MFG-001 are not cited; capacity facts must not be assumed |
+| Production timing, mailing timing, or delivery promises | HW-MFG-010 remains on HOLD |
+| Queue behavior or customer timing communication | Reserved for FI-MFG-POL-003; timing elements blocked by HW-MFG-010 HOLD |
+| Customer promise or outward-facing messaging | Operational policy domain; not a manufacturing principle subject |
+| Envelope production or fulfillment handling | Governed by FI-MFG-CON-001 |
+| API behavior, order payloads, or system workflows | Implementation; not defined in this principle |
+| Engineering specifications or production workflows | Implementation; deferred to Section 11 upon freeze review |
+
+#### Supporting evidence
+
+| Fact ID | Verified statement used by this standard | Qualification preserved |
+|---------|------------------------------------------|-------------------------|
+| HW-MFG-004 | Handwrytten’s company FAQ states that custom-designed handwriting robots hold real pens to write notes in the handwriting style of the customer’s choice. | Core production-method disclosure. |
+
+No additional verified facts are cited by this standard.
+
+#### Engineering implications
+
+Not defined in this manufacturing principle.
+
+Engineering specifications, if required, SHALL be derived separately from this standard upon freeze review. This standard does not authorize engineering requirements.
+
+#### Validation method
+
+Compliance with FI-MFG-PRN-001 SHALL be verified by review of in-scope design, product, operational, and planning materials against FI-MFG-PRN-001-R01 through FI-MFG-PRN-001-R07.
+
+A material assumption, boundary statement, or production-method description violates this standard if it contradicts any normative requirement in this standard.
+
+#### Related standards
+
+| Standard ID | Relationship |
+|-------------|--------------|
+| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary — related manufacturing domain; distinct subject; not superseded by this standard |
+| FI-MFG-POL-003 | Customer Promise Discipline Policy — governs outward-facing commitments; timing elements remain blocked by HW-MFG-010 HOLD |
+
+#### Future revision notes
+
+- If the verified facts baseline changes HW-MFG-004 or its qualification, this standard requires revision before F.I. Forgot production-method boundaries may change.
+- This principle does not authorize engineering specifications, production workflows, or customer promises.
 - HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
 
 ---
