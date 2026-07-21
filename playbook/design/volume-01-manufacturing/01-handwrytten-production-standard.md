@@ -292,7 +292,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 | Envelope Fulfillment Handling | Manufacturing Constraint | Envelope Fulfillment Handling Boundary | FI-MFG-CON-001 | HW-MFG-005 | HW-VQ-014 | Yes | HW-VQ-014 (envelope addressing method undisclosed) | READY WITH QUALIFICATION | HW-MFG-005 confirms envelope handling as part of fulfillment, not handwritten addressing. Constraint must preserve envelope-handling language only and prohibit assumptions about addressing method or envelope-production path. | Frozen in Section 8.5 (July 21, 2026). |
 | Custom Signature Governance | Operational Policy | Custom Signature Governance Policy | FI-MFG-POL-001 | HW-MFG-006 | HW-VQ-011 | Yes | HW-VQ-011 (personalization and signature workflow detail) | READY WITH QUALIFICATION | HW-MFG-006 confirms capability, fee, turnaround, and robotic execution. Policy must govern authorization, authenticity, ownership, and approval — all company decisions beyond vendor disclosure. | Qualification requires fee and turnaround visibility in any future policy. |
 | Delivery Confirmation Policy | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-011 | — | Yes | — | NOT APPLICABLE | Optional delivery confirmation is one element of customer promise boundaries, not a standalone Volume 01 policy. Consolidated into FI-MFG-POL-003. API field presence proves capability only; universal support must not be assumed. | Absorbed candidate; no separate Standard ID reserved. |
-| Add-On Matching | Manufacturing Constraint | Add-On Fulfillment Boundary | FI-MFG-CON-002 | HW-MFG-012; HW-MFG-018 | HW-VQ-007 | Yes | HW-VQ-007 (pick/pack and matching operations undisclosed) | READY WITH QUALIFICATION | HW-MFG-012 and HW-MFG-018 support optional inserts, gift cards, and vendor guarantee matching language. Internal matching controls remain unknown. Constraint governs what F.I. Forgot may claim or assume about add-on fulfillment. | Related to envelope fulfillment but distinct; matching operations are a separate unknown. |
+| Add-On Matching | Manufacturing Constraint | Add-On Fulfillment Boundary | FI-MFG-CON-002 | HW-MFG-012; HW-MFG-018 | HW-VQ-007 | Yes | HW-VQ-007 (pick/pack and matching operations undisclosed) | READY WITH QUALIFICATION | HW-MFG-012 and HW-MFG-018 support optional inserts, gift cards, and vendor guarantee matching language. Internal matching controls remain unknown. Constraint governs what F.I. Forgot may claim or assume about add-on fulfillment. | Frozen in Section 8.7 (July 21, 2026). |
 | API Capability Boundaries | Excluded From Volume 01 | Vendor Capability Validation Constraint (consolidated) | — | HW-MFG-013 | — | Yes | Detailed API engineering deferred to later research volume | NOT APPLICABLE | HW-MFG-013 supports documented capability only. Detailed API integration standards belong in a later research volume, not Volume 01. Boundary-setting inputs are absorbed into FI-MFG-CON-003. | Excluded as standalone standard area; inputs retained in vendor capability constraint. |
 | Bulk Workflow Compatibility | Manufacturing Constraint | Bulk Workflow Compatibility Boundary | FI-MFG-CON-004 | HW-MFG-014 | — | Yes | — | READY WITH QUALIFICATION | HW-MFG-014 supports documented bulk workflows by address book or Excel with merge fields. Constraint must not become a Volume 01 integration specification or imply hidden manufacturing steps. | Company adoption of bulk workflows remains a separate decision. |
 | Queue Semantics and Customer Timing Communication | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-015 | HW-VQ-012 | Yes | HW-MFG-010 HOLD; HW-VQ-012 | NOT APPLICABLE | HW-MFG-015 confirms queue-entry semantics only. HW-MFG-010 remains on HOLD. No production timeline or delivery promise may be created from queue semantics. Consolidated into FI-MFG-POL-003 with timing elements blocked. | Absorbed candidate; timing portions remain blocked pending vendor confirmation. |
@@ -337,13 +337,12 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| — | — | — | — | — | — | FI-MFG-PRN-001 frozen — see Section 8.6. No standards currently queued for initial drafting. |
+| — | — | — | — | — | — | FI-MFG-CON-002 frozen — see Section 8.7. No standards currently queued for initial drafting. |
 
 ##### Ready With Qualification
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | HW-MFG-012; HW-MFG-018 | Pick/pack operations undisclosed | HW-VQ-007 | Draft constraint governing add-on claims and matching assumptions. |
 | FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | API integration detail deferred to later volume | HW-VQ-003 | Draft constraint requiring validation before assuming vendor capability in production. |
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | HW-MFG-014 | Must not become integration specification | — | Draft boundary for documented bulk workflow compatibility without hidden manufacturing claims. |
 | FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | HW-MFG-006 | Authorization and approval rules undecided | HW-VQ-011 | Draft policy with company judgment on signature authorization, authenticity, and ownership. |
@@ -407,7 +406,7 @@ The main risks of translating verified facts into standards prematurely are:
 
 This section contains **company decisions** about how F.I. Forgot chooses to manufacture, design for production, and govern the physical product experience.
 
-**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Three standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, July 21, 2026); remaining reserved standards not yet authored.
+**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Four standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, July 21, 2026); remaining reserved standards not yet authored.
 
 Standards in this section must be deliberate F.I. Forgot decisions. They may be informed by verified facts but must not be confused with vendor disclosures.
 
@@ -593,7 +592,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 |-------------|------|-------------|--------------------|---------------------|--------|
 | FI-MFG-PRN-001 | Real Pen Production Method Principle | Manufacturing Principle | READY WITH QUALIFICATION | HW-MFG-004 | Frozen (July 21, 2026) |
 | FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-005 | Frozen (July 21, 2026) |
-| FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-012; HW-MFG-018 | Reserved, Not Drafted |
+| FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-012; HW-MFG-018 | Frozen (July 21, 2026) |
 | FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Reserved, Not Drafted |
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-014 | Reserved, Not Drafted |
 | FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-006 | Reserved, Not Drafted |
@@ -605,6 +604,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 
 | Standard ID | Standard Statement | Supporting Fact IDs | Status |
 |-------------|-------------------|---------------------|--------|
+| FI-MFG-CON-002 | F.I. Forgot SHALL treat optional gift cards and inserts as confirmed Handwrytten add-on capability and SHALL NOT assume undisclosed pick/pack, matching, or operational-sequencing mechanics. | HW-MFG-012; HW-MFG-018 | Frozen (July 21, 2026) |
 | FI-MFG-PRN-001 | F.I. Forgot SHALL adopt verified real-pen robotic writing as the governing Handwrytten production method for Volume 01 and SHALL NOT treat that disclosure as evidence of handwriting realism, quality superiority, or recipient perception outcomes. | HW-MFG-004 | Frozen (July 21, 2026) |
 | FI-MFG-POL-002 | Placed Handwrytten manufacturing orders SHALL NOT be represented as editable; cancellation SHALL be treated as available only before the writing process begins. | HW-MFG-016 | Frozen (July 21, 2026) |
 | FI-MFG-CON-001 | F.I. Forgot SHALL treat envelope handling as confirmed Handwrytten fulfillment scope and SHALL NOT assume handwritten envelope addressing or an undisclosed envelope-production path. | HW-MFG-005 | Frozen (July 21, 2026) |
@@ -996,6 +996,140 @@ A material assumption, boundary statement, or production-method description viol
 - If the verified facts baseline changes HW-MFG-004 or its qualification, this standard requires revision before F.I. Forgot production-method boundaries may change.
 - This principle does not authorize engineering specifications, production workflows, or customer promises.
 - HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
+
+### 8.7 FI-MFG-CON-002 — Add-On Fulfillment Boundary
+
+#### Standard record
+
+| Field | Value |
+|-------|-------|
+| **Standard ID** | FI-MFG-CON-002 |
+| **Standard name** | Add-On Fulfillment Boundary |
+| **Disposition** | Manufacturing Constraint |
+| **Status** | Frozen |
+| **Freeze date** | July 21, 2026 |
+| **Supporting Fact IDs** | HW-MFG-012; HW-MFG-018 |
+| **Related vendor questions** | HW-VQ-007 |
+| **Governing qualification** | HW-MFG-012: product capability, not pick/pack detail. HW-MFG-018: service and liability boundaries. |
+
+#### Standard freeze gate
+
+FI-MFG-CON-002 passed individual freeze review on July 21, 2026.
+
+| Criterion | Result |
+|-----------|--------|
+| Identity and planning alignment | Pass |
+| Template v1.0 compliance | Pass |
+| Normative requirements (R01–R07) | Pass |
+| Evidence discipline | Pass |
+| Scope and dependencies | Pass |
+| Validation method | Pass |
+| Prohibitions | Pass |
+| Stability | Pass |
+
+#### Standard statement
+
+F.I. Forgot SHALL treat optional gift cards and inserts as confirmed Handwrytten add-on capability and SHALL NOT assume undisclosed pick/pack, matching, or operational-sequencing mechanics.
+
+#### Purpose
+
+Define the manufacturing constraint that bounds how F.I. Forgot may treat Handwrytten add-on fulfillment in Volume 01 design, product, operational, and planning decisions.
+
+This constraint prevents undisclosed pick/pack, matching, or operational-sequencing assumptions from entering the F.I. Forgot manufacturing baseline.
+
+#### Scope
+
+This standard applies to:
+
+- All F.I. Forgot Volume 01 design, product, operational, and planning decisions that depend on Handwrytten add-on fulfillment characteristics.
+- All internal materials that bound, classify, or depend on add-on fulfillment assumptions for Handwrytten manufacturing.
+
+This standard does not define customer messaging, workflow instructions, engineering specifications, API behavior, user-interface behavior, vendor diligence procedures, or vendor performance guarantees.
+
+#### Definitions
+
+| Term | Definition |
+|------|------------|
+| **Add-on capability** | Handwrytten support for gift cards and inserts as optional order add-ons, as confirmed by HW-MFG-012. This standard does not expand add-on capability beyond verified disclosure. |
+| **Add-on fulfillment mechanics** | Pick/pack workflows, matching logic, and operational sequencing used to fulfill add-on orders. These mechanics are not disclosed in the verified facts baseline. |
+
+#### Normative requirements
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| FI-MFG-CON-002-R01 | F.I. Forgot SHALL adopt the verified add-on capability boundary as a permanent manufacturing constraint for Volume 01 add-on fulfillment decisions. | Company judgment |
+| FI-MFG-CON-002-R02 | F.I. Forgot SHALL treat gift cards and inserts as optional Handwrytten order add-ons within Volume 01. | HW-MFG-012 |
+| FI-MFG-CON-002-R03 | F.I. Forgot SHALL use add-on capability language when bounding add-on fulfillment scope in in-scope decisions. | HW-MFG-012 qualification |
+| FI-MFG-CON-002-R04 | F.I. Forgot SHALL NOT assume pick/pack workflows, matching logic, or operational sequencing for add-on fulfillment in any in-scope decision. | HW-MFG-012 qualification |
+| FI-MFG-CON-002-R05 | F.I. Forgot SHALL NOT treat vendor guarantee matching language as evidence of disclosed pick/pack or matching operations. | HW-MFG-018 qualification |
+| FI-MFG-CON-002-R06 | F.I. Forgot SHALL NOT adopt vendor guarantee assurances as F.I. Forgot operational assumptions or customer commitments. | HW-MFG-018 qualification |
+| FI-MFG-CON-002-R07 | F.I. Forgot SHALL align in-scope materials describing add-on fulfillment with FI-MFG-CON-002-R02 through FI-MFG-CON-002-R06. | Company judgment |
+
+#### Company judgment
+
+The following decisions are F.I. Forgot company judgments. They are not established by vendor disclosure alone:
+
+- F.I. Forgot adopts the HW-MFG-012 and HW-MFG-018 verified boundaries as a permanent manufacturing constraint for Volume 01 add-on fulfillment decisions.
+- F.I. Forgot applies this constraint to design, product, operational, and planning decisions — not only to engineering artifacts.
+- F.I. Forgot does not treat vendor guarantee language as a disclosed description of add-on fulfillment mechanics or as an F.I. Forgot customer commitment.
+
+#### Exceptions
+
+No exceptions are defined in this standard.
+
+Any future exception requires a documented standard revision supported by verified evidence or explicit company judgment recorded in the revision.
+
+#### Out of scope
+
+The following subjects are explicitly out of scope for FI-MFG-CON-002:
+
+| Subject | Reason |
+|---------|--------|
+| Pick/pack workflows, matching logic, or operational sequencing | Not disclosed; HW-VQ-007 unresolved |
+| Vendor guarantee timing, mailing, or delivery promises | HW-MFG-018 service boundary only; HW-MFG-010 remains on HOLD |
+| Customer promise or outward-facing messaging | Operational policy domain; reserved for FI-MFG-POL-003 and FI-MFG-POL-004 |
+| Envelope fulfillment handling | Governed by FI-MFG-CON-001 |
+| Add-on quality, presentation, or premium claims beyond verified capability disclosure | Not verified beyond HW-MFG-012 |
+| Production timing, mailing timing, or delivery promises | HW-MFG-010 remains on HOLD |
+| API behavior, order payloads, or system workflows | Implementation; not defined in this constraint |
+| Vendor diligence procedures for HW-VQ-007 | Vendor diligence; not defined in this constraint |
+| Resend, refund, or recovery policy | Reserved for FI-MFG-POL-004 |
+
+#### Supporting evidence
+
+| Fact ID | Verified statement used by this standard | Qualification preserved |
+|---------|------------------------------------------|-------------------------|
+| HW-MFG-012 | Handwrytten’s features page and API support gift cards and inserts as optional order add-ons. | Product capability, not pick/pack detail. |
+| HW-MFG-018 | Handwrytten’s guarantee offers a 100% money-back guarantee for 90 days, promises pen-written notes, timely mailing for standard orders, and correct card-to-envelope and insert matching, while excluding sender text errors, incorrect addresses, and postal issues after USPS handoff. | Service and liability boundaries. |
+
+No additional verified facts are cited by this standard.
+
+#### Engineering implications
+
+Not defined in this manufacturing constraint.
+
+Engineering specifications, if required, SHALL be derived separately from this standard upon freeze review. This standard does not authorize engineering requirements.
+
+#### Validation method
+
+Compliance with FI-MFG-CON-002 SHALL be verified by review of in-scope design, product, operational, and planning materials against FI-MFG-CON-002-R01 through FI-MFG-CON-002-R07.
+
+A material assumption, boundary statement, or dependency violates this standard if it contradicts any normative requirement in this standard.
+
+#### Related standards
+
+| Standard ID | Relationship |
+|-------------|--------------|
+| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary — related fulfillment domain; distinct subject; not superseded by this standard |
+| FI-MFG-POL-003 | Customer Promise Discipline Policy — governs outward-facing commitments; timing elements remain blocked by HW-MFG-010 HOLD |
+| FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy — governs resend and recovery; distinct from add-on fulfillment mechanics |
+
+#### Future revision notes
+
+- If HW-VQ-007 resolves pick/pack or matching operations, this standard requires revision before F.I. Forgot may treat those mechanics as verified.
+- If the verified facts baseline changes HW-MFG-012 or HW-MFG-018 or their qualifications, this standard requires revision before F.I. Forgot constraint boundaries may change.
+- HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
+- Vendor guarantee timing language in HW-MFG-018 does not override HW-MFG-010 HOLD.
 
 ---
 
