@@ -17,6 +17,7 @@
 | **Governing verified facts** | `playbook/research/handwrytten/volume-01-manufacturing-overview/03-verified-facts.md` (Baseline Version 1.0) |
 | **Verified facts mapping status** | Complete |
 | **Verified facts baseline** | Handwrytten Manufacturing Overview v1.0 |
+| **Fact-to-decision assessment status** | Complete |
 
 ---
 
@@ -212,29 +213,95 @@ This section records verified Handwrytten facts from the frozen Volume 01 verifi
 | Vendor Disclosure | 1 |
 | **Total** | **19** |
 
-### 7.5 Fact-to-standards mapping placeholder
+### 7.5 Fact-to-decision assessment register
 
-| Fact ID | Potential Standard Area | Standard ID | Mapping Status | Notes |
-|---------|-------------------------|-------------|----------------|-------|
-| HW-MFG-001 | | | Not Yet Assessed | |
-| HW-MFG-002 | | | Not Yet Assessed | |
-| HW-MFG-003 | | | Not Yet Assessed | |
-| HW-MFG-004 | | | Not Yet Assessed | |
-| HW-MFG-005 | | | Not Yet Assessed | |
-| HW-MFG-006 | | | Not Yet Assessed | |
-| HW-MFG-007 | | | Not Yet Assessed | |
-| HW-MFG-008 | | | Not Yet Assessed | |
-| HW-MFG-009 | | | Not Yet Assessed | |
-| HW-MFG-011 | | | Not Yet Assessed | |
-| HW-MFG-012 | | | Not Yet Assessed | |
-| HW-MFG-013 | | | Not Yet Assessed | |
-| HW-MFG-014 | | | Not Yet Assessed | |
-| HW-MFG-015 | | | Not Yet Assessed | |
-| HW-MFG-016 | | | Not Yet Assessed | |
-| HW-MFG-017 | | | Not Yet Assessed | |
-| HW-MFG-018 | | | Not Yet Assessed | |
-| HW-MFG-019 | | | Not Yet Assessed | |
-| HW-MFG-020 | | | Not Yet Assessed | |
+**Status:** Fact-to-decision assessment complete.
+
+This register classifies what each verified fact may mean for F.I. Forgot before any permanent manufacturing standard is drafted. Classifications do not approve standards, assign Standard IDs, or create engineering requirements.
+
+| Fact ID | Fact Domain | Decision Classification | Potential Decision Area | Company Judgment Required | Related Vendor Question | Deferred Research Dependency | Rationale | Standard Drafting Status | Notes |
+|---------|-------------|----------------------|-------------------------|---------------------------|-------------------------|------------------------------|-----------|--------------------------|-------|
+| HW-MFG-001 | Production Infrastructure | Context Only; No Company Action | Vendor scale disclosure | No | — | — | Official fleet-size language is useful background only. Qualification limits the fact to fleet-size disclosure; it does not establish capacity, reliability, utilization, or service levels. | Not Yet Drafted | Do not derive capacity or throughput assumptions from fleet count. |
+| HW-MFG-002 | Robotic Handwriting | Context Only; Supports Manufacturing Constraint; Supports Vendor Question; Supports Deferred Research | Per-machine capacity boundary; vendor throughput diligence | Yes | HW-VQ-003 | Vendor Operations Diligence | Per-machine capacity is a theoretical upper bound, not fleet-average or customer-accessible throughput. May inform conservative planning boundaries only after company judgment. | Not Yet Drafted | Do not create service-level or production-capacity promises from this fact. |
+| HW-MFG-003 | Robotic Handwriting | Context Only; No Company Action | Intellectual property disclosure | No | — | — | Patent existence is verified vendor disclosure with scope not reproduced. No concrete legal, design, or engineering consequence for F.I. Forgot is established by this fact alone. | Not Yet Drafted | Retain as context if later legal or partner diligence requires it. |
+| HW-MFG-004 | Robotic Handwriting | Supports Company Standard; Supports Manufacturing Constraint | Physical ink authenticity; production-method validation | Yes | — | — | Real-pen writing is core to the vendor production method and may later support a deliberate F.I. Forgot authenticity requirement, but only as a company choice beyond vendor disclosure. | Not Yet Drafted | Qualification preserves production-method disclosure only; do not draft the standard in this pass. |
+| HW-MFG-005 | Fulfillment | Supports Manufacturing Constraint; Supports Vendor Question | Envelope fulfillment handling | Yes | HW-VQ-014 | Manufacturing Workflow Detail | Envelope handling is confirmed, but the specific addressing method is not disclosed. Design and engineering must not assume handwritten addressing or a particular envelope-production path. | Not Yet Drafted | Use envelope-handling language only; do not treat “crafted envelopes” as proof of handwritten addressing. |
+| HW-MFG-006 | Signature Handling | Supports Company Standard; Supports Manufacturing Constraint; Supports Vendor Question | Custom signature governance | Yes | HW-VQ-011 | Handwriting Personalization | Custom signatures involve design-team recreation, fee, turnaround, and robotic execution. This may support later signature policy and workflow boundaries, but company rules remain undecided. | Not Yet Drafted | Qualification requires fee and turnaround to remain visible in any future standard. |
+| HW-MFG-007 | Robotic Handwriting | Context Only; No Company Action | Robot monitoring disclosure | No | — | — | Autonomous operation and Slack/Teams alerts describe vendor monitoring capability, not uptime, staffing, or F.I. Forgot service reliability. | Not Yet Drafted | Qualification excludes uptime proof; no company action is justified from this fact alone. |
+| HW-MFG-008 | Manufacturing Workflow | Context Only; Supports Manufacturing Constraint | Application-specific production controls | Yes | — | — | Barcode and metadata integration are application-specific and may apply only to certain install paths. F.I. Forgot must not assume its orders use these controls without separate confirmation. | Not Yet Drafted | Qualification requires application-specific wording in any downstream use. |
+| HW-MFG-009 | Production Infrastructure | Context Only; Supports Vendor Question; Supports Deferred Research | Facility location disclosure; continuity planning | Yes | HW-VQ-001; HW-VQ-008 | Vendor Risk and Continuity; Vendor Operations Diligence | Tempe address is verified contact/operating-address disclosure only. It does not prove that all customer orders are fulfilled from Arizona or support continuity assumptions. | Not Yet Drafted | Corroboration on pricing and features pages does not change fulfillment-network uncertainty. |
+| HW-MFG-011 | Postage and Delivery | Supports Company Standard; Supports Manufacturing Constraint | Delivery confirmation policy; postage-service boundaries | Yes | — | — | Standard first-class mail excludes tracking; delivery confirmation is optional. This may support later F.I. Forgot product and operational decisions, but API field presence proves capability only. | Not Yet Drafted | Qualification preserves service-design and capability-only distinctions. |
+| HW-MFG-012 | Product Capability | Supports Company Standard; Supports Manufacturing Constraint; Supports Vendor Question | Add-on matching; optional inserts and gift cards | Yes | HW-VQ-007 | Fulfillment Standards | Gift cards and inserts are supported as optional add-ons, but pick/pack and matching operations are not publicly disclosed. Future standards may govern whether and how F.I. Forgot uses add-ons. | Not Yet Drafted | Product capability does not establish operational matching controls. |
+| HW-MFG-013 | Platform Capability | Context Only; Supports Manufacturing Constraint; Supports Deferred Research | API capability boundaries | Yes | — | API and integration engineering (later volume) | API v3.15.0 documents broad platform capability, not universal operational use or production-path utilization. Useful for boundary-setting, not for creating integration requirements in this manufacturing volume. | Not Yet Drafted | Qualification excludes utilization proof; defer detailed integration standards to later work. |
+| HW-MFG-014 | Bulk Sending | Supports Company Standard; Supports Manufacturing Constraint | Bulk workflow compatibility | Yes | — | — | Bulk sending by address book or Excel with merge fields is a documented customer workflow that may affect how F.I. Forgot designs high-volume sending, but it does not disclose hidden manufacturing steps. | Not Yet Drafted | Support-documentation fact only; company adoption of bulk workflows remains a separate decision. |
+| HW-MFG-015 | Customer Workflow | Supports Manufacturing Constraint; Supports Vendor Question | Queue semantics; customer timing communication | Yes | HW-VQ-012 | Operational Characteristics | Send date defaults and queue-entry semantics are verified, but they do not resolve production or mailing timing. HW-MFG-010 remains on HOLD and no timing promise may be derived here. | Not Yet Drafted | Queue-semantics fact only; do not create delivery or fulfillment SLA language. |
+| HW-MFG-016 | Customer Workflow | Supports Company Standard; Supports Manufacturing Constraint | Order modification and cancellation boundaries | Yes | — | — | Orders can be canceled only before writing begins and cannot be edited once placed. This may support later customer-promise, support, and resend discipline, but F.I. Forgot policy is not yet defined. | Not Yet Drafted | Operational boundary fact; company escalation and edit policy remain undecided. |
+| HW-MFG-017 | International Fulfillment | Supports Company Standard; Supports Manufacturing Constraint; Supports Deferred Research | International availability | Yes | — | International fulfillment architecture | FAQ-confirmed reach to Canada and 180+ countries does not establish country-level performance, transit reliability, or customs behavior. | Not Yet Drafted | Qualification limits use to FAQ-confirmed reach only. |
+| HW-MFG-018 | Vendor Disclosure | Supports Company Standard; Supports Manufacturing Constraint; Supports Vendor Question | Customer promise discipline; vendor liability boundaries | Yes | HW-VQ-009 | Fulfillment and Support Operations | Guarantee promises and exclusions define vendor service boundaries that may inform later F.I. Forgot customer experience, resend, and escalation design, but must not be adopted as F.I. Forgot promises without separate company judgment. | Not Yet Drafted | Qualification preserves service and liability boundaries; timing language inside the guarantee does not override HW-MFG-010 HOLD. |
+| HW-MFG-019 | Postage and Delivery | Supports Company Standard; Supports Manufacturing Constraint; Supports Vendor Question | Vendor liability and resend handling | Yes | HW-VQ-009 | Fulfillment and Support Operations | USPS handoff liability exclusion is a verified vendor boundary that may inform later F.I. Forgot support and resend policy, but does not by itself define F.I. Forgot obligations. | Not Yet Drafted | Liability-boundary fact only. |
+| HW-MFG-020 | Production Infrastructure | Context Only; Supports Vendor Question; Supports Deferred Research | Deployment capability disclosure; fulfillment-network uncertainty | Yes | HW-VQ-001 | Vendor Operations Diligence | Global 3PL robot integration is a deployment-capability statement only. It does not establish that Handwrytten customer fulfillment is distributed across 3PL sites. | Not Yet Drafted | Qualification excludes customer-order fulfillment proof. |
+
+**Boundary note:** This section records verified Handwrytten facts only. It does not establish what F.I. Forgot must adopt, promise, reject, or implement.
+
+### 7.6 Decision area summary
+
+Counts below are calculated from Decision Classification values in Section 7.5. Because one fact may have multiple classifications, totals may exceed 19.
+
+| Decision Classification | Fact Association Count |
+|-------------------------|-------------------------:|
+| Supports Company Standard | 9 |
+| Supports Manufacturing Constraint | 14 |
+| Supports Vendor Question | 9 |
+| Supports Deferred Research | 5 |
+| Context Only | 8 |
+| No Company Action | 3 |
+
+### 7.7 Nonbinding candidate standard areas
+
+The following areas are **nonbinding** potential future standard topics derived from the fact-to-decision assessment. They do not assign Standard IDs and do not constitute approved standards.
+
+- Physical Ink Authenticity
+- Envelope Fulfillment Handling
+- Custom Signature Governance
+- Delivery Confirmation Policy
+- Add-On Matching
+- API Capability Boundaries
+- Bulk Workflow Compatibility
+- Queue Semantics and Customer Timing Communication
+- Order Modification and Cancellation Boundaries
+- International Availability
+- Customer Promise Discipline
+- Vendor Liability and Resend Handling
+- Vendor Capability Validation
+- Operational Continuity
+
+### 7.8 No-action and context register
+
+Facts classified as **Context Only** and/or **No Company Action** should not be promoted into F.I. Forgot manufacturing standards without new evidence or separate company judgment.
+
+| Fact ID | Classification | Why No Standard Should Be Derived |
+|---------|----------------|-----------------------------------|
+| HW-MFG-001 | Context Only; No Company Action | Fleet-size marketing disclosure does not establish utilization, reliability, capacity, or service performance. |
+| HW-MFG-002 | Context Only (also constraint input) | Per-machine capacity is not actual throughput; it supports diligence and conservative boundary thinking only, not a company SLA. |
+| HW-MFG-003 | Context Only; No Company Action | Patent citation has no identified design, engineering, or operating consequence for F.I. Forgot in this volume. |
+| HW-MFG-007 | Context Only; No Company Action | Monitoring alerts are vendor operations disclosure, not proof of uptime or F.I. Forgot service reliability. |
+| HW-MFG-008 | Context Only (also constraint input) | Application-specific production controls may not apply to F.I. Forgot orders and should not be assumed universal. |
+| HW-MFG-009 | Context Only (also vendor-question input) | Address disclosure does not prove centralized fulfillment or continuity design. |
+| HW-MFG-013 | Context Only (also constraint input) | API documentation proves capability only; it does not justify integration requirements in this manufacturing volume. |
+| HW-MFG-020 | Context Only (also vendor-question input) | 3PL deployment capability does not prove distributed customer fulfillment. |
+
+### 7.9 Decision risks
+
+The main risks of translating verified facts into standards prematurely are:
+
+- **Converting marketing scale into capacity assumptions.** Fleet-size and per-machine capacity facts must not be turned into throughput, utilization, or SLA commitments.
+- **Converting API capability into universal operational practice.** Documented endpoints and fields do not prove that F.I. Forgot uses or should use every capability in production.
+- **Converting vendor guarantees into F.I. Forgot promises.** Guarantee and liability facts describe vendor boundaries, not F.I. Forgot customer commitments.
+- **Converting location disclosure into continuity assumptions.** A verified operating address does not prove fulfillment-network design or disaster recovery.
+- **Converting international reach into performance claims.** Country-count disclosure does not establish delivery performance, customs reliability, or market readiness.
+- **Converting physical process facts into untested quality claims.** Real-pen production method may inform later authenticity policy, but not measured quality superiority.
+- **Ignoring qualifications attached to verified facts.** Qualifications such as capability-only, application-specific, queue-semantics, and deployment-capability-only must remain visible in all downstream interpretation.
+- **Deriving timing standards while HW-MFG-010 remains on HOLD.** Queue semantics and guarantee timing language must not be harmonized into F.I. Forgot delivery promises without vendor confirmation.
 
 ---
 
