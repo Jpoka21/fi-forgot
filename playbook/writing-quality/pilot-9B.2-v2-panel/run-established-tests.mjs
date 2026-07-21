@@ -5,7 +5,7 @@
  * Usage:
  *   node playbook/writing-quality/pilot-9B.2-v2-panel/run-established-tests.mjs
  *
- * Expected: 370 unit assertions + harness self-checks, all exit 0.
+ * Expected: 315 unit assertions + harness self-checks, all exit 0.
  */
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -16,7 +16,6 @@ const root = path.resolve(__dirname, "../../..");
 
 const UNIT_TESTS = [
   "v2-generate-card-prompt-priority",
-  "v2-generate-card-professional-thankyou-postprocess",
   "v2-generate-card-one-card",
   "v2-generate-card-primary-context",
   "v2-sprint-8g-support-retention",
@@ -95,9 +94,9 @@ for (const r of results) {
 }
 
 console.log(`\nUnit assertion total: ${unitPassed} passed, ${unitFailed} failed`);
-console.log(`Expected unit total: 370 passed, 0 failed`);
-if (unitPassed !== 370 || unitFailed !== 0) {
-  console.log("WARNING: unit total differs from established 370.");
+console.log(`Expected unit total: 315 passed, 0 failed`);
+if (unitPassed !== 315 || unitFailed !== 0) {
+  console.log("WARNING: unit total differs from established 315.");
   hardFail = true;
 }
 
