@@ -298,7 +298,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 | Queue Semantics and Customer Timing Communication | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-015 | HW-VQ-012 | Yes | HW-MFG-010 HOLD; HW-VQ-012 | NOT APPLICABLE | HW-MFG-015 confirms queue-entry semantics only. HW-MFG-010 remains on HOLD. No production timeline or delivery promise may be created from queue semantics. Consolidated into FI-MFG-POL-003 with timing elements blocked. | Absorbed candidate; timing portions remain blocked pending vendor confirmation. |
 | Order Modification and Cancellation Boundaries | Operational Policy | Order Modification and Cancellation Policy | FI-MFG-POL-002 | HW-MFG-016 | — | Yes | — | READY FOR DRAFTING | HW-MFG-016 establishes a verified operational boundary: cancellation before writing only; no post-placement edits. Sufficient to support an internal customer experience and operational boundary policy. | Frozen in Section 8.4 (July 21, 2026). |
 | International Availability | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-017 | — | Yes | International fulfillment architecture (deferred research) | NOT APPLICABLE | HW-MFG-017 confirms broad FAQ reach only. Country-level service quality, transit reliability, and customs behavior are not established. Consolidated into FI-MFG-POL-003 as reach-limit discipline, not performance promise. | Absorbed candidate; no separate Standard ID reserved. |
-| Customer Promise Discipline | Operational Policy | Customer Promise Discipline Policy | FI-MFG-POL-003 | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | HW-VQ-012 | Yes | HW-MFG-010 HOLD (timing and queue promise elements); HW-VQ-012 | READY WITH QUALIFICATION | Overarching policy consolidating delivery confirmation boundaries, queue semantics communication limits, international reach limits, and vendor guarantee-informed promise discipline. Non-timing elements may be drafted; timing and delivery promise language remain blocked while HW-MFG-010 is on HOLD. | Absorbs Delivery Confirmation Policy, Queue Semantics and Customer Timing Communication, and International Availability. Vendor guarantee timing language does not override HW-MFG-010 HOLD. |
+| Customer Promise Discipline | Operational Policy | Customer Promise Discipline Policy | FI-MFG-POL-003 | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | HW-VQ-012 | Yes | HW-MFG-010 HOLD (timing and queue promise elements); HW-VQ-012 | READY WITH QUALIFICATION | Overarching policy consolidating delivery confirmation boundaries, queue semantics communication limits, international reach limits, and vendor guarantee-informed promise discipline. Non-timing elements may be drafted; timing and delivery promise language remain blocked while HW-MFG-010 is on HOLD. | Absorbs Delivery Confirmation Policy, Queue Semantics and Customer Timing Communication, and International Availability. Vendor guarantee timing language does not override HW-MFG-010 HOLD. Non-timing portion drafted in Section 8.11; timing elements remain blocked. |
 | Vendor Liability and Resend Handling | Operational Policy | Vendor Liability and Resend Handling Policy | FI-MFG-POL-004 | HW-MFG-018; HW-MFG-019 | HW-VQ-009 | Yes | — | READY WITH QUALIFICATION | HW-MFG-018 and HW-MFG-019 establish vendor guarantee and USPS handoff liability boundaries. F.I. Forgot resend, recovery, and escalation policy remains a company decision and must not adopt vendor guarantees as F.I. Forgot promises. | Related to Customer Promise Discipline but retained as separate policy for liability and resend obligations. |
 | Vendor Capability Validation | Manufacturing Constraint | Vendor Capability Validation Constraint | FI-MFG-CON-003 | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | HW-VQ-003 | Yes | API and integration engineering (later research volume) | READY WITH QUALIFICATION | Overarching constraint requiring F.I. Forgot to validate vendor capability before assuming operational use. Absorbs API capability boundary inputs from HW-MFG-013. Application-specific controls (HW-MFG-008) and deployment capability (HW-MFG-020) must not be assumed universal. | Frozen in Section 8.8 (July 21, 2026). |
 | Operational Continuity | Vendor Diligence Only | — | — | HW-MFG-009; HW-MFG-020 | HW-VQ-001; HW-VQ-003; HW-VQ-008 | Yes | HW-VQ-001; HW-VQ-003; HW-VQ-008; insufficient continuity evidence | BLOCKED | Current evidence is insufficient for continuity or fulfillment-network standards. Tempe address and 3PL deployment capability do not prove customer-order fulfillment topology or disaster recovery. Remains vendor diligence until HW-VQ responses resolve. | No Standard ID reserved; related inputs partially inform FI-MFG-CON-003 diligence posture. |
@@ -343,7 +343,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Timing and queue promise elements blocked by HW-MFG-010 HOLD | HW-VQ-012 | Draft non-timing promise boundaries first; defer timing language until HW-VQ-012 resolves. |
+| FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Timing and queue promise elements blocked by HW-MFG-010 HOLD | HW-VQ-012 | Non-timing portion drafted in Section 8.11; timing and queue promise sections remain blocked pending HW-VQ-012 resolution. |
 | FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | HW-MFG-018; HW-MFG-019 | F.I. Forgot resend policy undecided | HW-VQ-009 | Draft resend and recovery policy with vendor liability boundaries disclosed; do not adopt vendor guarantees as F.I. Forgot promises. |
 
 ##### Blocked
@@ -403,7 +403,7 @@ The main risks of translating verified facts into standards prematurely are:
 
 This section contains **company decisions** about how F.I. Forgot chooses to manufacture, design for production, and govern the physical product experience.
 
-**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Seven standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, FI-MFG-CON-003, FI-MFG-CON-004, FI-MFG-POL-001, July 21, 2026); remaining reserved standards not yet authored.
+**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Seven standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, FI-MFG-CON-003, FI-MFG-CON-004, FI-MFG-POL-001, July 21, 2026). FI-MFG-POL-003 non-timing portion drafted in Section 8.11 (timing elements blocked by HW-MFG-010 HOLD). Remaining reserved standards not yet fully authored.
 
 Standards in this section must be deliberate F.I. Forgot decisions. They may be informed by verified facts but must not be confused with vendor disclosures.
 
@@ -594,13 +594,14 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-014 | Frozen (July 21, 2026) |
 | FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-006 | Frozen (July 21, 2026) |
 | FI-MFG-POL-002 | Order Modification and Cancellation Policy | Operational Policy | READY FOR DRAFTING | HW-MFG-016 | Frozen (July 21, 2026) |
-| FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Reserved, Not Drafted |
+| FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Drafted, Pending Freeze (timing elements blocked) |
 | FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-018; HW-MFG-019 | Reserved, Not Drafted |
 
 ### 8.3 Standards register
 
 | Standard ID | Standard Statement | Supporting Fact IDs | Status |
 |-------------|-------------------|---------------------|--------|
+| FI-MFG-POL-003 | F.I. Forgot SHALL govern customer-facing promise discipline for delivery confirmation, queue semantics, international reach, and vendor guarantee boundaries on Handwrytten-fulfilled manufacturing orders, and SHALL NOT represent optional capabilities as universal, convert queue semantics into timing commitments, exceed FAQ-confirmed international reach, or adopt Handwrytten guarantee disclosure as F.I. Forgot customer promises. Timing and delivery-promise elements remain blocked pending resolution of HW-MFG-010 HOLD and HW-VQ-012. | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Drafted, Pending Freeze (timing elements blocked) |
 | FI-MFG-POL-001 | F.I. Forgot SHALL govern custom signature use through documented authorization and approval, SHALL disclose that a one-time fee and turnaround apply, and SHALL NOT treat Handwrytten custom-signature capability as establishing legal authority, identity, ownership, consent, or proof of personal execution. | HW-MFG-006 | Frozen (July 21, 2026) |
 | FI-MFG-CON-004 | F.I. Forgot SHALL treat Handwrytten bulk sending by address-book selection or Excel upload as documented customer-workflow disclosure only and SHALL NOT assume hidden manufacturing steps, undisclosed production mechanics, or F.I. Forgot bulk-workflow adoption from that disclosure. | HW-MFG-014 | Frozen (July 21, 2026) |
 | FI-MFG-CON-003 | F.I. Forgot SHALL validate Handwrytten vendor capability against verified disclosure before assuming operational use and SHALL NOT treat documented platform capability, application-specific controls, deployment capability, or per-machine capacity as universal operational practice. | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Frozen (July 21, 2026) |
@@ -1544,6 +1545,169 @@ A material statement violates this standard if it contradicts any normative requ
 - If the verified facts baseline changes HW-MFG-006 or its qualification, this standard requires revision before F.I. Forgot policy boundaries may change.
 - Exact fee, turnaround, refund, revision, and workflow mechanics may be added only through a documented revision supported by verified evidence or explicit company judgment.
 - HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
+
+### 8.11 FI-MFG-POL-003 — Customer Promise Discipline Policy
+
+#### Standard record
+
+| Field | Value |
+|-------|-------|
+| **Standard ID** | FI-MFG-POL-003 |
+| **Standard name** | Customer Promise Discipline Policy |
+| **Disposition** | Operational Policy |
+| **Status** | Drafted, Pending Freeze (timing elements blocked) |
+| **Supporting Fact IDs** | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 |
+| **Related vendor questions** | HW-VQ-012 (unresolved; nonnormative vendor diligence only) |
+| **Governing qualification** | HW-MFG-011: Service-design fact; API field proves capability only. HW-MFG-015: Queue-semantics fact. HW-MFG-017: FAQ-confirmed reach only; API country-list endpoint not captured in public docs. HW-MFG-018: Service and liability boundaries. |
+
+#### Blocked completion record
+
+The non-timing portion of FI-MFG-POL-003 is drafted in this section. Material timing and delivery-promise elements remain **blocked** and are not normatively authored here.
+
+| Blocked element category | Blocking cause | Resolution required |
+|--------------------------|----------------|---------------------|
+| Production-time promises | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Mailing-time promises | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Processing-time promises | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Fulfillment-time promises | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Delivery-date promises | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Arrival estimates | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Elapsed queue-time representations | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Customer-facing service levels | HW-MFG-010 HOLD | Direct vendor confirmation per HW-VQ-012 |
+| Harmonized vendor timing language | HW-MFG-010 HOLD; HW-VQ-012 unresolved | Direct vendor confirmation per HW-VQ-012 |
+
+HW-MFG-010 is not cited as normative support by this partial draft. HW-VQ-012 is not treated as evidence and does not support any requirement.
+
+This standard has not passed individual freeze review. Promotion to **Frozen** requires resolution of HW-MFG-010 HOLD or an approved scope revision, verified disposition of HW-VQ-012, formal standard revision with evidence and Source review, completion of blocked timing elements where applicable, and individual freeze review.
+
+#### Standard statement
+
+F.I. Forgot SHALL govern customer-facing promise discipline for delivery confirmation, queue semantics, international reach, and vendor guarantee boundaries on Handwrytten-fulfilled manufacturing orders, and SHALL NOT represent optional capabilities as universal, convert queue semantics into timing commitments, exceed FAQ-confirmed international reach, or adopt Handwrytten guarantee disclosure as F.I. Forgot customer promises. Timing and delivery-promise elements remain blocked pending resolution of HW-MFG-010 HOLD and HW-VQ-012.
+
+#### Purpose
+
+Define F.I. Forgot's operational policy for outward-facing customer promise discipline on Handwrytten-fulfilled manufacturing orders.
+
+This policy establishes what F.I. Forgot may communicate, imply, promise, or rely upon when describing delivery confirmation, queue semantics, international reach, and vendor guarantee boundaries. It does not establish timing promises, production timelines, mailing timelines, fulfillment timelines, delivery dates, or customer-facing service levels.
+
+#### Scope
+
+This standard applies to:
+
+- All F.I. Forgot Volume 01 customer-facing, partner-facing, and internal policy statements that describe delivery confirmation, send-date or queue semantics, international shipment availability, or Handwrytten guarantee-related customer commitments for Handwrytten-fulfilled manufacturing orders.
+- F.I. Forgot decisions to represent, offer, or rely upon those subjects in in-scope materials.
+
+This standard does not define API integration behavior, field mappings, webhook behavior, polling logic, order-status synchronization, customer-notification architecture, tracking implementation, country-list synchronization, database schemas, user-interface behavior, workflow automation, alerting logic, international fulfillment architecture, service-level monitoring, resend eligibility, refund decisions, replacement procedures, customer compensation, or recovery workflow.
+
+#### Definitions
+
+| Term | Definition |
+|------|------------|
+| **Delivery confirmation** | Optional checkout capability described in HW-MFG-011. Standard first-class mail does not include tracking. This standard does not treat delivery confirmation as universal, automatic, or proof of delivery timing or recipient receipt. |
+| **Send date** | The Handwrytten scheduling term confirmed by HW-MFG-015 as the date the card enters the processing queue. Send date is not necessarily the mailing date. This standard does not treat send date as a timing promise. |
+| **FAQ-confirmed international reach** | Handwrytten company FAQ disclosure confirmed by HW-MFG-017 that international shipments are available to Canada and over 180 countries. This standard does not expand reach beyond that disclosure. |
+| **Vendor guarantee disclosure** | Handwrytten guarantee promises and exclusions confirmed by HW-MFG-018. This standard treats that disclosure as vendor service and liability boundaries only, not as automatic F.I. Forgot customer promises. |
+
+#### Normative requirements
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| FI-MFG-POL-003-R01 | F.I. Forgot SHALL adopt customer promise discipline as a permanent operational policy for Volume 01 outward-facing manufacturing communications within the scope of this standard. | Company judgment |
+| FI-MFG-POL-003-R02 | F.I. Forgot SHALL treat Handwrytten standard first-class mail as excluding tracking, as confirmed by HW-MFG-011. | HW-MFG-011 |
+| FI-MFG-POL-003-R03 | F.I. Forgot SHALL treat delivery confirmation as optional at checkout, as confirmed by HW-MFG-011. | HW-MFG-011 |
+| FI-MFG-POL-003-R04 | F.I. Forgot SHALL NOT represent delivery confirmation as included in standard first-class mail, available for every order or workflow, or established in F.I. Forgot production use solely because the Handwrytten API exposes a `delivery_confirmation` field. | Company judgment |
+| FI-MFG-POL-003-R05 | F.I. Forgot SHALL NOT represent delivery confirmation as a delivery time commitment, guaranteed arrival, or proof of receipt by a particular recipient. | Company judgment |
+| FI-MFG-POL-003-R06 | F.I. Forgot SHALL treat Handwrytten send date as the date the card enters the processing queue and not necessarily the mailing date, as confirmed by HW-MFG-015. | HW-MFG-015 |
+| FI-MFG-POL-003-R07 | F.I. Forgot SHALL NOT convert queue state, send-date, or processing-queue language into production timing, mailing timing, fulfillment timing, delivery timing, elapsed-time estimates, or customer-facing service levels. | Company judgment |
+| FI-MFG-POL-003-R08 | F.I. Forgot SHALL NOT invent, assume, or represent undocumented queue states, state transitions, or internal vendor production mechanics. | Company judgment |
+| FI-MFG-POL-003-R09 | F.I. Forgot SHALL treat Handwrytten international shipment availability as FAQ-confirmed to Canada and over 180 countries, as confirmed by HW-MFG-017. | HW-MFG-017 |
+| FI-MFG-POL-003-R10 | F.I. Forgot SHALL NOT represent international availability beyond FAQ-confirmed reach, assert a complete country list, or claim country-specific operational support, customs treatment, duties, local postal behavior, transit timing, delivery performance, or tracking availability by country. | Company judgment |
+| FI-MFG-POL-003-R11 | F.I. Forgot SHALL treat Handwrytten guarantee disclosure as describing vendor service and liability boundaries, including guarantee promises and exclusions, as confirmed by HW-MFG-018. | HW-MFG-018 |
+| FI-MFG-POL-003-R12 | F.I. Forgot SHALL NOT adopt Handwrytten guarantee or remedy disclosure as F.I. Forgot customer guarantees, universal refund rights, automatic resend entitlement, F.I. Forgot liability amounts, or customer-facing service-level commitments. | Company judgment |
+| FI-MFG-POL-003-R13 | F.I. Forgot SHALL align all in-scope customer-facing, partner-facing, and internal promise statements with FI-MFG-POL-003-R02 through FI-MFG-POL-003-R12. | Company judgment |
+| FI-MFG-POL-003-R14 | F.I. Forgot SHALL NOT make production, mailing, processing, fulfillment, delivery-date, arrival, or customer-facing service-level timing promises while HW-MFG-010 remains on HOLD. | Company judgment |
+| FI-MFG-POL-003-R15 | F.I. Forgot SHALL NOT convert unresolved vendor facts, held facts, or vendor diligence into customer promises. | Company judgment |
+
+#### Company judgment
+
+The following decisions are F.I. Forgot company judgments. They are not established by vendor disclosure alone:
+
+- F.I. Forgot adopts customer promise discipline as a permanent operational policy for in-scope outward-facing communications (FI-MFG-POL-003-R01).
+- F.I. Forgot requires conservative representation of optional delivery confirmation, prohibits treating delivery confirmation as universal or included in standard first-class mail, and prohibits establishing production use solely from API field presence; HW-MFG-011 qualification (Service-design fact; API field proves capability only) informs the API capability-only limitation (FI-MFG-POL-003-R04).
+- F.I. Forgot prohibits representing delivery confirmation as delivery-timing proof or guaranteed receipt (FI-MFG-POL-003-R05).
+- F.I. Forgot requires queue-semantics communication discipline without converting queue states into timing or service-level promises; HW-MFG-015 qualification (Queue-semantics fact) informs the subject boundary only (FI-MFG-POL-003-R07).
+- F.I. Forgot prohibits inventing or assuming undocumented queue states, transitions, or internal vendor production mechanics (FI-MFG-POL-003-R08).
+- F.I. Forgot requires international messaging to remain within FAQ-confirmed reach limits and prohibits country-specific operational, customs, transit, performance, or tracking claims; HW-MFG-017 qualification (FAQ-confirmed reach only; API country-list endpoint not captured in public docs) informs reach-limit discipline (FI-MFG-POL-003-R10).
+- F.I. Forgot distinguishes vendor guarantee disclosure from F.I. Forgot customer promises and does not automatically adopt vendor remedies, refund rights, resend entitlements, or service-level commitments; HW-MFG-018 qualification (Service and liability boundaries) informs the vendor-boundary distinction (FI-MFG-POL-003-R12).
+- F.I. Forgot requires in-scope promise alignment with the drafted non-timing requirements (FI-MFG-POL-003-R13).
+- Timing and delivery-promise language remains blocked while HW-MFG-010 remains on HOLD and HW-VQ-012 remains unresolved (FI-MFG-POL-003-R14).
+- Vendor capability, vendor guarantee disclosure, and vendor diligence do not authorize customer promises beyond approved F.I. Forgot policy and verified evidence (FI-MFG-POL-003-R15).
+- Vendor guarantee timing language in HW-MFG-018 does not override HW-MFG-010 HOLD or authorize timing promises in this partial draft.
+
+#### Exceptions
+
+No exceptions are defined in this partial draft.
+
+Any future exception requires a documented standard revision supported by verified evidence or explicit company judgment recorded in the revision.
+
+#### Out of scope
+
+The following subjects are explicitly out of scope for this partial draft of FI-MFG-POL-003:
+
+| Subject | Reason |
+|---------|--------|
+| Production timing, mailing timing, processing timing, fulfillment timing, delivery-date, arrival, or service-level promises | Blocked by HW-MFG-010 HOLD; reserved pending HW-VQ-012 resolution |
+| Harmonized vendor timing language | HW-MFG-010 HOLD; HW-VQ-012 unresolved |
+| Resend eligibility, refund decisions, replacement procedures, customer compensation, or recovery workflow | Reserved for FI-MFG-POL-004 |
+| API integration behavior, field mappings, webhooks, polling, order-status synchronization, or tracking implementation | Implementation; not defined in this operational policy |
+| Country-list synchronization, international fulfillment architecture, or country-specific operational design | Deferred research; not established beyond HW-MFG-017 qualification |
+| Customer-notification architecture, workflow automation, alerting logic, or service-level monitoring | Engineering; not defined in this operational policy |
+| Complete country lists, customs treatment, duties, taxes, or local postal behavior | Not established in the frozen facts baseline |
+| Vendor internal production mechanics beyond verified queue-entry semantics | Not verified |
+
+#### Supporting evidence
+
+| Fact ID | Verified statement used by this standard | Qualification preserved |
+|---------|------------------------------------------|-------------------------|
+| HW-MFG-011 | Handwrytten’s guarantee states standard first-class mail does not include tracking; delivery confirmation is optional at checkout, and the API exposes a `delivery_confirmation` field. | Service-design fact; API field proves capability only. |
+| HW-MFG-015 | Handwrytten’s scheduling guide states that requested send date defaults to two business days from today and that send date is when the card enters the processing queue, not necessarily the mailing date. | Queue-semantics fact. |
+| HW-MFG-017 | Handwrytten’s company FAQ states international shipments are available to Canada and over 180 countries. | FAQ-confirmed reach only; API country-list endpoint not captured in public docs. |
+| HW-MFG-018 | Handwrytten’s guarantee offers a 100% money-back guarantee for 90 days, promises pen-written notes, timely mailing for standard orders, and correct card-to-envelope and insert matching, while excluding sender text errors, incorrect addresses, and postal issues after USPS handoff. | Service and liability boundaries. |
+
+No additional verified facts are cited by this partial draft. HW-MFG-010 is on HOLD and is not normative support.
+
+#### Engineering implications
+
+Not defined in this operational policy.
+
+Engineering specifications, if required, SHALL be derived separately from this standard upon freeze review. This standard does not authorize engineering requirements.
+
+#### Validation method
+
+Compliance with the drafted non-timing portion of FI-MFG-POL-003 SHALL be verified by review of in-scope customer-facing, partner-facing, and internal policy materials against FI-MFG-POL-003-R01 through FI-MFG-POL-003-R15.
+
+A material statement violates this partial draft if it contradicts any normative requirement in this standard. Timing and delivery-promise elements are not validated by this partial draft because they remain blocked.
+
+#### Related standards
+
+| Standard ID | Relationship |
+|-------------|--------------|
+| FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy — governs resend, recovery, and remedy handling; distinct from outward-facing promise discipline; not superseded by this standard |
+| FI-MFG-POL-002 | Order Modification and Cancellation Policy — related operational domain; distinct subject; informational only |
+| FI-MFG-POL-001 | Custom Signature Governance Policy — related operational domain; distinct subject; informational only |
+| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary — related fulfillment domain; distinct subject; informational only |
+| FI-MFG-CON-002 | Add-On Fulfillment Boundary — related fulfillment domain; distinct subject; informational only |
+| FI-MFG-CON-003 | Vendor Capability Validation Constraint — related capability-validation domain; distinct subject; informational only |
+| FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary — related workflow domain; distinct subject; informational only |
+| FI-MFG-PRN-001 | Real Pen Production Method Principle — related production-method domain; distinct subject; informational only |
+
+#### Future revision notes
+
+- Timing and delivery-promise requirements may be added only after HW-MFG-010 HOLD is resolved or an approved scope revision records the evidence change, HW-VQ-012 vendor diligence is complete or explicitly dispositioned, and formal standard revision with evidence and Source review is completed. Future timing language requires individual freeze review even if HW-MFG-010 HOLD is lifted.
+- If the verified facts baseline changes HW-MFG-011, HW-MFG-015, HW-MFG-017, or HW-MFG-018 or their qualifications, this standard requires revision before F.I. Forgot policy boundaries may change.
+- Resend, refund, recovery, and escalation policy remain reserved for FI-MFG-POL-004.
+- HW-MFG-010 HOLD remains in effect; this partial draft does not create timing or delivery commitments.
+- Vendor guarantee timing language in HW-MFG-018 does not override HW-MFG-010 HOLD.
 
 ---
 
