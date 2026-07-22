@@ -290,7 +290,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 |----------------|-------------------|------------------------|----------------------|---------------------|--------------------------|---------------------------|---------------------|--------------------|-----------|-------|
 | Physical Ink Authenticity | Manufacturing Principle | Real Pen Production Method Principle | FI-MFG-PRN-001 | HW-MFG-004 | — | Yes | — | READY WITH QUALIFICATION | HW-MFG-004 confirms real-pen production method. F.I. Forgot may adopt a governing principle that production uses physical ink via real pens, but must not claim automatic realism, quality superiority, or recipient perception outcomes. | Frozen in Section 8.6 (July 21, 2026). |
 | Envelope Fulfillment Handling | Manufacturing Constraint | Envelope Fulfillment Handling Boundary | FI-MFG-CON-001 | HW-MFG-005 | HW-VQ-014 | Yes | HW-VQ-014 (envelope addressing method undisclosed) | READY WITH QUALIFICATION | HW-MFG-005 confirms envelope handling as part of fulfillment, not handwritten addressing. Constraint must preserve envelope-handling language only and prohibit assumptions about addressing method or envelope-production path. | Frozen in Section 8.5 (July 21, 2026). |
-| Custom Signature Governance | Operational Policy | Custom Signature Governance Policy | FI-MFG-POL-001 | HW-MFG-006 | HW-VQ-011 | Yes | HW-VQ-011 (personalization and signature workflow detail) | READY WITH QUALIFICATION | HW-MFG-006 confirms capability, fee, turnaround, and robotic execution. Policy must govern authorization, authenticity, ownership, and approval — all company decisions beyond vendor disclosure. | Qualification requires fee and turnaround visibility in any future policy. |
+| Custom Signature Governance | Operational Policy | Custom Signature Governance Policy | FI-MFG-POL-001 | HW-MFG-006 | HW-VQ-011 | Yes | HW-VQ-011 (personalization and signature workflow detail) | READY WITH QUALIFICATION | HW-MFG-006 confirms capability, fee, turnaround, and robotic execution. Policy must govern authorization, authenticity, ownership, and approval — all company decisions beyond vendor disclosure. | Frozen in Section 8.10 (July 21, 2026). |
 | Delivery Confirmation Policy | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-011 | — | Yes | — | NOT APPLICABLE | Optional delivery confirmation is one element of customer promise boundaries, not a standalone Volume 01 policy. Consolidated into FI-MFG-POL-003. API field presence proves capability only; universal support must not be assumed. | Absorbed candidate; no separate Standard ID reserved. |
 | Add-On Matching | Manufacturing Constraint | Add-On Fulfillment Boundary | FI-MFG-CON-002 | HW-MFG-012; HW-MFG-018 | HW-VQ-007 | Yes | HW-VQ-007 (pick/pack and matching operations undisclosed) | READY WITH QUALIFICATION | HW-MFG-012 and HW-MFG-018 support optional inserts, gift cards, and vendor guarantee matching language. Internal matching controls remain unknown. Constraint governs what F.I. Forgot may claim or assume about add-on fulfillment. | Frozen in Section 8.7 (July 21, 2026). |
 | API Capability Boundaries | Excluded From Volume 01 | Vendor Capability Validation Constraint (consolidated) | — | HW-MFG-013 | — | Yes | Detailed API engineering deferred to later research volume | NOT APPLICABLE | HW-MFG-013 supports documented capability only. Detailed API integration standards belong in a later research volume, not Volume 01. Boundary-setting inputs are absorbed into FI-MFG-CON-003. | Excluded as standalone standard area; inputs retained in vendor capability constraint. |
@@ -337,13 +337,12 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| — | — | — | — | — | — | FI-MFG-CON-004 frozen — see Section 8.9. No standards currently queued for initial drafting. |
+| — | — | — | — | — | — | FI-MFG-POL-001 frozen — see Section 8.10. No standards currently queued for initial drafting. |
 
 ##### Ready With Qualification
 
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
-| FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | HW-MFG-006 | Authorization and approval rules undecided | HW-VQ-011 | Draft policy with company judgment on signature authorization, authenticity, and ownership. |
 | FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Timing and queue promise elements blocked by HW-MFG-010 HOLD | HW-VQ-012 | Draft non-timing promise boundaries first; defer timing language until HW-VQ-012 resolves. |
 | FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | HW-MFG-018; HW-MFG-019 | F.I. Forgot resend policy undecided | HW-VQ-009 | Draft resend and recovery policy with vendor liability boundaries disclosed; do not adopt vendor guarantees as F.I. Forgot promises. |
 
@@ -404,7 +403,7 @@ The main risks of translating verified facts into standards prematurely are:
 
 This section contains **company decisions** about how F.I. Forgot chooses to manufacture, design for production, and govern the physical product experience.
 
-**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Six standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, FI-MFG-CON-003, FI-MFG-CON-004, July 21, 2026); remaining reserved standards not yet authored.
+**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Seven standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, FI-MFG-CON-003, FI-MFG-CON-004, FI-MFG-POL-001, July 21, 2026); remaining reserved standards not yet authored.
 
 Standards in this section must be deliberate F.I. Forgot decisions. They may be informed by verified facts but must not be confused with vendor disclosures.
 
@@ -593,7 +592,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 | FI-MFG-CON-002 | Add-On Fulfillment Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-012; HW-MFG-018 | Frozen (July 21, 2026) |
 | FI-MFG-CON-003 | Vendor Capability Validation Constraint | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Frozen (July 21, 2026) |
 | FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Manufacturing Constraint | READY WITH QUALIFICATION | HW-MFG-014 | Frozen (July 21, 2026) |
-| FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-006 | Reserved, Not Drafted |
+| FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-006 | Frozen (July 21, 2026) |
 | FI-MFG-POL-002 | Order Modification and Cancellation Policy | Operational Policy | READY FOR DRAFTING | HW-MFG-016 | Frozen (July 21, 2026) |
 | FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Reserved, Not Drafted |
 | FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-018; HW-MFG-019 | Reserved, Not Drafted |
@@ -602,6 +601,7 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 
 | Standard ID | Standard Statement | Supporting Fact IDs | Status |
 |-------------|-------------------|---------------------|--------|
+| FI-MFG-POL-001 | F.I. Forgot SHALL govern custom signature use through documented authorization and approval, SHALL disclose that a one-time fee and turnaround apply, and SHALL NOT treat Handwrytten custom-signature capability as establishing legal authority, identity, ownership, consent, or proof of personal execution. | HW-MFG-006 | Frozen (July 21, 2026) |
 | FI-MFG-CON-004 | F.I. Forgot SHALL treat Handwrytten bulk sending by address-book selection or Excel upload as documented customer-workflow disclosure only and SHALL NOT assume hidden manufacturing steps, undisclosed production mechanics, or F.I. Forgot bulk-workflow adoption from that disclosure. | HW-MFG-014 | Frozen (July 21, 2026) |
 | FI-MFG-CON-003 | F.I. Forgot SHALL validate Handwrytten vendor capability against verified disclosure before assuming operational use and SHALL NOT treat documented platform capability, application-specific controls, deployment capability, or per-machine capacity as universal operational practice. | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | Frozen (July 21, 2026) |
 | FI-MFG-CON-002 | F.I. Forgot SHALL treat optional gift cards and inserts as confirmed Handwrytten add-on capability and SHALL NOT assume undisclosed pick/pack, matching, or operational-sequencing mechanics. | HW-MFG-012; HW-MFG-018 | Frozen (July 21, 2026) |
@@ -1402,6 +1402,147 @@ A material assumption, boundary statement, or bulk-workflow dependency violates 
 
 - If the verified facts baseline changes HW-MFG-014 or its qualification, this standard requires revision before F.I. Forgot constraint boundaries may change.
 - Company adoption of bulk workflows remains a separate F.I. Forgot decision; this standard does not authorize adoption.
+- HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
+
+### 8.10 FI-MFG-POL-001 — Custom Signature Governance Policy
+
+#### Standard record
+
+| Field | Value |
+|-------|-------|
+| **Standard ID** | FI-MFG-POL-001 |
+| **Standard name** | Custom Signature Governance Policy |
+| **Disposition** | Operational Policy |
+| **Status** | Frozen |
+| **Freeze date** | July 21, 2026 |
+| **Supporting Fact IDs** | HW-MFG-006 |
+| **Related vendor questions** | HW-VQ-011 (unresolved; nonnormative vendor diligence only) |
+| **Governing qualification** | HW-MFG-006: one-time fee and turnaround apply. |
+
+#### Standard freeze gate
+
+FI-MFG-POL-001 passed individual freeze review on July 21, 2026.
+
+| Criterion | Result |
+|-----------|--------|
+| Identity and planning alignment | Pass |
+| Template v1.0 compliance | Pass |
+| Normative requirements (R01–R09) | Pass |
+| Evidence discipline | Pass |
+| Scope and dependencies | Pass |
+| Validation method | Pass |
+| Prohibitions | Pass |
+| Stability | Pass |
+
+#### Standard statement
+
+F.I. Forgot SHALL govern custom signature use through documented authorization and approval, SHALL disclose that a one-time fee and turnaround apply, and SHALL NOT treat Handwrytten custom-signature capability as establishing legal authority, identity, ownership, consent, or proof of personal execution.
+
+#### Purpose
+
+Define F.I. Forgot's permanent operational policy for custom signature authorization, authenticity treatment, ownership, approval, and use restrictions on Handwrytten-fulfilled manufacturing orders.
+
+This policy establishes what F.I. Forgot may represent about custom signatures and what F.I. Forgot SHALL require before a custom signature may be used in production.
+
+#### Scope
+
+This standard applies to:
+
+- All F.I. Forgot Volume 01 decisions to use, offer, represent, or approve a custom signature on Handwrytten-fulfilled manufacturing orders.
+- All customer-facing, partner-facing, and internal policy statements that describe custom signature availability, authorization, approval, or use.
+
+This standard does not define file formats, upload methods, image specifications, capture methods, storage architecture, API behavior, data models, legal execution, electronic-signature law, or system implementation.
+
+#### Definitions
+
+| Term | Definition |
+|------|------------|
+| **Custom signature** | A signature hand-recreated by Handwrytten's design team and written using the same handwriting robots that write the card, as confirmed by HW-MFG-006. This standard does not expand custom-signature capability beyond verified disclosure. |
+| **Custom signature approval** | Documented F.I. Forgot authorization that a specific custom signature may be used for a stated purpose before production use. This standard does not define approval workflow mechanics. |
+| **Approved purpose** | The specific use for which F.I. Forgot has granted custom signature approval. Use outside that purpose requires separate approval. |
+
+#### Normative requirements
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| FI-MFG-POL-001-R01 | F.I. Forgot SHALL adopt custom signature governance as a permanent operational policy for Volume 01 custom-signature decisions. | Company judgment |
+| FI-MFG-POL-001-R02 | F.I. Forgot SHALL treat Handwrytten custom signatures as hand-recreated by the design team and written using the same handwriting robots that write the card, as confirmed by HW-MFG-006. | HW-MFG-006 |
+| FI-MFG-POL-001-R03 | F.I. Forgot SHALL disclose that a one-time fee and turnaround apply wherever custom-signature availability or adoption is represented in in-scope materials. | Company judgment |
+| FI-MFG-POL-001-R04 | F.I. Forgot SHALL NOT use a custom signature in Handwrytten production without documented custom signature approval obtained before production use. | Company judgment |
+| FI-MFG-POL-001-R05 | F.I. Forgot SHALL require documented permission from the signer or lawful rights holder before granting custom signature approval. | Company judgment |
+| FI-MFG-POL-001-R06 | F.I. Forgot SHALL limit custom signature use to the approved purpose for which approval was granted. | Company judgment |
+| FI-MFG-POL-001-R07 | F.I. Forgot SHALL NOT treat Handwrytten custom-signature capability as establishing legal authority, identity, ownership, consent, authenticity, or permitted use. | Company judgment |
+| FI-MFG-POL-001-R08 | F.I. Forgot SHALL NOT represent a custom signature as proof of personal execution, identity, or legal assent. | Company judgment |
+| FI-MFG-POL-001-R09 | F.I. Forgot SHALL NOT assume unresolved personalization or signature workflow details in Volume 01. | Company judgment |
+
+#### Company judgment
+
+The following decisions are F.I. Forgot company judgments. They are not established by vendor disclosure alone:
+
+- F.I. Forgot adopts custom signature governance as a permanent operational policy for Volume 01 (FI-MFG-POL-001-R01).
+- F.I. Forgot requires disclosure that a one-time fee and turnaround apply wherever custom-signature availability or adoption is represented, implementing the HW-MFG-006 qualification visibility requirement (FI-MFG-POL-001-R03).
+- F.I. Forgot requires documented approval and signer or rights-holder permission before production use (FI-MFG-POL-001-R04, FI-MFG-POL-001-R05).
+- Documented permission under FI-MFG-POL-001-R05 is a company governance gate; it does not represent conclusive legal-title verification, legal validity, or Handwrytten ownership or consent verification.
+- F.I. Forgot limits custom signature use to the approved purpose (FI-MFG-POL-001-R06).
+- F.I. Forgot prohibits treating vendor capability as authority, identity, ownership, consent, authenticity, or permitted use (FI-MFG-POL-001-R07).
+- F.I. Forgot prohibits representing custom signatures as proof of personal execution or legal assent (FI-MFG-POL-001-R08).
+- Vendor capability does not authorize production use without F.I. Forgot approval.
+- Exact fee amount, turnaround duration, refund treatment, revision process, setup sequence, and approval workflow mechanics remain undefined in this standard unless supported by verified evidence in a future revision.
+- Volume 01 does not prescribe file formats, upload methods, capture methods, API behavior, or implementation mechanics (FI-MFG-POL-001-R09; out of scope).
+
+#### Exceptions
+
+No exceptions are defined in this standard.
+
+Any future exception requires a documented standard revision supported by verified evidence or explicit company judgment recorded in the revision.
+
+#### Out of scope
+
+The following subjects are explicitly out of scope for FI-MFG-POL-001:
+
+| Subject | Reason |
+|---------|--------|
+| File formats, upload methods, image specifications, or capture methods | Implementation; not defined in this operational policy |
+| API behavior, data models, storage architecture, or system workflows | Implementation; prohibited in Volume 01; out of scope |
+| Exact fee amount, guaranteed turnaround duration, refund treatment, or revision process | Not established beyond HW-MFG-006 qualification; no timing guarantee permitted |
+| Personalization or signature workflow detail sought through HW-VQ-011 | Unresolved vendor diligence; not normative support |
+| Identity verification, ownership verification, or consent verification by Handwrytten | Not established by HW-MFG-006 |
+| Electronic-signature law, contract execution, notarization, regulated consent, or legally binding signature use | Greeting-card production governance only; not legal execution policy |
+| Production timing, mailing timing, or delivery promises | HW-MFG-010 remains on HOLD |
+| Vendor diligence procedures for HW-VQ-011 | Vendor diligence; not defined in this operational policy |
+
+#### Supporting evidence
+
+| Fact ID | Verified statement used by this standard | Qualification preserved |
+|---------|------------------------------------------|-------------------------|
+| HW-MFG-006 | Handwrytten’s signature guide states that a custom signature is hand-recreated by the design team and written using the same handwriting robots that write the card. | One-time fee and turnaround apply. |
+
+No additional verified facts are cited by this standard.
+
+#### Engineering implications
+
+Not defined in this operational policy.
+
+Engineering specifications, if required, SHALL be derived separately from this standard upon freeze review. This standard does not authorize engineering requirements.
+
+#### Validation method
+
+Compliance with FI-MFG-POL-001 SHALL be verified by review of in-scope customer-facing, partner-facing, and internal policy materials against FI-MFG-POL-001-R01 through FI-MFG-POL-001-R09.
+
+A material statement violates this standard if it contradicts any normative requirement in this standard.
+
+#### Related standards
+
+| Standard ID | Relationship |
+|-------------|--------------|
+| FI-MFG-POL-002 | Order Modification and Cancellation Policy — related operational domain; distinct subject; not superseded by this standard |
+| FI-MFG-PRN-001 | Real Pen Production Method Principle — related production-method domain; distinct subject; not superseded by this standard |
+
+#### Future revision notes
+
+- If HW-VQ-011 resolves personalization or signature workflow questions, this standard requires revision only where verified disclosure changes custom-signature governance boundaries.
+- If the verified facts baseline changes HW-MFG-006 or its qualification, this standard requires revision before F.I. Forgot policy boundaries may change.
+- Exact fee, turnaround, refund, revision, and workflow mechanics may be added only through a documented revision supported by verified evidence or explicit company judgment.
 - HW-MFG-010 HOLD remains in effect; this standard does not create timing or delivery commitments.
 
 ---
