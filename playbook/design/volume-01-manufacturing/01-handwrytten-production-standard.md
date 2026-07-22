@@ -299,7 +299,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 | Order Modification and Cancellation Boundaries | Operational Policy | Order Modification and Cancellation Policy | FI-MFG-POL-002 | HW-MFG-016 | — | Yes | — | READY FOR DRAFTING | HW-MFG-016 establishes a verified operational boundary: cancellation before writing only; no post-placement edits. Sufficient to support an internal customer experience and operational boundary policy. | Frozen in Section 8.4 (July 21, 2026). |
 | International Availability | Operational Policy | Customer Promise Discipline Policy (consolidated) | — | HW-MFG-017 | — | Yes | International fulfillment architecture (deferred research) | NOT APPLICABLE | HW-MFG-017 confirms broad FAQ reach only. Country-level service quality, transit reliability, and customs behavior are not established. Consolidated into FI-MFG-POL-003 as reach-limit discipline, not performance promise. | Absorbed candidate; no separate Standard ID reserved. |
 | Customer Promise Discipline | Operational Policy | Customer Promise Discipline Policy | FI-MFG-POL-003 | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | HW-VQ-012 | Yes | HW-MFG-010 HOLD (timing and queue promise elements); HW-VQ-012 | READY WITH QUALIFICATION | Overarching policy consolidating delivery confirmation boundaries, queue semantics communication limits, international reach limits, and vendor guarantee-informed promise discipline. Non-timing elements may be drafted; timing and delivery promise language remain blocked while HW-MFG-010 is on HOLD. | Absorbs Delivery Confirmation Policy, Queue Semantics and Customer Timing Communication, and International Availability. Vendor guarantee timing language does not override HW-MFG-010 HOLD. Non-timing portion drafted in Section 8.11; timing elements remain blocked. |
-| Vendor Liability and Resend Handling | Operational Policy | Vendor Liability and Resend Handling Policy | FI-MFG-POL-004 | HW-MFG-018; HW-MFG-019 | HW-VQ-009 | Yes | — | READY WITH QUALIFICATION | HW-MFG-018 and HW-MFG-019 establish vendor guarantee and USPS handoff liability boundaries. F.I. Forgot resend, recovery, and escalation policy remains a company decision and must not adopt vendor guarantees as F.I. Forgot promises. | Related to Customer Promise Discipline but retained as separate policy for liability and resend obligations. |
+| Vendor Liability and Resend Handling | Operational Policy | Vendor Liability and Resend Handling Policy | FI-MFG-POL-004 | HW-MFG-018; HW-MFG-019 | HW-VQ-009 | Yes | — | READY WITH QUALIFICATION | HW-MFG-018 and HW-MFG-019 establish vendor guarantee and USPS handoff liability boundaries. F.I. Forgot resend, recovery, and escalation policy remains a company decision and must not adopt vendor guarantees as F.I. Forgot promises. | Related to Customer Promise Discipline but retained as separate policy for liability and resend obligations. Frozen in Section 8.12 (July 21, 2026). |
 | Vendor Capability Validation | Manufacturing Constraint | Vendor Capability Validation Constraint | FI-MFG-CON-003 | HW-MFG-002; HW-MFG-008; HW-MFG-013; HW-MFG-020 | HW-VQ-003 | Yes | API and integration engineering (later research volume) | READY WITH QUALIFICATION | Overarching constraint requiring F.I. Forgot to validate vendor capability before assuming operational use. Absorbs API capability boundary inputs from HW-MFG-013. Application-specific controls (HW-MFG-008) and deployment capability (HW-MFG-020) must not be assumed universal. | Frozen in Section 8.8 (July 21, 2026). |
 | Operational Continuity | Vendor Diligence Only | — | — | HW-MFG-009; HW-MFG-020 | HW-VQ-001; HW-VQ-003; HW-VQ-008 | Yes | HW-VQ-001; HW-VQ-003; HW-VQ-008; insufficient continuity evidence | BLOCKED | Current evidence is insufficient for continuity or fulfillment-network standards. Tempe address and 3PL deployment capability do not prove customer-order fulfillment topology or disaster recovery. Remains vendor diligence until HW-VQ responses resolve. | No Standard ID reserved; related inputs partially inform FI-MFG-CON-003 diligence posture. |
 
@@ -344,7 +344,7 @@ This register reviews each nonbinding candidate area from Section 7.7 and determ
 | Reserved ID | Standard Name | Disposition | Supporting Facts | Blocking Issue | Related Vendor Questions | Next Action |
 |-------------|---------------|-------------|------------------|----------------|--------------------------|-------------|
 | FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Timing and queue promise elements blocked by HW-MFG-010 HOLD | HW-VQ-012 | Non-timing portion drafted in Section 8.11; timing and queue promise sections remain blocked pending HW-VQ-012 resolution. |
-| FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | HW-MFG-018; HW-MFG-019 | F.I. Forgot resend policy undecided | HW-VQ-009 | Draft resend and recovery policy with vendor liability boundaries disclosed; do not adopt vendor guarantees as F.I. Forgot promises. |
+| FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | HW-MFG-018; HW-MFG-019 | F.I. Forgot resend policy undecided | HW-VQ-009 | Frozen in Section 8.12 (July 21, 2026). |
 
 ##### Blocked
 
@@ -403,7 +403,7 @@ The main risks of translating verified facts into standards prematurely are:
 
 This section contains **company decisions** about how F.I. Forgot chooses to manufacture, design for production, and govern the physical product experience.
 
-**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Seven standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, FI-MFG-CON-003, FI-MFG-CON-004, FI-MFG-POL-001, July 21, 2026). FI-MFG-POL-003 non-timing portion drafted in Section 8.11 (timing elements blocked by HW-MFG-010 HOLD). Remaining reserved standards not yet fully authored.
+**Status:** Manufacturing Standard Template v1.0 frozen (July 21, 2026). Eight standards individually frozen (FI-MFG-POL-002, FI-MFG-CON-001, FI-MFG-PRN-001, FI-MFG-CON-002, FI-MFG-CON-003, FI-MFG-CON-004, FI-MFG-POL-001, FI-MFG-POL-004, July 21, 2026). FI-MFG-POL-003 non-timing portion drafted in Section 8.11 (timing elements blocked by HW-MFG-010 HOLD).
 
 Standards in this section must be deliberate F.I. Forgot decisions. They may be informed by verified facts but must not be confused with vendor disclosures.
 
@@ -595,12 +595,13 @@ Frozen standards receive Status **Frozen**, a freeze date, and a concise freeze 
 | FI-MFG-POL-001 | Custom Signature Governance Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-006 | Frozen (July 21, 2026) |
 | FI-MFG-POL-002 | Order Modification and Cancellation Policy | Operational Policy | READY FOR DRAFTING | HW-MFG-016 | Frozen (July 21, 2026) |
 | FI-MFG-POL-003 | Customer Promise Discipline Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Drafted, Pending Freeze (timing elements blocked) |
-| FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-018; HW-MFG-019 | Reserved, Not Drafted |
+| FI-MFG-POL-004 | Vendor Liability and Resend Handling Policy | Operational Policy | READY WITH QUALIFICATION | HW-MFG-018; HW-MFG-019 | Frozen (July 21, 2026) |
 
 ### 8.3 Standards register
 
 | Standard ID | Standard Statement | Supporting Fact IDs | Status |
 |-------------|-------------------|---------------------|--------|
+| FI-MFG-POL-004 | F.I. Forgot SHALL govern resend, replacement, refund, recovery, and escalation decisions through documented company approval, SHALL treat Handwrytten guarantee and USPS handoff disclosures as vendor service and liability boundaries only, and SHALL NOT adopt vendor guarantees or remedies as automatic F.I. Forgot customer entitlements. | HW-MFG-018; HW-MFG-019 | Frozen (July 21, 2026) |
 | FI-MFG-POL-003 | F.I. Forgot SHALL govern customer-facing promise discipline for delivery confirmation, queue semantics, international reach, and vendor guarantee boundaries on Handwrytten-fulfilled manufacturing orders, and SHALL NOT represent optional capabilities as universal, convert queue semantics into timing commitments, exceed FAQ-confirmed international reach, or adopt Handwrytten guarantee disclosure as F.I. Forgot customer promises. Timing and delivery-promise elements remain blocked pending resolution of HW-MFG-010 HOLD and HW-VQ-012. | HW-MFG-011; HW-MFG-015; HW-MFG-017; HW-MFG-018 | Drafted, Pending Freeze (timing elements blocked) |
 | FI-MFG-POL-001 | F.I. Forgot SHALL govern custom signature use through documented authorization and approval, SHALL disclose that a one-time fee and turnaround apply, and SHALL NOT treat Handwrytten custom-signature capability as establishing legal authority, identity, ownership, consent, or proof of personal execution. | HW-MFG-006 | Frozen (July 21, 2026) |
 | FI-MFG-CON-004 | F.I. Forgot SHALL treat Handwrytten bulk sending by address-book selection or Excel upload as documented customer-workflow disclosure only and SHALL NOT assume hidden manufacturing steps, undisclosed production mechanics, or F.I. Forgot bulk-workflow adoption from that disclosure. | HW-MFG-014 | Frozen (July 21, 2026) |
@@ -1708,6 +1709,165 @@ A material statement violates this partial draft if it contradicts any normative
 - Resend, refund, recovery, and escalation policy remain reserved for FI-MFG-POL-004.
 - HW-MFG-010 HOLD remains in effect; this partial draft does not create timing or delivery commitments.
 - Vendor guarantee timing language in HW-MFG-018 does not override HW-MFG-010 HOLD.
+
+### 8.12 FI-MFG-POL-004 — Vendor Liability and Resend Handling Policy
+
+#### Standard record
+
+| Field | Value |
+|-------|-------|
+| **Standard ID** | FI-MFG-POL-004 |
+| **Standard name** | Vendor Liability and Resend Handling Policy |
+| **Disposition** | Operational Policy |
+| **Status** | Frozen |
+| **Freeze date** | July 21, 2026 |
+| **Supporting Fact IDs** | HW-MFG-018; HW-MFG-019 |
+| **Related vendor questions** | HW-VQ-009 (unresolved; nonnormative vendor diligence only) |
+| **Governing qualification** | HW-MFG-018: Service and liability boundaries. HW-MFG-019: Liability boundary after USPS handoff. |
+
+#### Standard freeze gate
+
+FI-MFG-POL-004 passed individual freeze review on July 21, 2026.
+
+| Criterion | Result |
+|-----------|--------|
+| Identity and planning alignment | Pass |
+| Template v1.0 compliance | Pass |
+| Normative requirements (R01–R15) | Pass |
+| Evidence discipline | Pass |
+| Scope and dependencies | Pass |
+| Validation method | Pass |
+| Prohibitions | Pass |
+| Stability | Pass |
+
+#### Standard statement
+
+F.I. Forgot SHALL govern resend, replacement, refund, recovery, and escalation decisions through documented company approval, SHALL treat Handwrytten guarantee and USPS handoff disclosures as vendor service and liability boundaries only, and SHALL NOT adopt vendor guarantees or remedies as automatic F.I. Forgot customer entitlements.
+
+#### Purpose
+
+Define F.I. Forgot's operational policy for vendor liability boundaries, resend eligibility, replacement handling, recovery decisions, escalation boundaries, and customer remedy approval on Handwrytten-fulfilled manufacturing orders.
+
+This policy establishes how F.I. Forgot distinguishes verified vendor guarantee and liability disclosure from F.I. Forgot resend, replacement, refund, recovery, and escalation decisions. It does not establish customer timing guarantees, legal liability findings, or support-workflow implementation.
+
+#### Scope
+
+This standard applies to:
+
+- All F.I. Forgot Volume 01 decisions to approve, deny, escalate, document, or execute a resend, replacement, refund, recovery action, or related customer remedy for Handwrytten-fulfilled manufacturing orders.
+- All internal policy statements governing those decisions.
+
+This standard does not define customer-facing promise language, API behavior, payment processing, refund processing, case-management systems, ticketing systems, escalation routing, notification workflows, support scripts, approval thresholds, employee roles, vendor support integrations, or postal tracking integrations.
+
+#### Definitions
+
+| Term | Definition |
+|------|------------|
+| **Vendor guarantee disclosure** | Handwrytten guarantee promises and exclusions confirmed by HW-MFG-018. This standard treats that disclosure as vendor service and liability boundaries only. |
+| **USPS handoff liability boundary** | Handwrytten disclaimer of liability for lost, stolen, or delayed mail after USPS handoff, as confirmed by HW-MFG-019. |
+| **Remedy** | A resend, replacement, refund, recovery action, or other customer remedy governed by this standard. This standard does not define remedy mechanics. |
+| **Documented company approval** | Recorded F.I. Forgot authorization that a specific remedy may be offered or executed for a stated issue. This standard does not define approval workflow mechanics. |
+
+#### Normative requirements
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| FI-MFG-POL-004-R01 | F.I. Forgot SHALL adopt vendor liability and resend handling as a permanent operational policy for Volume 01 remedy decisions within the scope of this standard. | Company judgment |
+| FI-MFG-POL-004-R02 | F.I. Forgot SHALL treat Handwrytten guarantee disclosure as describing vendor service and liability boundaries, including guarantee promises and exclusions, as confirmed by HW-MFG-018. | HW-MFG-018 |
+| FI-MFG-POL-004-R03 | F.I. Forgot SHALL treat Handwrytten as disclaiming liability for lost, stolen, or delayed mail once handed off to USPS, as confirmed by HW-MFG-019. | HW-MFG-019 |
+| FI-MFG-POL-004-R04 | F.I. Forgot SHALL NOT adopt Handwrytten guarantee or remedy disclosure as automatic F.I. Forgot customer entitlements, universal refund rights, or automatic resend or replacement rights. | Company judgment |
+| FI-MFG-POL-004-R05 | F.I. Forgot SHALL NOT treat vendor guarantee exclusions or the USPS handoff liability boundary as automatically determining F.I. Forgot customer handling or requiring denial of F.I. Forgot assistance. | Company judgment |
+| FI-MFG-POL-004-R06 | F.I. Forgot SHALL require documented company approval before authorizing a resend or replacement for a Handwrytten-fulfilled manufacturing order. | Company judgment |
+| FI-MFG-POL-004-R07 | F.I. Forgot SHALL require separate documented company approval before authorizing a refund or other customer remedy not covered by the same approved resend or replacement decision. | Company judgment |
+| FI-MFG-POL-004-R08 | F.I. Forgot SHALL review available evidence before approving any remedy under this standard. | Company judgment |
+| FI-MFG-POL-004-R09 | F.I. Forgot SHALL document the basis for each remedy decision, including unresolved or uncertain cause where available evidence does not establish responsibility. | Company judgment |
+| FI-MFG-POL-004-R10 | F.I. Forgot SHALL NOT attribute operational fault or responsibility for a remedy decision unless available records support the attribution. | Company judgment |
+| FI-MFG-POL-004-R11 | F.I. Forgot SHALL escalate for review before remedy approval when responsibility is unresolved, available evidence conflicts, a remedy was previously granted for the same qualifying issue, or customer impact is material beyond an ordinary remedy case. | Company judgment |
+| FI-MFG-POL-004-R12 | F.I. Forgot SHALL NOT grant an unapproved duplicate remedy for the same qualifying issue and approved scope. | Company judgment |
+| FI-MFG-POL-004-R13 | F.I. Forgot SHALL limit any approved remedy to the scope recorded in that approval. | Company judgment |
+| FI-MFG-POL-004-R14 | F.I. Forgot SHALL NOT make resend, replacement, or recovery timing promises in remedy decisions or internal remedy policy statements governed by this standard. | Company judgment |
+| FI-MFG-POL-004-R15 | F.I. Forgot SHALL align in-scope remedy decisions and internal policy statements with FI-MFG-POL-004-R02 through FI-MFG-POL-004-R14. | Company judgment |
+
+#### Company judgment
+
+The following decisions are F.I. Forgot company judgments. They are not established by vendor disclosure alone:
+
+- F.I. Forgot adopts vendor liability and resend handling as a permanent operational policy for in-scope remedy decisions (FI-MFG-POL-004-R01).
+- F.I. Forgot distinguishes vendor guarantee and USPS handoff liability disclosure from F.I. Forgot customer entitlements and customer-handling discretion (FI-MFG-POL-004-R04, FI-MFG-POL-004-R05).
+- HW-MFG-018 qualification (Service and liability boundaries) informs the vendor-boundary distinction; vendor guarantee timing language does not override HW-MFG-010 HOLD or authorize timing promises in this standard.
+- HW-MFG-019 qualification (Liability boundary after USPS handoff) informs the USPS handoff boundary only; it does not by itself define F.I. Forgot obligations.
+- Resend, replacement, refund, recovery, and escalation require documented company approval and evidence review (FI-MFG-POL-004-R06 through FI-MFG-POL-004-R08).
+- Remedy decisions require documented basis, uncertainty recording, escalation where appropriate, duplicate prevention, and scope limits (FI-MFG-POL-004-R09 through FI-MFG-POL-004-R13).
+- Material customer impact beyond an ordinary remedy case is assessed at policy level without defined dollar thresholds or routing mechanics (FI-MFG-POL-004-R11).
+- Unapproved duplicate remedy for the same qualifying issue and approved scope is prohibited; a subsequent remedy requires new documented approval under FI-MFG-POL-004-R06 or FI-MFG-POL-004-R07 (FI-MFG-POL-004-R12).
+- Unsupported resend, replacement, or recovery timing promises in remedy decisions or internal remedy policy are prohibited; outward-facing production, mailing, fulfillment, and delivery timing promises remain governed by FI-MFG-POL-003 and HW-MFG-010 HOLD status (FI-MFG-POL-004-R14).
+- In-scope remedy policy alignment is required (FI-MFG-POL-004-R15).
+- No customer remedy is automatic solely because an order was delayed, lost, stolen, damaged, incorrect, or disputed.
+- No customer remedy is automatically denied solely because Handwrytten disclaims liability.
+- This standard does not establish legal liability, indemnity, damages, negligence, or contractual liability findings.
+
+#### Exceptions
+
+No exceptions are defined in this standard.
+
+Any future exception requires a documented standard revision supported by verified evidence or explicit company judgment recorded in the revision.
+
+#### Out of scope
+
+The following subjects are explicitly out of scope for FI-MFG-POL-004:
+
+| Subject | Reason |
+|---------|--------|
+| Customer-facing promise language, delivery confirmation, queue semantics, international reach, or outward-facing production, mailing, fulfillment, or delivery timing promises | Governed by FI-MFG-POL-003; not duplicated here |
+| Resend, replacement, or recovery timing promises in remedy decisions or internal remedy policy | Unsupported unless added through formal standard revision with verified evidence or explicit company judgment |
+| Vendor guarantee timing language | Does not override HW-MFG-010 HOLD |
+| Legal liability adjudication, indemnity, damages, or negligence findings | Operational policy only; not legal execution policy |
+| Payment processing, refund processing, billing credits, or compensation amounts | Implementation; not defined in this operational policy |
+| Case-management systems, ticketing, escalation routing, support scripts, or vendor contacts | Operational procedure; not defined in this operational policy |
+| Vendor support procedures, turnaround mechanics, or refund mechanics sought through HW-VQ-009 | Unresolved vendor diligence; not normative support |
+| API behavior, automation, database fields, evidence-upload interfaces, or notification workflows | Engineering; not defined in this operational policy |
+
+#### Supporting evidence
+
+| Fact ID | Verified statement used by this standard | Qualification preserved |
+|---------|------------------------------------------|-------------------------|
+| HW-MFG-018 | Handwrytten’s guarantee offers a 100% money-back guarantee for 90 days, promises pen-written notes, timely mailing for standard orders, and correct card-to-envelope and insert matching, while excluding sender text errors, incorrect addresses, and postal issues after USPS handoff. | Service and liability boundaries. |
+| HW-MFG-019 | Handwrytten’s guarantee states Handwrytten cannot be held liable for lost, stolen, or delayed mail once handed off to USPS. | Liability boundary after USPS handoff. |
+
+No additional verified facts are cited by this standard. HW-MFG-010 is on HOLD and is not normative support.
+
+#### Engineering implications
+
+Not defined in this operational policy.
+
+Engineering specifications, if required, SHALL be derived separately from this standard upon freeze review. This standard does not authorize engineering requirements.
+
+#### Validation method
+
+Compliance with FI-MFG-POL-004 SHALL be verified by review of in-scope internal remedy policy and remedy decision records against FI-MFG-POL-004-R01 through FI-MFG-POL-004-R15.
+
+A material remedy decision or internal policy statement violates this standard if it contradicts any normative requirement in this standard.
+
+#### Related standards
+
+| Standard ID | Relationship |
+|-------------|--------------|
+| FI-MFG-POL-003 | Customer Promise Discipline Policy — governs outward-facing promise discipline; distinct from operational remedy handling; informational only |
+| FI-MFG-POL-002 | Order Modification and Cancellation Policy — related operational domain; distinct subject; informational only |
+| FI-MFG-CON-002 | Add-On Fulfillment Boundary — related fulfillment domain; distinct subject; informational only |
+| FI-MFG-POL-001 | Custom Signature Governance Policy — related operational domain; distinct subject; informational only |
+| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary — related fulfillment domain; distinct subject; informational only |
+| FI-MFG-CON-003 | Vendor Capability Validation Constraint — related capability-validation domain; distinct subject; informational only |
+| FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary — related workflow domain; distinct subject; informational only |
+| FI-MFG-PRN-001 | Real Pen Production Method Principle — related production-method domain; distinct subject; informational only |
+
+#### Future revision notes
+
+- If the verified facts baseline changes HW-MFG-018 or HW-MFG-019 or their qualifications, this standard requires revision before F.I. Forgot policy boundaries may change.
+- If HW-VQ-009 resolves fulfillment or support operations questions, this standard requires revision only where verified disclosure changes vendor liability or remedy boundaries.
+- HW-MFG-010 HOLD remains in effect; vendor guarantee timing language in HW-MFG-018 does not authorize timing promises in this standard.
+- Resend, replacement, or recovery timing language may be added only through formal standard revision with verified evidence or explicit company judgment.
+- Escalation mechanics, approval workflows, and support procedures may be added only through a documented revision supported by verified evidence or explicit company judgment.
 
 ---
 
