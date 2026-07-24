@@ -232,6 +232,7 @@ The following table is the authoritative initial inventory of currently frozen D
 | FI-DSN-CLS-001 | Design Classification Strategy | Not Applicable | CLS-GOV | — | Not Applicable | Frozen | FI-DSN-GOV-001; FI-DSN-TPL-001 | FI-DSN-GOV-001 | None Required | Yes — taxonomy is company judgment | F.I. Forgot | OQ-CLS-001 | 1.0 | July 22, 2026 | Frozen classification strategy; `02-design-classification-strategy.md` |
 | FI-DSN-ID-001 | Design Identifier System | Not Applicable | CLS-GOV | — | Not Applicable | Frozen | FI-DSN-GOV-001; FI-DSN-TPL-001; FI-DSN-CLS-001 | FI-DSN-GOV-001 | None Required | Yes — identifier architecture is company judgment | F.I. Forgot | — | 1.0 | July 22, 2026 | Frozen identifier system; `03-design-identifier-system.md` |
 | FI-DSN-GOV-002 | Design Library Metadata Standard | Not Applicable | CLS-GOV | — | Not Applicable | Frozen | FI-DSN-GOV-001; FI-DSN-TPL-001; FI-DSN-CLS-001; FI-DSN-ID-001 | FI-DSN-GOV-001 | None Required | Yes — metadata model is company judgment | F.I. Forgot | OQ-DSN-003 | 1.0 | July 22, 2026 | Frozen metadata standard; `04-design-library-metadata-standard.md` |
+| FI-DSN-PRN-001 | Visual Philosophy Standard | PRN | CLS-VPH | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md` | FI-DSN-GOV-001 | None Required | Yes — visual philosophy is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 1 — Visual Intent. Frozen standard; `playbook/design/volume-02-visual-design/02-visual-philosophy-standard.md` |
 
 ---
 
@@ -435,6 +436,7 @@ Revisions after freeze require documented change control under Section 9 and `FI
 | 1.0 Draft (refined) | July 22, 2026 | F.I. Forgot | Sprint D1.6 refinement — lifecycle **Status** aligned to `FI-DSN-GOV-001`; **Visual Source** column added; single authoritative register established; open questions moved to `OQ-DSN-004` through `OQ-DSN-006` |
 | 1.0 Draft (freeze review) | July 22, 2026 | F.I. Forgot | Sprint D1.6 formal freeze review — READY TO FREEZE |
 | 1.0 | July 22, 2026 | F.I. Forgot | Frozen — promoted to Frozen Planning Register; `OQ-CLS-001` and `OQ-DSN-003` remain deferred |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-PRN-001` Visual Philosophy Standard reserved and frozen per Section 9 row addition |
 
 ---
 
