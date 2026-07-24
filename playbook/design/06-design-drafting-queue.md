@@ -531,12 +531,14 @@ Revisions after freeze require documented change control under Section 9 and `FI
 
 The following table records operational queue entries admitted under Section 5.2. Register **Status** remains authoritative for lifecycle state.
 
-No active queue entries.
+| Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
+|---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
 
 ### 18.1 Queue History
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
+| FI-DSN-STD-005 | Frozen | Completed (queue) | 11 | F.I. Forgot | July 24, 2026 | July 24, 2026 | Sprint D9.8 — Surface Spatial Allocation Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-004 | Frozen | Completed (queue) | 10 | F.I. Forgot | July 24, 2026 | July 24, 2026 | Sprint D8.8 — Card Architecture Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 
 ---
@@ -552,6 +554,10 @@ No active queue entries.
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-004` Card Architecture Standard admitted (Execution Order 10; In progress) per Sprint D8.4 draft |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-004` queue notes updated for Version 0.2 Draft refinement per Sprint D8.6 |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-004` queue exit (Completed (queue); Execution Order 10 preserved) per Sprint D8.8 freeze promotion |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-005` Surface Spatial Allocation Standard admitted (Execution Order 11; Queued) per Sprint D9.1 planning |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-005` queue state advanced to In progress (Version 0.1 Draft) per Sprint D9.4 draft |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-005` queue notes updated for Version 0.2 Draft refinement per Sprint D9.6 |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-005` queue exit (Completed (queue); Execution Order 11 preserved) per Sprint D9.8 freeze promotion |
 
 ### Future revision notes
 
