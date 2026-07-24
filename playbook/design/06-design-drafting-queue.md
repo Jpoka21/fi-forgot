@@ -533,6 +533,7 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
+| FI-DSN-STD-007 | Reserved, Not Drafted | Queued | 13 | F.I. Forgot | July 24, 2026 | — | Brain Visual Selection Standard (Domain 3 — Authorized Selection); Volume 04 architecture dependency satisfied — frozen `playbook/design/volume-04-artwork-intelligence/01-artwork-intelligence-architecture.md` Version 1.0; eligible for governed challenge or drafting preparation sprint; no draft created during D11.8 |
 
 ### 18.1 Queue History
 
@@ -562,6 +563,9 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-006` Envelope and Exterior Presentation Standard admitted (Execution Order 12; In progress) per Sprint D10.4 draft |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-006` queue notes updated for Version 0.2 Draft refinement per Sprint D10.6 |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-006` queue exit (Completed (queue); Execution Order 12 preserved) per Sprint D10.8 freeze promotion |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-007` Brain Visual Selection Standard admitted (Execution Order 13; Queued) per Sprint D11.4; architecture Version 0.1 Draft at `volume-04-artwork-intelligence/01-artwork-intelligence-architecture.md` |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-007` queue state advanced to **Blocked** pending Volume 04 architecture freeze promotion; drafting blocked until architecture freeze completes |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-007` queue state advanced to **Queued** following Volume 04 Artwork Intelligence Architecture Version 1.0 freeze promotion; architecture dependency satisfied; eligible for governed drafting preparation; no draft created during D11.8 |
 
 ### Future revision notes
 
