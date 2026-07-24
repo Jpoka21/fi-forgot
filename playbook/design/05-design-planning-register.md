@@ -236,6 +236,7 @@ The following table is the authoritative initial inventory of currently frozen D
 | FI-DSN-STD-001 | Brand Expression Standard | STD | CLS-BEX | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md`; FI-DSN-PRN-001 | FI-DSN-GOV-001 | None Required | Yes — brand expression is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 2 — Brand Expression. Frozen standard; `playbook/design/volume-02-visual-design/03-brand-expression-standard.md` |
 | FI-DSN-STD-002 | Typography Standard | STD | CLS-TYP | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md`; FI-DSN-PRN-001; FI-DSN-STD-001 | FI-DSN-GOV-001 | None Required | Yes — typography is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 3 — Visual Element Systems. Frozen standard; `playbook/design/volume-02-visual-design/04-typography-standard.md` |
 | FI-DSN-STD-003 | Composition Standard | STD | CLS-CMP | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md`; FI-DSN-PRN-001; FI-DSN-STD-001; FI-DSN-STD-002 | FI-DSN-GOV-001 | None Required | Yes — composition is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 4 — Composition Principles. Frozen standard; `playbook/design/volume-02-visual-design/05-composition-standard.md` |
+| FI-DSN-STD-004 | Card Architecture Standard | STD | CLS-CAR | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-03-surface-implementation/01-surface-implementation-architecture.md`; FI-DSN-PRN-001; FI-DSN-STD-001; FI-DSN-STD-002; FI-DSN-STD-003; applicable frozen `FI-MFG-*` | FI-DSN-GOV-001 | None Required | Yes — card architecture is company judgment | F.I. Forgot | OQ-V03-002 | 1.0 | July 24, 2026 | Primary Volume: VOL-03. Domain 1 — Surface System Structure. Frozen standard; `playbook/design/volume-03-surface-implementation/02-card-architecture-standard.md` |
 
 ---
 
@@ -443,6 +444,10 @@ Revisions after freeze require documented change control under Section 9 and `FI
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-001` Brand Expression Standard reserved and frozen per Section 9 row addition |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-002` Typography Standard reserved and frozen per Section 9 row addition |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-003` Composition Standard reserved and frozen per Section 9 row addition |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-004` Card Architecture Standard reserved (`Reserved, Not Drafted`) per Section 9 row addition |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-004` Card Architecture Standard status advanced to `Drafted, Pending Freeze` (Version 0.1) per Sprint D8.4 draft |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-004` Card Architecture Standard advanced to Version 0.2 Draft per Sprint D8.6 refinement |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-004` Card Architecture Standard promoted to Frozen (Version 1.0) per Sprint D8.8 freeze promotion |
 
 ---
 
