@@ -235,6 +235,7 @@ The following table is the authoritative initial inventory of currently frozen D
 | FI-DSN-PRN-001 | Visual Philosophy Standard | PRN | CLS-VPH | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md` | FI-DSN-GOV-001 | None Required | Yes — visual philosophy is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 1 — Visual Intent. Frozen standard; `playbook/design/volume-02-visual-design/02-visual-philosophy-standard.md` |
 | FI-DSN-STD-001 | Brand Expression Standard | STD | CLS-BEX | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md`; FI-DSN-PRN-001 | FI-DSN-GOV-001 | None Required | Yes — brand expression is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 2 — Brand Expression. Frozen standard; `playbook/design/volume-02-visual-design/03-brand-expression-standard.md` |
 | FI-DSN-STD-002 | Typography Standard | STD | CLS-TYP | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md`; FI-DSN-PRN-001; FI-DSN-STD-001 | FI-DSN-GOV-001 | None Required | Yes — typography is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 3 — Visual Element Systems. Frozen standard; `playbook/design/volume-02-visual-design/04-typography-standard.md` |
+| FI-DSN-STD-003 | Composition Standard | STD | CLS-CMP | — | Not Applicable | Frozen | FI-DSN-GOV-001; `playbook/design/volume-02-visual-design/01-visual-design-architecture.md`; FI-DSN-PRN-001; FI-DSN-STD-001; FI-DSN-STD-002 | FI-DSN-GOV-001 | None Required | Yes — composition is company judgment | F.I. Forgot | — | 1.0 | July 24, 2026 | Primary Volume: VOL-02. Layer 4 — Composition Principles. Frozen standard; `playbook/design/volume-02-visual-design/05-composition-standard.md` |
 
 ---
 
@@ -441,6 +442,7 @@ Revisions after freeze require documented change control under Section 9 and `FI
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-PRN-001` Visual Philosophy Standard reserved and frozen per Section 9 row addition |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-001` Brand Expression Standard reserved and frozen per Section 9 row addition |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-002` Typography Standard reserved and frozen per Section 9 row addition |
+| 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-003` Composition Standard reserved and frozen per Section 9 row addition |
 
 ---
 
