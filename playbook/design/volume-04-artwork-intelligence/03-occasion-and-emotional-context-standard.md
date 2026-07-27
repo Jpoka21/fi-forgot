@@ -114,7 +114,7 @@ This standard does **not** inherit authority to redefine authorized selection or
 
 | Req ID | Requirement | Source |
 |--------|-------------|--------|
-| `FI-DSN-STD-008-R01` | This standard SHALL NOT contradict frozen Volume 04 Artwork Intelligence Architecture P1–P11 or the validated Occasion and Emotional Context standard architecture. | Company judgment |
+| `FI-DSN-STD-008-R01` | This standard SHALL NOT contradict frozen Volume 04 Artwork Intelligence Architecture P1–P11 or the validated Occasion and Emotional Context architecture for Domain 1 — including the locked governing question, principal-subject placement model, and authority boundaries expressed in this standard. | Company judgment |
 | `FI-DSN-STD-008-R02` | This standard SHALL remain reconcilable with frozen `FI-DSN-PRN-001`, `FI-DSN-STD-001`, `FI-DSN-STD-002`, `FI-DSN-STD-003`, `FI-DSN-STD-004`, `FI-DSN-STD-005`, and `FI-DSN-STD-006`. Occasion and Emotional Context SHALL NOT weaken, replace, or silently override upstream visual permission, surface structure, spatial allocation, or exterior presentation authority. | Company judgment |
 | `FI-DSN-STD-008-R03` | Occasion and Emotional Context SHALL consume applicable frozen `FI-MFG-*` obligations only as Compliance Boundary inputs when reconciling representational boundaries. This standard SHALL NOT restate manufacturing operational policy. Representational boundaries and semantic meaning that conflict with applicable Compliance Boundaries SHALL be unsuccessful and SHALL be removed, restricted, or revised per `FI-DSN-GOV-004` §13. | Company judgment |
 | `FI-DSN-STD-008-R04` | This standard SHALL govern Decision-stage semantic policy only. It SHALL NOT author or prescribe as normative requirements: authorized visual alternatives, context-bound eligibility, Preference Surfaces, Compliance Boundary authoring, Brain algorithms, ranking formulas, scoring models, prompt templates, runtime occasion inference mechanics, product UI behavior, metadata field schemas, occasion lookup tables, workflow choreography, or engineering implementation. Occasion and Emotional Context SHALL NOT treat product telemetry, runtime behavior, Brain recommendation history, or adaptive runtime patterns as sources of Decision-stage semantic policy. | Company judgment |
@@ -182,17 +182,16 @@ When steps conflict, **principal normative subject** per `FI-DSN-VOL-001` Sectio
 
 | Req ID | Requirement | Source |
 |--------|-------------|--------|
-| `FI-DSN-STD-008-R16` | Occasion and Emotional Context MAY produce semantic outputs — governed occasion meaning, emotional intent meaning, related contextual dimension meaning, and representational boundaries — for consumption by peer standards. Semantic ownership SHALL remain with this standard at the source. | Company judgment |
-| `FI-DSN-STD-008-R17` | Occasion and Emotional Context MAY supply semantic outputs consumable by `FI-DSN-STD-007`, `FI-DSN-STD-009`, and metadata handoff boundaries per `FI-DSN-GOV-002` when peer standards constrain governed design decisions. Peer standards SHALL NOT redefine occasion meaning, emotional intent meaning, or representational boundaries owned by this standard. | Company judgment |
-| `FI-DSN-STD-008-R18` | Occasion and Emotional Context SHALL NOT govern whether a permitted visual treatment may be included in an authorized alternative set for a selection context. Context-bound eligibility and authorized alternatives remain authoritative in `FI-DSN-STD-007` when principal. | Company judgment |
+| `FI-DSN-STD-008-R16` | Occasion and Emotional Context MAY produce semantic outputs — governed occasion meaning, emotional intent meaning, related contextual dimension meaning, and representational boundaries — for consumption by `FI-DSN-STD-007`, `FI-DSN-STD-009`, and metadata handoff boundaries per `FI-DSN-GOV-002` when peer standards constrain governed design decisions. Semantic ownership SHALL remain with this standard at the source. Peer standards SHALL NOT redefine occasion meaning, emotional intent meaning, related contextual dimension meaning, or representational boundaries owned by this standard. | Company judgment |
+| `FI-DSN-STD-008-R17` | Occasion and Emotional Context SHALL NOT govern whether a permitted visual treatment may be included in an authorized alternative set for a selection context. Context-bound eligibility and authorized alternatives remain authoritative in `FI-DSN-STD-007` when principal. | Company judgment |
 
 ### 6.6 Cross-surface semantic applicability
 
 | Req ID | Requirement | Source |
 |--------|-------------|--------|
-| `FI-DSN-STD-008-R19` | Occasion and Emotional Context semantic policy SHALL apply to governed visual design on card surfaces and exterior surfaces alike, subject to frozen Volume 03 structural, spatial, and `CLS-EEP` Compliance Boundaries. | Company judgment |
-| `FI-DSN-STD-008-R20` | Occasion and Emotional Context SHALL consume exterior presentation geometry and presentation boundaries from `FI-DSN-STD-006` as upstream constraints on where representational boundaries may apply and SHALL NOT absorb exterior presentation geometry or `CLS-EEP` principal authority. | Company judgment |
-| `FI-DSN-STD-008-R21` | When spatial placement or spatial Preference Surface authorization is principal, Occasion and Emotional Context SHALL defer to Volume 03 standards. This standard governs semantic meaning and representational boundaries only when `CLS-OEC` is principal. | Company judgment |
+| `FI-DSN-STD-008-R18` | Occasion and Emotional Context semantic policy SHALL apply to governed visual design on card surfaces and exterior surfaces alike, subject to frozen Volume 03 structural, spatial, and `CLS-EEP` Compliance Boundaries. | Company judgment |
+| `FI-DSN-STD-008-R19` | Occasion and Emotional Context SHALL consume exterior presentation geometry and presentation boundaries from `FI-DSN-STD-006` as upstream constraints on where representational boundaries may apply and SHALL NOT absorb exterior presentation geometry or `CLS-EEP` principal authority. | Company judgment |
+| `FI-DSN-STD-008-R20` | When spatial placement or spatial Preference Surface authorization is principal, Occasion and Emotional Context SHALL defer to Volume 03 standards. This standard governs semantic meaning and representational boundaries only when `CLS-OEC` is principal. | Company judgment |
 
 ---
 
@@ -221,8 +220,7 @@ Brain Runtime SHALL NOT:
 
 | Req ID | Requirement | Source |
 |--------|-------------|--------|
-| `FI-DSN-STD-008-R22` | Brain Runtime use of occasion, emotional intent, and related contextual signals affecting governed visual design SHALL remain reconcilable with frozen semantic meaning and representational boundaries established by this standard. Brain Runtime SHALL NOT redefine occasion meaning, emotional intent meaning, related contextual dimension meaning, or representational boundaries as Decision-stage policy. | Company judgment |
-| `FI-DSN-STD-008-R23` | Brain Runtime SHALL NOT treat runtime inference, telemetry, repeated narrowing patterns, Brain recommendation history, or adaptive runtime patterns as sources of Decision-stage semantic policy. Brain Runtime SHALL NOT authorize visual alternatives, widen Preference Surfaces, or alter context-bound eligibility based on occasion or emotional inference alone. | Company judgment |
+| `FI-DSN-STD-008-R21` | Brain Runtime use of occasion, emotional intent, and related contextual signals affecting governed visual design SHALL remain reconcilable with frozen semantic meaning and representational boundaries established by this standard. Brain Runtime SHALL NOT redefine occasion meaning, emotional intent meaning, related contextual dimension meaning, or representational boundaries as Decision-stage policy. Brain Runtime SHALL NOT treat runtime inference, telemetry, repeated narrowing patterns, Brain recommendation history, or adaptive runtime patterns as sources of Decision-stage semantic policy. Brain Runtime SHALL NOT authorize visual alternatives, widen Preference Surfaces, or alter context-bound eligibility based on occasion or emotional inference alone. | Company judgment |
 
 ---
 
@@ -286,15 +284,16 @@ Compliance with this standard SHALL be verified implementation-independently:
 
 | Check | Pass criterion |
 |-------|----------------|
-| Requirement IDs | Continuous `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R23` with no orphans or duplicates |
-| Constitutional inheritance | No contradiction with Volume 04 P1–P11; upstream PRN-001 and STD-001 through STD-006 reconciled; `FI-MFG-*` cited not restated |
+| Requirement IDs | Continuous `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R21` with no orphans or duplicates |
+| Constitutional inheritance | No contradiction with Volume 04 P1–P11 or validated Domain 1 architecture expressed in this standard; upstream PRN-001 and STD-001 through STD-006 reconciled; `FI-MFG-*` cited not restated |
 | Governing question | Decision-stage semantic meaning and representational boundaries only |
-| OEC / BVS boundary | Fit semantics and representational meaning owned; context-bound eligibility and authorized alternatives deferred to `FI-DSN-STD-007` |
-| PER boundary | Personalization policy deferral explicit; semantic outputs without policy absorption |
-| GOV-002 preservation | Metadata field semantics deferred; handoff without redefinition |
+| OEC / BVS boundary | Fit semantics and representational meaning owned (`R12`, `R15`); context-bound eligibility and authorized alternatives deferred to `FI-DSN-STD-007` (`R17`) |
+| PER boundary | Personalization policy deferral explicit; semantic outputs without policy absorption (`R16`) |
+| GOV-002 preservation | Metadata field semantics deferred; handoff without redefinition (`R16`) |
 | GOV-004 preservation | No Preference Surface or Compliance Boundary authoring |
-| Cross-surface posture | Card and exterior semantic policy under EEP constraints without geometry absorption |
-| Brain Interaction | Semantic boundary requirements present; runtime policy amendment prohibited |
+| Cross-surface posture | Card and exterior semantic policy under EEP constraints without geometry absorption (`R18`–`R20`) |
+| Brain Interaction | Single semantic boundary requirement (`R21`); runtime policy amendment prohibited |
+| Architecture principles | OEC-P1–P10 embodied across `R04`, `R05`, `R06`, `R14`–`R17`, `R21` |
 | Manufacturing | Compliance Boundary consumption; conflicting semantics excluded |
 | Implementation independence | No ranking, scoring, prompts, UI, lookup tables, or engineering schemas |
 | Principal-subject placement | Domain 1 ownership and deferral table present |
@@ -325,6 +324,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 |---------|------|--------|---------|
 | 0.1 Architecture Draft | July 24, 2026 | F.I. Forgot | Initial Occasion and Emotional Context Standard architecture — locked governing question; authority and boundaries; OEC-P1–P10; provisional requirement groups G1–G9; principal-subject placement; peer interaction model with frozen `FI-DSN-STD-007`; architecture validation gate |
 | 0.1 Draft | July 24, 2026 | F.I. Forgot | First normative requirement draft — `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R23`; Constitutional Inheritance; principal-subject placement; occasion meaning; emotional intent; related contextual dimensions; representational boundaries; semantic handoff; cross-surface applicability; Brain Interaction semantic boundary |
+| 0.1 Draft | July 27, 2026 | F.I. Forgot | Requirement consolidation refinement per Sprint D13.6 — reduced to `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R21`; merged semantic handoff (`R16`); merged Brain Interaction boundary (`R21`); clarified `R01` architecture traceability; status remains `Drafted, Pending Freeze` |
 
 ### Future revision notes
 

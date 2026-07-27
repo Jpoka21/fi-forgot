@@ -472,6 +472,7 @@ Revisions after freeze require documented change control under Section 9 and `FI
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-007` Brain Visual Selection Standard promoted to Frozen (Version 1.0) per Sprint D12.8 freeze promotion |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-008` Occasion and Emotional Context Standard status advanced to `Drafted, Pending Architecture Validation` (Version 0.1 Architecture Draft) per Sprint D13.2 architecture draft |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-008` Occasion and Emotional Context Standard status advanced to `Drafted, Pending Freeze` (Version 0.1 Draft) per Sprint D13.4 requirement draft |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Inventory note — `FI-DSN-STD-008` requirement set consolidated to `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R21` per Sprint D13.6 refinement; status remains `Drafted, Pending Freeze` |
 
 ---
 
