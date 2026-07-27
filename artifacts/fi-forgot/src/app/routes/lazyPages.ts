@@ -8,6 +8,8 @@ export const RecipientProfilePage = lazy(() => import("@/pages/recipient-profile
 export const CardGeneratorPage = lazy(() => import("@/pages/card-generator"));
 export const ReminderSettingsPage = lazy(() => import("@/pages/reminder-settings"));
 export const AdminPage = lazy(() => import("@/pages/admin"));
+export const StudioCollectionsPage = lazy(() => import("@/pages/studio/collections"));
+export const StudioCollectionDetailPage = lazy(() => import("@/pages/studio/collection-detail"));
 export const BriefingPage = lazy(() => import("@/pages/briefing"));
 export const SubscribePage = lazy(() => import("@/pages/subscribe"));
 export const CheckoutSuccessPage = lazy(() => import("@/pages/checkout-success"));

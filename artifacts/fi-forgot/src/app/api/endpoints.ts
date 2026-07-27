@@ -95,4 +95,8 @@ export const API_ENDPOINTS = {
     cardLibraryMetadataAudit: "/api/admin/card-library/metadata-audit",
     cardLibraryTrack: (id: string) => `/api/admin/card-library/${id}/track`,
   },
+  studio: {
+    collections: "/api/studio/collections",
+    collectionById: (id: string) => `/api/studio/collections/${encodeURIComponent(id)}`,
+  },
 } as const;

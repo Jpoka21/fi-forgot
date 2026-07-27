@@ -11,6 +11,8 @@ import {
   SystemVerificationPage,
   BrainPlaygroundPage,
   LaunchReadinessPage,
+  StudioCollectionsPage,
+  StudioCollectionDetailPage,
   BriefingPage,
   BusinessApprovePage,
   BusinessDashboardPage,
@@ -169,6 +171,12 @@ export function AppRoutes() {
       </Route>
       <Route path={ROUTE_PATHS.admin}>
         <ProtectedRoute component={AdminPage} />
+      </Route>
+      <Route path={ROUTE_PATHS.studio.collections}>
+        <ProtectedRoute component={StudioCollectionsPage} />
+      </Route>
+      <Route path="/studio/collections/:id">
+        <ProtectedRoute component={StudioCollectionDetailPage} />
       </Route>
 
       {/* Redirects */}

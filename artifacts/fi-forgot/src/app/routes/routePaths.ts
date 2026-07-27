@@ -27,6 +27,10 @@ export const ROUTE_PATHS = {
   brainPlayground: "/brain-playground",
   launchReadiness: "/launch-readiness",
   admin: "/admin",
+  studio: {
+    collections: "/studio/collections",
+    collectionById: (id: string) => `/studio/collections/${encodeURIComponent(id)}`,
+  },
   try: "/try",
   tryLegacy: "/v2",
   subscribe: "/subscribe",
@@ -81,6 +85,7 @@ export const HIDE_TRY_BUTTON_ON = [
   ROUTE_PATHS.brainPlayground,
   ROUTE_PATHS.launchReadiness,
   ROUTE_PATHS.admin,
+  "/studio",
   "/briefings",
   "/business",
   ROUTE_PATHS.businessDemo,
