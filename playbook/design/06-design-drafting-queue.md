@@ -533,7 +533,7 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-| FI-DSN-STD-011 | Drafted, Pending Architecture Validation | In progress | 17 | F.I. Forgot | July 27, 2026 | — | Collection Lifecycle and Consistency Standard (Domain 2 — Collection Lifecycle and Consistency); Version 0.2 Architecture Draft at `playbook/design/volume-05-signature-collections/03-collection-lifecycle-and-consistency-standard.md` per Sprint D17.0B; consumes frozen `FI-DSN-STD-010` membership outputs; normative requirement drafting not authorized |
+| FI-DSN-STD-011 | Drafted, Pending Freeze | In progress | 17 | F.I. Forgot | July 27, 2026 | — | Collection Lifecycle and Consistency Standard (Domain 2 — Collection Lifecycle and Consistency); Version 0.3 Requirement Draft at `playbook/design/volume-05-signature-collections/03-collection-lifecycle-and-consistency-standard.md` (`FI-DSN-STD-011-R01`–`R27`) per Sprint D17.1; consumes frozen `FI-DSN-STD-010` membership outputs; pending adversarial requirement validation |
 
 ### 18.1 Queue History
 
@@ -590,6 +590,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-010` queue exit (Completed (queue); Execution Order 16 preserved) per Sprint D16.7 freeze promotion |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` queue state advanced to **In progress** (Version 0.1 Architecture Draft) per Sprint D17.0 architecture draft; normative requirement drafting not authorized |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` architecture refined to Version 0.2 Architecture Draft per Sprint D17.0B; normative requirement drafting not authorized |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` first complete requirement draft (Version 0.3 Requirement Draft; `FI-DSN-STD-011-R01`–`R27`) per Sprint D17.1; pending adversarial requirement validation |
 
 ### Future revision notes
 
