@@ -533,12 +533,14 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-| FI-DSN-STD-008 | Drafted, Pending Freeze | In progress | 14 | F.I. Forgot | July 24, 2026 | — | Occasion and Emotional Context Standard (Domain 1 — Context Semantics); Version 0.1 Draft at `playbook/design/volume-04-artwork-intelligence/03-occasion-and-emotional-context-standard.md` — `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R21`; freeze review not authorized |
+
+*No active queue entries.*
 
 ### 18.1 Queue History
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
+| FI-DSN-STD-008 | Frozen | Completed (queue) | 14 | F.I. Forgot | July 24, 2026 | July 27, 2026 | Sprint D13.8 — Occasion and Emotional Context Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-007 | Frozen | Completed (queue) | 13 | F.I. Forgot | July 24, 2026 | July 24, 2026 | Sprint D12.8 — Brain Visual Selection Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-006 | Frozen | Completed (queue) | 12 | F.I. Forgot | July 24, 2026 | July 24, 2026 | Sprint D10.8 — Envelope and Exterior Presentation Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-005 | Frozen | Completed (queue) | 11 | F.I. Forgot | July 24, 2026 | July 24, 2026 | Sprint D9.8 — Surface Spatial Allocation Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
@@ -574,6 +576,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-008` Occasion and Emotional Context Standard admitted (Execution Order 14; In progress) per Sprint D13.2 architecture draft |
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-008` queue notes updated for Version 0.1 Draft requirement body (`FI-DSN-STD-008-R01`–`R23`) per Sprint D13.4; queue state remains **In progress** |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-008` requirement set consolidated to `FI-DSN-STD-008-R01`–`R21` per Sprint D13.6; queue state remains **In progress** |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-008` queue exit (Completed (queue); Execution Order 14 preserved) per Sprint D13.8 freeze promotion |
 
 ### Future revision notes
 

@@ -12,9 +12,10 @@
 | **Primary Volume** | 04 — Artwork Intelligence |
 | **Architectural domain** | Domain 1 — Context Semantics |
 | **Document** | `03-occasion-and-emotional-context-standard.md` |
-| **Status** | Drafted, Pending Freeze |
-| **Version** | 0.1 Draft |
-| **Date** | July 24, 2026 |
+| **Status** | Frozen |
+| **Version** | 1.0 |
+| **Date** | July 27, 2026 |
+| **Freeze date** | July 27, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -293,7 +294,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 | GOV-004 preservation | No Preference Surface or Compliance Boundary authoring |
 | Cross-surface posture | Card and exterior semantic policy under EEP constraints without geometry absorption (`R18`–`R20`) |
 | Brain Interaction | Single semantic boundary requirement (`R21`); runtime policy amendment prohibited |
-| Architecture principles | OEC-P1–P10 embodied across `R04`, `R05`, `R06`, `R14`–`R17`, `R21` |
+| Architecture principles | OEC-P1–P10 embodied across `R04`, `R05`, `R06`, `R12`, `R14`–`R17`, `R21` |
 | Manufacturing | Compliance Boundary consumption; conflicting semantics excluded |
 | Implementation independence | No ranking, scoring, prompts, UI, lookup tables, or engineering schemas |
 | Principal-subject placement | Domain 1 ownership and deferral table present |
@@ -322,6 +323,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 | July 27, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Standard; Formal Freeze Review passed; first Volume 04 `CLS-OEC` standard; Domain 1 — Context Semantics; 21 normative requirements (`FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R21`) |
 | 0.1 Architecture Draft | July 24, 2026 | F.I. Forgot | Initial Occasion and Emotional Context Standard architecture — locked governing question; authority and boundaries; OEC-P1–P10; provisional requirement groups G1–G9; principal-subject placement; peer interaction model with frozen `FI-DSN-STD-007`; architecture validation gate |
 | 0.1 Draft | July 24, 2026 | F.I. Forgot | First normative requirement draft — `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R23`; Constitutional Inheritance; principal-subject placement; occasion meaning; emotional intent; related contextual dimensions; representational boundaries; semantic handoff; cross-surface applicability; Brain Interaction semantic boundary |
 | 0.1 Draft | July 27, 2026 | F.I. Forgot | Requirement consolidation refinement per Sprint D13.6 — reduced to `FI-DSN-STD-008-R01` through `FI-DSN-STD-008-R21`; merged semantic handoff (`R16`); merged Brain Interaction boundary (`R21`); clarified `R01` architecture traceability; status remains `Drafted, Pending Freeze` |
