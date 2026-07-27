@@ -533,12 +533,14 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-| FI-DSN-STD-009 | Drafted, Pending Freeze | In progress | 15 | F.I. Forgot | July 27, 2026 | — | Sprint D14.4 — Version 0.1 Draft requirement body (`FI-DSN-STD-009-R01`–`R20`) |
+
+*No active queue entries.*
 
 ### 18.1 Queue History
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
+| FI-DSN-STD-009 | Frozen | Completed (queue) | 15 | F.I. Forgot | July 27, 2026 | July 27, 2026 | Sprint D14.8 — Personalization Policy Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-008 | Frozen | Completed (queue) | 14 | F.I. Forgot | July 24, 2026 | July 27, 2026 | Sprint D13.8 — Occasion and Emotional Context Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-007 | Frozen | Completed (queue) | 13 | F.I. Forgot | July 24, 2026 | July 24, 2026 | Sprint D12.8 — Brain Visual Selection Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-006 | Frozen | Completed (queue) | 12 | F.I. Forgot | July 24, 2026 | July 24, 2026 | Sprint D10.8 — Envelope and Exterior Presentation Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
@@ -579,6 +581,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` Personalization Policy Standard admitted (Execution Order 15; In progress) per Sprint D14.2 architecture draft |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` queue notes updated for Sprint D14.3A architecture refinement (F-01–F-03); queue state remains **In progress** |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` queue notes updated for Version 0.1 Draft requirement body (`FI-DSN-STD-009-R01`–`R20`) per Sprint D14.4; queue state remains **In progress** |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` queue exit (Completed (queue); Execution Order 15 preserved) per Sprint D14.8 freeze promotion |
 
 ### Future revision notes
 

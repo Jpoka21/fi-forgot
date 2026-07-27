@@ -12,9 +12,10 @@
 | **Primary Volume** | 04 — Artwork Intelligence |
 | **Architectural domain** | Domain 2 — Personalization Policy |
 | **Document** | `04-personalization-policy-standard.md` |
-| **Status** | Drafted, Pending Freeze |
-| **Version** | 0.1 Draft |
+| **Status** | Frozen |
+| **Version** | 1.0 |
 | **Date** | July 27, 2026 |
+| **Freeze date** | July 27, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -312,7 +313,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 | Governing question | Customer- and relationship-specific treatment boundaries and policy outputs addressed |
 | PER / OEC boundary | Semantic consumption without redefinition (`R14`); treatment policy owned (`R07`–`R11`); semantics deferred (`R06`, `R10`, `R13`) |
 | PER / BVS boundary | Policy outputs consumable (`R15`); eligibility and alternatives deferred to `FI-DSN-STD-007` (`R16`) |
-| GOV-002 preservation | Metadata field semantics deferred; handoff without redefinition (`R15`) |
+| GOV-002 preservation | Metadata field semantics and visual source provenance deferred (`R04`, `R06`); handoff without redefinition or provenance restatement (`R15`); `OQ-DSN-003` deferred |
 | GOV-004 preservation | No Preference Surface or Compliance Boundary authoring (`R04`, `R16`, `R19`) |
 | Treatment boundary distinction | Boundaries are permit/prohibit policy — not permission, semantics, surfaces, or eligibility (`R12`, `R13`) |
 | Cross-surface posture | Card and exterior policy under EEP constraints without geometry absorption (`R17`–`R19`) |
@@ -346,6 +347,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 | July 27, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Standard; Formal Freeze Review passed; first Volume 04 `CLS-PER` standard; Domain 2 — Personalization Policy; 20 normative requirements (`FI-DSN-STD-009-R01` through `FI-DSN-STD-009-R20`) |
 | 0.1 Architecture Draft | July 27, 2026 | F.I. Forgot | Initial Personalization Policy Standard architecture — locked governing question; authority and boundaries; PER-P1–PER-P10; provisional requirement groups G1–G8; principal-subject placement; peer interaction model with frozen `FI-DSN-STD-008` and `FI-DSN-STD-007`; architecture validation gate |
 | 0.1 Architecture Draft (refined) | July 27, 2026 | F.I. Forgot | Sprint D14.3A — PER-P1 peer-input wording (F-01); inbound OEC semantic consumption recorded in §6.4 (F-02); Preference Surface deferral distinguished from Volume 03 spatial deferral in §6.5 (F-03) |
 | 0.1 Draft | July 27, 2026 | F.I. Forgot | First normative requirement draft — `FI-DSN-STD-009-R01` through `FI-DSN-STD-009-R20`; Constitutional Inheritance; principal-subject placement; customer-specific policy; relationship-specific policy; personalization treatment boundaries; policy output and peer handoff; cross-surface applicability; Brain Interaction policy boundary |
