@@ -13,7 +13,7 @@
 | **Architectural domain** | Domain 2 — Collection Lifecycle and Consistency |
 | **Document** | `03-collection-lifecycle-and-consistency-standard.md` |
 | **Status** | Drafted, Pending Architecture Validation |
-| **Version** | 0.1 Architecture Draft |
+| **Version** | 0.2 Architecture Draft |
 | **Date** | July 27, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
@@ -55,7 +55,7 @@ This standard is the **architectural foundation** for F.I. Forgot Volume 05 Doma
 
 It answers the locked governing question:
 
-> How shall governed artwork collections be constitutionally published, kept consistent over time, maintained, withdrawn, superseded, grandfathered, and retired while consuming frozen membership decisions from `FI-DSN-STD-010` without redefining membership eligibility, upstream visual permission, contextual selection, personalization, manufacturing execution, storage state, or runtime mechanics?
+> How shall governed artwork collections be constitutionally published, kept consistent over time, maintained, withdrawn, superseded, grandfathered, retired, or restored through bounded reactivation while consuming frozen membership decisions from `FI-DSN-STD-010` without redefining membership eligibility, upstream visual permission, contextual selection, personalization, manufacturing execution, storage state, or runtime mechanics?
 
 This architecture draft translates frozen Signature Collections Architecture Domain 2 assignment into a complete constitutional structure for later normative requirement drafting. It does not replace frozen Volume 05 architecture, frozen `FI-DSN-STD-010`, frozen upstream Volumes 02–04 standards, frozen `FI-DSN-GOV-002`, or frozen `FI-DSN-GOV-004`.
 
@@ -72,7 +72,8 @@ This architecture draft translates frozen Signature Collections Architecture Dom
 - Upstream consumption posture without authority absorption
 - Principal-subject placement and deferral relationships
 - Architectural principles `LIF-P1`–`LIF-P10`
-- Constitutional lifecycle posture vocabulary (not a runtime state machine)
+- Constitutional lifecycle vocabulary taxonomy (not a runtime state machine)
+- Domain 1 validity lifecycle response model
 - Provisional requirement groups `G1`–`G8` for later normative drafting
 - Brain Interaction policy boundary posture (Decision stage only)
 - Manufacturing Compliance Boundary integration posture
@@ -94,10 +95,12 @@ See Section 14.
 | Term | Definition |
 |------|------------|
 | **Collection Lifecycle decision** | A governed design decision whose principal normative subject is collection publication policy, longitudinal collection consistency, maintenance discipline, withdrawal, grandfathering, supersession, or retirement under `CLS-ASG` Domain 2 |
-| **Collection publication policy** | Decision-stage constitutional rules governing when a governed collection or member may enter, remain in, or exit a published availability posture — distinct from manufacturing execution, fulfillment timing, or runtime orchestration |
+| **Collection publication policy** | Decision-stage constitutional rules governing when a governed collection may enter and remain in a published availability posture, and when member availability may attach within that collection lifecycle — distinct from manufacturing execution, fulfillment timing, deployment, storefront release, or runtime orchestration |
 | **Decision-stage lifecycle policy** | Frozen normative lifecycle rules recorded in Design Standards; not runtime evaluation, DAM state, production scheduling, or customer delivery timing |
-| **Lifecycle posture** | A constitutional availability or treatment classification for a governed collection or member — such as unpublished, published, withdrawn, grandfathered, superseded, or retired — distinct from database status fields or workflow states |
-| **Longitudinal collection consistency** | Collection-scoped coherence requirements among existing members over time — distinct from Domain 1 admission-time population fit and from Volume 02 global visual identity |
+| **Longitudinal collection consistency** | Collection-scoped coherence requirements among existing members over time — distinct from Domain 1 admission-time population fit and from Volume 02 global visual identity; obligations apply only where tied to declared collection identity, mandate, range principles, or frozen upstream visual constraints |
+| **Mandatory population condition** | A population requirement declared in a governed collection's constitutional mandate that must be satisfied by valid Domain 1 members before collection publication — distinct from optional or aspirational population classes, operational launch targets, or downstream release readiness |
+| **Nonpublication** | The constitutional condition of a governed collection or member that has not entered a published availability posture — distinct from withdrawal |
+| **Reactivation** | An explicitly authorized constitutional transition restoring active lifecycle treatment after retirement — not a durable lifecycle posture, not a separate facet, and not a restoration of Domain 1 membership validity |
 
 Domain 1 membership terms — **membership grant**, **invalidation**, **disqualification**, and **membership revocation** — are defined for boundary reference only. Those subjects are owned by `FI-DSN-STD-010`.
 
@@ -130,7 +133,7 @@ This standard does **not** inherit authority to redefine permanent collection me
 
 ### 5.1 Locked governing question
 
-> How shall governed artwork collections be constitutionally published, kept consistent over time, maintained, withdrawn, superseded, grandfathered, and retired while consuming frozen membership decisions from `FI-DSN-STD-010` without redefining membership eligibility, upstream visual permission, contextual selection, personalization, manufacturing execution, storage state, or runtime mechanics?
+> How shall governed artwork collections be constitutionally published, kept consistent over time, maintained, withdrawn, superseded, grandfathered, retired, or restored through bounded reactivation while consuming frozen membership decisions from `FI-DSN-STD-010` without redefining membership eligibility, upstream visual permission, contextual selection, personalization, manufacturing execution, storage state, or runtime mechanics?
 
 ### 5.2 Principal subject
 
@@ -179,22 +182,57 @@ Frozen Volume 05 Section 9.3.1 governs permanently:
 
 ## 7. Constitutional Lifecycle Vocabulary
 
+### 7.1 Domain 1 membership terms (boundary reference only)
+
 | Term | Owner | Constitutional meaning |
 |------|-------|------------------------|
 | **Membership grant** | `FI-DSN-STD-010` — Domain 1 | A Domain 1 conclusion that an asset may permanently belong to a governed collection |
 | **Invalidation** | `FI-DSN-STD-010` — Domain 1 | A conclusion that existing membership no longer satisfies governing membership law |
 | **Disqualification** | `FI-DSN-STD-010` — Domain 1 | A conclusion that membership may not remain valid because a continuing validity condition failed |
 | **Membership revocation** | `FI-DSN-STD-010` — Domain 1 | The constitutionally authorized act ending membership when a governed Domain 1 basis applies |
-| **Publication** | `FI-DSN-STD-011` — Domain 2 | The constitutional availability posture under which a governed collection or member is constitutionally available for governed library use — not deployment, storefront release, or manufacturing readiness |
-| **Withdrawal** | `FI-DSN-STD-011` — Domain 2 | A lifecycle posture removing constitutional availability without necessarily changing underlying membership validity |
-| **Grandfathering** | `FI-DSN-STD-011` — Domain 2 | Bounded lifecycle treatment allowing prior publication or availability posture to continue temporarily or exceptionally after governing conditions change — only where membership remains valid and upstream law permits |
-| **Supersession** | `FI-DSN-STD-011` — Domain 2 | A declared successor relationship in which a successor does not automatically receive Domain 1 membership |
-| **Retirement** | `FI-DSN-STD-011` — Domain 2 | Final or bounded end of active lifecycle treatment for a member or collection — not storage deletion or archive mechanics |
-| **Maintenance** | `FI-DSN-STD-011` — Domain 2 | Constitutional policy preserving lifecycle validity and collection consistency after publication — not operational schedules, review queues, or replacement procedures |
+
+### 7.2 Domain 2 lifecycle terms
+
+| Term | Owner | Taxonomy | Constitutional meaning |
+|------|-------|----------|------------------------|
+| **Publication** | `FI-DSN-STD-011` — Domain 2 | Availability posture | The constitutional availability posture under which a governed collection or member is constitutionally available for governed library use — not deployment, storefront release, manufacturing readiness, fulfillment timing, or runtime orchestration |
+| **Nonpublication** | `FI-DSN-STD-011` — Domain 2 | Availability posture | A governed collection or member that has not entered published availability — distinct from withdrawal |
+| **Withdrawal** | `FI-DSN-STD-011` — Domain 2 | Availability posture | Exit from an existing published posture; removes constitutional availability without necessarily changing underlying membership validity; may be temporary or indefinite |
+| **Grandfathering** | `FI-DSN-STD-011` — Domain 2 | Lifecycle treatment | Bounded lifecycle treatment allowing prior publication or availability posture to continue after governing conditions change — only where membership remains valid, upstream law permits, and lifecycle law explicitly authorizes continuation; not an availability state |
+| **Supersession** | `FI-DSN-STD-011` — Domain 2 | Successor relationship | A declared successor relationship in which a successor does not automatically receive Domain 1 membership; not an availability state |
+| **Retirement** | `FI-DSN-STD-011` — Domain 2 | Lifecycle conclusion | The presumptively final end of active lifecycle treatment for a member or collection — not storage deletion, archive mechanics, or membership revocation |
+| **Maintenance** | `FI-DSN-STD-011` — Domain 2 | Policy obligation | Constitutional policy preserving lifecycle validity and declared longitudinal consistency after publication — not operational schedules, review queues, or replacement procedures |
+| **Reactivation** | `FI-DSN-STD-011` — Domain 2 | Authorized transition | An explicitly authorized constitutional transition restoring active lifecycle treatment after retirement — not a durable posture, not a separate facet, and not a restoration of Domain 1 membership validity |
+
+**Temporary unavailability** is a bounded form of **withdrawal**, not a separate constitutional facet.
 
 **Suspension** is not a separate constitutional owner. Temporary unavailability is expressed as a bounded **withdrawal** posture.
 
-**Reactivation** — restoring active lifecycle treatment after withdrawal or retirement — is a bounded constitutional policy subject owned by Domain 2 when principal; it is not operational workflow restoration.
+### 7.3 Domain 1 validity lifecycle response
+
+Domain 2 must respond to frozen Domain 1 validity outputs without reinterpreting them. Grandfathering must not preserve publication after invalidation, disqualification, or revocation.
+
+| Domain 1 output | Domain 2 constitutional response | Grandfathering permitted? |
+|-----------------|----------------------------------|-------------------------|
+| **Invalidation posture** | An invalidated member must not remain published. If previously published, **withdrawal** is required. If never published, **continued nonpublication** is required. Domain 2 responds to the frozen invalidation posture without reinterpreting it. | **No** |
+| **Disqualification posture** | A disqualified member must not remain published. If previously published, **withdrawal** is required. Domain 2 does not determine whether disqualification exists. | **No** |
+| **Revocation posture** | A revoked membership cannot support continued publication. If previously published, **withdrawal** is required. If never published, publication remains prohibited. Revocation authority remains owned by `FI-DSN-STD-010`. | **No** |
+
+These responses are constitutional policy only. They do not prescribe workflow timing, operational sequence, or technical unpublishing procedures.
+
+### 7.4 Lifecycle vocabulary taxonomy
+
+Lifecycle vocabulary is **not** a flat set of peer states and does **not** create a runtime state machine, database values, or status fields.
+
+| Taxonomy class | Terms |
+|----------------|-------|
+| **Availability postures** | unpublished (nonpublication); published; withdrawn |
+| **Lifecycle treatment** | grandfathered |
+| **Successor relationship** | superseded |
+| **Lifecycle conclusion** | retired |
+| **Authorized transition** | reactivated |
+
+Grandfathering is a **treatment**, not an availability state. Supersession is a **relationship**, not an availability state. Reactivation is an **authorized transition**, not a durable state.
 
 ---
 
@@ -204,7 +242,7 @@ Seven constitutional facets are required. Each passed the **removal test**: remo
 
 | Facet | Governs |
 |-------|---------|
-| **Collection Publication Policy** | When a governed collection or member may enter, remain in, or exit a published availability posture |
+| **Collection Publication Policy** | When a governed collection may enter and remain in a published availability posture, and when member availability may attach within that lifecycle |
 | **Collection Consistency** | What collection-scoped coherence must be preserved among existing members over time |
 | **Collection Maintenance** | What lifecycle obligations preserve a governed collection after publication |
 | **Withdrawal Policy** | When availability may be removed without redefining membership validity |
@@ -216,76 +254,104 @@ Seven constitutional facets are required. Each passed the **removal test**: remo
 
 | Field | Content |
 |-------|---------|
-| **Constitutional question** | Under what constitutional conditions may a governed collection or member enter a published availability posture? |
-| **Owned subjects** | Collection-level and member-level publication eligibility; publication readiness distinct from manufacturing readiness; publication posture distinct from membership grant; staged or mandate-dependent publication postures where constitutionally required |
-| **Excluded subjects** | Permanent membership grant; deployment mechanics; storefront release; production scheduling; fulfillment timing; runtime orchestration; DAM publication workflows |
+| **Constitutional question** | Under what constitutional conditions may a governed collection enter and remain in a published availability posture, and when may member availability attach within that lifecycle? |
+| **Owned subjects** | Collection-level publication eligibility as the principal constitutional subject; subordinate member availability postures within collection lifecycle law; mandatory population condition satisfaction; mandate-declared publication consistency prerequisites; publication readiness distinct from manufacturing readiness; publication posture distinct from membership grant; phased or staged publication only where the collection mandate explicitly authorizes it |
+| **Excluded subjects** | Exit from published availability (Withdrawal Policy); permanent membership grant; deployment mechanics; storefront release; production scheduling; fulfillment timing; runtime orchestration; DAM publication workflows; operational launch targets; downstream release readiness |
 | **Removal test** | **Pass** — without this facet, constitutional availability of governed collections would be undefined |
 
 **Architecture decisions:**
 
-- Publication is **distinct from membership**. A valid member may remain unpublished; publication governs availability posture only.
-- Publication applies to **both collections and members**, with collection-level and member-level postures distinguished.
-- Publication is a **constitutional availability posture**, not deployment or customer timing.
+- **Collection publication is the principal constitutional subject.** Member availability is subordinate within the collection lifecycle.
+- Publication governs **entry into and continued eligibility for** published availability. **Exit** from published availability belongs to Withdrawal Policy.
+- Publication is **distinct from membership**. A valid member may remain unpublished; publication governs availability posture only. Publication may occur only after Domain 1 membership grant for the satisfying members.
+- Publication is a **constitutional availability posture**, not deployment, storefront release, fulfillment timing, or runtime availability mechanics.
 - Publication readiness is **distinct from manufacturing readiness**. Manufacturing Compliance Boundaries may inform publication policy but do not own it.
-- Publication may be **binary, staged, or mandate-dependent** as declared under collection lifecycle law — not as runtime workflow states.
+
+**Mandatory population condition model** (`OQ-STD-011-001` resolved):
+
+A governed collection may enter a published posture only when:
+
+1. All **declared mandatory population conditions** in the collection constitutional mandate are satisfied by valid Domain 1 members.
+2. Any **mandate-declared publication consistency prerequisites** are satisfied.
+3. **Optional or aspirational** population classes do not block publication when mandatory conditions are met.
+4. **Every conceivable or planned asset** is not required. **Numeric completeness** is not required unless constitutionally declared in the collection mandate.
+5. **Operational launch targets** and **downstream release readiness** do not determine constitutional publication.
+6. **Phased or staged publication** may occur only where the collection mandate **explicitly authorizes** it.
+7. When the mandate is **silent** on staging, all declared mandatory population conditions must be satisfied before publication.
+
+No counts, percentages, schedules, production milestones, or operational launch gates are prescribed.
 
 ### 8.2 Facet 2 — Collection Consistency
 
 | Field | Content |
 |-------|---------|
 | **Constitutional question** | What collection-scoped coherence must be preserved among existing members over time? |
-| **Owned subjects** | Longitudinal balance, thematic range, repetition discipline, medium character coherence within collection mandate, visual harmony among existing members — all bounded by declared collection identity and mandate |
-| **Excluded subjects** | Global visual identity, typography, composition, or character rules (Volume 02); admission-time population fit (Domain 1); subjective unbounded curator preference; runtime harmonization workflows |
+| **Owned subjects** | Longitudinal balance, thematic range, repetition discipline, medium character coherence, visual harmony, and declared diversity or range principles — only where tied to declared collection identity, declared collection mandate, declared collection range principles, or frozen upstream visual constraints |
+| **Excluded subjects** | Global visual permission, typography, composition, or visual character (Volume 02); admission-time population fit (`FI-DSN-STD-010`); unbounded curator preference; curation workflows; runtime harmonization workflows |
 | **Removal test** | **Pass** — without this facet, longitudinal coherence among collection members would be ungoverned at the constitutional layer |
 
 **Architecture decisions:**
 
-- Longitudinal consistency is **distinct from Domain 1 admission-time population fit** and from Volume 02 global visual permission.
-- Consistency may govern **diversity, repetition, density, and collection-scoped visual harmony** only where tied to declared collection mandate.
+- **Volume 02** owns global visual permission, typography, composition, and visual character.
+- **`FI-DSN-STD-010`** owns admission-time population fit.
+- **`FI-DSN-STD-011`** owns longitudinal coherence among existing members over time.
+- Longitudinal consistency obligations apply only where tied to **declared collection identity, mandate, range principles, or frozen upstream visual constraints** — not unbounded curator preference.
 - Consistency applies to **governed collections with existing members**, whether published or unpublished, when consistency is the principal subject.
 
 ### 8.3 Facet 3 — Collection Maintenance
 
 | Field | Content |
 |-------|---------|
-| **Constitutional question** | What lifecycle obligations preserve a governed collection after publication? |
-| **Owned subjects** | Constitutional duty to preserve lifecycle validity and consistency; obligation to respond to Domain 1 validity changes; obligation to address inconsistency or failed continuing conditions where lifecycle law requires action |
-| **Excluded subjects** | Review intervals; operational cadence; replacement procedures; metadata schema ownership; manufacturing scheduling; DAM operator workflows |
-| **Removal test** | **Pass** — without this facet, post-publication preservation policy would be undefined |
+| **Constitutional question** | What affirmative lifecycle obligations preserve a governed collection after publication? |
+| **Owned subjects** | Preserving lifecycle validity after publication; preserving declared longitudinal consistency; responding constitutionally to Domain 1 validity outputs; initiating the appropriate lifecycle policy response where continuing publication conditions fail; addressing declared lifecycle obligations when metadata or manufacturing boundaries materially change |
+| **Excluded subjects** | Publication eligibility rules; withdrawal rules; retirement rules; supersession rules; grandfathering rules; consistency definitions; review intervals; operational cadence; replacement procedures; refresh workflows; production tasks; metadata schema ownership; manufacturing scheduling; DAM operator workflows |
+| **Removal test** | **Pass** — without this facet, the affirmative post-publication sustainment duty and mandatory response to Domain 1 validity postures would lack a constitutional home |
 
-**Merge test (Consistency + Maintenance):** **Not merged.** Consistency defines **what coherence must hold**; Maintenance defines **what obligations preserve lifecycle validity and coherence over time**. Distinct constitutional questions.
+**Architecture decisions:**
+
+- Maintenance governs the **obligation to preserve and respond**, not the operational method.
+- Maintenance does **not** duplicate publication eligibility, withdrawal, retirement, supersession, grandfathering, or consistency definitions.
+- Maintenance **triggers** appropriate facet responses (Withdrawal, Supersession, Retirement) when continuing publication conditions fail — it does not redefine those facets.
+
+**Merge test (Consistency + Maintenance):** **Not merged.** Consistency defines **what coherence must hold**; Maintenance defines **what affirmative obligations preserve lifecycle validity and coherence over time**. Distinct constitutional questions.
 
 ### 8.4 Facet 4 — Withdrawal Policy
 
 | Field | Content |
 |-------|---------|
 | **Constitutional question** | Under what constitutional conditions may an asset or collection be removed from published availability without redefining membership validity? |
-| **Owned subjects** | Member-level and collection-level withdrawal; temporary or indefinite unavailability postures; mandatory lifecycle response to Domain 1 invalidation or revocation outputs |
+| **Owned subjects** | Member-level and collection-level withdrawal; temporary or indefinite unavailability postures; mandatory nonpublication or withdrawal response to Domain 1 invalidation, disqualification, and revocation postures per Section 7.3; republication of withdrawn valid members where lifecycle law permits |
 | **Excluded subjects** | Membership revocation authority (Domain 1); technical unpublishing; fulfillment mechanics; storage deletion |
 | **Removal test** | **Pass** — without this facet, availability removal could not be governed independently from membership validity |
 
 **Architecture decisions:**
 
-- Withdrawal is **distinct from membership revocation**. A valid member **may** be withdrawn while remaining a member.
-- Invalidated or revoked members **must** receive a governed lifecycle availability posture; withdrawal is the principal Domain 2 response — without redefining Domain 1 conclusions.
-- Withdrawal applies to **members and collections**.
+- **Withdrawal** removes an asset or collection from published availability. It does not necessarily change underlying membership validity.
+- A **valid member may be withdrawn** while remaining a member. Withdrawal may be **temporary or indefinite**.
+- **Nonpublication** is distinct from withdrawal: nonpublication means never having entered published availability; withdrawal means exit from an existing published posture.
+- **Temporary unavailability** is a bounded form of withdrawal, not a separate constitutional facet.
+- Withdrawal is **distinct from membership revocation**, **retirement**, and **nonpublication**.
+- A withdrawn but valid member **may later be republished** where membership remains valid and lifecycle law permits — distinct from **reactivation** after retirement.
+- Invalidated, disqualified, or revoked members must not remain published per Section 7.3.
 
-**Merge test (Publication + Withdrawal):** **Not merged.** Publication governs entry to availability; Withdrawal governs exit from availability.
+**Merge test (Publication + Withdrawal):** **Not merged.** Publication governs entry and remain-in eligibility; Withdrawal governs exit from availability.
 
 ### 8.5 Facet 5 — Grandfathering Policy
 
 | Field | Content |
 |-------|---------|
 | **Constitutional question** | Under what constitutional conditions may prior lifecycle treatment continue after governing standards or conditions change? |
-| **Owned subjects** | Bounded temporary or transitional continuation of publication or availability posture; explicit authorization requirements; prohibition on overriding invalid membership or upstream visual prohibition |
-| **Excluded subjects** | Invalid membership preservation; override of Volume 02 global prohibition; permanent exception without bounded authorization; operational transition playbooks |
+| **Owned subjects** | Bounded lifecycle treatment after governing conditions change; explicit authorization requirements; valid Domain 1 membership requirement; prohibition on overriding invalid membership or upstream visual prohibition; application to members and collections |
+| **Excluded subjects** | Invalid membership preservation; override of Volume 02 global prohibition; informal exception without explicit authorization; operational transition playbooks; transition deadlines |
 | **Removal test** | **Pass** — without this facet, lawful treatment after upstream or policy change would be undefined |
 
 **Architecture decisions:**
 
-- Grandfathering **may not** preserve publication after Domain 1 invalidation or disqualification.
+- Grandfathering is a **bounded lifecycle treatment**, not an availability state or informal exception mechanism.
+- Grandfathering **requires explicit authorization** and **valid Domain 1 membership**.
+- Grandfathering **may not** preserve publication after Domain 1 invalidation, disqualification, or revocation.
 - Grandfathering **may not** override upstream visual prohibition.
-- Grandfathering is permitted only where **membership remains valid** and lifecycle law explicitly authorizes bounded continuation.
+- Grandfathering is **temporary or transitional by default**; indefinite grandfathering is permitted only where lifecycle law **expressly authorizes** it.
 
 **Merge test (Grandfathering + Maintenance):** **Not merged.** Maintenance is ongoing preservation duty; Grandfathering is bounded exception after change.
 
@@ -294,15 +360,17 @@ Seven constitutional facets are required. Each passed the **removal test**: remo
 | Field | Content |
 |-------|---------|
 | **Constitutional question** | How may a governed member or collection be constitutionally replaced by a successor without erasing historical lifecycle relationships? |
-| **Owned subjects** | Declared successor relationships; prohibition on automatic membership inheritance; distinction between member-level and collection-level supersession |
-| **Excluded subjects** | Automatic Domain 1 membership transfer; provenance schema ownership; metadata field definitions; operational migration procedures |
+| **Owned subjects** | Declared successor relationships for members and collections; prohibition on automatic membership inheritance; constitutional lineage preservation without provenance schema ownership |
+| **Excluded subjects** | Automatic Domain 1 membership transfer; automatic withdrawal or retirement of predecessor; automatic publication of successor; provenance schema ownership; metadata field definitions; operational migration or replacement procedures |
 | **Removal test** | **Pass** — without this facet, successor relationships would collapse into withdrawal or retirement without governed continuity |
 
 **Architecture decisions:**
 
+- Supersession creates a **declared successor relationship** — not an availability state.
 - Supersession is **distinct from withdrawal and retirement**.
+- Supersession does **not** automatically withdraw or retire the predecessor, publish the successor, or confer Domain 1 membership.
 - Successor assets **require independent Domain 1 membership decisions** before lifecycle treatment attaches.
-- **Collection-level supersession** and **member-level supersession** are distinct constitutional subjects.
+- **Collection-level supersession** and **member-level supersession** are distinct constitutional subjects within one facet.
 
 **Merge test (Supersession + Retirement):** **Not merged.** Supersession declares successor lineage; Retirement ends active treatment.
 
@@ -310,33 +378,27 @@ Seven constitutional facets are required. Each passed the **removal test**: remo
 
 | Field | Content |
 |-------|---------|
-| **Constitutional question** | Under what conditions does a governed member or collection reach final or bounded end of active lifecycle treatment? |
-| **Owned subjects** | End of active lifecycle governance; distinction between retirement of publication posture and historical membership record; bounded reactivation policy when constitutionally authorized |
-| **Excluded subjects** | Storage archives; file retention; deletion mechanics; data destruction; membership revocation |
+| **Constitutional question** | Under what conditions does a governed member or collection reach the presumptively final end of active lifecycle treatment? |
+| **Owned subjects** | Presumptively final end of active lifecycle governance; distinction between retirement and historical membership record; distinction between retirement and withdrawal; bounded reactivation as authorized transition per Section 7.2; application to valid members and collections for lifecycle policy reasons |
+| **Excluded subjects** | Storage archives; file retention; deletion mechanics; data destruction; membership revocation; Domain 1 membership validity restoration |
 | **Removal test** | **Pass** — without this facet, final lifecycle closure would be undefined |
 
 **Architecture decisions:**
 
-- Retirement is **distinct from withdrawal**. Retirement ends active lifecycle treatment; withdrawal removes availability only.
+- **Retirement** is the **presumptively final end of active lifecycle treatment** for a governed member or collection.
+- Retirement is **more than withdrawal**. It ends active lifecycle treatment; withdrawal removes availability only.
+- Retirement does **not** erase historical membership relationships, destroy constitutional entity history, define archive storage or deletion, or revoke Domain 1 membership.
 - A retired member **may** remain historically part of a collection for constitutional record purposes without active publication.
-- Retirement is **bounded, not necessarily irreversible** at the architecture layer; **reactivation** requires explicit constitutional authorization and does not restore membership validity conclusions owned by Domain 1.
+- A retired collection **continues to exist** constitutionally for historical record purposes.
+- **Reactivation** (`OQ-STD-011-002` resolved) is an **explicitly authorized constitutional transition** restoring active lifecycle treatment after retirement. It is not a durable posture, not a separate facet, does not restore or alter Domain 1 membership validity, requires valid membership where member publication is involved, and differs from republishing a merely withdrawn valid member.
 
 **Merge test (Withdrawal + Retirement):** **Not merged.** Withdrawal governs availability removal; Retirement governs end of active lifecycle treatment.
 
-### 8.8 Lifecycle posture model (vocabulary only)
+### 8.8 Lifecycle vocabulary model (taxonomy only)
 
-Constitutional lifecycle postures include at minimum:
+See Section 7.4 for the constitutional vocabulary taxonomy. Lifecycle terms are **not** a flat set of peer states and do **not** create a runtime state machine, database values, or workflow statuses.
 
-- governed but unpublished
-- published
-- withdrawn
-- grandfathered
-- superseded
-- retired
-
-These postures are **constitutional vocabulary** expressing facet outcomes. They are **not** a separate facet, runtime state machine, database values, or workflow statuses.
-
-**Merge test (Lifecycle State Model + all facets):** **Not merged as independent facet.** Postures are expressions of Publication, Withdrawal, Grandfathering, Supersession, and Retirement facets.
+**Merge test (Lifecycle State Model + all facets):** **Not merged as independent facet.** Vocabulary expresses facet outcomes across availability postures, lifecycle treatments, successor relationships, lifecycle conclusions, and authorized transitions.
 
 ---
 
@@ -372,6 +434,8 @@ These postures are **constitutional vocabulary** expressing facet outcomes. They
 |----------|-----------------|
 | Metadata field semantics and completeness obligations at lifecycle boundaries | Metadata schemas; provenance ownership |
 
+Metadata incompleteness affects Domain 1 validity only where frozen `FI-DSN-STD-010` made it a continuing validity condition. It may affect publication or Maintenance where lifecycle-boundary completeness is declared. It does not automatically require withdrawal and does not transfer metadata semantics or schema ownership.
+
 ### 9.6 `FI-DSN-GOV-004` — Brain authority
 
 | Consumes | Does not absorb |
@@ -383,6 +447,8 @@ These postures are **constitutional vocabulary** expressing facet outcomes. They
 | Consumes | Does not absorb |
 |----------|-----------------|
 | Manufacturing feasibility boundaries where continued publication or lifecycle treatment materially depends on producibility | Production readiness; manufacturing execution; scheduling; fulfillment |
+
+Loss of producibility does not change membership validity through `FI-DSN-STD-011`. It may affect publication or lifecycle treatment only where the collection mandate materially depends on producibility. It may require lifecycle review and may justify withdrawal or grandfathering only where membership remains valid and governing lifecycle policy permits. Manufacturing execution authority is not transferred.
 
 ---
 
@@ -396,9 +462,9 @@ These postures are **constitutional vocabulary** expressing facet outcomes. They
 | **Membership decision posture** | Inform lifecycle response to overall membership state | Membership grant or denial authority |
 | **Membership grant or denial** | Determine whether lifecycle treatment may attach to a member | Admission eligibility re-evaluation |
 | **Exclusion basis or exclusion class** | Distinguish upstream or Domain 1 exclusion from lifecycle withdrawal | Collection exclusion policy ownership |
-| **Invalidation posture** | Trigger mandatory lifecycle availability review | Invalidation conclusion ownership |
-| **Disqualification posture** | Trigger mandatory lifecycle availability review | Disqualification conclusion ownership |
-| **Revocation posture** | Inform who may act after validity conclusions; coordinate withdrawal response | Revocation authority ownership |
+| **Invalidation posture** | Trigger mandatory nonpublication or withdrawal per Section 7.3 | Invalidation conclusion ownership |
+| **Disqualification posture** | Trigger mandatory nonpublication or withdrawal per Section 7.3 | Disqualification conclusion ownership |
+| **Revocation posture** | Require nonpublication or withdrawal per Section 7.3; coordinate post-revocation lifecycle treatment | Revocation authority ownership |
 | **Multi-collection or exclusivity posture** | Inform collection-level publication and consistency treatment | Exclusivity rule definition |
 | **Governing authority reference** | Identify applicable Domain 1 authority basis without re-deriving membership law | Authority model ownership |
 
@@ -499,19 +565,24 @@ No procedures, review schedules, operational cadence, workflow steps, deployment
 
 ### 15.6 Completeness test
 
-The seven-facet model can support a complete normative requirement set without reopening membership-versus-lifecycle boundary, publication meaning, consistency scope, maintenance scope, withdrawal, grandfathering, supersession, retirement, posture relationships, or Domain 1 handoff.
+The seven-facet model can support a complete normative requirement set without reopening membership-versus-lifecycle boundary, publication completeness, collection-versus-member publication hierarchy, consistency scope, maintenance scope, invalidation lifecycle response, withdrawal meaning, grandfathering bounds, supersession effects, retirement finality, reactivation authority, posture relationships, or Domain 1 handoff.
 
 ### 15.7 Normative readiness test
 
 | Subject | Architecture coverage |
 |---------|----------------------|
-| Domain 1 consumption without reinterpretation | **Yes** — Sections 6, 10, 11 |
+| Domain 1 consumption without reinterpretation | **Yes** — Sections 6, 7.3, 10, 11 |
+| Publication completeness (mandatory population conditions) | **Yes** — Facet 1; Section 3 |
+| Collection principal / member subordinate publication | **Yes** — Facet 1 |
 | Publication vs manufacturing readiness | **Yes** — Facet 1; LIF-P3 |
-| Longitudinal consistency vs Volume 02 | **Yes** — Facet 2; LIF-P4–P5 |
-| Withdrawal vs revocation | **Yes** — Facet 4; LIF-P6 |
+| Longitudinal consistency vs Volume 02 and Domain 1 | **Yes** — Facet 2; LIF-P4–P5 |
+| Maintenance independence and narrow scope | **Yes** — Facet 3 |
+| Invalidation, disqualification, revocation response | **Yes** — Section 7.3; Facet 4 |
+| Withdrawal vs nonpublication vs revocation | **Yes** — Section 7.2–7.3; Facet 4; LIF-P6 |
 | Grandfathering bounds | **Yes** — Facet 5; LIF-P7 |
 | Supersession without membership inheritance | **Yes** — Facet 6; LIF-P8 |
-| Retirement without storage deletion | **Yes** — Facet 7 |
+| Retirement presumptive finality and reactivation | **Yes** — Facet 7; Section 7.2 |
+| Lifecycle vocabulary taxonomy | **Yes** — Section 7.4 |
 | One standard sufficient | **Yes** — Section 15.3 |
 
 ---
@@ -526,11 +597,19 @@ Normative Brain Interaction requirements are deferred to later normative draftin
 
 ---
 
-## 17. Manufacturing Considerations (posture only)
+## 17. Manufacturing and Metadata Considerations (posture only)
+
+### 17.1 Manufacturing
 
 Applicable frozen `FI-MFG-*` standards are consumed as Compliance Boundary inputs only where continued publication or lifecycle treatment materially depends on producibility. Manufacturing integration policy remains `CLS-MFI` when integration is principal.
 
-Normative manufacturing integration requirements are deferred to later normative drafting.
+Loss of producibility does not change membership validity through `FI-DSN-STD-011`. It may affect publication or lifecycle treatment only where the collection mandate materially depends on producibility; may require lifecycle review; and may justify withdrawal or grandfathering only where membership remains valid and governing lifecycle policy permits. Manufacturing execution authority is not transferred.
+
+### 17.2 Metadata
+
+`FI-DSN-GOV-002` metadata field semantics and completeness obligations are consumed at lifecycle boundaries only. Metadata incompleteness affects Domain 1 validity only where frozen `FI-DSN-STD-010` made it a continuing validity condition. It may affect publication or Maintenance where lifecycle-boundary completeness is declared. It does not automatically require withdrawal and does not transfer metadata semantics or schema ownership.
+
+Normative manufacturing integration and metadata boundary requirements are deferred to later normative drafting.
 
 ---
 
@@ -548,8 +627,10 @@ Entity-level and member-level lifecycle postures, bounded grandfathering authori
 
 | ID | Status | Issue | Blocks requirement drafting? |
 |----|--------|-------|------------------------------|
-| `OQ-STD-011-001` | **Open** | Whether a governed collection may enter a published availability posture when its declared population mandate is only partially satisfied by valid members | **Yes** — publication facet requirements need resolved posture |
-| `OQ-STD-011-002` | **Open** | Whether bounded reactivation after retirement requires a distinct constitutional authorization model or is subsidiary to retirement policy requirements | **No** — resolvable during requirement drafting under Facet 7 |
+| `OQ-STD-011-001` | **Resolved** | Whether a governed collection may enter a published availability posture when its declared population mandate is only partially satisfied by valid members | **No** — resolved by mandatory population condition model in Facet 1 (Section 8.1) |
+| `OQ-STD-011-002` | **Resolved** | Whether bounded reactivation after retirement requires a distinct constitutional authorization model or is subsidiary to retirement policy requirements | **No** — resolved: reactivation is an authorized transition under Retirement Policy (Facet 7; Section 7.2) |
+
+No open questions remain that block normative requirement drafting.
 
 ---
 
@@ -560,11 +641,13 @@ Entity-level and member-level lifecycle postures, bounded grandfathering authori
 | Governing question | Lifecycle and consistency only; membership deferred to Domain 1 |
 | Facet completeness | Seven facets retained; merge and split tests passed |
 | Domain 1 consumption | Section 10 categories consumed without reinterpretation |
-| Vocabulary boundary | Section 7 distinguishes membership from lifecycle terms |
+| Vocabulary boundary | Section 7 distinguishes membership from lifecycle terms; taxonomy in Section 7.4 |
+| Publication completeness | Mandatory population condition model defined in Facet 1 |
+| Invalidity response | Section 7.3 defines nonpublication and withdrawal consequences |
 | Implementation independence | No schemas, workflows, state machines, or runtime logic |
 | One standard sufficient | No conflict with frozen Volume 05 two-standard inventory |
 
-**Architecture validation posture:** Ready for adversarial architecture validation (Sprint D17.0A).
+**Architecture validation posture:** Architecture refined per Sprint D17.0B; ready for normative requirement drafting (Sprint D17.1).
 
 ---
 
@@ -591,6 +674,7 @@ Entity-level and member-level lifecycle postures, bounded grandfathering authori
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 Architecture Draft | July 27, 2026 | F.I. Forgot | Sprint D17.0 — initial Collection Lifecycle and Consistency Standard architecture: locked governing question; principal subject; seven constitutional facets; lifecycle vocabulary boundary; Domain 1 membership output consumption model; LIF-P1–LIF-P10; provisional requirement groups G1–G8; architecture validation gate; no normative requirements assigned |
+| 0.2 Architecture Draft | July 27, 2026 | F.I. Forgot | Sprint D17.0B — targeted architecture refinement per D17.0A validation: mandatory population condition publication model (`OQ-STD-011-001` resolved); collection-principal publication hierarchy; Domain 1 validity lifecycle response model (Section 7.3); nonpublication versus withdrawal distinction; presumptively final retirement and reactivation as authorized transition (`OQ-STD-011-002` resolved); lifecycle vocabulary taxonomy (Section 7.4); narrowed Maintenance scope; refined Consistency mandate-tie rule; manufacturing and metadata boundary triggers; seven facets preserved |
 
 ### Future revision notes
 
