@@ -13,7 +13,7 @@
 | **Architectural domain** | Domain 1 — Collection Membership and Eligibility |
 | **Document** | `02-collection-membership-and-eligibility-standard.md` |
 | **Status** | Drafted, Pending Architecture Validation |
-| **Version** | 0.1 Architecture Draft |
+| **Version** | 0.2 Architecture Draft |
 | **Date** | July 27, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
@@ -55,7 +55,7 @@ This standard is the **architectural foundation** for F.I. Forgot Volume 05 Doma
 
 It answers the locked governing question:
 
-> How shall permanent governed artwork collections define their entity boundaries, membership authority, membership preconditions, inclusion policy, and exclusion policy without redefining upstream visual permission, contextual selection, personalization, metadata semantics, provenance ownership, manufacturing feasibility boundaries, storage state, or runtime decisions?
+> How shall permanent governed artwork collections define their entity boundaries, membership authority, membership preconditions, inclusion policy, and exclusion policy without redefining upstream visual permission, contextual selection, personalization, metadata semantics, provenance ownership, manufacturing feasibility boundaries, storage state, runtime decisions, or collection publication?
 
 This architecture draft translates frozen Signature Collections Architecture Domain 1 assignment into a complete constitutional structure for later normative requirement drafting. It does not replace frozen Volume 05 architecture, frozen upstream Volumes 02–04 standards, frozen `FI-DSN-GOV-002`, frozen `FI-DSN-GOV-004`, or deferred `FI-DSN-STD-011`.
 
@@ -67,9 +67,10 @@ This architecture draft translates frozen Signature Collections Architecture Dom
 
 - Constitutional governing question and principal subject for Domain 1
 - Six validated architectural facets for permanent collection membership
+- Constitutional membership vocabulary (invalidation, disqualification, revocation, and Domain 2 lifecycle terms)
 - Three-type eligibility boundary model (identity, contextual, permanent membership)
+- Domain 1 → Domain 2 handoff categories (constitutional outputs only)
 - Upstream consumption posture without authority absorption
-- Domain 1 → Domain 2 handoff model for frozen membership decisions
 - Principal-subject placement and deferral relationships
 - Architectural principles `MEM-P1`–`MEM-P10`
 - Provisional requirement groups `G1`–`G8` for later normative drafting
@@ -93,9 +94,10 @@ See Section 12.
 | Term | Definition |
 |------|------------|
 | **Collection Membership decision** | A governed design decision whose principal normative subject is permanent collection entity boundaries, membership authority, membership preconditions, inclusion policy, exclusion policy, or membership integrity under `CLS-ASG` Domain 1 |
+| **Collection-scoped membership** | Permanent membership bounded by the collection's declared constitutional mandate — distinct from temporary, publication-bound, runtime-bound, or occasion-bound status |
 | **Decision-stage membership policy** | Frozen normative membership rules recorded in Design Standards; not runtime evaluation, instance selection, DAM state, or production scheduling |
-| **Governed collection entity** | A durable constitutional library container with defined membership authority, population boundaries, and collection-scoped inclusion and exclusion discipline — distinct from informal tags, folders, or storage partitions |
-| **Membership output** | A frozen permanent membership decision or membership boundary artifact produced by this standard for consumption by `FI-DSN-STD-011` and downstream systems without transferring membership ownership |
+| **Governed collection entity** | A durable constitutional library container with declared identity, mandate, membership authority, population boundaries, and collection-scoped inclusion and exclusion discipline — distinct from informal tags, folders, or storage partitions |
+| **Membership output** | A frozen permanent membership decision or membership boundary artifact in one of the constitutional output categories defined in Section 10 — produced for consumption by `FI-DSN-STD-011` without transferring membership ownership |
 | **Permanent collection membership** | The constitutional status of an already-permitted artwork as a durable member of a governed collection — distinct from identity eligibility, contextual eligibility, and publication state |
 | **Permanent collection membership eligibility** | Whether an already-permitted artwork may permanently belong to a governed collection under Domain 1 rules — the principal eligibility type owned by this standard |
 
@@ -128,7 +130,7 @@ This standard does **not** inherit authority to redefine visual permission (Volu
 
 ### 5.1 Locked governing question
 
-> **How shall permanent governed artwork collections define their entity boundaries, membership authority, membership preconditions, inclusion policy, and exclusion policy without redefining upstream visual permission, contextual selection, personalization, metadata semantics, provenance ownership, manufacturing feasibility boundaries, storage state, or runtime decisions?**
+> **How shall permanent governed artwork collections define their entity boundaries, membership authority, membership preconditions, inclusion policy, and exclusion policy without redefining upstream visual permission, contextual selection, personalization, metadata semantics, provenance ownership, manufacturing feasibility boundaries, storage state, runtime decisions, or collection publication?**
 
 ### 5.2 Principal subject
 
@@ -179,148 +181,216 @@ Volume 05 architecture Section 2.1 defines three peer-separated eligibility type
 
 ---
 
-## 7. Architectural Facets
+## 7. Constitutional Membership Vocabulary
+
+The following terms are permanent architecture-level vocabulary. They distinguish Domain 1 membership validity from Domain 2 lifecycle treatment.
+
+| Term | Owner | Meaning |
+|------|-------|---------|
+| **Invalidation** | `FI-DSN-STD-010` — Membership Integrity | A declarative constitutional conclusion that an existing membership no longer satisfies governing membership law. Invalidation is not a publication action. |
+| **Disqualification** | `FI-DSN-STD-010` — Membership Integrity | The constitutional consequence that membership may not continue as valid because a required membership condition has failed. Authority to act remains governed by Membership Authority. |
+| **Membership revocation** | `FI-DSN-STD-010` — Membership Authority | The constitutionally authorized act that ends a membership because invalidation, disqualification, or another governed Domain 1 basis applies. Procedures for performing revocation are not defined in this architecture. |
+| **Withdrawal** | `FI-DSN-STD-011` — Domain 2 | A lifecycle or publication action affecting whether an asset remains available within a published collection state. Withdrawal does not redefine whether the underlying membership was constitutionally valid. |
+| **Grandfathering** | `FI-DSN-STD-011` — Domain 2 | A temporal lifecycle policy governing continued treatment after standards or conditions change. |
+| **Supersession** | `FI-DSN-STD-011` — Domain 2 | Lifecycle replacement or succession of assets or collection members over time. |
+| **Retirement** | `FI-DSN-STD-011` — Domain 2 | End-of-lifecycle treatment for a member or collection. |
+
+**Domain boundary rule:**
+
+> Domain 1 determines membership validity. Domain 2 determines publication and lifecycle treatment after that determination. Domain 2 consumes frozen Domain 1 outputs without reinterpreting membership eligibility.
+
+---
+
+## 8. Architectural Facets
 
 Six constitutional facets are required. Each passed the **removal test**: removing any facet would leave a distinct constitutional question unanswered.
 
-### 7.1 Facet 1 — Collection Entity Definition
+**Permanent who versus when distinction:**
+
+| Facet | Governs |
+|-------|---------|
+| **Membership Authority** | **Who** may establish, constrain, invalidate, disqualify, or revoke membership |
+| **Membership Integrity** | **When** an existing membership is constitutionally invalid or subject to disqualification |
+
+### 8.1 Facet 1 — Collection Entity Definition
 
 | Field | Value |
 |-------|-------|
-| **Constitutional question** | What makes one governed collection constitutionally distinct from another, and what establishes a durable collection boundary rather than an informal tag or storage folder? |
-| **Owned subjects** | Governed collection entity identity; constitutional distinctness between collections; collection boundary discipline; collection-scoped identity attributes that are not metadata schema fields |
+| **Constitutional question** | What makes one governed collection constitutionally distinct from another, and what bounded identity and mandate must exist before membership can be evaluated? |
+| **Owned subjects** | Governed collection entity identity; constitutional distinctness between collections; declared collection mandate and bounded population scope; multi-collection and exclusivity posture as entity-declared constitutional attributes |
 | **Excluded subjects** | Metadata field definitions; DAM folder structure; storage partitions; file naming; database keys; informal tagging systems |
-| **Removal test** | **Pass** — without this facet, collections could not be distinguished from implementation containers |
+| **Removal test** | **Pass** — membership must attach to a defined governed entity with bounded identity and mandate before inclusion or exclusion can be evaluated |
 
 **Architecture decisions:**
 
-- Collection entity definition is a **separate facet** from membership rules — an asset cannot have membership without a defined constitutional entity.
-- Multi-collection membership posture and collection exclusivity rules are **constitutional** attributes declared at entity definition — not downstream implementation details.
-- Identity attributes describe constitutional purpose and boundary (for example, collection mandate and scope) without inventing metadata schemas.
+- Membership attaches to a **defined governed collection entity** with bounded identity and mandate — entity distinctness is a constitutional prerequisite, not a metadata record alone.
+- `FI-DSN-GOV-002` may **express** entity identity in metadata; metadata does not **constitutionally create** the governed collection entity.
+- Multi-collection permissibility and exclusivity are **entity-declared constitutional attributes** — each governed collection must declare whether membership is exclusive, nonexclusive, or constrained. No volume-wide default posture is implied.
+- Informal tags, folders, storage partitions, and DAM containers are **negative examples only** — they do not constitute governed collection entities.
 
-### 7.2 Facet 2 — Membership Authority
+### 8.2 Facet 2 — Membership Authority
 
 | Field | Value |
 |-------|-------|
-| **Constitutional question** | Who or what constitutional authority may establish, constrain, or revoke permanent membership decisions — and how is that authority bounded from operational administration and runtime approval? |
-| **Owned subjects** | Membership decision authority; authority delegation and constraint model; constitutional versus operational boundary; membership output authority |
-| **Excluded subjects** | Review queue mechanics; approval screens; workflow engines; runtime orchestration; DAM operator permissions |
+| **Constitutional question** | Who or what constitutional authority may establish, constrain, invalidate, disqualify, or revoke permanent membership — and how is that authority bounded from operational administration and runtime approval? |
+| **Owned subjects** | Membership decision authority; authority delegation and constraint model; constitutional versus operational boundary; membership revocation authority |
+| **Excluded subjects** | Review queue mechanics; approval screens; workflow engines; runtime orchestration; DAM operator permissions; withdrawal, publication, and retirement acts |
 | **Removal test** | **Pass** — without this facet, membership decisions would have no governed authority model |
 
 **Architecture decisions:**
 
-- Membership authority and membership preconditions are **separate facets** — authority answers *who may decide*; preconditions answer *what must already be true*.
+- Membership Authority answers **who may act** — not **when** membership is invalid (Membership Integrity) and not **how** publication or lifecycle treatment proceeds (Domain 2).
+- **Membership revocation** is an authorized constitutional act under this facet when invalidation, disqualification, or another governed Domain 1 basis applies.
 - Authority is **constitutional governance**, not operational workflow — bounded without defining approval procedures.
 
-### 7.3 Facet 3 — Membership Preconditions
+### 8.3 Facet 3 — Membership Preconditions
 
 | Field | Value |
 |-------|-------|
 | **Constitutional question** | What must already be true before artwork may be considered for permanent collection membership — and which upstream permissions must be consumed without absorption? |
-| **Owned subjects** | Permanent membership precondition rules; upstream permission consumption order; feasibility boundary consumption from Volume 03 and `FI-MFG-*`; metadata completeness as a precondition gate without schema ownership |
-| **Excluded subjects** | Identity eligibility redefinition; contextual selection; production readiness; publication readiness; runtime evaluation |
+| **Owned subjects** | Permanent membership precondition rules; upstream permission consumption order; feasibility boundary consumption from Volume 03; metadata completeness as a precondition gate without schema ownership |
+| **Excluded subjects** | Identity eligibility redefinition; contextual selection; production readiness; publication readiness; runtime evaluation; general global asset approval |
 | **Removal test** | **Pass** — without this facet, membership could not be bounded by upstream law |
 
 **Architecture decisions:**
 
-- Contextual usefulness may inform membership preconditions only as **upstream policy evidence** — never as contextual selection authority.
-- Manufacturing feasibility is consumed as a **Compliance Boundary precondition**, not production readiness or scheduling (Domain 2 / `FI-MFG-*` operational policy).
+- Contextual policy may inform membership preconditions only as **upstream policy evidence** — never as contextual selection authority.
+- Manufacturing feasibility may operate as a membership precondition **only where the collection's declared constitutional mandate materially depends on producibility**. Applicable `FI-MFG-*` obligations are consumed as Compliance Boundaries only. Manufacturing feasibility must not become general global asset approval, production readiness, scheduling, operational quality control, fulfillment eligibility, or customer delivery readiness.
 - Metadata completeness may be a **membership precondition** while metadata field semantics remain owned by `FI-DSN-GOV-002`.
 - Provenance is a **Compliance Boundary input only** — not constitutive of membership identity (per Volume 05 P8 and `FI-DSN-GOV-002`).
 
-### 7.4 Facet 4 — Inclusion Policy
+### 8.4 Facet 4 — Inclusion Policy
 
 | Field | Value |
 |-------|-------|
-| **Constitutional question** | On what constitutional basis may an asset become a permanent member of a governed collection — and what forms of membership (permanent, qualified, scoped) are recognized? |
-| **Owned subjects** | Inclusion basis; permanent membership grant posture; qualified or scoped membership where constitutionally necessary; multi-collection membership permissibility declared at entity level |
-| **Excluded subjects** | Runtime admission; publication activation; catalog ingestion procedures; duplicate file detection mechanics |
+| **Constitutional question** | On what constitutional basis may an asset become a permanent member of a governed collection — and what forms of collection-scoped membership are recognized? |
+| **Owned subjects** | Inclusion basis; permanent membership grant posture; collection-scoped membership bounded by declared mandate; multi-collection membership as constitutional population relationship |
+| **Excluded subjects** | Runtime admission; publication activation; catalog ingestion procedures; duplicate file detection mechanics; temporary, publication-bound, runtime-bound, or occasion-bound membership |
 | **Removal test** | **Pass** — without this facet, positive membership rules would be undefined |
 
 **Architecture decisions:**
 
-- Inclusion and exclusion are **independently necessary facets** — exclusion includes collection-coherence prohibitions that are not merely inclusion failures.
-- Multi-collection membership is **constitutional** — default posture is permissive unless a collection entity declares exclusivity constraints.
-- Inclusion means **permanent library belonging** at the Decision stage — not instance selection or publication.
+- Inclusion governs the **positive basis** for permanent membership at the Decision stage.
+- **Collection-scoped membership** means membership bounded by the collection's declared constitutional mandate — not temporary membership, publication state, runtime eligibility, occasion-specific eligibility, recipient-specific eligibility, provisional storage, or workflow status.
+- Multi-collection membership is a **constitutional population relationship** governed here and by entity-declared exclusivity posture — not DAM cardinality or storage behavior.
+- Valid multi-collection membership is **not** duplicate membership.
 
-### 7.5 Facet 5 — Exclusion Policy
+### 8.5 Facet 5 — Exclusion Policy
 
 | Field | Value |
 |-------|-------|
 | **Constitutional question** | What conditions constitutionally prevent permanent membership — and how are upstream prohibitions distinguished from collection-specific exclusions? |
-| **Owned subjects** | Collection-scoped exclusion rules; upstream prohibition consumption; collection-coherence exclusions without absorbing Volume 02 visual identity authority |
-| **Excluded subjects** | Global visual exclusions (Volume 02); contextual ineligibility (`FI-DSN-STD-007`); publication withdrawal (Domain 2) |
+| **Owned subjects** | Collection-scoped exclusion rules; upstream prohibition consumption; admission-time population-fit exclusions tied to declared collection identity, purpose, mandate, or bounded population rule |
+| **Excluded subjects** | Global visual exclusions (Volume 02); contextual ineligibility (`FI-DSN-STD-007`); publication withdrawal (Domain 2); longitudinal consistency; ongoing cross-asset harmonization; maintenance of visual coherence over time; publication consistency; collection refresh decisions |
 | **Removal test** | **Pass** — without this facet, collection-specific prohibitions could not be governed independently |
 
 **Architecture decisions:**
 
-- Exclusion requires **independent constitutional authority** — a collection may exclude otherwise permitted artwork for collection-coherence reasons without redefining Volume 02 permission.
-- Collection coherence may affect membership through **exclusion policy** without becoming global visual identity authority.
+- Exclusion governs **independent collection-specific barriers** — not merely the inverse of inclusion criteria.
+- **Admission-time population fit** may be expressed as exclusion where a declared collection mandate is violated — even when the asset is otherwise visually permitted under Volume 02.
+- Population-fit exclusion must be tied to a **declared collection identity, purpose, mandate, or bounded population rule** — not informal curator preference.
+- Collection-scoped population fit does **not** redefine global visual identity or character owned by Volume 02.
+- **Longitudinal coherence** among existing members, ongoing harmonization, and consistency over time belong to **`FI-DSN-STD-011`** — Domain 2.
 
-### 7.6 Facet 6 — Membership Integrity
+### 8.6 Facet 6 — Membership Integrity
 
 | Field | Value |
 |-------|-------|
-| **Constitutional question** | What minimum constitutional discipline preserves membership validity when upstream law changes, conflicts arise, or membership must be disqualified — without absorbing lifecycle, maintenance, or retirement authority? |
-| **Owned subjects** | Invalid membership posture when upstream eligibility is lost; constitutional treatment of conflicting or duplicate membership at the membership layer; membership removal or disqualification necessary to preserve membership integrity |
-| **Excluded subjects** | Grandfathering policy; superseded-asset lifecycle; withdrawn-asset publication; maintenance cadence; retirement governance |
+| **Constitutional question** | When is an existing membership constitutionally invalid or subject to disqualification — without absorbing lifecycle, maintenance, or retirement authority? |
+| **Owned subjects** | Invalidation when upstream eligibility is lost; disqualification when required membership conditions fail; constitutional treatment of duplicate membership within one collection; constitutional treatment of conflicting membership across exclusivity rules |
+| **Excluded subjects** | Who may act (Membership Authority); withdrawal; grandfathering; superseded-asset lifecycle; withdrawn-asset publication; maintenance cadence; retirement governance |
 | **Removal test** | **Pass** — without this facet, membership validity over time would be ungoverned at the constitutional layer |
 
 **Architecture decisions — Domain 1 versus Domain 2 versus downstream:**
 
 | Subject | Disposition | Owner |
 |---------|-------------|-------|
-| Loss of upstream eligibility invalidating membership | Domain 1 — membership integrity | This standard |
-| Conflicting or duplicate membership at constitutional layer | Domain 1 — membership integrity | This standard |
-| Membership removal/disqualification for integrity | Domain 1 — membership integrity | This standard |
+| Invalidation when upstream eligibility is lost | Domain 1 — membership integrity | This standard |
+| Disqualification when membership conditions fail | Domain 1 — membership integrity | This standard |
+| Duplicate membership within one collection | Domain 1 — constitutionally prohibited | This standard |
+| Conflicting membership across declared exclusivity rules | Domain 1 — validity consequence; Authority resolves | This standard |
+| Membership revocation (authorized act) | Domain 1 — membership authority | This standard — Facet 2 |
+| Withdrawal from published collection state | Domain 2 | `FI-DSN-STD-011` |
 | Grandfathering when upstream law changes | Domain 2 — lifecycle policy | `FI-DSN-STD-011` |
 | Superseded assets, withdrawn assets, publication of changes | Domain 2 — lifecycle / consistency | `FI-DSN-STD-011` |
 | Maintenance cadence and retirement | Domain 2 — lifecycle | `FI-DSN-STD-011` |
+| Equivalent assets with separate identifiers | Downstream unless constitutional equivalence rule is later authorized | Engineering / metadata |
 | DAM tracking, audit logs, implementation reconciliation | Downstream | Engineering |
+
+#### Duplicate and conflicting membership — constitutional meanings
+
+| Case | Constitutional meaning | Owner |
+|------|------------------------|-------|
+| **Duplicate membership within one collection** | A single governed asset represented as more than one membership relationship in the same collection | **Prohibited** — Domain 1 Membership Integrity |
+| **Equivalent assets with different identifiers** | Metadata or downstream equivalence concern — not duplicate membership unless a future constitutional equivalence rule is authorized | **Downstream** — unless frozen authority later establishes equivalence |
+| **Multi-collection membership** | A constitutional population relationship when entity posture permits | **Domain 1** — Inclusion Policy and entity exclusivity posture; not a duplicate |
+| **Conflicting membership** | An asset admitted to two collections whose declared exclusivity rules cannot both be satisfied | **Domain 1** — Integrity governs validity consequence; Authority governs who may revoke |
+
+Operational conflict resolution procedures are not defined in this architecture.
 
 ---
 
-## 8. Upstream Dependency Model
+## 9. Upstream Dependency Model
 
-### 8.1 Volume 02 — Visual permission
+### 9.1 Volume 02 — Visual permission
 
 | Consumes | Does not absorb |
 |----------|-----------------|
 | Visual permission; visual exclusions; identity-level character constraints | Visual identity permission; typography permission; composition permission; global exclusion redefinition |
 
-### 8.2 Volume 03 — Surface implementation
+### 9.2 Volume 03 — Surface implementation
 
 | Consumes | Does not absorb |
 |----------|-----------------|
 | Surface compatibility; spatial and exterior constraints where membership feasibility is materially affected | Surface structure; spatial allocation; envelope presentation authority |
 
-### 8.3 Volume 04 — Artwork intelligence
+### 9.3 Volume 04 — Artwork intelligence
 
 | Consumes | Does not absorb |
 |----------|-----------------|
 | Contextual policy as evidence or boundary input where material to membership preconditions | Context-bound eligibility; authorized alternatives; occasion meaning; personalization policy; runtime visual selection |
 
-### 8.4 `FI-DSN-GOV-002` — Metadata
+### 9.4 `FI-DSN-GOV-002` — Metadata
 
 | Consumes | Does not absorb |
 |----------|-----------------|
 | Metadata obligations; field semantics at handoff boundaries; completeness preconditions | Metadata field definitions; schemas; dictionaries; provenance schema ownership |
 
-### 8.5 `FI-DSN-GOV-004` — Brain authority
+### 9.5 `FI-DSN-GOV-004` — Brain authority
 
 | Consumes | Does not absorb |
 |----------|-----------------|
 | Brain Authority Boundaries; Compliance Boundaries; Decision versus runtime distinction | Runtime reasoning; orchestration; selection mechanics |
 
-### 8.6 `FI-MFG-*` — Manufacturing
+### 9.6 `FI-MFG-*` — Manufacturing
 
 | Consumes | Does not absorb |
 |----------|-----------------|
-| Applicable manufacturing feasibility Compliance Boundaries | Manufacturing procedures; production scheduling; readiness decisions |
+| Applicable manufacturing feasibility Compliance Boundaries — only where collection mandate materially depends on producibility | Manufacturing procedures; production scheduling; readiness decisions; operational quality control; fulfillment eligibility |
 
 ---
 
-## 9. Relationship to `FI-DSN-STD-011`
+## 10. Domain 1 → Domain 2 Handoff Categories
+
+`OQ-STD-010-002` is resolved at the constitutional category level. The following are **membership output categories** that `FI-DSN-STD-011` may consume as frozen Domain 1 decisions. They are not schemas, field names, APIs, event messages, document formats, runtime payloads, or workflow handoffs.
+
+| Category | Constitutional content | Domain 1 owner facet |
+|----------|------------------------|----------------------|
+| **Collection entity reference** | Which governed collection entity the output concerns | Collection Entity Definition |
+| **Membership decision posture** | Whether a membership decision is granted, denied, invalidated, disqualified, or subject to conflict | Inclusion Policy; Membership Integrity |
+| **Membership grant or denial** | The permanent membership eligibility outcome for a governed asset | Inclusion Policy; Exclusion Policy |
+| **Exclusion basis or exclusion class** | The constitutional reason a collection-specific barrier applies — including admission-time population-fit exclusion | Exclusion Policy |
+| **Invalidation posture** | Declarative conclusion that existing membership no longer satisfies governing membership law | Membership Integrity |
+| **Disqualification posture** | Constitutional consequence that membership may not remain valid | Membership Integrity |
+| **Revocation posture** | Whether membership revocation is constitutionally authorized and on what Domain 1 basis | Membership Authority |
+| **Multi-collection or exclusivity posture** | The entity-declared population relationship constraints applicable to the decision | Collection Entity Definition; Inclusion Policy |
+| **Governing authority reference** | Which constitutional authority basis applies when required for Domain 2 consumption without reinterpretation | Membership Authority |
+
+Domain 2 consumes these categories **without reinterpreting** permanent membership eligibility, inclusion rules, or exclusion rules per Volume 05 Section 9.3.1.
+
+---
+
+## 11. Relationship to `FI-DSN-STD-011`
 
 **Permanent constitutional rule (inherited from Volume 05 Section 9.3.1):**
 
@@ -328,16 +398,16 @@ Six constitutional facets are required. Each passed the **removal test**: removi
 
 | Domain 1 — this standard | Domain 2 — `FI-DSN-STD-011` |
 |--------------------------|----------------------------|
-| Owns permanent membership decisions | Consumes frozen membership outputs |
-| Produces membership outputs for peer consumption | Owns publication, consistency, maintenance, retirement |
-| Governs inclusion, exclusion, preconditions | Governs longitudinal coherence and temporal policy |
+| Owns permanent membership decisions and validity | Consumes frozen membership outputs per Section 10 |
+| Determines invalidation and disqualification | Determines withdrawal, grandfathering, supersession, and retirement treatment |
+| Governs admission-time population-fit exclusion | Governs longitudinal consistency among existing members |
 | Does not govern publication or retirement | Does not redefine membership eligibility |
 
-This is a **planning and constitutional handoff**, not an implementation workflow. Cross-reference requirements in both standards are expected at freeze review per `OQ-V05-002`.
+Cross-reference requirements in both standards are expected at freeze review per `OQ-V05-002`.
 
 ---
 
-## 10. Architectural Principles
+## 12. Architectural Principles
 
 Future normative requirements shall embody these principles. They record architectural law at the standard layer; they are not yet assigned requirement identifiers.
 
@@ -346,17 +416,17 @@ Future normative requirements shall embody these principles. They record archite
 | **MEM-P1** | **Permission precedes membership** | Permanent membership consumes frozen Volume 02 permission and exclusions; this standard does not redefine identity eligibility |
 | **MEM-P2** | **Structure precedes library placement** | Membership preconditions consume frozen Volume 03 feasibility boundaries; this standard does not author surface layout |
 | **MEM-P3** | **Context precedes library operation** | Membership preconditions may consume frozen Volume 04 policy outputs as evidence; this standard does not own contextual eligibility or selection |
-| **MEM-P4** | **Membership separated from lifecycle** | Population rules remain in Domain 1; publication, maintenance, and retirement remain in Domain 2 |
+| **MEM-P4** | **Membership separated from lifecycle** | Population rules and validity remain in Domain 1; publication, maintenance, and retirement remain in Domain 2 |
 | **MEM-P5** | **Libraries separated from selection** | This standard governs permanent belonging; it does not author authorized alternatives or runtime selection |
-| **MEM-P6** | **Coherence is collection-scoped** | Collection-coherence exclusions apply within governed collections; they do not become global Volume 02 visual rules |
-| **MEM-P7** | **Manufacturing constrains; membership integrates** | Applicable `FI-MFG-*` obligations are Compliance Boundary inputs only |
+| **MEM-P6** | **Coherence is collection-scoped and admission-bounded in Domain 1** | Admission-time population-fit exclusions apply within declared collection mandate; longitudinal coherence belongs to Domain 2; global visual rules remain Volume 02 |
+| **MEM-P7** | **Manufacturing constrains; membership integrates** | Applicable `FI-MFG-*` obligations are Compliance Boundary inputs only — gated by material producibility dependence of collection mandate |
 | **MEM-P8** | **Metadata referenced, not redefined** | Collection records use `FI-DSN-GOV-002` semantics at handoff boundaries; provenance ownership stays with `FI-DSN-GOV-002` |
-| **MEM-P9** | **Entities before operations** | Governed collection entities are constitutional containers — not informal tags, folders, or storage partitions |
+| **MEM-P9** | **Entities before operations** | Governed collection entities require declared identity and mandate before population rules apply |
 | **MEM-P10** | **Implementation independence** | Membership policy remains valid across DAM, partner program, rendering, and vendor change without constitutional redesign |
 
 ---
 
-## 11. Provisional Requirement Groups
+## 13. Provisional Requirement Groups
 
 The following groups define the anticipated normative structure for a later requirements sprint. **No requirement identifiers are assigned in this architecture draft.**
 
@@ -364,16 +434,16 @@ The following groups define the anticipated normative structure for a later requ
 |-------|---------------------|--------------|
 | **G1** | Constitutional inheritance and upstream reconcilability | Section 4 |
 | **G2** | Principal-subject placement and deferral | Section 5.3 |
-| **G3** | Governed collection entity definition | Facet 1 |
-| **G4** | Membership authority | Facet 2 |
+| **G3** | Governed collection entity definition and entity-declared exclusivity posture | Facet 1 |
+| **G4** | Membership authority and revocation authority | Facet 2 |
 | **G5** | Membership preconditions and upstream consumption | Facet 3 |
-| **G6** | Inclusion policy | Facet 4 |
-| **G7** | Exclusion policy | Facet 5 |
-| **G8** | Membership integrity, membership outputs, and Domain 2 handoff | Facet 6; Section 9 |
+| **G6** | Inclusion policy and collection-scoped membership | Facet 4 |
+| **G7** | Exclusion policy and admission-time population fit | Facet 5 |
+| **G8** | Membership integrity, membership output categories, and Domain 2 handoff | Facet 6; Section 10 |
 
 ---
 
-## 12. Mandatory Ownership Exclusions
+## 14. Mandatory Ownership Exclusions
 
 `FI-DSN-STD-010` does **not** own the following subjects. Where relevant, this standard defines only Compliance Boundary or consumption posture.
 
@@ -388,36 +458,49 @@ The following groups define the anticipated normative structure for a later requ
 | Asset storage; DAM behavior; file naming mechanics; database design | Engineering |
 | APIs; workflow engines; review queues; approval screens | Engineering / product |
 | Manufacturing execution; production scheduling; fulfillment; delivery timing | `FI-MFG-*` / engineering |
-| Collection publication; collection maintenance; collection retirement; longitudinal consistency | `FI-DSN-STD-011` — Domain 2 |
+| Collection publication; withdrawal; maintenance; retirement; longitudinal consistency | `FI-DSN-STD-011` — Domain 2 |
 | Brain runtime behavior and orchestration | `FI-DSN-GOV-004` / implementation |
 
 ---
 
-## 13. Architecture Tests
+## 15. Architecture Tests
 
-### 13.1 Removal test
+### 15.1 Removal test
 
-All six facets in Section 7 passed. No facet merely restates another authority.
+All six facets in Section 8 passed. No facet merely restates another authority.
 
-### 13.2 Ownership test
+### 15.2 Ownership test
 
-Each facet owns a principal constitutional subject. Consumer-only subjects appear only in upstream dependency and exclusion tables.
+Each facet owns a principal constitutional subject. Consumer-only subjects appear only in upstream dependency and exclusion tables. Major subjects are classified in Sections 7, 8, 10, and 14.
 
-### 13.3 Implementation independence test
+### 15.3 Implementation independence test
 
-This architecture draft contains no procedures, step sequences, approval workflows, tool behavior, storage methods, database mechanics, interfaces, automation, runtime logic, or production instructions.
+This architecture draft contains no schemas, fields, databases, files, folders, APIs, payloads, approval steps, workflow procedures, runtime logic, or production instructions.
 
-### 13.4 Split test
+### 15.4 Split test
 
 Domain 1 membership and Domain 2 lifecycle answer **independent governing questions**. One standard remains sufficient for the complete Domain 1 subject. No conflict with frozen Volume 05 two-standard inventory was found.
 
-### 13.5 Completeness test
+### 15.5 Completeness test
 
-The six-facet model can support a complete normative requirement set without reopening Volume 05 ownership boundaries, subject to adversarial validation.
+The six-facet model can support a complete normative requirement set without reopening authority-integrity boundaries, coherence exclusion scope, multi-collection posture, handoff categories, or duplicate/conflict treatment.
+
+### 15.6 Normative readiness test
+
+| Subject | Ready for requirements? |
+|---------|-------------------------|
+| Authority versus integrity | **Yes** — who/when distinction and vocabulary table defined |
+| Invalidation versus withdrawal | **Yes** — Section 7 |
+| Coherence exclusion | **Yes** — admission-time population fit only; Domain 2 owns longitudinal consistency |
+| Multi-collection posture | **Yes** — entity-declared; no unsupported volume-wide default |
+| Exclusivity posture | **Yes** — entity-declared constitutional attribute |
+| Scoped membership | **Yes** — mandate-bounded only |
+| Duplicates and conflicts | **Yes** — Section 8.6 |
+| Domain 1 → Domain 2 handoff | **Yes** — Section 10 categories |
 
 ---
 
-## 14. Brain Interaction (policy boundary posture)
+## 16. Brain Interaction (policy boundary posture)
 
 Collection Membership and Eligibility defines Decision-stage membership policy and membership outputs. Brain Runtime and product systems may operationalize membership within frozen bounds.
 
@@ -426,58 +509,64 @@ Brain Runtime and operational systems do **not**:
 - redefine permanent membership eligibility as normative policy at runtime
 - treat instance selection, contextual fit, or recommendation history as sources of membership eligibility
 - substitute DAM state, storage location, or workflow status for constitutional membership decisions
-- authorize publication, retirement, or lifecycle transitions owned by Domain 2
+- authorize publication, withdrawal, or lifecycle transitions owned by Domain 2
 
 Normative Brain Interaction requirements are deferred to the requirements sprint under provisional group **G8**.
 
 ---
 
-## 15. Manufacturing Considerations (posture only)
+## 17. Manufacturing Considerations (posture only)
 
-Applicable frozen `FI-MFG-*` standards are consumed as Compliance Boundary inputs at membership preconditions. Manufacturing feasibility may gate membership without becoming production readiness, scheduling, or operational policy.
+Applicable frozen `FI-MFG-*` standards are consumed as Compliance Boundary inputs at membership preconditions only where the collection's declared mandate materially depends on producibility. Manufacturing feasibility must not become general global asset approval, production readiness, scheduling, or operational policy.
 
 Engineering implications are **deferred** to the requirements sprint.
 
 ---
 
-## 16. Company Judgment
+## 18. Company Judgment
 
 This standard is based on company judgment.
 
 F.I. Forgot has chosen to govern Collection Membership and Eligibility because frozen Volume 05 architecture assigns permanent collection membership to Domain 1 under `CLS-ASG`, and because membership authority must be frozen independently of lifecycle operations, contextual selection, visual permission, metadata schema ownership, and Brain runtime mechanics.
 
+**Company judgment — entity-declared exclusivity posture:** Each governed collection must declare whether membership is exclusive, nonexclusive, or constrained. No volume-wide default multi-collection or exclusivity posture is established at the architecture layer.
+
 Frozen upstream Volumes 02–04 standards, frozen `FI-DSN-GOV-002`, frozen `FI-DSN-GOV-004`, and applicable frozen `FI-MFG-*` obligations informed this architecture as constraint and handoff context only. `FI-DSN-STD-011` remains the deferred lifecycle owner.
 
 ---
 
-## 17. Open Questions
+## 19. Open Questions
 
-| ID | Unresolved constitutional issue | Why frozen authority does not fully answer | Blocks requirement drafting? | Governed resolution path |
-|----|----------------------------------|--------------------------------------------|------------------------------|--------------------------|
-| `OQ-STD-010-001` | Whether collection entity definition requires explicit constitutional declaration of multi-collection permissibility and exclusivity on every governed collection, or whether a volume-wide default with entity-level override is sufficient | Volume 05 architecture requires constitutional entities but does not prescribe default exclusivity posture | No — default permissive with entity-level declaration is architecturally safe; normative wording resolved at requirements sprint | Requirements sprint under **G3**; adversarial validation |
-| `OQ-STD-010-002` | Minimum shape of membership outputs consumed by `FI-DSN-STD-011` at Domain 1 freeze | `OQ-V05-002` partially resolves handoff ownership; output artifact structure not yet normative | No — handoff boundary is defined; output schema deferred to requirements sprint and Domain 2 architecture | Requirements sprint under **G8**; coordinated with `FI-DSN-STD-011` architecture draft |
-| `OQ-STD-010-003` | Whether collection-coherence exclusion always requires independent exclusion authority or may sometimes be expressed only as failed inclusion | Frozen architecture distinguishes inclusion and exclusion domains but does not prescribe normative expression preference | No — both facets retained; expression consolidated during requirements drafting if adversarial review permits | Adversarial validation sprint D16.4A; requirements sprint under **G6**–**G7** |
+| ID | Status | Resolution |
+|----|--------|------------|
+| `OQ-STD-010-001` | **Resolved** | Multi-collection permissibility and exclusivity are entity-declared constitutional attributes. Each governed collection must declare its posture. No volume-wide default. Company judgment recorded in Section 18. |
+| `OQ-STD-010-002` | **Resolved** | Constitutional handoff categories defined in Section 10. No artifact or schema shape prescribed. |
+| `OQ-STD-010-003` | **Resolved** | Inclusion governs positive membership basis. Exclusion governs independent collection-specific barriers. Admission-time population fit may be expressed as exclusion where declared mandate is violated. Longitudinal coherence belongs to Domain 2. Both facets retained. |
+
+No open question blocks normative requirement drafting.
 
 ---
 
-## 18. Architecture Validation Gate
+## 20. Architecture Validation Gate
 
-This architecture draft advances to normative requirement drafting only after adversarial validation confirms:
+This architecture draft advances to normative requirement drafting when adversarial validation confirms:
 
 | Gate | Pass criterion |
 |------|----------------|
-| Governing question | Limited to permanent collection membership; no lifecycle or selection absorption |
+| Governing question | Limited to permanent collection membership; publication explicitly excluded |
 | Eligibility model | Three-type distinction preserved; no Volume 04 selection authority absorbed |
-| Facet completeness | Six facets retained; removal and split tests passed |
+| Facet completeness | Six facets retained; authority/integrity distinction defined |
+| Vocabulary | Invalidation, disqualification, revocation, withdrawal, grandfathering, supersession, retirement distinguished |
 | Upstream boundaries | Volume 02 permission, Volume 04 contextual eligibility, metadata, provenance, and manufacturing consumed not absorbed |
-| Domain 2 boundary | Publication, maintenance, retirement, and grandfathering deferred to `FI-DSN-STD-011` |
+| Domain 2 boundary | Publication, maintenance, retirement, grandfathering, and longitudinal consistency deferred to `FI-DSN-STD-011` |
+| Handoff categories | Section 10 defined without schemas |
 | Implementation independence | No DAM, storage, API, workflow, or runtime mechanics introduced |
 | Standard sufficiency | One standard remains sufficient for Domain 1 |
-| Open questions | None block requirement drafting |
+| Open questions | All resolved; none block requirement drafting |
 
 ---
 
-## 19. Related Standards
+## 21. Related Standards
 
 | Standard | Relationship |
 |----------|--------------|
@@ -495,10 +584,11 @@ This architecture draft advances to normative requirement drafting only after ad
 
 ---
 
-## 20. Revision History
+## 22. Revision History
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.2 Architecture Draft (refined) | July 27, 2026 | F.I. Forgot | Sprint D16.4B — constitutional boundary refinement: authority/integrity who-when distinction; membership vocabulary table (invalidation, disqualification, revocation, withdrawal, grandfathering, supersession, retirement); admission-time population-fit exclusion bounded against Domain 2 longitudinal consistency; entity-declared multi-collection/exclusivity posture; collection-scoped membership definition; Domain 1→2 handoff categories; duplicate/conflict disambiguation; manufacturing feasibility guardrail; governing question publication exclusion; OQ-STD-010-001 through OQ-STD-010-003 resolved |
 | 0.1 Architecture Draft | July 27, 2026 | F.I. Forgot | Sprint D16.4 — initial Collection Membership and Eligibility Standard architecture: locked governing question; principal subject; six constitutional facets; three-type eligibility model; upstream dependency model; Domain 1 → Domain 2 handoff; MEM-P1–MEM-P10; provisional requirement groups G1–G8; architecture validation gate; no normative requirements assigned |
 
 ### Future revision notes
