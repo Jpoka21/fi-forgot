@@ -533,8 +533,7 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-
-*No active queue entries.*
+| FI-DSN-STD-009 | Drafted, Pending Freeze | In progress | 15 | F.I. Forgot | July 27, 2026 | — | Sprint D14.4 — Version 0.1 Draft requirement body (`FI-DSN-STD-009-R01`–`R20`) |
 
 ### 18.1 Queue History
 
@@ -577,6 +576,9 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 24, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-008` queue notes updated for Version 0.1 Draft requirement body (`FI-DSN-STD-008-R01`–`R23`) per Sprint D13.4; queue state remains **In progress** |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-008` requirement set consolidated to `FI-DSN-STD-008-R01`–`R21` per Sprint D13.6; queue state remains **In progress** |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-008` queue exit (Completed (queue); Execution Order 14 preserved) per Sprint D13.8 freeze promotion |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` Personalization Policy Standard admitted (Execution Order 15; In progress) per Sprint D14.2 architecture draft |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` queue notes updated for Sprint D14.3A architecture refinement (F-01–F-03); queue state remains **In progress** |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` queue notes updated for Version 0.1 Draft requirement body (`FI-DSN-STD-009-R01`–`R20`) per Sprint D14.4; queue state remains **In progress** |
 
 ### Future revision notes
 
