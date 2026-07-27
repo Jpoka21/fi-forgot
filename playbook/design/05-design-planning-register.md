@@ -488,6 +488,7 @@ Revisions after freeze require documented change control under Section 9 and `FI
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-011` Collection Lifecycle and Consistency Standard status advanced to `Drafted, Pending Architecture Validation` (Version 0.1 Architecture Draft) per Sprint D17.0 architecture draft |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Inventory note — `FI-DSN-STD-011` architecture refined to Version 0.2 Architecture Draft per Sprint D17.0B (mandatory population condition model; validity lifecycle response; vocabulary taxonomy; retirement/reactivation; narrowed Maintenance; `OQ-STD-011-001`–`002` resolved); status remains `Drafted, Pending Architecture Validation` |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Inventory update — `FI-DSN-STD-011` Collection Lifecycle and Consistency Standard status advanced to `Drafted, Pending Freeze` (Version 0.3 Requirement Draft) per Sprint D17.1 requirement draft (`FI-DSN-STD-011-R01`–`R27`) |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Inventory note — `FI-DSN-STD-011` requirement set refined (continued publication eligibility; Maintenance duty precision; staged publication conditions; reactivation publication readiness; manufacturing wording; evidence classification) per Sprint D17.1B; status remains `Drafted, Pending Freeze` (Version 0.3 Requirement Draft) |
 
 ---
 
