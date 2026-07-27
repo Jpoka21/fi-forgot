@@ -595,6 +595,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` first complete requirement draft (Version 0.3 Requirement Draft; `FI-DSN-STD-011-R01`–`R27`) per Sprint D17.1; pending adversarial requirement validation |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` requirement set refined per Sprint D17.1B; pending freeze readiness validation |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` queue exit (Completed (queue); Execution Order 17 preserved) per Sprint D17.3 freeze promotion |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Volume closure — **VOL-05 Signature Collections** declared **Structurally Complete** per Sprint D18.1 (audit basis Sprint D18.0); architecture Version 1.0 Frozen; `FI-DSN-STD-010` and `FI-DSN-STD-011` Version 1.0 Frozen; no active queue entry; no new standard; no Execution Order assigned; EO 16 and EO 17 unchanged; implementation translation and artwork production remain downstream |
 
 ### Future revision notes
 
