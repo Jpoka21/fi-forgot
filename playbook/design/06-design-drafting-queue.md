@@ -533,7 +533,7 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-| FI-DSN-STD-011 | Reserved, Not Drafted | Queued | 17 | F.I. Forgot | July 27, 2026 | — | Collection Lifecycle and Consistency Standard (Domain 2 — Collection Lifecycle and Consistency); sequenced after `FI-DSN-STD-010` per architecture Section 12; Domain 2 publication policy consumes frozen Domain 1 membership decisions per Section 9.3.1; eligible for governed drafting preparation after Domain 1; no draft created during D16.3 |
+| FI-DSN-STD-011 | Drafted, Pending Architecture Validation | In progress | 17 | F.I. Forgot | July 27, 2026 | — | Collection Lifecycle and Consistency Standard (Domain 2 — Collection Lifecycle and Consistency); Version 0.1 Architecture Draft at `playbook/design/volume-05-signature-collections/03-collection-lifecycle-and-consistency-standard.md` per Sprint D17.0; consumes frozen `FI-DSN-STD-010` membership outputs; normative requirement drafting not authorized |
 
 ### 18.1 Queue History
 
@@ -588,6 +588,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-010` queue notes updated for Version 0.2 Architecture Draft refinement per Sprint D16.4B; queue state remains **In progress**; normative requirement drafting not authorized |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-010` queue notes updated for Version 0.3 Requirement Draft (`FI-DSN-STD-010-R01`–`R21`) per Sprint D16.5; queue state remains **In progress**; pending adversarial requirement validation and freeze preparation |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-010` queue exit (Completed (queue); Execution Order 16 preserved) per Sprint D16.7 freeze promotion |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` queue state advanced to **In progress** (Version 0.1 Architecture Draft) per Sprint D17.0 architecture draft; normative requirement drafting not authorized |
 
 ### Future revision notes
 
