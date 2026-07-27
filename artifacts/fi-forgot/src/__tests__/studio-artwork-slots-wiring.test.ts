@@ -121,11 +121,11 @@ section("dialog submission behavior");
 
 section("slot list rendering");
 {
-  const detail = readSrc("app/components/studio/FiStudioCollectionDetailPage.tsx");
-  expectTrue("slot list component", detail.includes("ArtworkSlotRow"));
-  expectTrue("brief rendering", detail.includes("slot.brief"));
-  expectTrue("quantity rendering", detail.includes("slot.quantity"));
-  expectTrue("slot position label", detail.includes("artworkSlotsDefaults.slotPositionLabel"));
+  const section = readSrc("app/components/studio/ArtworkSlotSection.tsx");
+  expectTrue("slot list component", readSrc("app/components/studio/FiStudioCollectionDetailPage.tsx").includes("ArtworkSlotSection"));
+  expectTrue("brief rendering", section.includes("slot.brief"));
+  expectTrue("quantity rendering", section.includes("slot.quantity"));
+  expectTrue("slot position label", section.includes("artworkSlotsDefaults.slotPositionLabel"));
 }
 
 section("summary counts");
@@ -133,7 +133,7 @@ section("summary counts");
   const detail = readSrc("app/components/studio/FiStudioCollectionDetailPage.tsx");
   expectTrue("real artwork slots count", detail.includes("slots.slotCount"));
   expectTrue("artwork remains zero", detail.includes('label="Artwork" value={0}'));
-  expectTrue("candidates remain zero", detail.includes('label="Candidates" value={0}'));
+  expectTrue("live candidates count", detail.includes("candidateCount"));
   expectTrue("approved assets remain zero", detail.includes('label="Approved Assets" value={0}'));
 }
 

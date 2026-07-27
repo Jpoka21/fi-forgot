@@ -102,5 +102,9 @@ export const API_ENDPOINTS = {
       `/api/studio/collections/${encodeURIComponent(collectionId)}/artwork-slots`,
     artworkSlotById: (collectionId: string, slotId: string) =>
       `/api/studio/collections/${encodeURIComponent(collectionId)}/artwork-slots/${encodeURIComponent(slotId)}`,
+    artworkCandidates: (collectionId: string, slotId: string) =>
+      `/api/studio/collections/${encodeURIComponent(collectionId)}/artwork-slots/${encodeURIComponent(slotId)}/artwork-candidates`,
+    artworkCandidateById: (collectionId: string, slotId: string, candidateId: string) =>
+      `/api/studio/collections/${encodeURIComponent(collectionId)}/artwork-slots/${encodeURIComponent(slotId)}/artwork-candidates/${encodeURIComponent(candidateId)}`,
   },
 } as const;

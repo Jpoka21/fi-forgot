@@ -130,7 +130,7 @@ section("collection detail page wiring");
   expectTrue("shows status", detail.includes("Status:"));
   expectTrue("artwork count placeholder", detail.includes('label="Artwork" value={0}'));
   expectTrue("artwork slots uses live count", detail.includes("slots.slotCount"));
-  expectTrue("candidates placeholder", detail.includes('label="Candidates" value={0}'));
+  expectTrue("candidates uses live count", detail.includes("candidateCount"));
   expectTrue("approved assets placeholder", detail.includes('label="Approved Assets" value={0}'));
   expectTrue("planning empty state", detail.includes("studioCollectionsDefaults.planningEmptyTitle"));
 }

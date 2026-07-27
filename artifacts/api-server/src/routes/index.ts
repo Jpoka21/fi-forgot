@@ -33,6 +33,7 @@ import v2NotificationsRouter from "./v2-notifications";
 import v2ConciergeRouter from "./v2-concierge";
 import studioCollectionsRouter from "./studio-collections";
 import studioArtworkSlotsRouter from "./studio-artwork-slots";
+import studioArtworkCandidatesRouter from "./studio-artwork-candidates";
 
 const router: IRouter = Router();
 
@@ -62,6 +63,7 @@ router.use(v2DashboardBrainRouter);
 router.use(v2NotificationsRouter);
 router.use(v2ConciergeRouter);
 router.use(studioArtworkSlotsRouter);
+router.use(studioArtworkCandidatesRouter);
 router.use(studioCollectionsRouter);
 router.use(v2RecipientsRouter);
 router.use(v2GenerateCardRouter);

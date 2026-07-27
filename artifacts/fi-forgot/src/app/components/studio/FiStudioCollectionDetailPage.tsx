@@ -1,8 +1,9 @@
 import { Link } from "wouter";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FiButton } from "@/app/components/button/FiButton";
 import { AddArtworkSlotDialog } from "@/app/components/studio/AddArtworkSlotDialog";
+import { ArtworkSlotSection } from "@/app/components/studio/ArtworkSlotSection";
 import { useStudioCollectionDetail } from "@/app/studio/hooks/useStudioCollectionDetail";
 import { useStudioArtworkSlots } from "@/app/studio/hooks/useStudioArtworkSlots";
 import { ROUTE_PATHS } from "@/app/routes/routePaths";
@@ -14,7 +15,6 @@ import {
   studioCollectionsDefaults,
 } from "@/app/studio/collectionsDomain";
 import { artworkSlotsDefaults } from "@/app/studio/artworkSlotsDomain";
-import type { StudioArtworkSlot } from "@/app/studio/artworkSlotsDomain";
 import { PB } from "@/lib/personal-brand";
 
 export interface FiStudioCollectionDetailPageProps {
@@ -39,41 +39,23 @@ function SummaryStat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ArtworkSlotRow({ slot, position }: { slot: StudioArtworkSlot; position: number }) {
-  return (
-    <article
-      style={{
-        border: `1px solid ${PB.border}`,
-        borderRadius: 12,
-        padding: "16px 20px",
-        background: PB.white,
-        display: "flex",
-        flexDirection: "column",
-        gap: 6,
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
-        <div>
-          <div style={{ fontSize: "0.75rem", color: PB.mid, marginBottom: 4 }}>
-            {artworkSlotsDefaults.slotPositionLabel(position)}
-          </div>
-          <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 600 }}>{slot.name}</h3>
-        </div>
-        <span style={{ fontSize: "0.85rem", color: PB.mid, whiteSpace: "nowrap" }}>
-          Qty {slot.quantity}
-        </span>
-      </div>
-      {slot.brief ? (
-        <p style={{ margin: 0, color: PB.mid, fontSize: "0.9rem" }}>{slot.brief}</p>
-      ) : null}
-    </article>
-  );
-}
-
 export function FiStudioCollectionDetailPage({ collectionId }: FiStudioCollectionDetailPageProps) {
   const detail = useStudioCollectionDetail(collectionId);
   const slots = useStudioArtworkSlots(collectionId);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [candidateCountsBySlot, setCandidateCountsBySlot] = useState<Record<string, number>>({});
+
+  const handleCandidateCountChange = useCallback((slotId: string, count: number) => {
+    setCandidateCountsBySlot((prev) => {
+      if (prev[slotId] === count) return prev;
+      return { ...prev, [slotId]: count };
+    });
+  }, []);
+
+  const candidateCount = useMemo(
+    () => Object.values(candidateCountsBySlot).reduce((total, count) => total + count, 0),
+    [candidateCountsBySlot],
+  );
 
   if (detail.loading) {
     return (
@@ -147,7 +129,7 @@ export function FiStudioCollectionDetailPage({ collectionId }: FiStudioCollectio
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <SummaryStat label="Artwork" value={0} />
           <SummaryStat label="Artwork Slots" value={slots.slotCount} />
-          <SummaryStat label="Candidates" value={0} />
+          <SummaryStat label="Candidates" value={candidateCount} />
           <SummaryStat label="Approved Assets" value={0} />
         </div>
       </section>
@@ -222,7 +204,13 @@ export function FiStudioCollectionDetailPage({ collectionId }: FiStudioCollectio
         {!slots.loading && !slots.error && slots.slots.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {slots.slots.map((slot, index) => (
-              <ArtworkSlotRow key={slot.id} slot={slot} position={index + 1} />
+              <ArtworkSlotSection
+                key={slot.id}
+                collectionId={collection.id}
+                slot={slot}
+                position={index + 1}
+                onCandidateCountChange={handleCandidateCountChange}
+              />
             ))}
           </div>
         ) : null}
