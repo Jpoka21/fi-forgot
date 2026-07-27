@@ -32,6 +32,7 @@ import v2DashboardBrainRouter from "./v2-dashboard-brain";
 import v2NotificationsRouter from "./v2-notifications";
 import v2ConciergeRouter from "./v2-concierge";
 import studioCollectionsRouter from "./studio-collections";
+import studioArtworkSlotsRouter from "./studio-artwork-slots";
 
 const router: IRouter = Router();
 
@@ -60,6 +61,7 @@ router.use(v2RecipientHealthRouter);
 router.use(v2DashboardBrainRouter);
 router.use(v2NotificationsRouter);
 router.use(v2ConciergeRouter);
+router.use(studioArtworkSlotsRouter);
 router.use(studioCollectionsRouter);
 router.use(v2RecipientsRouter);
 router.use(v2GenerateCardRouter);

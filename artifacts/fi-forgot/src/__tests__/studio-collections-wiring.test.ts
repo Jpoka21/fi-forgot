@@ -129,7 +129,7 @@ section("collection detail page wiring");
   const detail = readSrc("app/components/studio/FiStudioCollectionDetailPage.tsx");
   expectTrue("shows status", detail.includes("Status:"));
   expectTrue("artwork count placeholder", detail.includes('label="Artwork" value={0}'));
-  expectTrue("artwork slots placeholder", detail.includes('label="Artwork Slots" value={0}'));
+  expectTrue("artwork slots uses live count", detail.includes("slots.slotCount"));
   expectTrue("candidates placeholder", detail.includes('label="Candidates" value={0}'));
   expectTrue("approved assets placeholder", detail.includes('label="Approved Assets" value={0}'));
   expectTrue("planning empty state", detail.includes("studioCollectionsDefaults.planningEmptyTitle"));

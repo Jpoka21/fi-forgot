@@ -98,5 +98,9 @@ export const API_ENDPOINTS = {
   studio: {
     collections: "/api/studio/collections",
     collectionById: (id: string) => `/api/studio/collections/${encodeURIComponent(id)}`,
+    artworkSlots: (collectionId: string) =>
+      `/api/studio/collections/${encodeURIComponent(collectionId)}/artwork-slots`,
+    artworkSlotById: (collectionId: string, slotId: string) =>
+      `/api/studio/collections/${encodeURIComponent(collectionId)}/artwork-slots/${encodeURIComponent(slotId)}`,
   },
 } as const;

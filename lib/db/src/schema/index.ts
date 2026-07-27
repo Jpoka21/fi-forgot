@@ -27,6 +27,7 @@ export * from "./business-settings";
 export * from "./business-card-queue";
 export * from "./ai-card-library";
 export * from "./studio-collections";
+export * from "./studio-artwork-slots";
 export * from "./users";
 export * from "./personal-recipients";
 export * from "./card-previews";
