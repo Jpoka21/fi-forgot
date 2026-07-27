@@ -12,9 +12,10 @@
 | **Primary Volume** | 05 — Signature Collections |
 | **Architectural domain** | Domain 1 — Collection Membership and Eligibility |
 | **Document** | `02-collection-membership-and-eligibility-standard.md` |
-| **Status** | Drafted, Pending Freeze |
-| **Version** | 0.3 Requirement Draft |
+| **Status** | Frozen |
+| **Version** | 1.0 |
 | **Date** | July 27, 2026 |
+| **Freeze date** | July 27, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -89,7 +90,7 @@ See Section 11.
 | **Continuing validity condition** | A condition expressly declared under governing membership law whose later failure constitutionally invalidates or disqualifies existing membership — distinct from an admission-only precondition |
 | **Conflicting membership** | A constitutional conflict in which an asset holds membership relationships that cannot coexist under declared exclusivity rules or another frozen collection rule governed by this standard |
 | **Decision-stage membership policy** | Frozen normative membership rules recorded in Design Standards; not runtime evaluation, instance selection, DAM state, or production scheduling |
-| **Disqualification** | The constitutional consequence that membership may not remain valid because a required membership condition has failed — owned by Membership Integrity |
+| **Disqualification** | The constitutional consequence that membership may not remain valid because a required continuing validity condition has failed — owned by Membership Integrity |
 | **Duplicate membership** | A single governed asset holding more than one constitutional membership relationship in the same governed collection |
 | **Governed collection entity** | A durable constitutional library container with declared identity, mandate, membership authority, population boundaries, and collection-scoped inclusion and exclusion discipline — distinct from informal tags, folders, or storage partitions |
 | **Invalidation** | A declarative constitutional conclusion that an existing membership no longer satisfies governing membership law — not a publication action; owned by Membership Integrity |
@@ -345,6 +346,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 | July 27, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Standard; Formal Freeze Review passed per Sprint D16.6; first Volume 05 `CLS-ASG` Domain 1 standard; 21 normative requirements (`FI-DSN-STD-010-R01` through `FI-DSN-STD-010-R21`) |
 | 0.3 Requirement Draft (refined) | July 27, 2026 | F.I. Forgot | Sprint D16.5B — targeted requirement refinement per adversarial validation: constrained exclusivity definition (`R08`); delegation boundaries (`R09`); admission versus continuing validity conditions (`R11`, `R18`); constitutional Integrity wording (`R17`); handoff category clarification (`R19`); evidence classification prose (Section 7) |
 | 0.3 Requirement Draft | July 27, 2026 | F.I. Forgot | Sprint D16.5 — first normative requirement draft: `FI-DSN-STD-010-R01` through `FI-DSN-STD-010-R21`; constitutional inheritance; principal-subject placement; governed collection entity definition; membership authority; membership preconditions; inclusion policy; exclusion policy; membership integrity; Domain 1 → Domain 2 handoff; Brain Interaction boundary |
 | 0.2 Architecture Draft (refined) | July 27, 2026 | F.I. Forgot | Sprint D16.4B — constitutional boundary refinement per adversarial validation |
@@ -352,7 +354,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 
 ### Future revision notes
 
-Revision to this standard after freeze requires governed change control per `FI-DSN-GOV-001` Section 15. Material change to principal-subject ownership, facet model, or Domain 2 handoff requires architectural revision before normative amendment.
+Revision to this standard SHALL occur only after formal freeze review and governed change control per `FI-DSN-GOV-001` Section 15. Material change to principal-subject ownership, facet model, or Domain 2 handoff requires architectural revision before normative amendment.
 
 ---
 
