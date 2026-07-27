@@ -533,12 +533,14 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-| FI-DSN-STD-011 | Drafted, Pending Freeze | In progress | 17 | F.I. Forgot | July 27, 2026 | — | Collection Lifecycle and Consistency Standard (Domain 2 — Collection Lifecycle and Consistency); Version 0.3 Requirement Draft at `playbook/design/volume-05-signature-collections/03-collection-lifecycle-and-consistency-standard.md` (`FI-DSN-STD-011-R01`–`R27`) per Sprint D17.1B refinement; consumes frozen `FI-DSN-STD-010` membership outputs; pending freeze readiness validation |
+
+*No active queue entries.*
 
 ### 18.1 Queue History
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
+| FI-DSN-STD-011 | Frozen | Completed (queue) | 17 | F.I. Forgot | July 27, 2026 | July 27, 2026 | Sprint D17.3 — Collection Lifecycle and Consistency Standard promoted to Version 1.0 Frozen (`FI-DSN-STD-011-R01`–`R27`); queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-010 | Frozen | Completed (queue) | 16 | F.I. Forgot | July 27, 2026 | July 27, 2026 | Sprint D16.7 — Collection Membership and Eligibility Standard promoted to Version 1.0 Frozen (`FI-DSN-STD-010-R01`–`R21`); queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-009 | Frozen | Completed (queue) | 15 | F.I. Forgot | July 27, 2026 | July 27, 2026 | Sprint D14.8 — Personalization Policy Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
 | FI-DSN-STD-008 | Frozen | Completed (queue) | 14 | F.I. Forgot | July 24, 2026 | July 27, 2026 | Sprint D13.8 — Occasion and Emotional Context Standard promoted to Version 1.0 Frozen; queue exit per §5.5 Frozen lifecycle |
@@ -592,6 +594,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` architecture refined to Version 0.2 Architecture Draft per Sprint D17.0B; normative requirement drafting not authorized |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` first complete requirement draft (Version 0.3 Requirement Draft; `FI-DSN-STD-011-R01`–`R27`) per Sprint D17.1; pending adversarial requirement validation |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` requirement set refined per Sprint D17.1B; pending freeze readiness validation |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` queue exit (Completed (queue); Execution Order 17 preserved) per Sprint D17.3 freeze promotion |
 
 ### Future revision notes
 

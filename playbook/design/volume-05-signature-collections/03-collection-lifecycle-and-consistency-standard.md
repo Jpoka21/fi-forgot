@@ -12,9 +12,10 @@
 | **Primary Volume** | 05 — Signature Collections |
 | **Architectural domain** | Domain 2 — Collection Lifecycle and Consistency |
 | **Document** | `03-collection-lifecycle-and-consistency-standard.md` |
-| **Status** | Drafted, Pending Freeze |
-| **Version** | 0.3 Requirement Draft |
+| **Status** | Frozen |
+| **Version** | 1.0 |
 | **Date** | July 27, 2026 |
+| **Freeze date** | July 27, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -88,7 +89,7 @@ See Section 11.
 | **Decision-stage lifecycle policy** | Frozen normative lifecycle rules recorded in Design Standards; not runtime evaluation, DAM state, production scheduling, or customer delivery timing |
 | **Grandfathering** | Bounded lifecycle treatment allowing prior publication or availability treatment to continue after governing conditions change — only where membership remains valid, upstream law permits, and lifecycle law explicitly authorizes continuation |
 | **Longitudinal collection consistency** | Collection-scoped coherence requirements among existing members over time — distinct from Domain 1 admission-time population fit and from Volume 02 global visual identity |
-| **Maintenance** | The affirmative constitutional duty to preserve lifecycle validity and declared longitudinal consistency and to respond to governing changes — not operational schedules, review queues, or replacement procedures |
+| **Maintenance** | The affirmative constitutional duty to preserve continuing publication eligibility and valid lifecycle treatment and declared longitudinal consistency and to respond to governing changes — not operational schedules, review queues, or replacement procedures |
 | **Mandatory population condition** | A population requirement declared in a governed collection's constitutional mandate that must be satisfied by valid Domain 1 members before collection publication — distinct from optional or aspirational population classes, operational launch targets, or downstream release readiness |
 | **Nonpublication** | The constitutional condition of a governed collection or member that has not entered a published availability posture — distinct from withdrawal |
 | **Publication** | The constitutional availability posture under which a governed collection or member is constitutionally available for governed library use — not deployment, storefront release, manufacturing readiness, fulfillment timing, or runtime orchestration |
@@ -376,6 +377,7 @@ Compliance with this standard SHALL be verified implementation-independently:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 | July 27, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Standard; Formal Freeze Readiness Validation passed per Sprint D17.2; first Volume 05 `CLS-ASG` Domain 2 standard; 27 normative requirements (`FI-DSN-STD-011-R01` through `FI-DSN-STD-011-R27`) |
 | 0.3 Requirement Draft (refined) | July 27, 2026 | F.I. Forgot | Sprint D17.1B — targeted requirement refinement per adversarial validation: continued publication eligibility (`R07`, `R09`); staged publication stage conditions (`R10`); Maintenance duty precision and R17 cross-reference (`R13`); reactivation publication readiness (`R21`); manufacturing nonoperational wording (`R26`); evidence classification prose (Section 7) |
 | 0.3 Requirement Draft | July 27, 2026 | F.I. Forgot | Sprint D17.1 — first normative requirement draft: `FI-DSN-STD-011-R01` through `FI-DSN-STD-011-R27`; constitutional inheritance; principal-subject placement; collection publication policy; longitudinal consistency; maintenance; withdrawal; Domain 1 validity lifecycle response; grandfathering; supersession; retirement and reactivation; Domain 1 handoff; lifecycle vocabulary discipline; Brain Interaction; manufacturing and metadata boundaries |
 | 0.2 Architecture Draft | July 27, 2026 | F.I. Forgot | Sprint D17.0B — targeted architecture refinement per D17.0A validation |
