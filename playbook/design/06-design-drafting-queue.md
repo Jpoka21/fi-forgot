@@ -533,7 +533,7 @@ The following table records operational queue entries admitted under Section 5.2
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-| FI-DSN-STD-010 | Reserved, Not Drafted | Queued | 16 | F.I. Forgot | July 27, 2026 | — | Collection Membership and Eligibility Standard (Domain 1 — Collection Membership and Eligibility); Volume 05 architecture dependency satisfied — frozen `playbook/design/volume-05-signature-collections/01-signature-collections-architecture.md` Version 1.0; eligible for governed drafting preparation; no draft created during D16.3 |
+| FI-DSN-STD-010 | Drafted, Pending Architecture Validation | In progress | 16 | F.I. Forgot | July 27, 2026 | — | Collection Membership and Eligibility Standard (Domain 1 — Collection Membership and Eligibility); standard architecture authored at `playbook/design/volume-05-signature-collections/02-collection-membership-and-eligibility-standard.md` Version 0.1 Architecture Draft per Sprint D16.4; normative requirement drafting not authorized |
 | FI-DSN-STD-011 | Reserved, Not Drafted | Queued | 17 | F.I. Forgot | July 27, 2026 | — | Collection Lifecycle and Consistency Standard (Domain 2 — Collection Lifecycle and Consistency); sequenced after `FI-DSN-STD-010` per architecture Section 12; Domain 2 publication policy consumes frozen Domain 1 membership decisions per Section 9.3.1; eligible for governed drafting preparation after Domain 1; no draft created during D16.3 |
 
 ### 18.1 Queue History
@@ -584,6 +584,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-009` queue exit (Completed (queue); Execution Order 15 preserved) per Sprint D14.8 freeze promotion |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-010` Collection Membership and Eligibility Standard admitted (Execution Order 16; Queued) per Sprint D16.3; architecture Version 1.0 Frozen at `volume-05-signature-collections/01-signature-collections-architecture.md` |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` Collection Lifecycle and Consistency Standard admitted (Execution Order 17; Queued) per Sprint D16.3; sequenced after `FI-DSN-STD-010` per architecture Section 12 and Section 9.3.1 |
+| 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-010` queue state advanced to **In progress** (Version 0.1 Architecture Draft) per Sprint D16.4 architecture draft; normative requirement drafting not authorized |
 
 ### Future revision notes
 
