@@ -51,6 +51,18 @@ if (!basePath) {
   );
 }
 
+const apiProxyTarget = process.env.API_PROXY_TARGET?.trim();
+
+const devApiProxy =
+  apiProxyTarget && apiProxyTarget.length > 0
+    ? {
+        "/api": {
+          target: apiProxyTarget,
+          changeOrigin: true,
+        },
+      }
+    : undefined;
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -92,6 +104,7 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    ...(devApiProxy ? { proxy: devApiProxy } : {}),
   },
   preview: {
     port,
