@@ -11,10 +11,11 @@
 | **Volume** | 02 — Design Language |
 | **Title** | Visual Design Architecture |
 | **Sprint working label** | `FI-DSN-VIS-001` (D2.1 tracking only — not an authorized `FI-DSN-*` namespace per `FI-DSN-ID-001`) |
-| **Status** | Frozen |
-| **Version** | 1.0 |
-| **Date** | July 23, 2026 |
-| **Freeze date** | July 23, 2026 |
+| **Status** | Under revision |
+| **Version** | 1.1 Draft |
+| **Date** | July 28, 2026 |
+| **Freeze date** | July 23, 2026 (Version 1.0 frozen baseline) |
+| **Prior frozen baseline** | Version 1.0 — Frozen July 23, 2026 (remains binding until Version 1.1 freeze per `FI-DSN-GOV-001` Section 15) |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -433,6 +434,8 @@ Volume 02 **Structurally Complete** posture remains governed by `FI-DSN-VOL-001`
 
 Reusable visual assets are governed by **lifecycle stage**, not by asset type alone.
 
+For permanent collection membership intake, constitutional dependency order places Volume 06 **before** Volume 05 library belonging per `FI-DSN-VOL-001` Section 6.4: Volume 04 contextual application and selection → Volume 06 visual artifact realization and Governed Production-Ready Artifact approval → Volume 05 library operations (Volume 05 consumes Governed Production-Ready Artifacts at collection intake per harmonized Volume 05 architecture Section 2.1).
+
 | Lifecycle stage | Architectural owner | Governs |
 |-----------------|---------------------|---------|
 | **Asset character** | Volume 02 — Layer 3 | What photography, illustration, icons, decorative elements, and backgrounds may look like |
@@ -440,13 +443,14 @@ Reusable visual assets are governed by **lifecycle stage**, not by asset type al
 | **Contextual eligibility** | Volume 04 | Whether a permitted treatment fits occasion, relationship, or selection context |
 | **Surface placement** | Volume 03 | How assets occupy card and envelope surfaces |
 | **Contextual selection** | Volume 04 | Which eligible asset applies in a given context |
+| **Visual artifact realization and GPRA approval** | Volume 06 — Creative Production | Declared production intent through Realization, Review Determination, Approval, Governed Production-Ready Artifact status, and Governed Handoff |
 | **Library operations** | Volume 05 | Collection membership, release, retirement, and consistency |
 
 **Permanent rule:**
 
-> **Volume 02 governs what assets may be. Volume 05 governs how asset libraries run. Volume 04 governs which assets apply when. Volume 03 governs where assets sit.**
+> **Volume 02 governs what assets may be. Volume 03 governs where assets sit. Volume 04 governs which assets apply when. Volume 06 governs how permitted visual artifacts become Governed Production-Ready. Volume 05 governs how asset libraries run.**
 
-Licensed artwork, third-party assets, internally created artwork, AI-generated imagery, and future asset types map into this lifecycle without architectural revision. Visual source provenance is recorded as planning metadata per `FI-DSN-CLS-001`; provenance does not determine Primary Volume.
+Licensed artwork, third-party assets, internally created artwork, AI-generated imagery, and future asset types map into this lifecycle without architectural revision to the **asset-type mapping** posture. Mapping an asset type into the lifecycle does not bypass the Volume 06 realization stage or substitute identity permission for production-readiness approval. Visual source provenance is recorded as planning metadata per `FI-DSN-CLS-001`; provenance does not determine Primary Volume.
 
 ### 11.1 Harmonization with `CLS-ART` — Artwork eligibility
 
@@ -645,7 +649,8 @@ Before freeze of this document, Architecture Validation MUST confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
-| 1.0 | July 23, 2026 | F.I. Forgot | Frozen — promoted to Frozen Volume Governance; Formal Freeze Review Outcome A (Freeze Eligible); FR-VIS-MIN-001 (`FI-DSN-VOL-001` identifier consistency in P10); architecture unchanged from Version 0.2 Draft |
+| 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H3 — Section 11 lifecycle extension: Volume 06 visual artifact realization and GPRA approval stage inserted; constitutional dependency V04→V06→V05; permanent rule harmonized; post-table asset-type clarification; Version 1.0 Frozen baseline preserved in revision history |
+| 1.0 | July 23, 2026 | F.I. Forgot | Frozen — promoted to Frozen Volume Governance; Formal Freeze Review Outcome A (Freeze Eligible); FR-VIS-MIN-001 (`FI-DSN-VOL-001` identifier consistency in P10); architecture unchanged from Version 0.2 Draft; freeze date July 23, 2026 |
 | 0.2 Draft | July 23, 2026 | F.I. Forgot | Sprint D2.1 refinement — Architecture Review findings AR-VIS-001 through AR-VIS-010: CLS-001 code corrections (`CLS-BEX`, `CLS-ACI`); VOL-001 Layer 4 and Vol 03 Layout and composition harmonization; `CLS-CMP` and `CLS-ART` harmonization; `OQ-DSN-009` partial resolution posture; premium placement tie-breaker; Vol 02/05 exclusion example; conceptual dependency diagram note; P11 negative examples |
 | 0.1 Draft | July 23, 2026 | F.I. Forgot | Sprint D2.1 — initial Visual Design Architecture Volume Governance draft: five-layer model; P11 Message Primacy; Composition Principles authority; asset lifecycle ownership; Volume 02/03/04 boundary architecture; standard placement guidance; future domain inventory; validation gate |
 
