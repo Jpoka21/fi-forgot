@@ -11,10 +11,10 @@
 | **Document** | `09-design-volume-roadmap.md` |
 | **Sprint** | D1.10 |
 | **Artifact type** | Design Volume Roadmap |
-| **Status** | Frozen Design Volume Roadmap |
-| **Version** | 1.0 |
-| **Date** | July 23, 2026 |
-| **Freeze date** | July 23, 2026 |
+| **Status** | Frozen Version 1.0 Baseline; Version 1.1 Governed Draft Pending Review |
+| **Version** | 1.1 Draft |
+| **Date** | July 28, 2026 |
+| **Freeze date** | July 23, 2026 (Version 1.0); Version 1.1 governed revision pending independent review |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -28,9 +28,9 @@
 | **Template reference** | `FI-DSN-TPL-001` — Design Standard Template (Frozen Governance Template, Version 1.0, July 22, 2026) |
 | **Research reference** | `playbook/research/README.md` — Research Library governance |
 | **Upstream governance** | `playbook/design/00-design-standards-governance.md`; `playbook/design/01-design-standard-template.md`; `playbook/design/02-design-classification-strategy.md`; `playbook/design/03-design-identifier-system.md`; `playbook/design/04-design-library-metadata-standard.md`; `playbook/design/05-design-planning-register.md`; `playbook/design/06-design-drafting-queue.md`; `playbook/design/07-evidence-vs-company-judgment-governance.md`; `playbook/design/08-brain-authority-boundary.md`; `playbook/design/README.md` |
-| **Downstream consumers** | Design Standards in Volumes 02 through 05; `FI-DSN-REG-001` volume planning rows; `FI-DSN-QUE-001` governance-layer ordering; future automation |
+| **Downstream consumers** | Design Standards in Volumes 02 through 06; `FI-DSN-REG-001` volume planning rows; `FI-DSN-QUE-001` governance-layer ordering; future automation |
 
-**Standard statement:** F.I. Forgot maintains **one authoritative Design Volume Roadmap** that defines durable production volume architecture, sequencing, dependencies, entry and completion conditions, and Primary Volume assignment rules for the Design Library. The Planning Foundation is a prerequisite layer — not Volume 00. Production volumes 01 through 05 organize planning scope and dependency posture; they do not replace the Planning Register, Drafting Queue, classification taxonomy, metadata semantics, epistemic governance, or Brain authority boundaries. Each planned Layer B `FI-DSN-*` standard SHALL have exactly one Primary Volume. Roadmap sequence informs planning; the Drafting Queue authorizes drafting.
+**Standard statement:** F.I. Forgot maintains **one authoritative Design Volume Roadmap** that defines durable production volume architecture, sequencing, dependencies, entry and completion conditions, and Primary Volume assignment rules for the Design Library. The Planning Foundation is a prerequisite layer — not Volume 00. Production volumes 01 through 06 organize planning scope and dependency posture; they do not replace the Planning Register, Drafting Queue, classification taxonomy, metadata semantics, epistemic governance, or Brain authority boundaries. Each planned Layer B `FI-DSN-*` standard SHALL have exactly one Primary Volume. Roadmap sequence informs planning; the Drafting Queue authorizes drafting.
 
 **Source basis:** Company judgment. This volume roadmap model is an F.I. Forgot governance choice. It is not derived from vendor facts, verified evidence, or Brain runtime behavior.
 
@@ -69,7 +69,7 @@ This document does **not**:
 - Definition of a Design Library volume and volume authority model
 - Primary Volume, Cross-Volume Dependency, Cross-Volume Influence, and Cross-Volume Applicability
 - Volume Status roadmap planning states and coexistence with GOV-001, REG-001, and QUE-001
-- Production volumes 01 through 05 architecture, sequencing, entry, and completion
+- Production volumes 01 through 06 architecture, sequencing, entry, and completion
 - Manufacturing hybrid peer model for Volume 01
 - Classification relationship, including `CLS-BVS` and `OQ-CLS-001`
 - Six-type cross-volume dependency taxonomy and blocking posture
@@ -96,7 +96,7 @@ Future roadmap consumers MUST use the following terms precisely. Interchangeable
 |------|------------|---------------|
 | **Volume** | A durable organizational and dependency container with stable two-digit numbering, declared scope, and roadmap states | No — also used descriptively in GOV-001 and README |
 | **Planning Foundation Inventory** | Descriptive index of frozen meta-governance and planning-layer artifacts prerequisite to production volumes | Yes — defined here |
-| **Production Volume Inventory** | Normative inventory of production volumes 01–05 (and future append-only volumes) in this document | Yes — defined here |
+| **Production Volume Inventory** | Normative inventory of production volumes 01–06 (and future append-only volumes) in this document | Yes — defined here |
 | **Primary Volume** | Exactly one home production volume per planned Layer B `FI-DSN-*` standard or `FI-MFG-*` manufacturing standard | Planning rule — interim REG **Notes** per Section 14 |
 | **Cross-Volume Dependency** | Directed requirement that another volume's artifact, baseline, or roadmap state must exist before an action proceeds; does not transfer ownership | Instance in REG **Dependencies** |
 | **Cross-Volume Influence** | Informational or soft ordering relationship; does not block unless recorded as Soft dependency | REG **Notes** or Soft dependency |
@@ -107,7 +107,9 @@ Future roadmap consumers MUST use the following terms precisely. Interchangeable
 | **Optional Volume Artifact** | Planned artifact that may remain open without blocking structural completion | VOL-001 declaration |
 | **Deferred Artifact** | Explicitly postponed with boundary label and/or open question | REG + VOL-001 |
 | **Volume Supplement** | Governed document or section that specializes, clarifies, constrains, or organizes within frozen library minimums | Section 20 |
-| **Volume Sequence** | Recommended maturity order among production volumes in this document | Not QUE **Execution Order** |
+| **Volume Sequence** | Recommended maturity order among production volumes in this document | Not QUE **Execution Order**; not constitutional dependency order (Section 6.4) |
+| **Constitutional dependency order** | Directed authority and artifact-flow posture among volumes (Section 6.4) | Not numeric volume order; not QUE **Execution Order** |
+| **Lifecycle order** | Governed artifact-state progression for creative production (Volume 06) and library belonging (Volume 05) | Not numeric volume order; defined in Volume 06 architecture |
 | **Volume Status** | Roadmap planning state of a volume container: Defined, Entry Ready, Active, Structurally Complete, Mature, Archived | **Roadmap-only** — not REG **Status** |
 
 ---
@@ -179,25 +181,26 @@ The following **Required** foundation artifacts MUST be frozen before production
 
 ### 6.1 Purpose and authority
 
-The **Production Volume Inventory** is the normative architecture of production volumes **01 through 05**. This document owns volume numbers, scope boundaries, sequence, entry and completion rules, and Required Volume Artifact declarations.
+The **Production Volume Inventory** is the normative architecture of production volumes **01 through 06**. This document owns volume numbers, scope boundaries, sequence, entry and completion rules, and Required Volume Artifact declarations.
 
-Future volumes SHALL use append-only numbering (06, 07, …) per Section 25.
+Future volumes SHALL use append-only numbering (07, 08, …) per Section 25.
 
 ### 6.2 Production volume summary
 
 | Volume | Title | Primary artifact family | Volume governance document |
 |--------|-------|-------------------------|----------------------------|
 | **01** | Manufacturing and Production | `FI-MFG-*` | `playbook/design/volume-01-manufacturing/01-handwrytten-production-standard.md` |
-| **02** | Design Language | `FI-DSN-*` (Volumes 02–05) | Authorized when first Volume 02 standard enters drafting per `OQ-DSN-009` |
+| **02** | Design Language | `FI-DSN-*` (Volumes 02–06) | Authorized when first Volume 02 standard enters drafting per `OQ-DSN-009` |
 | **03** | Card Design System | `FI-DSN-*` | Per `OQ-DSN-009` |
 | **04** | Artwork Intelligence | `FI-DSN-*` | Per `OQ-DSN-009` |
 | **05** | Signature Collections | `FI-DSN-*` | Per `OQ-DSN-009` |
+| **06** | Creative Production | `FI-DSN-*` | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 0.3 Draft — pending architecture freeze) |
 
-### 6.3 Foundation posture and initial Volume Status
+### 6.3 Foundation posture and Volume Status
 
 **Foundation posture (not a Volume Status):** Frozen prerequisite layer complete as of July 23, 2026. All Planning Foundation **Required** artifacts in Section 5.4 are frozen.
 
-At Version 1.0 freeze, the following **production volume** roadmap states apply:
+**Current production volume roadmap states** (Version 1.1 Draft):
 
 | Volume | Volume Status | Notes |
 |--------|---------------|-------|
@@ -206,6 +209,25 @@ At Version 1.0 freeze, the following **production volume** roadmap states apply:
 | **03** | **Defined** | Awaiting predecessors |
 | **04** | **Defined** | Awaiting predecessors and governed design systems |
 | **05** | **Defined** | Awaiting predecessors |
+| **06** | **Defined** | Volume 06 Creative Production Architecture Version 0.3 Draft authored; pending cross-volume harmonization (Volumes 05 and 02); pending Volume 06 architecture freeze; not **Entry Ready** until harmonization and freeze gate satisfied per Volume 06 architecture Section 22.1 |
+
+At Version 1.0 freeze (July 23, 2026), Volumes 01–05 had the roadmap states shown above for **01** through **05**. Volume 06 is added by governed Version 1.1 revision per Section 25.
+
+### 6.4 Volume numbering, constitutional dependency, and lifecycle order
+
+Three order concepts MUST NOT be conflated:
+
+| Order type | Definition | Example |
+|------------|------------|---------|
+| **Numeric volume order** | Stable two-digit document numbering in this inventory (01–06 at this revision) | Volume 05 appears before Volume 06 numerically |
+| **Constitutional dependency order** | Directed authority and artifact-flow posture — which volumes supply governing law and which consume outputs | Volume 06 consumes Volumes 01–04; Volume 05 consumes Governed Production-Ready Artifacts (GPRAs) from Volume 06 for membership intake |
+| **Lifecycle order** | Governed artifact-state progression within and across volumes | Declared production intent → realization → GPRA → Handoff Posture → Volume 05 membership consideration (Volume 06 architecture) |
+
+**Permanent rule:**
+
+> **Numeric volume order is a stable planning identifier. Constitutional dependency order and lifecycle order govern authority and artifact flow. A lower volume number does NOT imply upstream governing authority when this document declares otherwise.**
+
+Volume 05 retains numeric identifier **05** and frozen planning history. Volume 06 is constitutionally **upstream of Volume 05 for GPRA intake** even though Volume 06 is numbered **06**.
 
 ---
 
@@ -215,7 +237,7 @@ A **Design Library volume** is a **durable organizational and dependency contain
 
 1. A **stable two-digit number** (01–05 at initial freeze; 06+ for governed additions)
 2. A **declared purpose** and normative scope boundary recorded in this document
-3. A **primary artifact family** (`FI-MFG-*` for Volume 01; `FI-DSN-*` for Volumes 02–05)
+3. A **primary artifact family** (`FI-MFG-*` for Volume 01; `FI-DSN-*` for Volumes 02–06)
 4. **Volume Entry Conditions** and **Volume Completion Conditions**
 5. Optional **Volume Supplements** and volume governance documents where authorized
 
@@ -404,7 +426,7 @@ Roadmap state regression is governed and auditable.
 | **Major scope** | Selection governance; `CLS-BVS` Decision-stage boundaries; occasion and personalization policy where principal |
 | **Typical classifications** | `CLS-BVS`, `CLS-OEC`, `CLS-PER`, artwork medium classes |
 | **Upstream** | Volumes 02–03 minimum governed alternatives; GOV-004 frozen; Brain Architecture informational only |
-| **Downstream** | Volume 05; production workflows |
+| **Downstream** | Volume 06; Volume 05 (GPRA intake downstream per Section 6.4); production workflows |
 | **Completion summary** | Section 18.5 |
 
 ### 11.5 Volume 05 — Signature Collections
@@ -416,10 +438,25 @@ Roadmap state regression is governed and auditable.
 | **Typical classifications** | `CLS-ASG`, medium-specific asset classes |
 | **Upstream (Entry Ready)** | Volumes 02–04 **Entry Ready**; collection scope defined |
 | **Upstream (Structurally Complete / freeze)** | Volumes 02–04 **Structurally Complete** or equivalent frozen upstream artifacts for standards that depend on final Design Language, Card System, or Artwork Intelligence rules |
+| **Upstream (GPRA intake)** | Volume 06 Governed Production-Ready Artifacts for permanent collection membership consideration — constitutional dependency per Section 6.4; Volume 05 does **not** govern Volume 06 realization |
 | **Completion summary** | Section 18.5 |
 | **Downstream** | Production artwork libraries; partner guidance |
 
-### 11.6 Rejected volume concepts
+### 11.6 Volume 06 — Creative Production
+
+| Field | Value |
+|-------|-------|
+| **Purpose** | Govern the transformation of declared creative intent into **Governed Production-Ready Artifacts (GPRAs)** through planning, exploration, realization, review, approval, and handoff |
+| **Major scope** | Production Program; Declared Production Intent; Production Obligation; Realized Visual Artifact (RVA); Governed Production-Ready Artifact (GPRA); Review and Approval; Governed Handoff; manufacturing boundary at Design-Time Feasibility |
+| **Out of scope** | Visual identity permission (Volume 02); surface architecture (Volume 03); contextual selection authority and Brain Visual Selection Decision policy (Volume 04); permanent collection membership (Volume 05); Manufacturing Validation and Fulfillment Execution (Volume 01 operational layer); Brain runtime behavior; implementation technology |
+| **Typical classifications** | Principal classification assignment pending `OQ-V06-002`; provisional architectural domains per Section 19.4 — not final `CLS-*` assignment |
+| **Upstream** | Volumes 01–04 applicable frozen law and Compliance Boundaries; Volume 01 `FI-MFG-*` as Design-Time Feasibility input |
+| **Downstream** | Volume 05 (GPRA intake for **approved artwork** / membership consideration); production artwork libraries; engineering specifications |
+| **Constitutional posture** | Volume 06 consumes governing law from Volumes 01–04; produces GPRAs for downstream consumers; Volume 05 is downstream for artifact intake despite lower numeric identifier (Section 6.4) |
+| **Volume governance document** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 0.3 Draft) |
+| **Completion summary** | Section 18.5 |
+
+### 11.7 Rejected volume concepts
 
 The following are **classifications or topics**, not separate production volumes: Typography-only volume; Occasion-only volume; Brain Visual Selection volume (`CLS-BVS`); Quality/Validation volume (`CLS-VQA`); Foundation/Governance as Volume 00.
 
@@ -433,7 +470,7 @@ The following are **classifications or topics**, not separate production volumes
 |------|-------------|
 | Volume 01 peer status | Volume 01 is a first-class production volume in this roadmap |
 | Identifier family | `FI-MFG-*` remains outside `FI-DSN-*`; MUST NOT be reclassified |
-| Design volume reference | Volumes 02–05 MUST treat applicable `FI-MFG-*` obligations as Compliance Boundary inputs per GOV-004 §13 |
+| Design volume reference | Volumes 02–06 MUST treat applicable `FI-MFG-*` obligations as Compliance Boundary inputs per GOV-004 §13 |
 | Queue separation | Manufacturing drafting queues remain outside `FI-DSN-QUE-001` per QUE-001 |
 | Authority | Volume 01 governance document and `FI-MFG-*` corpus own manufacturing policy; this roadmap does not absorb it |
 | Research | Manufacturing facts remain Research Library + GOV-003 governed |
@@ -604,8 +641,12 @@ Volume 03 (Card Design System)
         ↓
 Volume 04 (Artwork Intelligence / CLS-BVS boundaries)
         ↓
-Volume 05 (Signature Collections)
+Volume 06 (Creative Production — realization and GPRA approval)
+        ↓
+Volume 05 (Signature Collections — GPRA intake and permanent membership)
 ```
+
+**Numeric inventory order** in Section 6.2 lists Volume 05 before Volume 06. **Constitutional dependency order** for governed visual artifact realization places Volume 06 **before** Volume 05 membership intake per Section 6.4. Both orderings are intentional and MUST NOT be conflated.
 
 ### 16.2 Rationale
 
@@ -616,6 +657,7 @@ Volume 05 (Signature Collections)
 | Language before structure | Visual identity foundations precede template architecture |
 | Structure before selection | Governed alternatives and Compliance Boundaries precede `CLS-BVS` Preference Surfaces |
 | Selection before collections | Collection governance consumes selection and language rules; Volume 05 **Entry Ready** MAY occur when Volumes 02–04 are **Entry Ready**; Signature Collection standards that depend on final upstream rules MUST NOT **Frozen** until required upstream artifacts are **Frozen** |
+| Realization before membership intake | Volume 06 **Defined** or **Entry Ready** SHOULD precede Volume 05 standards that depend on GPRA intake posture; Volume 05 consumes GPRAs from Volume 06 per Section 6.4 — numeric identifier 05 does not reverse this dependency |
 | Brain sequencing | Brain **visual selection policy** standards MUST NOT draft before Volume 02–03 provide governed treatments to select among (GOV-004) |
 | Brain algorithms | Out of roadmap scope entirely |
 
@@ -635,7 +677,7 @@ Volume 05 (Signature Collections)
 |----------|-------------|
 | **Governance** | Planning Foundation frozen; this document defines the volume |
 | **Research** | Required verified baselines frozen OR explicit GOV-001/GOV-003 boundary labels for gaps |
-| **Manufacturing** | For Volumes 02–05: applicable `FI-MFG-*` constraints identified for volume scope |
+| **Manufacturing** | For Volumes 02–06: applicable `FI-MFG-*` constraints identified for volume scope |
 | **Predecessor volumes** | Declared upstream volumes **Entry Ready** or **Structurally Complete** as specified per volume |
 | **Register** | Volume planning candidates dispositioned per GOV-001 §6.2 where in scope |
 | **Queue** | Not required for **Entry Ready** |
@@ -651,6 +693,7 @@ Volume 05 (Signature Collections)
 | **03** | Volume 02 **Entry Ready**; MFG constraints identified |
 | **04** | Volumes 02–03 **Entry Ready**; governed design alternatives identifiable; GOV-004 frozen |
 | **05** | Volumes 02–04 **Entry Ready**; collection scope defined in planning; drafting and freeze of upstream-dependent standards subject to Hard dependencies and Section 15.4 |
+| **06** | Volumes 02–04 **Entry Ready**; applicable Volume 01 `FI-MFG-*` constraints identified; Volume 06 architecture document drafted; cross-volume harmonization with Volume 05 and Volume 02 lifecycle extension in progress or complete; material volume-scoped open questions nonblocking |
 
 ---
 
@@ -704,6 +747,7 @@ The following summaries are concise completion posture statements. They are subo
 | **03 — Card Design System** | Required card architecture, layout, template, safe-area, and manufacturing integration categories in Section 19.4 are **Frozen** |
 | **04 — Artwork Intelligence** | Required artwork governance and Brain Visual Selection boundary categories in Section 19.4 are **Frozen**; no algorithmic requirements have entered Design Standards per GOV-004 |
 | **05 — Signature Collections** | Required collection governance categories in Section 19.4 are **Frozen**; all material upstream **Hard** dependencies are resolved |
+| **06 — Creative Production** | Required provisional architectural areas in Section 19.4 are satisfied through frozen Layer B standards when authorized; Volume 06 architecture **Frozen**; cross-volume harmonization with Volume 05 and Volume 02 complete; no material unresolved **Hard** dependencies |
 
 ---
 
@@ -756,7 +800,7 @@ Exact artifact identifiers and titles are populated through governed REG plannin
 | Vendor capability and continuity governance | **Required** | e.g. `FI-MFG-CON-003` (Vendor Capability Validation Constraint) | Required for **Structurally Complete** |
 | Delivery and fulfillment boundaries | **Required** | e.g. `FI-MFG-CON-001` (Envelope Fulfillment Handling Boundary) | Required for **Structurally Complete** |
 | Cancellation or modification policy | **Required** where applicable | e.g. `FI-MFG-POL-002` (Order Modification and Cancellation Policy) | Required when in declared scope |
-| Manufacturing constraints required by downstream Design volumes | **Required** | Applicable `FI-MFG-CON-*` and `FI-MFG-POL-*` identified for Volumes 02–05 consumption | Documented Compliance Boundary inputs |
+| Manufacturing constraints required by downstream Design volumes | **Required** | Applicable `FI-MFG-CON-*` and `FI-MFG-POL-*` identified for Volumes 02–06 consumption | Documented Compliance Boundary inputs |
 | Additional operational policies | **Optional** | e.g. `FI-MFG-POL-003`, `FI-MFG-POL-004` | Do not block **Structurally Complete** |
 | Operational continuity standard | **Deferred** | Pending vendor diligence resolution per volume governance document | Excluded until promoted |
 
@@ -818,6 +862,22 @@ This framework does NOT require every future `FI-MFG-*` standard. It requires sa
 | Upstream Artwork Intelligence dependencies | **Required** | Material **Hard** deps MUST be **Frozen** before **Structurally Complete** |
 | Partner-specific collection variants | **Optional** | Do not block **Structurally Complete** |
 | Experimental collection pilots | **Deferred** | Governed record required |
+
+#### Volume 06 — Creative Production
+
+**Planning posture only.** The following are **provisional architectural planning areas** — not frozen Layer B standard titles. Exact artifact identifiers and titles are populated through governed REG planning after Volume 06 architecture freeze and Layer B authorization. Primary Classification assignment remains open per `OQ-V06-002`. Category classification as **Required** below is planning posture pending Volume 06 Version 1.0 architecture freeze review.
+
+| Provisional architectural area | Planning classification | Completion effect |
+|-------------------------------|-------------------------|-------------------|
+| Intent and Planning Governance | **Required (provisional)** | Required for Volume 06 **Structurally Complete** when promoted to frozen category framework |
+| Artifact Realization Governance | **Required (provisional)** | Required for Volume 06 **Structurally Complete** when promoted to frozen category framework |
+| Review and Approval Governance | **Required (provisional)** | Required for Volume 06 **Structurally Complete** when promoted to frozen category framework |
+| Governed Handoff and Manufacturing Boundary | **Required (provisional)** | Required for Volume 06 **Structurally Complete** when promoted to frozen category framework |
+| Volume 06 architecture governance document | **Required (provisional)** | `01-creative-production-architecture.md` MUST reach **Frozen** before Volume 06 **Structurally Complete** |
+| Extended realization tooling or vendor policy | **Optional (provisional)** | Do not block **Structurally Complete** when promoted |
+| Experimental production pilots | **Deferred (provisional)** | Governed record required when promoted |
+
+This framework does NOT reserve Layer B Standard IDs. It does NOT imply any provisional category is frozen until Volume 06 architecture freeze and governed VOL-001 category promotion.
 
 ---
 
@@ -933,7 +993,7 @@ Per `FI-DSN-GOV-001` Section 17.1, preserved and detailed here:
 
 | Rule | Policy |
 |------|--------|
-| New volumes | **06, 07, …** append only |
+| New volumes | **07, 08, …** append only (Volume 06 added by Version 1.1 governed revision) |
 | Renumbering 01–05 | **PROHIBITED** after VOL-001 Version 1.0 freeze |
 | Insertion between | **PROHIBITED** — use append or volume supplement |
 | Split / merge | Governed VOL-001 revision + GOV-001 §15 + impact review |
@@ -953,7 +1013,7 @@ Before freeze, Roadmap Validation MUST pass:
 | Check | Pass criterion |
 |-------|----------------|
 | Planning Foundation Inventory | Complete and distinct from production volumes; Section 5.4 Required categories satisfied |
-| Production Volume Inventory | Volumes 01–05 defined with scope and sequence |
+| Production Volume Inventory | Volumes 01–06 defined with scope and sequence; Section 6.4 order distinctions present |
 | Required Artifact category framework | Each production volume has Section 19.4 framework; each category classified Required, Optional, or Deferred |
 | Volume 01 manufacturing reference | Section 19.4 references existing volume governance and applicable frozen `FI-MFG-*` accurately |
 | Volume authority | Section 8 tables respected in prose |
@@ -964,8 +1024,9 @@ Before freeze, Roadmap Validation MUST pass:
 | Classification | CLS-001 preserved; `CLS-BVS` not a volume |
 | Dependency taxonomy | Six types with blocking matrix; Hard waivers comply with QUE-001 Section 7.5 |
 | Volume 05 consistency | Entry, drafting, freeze, and completion rules aligned across Sections 11.5, 16.2, 17.2, 18.5, and 19.4 |
+| Volume 06 consistency | Section 11.6 architecture; Section 6.4 dependency order; Section 19.4 provisional framework; not **Structurally Complete** or **Frozen** |
 | Structurally Complete reopening | Section 10.4 rules present |
-| Per-volume completion summaries | Section 18.5 present for Volumes 01–05 |
+| Per-volume completion summaries | Section 18.5 present for Volumes 01–06 |
 | REG boundary | No duplicate fields; interim Notes convention |
 | QUE boundary | No new states; inform-only; waiver authority not overstated |
 | GOV-003 / GOV-004 | No redefinition |
@@ -1007,7 +1068,7 @@ Before freeze promotion, confirm:
 - [ ] Per-volume Required Volume Artifact **category framework** complete per Sections 5.4 and 19.4
 - [ ] Exact artifact identifiers may remain to be populated through REG only where category ownership and change authority are defined
 - [ ] No unresolved normative placeholder language remains
-- [ ] Production volumes 01–05 architecturally defined
+- [ ] Production volumes 01–06 architecturally defined
 - [ ] Volume authority and ownership models complete
 - [ ] Primary Volume principal-subject and tie-breaker rules complete per Section 14.1
 - [ ] Dual Primary Volume ownership prohibited and validated per Section 14.4
@@ -1016,7 +1077,8 @@ Before freeze promotion, confirm:
 - [ ] Hard dependency waiver authority aligned to QUE-001 Section 7.5 per Section 15.4
 - [ ] Volume 05 entry, drafting, freeze, and completion rules harmonized
 - [ ] Structurally Complete reopening governance complete per Section 10.4
-- [ ] Per-volume completion summaries present per Section 18.5
+- [ ] Per-volume completion summaries present per Section 18.5 (Volumes 01–06)
+- [ ] Section 6.4 numeric vs constitutional dependency order explicit for Volume 05 / Volume 06
 - [ ] REG and QUE relationship boundaries preserved
 - [ ] GOV-003 and GOV-004 harmonization complete
 - [ ] Dependency taxonomy complete
@@ -1039,6 +1101,7 @@ Before freeze promotion, confirm:
 | `OQ-DSN-008` | Should **Primary Volume** become a canonical REG/GOV-002 field? | Open — architecture | Structured REG **Notes** `Primary Volume: VOL-0n` per Section 14 |
 | `OQ-DSN-009` | Does each volume 02–05 require a separate volume governance document before first standard freeze, or is VOL-001 sufficient initially? | Open — architecture | VOL-001 sufficient until first standard in volume enters drafting |
 | `OQ-DSN-010` | Who approves Required Volume Artifact set changes after VOL-001 Version 1.0 freeze? | Open — governance detail | Section 19 four-authority model: Required Artifact set and category changes REQUIRE governed VOL-001 revision, formal review where material, and REG reconciliation; silent change PROHIBITED |
+| `OQ-V06-002` | What Primary Classification (`CLS-*`) should govern Volume 06 standards — extend `CLS-ART`, distribute by domain, or authorize new classification through governed `FI-DSN-CLS-001` revision? | Open — classification; nonblocking for VOL-001 Volume 06 inventory amendment | Principal-subject placement per `FI-DSN-CLS-001`; no new `CLS-*` in this roadmap revision |
 
 ### Inherited nonblocking questions
 
@@ -1079,6 +1142,7 @@ Before freeze promotion, confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H1 — append Volume 06 Creative Production to Production Volume Inventory; Section 6.4 numeric vs constitutional dependency vs lifecycle order; Section 11.6 architecture; Volume Sequence and entry/completion updates; Section 19.4 provisional Required category planning posture; Roadmap Validation and Freeze Gate updates; governed revision pending independent review — not re-frozen |
 | 1.0 | July 23, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Volume Roadmap; Formal Freeze Review passed; identifier collision verified; `OQ-CLS-001`, `OQ-DSN-003`, `OQ-DSN-008`, `OQ-DSN-009`, and `OQ-DSN-010` remain deferred |
 | 0.2 Draft | July 23, 2026 | F.I. Forgot | Sprint D1.10 refinement — per-volume Required Artifact category frameworks (Sections 5.4, 18.4, 19.4); Primary Volume principal-subject tie-breaker and ownership validation (Section 14); Hard dependency waiver alignment to QUE-001 Section 7.5 (Section 15.4); foundation posture separated from Volume Status; Volume 05 entry/completion harmonization; Structurally Complete reopening rules (Section 10.4); per-volume completion summaries (Section 18.5); expanded Roadmap Validation and Freeze Gate; cross-reference corrections |
 | 0.1 Draft | July 23, 2026 | F.I. Forgot | Sprint D1.10 — initial Design Volume Roadmap (`FI-DSN-VOL-001`) draft: Planning Foundation and Production Volume inventories; volume authority and ownership models; roadmap Volume Status; volumes 01–05 architecture; manufacturing hybrid model; classification relationship; Primary Volume interim mechanism; six-type dependency taxonomy; entry and completion conditions; Required Artifact and Supplement governance; REG/QUE/GOV-003/GOV-004 relationships; future expansion; validation and gates |
