@@ -248,7 +248,7 @@ Governed asset authority is organized by **lifecycle stage**, not by production 
 
 **Permanent rule:**
 
-> **Volume 02 governs what assets may be. Volume 03 governs where assets sit. Volume 04 governs which assets apply when. Volume 05 governs how asset libraries run.**
+> **Volume 02 governs what assets may be. Volume 03 governs where assets sit. Volume 04 governs which assets apply when. Volume 06 governs realization, Review Determination, Approval, GPRA status, and Governed Handoff. Volume 05 governs collection admission, membership, lifecycle, consistency, and retirement. GPRA approval is not collection membership.**
 
 Volume 05 consumes Governed Production-Ready Artifacts from Volume 06 for permanent collection membership intake. Constitutional dependency order places Volume 06 **before** Volume 05 library belonging per `FI-DSN-VOL-001` Section 6.4:
 
@@ -286,7 +286,7 @@ Collection publication policy and retirement rules MUST remain reconcilable with
 
 Volume 05 consumes frozen Volume 02 visual permission, element boundaries, brand boundaries, relational composition principles, and exclusions when governing collection membership and cross-asset consistency. Volume 05 MUST remain reconcilable with frozen `FI-DSN-PRN-001`, `FI-DSN-STD-001`, `FI-DSN-STD-002`, and `FI-DSN-STD-003`.
 
-Volume 02 assigns **library operations** to Volume 05 per frozen Visual Design Architecture Section 9.1 and Section 10.4. Collection-scoped inclusion and exclusion MUST NOT weaken Volume 02 identity or global exclusion boundaries.
+Volume 02 supplies inherited identity eligibility and constraints per frozen Visual Design Architecture Section 9.1. Volume 06 realizes and approves Governed Production-Ready Artifacts per Section 10.4; Volume 05 considers those GPRAs for collection membership per Section 10.5. Collection-scoped inclusion and exclusion MUST NOT weaken Volume 02 identity or global exclusion boundaries.
 
 ### 7.3 Upstream — Volume 03
 
@@ -300,15 +300,17 @@ Volume 05 consumes frozen Volume 04 contextual application policy when governing
 
 Volume 04 governs **which permitted treatment applies when** and **contextual eligibility for instance selection**; Volume 05 governs **which assets permanently belong in a governed collection** and **how that collection is operated over time**. Collection membership MUST NOT redefine occasion semantics (`CLS-OEC`), personalization policy (`CLS-PER`), authorized alternatives, or context-bound eligibility (`CLS-BVS` / `FI-DSN-STD-007`).
 
-### 7.5 Downstream — Production and Engineering
+### 7.5 Upstream — Volume 06
 
-Volume 05 **consumes** **Governed Production-Ready Artifacts (GPRAs)** from Volume 06 as eligible intake objects for permanent collection membership consideration. Volume 05 MUST NOT perform visual artifact realization, production-readiness Review Determination, or Governed Production-Ready Approval — those authorities belong to Volume 06 per Section 2.1.
+Volume 05 **consumes** eligible **Governed Production-Ready Artifacts (GPRAs)** from Volume 06 at collection intake. Volume 06 Approval establishes GPRA status only; GPRA status does not establish collection membership. Volume 05 applies its own admission, membership, consistency, and lifecycle rules to eligible GPRAs. Volume 05 MUST NOT perform visual artifact realization, production-readiness Review Determination, or Governed Production-Ready Approval — those authorities belong to Volume 06 per Section 2.1. Volume 05 does not repeat Volume 06 Review Determination or GPRA approval and does not realize visual artifacts.
+
+### 7.6 Downstream — Production and Engineering
 
 Production artwork libraries, partner design guidance, and engineering specifications consume frozen Volume 05 policy as Compliance Boundary inputs. They MUST NOT redefine collection governance authority.
 
 Engineering implementations MAY operationalize collection membership, release workflows, and retirement mechanics within Volume 05 bounds. Engineering operationalizes governed collection policy; it does **not** constitutionally own creative authorship, visual artifact realization, or production-readiness approval. Engineering MUST NOT silently widen collection authority beyond frozen standards.
 
-### 7.6 Alignment with `FI-DSN-VOL-001`
+### 7.7 Alignment with `FI-DSN-VOL-001`
 
 `FI-DSN-VOL-001` Section 19.4 Required categories for Volume 05 are mapped to constitutional domains in **Section 9**. Cross-cutting subjects (collection governance foundations, metadata handoff boundaries, manufacturing Compliance Boundaries) are embedded in future standard bodies per **Section 10**, not separate constitutional domains.
 
@@ -560,6 +562,7 @@ The following inventory records **candidate** Volume 05 Layer B standards. **No 
 | **Volume 02** — `FI-DSN-PRN-001`, `FI-DSN-STD-001`–`003` | Visual permission, brand boundaries, element character, composition discipline, global exclusions | Redefine identity eligibility, element systems, or exclusions |
 | **Volume 03** — `FI-DSN-STD-004`–`006` | Surface structure, spatial limits, exterior presentation boundaries for placement feasibility | Author template topology, safe areas, or spatial allocation |
 | **Volume 04** — `FI-DSN-STD-007`–`009` | Contextual application, occasion semantics, personalization policy, authorized selection boundaries | Redefine `CLS-OEC`, `CLS-PER`, or `CLS-BVS` policy |
+| **Volume 06** — Creative Production Architecture | Governed Production-Ready Artifact status and Governed Handoff posture for collection intake, membership eligibility assessment, collection admission, and lifecycle governance | Recreate realization, Review Determination, or Approval |
 | **Manufacturing** — applicable `FI-MFG-*` | Feasibility and fulfillment Compliance Boundaries | Restate manufacturing operational policy |
 | **Metadata** — `FI-DSN-GOV-002` | Field semantics and handoff obligations for collection records | Create metadata fields, schemas, or dictionaries |
 
@@ -567,12 +570,13 @@ The following inventory records **candidate** Volume 05 Layer B standards. **No 
 
 Future Volume 05 standards SHALL apply upstream reconcilability in dependency order:
 
-1. Applicable `FI-MFG-*` Compliance Boundaries
-2. Frozen `FI-DSN-PRN-001`, then `FI-DSN-STD-001`, `FI-DSN-STD-002`, `FI-DSN-STD-003`
-3. Frozen `FI-DSN-STD-004`, `FI-DSN-STD-005`, `FI-DSN-STD-006`
-4. Frozen `FI-DSN-STD-007`, `FI-DSN-STD-008`, `FI-DSN-STD-009`
-5. `FI-DSN-GOV-002` metadata semantics where handoff is principal
-6. Domain-appropriate Volume 05 principal subject validation
+1. Frozen `FI-DSN-PRN-001`, then `FI-DSN-STD-001`, `FI-DSN-STD-002`, `FI-DSN-STD-003` — visual identity permission and eligibility
+2. Frozen `FI-DSN-STD-004`, `FI-DSN-STD-005`, `FI-DSN-STD-006` — surface and spatial constraints
+3. Frozen `FI-DSN-STD-007`, `FI-DSN-STD-008`, `FI-DSN-STD-009` — contextual eligibility and selection
+4. Volume 06 Creative Production Architecture — realization, Review Determination, Approval, GPRA status, and Governed Handoff. Volume 05 MUST NOT treat Volume 04 contextual selection as GPRA approval, admit unrealized or unapproved visual artifacts, repeat Volume 06 Review Determination, or convert GPRA status automatically into collection membership
+5. Domain-appropriate Volume 05 collection admission, membership, and principal subject validation
+6. Applicable `FI-MFG-*` Compliance Boundaries and Manufacturing Validation where applicable — membership alone MUST NOT authorize Manufacturing Validation or fulfillment
+7. `FI-DSN-GOV-002` metadata semantics where handoff is principal
 
 ### 13.3 Downstream dependency
 
@@ -735,6 +739,7 @@ Before freeze of this document, Architecture Validation MUST confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H4.2 — completion of Volume 05 cross-document harmonization for Volume 06: Section 6 permanent rule; Section 7 relationship structure and cross-references; Section 13.1 upstream table; Section 13.2 reconcilability gates; Version 1.0 Frozen baseline preserved |
 | 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H2 — authority re-homing: creative production, visual artifact realization, and GPRA approval assigned to Volume 06; Section 2.1 GPRA intake harmonization; Sections 3.2, 6, 7.5, 9.1, 9.2, and 16 updated; Version 1.0 Frozen baseline preserved in revision history |
 | 1.0 | July 27, 2026 | F.I. Forgot | Frozen — promoted to Frozen Volume Governance; Formal Freeze Review Outcome A (Ready for Version 1.0 Freeze); architecture unchanged from Version 0.2 Architecture Draft (refined); freeze date July 27, 2026 |
 | 0.2 Architecture Draft (refined) | July 27, 2026 | F.I. Forgot | Sprint D16.1A — constitutional boundary refinement: governing question disambiguated from BVS authorization; Section 2.1 three-type eligibility matrix; Domain 1 ownership strengthened; Section 9.3.1 Domain 1 → Domain 2 consumption rule; collection publication policy distinguished from manufacturing execution and fulfillment; P11 Collections as constitutional entities; P3/P5/P8 refinements |
