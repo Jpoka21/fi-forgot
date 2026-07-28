@@ -6,7 +6,7 @@
 |-------|-------|
 | **Status** | Governance Review Draft |
 | **Version** | 1.1 Draft |
-| **Date** | July 21, 2026 |
+| **Date** | July 28, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Upstream governance** | `playbook/research/README.md` |
 | **Owner** | F.I. Forgot |
@@ -173,54 +173,75 @@ Absence of evidence must not be converted into a vendor limitation. Unknown oper
 
 ## 8. Volume Architecture
 
-The Design Library is divided into five volumes. Each volume has a distinct role in the product design system.
+The Design Library is organized into **six production volumes** (Volume 01 through Volume 06). Each volume has a distinct role in the product design system.
+
+**Authoritative source:** `FI-DSN-VOL-001` (`playbook/design/09-design-volume-roadmap.md`) is the authoritative source for the Production Volume Inventory, roadmap status, and constitutional dependency posture. This section is a **descriptive summary only**.
 
 ### Volume 01: Manufacturing and Production
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Translate verified manufacturing facts into F.I. Forgot manufacturing principles, standards, constraints, vendor questions, and engineering requirements |
+| **Purpose** | Translate verified manufacturing facts into F.I. Forgot manufacturing principles, standards, constraints, vendor questions, and engineering requirements; govern Manufacturing Validation, Manufacturing Execution, and Fulfillment Execution |
 | **Primary outputs** | Production standards, manufacturing constraints, vendor-question registers, engineering requirement references |
 | **Upstream dependencies** | Relevant Research Library verified facts; vendor confirmations where required |
-| **Downstream consumers** | Card Design System, artwork production rules, engineering specifications, vendor configuration |
+| **Downstream consumers** | Card Design System, Creative Production, engineering specifications, vendor configuration |
 
 ### Volume 02: Design Language
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Define the visual identity of F.I. Forgot, including brand personality, emotional goals, typography, color philosophy, illustration philosophy, and artistic direction |
+| **Purpose** | Visual identity permission — visual philosophy, brand expression, asset character, identity eligibility, and identity constraints. Does **not** own visual artifact realization or Governed Production-Ready Artifact (GPRA) approval |
 | **Primary outputs** | Brand and visual identity standards, emotional design rules, typographic and color philosophy |
+| **Architecture** | `playbook/design/volume-02-visual-design/01-visual-design-architecture.md` — Version **1.1 Draft**, **Under revision**; Version **1.0** Frozen baseline (July 23, 2026) remains binding until re-freeze |
 | **Upstream dependencies** | Company principles; relevant verified facts where manufacturing or presentation constraints apply |
-| **Downstream consumers** | Card Design System, Signature Collections, Artwork Intelligence |
+| **Downstream consumers** | Card Design System, Artwork Intelligence, Creative Production |
 
 ### Volume 03: Card Design System
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Define the architecture of every greeting card, including templates, layout rules, artwork placement, metadata, and production structure |
-| **Primary outputs** | Template standards, layout rules, safe zones, metadata schema, production-ready card structure |
+| **Purpose** | Surface and spatial law — card structure, envelope structure, templates, layout rules, artwork placement, and governed card and envelope surface structure (distinct from GPRA status) |
+| **Primary outputs** | Template standards, layout rules, safe zones, metadata schema, governed surface structure |
+| **Architecture** | `playbook/design/volume-03-surface-implementation/01-surface-implementation-architecture.md` — Version **1.0** Frozen |
 | **Upstream dependencies** | Volume 01 manufacturing constraints; Volume 02 design language |
-| **Downstream consumers** | Artwork Intelligence, engineering templates, manufacturing execution |
+| **Downstream consumers** | Artwork Intelligence, Creative Production, engineering templates, manufacturing execution |
 
 ### Volume 04: Artwork Intelligence
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Define how the Brain selects artwork using relationship context, occasion, emotional intent, tone, and future personalization |
-| **Primary outputs** | Artwork selection rules, metadata requirements, collection usage standards, intelligence constraints |
+| **Purpose** | Contextual eligibility and contextual selection — how the Brain selects among permitted treatments using relationship context, occasion, emotional intent, tone, and personalization policy. Does **not** own visual realization or production-readiness approval |
+| **Primary outputs** | Artwork selection rules, metadata requirements, occasion and personalization standards, intelligence constraints |
+| **Architecture** | `playbook/design/volume-04-artwork-intelligence/01-artwork-intelligence-architecture.md` — Version **1.0** Frozen |
 | **Upstream dependencies** | Brain Architecture; Volume 02 design language; Volume 03 card structure |
-| **Downstream consumers** | Signature Collections, production workflows, implementation logic |
+| **Downstream consumers** | Creative Production; Volume 05 collection intake (via GPRA consumption); engineering implementation |
 
 ### Volume 05: Signature Collections
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Define the permanent artwork collections that establish the recognizable visual identity of F.I. Forgot |
-| **Primary outputs** | Collection standards, artwork governance, release criteria, collection metadata rules |
-| **Upstream dependencies** | Volume 02 design language; Volume 03 card system; Volume 04 artwork intelligence |
+| **Purpose** | Permanent collection membership, collection admission, collection structure and identity, collection lifecycle, consistency, and retirement. Consumes GPRAs from Volume 06 at collection intake; GPRA approval is **not** collection membership. Does **not** perform visual realization or repeat Volume 06 GPRA approval |
+| **Primary outputs** | Collection membership standards, collection lifecycle standards, collection metadata rules |
+| **Architecture** | `playbook/design/volume-05-signature-collections/01-signature-collections-architecture.md` — Version **1.1 Draft**, **Under revision**; Version **1.0** Frozen baseline (July 27, 2026) remains binding until re-freeze |
+| **Upstream dependencies** | Volume 02 design language; Volume 03 card system; Volume 04 artwork intelligence; Volume 06 GPRAs at intake |
 | **Downstream consumers** | Production artwork libraries, marketing assets, partner design guidance |
 
-Detailed volume content is defined in each volume’s own documents. This README defines architecture only.
+### Volume 06: Creative Production
+
+| Field | Value |
+|-------|-------|
+| **Purpose** | Governed transformation of declared production intent into Governed Production-Ready Artifacts through realization, Review Determination, Approval, and Governed Handoff |
+| **Owns** | Declared Production Intent; Production Obligation; Exploration; Realization; Realized Visual Artifact posture; Review Determination; production-readiness Approval; GPRA status; Governed Handoff |
+| **Does not own** | Visual identity permission (Volume 02); surface and spatial law (Volume 03); contextual selection (Volume 04); permanent collection membership (Volume 05); Manufacturing Validation, Manufacturing Execution, or Fulfillment Execution (Volume 01); Brain runtime artifact approval |
+| **Architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Version **0.3 Draft**; roadmap status **Defined**; unfrozen; **not Entry Ready**; no Layer B standards yet |
+| **Upstream dependencies** | Applicable authority from Volumes 01 through 04 |
+| **Downstream consumers** | Volume 05 collection intake; production artwork libraries; engineering specifications |
+
+**Numeric order and constitutional dependency:** Numeric volume order remains Volume 01 through Volume 06. Numeric order does not alone establish constitutional dependency order. For the relevant artwork lifecycle, Volume 04 contextual selection → Volume 06 realization and GPRA approval → Volume 05 collection intake and membership consideration. Volume 06 is numbered **06** but is constitutionally **upstream of Volume 05** for GPRA intake.
+
+**Structurally Complete versus GPRA:** **Structurally Complete** describes a volume container's roadmap maturity. **Governed Production-Ready Artifact (GPRA)** describes an individual visual artifact approved under Volume 06. They are not comparable statuses.
+
+Detailed volume content is defined in each volume's own documents. This README defines architecture only.
 
 ---
 
@@ -252,6 +273,8 @@ The Brain Architecture, writing engine, Design Library, and manufacturing standa
 | **Manufacturing standards** | Determine whether the designed experience can be produced reliably |
 
 No layer should compensate for failures in another layer. A strong message cannot excuse poor presentation. Beautiful presentation cannot excuse unreliable manufacturing. Reliable manufacturing cannot excuse weak emotional design.
+
+Brain runtime may inform or recommend within governed bounds per `FI-DSN-GOV-004` (`playbook/design/08-brain-authority-boundary.md`), but does **not** grant GPRA status or collection membership.
 
 Together these layers create the complete F.I. Forgot experience.
 
@@ -340,12 +363,20 @@ A Design Library volume may be frozen only after all of the following are confir
 
 ## 15. Current Status
 
-| Item | Status |
-|------|--------|
-| Research Library governance | Frozen at version **1.0** |
-| Handwrytten Manufacturing Overview verified facts | Frozen at version **1.0** |
-| Volume 01 Manufacturing and Production Standard | In development |
-| Volumes 02 through 05 | Planned and unpopulated |
+This table is a **descriptive snapshot** only. Each artifact's Document Control and governing source remain authoritative.
+
+| Item | Current working posture | Binding baseline / notes |
+|------|-------------------------|--------------------------|
+| Research Library governance | Frozen | Version **1.0** |
+| Handwrytten Manufacturing Overview verified facts | Frozen | Version **1.0** |
+| `FI-DSN-VOL-001` Design Volume Roadmap | Version **1.1 Draft** | Version **1.0** Frozen baseline (July 23, 2026) remains binding until re-freeze |
+| Volume 02 Visual Design Architecture | Version **1.1 Draft**, **Under revision** | Version **1.0** Frozen baseline remains binding |
+| Volume 03 Surface Implementation Architecture | Version **1.0** Frozen | — |
+| Volume 04 Artwork Intelligence Architecture | Version **1.0** Frozen | — |
+| Volume 05 Signature Collections Architecture | Version **1.1 Draft**, **Under revision** | Version **1.0** Frozen baseline (July 27, 2026) remains binding |
+| Volume 06 Creative Production Architecture | Version **0.3 Draft**; roadmap **Defined**; unfrozen; **not Entry Ready** | No Layer B standards established |
+| Volume 01 Manufacturing and Production Standard | In development | — |
+| Design Planning Register (`FI-DSN-REG-001`) | Frozen | See `playbook/design/05-design-planning-register.md` for detailed Layer B status (Volumes 02–05) |
 
 The Design Library itself is **not** frozen. This document is a **Governance Review Draft**.
 
