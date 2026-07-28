@@ -11,9 +11,10 @@
 | **Volume** | 05 — Signature Collections |
 | **Title** | Signature Collections Architecture |
 | **Sprint working label** | `FI-DSN-V05-001` (D16.0 tracking only — not an authorized `FI-DSN-*` namespace per `FI-DSN-ID-001`) |
-| **Status** | Frozen |
-| **Version** | 1.0 |
-| **Date** | July 27, 2026 |
+| **Status** | Under revision |
+| **Version** | 1.1 Draft |
+| **Date** | July 28, 2026 |
+| **Prior frozen baseline** | Version 1.0 — Frozen July 27, 2026 (remains binding until Version 1.1 freeze per `FI-DSN-GOV-001` Section 15) |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -26,7 +27,7 @@
 | **Epistemic reference** | `FI-DSN-GOV-003` — Evidence vs Company Judgment Governance (Frozen Governance Standard, Version 1.0, July 23, 2026) |
 | **Brain authority reference** | `FI-DSN-GOV-004` — Brain Authority Boundary (Frozen Governance Standard, Version 1.0, July 23, 2026) |
 | **Template reference** | `FI-DSN-TPL-001` — Design Standard Template (Frozen Governance Template, Version 1.0, July 22, 2026) |
-| **Upstream governance** | `playbook/design/README.md`; `playbook/design/09-design-volume-roadmap.md`; frozen Volume 02 Visual Design Architecture and frozen Volume 02 `FI-DSN-*` standards; frozen Volume 03 Surface Implementation Architecture and frozen Volume 03 `FI-DSN-*` standards; frozen Volume 04 Artwork Intelligence Architecture and frozen Volume 04 `FI-DSN-*` standards |
+| **Upstream governance** | `playbook/design/README.md`; `playbook/design/09-design-volume-roadmap.md`; frozen Volume 02 Visual Design Architecture and frozen Volume 02 `FI-DSN-*` standards; frozen Volume 03 Surface Implementation Architecture and frozen Volume 03 `FI-DSN-*` standards; frozen Volume 04 Artwork Intelligence Architecture and frozen Volume 04 `FI-DSN-*` standards; Volume 06 Creative Production Architecture (`playbook/design/volume-06-creative-production/01-creative-production-architecture.md`, Version 0.3 Draft — GPRA intake authority) |
 | **Downstream consumers** | Future Volume 05 `FI-DSN-*` standards; production artwork libraries; partner design guidance; engineering specifications |
 
 **Standard statement:** F.I. Forgot maintains **one authoritative Signature Collections Architecture** for Volume 05 that defines durable constitutional purpose, two-domain authority architecture, inheritance and decision placement rules, and cross-volume relationships for governed asset library operations. This document governs how Volume 05 is organized. It does not author normative collection requirements, membership rule prose, release workflow steps, metadata schemas, manufacturing operational policy, engineering behavior, or Brain runtime logic.
@@ -90,11 +91,25 @@ The term **eligibility** has three distinct constitutional meanings in the Desig
 |------------------|------------------------|--------------------|----------------|
 | **Identity eligibility** | Volume 02 | May this visual treatment exist? | **Consume** — upstream Compliance Boundary; MUST NOT redefine |
 | **Contextual eligibility** | Volume 04 — `CLS-BVS` / `FI-DSN-STD-007` | May this permitted artwork be selected for this specific situation? | **Consume** — upstream Compliance Boundary; MUST NOT redefine |
-| **Permanent collection membership eligibility** | Volume 05 — Domain 1 — `CLS-ASG` | May this approved artwork permanently belong to this governed collection? | **Own** when principal |
+| **Permanent collection membership eligibility** | Volume 05 — Domain 1 — `CLS-ASG` | May this **approved artwork** (a Governed Production-Ready Artifact presented for intake) permanently belong to this governed collection? | **Own** when principal |
 
 **Permanent rule:**
 
 > **Identity eligibility governs existence. Contextual eligibility governs instance selection. Permanent collection membership eligibility governs library belonging. These are peer-separated authorities; none substitutes for another.**
+
+#### Collection intake — approved artwork and GPRA harmonization
+
+At permanent collection membership intake, **approved artwork** means a **Governed Production-Ready Artifact (GPRA)** per Volume 06 Creative Production Architecture Section 5.6 — a visual artifact that has passed Volume 06 Review Determination and Approval. It is **not** a separate approval class, aesthetic judgment label, or DAM status.
+
+| Constitutional transition | Volume 05 posture |
+|---------------------------|-------------------|
+| GPRA approval (Volume 06) | Upstream Compliance Boundary — Volume 05 MUST NOT repeat Volume 06 production-readiness Review or Approval |
+| GPRA presentation for collection intake | Eligible intake object for permanent membership **consideration** — not automatic admission |
+| Collection admission (Domain 1) | Separate membership decision under `CLS-ASG` — approval is not membership |
+
+**Permanent intake rules:**
+
+> **GPRA approval is not membership. Presentation for intake is not admission. Volume 05 does not repeat Volume 06 approval.**
 
 #### Worked eligibility example
 
@@ -128,7 +143,7 @@ The term **eligibility** has three distinct constitutional meanings in the Desig
 | Visual character, identity violations, global exclusions | Volume 02 |
 | Surface topology, spatial allocation, exterior presentation | Volume 03 |
 | Occasion semantics, personalization policy, authorized selection | Volume 04 |
-| Individual asset authoring pipelines and creative production workflows | Engineering / creative operations |
+| Individual asset authoring pipelines, visual artifact realization, and creative production workflows | Volume 06 — Creative Production (Volume 05 consumes Governed Production-Ready Artifacts at collection intake only) |
 | Digital asset management implementation, CDN topology, file formats | Engineering |
 | Marketing campaign asset operations unrelated to governed Signature Collections | Product / marketing operations |
 | Brain runtime recommendation pools and selection orchestration | Implementation per `FI-DSN-GOV-004` |
@@ -227,14 +242,15 @@ Governed asset authority is organized by **lifecycle stage**, not by production 
 | **Surface spatial allocation** | Volume 03 — Domain 2 | How permitted content occupies governed surfaces |
 | **Exterior presentation boundaries** | Volume 03 — `CLS-EEP` | Outward-facing presentation boundaries |
 | **Contextual application** | Volume 04 | Which permitted treatment applies in a given context |
+| **Visual artifact realization and GPRA approval** | Volume 06 — Creative Production | Declared production intent through Realization, Review Determination, Approval, Governed Production-Ready Artifact status, and Governed Handoff |
 | **Library operations** | Volume 05 | Permanent collection membership, collection publication policy, consistency, maintenance, and retirement |
-| **Implementation** | Engineering / Product | How governed policy is stored, rendered, recommended, selected, and produced |
+| **Implementation** | Engineering / Product | How governed policy is stored, rendered, recommended, selected, and operationalized — not visual artifact realization or production-readiness approval |
 
 **Permanent rule:**
 
 > **Volume 02 governs what assets may be. Volume 03 governs where assets sit. Volume 04 governs which assets apply when. Volume 05 governs how asset libraries run.**
 
-Volume 05 sits immediately after Volume 04 in durable authority flow:
+Volume 05 consumes Governed Production-Ready Artifacts from Volume 06 for permanent collection membership intake. Constitutional dependency order places Volume 06 **before** Volume 05 library belonging per `FI-DSN-VOL-001` Section 6.4:
 
 ```
 Planning Foundation (GOV, REG, QUE, VOL-001, CLS-001, …)
@@ -247,6 +263,8 @@ Volume 03 — Surface Implementation Architecture
         ↓         frozen Volume 03 FI-DSN-* standards
 Volume 04 — Artwork Intelligence Architecture
         ↓         frozen Volume 04 FI-DSN-* standards
+Volume 06 — Creative Production Architecture
+        ↓         Governed Production-Ready Artifacts (GPRAs)
 Volume 05 — Signature Collections Architecture (this document)
         ↓         future Volume 05 FI-DSN-* standards
 Production artwork libraries / Engineering Specifications / Implementation
@@ -284,9 +302,11 @@ Volume 04 governs **which permitted treatment applies when** and **contextual el
 
 ### 7.5 Downstream — Production and Engineering
 
+Volume 05 **consumes** **Governed Production-Ready Artifacts (GPRAs)** from Volume 06 as eligible intake objects for permanent collection membership consideration. Volume 05 MUST NOT perform visual artifact realization, production-readiness Review Determination, or Governed Production-Ready Approval — those authorities belong to Volume 06 per Section 2.1.
+
 Production artwork libraries, partner design guidance, and engineering specifications consume frozen Volume 05 policy as Compliance Boundary inputs. They MUST NOT redefine collection governance authority.
 
-Engineering implementations MAY operationalize collection membership, release workflows, and retirement mechanics within Volume 05 bounds. They MUST NOT silently widen collection authority beyond frozen standards.
+Engineering implementations MAY operationalize collection membership, release workflows, and retirement mechanics within Volume 05 bounds. Engineering operationalizes governed collection policy; it does **not** constitutionally own creative authorship, visual artifact realization, or production-readiness approval. Engineering MUST NOT silently widen collection authority beyond frozen standards.
 
 ### 7.6 Alignment with `FI-DSN-VOL-001`
 
@@ -373,9 +393,9 @@ Volume 05 is organized into **two constitutional domains**. Each domain answers 
 | **Candidate standard** | Collection Membership and Eligibility Standard |
 | **Reserved Standard ID** | Not assigned — reservation deferred to governed sprint |
 | **Owns (principal only)** | Permanent collection membership; membership preconditions; collection-scoped inclusion; collection-scoped exclusion; governed collection entity boundaries for population decisions |
-| **Does not own** | Visual permission; identity eligibility; contextual eligibility; contextual selection; personalization policy; authorized alternatives; metadata field semantics; Visual Source provenance ownership; manufacturing feasibility policy; runtime decisions; release publication policy; retirement policy; cross-asset consistency over time; surface layout; asset authoring |
+| **Does not own** | Visual permission; identity eligibility; contextual eligibility; contextual selection; personalization policy; authorized alternatives; metadata field semantics; Visual Source provenance ownership; manufacturing feasibility policy; runtime decisions; release publication policy; retirement policy; cross-asset consistency over time; surface layout; governed visual artifact realization; asset authoring; production-readiness Review Determination; Governed Production-Ready Approval; Governed Handoff (Volume 06 owns these when principal) |
 
-Domain 1 governs **permanent collection membership** only. It answers whether an approved artwork may **permanently belong** to a governed collection — not whether that artwork may be selected for a specific send, not whether it is visually permitted in principle, and not how production systems store or deliver it.
+Domain 1 governs **permanent collection membership** only. It answers whether an **approved artwork** (a GPRA presented for intake per Section 2.1) may **permanently belong** to a governed collection — not whether that artwork may be selected for a specific send, not whether it is visually permitted in principle, not whether it has passed Volume 06 production-readiness approval (that is upstream), and not how production systems store or deliver it.
 
 **Satisfies `FI-DSN-VOL-001` Section 19.4 categories:**
 
@@ -392,7 +412,7 @@ Domain 1 governs **permanent collection membership** only. It answers whether an
 | **Candidate standard** | Collection Lifecycle and Consistency Standard |
 | **Reserved Standard ID** | Not assigned — reservation deferred to governed sprint |
 | **Owns (principal only)** | Collection publication policy; cross-asset consistency within governed collections; maintenance discipline; retirement and deprecation governance |
-| **Does not own** | Permanent collection membership preconditions; inclusion/exclusion rules; visual permission; contextual selection; personalization; metadata ownership; provenance ownership; manufacturing execution; production scheduling; operational workflow; customer fulfillment; delivery timing; asset authoring |
+| **Does not own** | Permanent collection membership preconditions; inclusion/exclusion rules; visual permission; contextual selection; personalization; metadata ownership; provenance ownership; manufacturing execution; production scheduling; operational workflow; customer fulfillment; delivery timing; governed visual artifact realization; asset authoring; production-readiness approval (Volume 06 owns these when principal) |
 
 Domain 2 governs **collection publication and lifecycle policy** only. **Collection publication policy** means constitutional rules for when a governed collection may become available as a published library — not manufacturing execution, production scheduling, operational workflow, customer fulfillment, or delivery timing.
 
@@ -637,7 +657,7 @@ Domain 2 consumes frozen Domain 1 membership decisions per Section 9.3.1. Domain
 | Visual element character and global exclusions | Volume 02 |
 | Surface structure and spatial allocation | Volume 03 |
 | Contextual application and authorized selection | Volume 04 |
-| Asset authoring and creative production | Engineering / creative operations |
+| Visual artifact realization, asset authoring, and creative production | Volume 06 — Creative Production |
 | Production catalog and DAM implementation | Engineering |
 | Brain runtime and recommendation mechanics | Implementation per `FI-DSN-GOV-004` |
 | Manufacturing operational policy | Volume 01 — `FI-MFG-*` |
@@ -715,7 +735,8 @@ Before freeze of this document, Architecture Validation MUST confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
-| 1.0 | July 27, 2026 | F.I. Forgot | Frozen — promoted to Frozen Volume Governance; Formal Freeze Review Outcome A (Ready for Version 1.0 Freeze); architecture unchanged from Version 0.2 Architecture Draft (refined) |
+| 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H2 — authority re-homing: creative production, visual artifact realization, and GPRA approval assigned to Volume 06; Section 2.1 GPRA intake harmonization; Sections 3.2, 6, 7.5, 9.1, 9.2, and 16 updated; Version 1.0 Frozen baseline preserved in revision history |
+| 1.0 | July 27, 2026 | F.I. Forgot | Frozen — promoted to Frozen Volume Governance; Formal Freeze Review Outcome A (Ready for Version 1.0 Freeze); architecture unchanged from Version 0.2 Architecture Draft (refined); freeze date July 27, 2026 |
 | 0.2 Architecture Draft (refined) | July 27, 2026 | F.I. Forgot | Sprint D16.1A — constitutional boundary refinement: governing question disambiguated from BVS authorization; Section 2.1 three-type eligibility matrix; Domain 1 ownership strengthened; Section 9.3.1 Domain 1 → Domain 2 consumption rule; collection publication policy distinguished from manufacturing execution and fulfillment; P11 Collections as constitutional entities; P3/P5/P8 refinements |
 | 0.1 Architecture Draft | July 27, 2026 | F.I. Forgot | Sprint D16.0 — initial Signature Collections Architecture Volume Governance draft: constitutional question; collection scope for Entry Ready; two-domain model (Collection Membership and Eligibility; Collection Lifecycle and Consistency); lifecycle position; cross-volume boundaries; category challenge record; proposed standard inventory (two candidates, no Standard IDs assigned); architectural principles P1–P10; consolidation posture |
 
