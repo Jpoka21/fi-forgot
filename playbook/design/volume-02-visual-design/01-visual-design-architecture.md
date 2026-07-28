@@ -29,7 +29,7 @@
 | **Brain authority reference** | `FI-DSN-GOV-004` — Brain Authority Boundary (Frozen Governance Standard, Version 1.0, July 23, 2026) |
 | **Template reference** | `FI-DSN-TPL-001` — Design Standard Template (Frozen Governance Template, Version 1.0, July 22, 2026) |
 | **Upstream governance** | `playbook/design/README.md`; `playbook/design/09-design-volume-roadmap.md` |
-| **Downstream consumers** | Future Volume 02 `FI-DSN-*` standards; Volumes 03 through 05; `FI-DSN-REG-001` volume planning rows |
+| **Downstream consumers** | Future Volume 02 `FI-DSN-*` standards; Volumes 03, 04, 06, and 05 according to their distinct governed roles; `FI-DSN-REG-001` volume planning rows |
 
 **Standard statement:** F.I. Forgot maintains **one authoritative Visual Design Architecture** for Volume 02 that defines durable architectural layers, authority boundaries, standard placement rules, and cross-volume relationships for the visual design domain. This document governs how Volume 02 is organized. It does not author normative visual requirements, product templates, artwork selection logic, collection operations, or Brain runtime behavior.
 
@@ -100,22 +100,27 @@ Volume 03 — Card Design System
         ↓
 Volume 04 — Artwork Intelligence
         ↓
+Volume 06 — Creative Production
+        ↓         Governed Production-Ready Artifacts (GPRAs)
 Volume 05 — Signature Collections
 ```
 
-This diagram is **conceptual**. It shows durable authority direction, not a mandatory drafting sequence. Volume 02 planning MAY proceed in parallel with Volume 01 manufacturing constraint identification per `FI-DSN-VOL-001` Section 16.2.
+This diagram is **conceptual**. It shows durable authority direction for the visual artifact and collection-intake lifecycle, not a mandatory drafting sequence and not every Design Library dependency. Numeric volume order does not alone establish constitutional dependency order per `FI-DSN-VOL-001` Section 6.4. Volume 02 planning MAY proceed in parallel with Volume 01 manufacturing constraint identification per `FI-DSN-VOL-001` Section 16.2.
 
 | Layer | Role relative to this document |
 |-------|------------------------------|
 | **Planning Foundation** | Supplies frozen meta-governance that enables volume planning |
 | **Volume 01** | Supplies applicable manufacturing Compliance Boundaries consumed by Volume 02 |
 | **Volume 02** | Defines visual identity architecture; hosts future visual standards |
-| **Volumes 03–05** | Consume Volume 02 element systems, composition principles, and visual boundaries |
+| **Volume 03** | Consumes Volume 02 element systems, composition principles, and visual boundaries for surface and spatial law |
+| **Volume 04** | Consumes Volume 02 visual boundaries for contextual eligibility and contextual selection |
+| **Volume 06** | Consumes Volume 02 identity permission, asset character, identity eligibility, and identity constraints during governed realization and GPRA approval |
+| **Volume 05** | Consumes Volume 02 asset character rules as membership constraints and eligible GPRAs from Volume 06 at collection intake |
 | **Engineering / Product** | Implement governed visual rules; do not redefine library architecture |
 
 **Permanent principle:**
 
-> **Volume 02 defines what F.I. Forgot visuals are allowed to be. Volumes 03–05 define how those visuals occupy products, get chosen, and get organized.**
+> **Volume 02 governs what visual identity is permitted. Volume 03 governs how permitted identity occupies governed surfaces. Volume 04 governs contextual eligibility and selection. Volume 06 governs realization, Review Determination, Approval, Governed Production-Ready Artifact status, and Governed Handoff. Volume 05 governs collection admission, membership, lifecycle, consistency, and retirement.**
 
 ---
 
@@ -128,7 +133,7 @@ This diagram is **conceptual**. It shows durable authority direction, not a mand
 | **Architectural organization** | Five-layer model, layer dependency, sub-domain structure |
 | **Standard placement** | Rules for assigning future standards to layers and domains |
 | **Volume 02 scope architecture** | Declared in-scope and out-of-scope boundaries for the visual domain |
-| **Cross-volume boundary architecture** | How Volume 02 relates to Volumes 01, 03, 04, and 05 at the planning layer |
+| **Cross-volume boundary architecture** | How Volume 02 relates to Volumes 01, 03, 04, 06, and 05 at the planning layer — Volume 01 Manufacturing Validation, Execution, and Fulfillment; Volume 03 surface and spatial law; Volume 04 contextual selection; Volume 06 realization and GPRA approval; Volume 05 collection membership and lifecycle |
 | **Asset lifecycle architecture** | Which volume owns each lifecycle stage of reusable visual assets |
 | **Composition authority definition** | Independent Composition Principles authority within Volume 02 |
 | **Volume Supplement authorization** | Permitted supplements within Volume 02 per `FI-DSN-VOL-001` Section 20 |
@@ -311,7 +316,8 @@ Each layer MUST remain independently justified. Layers SHALL NOT be merged for c
 | **Volume 01 — Manufacturing** | Consumes applicable `FI-MFG-*` as Compliance Boundary inputs per `FI-DSN-GOV-004` Section 13 | Restating manufacturing operational policy in visual architecture |
 | **Volume 03 — Card Design System** | Downstream consumer of Layers 3–4 and Layer 5 boundaries | Template regions, safe zones, or layout implementation in Volume 02 |
 | **Volume 04 — Artwork Intelligence** | Downstream consumer of visual boundaries; owns selection and BVS policy | Selection logic, occasion semantics, or Preference Surfaces in Volume 02 |
-| **Volume 05 — Signature Collections** | Downstream consumer of asset character rules; owns library operations | Collection release, retirement, or membership governance in Volume 02 |
+| **Volume 06 — Creative Production** | Downstream consumer of Volume 02 identity permission, asset character, identity eligibility, and identity constraints during governed realization; produces GPRAs after applying applicable upstream authority; does not redefine Volume 02 identity law | Realization, Review Determination, Approval, or Governed Handoff authority in Volume 02 |
+| **Volume 05 — Signature Collections** | Consumes eligible GPRAs from Volume 06 at collection intake; uses Volume 02 identity law as inherited membership constraints; owns library operations | Visual artifact realization, GPRA approval, collection release, retirement, or membership governance in Volume 02 |
 
 #### Worked ownership example — global exclusion versus collection membership
 
@@ -395,11 +401,15 @@ Volume 03 consumes Volume 02 element systems, composition principles, and visual
 
 Volume 04 consumes Volume 02 visual boundaries when governing artwork selection, occasion treatment, personalization, and Brain Visual Selection policy.
 
-### 10.4 Downstream — Volume 05
+### 10.4 Downstream — Volume 06
 
-Volume 05 consumes Volume 02 asset character rules when governing collection membership, consistency, and release criteria.
+Volume 06 consumes Volume 02 visual identity permission, brand expression boundaries, asset character, identity eligibility, and identity constraints when governing Declared Production Intent interpretation, Exploration, Realization, Review Determination, Approval, and Governed Handoff. Volume 02 does not create or realize visual artifacts and does not grant Governed Production-Ready Artifact status. Volume 06 does not redefine visual identity permission.
 
-### 10.5 Alignment with `FI-DSN-VOL-001`
+### 10.5 Downstream — Volume 05
+
+Volume 05 consumes eligible Governed Production-Ready Artifacts from Volume 06 at collection intake. Volume 05 applies Volume 02 asset character rules and identity constraints as inherited membership eligibility boundaries. GPRA approval is not collection membership. Volume 05 does not repeat Volume 06 GPRA approval and does not own realization.
+
+### 10.6 Alignment with `FI-DSN-VOL-001`
 
 #### Volume 02 required categories
 
@@ -618,7 +628,7 @@ This document MUST NOT specify fonts, colors, spacing values, artwork styles, il
 | `OQ-VIS-008` | How much localization-specific visual rules belong in Volume 02 versus downstream volumes? | Open — scope | Identity-level rules in Volume 02; market-specific campaign visuals downstream |
 | `OQ-DSN-003` | Visual Source controlled metadata schema | Open — inherited | Volume 02 architecture proceeds; provenance-referencing standards defer |
 | `OQ-DSN-008` | Primary Volume canonical metadata field | Open — inherited | REG **Notes** convention per `FI-DSN-VOL-001` Section 14.2 |
-| `OQ-DSN-009` | Separate volume governance document timing | Partially resolved for Volume 02 — open for Volumes 03–05 per frozen `FI-DSN-VOL-001` | Volume 02 governance requirement is satisfied by this document; the broader `OQ-DSN-009` remains open for other production volumes until resolved by authorized `FI-DSN-VOL-001` revision |
+| `OQ-DSN-009` | Separate volume governance document timing | Partially resolved for Volumes 02–06 — Volume 06 governance satisfied per `OQ-V06-004` and `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` | Volume 02 governance requirement is satisfied by this document; Volume 06 governance-document requirement is satisfied by the Volume 06 architecture; the broader `OQ-DSN-009` governance-timing question remains open per `FI-DSN-VOL-001` until authorized revision |
 | `OQ-CLS-001` | Cross-volume classification justification | Open — inherited | `FI-DSN-VOL-001` Section 13.1 table |
 
 ---
@@ -636,7 +646,7 @@ Before freeze of this document, Architecture Validation MUST confirm:
 | Volume 03 boundary | Decision rule and examples present |
 | Volume 04 boundary | Character vs selection matrix present |
 | Asset lifecycle | Lifecycle ownership table complete |
-| VOL-001 alignment | Required category mapping and composition split in Section 10.5 |
+| VOL-001 alignment | Required category mapping and composition split in Section 10.6 |
 | CLS-001 harmonization | `CLS-BEX`, `CLS-ACI`, `CLS-CMP`, and `CLS-ART` consumed per Sections 11.1 and 12.3 |
 | No implementation rules | No fonts, colors, dimensions, algorithms, or runtime policy |
 | No unauthorized extensions | No new metadata, identifiers, classifications, or queue states |
@@ -649,6 +659,7 @@ Before freeze of this document, Architecture Validation MUST confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H4.1 — Volume 02 cross-document harmonization for Volume 06: Document Control downstream consumers; Section 3 stack diagram, layer table, and permanent principle; Section 4.1 cross-volume boundaries; Section 9.1 peer table; Section 10 downstream relationships (Volume 06 added; Volume 05 revised; Section 10.6 renumbered); Section 16 OQ-DSN-009 scope update; Version 1.0 Frozen baseline preserved in revision history |
 | 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H3 — Section 11 lifecycle extension: Volume 06 visual artifact realization and GPRA approval stage inserted; constitutional dependency V04→V06→V05; permanent rule harmonized; post-table asset-type clarification; Version 1.0 Frozen baseline preserved in revision history |
 | 1.0 | July 23, 2026 | F.I. Forgot | Frozen — promoted to Frozen Volume Governance; Formal Freeze Review Outcome A (Freeze Eligible); FR-VIS-MIN-001 (`FI-DSN-VOL-001` identifier consistency in P10); architecture unchanged from Version 0.2 Draft; freeze date July 23, 2026 |
 | 0.2 Draft | July 23, 2026 | F.I. Forgot | Sprint D2.1 refinement — Architecture Review findings AR-VIS-001 through AR-VIS-010: CLS-001 code corrections (`CLS-BEX`, `CLS-ACI`); VOL-001 Layer 4 and Vol 03 Layout and composition harmonization; `CLS-CMP` and `CLS-ART` harmonization; `OQ-DSN-009` partial resolution posture; premium placement tie-breaker; Vol 02/05 exclusion example; conceptual dependency diagram note; P11 negative examples |
