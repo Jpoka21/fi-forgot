@@ -209,7 +209,7 @@ Future volumes SHALL use append-only numbering (07, 08, …) per Section 25.
 | **03** | **Defined** | Awaiting predecessors |
 | **04** | **Defined** | Awaiting predecessors and governed design systems |
 | **05** | **Defined** | Awaiting predecessors |
-| **06** | **Defined** | Volume 06 Creative Production Architecture Version 0.3 Draft authored; pending cross-volume harmonization (Volumes 05 and 02); pending Volume 06 architecture freeze; not **Entry Ready** until harmonization and freeze gate satisfied per Volume 06 architecture Section 22.1 |
+| **06** | **Defined** | Volume 06 Creative Production Architecture Version 0.3 Draft authored (not yet committed to repository). Cross-volume architecture harmonization complete across Volumes 02 and 05 and the Design README. Post-harmonization close-out pending: Volume 06 metadata reconciliation and initial repository commit, full combined-system rereview, and formal Version 1.0 Freeze Review; not **Entry Ready**; Layer B not authorized |
 
 At Version 1.0 freeze (July 23, 2026), Volumes 01–05 had the roadmap states shown above for **01** through **05**. Volume 06 is added by governed Version 1.1 revision per Section 25.
 
@@ -693,7 +693,7 @@ Volume 05 (Signature Collections — GPRA intake and permanent membership)
 | **03** | Volume 02 **Entry Ready**; MFG constraints identified |
 | **04** | Volumes 02–03 **Entry Ready**; governed design alternatives identifiable; GOV-004 frozen |
 | **05** | Volumes 02–04 **Entry Ready**; collection scope defined in planning; drafting and freeze of upstream-dependent standards subject to Hard dependencies and Section 15.4 |
-| **06** | Volumes 02–04 **Entry Ready**; applicable Volume 01 `FI-MFG-*` constraints identified; Volume 06 architecture document drafted; cross-volume harmonization with Volume 05 and Volume 02 lifecycle extension in progress or complete; material volume-scoped open questions nonblocking |
+| **06** | Volumes 02–04 **Entry Ready**; applicable Volume 01 `FI-MFG-*` constraints identified; Volume 06 architecture document drafted (Version 0.3 Draft); cross-volume harmonization with Volumes 02 and 05 and Design README **complete**; not **Entry Ready** — remaining: metadata reconciliation, initial repository commit, full post-H4 combined-system rereview, formal Version 1.0 Freeze Review per Volume 06 architecture Section 22.1; material volume-scoped open questions nonblocking |
 
 ---
 
@@ -1099,7 +1099,7 @@ Before freeze promotion, confirm:
 | ID | Question | Status | Safe default |
 |----|----------|--------|--------------|
 | `OQ-DSN-008` | Should **Primary Volume** become a canonical REG/GOV-002 field? | Open — architecture | Structured REG **Notes** `Primary Volume: VOL-0n` per Section 14 |
-| `OQ-DSN-009` | Does each volume 02–05 require a separate volume governance document before first standard freeze, or is VOL-001 sufficient initially? | Open — architecture | VOL-001 sufficient until first standard in volume enters drafting |
+| `OQ-DSN-009` | Does each production volume require a separate volume governance document before first standard freeze, or is VOL-001 sufficient initially? Volume 06 now has explicit governance architecture (`01-creative-production-architecture.md`); Volume 06 governance-document requirement addressed through `OQ-V06-004`. Broader governance-timing posture for future volumes remains open. | Open — architecture (partially resolved for Volumes 02–06) | VOL-001 sufficient until first standard in volume enters drafting; Volume 06 architecture satisfies volume governance until Layer B authorization per `OQ-V06-004` |
 | `OQ-DSN-010` | Who approves Required Volume Artifact set changes after VOL-001 Version 1.0 freeze? | Open — governance detail | Section 19 four-authority model: Required Artifact set and category changes REQUIRE governed VOL-001 revision, formal review where material, and REG reconciliation; silent change PROHIBITED |
 | `OQ-V06-002` | What Primary Classification (`CLS-*`) should govern Volume 06 standards — extend `CLS-ART`, distribute by domain, or authorize new classification through governed `FI-DSN-CLS-001` revision? | Open — classification; nonblocking for VOL-001 Volume 06 inventory amendment | Principal-subject placement per `FI-DSN-CLS-001`; no new `CLS-*` in this roadmap revision |
 
@@ -1142,6 +1142,7 @@ Before freeze promotion, confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H4.3 — correction of Volume 06 harmonization-status metadata: Section 6.3 Volume 06 notes; Section 17.2 Entry Ready posture; OQ-DSN-009; Version 1.0 Frozen baseline preserved |
 | 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H1 — append Volume 06 Creative Production to Production Volume Inventory; Section 6.4 numeric vs constitutional dependency vs lifecycle order; Section 11.6 architecture; Volume Sequence and entry/completion updates; Section 19.4 provisional Required category planning posture; Roadmap Validation and Freeze Gate updates; governed revision pending independent review — not re-frozen |
 | 1.0 | July 23, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Volume Roadmap; Formal Freeze Review passed; identifier collision verified; `OQ-CLS-001`, `OQ-DSN-003`, `OQ-DSN-008`, `OQ-DSN-009`, and `OQ-DSN-010` remain deferred |
 | 0.2 Draft | July 23, 2026 | F.I. Forgot | Sprint D1.10 refinement — per-volume Required Artifact category frameworks (Sections 5.4, 18.4, 19.4); Primary Volume principal-subject tie-breaker and ownership validation (Section 14); Hard dependency waiver alignment to QUE-001 Section 7.5 (Section 15.4); foundation posture separated from Volume Status; Volume 05 entry/completion harmonization; Structurally Complete reopening rules (Section 10.4); per-volume completion summaries (Section 18.5); expanded Roadmap Validation and Freeze Gate; cross-reference corrections |
