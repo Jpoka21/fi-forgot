@@ -24,7 +24,7 @@
 | **Classification reference** | `FI-DSN-CLS-001` — Design Classification Strategy (Frozen Classification Strategy, Version 1.0, July 22, 2026) |
 | **Template reference** | `FI-DSN-TPL-001` — Design Standard Template (Frozen Governance Template, Version 1.0, July 22, 2026) |
 | **Upstream governance** | `playbook/design/00-design-standards-governance.md`; `playbook/design/01-design-standard-template.md`; `playbook/design/02-design-classification-strategy.md`; `playbook/design/03-design-identifier-system.md`; `playbook/design/04-design-library-metadata-standard.md`; `playbook/design/05-design-planning-register.md`; `playbook/design/README.md` |
-| **Downstream consumers** | Design Standards in Volumes 02 through 05; future Volume Roadmap; future automation |
+| **Downstream consumers** | Design Standards in Volumes 02 through 06; future Volume Roadmap; future automation |
 
 **Standard statement:** F.I. Forgot maintains **one authoritative Design Drafting Queue** that governs operational drafting sequence and execution readiness for eligible artifacts recorded in `FI-DSN-REG-001`. Queue admission is manual. Register reservation does not authorize drafting. Queue operational state and **Execution Order** are governed exclusively by this document and do not replace canonical lifecycle **Status**, identifier reservation, or register metadata.
 
@@ -529,12 +529,14 @@ Revisions after freeze require documented change control under Section 9 and `FI
 
 ## 18. Active Queue Inventory
 
-The following table records operational queue entries admitted under Section 5.2. Register **Status** remains authoritative for lifecycle state.
+The following table records operational queue entries admitted under Section 5.2. Register **Status** remains authoritative for lifecycle state. Volume 06 Layer B standards (`FI-DSN-STD-012` through `FI-DSN-STD-015`) are admitted at **Queued** only. Queue admission establishes governed drafting order; it does not begin drafting, authorize architecture drafting, or create standard files.
 
 | Register Identifier | Register Status (informational) | Queue state | Execution Order | Owner | Admitted date | Exit date | Notes |
 |---------------------|-------------------------------|-------------|-----------------|-------|---------------|-----------|-------|
-
-*No active queue entries.*
+| FI-DSN-STD-012 | Reserved, Not Drafted | Queued | 18 | F.I. Forgot | July 29, 2026 | — | First Volume 06 Layer B drafting candidate. Planning Register reservation complete (`Reserved, Not Drafted`; `CLS-CPR`; Primary Volume VOL-06). Volume 06 architecture Version 1.0 Frozen. `FI-DSN-CLS-001` Version 1.1 Frozen; `FI-DSN-CLS-002` Version 1.0 Frozen. No direct Volume 06 Layer B predecessor. Queue admission only — establishes governed drafting order; does not begin drafting; no standard file exists; drafting has not begun. Separate governed drafting kickoff required for `FI-DSN-STD-012`. `FI-DSN-STD-013` through `FI-DSN-STD-015` remain blocked behind predecessors |
+| FI-DSN-STD-013 | Reserved, Not Drafted | Queued | 19 | F.I. Forgot | July 29, 2026 | — | Drafting sequence 2 of 4. Direct predecessor: `FI-DSN-STD-012` (reserved and queued — not drafted or frozen). Normative drafting depends on governed completion posture required for `FI-DSN-STD-012`. Queue admission does not waive dependency. `OQ-DSN-003`. Queue admission only — drafting not authorized; no standard file exists |
+| FI-DSN-STD-014 | Reserved, Not Drafted | Queued | 20 | F.I. Forgot | July 29, 2026 | — | Drafting sequence 3 of 4. Direct predecessor: `FI-DSN-STD-013` (reserved and queued — not drafted or frozen). `CLS-CPR` Primary Classification; `CLS-MFI` Secondary Classification only. Design-Time Feasibility remains a Review dimension; applicable `FI-MFG-*` artifacts remain Compliance Boundaries only. `OQ-V06-006`. Queue admission only — drafting not authorized; no standard file exists |
+| FI-DSN-STD-015 | Reserved, Not Drafted | Queued | 21 | F.I. Forgot | July 29, 2026 | — | Drafting sequence 4 of 4. Direct predecessor: `FI-DSN-STD-014` (reserved and queued — not drafted or frozen). Volume 05 architecture and `FI-DSN-STD-010` / `FI-DSN-STD-011` are downstream intake alignment references only — not upstream constitutional owners. `OQ-V06-007`. Queue admission only — does not authorize drafting. Handoff governance does not grant collection membership or manufacturing execution authority; no standard file exists |
 
 ### 18.1 Queue History
 
@@ -596,6 +598,7 @@ The following table records operational queue entries admitted under Section 5.2
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` requirement set refined per Sprint D17.1B; pending freeze readiness validation |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Operational inventory update — `FI-DSN-STD-011` queue exit (Completed (queue); Execution Order 17 preserved) per Sprint D17.3 freeze promotion |
 | 1.0 (inventory) | July 27, 2026 | F.I. Forgot | Volume closure — **VOL-05 Signature Collections** declared **Structurally Complete** per Sprint D18.1 (audit basis Sprint D18.0); architecture Version 1.0 Frozen; `FI-DSN-STD-010` and `FI-DSN-STD-011` Version 1.0 Frozen; no active queue entry; no new standard; no Execution Order assigned; EO 16 and EO 17 unchanged; implementation translation and artwork production remain downstream |
+| 1.0 (inventory) | July 29, 2026 | F.I. Forgot | Volume 06 Layer B QUE admission draft — `FI-DSN-STD-012` through `FI-DSN-STD-015` admitted (Execution Orders 18–21; **Queued**); all four remain **Queued**; no standard **In progress**; queue admission establishes governed drafting order only; no drafting authorization; no architecture drafting authorization; no review or freeze activity; no standard files created; no REG changes; no Product Sprint 004 authorization |
 
 ### Future revision notes
 
