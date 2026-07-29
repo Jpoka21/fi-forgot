@@ -10,19 +10,23 @@
 | **Title** | Design Classification Strategy |
 | **Document** | `02-design-classification-strategy.md` |
 | **Sprint** | D1.3 |
-| **Classification** | Frozen Classification Strategy |
+| **Classification** | Classification Strategy — governed document class |
 | **Status** | Frozen Classification Strategy |
-| **Version** | 1.0 |
-| **Date** | July 22, 2026 |
-| **Freeze date** | July 22, 2026 |
+| **Version** | 1.1 Frozen |
+| **Date** | July 29, 2026 |
+| **Freeze date** | July 29, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
+| **Classification expansion decision** | `FI-DSN-CLS-002` — Classification Expansion Decision (Version 1.0 Frozen, July 29, 2026) — governing authority for nineteenth-family expansion; decision record only — taxonomy implementation is in this document |
 | **Template reference** | `FI-DSN-TPL-001` — Design Standard Template (Frozen Governance Template, Version 1.0, July 22, 2026) |
 | **Upstream governance** | `playbook/design/00-design-standards-governance.md`; `playbook/design/README.md` |
 | **Downstream consumers** | Future Design Planning Register; Drafting Queue; Identifier System; Volume Roadmap |
+| **Amendment posture** | Version **1.1 Frozen** (July 29, 2026) — binding classification baseline. Supersedes Version **1.0 Frozen** (July 22, 2026) for active taxonomy assignment. Version 1.0 freeze gate preserved as historical audit record. Active taxonomy: **nineteen** classifications in **seven** families; `CLS-CPR` active as nineteenth classification. `FI-DSN-CLS-002` Version 1.0 Frozen remains governing expansion decision authority. |
 
 **Source basis:** Company judgment. This taxonomy is an F.I. Forgot governance choice. It is not derived from vendor facts or verified evidence.
+
+**Version 1.1 amendment scope (frozen):** Implements the frozen `FI-DSN-CLS-002` decision by introducing `CLS-CPR` — Creative Production Realization. Does not reclassify existing standards, authorize Layer B drafting, populate REG or QUE, or authorize Product Sprint 004.
 
 ---
 
@@ -51,9 +55,9 @@ The classification system SHALL:
 - Support future Planning Register, Drafting Queue, Identifier System, and Volume Roadmap work
 - Preserve separation between Design, Manufacturing, Product Intelligence, Research, and Implementation
 
-This document is the **frozen classification authority** for subject-matter classification of future Design Standards and Design Library planning artifacts. It is not a Design Standard and SHALL NOT be cited as normative visual policy.
+This document is the **classification authority** for subject-matter classification of future Design Standards and Design Library planning artifacts. It is not a Design Standard and SHALL NOT be cited as normative visual policy.
 
-**Status:** Frozen Classification Strategy, Version 1.0, effective July 22, 2026.
+**Status:** Frozen Classification Strategy, Version **1.1 Frozen**, effective July 29, 2026. Supersedes Version 1.0 Frozen (July 22, 2026) as the binding classification baseline.
 
 ---
 
@@ -158,6 +162,7 @@ The following examples explain attribute logic only. They do not reserve Standar
 | Card template metadata schema | SYS | Card Architecture | Not Applicable | Principal subject is structural card-system architecture |
 | Brain-permitted artwork alternative rule | POL | Brain Visual Selection | Not Applicable | Principal subject is selection-boundary governance |
 | Envelope exterior presentation policy | POL | Envelope and Exterior Presentation | Not Applicable | Principal subject is exterior presentation domain |
+| Production intent and program governance policy | STD | Creative Production Realization | Not Applicable | Principal subject is governed visual artifact realization transformation |
 
 A subject-specific policy uses `POL` (or another applicable disposition) as its disposition and the applicable subject classification. It does not use `CLS-GOV` unless the principal subject is Design Library meta-governance.
 
@@ -165,7 +170,7 @@ A subject-specific policy uses `POL` (or another applicable disposition) as its 
 
 ## 6. Classification Taxonomy
 
-The Design Library uses **18** primary classification domains grouped into six families.
+The Design Library uses **19** primary classification domains grouped into seven families. Version 1.0 Frozen established **18** primary classification domains grouped into six families (July 22, 2026).
 
 | Family | Classification code | Classification name |
 |--------|---------------------|---------------------|
@@ -187,6 +192,7 @@ The Design Library uses **18** primary classification domains grouped into six f
 | | `CLS-MFI` | Manufacturing Integration |
 | | `CLS-VQA` | Visual Quality Assurance |
 | **Library operations** | `CLS-ASG` | Asset Library Governance |
+| **Creative production** | `CLS-CPR` | Creative Production Realization |
 
 ### Taxonomy rules
 
@@ -316,7 +322,39 @@ Each definition states domain ownership only. Definitions do not prescribe visua
 
 **Owns:** Governance of asset libraries, collections, release structure, retention, and library operations for governed design assets.
 
-**Does not own:** Rules governing a single asset medium (Illustration, Photography, etc.) when the medium is principal.
+**Does not own:** Rules governing a single asset medium (Illustration, Photography, etc.) when the medium is principal; governed visual artifact realization transformation (Creative Production Realization).
+
+### CLS-CPR — Creative Production Realization
+
+**Owns:** Constitutional policy governing visual artifact realization when the principal subject is the governed transformation from Declared Production Intent to Governed Production-Ready Artifact (GPRA). Owned subjects include:
+
+- Declared Production Intent
+- Production Program
+- Production Obligation
+- Exploration Posture
+- Artifact realization
+- Realized Visual Artifact (RVA) posture
+- Production-readiness Review
+- Review Determination
+- Production-readiness Approval
+- Governed Production-Ready Artifact (GPRA) status
+- Governed Handoff posture
+
+Definitions remain constitutional and implementation-independent. This classification governs subject ownership for planning metadata only.
+
+**Does not own:**
+
+- Visual identity permission (Volume 02; Visual Philosophy, Brand Expression, Typography, Color, Composition and Layout, and related visual-element domains when those are principal)
+- Surface structure, composition, or spatial law (Volume 03; Card Architecture, Composition and Layout when those are principal)
+- Contextual eligibility or Brain Visual Selection (Volume 04; `CLS-BVS`, Occasion and Emotional Context, Personalization when those are principal)
+- Collection admission, membership, lifecycle, release, or retention (Volume 05; `CLS-ASG`)
+- Manufacturing operational policy, Manufacturing Validation, Manufacturing Execution, or Fulfillment Execution (Volume 01; `FI-MFG-*`)
+- Artwork eligibility or medium character when those are the principal subject (`CLS-ART`, `CLS-ILL`, `CLS-PHO`)
+- Library quality assurance when QA governance is the principal subject (`CLS-VQA`)
+- Engineering implementation, APIs, databases, DAM systems, workflow orchestration, or image generation tooling
+- Brain runtime Approval authority
+
+**Governing authority for introduction:** `FI-DSN-CLS-002` Version 1.0 Frozen (July 29, 2026) — expansion decision only; this section defines and governs the implemented taxonomy code.
 
 ---
 
@@ -357,6 +395,12 @@ Secondary classification SHALL NOT:
 - Override the primary classification for queue ordering, identifier grouping, or volume reading sequence
 - Substitute for visual source metadata
 
+### CLS-CPR secondary classification posture
+
+`CLS-MFI` MAY be assigned as a **Secondary Classification** when Design-Time Feasibility integration against `FI-MFG-*` Compliance Boundaries is materially governed in a standard whose **Primary Classification** is `CLS-CPR`.
+
+`CLS-MFI` SHALL NOT be the default secondary classification for every `CLS-CPR` standard. Secondary assignment requires the material second-domain test in this section. Creative Production Realization remains the principal subject.
+
 ---
 
 ## 10. Cross Classification and Boundary Rules
@@ -377,6 +421,11 @@ The following boundary decisions resolve common overlap areas. They define owner
 | **Visual Quality Assurance vs per-standard Validation** | Visual Quality Assurance for library-level QA policy; individual standard Validation sections remain template-required per-standard compliance checks | Do not classify every standard as Visual Quality Assurance because it has a Validation section. |
 | **Asset Library Governance (`CLS-ASG`) vs individual asset types** | Asset Library Governance for library/collection operations; Illustration/Photography/Artwork/etc. when a single medium or asset class is principal | Library operations do not absorb medium-specific ownership. |
 | **Handwritten message presentation** | No dedicated `CLS-*` classification at this stage | Handwritten message presentation remains governed by manufacturing or message-engine domains outside this taxonomy until future planning justifies otherwise. |
+| **Creative Production Realization (`CLS-CPR`) vs Artwork (`CLS-ART`)** | Artwork for artwork eligibility and artwork-boundary rules when character or eligibility is principal; Creative Production Realization for realization transformation from intent to GPRA | Realization state discipline, Production Program governance, Review Determination, Approval, and Handoff Posture are not Artwork eligibility. Medium-specific primaries remain Illustration or Photography when medium is principal. |
+| **Creative Production Realization vs Brain Visual Selection (`CLS-BVS`)** | Brain Visual Selection for contextual selection-boundary and authorized-alternative policy; Creative Production Realization for production-readiness Decision policy and GPRA Approval | Production-readiness Approval is distinct from Brain Visual Selection Decision authority. `CLS-BVS` does not absorb GPRA Approval. |
+| **Creative Production Realization vs Asset Library Governance (`CLS-ASG`)** | Asset Library Governance for permanent collection membership, library lifecycle, and library operations; Creative Production Realization for upstream realization and Governed Handoff toward library intake | Approval ≠ membership. Handoff supplies ASG-domain intake; ASG does not own realization transformation. |
+| **Creative Production Realization vs Manufacturing Integration (`CLS-MFI`)** | Manufacturing Integration when manufacturability integration or design-side production handoff is the **principal** subject; Creative Production Realization when realization transformation is principal | Design-Time Feasibility as a Review dimension does not make MFI primary. `CLS-MFI` MAY appear as secondary on `CLS-CPR` standards only when materially governed. |
+| **Creative Production Realization vs Visual Quality Assurance (`CLS-VQA`)** | Visual Quality Assurance for library-level QA inspection categories; Creative Production Realization for production-readiness Review and GPRA Approval policy | Per-standard Validation sections and GPRA Decision policy are not library-level VQA. |
 
 ---
 
@@ -395,7 +444,7 @@ Rules:
 - One classification MAY span more than one volume only when formally justified in future volume planning and recorded in the Volume Roadmap.
 - Volume placement SHALL NOT override primary classification.
 - Cross-volume classification ownership is deferred to the future Volume Roadmap.
-- Existing repository architecture identifies five volumes (01 Manufacturing and Production; 02 Design Language; 03 Card Design System; 04 Artwork Intelligence; 05 Signature Collections) in `playbook/design/README.md`. This strategy does not freeze a Design Volume Roadmap.
+- At Version 1.0 freeze (July 22, 2026), existing repository architecture identified five production volumes (01 Manufacturing and Production; 02 Design Language; 03 Card Design System; 04 Artwork Intelligence; 05 Signature Collections) in `playbook/design/README.md`. Volume 06 and governed volume roadmap updates are outside Version 1.0 freeze scope.
 
 ### Informational volume affinity (nonnormative)
 
@@ -405,9 +454,10 @@ Rules:
 | **03 Card Design System** | Card Architecture, Composition and Layout |
 | **04 Artwork Intelligence** | Brain Visual Selection, Occasion and Emotional Context, Personalization |
 | **05 Signature Collections** | Asset Library Governance, Artwork, Illustration, Photography |
+| **06 Creative Production** | Creative Production Realization |
 | **Cross-volume** | Governance, Accessibility and Inclusion, Manufacturing Integration, Visual Quality Assurance, Envelope and Exterior Presentation |
 
-Affinity is planning guidance only. Primary classification remains authoritative. Final cross-volume placement is deferred to the Volume Roadmap.
+Affinity is planning guidance only. Primary classification remains authoritative. Classification does not itself grant volume authority; governing volume architecture and frozen constitutional artifacts remain authoritative for permission boundaries. Final cross-volume placement is deferred to the Volume Roadmap.
 
 Volume 01 governs `FI-MFG-*` manufacturing standards and is outside the `FI-DSN-*` classification taxonomy except where future cross-library planning explicitly requires a bridge record.
 
@@ -515,7 +565,7 @@ Before a candidate Design Standard receives a Planning Register entry with assig
 
 - [ ] Principal governed subject is stated in one sentence
 - [ ] Exactly one primary `CLS-*` code is assigned
-- [ ] Primary `CLS-*` code exists in the frozen taxonomy (Section 6)
+- [ ] Primary `CLS-*` code exists in the active taxonomy (Section 6) at time of assignment
 - [ ] Secondary codes are zero, one, or two, each with justification
 - [ ] Disposition (`PRN`, `STD`, `CON`, `POL`, `SYS`) is assigned separately from classification
 - [ ] Visual source, when relevant, is recorded separately and is not used as classification
@@ -535,7 +585,14 @@ The following question remains open for future Volume Roadmap planning. It is ex
 
 | ID | Question | Notes |
 |----|----------|-------|
-| OQ-CLS-001 | Will any primary classifications currently treated as cross-volume require formal cross-volume justification in the Volume Roadmap? | Deferred to Design Volume Roadmap sprint; intentionally unresolved at freeze |
+| OQ-CLS-001 | Will any primary classifications currently treated as cross-volume require formal cross-volume justification in the Volume Roadmap? | Deferred to Design Volume Roadmap sprint; intentionally unresolved at Version 1.0 freeze |
+
+Resolved by Version 1.1 amendment (external metadata closure deferred):
+
+| ID | Question | Resolution in this document |
+|----|----------|----------------------------|
+| `OQ-V06-002` | What Primary Classification (`CLS-*`) should govern Volume 06 standards? | **Resolved in CLS-001** — `CLS-CPR` (Creative Production Realization) per `FI-DSN-CLS-002` Version 1.0 Frozen. Closure in Volume 06 architecture §23 and `FI-DSN-VOL-001` remains a separate metadata sprint after Version 1.1 freeze. |
+| `OQ-CLS-002-A` | Exact `CLS-*` code string for the nineteenth family | **Resolved in CLS-001** — `CLS-CPR` |
 
 Resolved by Sprint D1.3 taxonomy refinement (no longer open):
 
@@ -549,6 +606,8 @@ Resolved by Sprint D1.3 taxonomy refinement (no longer open):
 ---
 
 ## Classification Strategy Freeze Gate
+
+### Version 1.0 Frozen baseline (July 22, 2026)
 
 FI-DSN-CLS-001 passed classification strategy freeze review on July 22, 2026.
 
@@ -575,9 +634,52 @@ FI-DSN-CLS-001 passed classification strategy freeze review on July 22, 2026.
 | Open planning question OQ-CLS-001 recorded as deferred and nonblocking | Pass |
 | Document internally consistent and publication quality | Pass |
 
-This strategy is **Frozen Classification Strategy**, Version 1.0, effective July 22, 2026.
+This strategy was **Frozen Classification Strategy**, Version 1.0, effective July 22, 2026. The Version 1.0 taxonomy count of **18** classifications remains accurate historical record for that freeze.
 
-Revisions after freeze require documented change control under Section 16 and `FI-DSN-GOV-001` Section 15. A revision that changes taxonomy codes, boundary rules, or primary or secondary classification policy requires a new strategy version and freeze review.
+### Version 1.1 Frozen (July 29, 2026)
+
+FI-DSN-CLS-001 passed Version 1.1 controlled freeze promotion on July 29, 2026.
+
+This strategy is **Frozen Classification Strategy**, Version **1.1 Frozen**, effective July 29, 2026. Version **1.1 Frozen** is the binding classification baseline and supersedes Version 1.0 Frozen (July 22, 2026) for active taxonomy assignment. The active taxonomy contains **nineteen** primary `CLS-*` classifications in **seven** families. `CLS-CPR` — Creative Production Realization is the nineteenth active classification. `FI-DSN-CLS-002` Version 1.0 Frozen remains the governing expansion decision authority. Version 1.0 freeze gate above remains accurate historical audit record.
+
+| Item | Posture |
+|------|---------|
+| Lifecycle state | Frozen — Version 1.1 Frozen; binding classification baseline |
+| Governing expansion decision | `FI-DSN-CLS-002` Version 1.0 Frozen |
+| Taxonomy | Nineteen active `CLS-*` classifications in seven families; `CLS-CPR` active |
+| Version 1.0 baseline | Superseded for active taxonomy; preserved as historical audit record |
+| REG / QUE / identifier reservation | **Not authorized** by this freeze |
+| Layer B drafting | **Not authorized** |
+| Product Sprint 004 | **Not authorized** |
+
+#### Version 1.1 freeze validation checklist (complete)
+
+All criteria verified and passed at controlled Version 1.1 freeze promotion on July 29, 2026.
+
+- [x] Identity complete — FI-DSN-CLS-001, title, **Status**, **Version**, and freeze-date fields consistent with Version 1.1 Frozen promotion
+- [x] Structural completeness — all required sections present; internal references valid after amendment
+- [x] Governance alignment with `FI-DSN-GOV-001` — company judgment, implementation independence, manufacturing and Brain separation, evidence independence, change control
+- [x] Independent Constitutional Review of Version 1.1 amendment completed — Pass
+- [x] MIN-001 resolved — Document Control Classification field clarified as document class only
+- [x] MIN-002 resolved — Version 1.1 pre-freeze framing and validation checklist added and completed at promotion
+- [x] Focused Independent Rereview completed — Pass
+- [x] `FI-DSN-CLS-002` Version 1.0 Frozen correctly consumed as expansion authority; taxonomy implementation in this document without duplicating decision reasoning
+- [x] Taxonomy integrity — exactly **19** active `CLS-*` classifications; unique codes and names; all eighteen Version 1.0 codes preserved
+- [x] `CLS-CPR` definition constitutional, implementation-independent, and bounded by required exclusions preserving peer volume authority
+- [x] Boundary rules — CPR versus ART, BVS, ASG, MFI, and VQA present and principal-subject-based
+- [x] Primary classification rule — exactly one primary per standard; principal-subject rule enforced
+- [x] Secondary classification rule — optional, subordinate; `CLS-MFI` secondary posture for `CLS-CPR` not default for all CPR standards
+- [x] Volume 06 primary affinity recorded; classification does not grant volume authority
+- [x] `OQ-V06-002` and `OQ-CLS-002-A` disposition recorded in CLS-001; external metadata closure in Volume 06 architecture and `FI-DSN-VOL-001` deferred to separate sprint
+- [x] Version 1.0 freeze gate historical record preserved and accurate
+- [x] No identifier reservation occurred
+- [x] No REG or QUE modification occurred
+- [x] No Layer B drafting authorization occurred
+- [x] No Product Sprint 004 authorization occurred
+- [x] Controlled Version 1.1 freeze commit completed
+- [x] Document internally consistent and publication quality at freeze promotion
+
+Revisions after Version 1.1 freeze require documented change control under Section 16 and `FI-DSN-GOV-001` Section 15. A revision that changes taxonomy codes, boundary rules, or primary or secondary classification policy requires a new strategy version and freeze review.
 
 ---
 
@@ -589,6 +691,9 @@ Revisions after freeze require documented change control under Section 16 and `F
 | 1.0 Draft (refined) | July 22, 2026 | F.I. Forgot | Sprint D1.3 taxonomy refinement — reduced to 18 classifications; removed visual-source and treatment-mode classifications; renamed `CLS-ALG` to `CLS-ASG`; introduced Visual Source as separate controlled attribute; clarified `CLS-GOV` scope |
 | 1.0 Draft (freeze review) | July 22, 2026 | F.I. Forgot | Sprint D1.3 formal freeze review — template field harmonization note; validation checklist and change-control clarifications |
 | 1.0 | July 22, 2026 | F.I. Forgot | Frozen — promoted to Frozen Classification Strategy; OQ-CLS-001 deferred to Design Volume Roadmap sprint |
+| 1.1 Draft | July 29, 2026 | F.I. Forgot | Amendment drafting sprint — implements `FI-DSN-CLS-002` Version 1.0 Frozen; introduces `CLS-CPR` (Creative Production Realization); nineteenth-family taxonomy; boundary rules; Volume 06 primary affinity; `OQ-V06-002` resolved in CLS-001; Version 1.0 baseline remains binding until Version 1.1 freeze |
+| 1.1 Draft (minor corrections) | July 29, 2026 | F.I. Forgot | Minor correction sprint — MIN-001 Document Control Classification field clarified; MIN-002 Version 1.1 pre-freeze checklist added; constitutional substance unchanged |
+| 1.1 Frozen | July 29, 2026 | F.I. Forgot | Controlled Version 1.1 Freeze promotion — `FI-DSN-CLS-002` Version 1.0 Frozen consumed as expansion authority; `CLS-CPR` introduced as nineteenth classification; taxonomy expanded eighteen → nineteen classifications and six → seven families; Independent Constitutional Review Pass; MIN-001 and MIN-002 corrected; Focused Independent Rereview Pass; Version 1.1 freeze checklist completed; Version 1.1 supersedes Version 1.0 as binding classification baseline; no identifier reservation; no REG modification; no QUE modification; no Layer B drafting authorization; no Product Sprint 004 authorization |
 
 ---
 
