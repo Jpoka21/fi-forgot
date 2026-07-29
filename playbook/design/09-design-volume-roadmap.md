@@ -194,7 +194,7 @@ Future volumes SHALL use append-only numbering (07, 08, …) per Section 25.
 | **03** | Card Design System | `FI-DSN-*` | Per `OQ-DSN-009` |
 | **04** | Artwork Intelligence | `FI-DSN-*` | Per `OQ-DSN-009` |
 | **05** | Signature Collections | `FI-DSN-*` | Per `OQ-DSN-009` |
-| **06** | Creative Production | `FI-DSN-*` | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 0.3 Draft — pending architecture freeze) |
+| **06** | Creative Production | `FI-DSN-*` | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 1.0 Frozen — architecture freeze complete July 29, 2026; not Entry Ready; Layer B not authorized; Product Sprint 004 not authorized) |
 
 ### 6.3 Foundation posture and Volume Status
 
@@ -209,7 +209,7 @@ Future volumes SHALL use append-only numbering (07, 08, …) per Section 25.
 | **03** | **Defined** | Awaiting predecessors |
 | **04** | **Defined** | Awaiting predecessors and governed design systems |
 | **05** | **Defined** | Awaiting predecessors |
-| **06** | **Defined** | Volume 06 Creative Production Architecture Version 0.3 Draft committed to repository (`playbook/design/volume-06-creative-production/01-creative-production-architecture.md`). Cross-volume architecture harmonization complete across Volumes 02 and 05 and the Design README. Post-harmonization close-out pending: full post-H4 combined-system rereview and formal Version 1.0 Freeze Review; not **Entry Ready**; Layer B not authorized |
+| **06** | **Defined** | Volume 06 Creative Production Architecture Version **1.0 Frozen** (`playbook/design/volume-06-creative-production/01-creative-production-architecture.md`). Architecture **frozen** July 29, 2026. Initial controlled repository admission **complete**. Full post-H4 combined-system constitutional rereview **complete**. Formal Version 1.0 Freeze Review **complete**. Governed Version 1.0 Freeze commit **complete**. Cross-volume architecture harmonization complete across Volumes 02 and 05 and the Design README. **Not Entry Ready**; **not Structurally Complete**; Layer B not authorized; Product Sprint 004 not authorized |
 
 At Version 1.0 freeze (July 23, 2026), Volumes 01–05 had the roadmap states shown above for **01** through **05**. Volume 06 is added by governed Version 1.1 revision per Section 25.
 
@@ -453,7 +453,7 @@ Roadmap state regression is governed and auditable.
 | **Upstream** | Volumes 01–04 applicable frozen law and Compliance Boundaries; Volume 01 `FI-MFG-*` as Design-Time Feasibility input |
 | **Downstream** | Volume 05 (GPRA intake for **approved artwork** / membership consideration); production artwork libraries; engineering specifications |
 | **Constitutional posture** | Volume 06 consumes governing law from Volumes 01–04; produces GPRAs for downstream consumers; Volume 05 is downstream for artifact intake despite lower numeric identifier (Section 6.4) |
-| **Volume governance document** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 0.3 Draft) |
+| **Volume governance document** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 1.0 Frozen) |
 | **Completion summary** | Section 18.5 |
 
 ### 11.7 Rejected volume concepts
@@ -693,7 +693,7 @@ Volume 05 (Signature Collections — GPRA intake and permanent membership)
 | **03** | Volume 02 **Entry Ready**; MFG constraints identified |
 | **04** | Volumes 02–03 **Entry Ready**; governed design alternatives identifiable; GOV-004 frozen |
 | **05** | Volumes 02–04 **Entry Ready**; collection scope defined in planning; drafting and freeze of upstream-dependent standards subject to Hard dependencies and Section 15.4 |
-| **06** | Volumes 02–04 **Entry Ready**; applicable Volume 01 `FI-MFG-*` constraints identified; Volume 06 architecture document committed (Version 0.3 Draft); cross-volume harmonization with Volumes 02 and 05 and Design README **complete**; initial controlled repository admission **complete**; not **Entry Ready** — remaining: full post-H4 combined-system rereview, formal Version 1.0 Freeze Review per Volume 06 architecture Section 22.1; material volume-scoped open questions nonblocking |
+| **06** | Volumes 02–04 **Entry Ready**; applicable Volume 01 `FI-MFG-*` constraints identified; Volume 06 architecture document **Frozen** (Version 1.0 Frozen, July 29, 2026); cross-volume harmonization with Volumes 02 and 05 and Design README **complete**; initial controlled repository admission **complete**; full post-H4 combined-system constitutional rereview **complete**; formal Version 1.0 Freeze Review **complete**; governed Version 1.0 Freeze commit **complete**; **not Entry Ready** — volume entry conditions not yet satisfied; **not Structurally Complete**; material volume-scoped open questions nonblocking; Layer B not authorized; Product Sprint 004 not authorized |
 
 ---
 
@@ -865,7 +865,7 @@ This framework does NOT require every future `FI-MFG-*` standard. It requires sa
 
 #### Volume 06 — Creative Production
 
-**Planning posture only.** The following are **provisional architectural planning areas** — not frozen Layer B standard titles. Exact artifact identifiers and titles are populated through governed REG planning after Volume 06 architecture freeze and Layer B authorization. Primary Classification assignment remains open per `OQ-V06-002`. Category classification as **Required** below is planning posture pending Volume 06 Version 1.0 architecture freeze review.
+**Planning posture only.** The following are **provisional architectural planning areas** — not frozen Layer B standard titles. Exact artifact identifiers and titles are populated through governed REG planning after Volume 06 architecture freeze and Layer B authorization. Primary Classification assignment remains open per `OQ-V06-002`. Volume 06 architecture freeze is **complete** (Version 1.0 Frozen, July 29, 2026). Category classification as **Required** below is planning posture for Layer B standards when separately authorized — Layer B authorization remains a distinct governed step.
 
 | Provisional architectural area | Planning classification | Completion effect |
 |-------------------------------|-------------------------|-------------------|

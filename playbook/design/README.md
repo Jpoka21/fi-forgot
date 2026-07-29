@@ -233,7 +233,7 @@ The Design Library is organized into **six production volumes** (Volume 01 throu
 | **Purpose** | Governed transformation of declared production intent into Governed Production-Ready Artifacts through realization, Review Determination, Approval, and Governed Handoff |
 | **Owns** | Declared Production Intent; Production Obligation; Exploration; Realization; Realized Visual Artifact posture; Review Determination; production-readiness Approval; GPRA status; Governed Handoff |
 | **Does not own** | Visual identity permission (Volume 02); surface and spatial law (Volume 03); contextual selection (Volume 04); permanent collection membership (Volume 05); Manufacturing Validation, Manufacturing Execution, or Fulfillment Execution (Volume 01); Brain runtime artifact approval |
-| **Architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Version **0.3 Draft**; roadmap status **Defined**; unfrozen; **not Entry Ready**; no Layer B standards yet |
+| **Architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Version **1.0 Frozen**; **Frozen**; architecture freeze complete (July 29, 2026); roadmap status **Defined**; **not Entry Ready**; **not Structurally Complete**; Layer B not authorized; Product Sprint 004 not authorized; no Layer B standards yet |
 | **Upstream dependencies** | Applicable authority from Volumes 01 through 04 |
 | **Downstream consumers** | Volume 05 collection intake; production artwork libraries; engineering specifications |
 
@@ -374,7 +374,7 @@ This table is a **descriptive snapshot** only. Each artifact's Document Control 
 | Volume 03 Surface Implementation Architecture | Version **1.0** Frozen | — |
 | Volume 04 Artwork Intelligence Architecture | Version **1.0** Frozen | — |
 | Volume 05 Signature Collections Architecture | Version **1.1 Draft**, **Under revision** | Version **1.0** Frozen baseline (July 27, 2026) remains binding |
-| Volume 06 Creative Production Architecture | Version **0.3 Draft**; roadmap **Defined**; unfrozen; **not Entry Ready** | No Layer B standards established |
+| Volume 06 Creative Production Architecture | Version **1.0 Frozen**; **Frozen**; architecture freeze complete (July 29, 2026); roadmap **Defined**; **not Entry Ready**; **not Structurally Complete** | Layer B not authorized; Product Sprint 004 not authorized; no Layer B standards established |
 | Volume 01 Manufacturing and Production Standard | In development | — |
 | Design Planning Register (`FI-DSN-REG-001`) | Frozen | See `playbook/design/05-design-planning-register.md` for detailed Layer B status (Volumes 02–05) |
 
