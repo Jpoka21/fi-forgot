@@ -13,15 +13,15 @@
 | **Primary Volume** | 06 — Creative Production |
 | **Architectural domain** | Domain 2 — Artifact Realization Authority |
 | **Document** | `03-artifact-realization-governance-standard.md` |
-| **Status** | Partial Requirement Draft |
-| **Version** | 0.3 Draft |
+| **Status** | Requirement Draft |
+| **Version** | 0.4 Draft |
 | **Date** | July 29, 2026 |
 | **Freeze date** | — |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Approval status** | Not approved |
 | **Binding status** | Not binding |
-| **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`) — partial normative body drafted |
+| **Register posture** | `Drafted, Pending Freeze` (`FI-DSN-REG-001`) — full normative body drafted |
 | **Queue posture** | EO 19 — **In progress** (`FI-DSN-QUE-001`) |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
@@ -53,7 +53,7 @@
 
 ## 1. Purpose
 
-This standard is the **normative and constitutional foundation** for F.I. Forgot Volume 06 Domain 2 — Artifact Realization Authority under `CLS-CPR`. Normative requirements **`FI-DSN-STD-013-R01` through `FI-DSN-STD-013-R35`** are drafted for planning groups **G1**, **G8**, **G2**, **G3**, **G4**, **G5**, and **G6**. Groups **G7**, **G9**, **G10**, and **Brain Interaction** remain undrafted. This document does not claim full requirement completeness, approval, freeze, binding authority, or readiness for independent full constitutional review.
+This standard is the **normative and constitutional foundation** for F.I. Forgot Volume 06 Domain 2 — Artifact Realization Authority under `CLS-CPR`. Normative requirements **`FI-DSN-STD-013-R01` through `FI-DSN-STD-013-R51`** comprise the full requirement body for planning groups **G1**, **G8**, **G2**, **G3**, **G4**, **G5**, **G6**, **G7**, **G9**, **G10**, and **Brain Interaction**. This document does not claim approval, freeze, binding authority, or that independent constitutional review has passed.
 
 It answers the **locked governing question**:
 
@@ -61,7 +61,7 @@ It answers the **locked governing question**:
 
 **Governing-question lock:** This question is locked for subsequent STD-013 drafting unless a separately authorized amendment sprint changes it.
 
-Version 0.3 is a **Partial Requirement Draft**: normative requirements **R01** through **R35** govern planning groups **G1**, **G8**, **G2**, **G3**, **G4**, **G5**, and **G6**. Groups **G7**, **G9**, **G10**, and **Brain Interaction** remain undrafted; the full normative body is incomplete. Full-body independent requirement review and freeze remain unauthorized. Constitutional architecture from Sprint V06-D2.0 and V06-D2.1 remains authoritative for undrafted scope. This standard does not replace frozen Volume 06 Creative Production Architecture, frozen `FI-DSN-STD-012`, frozen upstream Volumes 01–04 standards, frozen `FI-DSN-GOV-004`, or deferred `FI-DSN-STD-014` and `FI-DSN-STD-015`.
+Version 0.4 is a **Requirement Draft**: normative requirements **R01** through **R51** govern all authorized planning groups. The full normative body is complete and ready for independent constitutional review. Approval, freeze, and binding authority remain unauthorized. This standard does not replace frozen Volume 06 Creative Production Architecture, frozen `FI-DSN-STD-012`, frozen upstream Volumes 01–04 standards, frozen `FI-DSN-GOV-004`, or deferred `FI-DSN-STD-014` and `FI-DSN-STD-015`.
 
 ---
 
@@ -101,7 +101,7 @@ See Section 10.
 
 ## 3. Definitions
 
-Terms needed by **R01** through **R35** support the partial normative body drafted for **G1**, **G8**, **G2**, **G3**, **G4**, **G5**, and **G6**. Additional Domain 2 terms associated with **G7**, **G9**, **G10**, and **Brain Interaction** remain subject to later requirement drafting. This section does not claim full normative definition completion.
+Terms needed by **R01** through **R51** support the full normative body. This section does not claim metadata schema ownership or implementation format definition.
 
 | Term | Definition |
 |------|------------|
@@ -246,7 +246,7 @@ When steps conflict, **principal normative subject** per `FI-DSN-VOL-001` Sectio
 | `FI-DSN-STD-013-R26` | Each governed **RVA** SHALL have distinguishable constitutional identity and SHALL remain attributable to at least one defined **Production Obligation** for its existence and version posture. | Company judgment |
 | `FI-DSN-STD-013-R27` | **RVA Version Lineage** SHALL remain traceable across successor versions within the authorized obligation scope. Successor **RVA** versions SHALL remain distinguishable from prior versions without prescribing numbering schemes, database identities, enums, filenames, or storage structures. | Company judgment |
 | `FI-DSN-STD-013-R28` | **Production Obligation** attribution for a governed **RVA** SHALL persist through iteration, successor version creation, and governed invalidation consideration. Domain 2 version handling SHALL NOT reinterpret underlying Program or **Production Obligation** establishment under `FI-DSN-STD-012`. | Company judgment |
-| `FI-DSN-STD-013-R29` | Material changes to applicable **Compliance Boundaries** affecting a governed **RVA** or active iteration SHALL trigger a governed Domain 2 decision concerning re-exploration need, successor version creation, or invalidation consideration, with documentary evidence traceable to the upstream change. Final **RVA Superseded** and **RVA Invalidated** termination rules remain for undrafted G10 requirements. | Company judgment |
+| `FI-DSN-STD-013-R29` | Material changes to applicable **Compliance Boundaries** affecting a governed **RVA** or active iteration SHALL trigger a governed Domain 2 decision concerning re-exploration need, successor version creation, or invalidation consideration, with documentary evidence traceable to the upstream change. Final **RVA Superseded** and **RVA Invalidated** termination rules are governed by `FI-DSN-STD-013-R44` and `FI-DSN-STD-013-R45`; material **Compliance Boundary** changes affecting existing **RVA** versions are resolved under `FI-DSN-STD-013-R46`. | Company judgment |
 | `FI-DSN-STD-013-R30` | An **RVA** version SHALL NOT acquire GPRA status without authority of `FI-DSN-STD-014`. | Company judgment |
 
 ### 6.6 Iteration, rework, and successor RVA versions (G6)
@@ -257,9 +257,45 @@ When steps conflict, **principal normative subject** per `FI-DSN-VOL-001` Sectio
 | `FI-DSN-STD-013-R32` | Rework triggered by downstream Review SHALL be consumed as an external trigger from `FI-DSN-STD-014` only. This standard SHALL NOT create, issue, or authorize Review Determinations or Review-layer rework authority. | Company judgment |
 | `FI-DSN-STD-013-R33` | Iteration and rework SHALL preserve consumption of applicable **Compliance Boundaries**, **Waivers**, and **Unresolved Constraints** consistent with `FI-DSN-STD-013-R08` and `FI-DSN-STD-013-R09`. | Company judgment |
 | `FI-DSN-STD-013-R34` | Material upstream changes affecting the obligation scope SHALL trigger reconsideration, re-exploration, or governed successor version decision as constitutionally required under `FI-DSN-STD-013-R10` and `FI-DSN-STD-013-R29`. | Company judgment |
-| `FI-DSN-STD-013-R35` | Successor **RVA** versions produced through iteration or rework SHALL remain constitutionally distinct from **RVA Superseded** and **RVA Invalidated** termination postures governed by undrafted G10 requirements. Iteration and rework SHALL NOT grant GPRA status, Review Determination, Governed Handoff authority, collection membership, or manufacturing authority. | Company judgment |
+| `FI-DSN-STD-013-R35` | Successor **RVA** versions produced through iteration or rework SHALL remain constitutionally distinct from **RVA Superseded** and **RVA Invalidated** termination postures governed by `FI-DSN-STD-013-R44`, `FI-DSN-STD-013-R45`, and `FI-DSN-STD-013-R46`. Iteration and rework SHALL NOT grant GPRA status, Review Determination, Governed Handoff authority, collection membership, or manufacturing authority. | Company judgment |
 
-**Undrafted groups:** G7 (method neutrality), G9 (provenance handoff), G10 (supersession, invalidation, Review handoff), and Brain Interaction remain unauthorized in this partial draft.
+### 6.7 Method neutrality and licensed or acquired intake (G7)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-013-R36` | **Created**, **generated**, **commissioned**, and **licensed or acquired** realization paths SHALL remain constitutionally equivalent for Domain 2 governance. Each path SHALL remain subject to the same applicable **Production Obligations**, **Compliance Boundaries**, realization provenance obligations, and downstream Review path without method-specific constitutional redesign. | Company judgment |
+| `FI-DSN-STD-013-R37` | **Licensed or Acquired Intake** SHALL enter the same governed Realization lifecycle as other realization paths and SHALL NOT constitute a separate constitutional lifecycle per Volume 06 P8 and §11.1. | Company judgment |
+| `FI-DSN-STD-013-R38` | Method choice SHALL NOT alter governed **RVA** existence criteria under `FI-DSN-STD-013-R22` through `FI-DSN-STD-013-R25` and SHALL NOT grant GPRA status, Review Determination, Governed Handoff authority, collection membership, or manufacturing authority. Governed documentary records MAY identify the applicable realization path without prescribing tools, vendors, APIs, workflows, pipelines, prompts, models, or storage systems. | Company judgment |
+| `FI-DSN-STD-013-R39` | **Licensed or Acquired Intake** SHALL remain traceable in governed documentary evidence to its governing source and applicable rights or permissions posture without inventing metadata field schemas, storage rules, or implementation formats under `FI-DSN-GOV-002`. | Company judgment |
+
+### 6.8 Provenance handoff and auditability (G9)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-013-R40` | Every material Domain 2 decision governed by this standard SHALL be attributable and reconstructable in governed documentary evidence. Domain 2 auditability SHALL persist through iteration, successor versions, **RVA Superseded**, and **RVA Invalidated** postures. | Company judgment |
+| `FI-DSN-STD-013-R41` | A **Realization Traceability Package** for a governed **RVA** version SHALL contain constitutionally sufficient documentary evidence for downstream Review to evaluate the artifact without granting Review authority. At minimum, the package SHALL reflect source or origin posture, governing realization path, applicable rights or permissions posture where material, **Production Obligation** attribution, **Current Program** relationship, applicable **Compliance Boundaries**, consumed **Waivers** and **Unresolved Constraints**, **Realization Commitment** basis, **RVA** identity and **RVA Version Lineage**, and material Domain 2 decisions affecting the artifact. | Company judgment |
+| `FI-DSN-STD-013-R42` | Realization provenance handoff obligations governed by this standard SHALL remain reconcilable with `FI-DSN-GOV-002` and `FI-DSN-GOV-003` without inventing metadata field schemas, field semantics, storage rules, or implementation formats. | Company judgment |
+| `FI-DSN-STD-013-R43` | Missing, incomplete, or unresolved provenance material to governed Review evaluation SHALL remain explicit in Domain 2 posture and MAY prevent **Review-Entry Readiness** under `FI-DSN-STD-013-R49`. | Company judgment |
+
+### 6.9 Supersession, invalidation, Shared-Source Linkage, and Review-Entry Readiness (G10)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-013-R44` | **RVA Superseded** SHALL be a governed termination posture recorded when a prior **RVA** version is replaced for forward governance by a successor **RVA** within the same **Production Obligation** scope under governed succession rules. **RVA Superseded** is constitutionally distinct from ordinary **RVA Iteration** under `FI-DSN-STD-013-R31` through `FI-DSN-STD-013-R35` and SHALL require documentary evidence of the succession basis. | Company judgment |
+| `FI-DSN-STD-013-R45` | **RVA Invalidated** SHALL be a governed termination posture recorded when a governed **RVA** no longer satisfies governing law or applicable bound **Compliance Boundaries** for forward Domain 2 authority. Governed invalidation SHALL require documentary evidence of the governing basis, SHALL terminate forward realization authority for the affected **RVA** version, and SHALL NOT grant Review Determination, GPRA status, Governed Handoff authority, collection membership, or manufacturing authority. | Company judgment |
+| `FI-DSN-STD-013-R46` | Material changes to applicable **Compliance Boundaries** affecting existing **RVA** versions, active iteration, or successor creation SHALL be resolved through a governed Domain 2 decision among re-exploration under `FI-DSN-STD-013-R10`, governed successor version creation, **RVA Superseded**, or **RVA Invalidated**, with documentary evidence traceable to the upstream change and without reinterpretation of Domain 1 authority under `FI-DSN-STD-012`. | Company judgment |
+| `FI-DSN-STD-013-R47` | **Shared-Source Linkage** SHALL NOT exist by default. One realization outcome satisfying more than one **Production Obligation** is permitted only under an explicit governed **Shared-Source Linkage** record that identifies each linked obligation, preserves independent attribution, and documents traceability without silent many-to-many attribution. Each linked obligation SHALL retain independent application of its applicable **Compliance Boundaries**, **Waivers**, and **Unresolved Constraints**. | Company judgment |
+| `FI-DSN-STD-013-R48` | **Shared-Source Linkage** SHALL NOT grant, propagate, or substitute for GPRA status, Review Determination, Governed Handoff authority, collection membership, or manufacturing authority across linked obligations. | Company judgment |
+| `FI-DSN-STD-013-R49` | **Review-Entry Readiness** posture MAY exist for a forward-active governed **RVA** version only when applicable Domain 2 obligations are satisfied — including valid **Realization Commitment**, governed **RVA** existence, applicable **Realization Traceability Package** posture under `FI-DSN-STD-013-R41`, and documented **RVA Version Lineage** including applicable **RVA Superseded** or **RVA Invalidated** termination posture for prior versions where relevant. A governed **RVA** version in **RVA Superseded** or **RVA Invalidated** termination posture SHALL NOT itself achieve **Review-Entry Readiness**. **Review-Entry Readiness** is not Review Determination, GPRA status, rejection, approval, Governed Handoff, collection membership, or manufacturing authority. | Company judgment |
+| `FI-DSN-STD-013-R50` | `FI-DSN-STD-014` MAY consume **Review-Entry Ready** outputs and **Realization Traceability Package** posture governed by this standard without reinterpreting Domain 2 decisions. This standard SHALL NOT govern Review criteria, Design-Time Feasibility evaluation, or Review Determinations. | Company judgment |
+
+### 6.10 Brain Interaction
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-013-R51` | Brain Runtime, the Writing Engine, and automated output MAY inform exploration and realization inputs within governed Domain 2 scope per `FI-DSN-GOV-004`. The Brain SHALL NOT create **Exploration-Entry Authorization**, Domain 1 **Waiver Authority**, exploration-posture waiver effect, **Realization Commitment**, governed **RVA** existence, GPRA status, Review Determination, rejection, approval, Governed Handoff authority, collection membership, manufacturing authority, or **Compliance Boundary** waiver, and SHALL NOT silently promote an artifact or substitute for required governed Domain 2 records. | Company judgment |
+
+**Full normative body:** All authorized planning groups are drafted (`FI-DSN-STD-013-R01`–`R51`).
 
 ---
 
@@ -391,14 +427,14 @@ This section refines the Volume 06 Stage Governance Matrix for Domain 2. Labels 
 | **RVA Candidate** | Proposed visual artifact under evaluation for governed **RVA** existence — per `FI-DSN-STD-013-R22` through `FI-DSN-STD-013-R25` |
 | **RVA Exists** | Governed **RVA** existence established per `FI-DSN-STD-013-R22` through `FI-DSN-STD-013-R25`; constitutional identity and **Production Obligation** attribution per `FI-DSN-STD-013-R26` through `FI-DSN-STD-013-R30` |
 | **RVA Iteration** | Successor version or rework within the authorized obligation scope — per `FI-DSN-STD-013-R31` through `FI-DSN-STD-013-R35` |
-| **RVA Superseded** | Prior **RVA** version replaced for forward governance within obligation scope — final termination rules undrafted (G10) |
-| **RVA Invalidated** | **RVA** no longer satisfies governing law or bound **Compliance Boundaries** for forward authority — final termination rules undrafted (G10) |
+| **RVA Superseded** | Prior **RVA** version replaced for forward governance within obligation scope — per `FI-DSN-STD-013-R44` |
+| **RVA Invalidated** | **RVA** no longer satisfies governing law or bound **Compliance Boundaries** for forward authority — per `FI-DSN-STD-013-R45` |
 
 ### 11.3 Downstream transition
 
 | Posture | Meaning |
 |---------|---------|
-| **Review-Entry Ready** | RVA and Realization Traceability Package are sufficient for `FI-DSN-STD-014` to commence Review — Domain 2 does not grant Review outcomes |
+| **Review-Entry Ready** | RVA and Realization Traceability Package are sufficient for `FI-DSN-STD-014` to commence Review — per `FI-DSN-STD-013-R49` and `FI-DSN-STD-013-R50`; Domain 2 does not grant Review outcomes |
 
 ### 11.4 Permissible conceptual relationships
 
@@ -427,13 +463,13 @@ Domain 2 postures do not grant GPRA, collection membership, manufacturing author
 
 ### 11.5 Shared-artifact posture
 
-Volume 06 architecture §5.12 permits one realization outcome to satisfy more than one Production Obligation only through **explicit Shared-Source Linkage** under governed rules. Default posture: one RVA or GPRA satisfying more than one obligation is not permitted. Resolution of governed linkage conditions is owned by `OQ-STD-013-004` and will be addressed in normative drafting without inventing implementation structures.
+Volume 06 architecture §5.12 permits one realization outcome to satisfy more than one Production Obligation only through **explicit Shared-Source Linkage** under governed rules per `FI-DSN-STD-013-R47` and `FI-DSN-STD-013-R48`. Default posture: one RVA or GPRA satisfying more than one obligation is not permitted.
 
 ---
 
 ## 12. Requirement Planning Architecture
 
-Planning groups for normative requirement drafting. **G1**, **G8**, **G2**, **G3**, **G4**, **G5**, and **G6** are drafted (`FI-DSN-STD-013-R01`–`R35`). **G7**, **G9**, **G10**, and **Brain Interaction** remain undrafted.
+Planning groups for normative requirement drafting. **All authorized groups** are drafted (`FI-DSN-STD-013-R01`–`R51`).
 
 | Group | Principal subject | Draft status |
 |-------|------------------|--------------|
@@ -444,10 +480,10 @@ Planning groups for normative requirement drafting. **G1**, **G8**, **G2**, **G3
 | **G4** | RVA existence — constitutional criteria for governed artifact existence | **Drafted** — `R22`–`R25` |
 | **G5** | RVA state, identity, versioning, and Production Obligation attribution | **Drafted** — `R26`–`R30` |
 | **G6** | Iteration, rework, and successor RVA versions within obligation scope | **Drafted** — `R31`–`R35` |
-| **G7** | Method neutrality — created, generated, commissioned, licensed or acquired equivalence | Undrafted |
-| **G9** | Provenance handoff and Domain 2 auditability — GOV-002 consumption without schema invention | Undrafted |
-| **G10** | RVA supersession, invalidation, Shared-Source Linkage, and downstream Review handoff to STD-014 | Undrafted |
-| **Brain Interaction** | Brain boundary within realization scope per GOV-004 | Undrafted |
+| **G7** | Method neutrality — created, generated, commissioned, licensed or acquired equivalence | **Drafted** — `R36`–`R39` |
+| **G9** | Provenance handoff and Domain 2 auditability — GOV-002 consumption without schema invention | **Drafted** — `R40`–`R43` |
+| **G10** | RVA supersession, invalidation, Shared-Source Linkage, and downstream Review handoff to STD-014 | **Drafted** — `R44`–`R50` |
+| **Brain Interaction** | Brain boundary within realization scope per GOV-004 | **Drafted** — `R51` |
 
 ---
 
@@ -534,9 +570,9 @@ These are constitutional concepts, not database records, schemas, or implementat
 |----|----------|--------|-------------|
 | `OQ-STD-013-001` | When may Exploration Posture be formally waived versus required before Realization commitment? | **Resolved** | Resolved in partial draft — `FI-DSN-STD-013-R14`; waiver effect permitted only when applicable Domain 1 waiver posture supports bypass; Active exploration required otherwise |
 | `OQ-STD-013-002` | What constitutes sufficient Exploration Posture exit to authorize Realization for a defined obligation scope? | **Resolved** | **Exploration Exit Ready** in `FI-DSN-STD-013-R15`; separate **Realization Commitment** governed by `FI-DSN-STD-013-R17` through `FI-DSN-STD-013-R21`; Exit Ready does not automatically create Commitment |
-| `OQ-STD-013-003` | How shall RVA versioning relate to Production Obligation scope when upstream Compliance Boundaries materially change? | **Partially resolved** | Governed decision and traceability in `FI-DSN-STD-013-R29` and `FI-DSN-STD-013-R34`; final **RVA Superseded** and **RVA Invalidated** rules deferred to undrafted G10 |
-| `OQ-STD-013-004` | Under what governed conditions may one realization outcome satisfy multiple Production Obligations through explicit linkage? | **Open** | Owned by STD-013 — architecture §11.5 frames default; resolution deferred to G10 |
-| `OQ-STD-013-005` | What minimum provenance handoff obligations must exist at Realization without inventing GOV-002 schemas? | **Open** | Owned by STD-013 — intersects inherited `OQ-DSN-003` |
+| `OQ-STD-013-003` | How shall RVA versioning relate to Production Obligation scope when upstream Compliance Boundaries materially change? | **Resolved** | Governed decision among re-exploration, successor version creation, **RVA Superseded**, and **RVA Invalidated** in `FI-DSN-STD-013-R29`, `FI-DSN-STD-013-R34`, and `FI-DSN-STD-013-R46`; traceability required; Domain 1 authority not reinterpreted |
+| `OQ-STD-013-004` | Under what governed conditions may one realization outcome satisfy multiple Production Obligations through explicit linkage? | **Resolved** | Default prohibition and explicit **Shared-Source Linkage** governed by `FI-DSN-STD-013-R47` and `FI-DSN-STD-013-R48`; independent attribution and boundary application required |
+| `OQ-STD-013-005` | What minimum provenance handoff obligations must exist at Realization without inventing GOV-002 schemas? | **Resolved** | Minimum **Realization Traceability Package** obligations in `FI-DSN-STD-013-R41`; GOV-002/GOV-003 reconcilability in `FI-DSN-STD-013-R42`; unresolved provenance in `FI-DSN-STD-013-R43`; `OQ-DSN-003` schema ownership not resolved |
 | `OQ-DSN-003` | Inherited metadata / provenance open question | **Inherited — not owned** | STD-013 may govern handoff obligations only; must not resolve schema ownership |
 | `OQ-V06-006` | Conditional Review Determination retention | **Not owned** | STD-014 domain |
 | `OQ-V06-007` | Handoff Posture split vs unified | **Not owned** | STD-015 domain |
@@ -545,7 +581,7 @@ These are constitutional concepts, not database records, schemas, or implementat
 
 ---
 
-## 18. Partial Requirement Draft Readiness Assessment
+## 18. Requirement Draft Readiness Assessment
 
 | Criterion | Result |
 |-----------|--------|
@@ -557,16 +593,19 @@ These are constitutional concepts, not database records, schemas, or implementat
 | G4 RVA existence drafted | Pass — `R22`–`R25` |
 | G5 RVA state and versioning drafted | Pass — `R26`–`R30` |
 | G6 iteration and rework drafted | Pass — `R31`–`R35` |
-| G7, G9, G10, and Brain Interaction | Undrafted — as authorized |
-| Continuous requirement identifiers | Pass — `R01`–`R35` |
+| G7 method neutrality drafted | Pass — `R36`–`R39` |
+| G9 provenance handoff drafted | Pass — `R40`–`R43` |
+| G10 supersession, invalidation, linkage, Review-entry drafted | Pass — `R44`–`R50` |
+| Brain Interaction drafted | Pass — `R51` |
+| Continuous requirement identifiers | Pass — `R01`–`R51` |
 | Authority boundaries preserved | Pass |
 | Implementation independence preserved | Pass |
 
-**Readiness determination:** **Partial Requirement Draft — Pending Independent Partial Requirement Review (R01–R35)**
+**Readiness determination:** **Requirement Draft — Pending Independent Full Constitutional Review**
 
-This document is a **Partial Requirement Draft only**. Groups G7, G9, G10, and Brain Interaction remain undrafted. This draft does not claim full requirement completeness, approval, freeze, binding authority, readiness for independent full constitutional review, or Product Sprint 004 readiness.
+This document is a **Requirement Draft** with a complete normative body (`FI-DSN-STD-013-R01`–`R51`). Independent constitutional review has not passed. This draft does not claim approval, freeze, binding authority, freeze readiness, or Product Sprint 004 readiness.
 
-**Next validation gate:** Independent Partial Requirement Review of the complete drafted tranche (`FI-DSN-STD-013-R01`–`R35`).
+**Next validation gate:** Independent Full Constitutional Review of `FI-DSN-STD-013`.
 
 ---
 
@@ -574,6 +613,7 @@ This document is a **Partial Requirement Draft only**. Groups G7, G9, G10, and B
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.4 Requirement Draft | July 29, 2026 | F.I. Forgot | Sprint V06-D2.9 — final normative requirements `FI-DSN-STD-013-R36`–`R51` for G7, G9, G10, and Brain Interaction; full body `R01`–`R51`; `OQ-STD-013-003` through `005` resolved at constitutional layer; REG advanced to **Drafted, Pending Freeze**; EO 19 remains **In progress**; not approved; not frozen; not binding; independent full constitutional review pending; no downstream drafting; no Product Sprint 004 authorization |
 | 0.3 Partial Requirement Draft | July 29, 2026 | F.I. Forgot | Sprint V06-D2.7 — second normative requirements `FI-DSN-STD-013-R17`–`R35` for G3, G4, G5, and G6; G7, G9, G10, and Brain Interaction undrafted; `OQ-STD-013-002` resolved; `OQ-STD-013-003` partially resolved; EO 19 remains **In progress**; not approved; not frozen; not binding; no full requirement review; no downstream drafting; no Product Sprint 004 authorization |
 | 0.2 Partial Requirement Draft | July 29, 2026 | F.I. Forgot | Sprint V06-D2.5 — first normative requirements `FI-DSN-STD-013-R01`–`R16` for G1, G8, and G2 only; G3 through G10 and Brain Interaction undrafted; `OQ-STD-013-001` resolved; `OQ-STD-013-002` partially resolved; EO 19 remains **In progress**; not approved; not frozen; not binding; no full requirement review; no downstream drafting; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 29, 2026 | F.I. Forgot | Sprint V06-D2.2 — initial architecture draft; locked governing question embedded; Domain 2 constitutional purpose, principal subject, ownership test, positive scope, exclusions, inputs and outputs, lifecycle model, method neutrality, Brain interaction, planning groups G1–G10, owned open questions `OQ-STD-013-001`–`005`; REG synchronized to Architecture Draft; EO 19 remains **In progress**; not approved; not frozen; not binding; no normative requirements; no downstream drafting; no Product Sprint 004 authorization |
