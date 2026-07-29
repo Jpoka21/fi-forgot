@@ -209,7 +209,7 @@ Future volumes SHALL use append-only numbering (07, 08, …) per Section 25.
 | **03** | **Defined** | Awaiting predecessors |
 | **04** | **Defined** | Awaiting predecessors and governed design systems |
 | **05** | **Defined** | Awaiting predecessors |
-| **06** | **Defined** | Volume 06 Creative Production Architecture Version 0.3 Draft authored (not yet committed to repository). Cross-volume architecture harmonization complete across Volumes 02 and 05 and the Design README. Post-harmonization close-out pending: Volume 06 metadata reconciliation and initial repository commit, full combined-system rereview, and formal Version 1.0 Freeze Review; not **Entry Ready**; Layer B not authorized |
+| **06** | **Defined** | Volume 06 Creative Production Architecture Version 0.3 Draft committed to repository (`playbook/design/volume-06-creative-production/01-creative-production-architecture.md`). Cross-volume architecture harmonization complete across Volumes 02 and 05 and the Design README. Post-harmonization close-out pending: full post-H4 combined-system rereview and formal Version 1.0 Freeze Review; not **Entry Ready**; Layer B not authorized |
 
 At Version 1.0 freeze (July 23, 2026), Volumes 01–05 had the roadmap states shown above for **01** through **05**. Volume 06 is added by governed Version 1.1 revision per Section 25.
 
@@ -693,7 +693,7 @@ Volume 05 (Signature Collections — GPRA intake and permanent membership)
 | **03** | Volume 02 **Entry Ready**; MFG constraints identified |
 | **04** | Volumes 02–03 **Entry Ready**; governed design alternatives identifiable; GOV-004 frozen |
 | **05** | Volumes 02–04 **Entry Ready**; collection scope defined in planning; drafting and freeze of upstream-dependent standards subject to Hard dependencies and Section 15.4 |
-| **06** | Volumes 02–04 **Entry Ready**; applicable Volume 01 `FI-MFG-*` constraints identified; Volume 06 architecture document drafted (Version 0.3 Draft); cross-volume harmonization with Volumes 02 and 05 and Design README **complete**; not **Entry Ready** — remaining: metadata reconciliation, initial repository commit, full post-H4 combined-system rereview, formal Version 1.0 Freeze Review per Volume 06 architecture Section 22.1; material volume-scoped open questions nonblocking |
+| **06** | Volumes 02–04 **Entry Ready**; applicable Volume 01 `FI-MFG-*` constraints identified; Volume 06 architecture document committed (Version 0.3 Draft); cross-volume harmonization with Volumes 02 and 05 and Design README **complete**; initial controlled repository admission **complete**; not **Entry Ready** — remaining: full post-H4 combined-system rereview, formal Version 1.0 Freeze Review per Volume 06 architecture Section 22.1; material volume-scoped open questions nonblocking |
 
 ---
 

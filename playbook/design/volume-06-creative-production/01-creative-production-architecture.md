@@ -29,7 +29,7 @@
 | **Upstream governance** | `playbook/design/README.md` (six-volume harmonization committed); `playbook/design/09-design-volume-roadmap.md` (Version 1.1 Draft); frozen Volume 01 manufacturing standards; Volume 02 Visual Design Architecture (Version 1.1 Draft, Under revision — residual harmonization complete per H4.1; Version 1.0 Frozen baseline remains binding); frozen Volume 03 Surface Implementation Architecture and frozen Volume 03 `FI-DSN-*` standards; frozen Volume 04 Artwork Intelligence Architecture and frozen Volume 04 `FI-DSN-*` standards; Volume 05 Signature Collections Architecture (Version 1.1 Draft, Under revision — residual harmonization complete per H4.2; Version 1.0 Frozen baseline remains binding) |
 | **Downstream consumers** | Future Volume 06 `FI-DSN-*` standards; Volume 05 Signature Collections intake posture; production artwork libraries; engineering specifications; manufacturing validation |
 | **Cross-volume harmonization** | **Complete** — H1 VOL-001 recognition; H2 Volume 05 authority re-homing; H3 Volume 02 lifecycle extension; README; H4.1 residual Volume 02; H4.2 residual Volume 05; H4.3 roadmap status reconciliation |
-| **Repository posture** | **Untracked** — H4.4 metadata reconciliation in progress; initial controlled repository commit pending focused independent review |
+| **Repository posture** | **Tracked** — initial controlled repository admission complete; full post-H4 combined-system rereview pending |
 | **Harmonization posture** | Cross-volume harmonization complete. Volume 06 remains Architecture Draft, Version 0.3 Draft, unfrozen, and **not Entry Ready**. Layer B not authorized. Product Sprint 004 not authorized |
 
 **Standard statement:** F.I. Forgot maintains **one authoritative Creative Production Architecture** for Volume 06 that defines durable constitutional purpose, constitutional axioms, governed terminology, three-domain authority architecture, lifecycle ownership, Stage Governance Matrix, inheritance and decision placement rules, and cross-volume relationships for the governed transformation of declared production intent into Governed Production-Ready Artifacts. This document governs how Volume 06 is organized. It does not author normative production requirements, review workflow steps, approval checklist prose, metadata schemas, manufacturing operational policy, collection membership rules, engineering behavior, or Brain runtime logic.
@@ -401,7 +401,7 @@ A Realized Visual Artifact or Governed Production-Ready Artifact that violates f
 
 Volume 06 architectural planning MAY proceed when Volumes 01 through 04 required upstream artifacts needed for realization governance are identifiable as Compliance Boundary inputs.
 
-`FI-DSN-VOL-001` Version 1.1 Draft recognizes Volume 06 and the V04→V06→V05 constitutional dependency. Cross-volume harmonization and residual Volume 02 and Volume 05 corrections are **complete**. Volume 06 remains **not Entry Ready**. Remaining prerequisites are completion of this H4.4 metadata correction, focused independent constitutional rereview, the controlled initial repository commit, the full post-H4 combined-system rereview, and the formal Volume 06 Version 1.0 Freeze Review per Section 22.1.
+`FI-DSN-VOL-001` Version 1.1 Draft recognizes Volume 06 and the V04→V06→V05 constitutional dependency. Cross-volume harmonization and residual Volume 02 and Volume 05 corrections are **complete**. H4.4 metadata reconciliation, focused independent constitutional rereview, and initial controlled repository admission are **complete**. Volume 06 remains **not Entry Ready**. Remaining prerequisites: full post-H4 combined-system rereview and formal Volume 06 Version 1.0 Freeze Review per Section 22.1.
 
 ---
 
@@ -870,8 +870,8 @@ Volume Supplement alone is **insufficient** for authority re-homing from enginee
 | 4 | Volume 02 Architecture Section 11 extension and residual harmonization | **Complete** (H3; H4.1) |
 | 5 | README descriptive update | **Complete** |
 | 6 | Roadmap harmonization-status reconciliation | **Complete** (H4.3) |
-| 7 | Volume 06 metadata reconciliation | **In progress** (H4.4 drafting) |
-| 8 | Volume 06 initial controlled repository commit | **Incomplete** — pending focused independent review |
+| 7 | Volume 06 metadata reconciliation | **Complete** (H4.4) |
+| 8 | Volume 06 initial controlled repository commit | **Complete** — initial controlled repository admission |
 | 9 | Full post-H4 combined-system rereview | **Incomplete** |
 | 10 | Volume 06 Version 1.0 Freeze Review | **Incomplete** |
 | 11 | Layer B authorization | **Not started** — out of scope for H4 |
@@ -904,7 +904,7 @@ Before Version 1.0 freeze promotion, Architecture Validation MUST pass:
 | Open questions | Only nonblocking questions remain in Section 23 |
 | Independent peer review | Version 0.3 independent constitutional review dispositioned |
 | Cross-volume amendments | Section 21 harmonization amendments **complete**; post-H4 combined-system rereview **pending** |
-| Post-amendment consistency | H4.1–H4.4 correction work in progress or complete per Section 21.2; **full** post-H4 combined-system rereview **pending** |
+| Post-amendment consistency | H4.1–H4.4 correction work **complete** per Section 21.2; **full** post-H4 combined-system rereview **pending** |
 | No unresolved authority conflict | No frozen document still assigns creative production authority to Engineering |
 
 ### 22.1 Freeze Gate
@@ -924,8 +924,8 @@ Version 1.0 freeze promotion REQUIRES all of the following in addition to Archit
 
 **Remaining close-out prerequisites:**
 
-- [ ] H4.4 metadata reconciliation and focused independent review
-- [ ] Volume 06 initial controlled repository commit (Version 0.3 Draft)
+- [x] H4.4 metadata reconciliation and focused independent review
+- [x] Volume 06 initial controlled repository commit (Version 0.3 Draft)
 - [ ] Full post-H4 combined-system rereview
 - [ ] Post-amendment consistency verification completed against Sections 5.6, 8.1, 8.3, 11.2, and 17.4
 - [ ] Formal Volume 06 Version 1.0 Freeze Review completed per `FI-DSN-GOV-001`
@@ -947,7 +947,7 @@ Version 1.0 freeze promotion REQUIRES all of the following in addition to Archit
 
 | ID | Resolution |
 |----|------------|
-| `OQ-V06-001` | **Partially resolved for roadmap recognition.** Volume 06 is positioned after Volume 04 and before Volume 05 library belonging. H1 completed `FI-DSN-VOL-001` Volume 06 recognition; H4.3 completed harmonization-status reconciliation. Roadmap prerequisite satisfied. Volume 06 remains **not Entry Ready** — metadata reconciliation, initial repository commit, full post-H4 combined-system rereview, and formal Version 1.0 Freeze Review remain incomplete per Section 8.3 |
+| `OQ-V06-001` | **Partially resolved for roadmap recognition.** Volume 06 is positioned after Volume 04 and before Volume 05 library belonging. H1 completed `FI-DSN-VOL-001` Volume 06 recognition; H4.3 completed harmonization-status reconciliation. Roadmap prerequisite satisfied. Initial controlled repository admission complete. Volume 06 remains **not Entry Ready** — full post-H4 combined-system rereview and formal Version 1.0 Freeze Review remain incomplete per Section 8.3 |
 | `OQ-V06-003` | **Closed.** GPRA is canonical Approval output; Volume 05 **approved artwork** harmonized as GPRA at intake per Section 5.6 |
 | `OQ-V06-004` | **Closed.** This document is sufficient volume governance until first Layer B standard enters drafting per `OQ-DSN-009` precedent |
 | `OQ-V06-005` | **Closed at constitutional layer.** Review dimensions are mandatory; human vs systematic validation is implementation detail bounded by Domain 3 standards |
@@ -975,7 +975,7 @@ Version 1.0 freeze promotion REQUIRES all of the following in addition to Archit
 
 ### Future revision notes
 
-Revision to a frozen Volume Governance baseline SHOULD occur only after architecture review, refinement as needed, and formal freeze review. Cross-volume harmonization is complete; Version 1.0 freeze remains blocked until H4.4 initial repository commit, full post-H4 combined-system rereview, and formal Version 1.0 Freeze Review per Section 22.1.
+Revision to a frozen Volume Governance baseline SHOULD occur only after architecture review, refinement as needed, and formal freeze review. Cross-volume harmonization is complete; Version 1.0 freeze remains blocked until full post-H4 combined-system rereview and formal Version 1.0 Freeze Review per Section 22.1.
 
 ---
 
@@ -1012,8 +1012,8 @@ Cross-volume harmonization amendments are **complete** (H1, H2, H3, README, H4.1
 
 | Step | Status |
 |------|--------|
-| Volume 06 metadata reconciliation (H4.4) | **In progress** |
-| Initial controlled repository commit | **Incomplete** |
+| Volume 06 metadata reconciliation (H4.4) | **Complete** |
+| Initial controlled repository commit | **Complete** |
 | Full post-H4 combined-system rereview | **Incomplete** |
 | Volume 06 Version 1.0 Freeze Review | **Incomplete** |
 
@@ -1023,10 +1023,10 @@ Cross-volume harmonization amendments are **complete** (H1, H2, H3, README, H4.1
 |-----------|---------|
 | Volume 06 internal constitutional stability | **Ready** — Version 0.3 Draft architecture text |
 | Cross-volume harmonization | **Complete** — H1 through H4.3 committed |
-| Initial repository admission | **Pending** — H4.4 focused review and controlled commit |
+| Initial repository admission | **Complete** — initial controlled repository admission |
 | Version 1.0 freeze | **Not yet** — requires close-out per Section 22.1 |
 
-**Expected next step:** H4.4 focused independent review → controlled initial repository commit → full post-H4 combined-system rereview → Version 1.0 Freeze Review.
+**Expected next step:** Full post-H4 combined-system rereview → Version 1.0 Freeze Review.
 
 ---
 
