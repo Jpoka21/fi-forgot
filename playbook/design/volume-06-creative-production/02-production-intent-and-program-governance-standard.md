@@ -13,16 +13,16 @@
 | **Primary Volume** | 06 — Creative Production |
 | **Architectural domain** | Domain 1 — Intent and Planning Authority |
 | **Document** | `02-production-intent-and-program-governance-standard.md` |
-| **Status** | Requirement Draft |
-| **Version** | 0.2 Draft |
+| **Status** | Frozen |
+| **Version** | 1.0 |
 | **Date** | July 29, 2026 |
-| **Freeze date** | — |
+| **Freeze date** | July 29, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
-| **Approval status** | Not approved |
-| **Binding status** | Not binding |
-| **Register posture** | `Drafted, Pending Freeze` (`FI-DSN-REG-001`) |
-| **Queue posture** | EO 18 — **In progress** after governed drafting kickoff (`FI-DSN-QUE-001`) |
+| **Approval status** | Approved |
+| **Binding status** | Binding |
+| **Register posture** | `Frozen` (`FI-DSN-REG-001`) |
+| **Queue posture** | EO 18 — **Completed (queue)** per Sprint V06-D1.4 freeze promotion (`FI-DSN-QUE-001`) |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -429,7 +429,7 @@ Realization, Review, Approval, and Handoff stages MUST NOT begin from **Intent U
 
 ---
 
-## 18. Requirement Draft Readiness Assessment
+## 18. Formal Freeze Gate Record
 
 | Criterion | Result |
 |-----------|--------|
@@ -438,10 +438,11 @@ Realization, Review, Approval, and Handoff stages MUST NOT begin from **Intent U
 | Groups G1–G10 populated | Pass |
 | Constitutional boundaries preserved | Pass |
 | Open questions resolved or explicitly retained | Pass |
+| `FI-DSN-GOV-001` §7.2 individual freeze gate | Pass |
 
-**Readiness determination:** **Requirement Draft Ready for Independent Review**
+**Readiness determination:** **Formal Individual Freeze Review passed** — promoted to **Frozen Design Standard**, Version **1.0**, July 29, 2026. Binding until revised per `FI-DSN-GOV-001` Section 15.
 
-This draft does **not** claim Review Passed, Freeze Ready, Frozen, Binding, Entry Ready, Structurally Complete, or Product Sprint 004 readiness.
+This standard does **not** claim Entry Ready, Structurally Complete, or Product Sprint 004 readiness. `FI-DSN-STD-013` through `FI-DSN-STD-015` drafting remains separately authorized.
 
 ---
 
@@ -449,6 +450,7 @@ This draft does **not** claim Review Passed, Freeze Ready, Frozen, Binding, Entr
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 | July 29, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Standard; Formal Individual Freeze Review passed per Sprint V06-D1.4; first Volume 06 `CLS-CPR` Domain 1 standard; 42 normative requirements (`FI-DSN-STD-012-R01` through `FI-DSN-STD-012-R42`); `FI-DSN-GOV-001` §7.2 freeze gate record; EO 18 exited; no downstream Layer B drafting; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 29, 2026 | F.I. Forgot | Sprint V06-D1.0 — governed drafting kickoff; initial architecture; governing question; principal subject; positive authority and exclusions; dependency classification; constitutional definitions; conceptual lifecycle model; requirement planning groups G1–G10; open questions `OQ-STD-012-001`–`003`; architecture readiness gate |
 | 0.2 Requirement Draft | July 29, 2026 | F.I. Forgot | Sprint V06-D1.1 — first normative requirement draft; continuous `FI-DSN-STD-012-R01` through `FI-DSN-STD-012-R42`; groups G1–G10 populated; locked governing question retained; lifecycle refined; `OQ-STD-012-001`–`003` resolved; REG synchronized to `Drafted, Pending Freeze`; EO 18 remains **In progress**; not approved; not frozen; not binding; no downstream drafting; no Product Sprint 004 authorization |
 
