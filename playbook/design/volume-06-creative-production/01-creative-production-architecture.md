@@ -19,7 +19,7 @@
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Version 1.1 Draft, Under revision; Version 1.0 Frozen July 23, 2026 remains binding until re-freeze) — Volume 06 formally recognized; V04→V06→V05 constitutional dependency established; harmonization-status reconciliation committed (H4.3) |
-| **Classification reference** | `FI-DSN-CLS-001` — Design Classification Strategy (Frozen Classification Strategy, Version 1.0, July 22, 2026) |
+| **Classification reference** | `FI-DSN-CLS-001` — Design Classification Strategy (Frozen Classification Strategy, Version 1.1 Frozen, July 29, 2026); `FI-DSN-CLS-002` — Classification Expansion Decision (Version 1.0 Frozen, July 29, 2026) — expansion authority |
 | **Identifier reference** | `FI-DSN-ID-001` — Design Identifier System (Frozen Identifier System, Version 1.0, July 22, 2026) |
 | **Metadata reference** | `FI-DSN-GOV-002` — Design Library Metadata Standard (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Register reference** | `FI-DSN-REG-001` — Design Planning Register (Frozen Planning Register, Version 1.0, July 22, 2026) |
@@ -953,11 +953,16 @@ Version 1.0 freeze promotion REQUIRES all of the following in addition to Archit
 | `OQ-V06-004` | **Closed.** This document is sufficient volume governance until first Layer B standard enters drafting per `OQ-DSN-009` precedent |
 | `OQ-V06-005` | **Closed at constitutional layer.** Review dimensions are mandatory; human vs systematic validation is implementation detail bounded by Domain 3 standards |
 
+### Resolved by post-freeze metadata reconciliation (July 29, 2026)
+
+| ID | Status | Resolution |
+|----|--------|------------|
+| `OQ-V06-002` | **Closed** | `FI-DSN-CLS-002` Version 1.0 Frozen approved expansion of the classification taxonomy. `FI-DSN-CLS-001` Version 1.1 Frozen implemented `CLS-CPR` as the active classification for Creative Production Realization. `CLS-CPR` is the Primary Classification for future Volume 06 Layer B standards when Creative Production Realization is the principal subject. `CLS-MFI` may be used as a Secondary Classification only when Design-Time Feasibility integration is materially governed and remains subordinate to the principal `CLS-CPR` subject. The classification decision does not itself reserve identifiers. The classification decision does not populate REG or QUE. The classification decision does not authorize Layer B drafting. The classification decision does not authorize Product Sprint 004. |
+
 ### Remaining open questions
 
 | ID | Question | Status | Safe default |
 |----|----------|--------|--------------|
-| `OQ-V06-002` | What Primary Classification (`CLS-*`) should govern Volume 06 standards — extend `CLS-ART`, distribute by domain, or authorize new classification through governed `FI-DSN-CLS-001` revision? | Open — classification | Principal-subject placement per `FI-DSN-CLS-001`; no new `CLS-*` in this architecture document |
 | `OQ-V06-006` | Should conditional Review Determination be retained or collapsed to pass/fail only at Layer B standard freeze? | Open — drafting detail | Conditional pass permitted constitutionally; Layer B standards may narrow |
 | `OQ-V06-007` | Should Handoff Posture always split into library intake and production catalog classes, or may a single handoff serve both when rules are identical? | Open — handoff detail | Split by default when downstream rules may diverge |
 | `OQ-DSN-003` | Visual Source controlled metadata schema | Open — inherited | Volume 06 proceeds; realization standards defer schema specifics |
@@ -1014,7 +1019,6 @@ All Round 1 blocking issues and Version 0.2 independent review minor clarificati
 
 ### Remaining open constitutional questions
 
-- `OQ-V06-002` — Primary Classification assignment (nonblocking for harmonization and V06 architecture freeze)
 - `OQ-V06-006` — Conditional Review Determination retention at Layer B freeze (deferrable to Layer B)
 - `OQ-V06-007` — Handoff Posture split vs unified (deferrable to Layer B)
 - Inherited: `OQ-DSN-003`, `OQ-DSN-008`

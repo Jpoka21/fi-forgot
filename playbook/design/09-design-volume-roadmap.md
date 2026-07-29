@@ -449,7 +449,12 @@ Roadmap state regression is governed and auditable.
 | **Purpose** | Govern the transformation of declared creative intent into **Governed Production-Ready Artifacts (GPRAs)** through planning, exploration, realization, review, approval, and handoff |
 | **Major scope** | Production Program; Declared Production Intent; Production Obligation; Realized Visual Artifact (RVA); Governed Production-Ready Artifact (GPRA); Review and Approval; Governed Handoff; manufacturing boundary at Design-Time Feasibility |
 | **Out of scope** | Visual identity permission (Volume 02); surface architecture (Volume 03); contextual selection authority and Brain Visual Selection Decision policy (Volume 04); permanent collection membership (Volume 05); Manufacturing Validation and Fulfillment Execution (Volume 01 operational layer); Brain runtime behavior; implementation technology |
-| **Typical classifications** | Principal classification assignment pending `OQ-V06-002`; provisional architectural domains per Section 19.4 — not final `CLS-*` assignment |
+| **Typical classifications** | `CLS-CPR` — Creative Production Realization (Primary Classification for Layer B standards when realization transformation is the principal subject) |
+| **Primary Classification affinity** | `CLS-CPR` — Creative Production Realization |
+| **Primary Volume** | VOL-06 |
+| **Classification governing authority** | `FI-DSN-CLS-001` Version 1.1 Frozen (July 29, 2026) |
+| **Classification expansion authority** | `FI-DSN-CLS-002` Version 1.0 Frozen (July 29, 2026) |
+| **Layer B classification planning** | Primary Classification decision **complete** (`OQ-V06-002` closed); identifier reservation **pending**; REG population **pending**; QUE admission **pending**; Layer B drafting **unauthorized**; Product Sprint 004 **unauthorized** |
 | **Upstream** | Volumes 01–04 applicable frozen law and Compliance Boundaries; Volume 01 `FI-MFG-*` as Design-Time Feasibility input |
 | **Downstream** | Volume 05 (GPRA intake for **approved artwork** / membership consideration); production artwork libraries; engineering specifications |
 | **Constitutional posture** | Volume 06 consumes governing law from Volumes 01–04; produces GPRAs for downstream consumers; Volume 05 is downstream for artifact intake despite lower numeric identifier (Section 6.4) |
@@ -865,7 +870,7 @@ This framework does NOT require every future `FI-MFG-*` standard. It requires sa
 
 #### Volume 06 — Creative Production
 
-**Planning posture only.** The following are **provisional architectural planning areas** — not frozen Layer B standard titles. Exact artifact identifiers and titles are populated through governed REG planning after Volume 06 architecture freeze and Layer B authorization. Primary Classification assignment remains open per `OQ-V06-002`. Volume 06 architecture freeze is **complete** (Version 1.0 Frozen, July 29, 2026). Category classification as **Required** below is planning posture for Layer B standards when separately authorized — Layer B authorization remains a distinct governed step.
+**Planning posture only.** The following are **provisional architectural planning areas** — not frozen Layer B standard titles. Exact artifact identifiers and titles are populated through governed REG planning after Volume 06 architecture freeze and Layer B authorization. Primary Classification assignment is **complete** — `CLS-CPR` per `FI-DSN-CLS-001` Version 1.1 Frozen (`OQ-V06-002` closed). Volume 06 architecture freeze is **complete** (Version 1.0 Frozen, July 29, 2026). Category classification as **Required** below is planning posture for Layer B standards when separately authorized — Layer B authorization remains a distinct governed step. Identifier reservation, REG population, and QUE admission remain **pending**; Layer B drafting and Product Sprint 004 remain **unauthorized**.
 
 | Provisional architectural area | Planning classification | Completion effect |
 |-------------------------------|-------------------------|-------------------|
@@ -1101,7 +1106,12 @@ Before freeze promotion, confirm:
 | `OQ-DSN-008` | Should **Primary Volume** become a canonical REG/GOV-002 field? | Open — architecture | Structured REG **Notes** `Primary Volume: VOL-0n` per Section 14 |
 | `OQ-DSN-009` | Does each production volume require a separate volume governance document before first standard freeze, or is VOL-001 sufficient initially? Volume 06 now has explicit governance architecture (`01-creative-production-architecture.md`); Volume 06 governance-document requirement addressed through `OQ-V06-004`. Broader governance-timing posture for future volumes remains open. | Open — architecture (partially resolved for Volumes 02–06) | VOL-001 sufficient until first standard in volume enters drafting; Volume 06 architecture satisfies volume governance until Layer B authorization per `OQ-V06-004` |
 | `OQ-DSN-010` | Who approves Required Volume Artifact set changes after VOL-001 Version 1.0 freeze? | Open — governance detail | Section 19 four-authority model: Required Artifact set and category changes REQUIRE governed VOL-001 revision, formal review where material, and REG reconciliation; silent change PROHIBITED |
-| `OQ-V06-002` | What Primary Classification (`CLS-*`) should govern Volume 06 standards — extend `CLS-ART`, distribute by domain, or authorize new classification through governed `FI-DSN-CLS-001` revision? | Open — classification; nonblocking for VOL-001 Volume 06 inventory amendment | Principal-subject placement per `FI-DSN-CLS-001`; no new `CLS-*` in this roadmap revision |
+
+### Resolved by post-freeze metadata reconciliation (July 29, 2026)
+
+| ID | Status | Resolution |
+|----|--------|------------|
+| `OQ-V06-002` | **Closed** | `FI-DSN-CLS-002` Version 1.0 Frozen approved taxonomy expansion. `FI-DSN-CLS-001` Version 1.1 Frozen implemented `CLS-CPR` as the active classification for Creative Production Realization. `CLS-CPR` is Primary Classification affinity for Volume 06 Layer B standards when Creative Production Realization is the principal subject; Primary Volume VOL-06. `CLS-MFI` may be Secondary Classification only when Design-Time Feasibility integration is materially governed and remains subordinate. Volume 06 Layer B classification planning **complete** for Primary Classification decision. Identifier reservation **pending**; REG population **pending**; QUE admission **pending**; Layer B drafting **unauthorized**; Product Sprint 004 **unauthorized**. Classification decision does not reserve identifiers or populate REG or QUE. |
 
 ### Inherited nonblocking questions
 
@@ -1142,6 +1152,7 @@ Before freeze promotion, confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.1 Draft (metadata reconciliation) | July 29, 2026 | F.I. Forgot | Post-freeze metadata reconciliation — `OQ-V06-002` closed; `CLS-CPR` Primary Classification affinity for Volume 06; Section 11.6 and Section 19.4 classification planning posture updated; Section 29 resolution recorded; constitutional substance unchanged; Volume 06 status remains **Defined**; not Entry Ready; not Structurally Complete |
 | 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H4.3 — correction of Volume 06 harmonization-status metadata: Section 6.3 Volume 06 notes; Section 17.2 Entry Ready posture; OQ-DSN-009; Version 1.0 Frozen baseline preserved |
 | 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H1 — append Volume 06 Creative Production to Production Volume Inventory; Section 6.4 numeric vs constitutional dependency vs lifecycle order; Section 11.6 architecture; Volume Sequence and entry/completion updates; Section 19.4 provisional Required category planning posture; Roadmap Validation and Freeze Gate updates; governed revision pending independent review — not re-frozen |
 | 1.0 | July 23, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Volume Roadmap; Formal Freeze Review passed; identifier collision verified; `OQ-CLS-001`, `OQ-DSN-003`, `OQ-DSN-008`, `OQ-DSN-009`, and `OQ-DSN-010` remain deferred |
