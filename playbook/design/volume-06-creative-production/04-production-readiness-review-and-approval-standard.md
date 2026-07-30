@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`) |
 | **Queue posture** | EO 20 — **In progress** per Sprint V06-D5.4 requirement plan adoption (`FI-DSN-QUE-001`) |
-| **Sprint** | V06-D14.1 |
+| **Sprint** | V06-D16.1A |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed as Design-Time Feasibility Compliance Boundary inputs only. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **drafted** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; Section 21.6). G1 through G6 normative requirements drafted (`FI-DSN-STD-014-R01`–`R43`). G7–G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **committed** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G1 through G6 normative requirements committed (`FI-DSN-STD-014-R01`–`R43` continuous). G7 drafting preparation **complete** (Sprint V06-D15.1; Section 20.13). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** (Sprint V06-D16.1; constitutional corrections Sprint V06-D16.1A; Section 20.19); **`PD-STD-014-011` baseline resolved** preserved. Next gate: **governed G7 planning adoption commit**; G7 normative drafting remains **unauthorized**. G7–G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -549,15 +549,15 @@ Architecture Validation is governance-level validation before normative requirem
 | Post-approval states | Invalidated and Superseded aligned with Volume 06 §5.9 |
 | Rework boundary | Review authorization vs Domain 2 consumption split documented |
 | Implementation independence | No APIs, schemas, UI, workflows, vendors, or models prescribed |
-| Normative requirements | **Partial** — G1 drafted (`FI-DSN-STD-014-R01`–`R07`); G2 drafted (`FI-DSN-STD-014-R08`–`R13`); G3 drafted (`FI-DSN-STD-014-R14`–`R20`); G4 drafted (`FI-DSN-STD-014-R21`–`R26`); G5 drafted (`FI-DSN-STD-014-R27`–`R33`); G6 drafted (`FI-DSN-STD-014-R34`–`R43`); G7–G11 not drafted |
+| Normative requirements | **Partial** — G1 committed (`FI-DSN-STD-014-R01`–`R07`); G2 committed (`FI-DSN-STD-014-R08`–`R13`); G3 committed (`FI-DSN-STD-014-R14`–`R20`); G4 committed (`FI-DSN-STD-014-R21`–`R26`); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7–G11 not drafted |
 | Independent review | **Passed** — Sprint V06-D4.4; minor corrective findings resolved in Sprint V06-D4.4A; architecture committed in Sprint V06-D4.5 |
-| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 drafting preparation **complete**; G6 normative drafting **unauthorized** until separately authorized sprint |
+| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 committed (V06-D14.1); G7 drafting preparation **complete** (V06-D15.1); G7 planning decisions **`PD-STD-014-008`–`012` resolved** (V06-D16.1); next gate **governed G7 planning adoption commit**; G7 normative drafting **unauthorized** |
 
 ---
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D13.1A — constitutional clarifications to V06-D13.1 planning decisions without model change. `PD-STD-014-002` (MAGAC), `PD-STD-014-003` (EGWG), and baseline `PD-STD-014-005` (TOC-PA) **preserved**. MAGAC establishment versus activation clarified (Section 20.16.3); Approval and GPRA baseline clarified (Section 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G5 normative requirements committed (`FI-DSN-STD-014-R27`–`R33`; Section 21.5). G6 drafting preparation **complete** (Section 20.13). Section 16 records the architecture-era provisional group plan. **Section 20 is the authoritative requirement planning artifact** for future normative drafting. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). G6–G11 normative requirement drafting remains **unauthorized**.
+**Planning posture:** Sprint V06-D16.1A — G7 planning constitutional corrections. G6 normative requirements **committed** (`FI-DSN-STD-014-R34`–`R43`; Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`). G1 through G6 committed (`FI-DSN-STD-014-R01`–`R43` continuous). G7 drafting preparation **complete** (Section 20.13). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** (Section 20.19): **DDAC**, **EGDF**, **DSRA**, **TRPM** preserved; **`PD-STD-014-011` baseline resolved** preserved; termination authority **excluded and deferred**; cross-decision model clarified as logical constitutional dependency architecture. Next gate: **governed G7 planning adoption commit**; G7 normative drafting remains **unauthorized** until separately authorized after adoption. `PD-STD-014-002` (MAGAC), `PD-STD-014-003` (EGWG), and baseline `PD-STD-014-005` (TOC-PA) **preserved**. `OQ-STD-014-003`, `OQ-STD-014-005`, and `OQ-STD-014-007` **preserved** (unchanged). Section 16 records the architecture-era provisional group plan. **Section 20 is the authoritative requirement planning artifact** for future normative drafting. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). G7–G11 normative requirement drafting remains **unauthorized**.
 
 ### 20.1 Final requirement group plan
 
@@ -657,23 +657,25 @@ The accepted architecture groups G1–G11 are retained without merge, split, ren
 | **Likely requirement themes** | Approval authority classes; scope boundaries; withholding ground families; favorable Pass insufficiency; GPRA grant; instance and obligation binding; GPRA scope baseline |
 | **Collision risks** | Brain or workflow permission treated as Approval; membership implied by GPRA; reopening Review Determination during withholding |
 | **Drafting prerequisites** | G5 committed; **`PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` resolved** (Sprint V06-D13.1) |
+| **Commit status** | **Committed** — Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; `FI-DSN-STD-014-R34`–`R43` (Section 21.6) |
 | **Review gate** | GOV-004 and Volume 05 boundary review before Tranche 2 commit |
 
-#### G7 — Rejection and rework authorization
+#### G7 — Rejection, deficiency disposition, rework authorization, and return posture
 
 | Field | Planning content |
 |-------|------------------|
-| **Constitutional subject** | Review-layer rejection; rework authorization as external trigger to STD-013 |
-| **Positive authority** | Rejection posture; rework trigger at Review layer |
-| **Explicit exclusions** | Realization methods; successor RVA mechanics; iteration discipline |
-| **Inherited terms** | Rework return path — Volume 06 §11.1; `FI-DSN-STD-013-R32` |
-| **Upstream dependencies** | G5; frozen STD-013 |
-| **Downstream implications** | Consumed by STD-013; no GPRA |
-| **Open questions** | None — boundary architecturally defined |
-| **Likely requirement themes** | Rejection; fail-to-rework trigger; authorization vs consumption split |
-| **Collision risks** | Governing realization iteration; duplicating `R32` |
-| **Drafting prerequisites** | G5 outcome families planned |
-| **Review gate** | STD-013 rework boundary review before Tranche 2 commit |
+| **Constitutional subject** | Downstream disposition following **Conditional** or **Fail** **Review Determination** or withheld **Approval**; constitutionally governed deficiency records; rework authorization; return posture; resubmission or re-entry eligibility; requirement for subsequent governed **Review**; preservation of prior **Review Determination** records |
+| **Positive authority** | Downstream disposition after Conditional or Fail; deficiency record or deficiency-family architecture; rework authorization or withholding; return posture; resubmission or re-entry eligibility; subsequent governed **Review** requirement; relationship between **Approval** withholding and return posture where constitutionally supported |
+| **Explicit exclusions** | Changing an existing **Review Determination**; Pass, Conditional, or Fail definitions (G5); **Review** activity or dimensions (G3); **Approval** authority classes (G6); **Approval** withholding ground families (G6); GPRA grant (G6); GPRA expiration, revocation, succession, or supersession (G8–G9); Handoff consumer class binding (G9); Brain interaction detail (G10); Governed Handoff (G11); membership; manufacturing operations; implementation assignments; workflow state machines; UI, API, database, tooling, scoring, thresholds, or queues; realization methods (`FI-DSN-STD-013`) |
+| **Inherited terms** | **Review Determination**; Pass; Conditional; Fail; Failed Review Determination; rework return path — Volume 06 §11.1; `FI-DSN-STD-013-R32`; Conditional lifecycle — Section 20.15.3; Pass necessary-not-sufficient and Determination preservation — G6 (`FI-DSN-STD-014-R35`) |
+| **Inherited architectural constraints** | **Conditional** is a **completed** fixed **Review Determination**; there is no "Satisfied Conditional"; condition resolution requires a **subsequent governed Review** recording a **new** Determination; **Approval** eligibility arises only from a later **Pass**; deficiency records are **not** Determinations; rework authorization is distinct from deficiency identification and from operational work assignment; workflow or tooling state does not create constitutional authority; **Approval** withholding is not silently converted into **Fail** or **Conditional** |
+| **Upstream dependencies** | G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`); frozen `FI-DSN-STD-013`; Volume 06 §11.1 |
+| **Downstream implications** | Consumed by STD-013 rework consumption boundary; no GPRA; gates Tranche 2 completion |
+| **Open questions** | None blocking G7 normative drafting authorization at planning layer — `PD-STD-014-008` through `PD-STD-014-012` **resolved** (Sprint V06-D16.1; constitutional corrections V06-D16.1A; Section 20.19); `PD-STD-014-011` **baseline resolved** (Section 20.19.4); termination authority **excluded and deferred** — does not block planning adoption |
+| **Likely requirement themes** | Determination-to-disposition separation; DDAC authority classes; EGDF deficiency records; DSRA rework authorization; TRPM return posture; resubmission eligibility; subsequent Review routing; Determination preservation; Approval-withholding boundary |
+| **Collision risks** | Reopening or editing prior Determination; Satisfied Conditional; deficiency-as-Determination; automatic rework from Conditional or Fail; workflow permission as constitutional authority; collapsing Approval withholding into Fail; absorbing STD-013 realization mechanics; GPRA succession leakage |
+| **Drafting prerequisites** | G6 committed; **`PD-STD-014-008` through `PD-STD-014-012` resolved**; **`PD-STD-014-011` baseline resolved**; governed G7 planning adoption commit before G7 normative drafting authorization |
+| **Review gate** | STD-013 rework boundary review; G5/G6 boundary preservation review before Tranche 2 commit |
 
 #### G8 — Invalidated posture
 
@@ -789,13 +791,18 @@ Repository evidence does not make one answer constitutionally unavoidable at pla
 | `PD-STD-014-005` | What is the precise GPRA binding scope? | `OQ-STD-014-004`; Volume 06 §5.11 | G6; G9 | Pre-G6 (baseline); pre-G9 freeze | **Baseline resolved** (Sprint V06-D13.1) | Pass–Approval–GPRA chain and obligation-scoped instance binding baseline — Section 20.18; succession detail deferred to G9 |
 | `PD-STD-014-006` | What Review dimension set is mandatory at Layer B? | `OQ-STD-014-006`; Volume 06 P10 | G3 | Pre-G3 normative drafting (Tranche 1) | **Resolved** (Sprint V06-D6.1) | Mandatory constitutional core plus governed extensibility — Section 20.12 |
 | `PD-STD-014-007` | What material Compliance Boundary changes trigger Invalidated vs new Review only? | `OQ-STD-014-005`; GOV-003 | G8 | Pre-G8 normative drafting | **Open** | Invalidation triggers incomplete |
+| `PD-STD-014-008` | What deficiency classification model governs downstream disposition records? | Volume 06 §11.1; G5 deficiency-evidence boundary; `FI-DSN-STD-013-R32`; G3 Review dimensions | G7 | Pre-G7 normative drafting | **Resolved** (Sprint V06-D16.1) | EGDF — enumerated governed deficiency families — Section 20.19.1 |
+| `PD-STD-014-009` | What rework authorization model follows Conditional or Fail Determination? | Volume 06 §11.1; `FI-DSN-STD-013-R32`; G5 rework boundary | G7 | Pre-G7 normative drafting | **Resolved** (Sprint V06-D16.1) | DSRA — Determination-sensitive separate rework-authorization act — Section 20.19.2 |
+| `PD-STD-014-010` | What return posture model applies after Conditional, Fail, or withheld Approval? | G6 withholding baseline; Volume 06 §11.1; architecture rework split | G7 | Pre-G7 normative drafting | **Resolved** (Sprint V06-D16.1) | TRPM — three-route return posture model — Section 20.19.3 |
+| `PD-STD-014-011` | What subsequent Review entry model applies after Conditional or Fail? | G5 `FI-DSN-STD-014-R32`; G6 `FI-DSN-STD-014-R35`; Section 20.15.3 | G7 | Pre-G7 normative drafting | **Baseline resolved** (Sprint V06-D15.1) | New governed Review instance; prior Determination preserved; G2–G4 and G5 apply — Section 20.19.4 |
+| `PD-STD-014-012` | What constitutional authority classes may record deficiencies, authorize rework, define return posture, and authorize resubmission? | Volume 06 §11.1; G6 MAGAC boundary; `FI-DSN-STD-013-R06`; architecture Domain 3 ownership | G7 | Pre-G7 normative drafting | **Resolved** (Sprint V06-D16.1) | DDAC — Decision-stage Downstream Disposition Authority Classes — Section 20.19.5 |
 
 ### 20.5 Drafting tranche plan
 
 | Tranche | Groups | Purpose | Prerequisite decisions | Open questions to resolve | Expected output | Independent review gate | Correction gate | Commit gate | Advancement prohibition |
 |---------|--------|---------|------------------------|---------------------------|-----------------|------------------------|-----------------|-------------|-------------------------|
 | **1** | G1–G4 | Constitutional inheritance; entry boundary; Review dimensions; Design-Time Feasibility | Architecture adoption (complete); planning review passed; **`PD-STD-014-006` resolved** (Sprint V06-D6.1) | None blocking Tranche 1 drafting authorization | Partial Requirement Draft covering G1–G4 only | Independent constitutional review of Tranche 1 boundary separation | Corrective sprint if material boundary defects | Governed commit of Tranche 1 partial draft | Tranche 2 unauthorized until Tranche 1 review passed and committed |
-| **2** | G5–G7 | Review Determination; Approval and GPRA grant; rejection and rework | Tranche 1 committed; **`PD-STD-014-001` resolved** (Sprint V06-D11.1); G5 committed (Sprint V06-D12.1); **`PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` resolved** (Sprint V06-D13.1) | None blocking G6 | Partial Requirement Draft covering G5–G7 | Review vs Approval separation; STD-013 rework boundary | Corrective sprint if Determination/Approval collapsed | Governed commit of Tranche 2 partial draft | Tranche 3 unauthorized until Tranche 2 review passed and committed |
+| **2** | G5–G7 | Review Determination; Approval and GPRA grant; rejection and rework | Tranche 1 committed; **`PD-STD-014-001` resolved** (Sprint V06-D11.1); G5 committed (Sprint V06-D12.1); **`PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` resolved** (Sprint V06-D13.1); G6 committed (Sprint V06-D14.1); G7 drafting preparation complete (Sprint V06-D15.1); **`PD-STD-014-008` through `PD-STD-014-012` resolved** (Sprint V06-D16.1); **`PD-STD-014-011` baseline resolved** | None blocking G7 planning adoption at planning layer | Partial Requirement Draft covering G5–G7 | Review vs Approval separation; STD-013 rework boundary; Determination immutability; DDAC/EGDF/DSRA/TRPM fidelity | Corrective sprint if Determination/Approval collapsed or Satisfied Conditional introduced | Governed commit of Tranche 2 partial draft | Tranche 3 unauthorized until Tranche 2 review passed and committed |
 | **3** | G8–G11 | Invalidated; Superseded and succession; Brain interaction; STD-015 consumption | Tranche 2 accepted; **`PD-STD-014-004` mandatory**; `PD-STD-014-005` and `PD-STD-014-007` before G8 | `OQ-STD-014-003`; `OQ-STD-014-005`; `OQ-STD-014-007` | Partial or full Requirement Draft covering G8–G11 | Invalidated/Superseded distinction; G10 non-duplication; G11 Handoff non-absorption | Corrective sprint if STD-015 procedures appear | Governed commit; full body review before freeze readiness | Full-body freeze review unauthorized until all three tranches accepted |
 
 **G10 handling:** G10 normative themes are drafted in Tranche 3 but must **reference** G6 Approval prohibitions without restating full G6 body. G6 carries instance-binding Approval rules; G10 carries cross-cutting Brain/runtime prohibition reinforcement per GOV-004.
@@ -890,7 +897,7 @@ Counts are planning estimates only. They are not settled and do not assign requi
 
 ### 20.11 Normative drafting prohibition
 
-Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. Tranche 1 preparation is **complete** (Sprint V06-D6.1). `PD-STD-014-006` is **resolved**. G1 normative requirements **`FI-DSN-STD-014-R01`–`R07`** are drafted (Sprint V06-D7.1; Section 21.1). G2 normative requirements **`FI-DSN-STD-014-R08`–`R13`** are drafted (Sprint V06-D8.1; Section 21.2). G3 normative requirements **`FI-DSN-STD-014-R14`–`R20`** are drafted (Sprint V06-D9.1; Section 21.3). G4 normative requirements **`FI-DSN-STD-014-R21`–`R26`** are drafted (Sprint V06-D10.1; Section 21.4). Tranche 1 partial normative draft is **committed**. `PD-STD-014-001` is **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **`FI-DSN-STD-014-R27`–`R33`** are committed (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` are **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). Planning clarifications applied (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4; `OQ-STD-014-004` closed; `OQ-STD-014-007` opened). G6 drafting preparation is **complete** (Sprint V06-D13.1; Section 20.13). G6–G11 normative requirement drafting remains **unauthorized** until separately authorized drafting sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
+Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. Tranche 1 preparation is **complete** (Sprint V06-D6.1). `PD-STD-014-006` is **resolved**. G1 normative requirements **`FI-DSN-STD-014-R01`–`R07`** are committed (Sprint V06-D7.1; Section 21.1). G2 normative requirements **`FI-DSN-STD-014-R08`–`R13`** are committed (Sprint V06-D8.1; Section 21.2). G3 normative requirements **`FI-DSN-STD-014-R14`–`R20`** are committed (Sprint V06-D9.1; Section 21.3). G4 normative requirements **`FI-DSN-STD-014-R21`–`R26`** are committed (Sprint V06-D10.1; Section 21.4). Tranche 1 partial normative draft is **committed**. `PD-STD-014-001` is **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **`FI-DSN-STD-014-R27`–`R33`** are committed (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` are **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). Planning clarifications applied (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4; `OQ-STD-014-004` closed; `OQ-STD-014-007` opened). G6 normative requirements **`FI-DSN-STD-014-R34`–`R43`** are **committed** (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 drafting preparation is **complete** (Sprint V06-D15.1; Section 20.13). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` are resolved** (Sprint V06-D16.1; Section 20.19). Next gate: **governed G7 planning adoption commit**; G7 normative drafting remains **unauthorized** until separately authorized after adoption. G7–G11 normative requirement drafting remains **unauthorized** until separately authorized drafting sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
 
 ### 20.12 PD-STD-014-006 resolution — Review dimension model
 
@@ -1038,6 +1045,37 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **Expected requirement themes** | Authority classes; scope boundaries; withholding grounds; Pass insufficiency; Approval act; GPRA grant; instance binding; obligation-scoped GPRA baseline |
 | **Expected count range** | 8–11 (nonbinding) |
 | **Independent review focus** | GOV-004 and Volume 05 boundary review; PRR-P2–P4 and P7–P8 preserved; G5/G7 boundaries intact; no implementation prescription |
+| **Commit status** | **Committed** — Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; `FI-DSN-STD-014-R34`–`R43` (Section 21.6) |
+
+#### G7 — Rejection, deficiency disposition, rework authorization, and return posture
+
+| Field | Tranche 2 drafting posture |
+|-------|---------------------------|
+| **Drafting objective** | Freeze downstream disposition following **Conditional** or **Fail** **Review Determination** or withheld **Approval**; constitutionally governed deficiency records; rework authorization; return posture; resubmission or re-entry eligibility; and subsequent governed **Review** routing per Section 20.19 without redefining Pass, Conditional, or Fail; without governing GPRA succession, Handoff, membership, manufacturing, or implementation systems |
+| **Inherited terms** | **Review Determination**; Pass; Conditional; Fail; Failed Review Determination; rework return path — Volume 06 §11.1; `FI-DSN-STD-013-R32`; Conditional lifecycle — Section 20.15.3; Determination preservation — `FI-DSN-STD-014-R35` |
+| **Inherited architectural constraints** | **Conditional** is completed and immutable; no "Satisfied Conditional"; subsequent governed **Review** records new Determination; **Approval** eligibility only from later **Pass**; deficiency records are not Determinations; rework authorization ≠ deficiency identification ≠ operational assignment; workflow or tooling state ≠ constitutional authority; **Approval** withholding ≠ **Fail** or **Conditional** |
+| **Planning distinctions (minimum)** | (1) Review Determination outcome vs downstream disposition; (2) Conditional vs Fail disposition paths; (3) Determination vs deficiency record; (4) deficiency identification vs rework authorization; (5) rework authorization vs implementation or manufacturing work; (6) return posture vs Approval withholding; (7) subsequent submission vs subsequent Review; (8) subsequent Review vs reopening prior Determination; (9) constitutional permission to rework vs operational assignment; (10) G7 routing authority vs workflow or tooling state |
+| **Deficiency classification model** | **Resolved** — `PD-STD-014-008` **EGDF** (Section 20.19.1): exactly four mandatory core families (identity compliance, surface fit, contextual obligations, Design-Time Feasibility); separate governed extensibility rule; families classify downstream records — not scores, severity, rankings, or Determination outcomes |
+| **Rework authorization model** | **Resolved** — `PD-STD-014-009` **DSRA** (Section 20.19.2): Determination-sensitive separate rework-authorization act; withholding only on frozen-governance-traceable grounds; Model A rejected |
+| **Return posture model** | **Resolved** — `PD-STD-014-010` **TRPM** (Section 20.19.3): three-route posture for Conditional, Fail, and withheld Approval; termination authority excluded and deferred |
+| **Subsequent Review entry model** | **Baseline resolved** — `PD-STD-014-011` (Section 20.19.4): always a **new** governed production-readiness **Review** instance; prior Determination preserved; G2 entry, G3, G4, and G5 apply |
+| **G7 constitutional authority model** | **Resolved** — `PD-STD-014-012` **DDAC** (Section 20.19.5): Decision-stage Downstream Disposition Authority Classes; Review evidence under G3; DDAC owns downstream disposition acts only; no termination power; personnel titles, staffing roles, workflow permissions, and tools are **not** constitutional authority |
+| **Review evidence versus deficiency** | **Resolved** — Section 20.19.0: Review evidence may document observed deficiencies; EGDF downstream record is separate DDAC-attributed act; evidence does not automatically dictate Determination or create EGDF record |
+| **Positive authority** | Downstream disposition; deficiency records or deficiency families; rework authorization or withholding; return posture; resubmission or re-entry eligibility; subsequent governed **Review** requirement; prior Determination preservation; Approval-withholding versus return posture relationship where supported |
+| **Exclusions** | Changing existing Determination; Pass/Conditional/Fail definitions (G5); Review activity or dimensions (G3); Approval authority classes and withholding grounds (G6); GPRA grant, expiration, revocation, succession, or supersession (G6, G8–G9); Handoff consumer class binding (G9); Brain interaction (G10); Governed Handoff (G11); membership; manufacturing; implementation assignments; workflow state machines; UI, API, database, tooling, scoring, thresholds, queues; realization methods |
+| **Prerequisite decisions** | G6 committed (`FI-DSN-STD-014-R34`–`R43`); **`PD-STD-014-008` through `PD-STD-014-012` resolved** (Sprint V06-D16.1; constitutional corrections V06-D16.1A); **`PD-STD-014-011` baseline resolved**; governed G7 planning adoption commit before G7 normative drafting authorization |
+| **Terms owned** | Downstream disposition; deficiency records or families; rework authorization; return posture; resubmission or re-entry eligibility; subsequent Review routing requirement |
+| **Terms referenced only** | Pass, Conditional, Fail (G5); Approval withholding (G6); Review entry (G2); Review evidence (G3); Design-Time Feasibility (G4); STD-013 rework consumption (`R32`) |
+| **Required evidence** | Determination-to-disposition separation table; deficiency-vs-Determination boundary; rework authorization boundary; return posture decision matrix draft; subsequent Review entry baseline; STD-013 consumption alignment; PRR-P1 and PRR-P2 preserved |
+| **Boundary risks** | Satisfied Conditional; Determination reopening; deficiency-as-Determination; automatic rework; workflow-as-authority; Approval withholding collapsed into Fail; GPRA or Handoff leakage; STD-013 realization duplication |
+| **Expected requirement themes** | Disposition routing; deficiency record architecture; rework authorization act; return posture; resubmission eligibility; subsequent Review requirement; Determination preservation; Approval-withholding boundary |
+| **Expected count range** | 6–10 (nonbinding) |
+| **Independent review focus** | G5/G6 boundary preservation; STD-013 rework consumption split; no Satisfied Conditional; no workflow-as-authority; no GPRA or Handoff absorption |
+| **G7 vs G8** | G7 governs pre-approval disposition and rework routing; G8 governs post-approval **Invalidated** posture — no overlap |
+| **G7 vs G9** | G7 does not govern GPRA succession, expiration, revocation, or supersession; G9 owns authoritative GPRA succession |
+| **G7 vs G10** | G7 does not govern Brain interaction; G10 reinforces GOV-004 cross-cutting prohibitions only |
+| **G7 vs G11** | G7 does not govern Governed Handoff; G11 owns STD-015 output contract only |
+| **Preparation status** | **Complete** (Sprint V06-D16.1; constitutional corrections V06-D16.1A); planning decisions resolved; termination authority excluded and deferred; cross-decision model clarified as logical constitutional dependency architecture; normative drafting **unauthorized** until governed planning adoption commit and separate G7 normative drafting authorization |
 
 ### 20.14 Tranche 1 drafting sequence, gates, and controls
 
@@ -1058,7 +1096,12 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **11** | G5 governed commit | G5 boundary review passed | G5 requirements committed (Sprint V06-D12.1) |
 | **12** | `PD-STD-014-002`–`003` and baseline `PD-STD-014-005` gates | **Satisfied** (Sprint V06-D13.1) | G6 normative drafting authorized at planning layer |
 | **13** | G6 drafting preparation | G5 committed; planning decisions resolved | G6 preparation table complete (Section 20.13) |
-| **14** | Tranche 2 prohibition | G6 normative requirements not separately authorized | G6–G11 normative requirement text remains unauthorized |
+| **14** | G6 normative drafting | G6 drafting preparation complete; separately authorized | G6 requirements drafted (Sprint V06-D14.1) |
+| **15** | G6 governed commit | G6 boundary review passed | G6 requirements committed (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; `FI-DSN-STD-014-R34`–`R43`) |
+| **16** | G7 drafting preparation | G6 committed | G7 preparation table complete (Section 20.13); `PD-STD-014-008`–`012` registered (Section 20.19); `PD-STD-014-011` baseline resolved |
+| **17** | G7 planning decision resolution | G7 drafting preparation complete | `PD-STD-014-008` through `PD-STD-014-012` resolved (Sprint V06-D16.1; Section 20.19) |
+| **18** | G7 planning adoption commit | G7 planning decisions resolved | Governed commit of G7 planning architecture (next separately authorized gate) |
+| **19** | Tranche 2 prohibition | G7 normative requirements not separately authorized | G7–G11 normative requirement text remains unauthorized |
 
 G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and extensibility rules are stable. G4 MUST NOT publish normative requirements that redefine Review activity or the mandatory core owned by G3.
 
@@ -1258,11 +1301,204 @@ G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and e
 | **Determination preservation** | **Approval** consideration does **not** rewrite the recorded **Review Determination** |
 | **Implementation deferral** | Mechanics for recording **Approval** or **GPRA** grant remain **implementation deferred** |
 
+### 20.19 G7 planning decisions — deficiency, rework, return, and subsequent Review
+
+G7 planning decisions `PD-STD-014-008` through `PD-STD-014-012` govern constitutional architecture for downstream disposition following **Conditional** or **Fail** **Review Determination** or withheld **Approval**. None of these decisions redefine Pass, Conditional, or Fail (G5). **`PD-STD-014-011` baseline resolved** posture is preserved (Section 20.19.4). **`PD-STD-014-008` through `PD-STD-014-012` are resolved** (Sprint V06-D16.1; constitutional corrections Sprint V06-D16.1A). Cross-decision constitutional model: logical dependency architecture among **DDAC** (§20.19.5), **EGDF** (§20.19.1), **DSRA** (§20.19.2), **TRPM** (§20.19.3), and subsequent **Review** entry per **`PD-STD-014-011`** (§20.19.4) — summary Section 20.19.6.
+
+**Frozen-authority scope note:** Frozen governance supports governed downstream disposition authority within STD-014 — including Volume 06 Domain 3 ownership of rejection and rework posture and §11.1 governed return paths — but does **not** expressly name **DDAC** or expressly enumerate every downstream disposition function. Planning model names (**DDAC**, **EGDF**, **DSRA**, **TRPM**) are Layer B architectural designations traceable to frozen authority and committed G5/G6 boundaries.
+
+#### 20.19.0 Review evidence versus downstream deficiency disposition
+
+| Layer | Constitutional subject | Owning group | Authority posture |
+|-------|------------------------|--------------|-------------------|
+| **Review evidence** | Documented observation of possible or actual dimension deficiencies during production-readiness **Review** | G3 (**Review** activity and **Review** evidence categories) | **Directly supported** — G3 and G5 `FI-DSN-STD-014-R30` |
+| **Review Determination** | Pass, Conditional, or Fail outcome for a completed **Review** | G5 | **Directly supported** — committed G5 requirements |
+| **EGDF downstream deficiency record** | Governed downstream disposition artifact classifying deficiency under EGDF families | G7 planning (**DDAC** attribution within authorized scope) | **Necessary architectural inference** — downstream record distinct from Review evidence and Determination |
+| **Downstream disposition acts** | Rework authorization, return posture, resubmission or re-entry eligibility | G7 planning (**DDAC**, **DSRA**, **TRPM**) | Mixed — see §20.19.5.2 authority posture table |
+
+| Distinction rule | Resolution |
+|----------------|------------|
+| **Review evidence** | **Review** authority **MAY** record evidence of observed or possible deficiencies under G3 **Review** dimensions |
+| **Not automatic EGDF record** | Such evidence is **not** automatically an EGDF downstream deficiency record |
+| **Not automatic Determination** | Such evidence does **not** automatically dictate Pass, Conditional, or Fail (`FI-DSN-STD-014-R30`) |
+| **Separate EGDF record** | An EGDF downstream deficiency record **MUST** be separately governed and attributable to **DDAC** within authorized scope |
+| **No Determination substitution** | An EGDF record **CANNOT** replace, reopen, or revise the recorded **Review Determination** (`FI-DSN-STD-014-R35`) |
+| **DDAC boundary** | **DDAC** does **not** own deficiency **observation** during **Review**; **DDAC** **MAY** own creation, adoption, or classification of a downstream EGDF deficiency disposition record |
+| **G7 non-ownership** | G7 does **not** own **Review** activity, **Review** dimensions, or **Review** evidence categories (G3) |
+
+#### 20.19.1 PD-STD-014-008 — Deficiency classification model
+
+**Planning decision:** `PD-STD-014-008` — **Resolved** (Sprint V06-D16.1).
+
+**Open question closure:** None — no new open question required.
+
+#### 20.19.1.1 Models evaluated
+
+| Model | Constitutional structure | G5 compatibility | EGWG compatibility | Prevents deficiency-as-Determination | Supports testable disposition | Scoring/severity risk | Suitability |
+|-------|-------------------------|------------------|--------------------|--------------------------------------|------------------------------|----------------------|-------------|
+| **A — Closed constitutional deficiency families** | Fixed enumerated families only | Compatible if families trace to Review dimensions | Orthogonal — EGWG governs Approval withholding after Pass | Yes — families are disposition records, not outcomes | Yes — fixed routing | Low — no severity ladder required | **Rejected** — insufficient flexibility for governing-law evolution without amendment sprint |
+| **B — Enumerated governed deficiency families with extensibility** (selected) | Mandatory core families plus governed extension traceable to frozen authority | Yes — preserves G5 `FI-DSN-STD-014-R30` evidence-to-Determination separation | Yes — withholding grounds remain Approval-layer only | Yes — deficiency records are explicitly not Determinations | Yes — families support downstream DSRA and TRPM routing | Low — families are constitutional grounds, not scores or severities | **Selected** — mirrors `PD-STD-014-006` MCCGE and `PD-STD-014-003` EGWG extensibility pattern |
+| **C — No formal deficiency classes; traceable grounds only** | Individual deficiency records cite grounds without family taxonomy | Compatible | Compatible | Yes if boundary enforced | Weaker — disposition routing less testable without family architecture | Low | **Rejected** — insufficient constitutional structure for governed downstream disposition at Layer B |
+
+#### 20.19.1.2 Selected model — Enumerated Governed Deficiency Families (Model B)
+
+**Model designation:** EGDF — Enumerated Governed Deficiency Families.
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Deficiency record status** | A deficiency record is a **downstream disposition artifact** — **not** a **Review Determination**, **not** Approval, and **not** GPRA |
+| **Mandatory core families (exactly four)** | (1) **identity compliance**; (2) **surface fit**; (3) **contextual obligations**; (4) **Design-Time Feasibility** — corresponding to the established G3 mandatory core **Review** dimensions under MCCGE |
+| **Governed extensibility (separate rule)** | Additional deficiency families **MAY** exist only when traceable to authoritative frozen governance already constitutionally authorized to constrain **Review** or downstream disposition — ad hoc reviewer preference **CANNOT** create a family |
+| **Family purpose** | EGDF families **classify downstream deficiency records**; they do **not** duplicate **Review** dimensions as **Review** activity; they are **not** scores, severity levels, rankings, or **Determination** outcomes; they do **not** automatically map to Pass, Conditional, or Fail |
+| **Evidence relationship** | **Review evidence** under G3 **MAY** document observed or possible dimension deficiencies; an EGDF downstream deficiency record **MAY** consume that evidence but **SHALL NOT** substitute for or revise the recorded **Review Determination** (`FI-DSN-STD-014-R30`, `FI-DSN-STD-014-R35`) |
+| **Prohibited constructs** | Deficiency severity scores; weighted deficiency ladders; deficiency auto-mapping to Pass, Conditional, or Fail; unofficial fourth Determination posture |
+| **G7 ownership** | Deficiency family architecture; deficiency record requirements; traceability rules |
+| **G5 consumption boundary** | G5 records Determination outcomes only; G5 does not define deficiency families |
+| **G6 consumption boundary** | EGWG withholding grounds govern **Approval** after **Pass** only; deficiency families do not redefine withholding grounds |
+| **Implementation deferral** | Checklists, UI taxonomies, scoring widgets, and tooling labels remain **implementation deferred** |
+
+**Repository evidence:** Volume 06 architecture P10 and §12.1 require multidimensional Review. G5 `FI-DSN-STD-014-R30` separates evidence from Determination. `PD-STD-014-006` MCCGE precedent establishes mandatory core plus governed extensibility as the constitutional pattern for Layer B enumerations in this standard.
+
+#### 20.19.2 PD-STD-014-009 — Rework authorization model
+
+**Planning decision:** `PD-STD-014-009` — **Resolved** (Sprint V06-D16.1).
+
+#### 20.19.2.1 Models evaluated
+
+| Model | Constitutional structure | Conditional eligibility vs authorization | Fail authorization posture | Authority attribution | Operational separation | Suitability |
+|-------|-------------------------|------------------------------------------|---------------------------|----------------------|------------------------|-------------|
+| **A — Automatic authorization from Conditional or Fail** | Determination outcome itself authorizes rework | Collapsed — Determination becomes authorization | Collapsed | None — workflow risk | None | **Rejected** — conflicts with G5 `FI-DSN-STD-014-R33` and Volume 06 §11.1 governed return path |
+| **B — Separate governed rework-authorization act** | Distinct constitutional act after eligible disposition | Eligibility separable | Eligibility separable | Requires DDAC | Preserved | **Selected as baseline component** — necessary but insufficient alone |
+| **C — Determination-sensitive authorization architecture** (selected) | Separate act with eligibility rules that differ by Conditional, Fail, or other governed downstream disposition; authorization remains a distinct act | **Yes** — Conditional creates disposition eligibility, not authorization | **Yes** — Fail creates return-path eligibility per §11.1; authorization separate and may be withheld | DDAC attribution required | Preserved — STD-013 consumes external trigger only (`R32`) | **Selected** — best fit for Volume 06 §11.1 and §12.1 differential paths |
+
+#### 20.19.2.2 Selected model — Determination-Sensitive Rework Authorization (Model C)
+
+**Model designation:** DSRA — Determination-Sensitive Rework Authorization.
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Separate authorization act** | Rework authorization **SHALL** be a **separate governed constitutional act** distinct from **Review Determination** recording, deficiency identification, return posture establishment, and operational realization assignment |
+| **Conditional posture** | A **Conditional** **Review Determination** creates downstream **disposition eligibility** and correction-return **eligibility** per Volume 06 §11.1 and §12.1; it does **not**, by itself, authorize rework |
+| **Fail posture** | A **Fail** **Review Determination** creates **Failed Review Determination** disposition eligibility and rework return-path **eligibility** per Volume 06 §11.1; it does **not**, by itself, authorize rework; authorization **MAY** be withheld only on documented grounds **traceable to authoritative frozen governance** |
+| **Authorization authority** | Rework authorization **SHALL** be attributable only to an established **DDAC** authority class acting within governed scope (Section 20.19.5) |
+| **Withholding permitted** | Rework authorization **MAY** be withheld despite eligible Determination posture only when documented grounds are **traceable to authoritative frozen governance**; **DDAC** **MAY NOT** invent withholding grounds ad hoc; withholding does **not** revise the prior Determination; eligibility does **not** automatically compel authorization |
+| **Prohibited withholding grounds** | Commercial preference; operational convenience; staffing limits; workflow state; tool limits; implementation constraints; reviewer preference; Brain recommendation |
+| **Operational assignment boundary** | Constitutional rework authorization **SHALL NOT** constitute operational realization assignment, manufacturing execution, workflow task assignment, or STD-013 iteration mechanics — STD-013 **consumes** the external trigger only (`FI-DSN-STD-013-R32`) |
+| **Prohibited constructs** | Automatic rework from Conditional or Fail; workflow advancement as authorization; reviewer participation as authorization |
+| **G7 ownership** | Rework authorization act architecture; Determination-sensitive eligibility rules; withholding boundary at authorization layer |
+| **G5 consumption boundary** | G5 does not authorize rework (`FI-DSN-STD-014-R33`) |
+| **Implementation deferral** | Task queues, staffing assignment, and tooling workflows remain **implementation deferred** |
+
+**Repository evidence:** Volume 06 §11.1 defines rework as a **governed** return path — not an automatic Determination effect. G5 `FI-DSN-STD-014-R33` assigns rework authorization to later groups. STD-013 `FI-DSN-STD-013-R32` requires STD-014 as the sole external rework trigger issuer.
+
+#### 20.19.3 PD-STD-014-010 — Return posture model
+
+**Planning decision:** `PD-STD-014-010` — **Resolved** (Sprint V06-D16.1).
+
+#### 20.19.3.1 Models evaluated — three constitutional routes
+
+| Route | Frozen authority | Return eligibility | Termination | Re-entry / new Review | Prior Determination | Suitability |
+|-------|------------------|-------------------|-------------|----------------------|---------------------|-------------|
+| **A — Conditional** | Vol 06 §11.1; §12.1; G5 `R31`–`R32` | Correction-return eligibility to Realization (same or successor **Production Obligation**) when separately authorized | Not automatic | Subsequent governed **Review** required for new Determination (`PD-STD-014-011`) | **Conditional** preserved | **Selected** |
+| **B — Fail** | Vol 06 §11.1; §12.1 Failed Review Determination | Rework return-path eligibility to Realization per §11.1 when separately authorized | **Not** automatic — no frozen authority mandates termination on **Fail** | Re-entry for subsequent **Review** requires separate resubmission eligibility authorization | **Fail** preserved | **Selected** |
+| **C — Approval withheld after Pass** | G6 EGWG; `FI-DSN-STD-014-R35` | **Not** automatic — withholding alone blocks **Approval** only | Not automatic | Does **not** substitute for subsequent **Review**; new Determination requires governed **Review** under G5 if evaluative outcome must change | **Pass** preserved | **Selected** |
+
+#### 20.19.3.2 Selected model — Three-Route Posture Model (TRPM)
+
+**Model designation:** TRPM — Three-Route Posture Model.
+
+| Route | Constitutional resolution |
+|-------|---------------------------|
+| **Route A — Conditional** | A **Conditional** Determination creates correction-return **eligibility** to Realization for the same or successor **Production Obligation** per Volume 06 §11.1; return posture **SHALL** be established only through a separate **DDAC** disposition act; return does **not** authorize rework without **DSRA**; subsequent governed **Review** is required for a new Determination (`PD-STD-014-011`); the original **Conditional** Determination remains fixed |
+| **Route B — Fail** | A **Fail** Determination creates rework return-path **eligibility** per Volume 06 §11.1; return posture **SHALL** be established only through a separate **DDAC** disposition act; **Fail** does **not** automatically terminate the **RVA**, **Production Obligation**, or program; where return or re-entry is not authorized, the current posture is **no authorized return or re-entry under G7** — this is **not** a new **Review Determination** and **not** a termination posture; constitutional termination authority is **not established** by current frozen authority and **MUST NOT** be inferred from **Fail**; re-entry for subsequent **Review** requires separate resubmission eligibility authorization; the **Fail** Determination remains fixed |
+| **Route C — Approval withheld after Pass** | **Approval** withholding under EGWG blocks **Approval** and **GPRA** only; withholding does **not** create **Conditional** or **Fail**; withholding does **not**, by itself, establish return posture; withheld **Approval** **MAY** remain block-without-return and **need not** invoke **EGDF** or **DSRA**; return posture **MAY** be separately authorized by **DDAC** only when a traceable constitutional ground supports return — baseline posture: withholding alone means block without return; the **Pass** Determination remains fixed |
+| **Termination posture** | **No DDAC termination power is currently established.** Constitutional termination of an **RVA**, **Production Obligation**, or program remains **unresolved pending explicit frozen constitutional authority** |
+| **Cross-route prohibitions** | No collapsing withheld **Approval** into **Conditional** or **Fail**; no collapsing **Conditional** into automatic rework; no collapsing **Fail** into automatic termination; no inferring termination from **Fail**; no Determination revision during disposition; lack of authorized return or re-entry is **not** itself a **Determination** or termination posture |
+| **G7 ownership** | Return posture architecture; route-specific eligibility and authorization separation |
+| **G6 consumption boundary** | EGWG governs withholding grounds only; G6 does not define return posture |
+| **Implementation deferral** | Routing UI, queue states, and operational logistics remain **implementation deferred** |
+
+**Repository evidence:** Volume 06 §11.1 explicitly routes both **Failed Review Determination** and unsatisfied **Conditional pass** to Realization return paths. G6 `FI-DSN-STD-014-R35` and EGWG preserve **Pass** during withholding. No frozen authority mandates automatic termination on **Fail**.
+
+#### 20.19.4 PD-STD-014-011 — Subsequent Review entry model
+
+**Planning decision:** `PD-STD-014-011` — **Baseline resolved** (Sprint V06-D15.1). **Preserved** — unchanged by Sprint V06-D16.1.
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Review instance** | Subsequent disposition requires a **new** governed production-readiness **Review** instance — not reuse of the prior Review record as if the prior Determination were open |
+| **Prior Determination preservation** | The prior **Review Determination** remains preserved and is **not** reopened, edited, or superseded by disposition activity |
+| **Entry evidence** | The subsequent **Review** is subject to applicable STD-014 **Review** requirements, including applicable G2 entry, G3 **Review** activity and **Review** dimension, and G4 Design-Time Feasibility requirements |
+| **New Determination** | The subsequent completed **Review** **SHALL** record exactly one new **Review Determination** under G5 |
+| **Not permitted** | Reopening or editing the prior Determination; "Satisfied Conditional"; treating disposition or deficiency resolution as a Determination substitute |
+| **Governing source** | `FI-DSN-STD-014-R32`; `FI-DSN-STD-014-R35`; Section 20.15.3 |
+| **G7 normative deferral** | Resubmission eligibility mechanics, re-entry evidence supplements, and routing gates beyond this baseline remain for G7 normative drafting |
+
+#### 20.19.5 PD-STD-014-012 — G7 constitutional authority attribution model
+
+**Planning decision:** `PD-STD-014-012` — **Resolved** (Sprint V06-D16.1).
+
+#### 20.19.5.1 Models evaluated
+
+| Model | Constitutional structure | Review authority overlap | MAGAC overlap | Workflow/tool risk | Suitability |
+|-------|-------------------------|--------------------------|---------------|-------------------|-------------|
+| **A — Review participation as authority** | Reviewers performing disposition acts | Collapses Review and disposition | N/A | High | **Rejected** — violates G5 boundary and GOV-004 posture |
+| **B — MAGAC Approval classes perform disposition** | Approval authority classes absorb downstream disposition | N/A | Collapses Approval and disposition | Medium | **Rejected** — no frozen authority grants MAGAC scope over deficiency, rework, or return posture |
+| **C — Decision-stage Downstream Disposition Authority Classes** (selected) | Separate constitutionally established authority classes for downstream disposition acts | None — Review records Determination only | None — distinct from MAGAC | Low when scope-bound | **Selected** — traceable to Volume 06 §11.1 governed return path and Domain 3 ownership of rejection and rework posture |
+
+#### 20.19.5.2 Selected model — Decision-stage Downstream Disposition Authority Classes (Model C)
+
+**Model designation:** DDAC — Decision-stage Downstream Disposition Authority Classes.
+
+Frozen governance supports governed downstream disposition authority within STD-014 but does **not** expressly name **DDAC** or expressly enumerate every downstream disposition function. **DDAC** is the proposed Decision-stage downstream disposition authority-class architecture established only through authoritative frozen governance.
+
+| Authority function | Constitutional attribution | Authority posture | Part of Review authority? | MAGAC permitted? | Governing source |
+|--------------------|---------------------------|-------------------|---------------------------|------------------|------------------|
+| **Observe or document deficiency during Review** | G3 **Review** evidence categories — **not DDAC** | **Directly supported** — G3 and G5 `FI-DSN-STD-014-R30` | **Yes** — Review activity | **No** | G3; `FI-DSN-STD-014-R30` |
+| **Create, adopt, or classify downstream EGDF deficiency disposition record** | **DDAC** downstream disposition authority within governed scope | **Necessary architectural inference** — downstream record distinct from Review evidence and Determination | **No** — G5 records Determination only | **No** | Volume 06 §11.1; EGDF (§20.19.1); §20.19.0 |
+| **Authorize rework** | **DDAC** separate **DSRA** act | **Necessary architectural inference** — `FI-DSN-STD-013-R32` requires external STD-014 trigger; G5 excludes authorization | **No** — G5 explicitly excludes rework authorization | **No** | Volume 06 §11.1; `FI-DSN-STD-013-R32`; DSRA (§20.19.2) |
+| **Establish return posture** | **DDAC** disposition act under TRPM | **Necessary architectural inference** — governed return-path architecture | **No** — return posture is downstream disposition, not Determination | **No** — EGWG withholding is block-only baseline | Volume 06 §11.1, §12.1; TRPM (§20.19.3) |
+| **Authorize resubmission or re-entry** | **DDAC** eligibility act for subsequent **Review** entry under G2 | **Necessary architectural inference** — **not** express frozen authority | **No** — distinct from subsequent **Review** itself (`PD-STD-014-011`) | **No** | `PD-STD-014-011`; G2 entry boundary |
+| **Terminate RVA, Production Obligation, or program** | **Not established** | **Unresolved pending additional frozen authority** — **no DDAC termination power is currently established** | **No** | **No** | None — termination **MUST NOT** be inferred from **Fail** |
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Establishment authority** | A **DDAC** authority class MAY exist only when **established** by authoritative frozen constitutional governance traceable to Volume 06 Domain 3 ownership of rejection and rework posture and §11.1 governed return paths — not by operating context alone |
+| **Class traceability** | Each established class MUST be traceable to its governing source identifier and authorized constitutional scope |
+| **Activation versus establishment** | Applicable **Production Program**, **Production Obligation**, artifact class, or other disposition context MAY **activate** or **scope** an already established **DDAC** class for a specific disposition act — activation does **not** establish authority |
+| **Non-establishment rule** | Operating context MUST NOT independently **create** a **DDAC** authority class |
+| **Prohibited authority sources** | Reviewer participation; organizational title; implementation role; workflow state; queue state; tool permission; Brain behavior; customer Selection; customary business practice; membership administration; MAGAC **Approval** acts unless future frozen governance explicitly grants disposition scope |
+| **G7 ownership** | **DDAC** architecture; scope boundaries; function-to-class traceability — **not** Review observation or dimension ownership |
+| **G5/G6 consumption boundaries** | G5 records Determinations; MAGAC performs **Approval** only; neither substitutes for **DDAC** |
+| **Implementation deferral** | Personnel assignment, job titles, permission matrices, and workflow engines remain **implementation deferred** |
+
+**Repository evidence:** Volume 06 architecture assigns Domain 3 ownership of "rejection, rework, and revocation posture." STD-013 `FI-DSN-STD-013-R06` defers "rework authorization at Review" to STD-014. MAGAC (`PD-STD-014-002`) governs **Approval** only. G5 `FI-DSN-STD-014-R33` excludes rework authorization from G5.
+
+#### 20.19.6 Cross-decision constitutional model — G7 planning synthesis
+
+This is a **logical constitutional dependency architecture** — **not** a mandatory workflow, implementation sequence, or requirement that every case traverse every layer. No workflow, queue, UI, or system sequence is prescribed.
+
+| Layer | Model | Role | Applies when |
+|-------|-------|------|--------------|
+| **Authority** | **DDAC** | Defines authority attribution for downstream disposition acts | A downstream disposition act within authorized scope is performed or required |
+| **Deficiency** | **EGDF** | Governs deficiency record families without creating Determinations | A downstream governed deficiency record is created or required |
+| **Rework** | **DSRA** | Separate Determination-sensitive rework authorization after eligibility | Rework authorization is considered |
+| **Return** | **TRPM** | Route-specific return posture for Conditional, Fail, and withheld Approval | Return posture is established or evaluated |
+| **Subsequent Review** | **`PD-STD-014-011`** | New governed Review instance; prior Determination preserved | A new **Review Determination** is sought |
+
+| Architectural rule | Resolution |
+|---------------------|------------|
+| **Not mandatory traversal** | A case **need not** invoke every layer; withheld **Approval** **MAY** remain block-without-return and **need not** invoke **EGDF** or **DSRA** |
+| **Logical dependency** | **DDAC** attribution precedes governed downstream acts; **EGDF** classifies deficiency records when created; **DSRA** governs rework authorization when considered; **TRPM** governs route posture; subsequent **Review** applies when a new Determination is sought |
+| **No workflow prescription** | No workflow, queue, UI, tooling sequence, or implementation order is prescribed by this architecture |
+
+**G7 drafting-readiness determination:** **A — Resolved.** All G7 planning decisions remain resolved at the planning layer. Termination authority is explicitly excluded and deferred and does **not** block G7 planning adoption. G7 drafting preparation is complete. Next gate: **governed G7 planning adoption commit**. G7 normative drafting remains **unauthorized** until separately authorized after adoption.
+
 ---
 
 ## 21. Normative Requirements — Partial Draft
 
-**Drafting posture:** Sprint V06-D14.1 — normative requirements drafted for planning groups **G1**, **G2**, **G3**, **G4**, **G5**, and **G6**. Identifiers **`FI-DSN-STD-014-R01` through `FI-DSN-STD-014-R43`** are continuous. Groups **G7** through **G11** are **not drafted**. This partial draft does not claim approval, freeze, binding authority, or effective status beyond draft governance posture.
+**Drafting posture:** Sprint V06-D16.1A — normative requirements committed for planning groups **G1** through **G6** (`FI-DSN-STD-014-R01` through `FI-DSN-STD-014-R43`; G6 commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`). G7 planning decisions resolved at planning layer with constitutional corrections (Section 20.19). Groups **G7** through **G11** are **not drafted**. This partial draft does not claim approval, freeze, binding authority, or effective status beyond draft governance posture.
 
 ### 21.1 Constitutional Inheritance and Principal-Subject Placement (G1)
 
@@ -1551,6 +1787,9 @@ This section establishes the constitutional architecture of **Approval** conside
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D16.1A — G7 planning constitutional corrections: DDAC authority-scope clarification (§20.19.5.2); Review evidence versus downstream deficiency distinction (§20.19.0); EGDF four mandatory core families with separate extensibility (§20.19.1); DSRA withholding frozen-governance traceability (§20.19.2); TRPM termination authority excluded and deferred (§20.19.3); cross-decision logical architecture clarification (§20.19.6); termination does not block G7 planning adoption; next gate governed G7 planning adoption commit; G7 normative drafting unauthorized; G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G1 through G6 committed; G7–G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D16.1 — G7 planning decisions resolved (`PD-STD-014-008` EGDF; `PD-STD-014-009` DSRA; `PD-STD-014-010` TRPM; `PD-STD-014-012` DDAC; `PD-STD-014-011` baseline preserved); cross-decision constitutional model (Section 20.19.6); next gate governed G7 planning adoption commit; G7 normative drafting unauthorized; G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G1 through G6 committed; G7–G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D15.1 — G6 post-commit synchronization (`FI-DSN-STD-014-R34`–`R43` committed; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7 drafting preparation complete (Section 20.13); G7 planning decisions `PD-STD-014-008`–`012` registered (Section 20.19); `PD-STD-014-011` baseline resolved; `PD-STD-014-008`, `009`, `010`, and `012` remain open; G1 through G6 committed (`FI-DSN-STD-014-R01`–`R43`); G7–G11 not drafted and unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D14.1 — G6 normative requirements drafted (`FI-DSN-STD-014-R34`–`R43`); Approval consideration, MAGAC authority classes, EGWG withholding grounds, and TOC-PA GPRA grant architecture drafted (Section 21.6); G1 through G5 preserved (`FI-DSN-STD-014-R01`–`R33`); G7–G11 not drafted and unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D13.1A — MAGAC establishment versus activation clarified (Section 20.16.3); Approval and GPRA baseline clarified (Section 20.18.4); `OQ-STD-014-004` closed; `OQ-STD-014-007` opened for G9 succession and handoff consumer class binding; MAGAC, EGWG, and TOC-PA models preserved; G6 preparation synchronized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D13.1 — `PD-STD-014-002` resolved (MAGAC Approval authority model; Section 20.16); `PD-STD-014-003` resolved (EGWG withholding grounds; Section 20.17); baseline `PD-STD-014-005` resolved (TOC-PA Pass–Approval–GPRA chain; Section 20.18); `OQ-STD-014-001` and `OQ-STD-014-002` closed; `OQ-STD-014-004` closed at G6 baseline; G6 drafting preparation complete (Section 20.13); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G1 through G5 preserved; G6–G11 normative requirement drafting unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
