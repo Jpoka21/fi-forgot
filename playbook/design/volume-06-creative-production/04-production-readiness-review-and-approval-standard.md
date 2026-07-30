@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`) |
 | **Queue posture** | EO 20 — **In progress** per Sprint V06-D5.4 requirement plan adoption (`FI-DSN-QUE-001`) |
-| **Sprint** | V06-D19.5 |
+| **Sprint** | V06-D20.1 |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed as Design-Time Feasibility Compliance Boundary inputs only. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **committed** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** and **adopted** (Sprints V06-D16.1 and V06-D16.1A; commit `cebf454`; Section 20.19). G7 normative requirements **drafted** — `FI-DSN-STD-014-R44`–`R51` (Sprint V06-D17.1; Section 21.7). G8 pre-planning gates **`PD-STD-014-004` and `PD-STD-014-007` resolved**; **`OQ-STD-014-003` closed** (Sprint V06-D18.1; Section 20.20). G8 normative requirements **drafted** — `FI-DSN-STD-014-R52`–`R63` (Sprints V06-D19.1, V06-D19.3, V06-D19.5; Section 21.8). G1 through G7 drafted (`FI-DSN-STD-014-R01`–`R51` continuous). G9–G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **committed** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** and **adopted** (Sprints V06-D16.1 and V06-D16.1A; commit `cebf454`; Section 20.19). G7 normative requirements **drafted** — `FI-DSN-STD-014-R44`–`R51` (Sprint V06-D17.1; Section 21.7). G8 pre-planning gates **`PD-STD-014-004` and `PD-STD-014-007` resolved**; **`OQ-STD-014-003` closed** (Sprint V06-D18.1; Section 20.20). G8 normative requirements **drafted and independently accepted** — `FI-DSN-STD-014-R52`–`R63` (Sprints V06-D19.1, V06-D19.3, V06-D19.5; independent acceptance V06-D19.6; Section 21.8). G9 planning architecture **established** (Sprint V06-D20.1; Section 20.21). G1 through G8 drafted (`FI-DSN-STD-014-R01`–`R63` continuous). G9–G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -505,7 +505,7 @@ Provisional normative requirement groups for future drafting. **No requirement I
 | `OQ-STD-014-002` | May Approval be withheld despite favorable Review Determination, and on what governed grounds? | **Closed** (Sprint V06-D13.1) | Resolved via `PD-STD-014-003` — enumerated governed withholding ground families (Section 20.17) |
 | `OQ-STD-014-003` | Is **revocation** a distinct post-approval term or umbrella for Invalidated/Superseded at Layer B? | **Closed** (Sprint V06-D18.1) | Resolved via `PD-STD-014-004` — RIVP peer-posture model (Section 20.20.1) |
 | `OQ-STD-014-004` | What is the precise GPRA binding scope baseline for G6 — Pass, Approval, and obligation-scoped instance binding? | **Closed** (Sprint V06-D13.1) | Resolved via baseline `PD-STD-014-005` — TOC-PA chain; RVA version under Production Obligation scope (Section 20.18) |
-| `OQ-STD-014-007` | How shall authoritative GPRA succession, supersession, and handoff consumer class binding be governed at Layer B? | **Open** | G9 planning question; Volume 06 §5.11 succession baseline; distinct from closed G6 binding baseline (`OQ-STD-014-004`) |
+| `OQ-STD-014-007` | How shall authoritative GPRA succession, supersession, and handoff consumer class binding be governed at Layer B? | **Closed** (Sprint V06-D20.1) | Resolved via G9 planning architecture — `PD-STD-014-013` through `PD-STD-014-016` (Section 20.21); Handoff consumer class catalog deferred G11 |
 | `OQ-STD-014-005` | What material Compliance Boundary changes trigger Invalidated posture versus requiring new Review only? | **Closed** (Sprint V06-D19.3) | Materiality thresholds normatively resolved in `FI-DSN-STD-014-R58`; trigger-family split via `PD-STD-014-007` — PVTA (Section 20.20.3) |
 | `OQ-STD-014-006` | What minimum Review dimension set is mandatory vs optionally extended at Layer B? | **Closed** (Sprint V06-D6.1) | Resolved via `PD-STD-014-006` — mandatory constitutional core plus governed extensibility (Section 20.12) |
 
@@ -549,15 +549,15 @@ Architecture Validation is governance-level validation before normative requirem
 | Post-approval states | Invalidated and Superseded aligned with Volume 06 §5.9 |
 | Rework boundary | Review authorization vs Domain 2 consumption split documented |
 | Implementation independence | No APIs, schemas, UI, workflows, vendors, or models prescribed |
-| Normative requirements | **Partial** — G1 committed (`FI-DSN-STD-014-R01`–`R07`); G2 committed (`FI-DSN-STD-014-R08`–`R13`); G3 committed (`FI-DSN-STD-014-R14`–`R20`); G4 committed (`FI-DSN-STD-014-R21`–`R26`); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7 drafted (`FI-DSN-STD-014-R44`–`R51`; Sprint V06-D17.1); G8 drafted (`FI-DSN-STD-014-R52`–`R63`; Sprints V06-D19.1, V06-D19.3, V06-D19.5); G9–G11 not drafted |
+| Normative requirements | **Partial** — G1 committed (`FI-DSN-STD-014-R01`–`R07`); G2 committed (`FI-DSN-STD-014-R08`–`R13`); G3 committed (`FI-DSN-STD-014-R14`–`R20`); G4 committed (`FI-DSN-STD-014-R21`–`R26`); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7 drafted (`FI-DSN-STD-014-R44`–`R51`; Sprint V06-D17.1); G8 drafted and **accepted** (`FI-DSN-STD-014-R52`–`R63`; Sprints V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6); G9 planning **complete** (V06-D20.1); G9–G11 normative not drafted |
 | Independent review | **Passed** — Sprint V06-D4.4; minor corrective findings resolved in Sprint V06-D4.4A; architecture committed in Sprint V06-D4.5 |
-| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 committed (V06-D14.1); G7 planning **adopted** (V06-D16.1, V06-D16.1A; commit `cebf454`); G7 normative requirements **drafted** (V06-D17.1); **`PD-STD-014-004` and `PD-STD-014-007` resolved** (V06-D18.1); **`OQ-STD-014-003` closed** (V06-D18.1); **`OQ-STD-014-005` closed** (V06-D19.3); G8 normative requirements **drafted** (V06-D19.1, V06-D19.3, V06-D19.5); G9–G11 normative drafting **unauthorized** |
+| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 committed (V06-D14.1); G7 planning **adopted** (V06-D16.1, V06-D16.1A; commit `cebf454`); G7 normative requirements **drafted** (V06-D17.1); **`PD-STD-014-004` and `PD-STD-014-007` resolved** (V06-D18.1); **`OQ-STD-014-003` closed** (V06-D18.1); **`OQ-STD-014-005` closed** (V06-D19.3); G8 normative requirements **drafted and accepted** (V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6); G9 planning **complete** (V06-D20.1); **`OQ-STD-014-007` closed** (V06-D20.1); G9–G11 normative drafting **unauthorized** |
 
 ---
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D19.5 — G8 normative requirements drafted (`FI-DSN-STD-014-R52`–`R63`; Section 21.8). G7 normative requirements drafted (`FI-DSN-STD-014-R44`–`R51`; Section 21.7). G6 normative requirements **committed** (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`). G7 planning architecture **adopted** (commit `cebf454`; Section 20.19). G1 through G8 drafted (`FI-DSN-STD-014-R01`–`R63` continuous). G9–G11 normative requirement drafting remains **unauthorized**. `PD-STD-014-002` (MAGAC), `PD-STD-014-003` (EGWG), and baseline `PD-STD-014-005` (TOC-PA) **preserved**. `OQ-STD-014-007` **preserved** for G9. Section 16 records the architecture-era provisional group plan. **Section 20 is the authoritative requirement planning artifact** for future normative drafting. Architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding.
+**Planning posture:** Sprint V06-D20.1 — G9 planning architecture **established** (Section 20.21). G8 normative requirements **drafted and independently accepted** (`FI-DSN-STD-014-R52`–`R63`; Section 21.8; Sprint V06-D19.6). G7 normative requirements drafted (`FI-DSN-STD-014-R44`–`R51`; Section 21.7). G6 normative requirements **committed** (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`). G7 planning architecture **adopted** (commit `cebf454`; Section 20.19). G1 through G8 drafted (`FI-DSN-STD-014-R01`–`R63` continuous). G9–G11 normative requirement drafting remains **unauthorized**. `PD-STD-014-002` (MAGAC), `PD-STD-014-003` (EGWG), and baseline `PD-STD-014-005` (TOC-PA) **preserved**. `OQ-STD-014-007` **closed** (Sprint V06-D20.1). Section 16 records the architecture-era provisional group plan. **Section 20 is the authoritative requirement planning artifact** for future normative drafting. Architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding.
 
 ### 20.1 Final requirement group plan
 
@@ -703,11 +703,11 @@ The accepted architecture groups G1–G11 are retained without merge, split, ren
 | **Inherited terms** | Superseded; authoritative GPRA — Volume 06 §5.11 |
 | **Upstream dependencies** | G6; G8; `OQ-STD-014-004` |
 | **Downstream implications** | STD-015 authoritative GPRA consumption |
-| **Open questions** | `OQ-STD-014-007` — authoritative GPRA succession and handoff consumer class binding |
-| **Likely requirement themes** | Supersession; authoritative GPRA; historical preservation; context binding |
+| **Open questions** | None — `OQ-STD-014-007` **closed** (Sprint V06-D20.1; Section 20.21) |
+| **Likely requirement themes** | Supersession; authoritative GPRA; ST families; historical preservation; context binding; posture interaction |
 | **Collision risks** | Overlap with G8 triggers; absorbing STD-015 intake rules |
-| **Drafting prerequisites** | G8 Invalidated framework **planned** (`PD-STD-014-004` and `PD-STD-014-007` resolved; Section 20.20); governed G8 planning acceptance review |
-| **Review gate** | GPRA succession coherence review before Tranche 3 commit |
+| **Drafting prerequisites** | G8 normative requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`; Sprint V06-D19.6); G9 planning architecture **complete** (Section 20.21); governed G9 planning acceptance review |
+| **Review gate** | GPRA succession coherence review before G9 normative drafting authorization |
 
 #### G10 — Brain and Decision-stage interaction (cross-cutting)
 
@@ -767,7 +767,7 @@ PRR-P1–P10 are constitutional distinctions for planning. They are **not** conv
 | `OQ-STD-014-002` | G6 | **Resolved** (Sprint V06-D13.1) | G6 freeze review | Architecture §8.3; planning decision `PD-STD-014-003` (Section 20.17) |
 | `OQ-STD-014-003` | G8 | **Resolved** (Sprint V06-D18.1) | G8 planning acceptance review | Volume 06 §5.9; §13 item 6; STD-013 `R06` revocation deferral; planning decision `PD-STD-014-004` (Section 20.20.1) |
 | `OQ-STD-014-004` | G6 | **Resolved** (Sprint V06-D13.1) | G6 freeze review | Volume 06 §5.11 baseline; architecture §9.4; planning decision `PD-STD-014-005` baseline (Section 20.18) |
-| `OQ-STD-014-007` | G9 | **Pre-G9 normative drafting** | G9 freeze review | Volume 06 §5.11; architecture §9.4; authoritative GPRA succession and handoff consumer class binding |
+| `OQ-STD-014-007` | G9 | **Closed** (Sprint V06-D20.1) | G9 planning acceptance review | Volume 06 §5.11; architecture §9.4; `PD-STD-014-013`–`PD-STD-014-016` (Section 20.21) |
 | `OQ-STD-014-005` | G8 | **Closed** (Sprint V06-D19.3) | G8 acceptance review | GOV-003 propagation; architecture §12.3; `FI-DSN-STD-014-R58`; planning decision `PD-STD-014-007` (Section 20.20.3) |
 | `OQ-STD-014-006` | G3 | **Resolved** (Sprint V06-D6.1) | G3 freeze review | Volume 06 P10; architecture §6.2; planning decision `PD-STD-014-006` (Section 20.12) |
 
@@ -789,6 +789,10 @@ PRR-P1–P10 are constitutional distinctions for planning. They are **not** conv
 | `PD-STD-014-010` | What return posture model applies after Conditional, Fail, or withheld Approval? | G6 withholding baseline; Volume 06 §11.1; architecture rework split | G7 | Pre-G7 normative drafting | **Resolved** (Sprint V06-D16.1) | TRPM — three-route return posture model — Section 20.19.3 |
 | `PD-STD-014-011` | What subsequent Review entry model applies after Conditional or Fail? | G5 `FI-DSN-STD-014-R32`; G6 `FI-DSN-STD-014-R35`; Section 20.15.3 | G7 | Pre-G7 normative drafting | **Baseline resolved** (Sprint V06-D15.1) | New governed Review instance; prior Determination preserved; G2–G4 and G5 apply — Section 20.19.4 |
 | `PD-STD-014-012` | What constitutional authority classes may record deficiencies, authorize rework, define return posture, and authorize resubmission? | Volume 06 §11.1; G6 MAGAC boundary; `FI-DSN-STD-013-R06`; architecture Domain 3 ownership | G7 | Pre-G7 normative drafting | **Resolved** (Sprint V06-D16.1) | DDAC — Decision-stage Downstream Disposition Authority Classes — Section 20.19.5 |
+| `PD-STD-014-013` | What is the constitutional definition of **Superseded** posture at Layer B? | `OQ-STD-014-007`; Volume 06 §5.9; RIVP (Section 20.20.1) | G9 | Pre-G9 planning (mandatory before G9 normative drafting) | **Resolved** (Sprint V06-D20.1) | Superseded posture definition — Section 20.21.1 |
+| `PD-STD-014-014` | What constitutional authority classes may establish **Superseded** posture? | `OQ-STD-014-007`; PVTA ST families; G6 GPRA grant boundary | G9 | Pre-G9 planning | **Resolved** (Sprint V06-D20.1) | SSAC — Supersession Authority Classes — Section 20.21.3 |
+| `PD-STD-014-015` | What predecessor–successor identity and lineage rules govern authoritative GPRA succession? | `OQ-STD-014-007`; Volume 06 §5.11; baseline `PD-STD-014-005` | G9 | Pre-G9 planning | **Resolved** (Sprint V06-D20.1) | PSIM — Predecessor–Successor Identity Model — Section 20.21.4 |
+| `PD-STD-014-016` | How do **Superseded** and **Invalidated** postures interact constitutionally? | RIVP; G8 `FI-DSN-STD-014-R62`; Section 20.20.4 | G9 | Pre-G9 planning | **Resolved** (Sprint V06-D20.1) | PIIM — Posture Interaction and Immutability Model — Section 20.21.6 |
 
 ### 20.5 Drafting tranche plan
 
@@ -796,7 +800,7 @@ PRR-P1–P10 are constitutional distinctions for planning. They are **not** conv
 |---------|--------|---------|------------------------|---------------------------|-----------------|------------------------|-----------------|-------------|-------------------------|
 | **1** | G1–G4 | Constitutional inheritance; entry boundary; Review dimensions; Design-Time Feasibility | Architecture adoption (complete); planning review passed; **`PD-STD-014-006` resolved** (Sprint V06-D6.1) | None blocking Tranche 1 drafting authorization | Partial Requirement Draft covering G1–G4 only | Independent constitutional review of Tranche 1 boundary separation | Corrective sprint if material boundary defects | Governed commit of Tranche 1 partial draft | Tranche 2 unauthorized until Tranche 1 review passed and committed |
 | **2** | G5–G7 | Review Determination; Approval and GPRA grant; rejection and rework | Tranche 1 committed; **`PD-STD-014-001` resolved** (Sprint V06-D11.1); G5 committed (Sprint V06-D12.1); **`PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` resolved** (Sprint V06-D13.1); G6 committed (Sprint V06-D14.1); G7 drafting preparation complete (Sprint V06-D15.1); **`PD-STD-014-008` through `PD-STD-014-012` resolved** (Sprint V06-D16.1); **`PD-STD-014-011` baseline resolved** | None blocking G7 planning adoption at planning layer | Partial Requirement Draft covering G5–G7 | Review vs Approval separation; STD-013 rework boundary; Determination immutability; DDAC/EGDF/DSRA/TRPM fidelity | Corrective sprint if Determination/Approval collapsed or Satisfied Conditional introduced | Governed commit of Tranche 2 partial draft | Tranche 3 unauthorized until Tranche 2 review passed and committed |
-| **3** | G8–G11 | Invalidated; Superseded and succession; Brain interaction; STD-015 consumption | Tranche 2 accepted; **`PD-STD-014-004` resolved** (V06-D18.1); **`PD-STD-014-007` resolved** (V06-D18.1); governed G8 planning acceptance review | `OQ-STD-014-007` (G9); `OQ-STD-014-005` materiality detail (G8 normative) | Partial or full Requirement Draft covering G8–G11 | Invalidated/Superseded distinction; G10 non-duplication; G11 Handoff non-absorption | Corrective sprint if STD-015 procedures appear | Governed commit; full body review before freeze readiness | Full-body freeze review unauthorized until all three tranches accepted |
+| **3** | G8–G11 | Invalidated; Superseded and succession; Brain interaction; STD-015 consumption | Tranche 2 accepted; G8 normative requirements **accepted** (V06-D19.6); G9 planning architecture **complete** (V06-D20.1) | None blocking G9 planning acceptance at planning layer | Partial or full Requirement Draft covering G8–G11 | Invalidated/Superseded distinction; G10 non-duplication; G11 Handoff non-absorption | Corrective sprint if STD-015 procedures appear | Governed commit; full body review before freeze readiness | Full-body freeze review unauthorized until all three tranches accepted |
 
 **G10 handling:** G10 normative themes are drafted in Tranche 3 but must **reference** G6 Approval prohibitions without restating full G6 body. G6 carries instance-binding Approval rules; G10 carries cross-cutting Brain/runtime prohibition reinforcement per GOV-004.
 
@@ -890,7 +894,7 @@ Counts are planning estimates only. They are not settled and do not assign requi
 
 ### 20.11 Normative drafting prohibition
 
-Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. Tranche 1 preparation is **complete** (Sprint V06-D6.1). `PD-STD-014-006` is **resolved**. G1 normative requirements **`FI-DSN-STD-014-R01`–`R07`** are committed (Sprint V06-D7.1; Section 21.1). G2 normative requirements **`FI-DSN-STD-014-R08`–`R13`** are committed (Sprint V06-D8.1; Section 21.2). G3 normative requirements **`FI-DSN-STD-014-R14`–`R20`** are committed (Sprint V06-D9.1; Section 21.3). G4 normative requirements **`FI-DSN-STD-014-R21`–`R26`** are committed (Sprint V06-D10.1; Section 21.4). Tranche 1 partial normative draft is **committed**. `PD-STD-014-001` is **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **`FI-DSN-STD-014-R27`–`R33`** are committed (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` are **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). Planning clarifications applied (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4; `OQ-STD-014-004` closed; `OQ-STD-014-007` opened). G6 normative requirements **`FI-DSN-STD-014-R34`–`R43`** are **committed** (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 planning architecture is **adopted** (commit `cebf454`; Section 20.19). G7 normative requirements **`FI-DSN-STD-014-R44`–`R51`** are **drafted** (Sprint V06-D17.1; Section 21.7). G8 pre-planning gates **`PD-STD-014-004` and `PD-STD-014-007` resolved**; **`OQ-STD-014-003` closed** (Sprint V06-D18.1; Section 20.20). G8–G11 normative requirement drafting remains **unauthorized** until separately authorized drafting sprints and governed G8 planning acceptance review. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
+Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. G8 normative requirements **`FI-DSN-STD-014-R52`–`R63`** are **drafted and independently accepted** (Sprints V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6; Section 21.8). G9 planning architecture is **complete** (Sprint V06-D20.1; Section 20.21; `PD-STD-014-013`–`PD-STD-014-016` resolved; `OQ-STD-014-007` closed). G9–G11 normative requirement drafting remains **unauthorized** until separately authorized drafting sprints and governed G9 planning acceptance review. G1 through G7 status preserved per prior sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
 
 ### 20.12 PD-STD-014-006 resolution — Review dimension model
 
@@ -1081,7 +1085,7 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **New Review only path** | **PVTA NR families** — subsequent **Review** without GPRA posture loss distinguished from invalidation (Section 20.20.3.2) |
 | **Positive authority** | Retention default; **Invalidated** posture; invalidation trigger families; historical preservation; forward Handoff prohibition on **Invalidated** authority |
 | **Exclusions** | **Superseded** succession (G9); operational revocation mechanics; Volume 05 downstream use policy; Handoff procedures (G11); G7 downstream disposition; reopening **Review Determination** |
-| **Prerequisite decisions** | G7 drafted (`FI-DSN-STD-014-R44`–`R51`); **`PD-STD-014-004` resolved** (V06-D18.1); **`PD-STD-014-007` resolved** (V06-D18.1); governed G8 planning acceptance review |
+| **Prerequisite decisions** | G7 drafted (`FI-DSN-STD-014-R44`–`R51`); **`PD-STD-014-004` resolved** (V06-D18.1); **`PD-STD-014-007` resolved** (V06-D18.1); G8 planning acceptance (V06-D19.2); G8 normative acceptance (V06-D19.6) |
 | **Terms owned** | Retention; **Invalidated** posture; invalidation acts and trigger families; historical preservation for invalidation path |
 | **Terms referenced only** | **GPRA** grant (G6); **Review Determination** immutability (G5; G7); **Superseded** (G9); validity posture export (G11) |
 | **Required evidence** | RIVP vocabulary table; PVTA IT vs NR distinction; Invalidated vs Superseded boundary; PRR-P9 preserved; G7/G9 boundary preserved |
@@ -1091,7 +1095,32 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **Independent review focus** | RIVP fidelity; PVTA IT/NR split; G7/G9 boundary; no Handoff absorption |
 | **G8 vs G7** | G8 governs post-approval GPRA validity loss; G7 governs pre-approval disposition — no overlap |
 | **G8 vs G9** | G8 owns **Invalidated**; G9 owns **Superseded** — peer postures not interchangeable |
-| **Preparation status** | **Complete** (Sprint V06-D19.5); G8 normative requirements drafted (`FI-DSN-STD-014-R52`–`R63`; Section 21.8); G9–G11 normative drafting **unauthorized** |
+| **Preparation status** | **Complete** (Sprint V06-D19.5); G8 normative requirements drafted and **accepted** (`FI-DSN-STD-014-R52`–`R63`; Sprint V06-D19.6; Section 21.8); G9–G11 normative drafting **unauthorized** |
+
+#### G9 — Superseded posture and GPRA succession
+
+| Field | Tranche 3 drafting posture |
+|-------|---------------------------|
+| **Drafting objective** | Freeze **Superseded** posture, PVTA ST supersession trigger families, supersession authority classes, predecessor–successor identity, forward authority transition, and posture interaction with **Invalidated** per Section 20.21 without governing Handoff procedures, Brain authority, or manufacturing execution |
+| **Inherited terms** | **Superseded**; authoritative **GPRA** — Volume 06 §5.9, §5.11; RIVP peer-posture vocabulary |
+| **Post-approval validity model** | **RIVP** — peer **Invalidated** (G8) and **Superseded** (G9); controlled **revocation** umbrella vocabulary per `PD-STD-014-004` |
+| **Supersession trigger model** | **PVTA ST families** — replacement **GPRA** grant (**ST-1**), authoritative succession rule (**ST-2**), context rebinding (**ST-3**) per Section 20.21.2 |
+| **Supersession authority model** | **SSAC** — Supersession Authority Classes per `PD-STD-014-014` (Section 20.21.3) |
+| **Identity and lineage model** | **PSIM** — Predecessor–Successor Identity Model per `PD-STD-014-015` (Section 20.21.4) |
+| **Posture interaction model** | **PIIM** — Posture Interaction and Immutability Model per `PD-STD-014-016` (Section 20.21.6) |
+| **Positive authority** | **Superseded** posture; ST trigger families; supersession acts; authoritative **GPRA** per obligation and Handoff consumer context; historical preservation; forward authority transition |
+| **Exclusions** | **Invalidated** posture and IT families (G8); Handoff procedures and consumer class catalog (G11); Brain authority (G10); G7 downstream disposition; manufacturing execution; operational withdrawal or recall |
+| **Prerequisite decisions** | G8 normative requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`; V06-D19.6); G9 planning architecture **complete** (V06-D20.1; Section 20.21); governed G9 planning acceptance review |
+| **Terms owned** | **Superseded** posture; ST families; supersession acts; SSAC; PSIM lineage; forward authority loss in superseded context |
+| **Terms referenced only** | **GPRA** grant (G6); **Retention** and **Invalidated** (G8); Handoff consumer context scope keys (G11 catalog reference); validity posture export (G11) |
+| **Required evidence** | RIVP fidelity; ST vs IT/NR distinction; SSAC implicit-authority prohibition; PSIM non-overwrite; PIIM interaction rules; PRR-P9 preserved; G7/G8/G11 boundaries preserved |
+| **Boundary risks** | Collapsing **Superseded** with **Invalidated**; absorbing STD-015 intake rules; treating supersession as Determination reopening; operational catalog mechanics absorption |
+| **Expected requirement themes** | **Superseded** posture; ST families; supersession authority; lineage traceability; forward authority transition; posture interaction; G9 completion boundary |
+| **Expected count range** | 5–7 (nonbinding) |
+| **Independent review focus** | RIVP/PVTA fidelity; G8 boundary; G11 non-absorption; Determination immutability |
+| **G9 vs G8** | G9 owns **Superseded**; G8 owns **Invalidated** — peer postures not interchangeable |
+| **G9 vs G11** | G9 owns constitutional binding scope keys; G11 owns Handoff procedures and consumer class catalog |
+| **Preparation status** | **Complete** (Sprint V06-D20.1); G9 normative requirements **not drafted**; G9–G11 normative drafting **unauthorized** |
 
 ### 20.14 Tranche 1 drafting sequence, gates, and controls
 
@@ -1121,6 +1150,10 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **20** | G8 drafting preparation | G7 drafted; Tranche 2 accepted at planning layer | G8 preparation table complete (Section 20.13); `PD-STD-014-004` and `PD-STD-014-007` resolved (Section 20.20) |
 | **21** | G8 planning acceptance review | G8 drafting preparation complete | Governed G8 planning acceptance review (next separately authorized gate) |
 | **22** | Tranche 3 prohibition | G8 normative requirements not separately authorized | G8–G11 normative requirement text remains unauthorized |
+| **23** | G8 normative drafting and acceptance | G8 planning acceptance passed (V06-D19.2); G8 normative drafting authorized and complete (V06-D19.1, V06-D19.3, V06-D19.5); independent G8 acceptance (V06-D19.6) | G8 requirements `FI-DSN-STD-014-R52`–`R63` accepted |
+| **24** | G9 planning architecture | G8 accepted; G9 planning sprint separately authorized | G9 planning architecture complete (Section 20.21) |
+| **25** | G9 planning acceptance review | G9 planning architecture complete | Governed G9 planning acceptance review (next separately authorized gate) |
+| **26** | Tranche 3 prohibition | G9 normative requirements not separately authorized | G9–G11 normative requirement text remains unauthorized |
 
 G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and extensibility rules are stable. G4 MUST NOT publish normative requirements that redefine Review activity or the mandatory core owned by G3.
 
@@ -1271,7 +1304,7 @@ G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and e
 
 **Open question closure:** `OQ-STD-014-004` — **Closed** through this baseline resolution (G6 binding scope only).
 
-**G9 planning question:** `OQ-STD-014-007` — authoritative GPRA succession, supersession, and handoff consumer class binding remains **Open** for G9.
+**G9 planning question:** `OQ-STD-014-007` — authoritative GPRA succession, supersession, and Handoff consumer context binding — **Closed** (Sprint V06-D20.1; Section 20.21). Handoff consumer class catalog detail remains G11.
 
 #### 20.18.1 Models evaluated — Pass to Approval to GPRA chain
 
@@ -1301,7 +1334,7 @@ G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and e
 | **Pass prohibitions** | **Pass** does not constitute **Approval**, create **GPRA**, confer membership, or declare Governed Handoff |
 | **Determination preservation** | **Review Determination** MUST NOT be rewritten, reopened, or substituted during **Approval** consideration; withholding or grant decisions are **Approval-layer** acts |
 | **GPRA binding scope baseline** | Each **GPRA** binds a **specific RVA version** under a **defined Production Obligation** scope per Volume 06 §5.11 and §16.5 |
-| **Deferred refinement** | Handoff consumer class binding, simultaneous authoritative variant rules, and full succession mechanics remain for G9 under `OQ-STD-014-007` |
+| **Deferred refinement** | Simultaneous authoritative variant rules (Volume 06 §5.11 non-default path) and Handoff consumer class catalog detail remain for G11; constitutional Handoff consumer context binding scope resolved G9 (Section 20.21.4) |
 | **G6 ownership** | Pass-to-Approval baseline; Approval act; GPRA grant; obligation-scoped instance binding baseline |
 | **G9 consumption boundary** | G9 owns authoritative GPRA succession and supersession detail without redefining Approval grant |
 | **G11 consumption boundary** | G11 exports GPRA identity and validity posture; does not redefine grant rules |
@@ -1658,7 +1691,161 @@ This is a **logical constitutional dependency architecture** — not a mandatory
 
 #### 20.20.5 G8 planning-readiness determination
 
-**G8 planning-readiness determination:** **A — Resolved at planning layer.** `PD-STD-014-004` (RIVP), `PD-STD-014-007` (PVTA), and `OQ-STD-014-003` are resolved. G8 drafting preparation is **complete** (Section 20.13). Next gate: **governed G8 planning acceptance review**. G8 normative requirement drafting remains **unauthorized** until separately authorized after planning acceptance.
+**G8 planning-readiness determination:** **A — Resolved at planning layer.** `PD-STD-014-004` (RIVP), `PD-STD-014-007` (PVTA invalidation architecture), and `OQ-STD-014-003` are resolved. G8 drafting preparation is **complete** (Section 20.13). G8 normative requirements **drafted and independently accepted** (`FI-DSN-STD-014-R52`–`R63`; Sprint V06-D19.6). Next gate for G9: **governed G9 planning acceptance review** (Section 20.21.10). G9 normative requirement drafting remains **unauthorized** until separately authorized after G9 planning acceptance.
+
+### 20.21 G9 Planning — Superseded Posture and Authoritative GPRA Succession
+
+This section establishes the constitutional planning architecture for **Superseded** post-approval GPRA posture, authoritative GPRA succession, and Handoff consumer context binding scope. It consumes **RIVP** (Section 20.20.1), **PVTA** ST families (Section 20.20.3.3), G6 GPRA grant baseline (Section 20.18), G8 **Retention** and **Invalidated** requirements (`FI-DSN-STD-014-R52`–`R63`), and frozen Volume 06 §5.9 and §5.11 without authoring G9 normative requirements.
+
+**Planning scope boundary:** This section governs post-approval **Superseded** posture, supersession trigger families, supersession authority classes, predecessor–successor identity, forward authority transition, and posture interaction with **Invalidated** only. It does not redefine pre-approval **Review Determination** outcomes (G5), downstream disposition (G7), **GPRA** grant mechanics (G6), **Invalidated** posture (G8), Brain authority (G10), Governed Handoff procedures (G11), manufacturing execution, lifecycle termination, or operational withdrawal or recall.
+
+#### 20.21.0 Constitutional vocabulary — Retention, Invalidated, and Superseded
+
+| Posture | Constitutional meaning | Forward authority | Historical validity | Distinguished from |
+|---------|------------------------|-------------------|---------------------|-------------------|
+| **Retention** | Default forward-active approved GPRA after G6 grant | **Yes** — until **Invalidated** or **Superseded** | Approval and grant valid when granted | Not a loss posture |
+| **Invalidated** (G8) | GPRA no longer satisfies governing law or required **Compliance Boundaries** | **No** — new Handoff and intake on affected authority prohibited | Historical approval preserved when granted (PRR-P9) | **Superseded**; termination; erasure; historical invalidity claim |
+| **Superseded** (G9) | Newer authoritative GPRA has replaced this GPRA for a defined **Production Obligation** and Handoff consumer context | **No** in superseded context; replacement GPRA governs forward intake when eligible | Historical approval preserved; prior approval **not** asserted invalid when granted (PRR-P9) | **Invalidated**; termination; withdrawal; third revocation posture; erasure |
+
+**RIVP planning rule:** Layer B recognizes exactly **Invalidated** and **Superseded** as peer post-approval GPRA loss postures. **Superseded** is **not** a form of **Invalidated**, **not** lifecycle termination, **not** operational withdrawal or recall, **not** retroactive erasure, and **not** a claim that the predecessor approval was historically invalid when granted.
+
+#### 20.21.1 PD-STD-014-013 resolution — Superseded posture definition
+
+**Planning decision:** `PD-STD-014-013` — **Resolved** (Sprint V06-D20.1).
+
+**Open question closure:** `OQ-STD-014-007` — **Closed** at planning baseline through Sections 20.21.1–20.21.6 and `PD-STD-014-013`–`PD-STD-014-016` (Handoff consumer class catalog detail remains G11).
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Superseded meaning** | **Superseded** means a newer authoritative **GPRA** has replaced this **GPRA** for a defined **Production Obligation** scope and Handoff consumer context per Volume 06 §5.9 and §5.11 |
+| **Peer posture** | **Superseded** remains a peer post-approval GPRA posture under **RIVP** alongside **Invalidated**; neither is a third revocation posture |
+| **Historical preservation** | Historical **Approval** and **GPRA** grant remain preserved; predecessor approval is **not** asserted invalid when granted |
+| **Forward authority** | Predecessor **GPRA** ceases forward authority in the superseded context; successor **GPRA** governs forward intake when otherwise eligible |
+| **Determination boundary** | Supersession does **not** reopen, edit, or substitute any recorded **Review Determination** |
+| **G8 boundary** | **Invalidated** posture and invalidation trigger architecture remain G8-owned; G9 does **not** treat **Superseded** as **Invalidated** |
+| **G6 boundary** | Replacement **GPRA** grant remains G6-owned; G9 owns supersession posture consequence and succession traceability |
+
+#### 20.21.2 PVTA ST families — supersession trigger architecture (G9)
+
+**Planning consumption:** PVTA ST families introduced in Section 20.20.3.3 are expanded here for G9 planning. No normative **SHALL** language is introduced in this section.
+
+| ST family | Trigger source | Predecessor–successor relationship | Affected GPRA | Successor GPRA or authority | Traceability obligation | Distinguished from **Invalidated** | Distinguished from NR paths |
+|-----------|----------------|-----------------------------------|---------------|----------------------------|-------------------------|-----------------------------------|----------------------------|
+| **ST-1 — Replacement GPRA grant** | Explicit governed **GPRA** grant under G6 (`FI-DSN-STD-014-R42`) for the same **Production Obligation** scope and applicable Handoff consumer context | Predecessor **GPRA** in **Retention** for that context becomes **Superseded** when successor **GPRA** is granted for the same scope and context | Predecessor **GPRA** identity in the superseded context | Successor **GPRA** identity from the replacement grant act | Superseded **GPRA**; replacing **GPRA**; obligation scope; Handoff consumer context; governing grant source; supersession authority attribution | No governing-law failure required; does **not** assert predecessor approval was invalid when granted | Subsequent **Review**, exploratory **Review**, or successor **RVA** evaluation without replacement **GPRA** grant does **not** establish **Superseded** |
+| **ST-2 — Authoritative succession rule** | Frozen constitutional governance per Volume 06 §5.11 and applicable Layer B succession rules | When frozen law requires one authoritative **GPRA** per obligation and context, governed succession act assigns successor authority per that rule | Predecessor **GPRA** bound to the superseded context | Successor **GPRA** identified by the governing succession rule | Governing succession source identifier; predecessor and successor **GPRA** identities; obligation and context scope | Constitutional succession without governing-law failure finding | Operational catalog replacement mechanics alone (deferred) |
+| **ST-3 — Context rebinding** | Governed change in **Production Obligation** or Handoff consumer context binding that assigns a different authoritative **GPRA** for the new or redefined context | Predecessor **GPRA** becomes **Superseded** **in the prior context only**; a different existing or newly granted **GPRA** becomes authoritative for the rebound context | Predecessor **GPRA** for the prior context binding | **GPRA** bound to the rebound context per governed linkage | Prior context binding; new context binding; predecessor and successor **GPRA** identities; governing rebinding source | Context change without governing-law failure; does **not** delete historical approval fact | **Review** activity or NR paths alone without governed context-rebinding act |
+
+**Supersession act requirements (planning):** A supersession act is a separate post-approval constitutional disposition distinct from **Review Determination** recording, G7 downstream disposition, G8 invalidation acts, and mere **GPRA** grant recording — though **ST-1** may be constitutionally coupled to a replacement **GPRA** grant act under G6. Every supersession act is traceable to superseded **GPRA** identity, replacing **GPRA** identity (when applicable), **Production Obligation** scope, Handoff consumer context, ST family designation, and governing source identifier. It does **not** reopen the prior **Review Determination**.
+
+**ST family attribution (planning):** Establishing **Superseded** posture requires attribution to exactly one ST family per supersession act.
+
+#### 20.21.3 PD-STD-014-014 resolution — Supersession authority architecture (SSAC)
+
+**Planning decision:** `PD-STD-014-014` — **Resolved** (Sprint V06-D20.1).
+
+**Model designation:** SSAC — Supersession Authority Classes.
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Establishment rule** | A supersession authority class exists only when **established** by authoritative frozen constitutional governance |
+| **Activation and scope** | Applicable **Production Program**, **Production Obligation**, artifact class, Handoff consumer context, or **GPRA** context MAY **activate** or **scope** an already established supersession authority class for a specific supersession act and SHALL NOT independently **create** a supersession authority class |
+| **ST-1 authority** | Replacement **GPRA** grant authority under G6 (MAGAC or other constitutionally established grant authority) MAY trigger **ST-1** supersession when granting a successor **GPRA** for the same obligation scope and Handoff consumer context |
+| **ST-2 authority** | Supersession under frozen Volume 06 §5.11 succession rules and other frozen Layer B succession law only |
+| **ST-3 authority** | Context-rebinding authority established only by frozen governance governing **Production Obligation** linkage, program structure, or Handoff consumer context assignment — not by **Review**, **Approval**, or disposition participation alone |
+| **Prohibited implicit authority** | Production-readiness **Review** participation; **Review Determination** recording; **Approval** participation; MAGAC activation alone without grant act; DDAC downstream disposition; G8 invalidation authority; Brain output; workflow state; tool permission; operational preference; customer Selection; membership administration |
+| **Attribution requirement** | Every supersession act has attributable constitutional authority class and governed scope |
+| **G6/G9 split** | G6 owns replacement **GPRA** grant; G9 owns **Superseded** posture consequence, ST family attribution, and succession traceability |
+
+#### 20.21.4 PD-STD-014-015 resolution — Predecessor and successor identity model (PSIM)
+
+**Planning decision:** `PD-STD-014-015` — **Resolved** (Sprint V06-D20.1).
+
+**Model designation:** PSIM — Predecessor–Successor Identity Model.
+
+| Relationship | Planning rule |
+|--------------|---------------|
+| **Predecessor GPRA ↔ successor GPRA** | Each supersession act links exactly one predecessor **GPRA** identity to exactly one successor **GPRA** identity (or to a governed authoritative succession assignment under **ST-2**) for a defined obligation scope and Handoff consumer context |
+| **Predecessor Approval ↔ successor Approval** | Predecessor and successor **Approval** acts remain distinct historical records; successor **Approval** does **not** overwrite predecessor **Approval** |
+| **Predecessor Review ↔ successor Review** | Predecessor and successor **Review** instances and **Review Determinations** remain distinct and immutable; successor **Review** is a separate governed instance per `PD-STD-014-011` when required |
+| **Predecessor RVA ↔ successor RVA** | Predecessor and successor **RVA** versions remain distinct lineage objects; successor **GPRA** binds its own **RVA** version per G6 baseline |
+| **Authoritative GPRA rule** | For a given **Production Obligation** and Handoff consumer context, exactly one **GPRA** is authoritative at a time per Volume 06 §5.11 unless future Layer B law explicitly permits multiple simultaneously authoritative variants for distinct governed purposes |
+| **Historical multiplicity** | Multiple historical **GPRAs** MAY exist for successive **RVA** versions over time; historical identities are preserved |
+| **Non-overwrite rule** | A successor object SHALL NOT overwrite, delete, or substitute the predecessor record; supersession adds posture and lineage linkage only |
+| **Handoff consumer context binding (baseline)** | Authoritative **GPRA** succession and **Superseded** scope are keyed by **Production Obligation** scope **and** Handoff consumer context identifier; G9 owns constitutional binding scope keys; Handoff consumer class catalog definition and intake binding procedures remain G11 (`FI-DSN-STD-015`) |
+
+**`OQ-STD-014-007` closure posture:** Authoritative GPRA succession, supersession trigger architecture, and Handoff consumer context binding **scope** are resolved at the G9 planning layer through PSIM and ST families. Handoff consumer class **catalog** and intake procedure detail remain deferred to G11 without blocking G9 planning completeness.
+
+#### 20.21.5 Forward authority transition
+
+| Transition element | Planning consequence |
+|--------------------|---------------------|
+| **Predecessor forward reliance** | New constitutional production-ready reliance, new Governed Handoff eligibility, and new intake authority based on the **Superseded** predecessor **GPRA** are **not** permitted in the superseded context |
+| **Successor forward authority** | The successor **GPRA** governs forward intake and new reliance in the applicable context when otherwise eligible under governing law |
+| **Historical predecessor records** | Historical **Approval**, **GPRA** grant, **Review**, Governed Handoff, and production records associated with the predecessor **GPRA** remain preserved (PRR-P9) |
+| **Historical downstream records** | Historical downstream reliance and operational records remain preserved; existing downstream use is **not** automatically revoked per Volume 06 §5.9 |
+| **Retroactive erasure** | **Superseded** posture does **not** retroactively erase, delete, or rewrite historical records |
+| **Automatic invalidation** | **Superseded** posture does **not**, by itself, establish **Invalidated** posture on the predecessor or successor **GPRA** |
+| **G11 boundary** | G9 does **not** define Governed Handoff procedures, consumer intake mechanics, or manufacturing execution |
+
+#### 20.21.6 PD-STD-014-016 resolution — Supersession and invalidation interaction (PIIM)
+
+**Planning decision:** `PD-STD-014-016` — **Resolved** (Sprint V06-D20.1).
+
+**Model designation:** PIIM — Posture Interaction and Immutability Model.
+
+| Interaction question | Planning resolution | Governing basis |
+|---------------------|---------------------|-----------------|
+| **May an Invalidated GPRA later become Superseded?** | **No** for the same **GPRA** identity. An **Invalidated** **GPRA** remains **Invalidated** and constitutionally distinguished from any replacement **GPRA**. Replacement authority is restored only through a new G6 **GPRA** grant path (`FI-DSN-STD-014-R62`); the replacement **GPRA** is a separate object | G8 `FI-DSN-STD-014-R62`; RIVP peer separation |
+| **May a Superseded GPRA later become Invalidated?** | **Yes** as a separate governed invalidation act under G8 when governing-law failure is established for that historical **GPRA** identity. **Superseded** does **not** immunize a **GPRA** from later **Invalidated** posture; historical approval when granted remains preserved | Volume 06 §5.9; G8 IT families; PRR-P9 |
+| **One current posture per context?** | **Yes** — at a given evaluation point for a defined **Production Obligation** and Handoff consumer context, a **GPRA** is in exactly one of **Retention**, **Invalidated**, or **Superseded** | Section 20.20.4 |
+| **Posture history preservation?** | **Yes** — every posture transition is recorded; posture history is preserved as constitutional fact | PRR-P9; G8 `FI-DSN-STD-014-R55`, `R59` |
+| **May later posture changes overwrite earlier historical posture records?** | **No** — later transitions add new posture state; they do **not** overwrite, delete, or rewrite earlier posture or **Review Determination** records | G5 `FI-DSN-STD-014-R35`; G7 `FI-DSN-STD-014-R51`; G8 `FI-DSN-STD-014-R59` |
+| **ST-1 from Retention only?** | **ST-1** supersession by replacement **GPRA** grant applies when the predecessor **GPRA** is in **Retention** for the superseded context; an already **Invalidated** predecessor is **not** superseded — the replacement **GPRA** is a distinct successor object | G8/G9 boundary; RIVP |
+
+#### 20.21.7 Historical preservation and Review Determination immutability
+
+| Preservation subject | Planning rule |
+|---------------------|---------------|
+| **Review Determination** | Immutable; supersession does **not** reopen, edit, or substitute prior **Review Determinations** |
+| **Historical Approval validity** | Preserved per PRR-P9 for both predecessor and successor chains |
+| **Historical GPRA grant validity** | Preserved; **Superseded** does **not** assert predecessor grant was invalid when granted |
+| **Predecessor and successor lineage** | Recorded under PSIM; neither lineage overwrites the other |
+| **PRR-P9** | **Invalidated** and **Superseded** both preserve historical approval fact when constitutionally valid at grant time |
+
+#### 20.21.8 G9 boundary verification
+
+| Boundary | G9 relationship |
+|----------|-----------------|
+| **G7 downstream disposition** | G9 does **not** govern pre-approval disposition, deficiency records, rework authorization, or return posture |
+| **G8 invalidation** | G9 does **not** define **Invalidated** posture, IT families, or invalidation authority; **Superseded** is not **Invalidated** |
+| **G10 Brain authority** | Brain output does **not** establish supersession authority or **Superseded** posture |
+| **G11 Handoff execution** | G9 does **not** define Handoff procedures, consumer intake, or validity posture export mechanics |
+| **Manufacturing execution** | G9 does **not** establish manufacturing, fulfillment, recall, or operational execution rules |
+| **Lifecycle termination** | **Superseded** is **not** program, obligation, or lifecycle termination (G7 `R50` exclusion preserved) |
+| **Operational withdrawal or recall** | **Withdrawal** is not a Layer B posture; G9 does **not** define operational withdrawal or recall |
+
+#### 20.21.9 G9 drafting preparation table
+
+| Planning theme | Source authority | Proposed normative ownership | Dependencies | Unresolved question | Readiness status |
+|----------------|------------------|------------------------------|--------------|---------------------|------------------|
+| **Superseded posture definition** | Volume 06 §5.9; RIVP; `PD-STD-014-013` | G9 — posture definition requirement | G8 complete; RIVP | None | **Ready** |
+| **ST-1 replacement GPRA grant supersession** | PVTA §20.20.3.3; G6 `R42`; Volume 06 §5.11 | G9 — ST-1 trigger and traceability | G6 grant; PSIM | None | **Ready** |
+| **ST-2 authoritative succession rule** | Volume 06 §5.11; frozen succession law | G9 — ST-2 trigger and traceability | PSIM | Simultaneous authoritative variant rules (non-default; §5.11 deferral) | **Ready** — variant rules deferred, not blocking |
+| **ST-3 context rebinding** | Volume 06 §5.11; §5.12 obligation linkage | G9 — ST-3 trigger and traceability | PSIM; STD-012 linkage | None at planning layer | **Ready** |
+| **Supersession authority classes (SSAC)** | `PD-STD-014-014`; G6 MAGAC boundary | G9 — authority establishment and attribution | G6; G8 R57 boundary | None | **Ready** |
+| **Predecessor–successor identity (PSIM)** | `PD-STD-014-015`; G6 baseline `PD-STD-014-005` | G9 — lineage and non-overwrite requirements | G5/G7 Determination immutability | None | **Ready** |
+| **Handoff consumer context binding scope** | Volume 06 §5.11; `OQ-STD-014-007` closure | G9 — constitutional scope keys | G11 consumer catalog (reference only) | Consumer class catalog detail (G11) | **Ready** — scope resolved; catalog deferred G11 |
+| **Forward authority transition** | Volume 06 §5.9; §20.21.5 | G9 — predecessor loss and successor authority | G8 R60/R61 parallel boundary | None | **Ready** |
+| **Invalidated interaction (PIIM)** | `PD-STD-014-016`; G8 `R62` | G9 — posture interaction rules | G8 complete | None | **Ready** |
+| **Historical preservation** | PRR-P9; G8 `R55` | G9 — supersession path preservation | G8 | None | **Ready** |
+| **Determination immutability** | G5 `R35`; G7 `R51`; G8 `R59` | G9 — supersession non-reopening rule | G5/G7/G8 | None | **Ready** |
+| **G9 completion boundary** | RIVP; G8 `R63` | G9 — completion and exclusion requirement | Full G9 theme coverage | None — count range nonbinding | **Ready** |
+
+#### 20.21.10 G9 planning-readiness determination
+
+**G9 planning-readiness determination:** **A — Resolved at planning layer.** `PD-STD-014-013` (Superseded posture definition), `PD-STD-014-014` (SSAC), `PD-STD-014-015` (PSIM), `PD-STD-014-016` (PIIM), and **`OQ-STD-014-007`** (succession, supersession, and Handoff consumer context binding scope) are resolved. G9 drafting preparation is **complete** (Sections 20.13 and 20.21.9). Next gate: **governed G9 planning acceptance review**. G9 normative requirement drafting remains **unauthorized** until separately authorized after planning acceptance.
+
+**Nonblocking deferrals preserved:** Simultaneous authoritative variant rules per Volume 06 §5.11 non-default path; Handoff consumer class catalog and intake procedure detail (G11); operational catalog replacement mechanics (**ST-2** implementation layer).
 
 ---
 
@@ -2091,6 +2278,7 @@ Post-approval **GPRA** validity is governed by **RIVP** peer-posture vocabulary 
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D20.1 — G9 planning architecture **established** (Section 20.21): `PD-STD-014-013` Superseded posture definition; `PD-STD-014-014` SSAC supersession authority classes; `PD-STD-014-015` PSIM predecessor–successor identity model; `PD-STD-014-016` PIIM posture interaction model; `OQ-STD-014-007` **closed**; G9 drafting preparation complete (Sections 20.13, 20.21.9); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G9–G11 normative not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D19.5 — G8 normative drafting **complete** (Section 21.8 Tranche 3): `FI-DSN-STD-014-R60`–`R63` (forward authority consequences, downstream reliance boundary, reinstatement boundary, G8 completion boundary); G8 requirements `FI-DSN-STD-014-R52`–`R63` continuous; G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); `OQ-STD-014-005` **closed**; G9–G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D19.3 — G8 Tranche 2 normative requirements drafted (Section 21.8.5): `FI-DSN-STD-014-R56`–`R59` (PVTA IT trigger families, invalidation authority classes, materiality thresholds, invalidation-act traceability); `OQ-STD-014-005` materiality normatively resolved in R58; G8 Tranche 1 preserved (`FI-DSN-STD-014-R52`–`R55`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G8 partial; G9–G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D19.1 — G8 normative architecture begun (Section 21.8 Tranche 1): `FI-DSN-STD-014-R52`–`R55` (Retention default, Invalidated posture, separate invalidation act, historical preservation); RIVP and PVTA consumed; G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G8 partial; G9–G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
