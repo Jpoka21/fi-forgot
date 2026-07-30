@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`) |
 | **Queue posture** | EO 20 — **In progress** per Sprint V06-D5.4 requirement plan adoption (`FI-DSN-QUE-001`) |
-| **Sprint** | V06-D13.1A |
+| **Sprint** | V06-D14.1 |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed as Design-Time Feasibility Compliance Boundary inputs only. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 drafting preparation **complete** (Sprint V06-D13.1; Section 20.13). G6–G11 normative requirement drafting remains **unauthorized**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **drafted** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; Section 21.6). G1 through G6 normative requirements drafted (`FI-DSN-STD-014-R01`–`R43`). G7–G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -549,7 +549,7 @@ Architecture Validation is governance-level validation before normative requirem
 | Post-approval states | Invalidated and Superseded aligned with Volume 06 §5.9 |
 | Rework boundary | Review authorization vs Domain 2 consumption split documented |
 | Implementation independence | No APIs, schemas, UI, workflows, vendors, or models prescribed |
-| Normative requirements | **Partial** — G1 drafted (`FI-DSN-STD-014-R01`–`R07`); G2 drafted (`FI-DSN-STD-014-R08`–`R13`); G3 drafted (`FI-DSN-STD-014-R14`–`R20`); G4 drafted (`FI-DSN-STD-014-R21`–`R26`); G5 drafted (`FI-DSN-STD-014-R27`–`R33`); G6–G11 not drafted |
+| Normative requirements | **Partial** — G1 drafted (`FI-DSN-STD-014-R01`–`R07`); G2 drafted (`FI-DSN-STD-014-R08`–`R13`); G3 drafted (`FI-DSN-STD-014-R14`–`R20`); G4 drafted (`FI-DSN-STD-014-R21`–`R26`); G5 drafted (`FI-DSN-STD-014-R27`–`R33`); G6 drafted (`FI-DSN-STD-014-R34`–`R43`); G7–G11 not drafted |
 | Independent review | **Passed** — Sprint V06-D4.4; minor corrective findings resolved in Sprint V06-D4.4A; architecture committed in Sprint V06-D4.5 |
 | Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 drafting preparation **complete**; G6 normative drafting **unauthorized** until separately authorized sprint |
 
@@ -1262,7 +1262,7 @@ G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and e
 
 ## 21. Normative Requirements — Partial Draft
 
-**Drafting posture:** Sprint V06-D12.1 — normative requirements drafted for planning groups **G1**, **G2**, **G3**, **G4**, and **G5**. Identifiers **`FI-DSN-STD-014-R01` through `FI-DSN-STD-014-R33`** are continuous. Groups **G6** through **G11** are **not drafted**. This partial draft does not claim approval, freeze, binding authority, or effective status beyond draft governance posture.
+**Drafting posture:** Sprint V06-D14.1 — normative requirements drafted for planning groups **G1**, **G2**, **G3**, **G4**, **G5**, and **G6**. Identifiers **`FI-DSN-STD-014-R01` through `FI-DSN-STD-014-R43`** are continuous. Groups **G7** through **G11** are **not drafted**. This partial draft does not claim approval, freeze, binding authority, or effective status beyond draft governance posture.
 
 ### 21.1 Constitutional Inheritance and Principal-Subject Placement (G1)
 
@@ -1307,7 +1307,7 @@ This section establishes the constitutional identity, purpose, and initiation po
 
 **Production-readiness Review** is the Decision-stage constitutional activity whose principal subject is governed evaluation of a **Review-Entry Ready** **Realized Visual Artifact (RVA)** instance under applicable Production Obligation scope and bound Compliance Boundaries. Review produces evidence toward a later **Review Determination**; Review alone does not grant **GPRA** or approved production-ready posture. Review-Entry Ready posture is an upstream Domain 2 output consumed under `FI-DSN-STD-013`; this G1 boundary statement does not define Review entry eligibility, which is assigned to G2.
 
-**Undrafted groups:** G6–G11 — **not drafted**.
+**Undrafted groups:** G7–G11 — **not drafted**.
 
 ---
 
@@ -1350,7 +1350,7 @@ This section establishes when production-readiness Review may commence and what 
 
 **Review entry eligibility** is the Decision-stage constitutional gate that determines whether a **Review-Entry Ready** **RVA** instance may be accepted into production-readiness Review under applicable **Production Program**, **Production Obligation**, **Declared Production Intent**, and bound **Compliance Boundaries**. Review entry consumes upstream Domain 2 posture and traceability; it does not create **Review-Entry Ready** posture, commence Review from **Exploration Posture** or incomplete **Realization**, or grant **GPRA** or **Approval**. Review findings and **Review Determination** are assigned to later groups.
 
-**Undrafted groups:** G6–G11 — **not drafted**.
+**Undrafted groups:** G7–G11 — **not drafted**.
 
 ---
 
@@ -1397,7 +1397,7 @@ This section establishes the constitutional architecture of production-readiness
 
 **Production-readiness Review** activity evaluates a **Review-Entry Ready** **RVA** instance through a mandatory constitutional core of four **Review dimension** categories under the MCCGE model, with governed extensibility only where upstream authority requires additional dimensions. **Design-Time Feasibility** is a mandatory core category; detailed Design-Time Feasibility evaluation integration is assigned to G4. **Review evidence** categories support a later **Review Determination**; Review activity alone does not record Determination outcomes, grant **Approval**, or create **GPRA**.
 
-**Undrafted groups:** G6–G11 — **not drafted**.
+**Undrafted groups:** G7–G11 — **not drafted**.
 
 ---
 
@@ -1441,7 +1441,7 @@ This section establishes how **Design-Time Feasibility** is integrated within pr
 
 **Design-Time Feasibility** integration evaluates applicable manufacturing feasibility constraints at the Decision stage as a mandatory core **Review dimension** under **Review dimension** membership established by `FI-DSN-STD-014-R15` and `FI-DSN-STD-014-R16`. It consumes applicable frozen `FI-MFG-*` **Compliance Boundaries** as governed inputs, produces **Design-Time Feasibility** **Review evidence** toward a later **Review Determination**, and preserves separation from **Manufacturing Validation** and **Fulfillment Execution**. It does not redefine Review dimension architecture, govern manufacturing operations, or grant **GPRA** or **Approval**.
 
-**Undrafted groups:** G6–G11 — **not drafted**.
+**Undrafted groups:** G7–G11 — **not drafted**.
 
 ---
 
@@ -1488,7 +1488,62 @@ This section establishes the constitutional architecture of **Review Determinati
 
 **Review Determination** is the Decision-stage constitutional outcome recorded when a production-readiness **Review** is completed. The permitted outcome set is **Pass**, **Conditional**, and **Fail** only. **Conditional** is a **completed** and fixed Determination for its **Review** instance; condition resolution requires a subsequent governed **Review** that records exactly one new Determination. Only **Pass** may support later **Approval** consideration; **Pass** does not constitute **Approval** or **GPRA**. G5 records outcome architecture and evidence grounding only; deficiency disposition, rework authorization, resubmission, and return paths are assigned to G7.
 
-**Undrafted groups:** G6–G11 — **not drafted**.
+**Undrafted groups:** G7–G11 — **not drafted**.
+
+---
+
+### 21.6 Approval Authority and GPRA Grant (G6)
+
+This section establishes the constitutional architecture of **Approval** consideration, **Approval** authority classes, governed **Approval** withholding grounds, and explicit **GPRA** grant posture. It does not govern Review activity or **Review Determination** outcomes (G1–G5), deficiency classification, rework authorization, resubmission mechanics, or return paths (G7), **Invalidated** or **Superseded** posture (G8–G9), Brain interaction detail (G10), Governed Handoff consumption (G11), or any implementation system.
+
+#### 21.6.1 Inherited authority
+
+| Inherited source | What G6 consumes for Approval and GPRA grant architecture |
+|------------------|----------------------------------------------------------|
+| **Volume 06 Creative Production Architecture** | Decision-stage **Approval** authority (§8); **GPRA** posture (§8.4, §9); Stage Governance Matrix (§12); instance binding (§16.5); PRR-P2–P4 and PRR-P7–P8 |
+| **`PD-STD-014-002` resolution (Section 20.16)** | MAGAC — Multiple Authorized Governed Authority Classes; establishment versus activation (Section 20.16.3) |
+| **`PD-STD-014-003` resolution (Section 20.17)** | EGWG — Enumerated Governed Withholding Grounds; mandatory ground families; governed extensibility |
+| **`PD-STD-014-005` baseline resolution (Section 20.18)** | TOC-PA — Pass–Approval–GPRA chain; explicit **GPRA** grant; obligation-scoped instance binding (Section 20.18.4) |
+| **`FI-DSN-GOV-004`** | Decision-stage versus runtime distinction; prohibition on Brain **GPRA** grant |
+| **`FI-DSN-STD-012`** | **Production Program** and **Production Obligation** attribution for scope activation and **GPRA** binding |
+| **G5 requirements (`FI-DSN-STD-014-R27`–`R33`)** | **Pass**-only **Approval** consideration eligibility; **Review Determination** outcome architecture — consumed, not redefined |
+| **G1–G4 requirements** | Domain 3 placement; Review entry; Review activity; Design-Time Feasibility integration — referenced for boundary preservation only |
+
+#### 21.6.2 Normative requirements — Approval Authority and GPRA Grant (G6)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-014-R34` | Production Readiness Review and Approval SHALL permit **Approval** consideration to commence only after a completed production-readiness **Review** has recorded a **Pass** **Review Determination** for the applicable **Realized Visual Artifact (RVA)** instance version under defined **Production Obligation** scope. **Approval** consideration SHALL be distinct from the **Approval** act and SHALL NOT, by itself, constitute **Approval**, create **GPRA**, or confer approved production-ready posture. | Company judgment |
+| `FI-DSN-STD-014-R35` | Production Readiness Review and Approval SHALL treat **Pass** as necessary but not sufficient for **Approval** per `FI-DSN-STD-014-R33`. **Approval** consideration, withholding, or grant decisions SHALL NOT rewrite, reopen, substitute for, or revise the recorded **Review Determination**. A different **Review Determination** outcome SHALL require a subsequent governed production-readiness **Review** subject to applicable STD-014 Review requirements, including applicable G2 entry, G3 Review activity and **Review dimension**, and G4 **Design-Time Feasibility** requirements; the subsequent completed **Review** SHALL record the new **Review Determination** under G5. | Company judgment |
+| `FI-DSN-STD-014-R36` | An **Approval** authority class SHALL exist only when established by authoritative frozen constitutional governance. Every established **Approval** authority class SHALL be traceable to its governing source identifier and authorized constitutional scope. | Company judgment |
+| `FI-DSN-STD-014-R37` | Applicable **Production Program**, **Production Obligation**, artifact class, or other Review or **Approval** context MAY activate or scope an already established **Approval** authority class for a specific **Approval** act and SHALL NOT independently create an **Approval** authority class. Production Readiness Review and Approval SHALL NOT treat customary business practice, reviewer participation, organizational title, implementation role, workflow state, tool permission, Brain behavior, customer Selection, or membership administration as establishing **Approval** authority. | Company judgment |
+| `FI-DSN-STD-014-R38` | Every completed **Approval** act SHALL be attributable to a constitutionally established **Approval** authority class acting within that class's governed scope. | Company judgment |
+| `FI-DSN-STD-014-R39` | Production Readiness Review and Approval SHALL permit **Approval** to be withheld despite a **Pass** **Review Determination** only on documented constitutional withholding grounds. The mandatory withholding ground families SHALL be: (1) **bound governing prerequisites not satisfied**; (2) **authority or provenance defects**; and (3) **unresolved Production Program or Production Obligation conflicts** under applicable frozen governance. | Company judgment |
+| `FI-DSN-STD-014-R40` | Additional **Approval** withholding grounds beyond the mandatory families SHALL apply only when established by authoritative frozen governance already constitutionally authorized to block or condition **Approval** and SHALL be documented and traceable to that governing source. Production Readiness Review and Approval SHALL NOT permit arbitrary human discretion, commercial preference presented as constitutional law, implementation or tooling limitations presented as withholding grounds, workflow state, Brain recommendation, or reopening or revising a **Review Determination** without a subsequent governed **Review** as withholding grounds. | Company judgment |
+| `FI-DSN-STD-014-R41` | **Approval** SHALL be a distinct Decision-stage constitutional act separate from production-readiness **Review**, **Review Determination**, and **Approval** consideration. **Approval** SHALL be necessary but not sufficient for **GPRA**; **GPRA** SHALL NOT arise automatically from **Pass** or **Approval**. | Company judgment |
+| `FI-DSN-STD-014-R42` | **GPRA** posture SHALL arise only through an explicit governed grant or posture assignment attributable to constitutionally authorized **Approval** authority acting within governed scope. **Pass** and **Approval** SHALL NOT, by themselves, create **GPRA** or substitute for that explicit governed grant. | Company judgment |
+| `FI-DSN-STD-014-R43` | Each **GPRA** grant SHALL bind a **specific Realized Visual Artifact (RVA)** version under a **defined Production Obligation** scope. **GPRA** SHALL remain constitutionally distinct from permanent collection **membership** and Governed Handoff under `FI-DSN-STD-015`. | Company judgment |
+
+#### 21.6.3 G6 drafting traceability
+
+| Req ID | Planning group | Primary theme | Upstream authority |
+|--------|----------------|---------------|-------------------|
+| `FI-DSN-STD-014-R34` | G6 | Approval consideration eligibility; consideration versus Approval act | Section 20.18; G5 R33; PRR-P2 |
+| `FI-DSN-STD-014-R35` | G6 | Pass insufficiency; Determination preservation during Approval consideration | Section 20.18.4; G5 R33; PRR-P2 |
+| `FI-DSN-STD-014-R36` | G6 | MAGAC establishment and class traceability | Section 20.16.3; `PD-STD-014-002` |
+| `FI-DSN-STD-014-R37` | G6 | MAGAC activation versus establishment; prohibited authority sources | Section 20.16.3; `PD-STD-014-002`; `FI-DSN-GOV-004` |
+| `FI-DSN-STD-014-R38` | G6 | Approval act attribution to authorized class within scope | Section 20.16.3; Volume 06 §16.5 |
+| `FI-DSN-STD-014-R39` | G6 | EGWG mandatory withholding ground families | Section 20.17.2; `PD-STD-014-003` |
+| `FI-DSN-STD-014-R40` | G6 | EGWG extensibility, traceability, and prohibited grounds | Section 20.17.2; `PD-STD-014-003` |
+| `FI-DSN-STD-014-R41` | G6 | Approval as separate act; Approval necessary but insufficient for GPRA | Section 20.18.3–20.18.4; TOC-PA; PRR-P2 |
+| `FI-DSN-STD-014-R42` | G6 | Explicit governed GPRA grant; nonautomatic posture | Section 20.18.4; `PD-STD-014-005`; PRR-P2 |
+| `FI-DSN-STD-014-R43` | G6 | Obligation-scoped RVA binding; membership and Handoff exclusion | Section 20.18.3; Volume 06 §5.11, §16.5; PRR-P3–P4 |
+
+#### 21.6.4 Constitutional Approval and GPRA grant architecture (G6 boundary statement)
+
+**Approval** consideration may commence only after a **Pass** **Review Determination** and remains distinct from the **Approval** act and from **GPRA** grant. **Approval** authority classes exist only when established by authoritative frozen constitutional governance; applicable **Production Program**, **Production Obligation**, artifact class, or Review or **Approval** context may activate or scope an established class but SHALL NOT create one. **Approval** may be withheld after **Pass** only on documented EGWG grounds. **Approval** is a separate constitutional act that is necessary but not sufficient for **GPRA**; **GPRA** requires an explicit governed grant binding a **specific RVA** version under **defined Production Obligation** scope. Deficiency disposition, rework authorization, **Invalidated** and **Superseded** posture, **GPRA** succession, and Governed Handoff are assigned to later groups.
+
+**Undrafted groups:** G7–G11 — **not drafted**.
 
 ---
 
@@ -1496,6 +1551,7 @@ This section establishes the constitutional architecture of **Review Determinati
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D14.1 — G6 normative requirements drafted (`FI-DSN-STD-014-R34`–`R43`); Approval consideration, MAGAC authority classes, EGWG withholding grounds, and TOC-PA GPRA grant architecture drafted (Section 21.6); G1 through G5 preserved (`FI-DSN-STD-014-R01`–`R33`); G7–G11 not drafted and unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D13.1A — MAGAC establishment versus activation clarified (Section 20.16.3); Approval and GPRA baseline clarified (Section 20.18.4); `OQ-STD-014-004` closed; `OQ-STD-014-007` opened for G9 succession and handoff consumer class binding; MAGAC, EGWG, and TOC-PA models preserved; G6 preparation synchronized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D13.1 — `PD-STD-014-002` resolved (MAGAC Approval authority model; Section 20.16); `PD-STD-014-003` resolved (EGWG withholding grounds; Section 20.17); baseline `PD-STD-014-005` resolved (TOC-PA Pass–Approval–GPRA chain; Section 20.18); `OQ-STD-014-001` and `OQ-STD-014-002` closed; `OQ-STD-014-004` closed at G6 baseline; G6 drafting preparation complete (Section 20.13); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G1 through G5 preserved; G6–G11 normative requirement drafting unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D12.1 — G5 normative requirements drafted (`FI-DSN-STD-014-R27`–`R33`); Review Determination outcome architecture drafted (Section 21.5); G1 through G4 preserved (`FI-DSN-STD-014-R01`–`R26`); G6–G11 not drafted and unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
