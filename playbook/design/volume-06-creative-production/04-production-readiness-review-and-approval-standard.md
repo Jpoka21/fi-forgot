@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`) |
 | **Queue posture** | EO 20 — **In progress** per Sprint V06-D5.4 requirement plan adoption (`FI-DSN-QUE-001`) |
-| **Sprint** | V06-D12.1 |
+| **Sprint** | V06-D13.1A |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed as Design-Time Feasibility Compliance Boundary inputs only. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 drafting preparation **complete** (Sprint V06-D6.1; Section 20.13–20.14). **Tranche 1 partial normative draft committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 drafting preparation **complete** (Sprint V06-D11.1; Section 20.13). **G5 normative requirements drafted** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). G6–G11 normative requirement drafting remains **unauthorized**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 drafting preparation **complete** (Sprint V06-D13.1; Section 20.13). G6–G11 normative requirement drafting remains **unauthorized**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -254,13 +254,13 @@ Approval is distinct from:
 
 ### 8.2 Approval authority (conceptual)
 
-Volume 06 architecture assigns **Approval authority** to Domain 3 Decision-stage policy. This architecture anticipates a **constitutionally authorized Decision-stage authority class** for Approval acts — distinct from Brain Runtime, engineering role assignment, or operational workflow permission.
+Volume 06 architecture assigns **Approval authority** to Domain 3 Decision-stage policy. This architecture anticipates **constitutionally authorized Decision-stage authority classes** with explicit scope boundaries per planning decision `PD-STD-014-002` (Section 20.16) — distinct from Brain Runtime, engineering role assignment, operational workflow permission, Reviewer participation, or Review Determination recording.
 
-The specific authority class definition remains an architecture open question (`OQ-STD-014-001`). Normative drafting will freeze who or what governance entity may approve without prescribing organizational roles or product UI.
+The specific authority class architecture is **resolved at planning layer** (`PD-STD-014-002`). Normative drafting will freeze governed authority classes and scope boundaries without prescribing organizational roles, product UI, or implementation permission systems.
 
 ### 8.3 Approval withholding
 
-Architecture anticipates that Approval may be withheld despite a favorable Review Determination when separate governing rules require — for example unresolved Approval prerequisites, succession conflicts, or explicit governance holds. The conditions for withholding are not finalized in this draft (`OQ-STD-014-002`).
+Architecture anticipates that Approval may be withheld despite a **Pass** **Review Determination** when separate governing rules require withholding on documented constitutional grounds per planning decision `PD-STD-014-003` (Section 20.17). Withholding does **not** reopen, revise, or substitute for the recorded **Review Determination**; a different outcome requires a subsequent governed **Review** under G5.
 
 ### 8.4 Instance binding
 
@@ -501,10 +501,11 @@ Provisional normative requirement groups for future drafting. **No requirement I
 | ID | Question | Status | Notes |
 |----|----------|--------|-------|
 | `OQ-V06-006` | Should conditional Review Determination be retained or collapsed to pass/fail only at Layer B freeze? | **Closed** (Sprint V06-D11.1) | Resolved via `PD-STD-014-001` — three-outcome model retained (Section 20.15) |
-| `OQ-STD-014-001` | What constitutionally authorized Decision-stage authority class may perform Approval? | **Open** | Architecture anticipates class without prescribing roles |
-| `OQ-STD-014-002` | May Approval be withheld despite favorable Review Determination, and on what governed grounds? | **Open** | Distinct from Review fail |
+| `OQ-STD-014-001` | What constitutionally authorized Decision-stage authority class may perform Approval? | **Closed** (Sprint V06-D13.1) | Resolved via `PD-STD-014-002` — multiple governed authority classes with explicit scope boundaries (Section 20.16) |
+| `OQ-STD-014-002` | May Approval be withheld despite favorable Review Determination, and on what governed grounds? | **Closed** (Sprint V06-D13.1) | Resolved via `PD-STD-014-003` — enumerated governed withholding ground families (Section 20.17) |
 | `OQ-STD-014-003` | Is **revocation** a distinct post-approval term or umbrella for Invalidated/Superseded at Layer B? | **Open** | Volume 06 uses Invalidated/Superseded in §5.9 |
-| `OQ-STD-014-004` | What is the precise binding scope of GPRA — per RVA version, per obligation, per handoff consumer class, or combined? | **Open** | Volume 06 §5.11 provides architectural baseline |
+| `OQ-STD-014-004` | What is the precise GPRA binding scope baseline for G6 — Pass, Approval, and obligation-scoped instance binding? | **Closed** (Sprint V06-D13.1) | Resolved via baseline `PD-STD-014-005` — TOC-PA chain; RVA version under Production Obligation scope (Section 20.18) |
+| `OQ-STD-014-007` | How shall authoritative GPRA succession, supersession, and handoff consumer class binding be governed at Layer B? | **Open** | G9 planning question; Volume 06 §5.11 succession baseline; distinct from closed G6 binding baseline (`OQ-STD-014-004`) |
 | `OQ-STD-014-005` | What material Compliance Boundary changes trigger Invalidated posture versus requiring new Review only? | **Open** | GOV-003 propagation relationship |
 | `OQ-STD-014-006` | What minimum Review dimension set is mandatory vs optionally extended at Layer B? | **Closed** (Sprint V06-D6.1) | Resolved via `PD-STD-014-006` — mandatory constitutional core plus governed extensibility (Section 20.12) |
 
@@ -550,13 +551,13 @@ Architecture Validation is governance-level validation before normative requirem
 | Implementation independence | No APIs, schemas, UI, workflows, vendors, or models prescribed |
 | Normative requirements | **Partial** — G1 drafted (`FI-DSN-STD-014-R01`–`R07`); G2 drafted (`FI-DSN-STD-014-R08`–`R13`); G3 drafted (`FI-DSN-STD-014-R14`–`R20`); G4 drafted (`FI-DSN-STD-014-R21`–`R26`); G5 drafted (`FI-DSN-STD-014-R27`–`R33`); G6–G11 not drafted |
 | Independent review | **Passed** — Sprint V06-D4.4; minor corrective findings resolved in Sprint V06-D4.4A; architecture committed in Sprint V06-D4.5 |
-| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 preparation **complete**; Tranche 1 committed (V06-D10.1); `PD-STD-014-001` **resolved** (V06-D11.1); G5 drafting preparation **complete**; G5 normative drafting **unauthorized** until separately authorized sprint |
+| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 drafting preparation **complete**; G6 normative drafting **unauthorized** until separately authorized sprint |
 
 ---
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D11.1 — Tranche 1 partial normative draft committed (`FI-DSN-STD-014-R01`–`R26`; Section 21). `PD-STD-014-001` **resolved** (Section 20.15); `OQ-V06-006` **closed**; G5 drafting preparation **complete** (Section 20.13). Section 16 records the architecture-era provisional group plan. **Section 20 is the authoritative requirement planning artifact** for future normative drafting. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). G5–G11 normative requirement drafting remains **unauthorized**.
+**Planning posture:** Sprint V06-D13.1A — constitutional clarifications to V06-D13.1 planning decisions without model change. `PD-STD-014-002` (MAGAC), `PD-STD-014-003` (EGWG), and baseline `PD-STD-014-005` (TOC-PA) **preserved**. MAGAC establishment versus activation clarified (Section 20.16.3); Approval and GPRA baseline clarified (Section 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G5 normative requirements committed (`FI-DSN-STD-014-R27`–`R33`; Section 21.5). G6 drafting preparation **complete** (Section 20.13). Section 16 records the architecture-era provisional group plan. **Section 20 is the authoritative requirement planning artifact** for future normative drafting. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). G6–G11 normative requirement drafting remains **unauthorized**.
 
 ### 20.1 Final requirement group plan
 
@@ -652,10 +653,10 @@ The accepted architecture groups G1–G11 are retained without merge, split, ren
 | **Inherited terms** | GPRA; approved production-ready posture; Handoff eligibility (necessary not sufficient) |
 | **Upstream dependencies** | G5; `FI-DSN-GOV-004`; `OQ-STD-014-001`; `OQ-STD-014-002`; `OQ-STD-014-004` |
 | **Downstream implications** | Produces GPRA for G8–G11; STD-015 consumption |
-| **Open questions** | `OQ-STD-014-001`; `OQ-STD-014-002`; `OQ-STD-014-004` |
-| **Likely requirement themes** | Approval separation; authority class; withholding grounds; instance binding; GPRA grant; GPRA scope |
-| **Collision risks** | Brain or workflow permission treated as Approval; membership implied by GPRA |
-| **Drafting prerequisites** | G5 drafted or planned; `PD-STD-014-002`, `PD-STD-014-003`, and `PD-STD-014-005` resolved before G6 normative drafting |
+| **Open questions** | None blocking G6 preparation — `OQ-STD-014-001`, `OQ-STD-014-002`, and `OQ-STD-014-004` **closed** (Sprint V06-D13.1) |
+| **Likely requirement themes** | Approval authority classes; scope boundaries; withholding ground families; favorable Pass insufficiency; GPRA grant; instance and obligation binding; GPRA scope baseline |
+| **Collision risks** | Brain or workflow permission treated as Approval; membership implied by GPRA; reopening Review Determination during withholding |
+| **Drafting prerequisites** | G5 committed; **`PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` resolved** (Sprint V06-D13.1) |
 | **Review gate** | GOV-004 and Volume 05 boundary review before Tranche 2 commit |
 
 #### G7 — Rejection and rework authorization
@@ -700,7 +701,7 @@ The accepted architecture groups G1–G11 are retained without merge, split, ren
 | **Inherited terms** | Superseded; authoritative GPRA — Volume 06 §5.11 |
 | **Upstream dependencies** | G6; G8; `OQ-STD-014-004` |
 | **Downstream implications** | STD-015 authoritative GPRA consumption |
-| **Open questions** | `OQ-STD-014-004` — binding scope refinement |
+| **Open questions** | `OQ-STD-014-007` — authoritative GPRA succession and handoff consumer class binding |
 | **Likely requirement themes** | Supersession; authoritative GPRA; historical preservation; context binding |
 | **Collision risks** | Overlap with G8 triggers; absorbing STD-015 intake rules |
 | **Drafting prerequisites** | G8 Invalidated framework planned; `PD-STD-014-004` at least partially resolved |
@@ -760,10 +761,11 @@ PRR-P1–P10 are constitutional distinctions for planning. They are **not** conv
 | Open question | Target group | Resolution gate | Latest permissible resolution | Required evidence |
 |---------------|--------------|-----------------|------------------------------|-------------------|
 | `OQ-V06-006` | G5 | **Resolved** (Sprint V06-D11.1) | G5 freeze review | Volume 06 §12.1; architecture §7.2–7.3; planning decision `PD-STD-014-001` (Section 20.15) |
-| `OQ-STD-014-001` | G6 | **Pre-G6 normative drafting** | G6 freeze review | Volume 06 §16.5; GOV-004; planning decision `PD-STD-014-002` |
-| `OQ-STD-014-002` | G6 | **Pre-G6 normative drafting** | G6 freeze review | Architecture §8.3; planning decision `PD-STD-014-003` |
+| `OQ-STD-014-001` | G6 | **Resolved** (Sprint V06-D13.1) | G6 freeze review | Volume 06 §16.5; GOV-004; planning decision `PD-STD-014-002` (Section 20.16) |
+| `OQ-STD-014-002` | G6 | **Resolved** (Sprint V06-D13.1) | G6 freeze review | Architecture §8.3; planning decision `PD-STD-014-003` (Section 20.17) |
 | `OQ-STD-014-003` | G8 | **Mandatory pre-G8 normative drafting** | G8 drafting kickoff (Tranche 3) | Volume 06 §5.9; §13 item 6; STD-013 `R06` revocation deferral; planning decision `PD-STD-014-004` |
-| `OQ-STD-014-004` | G6 (primary); G9 (refinement) | **Pre-G6 normative drafting** (baseline); **Pre-G9 freeze** (succession detail) | G9 freeze review | Volume 06 §5.11; architecture §9.4 |
+| `OQ-STD-014-004` | G6 | **Resolved** (Sprint V06-D13.1) | G6 freeze review | Volume 06 §5.11 baseline; architecture §9.4; planning decision `PD-STD-014-005` baseline (Section 20.18) |
+| `OQ-STD-014-007` | G9 | **Pre-G9 normative drafting** | G9 freeze review | Volume 06 §5.11; architecture §9.4; authoritative GPRA succession and handoff consumer class binding |
 | `OQ-STD-014-005` | G8 | **Pre-G8 normative drafting** | G8 freeze review | GOV-003 propagation; Volume 06 §13; architecture §12.3 |
 | `OQ-STD-014-006` | G3 | **Resolved** (Sprint V06-D6.1) | G3 freeze review | Volume 06 P10; architecture §6.2; planning decision `PD-STD-014-006` (Section 20.12) |
 
@@ -781,10 +783,10 @@ Repository evidence does not make one answer constitutionally unavoidable at pla
 | ID | Question | Governing source | Target group | Required resolution stage | Status | Consequence if unresolved |
 |----|----------|----------------|--------------|-------------------------|--------|---------------------------|
 | `PD-STD-014-001` | Retain or collapse conditional Review Determination? | `OQ-V06-006`; Volume 06 §12.1 | G5 | Pre-G5 normative drafting (Tranche 2 kickoff) | **Resolved** (Sprint V06-D11.1) | Three-outcome model retained — Section 20.15 |
-| `PD-STD-014-002` | What Decision-stage authority class may perform Approval? | `OQ-STD-014-001`; Volume 06 §16.5 | G6 | Pre-G6 normative drafting | **Open** | Approval authority undefined in normative body |
-| `PD-STD-014-003` | On what grounds may Approval be withheld despite favorable Review? | `OQ-STD-014-002`; architecture §8.3 | G6 | Pre-G6 normative drafting | **Open** | Withholding rules incomplete or over-broad |
+| `PD-STD-014-002` | What Decision-stage authority class may perform Approval? | `OQ-STD-014-001`; Volume 06 §16.5 | G6 | Pre-G6 normative drafting | **Resolved** (Sprint V06-D13.1) | Multiple governed authority classes with explicit scope boundaries — Section 20.16 |
+| `PD-STD-014-003` | On what grounds may Approval be withheld despite favorable Review? | `OQ-STD-014-002`; architecture §8.3 | G6 | Pre-G6 normative drafting | **Resolved** (Sprint V06-D13.1) | Enumerated governed withholding ground families — Section 20.17 |
 | `PD-STD-014-004` | How shall revocation relate to Invalidated and Superseded? | `OQ-STD-014-003`; STD-013 `R06`; Volume 06 §5.9, §13 | G8 | **Mandatory pre-G8 normative drafting** | **Open** | G8 drafting blocked; STD-013 deferral unreconciled |
-| `PD-STD-014-005` | What is the precise GPRA binding scope? | `OQ-STD-014-004`; Volume 06 §5.11 | G6; G9 | Pre-G6 (baseline); pre-G9 freeze | **Open** | Succession and Handoff consumption ambiguity |
+| `PD-STD-014-005` | What is the precise GPRA binding scope? | `OQ-STD-014-004`; Volume 06 §5.11 | G6; G9 | Pre-G6 (baseline); pre-G9 freeze | **Baseline resolved** (Sprint V06-D13.1) | Pass–Approval–GPRA chain and obligation-scoped instance binding baseline — Section 20.18; succession detail deferred to G9 |
 | `PD-STD-014-006` | What Review dimension set is mandatory at Layer B? | `OQ-STD-014-006`; Volume 06 P10 | G3 | Pre-G3 normative drafting (Tranche 1) | **Resolved** (Sprint V06-D6.1) | Mandatory constitutional core plus governed extensibility — Section 20.12 |
 | `PD-STD-014-007` | What material Compliance Boundary changes trigger Invalidated vs new Review only? | `OQ-STD-014-005`; GOV-003 | G8 | Pre-G8 normative drafting | **Open** | Invalidation triggers incomplete |
 
@@ -793,8 +795,8 @@ Repository evidence does not make one answer constitutionally unavoidable at pla
 | Tranche | Groups | Purpose | Prerequisite decisions | Open questions to resolve | Expected output | Independent review gate | Correction gate | Commit gate | Advancement prohibition |
 |---------|--------|---------|------------------------|---------------------------|-----------------|------------------------|-----------------|-------------|-------------------------|
 | **1** | G1–G4 | Constitutional inheritance; entry boundary; Review dimensions; Design-Time Feasibility | Architecture adoption (complete); planning review passed; **`PD-STD-014-006` resolved** (Sprint V06-D6.1) | None blocking Tranche 1 drafting authorization | Partial Requirement Draft covering G1–G4 only | Independent constitutional review of Tranche 1 boundary separation | Corrective sprint if material boundary defects | Governed commit of Tranche 1 partial draft | Tranche 2 unauthorized until Tranche 1 review passed and committed |
-| **2** | G5–G7 | Review Determination; Approval and GPRA grant; rejection and rework | Tranche 1 committed; **`PD-STD-014-001` resolved** (Sprint V06-D11.1); `PD-STD-014-002`–`003` and baseline `PD-STD-014-005` before G6 | `OQ-STD-014-001`–`002`; `OQ-STD-014-004` baseline | Partial Requirement Draft covering G5–G7 | Review vs Approval separation; STD-013 rework boundary | Corrective sprint if Determination/Approval collapsed | Governed commit of Tranche 2 partial draft | Tranche 3 unauthorized until Tranche 2 review passed and committed |
-| **3** | G8–G11 | Invalidated; Superseded and succession; Brain interaction; STD-015 consumption | Tranche 2 accepted; **`PD-STD-014-004` mandatory**; `PD-STD-014-005` and `PD-STD-014-007` before G8 | `OQ-STD-014-003`; `OQ-STD-014-005`; `OQ-STD-014-004` succession detail | Partial or full Requirement Draft covering G8–G11 | Invalidated/Superseded distinction; G10 non-duplication; G11 Handoff non-absorption | Corrective sprint if STD-015 procedures appear | Governed commit; full body review before freeze readiness | Full-body freeze review unauthorized until all three tranches accepted |
+| **2** | G5–G7 | Review Determination; Approval and GPRA grant; rejection and rework | Tranche 1 committed; **`PD-STD-014-001` resolved** (Sprint V06-D11.1); G5 committed (Sprint V06-D12.1); **`PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` resolved** (Sprint V06-D13.1) | None blocking G6 | Partial Requirement Draft covering G5–G7 | Review vs Approval separation; STD-013 rework boundary | Corrective sprint if Determination/Approval collapsed | Governed commit of Tranche 2 partial draft | Tranche 3 unauthorized until Tranche 2 review passed and committed |
+| **3** | G8–G11 | Invalidated; Superseded and succession; Brain interaction; STD-015 consumption | Tranche 2 accepted; **`PD-STD-014-004` mandatory**; `PD-STD-014-005` and `PD-STD-014-007` before G8 | `OQ-STD-014-003`; `OQ-STD-014-005`; `OQ-STD-014-007` | Partial or full Requirement Draft covering G8–G11 | Invalidated/Superseded distinction; G10 non-duplication; G11 Handoff non-absorption | Corrective sprint if STD-015 procedures appear | Governed commit; full body review before freeze readiness | Full-body freeze review unauthorized until all three tranches accepted |
 
 **G10 handling:** G10 normative themes are drafted in Tranche 3 but must **reference** G6 Approval prohibitions without restating full G6 body. G6 carries instance-binding Approval rules; G10 carries cross-cutting Brain/runtime prohibition reinforcement per GOV-004.
 
@@ -888,7 +890,7 @@ Counts are planning estimates only. They are not settled and do not assign requi
 
 ### 20.11 Normative drafting prohibition
 
-Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. Tranche 1 preparation is **complete** (Sprint V06-D6.1). `PD-STD-014-006` is **resolved**. G1 normative requirements **`FI-DSN-STD-014-R01`–`R07`** are drafted (Sprint V06-D7.1; Section 21.1). G2 normative requirements **`FI-DSN-STD-014-R08`–`R13`** are drafted (Sprint V06-D8.1; Section 21.2). G3 normative requirements **`FI-DSN-STD-014-R14`–`R20`** are drafted (Sprint V06-D9.1; Section 21.3). G4 normative requirements **`FI-DSN-STD-014-R21`–`R26`** are drafted (Sprint V06-D10.1; Section 21.4). Tranche 1 partial normative draft is **committed**. `PD-STD-014-001` is **resolved** (Sprint V06-D11.1; Section 20.15). G5 drafting preparation is **complete** (Sprint V06-D11.1; Section 20.13). G5 normative requirements **`FI-DSN-STD-014-R27`–`R33`** are drafted (Sprint V06-D12.1; Section 21.5). G6–G11 normative requirement drafting remains **unauthorized** until separately authorized drafting sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
+Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. Tranche 1 preparation is **complete** (Sprint V06-D6.1). `PD-STD-014-006` is **resolved**. G1 normative requirements **`FI-DSN-STD-014-R01`–`R07`** are drafted (Sprint V06-D7.1; Section 21.1). G2 normative requirements **`FI-DSN-STD-014-R08`–`R13`** are drafted (Sprint V06-D8.1; Section 21.2). G3 normative requirements **`FI-DSN-STD-014-R14`–`R20`** are drafted (Sprint V06-D9.1; Section 21.3). G4 normative requirements **`FI-DSN-STD-014-R21`–`R26`** are drafted (Sprint V06-D10.1; Section 21.4). Tranche 1 partial normative draft is **committed**. `PD-STD-014-001` is **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **`FI-DSN-STD-014-R27`–`R33`** are committed (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` are **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). Planning clarifications applied (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4; `OQ-STD-014-004` closed; `OQ-STD-014-007` opened). G6 drafting preparation is **complete** (Sprint V06-D13.1; Section 20.13). G6–G11 normative requirement drafting remains **unauthorized** until separately authorized drafting sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
 
 ### 20.12 PD-STD-014-006 resolution — Review dimension model
 
@@ -1016,6 +1018,27 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **Expected count range** | 5–7 (nonbinding) |
 | **Independent review focus** | Model B fidelity; PRR-P2 preserved; G6/G7 boundaries intact; no implementation prescription |
 
+#### G6 — Approval authority and GPRA grant
+
+| Field | Tranche 2 drafting posture |
+|-------|---------------------------|
+| **Drafting objective** | Freeze Decision-stage **Approval** authority classes, governed withholding ground families, Pass-to-Approval constitutional baseline, and GPRA grant posture per Sections 20.16–20.18 without governing rework mechanics, post-approval Invalidated or Superseded posture, Handoff, membership, or implementation systems |
+| **Inherited terms** | Approval; GPRA; approved production-ready posture; Handoff eligibility (necessary not sufficient); Pass **Review Determination** — Volume 06 §8, §9, §12, §16.5; PRR-P2–P4, P7–P8 |
+| **Approval authority model** | **MAGAC** — Multiple Authorized Governed Authority Classes with explicit constitutional scope boundaries per `PD-STD-014-002` (Section 20.16); establishment versus activation clarified (Section 20.16.3) |
+| **Approval withholding model** | **EGWG** — Enumerated Governed Withholding Grounds with traceable constitutional sources per `PD-STD-014-003` (Section 20.17) |
+| **Pass to Approval baseline** | **TOC-PA** — **Pass** → **Approval** consideration → **Approval**; Pass is necessary but not sufficient for Approval; Review Determination is not rewritten during Approval consideration (Section 20.18) |
+| **Approval to GPRA relationship** | **Approval** → explicit governed **GPRA** grant; Approval is necessary but not sufficient for GPRA; GPRA does not arise automatically from Pass or Approval; GPRA binds specific **RVA** version under defined **Production Obligation** scope; Approval remains distinct from GPRA, membership, and Governed Handoff (Section 20.18.4) |
+| **Positive authority** | Decision-stage **Approval** act; governed authority class boundaries; withholding ground families; instance and obligation binding; GPRA grant; GPRA scope baseline |
+| **Exclusions** | Review Determination recording (G5); deficiency taxonomy and rework authorization (G7); Invalidated and Superseded posture (G8–G9); Handoff Posture (STD-015); membership; Brain GPRA grant; manufacturing authorization; reviewer staffing; workflow permissions; UI roles; APIs; databases; scoring; thresholds |
+| **Prerequisite decisions** | G5 committed (`FI-DSN-STD-014-R27`–`R33`); **`PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` resolved** (Sprint V06-D13.1) |
+| **Terms owned** | Approval authority classes; scope boundaries; withholding ground families; Approval act; GPRA grant; GPRA binding scope baseline |
+| **Terms referenced only** | Pass **Review Determination** (G5); Review evidence (G3); Production Program and Production Obligation attribution (STD-012); Brain boundary (GOV-004); authoritative GPRA succession detail (G9) |
+| **Required evidence** | Authority class table with scope boundaries; withholding ground family table; Pass necessary-not-sufficient baseline; Approval versus GPRA separation; membership and Handoff exclusions; PRR-P2–P4 preserved |
+| **Boundary risks** | Collapsing Approval into Pass or Review Determination; Brain or tool permission as Approval authority; arbitrary withholding; commercial preference as constitutional ground; reopening Determination during withholding; membership implied by GPRA |
+| **Expected requirement themes** | Authority classes; scope boundaries; withholding grounds; Pass insufficiency; Approval act; GPRA grant; instance binding; obligation-scoped GPRA baseline |
+| **Expected count range** | 8–11 (nonbinding) |
+| **Independent review focus** | GOV-004 and Volume 05 boundary review; PRR-P2–P4 and P7–P8 preserved; G5/G7 boundaries intact; no implementation prescription |
+
 ### 20.14 Tranche 1 drafting sequence, gates, and controls
 
 #### 20.14.1 Controlled drafting sequence
@@ -1031,7 +1054,11 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **7** | Tranche 1 governed commit | Boundary review passed | Partial Requirement Draft committed |
 | **8** | `PD-STD-014-001` gate | **Satisfied** (Sprint V06-D11.1) | G5 normative drafting authorized at planning layer |
 | **9** | G5 drafting preparation | Tranche 1 committed; `PD-STD-014-001` resolved | G5 preparation table complete (Section 20.13) |
-| **10** | Tranche 2 prohibition | G5 normative requirements not separately authorized | G5–G11 normative requirement text remains unauthorized |
+| **10** | G5 normative drafting | G5 drafting preparation complete | G5 requirements drafted |
+| **11** | G5 governed commit | G5 boundary review passed | G5 requirements committed (Sprint V06-D12.1) |
+| **12** | `PD-STD-014-002`–`003` and baseline `PD-STD-014-005` gates | **Satisfied** (Sprint V06-D13.1) | G6 normative drafting authorized at planning layer |
+| **13** | G6 drafting preparation | G5 committed; planning decisions resolved | G6 preparation table complete (Section 20.13) |
+| **14** | Tranche 2 prohibition | G6 normative requirements not separately authorized | G6–G11 normative requirement text remains unauthorized |
 
 G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and extensibility rules are stable. G4 MUST NOT publish normative requirements that redefine Review activity or the mandatory core owned by G3.
 
@@ -1103,7 +1130,133 @@ G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and e
 | **Prohibited constructs** | **No** fourth outcome ("Satisfied Conditional"); **no** mutable Conditional substate; **no** silent Conditional-to-Pass conversion; **no** treating incomplete Review as Conditional. |
 | **G7 disposition boundary** | Fail or Conditional may make the reviewed RVA eligible for later governed deficiency, rework, or resubmission disposition under **G7**; G5 does not authorize rework, define rework mechanics, or prescribe return paths. |
 
-**Repository evidence:** Volume 06 architecture §12.1 defines Pass, Fail, and Conditional pass as peer Determination outcomes and requires subsequent Review passage before Approval when Conditional applies. PRR-P2 requires Determination distinct from Approval. STD-014 Tranche 1 `FI-DSN-STD-014-R07`, `R13`, and `R20` preserve Review versus Determination separation. Collapsing to pass/fail only would contradict frozen Volume 06 constitutional authority without a separately authorized architecture amendment sprint.
+**Repository evidence:** Volume 06 architecture §12.1 defines Pass, Fail, and Conditional pass as peer Determination outcomes and requires subsequent Review passage before Approval when Conditional applies. PRR-P2 requires Determination distinct from Approval. STD-014 Tranche 1 `FI-DSN-STD-014-R07`, `R13`, and `R20` preserve Review versus Determination separation. G5 `FI-DSN-STD-014-R27`–`R33` preserve Determination outcome architecture and Pass-only Approval eligibility posture. Collapsing to pass/fail only would contradict frozen Volume 06 constitutional authority without a separately authorized architecture amendment sprint.
+
+### 20.16 PD-STD-014-002 resolution — Approval authority model
+
+**Planning decision:** `PD-STD-014-002` — **Resolved** (Sprint V06-D13.1).
+
+**Open question closure:** `OQ-STD-014-001` — **Closed** through this planning decision.
+
+#### 20.16.1 Models evaluated
+
+| Model | Constitutional structure | Strengths | Risks | Suitability |
+|-------|-------------------------|-----------|-------|-------------|
+| **A — Single authorized authority class** | One Decision-stage class may perform all Approval acts | Simple authority logic; single audit anchor | Too coarse for Production Program versus Production Obligation scope distinctions; risks conflating reviewer participation with Approval authority; insufficient for §16.5 instance binding under varying attribution scopes | **Rejected** — insufficient constitutional granularity |
+| **B — Multiple governed authority classes with explicit scope boundaries** (selected) | Two or more constitutionally authorized Decision-stage authority classes, each with explicit scope boundaries traceable to frozen governance | Aligns with Volume 06 §16.5 Decision-stage policy versus instance binding; supports STD-012 Production Program and Production Obligation attribution; preserves separation from Review participation, Brain, tooling, and membership; constitutionally testable scope boundaries | Requires careful scope boundary rules to prevent authority sprawl or implementation role absorption | **Selected** — best fit for frozen Volume 06 Domain 3 architecture and GOV-004 posture |
+| **C — Alternative governed model** | e.g., workflow permission as authority; reviewer quorum; Brain-delegated Approval | Theoretical operational convenience | No frozen constitutional support; violates GOV-004 and PRR-P8; collapses AX-5 runtime/workflow boundary; treats implementation roles as constitutional authority | **Rejected** — incompatible with frozen constitutional authority |
+
+#### 20.16.2 Selected model — Multiple Authorized Governed Authority Classes (Model B)
+
+**Model designation:** MAGAC — Multiple Authorized Governed Authority Classes.
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Permitted authority architecture** | **Multiple** constitutionally authorized Decision-stage **Approval** authority classes with explicit scope boundaries |
+| **Authority class definition** | Each class MUST be defined by constitutional scope — for example Production Program scope, Production Obligation scope, or other scope expressly authorized by frozen governance — not by implementation role, UI permission, reviewer participation, or tool configuration |
+| **Permitted authority** | Decision-stage **Approval** acts performed only by constitutionally authorized authority classes within their defined scope boundaries |
+| **Prohibited authority** | Reviewer participation alone; Review Determination recording; Brain runtime recommendation or selection; customer Selection; workflow advancement permission; DAM or queue state; engineering role assignment; tool configuration; membership clerks; manufacturing operators |
+| **Instance binding** | Each **Approval** act binds a specific **RVA** version under applicable scope per Volume 06 §16.5 — instance binding does not create a new authority class |
+| **G6 ownership** | Approval authority class architecture; scope boundary rules; class-to-scope traceability |
+| **G5 consumption boundary** | G5 records Pass eligibility only; G5 does not define Approval authority classes |
+| **G10 consumption boundary** | G10 reinforces Brain prohibition; G10 does not redefine authority classes |
+| **Implementation deferral** | Organizational titles, UI role names, permission matrices, and staffing models remain **implementation deferred** |
+
+#### 20.16.3 MAGAC establishment and activation (Sprint V06-D13.1A)
+
+| Planning element | Resolution |
+|------------------|------------|
+| **Establishment authority** | An **Approval** authority class MAY exist only when **established** by authoritative frozen constitutional governance — not by operating context, customary practice, or implementation posture |
+| **Class traceability** | Each established class MUST be traceable to its governing source identifier and authorized constitutional scope |
+| **Activation and scope context** | Applicable **Production Program**, **Production Obligation**, artifact class, or other Review or Approval context MAY **activate** or **scope** an already established authority class for a specific **Approval** act |
+| **Non-establishment rule** | Operating context MUST NOT independently **create** an **Approval** authority class |
+| **Prohibited establishment sources** | Customary business practice; reviewer participation; organizational title; implementation role; workflow state; tool permission; Brain behavior; customer Selection; membership administration |
+| **Approval act attribution** | Every **Approval** act MUST be attributable to an authorized class acting within its governed scope |
+| **Implementation deferral** | Personnel assignment, job titles, staffing models, quorum rules, and implementation permission systems remain **implementation deferred** |
+
+### 20.17 PD-STD-014-003 resolution — Approval withholding grounds
+
+**Planning decision:** `PD-STD-014-003` — **Resolved** (Sprint V06-D13.1).
+
+**Open question closure:** `OQ-STD-014-002` — **Closed** through this planning decision.
+
+#### 20.17.1 Models evaluated
+
+| Model | Constitutional structure | Strengths | Risks | Suitability |
+|-------|-------------------------|-----------|-------|-------------|
+| **A — Closed enumeration only** | Withholding permitted only for exactly three fixed ground families with no extensibility | Maximum predictability; strong anti-arbitrariness | Too rigid for governing-law changes, succession conflicts, and explicit governance holds anticipated in architecture §8.3; may force improper Determination revision | **Rejected** — insufficient for frozen architectural anticipation |
+| **B — Enumerated ground families plus governed extensibility** (selected) | Mandatory constitutional ground families plus additional grounds only when traceable to frozen governing authority | Preserves anti-arbitrariness; allows architecture §8.3 examples; mirrors MCCGE extensibility pattern; constitutionally testable traceability | Requires strong traceability rules to prevent discretion creep | **Selected** — best fit for frozen architecture and constitutional testability |
+| **C — Unbounded withholding discretion** | Approval may be withheld for any documented reason | Operational flexibility | Arbitrary withholding; commercial preference as law; implementation limits as grounds; Determination reopening risk | **Rejected** — violates PRR-P2 and constitutional governance posture |
+
+#### 20.17.2 Selected model — Enumerated Governed Withholding Grounds (Model B)
+
+**Model designation:** EGWG — Enumerated Governed Withholding Grounds.
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Withholding permitted after Pass** | **Yes** — **Approval** MAY be withheld despite a **Pass** **Review Determination** only on documented constitutional grounds |
+| **Mandatory ground families** | (1) **Bound governing prerequisites not satisfied** — required upstream posture, evidence, or governing inputs for Approval are absent or invalid; (2) **Authority or provenance defects** — the proposed **Approval** act lacks valid authority class scope, attribution, or provenance under frozen governance; (3) **Unresolved program or obligation conflicts** — applicable **Production Program**, **Production Obligation**, succession, or authoritative GPRA conflicts remain unresolved under frozen Volume 06 §5.11 baseline |
+| **Governed extensibility** | Additional withholding grounds MAY apply only when traceable to authoritative frozen governance already constitutionally authorized to block or condition **Approval** — not to ad hoc reviewer preference |
+| **Prohibited grounds** | Arbitrary human discretion; commercial preference presented as constitutional law; implementation or tooling limitations presented as **Approval** grounds; workflow state; Brain recommendation; reopening or revising **Review Determination** without a subsequent governed **Review** |
+| **Determination preservation** | Withholding does **not** change, reopen, or substitute for the recorded **Pass** **Review Determination**; a different evaluative outcome requires a subsequent governed **Review** under G5 |
+| **G6 ownership** | Withholding ground families; traceability rules; Pass-insufficiency during Approval consideration |
+| **G5 consumption boundary** | G5 supplies Pass posture only; G5 does not define withholding grounds |
+| **Implementation deferral** | Withholding documentation mechanics, UI presentation, and escalation workflows remain **implementation deferred** |
+
+### 20.18 PD-STD-014-005 baseline resolution — Pass, Approval, and GPRA constitutional chain
+
+**Planning decision:** `PD-STD-014-005` — **Baseline resolved** (Sprint V06-D13.1). Full GPRA succession and handoff consumer class refinement remains for G9 normative drafting.
+
+**Open question closure:** `OQ-STD-014-004` — **Closed** through this baseline resolution (G6 binding scope only).
+
+**G9 planning question:** `OQ-STD-014-007` — authoritative GPRA succession, supersession, and handoff consumer class binding remains **Open** for G9.
+
+#### 20.18.1 Models evaluated — Pass to Approval to GPRA chain
+
+| Model | Constitutional structure | Strengths | Risks | Suitability |
+|-------|-------------------------|-----------|-------|-------------|
+| **A — Automatic GPRA on Pass** | Pass Determination directly creates GPRA | Fewer steps | Collapses PRR-P2; contradicts G5 `FI-DSN-STD-014-R33`; eliminates distinct Approval act | **Rejected** — incompatible with committed G5 and frozen architecture |
+| **B — Two-step constitutional chain** (selected) | Pass enables Approval consideration; separate Approval act precedes explicit governed GPRA grant | Preserves PRR-P2; aligns with Volume 06 §12 Stage Governance Matrix; supports withholding after Pass; constitutionally testable | Requires explicit baseline rules to prevent silent auto-Approval or auto-GPRA | **Selected** — best fit for frozen Volume 06 and committed G5 |
+| **C — Approval as label only** | GPRA exists independently; Approval is documentary | Theoretical simplicity | Erases Decision-stage Approval authority; weakens Domain 3 placement | **Rejected** — contradicts governing question and architecture §8 |
+
+#### 20.18.2 Models evaluated — GPRA binding scope baseline
+
+| Model | Constitutional structure | Strengths | Risks | Suitability |
+|-------|-------------------------|-----------|-------|-------------|
+| **A — Per RVA version only** | GPRA binds artifact version without obligation scope | Simple binding | Insufficient for §5.11 authoritative GPRA per obligation; multi-obligation ambiguity | **Rejected** — insufficient for frozen §5.11 |
+| **B — Per RVA version under Production Obligation scope** (selected) | GPRA binds specific **RVA** version under defined **Production Obligation** scope; handoff consumer class refinement deferred | Aligns with architecture §8.4, §9.4, and Volume 06 §5.11 baseline; supports one authoritative GPRA per obligation context; leaves G9 succession detail | Handoff consumer class binding requires G9 refinement | **Selected** — constitutional baseline for G6 drafting |
+| **C — Per Production Program only** | GPRA binds at program level without instance specificity | Program-level simplicity | Violates §16.5 instance binding; obscures RVA version authority | **Rejected** — incompatible with instance binding |
+
+#### 20.18.3 Selected baseline — Two-Step Constitutional Pass–Approval–GPRA chain with obligation-scoped instance binding
+
+**Model designation:** TOC-PA — Two-Step Constitutional Pass–Approval–GPRA chain.
+
+| Decision element | Resolution |
+|------------------|------------|
+| **Pass to Approval** | **Pass** is **necessary** but **not sufficient** for **Approval**; **Approval** does **not** arise automatically from **Pass** |
+| **Approval act** | **Approval** is a distinct Decision-stage constitutional act that MAY grant approved production-ready posture |
+| **Approval to GPRA** | **Approval** is **necessary** but **not sufficient** for **GPRA**; **GPRA** requires an explicit governed grant or posture assignment and does **not** arise automatically from **Pass** or **Approval** |
+| **Pass prohibitions** | **Pass** does not constitute **Approval**, create **GPRA**, confer membership, or declare Governed Handoff |
+| **Determination preservation** | **Review Determination** MUST NOT be rewritten, reopened, or substituted during **Approval** consideration; withholding or grant decisions are **Approval-layer** acts |
+| **GPRA binding scope baseline** | Each **GPRA** binds a **specific RVA version** under a **defined Production Obligation** scope per Volume 06 §5.11 and §16.5 |
+| **Deferred refinement** | Handoff consumer class binding, simultaneous authoritative variant rules, and full succession mechanics remain for G9 under `OQ-STD-014-007` |
+| **G6 ownership** | Pass-to-Approval baseline; Approval act; GPRA grant; obligation-scoped instance binding baseline |
+| **G9 consumption boundary** | G9 owns authoritative GPRA succession and supersession detail without redefining Approval grant |
+| **G11 consumption boundary** | G11 exports GPRA identity and validity posture; does not redefine grant rules |
+
+#### 20.18.4 Approval and GPRA baseline clarification (Sprint V06-D13.1A)
+
+**Constitutional sequence:** **Pass** → **Approval** consideration → **Approval** → **GPRA**.
+
+| Planning element | Resolution |
+|------------------|------------|
+| **Pass to Approval** | **Pass** is **necessary** but **not sufficient** for **Approval**; **Approval** is a separate constitutional act |
+| **Approval to GPRA** | **Approval** is **necessary** but **not sufficient** for **GPRA**; **GPRA** does **not** arise automatically from **Pass** or **Approval** |
+| **GPRA grant** | **GPRA** requires an explicit governed grant or posture assignment attributable to constitutionally authorized authority |
+| **GPRA binding** | The **GPRA** grant MUST bind a **specific RVA version** under a **defined Production Obligation** scope |
+| **Distinct postures** | **Approval** remains distinct from **GPRA**, membership, and Governed Handoff |
+| **Determination preservation** | **Approval** consideration does **not** rewrite the recorded **Review Determination** |
+| **Implementation deferral** | Mechanics for recording **Approval** or **GPRA** grant remain **implementation deferred** |
 
 ---
 
@@ -1343,6 +1496,8 @@ This section establishes the constitutional architecture of **Review Determinati
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D13.1A — MAGAC establishment versus activation clarified (Section 20.16.3); Approval and GPRA baseline clarified (Section 20.18.4); `OQ-STD-014-004` closed; `OQ-STD-014-007` opened for G9 succession and handoff consumer class binding; MAGAC, EGWG, and TOC-PA models preserved; G6 preparation synchronized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D13.1 — `PD-STD-014-002` resolved (MAGAC Approval authority model; Section 20.16); `PD-STD-014-003` resolved (EGWG withholding grounds; Section 20.17); baseline `PD-STD-014-005` resolved (TOC-PA Pass–Approval–GPRA chain; Section 20.18); `OQ-STD-014-001` and `OQ-STD-014-002` closed; `OQ-STD-014-004` closed at G6 baseline; G6 drafting preparation complete (Section 20.13); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G1 through G5 preserved; G6–G11 normative requirement drafting unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D12.1 — G5 normative requirements drafted (`FI-DSN-STD-014-R27`–`R33`); Review Determination outcome architecture drafted (Section 21.5); G1 through G4 preserved (`FI-DSN-STD-014-R01`–`R26`); G6–G11 not drafted and unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D11.1A — Conditional Determination lifecycle clarified (Section 20.15.3); Conditional remains completed and non-mutating; subsequent governed Review with Pass Determination required for Approval eligibility; no Satisfied Conditional outcome; G7 rework boundary preserved; G5 preparation synchronized; `PD-STD-014-001` and Model B preserved; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D11.1 — `PD-STD-014-001` resolved (three-outcome Review Determination model: Pass, Conditional, Fail); `OQ-V06-006` closed; G5 drafting preparation complete (Section 20.13); Tranche 1 committed (`FI-DSN-STD-014-R01`–`R26`); G5–G11 normative requirement drafting unauthorized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
