@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`) |
 | **Queue posture** | EO 20 — **In progress** per Sprint V06-D5.4 requirement plan adoption (`FI-DSN-QUE-001`) |
-| **Sprint** | V06-D23.1 |
+| **Sprint** | V06-D24.1 |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed as Design-Time Feasibility Compliance Boundary inputs only. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **committed** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** and **adopted** (Sprints V06-D16.1 and V06-D16.1A; commit `cebf454`; Section 20.19). G7 normative requirements **drafted** — `FI-DSN-STD-014-R44`–`R51` (Sprint V06-D17.1; Section 21.7). G8 pre-planning gates **`PD-STD-014-004` and `PD-STD-014-007` resolved**; **`OQ-STD-014-003` closed** (Sprint V06-D18.1; Section 20.20). G8 normative requirements **drafted and independently accepted** — `FI-DSN-STD-014-R52`–`R63` (Sprints V06-D19.1, V06-D19.3, V06-D19.5; independent acceptance V06-D19.6; Section 21.8). G9 planning architecture **established** (Sprint V06-D20.1; Section 20.21) and **independently accepted** (Sprint V06-D20.2). G9 Tranche 1 normative requirements **accepted** — `FI-DSN-STD-014-R64`–`R67` (Sprint V06-D21.2; acceptance V06-D21.3). G9 Tranche 2 normative requirements **accepted** — `FI-DSN-STD-014-R68`–`R71` (Sprint V06-D22.1; acceptance V06-D22.2). G9 normative requirements **complete** — `FI-DSN-STD-014-R64`–`R72` (Sprint V06-D23.1; Section 21.9). G9 normative requirement drafting **authorized** (Sprint V06-D21.1). G10–G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **committed** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** and **adopted** (Sprints V06-D16.1 and V06-D16.1A; commit `cebf454`; Section 20.19). G7 normative requirements **drafted** — `FI-DSN-STD-014-R44`–`R51` (Sprint V06-D17.1; Section 21.7). G8 pre-planning gates **`PD-STD-014-004` and `PD-STD-014-007` resolved**; **`OQ-STD-014-003` closed** (Sprint V06-D18.1; Section 20.20). G8 normative requirements **drafted and independently accepted** — `FI-DSN-STD-014-R52`–`R63` (Sprints V06-D19.1, V06-D19.3, V06-D19.5; independent acceptance V06-D19.6; Section 21.8). G9 planning architecture **established** (Sprint V06-D20.1; Section 20.21) and **independently accepted** (Sprint V06-D20.2). G9 Tranche 1 normative requirements **accepted** — `FI-DSN-STD-014-R64`–`R67` (Sprint V06-D21.2; acceptance V06-D21.3). G9 Tranche 2 normative requirements **accepted** — `FI-DSN-STD-014-R68`–`R71` (Sprint V06-D22.1; acceptance V06-D22.2). G9 normative requirements **complete** — `FI-DSN-STD-014-R64`–`R72` (Sprint V06-D23.1; Section 21.9). G9 normative requirement drafting **authorized** (Sprint V06-D21.1). G10 planning architecture **established** (Sprint V06-D24.1; Section 20.22). G10–G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -549,15 +549,15 @@ Architecture Validation is governance-level validation before normative requirem
 | Post-approval states | Invalidated and Superseded aligned with Volume 06 §5.9 |
 | Rework boundary | Review authorization vs Domain 2 consumption split documented |
 | Implementation independence | No APIs, schemas, UI, workflows, vendors, or models prescribed |
-| Normative requirements | **Partial** — G1 committed (`FI-DSN-STD-014-R01`–`R07`); G2 committed (`FI-DSN-STD-014-R08`–`R13`); G3 committed (`FI-DSN-STD-014-R14`–`R20`); G4 committed (`FI-DSN-STD-014-R21`–`R26`); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7 drafted (`FI-DSN-STD-014-R44`–`R51`; Sprint V06-D17.1); G8 drafted and **accepted** (`FI-DSN-STD-014-R52`–`R63`; acceptance V06-D19.6); G9 **complete** (`FI-DSN-STD-014-R64`–`R72`; Tranches 1–2 accepted V06-D21.3/V06-D22.2; completion V06-D23.1); G10–G11 not drafted |
+| Normative requirements | **Partial** — G1 committed (`FI-DSN-STD-014-R01`–`R07`); G2 committed (`FI-DSN-STD-014-R08`–`R13`); G3 committed (`FI-DSN-STD-014-R14`–`R20`); G4 committed (`FI-DSN-STD-014-R21`–`R26`); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7 drafted (`FI-DSN-STD-014-R44`–`R51`; Sprint V06-D17.1); G8 drafted and **accepted** (`FI-DSN-STD-014-R52`–`R63`; acceptance V06-D19.6); G9 **complete** (`FI-DSN-STD-014-R64`–`R72`; Tranches 1–2 accepted V06-D21.3/V06-D22.2; completion V06-D23.1); G10 planning **complete** (V06-D24.1; Section 20.22); G10–G11 normative not drafted |
 | Independent review | **Passed** — Sprint V06-D4.4; minor corrective findings resolved in Sprint V06-D4.4A; architecture committed in Sprint V06-D4.5 |
-| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 committed (V06-D14.1); G7 planning **adopted** (V06-D16.1, V06-D16.1A; commit `cebf454`); G7 normative requirements **drafted** (V06-D17.1); **`PD-STD-014-004` and `PD-STD-014-007` resolved** (V06-D18.1); **`OQ-STD-014-003` closed** (V06-D18.1); **`OQ-STD-014-005` closed** (V06-D19.3); G8 normative requirements **drafted and accepted** (V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6); G9 planning **accepted** (V06-D20.2); **`OQ-STD-014-007` closed** (V06-D20.1); G9 normative drafting **authorized** (V06-D21.1); G10–G11 normative drafting **unauthorized** |
+| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 committed (V06-D14.1); G7 planning **adopted** (V06-D16.1, V06-D16.1A; commit `cebf454`); G7 normative requirements **drafted** (V06-D17.1); **`PD-STD-014-004` and `PD-STD-014-007` resolved** (V06-D18.1); **`OQ-STD-014-003` closed** (V06-D18.1); **`OQ-STD-014-005` closed** (V06-D19.3); G8 normative requirements **drafted and accepted** (V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6); G9 planning **accepted** (V06-D20.2); **`OQ-STD-014-007` closed** (V06-D20.1); G9 normative drafting **authorized** (V06-D21.1); G10 planning architecture **established** (V06-D24.1; Section 20.22); G10–G11 normative drafting **unauthorized** |
 
 ---
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D23.1 — G9 normative requirements **complete** (`FI-DSN-STD-014-R64`–`R72`; Section 21.9). G9 Tranche 1 **accepted** (`FI-DSN-STD-014-R64`–`R67`; V06-D21.3). G9 Tranche 2 **accepted** (`FI-DSN-STD-014-R68`–`R71`; V06-D22.2). G9 normative requirement drafting **authorized** (Sprint V06-D21.1). G9 planning architecture **accepted** (Sprint V06-D20.2; Section 20.21). G8 normative requirements **drafted and independently accepted** (`FI-DSN-STD-014-R52`–`R63`; Section 21.8; Sprint V06-D19.6). G1 through G8 drafted (`FI-DSN-STD-014-R01`–`R63` continuous). G10–G11 normative requirement drafting remains **unauthorized**.
+**Planning posture:** Sprint V06-D24.1 — G10 planning architecture **established** (Section 20.22; `PD-STD-014-017` through `PD-STD-014-023`). G9 normative requirements **complete** (`FI-DSN-STD-014-R64`–`R72`; Section 21.9). G9 Tranche 1 **accepted** (`FI-DSN-STD-014-R64`–`R67`; V06-D21.3). G9 Tranche 2 **accepted** (`FI-DSN-STD-014-R68`–`R71`; V06-D22.2). G9 normative requirement drafting **authorized** (Sprint V06-D21.1). G9 planning architecture **accepted** (Sprint V06-D20.2; Section 20.21). G8 normative requirements **drafted and independently accepted** (`FI-DSN-STD-014-R52`–`R63`; Section 21.8; Sprint V06-D19.6). G1 through G8 drafted (`FI-DSN-STD-014-R01`–`R63` continuous). G10 normative requirement drafting remains **unauthorized** pending independent G10 planning acceptance review. G11 normative requirement drafting remains **unauthorized**.
 
 ### 20.1 Final requirement group plan
 
@@ -713,17 +713,17 @@ The accepted architecture groups G1–G11 are retained without merge, split, ren
 
 | Field | Planning content |
 |-------|------------------|
-| **Constitutional subject** | Prohibition on Brain/runtime GPRA grant; Decision-stage vs BVS separation |
-| **Positive authority** | Cross-cutting Brain boundary reinforcement within Domain 3 scope |
-| **Explicit exclusions** | BVS policy; runtime selection; Brain algorithms; expanding GOV-004 |
-| **Inherited terms** | Brain Visual Selection Decision; Decision-stage policy — GOV-004 |
-| **Upstream dependencies** | `FI-DSN-GOV-004`; G6 (reference only for Approval prohibition) |
-| **Downstream implications** | Cross-cutting consistency across all Approval-adjacent groups |
-| **Open questions** | None |
-| **Likely requirement themes** | Brain prohibition; runtime vs Decision separation; advisory input limits |
-| **Collision risks** | Duplicating G6 entirely; restating STD-007 |
-| **Drafting prerequisites** | G6 Approval authority themes drafted; Tranche 2 accepted |
-| **Review gate** | GOV-004 non-duplication review at Tranche 3 commit |
+| **Constitutional subject** | Brain as governed consumer and advisory participant only; prohibition on Brain GPRA grant and constitutional act substitution; Decision-stage versus BVS separation |
+| **Positive authority** | Cross-cutting Brain boundary reinforcement within Domain 3 scope per `FI-DSN-GOV-004`; BIIM input consumption; BOCM output classification; DSIB stage boundaries; BRPAM persistence; BDOM disagreement model; BRRM reevaluation requests |
+| **Explicit exclusions** | BVS policy; runtime selection mechanics; Brain algorithms; expanding GOV-004; constitutional act creation; Handoff execution; manufacturing execution |
+| **Inherited terms** | Brain Runtime; Brain Visual Selection Decision; Recommendation → Selection → Decision → Enforcement chain — GOV-004 |
+| **Upstream dependencies** | `FI-DSN-GOV-004`; frozen `FI-DSN-STD-013` Brain Interaction (`R51`); G5–G9 constitutional boundaries; PRR-P8; PRR-P9 |
+| **Downstream implications** | Cross-cutting consistency across all Approval-adjacent groups; G11 validity posture export references Brain non-authority only |
+| **Open questions** | None blocking G10 planning — implicit Brain interaction deferral resolved at planning layer (Section 20.22) |
+| **Likely requirement themes** | Brain GPRA prohibition; runtime versus Decision separation; advisory input and output limits; GOV-004 cross-reference; persistence and mediation |
+| **Collision risks** | Duplicating G6 entirely; restating STD-007; treating Brain output as constitutional authority |
+| **Drafting prerequisites** | G6 committed; G8–G9 complete; G10 planning architecture **complete** (Section 20.22; Sprint V06-D24.1) |
+| **Review gate** | GOV-004 non-duplication review; independent G10 planning acceptance review before G10 normative drafting authorization |
 
 #### G11 — STD-015 consumption boundary
 
@@ -793,6 +793,13 @@ PRR-P1–P10 are constitutional distinctions for planning. They are **not** conv
 | `PD-STD-014-014` | What constitutional authority classes may establish **Superseded** posture? | `OQ-STD-014-007`; PVTA ST families; G6 GPRA grant boundary | G9 | Pre-G9 planning | **Resolved** (Sprint V06-D20.1) | SSAC — Supersession Authority Classes — Section 20.21.3 |
 | `PD-STD-014-015` | What predecessor–successor identity and lineage rules govern authoritative GPRA succession? | `OQ-STD-014-007`; Volume 06 §5.11; baseline `PD-STD-014-005` | G9 | Pre-G9 planning | **Resolved** (Sprint V06-D20.1) | PSIM — Predecessor–Successor Identity Model — Section 20.21.4 |
 | `PD-STD-014-016` | How do **Superseded** and **Invalidated** postures interact constitutionally? | RIVP; G8 `FI-DSN-STD-014-R62`; Section 20.20.4 | G9 | Pre-G9 planning | **Resolved** (Sprint V06-D20.1) | PIIM — Posture Interaction and Immutability Model — Section 20.21.6 |
+| `PD-STD-014-017` | What is the constitutional Brain role at Domain 3 Decision-stage? | `FI-DSN-GOV-004`; PRR-P8; G6 `R37`–`R40`; STD-013 `R51` | G10 | Pre-G10 planning (mandatory before G10 normative drafting) | **Resolved** (Sprint V06-D24.1) | BRDM — Brain Role Definition Model — Section 20.22.1 |
+| `PD-STD-014-018` | What constitutional inputs may Brain consume versus exercise? | GOV-004 §8; G3 evidence; G5 Determination; G6 GPRA; G8–G9 posture | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BIIM — Brain Input Interaction Model — Section 20.22.2 |
+| `PD-STD-014-019` | What planning classes of Brain output are permitted at Domain 3? | GOV-004 Recommendation chain; G6 prohibited grounds | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BOCM — Brain Output Classification Model — Section 20.22.3 |
+| `PD-STD-014-020` | What Brain interaction is permitted at each Decision-stage phase? | Volume 06 Stage Governance Matrix; G5–G9 stage boundaries | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | DSIB — Decision-Stage Interaction Boundary — Section 20.22.5 |
+| `PD-STD-014-021` | How must Brain outputs be persisted and distinguished from constitutional acts? | PRR-P9; GOV-004 §11 operational outputs | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BRPAM — Brain Recommendation Persistence and Attribution Model — Section 20.22.6 |
+| `PD-STD-014-022` | What controls when Brain output conflicts with governance or human decisions? | GOV-004 §14 Authority Escalation; G5 `R35`; G6 `R35` | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BDOM — Brain Disagreement and Override Model — Section 20.22.7 |
+| `PD-STD-014-023` | May Brain request reevaluation, and how is that distinguished from authorization? | G7 TRPM; G5 subsequent Review; G8–G9 invalidation and supersession boundaries | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BRRM — Brain Reevaluation Request Model — Section 20.22.8 |
 
 ### 20.5 Drafting tranche plan
 
@@ -889,12 +896,12 @@ Counts are planning estimates only. They are not settled and do not assign requi
 | G7 | `R32` alignment; no realization method requirements |
 | G8 | `PD-STD-014-004` resolved; `PD-STD-014-007` resolved; Invalidated distinct from Superseded |
 | G9 | Authoritative GPRA per §5.11; succession without Handoff rules |
-| G10 | No G6 duplication; GOV-004 cited not expanded |
+| G10 | BIIM/BOCM/DSIB complete; GOV-004 cited not expanded; no G6 duplication |
 | G11 | Six outputs listed; zero Handoff Posture themes |
 
 ### 20.11 Normative drafting prohibition
 
-Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. G8 normative requirements **`FI-DSN-STD-014-R52`–`R63`** are **drafted and independently accepted** (Sprints V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6; Section 21.8). G9 planning architecture is **accepted** (Sprint V06-D20.2; Section 20.21). G9 normative requirement drafting is **authorized** (Sprint V06-D21.1). G9 Tranche 1 normative requirements **`FI-DSN-STD-014-R64`–`R67`** are **accepted** (V06-D21.3; Section 21.9.2). G9 Tranche 2 normative requirements **`FI-DSN-STD-014-R68`–`R71`** are **accepted** (V06-D22.2; Section 21.9.5). G9 normative requirements **`FI-DSN-STD-014-R64`–`R72`** are **complete** (Sprint V06-D23.1; Section 21.9). G10–G11 normative requirement drafting remains **unauthorized**. G1 through G7 status preserved per prior sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
+Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. G8 normative requirements **`FI-DSN-STD-014-R52`–`R63`** are **drafted and independently accepted** (Sprints V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6; Section 21.8). G9 planning architecture is **accepted** (Sprint V06-D20.2; Section 20.21). G9 normative requirement drafting is **authorized** (Sprint V06-D21.1). G9 Tranche 1 normative requirements **`FI-DSN-STD-014-R64`–`R67`** are **accepted** (V06-D21.3; Section 21.9.2). G9 Tranche 2 normative requirements **`FI-DSN-STD-014-R68`–`R71`** are **accepted** (V06-D22.2; Section 21.9.5). G9 normative requirements **`FI-DSN-STD-014-R64`–`R72`** are **complete** (Sprint V06-D23.1; Section 21.9). G10 planning architecture is **established** (Sprint V06-D24.1; Section 20.22); G10 normative requirement drafting remains **unauthorized** pending independent G10 planning acceptance review. G11 normative requirement drafting remains **unauthorized**. G1 through G7 status preserved per prior sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
 
 ### 20.12 PD-STD-014-006 resolution — Review dimension model
 
@@ -1122,6 +1129,33 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **G9 vs G11** | G9 owns constitutional binding scope keys; G11 owns Handoff procedures and consumer class catalog |
 | **Preparation status** | **Complete** (Sprint V06-D20.1); G9 planning **accepted** (Sprint V06-D20.2); G9 normative drafting **authorized** (Sprint V06-D21.1); G9 Tranche 1 **accepted** (`FI-DSN-STD-014-R64`–`R67`; V06-D21.3); G9 Tranche 2 **accepted** (`FI-DSN-STD-014-R68`–`R71`; V06-D22.2); G9 normative requirements **complete** (`FI-DSN-STD-014-R64`–`R72`; Sprint V06-D23.1); G10–G11 normative drafting **unauthorized** |
 
+#### G10 — Brain and Decision-stage interaction (cross-cutting)
+
+| Field | Tranche 3 drafting posture |
+|-------|---------------------------|
+| **Drafting objective** | Freeze Brain role, input consumption, output classification, governed-actor mediation, Decision-stage interaction boundaries, persistence, disagreement, and reevaluation request architecture per Section 20.22 without restating G6 Approval body, BVS policy, Brain algorithms, or Handoff execution |
+| **Inherited terms** | Brain Runtime; Recommendation; Selection; Decision; Enforcement — GOV-004 §8 |
+| **Brain role model** | **BRDM** — Brain Role Definition Model per `PD-STD-014-017` (Section 20.22.1) |
+| **Input model** | **BIIM** — Brain Input Interaction Model per `PD-STD-014-018` (Section 20.22.2) |
+| **Output model** | **BOCM** — Brain Output Classification Model per `PD-STD-014-019` (Section 20.22.3) |
+| **Stage boundary model** | **DSIB** — Decision-Stage Interaction Boundary per `PD-STD-014-020` (Section 20.22.5) |
+| **Persistence model** | **BRPAM** — Brain Recommendation Persistence and Attribution Model per `PD-STD-014-021` (Section 20.22.6) |
+| **Disagreement model** | **BDOM** — Brain Disagreement and Override Model per `PD-STD-014-022` (Section 20.22.7) |
+| **Reevaluation model** | **BRRM** — Brain Reevaluation Request Model per `PD-STD-014-023` (Section 20.22.8) |
+| **Positive authority** | Cross-cutting prohibition reinforcement; advisory Brain participation boundaries; nonbinding output classification; governed-actor mediation requirements |
+| **Exclusions** | MAGAC Approval authority classes (G6); DDAC/DSRA disposition (G7); invalidation authority (G8); SSAC supersession (G9); Handoff procedures (G11); BVS algorithms; Brain runtime specification |
+| **Prerequisite decisions** | G9 normative requirements **complete** (`FI-DSN-STD-014-R64`–`R72`; V06-D23.1); G10 planning architecture **complete** (V06-D24.1; Section 20.22) |
+| **Terms owned** | Domain 3 Brain interaction boundaries; BOCM output classes; DSIB stage permissions |
+| **Terms referenced only** | **Approval** (G6); **Review Determination** (G5); **GPRA** posture (G6, G8, G9); BVS (STD-007; GOV-004) |
+| **Required evidence** | GOV-004 non-expansion; G6 non-duplication; no hidden constitutional authority class; PRR-P8 preserved; constitutional act prohibition table complete |
+| **Boundary risks** | Brain output treated as Approval; Brain as invalidation or supersession authority; Brain bypassing DDAC or MAGAC; duplicating STD-013 `R51` Domain 2 scope |
+| **Expected requirement themes** | Brain GPRA prohibition; Decision versus runtime separation; input read-only consumption; output class boundaries; persistence and attribution; reevaluation request versus authorization |
+| **Expected count range** | 3–5 (nonbinding) |
+| **Independent review focus** | GOV-004 fidelity; G6/G7/G8/G9 boundary preservation; no Handoff or manufacturing absorption |
+| **G10 vs G6** | G6 owns Approval and GPRA grant prohibitions at instance level; G10 owns cross-cutting Brain interaction architecture |
+| **G10 vs STD-013** | STD-013 `R51` owns Domain 2 Brain boundary; G10 owns Domain 3 Brain interaction without redefining realization authority |
+| **Preparation status** | **Complete** (Sprint V06-D24.1; Section 20.22); G10 planning acceptance review **pending**; G10 normative drafting **unauthorized**; G11 normative drafting **unauthorized** |
+
 ### 20.14 Tranche 1 drafting sequence, gates, and controls
 
 #### 20.14.1 Controlled drafting sequence
@@ -1156,6 +1190,9 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **26** | G9 normative drafting authorization | G9 planning acceptance passed | G9 normative requirement drafting **authorized** at planning layer (Sprint V06-D21.1) |
 | **27** | Tranche 3 prohibition (G10–G11) | G10–G11 normative requirements not separately authorized | G10–G11 normative requirement text remains unauthorized |
 | **28** | G9 Tranche 1 normative drafting | G9 normative drafting authorized | G9 normative requirements drafting (next separately authorized gate) |
+| **29** | G10 planning architecture | G9 normative requirements complete (V06-D23.1); G10 planning sprint separately authorized | G10 planning architecture complete (Section 20.22) |
+| **30** | G10 planning acceptance review | G10 planning architecture complete | Governed G10 planning acceptance review (next separately authorized gate) |
+| **31** | Tranche 3 prohibition (G10–G11 normative) | G10–G11 normative requirements not separately authorized | G10–G11 normative requirement text remains unauthorized |
 
 G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and extensibility rules are stable. G4 MUST NOT publish normative requirements that redefine Review activity or the mandatory core owned by G3.
 
@@ -1849,6 +1886,220 @@ This section establishes the constitutional planning architecture for **Supersed
 
 **Nonblocking deferrals preserved:** Simultaneous authoritative variant rules per Volume 06 §5.11 non-default path; Handoff consumer class catalog and intake procedure detail (G11); operational catalog replacement mechanics (**ST-2** implementation layer).
 
+### 20.22 G10 Planning — Brain and Decision-Stage Interaction Architecture
+
+This section establishes the constitutional planning architecture for Brain interaction with production-readiness **Review**, **Review Determination**, **Approval**, **GPRA** grant and posture, downstream disposition, and Handoff preparation eligibility context. It consumes `FI-DSN-GOV-004`, frozen `FI-DSN-STD-013` Brain Interaction (`FI-DSN-STD-013-R51`), G5–G9 normative boundaries, **RIVP**, **PVTA**, and PRR-P8–P9 without authoring G10 normative requirements.
+
+**Planning scope boundary:** This section governs Brain role definition, authority prohibition, constitutional input consumption, output classification, governed-actor mediation, Decision-stage interaction boundaries, recommendation persistence, disagreement handling, reevaluation requests, and historical treatment at Domain 3 only. It does not redefine BVS policy (`FI-DSN-STD-007`), Brain algorithms, runtime selection mechanics, Domain 2 realization authority (`FI-DSN-STD-013`), **Review Determination** outcomes (G5), **Approval** or **GPRA** grant (G6), downstream disposition (G7), **Retention** or **Invalidated** posture (G8), **Superseded** posture (G9), Governed Handoff execution (G11), manufacturing execution, lifecycle termination, or operational withdrawal or recall.
+
+#### 20.22.0 Constitutional vocabulary — Brain at Domain 3
+
+| Term | Planning meaning at Domain 3 | Authority posture | Distinguished from |
+|------|------------------------------|-------------------|-------------------|
+| **Brain** | Collective intelligence layer governed by `FI-DSN-GOV-004` — message-side and runtime recommendation within Preference Surfaces | Runtime and advisory dimension only within frozen bounds | Constitutional Decision-stage authority; reviewer; approver; DDAC; invalidation authority; SSAC |
+| **Brain Runtime** | Live subsystem producing recommendations, rankings, and selection proposals | Advisory Recommendation stage per GOV-004 §8 | **Review Determination** recording; **Approval**; **GPRA** grant |
+| **Decision-stage policy** | Frozen Layer B constitutional acts: **Review**, **Review Determination**, **Approval**, **GPRA** grant and posture, G7 disposition, G8 invalidation, G9 supersession | Governed human or constitutionally established authority classes only | Brain recommendation; customer Selection; workflow permission |
+| **Brain output** | Any operational artifact produced by Brain Runtime or Writing Engine within Domain 3 interaction scope | Nonbinding unless and until consumed and acted upon by a responsible governed actor within that actor's authority | Design Requirements; constitutional records; verified evidence |
+| **Constitutional act** | A recorded Decision-stage disposition with governing authority attribution | Human or constitutionally established authority class only | Brain output; Review evidence alone; workflow state |
+
+**PRR-P8 planning rule:** Volume 06 **Approval** and **GPRA** policy is Decision-stage governance. Brain Visual Selection and runtime recommendation remain within GOV-004 runtime authority. Brain does **not** become a hidden constitutional authority class.
+
+#### 20.22.1 PD-STD-014-017 resolution — Brain role definition (BRDM)
+
+**Planning decision:** `PD-STD-014-017` — **Resolved** (Sprint V06-D24.1).
+
+**Model designation:** BRDM — Brain Role Definition Model.
+
+| Capability question | Planning resolution | Governing basis |
+|--------------------|---------------------|-----------------|
+| **May Brain receive Review evidence?** | **Yes** — as read-only constitutional input for advisory evaluation, inconsistency detection, and routing suggestions. Brain does **not** record, adopt, or substitute for **Review evidence** categories owned by G3 | G3 evidence architecture; BIIM (Section 20.22.2) |
+| **May Brain receive a completed Review Determination?** | **Yes** — as read-only completed constitutional fact. Brain does **not** record, revise, reopen, or substitute for the **Review Determination** | G5 `FI-DSN-STD-014-R30`, `R35`; G7 `R51` |
+| **May Brain receive Approval or GPRA posture?** | **Yes** — as read-only constitutional fact including **Retention**, **Invalidated**, and **Superseded** posture. Brain does **not** grant **Approval**, create **GPRA**, or assign posture | G6 `R41`–`R43`; G8–G9 posture ownership |
+| **May Brain produce recommendations?** | **Yes** — as nonbinding advisory output per GOV-004 Recommendation stage | GOV-004 §8.1; BOCM (Section 20.22.3) |
+| **May Brain request reevaluation?** | **Yes** — as a nonbinding reevaluation request eligible only to initiate a separately governed act when accepted by the responsible authority class. A request is **not** authorization | BRRM (Section 20.22.8) |
+| **May Brain identify apparent inconsistencies?** | **Yes** — as inconsistency signals (advisory). Signals do **not** establish governing-law failure, deficiency records, or constitutional defects | BOCM; BDOM (Section 20.22.7) |
+| **May Brain initiate a governed request?** | **Conditional** — Brain may emit a governed **request** or **suggestion** routed to a responsible actor. Brain does **not** initiate, perform, or complete any constitutional act | BRRM; governed-actor mediation (Section 20.22.4) |
+| **What Brain may never establish directly** | **Review Determination**; **Approval**; **GPRA** grant; **Retention**; **Invalidated**; **Superseded**; DDAC disposition; DSRA rework authorization; invalidation authority acts; supersession authority acts; Handoff authority; manufacturing authority; lifecycle termination; membership; exploration-entry or realization authority | G5–G9; STD-013 `R51`; GOV-004 §6.2 never-delegated domains |
+
+**BRDM role summary:** At Domain 3, Brain is a **governed consumer**, **evaluator**, **recommender**, and **routing participant** only to the extent supported by frozen governance. Brain is **not** a constitutional authority class and **not** a substitute reviewer, approver, disposition authority, invalidation authority, supersession authority, or Handoff authority.
+
+#### 20.22.2 PD-STD-014-018 resolution — Brain input interaction model (BIIM)
+
+**Planning decision:** `PD-STD-014-018` — **Resolved** (Sprint V06-D24.1).
+
+**Model designation:** BIIM — Brain Input Interaction Model.
+
+| Constitutional input | Permitted Brain posture | Read evidence | Exercise authority | Prohibited Brain use |
+|---------------------|-------------------------|---------------|-------------------|---------------------|
+| **Review evidence** | Consume for advisory analysis only | **Yes** — G3 evidence categories as read-only inputs | **No** — Brain does not create Review evidence, record Determination, or perform Review activity | Substituting for Reviewer participation; auto-Determination |
+| **Review Determination** | Consume completed outcome as fact | **Yes** — Pass, Conditional, or Fail as recorded | **No** — Brain does not record, revise, or reopen Determination | Reopening or editing Determination; treating recommendation as Determination |
+| **Approval record** | Consume completed Approval act as fact | **Yes** — historical and current Approval attribution | **No** — Brain does not perform Approval or withhold Approval | Brain as MAGAC; Brain recommendation as withholding ground (G6 `R40`) |
+| **GPRA identity** | Consume identity and lineage as fact | **Yes** — obligation-scoped binding per G6 baseline | **No** — Brain does not grant or bind GPRA | Brain GPRA grant (G6; GOV-004) |
+| **GPRA posture** | Consume Retention, Invalidated, or Superseded as fact | **Yes** — current and historical posture per PRR-P9 | **No** — Brain does not assign or transition posture | Invalidation acts (G8); supersession acts (G9) |
+| **Invalidation evidence** | Consume traceability inputs as read-only | **Yes** — IT-family traceability references where available | **No** — Brain does not establish **Invalidated** posture | G8 invalidation authority substitution |
+| **Supersession evidence** | Consume traceability inputs as read-only | **Yes** — ST-family and PSIM lineage references where available | **No** — Brain does not establish **Superseded** posture | G9 SSAC substitution (G9 `R68`) |
+| **Historical records** | Consume for lineage and inconsistency analysis | **Yes** — Review, Approval, GPRA, posture history preserved (PRR-P9) | **No** — Brain does not rewrite historical constitutional records | Retroactive erasure or overwrite of constitutional fact |
+| **Compliance Boundary information** | Consume frozen governing limits | **Yes** — applicable `FI-DSN-*`, `FI-MFG-*`, and upstream law as Compliance Boundary inputs | **No** — Brain does not legislate or amend Compliance Boundaries | Policy creation; Preference Surface widening (GOV-004 §7) |
+| **Downstream disposition records** | Consume EGDF, DSRA, and TRPM records as fact | **Yes** — DDAC-attributed disposition records where available | **No** — Brain does not record deficiencies, authorize rework, or define return posture | DDAC or DSRA substitution (G7) |
+
+**BIIM planning rule:** For every input, Brain interaction is **reading evidence** or **consuming constitutional fact** — never **exercising authority**. Authority exercise remains with the owning group and constitutionally established authority class.
+
+#### 20.22.3 PD-STD-014-019 resolution — Brain output classification model (BOCM)
+
+**Planning decision:** `PD-STD-014-019` — **Resolved** (Sprint V06-D24.1).
+
+**Model designation:** BOCM — Brain Output Classification Model.
+
+| Output class | Planning description | Binding posture | Eligible to initiate separately governed act | Prohibited as |
+|--------------|---------------------|-----------------|-------------------------------------------|---------------|
+| **Informational observation** | Neutral description of consumed evidence or posture without evaluative recommendation | Nonbinding; evidence-adjacent only | **No** — informational only | Determination; Approval; constitutional defect finding |
+| **Recommendation** | Advisory proposed treatment, priority, or evaluative judgment for human consideration | Advisory; nonbinding | **No** — requires governed actor acceptance | **Approval** ground; **GPRA** grant; withholding ground (G6 `R40`) |
+| **Inconsistency signal** | Identification of apparent conflict among evidence, Determination, Approval, posture, or Compliance Boundary consumption | Advisory; nonbinding | **No** — may inform a governed actor's decision to initiate review | Automatic invalidation; automatic Determination change; governing-law finding |
+| **Reevaluation request** | Formal request that a responsible authority consider initiating a new governed evaluative or disposition act | Nonbinding request | **Yes** — only when accepted and executed by responsible governed actor per BRRM | Authorization; automatic subsequent **Review**; automatic disposition |
+| **Routing suggestion** | Proposal to direct attention, queue, or workflow toward a governed actor or stage | Advisory; nonbinding | **No** — routing suggestion alone does not advance constitutional state | Workflow permission; constitutional stage completion |
+| **Escalation suggestion** | Proposal to elevate a matter to a higher-precedence authority per GOV-004 §14 | Advisory; nonbinding | **No** — escalation requires governed actor action | Authority Escalation resolution by Brain alone |
+| **Constitutional act emulation** | Any output that purports to record Determination, Approval, GPRA, posture, disposition, invalidation, supersession, or Handoff | **Prohibited** | **Prohibited** | Hidden constitutional authority |
+
+**BOCM planning rule:** Brain outputs remain in the Recommendation or operational-artifact layer per GOV-004 §8 and §11. No Brain output class may substitute for a completed constitutional act.
+
+#### 20.22.4 Governed actor mediation
+
+Brain output must be consumed and acted upon only by the responsible governed actor. Brain output does **not** bypass the responsible actor.
+
+| Brain output class | Primary mediation actor | Secondary or escalation actor | Brain bypass prohibited |
+|-------------------|------------------------|------------------------------|------------------------|
+| **Informational observation** | Reviewer; any governed participant | DDAC; MAGAC approver as context requires | Automatic state change |
+| **Recommendation** | Reviewer during **Review**; MAGAC participant during **Approval** consideration | DDAC for disposition context | Auto-Approval; auto-Determination |
+| **Inconsistency signal** | Reviewer; MAGAC participant; DDAC participant | G8 invalidation authority; G9 supersession authority when posture inconsistency is alleged | Brain-established defect or posture |
+| **Reevaluation request** | Reviewer or Review authority path for new **Review**; DDAC for disposition correction; MAGAC for **Approval** reconsideration; G8 invalidation authority for invalidation review; SSAC path for supersession review | Governance escalation per GOV-004 §14 when jurisdictional conflict | Brain-authorized subsequent act |
+| **Routing suggestion** | Workflow participant only — non-constitutional | Responsible authority class for target stage | Workflow state as constitutional authority |
+| **Escalation suggestion** | Actor owning current stage; then authority per GOV-004 §14 precedence | Frozen governance when Compliance Boundary conflict | Brain as escalation resolver |
+
+**Mediation planning rule:** Product Implementation may surface Brain output to participants but enforcement of constitutional acts remains with governed authority classes and human or constitutionally attributed decision recording — not with Brain Runtime.
+
+#### 20.22.5 PD-STD-014-020 resolution — Decision-stage interaction boundary (DSIB)
+
+**Planning decision:** `PD-STD-014-020` — **Resolved** (Sprint V06-D24.1).
+
+**Model designation:** DSIB — Decision-Stage Interaction Boundary.
+
+| Decision stage | Permitted Brain role | Excluded Brain authority |
+|----------------|---------------------|--------------------------|
+| **Pre-Review** (Review-Entry Ready RVA; entry eligibility context) | Consume entry eligibility and traceability facts; advisory routing suggestions toward governed **Review** entry | **Review** activity; entry eligibility determination; Review-Entry Ready creation (STD-013) |
+| **Active Review** | Consume **Review evidence** as it becomes available; recommendations and inconsistency signals to reviewers; reevaluation suggestions **within** the active Review instance only as advisory input | **Review Determination** recording; dimension scoring as constitutional fact; Review completion |
+| **Completed Review** (Determination recorded) | Consume completed Pass, Conditional, or Fail as immutable fact; advisory recommendations for downstream routing (Approval consideration, G7 disposition) | Reopen, revise, or substitute Determination; convert Conditional to Pass |
+| **Approval consideration** | Consume Pass Determination and Review evidence; advisory recommendations to MAGAC participants | **Approval** act; withholding act; **GPRA** grant; MAGAC authority |
+| **GPRA grant** (G6 explicit grant act) | Consume grant record after completed governed act as fact | **GPRA** creation; obligation binding; grant attribution |
+| **Retention** (post-grant default) | Consume forward-active posture as fact; monitor inconsistency signals | **Retention** assignment — arises from G6 grant, not Brain |
+| **Invalidated** | Consume invalidation act and posture history as fact; request invalidation **review** only | **Invalidated** posture; invalidation authority acts (G8) |
+| **Superseded** | Consume supersession act and PSIM lineage as fact; request supersession **review** only | **Superseded** posture; SSAC supersession acts (G9) |
+| **Downstream disposition** (Conditional, Fail, withheld Approval) | Consume EGDF, DSRA, TRPM records; advisory recommendations to DDAC participants | DDAC disposition acts; DSRA authorization; deficiency record creation |
+| **Handoff preparation** (eligibility context only) | Consume GPRA validity posture and lineage for advisory export readiness signals | Handoff authority; Handoff act; consumer intake (G11; STD-015) |
+
+#### 20.22.6 PD-STD-014-021 resolution — Brain recommendation persistence (BRPAM)
+
+**Planning decision:** `PD-STD-014-021` — **Resolved** (Sprint V06-D24.1).
+
+**Model designation:** BRPAM — Brain Recommendation Persistence and Attribution Model.
+
+| Persistence element | Planning requirement | Implementation boundary |
+|--------------------|---------------------|-------------------------|
+| **Recorded** | Material Brain outputs that inform or are presented during Domain 3 constitutional workflows should be recorded as operational fact | Storage schema, media, and retention duration — **implementation deferred** |
+| **Attributable** | Each recorded Brain output identifies Brain Runtime (or Writing Engine where applicable) as source — not a human reviewer, approver, or authority class | Attribution mechanics — **implementation deferred** |
+| **Versioned** | Brain outputs reference applicable Brain Runtime version or model generation where material to reproducibility | Versioning mechanics — **implementation deferred** |
+| **Time stamped** | Brain outputs carry event time distinct from constitutional act time | Timestamp mechanics — **implementation deferred** |
+| **Linked to source evidence** | Brain outputs reference consumed constitutional inputs (Review evidence identifiers, Determination reference, GPRA identity, posture state) where material | Linkage schema — **implementation deferred** |
+| **Preserved historically** | Brain outputs remain available as historical operational fact alongside preserved constitutional records (PRR-P9) | Archive mechanics — **implementation deferred** |
+| **Marked nonbinding** | Brain outputs are distinguishably marked as advisory or nonbinding relative to constitutional acts | UI and record labeling — **implementation deferred** |
+| **Distinguishable from constitutional acts** | No Brain output record may present as, or be stored interchangeably with, **Review Determination**, **Approval**, **GPRA** grant, posture transition, DDAC disposition, DSRA, invalidation act, or supersession act | Record-type separation — **implementation deferred** |
+
+**BRPAM planning rule:** Persistence obligations are constitutional at the planning layer; implementation storage schemas are explicitly out of scope per G1 `R04` and architecture implementation deferral.
+
+#### 20.22.7 PD-STD-014-022 resolution — Brain disagreement and override model (BDOM)
+
+**Planning decision:** `PD-STD-014-022` — **Resolved** (Sprint V06-D24.1).
+
+**Model designation:** BDOM — Brain Disagreement and Override Model.
+
+| Conflict source | Controlling authority | Brain override permitted | Disagreement recording |
+|----------------|----------------------|--------------------------|---------------------|
+| **Brain output vs Review evidence** | **Review evidence** and reviewer judgment under G3; Brain remains advisory | **No** | When reviewer proceeds contrary to Brain recommendation, the completed **Review Determination** and evidence record control; Brain disagreement preserved in BRPAM history |
+| **Brain output vs Review Determination** | **Review Determination** as completed constitutional fact (G5 `R35`) | **No** | Brain signals do not revise Determination; subsequent **Review** requires separate governed instance |
+| **Brain output vs Approval** | **Approval** act and MAGAC attribution (G6) | **No** | Withholding or grant on human constitutional grounds controls; Brain recommendation excluded as ground (`R40`) |
+| **Brain output vs GPRA posture** | Current **Retention**, **Invalidated**, or **Superseded** posture per G8–G9 | **No** | Posture transitions require G8 or G9 governed acts only |
+| **Brain output vs governing law** | Frozen governance and Compliance Boundaries (GOV-004 §14 precedence 1) | **No** | Brain must not recommend or signal treatment outside Compliance Boundary |
+| **Brain output vs human decision** | Human governed actor within authorized scope | **No** — human decision controls for constitutional acts | BRPAM preserves Brain output; constitutional act record preserves human attribution |
+| **Brain output vs another Brain output** | Later contextual Brain ranking within Preference Surface only (GOV-004 §14.2) | Contextual ranking only — neither output creates policy | Both outputs preserved; neither overwrites constitutional records |
+
+**BDOM planning rule:** Brain may **not** override frozen governance, completed constitutional acts, or human decisions within governed authority. Disagreement is preserved by retaining both Brain operational history (BRPAM) and constitutional records without merge or overwrite.
+
+#### 20.22.8 PD-STD-014-023 resolution — Brain reevaluation model (BRRM)
+
+**Planning decision:** `PD-STD-014-023` — **Resolved** (Sprint V06-D24.1).
+
+**Model designation:** BRRM — Brain Reevaluation Request Model.
+
+| Request type | Brain may request or recommend | Brain may authorize | Governed actor that decides whether act begins |
+|--------------|-------------------------------|--------------------|---------------------------------------------|
+| **New Review** | **Yes** — advisory reevaluation request when pre-Review facts appear stale or inconsistent | **No** | Reviewer or constitutionally authorized Review initiation path under G2–G5 |
+| **Re-Review** (subsequent governed Review instance) | **Yes** — per `PD-STD-014-011` baseline when new evaluative outcome may be required | **No** | Reviewer or authorized Review path; new Determination recorded only under G5 |
+| **Downstream correction** | **Yes** — suggest DDAC reconsider EGDF, return posture, or resubmission routing | **No** | DDAC disposition authority class under G7 |
+| **Rework authorization review** | **Yes** — suggest DSRA reconsideration context only | **No** | DSRA authority under G7 `PD-STD-014-009` |
+| **Invalidation review** | **Yes** — suggest governing-law review when IT-family conditions may apply | **No** | G8 invalidation authority class only — Brain does **not** establish **Invalidated** posture |
+| **Supersession review** | **Yes** — suggest succession review when ST-family conditions may apply | **No** | G9 SSAC path only — Brain does **not** establish **Superseded** posture |
+| **Approval reconsideration** | **Yes** — suggest MAGAC revisit during consideration window | **No** | MAGAC **Approval** authority; Determination remains preserved (`R35`) |
+| **Handoff eligibility review** | **Yes** — advisory signal only in Handoff preparation context | **No** | G11 Handoff authority (STD-015) — not defined here |
+
+**Request versus authorization:** A Brain **reevaluation request** is a nonbinding operational artifact. It may alert a responsible actor. It does **not** open, schedule, or complete any constitutional act. Authorization always remains with the governing authority class for that act.
+
+#### 20.22.9 Historical preservation and constitutional immutability
+
+| Preservation subject | Planning rule |
+|---------------------|---------------|
+| **Historical Review records** | Immutable per G5 `R35` and G7 `R51`; Brain outputs do **not** rewrite Review or Determination history |
+| **Historical Brain outputs** | Preserved as operational fact per BRPAM; later Brain outputs add new records without overwriting earlier Brain or constitutional records |
+| **Historical Approval and GPRA records** | Preserved per PRR-P9; Brain does **not** assert historical invalidity of granted Approval |
+| **Posture history** | **Retention**, **Invalidated**, and **Superseded** transitions preserved per G8 `R59` and G9 `R70`; Brain consumes posture history read-only |
+| **Predecessor and successor lineage** | PSIM lineage preserved per G9; Brain may reference lineage without altering it |
+| **Non-overwrite rule** | A later Brain output must **not** rewrite an earlier constitutional record, posture record, or attributed human act |
+
+#### 20.22.10 G10 boundary verification
+
+| Boundary | G10 relationship |
+|----------|-----------------|
+| **G5 Review Determination** | G10 does **not** record, revise, or substitute Determination outcomes |
+| **G6 Approval and GPRA** | G10 reinforces GOV-004 and G6 prohibitions; G10 does **not** redefine MAGAC or GPRA grant |
+| **G7 disposition and rework** | G10 does **not** perform DDAC, DSRA, EGDF, or TRPM acts |
+| **G8 invalidation** | G10 does **not** establish **Invalidated** posture or invalidation authority |
+| **G9 supersession** | G10 does **not** establish **Superseded** posture or SSAC authority (G9 `R68`) |
+| **G11 Handoff execution** | G10 does **not** define Handoff procedures, consumer intake, or validity export mechanics |
+| **STD-013 Domain 2** | G10 consumes `R51` boundary without redefining realization Brain authority |
+| **Manufacturing execution** | G10 does **not** authorize manufacture, fulfillment, recall, or operational execution |
+| **Lifecycle termination** | G10 does **not** terminate programs, obligations, or Review authority |
+| **GOV-004** | G10 cites and reinforces GOV-004; G10 does **not** expand Brain authority beyond frozen governance |
+
+#### 20.22.11 G10 drafting preparation table
+
+| Planning theme | Source authority | Proposed normative ownership | Dependencies | Unresolved question | Readiness status |
+|----------------|------------------|------------------------------|--------------|---------------------|------------------|
+| **Brain role definition (BRDM)** | GOV-004 §6–§8; PRR-P8; `PD-STD-014-017` | G10 — role and prohibition requirements | G6 committed | None | **Ready** |
+| **Brain authority prohibition** | G6 `R37`–`R40`; G8 `R57`; G9 `R68`; STD-013 `R51` | G10 — cross-cutting prohibition reinforcement | G6; GOV-004 | None | **Ready** |
+| **Input consumption (BIIM)** | `PD-STD-014-018`; G3 evidence; G5–G9 records | G10 — read-only input boundary requirements | G3–G9 drafted | None | **Ready** |
+| **Output classification (BOCM)** | `PD-STD-014-019`; GOV-004 §8 | G10 — output class and prohibition requirements | BRDM | None | **Ready** |
+| **Governed actor mediation** | Section 20.22.4; G6 MAGAC; G7 DDAC; G8–G9 authority | G10 — mediation routing requirements | G6–G9 | None | **Ready** |
+| **Decision-stage boundaries (DSIB)** | `PD-STD-014-020`; Volume 06 stage matrix | G10 — per-stage permission requirements | G5–G9 | None | **Ready** |
+| **Persistence and attribution (BRPAM)** | `PD-STD-014-021`; PRR-P9 | G10 — persistence and distinguishability requirements | BOCM | Implementation storage schema (nonblocking) | **Ready** |
+| **Disagreement and override (BDOM)** | `PD-STD-014-022`; GOV-004 §14 | G10 — precedence and non-override requirements | G5 `R35`; G6 `R35` | None | **Ready** |
+| **Reevaluation requests (BRRM)** | `PD-STD-014-023`; G7 TRPM; `PD-STD-014-011` | G10 — request versus authorization requirements | G7; G5 | None | **Ready** |
+| **Historical preservation** | PRR-P9; G8 `R55`, `R59`; G9 `R67`, `R70` | G10 — non-overwrite requirements | BRPAM | None | **Ready** |
+| **G10 completion boundary** | BRDM through BRRM coverage | G10 — completion and exclusion requirement | Full G10 theme coverage | None — count range nonbinding | **Ready** |
+
+#### 20.22.12 G10 planning-readiness determination
+
+**G10 planning-readiness determination:** **A — Resolved at planning layer.** `PD-STD-014-017` (BRDM), `PD-STD-014-018` (BIIM), `PD-STD-014-019` (BOCM), `PD-STD-014-020` (DSIB), `PD-STD-014-021` (BRPAM), `PD-STD-014-022` (BDOM), and `PD-STD-014-023` (BRRM) are resolved. G10 drafting preparation is **complete** (Sections 20.13 and 20.22.11). Next gate: **independent G10 planning acceptance review**. G10 normative requirement drafting remains **unauthorized** until separately authorized after planning acceptance.
+
+**Nonblocking deferrals preserved:** Brain algorithm specification; runtime ranking mechanics; BVS Preference Surface detail (`FI-DSN-STD-007`); implementation storage schemas and UI presentation (BRPAM); cross-library Brain Architecture binding (`OQ-DSN-004`); Handoff consumer procedures (G11).
+
 ---
 
 ## 21. Normative Requirements — Partial Draft
@@ -2357,6 +2608,7 @@ Post-approval **Superseded** posture is governed by **RIVP** peer-posture vocabu
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D24.1 — G10 planning architecture **established** (Section 20.22): `PD-STD-014-017` BRDM; `PD-STD-014-018` BIIM; `PD-STD-014-019` BOCM; `PD-STD-014-020` DSIB; `PD-STD-014-021` BRPAM; `PD-STD-014-022` BDOM; `PD-STD-014-023` BRRM; G9 requirements **complete** (`FI-DSN-STD-014-R64`–`R72`); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G10 normative unauthorized; G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D23.1 — G9 normative architecture **complete** (Section 21.9.6): `FI-DSN-STD-014-R72` (G9 completion and exclusion boundary); G9 requirements `FI-DSN-STD-014-R64`–`R72` continuous; G9 Tranches 1–2 **accepted** (V06-D21.3, V06-D22.2); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G10–G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D22.1 — G9 Tranche 2 normative architecture continued (Section 21.9.5): `FI-DSN-STD-014-R68`–`R71` (SSAC supersession authority classes, PSIM identity and lineage, PIIM posture interaction, forward authority transition); G9 Tranche 1 **accepted** (`FI-DSN-STD-014-R64`–`R67`; V06-D21.3); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G9 partial; G10–G11 not drafted; Section 20.11 posture synchronized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D21.2 — G9 Tranche 1 normative architecture begun (Section 21.9): `FI-DSN-STD-014-R64`–`R67` (Superseded posture definition, separate supersession act, PVTA ST families, historical preservation); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G9 partial; G10–G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
