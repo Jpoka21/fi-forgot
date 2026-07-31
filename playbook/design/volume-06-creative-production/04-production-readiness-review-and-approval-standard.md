@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`) |
 | **Queue posture** | EO 20 — **In progress** per Sprint V06-D5.4 requirement plan adoption (`FI-DSN-QUE-001`) |
-| **Sprint** | V06-D25.6 |
+| **Sprint** | V06-D26.3 |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed as Design-Time Feasibility Compliance Boundary inputs only. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **committed** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** and **adopted** (Sprints V06-D16.1 and V06-D16.1A; commit `cebf454`; Section 20.19). G7 normative requirements **drafted** — `FI-DSN-STD-014-R44`–`R51` (Sprint V06-D17.1; Section 21.7). G8 pre-planning gates **`PD-STD-014-004` and `PD-STD-014-007` resolved**; **`OQ-STD-014-003` closed** (Sprint V06-D18.1; Section 20.20). G8 normative requirements **drafted and independently accepted** — `FI-DSN-STD-014-R52`–`R63` (Sprints V06-D19.1, V06-D19.3, V06-D19.5; independent acceptance V06-D19.6; Section 21.8). G9 planning architecture **established** (Sprint V06-D20.1; Section 20.21) and **independently accepted** (Sprint V06-D20.2). G9 Tranche 1 normative requirements **accepted** — `FI-DSN-STD-014-R64`–`R67` (Sprint V06-D21.2; acceptance V06-D21.3). G9 Tranche 2 normative requirements **accepted** — `FI-DSN-STD-014-R68`–`R71` (Sprint V06-D22.1; acceptance V06-D22.2). G9 normative requirements **complete** — `FI-DSN-STD-014-R64`–`R72` (Sprint V06-D23.1; Section 21.9). G9 normative requirement drafting **authorized** (Sprint V06-D21.1). G10 planning architecture **established** (Sprint V06-D24.1; Section 20.22) and **independently accepted** (Sprint V06-D24.2). G10 normative requirement drafting **authorized** (Sprint V06-D24.3). G10 Tranche 1 normative requirements **drafted** — `FI-DSN-STD-014-R73`–`R76` (Sprint V06-D25.1; Section 21.10). G10 Tranche 2 normative requirements **drafted** — `FI-DSN-STD-014-R77`–`R81` (Sprint V06-D25.3; Section 21.10.5; commit V06-D25.4). G10 Tranche 1 **accepted** (V06-D25.2). G10 Tranche 2 **accepted** (V06-D25.5). G10 completion boundary **drafted** — `FI-DSN-STD-014-R82` (Sprint V06-D25.6; Section 21.10.6). G10 normative requirements **complete** — `FI-DSN-STD-014-R73`–`R82` (Section 21.10). G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft. Independent architecture review **completed** (Sprint V06-D4.4; conditional findings corrected in Sprint V06-D4.4A). Architecture accepted for committed draft posture (Sprint V06-D4.5). Requirement planning **accepted** (Sprint V06-D5.1; Section 20; independent planning review **passed** after Sprint V06-D5.3 corrective). Requirement plan adopted for committed planning posture (Sprint V06-D5.4). `PD-STD-014-006` **resolved** (Sprint V06-D6.1; Section 20.12). Tranche 1 partial normative draft **committed** — G1 requirements `FI-DSN-STD-014-R01`–`R07` (Sprint V06-D7.1); G2 requirements `FI-DSN-STD-014-R08`–`R13` (Sprint V06-D8.1); G3 requirements `FI-DSN-STD-014-R14`–`R20` (Sprint V06-D9.1); G4 requirements `FI-DSN-STD-014-R21`–`R26` (Sprint V06-D10.1). `PD-STD-014-001` **resolved** (Sprint V06-D11.1; Section 20.15). G5 normative requirements **committed** — `FI-DSN-STD-014-R27`–`R33` (Sprint V06-D12.1; Section 21.5). `PD-STD-014-002`, `PD-STD-014-003`, and baseline `PD-STD-014-005` **resolved** (Sprint V06-D13.1; Sections 20.16–20.18). MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (Sprint V06-D13.1A; Sections 20.16.3 and 20.18.4); `OQ-STD-014-004` **closed**; `OQ-STD-014-007` opened for G9. G6 normative requirements **committed** — `FI-DSN-STD-014-R34`–`R43` (Sprint V06-D14.1; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; Section 21.6). G7 planning decisions **`PD-STD-014-008` through `PD-STD-014-012` resolved** and **adopted** (Sprints V06-D16.1 and V06-D16.1A; commit `cebf454`; Section 20.19). G7 normative requirements **drafted** — `FI-DSN-STD-014-R44`–`R51` (Sprint V06-D17.1; Section 21.7). G8 pre-planning gates **`PD-STD-014-004` and `PD-STD-014-007` resolved**; **`OQ-STD-014-003` closed** (Sprint V06-D18.1; Section 20.20). G8 normative requirements **drafted and independently accepted** — `FI-DSN-STD-014-R52`–`R63` (Sprints V06-D19.1, V06-D19.3, V06-D19.5; independent acceptance V06-D19.6; Section 21.8). G9 planning architecture **established** (Sprint V06-D20.1; Section 20.21) and **independently accepted** (Sprint V06-D20.2). G9 Tranche 1 normative requirements **accepted** — `FI-DSN-STD-014-R64`–`R67` (Sprint V06-D21.2; acceptance V06-D21.3). G9 Tranche 2 normative requirements **accepted** — `FI-DSN-STD-014-R68`–`R71` (Sprint V06-D22.1; acceptance V06-D22.2). G9 normative requirements **complete** — `FI-DSN-STD-014-R64`–`R72` (Sprint V06-D23.1; Section 21.9). G9 normative requirement drafting **authorized** (Sprint V06-D21.1). G10 planning architecture **established** (Sprint V06-D24.1; Section 20.22) and **independently accepted** (Sprint V06-D24.2). G10 normative requirement drafting **authorized** (Sprint V06-D24.3). G10 Tranche 1 normative requirements **drafted** — `FI-DSN-STD-014-R73`–`R76` (Sprint V06-D25.1; Section 21.10). G10 Tranche 2 normative requirements **drafted** — `FI-DSN-STD-014-R77`–`R81` (Sprint V06-D25.3; Section 21.10.5; commit V06-D25.4). G10 Tranche 1 **accepted** (V06-D25.2). G10 Tranche 2 **accepted** (V06-D25.5). G10 completion boundary **drafted** — `FI-DSN-STD-014-R82` (Sprint V06-D25.6; Section 21.10.6). G10 normative requirements **complete** — `FI-DSN-STD-014-R73`–`R82` (Section 21.10; commit V06-D25.8). G11 planning architecture **established** (Sprint V06-D26.1; Section 20.23) and **independently accepted** (Sprint V06-D26.2). G11 normative requirement drafting remains **unauthorized** and **undrafted**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -549,15 +549,15 @@ Architecture Validation is governance-level validation before normative requirem
 | Post-approval states | Invalidated and Superseded aligned with Volume 06 §5.9 |
 | Rework boundary | Review authorization vs Domain 2 consumption split documented |
 | Implementation independence | No APIs, schemas, UI, workflows, vendors, or models prescribed |
-| Normative requirements | **Partial** — G1 committed (`FI-DSN-STD-014-R01`–`R07`); G2 committed (`FI-DSN-STD-014-R08`–`R13`); G3 committed (`FI-DSN-STD-014-R14`–`R20`); G4 committed (`FI-DSN-STD-014-R21`–`R26`); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7 drafted (`FI-DSN-STD-014-R44`–`R51`; Sprint V06-D17.1); G8 drafted and **accepted** (`FI-DSN-STD-014-R52`–`R63`; acceptance V06-D19.6); G9 **complete** (`FI-DSN-STD-014-R64`–`R72`; Tranches 1–2 accepted V06-D21.3/V06-D22.2; completion V06-D23.1); G10 **complete** (`FI-DSN-STD-014-R73`–`R82`; Tranches 1–2 accepted V06-D25.2/V06-D25.5; completion V06-D25.6; Section 21.10); G10 planning **accepted** (V06-D24.2; Section 20.22); G11 normative not drafted |
+| Normative requirements | **Partial** — G1 committed (`FI-DSN-STD-014-R01`–`R07`); G2 committed (`FI-DSN-STD-014-R08`–`R13`); G3 committed (`FI-DSN-STD-014-R14`–`R20`); G4 committed (`FI-DSN-STD-014-R21`–`R26`); G5 committed (`FI-DSN-STD-014-R27`–`R33`); G6 committed (`FI-DSN-STD-014-R34`–`R43`; commit `c8eeb2913ddf0170703518757ba36b3c72ea30ac`); G7 drafted (`FI-DSN-STD-014-R44`–`R51`; Sprint V06-D17.1); G8 drafted and **accepted** (`FI-DSN-STD-014-R52`–`R63`; acceptance V06-D19.6); G9 **complete** (`FI-DSN-STD-014-R64`–`R72`; Tranches 1–2 accepted V06-D21.3/V06-D22.2; completion V06-D23.1); G10 **complete** (`FI-DSN-STD-014-R73`–`R82`; commit V06-D25.8; Section 21.10); G10 planning **accepted** (V06-D24.2; Section 20.22); G11 planning **accepted** (V06-D26.2; Section 20.23); G11 normative not drafted |
 | Independent review | **Passed** — Sprint V06-D4.4; minor corrective findings resolved in Sprint V06-D4.4A; architecture committed in Sprint V06-D4.5 |
-| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 committed (V06-D14.1); G7 planning **adopted** (V06-D16.1, V06-D16.1A; commit `cebf454`); G7 normative requirements **drafted** (V06-D17.1); **`PD-STD-014-004` and `PD-STD-014-007` resolved** (V06-D18.1); **`OQ-STD-014-003` closed** (V06-D18.1); **`OQ-STD-014-005` closed** (V06-D19.3); G8 normative requirements **drafted and accepted** (V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6); G9 planning **accepted** (V06-D20.2); **`OQ-STD-014-007` closed** (V06-D20.1); G9 normative drafting **authorized** (V06-D21.1); G10 planning **accepted** (V06-D24.2); G10 normative drafting **authorized** (V06-D24.3); G11 normative drafting **unauthorized** |
+| Requirement planning | **Accepted** — Sprint V06-D5.1; Section 20; independent planning review **passed** (V06-D5.2; V06-D5.3 corrective); plan adopted (V06-D5.4); `PD-STD-014-006` **resolved** (V06-D6.1); Tranche 1 committed (V06-D10.1); G5 committed (V06-D12.1); `PD-STD-014-001` **resolved** (V06-D11.1); `PD-STD-014-002`, `PD-STD-014-003`, baseline `PD-STD-014-005` **resolved** (V06-D13.1); MAGAC establishment versus activation and Approval–GPRA baseline **clarified** (V06-D13.1A); G6 committed (V06-D14.1); G7 planning **adopted** (V06-D16.1, V06-D16.1A; commit `cebf454`); G7 normative requirements **drafted** (V06-D17.1); **`PD-STD-014-004` and `PD-STD-014-007` resolved** (V06-D18.1); **`OQ-STD-014-003` closed** (V06-D18.1); **`OQ-STD-014-005` closed** (V06-D19.3); G8 normative requirements **drafted and accepted** (V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6); G9 planning **accepted** (V06-D20.2); **`OQ-STD-014-007` closed** (V06-D20.1); G9 normative drafting **authorized** (V06-D21.1); G10 planning **accepted** (V06-D24.2); G10 normative drafting **authorized** (V06-D24.3); G11 planning **accepted** (V06-D26.2; Section 20.23); G11 normative drafting **unauthorized** |
 
 ---
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D25.6 — G10 normative requirements **complete** (`FI-DSN-STD-014-R73`–`R82`; Section 21.10). G10 completion boundary **drafted** (`FI-DSN-STD-014-R82`; Section 21.10.6). G10 Tranche 2 normative requirements **drafted** (`FI-DSN-STD-014-R77`–`R81`; Section 21.10.5; **accepted** V06-D25.5). G10 Tranche 1 normative requirements **drafted** (`FI-DSN-STD-014-R73`–`R76`; Section 21.10.2; **accepted** V06-D25.2). G10 normative requirement drafting **authorized** (Sprint V06-D24.3). G10 planning architecture **accepted** (Sprint V06-D24.2; Section 20.22; `PD-STD-014-017` through `PD-STD-014-023`). G9 normative requirements **complete** (`FI-DSN-STD-014-R64`–`R72`; Section 21.9). G9 Tranche 1 **accepted** (`FI-DSN-STD-014-R64`–`R67`; V06-D21.3). G9 Tranche 2 **accepted** (`FI-DSN-STD-014-R68`–`R71`; V06-D22.2). G8 normative requirements **drafted and independently accepted** (`FI-DSN-STD-014-R52`–`R63`; Section 21.8; Sprint V06-D19.6). G1 through G8 drafted (`FI-DSN-STD-014-R01`–`R63` continuous). G11 normative requirement drafting remains **unauthorized**.
+**Planning posture:** Sprint V06-D26.3 — G11 planning architecture **accepted** (Sprint V06-D26.2; Section 20.23; `PD-STD-014-024` through `PD-STD-014-035`). G11 planning architecture **established** (Sprint V06-D26.1). G10 normative requirements **complete and committed** (`FI-DSN-STD-014-R73`–`R82`; Section 21.10; commit V06-D25.8). G10 planning architecture **accepted** (Sprint V06-D24.2; Section 20.22). G9 normative requirements **complete** (`FI-DSN-STD-014-R64`–`R72`; Section 21.9). G8 normative requirements **drafted and independently accepted** (`FI-DSN-STD-014-R52`–`R63`; Section 21.8; Sprint V06-D19.6). G1 through G7 drafted (`FI-DSN-STD-014-R01`–`R51` continuous). G11 normative requirement drafting remains **unauthorized**.
 
 ### 20.1 Final requirement group plan
 
@@ -729,17 +729,18 @@ The accepted architecture groups G1–G11 are retained without merge, split, ren
 
 | Field | Planning content |
 |-------|------------------|
-| **Constitutional subject** | Constitutional outputs for STD-015 consumption without Handoff definition |
-| **Positive authority** | Output contract: GPRA identity, approval evidence, validity posture, obligation attribution, lineage references, authoritative GPRA |
-| **Explicit exclusions** | Handoff Posture; consumer classes; intake procedures; engineering handoff APIs |
-| **Inherited terms** | Handoff eligibility — necessary upstream condition only |
-| **Upstream dependencies** | G6–G9 |
-| **Downstream implications** | Enables future STD-015 architecture and drafting |
-| **Open questions** | None owned — `OQ-V06-007` remains STD-015 domain |
-| **Likely requirement themes** | Consumption outputs; validity posture export; traceability references; no Handoff absorption |
-| **Collision risks** | Defining Handoff procedures; Volume 05 intake rules |
-| **Drafting prerequisites** | G6–G9 posture vocabulary stable |
-| **Review gate** | STD-015 non-absorption review before Tranche 3 commit |
+| **Constitutional subject** | Governed Handoff preparation boundary and constitutional outputs for `FI-DSN-STD-015` consumption without Handoff execution definition |
+| **Positive authority** | Output contract planning: GPRA identity; approval evidence; validity posture export; obligation attribution; lineage references; authoritative GPRA pointer; eligibility facts; evidence package identity; consumer context keys; preservation requirements |
+| **Explicit exclusions** | Handoff Posture declaration; Handoff authorization acts; consumer intake procedures; engineering handoff APIs; manufacturing execution; production execution |
+| **Inherited terms** | Handoff eligibility — necessary upstream condition only; Governed Handoff — principal subject of `FI-DSN-STD-015` |
+| **Upstream dependencies** | G6–G10; Section 13; Section 14; PRR-P4 |
+| **Downstream implications** | Enables future `FI-DSN-STD-015` architecture and drafting; does not authorize STD-015 |
+| **Open questions** | `OQ-STD-014-008` (Handoff authority classes — STD-015 principal); `OQ-STD-014-009` (consumer class catalog); `OQ-STD-014-010` (recall versus posture transition) — Section 20.23.16 |
+| **Likely requirement themes** | HCPM purpose; HEIM eligibility; HEPM evidence package; HVEM validity export; HCBM consumer boundaries; HPAM preservation; G11 completion boundary |
+| **Collision risks** | Defining Handoff procedures; absorbing STD-015 authority; Volume 05 intake rules |
+| **Drafting prerequisites** | G10 **complete** (`FI-DSN-STD-014-R82`; V06-D25.8); G11 planning architecture **accepted** (V06-D26.2; Section 20.23) |
+| **Review gate** | STD-015 non-absorption review; G10 boundary preservation review before G11 normative drafting authorization |
+| **Preparation status** | **Complete** (Sprint V06-D26.1; Section 20.23); G11 planning **accepted** (V06-D26.2); G11 normative drafting **unauthorized** |
 
 ### 20.2 PRR-P mapping
 
@@ -770,6 +771,9 @@ PRR-P1–P10 are constitutional distinctions for planning. They are **not** conv
 | `OQ-STD-014-007` | G9 | **Closed** (Sprint V06-D20.1) | G9 normative drafting (Tranche 1) | Volume 06 §5.11; architecture §9.4; `PD-STD-014-013`–`PD-STD-014-016` (Section 20.21) |
 | `OQ-STD-014-005` | G8 | **Closed** (Sprint V06-D19.3) | G8 acceptance review | GOV-003 propagation; architecture §12.3; `FI-DSN-STD-014-R58`; planning decision `PD-STD-014-007` (Section 20.20.3) |
 | `OQ-STD-014-006` | G3 | **Resolved** (Sprint V06-D6.1) | G3 freeze review | Volume 06 P10; architecture §6.2; planning decision `PD-STD-014-006` (Section 20.12) |
+| `OQ-STD-014-008` | G11; STD-015 | **Open** | G11 normative drafting authorization or STD-015 architecture | Section 14 Handoff authorization owner; HAAM (Section 20.23.2) | What constitutionally authorized authority class may perform Governed Handoff authorization acts? |
+| `OQ-STD-014-009` | G11; STD-015 | **Open** | G11 normative drafting or STD-015 architecture | `OQ-STD-014-007` scope closure; HCBM (Section 20.23.6) | How are downstream consumer classes constitutionally cataloged and bound to Handoff context? |
+| `OQ-STD-014-010` | G11; STD-015 | **Open** | G11 normative drafting or STD-015 architecture | HRWM (Section 20.23.8); G8 `R60`; G9 `R71` | When GPRA posture becomes **Invalidated** or **Superseded**, is forward Handoff recall automatic, separately authorized, or notification-only? |
 
 **`OQ-STD-014-003` resolution (closed Sprint V06-D18.1):** Planning decision `PD-STD-014-004` selected the **RIVP** peer-posture model (Section 20.20.1). Layer B recognizes exactly **Invalidated** and **Superseded** as constitutional peer post-approval GPRA postures. **Revocation** is not a third posture; it names the operational class of post-approval forward-authority loss when umbrella language is required, and every constitutional act resolves to **Invalidated** or **Superseded**. STD-013 `R06` deferral is satisfied.
 
@@ -800,6 +804,20 @@ PRR-P1–P10 are constitutional distinctions for planning. They are **not** conv
 | `PD-STD-014-021` | How must Brain outputs be persisted and distinguished from constitutional acts? | PRR-P9; GOV-004 §11 operational outputs | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BRPAM — Brain Recommendation Persistence and Attribution Model — Section 20.22.6 |
 | `PD-STD-014-022` | What controls when Brain output conflicts with governance or human decisions? | GOV-004 §14 Authority Escalation; G5 `R35`; G6 `R35` | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BDOM — Brain Disagreement and Override Model — Section 20.22.7 |
 | `PD-STD-014-023` | May Brain request reevaluation, and how is that distinguished from authorization? | G7 TRPM; G5 subsequent Review; G8–G9 invalidation and supersession boundaries | G10 | Pre-G10 planning | **Resolved** (Sprint V06-D24.1) | BRRM — Brain Reevaluation Request Model — Section 20.22.8 |
+| `PD-STD-014-024` | What is the constitutional purpose of Governed Handoff preparation at the Domain 3 boundary? | PRR-P4; Section 13; Section 14; Volume 06 CP-03 split | G11 | Pre-G11 planning (mandatory before G11 normative drafting) | **Resolved** (Sprint V06-D26.1) | HCPM — Handoff Constitutional Purpose Model — Section 20.23.1 |
+| `PD-STD-014-025` | How does Handoff authority relate to MAGAC, DDAC, DSRA, G8, G9, and G10 at the planning layer? | Section 14; G6–G10 boundaries; `FI-DSN-STD-015` deferral | G11; STD-015 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HAAM — Handoff Authority Architecture Model — Section 20.23.2; Handoff act authority deferred `OQ-STD-014-008` |
+| `PD-STD-014-026` | What minimum constitutional conditions must exist before Handoff may be considered? | G5 `R35`; G6 `R41`–`R43`; G7 TRPM; G8–G9 posture; Section 13 | G11 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HEIM — Handoff Eligibility Interaction Model — Section 20.23.3 |
+| `PD-STD-014-027` | What governed evidence package must be available for Handoff consideration? | Section 13; G3 evidence; G6 Approval; G8–G9 lineage; G10 BRPAM | G11 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HEPM — Handoff Evidence Package Model — Section 20.23.4 |
+| `PD-STD-014-028` | How is constitutional validity represented to downstream consumers without rewriting history? | G8 `R60`; G9 `R71`; PRR-P9; Section 13 outputs | G11 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HVEM — Handoff Validity Export Model — Section 20.23.5 |
+| `PD-STD-014-029` | What downstream consumer categories exist at the constitutional boundary? | Volume 06 deferral matrix; `OQ-STD-014-007` scope closure; Volume 05 separation | G11; STD-015 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HCBM — Handoff Consumer Boundary Model — Section 20.23.6; catalog detail deferred `OQ-STD-014-009` |
+| `PD-STD-014-030` | What Handoff-related states or events are required at the G11 versus STD-015 boundary? | HEIM; HRWM; architecture lifecycle split | G11; STD-015 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HSLM — Handoff State and Lifecycle Model — Section 20.23.7 |
+| `PD-STD-014-031` | How do invalidation, supersession, or withdrawal affect completed Handoff at the planning layer? | G8 `R60`; G9 `R71`; RIVP; Volume 06 §5.9 | G11; STD-015 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HRWM — Handoff Recall and Withdrawal Model — Section 20.23.8; recall mechanics deferred `OQ-STD-014-010` |
+| `PD-STD-014-032` | How may Brain interact with Handoff eligibility without Handoff authority? | G10 `R73`–`R82`; DSIB Handoff preparation row; BRRM | G11 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HBIM — Handoff Brain Interaction Model — Section 20.23.9 |
+| `PD-STD-014-033` | What manufacturing and production execution authority must G11 exclude? | PRR-P5; G4; Section 14; Volume 01 deferral | G11 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HMEX — Handoff Manufacturing Exclusion Model — Section 20.23.10 |
+| `PD-STD-014-034` | What Handoff-related records must be preserved as additive historical fact? | PRR-P9; G10 `R81`; G8 `R55`; G9 `R67` | G11 | Pre-G11 planning | **Resolved** (Sprint V06-D26.1) | HPAM — Handoff Preservation and Auditability Model — Section 20.23.11 |
+| `PD-STD-014-035` | What themes must G11 normatively cover and what remains outside G11? | Full G11 planning theme coverage; STD-015 boundary | G11 | Pre-G11 planning completion | **Resolved and accepted** (V06-D26.1; acceptance V06-D26.2) | G11 planning completion and exclusion boundary — Section 20.23.14 |
+
+**G11 planning decision acceptance posture:** Planning decisions **`PD-STD-014-024` through `PD-STD-014-035`** were resolved at Sprint V06-D26.1 and **independently accepted** at Sprint V06-D26.2. Acceptance confirms planning-layer architecture only; it does **not** authorize G11 normative drafting.
 
 ### 20.5 Drafting tranche plan
 
@@ -901,7 +919,7 @@ Counts are planning estimates only. They are not settled and do not assign requi
 
 ### 20.11 Normative drafting prohibition
 
-Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. G8 normative requirements **`FI-DSN-STD-014-R52`–`R63`** are **drafted and independently accepted** (Sprints V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6; Section 21.8). G9 planning architecture is **accepted** (Sprint V06-D20.2; Section 20.21). G9 normative requirement drafting is **authorized** (Sprint V06-D21.1). G9 Tranche 1 normative requirements **`FI-DSN-STD-014-R64`–`R67`** are **accepted** (V06-D21.3; Section 21.9.2). G9 Tranche 2 normative requirements **`FI-DSN-STD-014-R68`–`R71`** are **accepted** (V06-D22.2; Section 21.9.5). G9 normative requirements **`FI-DSN-STD-014-R64`–`R72`** are **complete** (Sprint V06-D23.1; Section 21.9). G10 planning architecture is **accepted** (Sprint V06-D24.2; Section 20.22). G10 normative requirement drafting is **authorized** (Sprint V06-D24.3). G10 Tranche 1 normative requirements **`FI-DSN-STD-014-R73`–`R76`** are **drafted** (Sprint V06-D25.1; Section 21.10.2; **accepted** V06-D25.2). G10 Tranche 2 normative requirements **`FI-DSN-STD-014-R77`–`R81`** are **drafted** (Sprint V06-D25.3; Section 21.10.5; **accepted** V06-D25.5). G10 normative requirements **`FI-DSN-STD-014-R73`–`R82`** are **complete** (Sprint V06-D25.6; Section 21.10). G11 normative requirement drafting remains **unauthorized**. G1 through G7 status preserved per prior sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
+Normative requirement drafting for `FI-DSN-STD-014` remains **partial**. G8 normative requirements **`FI-DSN-STD-014-R52`–`R63`** are **drafted and independently accepted** (Sprints V06-D19.1, V06-D19.3, V06-D19.5; acceptance V06-D19.6; Section 21.8). G9 planning architecture is **accepted** (Sprint V06-D20.2; Section 20.21). G9 normative requirement drafting is **authorized** (Sprint V06-D21.1). G9 Tranche 1 normative requirements **`FI-DSN-STD-014-R64`–`R67`** are **accepted** (V06-D21.3; Section 21.9.2). G9 Tranche 2 normative requirements **`FI-DSN-STD-014-R68`–`R71`** are **accepted** (V06-D22.2; Section 21.9.5). G9 normative requirements **`FI-DSN-STD-014-R64`–`R72`** are **complete** (Sprint V06-D23.1; Section 21.9). G10 planning architecture is **accepted** (Sprint V06-D24.2; Section 20.22). G10 normative requirement drafting is **authorized** (Sprint V06-D24.3). G10 Tranche 1 normative requirements **`FI-DSN-STD-014-R73`–`R76`** are **drafted** (Sprint V06-D25.1; Section 21.10.2; **accepted** V06-D25.2). G10 Tranche 2 normative requirements **`FI-DSN-STD-014-R77`–`R81`** are **drafted** (Sprint V06-D25.3; Section 21.10.5; **accepted** V06-D25.5). G10 normative requirements **`FI-DSN-STD-014-R73`–`R82`** are **complete and committed** (Sprint V06-D25.6; Section 21.10; commit V06-D25.8). G11 planning architecture is **established** (Sprint V06-D26.1; Section 20.23; `PD-STD-014-024` through `PD-STD-014-035`) and **independently accepted** (Sprint V06-D26.2). G11 normative requirement drafting remains **unauthorized**. G1 through G7 status preserved per prior sprints. Independent requirement planning review **passed** (V06-D5.2; V06-D5.3 corrective completed; V06-D5.4 adoption). Tranche 1 preparation review **passed** (V06-D6.2).
 
 ### 20.12 PD-STD-014-006 resolution — Review dimension model
 
@@ -1198,7 +1216,9 @@ Tranche 1 covers G1–G4 only. The following tables define drafting posture for 
 | **34** | G10 Tranche 1 acceptance review | G10 Tranche 1 drafted (`FI-DSN-STD-014-R73`–`R76`) | Governed G10 Tranche 1 acceptance review **passed** (V06-D25.2) |
 | **35** | G10 Tranche 2 normative drafting | G10 Tranche 1 drafted; Tranche 2 separately authorized | G10 Tranche 2 requirements `FI-DSN-STD-014-R77`–`R81` drafted (Sprint V06-D25.3; Section 21.10.5) |
 | **36** | G10 Tranche 2 acceptance review | G10 Tranche 2 drafted (`FI-DSN-STD-014-R77`–`R81`) | Governed G10 Tranche 2 acceptance review **passed** (V06-D25.5) |
-| **37** | G10 completion boundary drafting | G10 Tranches 1–2 drafted and accepted | G10 completion requirement `FI-DSN-STD-014-R82` drafted (Sprint V06-D25.6; Section 21.10.6) |
+| **37** | G10 completion boundary drafting | G10 Tranches 1–2 drafted and accepted | G10 completion requirement `FI-DSN-STD-014-R82` drafted (Sprint V06-D25.6; Section 21.10.6; **committed** V06-D25.8) |
+| **38** | G11 planning architecture | G10 normative requirements complete (V06-D25.8) | G11 planning architecture established (Sprint V06-D26.1; Section 20.23) |
+| **39** | G11 planning acceptance review | G11 planning architecture complete (V06-D26.1) | Governed G11 planning acceptance review **passed** (Sprint V06-D26.2) |
 
 G4 MAY draft in parallel with late G3 theming only after G3 mandatory core and extensibility rules are stable. G4 MUST NOT publish normative requirements that redefine Review activity or the mandatory core owned by G3.
 
@@ -2104,13 +2124,290 @@ Brain output must be consumed and acted upon only by the responsible governed ac
 
 **G10 planning-readiness determination:** **A — Resolved at planning layer.** `PD-STD-014-017` (BRDM), `PD-STD-014-018` (BIIM), `PD-STD-014-019` (BOCM), `PD-STD-014-020` (DSIB), `PD-STD-014-021` (BRPAM), `PD-STD-014-022` (BDOM), and `PD-STD-014-023` (BRRM) are resolved. G10 drafting preparation is **complete** (Sections 20.13 and 20.22.11). G10 planning architecture **accepted** (Sprint V06-D24.2). G10 normative requirement drafting **authorized** (Sprint V06-D24.3). G10 Tranche 1 normative requirements **`FI-DSN-STD-014-R73`–`R76`** are **drafted** (Sprint V06-D25.1; Section 21.10.2; **accepted** V06-D25.2). G10 Tranche 2 normative requirements **`FI-DSN-STD-014-R77`–`R81`** are **drafted** (Sprint V06-D25.3; Section 21.10.5; **accepted** V06-D25.5). G10 normative requirements **`FI-DSN-STD-014-R73`–`R82`** are **complete** (Sprint V06-D25.6; Section 21.10). G11 normative requirement drafting remains **unauthorized**.
 
-**Nonblocking deferrals preserved:** Brain algorithm specification; runtime ranking mechanics; BVS Preference Surface detail (`FI-DSN-STD-007`); implementation storage schemas and UI presentation (BRPAM); cross-library Brain Architecture binding (`OQ-DSN-004`); Handoff consumer procedures (G11).
+**Nonblocking deferrals preserved:** Brain algorithm specification; runtime ranking mechanics; BVS Preference Surface detail (`FI-DSN-STD-007`); implementation storage schemas and UI presentation (BRPAM); cross-library Brain Architecture binding (`OQ-DSN-004`); Handoff consumer procedures (`OQ-STD-014-009`; G11 planning **accepted** V06-D26.2; STD-015 principal).
+
+### 20.23 G11 Planning — Governed Handoff Preparation and STD-015 Consumption Boundary Architecture
+
+This section establishes the constitutional planning architecture for Governed Handoff **preparation**, eligibility, evidence packaging, validity export, consumer boundary keys, and historical preservation at the Domain 3 closure boundary. It consumes G6–G10 normative requirements, Section 13 downstream outputs, Section 14 authority separation, PRR-P4, PSIM lineage, and `FI-DSN-GOV-004` without authoring G11 normative requirements or `FI-DSN-STD-015` Handoff procedures.
+
+**Planning scope boundary:** This section governs Handoff constitutional purpose, authority relationship mapping, eligibility conditions, evidence package composition, validity export posture, consumer category boundaries, Handoff-related state vocabulary at the G11 layer, recall and withdrawal interaction with GPRA posture, Brain advisory interaction at Handoff preparation, manufacturing and production exclusion, historical preservation, and G11 planning completion boundaries only. It does **not** define Handoff authorization acts, Handoff Posture declaration, consumer intake procedures, validity export implementation mechanics, manufacturing execution, production execution, operational recall procedures, or `FI-DSN-STD-015` normative text.
+
+**Planning language disclaimer:** Any **SHALL**, **SHALL NOT**, **MAY**, or **MUST NOT** wording in Section 20.23 is planning language only. It expresses intended downstream normative treatment for future authorized G11 drafting. It is not an operative requirement, does not create a G11 normative obligation, and does not assign a requirement identifier. Only future authorized normative requirements in Section 21.11 may create operative G11 obligations.
+
+#### 20.23.0 Constitutional vocabulary — Handoff at Domain 3 boundary
+
+| Term | Planning meaning at G11 boundary | Authority posture | Distinguished from |
+|------|----------------------------------|-------------------|-------------------|
+| **Governed Handoff preparation** | Domain 3 constitutional work product that assembles eligibility facts, evidence references, validity posture, and consumer context keys for `FI-DSN-STD-015` consumption | G11 output-contract planning only | Handoff execution; Handoff authorization act |
+| **Handoff eligibility** | Constitutional readiness facts showing whether a GPRA and context **may** be considered for Handoff under governing law | Factual export; not authorization | Handoff authorization; GPRA grant |
+| **Handoff authorization** | A governed act that permits forward Handoff under `FI-DSN-STD-015` | **`FI-DSN-STD-015` principal subject** (Section 14) — not G6 MAGAC, not G11 | Approval; GPRA grant; Brain recommendation |
+| **Handoff evidence package** | Governed bundle of constitutional references required for Handoff consideration | Identity and reference architecture only — no implementation schema | Review evidence alone; Brain output alone |
+| **Validity export** | Representation of current GPRA posture and authoritative lineage to downstream consumers | Export of constitutional fact; source system remains authoritative | Downstream reinterpretation of historical Approval |
+| **Consumer context** | Declared downstream domain category and scope key for Handoff consideration | Boundary key only — not consumer internal behavior | Volume 05 membership admission |
+| **Handoff lifecycle** | States and events of Handoff acts under STD-015 | STD-015 principal — G11 references only | Artifact lifecycle; GPRA posture lifecycle |
+
+**PRR-P4 planning rule:** GPRA grant and approved production-ready posture are **necessary** upstream conditions for Handoff eligibility consideration. GPRA grant is **not** Handoff authorization. G11 plans the export boundary only.
+
+#### 20.23.1 PD-STD-014-024 resolution — Handoff constitutional purpose (HCPM)
+
+**Planning decision:** `PD-STD-014-024` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HCPM — Handoff Constitutional Purpose Model.
+
+**Constitutional purpose:** Governed Handoff preparation is the governed transition boundary from accepted Production Readiness posture — completed **Review Determination**, governed **Approval**, explicit **GPRA** grant, and applicable posture — into separately governed downstream use under `FI-DSN-STD-015`, without absorbing upstream Decision-stage authority or downstream operational execution.
+
+**Handoff is not:**
+
+| Misclassification | Owning authority | G11 posture |
+|-------------------|------------------|-------------|
+| **Review Determination** | G5 | Export references Determination; does not record or revise it |
+| **Approval** | G6 MAGAC | Export references Approval; does not perform it |
+| **GPRA grant** | G6 | Export references GPRA; does not grant it |
+| **DDAC or DSRA disposition** | G7 | Export may reference disposition records; does not perform disposition |
+| **Invalidation** | G8 | Export reflects **Invalidated** posture; does not establish it |
+| **Supersession** | G9 | Export reflects **Superseded** posture and PSIM lineage; does not establish it |
+| **Brain recommendation** | G10 | Export may reference BRPAM history; Brain does not authorize Handoff |
+| **Manufacturing execution** | Volume 01 / engineering | Excluded — HMEX (Section 20.23.10) |
+| **Production execution** | Operational domains | Excluded — HMEX (Section 20.23.10) |
+
+#### 20.23.2 PD-STD-014-025 resolution — Handoff authority architecture (HAAM)
+
+**Planning decision:** `PD-STD-014-025` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HAAM — Handoff Authority Architecture Model.
+
+| Authority domain | Relationship to Handoff | Planning resolution |
+|------------------|------------------------|---------------------|
+| **MAGAC (G6)** | Grants **Approval** and **GPRA**; establishes forward-active **Retention** default | **Does not** authorize Handoff. GPRA is necessary upstream eligibility input only |
+| **DDAC (G7)** | Records downstream disposition for Conditional, Fail, or withheld paths | **Does not** authorize Handoff. Disposition completion may be eligibility prerequisite where governing law requires |
+| **DSRA (G7)** | Authorizes rework return to Domain 2 | **Does not** authorize Handoff |
+| **G8 invalidation authority** | Establishes **Invalidated** posture; removes forward Handoff eligibility on affected GPRA (`R60`) | **Does not** perform Handoff recall mechanics — defers `OQ-STD-014-010` |
+| **G9 SSAC** | Establishes **Superseded** posture; removes forward reliance on predecessor GPRA (`R71`) | **Does not** perform Handoff recall mechanics — defers `OQ-STD-014-010` |
+| **G10 Brain** | Advisory eligibility signals and reevaluation requests only | **Does not** authorize, execute, withdraw, recall, or terminate Handoff |
+| **Handoff authority class** | Performs Governed Handoff authorization acts | **Principal owner: `FI-DSN-STD-015`** per Section 14. Authority class catalog **not resolved** in STD-014 — `OQ-STD-014-008` open |
+
+**HAAM planning rule:** G11 normative requirements may define eligibility exports and boundary prohibitions only. Handoff authorization authority class definition is deferred to `FI-DSN-STD-015` unless future governed law assigns a cross-reference requirement in G11 without redefining STD-015 principal ownership.
+
+#### 20.23.3 PD-STD-014-026 resolution — Handoff eligibility interaction (HEIM)
+
+**Planning decision:** `PD-STD-014-026` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HEIM — Handoff Eligibility Interaction Model.
+
+**Eligibility versus authorization:** Eligibility facts describe whether Handoff **may be considered** under governing law. Eligibility **does not** authorize Handoff. Authorization requires a separate governed act under `FI-DSN-STD-015`.
+
+| Eligibility input | Minimum constitutional condition | Blocking when absent or adverse |
+|-------------------|----------------------------------|--------------------------------|
+| **Review Determination** | Completed Pass, Conditional handling resolved per G7, or Fail path closed per TRPM where required | Open Fail without governed disposition path; indeterminate Determination |
+| **Approval** | Governed **Approval** act on record where required by governing law | Withheld **Approval** without governed resolution |
+| **GPRA grant** | Explicit governed **GPRA** grant under G6 for defined **Production Obligation** scope | No GPRA; GPRA not obligation-scoped |
+| **GPRA posture** | Forward-active **Retention** for the Handoff context | **Invalidated** or **Superseded** predecessor for forward reliance in context (`R60`, `R71`) |
+| **Downstream disposition** | DDAC/DSRA/TRPM requirements satisfied for Conditional or Fail history where material | Open disposition obligation blocking forward path |
+| **Unresolved review findings** | No constitutionally open mandatory core dimension omission or unresolved governed deficiency blocking forward export | Open EGDF blocking forward eligibility per governing law |
+| **Lineage completeness** | PSIM predecessor–successor references resolvable where successor GPRA is authoritative | Broken or ambiguous authoritative GPRA identity for context |
+| **Record integrity** | Constitutional records preserved and non-contradictory per PRR-P9 | Detected overwrite or missing authoritative record |
+| **Evidence package** | HEPM minimum references available (Section 20.23.4) | Missing mandatory evidence reference |
+
+**HEIM planning rule:** G11 may export composite eligibility posture as constitutional fact. G11 does **not** create eligibility by export alone.
+
+#### 20.23.4 PD-STD-014-027 resolution — Handoff evidence package (HEPM)
+
+**Planning decision:** `PD-STD-014-027` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HEPM — Handoff Evidence Package Model.
+
+**Package identity:** A Handoff evidence package is a governed reference bundle — not an implementation schema — linking constitutional records required for Handoff consideration.
+
+| Package element | Constitutional source | Export posture |
+|-----------------|----------------------|----------------|
+| **Artifact identity** | RVA instance and version under **GPRA** binding | Authoritative identity pointer |
+| **Version identity** | Obligation-scoped RVA version per G6 baseline | Immutable version reference |
+| **Review Determination** | G5 recorded outcome | Read-only constitutional fact |
+| **Approval record** | G6 MAGAC-attributed act | Read-only constitutional fact |
+| **GPRA record** | G6 grant and obligation scope | Read-only constitutional fact |
+| **Retention / lifecycle posture** | G8 default; G8/G9 posture state | Current posture fact |
+| **Disposition record** | G7 DDAC/DSRA/TRPM where material | Historical fact reference |
+| **Lineage and supersession state** | G9 PSIM; STD-013 traceability consumption | Read-only lineage graph reference |
+| **Brain recommendation history** | G10 BRPAM where material to eligibility context | Advisory operational fact — nonbinding |
+| **Unresolved exceptions** | Open EGDF or eligibility blockers | Explicit exception references |
+| **Destination / consumer context** | HCBM consumer category and scope key | Boundary key only |
+
+**HEPM planning rule:** Implementation storage format, media, APIs, and UI remain deferred. G11 normative requirements govern mandatory reference classes only.
+
+#### 20.23.5 PD-STD-014-028 resolution — Handoff validity export (HVEM)
+
+**Planning decision:** `PD-STD-014-028` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HVEM — Handoff Validity Export Model.
+
+| Export category | May be exported | Authoritative owner | Informational only |
+|-----------------|-----------------|---------------------|-------------------|
+| **Current GPRA posture** | **Retention**, **Invalidated**, or **Superseded** for defined context | Source Domain 3 constitutional records | Downstream cache copies |
+| **Authoritative GPRA identity** | Successor GPRA when PSIM governs context | G9 PSIM + G6 grant records | Consumer-side aliases |
+| **Forward eligibility flag** | Derived eligibility fact per HEIM | Computed export — not a new posture | Workflow convenience fields |
+| **Historical Approval and GPRA grant** | Preserved records at grant time | PRR-P9 — immutable historical fact | Downstream summaries |
+| **Invalidation / supersession effects** | Posture transition timestamps and lineage | G8/G9 acts — source authoritative | Notification payloads |
+
+**Stale validity detection (planning language only — see Section 20.23 planning language disclaimer):** Exports SHALL carry evaluation-point identity — GPRA identity, posture state, obligation scope, and consumer context key — sufficient for downstream systems to detect superseded export snapshots without rewriting source history.
+
+**HVEM planning rule (planning language only — see Section 20.23 planning language disclaimer):** Downstream consumers MAY consume validity exports for operational decisions in their domains. Downstream consumers SHALL NOT rewrite, merge into, or substitute for source constitutional records.
+
+#### 20.23.6 PD-STD-014-029 resolution — Handoff consumer boundary (HCBM)
+
+**Planning decision:** `PD-STD-014-029` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HCBM — Handoff Consumer Boundary Model.
+
+**Consumer categories** (boundary classes only — internal behavior excluded):
+
+| Consumer category | Constitutional boundary role | G11 governs | STD-015 / domain owns |
+|-------------------|------------------------------|-------------|------------------------|
+| **Manufacturing** | Design-time feasibility consumption boundary into manufacture planning | Export eligibility and validity into manufacturing context | Manufacturing instructions and validation execution |
+| **Production** | Operational production intake | Export boundary keys | Production execution systems |
+| **Catalog** | Production catalog or library catalog intake distinction | Consumer context key per `OQ-STD-014-009` | Catalog implementation and admission rules |
+| **Fulfillment** | Post-production fulfillment intake | Export boundary keys | Fulfillment procedures |
+| **Publication** | Publication or release intake | Export boundary keys | Publication execution |
+| **Distribution** | Distribution channel intake | Export boundary keys | Distribution operations |
+| **Archival systems** | Long-term constitutional record consumption | Export references and preservation hooks | Archive media and retention mechanics |
+
+**HCBM planning rule:** G11 governs the boundary **into** these domains. G11 does **not** absorb execution authority within them. Consumer class **catalog** detail remains open — `OQ-STD-014-009`.
+
+#### 20.23.7 PD-STD-014-030 resolution — Handoff state and lifecycle (HSLM)
+
+**Planning decision:** `PD-STD-014-030` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HSLM — Handoff State and Lifecycle Model.
+
+**Two-layer lifecycle split:**
+
+| Layer | Owner | Permitted state vocabulary (planning) |
+|-------|-------|--------------------------------------|
+| **G11 eligibility layer** | G11 export contract | **Not export-ready**; **export-ready** (eligibility facts satisfied); **blocked** (eligibility failure or posture block) |
+| **STD-015 Handoff act layer** | `FI-DSN-STD-015` | **Eligible-for-consideration**; **authorized**; **completed**; **rejected**; **suspended**; **withdrawn**; **recalled**; **expired** — normative establishment deferred to STD-015 |
+
+**HSLM planning rule:** G11 normative requirements govern eligibility-layer export states only unless future governed law assigns a minimal bridge reference to STD-015 act states without defining procedures. Handoff lifecycle is **distinct** from artifact lifecycle, GPRA posture lifecycle, and Review lifecycle.
+
+#### 20.23.8 PD-STD-014-031 resolution — Handoff recall and withdrawal (HRWM)
+
+**Planning decision:** `PD-STD-014-031` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HRWM — Handoff Recall and Withdrawal Model.
+
+| Event | Effect on forward Handoff eligibility | Historical Handoff records | Planning resolution |
+|-------|--------------------------------------|---------------------------|---------------------|
+| **GPRA Invalidated** | Forward Handoff eligibility **lost** on affected GPRA (`R60`) | Prior Handoff records **preserved** as historical fact | Recall mechanics **deferred** — `OQ-STD-014-010` |
+| **GPRA Superseded** | Forward reliance on predecessor **lost** in superseded context (`R71`) | Prior Handoff records **preserved** | Successor GPRA governs forward export only when independently eligible |
+| **Governed withdrawal** | Not a Layer B GPRA posture (RIVP) | Additive withdrawal history | Withdrawal act authority deferred STD-015 / `OQ-STD-014-010` |
+| **Operational recall** | Operational domain action — not Layer B posture | Notification and audit trail additive | Excluded from G11 — HMEX |
+
+**HRWM planning rule:** G11 plans constitutional **effects** of posture on eligibility export. G11 does **not** define operational recall procedures, automatic downstream revocation, or consumer notification mechanics.
+
+#### 20.23.9 PD-STD-014-032 resolution — Handoff Brain interaction (HBIM)
+
+**Planning decision:** `PD-STD-014-032` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HBIM — Handoff Brain Interaction Model.
+
+| Brain capability at Handoff boundary | Permitted | Prohibited |
+|-------------------------------------|-----------|------------|
+| Evaluate Handoff eligibility inputs | **Yes** — advisory analysis of HEIM conditions | Establishing eligibility as authorization |
+| Identify missing evidence | **Yes** — inconsistency signals and package gap detection | Creating or completing HEPM records as constitutional acts |
+| Recommend routing | **Yes** — routing suggestions toward Handoff authority path | Handoff authorization or execution |
+| Flag stale validity | **Yes** — advisory stale-export detection against current posture | Forcing recall or consumer action |
+| Request reevaluation | **Yes** — BRRM Handoff eligibility review context only (`R80`) | Authorizing, withdrawing, recalling, or terminating Handoff |
+
+**HBIM planning rule:** G10 architecture (`R73`–`R82`) is **preserved**. G11 planning adds Handoff-context export boundaries only. Brain remains advisory and nonbinding.
+
+#### 20.23.10 PD-STD-014-033 resolution — Handoff manufacturing exclusion (HMEX)
+
+**Planning decision:** `PD-STD-014-033` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HMEX — Handoff Manufacturing Exclusion Model.
+
+G11 governs constitutional transition and boundary control **only**. G11 and G11-planned normative requirements **must not** define:
+
+- Manufacturing instructions or validation procedures
+- Production execution workflows
+- Print specifications or vendor operations
+- Fulfillment, publication, or delivery execution
+- Engineering handoff APIs or queue mechanics
+
+**HMEX planning rule:** Manufacturing and production domains remain downstream consumers per HCBM. Design-Time Feasibility remains a Review dimension (G4) — not a Handoff execution substitute.
+
+#### 20.23.11 PD-STD-014-034 resolution — Handoff preservation and auditability (HPAM)
+
+**Planning decision:** `PD-STD-014-034` — **Resolved** (Sprint V06-D26.1).
+
+**Model designation:** HPAM — Handoff Preservation and Auditability Model.
+
+**Preserved as additive historical fact:**
+
+- Handoff preparation export acts and package identity hashes or reference IDs (implementation-deferred)
+- Destination consumer context key and evaluation-point posture
+- Export actor attribution (human or governed system — not Brain as authority)
+- Source GPRA identity, RVA version, and obligation scope
+- Later **Invalidated** or **Superseded** effects on export validity
+- Recall, withdrawal, or suspension history references (when established under STD-015)
+- Brain advisory history linked by BRPAM reference only
+
+**HPAM planning rule:** Later exports and posture transitions **add** records. G11 planning requires non-overwrite alignment with PRR-P9, G10 `R81`, G8 `R55`, and G9 `R67`.
+
+#### 20.23.12 G11 boundary preservation
+
+| Adjacent domain | G11 relationship |
+|----------------|------------------|
+| **G5 Review Determination** | Reference only — no Determination authority |
+| **G6 Approval and GPRA** | Export upstream grant facts — no grant authority |
+| **G7 DDAC/DSRA** | Reference disposition — no disposition authority |
+| **G8 Invalidation** | Export posture effects — no invalidation authority |
+| **G9 Supersession** | Export PSIM lineage — no supersession authority |
+| **G10 Brain** | Reference BRPAM — no expansion beyond G10 |
+| **`FI-DSN-STD-013`** | Consume traceability — no realization authority |
+| **`FI-DSN-STD-015`** | Enable drafting — no Handoff procedure absorption |
+| **Volume 05 membership** | GPRA prerequisite reference — no membership authority |
+
+#### 20.23.13 G11 drafting preparation table
+
+| Planning theme | Source authority | Proposed normative ownership | Dependencies | Unresolved question | Readiness status |
+|----------------|------------------|------------------------------|--------------|---------------------|------------------|
+| **Handoff purpose (HCPM)** | PRR-P4; Section 13–14 | G11 — purpose and exclusion requirements | G10 complete | None | **Ready** |
+| **Authority architecture (HAAM)** | Section 14; G6–G10 | G11 — prohibition and deferral requirements | G10 `R82` | `OQ-STD-014-008` (nonblocking at G11 planning) | **Ready** |
+| **Eligibility (HEIM)** | G5–G9; Section 13 | G11 — eligibility export requirements | G6–G9 | None | **Ready** |
+| **Evidence package (HEPM)** | Section 13; G3–G10 records | G11 — mandatory reference class requirements | HEIM | Implementation schema (nonblocking) | **Ready** |
+| **Validity export (HVEM)** | G8 `R60`; G9 `R71`; PRR-P9 | G11 — export and stale-detection requirements | HEPM | None | **Ready** |
+| **Consumer boundary (HCBM)** | Volume 06 deferral; `OQ-STD-014-007` | G11 — consumer category key requirements | HVEM | `OQ-STD-014-009` (nonblocking at G11 planning) | **Ready** |
+| **State and lifecycle (HSLM)** | HEIM; HRWM | G11 — eligibility-layer state requirements | HEIM | STD-015 act states (reference only) | **Ready** |
+| **Recall and withdrawal (HRWM)** | G8–G9; RIVP | G11 — eligibility effect requirements | G8 `R60`; G9 `R71` | `OQ-STD-014-010` (nonblocking at G11 planning) | **Ready** |
+| **Brain interaction (HBIM)** | G10 `R73`–`R82`; DSIB | G11 — Handoff-context Brain boundary requirements | G10 complete | None | **Ready** |
+| **Manufacturing exclusion (HMEX)** | PRR-P5; G4 | G11 — explicit exclusion requirements | HCBM | None | **Ready** |
+| **Preservation (HPAM)** | PRR-P9; G10 `R81` | G11 — additive preservation requirements | HEPM | None | **Ready** |
+| **G11 completion boundary** | Full G11 theme coverage | G11 — completion and exclusion requirement | All above | None — count range nonbinding | **Ready** |
+
+#### 20.23.14 PD-STD-014-035 resolution — G11 planning completion and exclusion boundary
+
+**Planning decision:** `PD-STD-014-035` — **Resolved** (Sprint V06-D26.1).
+
+G11 planning governs Handoff constitutional purpose (HCPM), authority relationship architecture (HAAM), eligibility interaction (HEIM), evidence package reference architecture (HEPM), validity export (HVEM), consumer boundary categories (HCBM), eligibility-layer lifecycle vocabulary (HSLM), recall and withdrawal constitutional effects (HRWM), Brain interaction at Handoff preparation (HBIM), manufacturing and production exclusion (HMEX), and preservation (HPAM) only. G11 planning **does not** authorize G11 normative drafting, **does not** authorize `FI-DSN-STD-015` drafting, and **does not** define Handoff execution procedures. Handoff authorization class catalog (`OQ-STD-014-008`), consumer class catalog (`OQ-STD-014-009`), and recall mechanics (`OQ-STD-014-010`) remain explicitly open for STD-015 or later governed resolution. G11 planning architecture is **complete** at `PD-STD-014-035`.
+
+#### 20.23.15 G11 planning-readiness determination
+
+**G11 planning-readiness determination:** **A — Resolved at planning layer.** `PD-STD-014-024` (HCPM), `PD-STD-014-025` (HAAM), `PD-STD-014-026` (HEIM), `PD-STD-014-027` (HEPM), `PD-STD-014-028` (HVEM), `PD-STD-014-029` (HCBM), `PD-STD-014-030` (HSLM), `PD-STD-014-031` (HRWM), `PD-STD-014-032` (HBIM), `PD-STD-014-033` (HMEX), `PD-STD-014-034` (HPAM), and `PD-STD-014-035` (G11 planning completion boundary) are resolved. G11 drafting preparation is **complete** (Sections 20.13 and 20.23.13). G11 planning architecture **accepted** (Sprint V06-D26.2). Next gate at planning record: **governed G11 normative drafting authorization**. G11 normative requirement drafting remains **unauthorized**.
+
+**Nonblocking deferrals preserved:** Handoff authorization class catalog (`OQ-STD-014-008`); consumer class catalog detail (`OQ-STD-014-009`); recall and withdrawal mechanics (`OQ-STD-014-010`); Handoff act lifecycle normative establishment (`FI-DSN-STD-015`); implementation schemas and APIs; operational notification and recall procedures.
+
+#### 20.23.16 G11 open questions register
+
+| Open question | Status | Principal owner | Planning dependency |
+|---------------|--------|-----------------|---------------------|
+| `OQ-STD-014-008` | **Open** | `FI-DSN-STD-015` (principal); G11 may reference) | HAAM — Handoff authorization class catalog |
+| `OQ-STD-014-009` | **Open** | G11 and STD-015 joint | HCBM — consumer class catalog and binding rules |
+| `OQ-STD-014-010` | **Open** | STD-015 (principal) | HRWM — recall versus posture-transition mechanics |
 
 ---
 
 ## 21. Normative Requirements — Partial Draft
 
-**Drafting posture:** Sprint V06-D25.6 — normative requirements drafted for planning groups **G1** through **G10** (`FI-DSN-STD-014-R01` through `FI-DSN-STD-014-R82` continuous through `R82`; G6 committed `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; G7 planning adopted `cebf454`). G8 Section 21.8 (`FI-DSN-STD-014-R52`–`R63`) is **complete** at Layer B for **Retention** and **Invalidated** posture. G9 Section 21.9 (`FI-DSN-STD-014-R64`–`R72`) is **complete** at Layer B for **Superseded** posture and authoritative GPRA succession; Tranches 1–2 **accepted** (V06-D21.3, V06-D22.2). G10 Section 21.10 (`FI-DSN-STD-014-R73`–`R82`) is **complete** at Layer B for Brain constitutional boundary, stage interaction, persistence, disagreement, reevaluation, historical preservation, and G10 completion and exclusion boundary; Tranches 1–2 **accepted** (V06-D25.2, V06-D25.5). G11 remains **unauthorized** and **not drafted**. This partial draft does not claim approval, freeze, binding authority, or effective status beyond draft governance posture.
+**Drafting posture:** Sprint V06-D26.3 — normative requirements drafted for planning groups **G1** through **G10** (`FI-DSN-STD-014-R01` through `FI-DSN-STD-014-R82` continuous through `R82`; G6 committed `c8eeb2913ddf0170703518757ba36b3c72ea30ac`; G7 planning adopted `cebf454`; G10 committed V06-D25.8). G8 Section 21.8 (`FI-DSN-STD-014-R52`–`R63`) is **complete** at Layer B for **Retention** and **Invalidated** posture. G9 Section 21.9 (`FI-DSN-STD-014-R64`–`R72`) is **complete** at Layer B for **Superseded** posture and authoritative GPRA succession; Tranches 1–2 **accepted** (V06-D21.3, V06-D22.2). G10 Section 21.10 (`FI-DSN-STD-014-R73`–`R82`) is **complete** at Layer B for Brain constitutional boundary, stage interaction, persistence, disagreement, reevaluation, historical preservation, and G10 completion and exclusion boundary; Tranches 1–2 **accepted** (V06-D25.2, V06-D25.5). G11 planning architecture is **established** (Sprint V06-D26.1; Section 20.23) and **accepted** (Sprint V06-D26.2). G11 normative requirement drafting remains **unauthorized** and **not drafted**. Section 21.11 is **absent**. `FI-DSN-STD-014-R83` is **absent**. This partial draft does not claim approval, freeze, binding authority, or effective status beyond draft governance posture.
 
 ### 21.1 Constitutional Inheritance and Principal-Subject Placement (G1)
 
@@ -2591,7 +2888,7 @@ This section establishes the initial constitutional architecture of post-approva
 
 Post-approval **Superseded** posture is governed by **RIVP** peer-posture vocabulary and **PVTA** ST supersession trigger families (Section 20.21). G9 normative requirements (`FI-DSN-STD-014-R64`–`R72`) establish **Superseded** posture definition, separate supersession acts, ST trigger-family architecture, predecessor–successor historical preservation, SSAC supersession authority classes, full PSIM identity and lineage, PIIM posture interaction, forward authority transition, and G9 completion boundaries. G9 normative drafting is **complete** at `FI-DSN-STD-014-R72`. Domain 3 Brain interaction is governed by G10 (`FI-DSN-STD-014-R73`–`R82`). Governed Handoff is assigned to G11.
 
-**Undrafted groups:** G11 — **not drafted**. G10 normative requirements (`FI-DSN-STD-014-R73`–`R82`) are **drafted** through G10 completion boundary at `FI-DSN-STD-014-R82`.
+**Undrafted groups:** G11 — **not drafted**. G10 normative requirements (`FI-DSN-STD-014-R73`–`R82`) are **complete and committed** (V06-D25.8) through G10 completion boundary at `FI-DSN-STD-014-R82`. G11 planning architecture is **accepted** (V06-D26.2; Section 20.23).
 
 #### 21.9.5 Initial normative requirements — Tranche 2 (G9)
 
@@ -2692,6 +2989,8 @@ Domain 3 Brain interaction is governed by **BRDM** role definition, **BIIM** rea
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 0.1 Architecture Draft | July 31, 2026 | F.I. Forgot | Sprint V06-D26.3 — G11 planning architecture **accepted** (V06-D26.2; Section 20.23); planning decisions `PD-STD-014-024` through `PD-STD-014-035` acceptance posture synchronized; Section 20.23 planning language disclaimer added (HVEM prospective SHALL/SHALL NOT clarification); open questions `OQ-STD-014-008`–`OQ-STD-014-010` remain **open**; G10 requirements **complete and committed** (`FI-DSN-STD-014-R73`–`R82`; V06-D25.8); G9 requirements **complete** (`FI-DSN-STD-014-R64`–`R72`); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G11 normative drafting **unauthorized**; Section 21.11 **absent**; `FI-DSN-STD-014-R83` **absent**; controlled sequence step 39 added; Section 21.9.4 posture synchronized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
+| 0.1 Architecture Draft | July 31, 2026 | F.I. Forgot | Sprint V06-D26.1 — G11 planning architecture **established** (Section 20.23): `PD-STD-014-024` through `PD-STD-014-035` resolved (HCPM, HAAM, HEIM, HEPM, HVEM, HCBM, HSLM, HRWM, HBIM, HMEX, HPAM, G11 planning completion boundary); open questions `OQ-STD-014-008`–`OQ-STD-014-010` recorded; G10 requirements **complete and committed** (`FI-DSN-STD-014-R73`–`R82`; V06-D25.8); G9 requirements **complete** (`FI-DSN-STD-014-R64`–`R72`); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G11 normative drafting **unauthorized**; Section 21.11 **absent**; `FI-DSN-STD-014-R83` **absent**; controlled sequence step 38 added; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 31, 2026 | F.I. Forgot | Sprint V06-D25.6 — G10 normative architecture **complete** (Section 21.10.6): `FI-DSN-STD-014-R82` (G10 completion and exclusion boundary); G10 requirements `FI-DSN-STD-014-R73`–`R82` continuous; G10 Tranches 1–2 **accepted** (V06-D25.2, V06-D25.5); G9 requirements **complete** (`FI-DSN-STD-014-R64`–`R72`); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G11 not drafted; Section 21.9.4 posture synchronized; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D25.3 — G10 Tranche 2 normative architecture continued (Section 21.10.5): `FI-DSN-STD-014-R77`–`R81` (DSIB stage boundaries, BRPAM persistence and attribution, BDOM precedence, BRRM reevaluation requests, historical preservation); G10 Tranche 1 preserved (`FI-DSN-STD-014-R73`–`R76`); G9 requirements **complete** (`FI-DSN-STD-014-R64`–`R72`); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G10 partial; G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
 | 0.1 Architecture Draft | July 30, 2026 | F.I. Forgot | Sprint V06-D25.1 — G10 Tranche 1 normative architecture begun (Section 21.10): `FI-DSN-STD-014-R73`–`R76` (Brain constitutional role, authority boundary, input and output boundary, governed mediation requirement); G9 requirements **complete** (`FI-DSN-STD-014-R64`–`R72`); G8 requirements **accepted** (`FI-DSN-STD-014-R52`–`R63`); G1–G7 preserved (`FI-DSN-STD-014-R01`–`R51`); G10 partial; G11 not drafted; architecture remains Version 0.1 Draft; status remains Architecture Draft; EO 20 remains **In progress**; not approved; not frozen; not binding; `FI-DSN-STD-015` not authorized; no Product Sprint 004 authorization |
