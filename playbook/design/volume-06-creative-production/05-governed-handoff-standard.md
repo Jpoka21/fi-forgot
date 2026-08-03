@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`; synchronized Sprint V06-D36.5) |
 | **Queue posture** | EO 21 — **In progress** per Sprint V06-D32.4 governing question adoption (`FI-DSN-QUE-001`; synchronized Sprint V06-D36.5) |
-| **Sprint** | V06-D36.5 |
+| **Sprint** | V06-D37.1 |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed only as upstream Compliance Boundary context established before Handoff consideration. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft — **accepted at draft posture** (Sprint V06-D33.7). Constitutional architecture kickoff (Sprints V06-D33.2–V06-D33.3) and continuation (Sprints V06-D33.4–V06-D33.5; corrective Sprints V06-D33.5A, V06-D33.6A). Governing question adopted (Sprints V06-D32.1–V06-D32.4; commit `87fd093`). Architecture body **complete** — Sections 1–19 authored. Independent architecture review **completed** (Sprint V06-D33.6); blocking correction **accepted** (Sprint V06-D33.6A). Section 20 requirement planning **completed** — planning framework authored (Sprint V06-D36.1); independent planning review **passed** (Sprint V06-D36.4; Disposition A); V06-D36.3 corrective **accepted**; Section 20 requirement plan **adopted** (Sprint V06-D36.5). Normative requirement drafting **not authorized** — next separately authorized gate. Open questions `OQ-STD-014-008`, `OQ-STD-014-009`, `OQ-STD-014-010`, and `OQ-V06-007` remain **open**. `OQ-STD-015-001` (Handoff act-layer re-entry mechanics) **registered Deferred** (Sprint V06-D35.3; principal owner `FI-DSN-STD-015`; resolution gate Section 20 planning decision; mechanics not resolved). REG/QUE synchronization **completed** (Sprint V06-D36.5). Product Sprint 004 **not authorized**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft — **accepted at draft posture** (Sprint V06-D33.7). Constitutional architecture kickoff (Sprints V06-D33.2–V06-D33.3) and continuation (Sprints V06-D33.4–V06-D33.5; corrective Sprints V06-D33.5A, V06-D33.6A). Governing question adopted (Sprints V06-D32.1–V06-D32.4; commit `87fd093`). Architecture body **complete** — Sections 1–19 authored. Independent architecture review **completed** (Sprint V06-D33.6); blocking correction **accepted** (Sprint V06-D33.6A). Section 20 requirement planning **completed** — planning framework authored (Sprint V06-D36.1); independent planning review **passed** (Sprint V06-D36.4; Disposition A); V06-D36.3 corrective **accepted**; Section 20 requirement plan **adopted** (Sprint V06-D36.5). Normative requirement drafting **authorized** for Tranche 1 only (Sprint V06-D37.1). Tranche 1 normative requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** (Sprint V06-D37.1; Section 21). Tranches 2–3 normative drafting **not authorized**. Open questions `OQ-STD-014-008`, `OQ-STD-014-009`, `OQ-STD-014-010`, and `OQ-V06-007` remain **open**. `OQ-STD-015-001` (Handoff act-layer re-entry mechanics) **registered Deferred** (Sprint V06-D35.3; principal owner `FI-DSN-STD-015`; resolution gate Section 20 planning decision; mechanics not resolved). All `PD-STD-015-*` placeholders remain **unresolved**. REG/QUE synchronization **completed** (Sprint V06-D36.5). Product Sprint 004 **not authorized**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -1107,7 +1107,7 @@ Architecture validation confirms independent architecture review **completed** (
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D36.1 — Section 20 normative requirement planning framework **authored**. Sprint V06-D36.2 — independent constitutional review **completed**; **conditional** findings identified (Sprint V06-D36.3 corrective). Sprint V06-D36.3 — Section 20 constitutional corrective **applied** and **accepted**. Sprint V06-D36.4 — independent planning re-review **completed**; Disposition **A — Accept**. Sprint V06-D36.5 — Section 20 requirement plan **adopted**; normative requirement planning **completed**. Architecture Sections 1–19 **accepted** at Version 0.1 Architecture Draft posture (Sprint V06-D33.7). `OQ-STD-015-001` **registered Deferred** (Sprint V06-D35.3). Normative requirement drafting **not authorized** — next separately authorized gate. No `FI-DSN-STD-015-R##` identifiers are assigned in this section. No operative normative language is drafted in this section. No governed open question is resolved in this section. All `PD-STD-015-*` placeholders remain **unresolved**.
+**Planning posture:** Sprint V06-D36.1 — Section 20 normative requirement planning framework **authored**. Sprint V06-D36.2 — independent constitutional review **completed**; **conditional** findings identified (Sprint V06-D36.3 corrective). Sprint V06-D36.3 — Section 20 constitutional corrective **applied** and **accepted**. Sprint V06-D36.4 — independent planning re-review **completed**; Disposition **A — Accept**. Sprint V06-D36.5 — Section 20 requirement plan **adopted**; normative requirement planning **completed**. Architecture Sections 1–19 **accepted** at Version 0.1 Architecture Draft posture (Sprint V06-D33.7). `OQ-STD-015-001` **registered Deferred** (Sprint V06-D35.3). Tranche 1 normative requirement drafting **authorized** (Sprint V06-D37.1); Tranche 1 requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** in Section 21. Tranches 2–3 normative drafting **not authorized**. Section 20 assigns no `FI-DSN-STD-015-R##` identifiers and drafts no operative normative language. No governed open question is resolved in this section. All `PD-STD-015-*` placeholders remain **unresolved**.
 
 This section establishes the adopted planning framework. Planning decisions (`PD-STD-015-*`) remain registered as **placeholders** pending separately authorized resolution sprints. Operative requirement text belongs in Section 21+ after separately authorized normative drafting gates.
 
@@ -1538,28 +1538,251 @@ Tranche ranges count obligations attributed to each tranche before cross-tranche
 
 Counts are planning estimates only. They do not assign requirement identifiers.
 
-### 20.11 Normative drafting prohibition
+### 20.11 Normative drafting posture
 
-Normative requirement drafting for `FI-DSN-STD-015` is **not authorized** by Sprint V06-D36.1, Sprint V06-D36.3, or Sprint V06-D36.5.
+Sprint V06-D36.5 adopted the Section 20 requirement plan and completed normative requirement planning at the planning-framework layer. Sprint V06-D37.1 **authorizes** Tranche 1 normative drafting only.
 
-Sprint V06-D36.5 **does not**:
+**Tranche 1 — authorized and drafted (Sprint V06-D37.1):**
 
-- Assign `FI-DSN-STD-015-R##` identifiers
-- Draft operative `SHALL` requirement text
+| Group | Scope | Requirement range | Status |
+|-------|-------|-------------------|--------|
+| HOF-G1 | Constitutional inheritance and upstream entry | `FI-DSN-STD-015-R01`–`R07` | **Drafted** — Section 21.1 |
+| HOF-G7 | Evidence and validity consumption | `FI-DSN-STD-015-R08`–`R15` | **Drafted** — Section 21.2 |
+| HOF-G10 | Preservation and audit | `FI-DSN-STD-015-R16`–`R21` | **Drafted** — Section 21.3 |
+| HOF-G9 (partial) | Authority prohibitions only | `FI-DSN-STD-015-R22`–`R24` | **Drafted** — Section 21.4 |
+
+Tranche 1 drafting **does not**:
+
 - Resolve `OQ-STD-014-008`, `OQ-STD-014-009`, `OQ-STD-014-010`, `OQ-V06-007`, or `OQ-STD-015-001`
 - Resolve any `PD-STD-015-*` placeholder
+- Draft HOF-G2, HOF-G3, HOF-G4, HOF-G5, HOF-G6, or HOF-G8
+- Draft HOF-G9 authority catalog integration (blocked by `PD-STD-015-001`)
 - Authorize Product Sprint 004
-- Authorize normative requirement drafting
+- Authorize Tranches 2–3 normative drafting
 
-Sprint V06-D36.5 **does**:
+**Tranches 2–3 — not authorized:**
 
-- Adopt the Section 20 requirement plan for committed planning posture (Sprint V06-D36.5)
-- Complete normative requirement planning at the planning-framework layer
-- Record normative requirement drafting as the next separately authorized gate
+| Tranche | Groups | Prerequisite |
+|---------|--------|--------------|
+| **2 — Catalog and posture** | HOF-G2; HOF-G3; HOF-G4; HOF-G5 baseline; HOF-G8 partial; HOF-G9 catalog integration | Tranche 1 review passed and committed; `PD-STD-015-001`, `PD-STD-015-002`, `PD-STD-015-003` resolved |
+| **3 — Recall, re-entry, completion** | HOF-G6; HOF-G5 re-entry or deferral; HOF-G8 completion; HOF-G9 completion | Tranche 2 review passed and committed; `PD-STD-015-004` resolved; `PD-STD-015-005` resolved or Version 1.0 re-entry deferral adopted |
 
 **Next governed gates (sequenced):**
 
-1. `PD-STD-015-001` resolution planning (separately authorized)
-2. Tranche 1 normative drafting authorization (separately authorized — after applicable PD prerequisites per Section 20.6)
-3. Independent tranche review and commit per tranche
-4. Full-body freeze review (future gate — not authorized)
+1. Independent Tranche 1 constitutional review
+2. Tranche 1 commit (separately authorized)
+3. `PD-STD-015-001` through `PD-STD-015-003` resolution (separately authorized — before Tranche 2)
+4. Tranche 2 normative drafting authorization (separately authorized)
+5. Independent tranche review and commit per subsequent tranche
+6. Full-body freeze review (future gate — not authorized)
+
+---
+
+## 21. Normative Requirements — Tranche 1 (Foundations)
+
+**Drafting posture:** Sprint V06-D37.1 — first authorized normative requirement tranche for `FI-DSN-STD-015`. Tranche 1 establishes constitutional inheritance and upstream entry (HOF-G1), evidence and validity consumption (HOF-G7), preservation and audit (HOF-G10), and authority prohibitions only (HOF-G9 partial). Requirements **`FI-DSN-STD-015-R01` through `FI-DSN-STD-015-R24`** are continuous with no gaps, no reserved unused identifiers, and no duplicates. Tranche 1 drafting **does not** resolve any open question or `PD-STD-015-*` placeholder. Tranches 2–3 remain **unauthorized**. This partial draft does not claim approval, freeze, binding authority, or effective status.
+
+**Constitutional purpose:** Establish the foundational normative boundary for Governed Handoff at Volume 06 Layer B CP-04 — upstream consumption, evidence architecture, historical preservation, and authority prohibitions — without drafting Handoff authorization acts, consumer catalog, Handoff Posture declaration, act lifecycle, recall mechanics, or downstream exit operative requirements.
+
+**Undrafted groups:** HOF-G2, HOF-G3, HOF-G4, HOF-G5, HOF-G6, HOF-G8 — **not drafted**. HOF-G9 authority catalog integration — **not drafted** (blocked by `PD-STD-015-001`).
+
+---
+
+### 21.1 Constitutional Inheritance and Upstream Entry Boundary (HOF-G1)
+
+This section establishes the constitutional identity, governing-question lock, upstream entry boundary, and exclusion posture of Governed Handoff at Domain 3 Layer B CP-04. It does not define Handoff authorization acts (HOF-G2), consumer class catalog (HOF-G3), Handoff Posture declaration (HOF-G4), Handoff act lifecycle (HOF-G5), recall and posture-transition mechanics (HOF-G6), operative evidence record classes beyond framework (HOF-G7 partial), downstream exit (HOF-G8), or authority catalog integration (HOF-G9 partial beyond prohibitions).
+
+#### 21.1.1 Inherited authority
+
+| Inherited source | What HOF-G1 consumes for Governed Handoff placement |
+|------------------|-----------------------------------------------------|
+| **Volume 06 Creative Production Architecture** | Domain 3 Handoff assignment; P1–P11; AX-1, AX-2; Stage Governance Matrix; Volume 06 terminus at Governed Handoff |
+| **Accepted governing question (Section 1)** | Locked constitutional problem for subsequent drafting |
+| **`FI-DSN-STD-012`** | Production Obligation attribution; Production Program posture; bound Compliance Boundaries — consumed for Handoff scope without governing Intent, Program, or Obligation establishment |
+| **`FI-DSN-STD-013`** | RVA existence; Realization Traceability Package; RVA Version Lineage — consumed without creating Review-Entry Readiness or reinterpreting Domain 2 |
+| **`FI-DSN-STD-014` G5–G11** | Review Determination; Approval; GPRA grant; GPRA posture; G11 Handoff preparation exports (`FI-DSN-STD-014-R83`–`R95`) — consumed as read-only constitutional inputs without re-performing those acts |
+| **`FI-DSN-GOV-004`** | Decision-stage versus runtime distinction; Brain non-authority at governed boundaries |
+| **Volumes 02–04 and applicable frozen `FI-MFG-*`** | Compliance Boundary inputs — consumed, not restated |
+| **HCPM, HEIM, HMEX (G11)** | Constitutional purpose; eligibility≠authorization; manufacturing exclusion — consumed at entry boundary |
+
+#### 21.1.2 Initial normative requirements — Tranche 1 (HOF-G1)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R01` | This standard SHALL NOT contradict frozen Volume 06 Creative Production Architecture P1–P11, the accepted governing question in Section 1, HOF-P1–P10, or the validated Governed Handoff architecture for Domain 3 Layer B CP-04 — including principal-subject placement, constitutional distinctions, and authority boundaries expressed in this standard. | Company judgment |
+| `FI-DSN-STD-015-R02` | Governed Handoff SHALL remain reconcilable with frozen `FI-DSN-PRN-001`, `FI-DSN-STD-001` through `FI-DSN-STD-009`, `FI-DSN-STD-012`, and `FI-DSN-STD-013` without weakening, replacing, or silently overriding upstream visual permission, surface structure, contextual policy, personalization policy, Production Intent and Program governance, or artifact Realization governance. | Company judgment |
+| `FI-DSN-STD-015-R03` | Governed Handoff SHALL consume applicable frozen `FI-MFG-*` obligations only as Compliance Boundary context within Handoff governance. This standard SHALL NOT restate manufacturing operational policy, Manufacturing Validation execution, or Fulfillment Execution. | Company judgment |
+| `FI-DSN-STD-015-R04` | This standard SHALL govern Decision-stage Domain 3 Governed Handoff policy only. It SHALL NOT author or prescribe as normative requirements: metadata field schemas, DAM workflows, APIs, databases, queue jobs, prompt templates, ranking models, image-generation configuration, product UI behavior, Brain algorithms, scoring systems, checklists, tool configuration, vendor assumptions, or engineering implementation architectures. | Company judgment |
+| `FI-DSN-STD-015-R05` | Governed Handoff SHALL govern Decision-stage Domain 3 decisions whose principal subject is one of the following: **Handoff authorization**; **Handoff Posture declaration**; **Handoff act lifecycle** at the STD-015 act layer; **Handoff recall, withdrawal, and suspension** at the operative act layer; **Handoff evidence consumption** at the authorization boundary; or **auditable transition rules** at the Volume 06 terminus toward constitutionally authorized downstream consumer classes. This standard SHALL preserve the permanent constitutional distinctions: GPRA grant is not Handoff authorization (HOF-P1); G11 eligibility export is not Handoff authorization (HOF-P2); Handoff Posture is not permanent collection membership (HOF-P3); Handoff is not manufacturing execution (HOF-P4); Handoff is not operational downstream intake (HOF-P5); Brain does not authorize Handoff (HOF-P6); Handoff policy is not runtime selection (HOF-P9); and Handoff act lifecycle is peer-distinct from artifact lifecycle, GPRA posture lifecycle, Review lifecycle, and G11 eligibility-layer export states (HOF-P10). | Company judgment |
+| `FI-DSN-STD-015-R06` | Governed Handoff SHALL defer authority for the following subjects to their authoritative owners when those subjects are principal: Declared Production Intent, Production Program structure, Production Obligation establishment, Compliance Boundary binding, exploration-entry authorization, and governed waiver posture (`FI-DSN-STD-012`); Exploration Posture operation, Realization commitment, RVA existence, RVA state and version discipline, iteration within realization, method-neutral realization paths, Review-Entry Readiness creation, and realization provenance handoff (`FI-DSN-STD-013`); production-readiness Review, Review Determination, Approval, GPRA grant, Invalidated and Superseded posture establishment, and Governed Handoff preparation (`FI-DSN-STD-014`); contextual selection and authorized alternatives (`FI-DSN-STD-007`); occasion and emotional context semantics (`FI-DSN-STD-008`); personalization policy (`FI-DSN-STD-009`); collection admission and permanent membership (`FI-DSN-STD-010`, `FI-DSN-STD-011`); visual permission and identity eligibility (Volume 02); surface structure, spatial allocation, and exterior presentation (Volume 03); metadata field semantics and provenance schema ownership (`FI-DSN-GOV-002`); Brain approval, GPRA grant, and runtime recommendation (`FI-DSN-GOV-004`); manufacturing operational policy (`FI-MFG-*`); and engineering implementation. | Company judgment |
+| `FI-DSN-STD-015-R07` | Governed Handoff consideration SHALL commence only when upstream Domain 3 outputs satisfy minimum Handoff entry conditions per Section 5, including a governed **GPRA** grant, consumed **Approval** and **Review Determination** references, current **GPRA** posture, applicable **Production Obligation** attribution, G11 **Handoff eligibility** export where governing law requires it, G11 **Handoff evidence package** references, G11 **validity export** posture, and applicable **consumer context boundary keys** per `FI-DSN-STD-014` G11 (`FI-DSN-STD-014-R83`–`R95`). **GPRA** grant SHALL remain a necessary upstream entry condition only and SHALL NOT constitute Handoff authorization (HOF-P1; HEIM). G11 export-ready eligibility SHALL remain a necessary factual input only where governing law requires it and SHALL NOT constitute Handoff authorization (HOF-P2). Governed Handoff SHALL consume **Invalidated** or **Superseded** **GPRA** posture effects from `FI-DSN-STD-014` G8 (`FI-DSN-STD-014-R60`) and G9 (`FI-DSN-STD-014-R71`) without performing invalidation or supersession acts. Governed Handoff SHALL NOT reopen G11 constitutional closure, redefine G11 normative requirements, or perform G11 Handoff preparation. | Company judgment |
+
+#### 21.1.3 HOF-G1 drafting traceability
+
+| Req ID | Planning group | Primary theme | Upstream authority |
+|--------|----------------|---------------|-------------------|
+| `FI-DSN-STD-015-R01` | HOF-G1 | Constitutional inheritance; governing-question lock | Volume 06 architecture; §1; HOF-P1–P10 |
+| `FI-DSN-STD-015-R02` | HOF-G1 | Upstream Compliance Boundary consumption | Volumes 02–04; `FI-DSN-STD-012`; `FI-DSN-STD-013` |
+| `FI-DSN-STD-015-R03` | HOF-G1 | Manufacturing boundary at Handoff governance layer | HMEX; Volume 06 P5; applicable `FI-MFG-*` |
+| `FI-DSN-STD-015-R04` | HOF-G1 | Implementation independence | §4; §18 |
+| `FI-DSN-STD-015-R05` | HOF-G1 | Principal-subject placement; permanent Handoff distinctions | HOF-P1–P6, P9–P10; Volume 06 AX-1, AX-2 |
+| `FI-DSN-STD-015-R06` | HOF-G1 | Deferral matrix | §4; Volume 06 deferral matrix; STD-012; STD-013; STD-014 |
+| `FI-DSN-STD-015-R07` | HOF-G1 | Entry boundary; G11 consumption; GPRA and eligibility separation | §5; G11 `R83`–`R95`; HEIM; G8 `R60`; G9 `R71` |
+
+#### 21.1.4 HOF-G1 boundary statement
+
+**Governed Handoff entry** is the Decision-stage constitutional gate that determines whether a **GPRA** and applicable G11 exports may be consumed for Handoff consideration under governing law. Entry consumes upstream Domain 3 posture, eligibility facts, evidence references, and validity exports; it does not grant **GPRA**, perform G11 preparation, authorize Handoff, or declare Handoff Posture. Handoff authorization, posture declaration, and act lifecycle are assigned to later groups.
+
+**Undrafted groups:** HOF-G2–HOF-G6, HOF-G8 — **not drafted**. HOF-G9 authority catalog integration — **not drafted**.
+
+---
+
+### 21.2 Evidence and Validity Consumption (HOF-G7)
+
+This section establishes normative requirements for HEPM reference consumption, HVEM validity consumption, HOEM operative evidence framework, advisory evidence boundary, and stale-evidence protection at the Handoff authorization boundary. It does not define operative Handoff authorization record requirements (HOF-G2), Handoff Posture declaration evidence (HOF-G4), recall or withdrawal operative evidence mechanics (HOF-G6), or implementation schemas for evidence storage.
+
+#### 21.2.1 Inherited authority
+
+| Inherited source | What HOF-G7 consumes for evidence architecture |
+|------------------|--------------------------------------------------|
+| **Section 11 architecture** | Four-model evidence relationship; reference versus operative distinction; eligibility versus authorization in evidence; stale-evidence protection |
+| **`FI-DSN-STD-014` G11 HEPM** | Mandatory reference classes (`FI-DSN-STD-014-R87`) — consumed without redefinition |
+| **`FI-DSN-STD-014` G11 HVEM** | Validity export and evaluation-point identity (`FI-DSN-STD-014-R88`) — consumed without redefinition |
+| **`FI-DSN-STD-014` G11 HEIM** | Eligibility versus authorization separation (`FI-DSN-STD-014-R85`) |
+| **`FI-DSN-STD-014` G10 BRPAM** | Brain recommendation history — advisory input only (`FI-DSN-STD-014-R78`) |
+| **`FI-DSN-STD-014` G11 HBIM** | Handoff-context Brain interaction boundary (`FI-DSN-STD-014-R92`) |
+| **HOF-G1 requirements (`FI-DSN-STD-015-R01`–`R07`)** | Entry boundary; upstream consumption posture |
+
+#### 21.2.2 Initial normative requirements — Tranche 1 (HOF-G7)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R08` | Governed Handoff evidence consumption SHALL preserve four constitutionally distinct evidence models at the Handoff boundary: **HEPM** reference classes linking authoritative source constitutional records; **HVEM** validity exports carrying current posture and eligibility facts for a defined evaluation point; **HOEM** operative Handoff evidence records additive at the STD-015 act layer; and **advisory evidence** comprising nonbinding Brain and analytical inputs. Each model SHALL remain peer-distinct. No model SHALL substitute for another. | Company judgment |
+| `FI-DSN-STD-015-R09` | Governed Handoff SHALL consume mandatory **HEPM** reference classes from `FI-DSN-STD-014` G11 (`FI-DSN-STD-014-R87`) as read-only references to authoritative source constitutional records. Each **HEPM** element SHALL remain a governed pointer to its source domain record. Governed Handoff SHALL NOT rewrite, merge, replace, or supersede source **Review Determination**, **Approval**, **GPRA** grant, posture transition, DDAC disposition, DSRA authorization, invalidation act, supersession act, G11 Handoff preparation record, or attributed human act records. | Company judgment |
+| `FI-DSN-STD-015-R10` | Governed Handoff SHALL consume **HVEM** validity exports from `FI-DSN-STD-014` G11 (`FI-DSN-STD-014-R88`) as read-only constitutional facts derived from authoritative Domain 3 source records for a defined **GPRA**, **Production Obligation** scope, and consumer context boundary key. **HVEM** consumption SHALL include evaluation-point identity sufficient to detect stale export snapshots against later authoritative posture without rewriting source history. **HVEM** consumption SHALL NOT constitute a new authoritative validity act, **Invalidated** or **Superseded** posture establishment, Handoff authorization, or substitution for source G8 or G9 records. | Company judgment |
+| `FI-DSN-STD-015-R11` | **HOEM** SHALL govern operative Handoff evidence records that MAY be added at the STD-015 act layer when separately authorized Handoff acts occur. **HOEM** records SHALL document what Governed Handoff did at the Handoff boundary and SHALL remain additive to **HEPM** references. **HOEM** SHALL NOT elevate advisory inputs to constitutional fact, collapse reference bundles into execution instructions, or substitute for **HEPM** source-record satisfaction. Operative **HOEM** record classes for authorization, posture declaration, completion, recall, and withdrawal acts remain principally assigned to later groups; this requirement establishes the **HOEM** framework only. | Company judgment |
+| `FI-DSN-STD-015-R12` | Advisory evidence — including Brain recommendation history under G10 **BRPAM** (`FI-DSN-STD-014-R78`) and Handoff-context Brain analysis permitted by G11 **HBIM** (`FI-DSN-STD-014-R92`) — SHALL remain nonbinding at the Handoff authorization boundary. Advisory evidence SHALL NOT satisfy **HEPM** mandatory reference classes, constitute **HVEM** validity facts, constitute **HOEM** operative authorization records, or substitute for a governed Handoff authorization act (HOF-P6; HBIM). | Company judgment |
+| `FI-DSN-STD-015-R13` | Governed Handoff SHALL treat G11 export-ready eligibility (`FI-DSN-STD-014-R85`, `FI-DSN-STD-014-R90`), complete **HEPM** reference availability, and advisory gap-clearance signals as factual inputs to Handoff consideration only. None of these inputs SHALL constitute evidence of Handoff authorization or Handoff Posture declaration (HOF-P2; HEIM). | Company judgment |
+| `FI-DSN-STD-015-R14` | Governed Handoff SHALL consume current **HVEM** posture facts and **HEPM** reference integrity at act time when Handoff consideration or operative acts occur. Upon **Invalidated** **GPRA** posture, forward Handoff eligibility on the affected **GPRA** SHALL be treated as lost and stale **HVEM** exports or prior eligibility snapshots SHALL NOT silently support new Handoff consideration without current authoritative posture fact (`FI-DSN-STD-014-R60`). Upon **Superseded** **GPRA** posture, predecessor **GPRA** forward reliance in the superseded context SHALL be treated as lost; successor **GPRA** SHALL govern forward consideration only when independently eligible; predecessor **HEPM** and **HVEM** snapshots SHALL NOT silently support forward Handoff on superseded authority (`FI-DSN-STD-014-R71`). G11 **Blocked** eligibility-layer conditions SHALL NOT be overridden by operative Handoff acts without upstream posture correction. Advisory stale-export signals SHALL remain advisory only and SHALL NOT perform recall or authorization. | Company judgment |
+| `FI-DSN-STD-015-R15` | Governed Handoff SHALL NOT define database schemas, APIs, payload formats, queue mechanics, file formats, storage media, UI presentation rules, or implementation structures for **HEPM** reference consumption, **HVEM** validity consumption, **HOEM** operative records, or advisory evidence at the Handoff boundary. | Company judgment |
+
+#### 21.2.3 HOF-G7 drafting traceability
+
+| Req ID | Planning group | Primary theme | Upstream authority |
+|--------|----------------|---------------|-------------------|
+| `FI-DSN-STD-015-R08` | HOF-G7 | Four-model evidence separation | §11.1; HEPM; HVEM; HOEM; HBIM |
+| `FI-DSN-STD-015-R09` | HOF-G7 | HEPM reference consumption; source-record preservation | G11 `R87`; HOF-P8 |
+| `FI-DSN-STD-015-R10` | HOF-G7 | HVEM validity fact consumption; evaluation-point identity | G11 `R88`; G8 `R60`; G9 `R69`, `R71` |
+| `FI-DSN-STD-015-R11` | HOF-G7 | HOEM operative evidence framework; additive act-layer records | §11.2; HOEM planning |
+| `FI-DSN-STD-015-R12` | HOF-G7 | Advisory evidence boundary; Brain non-authority | G10 `R78`; G11 `R92`; HOF-P6; GOV-004 |
+| `FI-DSN-STD-015-R13` | HOF-G7 | Eligibility versus authorization in evidence consumption | HEIM; G11 `R85`, `R90`; HOF-P2 |
+| `FI-DSN-STD-015-R14` | HOF-G7 | Stale, invalidated, and superseded evidence protection | §11.4; G8 `R60`; G9 `R71`; G11 `R90`, `R91` |
+| `FI-DSN-STD-015-R15` | HOF-G7 | Implementation deferral for evidence consumption | §11.5; G11 `R87`, `R88` |
+
+#### 21.2.4 HOF-G7 boundary statement
+
+HOF-G7 Tranche 1 requirements establish four-model evidence separation, **HEPM** and **HVEM** consumption, **HOEM** operative evidence framework, advisory boundary, eligibility versus authorization in evidence, stale-evidence protection, and implementation deferral only. Operative **HOEM** record requirements for authorization, posture declaration, completion, recall, and withdrawal acts remain assigned to HOF-G2, HOF-G4, HOF-G5, and HOF-G6.
+
+**Undrafted groups:** HOF-G2–HOF-G6, HOF-G8 — **not drafted**.
+
+---
+
+### 21.3 Preservation and Audit (HOF-G10)
+
+This section establishes normative requirements for historical Handoff preservation, additive audit, HPAM extension at the operative layer, and prohibition on overwriting upstream constitutional records. It does not define recall operative mechanics (HOF-G6), re-entry preservation rules (HOF-G5), or implementation archival systems.
+
+#### 21.3.1 Inherited authority
+
+| Inherited source | What HOF-G10 consumes for preservation architecture |
+|--------------------|-----------------------------------------------------|
+| **`FI-DSN-STD-014` G11 HPAM** | Handoff preparation preservation and auditability (`FI-DSN-STD-014-R94`) — extended to operative Handoff acts |
+| **HOF-P7** | Historical Handoff is preserved |
+| **HOF-P8** | Upstream law is consumed, not rewritten |
+| **`FI-DSN-STD-014` PRR-P9** | Historical constitutional fact preservation — consumed by extension |
+| **HOF-G1 requirements (`FI-DSN-STD-015-R01`–`R07`)** | Entry boundary; upstream non-reopening |
+| **HOF-G7 requirements (`FI-DSN-STD-015-R08`–`R15`)** | HOEM additive framework; source-record preservation |
+
+#### 21.3.2 Initial normative requirements — Tranche 1 (HOF-G10)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R16` | Governed Handoff SHALL preserve prior Handoff authorization, Handoff Posture, and Handoff act records as additive historical constitutional fact when later **GPRA** posture, eligibility export, or Handoff authority changes (HOF-P7; HPAM extension). Historical Handoff records SHALL remain available as historical fact and SHALL NOT be silently erased, merged into replacement records, or rewritten to reflect only current posture. | Company judgment |
+| `FI-DSN-STD-015-R17` | Governed Handoff SHALL NOT overwrite, merge into, substitute for, or supersede authoritative upstream **Review Determination**, **Approval**, **GPRA** grant, **Invalidated** or **Superseded** posture act, DDAC disposition, DSRA authorization, G11 Handoff preparation record, G11 evidence package source reference, or G11 validity export source record (HOF-P8; HPAM). | Company judgment |
+| `FI-DSN-STD-015-R18` | Governed Handoff SHALL extend **HPAM** from G11 Handoff preparation preservation (`FI-DSN-STD-014-R94`) to operative Handoff act records at the STD-015 layer. **HPAM** extension SHALL require that Handoff consideration and operative Handoff acts remain auditable through additive constitutional records without collapsing preparation history and operative history into a single rewritten record. | Company judgment |
+| `FI-DSN-STD-015-R19` | When **GPRA** posture transitions to **Invalidated** or **Superseded**, historical **Approval**, **GPRA** grant, G11 Handoff preparation, and any prior Handoff records associated with the affected **GPRA** SHALL remain preserved as historical fact (`FI-DSN-STD-014-R60`, `FI-DSN-STD-014-R71`; PRR-P9). Loss of forward Handoff eligibility or reliance SHALL NOT authorize erasure of those historical records. | Company judgment |
+| `FI-DSN-STD-015-R20` | Governed Handoff SHALL maintain an auditable constitutional record of Handoff consideration events and operative Handoff acts sufficient to reconstruct what constitutional facts were known, consumed, or recorded at the Handoff boundary without prescribing archival media, retention duration mechanics, notification payloads, or engineering storage implementation. Operative recall, withdrawal, and suspension audit record requirements remain principally assigned to HOF-G6; this requirement establishes the preservation and audit framework only. | Company judgment |
+| `FI-DSN-STD-015-R21` | Governed Handoff SHALL NOT treat evidence packages — whether **HEPM** reference bundles, **HVEM** exports, or **HOEM** operative records — as authorization to erase, redact, or replace upstream constitutional history. Evidence consumption and preservation obligations SHALL remain distinct from downstream operational remediation, consumer deletion, or fulfillment recall procedures excluded from this standard (HMEX; HOF-P4; HOF-P5). | Company judgment |
+
+#### 21.3.3 HOF-G10 drafting traceability
+
+| Req ID | Planning group | Primary theme | Upstream authority |
+|--------|----------------|---------------|-------------------|
+| `FI-DSN-STD-015-R16` | HOF-G10 | Additive Handoff history; no silent erasure | HOF-P7; HPAM |
+| `FI-DSN-STD-015-R17` | HOF-G10 | No overwrite of upstream constitutional records | HOF-P8; G11 `R87`, `R94`; PRR-P9 |
+| `FI-DSN-STD-015-R18` | HOF-G10 | HPAM extension to operative Handoff layer | G11 `R94`; §11.2 |
+| `FI-DSN-STD-015-R19` | HOF-G10 | Preservation on GPRA posture change | G8 `R60`; G9 `R71`; PRR-P9 |
+| `FI-DSN-STD-015-R20` | HOF-G10 | Auditable constitutional record framework | HPAM; HOF-P7 |
+| `FI-DSN-STD-015-R21` | HOF-G10 | Evidence packages are not erasure triggers; HMEX exclusion | HMEX; HOF-P4; HOF-P5; G11 `R91` |
+
+#### 21.3.4 HOF-G10 boundary statement
+
+HOF-G10 Tranche 1 requirements establish additive history, upstream non-overwrite, **HPAM** extension, posture-change preservation, auditable record framework, and evidence-package erasure prohibition only. Operative recall, withdrawal, suspension, and re-entry preservation mechanics remain assigned to HOF-G5 and HOF-G6.
+
+**Undrafted groups:** HOF-G2–HOF-G6, HOF-G8 — **not drafted**.
+
+---
+
+### 21.4 Authority Prohibitions (HOF-G9 Partial)
+
+This section establishes Tranche 1 authority prohibition requirements only. It reinforces GOV-004 Brain boundary, STD-014 Review and Approval authority preservation, HAAM inherited prohibitions, and peer-distinct decision classes. It does **not** establish the Handoff authorization class catalog, authority map integration, or operative authority class definition — those remain blocked by `PD-STD-015-001` and `OQ-STD-014-008`.
+
+#### 21.4.1 Inherited authority
+
+| Inherited source | What HOF-G9 prohibitions consume |
+|------------------|----------------------------------|
+| **`FI-DSN-GOV-004`** | Brain non-authority at governed Decision boundaries |
+| **`FI-DSN-STD-014` G11 HAAM** | Handoff authority prohibition map (`FI-DSN-STD-014-R86`) |
+| **`FI-DSN-STD-014` G10** | Domain 3 Brain advisory boundary (`FI-DSN-STD-014-R73`–`R82`) |
+| **`FI-DSN-STD-014` G11 HBIM** | Handoff-context Brain interaction boundary (`FI-DSN-STD-014-R92`) |
+| **Section 14 architecture** | Authority separation table; peer-distinct decision classes |
+| **HOF-G1 requirements (`FI-DSN-STD-015-R01`–`R07`)** | Deferral matrix; principal-subject placement |
+
+#### 21.4.2 Initial normative requirements — Tranche 1 (HOF-G9 prohibitions only)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R22` | At the Governed Handoff boundary, Brain SHALL function only as a governed consumer of constitutional inputs, evaluator of consumed evidence and posture, recommender of advisory treatment, and routing participant proposing governed attention toward responsible actors per `FI-DSN-GOV-004` and G11 **HBIM** (`FI-DSN-STD-014-R92`). Brain SHALL NOT authorize Handoff, declare Handoff Posture, complete Handoff acts, recall Handoff, withdraw Handoff, suspend Handoff, or terminate downstream reliance at the Handoff boundary (HOF-P6; HOF-P9). | Company judgment |
+| `FI-DSN-STD-015-R23` | Governed Handoff SHALL NOT absorb, reopen, substitute for, or re-perform production-readiness **Review**, recorded **Review Determination**, **Approval** act or withholding act, explicit governed **GPRA** grant, **Invalidated** or **Superseded** posture establishment, DDAC downstream disposition, DSRA rework authorization, or G11 Handoff preparation (`FI-DSN-STD-014-R83`–`R95`). `FI-DSN-STD-014` retains exclusive principal authority over those subjects when principal (HOF-P8). | Company judgment |
+| `FI-DSN-STD-015-R24` | Governed Handoff SHALL preserve HAAM prohibitions inherited from `FI-DSN-STD-014` G11 (`FI-DSN-STD-014-R86`) and SHALL NOT assign Handoff authorization authority to MAGAC participants or **Approval** authority classes, DDAC downstream disposition authority, DSRA rework authorization authority, G8 invalidation authority classes, G9 SSAC supersession authority classes, G10 Brain at Domain 3, G11 export contract, or downstream consumer domains. Governed Handoff SHALL preserve peer-distinct constitutional decision classes including **Handoff eligibility**, **Handoff authorization**, **Handoff Posture declaration**, **Handoff act completion**, **Handoff recall**, **Handoff withdrawal**, **Handoff suspension**, **downstream acceptance**, **permanent collection membership**, and **manufacturing validation and execution** without collapsing one class into another. Governed Handoff SHALL NOT invent, establish, or name a Handoff authorization class. Open question `OQ-STD-014-008` remains **open**; `PD-STD-015-001` remains **Placeholder — unresolved**. | Company judgment |
+
+#### 21.4.3 HOF-G9 partial drafting traceability
+
+| Req ID | Planning group | Primary theme | Upstream authority |
+|--------|----------------|---------------|-------------------|
+| `FI-DSN-STD-015-R22` | HOF-G9 | Brain Handoff authority prohibition; GOV-004 preservation | GOV-004; G11 `R92`; G10 `R73`–`R82`; HOF-P6, P9 |
+| `FI-DSN-STD-015-R23` | HOF-G9 | STD-014 Review and Approval non-absorption | G11 `R83`; §14.4; HOF-P8 |
+| `FI-DSN-STD-015-R24` | HOF-G9 | HAAM inherited prohibitions; peer-distinct decision classes; authority catalog deferral | G11 `R86`; HAAM; §14.1–§14.2; `OQ-STD-014-008`; `PD-STD-015-001` |
+
+#### 21.4.4 HOF-G9 partial boundary statement
+
+HOF-G9 Tranche 1 requirements establish Brain prohibition, STD-014 authority preservation, HAAM inherited prohibitions, peer-distinct decision class preservation, and `OQ-STD-014-008` deferral only. HOF-G9 authority catalog integration and operative authority map remain **not drafted** until `PD-STD-015-001` is resolved.
+
+**Undrafted groups:** HOF-G2–HOF-G6, HOF-G8 — **not drafted**. HOF-G9 catalog integration — **not drafted**.
+
+---
+
+### 21.5 Tranche 1 boundary statement
+
+Tranche 1 normative requirements (`FI-DSN-STD-015-R01`–`R24`) establish constitutional inheritance and upstream entry (HOF-G1), evidence and validity consumption framework (HOF-G7), preservation and audit framework (HOF-G10), and authority prohibitions (HOF-G9 partial) only.
+
+| Tranche | Groups drafted | Requirement range | Status |
+|---------|----------------|-------------------|--------|
+| **1 — Foundations** | HOF-G1; HOF-G7; HOF-G10; HOF-G9 (prohibitions only) | `FI-DSN-STD-015-R01`–`R24` | **Drafted** — Sprint V06-D37.1 |
+| **2 — Catalog and posture** | HOF-G2; HOF-G3; HOF-G4; HOF-G5 baseline; HOF-G8 partial; HOF-G9 catalog integration | — | **Not authorized** |
+| **3 — Recall, re-entry, completion** | HOF-G6; HOF-G5 re-entry or deferral; HOF-G8 completion; HOF-G9 completion | — | **Not authorized** |
+
+**Open questions preserved:** `OQ-STD-014-008` (Handoff authorization class catalog); `OQ-STD-014-009` (consumer class catalog and binding rules); `OQ-STD-014-010` (recall versus posture-transition mechanics); `OQ-V06-007` (Handoff Posture split versus unified model); `OQ-STD-015-001` (**Deferred** — Handoff act-layer re-entry mechanics).
+
+**Planning decisions preserved:** `PD-STD-015-001` through `PD-STD-015-005` remain **Placeholder — unresolved**.
+
+Tranche 1 boundary is **open** pending independent constitutional review and separately authorized commit. Tranche 2 normative drafting remains **unauthorized**.
