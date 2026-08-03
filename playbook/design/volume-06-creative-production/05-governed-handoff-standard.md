@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed only as upstream Compliance Boundary context established before Handoff consideration. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft — **accepted at draft posture** (Sprint V06-D33.7). Constitutional architecture kickoff (Sprints V06-D33.2–V06-D33.3) and continuation (Sprints V06-D33.4–V06-D33.5; corrective Sprints V06-D33.5A, V06-D33.6A). Governing question adopted (Sprints V06-D32.1–V06-D32.4; commit `87fd093`). Architecture body **complete** — Sections 1–19 authored. Independent architecture review **completed** (Sprint V06-D33.6); blocking correction **accepted** (Sprint V06-D33.6A). Section 20 requirement planning **completed** — planning framework authored (Sprint V06-D36.1); independent planning review **passed** (Sprint V06-D36.4; Disposition A); V06-D36.3 corrective **accepted**; Section 20 requirement plan **adopted** (Sprint V06-D36.5). Normative requirement drafting **authorized** for Tranche 1 only (Sprint V06-D37.1). Tranche 1 normative requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** (Sprint V06-D37.1; Section 21). Tranches 2–3 normative drafting **not authorized**. Open questions `OQ-STD-014-008`, `OQ-STD-014-009`, `OQ-STD-014-010`, and `OQ-V06-007` remain **open**. `OQ-STD-015-001` (Handoff act-layer re-entry mechanics) **registered Deferred** (Sprint V06-D35.3; principal owner `FI-DSN-STD-015`; resolution gate Section 20 planning decision; mechanics not resolved). All `PD-STD-015-*` placeholders remain **unresolved**. REG/QUE synchronization **completed** (Sprint V06-D36.5). Product Sprint 004 **not authorized**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft — **accepted at draft posture** (Sprint V06-D33.7). Constitutional architecture kickoff (Sprints V06-D33.2–V06-D33.3) and continuation (Sprints V06-D33.4–V06-D33.5; corrective Sprints V06-D33.5A, V06-D33.6A). Governing question adopted (Sprints V06-D32.1–V06-D32.4; commit `87fd093`). Architecture body **complete** — Sections 1–19 authored. Independent architecture review **completed** (Sprint V06-D33.6); blocking correction **accepted** (Sprint V06-D33.6A). Section 20 requirement planning **completed** — planning framework authored (Sprint V06-D36.1); independent planning review **passed** (Sprint V06-D36.4; Disposition A); V06-D36.3 corrective **accepted**; Section 20 requirement plan **adopted** (Sprint V06-D36.5). Normative requirement drafting **authorized** for Tranche 1 only (Sprint V06-D37.1). Tranche 1 normative requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** (Sprint V06-D37.1; Section 21); **committed** (Sprint V06-D37.3; commit `eeea1ce`); post-commit verified (Sprint V06-D37.4). REG/QUE Tranche 1 committed posture synchronization **committed** (Sprint V06-D37.6; commit `229f611`). Planning decision **`PD-STD-015-001` resolved** (Sprint V06-D38.2; Section 20.5.3). **`PD-STD-015-002` resolved** (Sprint V06-D38.3; Section 20.5.4). `OQ-STD-014-008` and `OQ-STD-014-009` **closed** (Sprints V06-D38.2–V06-D38.3). Open questions `OQ-STD-014-010` and `OQ-V06-007` remain **open**. `OQ-STD-015-001` (Handoff act-layer re-entry mechanics) **registered Deferred** (Sprint V06-D35.3). `PD-STD-015-003` through `PD-STD-015-005` remain **Placeholder — unresolved**. Tranches 2–3 normative drafting **not authorized**. Product Sprint 004 **not authorized**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -86,7 +86,7 @@ This standard governs **Governed Handoff** — the constitutional Decision-stage
 
 - **Handoff authorization** — governed acts that may permit forward Handoff under this standard (principal subject deferred in detail to future Handoff Authorization Architecture — `OQ-STD-014-008`)
 - **Handoff Posture declaration** — declarative intake posture toward Volume 05 and/or production catalog consumer classes (split versus unified architecture deferred — `OQ-V06-007`)
-- **Consumer class catalog and binding** — constitutional cataloging and binding of downstream consumer classes to Handoff context (deferred — `OQ-STD-014-009`)
+- **Consumer class catalog and binding** — constitutional cataloging and binding of downstream consumer classes to Handoff context (resolved — `PD-STD-015-002`; Section 20.5.4)
 - **Handoff act lifecycle** — operative states and transitions at the STD-015 act layer distinct from G11 eligibility export and GPRA posture lifecycle
 - **Recall, withdrawal, and posture-transition interaction** — operative mechanics when GPRA posture or Handoff authority changes (deferred — `OQ-STD-014-010`)
 - **Handoff evidence consumption** — operative requirements for evidence packages and validity exports at the Handoff boundary, building on G11 reference architecture without redefining source records
@@ -126,8 +126,8 @@ The following open questions are **framed** for future architecture sections. Th
 
 | Open question | Future architecture section | Principal STD-015 subject |
 |---------------|----------------------------|---------------------------|
-| `OQ-STD-014-008` | Handoff Authorization Architecture | What constitutionally authorized authority class may perform Governed Handoff authorization acts? |
-| `OQ-STD-014-009` | Consumer Class and Binding Architecture | How are downstream consumer classes constitutionally cataloged and bound to Handoff context? |
+| `OQ-STD-014-008` | Handoff Authorization Architecture | What constitutionally authorized authority class may perform Governed Handoff authorization acts? — **Closed** (Sprint V06-D38.2; `PD-STD-015-001`; Section 20.5.3) |
+| `OQ-STD-014-009` | Consumer Class and Binding Architecture | How are downstream consumer classes constitutionally cataloged and bound to Handoff context? — **Closed** (Sprint V06-D38.3; `PD-STD-015-002`; Section 20.5.4) |
 | `OQ-STD-014-010` | Recall, Withdrawal, and Posture Transition Architecture | When GPRA posture becomes **Invalidated** or **Superseded**, is forward Handoff recall automatic, separately authorized, or notification-only? |
 | `OQ-V06-007` | Handoff Posture Declaration Architecture | Should Handoff Posture always split into library intake and production catalog classes, or may a single handoff serve both when rules are identical? |
 | `OQ-STD-015-001` | Handoff Act Lifecycle / Re-entry Architecture | May a GPRA re-enter the Handoff act path after **Rejected**, **Suspended**, **Withdrawn**, **Recalled**, or other relevant act-layer states — and if so, under what upstream posture, eligibility, and authorization conditions? |
@@ -181,7 +181,7 @@ STD-015 authority begins only when upstream Domain 3 outputs satisfy minimum Han
 | **Handoff eligibility export** | `FI-DSN-STD-014` G11 HEIM | Factual eligibility for Handoff consideration — not authorization |
 | **Handoff evidence package references** | `FI-DSN-STD-014` G11 HEPM | Mandatory reference classes — consumed and extended at operative layer only |
 | **Validity export posture** | `FI-DSN-STD-014` G11 HVEM | Current posture fact for consumer context — source records remain authoritative |
-| **Consumer context boundary keys** | `FI-DSN-STD-014` G11 HCBM | Boundary keys into downstream domains — catalog detail deferred (`OQ-STD-014-009`) |
+| **Consumer context boundary keys** | `FI-DSN-STD-014` G11 HCBM | Boundary keys into downstream domains — catalog and binding **resolved** (`PD-STD-015-002`; Section 20.5.4) |
 | **G11 eligibility-layer condition** | `FI-DSN-STD-014` G11 HSLM | Not export-ready / Export-ready / Blocked — G11 layer only; distinct from Handoff act states |
 
 ### 5.2 Entry boundary rules (architectural)
@@ -203,7 +203,7 @@ The following G11 planning models from `FI-DSN-STD-014` Section 20.23 establish 
 | HEIM | Handoff Eligibility Interaction Model | Eligibility facts versus authorization acts |
 | HEPM | Handoff Evidence Package Model | Mandatory reference classes at consideration boundary |
 | HVEM | Handoff Validity Export Model | Posture export consumption; stale-detection context |
-| HCBM | Handoff Consumer Boundary Model | Consumer category boundary keys — catalog deferred (`OQ-STD-014-009`) |
+| HCBM | Handoff Consumer Boundary Model | Consumer category boundary keys consumed; operative catalog **resolved** (`PD-STD-015-002`; Section 20.5.4) |
 | HSLM | Handoff State and Lifecycle Model | Two-layer split — G11 eligibility layer versus STD-015 act layer |
 | HRWM | Handoff Recall and Withdrawal Model | Constitutional eligibility effects — recall mechanics deferred (`OQ-STD-014-010`) |
 | HBIM | Handoff Brain Interaction Model | Brain advisory boundary at Handoff preparation and consideration |
@@ -252,28 +252,23 @@ HAAM (`FI-DSN-STD-014` Section 20.23.2) establishes that the following upstream 
 | **G11 export contract** | Exports eligibility facts — does not authorize Handoff |
 | **Downstream consumer domains** | May consume Handoff Posture — do not retroactively authorize Handoff |
 
-### 6.3 Open question framing — `OQ-STD-014-008`
+### 6.3 Handoff authorization authority — `OQ-STD-014-008` (closed)
 
 **Question:** What constitutionally authorized authority class may perform Governed Handoff authorization acts?
 
-**Architectural framing (unresolved):** This section establishes that Handoff authorization requires a **constitutionally authorized authority class catalog** owned principally by this standard. The catalog must:
+**Resolution status:** **Closed** (Sprint V06-D38.2). `PD-STD-015-001` **resolved** at Section 20.5.3.
 
-- Identify at least one authority class capable of performing Handoff authorization acts at design time
-- Preserve HAAM prohibitions — no upstream authority class may be silently promoted to Handoff authorization by catalog definition
-- Distinguish authorization act attribution from evidence preparation, eligibility export, or downstream intake execution
-- Remain reconcilable with attributed human act requirements where governing law requires human accountability
-- Not conflate Handoff authorization with Brain advisory routing or automated eligibility scoring
+**Adopted planning architecture:** One constitutional **Handoff Governance Authority (HGA)** performs all operative STD-015 Handoff acts through a mandatory **act-type attribution matrix**. Peer-distinct decision classes (§14.2) are preserved by separate act attribution and separate **HOEM** operative record expectations — not by multiple constitutional authority owners.
 
-**Candidate architecture dimensions (not selected):**
+**Planning model consumed:** HAAM — prohibition map inherited; operative authority class catalog **adopted at planning layer** in Section 20.5.3. Normative catalog integration drafts in HOF-G2 and HOF-G9 (Tranche 2 — separately authorized).
+
+**Remaining architecture refinement dimensions (not blocking HOF-G2 planning):**
 
 | Dimension | Architectural role | Resolution status |
 |-----------|-------------------|-------------------|
-| Authority class taxonomy | Named classes permitted to authorize, withhold, recall, or suspend Handoff | **Open** — `OQ-STD-014-008` |
-| Delegation and substitution | Whether one authority class may delegate Handoff authorization to another | **Open** — architecture refinement |
-| Multi-party authorization | Whether Handoff authorization requires single or multiple attributed acts | **Open** — architecture refinement |
-| System versus human attribution | How governed system acts relate to human authority classes at the Handoff boundary | **Open** — architecture refinement |
-
-**Planning model consumed:** HAAM — prohibition map inherited; operative authority class catalog deferred to normative drafting under separate governed resolution of `OQ-STD-014-008`.
+| Delegation and substitution | Whether HGA may delegate act performance to another attribution path | **Open** — normative refinement |
+| Multi-party authorization | Whether any Handoff act requires single or multiple attributed acts | **Open** — normative refinement |
+| System versus human attribution | How governed system recording relates to human accountability at the Handoff boundary | **Open** — normative refinement |
 
 ### 6.4 Authorization boundary rules (architectural)
 
@@ -292,7 +287,7 @@ Consumer classes identify the downstream constitutional domain toward which Hand
 
 | Term | Architectural meaning | Owner layer |
 |------|----------------------|-------------|
-| **Consumer class** | A constitutionally cataloged category of downstream use with distinct governing downstream rules | STD-015 catalog architecture — detail deferred (`OQ-STD-014-009`) |
+| **Consumer class** | A constitutionally cataloged category of downstream use with distinct governing downstream rules | STD-015 operative catalog — **resolved** (`PD-STD-015-002`; Section 20.5.4) |
 | **Consumer context** | The bound instance of a consumer class for a specific Handoff act — obligation scope plus class identity plus boundary key | STD-015 binding architecture |
 | **Consumer context boundary key** | HCBM abstract category key exported from G11 — identifies boundary **into** a domain, not internal consumer behavior | G11 export; consumed by STD-015 |
 
@@ -312,7 +307,7 @@ G11 HCBM (`FI-DSN-STD-014` Section 20.23.6) establishes abstract consumer-catego
 | **Distribution** | Distribution channel intake |
 | **Archival systems** | Long-term constitutional record consumption |
 
-STD-015 consumes HCBM keys as upstream boundary vocabulary. STD-015 does not redefine G11 boundary key export mechanics. Operative consumer class **catalog** architecture — including how HCBM categories relate to Volume 06 Handoff Posture classes — remains deferred.
+STD-015 consumes HCBM keys as upstream boundary vocabulary. STD-015 does not redefine G11 boundary key export mechanics. Operative consumer class **catalog** and **binding** architecture is **resolved** at Section 20.5.4 (`PD-STD-015-002`). Volume 06 Handoff Posture **split versus unified** declaration model remains deferred to `PD-STD-015-003` (`OQ-V06-007`).
 
 ### 7.3 Volume 06 Handoff Posture classes (upstream reference)
 
@@ -323,35 +318,24 @@ Frozen Volume 06 architecture (Section 12.2) defines two Handoff Posture consume
 | **Library intake posture** | GPRA presented for Volume 05 permanent membership consideration |
 | **Production catalog posture** | GPRA authorized for production artwork library intake under engineering specification |
 
-Volume 06 provides that Handoff Posture classes are not merged when governing downstream rules differ. The relationship between these two volume-layer classes and the seven HCBM boundary categories is an architectural reconciliation subject — not resolved in this draft.
+Volume 06 provides that Handoff Posture classes are not merged when governing downstream rules differ. HCBM-to-catalog mapping and Volume 06 **posture-class affinity** are **resolved** at Section 20.5.4. Whether a single Handoff Posture declaration may serve multiple posture-class affinities when rules are identical remains deferred to `PD-STD-015-003` (`OQ-V06-007`).
 
-### 7.4 Open question framing — `OQ-STD-014-009`
+### 7.4 Consumer class and binding — `OQ-STD-014-009` (closed)
 
 **Question:** How are downstream consumer classes constitutionally cataloged and bound to Handoff context?
 
-**Architectural framing (unresolved):** Operative consumer class architecture must define:
+**Resolution status:** **Closed** (Sprint V06-D38.3). `PD-STD-015-002` **resolved** at Section 20.5.4.
 
-- The canonical catalog of consumer classes available for Handoff binding at design time
-- How each catalog entry maps to HCBM boundary keys without absorbing downstream internal behavior
-- How consumer class identity combines with Production Obligation scope and GPRA identity to form a bound Handoff context
-- Whether multiple consumer classes may be simultaneously bound to one GPRA for distinct governed purposes
-- How authoritative Handoff per context is identified when multiple bindings exist
+**Adopted planning architecture:** **HCCM** — Handoff Consumer Class Model: a **closed operative catalog** of six constitutional consumer classes with mandatory **HCBM boundary-key mapping**, **bound consumer context** identity rules, and **multi-binding** cardinality — without prescribing implementation or resolving Handoff Posture split versus unified declaration (`PD-STD-015-003`).
 
-**Candidate architecture dimensions (not selected):**
-
-| Dimension | Architectural role | Resolution status |
-|-----------|-------------------|-------------------|
-| Catalog taxonomy | Definitive list or extensibility rules for consumer classes | **Open** — `OQ-STD-014-009` |
-| HCBM reconciliation | Mapping between seven HCBM keys and Volume 06 two-class model | **Open** — architecture refinement |
-| Binding cardinality | One-to-one, one-to-many, or many-to-one GPRA-to-consumer bindings | **Open** — architecture refinement |
-| Context key structure | Minimum identity fields for a bound consumer context | **Open** — architecture refinement |
+**Planning model consumed:** HCBM (`FI-DSN-STD-014` Section 20.23.6; `FI-DSN-STD-014-R89`) — boundary keys consumed; catalog and binding owned by STD-015 at planning layer Section 20.5.4.
 
 ### 7.5 Consumer binding boundary rules (architectural)
 
 - Consumer binding identifies downstream **consideration** targets; it does not execute downstream intake procedures (HOF-P5).
 - Consumer binding does not grant collection membership, manufacturing authority, or fulfillment authorization (HOF-P3; HOF-P4).
 - G9 PSIM authoritative GPRA succession constrains which GPRA may be bound in a superseded context — binding consumes PSIM facts; STD-015 does not establish supersession.
-- Consumer class catalog resolution is a principal STD-015 architectural obligation; G11 remains limited to boundary key export.
+- Consumer class catalog and binding resolution is **complete** at planning layer (`PD-STD-015-002`; Section 20.5.4); G11 remains limited to boundary key export.
 
 ---
 
@@ -687,7 +671,7 @@ Operational downstream intake procedures — workflows, queues, APIs, notificati
 | **Manufacturing planning intake** | Manufacturing boundary category | Engineering / Volume 01 |
 | **Fulfillment, publication, distribution intake** | Respective HCBM categories | Operational domains per Volume 01 and engineering |
 
-STD-015 exports boundary keys and Handoff Posture facts. STD-015 does not define how downstream systems receive, queue, validate, accept, or reject intake objects. Consumer class catalog detail remains deferred (`OQ-STD-014-009`).
+STD-015 exports boundary keys and Handoff Posture facts. STD-015 does not define how downstream systems receive, queue, validate, accept, or reject intake objects. Consumer class catalog and binding are **resolved** at planning layer (`PD-STD-015-002`; Section 20.5.4).
 
 ### 13.4 Production catalog and consumer boundaries
 
@@ -698,7 +682,7 @@ Architecture preserves production catalog and other consumer boundaries without 
 | **Production catalog posture** | Handoff Posture declaration toward production catalog consumer class | Catalog schema, storage, versioning, or admission rules |
 | **Library intake posture** | Handoff Posture declaration toward library intake consumer class | Collection entity creation, slot assignment, or publication |
 | **HCBM seven-category model** | Consumption of boundary keys exported from G11 | Internal behavior within each downstream domain |
-| **Volume 06 two-class model** | Baseline Handoff Posture class framing | Reconciliation with HCBM — deferred (`OQ-STD-014-009`; `OQ-V06-007`) |
+| **Volume 06 two-class model** | Baseline Handoff Posture class framing | HCCM posture-class affinity on `CC-01` and `CC-02` — **resolved** (Section 20.5.4); split versus unified declaration deferred (`PD-STD-015-003`; `OQ-V06-007`) |
 
 ### 13.5 Non-implication rules (architectural)
 
@@ -742,7 +726,7 @@ Authority and decision separation architecture provides a constitutional map of 
 | **Permanent collection membership** | Volume 05 / `FI-DSN-STD-010` | Handoff Posture is prerequisite only — not membership (HOF-P3) |
 | **Manufacturing execution** | Volume 01 / engineering | Excluded (HMEX; HOF-P4) |
 | **Operational intake procedures** | Volume 05 / engineering | Excluded (HOF-P5) |
-| **Consumer class catalog** | Deferred — `OQ-STD-014-009` | HCBM boundary keys consumed; catalog not established |
+| **Consumer class catalog** | **`FI-DSN-STD-015`** — HCCM (Section 20.5.4) | HCBM boundary keys consumed from G11; catalog **resolved** at planning layer (`PD-STD-015-002`) |
 
 **Permanent rule (Volume 06 §16.5):** Volume 06 standards legislate production-readiness and Handoff Decision policy. Each Handoff act applies that policy to one GPRA instance in a defined consumer context. Neither Handoff authorization nor Handoff Posture declaration is Brain recommendation, customer Selection, GPRA grant, or downstream membership admission.
 
@@ -789,11 +773,11 @@ Volume 05 owns permanent collection belonging, membership, lifecycle, and public
 - Does not perform membership admission, collection lifecycle acts, manufacturing validation, or fulfillment.
 - Does not define production catalog implementation, engineering APIs, or operational intake workflows.
 
-### 14.6 Open question preservation — `OQ-STD-014-008`
+### 14.6 Authority class resolution — `OQ-STD-014-008` (closed)
 
 **Question:** What constitutionally authorized authority class may perform Governed Handoff authorization acts?
 
-**Architectural status:** Section 6 frames Handoff Authorization Architecture. Section 14 maps Handoff authorization to STD-015 principal ownership. The **authority class catalog** — which roles, bodies, or attribution models may perform Handoff authorization, posture declaration, recall, and withdrawal acts — remains **unresolved**. No authority catalog is adopted in this architecture draft. `OQ-STD-014-008` remains **open**.
+**Architectural status:** Section 6 frames Handoff Authorization Architecture. Section 14 maps Handoff authorization to STD-015 principal ownership. The **authority class catalog** is **resolved at planning layer** by `PD-STD-015-001` (Sprint V06-D38.2; Section 20.5.3): one **Handoff Governance Authority (HGA)** with mandatory act-type attribution matrix. `OQ-STD-014-008` is **closed**. Operative normative catalog requirements remain for separately authorized HOF-G2 and HOF-G9 drafting.
 
 ---
 
@@ -941,12 +925,12 @@ The following ten accepted architectural domains (D1–D10) frame STD-015 consti
 |-------|--------|------------------------|-------------------|----------------|----------------------|-------------------------|----------------|
 | **HOF-G1** | D1 | Upstream entry boundary; minimum G11 export consumption; GPRA and posture prerequisites | Entry gate; consumption of STD-014 G11 outputs | Review, Approval, GPRA grant; G11 preparation performance | `FI-DSN-STD-014` G11; G8–G9; §13 outputs; `FI-DSN-STD-012`/`013` scope binding | Gates HOF-G2–G8 | None at entry architecture |
 | **HOF-G2** | D2 | Handoff authorization act architecture; eligibility versus authorization separation at authorization boundary | Governed Handoff authorization acts | GPRA grant; G11 eligibility export as authorization; downstream acceptance | HOF-G1; HEIM; HAAM prohibitions | Gates HOF-G4–G6 | `OQ-STD-014-008` |
-| **HOF-G3** | D3 | Consumer class catalog; HCBM key binding; Volume 06 two-class reconciliation | Consumer taxonomy and context binding | Downstream internal consumer behavior; operational intake procedures | HOF-G1; HCBM export; Volume 06 §12.2 | Feeds HOF-G4, HOF-G8 | `OQ-STD-014-009` |
+| **HOF-G3** | D3 | Consumer class catalog; HCBM key binding; Volume 06 two-class reconciliation | Consumer taxonomy and context binding | Downstream internal consumer behavior; operational intake procedures | HOF-G1; HCBM export; Volume 06 §12.2 | Feeds HOF-G4, HOF-G8 | `OQ-STD-014-009` — **Closed** (Section 20.5.4) |
 | **HOF-G4** | D4 | Handoff Posture declaration; authorization versus declaration relationship; authoritative Handoff Posture per context | Declarative intake posture toward consumer classes | GPRA posture; membership admission; catalog implementation | HOF-G2; HOF-G3; Volume 06 §12.2 | Feeds HOF-G5, HOF-G8 | `OQ-V06-007` |
 | **HOF-G5** | D5 | Handoff act-layer lifecycle; provisional state vocabulary; transition architecture framing | Operative HSLM act-layer states and transitions | G11 eligibility-layer states; GPRA posture lifecycle; artifact lifecycle | HOF-G1; HOF-G2; HSLM two-layer split | Feeds HOF-G6; re-entry deferred | `OQ-STD-015-001` — **Deferred** |
 | **HOF-G6** | D6 | Recall, withdrawal, suspension; GPRA posture transition interaction; forward reliance cessation | Operative recall and posture-transition mechanics | GPRA Invalidated/Superseded establishment; operational recall; HMEX domains | HOF-G5; HRWM; G8 `R60`; G9 `R71` | Affects forward Handoff reliance | `OQ-STD-014-010` |
 | **HOF-G7** | D7 | HEPM reference consumption; HVEM validity consumption; HOEM operative evidence; advisory evidence boundary; stale-evidence protection | Evidence and validity at authorization boundary | Source record rewrite; implementation schemas; advisory as authorization | HOF-G1; HEPM; HVEM; HBIM; G10 BRPAM | Cross-cuts HOF-G2, G4–G6 | None — stale mechanics framed; recall interaction via G6 |
-| **HOF-G8** | D8 | Volume 06 terminus; downstream exit; non-implication rules; Volume 05 and production catalog boundaries | Auditable transition rules at Volume 06 boundary | Membership admission; operational intake; manufacturing execution | HOF-G4; HOF-G5; Volume 06 §9.2 | Enables downstream domain consumption | `OQ-STD-014-009` (catalog detail) |
+| **HOF-G8** | D8 | Volume 06 terminus; downstream exit; non-implication rules; Volume 05 and production catalog boundaries | Auditable transition rules at Volume 06 boundary | Membership admission; operational intake; manufacturing execution | HOF-G4; HOF-G5; Volume 06 §9.2 | Enables downstream domain consumption | `OQ-STD-014-009` — **Closed** (Section 20.5.4) |
 | **HOF-G9** | D9 | Authority and decision separation; GOV-004 Brain boundary; STD-014 authority preservation; peer-distinct decision classes | Constitutional authority map | Absorbing STD-014 Review/Approval; Brain Handoff authority | GOV-004; §14 architecture; HAAM | Cross-cuts all groups | `OQ-STD-014-008` (authority catalog) |
 | **HOF-G10** | D10 | Historical Handoff preservation; additive audit; HPAM extension; no overwrite of upstream records | Preservation and auditability of Handoff acts and posture history | Erasure of Approval, GPRA, G11 preparation, or prior Handoff records | HPAM; PRR-P9 extension; HOF-P7 | Cross-cuts all groups | None |
 
@@ -994,7 +978,7 @@ The following questions remain **open** at the architecture layer. None are reso
 | ID | Question | Status | Principal architecture section | Expected resolution owner / gate | Notes |
 |----|----------|--------|------------------------------|----------------------------------|-------|
 | `OQ-STD-014-008` | What constitutionally authorized authority class may perform Governed Handoff authorization acts? | **Open** | §6; §14.6 | STD-015 requirement planning or separately authorized architecture amendment | Originated in STD-014 G11 HAAM deferral; authority class catalog not adopted |
-| `OQ-STD-014-009` | How are downstream consumer classes constitutionally cataloged and bound to Handoff context? | **Open** | §7; §13.4 | STD-015 requirement planning; HCBM reconciliation with Volume 06 two-class model | Catalog taxonomy and HCBM mapping deferred |
+| `OQ-STD-014-009` | How are downstream consumer classes constitutionally cataloged and bound to Handoff context? | **Closed** (Sprint V06-D38.3) | §7; §13.4; Section 20.5.4 | HCCM closed catalog and binding architecture adopted | — |
 | `OQ-STD-014-010` | When GPRA posture becomes **Invalidated** or **Superseded**, is forward Handoff recall automatic, separately authorized, or notification-only? | **Open** | §10; §15.6 | STD-015 requirement planning; Models A–D framed, none adopted | HRWM constitutional effects consumed; operative recall mechanics deferred |
 | `OQ-V06-007` | Should Handoff Posture always split into library intake and production catalog classes, or may a single handoff serve both when rules are identical? | **Open** | §8; §15.1 | STD-015 requirement planning; Volume 06 §12.2 default noted | Models A–C framed, none adopted |
 | `OQ-STD-015-001` | Handoff act-layer re-entry mechanics — May a GPRA re-enter the Handoff act path after **Rejected**, **Suspended**, **Withdrawn**, **Recalled**, or other relevant act-layer states — and if so, under what upstream posture, eligibility, and authorization conditions? | **Deferred** | §9.3; §15.5 | `FI-DSN-STD-015`; Section 20 planning decision | Registered Sprint V06-D35.3; mechanics architecturally deferred; HPAM preservation constraint applies; no re-entry model adopted |
@@ -1026,7 +1010,7 @@ The following subjects are **explicitly deferred** from this architecture draft.
 |---|------------------|-------------------------------------|
 | 1 | **Normative requirement drafting** | Separately authorized requirement planning and drafting sprints — not authorized by V06-D33.5 |
 | 2 | **Final Handoff authority class catalog** | `OQ-STD-014-008`; HOF-G2; STD-015 requirement planning |
-| 3 | **Final consumer class catalog** | `OQ-STD-014-009`; HOF-G3; STD-015 requirement planning |
+| 3 | **Final consumer class catalog** | `OQ-STD-014-009` **closed**; HCCM adopted (Section 20.5.4); HOF-G3 |
 | 4 | **Split versus unified Handoff Posture decision** | `OQ-V06-007`; HOF-G4; STD-015 requirement planning |
 | 5 | **Recall mechanics** (automatic, separately authorized, notification-only, or hybrid) | `OQ-STD-014-010`; HOF-G6; STD-015 requirement planning |
 | 6 | **Re-entry mechanics** after act-layer terminal or pause states | `OQ-STD-015-001`; HOF-G5; Section 20 planning decision |
@@ -1070,7 +1054,7 @@ Architecture Validation is governance-level validation of the Version 0.1 Archit
 | 10 | **Handoff act versus Handoff Posture separation** | Authorization, posture declaration, and completion remain peer-distinct decision classes | §8.2; §14.2; §15.1 |
 | 11 | **Evidence reference versus operative evidence separation** | HEPM reference classes, HVEM exports, HOEM operative records, and advisory evidence remain architecturally distinct | §11.1–11.2 |
 | 12 | **Lifecycle ownership** | Four-layer model (G11 eligibility, GPRA posture, STD-015 act, Handoff Posture) with distinct owners preserved | §9; §15 |
-| 13 | **Open question preservation** | `OQ-STD-014-008`, `OQ-STD-014-009`, `OQ-STD-014-010`, and `OQ-V06-007` remain open; re-entry mechanics remain unresolved as an unnumbered architecture question (§17.1); no catalog or mechanic adopted | §17; §17.1 |
+| 13 | **Open question preservation** | `OQ-STD-014-010` and `OQ-V06-007` remain open; `OQ-STD-015-001` remains **Deferred**; `OQ-STD-014-008` and `OQ-STD-014-009` **closed** at planning layer (Sections 20.5.3–20.5.4); no recall or posture-split mechanic adopted in architecture Sections 1–19 | §17; §17.1 |
 | 14 | **No architecture precommitment beyond authorized scope** | No authority catalog, consumer catalog, posture model, recall mechanic, or re-entry rule selected | §§6–8, 10, 15; §17–18 |
 | 15 | **No normative language** | No operative `SHALL` requirements; no `FI-DSN-STD-015-R##` identifiers; no normative body (Section 20+) | Entire document; §16 boundary statement |
 | 16 | **No implementation authority** | No APIs, schemas, queues, storage, UI, workflows, or operational procedures prescribed | §4; §11.5; §18 row 7 |
@@ -1094,12 +1078,14 @@ Architecture Validation is governance-level validation of the Version 0.1 Archit
 
 This architecture draft **does not**:
 
-- Adopt a final Handoff authority class catalog (`OQ-STD-014-008`)
-- Adopt a final consumer class catalog (`OQ-STD-014-009`)
 - Select split, unified, or catalog-driven Handoff Posture model (`OQ-V06-007`)
 - Select automatic, separately authorized, notification-only, or hybrid recall mechanics (`OQ-STD-014-010`)
-- Select re-entry mechanics after act-layer terminal or pause states (unnumbered architecture question — §17.1; no governed identifier assigned; no model selected)
-- Authorize normative requirement drafting, requirement planning, Product Sprint 004, or implementation design
+- Select re-entry mechanics after act-layer terminal or pause states (`OQ-STD-015-001` — **Deferred**)
+- Authorize normative requirement drafting beyond committed Tranche 1, Tranche 2/3 authorization, Product Sprint 004, or implementation design
+
+**Resolved at planning layer (Sprint V06-D38.2):** Handoff authority class catalog (`OQ-STD-014-008` closed; `PD-STD-015-001` resolved — Section 20.5.3).
+
+**Resolved at planning layer (Sprint V06-D38.3):** Consumer class catalog and binding (`OQ-STD-014-009` closed; `PD-STD-015-002` resolved — Section 20.5.4).
 
 Architecture validation confirms independent architecture review **completed** (Sprint V06-D33.6), blocking correction **accepted** (Sprint V06-D33.6A), architecture **accepted** at Version 0.1 Architecture Draft posture (Sprint V06-D33.7), and validation disposition **synchronized** (Sprint V06-D33.7A). The **next governed gate** is controlled commit of the accepted STD-015 architecture together with accepted REG and QUE synchronization. Requirement planning remains a **later separately authorized gate**; normative requirement drafting remains **not authorized**.
 
@@ -1107,9 +1093,9 @@ Architecture validation confirms independent architecture review **completed** (
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D36.1 — Section 20 normative requirement planning framework **authored**. Sprint V06-D36.2 — independent constitutional review **completed**; **conditional** findings identified (Sprint V06-D36.3 corrective). Sprint V06-D36.3 — Section 20 constitutional corrective **applied** and **accepted**. Sprint V06-D36.4 — independent planning re-review **completed**; Disposition **A — Accept**. Sprint V06-D36.5 — Section 20 requirement plan **adopted**; normative requirement planning **completed**. Architecture Sections 1–19 **accepted** at Version 0.1 Architecture Draft posture (Sprint V06-D33.7). `OQ-STD-015-001` **registered Deferred** (Sprint V06-D35.3). Tranche 1 normative requirement drafting **authorized** (Sprint V06-D37.1); Tranche 1 requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** in Section 21. Tranches 2–3 normative drafting **not authorized**. Section 20 assigns no `FI-DSN-STD-015-R##` identifiers and drafts no operative normative language. No governed open question is resolved in this section. All `PD-STD-015-*` placeholders remain **unresolved**.
+**Planning posture:** Sprint V06-D36.1 — Section 20 normative requirement planning framework **authored**. Sprint V06-D36.2 — independent constitutional review **completed**; **conditional** findings identified (Sprint V06-D36.3 corrective). Sprint V06-D36.3 — Section 20 constitutional corrective **applied** and **accepted**. Sprint V06-D36.4 — independent planning re-review **completed**; Disposition **A — Accept**. Sprint V06-D36.5 — Section 20 requirement plan **adopted**; normative requirement planning **completed**. Architecture Sections 1–19 **accepted** at Version 0.1 Architecture Draft posture (Sprint V06-D33.7). `OQ-STD-015-001` **registered Deferred** (Sprint V06-D35.3). Tranche 1 normative requirement drafting **authorized** (Sprint V06-D37.1); Tranche 1 requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** in Section 21; **committed** (Sprint V06-D37.3). `PD-STD-015-001` **resolved** (Sprint V06-D38.2; Section 20.5.3); `OQ-STD-014-008` **closed**. `PD-STD-015-002` **resolved** (Sprint V06-D38.3; Section 20.5.4); `OQ-STD-014-009` **closed**. Tranches 2–3 normative drafting **not authorized**. Section 20 assigns no new `FI-DSN-STD-015-R##` identifiers beyond committed Tranche 1 and drafts no new operative normative language in this sprint. `PD-STD-015-003` through `PD-STD-015-005` remain **Placeholder — unresolved**.
 
-This section establishes the adopted planning framework. Planning decisions (`PD-STD-015-*`) remain registered as **placeholders** pending separately authorized resolution sprints. Operative requirement text belongs in Section 21+ after separately authorized normative drafting gates.
+This section establishes the adopted planning framework. Planning decisions `PD-STD-015-001` and `PD-STD-015-002` are **resolved** at Sections 20.5.3 and 20.5.4 respectively. Remaining `PD-STD-015-*` placeholders are pending separately authorized resolution sprints. Operative requirement text belongs in Section 21+ after separately authorized normative drafting gates.
 
 ### 20.1 Requirement planning methodology
 
@@ -1162,10 +1148,10 @@ The accepted architecture groups **HOF-G1 through HOF-G10** are **adopted** as t
 | **Explicit exclusions** | GPRA grant; G11 eligibility export as authorization; downstream intake acceptance |
 | **Upstream dependencies** | HOF-G1; HEIM; HAAM (`FI-DSN-STD-014` Section 20.23.2) |
 | **Downstream implications** | Gates HOF-G4 and HOF-G5; feeds HOF-G6 through the HOF-G5 lifecycle architecture. HOF-G3 remains a peer dependency for HOF-G4 |
-| **Open questions** | `OQ-STD-014-008` — **Open**; blocks operative authority catalog |
-| **Likely requirement themes** | Authorization act distinct from eligibility; authorization record; prohibition reinforcement; authority class consumption after PD resolution |
-| **Collision risks** | Inventing authority classes before `PD-STD-015-001`; collapsing authorization into posture declaration |
-| **Drafting prerequisites** | **`PD-STD-015-001` resolved** |
+| **Open questions** | `OQ-STD-014-008` — **Closed** (Sprint V06-D38.2); authority catalog resolved at planning layer (Section 20.5.3) |
+| **Likely requirement themes** | Authorization act distinct from eligibility; authorization record; prohibition reinforcement; HGA and act-type matrix consumption |
+| **Collision risks** | Collapsing authorization into posture declaration; diverging from adopted HGA act-type matrix |
+| **Drafting prerequisites** | **`PD-STD-015-001` resolved** — **complete** (Sprint V06-D38.2) |
 | **Review gate** | HAAM and GOV-004 boundary review before Tranche 2 commit |
 
 #### HOF-G3 — Consumer class and binding
@@ -1177,10 +1163,10 @@ The accepted architecture groups **HOF-G1 through HOF-G10** are **adopted** as t
 | **Explicit exclusions** | Downstream internal consumer behavior; operational intake procedures; membership admission |
 | **Upstream dependencies** | HOF-G1; HCBM (`FI-DSN-STD-014` Section 20.23.6); Volume 06 §12.2 |
 | **Downstream implications** | Feeds HOF-G4, HOF-G8 |
-| **Open questions** | `OQ-STD-014-009` — **Open** |
-| **Likely requirement themes** | Catalog architecture; HCBM binding; consumer context keys; Volume 06 class reconciliation |
-| **Collision risks** | Absorbing Volume 05 intake; defining downstream queue behavior |
-| **Drafting prerequisites** | **`PD-STD-015-002` resolved** |
+| **Open questions** | `OQ-STD-014-009` — **Closed** (Sprint V06-D38.3); consumer catalog and binding resolved at planning layer (Section 20.5.4) |
+| **Likely requirement themes** | HCCM catalog consumption; bound consumer context identity; HCBM key binding; multi-binding cardinality; authoritative Handoff per context |
+| **Collision risks** | Absorbing Volume 05 intake; defining downstream queue behavior; resolving posture split (`PD-STD-015-003`) |
+| **Drafting prerequisites** | **`PD-STD-015-002` resolved** — **complete** (Sprint V06-D38.3) |
 | **Review gate** | Volume 05 boundary review before Tranche 2 commit |
 
 #### HOF-G4 — Handoff Posture declaration
@@ -1252,10 +1238,10 @@ The accepted architecture groups **HOF-G1 through HOF-G10** are **adopted** as t
 | **Explicit exclusions** | Membership admission; operational intake; manufacturing execution |
 | **Upstream dependencies** | HOF-G4; HOF-G5; Volume 06 §9.2; HCBM |
 | **Downstream implications** | Enables downstream domain consumption without absorbing downstream authority |
-| **Open questions** | `OQ-STD-014-009` (catalog detail) — **Open** |
-| **Likely requirement themes** | Completed≠acceptance; posture export boundaries; manufacturing boundary; HCBM reconciliation detail after PD resolution |
+| **Open questions** | `OQ-STD-014-009` — **Closed** (Sprint V06-D38.3); catalog detail resolved at planning layer (Section 20.5.4) |
+| **Likely requirement themes** | Completed≠acceptance; posture export boundaries; manufacturing boundary; HCBM reconciliation detail per HCCM |
 | **Collision risks** | Defining Volume 05 intake procedures; implying membership from exit |
-| **Drafting prerequisites** | HOF-G4 and HOF-G5 baseline planned; **`PD-STD-015-002` resolved** for catalog detail themes |
+| **Drafting prerequisites** | HOF-G4 and HOF-G5 baseline planned; **`PD-STD-015-002` resolved** — **complete** (Sprint V06-D38.3) |
 | **Review gate** | Volume 05 and HMEX boundary review before Tranche 2/3 commit |
 
 #### HOF-G9 — Authority separation (cross-cutting)
@@ -1270,7 +1256,7 @@ The accepted architecture groups **HOF-G1 through HOF-G10** are **adopted** as t
 | **Open questions** | `OQ-STD-014-008` (authority catalog) — **Open** |
 | **Likely requirement themes** | Decision-class separation; Brain prohibition map; HAAM inherited prohibitions; authority catalog integration after PD resolution |
 | **Collision risks** | Duplicating HOF-G2 authorization body; restating full G6 MAGAC catalog |
-| **Drafting prerequisites** | Tranche 1 prohibitions **may** draft without catalog; full catalog requires **`PD-STD-015-001` resolved** |
+| **Drafting prerequisites** | Tranche 1 prohibitions **may** draft without catalog; full catalog requires **`PD-STD-015-001` resolved** — **complete** (Sprint V06-D38.2) |
 | **Review gate** | GOV-004 non-duplication review at each tranche commit |
 
 #### HOF-G10 — Preservation and audit (cross-cutting)
@@ -1330,8 +1316,8 @@ HOF-G10 (Preservation) — cross-cuts all
 
 | Order | Planning decision | Governing OQ | Unblocks |
 |-------|-------------------|--------------|----------|
-| 1 | `PD-STD-015-001` | `OQ-STD-014-008` | HOF-G2 operative catalog; HOF-G9 catalog integration |
-| 2 | `PD-STD-015-002` | `OQ-STD-014-009` | HOF-G3; HOF-G8 catalog detail |
+| 1 | `PD-STD-015-001` | `OQ-STD-014-008` | HOF-G2 operative catalog; HOF-G9 catalog integration — **resolved** (Section 20.5.3) |
+| 2 | `PD-STD-015-002` | `OQ-STD-014-009` | HOF-G3; HOF-G8 catalog detail — **resolved** (Section 20.5.4) |
 | 3 | `PD-STD-015-003` | `OQ-V06-007` | HOF-G4 |
 | 4 | `PD-STD-015-004` | `OQ-STD-014-010` | HOF-G6 |
 | 5 | `PD-STD-015-005` | `OQ-STD-015-001` | HOF-G5 re-entry operative themes (or explicit Version 1.0 deferral) |
@@ -1352,27 +1338,290 @@ Decisions 2 and 3 are **planning-interrelated** (consumer class and posture mode
 
 | Open question | Target group | Status | Required planning decision | Latest permissible resolution | Resolution gate |
 |---------------|--------------|--------|---------------------------|------------------------------|-----------------|
-| `OQ-STD-014-008` | HOF-G2; HOF-G9 | **Open** | `PD-STD-015-001` | Pre-HOF-G2 operative drafting | Separately authorized planning sprint |
-| `OQ-STD-014-009` | HOF-G3; HOF-G8 | **Open** | `PD-STD-015-002` | Pre-HOF-G3 operative drafting | Separately authorized planning sprint |
+| `OQ-STD-014-008` | HOF-G2; HOF-G9 | **Closed** | `PD-STD-015-001` | Pre-HOF-G2 operative drafting | **Resolved** — Sprint V06-D38.2 (Section 20.5.3) |
+| `OQ-STD-014-009` | HOF-G3; HOF-G8 | **Closed** | `PD-STD-015-002` | Pre-HOF-G3 operative drafting | **Resolved** — Sprint V06-D38.3 (Section 20.5.4) |
 | `OQ-V06-007` | HOF-G4 | **Open** | `PD-STD-015-003` | Pre-HOF-G4 operative drafting | Separately authorized planning sprint |
 | `OQ-STD-014-010` | HOF-G6 | **Open** | `PD-STD-015-004` | Pre-HOF-G6 operative drafting | Separately authorized planning sprint |
 | `OQ-STD-015-001` | HOF-G5 | **Deferred** | `PD-STD-015-005` | Pre-HOF-G5 re-entry operative drafting; Version 1.0 deferral permitted | Section 20 planning decision sprint |
 
-No open question is resolved in Sprint V06-D36.1. All remain **open** or **deferred** as listed.
+No open question was resolved in Sprint V06-D36.1. `OQ-STD-014-008` was **closed** in Sprint V06-D38.2 (`PD-STD-015-001`). `OQ-STD-014-009` was **closed** in Sprint V06-D38.3 (`PD-STD-015-002`). Remaining governed OQs remain **open** or **deferred** as listed.
 
 #### 20.5.2 Planning decision register (placeholders)
 
 | ID | Question | Governing source | Target group | Required resolution stage | Status | Consequence if unresolved |
 |----|----------|----------------|--------------|-------------------------|--------|---------------------------|
-| `PD-STD-015-001` | What constitutionally authorized authority class may perform Governed Handoff authorization, posture declaration, recall, and withdrawal acts? | `OQ-STD-014-008`; HAAM (STD-014 Section 20.23.2); §6; §14.6 | HOF-G2; HOF-G9 | Pre-HOF-G2 operative drafting (Tranche 2) | **Placeholder — unresolved** | Operative authority catalog prohibited; prohibition-only themes only. **Structural neutrality:** resolution may adopt peer authority classes, a unified authority class, or another constitutionally valid bounded structure — Section 20 selects no outcome |
-| `PD-STD-015-002` | How are downstream consumer classes constitutionally cataloged and bound to Handoff context? | `OQ-STD-014-009`; HCBM (STD-014 Section 20.23.6); §7; §13.4 | HOF-G3; HOF-G8 | Pre-HOF-G3 operative drafting (Tranche 2) | **Placeholder — unresolved** | HCBM key consumption only; catalog taxonomy prohibited |
+| `PD-STD-015-001` | What constitutionally authorized authority class may perform Governed Handoff authorization, posture declaration, recall, and withdrawal acts? | `OQ-STD-014-008`; HAAM (STD-014 Section 20.23.2); §6; §14.6 | HOF-G2; HOF-G9 | Pre-HOF-G2 operative drafting (Tranche 2) | **Resolved** (Sprint V06-D38.2; Section 20.5.3) | HOF-G2 operative catalog and HOF-G9 catalog integration **unblocked at planning layer**; normative drafting remains separately authorized |
+| `PD-STD-015-002` | How are downstream consumer classes constitutionally cataloged and bound to Handoff context? | `OQ-STD-014-009`; HCBM (STD-014 Section 20.23.6); §7; §13.4 | HOF-G3; HOF-G8 | Pre-HOF-G3 operative drafting (Tranche 2) | **Resolved** (Sprint V06-D38.3; Section 20.5.4) | HOF-G3 operative catalog and HOF-G8 catalog-detail themes **unblocked at planning layer**; normative drafting remains separately authorized |
 | `PD-STD-015-003` | Should Handoff Posture split into library intake and production catalog classes, or may a unified posture serve both when rules are identical? | `OQ-V06-007`; Volume 06 §12.2; §8 | HOF-G4 | Pre-HOF-G4 operative drafting (Tranche 2) | **Placeholder — unresolved** | Authorization≠posture separation only; posture model selection prohibited |
 | `PD-STD-015-004` | When GPRA posture becomes **Invalidated** or **Superseded**, is forward Handoff recall automatic, separately authorized, or notification-only? | `OQ-STD-014-010`; HRWM (STD-014 Section 20.23.8); §10; §15.6 | HOF-G6 | Pre-HOF-G6 operative drafting (Tranche 3) | **Placeholder — unresolved** | HRWM eligibility effects only; recall trigger mechanics prohibited |
 | `PD-STD-015-005` | May a GPRA re-enter the Handoff act path after act-layer terminal or pause states — and if so, under what conditions — or is re-entry deferred from Version 1.0? | `OQ-STD-015-001`; §9.3; §15.5; HPAM | HOF-G5 | Pre-HOF-G5 re-entry operative drafting (Tranche 3) or Version 1.0 scope decision | **Placeholder — unresolved** | Baseline lifecycle permitted; re-entry transitions prohibited or explicitly deferred |
 
-**Placeholder rule:** `PD-STD-015-*` identifiers are **registered** for planning traceability only. No planning decision is **resolved** until a separately authorized sprint authors and adopts resolution content in a dedicated Section 20 subsection.
+**Placeholder rule:** `PD-STD-015-*` identifiers are **registered** for planning traceability. A planning decision is **resolved** only when a separately authorized sprint authors and adopts resolution content in a dedicated Section 20 subsection. `PD-STD-015-001` is **resolved** at Section 20.5.3. `PD-STD-015-002` is **resolved** at Section 20.5.4.
 
-**`PD-STD-015-001` structural neutrality:** This placeholder frames the authority-class question for planning only. Governed resolution may produce peer authority classes, a unified authority class, or another constitutionally valid bounded structure. Section 20 does not adopt, prefer, or precommit to any outcome.
+#### 20.5.3 PD-STD-015-001 resolution — Handoff Governance Authority and act-type attribution matrix
+
+**Planning decision:** `PD-STD-015-001` — **Resolved** (Sprint V06-D38.2).
+
+**Governing open question closed:** `OQ-STD-014-008` — **Closed** (Sprint V06-D38.2).
+
+**Model designation:** Unified **Handoff Governance Authority** with mandatory **act-type attribution matrix** (constitutional discovery Model D; Sprint V06-D38.1 advisory recommendation — **adopted** in this resolution).
+
+##### 20.5.3.1 Decision
+
+F.I. Forgot adopts **one** constitutional Handoff authority class — **Handoff Governance Authority (HGA)** — as the sole constitutionally authorized owner of operative STD-015 Handoff acts at the Volume 06 Layer B CP-04 boundary.
+
+HGA performs all operative Handoff acts listed in Section 20.5.3.6 through a **mandatory act-type attribution matrix**. Each act type remains a **peer-distinct constitutional decision class** (§14.2). Co-performing or sequencing multiple act types does **not** collapse decision classes when each act receives separate attribution and a separate **HOEM** operative record expectation.
+
+No organizational role chart, job title, committee roster, runtime system, API, schema, UI, workflow engine, or implementation storage is established by this resolution.
+
+##### 20.5.3.2 Constitutional rationale
+
+1. **HAAM alignment** — STD-014 G11 (`FI-DSN-STD-014-R86`) defers Handoff authorization class definition to STD-015 while prohibiting upstream promotion. HGA is a **new** STD-015 authority class — not MAGAC, DDAC, DSRA, G8, G9, G10, G11 export, or downstream consumer authority.
+2. **Peer-distinct decision preservation** — Section 14.2 and Tranche 1 requirement `FI-DSN-STD-015-R24` require non-collapse of Handoff eligibility, authorization, posture declaration, completion, recall, withdrawal, and suspension. A unified **owner** with mandatory separate **act attribution** satisfies this without unnecessary authority fragmentation.
+3. **Evidence architecture fit** — HOF-G7 assigns operative **HOEM** records to authorization, posture, completion, recall, and withdrawal acts. One accountable authority domain with act-type-specific HOEM expectations aligns planning with committed evidence framework.
+4. **Minimum ambiguity** — One constitutional answer to "who may perform Handoff acts" reduces governance dead zones while the matrix preserves audit granularity.
+5. **Sibling PD preservation** — This resolution names **who** may act; it does not resolve **when** recall triggers (`PD-STD-015-004`), **how** posture splits (`PD-STD-015-003`), or **whether** re-entry is permitted (`PD-STD-015-005`). Consumer class catalog and binding are **`PD-STD-015-002`** — **resolved** at Section 20.5.4.
+
+##### 20.5.3.3 Governing-question traceability
+
+The accepted governing question requires governance that determines whether a GPRA may **receive and retain** governed Handoff posture toward authorized consumer classes **while preserving separate authority** over PRR&A, membership, manufacturing, and operational intake.
+
+HGA owns **receive and retain** mechanics at the STD-015 act layer only. HGA does not absorb PRR&A (HOF-P1; HOF-P8), membership (HOF-P3), manufacturing (HOF-P4), or operational intake (HOF-P5). Eligibility remains upstream (HOF-P2; HEIM).
+
+##### 20.5.3.4 HAAM compatibility
+
+| HAAM prohibition | HGA resolution compatibility |
+|------------------|------------------------------|
+| MAGAC / Approval does not authorize Handoff | **Preserved** — HGA is not an Approval authority class |
+| DDAC / DSRA does not authorize Handoff | **Preserved** |
+| G8 invalidation does not perform Handoff recall mechanics | **Preserved** — recall **acts** are HGA; recall **triggers** remain `PD-STD-015-004` |
+| G9 supersession does not perform Handoff recall mechanics | **Preserved** |
+| G10 Brain does not authorize Handoff | **Preserved** |
+| G11 export does not authorize Handoff | **Preserved** |
+| Downstream consumers do not retroactively authorize Handoff | **Preserved** |
+
+##### 20.5.3.5 HBIM and GOV-004 compatibility
+
+Brain remains advisory at the Handoff boundary (HOF-P6; `FI-DSN-GOV-004`; G11 `FI-DSN-STD-014-R92`). HGA is not Brain. Brain outputs may inform HGA consideration but do not satisfy act attribution or **HOEM** operative record requirements. Handoff policy is not runtime selection (HOF-P9).
+
+##### 20.5.3.6 HOF principle compatibility
+
+| Principle | Compatibility |
+|-----------|---------------|
+| HOF-P1 GPRA is not Handoff | HGA does not grant GPRA |
+| HOF-P2 Eligibility is not authorization | Matrix separates authorization act from eligibility consumption |
+| HOF-P3 Handoff is not membership | Posture declaration act does not admit membership |
+| HOF-P4 Handoff is not manufacturing execution | Completion act does not authorize manufacture |
+| HOF-P5 Handoff is not operational intake | No intake procedure ownership |
+| HOF-P6 Brain does not authorize Handoff | HGA exclusive operative actor; Brain excluded |
+| HOF-P7 Historical Handoff is preserved | Additive act records required per matrix |
+| HOF-P8 Upstream law consumed | HGA consumes; does not rewrite STD-014 records |
+| HOF-P9 Handoff policy is not runtime selection | HGA distinct from Selection |
+| HOF-P10 Lifecycle peer-distinct | Act-layer states distinct from G11 and GPRA layers |
+
+##### 20.5.3.7 STD-014 compatibility
+
+STD-014 retains exclusive principal authority over Review, Approval, GPRA grant, Invalidated and Superseded posture, and G11 Handoff preparation (`FI-DSN-STD-015-R23`). HGA consumes upstream outputs at entry and performs operative Handoff acts only. G11 HAAM deferral to STD-015 is **satisfied** at planning layer by HGA adoption.
+
+##### 20.5.3.8 Authority ownership
+
+| Authority subject | Constitutional owner | Planning resolution status |
+|-------------------|---------------------|---------------------------|
+| Handoff eligibility export facts | `FI-DSN-STD-014` G11 — HEIM / HSLM eligibility layer | Unchanged — consumed |
+| Handoff authorization acts | **HGA** | **Resolved** |
+| Handoff Posture declaration acts | **HGA** | **Resolved** |
+| Handoff act completion acts | **HGA** | **Resolved** |
+| Handoff suspension acts | **HGA** | **Resolved** |
+| Handoff withdrawal acts | **HGA** | **Resolved** |
+| Handoff recall acts | **HGA** | **Resolved** — performer identified; triggers deferred to `PD-STD-015-004` |
+| Recall trigger mechanics on Invalidated / Superseded | Deferred — `PD-STD-015-004` | **Unresolved** |
+| Consumer class catalog | Deferred — `PD-STD-015-002` | **Unresolved** |
+| Posture split versus unified model | Deferred — `PD-STD-015-003` | **Unresolved** |
+| Act-layer re-entry | Deferred — `PD-STD-015-005` | **Unresolved** |
+
+##### 20.5.3.9 Decision-class mapping
+
+| Peer-distinct decision class (§14.2) | Mapped operative act type | HGA relationship |
+|--------------------------------------|---------------------------|------------------|
+| Handoff eligibility | — (G11 layer — not HGA) | Consumed only |
+| Handoff authorization | **Authorization** | HGA performs |
+| Handoff Posture declaration | **Posture declaration** | HGA performs |
+| Handoff act completion | **Completion** | HGA performs |
+| Handoff recall | **Recall** | HGA performs — triggers separate PD |
+| Handoff withdrawal | **Withdrawal** | HGA performs |
+| Handoff suspension | **Suspension** | HGA performs |
+| Downstream acceptance | — | Excluded — not HGA |
+| Permanent collection membership | — | Excluded — Volume 05 |
+| Manufacturing validation and execution | — | Excluded — HMEX |
+
+##### 20.5.3.10 HOEM attribution strategy
+
+Operative Handoff evidence at the act layer follows **HOEM** (HOF-G7). For each matrix act type, normative drafting (separately authorized) SHALL require:
+
+1. **Separate act attribution** to HGA for that act type — not merged with other act types in a single undifferentiated operative record.
+2. **Separate HOEM operative record expectation** per act type — additive to **HEPM** references and **HVEM** exports; not a substitute for upstream source records.
+3. **Context binding** — each HOEM record binds to GPRA identity, Production Obligation scope, and consumer context per governing law (consumer catalog detail deferred to `PD-STD-015-002`).
+4. **Advisory boundary** — Brain-influenced inputs may appear in consideration evidence but do not constitute act attribution.
+
+##### 20.5.3.11 Historical preservation implications
+
+All HGA-attributed acts are **additive historical constitutional fact** (HOF-P7; HPAM extension per HOF-G10). Resolution of `PD-STD-015-001` does not authorize erasure, merge, or rewrite of prior Handoff records, upstream Approval or GPRA records, or G11 preparation history when later acts occur.
+
+##### 20.5.3.12 Audit implications
+
+The act-type matrix requires auditable reconstruction of **which** Handoff act types occurred, **in what constitutional context**, and **under HGA attribution** — without prescribing archival media, retention duration, notification payloads, or engineering storage. Operative recall, withdrawal, and suspension audit detail remains principally assigned to HOF-G6 normative drafting; this resolution establishes performer and act-type accountability only.
+
+##### 20.5.3.13 Explicit exclusions
+
+This resolution does **not**:
+
+| Excluded subject | Governing placeholder |
+|------------------|---------------------|
+| Recall trigger mechanics on GPRA Invalidated or Superseded | `PD-STD-015-004` / `OQ-STD-014-010` |
+| Consumer class catalog and binding taxonomy | `PD-STD-015-002` / `OQ-STD-014-009` |
+| Handoff Posture split versus unified architecture | `PD-STD-015-003` / `OQ-V06-007` |
+| Act-layer re-entry after Rejected, Suspended, Withdrawn, or Recalled | `PD-STD-015-005` / `OQ-STD-015-001` |
+| Organizational implementation | — |
+| Runtime, API, schema, UI, workflow, or storage design | — |
+| Normative `FI-DSN-STD-015-R##` requirement text | Separately authorized tranche drafting |
+| Tranche 2 or Tranche 3 drafting authorization | Separate governed sprint |
+
+##### 20.5.3.14 Mandatory act-type attribution matrix
+
+| Operative act type | Constitutional owner | Required separate attribution | HOEM record expectation |
+|--------------------|---------------------|------------------------------|-------------------------|
+| **Authorization** | **HGA** | Distinct **Handoff authorization act** attribution — not eligibility export, GPRA grant, Brain recommendation, or downstream acceptance | **HOEM authorization operative record** — additive; binds authorization to GPRA, obligation scope, and consumer context |
+| **Posture declaration** | **HGA** | Distinct **Handoff Posture declaration act** attribution — not authorization act, GPRA Retention posture, or membership admission | **HOEM posture declaration operative record** — additive; binds declarative posture to consumer context |
+| **Completion** | **HGA** | Distinct **Handoff act completion** attribution — not posture declaration alone, downstream acceptance, or manufacturing clearance | **HOEM completion operative record** — additive; records Volume 06 boundary completion for governed context |
+| **Suspension** | **HGA** | Distinct **Handoff suspension act** attribution — not G11 Blocked eligibility, GPRA posture loss, or downstream deferral | **HOEM suspension operative record** — additive; records temporary forward-reliance pause without erasing prior authorization history |
+| **Withdrawal** | **HGA** | Distinct **Handoff withdrawal act** attribution — not GPRA Invalidated posture, recall act, or operational consumer revocation | **HOEM withdrawal operative record** — additive; records active Handoff-layer retraction |
+| **Recall** | **HGA** | Distinct **Handoff recall act** attribution — not G8/G9 posture establishment, withdrawal act, or operational recall procedure | **HOEM recall operative record** — additive; records forward Handoff authority cessation while preserving historical fact |
+
+**Matrix rule:** Performing multiple act types in a governed sequence requires **separate attribution and separate HOEM operative record expectations** per row — never a single collapsed operative record that merges authorization, posture declaration, completion, suspension, withdrawal, or recall into one undifferentiated Handoff act.
+
+##### 20.5.3.15 Downstream planning effects
+
+| Group | Effect |
+|-------|--------|
+| **HOF-G2** | Operative authorization catalog drafting **unblocked at planning layer** — normative drafting separately authorized |
+| **HOF-G9** | Authority catalog integration **unblocked at planning layer** — normative drafting separately authorized |
+| **HOF-G4, G5, G6** | Unaffected by this resolution except recall **performer** identified; recall triggers, posture model, and lifecycle transitions remain blocked by sibling PDs |
+
+**Advancement note:** `PD-STD-015-001` resolution is necessary but **not sufficient** for Tranche 2 normative drafting authorization. `PD-STD-015-003` remains unresolved (`PD-STD-015-002` **resolved** — Section 20.5.4). Tranche 2 normative drafting remains **unauthorized**.
+
+#### 20.5.4 PD-STD-015-002 resolution — Handoff Consumer Class Model (HCCM)
+
+**Planning decision:** `PD-STD-015-002` — **Resolved** (Sprint V06-D38.3).
+
+**Governing open question closed:** `OQ-STD-014-009` — **Closed** (Sprint V06-D38.3).
+
+**Model designation:** **HCCM** — Handoff Consumer Class Model: closed operative **consumer class catalog**, mandatory **HCBM boundary-key mapping**, **bound consumer context** identity rules, and **multi-binding cardinality** architecture.
+
+##### 20.5.4.1 Decision
+
+F.I. Forgot adopts a **closed catalog** of **six constitutional consumer classes** (`CC-01` through `CC-06`) as the definitive operative taxonomy for Handoff binding at the STD-015 Layer B CP-04 boundary.
+
+Each catalog entry:
+
+1. Identifies a constitutionally distinct downstream **consideration** domain with distinct governing downstream rules.
+2. Maps to one or more **HCBM** boundary keys consumed from G11 export (`FI-DSN-STD-014-R89`) without absorbing downstream internal behavior.
+3. Declares **Volume 06 Handoff Posture class affinity** where applicable — without selecting split, unified, or catalog-driven **posture declaration** architecture (`PD-STD-015-003` remains unresolved).
+4. Remains reconcilable with **HGA** act attribution and **HOEM** context binding per `PD-STD-015-001` (Section 20.5.3).
+
+**Bound consumer context** identity is constitutionally defined as the tuple:
+
+**GPRA identity + Production Obligation scope + consumer class catalog entry (`CC-##`) + consumed HCBM boundary key set**
+
+No organizational structure, runtime routing target, API, schema, storage medium, UI, queue, or downstream implementation identifier is established by this resolution.
+
+##### 20.5.4.2 Constitutional rationale
+
+1. **HCBM consumption** — G11 exports abstract boundary keys only (`FI-DSN-STD-014-R89`). STD-015 owns operative **catalog** and **binding** at the Handoff act layer without redefining G11 export mechanics (HOF-P8).
+2. **Volume 06 reconciliation** — Frozen Volume 06 §12.2 two-class Handoff Posture model is preserved as **posture-class affinity** on catalog entries `CC-01` and `CC-02`. HCBM seven-category vocabulary is reconciled through explicit catalog mapping. Posture **declaration** cardinality (split versus unified) remains `PD-STD-015-003`.
+3. **Governing-question fidelity** — The governing question requires Handoff posture toward **constitutionally authorized downstream consumer classes**. HCCM defines those classes and binding without absorbing membership (HOF-P3), manufacturing execution (HOF-P4), or operational intake (HOF-P5).
+4. **HGA preservation** — Consumer binding identifies **consideration targets** for HGA-authorized acts; binding does not substitute for authorization, posture declaration, or downstream acceptance.
+5. **Closed catalog discipline** — Six entries provide complete design-time coverage of HCBM domains without open-ended extensibility rules that would defer constitutional clarity to implementation.
+
+##### 20.5.4.3 Governing-question traceability
+
+The governing question authorizes Handoff posture toward **constitutionally authorized downstream consumer classes**. HCCM is the planning-layer answer to **which classes exist** and **how a GPRA is bound** to them at design time. HCCM does not determine downstream acceptance, membership admission, manufacturing validation, or intake execution.
+
+##### 20.5.4.4 HCBM compatibility
+
+HCCM **consumes** HCBM boundary keys from G11. HCCM does **not** modify `FI-DSN-STD-014-R89`, redefine HCBM categories, or assign execution authority within downstream domains. The **Catalog** HCBM key is **disambiguated** by consumer class selection (`CC-01` versus `CC-02`) — not by HCBM alone.
+
+##### 20.5.4.5 HGA and PD-STD-015-001 compatibility
+
+All Handoff acts performed under HGA (Section 20.5.3) apply to a **bound consumer context** as defined by HCCM. Authorization, posture declaration, completion, suspension, withdrawal, and recall acts each retain separate HGA attribution and separate **HOEM** record expectations **per bound context**. Consumer binding does not collapse act types or decision classes.
+
+##### 20.5.4.6 HOF principle compatibility
+
+| Principle | Compatibility |
+|-----------|---------------|
+| HOF-P2 Eligibility is not authorization | Binding identifies consideration target only |
+| HOF-P3 Handoff is not membership | `CC-01` enables consideration — not admission |
+| HOF-P4 Handoff is not manufacturing execution | `CC-03` is feasibility consumption boundary only (HMEX) |
+| HOF-P5 Handoff is not operational intake | Binding does not execute intake procedures |
+| HOF-P8 Upstream law consumed | HCBM keys consumed; G11 not rewritten |
+| HOF-P10 Lifecycle peer-distinct | Consumer class binding distinct from eligibility and GPRA posture layers |
+
+##### 20.5.4.7 Operative consumer class catalog
+
+| Catalog ID | Constitutional consumer class | HCBM boundary key(s) | Volume 06 posture-class affinity | Constitutional downstream consideration domain |
+|------------|------------------------------|------------------------|----------------------------------|-----------------------------------------------|
+| **CC-01** | **Permanent collection intake consumer class** | **Catalog**; **Archival systems** | **Library intake posture** | Volume 05 permanent collection **membership consideration** — not admission |
+| **CC-02** | **Production artwork catalog intake consumer class** | **Production**; **Catalog** | **Production catalog posture** | Engineering production artwork catalog **consideration** — not catalog implementation |
+| **CC-03** | **Manufacturing feasibility consumption consumer class** | **Manufacturing** | None (feasibility boundary only) | Design-time manufacturing feasibility **consumption** — not manufacture or production execution (HMEX) |
+| **CC-04** | **Fulfillment intake consumer class** | **Fulfillment** | None | Post-production fulfillment domain **consideration** — not fulfillment execution |
+| **CC-05** | **Publication intake consumer class** | **Publication** | None | Publication or release domain **consideration** — not publication execution |
+| **CC-06** | **Distribution intake consumer class** | **Distribution** | None | Distribution channel domain **consideration** — not distribution execution |
+
+**Catalog rule:** The six entries are **closed** at Version 0.1 planning resolution. New consumer classes require a separately governed planning amendment — not implementation discovery.
+
+**HCBM mapping rule:** Every HCBM boundary key exported for a Handoff context **must** map to exactly one catalog entry primary domain. Where G11 exports multiple keys, the operative bound context records the **consumed key set** disambiguated by selected `CC-##` entry.
+
+##### 20.5.4.8 Binding architecture
+
+| Binding rule | Constitutional requirement |
+|--------------|---------------------------|
+| **Context identity** | A bound consumer context is identified by GPRA identity, Production Obligation scope, `CC-##` catalog entry, and consumed HCBM boundary key set |
+| **Multi-binding cardinality** | One GPRA **may** bind to **multiple** catalog entries simultaneously when each binding serves a **distinct governed purpose** |
+| **Single-purpose constraint** | Each binding SHALL serve one catalog entry per distinct governed purpose — bindings are not merged across `CC-##` identities |
+| **Authoritative Handoff per context** | For each bound consumer context, at most one **authoritative** forward Handoff posture chain applies at a time; superseded posture in the same context remains historical fact (HOF-P7; HPAM) |
+| **PSIM consumption** | G9 authoritative GPRA succession facts constrain which GPRA may be bound in a superseded context — binding consumes PSIM; STD-015 does not establish supersession |
+| **Eligibility gate** | Binding is permitted only where G11 eligibility export and entry boundary conditions are satisfied (HOF-G1; HEIM) — binding is not eligibility and not authorization |
+
+##### 20.5.4.9 HOEM and audit implications
+
+Each bound consumer context provides the **constitutional scope** for HGA act attribution and **HOEM** operative records (Section 20.5.3.10). Normative drafting (separately authorized) SHALL require that operative Handoff act records reference the bound consumer context identity tuple. HCCM does not prescribe record format, storage, or retrieval mechanics.
+
+##### 20.5.4.10 Explicit exclusions
+
+This resolution does **not**:
+
+| Excluded subject | Governing placeholder |
+|------------------|----------------------|
+| Handoff Posture split versus unified declaration | `PD-STD-015-003` / `OQ-V06-007` |
+| Recall trigger mechanics | `PD-STD-015-004` / `OQ-STD-014-010` |
+| Act-layer re-entry | `PD-STD-015-005` / `OQ-STD-015-001` |
+| Downstream internal consumer behavior | Volume 05 / engineering / operational domains |
+| Operational intake procedures | HOF-P5 |
+| Manufacturing or fulfillment execution | HMEX; HOF-P4 |
+| Organizational implementation | — |
+| Runtime, API, schema, UI, or storage design | — |
+| Normative `FI-DSN-STD-015-R##` text | Separately authorized tranche drafting |
+| Tranche 2 drafting authorization | Separate governed sprint |
+
+##### 20.5.4.11 Downstream planning effects
+
+| Group | Effect |
+|-------|--------|
+| **HOF-G3** | Operative consumer catalog and binding drafting **unblocked at planning layer** — normative drafting separately authorized |
+| **HOF-G8** | Catalog-detail and exit-boundary themes **unblocked at planning layer** — normative drafting separately authorized |
+| **HOF-G4** | Unaffected — posture declaration model remains blocked by `PD-STD-015-003` |
+| **HOF-G2** | Unaffected — may consume HCCM for authorization scope binding |
+
+**Advancement note:** `PD-STD-015-002` resolution is necessary but **not sufficient** for Tranche 2 normative drafting authorization. `PD-STD-015-003` remains unresolved. Tranche 2 normative drafting remains **unauthorized**.
 
 ### 20.6 Planned drafting tranches
 
@@ -1387,7 +1636,7 @@ No open question is resolved in Sprint V06-D36.1. All remain **open** or **defer
 1. **HOF-G2** and **HOF-G3** may proceed as **peer work** after `PD-STD-015-001` and `PD-STD-015-002` are respectively resolved — neither group is a drafting prerequisite for the other.
 2. **HOF-G4** follows the accepted outputs of HOF-G2 and HOF-G3 and requires `PD-STD-015-003` resolution.
 3. **HOF-G5** baseline lifecycle follows applicable HOF-G2 authorization and HOF-G4 posture foundations — baseline drafting **must not** precede HOF-G4 posture declaration architecture.
-4. **HOF-G8** partial drafting follows required HOF-G4 posture and HOF-G5 baseline boundary outputs; catalog-detail themes require `PD-STD-015-002` resolution.
+4. **HOF-G8** partial drafting follows required HOF-G4 posture and HOF-G5 baseline boundary outputs; catalog-detail themes **complete** at planning layer (`PD-STD-015-002`; Section 20.5.4).
 5. **HOF-G9** catalog and authority integration follows applicable HOF-G2 through HOF-G4 decisions and requires `PD-STD-015-001` resolution.
 
 This sequence establishes planning order only. It does not authorize normative drafting.
@@ -1571,7 +1820,7 @@ Tranche 1 drafting **does not**:
 
 1. Independent Tranche 1 constitutional review
 2. Tranche 1 commit (separately authorized)
-3. `PD-STD-015-001` through `PD-STD-015-003` resolution (separately authorized — before Tranche 2)
+3. `PD-STD-015-001` **resolved** (Sprint V06-D38.2); `PD-STD-015-002` and `PD-STD-015-003` resolution (separately authorized — before Tranche 2)
 4. Tranche 2 normative drafting authorization (separately authorized)
 5. Independent tranche review and commit per subsequent tranche
 6. Full-body freeze review (future gate — not authorized)
@@ -1584,7 +1833,7 @@ Tranche 1 drafting **does not**:
 
 **Constitutional purpose:** Establish the foundational normative boundary for Governed Handoff at Volume 06 Layer B CP-04 — upstream consumption, evidence architecture, historical preservation, and authority prohibitions — without drafting Handoff authorization acts, consumer catalog, Handoff Posture declaration, act lifecycle, recall mechanics, or downstream exit operative requirements.
 
-**Undrafted groups:** HOF-G2, HOF-G3, HOF-G4, HOF-G5, HOF-G6, HOF-G8 — **not drafted**. HOF-G9 authority catalog integration — **not drafted** (blocked by `PD-STD-015-001`).
+**Undrafted groups:** HOF-G2, HOF-G3, HOF-G4, HOF-G5, HOF-G6, HOF-G8 — **not drafted**. HOF-G9 authority catalog integration — **not drafted** (`PD-STD-015-001` **resolved** at planning layer — Section 20.5.3; normative drafting separately authorized).
 
 ---
 
@@ -1734,7 +1983,7 @@ HOF-G10 Tranche 1 requirements establish additive history, upstream non-overwrit
 
 ### 21.4 Authority Prohibitions (HOF-G9 Partial)
 
-This section establishes Tranche 1 authority prohibition requirements only. It reinforces GOV-004 Brain boundary, STD-014 Review and Approval authority preservation, HAAM inherited prohibitions, and peer-distinct decision classes. It does **not** establish the Handoff authorization class catalog, authority map integration, or operative authority class definition — those remain blocked by `PD-STD-015-001` and `OQ-STD-014-008`.
+This section establishes Tranche 1 authority prohibition requirements only. It reinforces GOV-004 Brain boundary, STD-014 Review and Approval authority preservation, HAAM inherited prohibitions, and peer-distinct decision classes. It does **not** establish the Handoff authorization class catalog or authority map integration — those remain for separately authorized HOF-G9 Tranche 2 drafting after `PD-STD-015-001` resolution (Section 20.5.3).
 
 #### 21.4.1 Inherited authority
 
@@ -1765,7 +2014,7 @@ This section establishes Tranche 1 authority prohibition requirements only. It r
 
 #### 21.4.4 HOF-G9 partial boundary statement
 
-HOF-G9 Tranche 1 requirements establish Brain prohibition, STD-014 authority preservation, HAAM inherited prohibitions, peer-distinct decision class preservation, and `OQ-STD-014-008` deferral only. HOF-G9 authority catalog integration and operative authority map remain **not drafted** until `PD-STD-015-001` is resolved.
+HOF-G9 Tranche 1 requirements establish Brain prohibition, STD-014 authority preservation, HAAM inherited prohibitions, peer-distinct decision class preservation, and Tranche 1 `OQ-STD-014-008` deferral only. HOF-G9 authority catalog integration remains **not drafted** — planning **unblocked** by `PD-STD-015-001` resolution (Section 20.5.3); normative drafting separately authorized.
 
 **Undrafted groups:** HOF-G2–HOF-G6, HOF-G8 — **not drafted**. HOF-G9 catalog integration — **not drafted**.
 
@@ -1781,8 +2030,8 @@ Tranche 1 normative requirements (`FI-DSN-STD-015-R01`–`R24`) establish consti
 | **2 — Catalog and posture** | HOF-G2; HOF-G3; HOF-G4; HOF-G5 baseline; HOF-G8 partial; HOF-G9 catalog integration | — | **Not authorized** |
 | **3 — Recall, re-entry, completion** | HOF-G6; HOF-G5 re-entry or deferral; HOF-G8 completion; HOF-G9 completion | — | **Not authorized** |
 
-**Open questions preserved:** `OQ-STD-014-008` (Handoff authorization class catalog); `OQ-STD-014-009` (consumer class catalog and binding rules); `OQ-STD-014-010` (recall versus posture-transition mechanics); `OQ-V06-007` (Handoff Posture split versus unified model); `OQ-STD-015-001` (**Deferred** — Handoff act-layer re-entry mechanics).
+**Planning decisions preserved:** `PD-STD-015-001` and `PD-STD-015-002` **resolved** (Sections 20.5.3–20.5.4). `PD-STD-015-003` through `PD-STD-015-005` remain **Placeholder — unresolved**.
 
-**Planning decisions preserved:** `PD-STD-015-001` through `PD-STD-015-005` remain **Placeholder — unresolved**.
+**Open questions preserved:** `OQ-STD-014-010` (recall versus posture-transition mechanics); `OQ-V06-007` (Handoff Posture split versus unified model); `OQ-STD-015-001` (**Deferred** — Handoff act-layer re-entry mechanics). `OQ-STD-014-008` and `OQ-STD-014-009` **closed** (Sprints V06-D38.2–V06-D38.3).
 
 Tranche 1 boundary is **open** pending independent constitutional review and separately authorized commit. Tranche 2 normative drafting remains **unauthorized**.
