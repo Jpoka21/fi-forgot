@@ -2813,13 +2813,64 @@ This section establishes operative normative requirements for HSLM baseline Hand
 
 HOF-G5 Tranche 2 baseline requirements establish HSLM operative act-layer lifecycle state vocabulary, peer-distinct class boundaries, bound-context and authoritative posture-chain scope, constitutional meanings for **Eligible-for-consideration**, **Authorized**, **Completed**, **Rejected**, **Suspended**, **Withdrawn**, **Expired**, and **Recalled**, additive HOEM lifecycle record discipline, and prohibited implicit lifecycle promotion only. HERCM re-entry and resumption operative transitions, HRTCM recall trigger mechanics, and HOF-G6 operative recall, withdrawal, and suspension act mechanics remain assigned to Tranche 3. Downstream exit completion remains assigned to HOF-G8.
 
-**Undrafted groups:** HOF-G6, HOF-G8 — **not drafted**. HOF-G9 catalog integration — **not drafted**. HERCM re-entry operative themes — **not drafted** (Tranche 3).
+**Undrafted groups:** HOF-G6 — **not drafted**. HOF-G9 catalog integration — **not drafted**. HOF-G8 completion — **not drafted** (Tranche 3). HERCM re-entry operative themes — **not drafted** (Tranche 3).
 
 ---
 
-### 23.6 Tranche 2 partial boundary statement
+### 23.6 Downstream Exit Partial (HOF-G8)
 
-Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R57`) plus amended `R24` establish HGA operative Handoff authorization acts (HOF-G2), HCCM consumer catalog and binding (HOF-G3), HPPM Handoff Posture declaration (HOF-G4), and HSLM baseline Handoff act-layer lifecycle (HOF-G5 baseline) only.
+This section establishes operative normative requirements for partial downstream exit boundary architecture at the STD-015 Layer B CP-04 Volume 06 terminus. It consumes `PD-STD-015-002` (Section 20.5.4) HCCM catalog-detail and downstream consideration domain mapping, HPPM authoritative posture chain cardinality (Section 23.3), HSLM baseline **Completed** lifecycle meaning (Section 23.5), and Volume 06 downstream exit architecture (Section 13). It does not define downstream exit-completeness operative themes (HOF-G8 completion), downstream acceptance logic, operational intake mechanics, HOF-G6 recall, withdrawal, or suspension operative mechanics, HERCM re-entry operative transitions, or authority catalog integration completion (HOF-G9).
+
+#### 23.6.1 Inherited authority
+
+| Inherited source | What HOF-G8 partial consumes for downstream exit architecture |
+|------------------|--------------------------------------------------------------|
+| **Section 13** | Volume 06 terminus; non-implication rules; Volume 05 and production catalog boundaries |
+| **Section 20.5.4 (HCCM)** | Closed `CC-01`–`CC-06` catalog; HCBM mapping; bound consumer context identity; downstream consideration domain per catalog entry |
+| **Section 20.5.5 (HPPM)** | One authoritative forward posture chain per bound context — consumed for exit scope |
+| **HOF-G3 requirements (`FI-DSN-STD-015-R33`–`R39`)** | Consumer class catalog; HCBM binding; `CC-01`/`CC-02` disambiguation; bound context identity |
+| **HOF-G4 requirements (`FI-DSN-STD-015-R40`–`R47`)** | Handoff Posture declaration architecture; posture versus authorization separation |
+| **HOF-G5 baseline requirements (`FI-DSN-STD-015-R48`–`R57`)** | Baseline lifecycle meanings; **Completed** constitutional boundary; peer-distinct class separation |
+| **HOF-G7 requirements (`FI-DSN-STD-015-R08`–`R15`)** | HOEM framework; additive operative record discipline |
+| **HOF-G10 requirements (`FI-DSN-STD-015-R16`–`R21`)** | HPAM preservation; historical record non-erasure |
+
+#### 23.6.2 Initial normative requirements — Tranche 2 (HOF-G8 partial)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R58` | Governed Handoff SHALL establish the constitutional **downstream exit boundary** at the Volume 06 Layer B CP-04 terminus (Section 13.1; Volume 06 §9.2) as the operative limit of STD-015 principal authority. Beyond this terminus, downstream consumer domains SHALL retain independent authority over acceptance, admission, validation, execution, and operational intake — and STD-015 SHALL NOT absorb downstream domain authority (HOF-P3; HOF-P4; HOF-P5). | Company judgment |
+| `FI-DSN-STD-015-R59` | **Downstream exit** from Governed Handoff SHALL denote constitutionally bounded export of Handoff authorization facts, Handoff Posture facts, **HEPM**/**HVEM** boundary exports, and auditable transition rules toward the constitutional downstream consideration domain mapped to the attributed **HCCM** bound consumer context (Section 13.1) — and SHALL NOT constitute **downstream acceptance**, permanent collection **membership admission**, manufacturing validation or execution, or operational intake completion (`FI-DSN-STD-015-R51`; §13.5; HOF-P3; HOF-P5). | Company judgment |
+| `FI-DSN-STD-015-R60` | **Completed** baseline act-layer lifecycle state (`FI-DSN-STD-015-R51`) SHALL enable constitutionally bounded downstream exit consideration toward the downstream consideration domain mapped to the attributed **HCCM** bound consumer context — and SHALL NOT constitute downstream intake performance, **downstream acceptance**, or operative downstream exit-completeness satisfaction. Operative downstream exit-completeness themes remain assigned to HOF-G8 completion and Tranche 3. | Company judgment |
+| `FI-DSN-STD-015-R61` | Each operative **downstream exit** SHALL be attributable to exactly one **HCCM** bound consumer context and SHALL route exit facts only toward the constitutional downstream consideration domain specified for the bound consumer class catalog entry (`CC-01` through `CC-06`) at Section 20.5.4.7 (`PD-STD-015-002`). **CC-01** (permanent collection intake) and **CC-02** (production artwork catalog intake) downstream exit SHALL remain peer-distinct notwithstanding shared **Catalog** **HCBM** boundary key affinity (`FI-DSN-STD-015-R37`). **CC-03** downstream exit SHALL remain design-time manufacturing feasibility consumption only (HMEX; HOF-P4). **CC-04**, **CC-05**, and **CC-06** downstream exit SHALL remain post-production consideration boundaries excluding fulfillment, publication, and distribution execution respectively. | Company judgment |
+| `FI-DSN-STD-015-R62` | Each downstream exit SHALL preserve consistency between the **HCCM** bound consumer context identity tuple (**GPRA** identity, **Production Obligation** scope, `CC-##` catalog entry, and consumed **HCBM** boundary key set), the **HCBM** boundary key mapping for the selected `CC-##` entry (Section 20.5.4.7), and the constitutional downstream consideration domain receiving the Handoff exit (`PD-STD-015-002`; `FI-DSN-STD-015-R34`, `R35`). Governed Handoff SHALL NOT route downstream exit toward a downstream consideration domain, consumer class, or intake channel not authorized by the applicable bound consumer context catalog entry and consumed **HCBM** boundary key set. A single downstream exit attribution SHALL NOT span multiple bound consumer contexts (`FI-DSN-STD-015-R36`, `R50`). | Company judgment |
+| `FI-DSN-STD-015-R63` | Downstream exit SHALL remain peer-distinct from **Handoff authorization acts**, **Handoff Posture declaration acts**, baseline act-layer lifecycle state attribution, **Handoff recall**, **Handoff withdrawal**, **Handoff suspension**, HERCM re-entry and resumption acts, **GPRA** Retention and **Invalidated** or **Superseded** posture, **downstream acceptance**, permanent collection membership admission, manufacturing validation and execution, and operational intake (`FI-DSN-STD-015-R41`, `R49`, `R51`; HOF-P1; HOF-P3; HOF-P4; HOF-P5). Recording or performing downstream exit SHALL NOT collapse any other peer-distinct decision class into exit attribution. Operative recall, withdrawal, and suspension act mechanics remain assigned to HOF-G6; HERCM re-entry operative transitions remain assigned to Tranche 3. | Company judgment |
+| `FI-DSN-STD-015-R64` | Each constitutionally attributable downstream exit at the Volume 06 boundary SHALL produce additive **HOEM** operative exit-boundary evidence linkage binding the exit attribution to the applicable **GPRA** identity, **Production Obligation** scope, bound consumer context identity, authoritative HPPM posture chain, and constitutional downstream consideration domain (`FI-DSN-STD-015-R11`; `FI-DSN-STD-015-R56`). **HOEM** operative exit-boundary records SHALL NOT prescribe downstream intake workflow, acceptance logic, routing implementation, storage mechanics, or notification mechanics. | Company judgment |
+| `FI-DSN-STD-015-R65` | Governed Handoff SHALL NOT establish, perform, infer, or recognize downstream exit through implicit transition, automatic inheritance, default system state, implementation-discovered exit pathway, configuration-driven exit promotion, **Completed** lifecycle state alone, downstream acceptance signal, operational intake event, or eligibility-layer condition absent constitutionally attributable exit-boundary linkage at the Volume 06 terminus (HOF-P9; `FI-DSN-STD-015-R57`). G11 eligibility-layer export conditions alone SHALL NOT perform, satisfy, or substitute for downstream exit attribution. | Company judgment |
+
+#### 23.6.3 HOF-G8 partial drafting traceability
+
+| Req ID | Planning group | Primary theme | Controlling planning decision |
+|--------|----------------|---------------|------------------------------|
+| `FI-DSN-STD-015-R58` | HOF-G8 (partial) | Volume 06 terminus constitutional exit boundary | §13.1; HOF-P3; HOF-P4; HOF-P5 |
+| `FI-DSN-STD-015-R59` | HOF-G8 (partial) | Downstream exit versus acceptance and intake separation | `PD-STD-015-002`; §13.5; `R51` |
+| `FI-DSN-STD-015-R60` | HOF-G8 (partial) | Completed versus downstream intake; completion deferred | HSLM; `R51`; Tranche 3 boundary |
+| `FI-DSN-STD-015-R61` | HOF-G8 (partial) | Consumer-class-specific exit catalog detail | `PD-STD-015-002`; §20.5.4.7; `R37` |
+| `FI-DSN-STD-015-R62` | HOF-G8 (partial) | Context-HCBM-domain consistency; unauthorized routing prohibition | `PD-STD-015-002`; `R34`, `R35`, `R36`, `R50` |
+| `FI-DSN-STD-015-R63` | HOF-G8 (partial) | Exit peer-distinct from authorization, posture, lifecycle, recall, intake | `R41`, `R49`, `R51`; HOF-P1; HOF-P3–P5 |
+| `FI-DSN-STD-015-R64` | HOF-G8 (partial) | Additive HOEM exit-boundary evidence linkage | `PD-STD-015-001`; `R11`; `R56` |
+| `FI-DSN-STD-015-R65` | HOF-G8 (partial) | Prohibition on implicit or automatic downstream exit | HOF-P9; `R57`; HEIM |
+
+#### 23.6.4 HOF-G8 partial boundary statement
+
+HOF-G8 Tranche 2 partial requirements establish the Volume 06 constitutional downstream exit boundary, downstream exit versus acceptance and intake separation, **Completed** versus downstream intake boundary with exit-completeness deferral, consumer-class-specific exit catalog detail for `CC-01` through `CC-06`, bound-context and **HCBM** routing consistency, peer-distinct exit separation from authorization, posture, lifecycle, recall, withdrawal, suspension, and downstream operational domains, additive **HOEM** exit-boundary evidence linkage, and prohibited implicit or automatic downstream exit only. Downstream exit-completeness operative themes remain assigned to HOF-G8 completion and Tranche 3. Downstream acceptance logic, operational intake mechanics, HOF-G6 operative recall, withdrawal, and suspension mechanics, and HERCM re-entry operative transitions remain assigned to Tranche 3. HOF-G9 authority catalog integration remains **not drafted**.
+
+**Undrafted groups:** HOF-G6 — **not drafted**. HOF-G9 catalog integration — **not drafted**. HOF-G8 completion — **not drafted** (Tranche 3). HERCM re-entry operative themes — **not drafted** (Tranche 3).
+
+---
+
+### 23.7 Tranche 2 partial boundary statement
+
+Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R65`) plus amended `R24` establish HGA operative Handoff authorization acts (HOF-G2), HCCM consumer catalog and binding (HOF-G3), HPPM Handoff Posture declaration (HOF-G4), HSLM baseline Handoff act-layer lifecycle (HOF-G5 baseline), and partial downstream exit boundary architecture (HOF-G8 partial) only.
 
 | Tranche 2 group | Requirement range | Status |
 |-----------------|-------------------|--------|
@@ -2827,10 +2878,10 @@ Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R57`) plus amended `R24`
 | **HOF-G3** | `FI-DSN-STD-015-R33`–`R39` | **Drafted** — Sprint V06-D40.1 |
 | **HOF-G4** | `FI-DSN-STD-015-R40`–`R47` | **Drafted** — Sprint V06-D40.4 |
 | **HOF-G5 (baseline)** | `FI-DSN-STD-015-R48`–`R57` | **Drafted** — Sprint V06-D40.8 |
-| **HOF-G8 (partial)** | — | **Not drafted** |
+| **HOF-G8 (partial)** | `FI-DSN-STD-015-R58`–`R65` | **Drafted** — Sprint V06-D41.2 |
 | **HOF-G9 (catalog integration)** | — | **Not drafted** |
 | **`R24` amendment** | `FI-DSN-STD-015-R24` | **Amended** — Sprint V06-D40.1 |
 
-**Identifier continuity:** `FI-DSN-STD-015-R01` through `R57` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
+**Identifier continuity:** `FI-DSN-STD-015-R01` through `R65` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
 
 **Tranche 3:** Remains **not authorized**. HOF-G6, HERCM re-entry operative themes, HOF-G8 completion, and HOF-G9 completion — **not drafted**.
