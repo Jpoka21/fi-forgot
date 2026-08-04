@@ -1718,6 +1718,270 @@ This resolution does **not**:
 
 **Advancement note:** `PD-STD-015-001`, `PD-STD-015-002`, and `PD-STD-015-003` are **resolved** at planning layer. Tranche 2 **planning prerequisites** for catalog and posture groups are **complete**. Tranche 2 normative drafting remains **unauthorized** until separately governed authorization.
 
+#### 20.5.6 PD-STD-015-004 resolution — Handoff Recall Trigger Catalog Model (HRTCM)
+
+**Planning decision:** `PD-STD-015-004` — **Resolved** (Sprint V06-D38.9A).
+
+**Governing open question closed:** `OQ-STD-014-010` — **Closed** (Sprint V06-D38.9A).
+
+**Model designation:** **HRTCM** — Handoff Recall Trigger Catalog Model: **closed categorized trigger catalog** with **mandatory separately authorized HGA recall act** — upstream constitutional events create eligibility and consideration gates only; they **never** automatically perform recall acts.
+
+##### 20.5.6.1 Decision
+
+F.I. Forgot adopts **closed categorized trigger catalog with separately authorized recall act architecture** (constitutional discovery Model B with Model D event-type categorization at planning layer only):
+
+1. **No automatic recall** — Model A **rejected**. GPRA **Invalidated** or **Superseded** posture establishment, G11 **Blocked** eligibility export, downstream rejection, manufacturing infeasibility, publication or distribution removal, fulfillment removal, and operational product recall **do not** automatically transition the Handoff act layer to **Recalled** and **do not** substitute for an HGA recall act.
+2. **No notification-only recall** — Model C **rejected** as sole operative architecture. HVEM validity export and downstream consumer awareness may inform reliance decisions but **do not** constitute STD-015 operative recall or forward reliance cessation at the act layer.
+3. **Separately authorized HGA recall act** — Model B **adopted** as operative architecture. Ceasing forward Handoff reliance at the STD-015 act layer for a bound consumer context **requires** a distinct HGA **recall** act with mandatory act-type attribution and separate **HOEM** operative record expectation (Section 20.5.3).
+4. **Closed trigger catalog** — Recall consideration is constitutionally bounded to trigger categories RTC-01 through RTC-04 in Section 20.5.6.6 only. Categories are planning architecture — not implementation routing logic, automation rules, or notification pipelines.
+5. **Eligibility≠recall preserved** — HRWM constitutional eligibility effects are **consumed** upstream facts. Loss of forward Handoff eligibility **authorizes consideration** of recall under applicable trigger categories; it **does not** perform recall.
+6. **Context-scoped recall** — Each HGA recall act **must** attribute to exactly **one** HCCM bound consumer context (Section 20.5.4) and **must** target the authoritative HPPM posture chain for that context (Section 20.5.5). Multi-bound GPRA configurations require **independent** recall act consideration per affected bound context.
+7. **Peer-distinct act preservation** — Recall remains peer-distinct from authorization, posture declaration, completion, **suspension**, and **withdrawal** (Section 20.5.6.7).
+
+No organizational structure, runtime system, API, schema, storage medium, UI, queue, notification service, automated recall executor, or downstream revocation procedure is established by this resolution.
+
+##### 20.5.6.2 Constitutional rationale
+
+1. **HAAM and HRWM fidelity** — STD-014 G8/G9 establish GPRA posture; G11 HRWM exports eligibility effects. STD-015 owns recall **acts** only. Automatic recall would collapse upstream posture establishment into HGA act attribution and violate HAAM prohibitions preserved in Section 20.5.3.4.
+2. **HGA act-type matrix completion** — PD-STD-015-001 identified HGA as recall performer; HRTCM completes **when recall may be considered** without prescribing **how** recall is executed in implementation.
+3. **Audit attribution** — Separately authorized recall acts preserve HOEM operative records per bound context per act — supporting HOF-P7 historical preservation and peer-distinct lifecycle discipline (HOF-P10).
+4. **Event-type expressiveness without Model D overreach** — Invalidation and supersession receive distinct trigger categories with different constitutional scope; both require separate HGA recall acts. Model D hybrid influence is limited to **catalog categorization** — not divergent automatic mechanics.
+5. **Implementation neutrality** — HRTCM defines trigger categories, consideration gates, act distinctness, and context scope — not runtime behavior.
+
+##### 20.5.6.3 Governing-question traceability
+
+`OQ-STD-014-010` asked whether forward Handoff recall on GPRA **Invalidated** or **Superseded** is automatic, separately authorized, or notification-only. HRTCM answers: **separately authorized HGA recall act** is the sole operative STD-015 mechanism. Automatic and notification-only models are **rejected**. Upstream posture transitions remain **eligibility and consideration** facts until HGA performs recall.
+
+##### 20.5.6.4 HGA, HCCM, and HPPM compatibility
+
+| Prior resolution | HRTCM consumption |
+|------------------|-------------------|
+| **HGA (PD-001)** | Recall acts performed only by HGA with mandatory act-type attribution |
+| **HCCM (PD-002)** | Recall scope is exactly one bound consumer context per act |
+| **HPPM (PD-003)** | Recall targets the authoritative posture chain for the attributed bound context; no cross-context merged recall |
+
+HRTCM does not modify the HGA act matrix, HCCM catalog, or HPPM partition rules.
+
+##### 20.5.6.5 Candidate model disposition
+
+| Model | Description | Disposition |
+|-------|-------------|-------------|
+| **A — Automatic recall** | Invalidated/Superseded automatically transitions act layer to Recalled | **Rejected** |
+| **B — Separately authorized recall** | Distinct HGA recall act required | **Adopted** as operative HRTCM architecture |
+| **C — Notification-only** | Downstream consumers responsible; act layer records notification only | **Rejected** as sole operative architecture |
+| **D — Hybrid by event type** | Event-type-specific recall mechanics | **Partially adopted** — event-type **trigger categories** only; recall act always separately authorized |
+
+##### 20.5.6.6 Closed constitutional trigger catalog
+
+| Trigger ID | Category | Constitutional authorizing condition | Recall consideration scope |
+|------------|----------|-------------------------------------|---------------------------|
+| **RTC-01** | Upstream GPRA **Invalidation** | G8 **Invalidated** posture established on the governed GPRA per `FI-DSN-STD-014` | HGA **may consider** recall act per **affected** HCCM bound consumer context where forward Handoff reliance on the invalidated GPRA remains constitutionally attributable; HRWM forward eligibility **lost** — consumed, not performed by recall |
+| **RTC-02** | Upstream GPRA **Supersession** — superseded context | G9 **Superseded** posture established in superseded GPRA context per `FI-DSN-STD-014` | HGA **may consider** recall act for bindings attributed to the **superseded** GPRA context only; successor GPRA forward eligibility requires independent satisfaction — supersession **does not** auto-transfer Handoff Posture |
+| **RTC-03** | HRWM eligibility loss without RTC-01/02 | Forward Handoff eligibility **lost** on a bound consumer context per HRWM constitutional effects where RTC-01 and RTC-02 do not apply — eligibility fact consumed from upstream export | HGA **may consider** recall act for the specific bound context where eligibility loss and authoritative posture chain coexist |
+| **RTC-04** | Authoritative posture chain governance cessation | Governing constitutional records establish that an authoritative HPPM posture chain for a bound context **must not** continue forward reliance — without substituting for suspension, withdrawal, or upstream Invalidated/Superseded when those are the operative facts | HGA **may consider** recall act per affected bound context — **narrow** governance trigger distinct from **withdrawal** (HGA-initiated retraction) and **suspension** (temporary pause) |
+
+**Catalog rule:** Triggers outside RTC-01 through RTC-04 **do not** authorize Handoff recall consideration at the STD-015 planning layer. Downstream rejection, operational intake blockage, manufacturing infeasibility, publication control, fulfillment control, distribution control, and operational product recall remain **excluded** (HOF-P4; HOF-P5; HMEX).
+
+##### 20.5.6.7 Recall versus neighboring acts and postures
+
+| Neighbor | Layer | HRTCM distinction |
+|----------|-------|-------------------|
+| **Authorization** | Handoff act layer — HGA | Authorization **permits** forward Handoff under governing conditions; recall **terminates** forward reliance for the attributed bound context |
+| **Posture declaration** | Handoff act layer — HGA | Posture declaration **declares** intake posture toward a bound context; recall **ceases** forward reliance on that authoritative posture chain without erasing declaration history |
+| **Completion** | Handoff act layer — HGA | Completion records successful act-layer closure; recall **terminates** forward reliance without substituting for completion fact |
+| **Suspension** | Handoff act layer — HGA | Suspension **pauses** forward reliance temporarily without terminating forward posture at act layer; recall **terminates** forward reliance for the attributed bound context (re-entry remains `PD-STD-015-005`) |
+| **Withdrawal** | Handoff act layer — HGA | Withdrawal is **HGA-initiated retraction** of authorization or posture without requiring RTC catalog upstream posture loss; recall is **responsive cessation** under RTC catalog conditions |
+| **GPRA Invalidation** | GPRA posture — G8 | Establishes posture upstream; RTC-01 **consumes** Invalidated fact; **does not** perform recall |
+| **GPRA Supersession** | GPRA posture — G9 | Establishes posture upstream; RTC-02 **consumes** Superseded fact; **does not** perform recall |
+| **G11 Blocked** | G11 eligibility export | Eligibility-layer state only; **not** recall act |
+| **Downstream rejection / nonacceptance** | Operational downstream | HOF-P5 excluded; **not** HGA recall trigger |
+| **Manufacturing infeasibility** | HMEX | Excluded from STD-015 recall catalog |
+| **Publication removal** | Operational downstream | Excluded — not Layer B recall |
+| **Fulfillment removal** | Operational downstream | Excluded — not Layer B recall |
+| **Distribution removal** | Operational downstream | Excluded — not Layer B recall |
+| **Operational product recall** | HMEX | Excluded — distinct from Handoff act-layer recall |
+
+##### 20.5.6.8 Bound consumer context and posture-chain treatment
+
+1. **One recall act — one bound context** — Recall act scope is exactly one HCCM bound consumer context identity tuple (Section 20.5.4.8).
+2. **One authoritative chain per act** — Each recall act addresses at most one authoritative HPPM posture chain for the attributed context.
+3. **Multi-bound GPRA** — When multiple `CC-##` bindings exist, recall consideration and any performed recall acts **must** be evaluated **per bound context**; merged cross-context recall is **prohibited**.
+4. **Invalidation breadth** — RTC-01 may affect **all** bound contexts attributing to the invalidated GPRA; each context still requires **separate** HGA recall act if recall is performed.
+
+##### 20.5.6.9 Evidence and governed-relationship requirements for recall consideration
+
+Before HGA recall consideration for a bound context, the following constitutional relationships **must** be satisfiable at the planning layer — without prescribing record format, storage, retrieval, or workflow mechanics:
+
+| Requirement | Constitutional relationship |
+|-------------|---------------------------|
+| **Context identity** | Valid HCCM bound consumer context attributed to the recall scope |
+| **Trigger category match** | Applicable RTC-01 through RTC-04 condition identified — not inferred solely from downstream operational events |
+| **Posture chain target** | Authoritative HPPM posture chain for the bound context identified |
+| **HEPM reference availability** | Governing upstream constitutional records supporting the trigger category (GPRA posture records for RTC-01/02; eligibility and posture references for RTC-03/04) are **consumable** at consideration boundary |
+| **HVEM validity posture** | Current validity export facts for the bound context, where HVEM applies, are **consumable** — advisory stale signals (HBIM) **do not** alone satisfy trigger category match |
+
+HRTCM does not prescribe notification content, consumer acknowledgment, or automated eligibility listeners.
+
+##### 20.5.6.10 Explicit exclusions
+
+This resolution does **not**:
+
+| Excluded subject | Governing placeholder |
+|------------------|----------------------|
+| Act-layer re-entry after recall | `PD-STD-015-005` / `OQ-STD-015-001` |
+| Withdrawal operative mechanics | HOF-G6 operative drafting — separately authorized |
+| Suspension operative mechanics | HOF-G6 operative drafting — separately authorized |
+| Notification delivery, consumer revocation, operational recall execution | HMEX; HOF-P5 — excluded |
+| Normative `FI-DSN-STD-015-R##` text | Separately authorized tranche drafting |
+| Tranche 2 or Tranche 3 drafting authorization | Separate governed sprint |
+
+##### 20.5.6.11 Downstream planning effects
+
+| Group | Effect |
+|-------|--------|
+| **HOF-G6** | Operative recall trigger and recall act drafting **unblocked at planning layer** — withdrawal and suspension operative mechanics remain in HOF-G6 scope; normative drafting separately authorized |
+| **HOF-G5** | Baseline lifecycle may reference recall as terminal forward reliance path — re-entry remains blocked by `PD-STD-015-005` |
+| **HOF-G7** | HOEM recall operative record themes may cite HRTCM trigger attribution — normative drafting separately authorized |
+| **HOF-G10** | Preservation themes may cite recall history — unchanged |
+
+**Advancement note:** `PD-STD-015-004` is **resolved** at planning layer. Tranche 3 **planning prerequisite** for recall trigger mechanics is **complete**. Tranche 3 normative drafting remains **unauthorized** until Tranche 2 committed and `PD-STD-015-005` resolved or Version 1.0 re-entry deferral adopted. Tranche 2 normative drafting remains **unauthorized**.
+
+#### 20.5.7 PD-STD-015-005 resolution — Handoff Act Re-entry Catalog Model (HERCM)
+
+**Planning decision:** `PD-STD-015-005` — **Resolved** (Sprint V06-D39.0A).
+
+**Governing open question closed:** `OQ-STD-015-001` — **Closed** (Sprint V06-D39.0A).
+
+**Model designation:** **HERCM** — Handoff Act Re-entry Catalog Model: **closed categorized re-entry catalog** with **mandatory separately authorized HGA re-entry or resumption acts** — prior act-layer terminal or pause states create eligibility and consideration gates only; they **never** automatically restore forward Handoff reliance and **never** resurrect or rewrite prior operative act records.
+
+##### 20.5.7.1 Decision
+
+F.I. Forgot adopts **closed categorized re-entry catalog with separately authorized re-entry act architecture** (constitutional discovery Model B with Model D state-class categorization at planning layer only):
+
+1. **No automatic re-entry** — Model A **rejected**. Upstream G11 export restoration, GPRA posture correction, downstream acceptance reversal, operational retry success, or elapsed time after **Rejected**, **Suspended**, **Withdrawn**, **Recalled**, or **Expired** act-layer states **do not** automatically return a GPRA to **Eligible-for-consideration**, **Authorized**, or forward-reliance posture and **do not** substitute for an HGA re-entry or resumption act.
+2. **No re-entry prohibition** — Model C **rejected** as sole operative architecture. Version 1.0 **does not** exclude all act-layer re-entry; conditional re-entry under HERCM is constitutionally permitted at planning layer.
+3. **Separately authorized HGA re-entry or resumption act** — Model B **adopted** as operative architecture. Restoring or re-establishing forward Handoff act-path consideration after a qualifying prior act-layer state for a bound consumer context **requires** a distinct HGA act with mandatory act-type attribution and separate **HOEM** operative record expectation (Section 20.5.3). Re-entry acts **do not** merge with authorization, posture declaration, completion, suspension, withdrawal, or recall in a single undifferentiated operative record.
+4. **Closed re-entry catalog** — Re-entry consideration is constitutionally bounded to re-entry categories REC-01 through REC-05 in Section 20.5.7.6 only. Categories are planning architecture — not implementation routing logic, automation rules, workflow sequencing, or notification pipelines.
+5. **Resumption versus full re-entry** — **Post-Suspension resumption** (REC-02) restores forward reliance on **existing** authorization and authoritative HPPM posture chain when suspension grounds are constitutionally cleared — without requiring a new authorization act. All other catalog categories require progression through **Eligible-for-consideration** and **new Handoff authorization consideration** before forward posture reliance may resume.
+6. **Eligibility≠re-entry preserved** — G11 export-ready eligibility and HRWM constitutional eligibility facts are **consumed** upstream inputs. Satisfied eligibility **authorizes consideration** of re-entry under applicable catalog categories; it **does not** perform re-entry.
+7. **Context-scoped re-entry** — Each HGA re-entry or resumption act **must** attribute to exactly **one** HCCM bound consumer context (Section 20.5.4) and **must** address the authoritative HPPM posture chain for that context (Section 20.5.5). Multi-bound GPRA configurations require **independent** re-entry or resumption act consideration per affected bound context.
+8. **Historical preservation** — Re-entry and resumption acts are **additive** constitutional fact. Prior **Rejected**, **Suspended**, **Withdrawn**, **Recalled**, **Expired**, authorization, posture declaration, completion, suspension, withdrawal, and recall records **must not** be erased, merged, or rewritten when re-entry occurs (HOF-P7; HPAM).
+9. **Peer-distinct act preservation** — Re-entry and resumption remain peer-distinct from authorization, posture declaration, completion, suspension, withdrawal, recall, downstream acceptance, downstream reprocessing, and operational retry (Section 20.5.7.7).
+
+No organizational structure, runtime system, API, schema, storage medium, UI, queue, notification service, automated re-entry executor, or downstream reprocessing procedure is established by this resolution.
+
+##### 20.5.7.2 Constitutional rationale
+
+1. **HOF-P7 and HPAM fidelity** — Act-layer history is additive constitutional fact. Automatic re-entry would silently collapse terminal or pause states into restored forward reliance without auditable HGA attribution. HERCM preserves historical Handoff records while permitting governed return paths.
+2. **HGA act-type matrix completion** — PD-STD-015-001 established HGA as performer for operative Handoff acts; HERCM completes **when re-entry may be considered** and **what class of re-entry act applies** without prescribing implementation execution order.
+3. **HRTCM symmetry** — Recall terminates forward reliance under RTC catalog conditions; HERCM governs return paths after qualifying act-layer states. Neither model substitutes for the other; REC-04 consumes post-recall context without bypassing recall history.
+4. **Suspension discipline** — Post-suspension resumption is constitutionally narrower than full re-entry — preserving the distinction between temporary pause and terminal cessation paths without conflating suspension with withdrawal or recall.
+5. **Implementation neutrality** — HERCM defines re-entry categories, consideration gates, act distinctness, and context scope — not runtime behavior, storage, or operational retry mechanics.
+
+##### 20.5.7.3 Governing-question traceability
+
+`OQ-STD-015-001` asked whether a GPRA may re-enter the Handoff act path after **Rejected**, **Suspended**, **Withdrawn**, **Recalled**, or other relevant act-layer states — and if so, under what upstream posture, eligibility, and authorization conditions.
+
+HERCM answers:
+
+| Question element | HERCM resolution |
+|------------------|------------------|
+| **May re-entry occur?** | **Yes** — under REC-01 through REC-05 catalog conditions only; not automatic; not prohibited at Version 1.0 planning layer |
+| **Upstream posture** | G11 export-ready and entry inputs **must** be satisfied for full re-entry categories; HPPM authoritative posture chain **must** be identified per bound context; GPRA **Invalidated** or **Superseded** posture blocks predecessor-context re-entry unless successor-independent eligibility path applies (REC exclusions) |
+| **Eligibility conditions** | HRWM and G11 eligibility facts **consumed** — eligibility restoration **authorizes consideration** only |
+| **Authorization conditions** | Full re-entry categories (REC-01, REC-03, REC-04, REC-05) require **new Handoff authorization act** after **Eligible-for-consideration**; REC-02 resumption requires cleared suspension grounds on **existing** authorization without new authorization act |
+
+`OQ-STD-015-001` is **closed** at planning layer by this resolution.
+
+##### 20.5.7.4 HGA, HCCM, HPPM, and HRTCM compatibility
+
+| Prior resolution | HERCM consumption |
+|------------------|-------------------|
+| **HGA (PD-001)** | Re-entry and resumption acts performed only by HGA with mandatory act-type attribution |
+| **HCCM (PD-002)** | Re-entry scope is exactly one bound consumer context per act |
+| **HPPM (PD-003)** | Re-entry addresses the authoritative posture chain for the attributed bound context; no cross-context merged re-entry |
+| **HRTCM (PD-004)** | Post-recall re-entry (REC-04) **consumes** recall act history; recall **does not** perform re-entry; RTC catalog **does not** authorize re-entry |
+
+HERCM does not modify the HGA act matrix, HCCM catalog, HPPM partition rules, or HRTCM trigger catalog.
+
+##### 20.5.7.5 Candidate model disposition
+
+| Model | Description | Disposition |
+|-------|-------------|-------------|
+| **A — Automatic re-entry** | Upstream correction automatically restores act-layer forward reliance | **Rejected** |
+| **B — Separately authorized re-entry** | Distinct HGA re-entry or resumption act required per catalog category | **Adopted** as operative HERCM architecture |
+| **C — Re-entry prohibited** | No act-layer re-entry permitted in Version 1.0 | **Rejected** as sole operative architecture |
+| **D — Hybrid by prior state** | State-class-specific re-entry mechanics with shared act requirement | **Partially adopted** — state-class **re-entry categories** only; re-entry or resumption act always separately authorized |
+
+##### 20.5.7.6 Closed constitutional re-entry catalog
+
+| Re-entry ID | Category | Qualifying prior act-layer state | Constitutional authorizing condition | Re-entry consideration scope |
+|-------------|----------|----------------------------------|-------------------------------------|-------------------------------|
+| **REC-01** | Post-**Rejected** reconsideration | Act-layer **Rejected** recorded for the attributed bound context | G11 export-ready eligibility and entry inputs **satisfied anew** for the governed GPRA; rejection grounds constitutionally addressable without erasing rejection history | HGA **may consider** re-entry act returning path to **Eligible-for-consideration** — **new authorization act required** before forward posture reliance |
+| **REC-02** | Post-**Suspended** resumption | Act-layer **Suspended** recorded for the attributed bound context | Suspension grounds constitutionally **cleared**; existing authorization and authoritative HPPM posture chain remain governing records — suspension **does not** substitute for withdrawal or recall | HGA **may consider** **resumption** act restoring forward reliance on **existing** authorization and posture chain — **no new authorization act required** when resumption conditions met |
+| **REC-03** | Post-**Withdrawn** re-entry | Act-layer **Withdrawn** recorded for the attributed bound context | G11 export-ready eligibility and entry inputs **satisfied anew**; withdrawal history preserved — withdrawal **does not** substitute for GPRA Invalidated posture | HGA **may consider** re-entry act returning path to **Eligible-for-consideration** — **new authorization act required**; prior withdrawn authorization **not** resurrected |
+| **REC-04** | Post-**Recalled** re-entry | Act-layer **Recalled** recorded for the attributed bound context per HRTCM | G11 export-ready eligibility and entry inputs **satisfied anew**; recall act history preserved per RTC attribution — recall **does not** perform re-entry | HGA **may consider** re-entry act per affected bound context — **new authorization act and new posture declaration path required**; prior recalled posture chain **not** resurrected |
+| **REC-05** | Post-**Expired** renewal | Act-layer **Expired** recorded for the attributed bound context | Governing validity or time boundary constitutionally **addressed** upstream; G11 export-ready eligibility and entry inputs **satisfied anew** | HGA **may consider** re-entry act returning path to **Eligible-for-consideration** — **new authorization act required**; expiry record preserved |
+
+**Catalog rule:** Re-entry consideration outside REC-01 through REC-05 **does not** authorize Handoff act-path restoration at the STD-015 planning layer. **Completed** act-layer state, GPRA **Superseded** successor-independent paths, downstream acceptance, downstream reprocessing, operational retry, manufacturing clearance, and operational intake reversal remain **excluded** (HOF-P4; HOF-P5; HMEX).
+
+##### 20.5.7.7 Re-entry versus neighboring acts and postures
+
+| Neighbor | Layer | HERCM distinction |
+|----------|-------|-------------------|
+| **Authorization** | Handoff act layer — HGA | Authorization **permits** forward Handoff under governing conditions; re-entry **restores consideration path** toward authorization — re-entry **is not** authorization and **does not** substitute for authorization act |
+| **Posture declaration** | Handoff act layer — HGA | Posture declaration **declares** intake posture toward a bound context; full re-entry categories require **new** posture declaration path after new authorization — re-entry **does not** resurrect prior posture declaration |
+| **Completion** | Handoff act layer — HGA | Completion records successful act-layer closure; **Completed** state is **not** a HERCM qualifying prior state — successor GPRA paths are independent of predecessor re-entry |
+| **Suspension** | Handoff act layer — HGA | Suspension **pauses** forward reliance; REC-02 **resumption** restores reliance on existing authorization — resumption **is not** full re-entry and **is not** new authorization |
+| **Withdrawal** | Handoff act layer — HGA | Withdrawal **retracts** authorization or posture; REC-03 re-entry requires new authorization path — withdrawal history preserved |
+| **Recall** | Handoff act layer — HGA | Recall **terminates** forward reliance per HRTCM; REC-04 re-entry **follows** recall — recall **does not** perform re-entry |
+| **GPRA Supersession** | GPRA posture — G9 | Successor GPRA requires **independent** eligibility and Handoff entry — **not** predecessor-context HERCM re-entry |
+| **GPRA Invalidation** | GPRA posture — G8 | Invalidated GPRA **blocks** HERCM re-entry for invalidated context — upstream posture correction required before any new GPRA Handoff consideration |
+| **Downstream acceptance** | Operational downstream | HOF-P5 excluded; acceptance **does not** authorize or perform act-layer re-entry |
+| **Downstream reprocessing** | Operational downstream | Operational re-intake or reprocessing **does not** substitute for HGA re-entry act |
+| **Operational retry** | Operational / runtime | Retry, resubmit, or queue replay mechanisms **excluded** — not HERCM re-entry |
+
+##### 20.5.7.8 Bound consumer context and posture-chain treatment
+
+1. **One re-entry or resumption act — one bound context** — Re-entry act scope is exactly one HCCM bound consumer context identity tuple (Section 20.5.4.8).
+2. **One authoritative chain per act** — Each re-entry or resumption act addresses at most one authoritative HPPM posture chain for the attributed context.
+3. **Independent multi-bound consideration** — GPRA configurations with multiple bound consumer contexts require **separate** HERCM consideration per context — no cross-context merged re-entry act.
+4. **Resumption chain fidelity** — REC-02 resumption **must** target the same authoritative posture chain that was suspended — not a substitute chain or cross-context posture.
+
+##### 20.5.7.9 Evidence and HOEM attribution expectations (planning only)
+
+Normative HOEM operative record requirements for re-entry and resumption acts are **deferred** to separately authorized HOF-G5 normative drafting. At planning layer, HERCM establishes:
+
+1. **Separate act attribution** — Re-entry and resumption require distinct HGA act-type attribution from authorization, posture declaration, completion, suspension, withdrawal, and recall.
+2. **Additive HOEM expectation** — Each re-entry or resumption act produces an additive operative record binding to GPRA identity, obligation scope, bound consumer context, qualifying prior act-layer state, and applicable REC category.
+3. **No resurrection semantics** — HOEM records **must not** represent re-entry as rewrite or deletion of prior act records.
+
+##### 20.5.7.10 Explicit exclusions
+
+This resolution does **not**:
+
+| Excluded subject | Governing placeholder |
+|------------------|---------------------|
+| Operative transition sequencing between REC categories and authorization acts | HOF-G5 normative drafting — separately authorized |
+| HOEM record field vocabulary for re-entry acts | HOF-G7 normative drafting — separately authorized |
+| G9 successor GPRA independent Handoff entry procedural detail | STD-014 G9 / HEIM — upstream; not HERCM re-entry |
+| Downstream acceptance, reprocessing, or operational retry as re-entry substitutes | HOF-P5; HMEX — excluded |
+| Organizational implementation | — |
+| Runtime, API, schema, UI, workflow, storage, or notification design | — |
+| Normative `FI-DSN-STD-015-R##` text | Separately authorized tranche drafting |
+| Tranche 2 or Tranche 3 drafting authorization | Separate governed sprint |
+
+##### 20.5.7.11 Downstream planning effects
+
+| Group | Effect |
+|-------|--------|
+| **HOF-G5** | Operative re-entry and resumption catalog drafting **unblocked at planning layer** — baseline lifecycle may reference HERCM categories; normative transition rules separately authorized |
+| **HOF-G6** | Withdrawal, suspension, and recall operative mechanics remain in HOF-G6 scope — HERCM REC-02/03/04 **consumes** those act outcomes without duplicating their operative rules |
+| **HOF-G7** | HOEM re-entry operative record themes may cite HERCM category attribution — normative drafting separately authorized |
+| **HOF-G10** | Preservation themes may cite re-entry history — unchanged; HPAM additive discipline preserved |
+
+**Advancement note:** `PD-STD-015-005` is **resolved** at planning layer. `OQ-STD-015-001` is **closed** at planning layer. Tranche 3 **planning prerequisite** for re-entry operative mechanics is **complete**. Tranche 3 normative drafting remains **unauthorized** until Tranche 2 committed and separately governed Tranche 3 authorization. Tranche 2 normative drafting remains **unauthorized**.
+
 ### 20.6 Planned drafting tranches
 
 | Tranche | Groups | Purpose | Prerequisite decisions | Open questions at drafting | Expected output | Review gate |
