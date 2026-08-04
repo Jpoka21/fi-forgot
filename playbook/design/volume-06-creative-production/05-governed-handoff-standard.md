@@ -2864,13 +2864,58 @@ This section establishes operative normative requirements for partial downstream
 
 HOF-G8 Tranche 2 partial requirements establish the Volume 06 constitutional downstream exit boundary, downstream exit versus acceptance and intake separation, **Completed** versus downstream intake boundary with exit-completeness deferral, consumer-class-specific exit catalog detail for `CC-01` through `CC-06`, bound-context and **HCBM** routing consistency, peer-distinct exit separation from authorization, posture, lifecycle, recall, withdrawal, suspension, and downstream operational domains, additive **HOEM** exit-boundary evidence linkage, and prohibited implicit or automatic downstream exit only. Downstream exit-completeness operative themes remain assigned to HOF-G8 completion and Tranche 3. Downstream acceptance logic, operational intake mechanics, HOF-G6 operative recall, withdrawal, and suspension mechanics, and HERCM re-entry operative transitions remain assigned to Tranche 3. HOF-G9 authority catalog integration remains **not drafted**.
 
-**Undrafted groups:** HOF-G6 — **not drafted**. HOF-G9 catalog integration — **not drafted**. HOF-G8 completion — **not drafted** (Tranche 3). HERCM re-entry operative themes — **not drafted** (Tranche 3).
+**Undrafted groups:** HOF-G6 — **not drafted**. HOF-G8 completion — **not drafted** (Tranche 3). HERCM re-entry operative themes — **not drafted** (Tranche 3). HOF-G9 catalog integration — **drafted** — Sprint V06-D41.6 (Section 23.8).
+
+---
+
+### 23.8 Authority Catalog Integration (HOF-G9)
+
+This section establishes operative normative requirements for HGA authority catalog integration at the STD-015 Layer B CP-04 act layer. It consumes `PD-STD-015-001` (Section 20.5.3) mandatory act-type attribution matrix, HCCM bound consumer context scope (Section 23.2), HPPM authoritative posture chain cardinality (Section 23.3), committed HOF-G9 prohibitions (Section 21.4), and operative act architectures in Sections 23.1–23.6. It does not define HOF-G9 completion operative themes, HOF-G6 recall, withdrawal, or suspension act mechanics, HERCM re-entry operative transitions, or HOF-G8 completion themes.
+
+#### 23.8.1 Inherited authority
+
+| Inherited source | What HOF-G9 catalog integration consumes for authority catalog architecture |
+|------------------|----------------------------------------------------------------------------|
+| **Section 20.5.3 (HGA)** | Sole operative Handoff authority class; mandatory act-type attribution matrix |
+| **Section 20.5.4 (HCCM)** | Bound consumer context identity as constitutional scope for HGA act attribution |
+| **Section 20.5.5 (HPPM)** | Authoritative forward Handoff Posture chain per bound context |
+| **HOF-G9 prohibitions (`FI-DSN-STD-015-R22`–`R24`)** | Brain prohibition; upstream non-absorption; HAAM inherited prohibitions; HGA adoption; peer-distinct decision classes |
+| **HOF-G2 requirements (`FI-DSN-STD-015-R25`–`R32`)** | Operative Handoff authorization act architecture |
+| **HOF-G3 requirements (`FI-DSN-STD-015-R33`–`R39`)** | Bound consumer context identity |
+| **HOF-G4 requirements (`FI-DSN-STD-015-R40`–`R47`)** | Handoff Posture declaration act architecture |
+| **HOF-G5 baseline requirements (`FI-DSN-STD-015-R48`–`R57`)** | Baseline lifecycle act-layer architecture |
+| **HOF-G7 requirements (`FI-DSN-STD-015-R08`–`R15`)** | HOEM framework; additive operative record discipline |
+| **HOF-G8 partial requirements (`FI-DSN-STD-015-R58`–`R65`)** | Downstream exit boundary architecture |
+
+#### 23.8.2 Initial normative requirements — Tranche 2 (HOF-G9 catalog integration)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R66` | Governed Handoff SHALL integrate **Handoff Governance Authority (HGA)** into the operative STD-015 authority catalog as the sole constitutional authority class at the Layer B CP-04 act layer and SHALL adopt the mandatory act-type attribution matrix comprising **authorization**, **posture declaration**, **completion**, **suspension**, **withdrawal**, and **recall** from Section 20.5.3.14 (`PD-STD-015-001`; `FI-DSN-STD-015-R24`). No additional Handoff authority class SHALL be recognized at this boundary without separately governed constitutional planning amendment. | Company judgment |
+| `FI-DSN-STD-015-R67` | Each operative Handoff act type in the Section 20.5.3.14 matrix SHALL be performed only under distinct **HGA** act-type attribution as constitutional owner and SHALL produce a separate **HOEM** operative record expectation appropriate to that act type (`FI-DSN-STD-015-R11`; `FI-DSN-STD-015-R29`, `R45`, `R56`). Governed Handoff SHALL NOT collapse **authorization**, **posture declaration**, **completion**, **suspension**, **withdrawal**, or **recall** into one undifferentiated **HGA** act or merged operative record class. | Company judgment |
+| `FI-DSN-STD-015-R68` | Each **HGA** operative act recorded in the authority catalog SHALL bind to exactly one **HCCM** bound consumer context identity (`FI-DSN-STD-015-R28`, `R43`, `R50`) and, where posture-relevant, SHALL reference the applicable authoritative HPPM forward Handoff Posture chain for that bound context (`PD-STD-015-003`; `FI-DSN-STD-015-R46`) without merging act-type attribution or spanning multiple bound consumer contexts. | Company judgment |
+| `FI-DSN-STD-015-R69` | Governed Handoff SHALL NOT assign operative Handoff act performance to **GPRA** grant authority, MAGAC participants, **Approval** authority classes, DDAC downstream disposition authority, DSRA rework authorization authority, G8 invalidation authority classes, G9 SSAC supersession authority classes, Brain, G11 export contract, downstream consumer domains, implementation actors, or implementation-created, inferred, delegated, or ad hoc Handoff authority classes (`FI-DSN-STD-015-R22`–`R24`; HAAM; `FI-DSN-STD-015-R32`, `R47`). Operative suspension, withdrawal, and recall act mechanics remain assigned to HOF-G6; HOF-G9 completion operative themes remain assigned to Tranche 3. | Company judgment |
+
+#### 23.8.3 HOF-G9 catalog integration drafting traceability
+
+| Req ID | Planning group | Primary theme | Controlling planning decision |
+|--------|----------------|---------------|------------------------------|
+| `FI-DSN-STD-015-R66` | HOF-G9 (catalog integration) | HGA sole authority class; act-type matrix adoption | `PD-STD-015-001`; §20.5.3.14; `R24` |
+| `FI-DSN-STD-015-R67` | HOF-G9 (catalog integration) | Distinct HGA act-type attribution; separate HOEM per act type | `PD-STD-015-001`; §20.5.3.14; `R11` |
+| `FI-DSN-STD-015-R68` | HOF-G9 (catalog integration) | HCCM scope and HPPM posture-chain binding for cataloged acts | `PD-STD-015-001`; `PD-STD-015-002`; `PD-STD-015-003` |
+| `FI-DSN-STD-015-R69` | HOF-G9 (catalog integration) | Prohibited performers; no ad hoc authority; Tranche 3 deferrals | `PD-STD-015-001`; `R22`–`R24`; HAAM |
+
+#### 23.8.4 HOF-G9 catalog integration boundary statement
+
+HOF-G9 Tranche 2 catalog integration requirements establish operative **HGA** authority catalog integration, mandatory act-type matrix adoption, distinct act-type attribution and **HOEM** record expectations, **HCCM** bound-context and HPPM authoritative posture-chain scope, and prohibited non-HGA performers and ad hoc authority classes only — building upon committed prohibitions `FI-DSN-STD-015-R22` through `R24` without amending them. HOF-G9 completion operative themes remain assigned to Tranche 3. Operative suspension, withdrawal, and recall act mechanics remain assigned to HOF-G6. HERCM re-entry operative transitions and HOF-G8 completion remain assigned to Tranche 3.
+
+**Undrafted groups:** HOF-G6 — **not drafted**. HOF-G8 completion — **not drafted** (Tranche 3). HERCM re-entry operative themes — **not drafted** (Tranche 3). HOF-G9 completion — **not drafted** (Tranche 3).
 
 ---
 
 ### 23.7 Tranche 2 partial boundary statement
 
-Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R65`) plus amended `R24` establish HGA operative Handoff authorization acts (HOF-G2), HCCM consumer catalog and binding (HOF-G3), HPPM Handoff Posture declaration (HOF-G4), HSLM baseline Handoff act-layer lifecycle (HOF-G5 baseline), and partial downstream exit boundary architecture (HOF-G8 partial) only.
+Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R69`) plus amended `R24` and committed prohibitions (`FI-DSN-STD-015-R22`–`R24`) establish HGA operative Handoff authorization acts (HOF-G2), HCCM consumer catalog and binding (HOF-G3), HPPM Handoff Posture declaration (HOF-G4), HSLM baseline Handoff act-layer lifecycle (HOF-G5 baseline), partial downstream exit boundary architecture (HOF-G8 partial), and HGA authority catalog integration (HOF-G9 catalog integration) only.
 
 | Tranche 2 group | Requirement range | Status |
 |-----------------|-------------------|--------|
@@ -2879,9 +2924,9 @@ Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R65`) plus amended `R24`
 | **HOF-G4** | `FI-DSN-STD-015-R40`–`R47` | **Drafted** — Sprint V06-D40.4 |
 | **HOF-G5 (baseline)** | `FI-DSN-STD-015-R48`–`R57` | **Drafted** — Sprint V06-D40.8 |
 | **HOF-G8 (partial)** | `FI-DSN-STD-015-R58`–`R65` | **Drafted** — Sprint V06-D41.2 |
-| **HOF-G9 (catalog integration)** | — | **Not drafted** |
+| **HOF-G9 (catalog integration)** | `FI-DSN-STD-015-R66`–`R69` | **Drafted** — Sprint V06-D41.6 |
 | **`R24` amendment** | `FI-DSN-STD-015-R24` | **Amended** — Sprint V06-D40.1 |
 
-**Identifier continuity:** `FI-DSN-STD-015-R01` through `R65` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
+**Identifier continuity:** `FI-DSN-STD-015-R01` through `R69` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
 
 **Tranche 3:** Remains **not authorized**. HOF-G6, HERCM re-entry operative themes, HOF-G8 completion, and HOF-G9 completion — **not drafted**.
