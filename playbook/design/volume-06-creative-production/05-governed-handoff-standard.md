@@ -2759,20 +2759,78 @@ HOF-G4 Tranche 2 requirements establish HGA operative **Handoff Posture declarat
 
 ---
 
-### 23.4 Tranche 2 partial boundary statement
+### 23.5 Handoff Act Lifecycle Baseline (HOF-G5)
 
-Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R47`) plus amended `R24` establish HGA operative Handoff authorization acts (HOF-G2), HCCM consumer catalog and binding (HOF-G3), and HPPM Handoff Posture declaration (HOF-G4) only.
+This section establishes operative normative requirements for HSLM baseline Handoff act-layer lifecycle architecture at the STD-015 Layer B CP-04 boundary. It consumes HSLM two-layer lifecycle split (`FI-DSN-STD-014` G11 Section 20.23.7), HGA act-type attribution (Section 20.5.3), HCCM bound consumer context identity (Section 23.2), HPPM authoritative posture chain cardinality (Section 23.3), and HGA authorization and posture declaration separation (Sections 23.1–23.3). It does not define HERCM re-entry or resumption operative transitions, HRTCM recall trigger mechanics, HOF-G6 operative recall, withdrawal, or suspension mechanics, downstream exit completion (HOF-G8), or authority catalog integration completion (HOF-G9).
+
+#### 23.5.1 Inherited authority
+
+| Inherited source | What HOF-G5 baseline consumes for lifecycle architecture |
+|------------------|----------------------------------------------------------|
+| **Section 20.5.3 (HGA)** | Sole operative Handoff act-layer performer; mandatory act-type attribution matrix |
+| **`FI-DSN-STD-014` G11 HSLM** | Two-layer lifecycle split; provisional act-layer state vocabulary — consumed without redefinition of G11 eligibility-layer states |
+| **Section 20.5.4 (HCCM)** | Bound consumer context identity for lifecycle scope |
+| **Section 20.5.5 (HPPM)** | One authoritative forward posture chain per bound context |
+| **Section 20.5.7 (HERCM)** | Re-entry categories acknowledged as planning architecture only — operative re-entry transitions **not drafted** in Tranche 2 |
+| **HOF-G1 requirements (`FI-DSN-STD-015-R01`–`R07`)** | Entry boundary; upstream posture consumption |
+| **HOF-G2 requirements (`FI-DSN-STD-015-R25`–`R32`)** | Authorization act architecture |
+| **HOF-G3 requirements (`FI-DSN-STD-015-R33`–`R39`)** | Bound consumer context identity |
+| **HOF-G4 requirements (`FI-DSN-STD-015-R40`–`R47`)** | Posture declaration architecture |
+| **HOF-G7 requirements (`FI-DSN-STD-015-R08`–`R15`)** | HOEM framework; additive operative record discipline |
+| **HOF-G10 requirements (`FI-DSN-STD-015-R16`–`R21`)** | HPAM preservation; historical record non-erasure |
+
+#### 23.5.2 Initial normative requirements — Tranche 2 (HOF-G5 baseline)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R48` | Governed Handoff SHALL adopt the constitutional baseline Handoff act-layer lifecycle states **Eligible-for-consideration**, **Authorized**, **Completed**, **Rejected**, **Suspended**, **Withdrawn**, **Recalled**, and **Expired** as operative HSLM vocabulary at the STD-015 act layer (`FI-DSN-STD-014` G11 HSLM; Section 9.2). No additional baseline act-layer lifecycle state SHALL be recognized at the Handoff boundary without a separately governed constitutional planning amendment. | Company judgment |
+| `FI-DSN-STD-015-R49` | Handoff act-layer baseline lifecycle states SHALL remain peer-distinct from G11 eligibility-layer export conditions, **GPRA** Retention, **Invalidated**, and **Superseded** posture, artifact lifecycle, **Handoff authorization acts**, **Handoff Posture declaration acts**, HERCM re-entry and resumption acts, **downstream acceptance**, operational intake, operational retry, manufacturing validation and execution, publication control, fulfillment control, and distribution control (HOF-P10; HSLM; HOF-P4; HOF-P5). Recording or inferring a baseline act-layer lifecycle state SHALL NOT collapse any other peer-distinct decision class into lifecycle posture. | Company judgment |
+| `FI-DSN-STD-015-R50` | Baseline Handoff act-layer lifecycle evaluation and state attribution SHALL apply to exactly one **HCCM** bound consumer context identity and one authoritative HPPM forward Handoff Posture chain at a time (`FI-DSN-STD-015-R36`, `R46`). A single baseline lifecycle state attribution SHALL NOT span multiple bound consumer contexts or merged authoritative posture chains in one undifferentiated lifecycle evaluation. | Company judgment |
+| `FI-DSN-STD-015-R51` | **Eligible-for-consideration** SHALL denote that minimum Handoff entry boundary conditions and G11 Handoff eligibility export are satisfied for evaluation of Handoff acts in the attributed bound consumer context — and SHALL NOT constitute **Handoff authorization**, **Handoff Posture declaration**, or **Completed** posture. **Authorized** SHALL denote that a distinct HGA **Handoff authorization act** has been recorded for the attributed bound consumer context — and SHALL NOT substitute for **Handoff Posture declaration** or **Completed** posture. **Completed** SHALL denote that Handoff Posture has been declared and Handoff obligations for the act path are satisfied at the Volume 06 boundary for the attributed bound consumer context — and SHALL NOT constitute downstream acceptance, permanent collection membership, or manufacturing clearance. **Rejected** SHALL denote that Handoff authorization or Handoff Posture declaration has been constitutionally withheld or denied on documented Handoff grounds at the act layer — and SHALL NOT constitute downstream rejection, operational intake denial, or eligibility-layer **Blocked** condition alone. | Company judgment |
+| `FI-DSN-STD-015-R52` | **Suspended** SHALL denote temporary cessation of forward reliance on an otherwise recorded Handoff authorization and authoritative HPPM posture chain for the attributed bound consumer context without erasing, overwriting, or rewriting prior authorization, posture declaration, or lifecycle operative records. **Suspended** SHALL remain peer-distinct from **Withdrawn**, **Recalled**, **Expired**, **Rejected**, and HERCM resumption or re-entry acts. Operative suspension act mechanics and HERCM REC-02 resumption transitions remain assigned to HOF-G6 and Tranche 3 HERCM operative drafting respectively. | Company judgment |
+| `FI-DSN-STD-015-R53` | **Withdrawn** SHALL denote active cessation of forward Handoff reliance initiated through a peer-distinct HGA withdrawal act at the Handoff act layer for the attributed bound consumer context while preserving prior authorization, posture declaration, and lifecycle operative records as historical fact only. **Withdrawn** SHALL remain peer-distinct from **GPRA** **Invalidated** or **Superseded** posture establishment, **Recalled**, **Expired**, downstream acceptance reversal, and operational intake reversal. Operative withdrawal act mechanics remain assigned to HOF-G6. | Company judgment |
+| `FI-DSN-STD-015-R54` | **Expired** SHALL denote loss of forward Handoff authorization or posture effect by a governed validity or time boundary at the Handoff act layer for the attributed bound consumer context without automatically constituting **Recalled**, **Withdrawn**, HERCM re-entry consideration, downstream acceptance change, or operational retry. Expiry record preservation and validity-boundary satisfaction remain additive historical facts only (`FI-DSN-STD-015-R16`–`R21`). | Company judgment |
+| `FI-DSN-STD-015-R55` | **Recalled** SHALL denote that forward Handoff authority and forward reliance on the authoritative HPPM posture chain have ceased for the attributed bound consumer context while preserving all prior Handoff authorization, posture declaration, and lifecycle operative records as historical fact only (HOF-P7; HPAM). **Recalled** SHALL NOT erase, overwrite, or rewrite prior operative records. HRTCM recall trigger mechanics and operative recall act performance remain assigned to HOF-G6 and Tranche 3 — not consumed in this baseline sprint. | Company judgment |
+| `FI-DSN-STD-015-R56` | Each baseline Handoff act-layer lifecycle state change attributable to HGA at the Handoff boundary SHALL receive distinct HGA act-type attribution appropriate to the lifecycle class recorded and SHALL produce an additive **HOEM** operative lifecycle record binding the state change to the applicable **GPRA** identity, **Production Obligation** scope, bound consumer context, and authoritative HPPM posture chain (`FI-DSN-STD-015-R11`; `FI-DSN-STD-015-R45`). **HOEM** operative lifecycle records SHALL NOT merge lifecycle state attribution with authorization, posture declaration, recall, withdrawal, suspension, or re-entry attribution in a single undifferentiated operative record and SHALL NOT represent lifecycle history as rewrite or deletion of prior operative records. | Company judgment |
+| `FI-DSN-STD-015-R57` | Governed Handoff SHALL NOT establish, promote, infer, or recognize baseline act-layer lifecycle states through implicit transition, automatic inheritance, default system state, implementation-discovered lifecycle pathway, configuration-driven lifecycle promotion, downstream acceptance signal, operational retry, or eligibility-layer condition alone absent attributable HGA lifecycle-class act attribution where such attribution is constitutionally required (HOF-P9). G11 eligibility-layer export conditions alone SHALL NOT perform, satisfy, or substitute for baseline act-layer lifecycle state attribution. | Company judgment |
+
+#### 23.5.3 HOF-G5 baseline drafting traceability
+
+| Req ID | Planning group | Primary theme | Controlling planning decision |
+|--------|----------------|---------------|------------------------------|
+| `FI-DSN-STD-015-R48` | HOF-G5 (baseline) | HSLM baseline act-layer state vocabulary adoption | HSLM; Section 9.2 |
+| `FI-DSN-STD-015-R49` | HOF-G5 (baseline) | Lifecycle peer-distinct decision-class separation | HSLM; HOF-P10 |
+| `FI-DSN-STD-015-R50` | HOF-G5 (baseline) | One lifecycle path per bound context and posture chain | `PD-STD-015-002`; `PD-STD-015-003` |
+| `FI-DSN-STD-015-R51` | HOF-G5 (baseline) | Eligible, Authorized, Completed, Rejected constitutional meanings | HSLM; `PD-STD-015-001` |
+| `FI-DSN-STD-015-R52` | HOF-G5 (baseline) | Suspension temporary reliance pause boundary | HSLM; Section 9.2 |
+| `FI-DSN-STD-015-R53` | HOF-G5 (baseline) | Withdrawal peer-distinct cessation boundary | HSLM; `PD-STD-015-001` |
+| `FI-DSN-STD-015-R54` | HOF-G5 (baseline) | Expiration validity boundary without auto-transition | HSLM; Section 9.2 |
+| `FI-DSN-STD-015-R55` | HOF-G5 (baseline) | Recalled baseline forward-reliance cessation meaning | HSLM; HOF-P7 |
+| `FI-DSN-STD-015-R56` | HOF-G5 (baseline) | HGA attribution and additive HOEM lifecycle records | `PD-STD-015-001`; HOF-G7 `R11` |
+| `FI-DSN-STD-015-R57` | HOF-G5 (baseline) | Prohibition on implicit or non-HGA lifecycle promotion | HOF-P9; HEIM |
+
+#### 23.5.4 HOF-G5 baseline boundary statement
+
+HOF-G5 Tranche 2 baseline requirements establish HSLM operative act-layer lifecycle state vocabulary, peer-distinct class boundaries, bound-context and authoritative posture-chain scope, constitutional meanings for **Eligible-for-consideration**, **Authorized**, **Completed**, **Rejected**, **Suspended**, **Withdrawn**, **Expired**, and **Recalled**, additive HOEM lifecycle record discipline, and prohibited implicit lifecycle promotion only. HERCM re-entry and resumption operative transitions, HRTCM recall trigger mechanics, and HOF-G6 operative recall, withdrawal, and suspension act mechanics remain assigned to Tranche 3. Downstream exit completion remains assigned to HOF-G8.
+
+**Undrafted groups:** HOF-G6, HOF-G8 — **not drafted**. HOF-G9 catalog integration — **not drafted**. HERCM re-entry operative themes — **not drafted** (Tranche 3).
+
+---
+
+### 23.6 Tranche 2 partial boundary statement
+
+Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R57`) plus amended `R24` establish HGA operative Handoff authorization acts (HOF-G2), HCCM consumer catalog and binding (HOF-G3), HPPM Handoff Posture declaration (HOF-G4), and HSLM baseline Handoff act-layer lifecycle (HOF-G5 baseline) only.
 
 | Tranche 2 group | Requirement range | Status |
 |-----------------|-------------------|--------|
 | **HOF-G2** | `FI-DSN-STD-015-R25`–`R32` | **Drafted** — Sprint V06-D40.1 |
 | **HOF-G3** | `FI-DSN-STD-015-R33`–`R39` | **Drafted** — Sprint V06-D40.1 |
 | **HOF-G4** | `FI-DSN-STD-015-R40`–`R47` | **Drafted** — Sprint V06-D40.4 |
-| **HOF-G5 (baseline)** | — | **Not drafted** |
+| **HOF-G5 (baseline)** | `FI-DSN-STD-015-R48`–`R57` | **Drafted** — Sprint V06-D40.8 |
 | **HOF-G8 (partial)** | — | **Not drafted** |
 | **HOF-G9 (catalog integration)** | — | **Not drafted** |
 | **`R24` amendment** | `FI-DSN-STD-015-R24` | **Amended** — Sprint V06-D40.1 |
 
-**Identifier continuity:** `FI-DSN-STD-015-R01` through `R47` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
+**Identifier continuity:** `FI-DSN-STD-015-R01` through `R57` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
 
-**Tranche 3:** Remains **not authorized**. HOF-G6, HERCM re-entry, HOF-G8 completion, and HOF-G9 completion — **not drafted**.
+**Tranche 3:** Remains **not authorized**. HOF-G6, HERCM re-entry operative themes, HOF-G8 completion, and HOF-G9 completion — **not drafted**.
