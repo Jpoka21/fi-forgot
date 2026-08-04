@@ -23,7 +23,7 @@
 | **Binding status** | Not binding |
 | **Register posture** | `Architecture Draft` (`FI-DSN-REG-001`; synchronized Sprint V06-D36.5) |
 | **Queue posture** | EO 21 — **In progress** per Sprint V06-D32.4 governing question adoption (`FI-DSN-QUE-001`; synchronized Sprint V06-D36.5) |
-| **Sprint** | V06-D37.1 |
+| **Sprint** | V06-D40.0 |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
 | **Parent architecture** | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` — Creative Production Architecture (Frozen Volume Governance, Version 1.0, July 29, 2026) |
 | **Volume roadmap** | `FI-DSN-VOL-001` — Design Volume Roadmap (Frozen Design Volume Roadmap, Version 1.0, July 23, 2026) |
@@ -50,7 +50,7 @@
 
 **Source basis:** Company judgment per `FI-DSN-GOV-003`. Applicable frozen `FI-MFG-*` obligations are consumed only as upstream Compliance Boundary context established before Handoff consideration. This architecture draft is not derived from product implementation, vendor facts, Brain runtime behavior, or engineering workflow design.
 
-**Architecture posture:** Version 0.1 Architecture Draft — **accepted at draft posture** (Sprint V06-D33.7). Constitutional architecture kickoff (Sprints V06-D33.2–V06-D33.3) and continuation (Sprints V06-D33.4–V06-D33.5; corrective Sprints V06-D33.5A, V06-D33.6A). Governing question adopted (Sprints V06-D32.1–V06-D32.4; commit `87fd093`). Architecture body **complete** — Sections 1–19 authored. Independent architecture review **completed** (Sprint V06-D33.6); blocking correction **accepted** (Sprint V06-D33.6A). Section 20 requirement planning **completed** — planning framework authored (Sprint V06-D36.1); independent planning review **passed** (Sprint V06-D36.4; Disposition A); V06-D36.3 corrective **accepted**; Section 20 requirement plan **adopted** (Sprint V06-D36.5). Normative requirement drafting **authorized** for Tranche 1 only (Sprint V06-D37.1). Tranche 1 normative requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** (Sprint V06-D37.1; Section 21); **committed** (Sprint V06-D37.3; commit `eeea1ce`); post-commit verified (Sprint V06-D37.4). REG/QUE Tranche 1 committed posture synchronization **committed** (Sprint V06-D37.6; commit `229f611`). All five Section 20 planning decisions **`PD-STD-015-001` through `PD-STD-015-005`** **resolved** (Sections 20.5.3–20.5.7; HGA, HCCM, HPPM, HRTCM, HERCM). Planning resolutions **committed** (Sprints V06-D38.4, V06-D38.6, V06-D39.1; commits `fc77ca7`, `b0e46d2`, `3af5ba5`). All five governed open questions **`OQ-STD-014-008`, `OQ-STD-014-009`, `OQ-STD-014-010`, `OQ-V06-007`, and `OQ-STD-015-001`** **closed** (Sprints V06-D38.2–V06-D39.0A). **Section 20 planning constitutionally complete** (Sprint V06-D39.2 synchronization). Tranche 2 **planning prerequisites complete**; Tranche 2 normative drafting **not authorized** pending separately governed drafting charter. Tranche 3 normative drafting **not authorized**. Product Sprint 004 **not authorized**. This document does not claim approval, freeze, binding authority, or effective status.
+**Architecture posture:** Version 0.1 Architecture Draft — **accepted at draft posture** (Sprint V06-D33.7). Constitutional architecture kickoff (Sprints V06-D33.2–V06-D33.3) and continuation (Sprints V06-D33.4–V06-D33.5; corrective Sprints V06-D33.5A, V06-D33.6A). Governing question adopted (Sprints V06-D32.1–V06-D32.4; commit `87fd093`). Architecture body **complete** — Sections 1–19 authored. Independent architecture review **completed** (Sprint V06-D33.6); blocking correction **accepted** (Sprint V06-D33.6A). Section 20 requirement planning **completed** — planning framework authored (Sprint V06-D36.1); independent planning review **passed** (Sprint V06-D36.4; Disposition A); V06-D36.3 corrective **accepted**; Section 20 requirement plan **adopted** (Sprint V06-D36.5). Normative requirement drafting **authorized** for Tranche 1 only (Sprint V06-D37.1). Tranche 1 normative requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** (Sprint V06-D37.1; Section 21); **committed** (Sprint V06-D37.3; commit `eeea1ce`); post-commit verified (Sprint V06-D37.4). REG/QUE Tranche 1 committed posture synchronization **committed** (Sprint V06-D37.6; commit `229f611`). All five Section 20 planning decisions **`PD-STD-015-001` through `PD-STD-015-005`** **resolved** (Sections 20.5.3–20.5.7; HGA, HCCM, HPPM, HRTCM, HERCM). Planning resolutions **committed** (Sprints V06-D38.4, V06-D38.6, V06-D39.1; commits `fc77ca7`, `b0e46d2`, `3af5ba5`). All five governed open questions **`OQ-STD-014-008`, `OQ-STD-014-009`, `OQ-STD-014-010`, `OQ-V06-007`, and `OQ-STD-015-001`** **closed** (Sprints V06-D38.2–V06-D39.0A). **Section 20 planning constitutionally complete** (Sprint V06-D39.2 synchronization). Tranche 2 **planning prerequisites complete**; Tranche 2 normative drafting **authorized** (Sprint V06-D40.0; Section 22) — **not drafted**. Tranche 3 normative drafting **not authorized**. Product Sprint 004 **not authorized**. This document does not claim approval, freeze, binding authority, or effective status.
 
 ---
 
@@ -1071,7 +1071,7 @@ Architecture Validation is governance-level validation of the Version 0.1 Archit
 | Independent architecture review | **Completed** — Sprint V06-D33.6; blocking correction **completed and accepted** (Sprint V06-D33.6A) |
 | Architecture acceptance | **Accepted** at Version 0.1 Architecture Draft posture — Sprint V06-D33.7 |
 | Requirement planning | **Complete** — Section 20 planning constitutionally complete (Sprints V06-D36.5, V06-D39.2) |
-| Normative requirement drafting | Tranche 1 **committed**; Tranches 2–3 **not authorized** |
+| Normative requirement drafting | Tranche 1 **committed**; Tranche 2 **authorized** — **not drafted** (Section 22); Tranche 3 **not authorized** |
 | Open questions | **All closed** — five governed OQs closed at planning layer (§17) |
 | Register / queue synchronization | **Completed** — Sprint V06-D33.7 (`FI-DSN-REG-001`; `FI-DSN-QUE-001`) |
 | Version posture | **0.1 Architecture Draft** — accepted at draft posture; not approved; not frozen; not binding |
@@ -1098,7 +1098,7 @@ Architecture validation confirms independent architecture review **completed** (
 
 ## 20. Requirement Planning
 
-**Planning posture:** Sprint V06-D36.1 — Section 20 normative requirement planning framework **authored**. Sprint V06-D36.2 — independent constitutional review **completed**; **conditional** findings identified (Sprint V06-D36.3 corrective). Sprint V06-D36.3 — Section 20 constitutional corrective **applied** and **accepted**. Sprint V06-D36.4 — independent planning re-review **completed**; Disposition **A — Accept**. Sprint V06-D36.5 — Section 20 requirement plan **adopted**; normative requirement planning **completed**. Architecture Sections 1–19 **accepted** at Version 0.1 Architecture Draft posture (Sprint V06-D33.7). Tranche 1 normative requirement drafting **authorized** (Sprint V06-D37.1); Tranche 1 requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** in Section 21; **committed** (Sprint V06-D37.3). All five planning decisions **`PD-STD-015-001` through `PD-STD-015-005`** **resolved** (Sections 20.5.3–20.5.7). All five governed open questions **closed** (Sprints V06-D38.2–V06-D39.0A). **Section 20 planning constitutionally complete** (Sprint V06-D39.2). Tranche 2 **planning prerequisites complete**; Tranche 2 normative drafting **not authorized** pending separately governed drafting charter. Tranche 3 normative drafting **not authorized**. Section 20 assigns no new `FI-DSN-STD-015-R##` identifiers beyond committed Tranche 1 and drafts no new operative normative language in this sprint.
+**Planning posture:** Sprint V06-D36.1 — Section 20 normative requirement planning framework **authored**. Sprint V06-D36.2 — independent constitutional review **completed**; **conditional** findings identified (Sprint V06-D36.3 corrective). Sprint V06-D36.3 — Section 20 constitutional corrective **applied** and **accepted**. Sprint V06-D36.4 — independent planning re-review **completed**; Disposition **A — Accept**. Sprint V06-D36.5 — Section 20 requirement plan **adopted**; normative requirement planning **completed**. Architecture Sections 1–19 **accepted** at Version 0.1 Architecture Draft posture (Sprint V06-D33.7). Tranche 1 normative requirement drafting **authorized** (Sprint V06-D37.1); Tranche 1 requirements **`FI-DSN-STD-015-R01`–`R24`** **drafted** in Section 21; **committed** (Sprint V06-D37.3). All five planning decisions **`PD-STD-015-001` through `PD-STD-015-005`** **resolved** (Sections 20.5.3–20.5.7). All five governed open questions **closed** (Sprints V06-D38.2–V06-D39.0A). **Section 20 planning constitutionally complete** (Sprint V06-D39.2). Tranche 2 **planning prerequisites complete**; Tranche 2 normative drafting **authorized** (Sprint V06-D40.0; Section 22) — **not drafted**. Tranche 3 normative drafting **not authorized**. Section 20 assigns no new `FI-DSN-STD-015-R##` identifiers beyond committed Tranche 1 and drafts no new operative normative language in this sprint.
 
 This section establishes the adopted planning framework. All planning decisions `PD-STD-015-001` through `PD-STD-015-005` are **resolved** at Sections 20.5.3 through 20.5.7 respectively. **Section 20 planning is constitutionally complete.** Operative requirement text belongs in Section 21+ after separately authorized normative drafting gates.
 
@@ -2168,17 +2168,29 @@ Tranche 1 drafting **does not**:
 - Authorize Product Sprint 004
 - Authorize Tranches 2–3 normative drafting
 
-**Tranches 2–3 — not authorized:**
+**Tranche 2 — authorized, not drafted:**
+
+Sprint V06-D40.0 **authorized** Tranche 2 normative drafting only (Section 22). Tranche 2 drafting **has not begun**. No `FI-DSN-STD-015-R25` or later identifier is assigned by this authorization.
+
+| Group | Scope | Planning decisions consumed | Authorization posture |
+|-------|-------|---------------------------|----------------------|
+| HOF-G2 | Handoff authorization act architecture; HGA operative catalog | `PD-STD-015-001` (HGA; §20.5.3) | **Fully authorized** |
+| HOF-G3 | Consumer class catalog; HCCM operative binding | `PD-STD-015-002` (HCCM; §20.5.4) | **Fully authorized** |
+| HOF-G4 | Handoff Posture declaration; HPPM operative partition | `PD-STD-015-003` (HPPM; §20.5.5) | **Fully authorized** |
+| HOF-G5 (baseline) | HSLM act-layer baseline lifecycle; eligible→authorized→completed path | HGA; HCCM; HPPM (consumed) | **Partially authorized** — baseline only; HERCM re-entry **deferred** to Tranche 3 |
+| HOF-G8 (partial) | Volume 06 exit boundaries; catalog detail; non-implication rules | HCCM; HPPM (consumed) | **Partially authorized** — partial scope only; completion themes **deferred** to Tranche 3 |
+| HOF-G9 (catalog integration) | HGA authority catalog integration; authority map completion | `PD-STD-015-001` (HGA; §20.5.3) | **Partially authorized** — catalog integration only; prohibitions **committed** (`R22`–`R24`) |
+
+**Tranche 3 — not authorized:**
 
 | Tranche | Groups | Prerequisite |
 |---------|--------|--------------|
-| **2 — Catalog and posture** | HOF-G2; HOF-G3; HOF-G4; HOF-G5 baseline; HOF-G8 partial; HOF-G9 catalog integration | Tranche 1 **committed**; `PD-STD-015-001`, `PD-STD-015-002`, `PD-STD-015-003` **resolved** — planning prerequisites **complete** |
 | **3 — Recall, re-entry, completion** | HOF-G6; HOF-G5 HERCM re-entry; HOF-G8 completion; HOF-G9 completion | Tranche 2 **committed**; `PD-STD-015-004`, `PD-STD-015-005` **resolved** — planning prerequisites **complete** |
 
 **Next governed gates (sequenced):**
 
-1. Tranche 2 normative drafting authorization (separately governed drafting charter — **not authorized**)
-2. Independent Tranche 2 constitutional review and commit (after authorization)
+1. Tranche 2 normative requirement drafting (separately governed drafting sprint — **authorized**; **not begun**)
+2. Independent Tranche 2 constitutional review and commit (after drafting)
 3. Tranche 3 normative drafting authorization (separately governed — **not authorized**)
 4. Independent tranche review and commit per subsequent tranche
 5. Full-body freeze review (future gate — not authorized)
@@ -2385,11 +2397,202 @@ Tranche 1 normative requirements (`FI-DSN-STD-015-R01`–`R24`) establish consti
 | Tranche | Groups drafted | Requirement range | Status |
 |---------|----------------|-------------------|--------|
 | **1 — Foundations** | HOF-G1; HOF-G7; HOF-G10; HOF-G9 (prohibitions only) | `FI-DSN-STD-015-R01`–`R24` | **Committed** — Sprint V06-D37.3 |
-| **2 — Catalog and posture** | HOF-G2; HOF-G3; HOF-G4; HOF-G5 baseline; HOF-G8 partial; HOF-G9 catalog integration | — | **Not authorized** |
+| **2 — Catalog and posture** | HOF-G2; HOF-G3; HOF-G4; HOF-G5 baseline; HOF-G8 partial; HOF-G9 catalog integration | — | **Authorized** — Section 22 (Sprint V06-D40.0); **not drafted** |
 | **3 — Recall, re-entry, completion** | HOF-G6; HOF-G5 HERCM re-entry; HOF-G8 completion; HOF-G9 completion | — | **Not authorized** |
 
 **Planning decisions preserved:** All `PD-STD-015-001` through `PD-STD-015-005` **resolved** (Sections 20.5.3–20.5.7). **Section 20 planning constitutionally complete.**
 
 **Open questions preserved:** All five governed OQs **closed** at planning layer (Sprints V06-D38.2–V06-D39.0A).
 
-Tranche 1 **committed** (Sprint V06-D37.3; commit `eeea1ce`). Tranche 2 normative drafting remains **unauthorized** pending separately governed drafting charter.
+Tranche 1 **committed** (Sprint V06-D37.3; commit `eeea1ce`). Tranche 2 normative drafting **authorized** (Sprint V06-D40.0; Section 22) — **not drafted**. Tranche 3 normative drafting remains **not authorized**.
+
+---
+
+## 22. Tranche 2 Normative Drafting Authorization and Charter
+
+**Charter posture:** Sprint V06-D40.0 — governed Tranche 2 normative drafting **authorization** and drafting charter only. This section **does not** draft normative requirements, assign `FI-DSN-STD-015-R25` or later identifiers, amend `FI-DSN-STD-015-R24`, or authorize Tranche 3 normative drafting. Tranche 2 operative requirement drafting remains **not begun** until a separately governed drafting sprint.
+
+### 22.1 Tranche identifier and purpose
+
+| Field | Value |
+|-------|-------|
+| **Tranche** | **2 — Catalog and posture** |
+| **Authorization sprint** | V06-D40.0 |
+| **Purpose** | Authorize operative normative drafting for Handoff authorization acts (HOF-G2), consumer class catalog and binding (HOF-G3), Handoff Posture declaration (HOF-G4), baseline act-layer lifecycle (HOF-G5 partial), partial downstream exit and catalog-detail themes (HOF-G8 partial), and HGA authority catalog integration (HOF-G9 partial beyond committed prohibitions) — consuming committed planning architecture HGA, HCCM, and HPPM without drafting recall, HERCM re-entry, or Tranche 3 completion themes |
+
+### 22.2 Authorized HOF groups
+
+| Group | Authorization | Scope boundary |
+|-------|---------------|----------------|
+| **HOF-G2** | **Fully authorized** | HGA operative Handoff authorization act architecture; eligibility versus authorization separation at authorization boundary; mandatory act-type attribution consumption |
+| **HOF-G3** | **Fully authorized** | HCCM closed consumer class catalog; HCBM boundary-key binding; bound consumer context identity; multi-binding cardinality |
+| **HOF-G4** | **Fully authorized** | HPPM catalog-driven mandatory posture partition; Handoff Posture declaration; authorization versus declaration relationship |
+| **HOF-G5 (baseline)** | **Partially authorized** | HSLM act-layer baseline state vocabulary; eligible→authorized→completed path framing; suspension, withdrawal, and expiry posture at baseline layer only |
+| **HOF-G8 (partial)** | **Partially authorized** | Volume 06 terminus exit boundaries; HCCM catalog-detail consumption; non-implication rules toward Volume 05 and production catalog boundaries |
+| **HOF-G9 (catalog integration)** | **Partially authorized** | HGA authority catalog integration and constitutional authority map completion — **excluding** committed Tranche 1 prohibitions (`R22`–`R24` operative text other than authorized `R24` amendment per §22.8) |
+
+**Deferred from Tranche 2 (Tranche 3 only):** HOF-G6; HOF-G5 HERCM re-entry operative themes; HOF-G8 completion themes; HOF-G9 completion themes.
+
+### 22.3 Planning decisions consumed
+
+| Planning decision | Model | Section | Tranche 2 consumption |
+|-------------------|-------|---------|----------------------|
+| `PD-STD-015-001` | HGA | 20.5.3 | HOF-G2 operative authorization; HOF-G9 catalog integration |
+| `PD-STD-015-002` | HCCM | 20.5.4 | HOF-G3 operative catalog and binding; HOF-G8 partial catalog detail |
+| `PD-STD-015-003` | HPPM | 20.5.5 | HOF-G4 operative posture declaration and partition |
+| `PD-STD-015-004` | HRTCM | 20.5.6 | **Not consumed** in Tranche 2 — Tranche 3 only |
+| `PD-STD-015-005` | HERCM | 20.5.7 | **Not consumed** in Tranche 2 — Tranche 3 only (baseline HOF-G5 **may** reference HERCM categories without operative re-entry rules) |
+
+All five governed open questions remain **closed** at planning layer. Tranche 2 drafting **must not** reopen, create, or re-resolve any governed open question.
+
+### 22.4 Existing requirements depended upon
+
+Tranche 2 drafting **must** remain reconcilable with committed Tranche 1 requirements:
+
+| Requirement range | Group | Dependency role |
+|-------------------|-------|-----------------|
+| `FI-DSN-STD-015-R01`–`R07` | HOF-G1 | Constitutional inheritance; entry boundary; upstream consumption |
+| `FI-DSN-STD-015-R08`–`R15` | HOF-G7 | Evidence and validity consumption framework |
+| `FI-DSN-STD-015-R16`–`R21` | HOF-G10 | Preservation and audit framework |
+| `FI-DSN-STD-015-R22`–`R24` | HOF-G9 (partial) | Authority prohibitions; peer-distinct decision classes — `R24` subject to authorized amendment per §22.8 |
+
+Tranche 2 **must not** weaken, contradict, or silently override Tranche 1 operative boundaries except through the expressly authorized `R24` amendment in §22.8.
+
+### 22.5 Authorized normative subjects
+
+Tranche 2 drafting **may** establish operative normative requirements for:
+
+1. **HGA authorization acts** — performer, act-type attribution, eligibility versus authorization separation at authorization boundary
+2. **HCCM consumer class catalog and binding** — closed catalog classes, HCBM key mapping, bound consumer context identity, multi-binding rules
+3. **HPPM posture declaration** — catalog-driven mandatory partition; declarative intake posture per bound context
+4. **HSLM baseline act-layer lifecycle** — provisional state vocabulary; eligible→authorized→completed path; baseline suspension, withdrawal, and expiry framing **without** HERCM operative re-entry transitions
+5. **Partial downstream exit** — Volume 06 terminus rules; catalog-detail and non-implication boundaries consumable before Tranche 3 completion
+6. **HGA authority catalog integration** — normative completion of authority map themes deferred from Tranche 1 `R24`
+7. **HOEM operative record themes** at authorization, posture declaration, and baseline lifecycle boundaries — framework consumption from `R11` only; recall and re-entry HOEM mechanics remain Tranche 3
+
+### 22.6 Prohibited normative subjects
+
+Tranche 2 drafting **must not**:
+
+| Prohibited subject | Governing boundary |
+|--------------------|-------------------|
+| HOF-G6 recall, withdrawal, and suspension operative mechanics | HRTCM — Tranche 3 (`PD-STD-015-004`) |
+| HERCM re-entry and resumption operative transitions | HERCM — Tranche 3 (`PD-STD-015-005`) |
+| HOF-G8 completion and full exit-completeness operative themes | Tranche 3 |
+| HOF-G9 completion themes beyond catalog integration | Tranche 3 |
+| GPRA grant, Review, Approval, G11 preparation performance | STD-014 principal authority |
+| Downstream operational intake, acceptance, or manufacturing execution | HOF-P4; HOF-P5; HMEX |
+| Implementation schemas, APIs, storage, queues, UI, workflows, or organizational roles | §4; §18; implementation neutrality |
+| New Handoff authorization class invention beyond HGA | HAAM; `R24` core prohibitions preserved |
+| Product Sprint 004 | Not authorized |
+| Tranche 3 normative drafting | §22.12 |
+
+### 22.7 Requirement identifier boundary
+
+| Boundary | Rule |
+|----------|------|
+| **Committed range** | `FI-DSN-STD-015-R01` through `R24` — Tranche 1 complete |
+| **Next assignable identifier** | `FI-DSN-STD-015-R25` onward — **only** after authorized `R24` amendment completed as first controlled drafting act |
+| **Assignment rule** | Continuous assignment with no gaps, no reserved unused identifiers, and no duplicates within Tranche 2 |
+| **Gross planning estimate** | 27–34 incremental unique requirements after deduplication (§20.10.5) — estimate only; not identifier assignment |
+| **R25+ prohibition in this sprint** | This charter **does not** assign any `R25` or later identifier |
+
+### 22.8 R24 amendment posture
+
+**Decision:** `FI-DSN-STD-015-R24` amendment **is required** and **may occur as the first controlled act within the separately authorized Tranche 2 normative drafting sprint** — **not** in this charter sprint.
+
+**Constitutional rationale:** `R24` contains operative deferral language stating that `OQ-STD-014-008` remains **open** and `PD-STD-015-001` remains **Placeholder — unresolved**. Both statements are factually inconsistent with committed planning architecture (`PD-STD-015-001` **resolved**; HGA adopted; `OQ-STD-014-008` **closed**). Because this language appears in operative `SHALL` requirement text, it is **not** metadata-only residue. Tranche 2 drafting of HGA authority catalog requirements (`HOF-G2`, `HOF-G9 catalog integration`) would directly contradict unchanged `R24` deferral language.
+
+**Permitted amendment purpose (drafting sprint only):**
+
+1. Remove false Tranche 1 deferral tail (`OQ-STD-014-008` open; `PD-STD-015-001` unresolved)
+2. Acknowledge HGA adoption at planning layer and authorize operative HGA catalog drafting in Tranche 2
+3. Preserve without weakening: HAAM inherited prohibitions; peer-distinct decision class preservation; **SHALL NOT invent, establish, or name a Handoff authorization class** except as normative adoption of committed HGA — not creation of a new class
+
+**Amendment prohibitions:** The `R24` amendment **must not** introduce recall, re-entry, consumer catalog, posture partition, or Tranche 3 operative mechanics; **must not** delete or weaken peer-distinct decision class obligations; **must not** authorize Tranche 3.
+
+**This sprint:** `R24` text is **unchanged**. Amendment authority is **declared** only.
+
+### 22.9 Tranche 3 exclusion boundary
+
+| Tranche 3 group or theme | Exclusion rule |
+|--------------------------|----------------|
+| HOF-G6 | Recall, withdrawal, suspension operative mechanics — **prohibited** in Tranche 2 |
+| HOF-G5 HERCM re-entry | Operative re-entry and resumption transitions — **prohibited** in Tranche 2 |
+| HOF-G8 completion | Exit completeness operative themes — **prohibited** in Tranche 2 |
+| HOF-G9 completion | Authority completion beyond catalog integration — **prohibited** in Tranche 2 |
+| `PD-STD-015-004` / HRTCM | Operative consumption — **prohibited** in Tranche 2 |
+| `PD-STD-015-005` / HERCM | Operative consumption — **prohibited** in Tranche 2 |
+
+Tranche 3 planning prerequisites are **complete**. Tranche 3 normative drafting remains **not authorized** until Tranche 2 is committed and a separately governed Tranche 3 authorization sprint occurs.
+
+### 22.10 Drafting sequence
+
+Tranche 2 normative drafting **must** follow this sequence when separately authorized to begin:
+
+| Step | Act | Authorized output |
+|------|-----|-------------------|
+| **0** | Controlled `R24` amendment | Amended `FI-DSN-STD-015-R24` only — first drafting act |
+| **1** | HOF-G2 drafting | HGA operative authorization requirements (`R25+`) |
+| **2** | HOF-G3 drafting | HCCM operative catalog and binding requirements |
+| **3** | HOF-G4 drafting | HPPM operative posture declaration requirements — **after** G2 and G3 dependencies satisfied |
+| **4** | HOF-G5 baseline drafting | Baseline act-layer lifecycle requirements — **without** HERCM operative re-entry |
+| **5** | HOF-G8 partial drafting | Partial exit and catalog-detail requirements |
+| **6** | HOF-G9 catalog integration drafting | HGA authority catalog integration requirements — **after** G2 drafting |
+
+Steps 1–2 **may** proceed in either order after Step 0. Steps 3–6 **must** respect group dependencies in §20.6.
+
+### 22.11 Review and acceptance gates
+
+| Gate | Requirement |
+|------|-------------|
+| **Drafting authorization** | This charter (V06-D40.0) — **complete** |
+| **Drafting sprint** | Separately governed — **not begun** |
+| **Independent constitutional review** | Required before Tranche 2 commit |
+| **Review disposition** | Disposition **A — Accept** required for commit admission |
+| **Corrective sprint** | Required if material boundary defects, HOF-G6/G5 HERCM leakage, or unauthorized `R24` expansion detected |
+| **Governed commit** | Single governed commit of Tranche 2 partial draft — separate sprint |
+| **Post-commit verification** | Independent verification sprint required after commit |
+| **REG/QUE synchronization** | Required after Tranche 2 commit — separate sprint |
+
+### 22.12 Commit and synchronization expectations
+
+This charter sprint **does not** commit. Expected downstream sequence:
+
+1. Tranche 2 normative drafting sprint (draft only)
+2. Independent Tranche 2 review
+3. Governed Tranche 2 commit
+4. Post-commit verification
+5. REG/QUE Tranche 2 committed posture synchronization
+6. Tranche 3 authorization charter (separately governed — **not authorized**)
+
+### 22.13 Stop conditions
+
+Tranche 2 drafting **must stop** and return to governed corrective if:
+
+1. `R24` amendment exceeds §22.8 permitted purpose
+2. Any `R25+` requirement is drafted before authorized `R24` amendment
+3. HOF-G6, HERCM re-entry, HOF-G8 completion, or HOF-G9 completion themes appear in Tranche 2 draft
+4. Any planning decision is reinterpreted beyond committed Sections 20.5.3–20.5.7
+5. Any governed open question is reopened or created
+6. Implementation guidance (API, schema, UI, storage, queue, workflow, organizational role) is introduced
+7. Tranche 3 drafting is attempted without separate authorization
+
+### 22.14 Implementation neutrality requirements
+
+Tranche 2 normative drafting **must** preserve implementation neutrality:
+
+- Requirements **must** govern constitutional Decision-stage Handoff policy only
+- Requirements **must not** prescribe metadata field schemas, DAM workflows, APIs, databases, queue jobs, UI behavior, storage media, notification payloads, or engineering implementation architectures
+- Planning models (HGA, HCCM, HPPM) **must** be consumed as constitutional architecture — not translated into implementation routing logic
+
+### 22.15 Charter issuance boundary
+
+This section establishes Tranche 2 **authorization and drafting charter only**. It **does not**:
+
+- Draft any `FI-DSN-STD-015-R##` operative requirement text
+- Assign `FI-DSN-STD-015-R25` or later identifiers
+- Amend `FI-DSN-STD-015-R01` through `R24`
+- Authorize Tranche 3 normative drafting
+- Authorize Product Sprint 004
+- Claim approval, freeze, binding authority, or effective status for Tranche 2 requirements
