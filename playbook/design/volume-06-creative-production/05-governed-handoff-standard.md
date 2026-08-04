@@ -2706,20 +2706,73 @@ HOF-G3 Tranche 2 requirements establish the closed HCCM consumer class catalog, 
 
 ---
 
-### 23.3 Tranche 2 partial boundary statement
+### 23.3 Handoff Posture Declaration (HOF-G4)
 
-Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R39`) plus amended `R24` establish HGA operative Handoff authorization acts (HOF-G2) and HCCM consumer catalog and binding (HOF-G3) only.
+This section establishes operative normative requirements for HPPM Handoff Posture declaration acts at the STD-015 Layer B CP-04 boundary. It consumes `PD-STD-015-003` (Section 20.5.5), HGA act-type attribution (Section 20.5.3), HCCM bound consumer context identity (Section 23.2), and HGA authorization separation (Section 23.1). It does not define Handoff act completion (HOF-G5), recall, withdrawal, or suspension mechanics (HOF-G6), downstream exit completion (HOF-G8), or HERCM re-entry operative transitions.
+
+#### 23.3.1 Inherited authority
+
+| Inherited source | What HOF-G4 consumes for posture declaration architecture |
+|------------------|----------------------------------------------------------|
+| **Section 20.5.3 (HGA)** | Sole operative Handoff Posture declaration act owner; mandatory act-type attribution matrix; posture declaration act row |
+| **Section 20.5.4 (HCCM)** | Bound consumer context identity; mandatory binding for posture scope |
+| **Section 20.5.5 (HPPM)** | Catalog-driven mandatory posture partition; one authoritative posture chain per bound context; cross-context merge prohibition |
+| **`FI-DSN-STD-014` G11 HEIM** | Eligibility versus posture declaration separation |
+| **`FI-DSN-STD-014` G11 HAAM** | Handoff authority prohibition map — consumed via `R24` |
+| **HOF-G1 requirements (`FI-DSN-STD-015-R01`–`R07`)** | Entry boundary; upstream posture consumption |
+| **HOF-G2 requirements (`FI-DSN-STD-015-R25`–`R32`)** | Authorization versus declaration separation; HGA authorization act architecture |
+| **HOF-G3 requirements (`FI-DSN-STD-015-R33`–`R39`)** | Bound consumer context identity; authoritative posture chain cardinality per context |
+| **HOF-G7 requirements (`FI-DSN-STD-015-R08`–`R15`)** | HOEM framework; additive operative record discipline |
+| **HOF-G9 prohibitions (`FI-DSN-STD-015-R22`–`R24`)** | Brain prohibition; upstream non-absorption; HAAM and HGA adoption |
+
+#### 23.3.2 Initial normative requirements — Tranche 2 (HOF-G4)
+
+| Req ID | Requirement | Source |
+|--------|-------------|--------|
+| `FI-DSN-STD-015-R40` | Operative **Handoff Posture declaration acts** at the Governed Handoff boundary SHALL be performed only under **Handoff Governance Authority (HGA)** attribution as the sole constitutionally authorized owner of Handoff Posture declaration at the STD-015 act layer (`PD-STD-015-001`; `PD-STD-015-003`; Section 20.5.3). No other authority class SHALL perform Handoff Posture declaration acts at this boundary. | Company judgment |
+| `FI-DSN-STD-015-R41` | A **Handoff Posture declaration act** SHALL remain a peer-distinct constitutional decision class separate from **Handoff eligibility** export, **GPRA** grant and **GPRA** Retention posture, **Handoff authorization**, **Handoff act completion**, **Handoff recall**, **Handoff withdrawal**, **Handoff suspension**, **downstream acceptance**, **permanent collection membership**, and **manufacturing validation and execution** (§14.2; HOF-P1; HOF-P3; HOF-P4; HOF-P5). Performing or recording a Handoff Posture declaration act SHALL NOT collapse any other peer-distinct decision class into posture declaration. | Company judgment |
+| `FI-DSN-STD-015-R42` | Governed Handoff SHALL NOT treat **GPRA** Retention posture, **GPRA** grant, G11 Handoff eligibility export, **Handoff authorization act**, **HVEM** validity facts, **HEPM** reference completeness, advisory evidence, Brain recommendation, downstream acceptance signal, operational intake event, or permanent collection membership admission as a **Handoff Posture declaration act** or as a substitute for distinct HGA **Handoff Posture declaration act** attribution (HOF-P1; HOF-P2; HOF-P3; HOF-P5; `FI-DSN-STD-015-R12`, `R13`, `R26`–`R27`). | Company judgment |
+| `FI-DSN-STD-015-R43` | Each **Handoff Posture declaration act** SHALL bind to exactly one **HCCM** bound consumer context identity comprising **GPRA** identity, **Production Obligation** scope, consumer class catalog entry (`CC-01` through `CC-06`), and consumed **HCBM** boundary key set (Section 20.5.4.8; Section 23.2). A single **Handoff Posture declaration act** SHALL NOT span multiple bound consumer contexts in one undifferentiated posture declaration attribution. **Handoff Posture declaration acts** SHALL NOT be performed absent a valid **HCCM** bound consumer context (`PD-STD-015-002`; `PD-STD-015-003`; Section 20.5.5.1). | Company judgment |
+| `FI-DSN-STD-015-R44` | **Handoff Posture declaration acts** SHALL remain constitutionally separate from **Handoff authorization acts**. Performing or recording a Handoff Posture declaration act SHALL NOT substitute for, satisfy, or merge with a **Handoff authorization act**, and performing or recording a Handoff authorization act SHALL NOT substitute for a **Handoff Posture declaration act** (`PD-STD-015-001`; `PD-STD-015-003`; Section 20.5.5.5; `FI-DSN-STD-015-R26`). | Company judgment |
+| `FI-DSN-STD-015-R45` | Each performed **Handoff Posture declaration act** SHALL receive distinct HGA **Handoff Posture declaration act** attribution separate from any other HGA act type and SHALL produce an additive **HOEM posture declaration operative record** binding declarative posture to the applicable **GPRA** identity, **Production Obligation** scope, and bound consumer context (Section 20.5.3.14; Section 20.5.5.8; `FI-DSN-STD-015-R11`). The **HOEM posture declaration operative record** SHALL NOT merge posture declaration attribution with authorization, completion, suspension, withdrawal, or recall attribution in a single undifferentiated operative record. | Company judgment |
+| `FI-DSN-STD-015-R46` | For each **HCCM** bound consumer context, Governed Handoff SHALL maintain at most one **authoritative** forward Handoff Posture chain at a time under HPPM catalog-driven mandatory posture partition (`PD-STD-015-003`; Section 20.5.5). A **Handoff Posture declaration act** or authoritative Handoff Posture chain SHALL NOT merge, unify, or span across distinct `CC-##` bound consumer contexts, including a unified posture declaration across **CC-01** and **CC-02** (Section 20.5.5.7; `FI-DSN-STD-015-R36`). | Company judgment |
+| `FI-DSN-STD-015-R47` | Governed Handoff SHALL NOT declare Handoff Posture through implicit declaration, automatic inference from authorization or eligibility, default system state, implementation-discovered posture pathway, or configuration-driven posture absent an attributable HGA **Handoff Posture declaration act** (`PD-STD-015-003`; HOF-P9). **Handoff Posture declaration acts** SHALL be performed only where minimum Handoff entry boundary conditions are satisfied (`FI-DSN-STD-015-R07`; HEIM). **Handoff Posture declaration acts** SHALL NOT be performed by Brain, downstream consumer domains, MAGAC participants, **Approval** authority classes, DDAC downstream disposition authority, DSRA rework authorization authority, G8 invalidation authority classes, G9 SSAC supersession authority classes, G11 export contract, or any authority class other than HGA at the Handoff boundary (`FI-DSN-STD-015-R22`; HAAM; Section 20.5.3.4). | Company judgment |
+
+#### 23.3.3 HOF-G4 drafting traceability
+
+| Req ID | Planning group | Primary theme | Controlling planning decision |
+|--------|----------------|---------------|------------------------------|
+| `FI-DSN-STD-015-R40` | HOF-G4 | HGA sole owner of operative posture declaration acts | `PD-STD-015-001`; `PD-STD-015-003` |
+| `FI-DSN-STD-015-R41` | HOF-G4 | Posture declaration peer-distinct decision class | `PD-STD-015-003`; §14.2 |
+| `FI-DSN-STD-015-R42` | HOF-G4 | No substitute inputs for posture declaration act | `PD-STD-015-003`; HEIM; HOF-P3 |
+| `FI-DSN-STD-015-R43` | HOF-G4 | Posture declaration bound to HCCM consumer context | `PD-STD-015-002`; `PD-STD-015-003` |
+| `FI-DSN-STD-015-R44` | HOF-G4 | Authorization versus declaration separation | `PD-STD-015-001`; `PD-STD-015-003` |
+| `FI-DSN-STD-015-R45` | HOF-G4 | Distinct attribution and HOEM posture declaration record | `PD-STD-015-001`; §20.5.5.8 |
+| `FI-DSN-STD-015-R46` | HOF-G4 | HPPM authoritative cardinality and cross-context partition | `PD-STD-015-003`; §20.5.5.7 |
+| `FI-DSN-STD-015-R47` | HOF-G4 | Prohibition on implicit posture; prerequisite gating; prohibited performers | `PD-STD-015-003`; HOF-P9; HAAM |
+
+#### 23.3.4 HOF-G4 boundary statement
+
+HOF-G4 Tranche 2 requirements establish HGA operative **Handoff Posture declaration act** architecture only — sole owner, peer-distinct class, bound consumer context scope, authorization versus declaration separation, distinct HOEM posture declaration record, HPPM authoritative cardinality and partition discipline, prerequisite gating, and prohibited implicit or non-HGA performers. Handoff act completion, suspension, withdrawal, and recall operative mechanics remain assigned to HOF-G5 and HOF-G6 respectively. Downstream exit completion remains assigned to HOF-G8.
+
+**Undrafted groups:** HOF-G5–HOF-G6, HOF-G8 — **not drafted**. HOF-G9 catalog integration — **not drafted**.
+
+---
+
+### 23.4 Tranche 2 partial boundary statement
+
+Tranche 2 partial requirements (`FI-DSN-STD-015-R25`–`R47`) plus amended `R24` establish HGA operative Handoff authorization acts (HOF-G2), HCCM consumer catalog and binding (HOF-G3), and HPPM Handoff Posture declaration (HOF-G4) only.
 
 | Tranche 2 group | Requirement range | Status |
 |-----------------|-------------------|--------|
 | **HOF-G2** | `FI-DSN-STD-015-R25`–`R32` | **Drafted** — Sprint V06-D40.1 |
 | **HOF-G3** | `FI-DSN-STD-015-R33`–`R39` | **Drafted** — Sprint V06-D40.1 |
-| **HOF-G4** | — | **Not drafted** |
+| **HOF-G4** | `FI-DSN-STD-015-R40`–`R47` | **Drafted** — Sprint V06-D40.4 |
 | **HOF-G5 (baseline)** | — | **Not drafted** |
 | **HOF-G8 (partial)** | — | **Not drafted** |
 | **HOF-G9 (catalog integration)** | — | **Not drafted** |
 | **`R24` amendment** | `FI-DSN-STD-015-R24` | **Amended** — Sprint V06-D40.1 |
 
-**Identifier continuity:** `FI-DSN-STD-015-R01` through `R39` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
+**Identifier continuity:** `FI-DSN-STD-015-R01` through `R47` — continuous with no gaps, no reserved unused identifiers, and no duplicates.
 
 **Tranche 3:** Remains **not authorized**. HOF-G6, HERCM re-entry, HOF-G8 completion, and HOF-G9 completion — **not drafted**.
