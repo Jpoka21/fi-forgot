@@ -12,10 +12,10 @@
 | **Primary Volume** | 02 — Design Language |
 | **Architectural layer** | Layer 3 — Visual Element Systems |
 | **Document** | `07-illustration-and-artwork-direction-standard.md` |
-| **Status** | Drafted, Pending Freeze |
-| **Version** | 0.1 |
+| **Status** | Frozen |
+| **Version** | 1.0 |
 | **Date** | August 10, 2026 |
-| **Freeze date** | — |
+| **Freeze date** | August 10, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -364,6 +364,7 @@ Cosmetic wording improvements alone do not justify revision.
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 | August 10, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Standard; Formal Individual Freeze Review passed per `FI-DSN-GOV-001` §7.2; Disposition A — Accept for freeze progression; `FI-DSN-STD-017-R01`–`R19` frozen unchanged; `CLS-ART`; Primary Volume VOL-02; freeze date August 10, 2026 |
 | 0.1 Draft | August 10, 2026 | F.I. Forgot | Sprint V02-D62.1 — initial Illustration and Artwork Direction Standard normative draft; 19 normative requirements (`FI-DSN-STD-017-R01`–`R19`); not frozen; not approved; not binding |
 
 ---
