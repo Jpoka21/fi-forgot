@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 
 import { createGovernanceTraceability } from "./authority.js";
 import { OrchestraConstitutionalError } from "./errors.js";
-import type { DeclaredProductionIntent } from "./production-intent.js";
 import type {
   ConstitutionalAuditMetadata,
   ObligationEnforcementPosture,
@@ -28,6 +27,8 @@ export interface ProductionObligation {
   readonly enforcementPosture: ObligationEnforcementPosture;
   readonly conditions: readonly string[];
   readonly complianceBoundaryRefs: readonly string[];
+  /** Required when enforcementPosture is waived — R18, R31 */
+  readonly waiverRecordId: string | null;
   readonly audit: ConstitutionalAuditMetadata;
 }
 
@@ -41,6 +42,7 @@ export function createProductionObligation(input: {
   enforcementPosture?: ObligationEnforcementPosture;
   conditions?: readonly string[];
   complianceBoundaryRefs?: readonly string[];
+  waiverRecordId?: string | null;
   createdBy: string;
   createdAt?: string;
 }): ProductionObligation {
@@ -55,12 +57,30 @@ export function createProductionObligation(input: {
 
   const enforcementPosture = input.enforcementPosture ?? "unconditional";
   const conditions = Object.freeze([...(input.conditions ?? [])]);
+  const waiverRecordId = input.waiverRecordId ?? null;
 
   if (enforcementPosture === "conditional" && conditions.length === 0) {
     throw new OrchestraConstitutionalError(
       "Conditional Obligation requires explicitly recorded conditions",
       "invalid_obligation",
       ["FI-DSN-STD-012-R18", "FI-DSN-STD-012-R33"],
+    );
+  }
+
+  if (enforcementPosture === "waived") {
+    const linkedWaiverId = waiverRecordId?.trim();
+    if (!linkedWaiverId || !linkedWaiverId.startsWith("waiver-")) {
+      throw new OrchestraConstitutionalError(
+        "Waived obligation requires linked Waiver evidence",
+        "invalid_obligation",
+        ["FI-DSN-STD-012-R18", "FI-DSN-STD-012-R31", "FI-DSN-STD-012-R32"],
+      );
+    }
+  } else if (waiverRecordId) {
+    throw new OrchestraConstitutionalError(
+      "Waiver evidence may only be linked to waived obligations",
+      "invalid_obligation",
+      ["FI-DSN-STD-012-R31", "FI-DSN-STD-012-R32"],
     );
   }
 
@@ -73,6 +93,7 @@ export function createProductionObligation(input: {
     enforcementPosture,
     conditions,
     complianceBoundaryRefs: Object.freeze([...(input.complianceBoundaryRefs ?? [])]),
+    waiverRecordId: enforcementPosture === "waived" ? waiverRecordId!.trim() : null,
     audit: Object.freeze({
       createdAt: now,
       createdBy: input.createdBy,
@@ -113,6 +134,7 @@ export function resolveObligationConstraint(
     ...obligation,
     enforcementPosture: "unconditional",
     conditions: Object.freeze([...obligation.conditions, `resolved:${resolution}`]),
+    waiverRecordId: obligation.waiverRecordId,
     audit: Object.freeze({
       ...obligation.audit,
       createdAt: resolvedAt,

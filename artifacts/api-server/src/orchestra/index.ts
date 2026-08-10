@@ -18,6 +18,8 @@ export {
 export {
   bindComplianceBoundary,
   detectComplianceBoundaryConflicts,
+  mergeComplianceBoundaryConflicts,
+  assertComplianceBoundaryConflictsSurfaced,
   validateComplianceBoundariesForExplorationEntry,
   COMPLIANCE_BOUNDARY_TRACEABILITY,
   type ComplianceBoundaryBinding,
@@ -99,6 +101,7 @@ export type {
   ProductionProgramId,
   ProductionProgramPosture,
   ProgramAmendmentMateriality,
+  ProgramTerminalTransition,
 } from "./types.js";
 
 export {

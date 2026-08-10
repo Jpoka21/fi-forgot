@@ -94,6 +94,46 @@ export function detectComplianceBoundaryConflicts(
   return conflicts;
 }
 
+/** R23 — merge detected conflicts into unresolved constraints without duplication. */
+export function mergeComplianceBoundaryConflicts(
+  bindings: readonly ComplianceBoundaryBinding[],
+  existingUnresolved: readonly UnresolvedConstraintRecord[] = [],
+): readonly UnresolvedConstraintRecord[] {
+  const conflicts = detectComplianceBoundaryConflicts(bindings);
+  const existingIds = new Set(existingUnresolved.map((record) => record.constraintId));
+  const merged = [...existingUnresolved];
+
+  for (const conflict of conflicts) {
+    if (!existingIds.has(conflict.constraintId)) {
+      merged.push(conflict);
+      existingIds.add(conflict.constraintId);
+    }
+  }
+
+  return Object.freeze(merged);
+}
+
+/** R23 — governed programs must not hide compliance-boundary conflicts. */
+export function assertComplianceBoundaryConflictsSurfaced(
+  bindings: readonly ComplianceBoundaryBinding[],
+  unresolvedConstraints: readonly UnresolvedConstraintRecord[],
+): void {
+  const conflicts = detectComplianceBoundaryConflicts(bindings);
+  if (conflicts.length === 0) {
+    return;
+  }
+
+  const surfacedIds = new Set(unresolvedConstraints.map((record) => record.constraintId));
+  const hidden = conflicts.filter((conflict) => !surfacedIds.has(conflict.constraintId));
+  if (hidden.length > 0) {
+    throw new OrchestraConstitutionalError(
+      "Compliance Boundary conflicts must be surfaced as governed Unresolved Constraints",
+      "invalid_compliance_boundary",
+      ["FI-DSN-STD-012-R23"],
+    );
+  }
+}
+
 /** R21 — bindings must exist before exploration-entry authorization. */
 export function validateComplianceBoundariesForExplorationEntry(
   bindings: readonly ComplianceBoundaryBinding[],

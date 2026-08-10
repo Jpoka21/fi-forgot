@@ -13,7 +13,8 @@ const INTENT_TRANSITIONS: Readonly<Record<ProductionIntentPosture, readonly Prod
  * Permissible Production Program posture transitions — STD-012 §16.4.
  */
 const PROGRAM_TRANSITIONS: Readonly<Record<ProductionProgramPosture, readonly ProductionProgramPosture[]>> = {
-  program_drafted: ["program_governed", "program_conditionally_governed", "program_invalidated"],
+  // STD-012 §16.4: Drafted → Governed only; terminal states follow amendment path.
+  program_drafted: ["program_governed", "program_conditionally_governed"],
   program_governed: [
     "program_amended",
     "program_superseded",

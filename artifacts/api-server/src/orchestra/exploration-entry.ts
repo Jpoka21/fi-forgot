@@ -8,7 +8,12 @@ import {
 } from "./compliance-boundary.js";
 import { OrchestraConstitutionalError } from "./errors.js";
 import type { ProductionProgram } from "./production-program.js";
-import type { ConstitutionalAttribution, ExplorationEntryPosture } from "./types.js";
+import { assertProgramIsActiveAuthority } from "./transitions.js";
+import type {
+  ConstitutionalAttribution,
+  ExplorationEntryPosture,
+  ProductionObligationId,
+} from "./types.js";
 
 const EXPLORATION_REQUIREMENTS = [
   "FI-DSN-STD-012-R26",
@@ -29,11 +34,21 @@ export interface ExplorationEntryDetermination {
   readonly affectedObligationIds: readonly string[];
   readonly governingBasis: string;
   readonly unresolvedConstraints: readonly UnresolvedConstraintRecord[];
+  readonly conditionalObligationIds: readonly ProductionObligationId[];
   readonly attribution: ConstitutionalAttribution;
   readonly traceability: ReturnType<typeof createGovernanceTraceability>;
 }
 
+interface ExplorationPrerequisites {
+  readonly unresolvedConstraints: readonly UnresolvedConstraintRecord[];
+  readonly conditionalObligationIds: readonly ProductionObligationId[];
+  readonly hasUnresolvedConstraints: boolean;
+  readonly hasConditionalPrerequisites: boolean;
+}
+
 function assertProgramReadyForExplorationEntry(program: ProductionProgram): void {
+  assertProgramIsActiveAuthority(program.posture);
+
   if (
     program.posture !== "program_governed" &&
     program.posture !== "program_conditionally_governed"
@@ -62,10 +77,10 @@ function assertProgramReadyForExplorationEntry(program: ProductionProgram): void
   }
 }
 
-function collectUnresolvedConstraints(
+function collectExplorationPrerequisites(
   program: ProductionProgram,
   bindings: readonly ComplianceBoundaryBinding[],
-): UnresolvedConstraintRecord[] {
+): ExplorationPrerequisites {
   const boundaryConflicts = detectComplianceBoundaryConflicts(bindings);
   const obligationConstraints = program.obligations
     .filter((o) => o.enforcementPosture === "unresolved_constraint")
@@ -79,7 +94,48 @@ function collectUnresolvedConstraints(
       }),
     );
 
-  return [...program.unresolvedConstraints, ...boundaryConflicts, ...obligationConstraints];
+  const unresolvedConstraints = Object.freeze([
+    ...program.unresolvedConstraints,
+    ...boundaryConflicts,
+    ...obligationConstraints,
+  ]);
+
+  const conditionalObligationIds = Object.freeze(
+    program.obligations
+      .filter((o) => o.enforcementPosture === "conditional")
+      .map((o) => o.id),
+  );
+
+  return Object.freeze({
+    unresolvedConstraints,
+    conditionalObligationIds,
+    hasUnresolvedConstraints: unresolvedConstraints.length > 0,
+    hasConditionalPrerequisites: conditionalObligationIds.length > 0,
+  });
+}
+
+function assertExplorationPostureMatchesPrerequisites(
+  posture: ExplorationEntryPosture,
+  prerequisites: ExplorationPrerequisites,
+): void {
+  const hasOutstanding =
+    prerequisites.hasUnresolvedConstraints || prerequisites.hasConditionalPrerequisites;
+
+  if (posture === "exploration_entry_authorized" && hasOutstanding) {
+    throw new OrchestraConstitutionalError(
+      "Exploration Entry Authorized requires all conditional prerequisites and constraints to be satisfied",
+      "invalid_exploration_entry",
+      ["FI-DSN-STD-012-R27", "FI-DSN-STD-012-R28"],
+    );
+  }
+
+  if (posture === "conditionally_authorized" && !hasOutstanding) {
+    throw new OrchestraConstitutionalError(
+      "Conditionally Authorized posture requires recorded conditional prerequisites or Unresolved Constraints",
+      "invalid_exploration_entry",
+      ["FI-DSN-STD-012-R28"],
+    );
+  }
 }
 
 export function determineExplorationEntry(input: {
@@ -101,32 +157,12 @@ export function determineExplorationEntry(input: {
     );
   }
 
-  const unresolved = collectUnresolvedConstraints(
+  const prerequisites = collectExplorationPrerequisites(
     input.program,
     input.program.complianceBoundaries,
   );
 
-  if (
-    input.posture === "exploration_entry_authorized" &&
-    unresolved.length > 0
-  ) {
-    throw new OrchestraConstitutionalError(
-      "Exploration Entry Authorized requires all constraints to be resolved",
-      "invalid_exploration_entry",
-      ["FI-DSN-STD-012-R27", "FI-DSN-STD-012-R28"],
-    );
-  }
-
-  if (
-    input.posture === "conditionally_authorized" &&
-    unresolved.length === 0
-  ) {
-    throw new OrchestraConstitutionalError(
-      "Conditionally Authorized posture requires recorded conditions or Unresolved Constraints",
-      "invalid_exploration_entry",
-      ["FI-DSN-STD-012-R28"],
-    );
-  }
+  assertExplorationPostureMatchesPrerequisites(input.posture, prerequisites);
 
   const affectedObligationIds =
     input.affectedObligationIds ??
@@ -140,7 +176,8 @@ export function determineExplorationEntry(input: {
     posture: input.posture,
     affectedObligationIds: Object.freeze([...affectedObligationIds]),
     governingBasis,
-    unresolvedConstraints: Object.freeze([...unresolved]),
+    unresolvedConstraints: prerequisites.unresolvedConstraints,
+    conditionalObligationIds: prerequisites.conditionalObligationIds,
     attribution: Object.freeze({
       actorId: input.determinedBy,
       recordedAt: now,

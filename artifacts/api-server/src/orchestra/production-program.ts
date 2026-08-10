@@ -1,19 +1,26 @@
 import { randomUUID } from "node:crypto";
 
 import { createGovernanceTraceability } from "./authority.js";
-import type { ComplianceBoundaryBinding, UnresolvedConstraintRecord } from "./compliance-boundary.js";
+import {
+  assertComplianceBoundaryConflictsSurfaced,
+  mergeComplianceBoundaryConflicts,
+  type ComplianceBoundaryBinding,
+  type UnresolvedConstraintRecord,
+} from "./compliance-boundary.js";
 import { OrchestraConstitutionalError } from "./errors.js";
 import type { DeclaredProductionIntent } from "./production-intent.js";
 import {
   createProductionObligation,
   type ProductionObligation,
 } from "./production-obligation.js";
+import { assertProgramPostureTransition } from "./transitions.js";
 import type {
   ConstitutionalAuditMetadata,
   CurrentProgramStatus,
   ProductionProgramId,
   ProductionProgramPosture,
   ProgramAmendmentMateriality,
+  ProgramTerminalTransition,
 } from "./types.js";
 
 const PROGRAM_REQUIREMENTS = [
@@ -49,6 +56,7 @@ export interface ProductionProgram {
   readonly unresolvedConstraints: readonly UnresolvedConstraintRecord[];
   readonly amendmentHistory: readonly ProgramAmendmentRecord[];
   readonly supersededByProgramId: ProductionProgramId | null;
+  readonly terminalTransition: ProgramTerminalTransition | null;
   readonly audit: ConstitutionalAuditMetadata;
 }
 
@@ -93,6 +101,7 @@ export function draftProductionProgram(input: {
     unresolvedConstraints: Object.freeze([]),
     amendmentHistory: Object.freeze([]),
     supersededByProgramId: null,
+    terminalTransition: null,
     audit: Object.freeze({
       createdAt: now,
       createdBy: input.createdBy,
@@ -108,6 +117,7 @@ export function addObligationToProgram(
     enforcementPosture?: ProductionObligation["enforcementPosture"];
     conditions?: readonly string[];
     complianceBoundaryRefs?: readonly string[];
+    waiverRecordId?: string | null;
     createdBy: string;
   },
 ): ProductionProgram {
@@ -143,10 +153,12 @@ export function bindComplianceBoundariesToProgram(
     );
   }
 
+  const mergedUnresolved = mergeComplianceBoundaryConflicts(bindings, unresolvedConstraints);
+
   return Object.freeze({
     ...program,
     complianceBoundaries: Object.freeze([...bindings]),
-    unresolvedConstraints: Object.freeze([...unresolvedConstraints]),
+    unresolvedConstraints: mergedUnresolved,
   });
 }
 
@@ -175,6 +187,11 @@ export function governProductionProgram(program: ProductionProgram): ProductionP
     );
   }
 
+  assertComplianceBoundaryConflictsSurfaced(
+    program.complianceBoundaries,
+    program.unresolvedConstraints,
+  );
+
   const hasConditionalOrUnresolved = program.obligations.some(
     (o) =>
       o.enforcementPosture === "conditional" ||
@@ -186,6 +203,8 @@ export function governProductionProgram(program: ProductionProgram): ProductionP
     hasConditionalOrUnresolved || hasUnresolvedConstraints
       ? "program_conditionally_governed"
       : "program_governed";
+
+  assertProgramPostureTransition(program.posture, posture);
 
   return Object.freeze({
     ...program,
@@ -233,6 +252,8 @@ export function recordProgramAmendment(
     priorPosture: program.posture,
   });
 
+  assertProgramPostureTransition(program.posture, "program_amended");
+
   return Object.freeze({
     ...program,
     posture: "program_amended",
@@ -254,16 +275,22 @@ export function supersedeProductionProgram(
     );
   }
 
+  assertProgramPostureTransition(program.posture, "program_superseded");
+
+  const transitionedAt = input.supersededAt ?? new Date().toISOString();
+  const terminalTransition: ProgramTerminalTransition = Object.freeze({
+    kind: "superseded",
+    transitionedAt,
+    transitionedBy: input.supersededBy,
+    successorProgramId,
+  });
+
   return Object.freeze({
     ...program,
     posture: "program_superseded",
     currentStatus: "superseded",
     supersededByProgramId: successorProgramId,
-    audit: Object.freeze({
-      ...program.audit,
-      createdAt: input.supersededAt ?? new Date().toISOString(),
-      createdBy: input.supersededBy,
-    }),
+    terminalTransition,
   });
 }
 
@@ -289,15 +316,21 @@ export function invalidateProductionProgram(
     );
   }
 
+  assertProgramPostureTransition(program.posture, "program_invalidated");
+
+  const transitionedAt = input.invalidatedAt ?? new Date().toISOString();
+  const terminalTransition: ProgramTerminalTransition = Object.freeze({
+    kind: "invalidated",
+    transitionedAt,
+    transitionedBy: input.invalidatedBy,
+    reason,
+  });
+
   return Object.freeze({
     ...program,
     posture: "program_invalidated",
     currentStatus: "invalidated",
-    audit: Object.freeze({
-      ...program.audit,
-      createdAt: input.invalidatedAt ?? new Date().toISOString(),
-      createdBy: input.invalidatedBy,
-    }),
+    terminalTransition,
   });
 }
 

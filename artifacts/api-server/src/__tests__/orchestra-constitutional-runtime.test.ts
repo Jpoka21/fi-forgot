@@ -175,14 +175,27 @@ expectThrows(
   "invalid_obligation",
 );
 
-section("3. Valid state transitions (R13, R34, R36)");
+section("3. Valid state transitions via lifecycle (R13, R34, R36)");
 
-assertProgramPostureTransition("program_drafted", "program_governed");
-assertProgramPostureTransition("program_governed", "program_amended");
-assertProgramPostureTransition("program_amended", "program_superseded");
-expect("valid transitions do not throw", true, true);
+const transitionProgram = governProductionProgram(
+  bindComplianceBoundariesToProgram(
+    addObligationToProgram(
+      draftProductionProgram({
+        intent,
+        constitutionalPurpose: "Lifecycle transition test",
+        createdBy: "governance-authority-1",
+      }),
+      {
+        description: "Transition test obligation",
+        createdBy: "governance-authority-1",
+      },
+    ),
+    [boundary],
+  ),
+);
+expect("drafted → governed via governProductionProgram", transitionProgram.posture, "program_governed");
 
-const amended = recordProgramAmendment(program, {
+const amended = recordProgramAmendment(transitionProgram, {
   materiality: "nonmaterial",
   reason: "Clarified constitutional purpose wording",
   amendedBy: "governance-authority-1",
@@ -190,10 +203,14 @@ const amended = recordProgramAmendment(program, {
 expect("amended program posture", amended.posture, "program_amended");
 expect("amendment recorded", amended.amendmentHistory.length, 1);
 
-const successorId = program.id;
-const superseded = supersedeProductionProgram(amended, successorId, {
-  supersededBy: "governance-authority-1",
-});
+const successorId = transitionProgram.id;
+const superseded = supersedeProductionProgram(
+  governProductionProgram(amended),
+  successorId,
+  {
+    supersededBy: "governance-authority-1",
+  },
+);
 expect("superseded posture", superseded.posture, "program_superseded");
 expect("no longer current", isCurrentProgram(superseded), false);
 expect("terminal posture", isTerminalProgramPosture(superseded.posture), true);
@@ -217,8 +234,11 @@ expectThrows(
 );
 
 expectThrows(
-  "invalid program transition rejected",
-  () => assertProgramPostureTransition("program_superseded", "program_governed"),
+  "invalid program transition rejected via lifecycle",
+  () =>
+    supersedeProductionProgram(superseded, successorId, {
+      supersededBy: "governance-authority-1",
+    }),
   "invalid_program_transition",
 );
 

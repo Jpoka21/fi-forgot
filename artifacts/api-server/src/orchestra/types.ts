@@ -23,6 +23,15 @@ export interface ConstitutionalAuditMetadata {
   readonly traceability: GovernanceTraceability;
 }
 
+/** Terminal lifecycle transition provenance — separate from creation audit. R37, R38 */
+export interface ProgramTerminalTransition {
+  readonly kind: "superseded" | "invalidated";
+  readonly transitionedAt: string;
+  readonly transitionedBy: string;
+  readonly reason?: string;
+  readonly successorProgramId?: ProductionProgramId;
+}
+
 /**
  * Production Intent constitutional postures — STD-012 §16.1.
  * Labels describe constitutional postures only.
