@@ -9,7 +9,7 @@ import {
   addObligationToProgram,
   bindComplianceBoundary,
   bindComplianceBoundariesToProgram,
-  createProductionProgramId,
+  createSuccessorProgramId,
   declareProductionIntent,
   determineExplorationEntry,
   draftProductionProgram,
@@ -117,7 +117,7 @@ const drafted = draftProductionProgram({
 expectThrows(
   "lifecycle rejects program_drafted → program_superseded",
   () =>
-    supersedeProductionProgram(drafted, createProductionProgramId(), {
+    supersedeProductionProgram(drafted, createSuccessorProgramId(), {
       supersededBy: "governance-authority-1",
     }),
   "invalid_program_transition",
@@ -144,7 +144,7 @@ const amended = recordProgramAmendment(governed, {
 const reGoverned = governProductionProgram(amended);
 expect("amended → governed via lifecycle", reGoverned.posture, "program_governed");
 
-const superseded = supersedeProductionProgram(reGoverned, createProductionProgramId(), {
+const superseded = supersedeProductionProgram(reGoverned, createSuccessorProgramId(), {
   supersededBy: "successor-authority",
   supersededAt: "2026-08-10T12:00:00.000Z",
 });
@@ -331,7 +331,7 @@ const provenanceSuperseded = supersedeProductionProgram(
     reason: "Successor program",
     amendedBy: "successor-authority",
   }),
-  createProductionProgramId(),
+  createSuccessorProgramId(),
   {
     supersededBy: "successor-authority",
     supersededAt: "2026-08-10T14:00:00.000Z",
@@ -442,7 +442,7 @@ const terminalSuperseded = supersedeProductionProgram(
       [boundary],
     ),
   ),
-  createProductionProgramId(),
+  createSuccessorProgramId(),
   { supersededBy: "governance-authority-1" },
 );
 

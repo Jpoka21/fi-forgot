@@ -3,6 +3,12 @@
  *
  * Governed implementation of Volume 06 Domain 1 per FI-DSN-STD-012.
  * Distinct from the pre-existing Brain orchestrator (artifacts/api-server/src/brain/orchestrator.ts).
+ *
+ * Public API review (ORCH-IMP-002):
+ * REMOVED: createProductionIntentId, createProductionProgramId, createProductionObligationId,
+ *          createGovernanceTraceability, INTENT_TRANSITIONS, PROGRAM_TRANSITIONS,
+ *          mergeComplianceBoundaryConflicts — enable constitutional invariant bypass.
+ * ADDED: persistence repository, governed program split, successor program ID.
  */
 
 export {
@@ -10,7 +16,6 @@ export {
   ORCHESTRA_DOMAIN_CLASSIFICATION,
   ORCHESTRA_GOVERNING_STANDARD,
   ORCHESTRA_GOVERNING_STANDARD_VERSION,
-  createGovernanceTraceability,
   type GovernanceTraceability,
   type Std012RequirementId,
 } from "./authority.js";
@@ -18,7 +23,6 @@ export {
 export {
   bindComplianceBoundary,
   detectComplianceBoundaryConflicts,
-  mergeComplianceBoundaryConflicts,
   assertComplianceBoundaryConflictsSurfaced,
   validateComplianceBoundariesForExplorationEntry,
   COMPLIANCE_BOUNDARY_TRACEABILITY,
@@ -48,9 +52,19 @@ export {
 } from "./errors.js";
 
 export {
+  createDomain1Repository,
+  type Domain1Repository,
+} from "./persistence/domain1-repository.js";
+
+export { createInMemoryDomain1Storage } from "./persistence/in-memory-storage.js";
+
+export type { Domain1StoragePort } from "./persistence/storage-port.js";
+
+export type { StoredExplorationEntry } from "./persistence/rehydration.js";
+
+export {
   declareProductionIntent,
   recordIntentChange,
-  createProductionIntentId,
   PRODUCTION_INTENT_TRACEABILITY,
   type DeclaredProductionIntent,
   type IntentChangeRecord,
@@ -58,7 +72,6 @@ export {
 
 export {
   createProductionObligation,
-  createProductionObligationId,
   resolveObligationConstraint,
   PRODUCTION_OBLIGATION_TRACEABILITY,
   type ProductionObligation,
@@ -73,11 +86,18 @@ export {
   supersedeProductionProgram,
   invalidateProductionProgram,
   isCurrentProgram,
-  createProductionProgramId,
   PRODUCTION_PROGRAM_TRACEABILITY,
   type ProductionProgram,
   type ProgramAmendmentRecord,
 } from "./production-program.js";
+
+export {
+  executeGovernedProgramSplit,
+  createSuccessorProgramId,
+  type GovernedProgramSplitInput,
+  type GovernedProgramSplitResult,
+  type ProgramSplitBranchDefinition,
+} from "./program-split.js";
 
 export {
   assertIntentPostureTransition,
@@ -85,23 +105,25 @@ export {
   assertProgramIsActiveAuthority,
   isTerminalProgramPosture,
   isActiveProgramPosture,
-  INTENT_TRANSITIONS,
-  PROGRAM_TRANSITIONS,
 } from "./transitions.js";
 
 export type {
   ConstitutionalAttribution,
   ConstitutionalAuditMetadata,
   CurrentProgramStatus,
+  ExplorationDeterminationStatus,
   ExplorationEntryPosture,
   ObligationEnforcementPosture,
+  ObligationResolutionRecord,
   ProductionIntentId,
   ProductionIntentPosture,
   ProductionObligationId,
   ProductionProgramId,
   ProductionProgramPosture,
   ProgramAmendmentMateriality,
+  ProgramSplitRecord,
   ProgramTerminalTransition,
+  WaiverSourceAttribution,
 } from "./types.js";
 
 export {

@@ -31,7 +31,10 @@ export type OrchestraErrorCode =
   | "invalid_waiver"
   | "invalid_amendment"
   | "program_not_active"
-  | "identity_violation";
+  | "identity_violation"
+  | "invalid_persistence_state"
+  | "invalid_program_split"
+  | "invalid_current_program";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

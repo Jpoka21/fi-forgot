@@ -5,6 +5,7 @@ import { OrchestraConstitutionalError } from "./errors.js";
 import type {
   ConstitutionalAuditMetadata,
   ObligationEnforcementPosture,
+  ObligationResolutionRecord,
   ProductionObligationId,
   ProductionProgramId,
 } from "./types.js";
@@ -30,6 +31,8 @@ export interface ProductionObligation {
   /** Required when enforcementPosture is waived — R18, R31 */
   readonly waiverRecordId: string | null;
   readonly audit: ConstitutionalAuditMetadata;
+  /** Resolution provenance — separate from creation audit. R37, R38 */
+  readonly resolution: ObligationResolutionRecord | null;
 }
 
 export function createProductionObligationId(): ProductionObligationId {
@@ -99,6 +102,7 @@ export function createProductionObligation(input: {
       createdBy: input.createdBy,
       traceability: createGovernanceTraceability([...OBLIGATION_REQUIREMENTS]),
     }),
+    resolution: null,
   });
 }
 
@@ -129,17 +133,18 @@ export function resolveObligationConstraint(
   }
 
   const resolvedAt = input.resolvedAt ?? new Date().toISOString();
+  const resolutionRecord: ObligationResolutionRecord = Object.freeze({
+    resolution,
+    resolvedAt,
+    resolvedBy: input.resolvedBy,
+  });
 
   return Object.freeze({
     ...obligation,
     enforcementPosture: "unconditional",
     conditions: Object.freeze([...obligation.conditions, `resolved:${resolution}`]),
     waiverRecordId: obligation.waiverRecordId,
-    audit: Object.freeze({
-      ...obligation.audit,
-      createdAt: resolvedAt,
-      createdBy: input.resolvedBy,
-    }),
+    resolution: resolutionRecord,
   });
 }
 

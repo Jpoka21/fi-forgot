@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { createGovernanceTraceability } from "./authority.js";
 import { OrchestraConstitutionalError } from "./errors.js";
+import type { WaiverSourceAttribution } from "./types.js";
 
 const WAIVER_REQUIREMENTS = [
   "FI-DSN-STD-012-R31",
@@ -28,6 +29,7 @@ export interface WaiverRecord {
   readonly downstreamEligibilityEffect: string;
   readonly grantedAt: string;
   readonly grantedBy: string;
+  readonly sourceAttribution: WaiverSourceAttribution;
 }
 
 /**
@@ -52,8 +54,9 @@ export function grantWaiver(input: {
   grantedAt?: string;
   /** Must be false for Brain-derived sources — R31, R42 */
   isBrainDerived?: boolean;
+  sourceAttribution?: WaiverSourceAttribution;
 }): WaiverRecord {
-  if (input.isBrainDerived) {
+  if (input.isBrainDerived || input.sourceAttribution === "brain_derived") {
     throw new OrchestraConstitutionalError(
       "Brain Runtime SHALL NOT grant or substitute for a Waiver",
       "invalid_waiver",
@@ -82,6 +85,7 @@ export function grantWaiver(input: {
     downstreamEligibilityEffect: input.downstreamEligibilityEffect,
     grantedAt: input.grantedAt ?? new Date().toISOString(),
     grantedBy: input.grantedBy,
+    sourceAttribution: "governance_authority",
   });
 }
 

@@ -1,6 +1,7 @@
 import type { ExplorationEntryDetermination } from "./exploration-entry.js";
 import type { ProductionProgram } from "./production-program.js";
 import { assertProgramIsActiveAuthority } from "./transitions.js";
+import { OrchestraConstitutionalError } from "./errors.js";
 
 /**
  * Extension boundary for FI-DSN-STD-013 artifact realization.
@@ -20,11 +21,25 @@ export interface Domain2RealizationReadiness {
 export function evaluateDomain2Readiness(input: {
   program: ProductionProgram;
   explorationEntry: ExplorationEntryDetermination | null;
+  /** Contextual current-program check — required when constitutional currentness depends on repository state. */
+  isConstitutionallyCurrent?: boolean;
 }): Domain2RealizationReadiness | null {
   assertProgramIsActiveAuthority(input.program.posture);
 
+  if (input.isConstitutionallyCurrent === false) {
+    return null;
+  }
+
   if (input.explorationEntry === null) {
     return null;
+  }
+
+  if (input.explorationEntry.programId !== input.program.id) {
+    throw new OrchestraConstitutionalError(
+      "Exploration-Entry Determination does not belong to the evaluated Production Program",
+      "invalid_exploration_entry",
+      ["FI-DSN-STD-012-R26", "FI-DSN-STD-012-R41"],
+    );
   }
 
   const hasExplorationEntry =

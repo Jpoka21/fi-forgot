@@ -69,3 +69,32 @@ export type ObligationEnforcementPosture =
   | "conditional"
   | "waived"
   | "unresolved_constraint";
+
+/** Separate resolution provenance — distinct from creation audit. R37, R38 */
+export interface ObligationResolutionRecord {
+  readonly resolution: string;
+  readonly resolvedAt: string;
+  readonly resolvedBy: string;
+}
+
+/** Waiver source attribution — prevents Brain authority spoofing. R31, R42 */
+export type WaiverSourceAttribution = "governance_authority" | "brain_derived";
+
+/** Status of a persisted exploration determination. R30, R34 */
+export type ExplorationDeterminationStatus = "active" | "superseded";
+
+/**
+ * Governed Program Split record — auditable evidence per R12.
+ * Records scope separation when one intent yields multiple programs.
+ */
+export interface ProgramSplitRecord {
+  readonly splitId: string;
+  readonly intentId: ProductionIntentId;
+  readonly sourceProgramId: ProductionProgramId;
+  readonly resultingProgramIds: readonly ProductionProgramId[];
+  readonly scopeSeparationReason: string;
+  readonly splitAuthority: string;
+  readonly splitAt: string;
+  readonly splitBy: string;
+  readonly audit: ConstitutionalAuditMetadata;
+}
