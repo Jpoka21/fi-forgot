@@ -31,7 +31,7 @@
 | **Downstream consumers** | Future Volume 06 `FI-DSN-*` standards; Volume 05 Signature Collections intake posture; production artwork libraries; engineering specifications; manufacturing validation |
 | **Cross-volume harmonization** | **Complete** — H1 VOL-001 recognition; H2 Volume 05 authority re-homing; H3 Volume 02 lifecycle extension; README; H4.1 residual Volume 02; H4.2 residual Volume 05; H4.3 roadmap status reconciliation |
 | **Repository posture** | **Tracked** — initial controlled repository admission complete; full post-H4 combined-system constitutional rereview **complete** (Pass); formal Version 1.0 Freeze Review **complete** (Pass with Minor Corrections); Independent Version 1.0 Freeze Promotion Review **complete** (Pass with Minor Corrections); governed Version 1.0 Freeze commit **complete** |
-| **Harmonization posture** | Cross-volume harmonization complete. Volume 06 **Frozen** Volume Governance Architecture, Version **1.0 Frozen**, **not Entry Ready**, **not Structurally Complete**. Layer B not authorized. Product Sprint 004 not authorized |
+| **Harmonization posture** | Cross-volume harmonization complete. Volume 06 **Frozen** Volume Governance Architecture, Version **1.0 Frozen**, **Structurally Complete** (August 10, 2026), **not Entry Ready**. Layer B complete — `FI-DSN-STD-012` through `FI-DSN-STD-015` Version 1.0 Frozen, Approved, Binding. Product Sprint 004 not authorized |
 
 **Standard statement:** F.I. Forgot maintains **one authoritative Creative Production Architecture** for Volume 06 that defines durable constitutional purpose, constitutional axioms, governed terminology, three-domain authority architecture, lifecycle ownership, Stage Governance Matrix, inheritance and decision placement rules, and cross-volume relationships for the governed transformation of declared production intent into Governed Production-Ready Artifacts. This document governs how Volume 06 is organized. It does not author normative production requirements, review workflow steps, approval checklist prose, metadata schemas, manufacturing operational policy, collection membership rules, engineering behavior, or Brain runtime logic.
 
@@ -974,6 +974,7 @@ Version 1.0 freeze promotion REQUIRES all of the following in addition to Archit
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 Frozen | August 10, 2026 | F.I. Forgot | Sprint V06-D54.2 — Volume 06 structural completion **performed** (§27; basis §26 authorization Sprint V06-D54.1); **VOL-06 Creative Production** declared **Structurally Complete** — August 10, 2026; Declarer: **F.I. Forgot**; `FI-DSN-VOL-001` §18.1 prerequisites **verified**; all four Layer B standards Version 1.0 Frozen Approved Binding; EO 18–21 **Completed (queue)**; `R96` and `R146` **undrafted**; F-13 through F-16 and F-18 and G7/G8 provenance **preserved**; `OQ-V06-006`, `OQ-V06-007`, inherited `OQ-DSN-003` and `OQ-DSN-008` **nonblocking**; Design Library **incomplete**; Product Sprint 004 **unauthorized**; implementation **unauthorized** |
 | 1.0 Frozen | August 10, 2026 | F.I. Forgot | Sprint V06-D54.1 — Volume 06 structural completion **authorized for future performance only** (§26; basis `FI-DSN-STD-014` §22.15 Sprint V06-D53.19); structural completion **not performed**; all four Layer B standards Verified Frozen Version 1.0 Approved Binding; EO 18–21 **Completed (queue)**; `R96` and `R146` **undrafted**; F-13 through F-16 and F-18 and G7/G8 provenance **preserved**; Volume 06 remains **not Structurally Complete**; Design Library **incomplete**; Product Sprint 004 **unauthorized** |
 | 1.0 Frozen | July 29, 2026 | F.I. Forgot | Version 1.0 Freeze promotion and governed repository commit — full post-H4 combined-system constitutional rereview complete (Pass); formal Version 1.0 Freeze Review Pass with Minor Corrections; Independent Version 1.0 Freeze Promotion Review Pass with Minor Corrections; governed Version 1.0 Freeze commit complete; Document Control, Section 8.3, Sections 21.2, 22, 22.1, 23 OQ-V06-001, Section 25; Version 0.3 Draft promoted to Version 1.0 Frozen; not Entry Ready; not Structurally Complete; Layer B not authorized; Product Sprint 004 not authorized |
 | 0.3 Draft | July 29, 2026 | F.I. Forgot | Harmonization Sprint H4.4 — metadata reconciliation after H1–H4.3: Document Control; Section 8.3 Entry posture; Section 11.2 Volume 02 dependency; Section 21 harmonization inventory; Section 22.1 Freeze Gate; Section 23 OQ-V06-001; Section 25 close-out posture; minor correction pass — Document Control naming posture, Section 7.2, and Section 8.3 stale roadmap-recognition wording; preparation for initial controlled repository admission — not Frozen; not Entry Ready |
@@ -1044,11 +1045,24 @@ Cross-volume harmonization amendments are **complete** (H1, H2, H3, README, H4.1
 | Volume 06 internal constitutional stability | **Frozen** — Version 1.0 Frozen architecture baseline |
 | Cross-volume harmonization | **Complete** — H1 through H4.4 committed |
 | Initial repository admission | **Complete** |
-| Version 1.0 architecture freeze | **Complete** — July 29, 2026; not Entry Ready; not Structurally Complete |
-| Layer B authorization | **Not authorized** |
+| Version 1.0 architecture freeze | **Complete** — July 29, 2026 |
+| Layer B standards | **Complete** — `FI-DSN-STD-012` through `FI-DSN-STD-015` Version 1.0 Frozen, Approved, Binding; EO 18–21 **Completed (queue)** |
+| Volume 06 structural completion | **Structurally Complete** — August 10, 2026 (Sprint V06-D54.2; basis §26 authorization Sprint V06-D54.1) |
+| Volume 06 Entry Ready | **Not Entry Ready** — per `FI-DSN-VOL-001` §17.2 entry summary |
 | Product Sprint 004 authorization | **Not authorized** |
 
-**Expected next step:** Volume 06 structural completion **performance** when separately governed per `FI-DSN-VOL-001` Section 18.1 and Section 26.
+### Volume-scoped open question treatment at structural completion
+
+The following volume-scoped open questions remain listed in Section 23 as **freeze-era accurate records**. At structural completion they are **confirmed nonblocking** per Sprint V06-D54.1 and Sprint V06-D54.2:
+
+| ID | Structural completion treatment |
+|----|--------------------------------|
+| `OQ-V06-006` | **Nonblocking** — conditional Review Determination governed at Layer B in `FI-DSN-STD-014`; architecture §23 table entry preserved as freeze-era record |
+| `OQ-V06-007` | **Nonblocking** — Handoff Posture split governed at Layer B in `FI-DSN-STD-015`; architecture §23 table entry preserved as freeze-era record |
+| `OQ-DSN-003` | **Nonblocking** — inherited; realization standards defer schema specifics |
+| `OQ-DSN-008` | **Nonblocking** — inherited; REG **Notes** `Primary Volume: VOL-06` per `FI-DSN-VOL-001` Section 14.2 |
+
+**Expected next step:** Design Library completion and implementation authorization remain **separately governed** — not authorized by Volume 06 structural completion.
 
 ---
 
@@ -1115,6 +1129,51 @@ Cross-volume harmonization amendments are **complete** (H1, H2, H3, README, H4.1
 **Structural completion posture at authorization:** Volume 06 structural completion **authorized for future performance only**; structural completion **not performed**; Volume 06 remains **not Structurally Complete**.
 
 **Explicit exclusions:** Structural completion performance; Design Library completion; Product Sprint 004; F.I. Forgot Orchestra implementation; drafting `R96` or `R146`; reopening EO 18–21; amending frozen normative requirements.
+
+---
+
+## 27. Volume 06 Structural Completion Performance (informative — Sprint V06-D54.2)
+
+**Performance type:** Nonnormative Volume 06 structural completion performance recording only. This section **does not** declare the Design Library complete, authorize Product Sprint 004, authorize F.I. Forgot Orchestra implementation, authorize implementation readiness or implementation authorization, amend frozen normative requirements in `FI-DSN-STD-012` through `FI-DSN-STD-015`, draft `FI-DSN-STD-014-R96` or `FI-DSN-STD-015-R146`, reopen EO 18 through EO 21, or modify `FI-DSN-GOV-001`.
+
+**Sequencing basis:** §26 (Sprint V06-D54.1) authorized Volume 06 structural completion **performance** per `FI-DSN-VOL-001` Section 18.1. This sprint **performs** the authorized act only.
+
+**Pre-performance verification:** All §26 prerequisite verifications **reconfirmed** at sprint start — **PASS**.
+
+**Structural completion gate record:**
+
+| Gate element | Record |
+|--------------|--------|
+| Authority | `FI-DSN-VOL-001` §18.1, §18.5, §19.4 |
+| Authorization basis | §26 Sprint V06-D54.1 |
+| §18.1 condition 1 — Required artifacts Frozen | **Satisfied** — architecture Version 1.0 Frozen; `FI-DSN-STD-012` through `FI-DSN-STD-015` Version 1.0 Frozen |
+| §18.1 condition 2 — No material Hard cross-volume deps | **Satisfied** |
+| §18.1 condition 3 — Planning dispositions per GOV-001 §6.2 | **Satisfied** — EO 18–21 **Completed (queue)** |
+| §18.1 condition 4 — Volume-scoped OQs nonblocking | **Satisfied** — see Section 25 volume-scoped open question treatment |
+| §18.1 condition 5 — No GOV-003/GOV-004 conflicts | **Satisfied** |
+| Performance date | **August 10, 2026** |
+| Declarer | **F.I. Forgot** |
+
+**Structural completion performed:**
+
+| Field | Prior | Current |
+|-------|-------|---------|
+| Volume 06 **Structurally Complete** | **not Structurally Complete** | **Structurally Complete** |
+| Structural completion date | unset | **August 10, 2026** |
+| Design Library | **incomplete** | **incomplete** — **unchanged** |
+| Product Sprint 004 | **unauthorized** | **unauthorized** — **unchanged** |
+| Implementation authorization | **none** | **none** — **unchanged** |
+| Layer B standards `FI-DSN-STD-012`–`015` | Frozen, Version 1.0, Approved, Binding | **unchanged** |
+| EO 18–21 | **Completed (queue)** | **unchanged** |
+| Normative bodies | `R01`–`R95` (STD-014); `R01`–`R145` (STD-015) | **unchanged** — frozen |
+
+**Inseparable effects:** Volume 06 **Structurally Complete** roadmap posture and structural completion date only — per `FI-DSN-VOL-001` §18.1 and Sprint D18.1 precedent.
+
+**Constitutional silence preservation:** F-13 through F-18 — **unchanged**; **controlling**.
+
+**G7/G8 provenance preservation:** **unchanged**; **controlling**; no restoration.
+
+**Performance does not establish:** Design Library completion; Product Sprint 004 authorization; implementation authorization; `R96` or `R146` assignment; normative amendment to any frozen Layer B standard.
 
 ---
 

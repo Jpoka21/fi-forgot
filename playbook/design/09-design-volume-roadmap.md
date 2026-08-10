@@ -194,7 +194,7 @@ Future volumes SHALL use append-only numbering (07, 08, …) per Section 25.
 | **03** | Card Design System | `FI-DSN-*` | Per `OQ-DSN-009` |
 | **04** | Artwork Intelligence | `FI-DSN-*` | Per `OQ-DSN-009` |
 | **05** | Signature Collections | `FI-DSN-*` | Per `OQ-DSN-009` |
-| **06** | Creative Production | `FI-DSN-*` | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 1.0 Frozen — architecture freeze complete July 29, 2026; not Entry Ready; Layer B not authorized; Product Sprint 004 not authorized) |
+| **06** | Creative Production | `FI-DSN-*` | `playbook/design/volume-06-creative-production/01-creative-production-architecture.md` (Version 1.0 Frozen — architecture freeze complete July 29, 2026; **Structurally Complete** August 10, 2026; not Entry Ready; Layer B complete; Product Sprint 004 not authorized) |
 
 ### 6.3 Foundation posture and Volume Status
 
@@ -209,7 +209,7 @@ Future volumes SHALL use append-only numbering (07, 08, …) per Section 25.
 | **03** | **Defined** | Awaiting predecessors |
 | **04** | **Defined** | Awaiting predecessors and governed design systems |
 | **05** | **Defined** | Awaiting predecessors |
-| **06** | **Defined** | Volume 06 Creative Production Architecture Version **1.0 Frozen** (`playbook/design/volume-06-creative-production/01-creative-production-architecture.md`). Architecture **frozen** July 29, 2026. Initial controlled repository admission **complete**. Full post-H4 combined-system constitutional rereview **complete**. Formal Version 1.0 Freeze Review **complete**. Governed Version 1.0 Freeze commit **complete**. Cross-volume architecture harmonization complete across Volumes 02 and 05 and the Design README. **Not Entry Ready**; **not Structurally Complete**; Layer B not authorized; Product Sprint 004 not authorized |
+| **06** | **Structurally Complete** | Volume 06 Creative Production Architecture Version **1.0 Frozen** (`playbook/design/volume-06-creative-production/01-creative-production-architecture.md`). Architecture **frozen** July 29, 2026. **Structurally Complete** August 10, 2026 (Sprint V06-D54.2). Layer B standards `FI-DSN-STD-012` through `FI-DSN-STD-015` Version 1.0 Frozen, Approved, Binding. Initial controlled repository admission **complete**. Full post-H4 combined-system constitutional rereview **complete**. Formal Version 1.0 Freeze Review **complete**. Governed Version 1.0 Freeze commit **complete**. Cross-volume architecture harmonization complete across Volumes 02 and 05 and the Design README. **Not Entry Ready**; Product Sprint 004 not authorized |
 
 At Version 1.0 freeze (July 23, 2026), Volumes 01–05 had the roadmap states shown above for **01** through **05**. Volume 06 is added by governed Version 1.1 revision per Section 25.
 
@@ -1152,6 +1152,7 @@ Before freeze promotion, confirm:
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.1 Draft (inventory) | August 10, 2026 | F.I. Forgot | Informative posture synchronization — Volume 06 declared **Structurally Complete** per Sprint V06-D54.2 (basis architecture §26 authorization Sprint V06-D54.1); Section 6.2 and Section 6.3 Volume 06 roadmap status advanced to **Structurally Complete**; completion date August 10, 2026; Layer B complete; not Entry Ready; Product Sprint 004 not authorized; constitutional substance unchanged |
 | 1.1 Draft (metadata reconciliation) | July 29, 2026 | F.I. Forgot | Post-freeze metadata reconciliation — `OQ-V06-002` closed; `CLS-CPR` Primary Classification affinity for Volume 06; Section 11.6 and Section 19.4 classification planning posture updated; Section 29 resolution recorded; constitutional substance unchanged; Volume 06 status remains **Defined**; not Entry Ready; not Structurally Complete |
 | 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H4.3 — correction of Volume 06 harmonization-status metadata: Section 6.3 Volume 06 notes; Section 17.2 Entry Ready posture; OQ-DSN-009; Version 1.0 Frozen baseline preserved |
 | 1.1 Draft | July 28, 2026 | F.I. Forgot | Harmonization Sprint H1 — append Volume 06 Creative Production to Production Volume Inventory; Section 6.4 numeric vs constitutional dependency vs lifecycle order; Section 11.6 architecture; Volume Sequence and entry/completion updates; Section 19.4 provisional Required category planning posture; Roadmap Validation and Freeze Gate updates; governed revision pending independent review — not re-frozen |
