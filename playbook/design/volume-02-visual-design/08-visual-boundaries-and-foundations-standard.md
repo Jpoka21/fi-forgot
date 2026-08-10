@@ -13,10 +13,10 @@
 | **Primary Volume** | 02 — Design Language |
 | **Architectural layer** | Layer 5 — Visual Boundaries and Foundations |
 | **Document** | `08-visual-boundaries-and-foundations-standard.md` |
-| **Status** | Drafted, Pending Freeze |
-| **Version** | 0.1 |
+| **Status** | Frozen |
+| **Version** | 1.0 |
 | **Date** | August 10, 2026 |
-| **Freeze date** | — |
+| **Freeze date** | August 10, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Governing authority** | `FI-DSN-GOV-001` — Design Standards Governance (Frozen Governance Standard, Version 1.0, July 22, 2026) |
@@ -415,6 +415,7 @@ Cosmetic wording improvements alone do not justify revision.
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
+| 1.0 | August 10, 2026 | F.I. Forgot | Frozen — promoted to Frozen Design Standard; Formal Individual Freeze Review passed per `FI-DSN-GOV-001` §7.2 (Sprint V02-D67.1); Disposition A — Accept for freeze progression; `FI-DSN-STD-018-R01`–`R23` frozen unchanged; `CLS-VQA` / `CLS-ACI`; Primary Volume VOL-02; Visual exclusions and accessibility or visual quality foundations satisfied; freeze date August 10, 2026 |
 | 0.1 Draft | August 10, 2026 | F.I. Forgot | Sprint V02-D66.1 — initial Visual Boundaries and Foundations Standard normative draft; 23 normative requirements (`FI-DSN-STD-018-R01`–`R23`); not frozen; not approved; not binding |
 
 ---
