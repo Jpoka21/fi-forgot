@@ -8,9 +8,9 @@
 |-------|-------|
 | **Document** | `01-handwrytten-production-standard.md` |
 | **Volume** | 01 — Manufacturing and Production |
-| **Status** | Architecture Draft |
-| **Version** | 2.0 Architecture Draft |
-| **Date** | July 21, 2026 |
+| **Status** | Frozen Manufacturing Standard |
+| **Version** | 2.0 Frozen |
+| **Date** | August 10, 2026 |
 | **Branch** | `frontend-rebuild` |
 | **Owner** | F.I. Forgot |
 | **Upstream governance** | `playbook/design/README.md` |
@@ -21,6 +21,7 @@
 | **Standard planning status** | Complete |
 | **Manufacturing standard template** | Frozen Governance Standard, Version 1.0 |
 | **Manufacturing standard template freeze date** | July 21, 2026 |
+| **Container freeze date** | August 10, 2026 |
 
 ---
 
@@ -30,9 +31,9 @@ This document is the permanent governing structure for F.I. Forgot Volume 01 man
 
 Its purpose is not to duplicate vendor documentation or restate the Research Library. Its purpose is to define how verified manufacturing facts are translated into F.I. Forgot company decisions, constraints, engineering implications, and validation requirements.
 
-Manufacturing partners may change over time. The customer experience should not. This volume establishes the architectural framework that every future engineering, illustration, layout, template, printing, and production decision must respect once standards are written.
+Manufacturing partners may change over time. The customer experience should not. This volume establishes the governing framework that engineering, illustration, layout, template, printing, and production decisions must respect through the frozen manufacturing standards in Section 8.
 
-**This document is an architecture draft only.** It defines structure, governance, and placeholders. It does not yet contain populated manufacturing standards, engineering specifications, or product decisions.
+This document is a **hybrid Volume 01 governance container**. It hosts the manufacturing planning system, verified-facts registers, standard planning records, and embedded `FI-MFG-*` standards. Eight manufacturing standards are individually **Frozen** (Version 1.0, July 21, 2026) in Section 8. Engineering specifications and product implementation remain downstream of this volume.
 
 ---
 
@@ -40,7 +41,7 @@ Manufacturing partners may change over time. The customer experience should not.
 
 ### In scope
 
-This volume will eventually govern:
+This volume governs, through frozen Section 8 standards and supporting registers:
 
 - Card formats and production structure
 - Printing specifications and artwork production requirements
@@ -129,9 +130,11 @@ Vendor practices inform these goals. They do not replace F.I. Forgot judgment. T
 
 ## 6. Manufacturing Principles
 
-This section will contain governing principles that shape how F.I. Forgot interprets verified facts into manufacturing decisions. Principles guide standards; they are not standards.
+This section may contain additional aspirational principles that shape how F.I. Forgot interprets verified facts into manufacturing decisions. Principles guide standards; they are not standards.
 
-**Status:** Placeholder — principles not yet authored.
+**Required core production method principle:** `FI-MFG-PRN-001` — Real Pen Production Method Principle (Section 8.6) satisfies the Required core production method category per `FI-DSN-VOL-001` Section 19.4.
+
+**Status:** Optional aspirational index — not yet authored beyond `FI-MFG-PRN-001`. The table below is non-normative and deferred.
 
 | Principle (placeholder) | Intended role | Status |
 |-------------------------|---------------|--------|
@@ -219,6 +222,8 @@ This section records verified Handwrytten facts from the frozen Volume 01 verifi
 ### 7.5 Fact-to-decision assessment register
 
 **Status:** Fact-to-decision assessment complete.
+
+**Boundary note:** The **Standard Drafting Status** column in this table reflects the pre-authoring assessment snapshot only. Current standard status is recorded in Section 7.8 and Section 8.
 
 This register classifies what each verified fact may mean for F.I. Forgot before any permanent manufacturing standard is drafted. Classifications do not approve standards, assign Standard IDs, or create engineering requirements.
 
@@ -419,7 +424,7 @@ Standards in this section must be deliberate F.I. Forgot decisions. They may be 
 | FI-MFG-POL-002 | Operational Policy | Section 8.4 |
 | FI-MFG-CON-001 | Manufacturing Constraint | Section 8.5 |
 
-Template v1.0 has been validated against **one Operational Policy** and **one Manufacturing Constraint**. Manufacturing Principles (PRN) and Permanent Standards (STD) have not yet been drafted against this template.
+Template v1.0 has been validated against **one Operational Policy** and **one Manufacturing Constraint** at template freeze (July 21, 2026). `FI-MFG-PRN-001` (Manufacturing Principle) was subsequently drafted and frozen in Section 8.6 (July 21, 2026). Permanent Standards (STD) have not yet been drafted against this template.
 
 Each drafted manufacturing standard in this volume SHALL follow the section order and rules below unless a documented exception is approved through Design Library change control.
 
@@ -1873,41 +1878,18 @@ A material remedy decision or internal policy statement violates this standard i
 
 ## 9. Manufacturing Constraints
 
-This section will document constraints that shape design and production. Constraints describe limits; they are not necessarily standards.
+Manufacturing constraints adopted by F.I. Forgot are authored as frozen `FI-MFG-CON-*` standards in Section 8. This section does not duplicate constraint normative bodies.
 
-**Status:** Placeholder — constraints not yet classified or authored.
+**Status:** Informative index — authoritative constraints are frozen in Section 8.
 
-### 9.1 Vendor constraints
+| Standard ID | Title | Location | Status |
+|-------------|-------|----------|--------|
+| FI-MFG-CON-001 | Envelope Fulfillment Handling Boundary | Section 8.5 | Frozen (July 21, 2026) |
+| FI-MFG-CON-002 | Add-On Fulfillment Boundary | Section 8.7 | Frozen (July 21, 2026) |
+| FI-MFG-CON-003 | Vendor Capability Validation Constraint | Section 8.8 | Frozen (July 21, 2026) |
+| FI-MFG-CON-004 | Bulk Workflow Compatibility Boundary | Section 8.9 | Frozen (July 21, 2026) |
 
-Constraints derived from verified vendor facts.
-
-| Constraint ID | Constraint Summary | Supporting Fact IDs | Qualification | Status |
-|---------------|-------------------|---------------------|---------------|--------|
-| `[TO BE POPULATED]` | `[TO BE POPULATED]` | `[TO BE POPULATED]` | `[TO BE POPULATED]` | `[NOT STARTED]` |
-
-### 9.2 Company constraints
-
-Constraints adopted by F.I. Forgot independent of vendor disclosure.
-
-| Constraint ID | Constraint Summary | Company Judgment | Status |
-|---------------|-------------------|------------------|--------|
-| `[TO BE AUTHORED]` | `[TO BE AUTHORED]` | `[TO BE AUTHORED]` | `[NOT STARTED]` |
-
-### 9.3 Engineering constraints
-
-Constraints that will be enforced through systems, templates, or validation.
-
-| Constraint ID | Constraint Summary | Related Standard ID | Status |
-|---------------|-------------------|---------------------|--------|
-| `[TO BE AUTHORED]` | `[TO BE AUTHORED]` | `[TO BE POPULATED]` | `[NOT STARTED]` |
-
-### 9.4 Unknown constraints
-
-Subjects not yet verified or confirmed.
-
-| Subject | Label | Resolution Path |
-|---------|-------|-----------------|
-| `[TO BE IDENTIFIED]` | Unresolved / Pending Vendor Confirmation / Deferred to Later Research Volume | `[TO BE DOCUMENTED]` |
+Additional constraint classification tables are **Optional** and remain unpopulated. They do not block Required governance categories satisfied by Section 8.
 
 ---
 
@@ -1915,13 +1897,20 @@ Subjects not yet verified or confirmed.
 
 Unresolved vendor questions must remain explicit. They must not be treated as resolved by implication.
 
-**Status:** Placeholder — vendor question register not yet populated.
+**Status:** Informative index — authoritative HW-VQ references appear in Section 7.8.1 (Standard Planning Register), per-standard **Related vendor questions** fields in Section 8, and the summary table below.
 
 Vendor questions must reference **HW-VQ** identifiers where assigned in the evidence audit.
 
 | Vendor Question ID | Question Summary | Related Fact IDs | Status | Resolution Required |
 |--------------------|------------------|------------------|--------|---------------------|
-| HW-VQ-012 | Direct Handwrytten confirmation of the controlling production and mailing timeline. | HW-MFG-010 | HOLD | Direct vendor confirmation |
+| HW-VQ-001 | Vendor operations and fulfillment-network diligence | HW-MFG-009; HW-MFG-020 | Unresolved | Vendor diligence |
+| HW-VQ-003 | Vendor operations and throughput diligence | HW-MFG-002 | Unresolved | Vendor diligence |
+| HW-VQ-007 | Fulfillment standards — pick/pack and matching operations | HW-MFG-012 | Unresolved | Vendor diligence |
+| HW-VQ-008 | Vendor risk and continuity diligence | HW-MFG-009 | Unresolved | Vendor diligence |
+| HW-VQ-009 | Fulfillment and support operations | HW-MFG-018; HW-MFG-019 | Unresolved | Vendor diligence |
+| HW-VQ-011 | Handwriting personalization and signature workflow detail | HW-MFG-006 | Unresolved | Vendor diligence |
+| HW-VQ-012 | Direct Handwrytten confirmation of the controlling production and mailing timeline | HW-MFG-010; HW-MFG-015 | HOLD | Direct vendor confirmation |
+| HW-VQ-014 | Envelope addressing method | HW-MFG-005 | Unresolved | Vendor diligence |
 
 ---
 
@@ -1929,23 +1918,19 @@ Vendor questions must reference **HW-VQ** identifiers where assigned in the evid
 
 Engineering implications are derived from **F.I. Forgot standards**, not directly from vendor facts.
 
-**Status:** Placeholder — engineering implications not yet defined.
+**Status:** Volume-level engineering specifications remain downstream. Each frozen standard in Section 8 includes an **Engineering implications** subsection per Manufacturing Standard Template v1.0 (Section 8.1). Per-standard deferrals and boundaries are authoritative; this section does not duplicate them.
 
-| Implication ID | Derived From Standard | Engineering Requirement Summary | Validation Method | Status |
-|----------------|----------------------|---------------------------------|-------------------|--------|
-| `[TO BE AUTHORED]` | `[TO BE POPULATED]` | `[TO BE AUTHORED]` | `[TO BE AUTHORED]` | `[NOT STARTED]` |
-
-Vendor facts may inform standards. Engineering specifications implement standards. This section bridges the two once standards exist.
+Vendor facts may inform standards. Engineering specifications implement standards. Volume-level engineering implication tables are **Optional** and remain unpopulated.
 
 ---
 
 ## 12. Validation Requirements
 
-This section will define how compliance with manufacturing standards is verified.
+Compliance with manufacturing standards is verified through per-standard **Validation method** subsections in Section 8 per Manufacturing Standard Template v1.0 (Section 8.1.16).
 
-**Status:** Placeholder — validation framework not yet defined.
+**Status:** Per-standard validation methods are defined for all frozen `FI-MFG-*` standards in Section 8. A volume-level validation framework table is **Optional** and remains unpopulated.
 
-Future validation may include:
+Future volume-level validation may include:
 
 - Design-time checks (templates, safe zones, artwork rules)
 - Pre-production checks (order payload, format compatibility)
@@ -1954,7 +1939,7 @@ Future validation may include:
 
 | Validation ID | Applies To | Method | Pass Criteria | Status |
 |---------------|------------|--------|---------------|--------|
-| `[TO BE AUTHORED]` | `[TO BE POPULATED]` | `[TO BE AUTHORED]` | `[TO BE AUTHORED]` | `[NOT STARTED]` |
+| — | Per-standard validation | See Section 8 Validation method subsections | Req ID compliance | Defined in Section 8 |
 
 ---
 
@@ -1991,13 +1976,13 @@ Absence of evidence must not be converted into a vendor limitation.
 
 ## 14. Future Research Dependencies
 
-Subjects that will require additional research volumes or vendor diligence before standards can be finalized.
+Subjects that may require additional research volumes or vendor diligence before future standards can be finalized.
 
-**Status:** Placeholder — dependency register not yet populated.
+**Status:** **Optional / Deferred** — this register is not a Required Volume Artifact category. Required manufacturing governance is satisfied through Section 8 frozen standards. See also Section 13 Evidence Boundaries for subjects outside the current verified baseline.
 
 | Subject | Why It Matters | Likely Research Volume | Status |
 |---------|----------------|------------------------|--------|
-| `[TO BE IDENTIFIED]` | `[TO BE DOCUMENTED]` | `[TO BE ASSIGNED]` | `[NOT STARTED]` |
+| Operational continuity and fulfillment-network topology | Insufficient evidence for continuity standard; vendor diligence ongoing | Deferred per Section 7.8 | **Deferred** |
 
 ---
 
@@ -2025,34 +2010,47 @@ Revision rules:
 | **1.1** | Minor clarifications without material policy change |
 | **2.0** | Material standard changes or restructuring |
 
-Current version **2.0 Architecture Draft** denotes structural redesign only, not a frozen standard.
+Current version **2.0 Frozen** denotes the frozen Volume 01 manufacturing governance container (August 10, 2026). Eight embedded `FI-MFG-*` standards remain individually frozen per Section 8 freeze records.
 
 ---
 
-## 16. Future Freeze Gate
+## 16. Container Freeze Gate
 
-This document may be promoted to **Frozen Manufacturing Standard** only after all of the following are confirmed:
+This document was promoted to **Frozen Manufacturing Standard** after all of the following were confirmed:
 
-- [ ] Upstream verified facts baseline is frozen and current
-- [ ] Verified manufacturing facts register is populated with Fact IDs and qualifications
-- [ ] Vendor facts and F.I. Forgot standards are separated throughout
-- [ ] Material standards reference supporting Fact IDs
-- [ ] Evidence boundaries are documented and current
-- [ ] Open vendor questions are listed with HW-VQ references
-- [ ] Engineering implications are identified for material standards
-- [ ] Validation methods are defined where applicable
-- [ ] No HOLD or REJECT claim is presented as verified
-- [ ] Change control and revision process are in place
-- [ ] Document is internally consistent and publication quality
-- [ ] Downstream impact on engineering specifications has been considered
+- [x] Upstream verified facts baseline is frozen and current
+- [x] Verified manufacturing facts register is populated with Fact IDs and qualifications
+- [x] Vendor facts and F.I. Forgot standards are separated throughout
+- [x] Material standards reference supporting Fact IDs
+- [x] Evidence boundaries are documented and current
+- [x] Open vendor questions are listed with HW-VQ references
+- [x] Engineering implications are identified for material standards
+- [x] Validation methods are defined where applicable
+- [x] No HOLD or REJECT claim is presented as verified
+- [x] Change control and revision process are in place
+- [x] Document is internally consistent and publication quality
+- [x] Downstream impact on engineering specifications has been considered
 
-Until the freeze gate is satisfied, this document remains an architecture or development draft.
+### Container freeze gate record
+
+This document passed container freeze review on **August 10, 2026** (Sprint V01-D57.2; basis bounded correction authorization Sprint V01-D57.1).
+
+| Criterion | Result |
+|-----------|--------|
+| Bounded correction package BC-1 through BC-11 | Performed and verified |
+| Required `FI-DSN-VOL-001` §19.4 categories | Satisfied through frozen Section 8 corpus and frozen container |
+| Eight frozen `FI-MFG-*` standards | Unchanged — PRN-001; CON-001 through CON-004; POL-001, POL-002, POL-004 |
+| `FI-MFG-POL-003` (Optional) | Drafted, Pending Freeze — timing elements blocked; nonblocking |
+| Operational Continuity | Deferred — nonblocking |
+| Volume 01 Structurally Complete | **Not declared** in this sprint |
+
+Frozen manufacturing governance containers are binding until revised per `FI-DSN-GOV-001` Section 6.1 lifecycle rules.
 
 ---
 
 ## 17. Appendices
 
-**Status:** Placeholder — appendices not yet defined.
+**Status:** **Optional** — Section 8.2 (Reserved Standard Index) and Section 8.3 (Standards Register) serve as the authoritative manufacturing standard index and register. Additional appendices listed below remain unpopulated and do not block Required governance.
 
 Future appendices may include:
 
