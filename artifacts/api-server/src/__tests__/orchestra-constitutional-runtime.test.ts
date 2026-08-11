@@ -19,7 +19,7 @@ const {
   declareProductionIntent,
   detectComplianceBoundaryConflicts,
   determineExplorationEntry,
-  DOMAIN2_IMPLEMENTATION_DEFERRED,
+  DOMAIN2_GOVERNING_STANDARD,
   DOMAIN3_IMPLEMENTATION_DEFERRED,
   DOMAIN4_IMPLEMENTATION_DEFERRED,
   draftProductionProgram,
@@ -287,7 +287,7 @@ expect(
 
 section("8. No accidental GPRA, handoff, or downstream state implementation");
 
-expect("STD-013 deferred marker", DOMAIN2_IMPLEMENTATION_DEFERRED, "FI-DSN-STD-013");
+expect("STD-013 governing standard exported", DOMAIN2_GOVERNING_STANDARD, "FI-DSN-STD-013");
 expect("STD-014 deferred marker", DOMAIN3_IMPLEMENTATION_DEFERRED, "FI-DSN-STD-014");
 expect("STD-015 deferred marker", DOMAIN4_IMPLEMENTATION_DEFERRED, "FI-DSN-STD-015");
 

@@ -1,4 +1,7 @@
 import type { Std012RequirementId } from "./authority.js";
+import type { Std013RequirementId } from "./domain2-authority.js";
+
+export type OrchestraRequirementId = Std012RequirementId | Std013RequirementId;
 
 /**
  * Constitutional invariant or transition violation within Orchestra Domain 1.
@@ -6,12 +9,12 @@ import type { Std012RequirementId } from "./authority.js";
  */
 export class OrchestraConstitutionalError extends Error {
   readonly code: OrchestraErrorCode;
-  readonly requirementIds: readonly Std012RequirementId[];
+  readonly requirementIds: readonly OrchestraRequirementId[];
 
   constructor(
     message: string,
     code: OrchestraErrorCode,
-    requirementIds: readonly Std012RequirementId[] = [],
+    requirementIds: readonly OrchestraRequirementId[] = [],
   ) {
     super(message);
     this.name = "OrchestraConstitutionalError";
@@ -34,7 +37,12 @@ export type OrchestraErrorCode =
   | "identity_violation"
   | "invalid_persistence_state"
   | "invalid_program_split"
-  | "invalid_current_program";
+  | "invalid_current_program"
+  | "invalid_exploration_posture"
+  | "invalid_realization_commitment"
+  | "invalid_rva"
+  | "domain2_not_ready"
+  | "invalid_domain2_persistence_state";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

@@ -34,12 +34,41 @@ export {
 } from "./compliance-boundary.js";
 
 export {
-  DOMAIN2_IMPLEMENTATION_DEFERRED,
   DOMAIN3_IMPLEMENTATION_DEFERRED,
   DOMAIN4_IMPLEMENTATION_DEFERRED,
   evaluateDomain2Readiness,
   type Domain2RealizationReadiness,
 } from "./domain2-boundary.js";
+
+export {
+  DOMAIN2_ARCHITECTURAL_DOMAIN,
+  DOMAIN2_DOMAIN_CLASSIFICATION,
+  DOMAIN2_GOVERNING_STANDARD,
+  DOMAIN2_GOVERNING_STANDARD_VERSION,
+  type Domain2GovernanceTraceability,
+  type Std013RequirementId,
+} from "./domain2-authority.js";
+
+export {
+  achieveExplorationExitReady,
+  beginExplorationPosture,
+  EXPLORATION_POSTURE_TRACEABILITY,
+} from "./exploration-posture.js";
+
+export {
+  recordRealizationCommitment,
+  REALIZATION_COMMITMENT_TRACEABILITY,
+} from "./realization-commitment.js";
+
+export {
+  establishRealizedVisualArtifact,
+  REALIZED_VISUAL_ARTIFACT_TRACEABILITY,
+} from "./realized-visual-artifact.js";
+
+export {
+  createDomain2Repository,
+  type Domain2Repository,
+} from "./persistence/domain2-repository.js";
 
 export {
   determineExplorationEntry,
@@ -117,6 +146,21 @@ export type {
   ProgramTerminalTransition,
   WaiverSourceAttribution,
 } from "./types.js";
+
+export type {
+  Domain1EntryEvidence,
+  Domain2GovernedCreationMarker,
+  ExplorationPostureRecord,
+  ExplorationPostureRecordId,
+  ExplorationPostureStatus,
+  RealizationCommitment,
+  RealizationCommitmentId,
+  RealizationPath,
+  RealizationPostureStatus,
+  RealizedVisualArtifact,
+  RealizedVisualArtifactId,
+  RvaVersionLineage,
+} from "./domain2-types.js";
 
 export {
   exceptionIsNotWaiver,

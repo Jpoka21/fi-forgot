@@ -64,9 +64,6 @@ export function evaluateDomain2Readiness(input: {
   });
 }
 
-/** Placeholder marker — STD-013 realization behavior is not implemented. */
-export const DOMAIN2_IMPLEMENTATION_DEFERRED = "FI-DSN-STD-013" as const;
-
 /** Placeholder marker — STD-014 GPRA behavior is not implemented. */
 export const DOMAIN3_IMPLEMENTATION_DEFERRED = "FI-DSN-STD-014" as const;
 
