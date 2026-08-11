@@ -18,6 +18,11 @@ export type ExplorationPostureRecordId = string & {
   readonly __brand: "ExplorationPostureRecordId";
 };
 
+/** Stable identifier for a Review-Entry Readiness record. FI-DSN-STD-013-R49 */
+export type ReviewEntryReadinessId = string & {
+  readonly __brand: "ReviewEntryReadinessId";
+};
+
 /**
  * Exploration Posture constitutional postures — STD-013 §11.1.
  * Labels describe constitutional postures only.
@@ -41,7 +46,14 @@ export type RealizationPostureStatus =
   | "rva_superseded"
   | "rva_invalidated";
 
-/** Method-neutral realization path — STD-013 §15. Foundation type only. */
+/** Executable RVA postures persisted in this runtime. */
+export type RvaExecutablePosture =
+  | "rva_candidate"
+  | "rva_exists"
+  | "rva_superseded"
+  | "rva_invalidated";
+
+/** Method-neutral realization path — STD-013 §15. */
 export type RealizationPath =
   | "created"
   | "generated"
@@ -61,8 +73,7 @@ export interface Domain1EntryEvidence {
 }
 
 /**
- * Governed RVA Version Lineage — minimal foundation per R27.
- * Successor versions deferred to later sprint.
+ * Governed RVA Version Lineage — FI-DSN-STD-013-R27.
  */
 export interface RvaVersionLineage {
   readonly rootRvaId: RealizedVisualArtifactId;
@@ -72,11 +83,26 @@ export interface RvaVersionLineage {
 
 /**
  * Opaque marker set only by governed Domain 2 creation functions.
- * Prevents forged constitutional object persistence.
  */
 export type Domain2GovernedCreationMarker = string & {
   readonly __brand: "Domain2GovernedCreationMarker";
 };
+
+/** Terminal lifecycle transition provenance for RVA — R44, R45. */
+export interface RvaTerminalTransition {
+  readonly kind: "superseded" | "invalidated";
+  readonly transitionedAt: string;
+  readonly transitionedBy: string;
+  readonly reason: string;
+  readonly successorRvaId?: RealizedVisualArtifactId;
+}
+
+/** RVA Exists promotion provenance — separate from creation audit. */
+export interface RvaExistsPromotionRecord {
+  readonly promotedAt: string;
+  readonly promotedBy: string;
+  readonly basis: string;
+}
 
 /**
  * Governed Exploration Posture operation record — R11 through R16.
@@ -88,6 +114,8 @@ export interface ExplorationPostureRecord {
   readonly posture: ExplorationPostureStatus;
   readonly domain1EntryEvidence: Domain1EntryEvidence;
   readonly governingBasis: string;
+  /** Domain 1 waiver supporting exploration-posture bypass — R14. */
+  readonly explorationWaiverRecordId: string | null;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain2GovernanceTraceability;
   readonly governedCreationMarker: Domain2GovernedCreationMarker;
@@ -118,10 +146,48 @@ export interface RealizedVisualArtifact {
   readonly programId: ProductionProgramId;
   readonly obligationId: ProductionObligationId;
   readonly realizationCommitmentId: RealizationCommitmentId;
-  readonly posture: "rva_candidate" | "rva_exists";
+  readonly posture: RvaExecutablePosture;
   readonly realizationPath: RealizationPath;
   readonly lineage: RvaVersionLineage;
   readonly domain1EntryEvidence: Domain1EntryEvidence;
+  readonly existsPromotion: RvaExistsPromotionRecord | null;
+  readonly terminalTransition: RvaTerminalTransition | null;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain2GovernanceTraceability;
+  readonly governedCreationMarker: Domain2GovernedCreationMarker;
+}
+
+/**
+ * Realization Traceability Package — derived assembly per R41.
+ * Not a competing source of truth.
+ */
+export interface RealizationTraceabilityPackage {
+  readonly packageId: string;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly realizationCommitmentId: RealizationCommitmentId;
+  readonly explorationPostureRecordId: ExplorationPostureRecordId;
+  readonly realizationPath: RealizationPath;
+  readonly rvaPosture: RvaExecutablePosture;
+  readonly lineage: RvaVersionLineage;
+  readonly domain1EntryEvidence: Domain1EntryEvidence;
+  readonly explorationWaiverRecordId: string | null;
+  readonly assembledAt: string;
+  readonly traceability: Domain2GovernanceTraceability;
+}
+
+/**
+ * Review-Entry Readiness — STD-013 output boundary to STD-014 per R49, R50.
+ * Not GPRA, not review determination.
+ */
+export interface ReviewEntryReadiness {
+  readonly readinessId: ReviewEntryReadinessId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly posture: "review_entry_ready";
+  readonly traceabilityPackage: RealizationTraceabilityPackage;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain2GovernanceTraceability;
   readonly governedCreationMarker: Domain2GovernedCreationMarker;

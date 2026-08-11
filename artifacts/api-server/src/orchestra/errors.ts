@@ -42,7 +42,8 @@ export type OrchestraErrorCode =
   | "invalid_realization_commitment"
   | "invalid_rva"
   | "domain2_not_ready"
-  | "invalid_domain2_persistence_state";
+  | "invalid_domain2_persistence_state"
+  | "invalid_review_entry_readiness";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

@@ -49,21 +49,25 @@ export {
   type Std013RequirementId,
 } from "./domain2-authority.js";
 
+/**
+ * ORCH-IMP-004: Raw governed Domain 2 chain functions removed from primary barrel.
+ * Integration path: createDomain2Repository(domain1).
+ * Internal/tests may import module-local paths.
+ */
 export {
-  achieveExplorationExitReady,
-  beginExplorationPosture,
+  EXPLORATION_POSTURE_BYPASS_EFFECT,
   EXPLORATION_POSTURE_TRACEABILITY,
 } from "./exploration-posture.js";
 
-export {
-  recordRealizationCommitment,
-  REALIZATION_COMMITMENT_TRACEABILITY,
-} from "./realization-commitment.js";
+export { REALIZATION_COMMITMENT_TRACEABILITY } from "./realization-commitment.js";
+
+export { REALIZED_VISUAL_ARTIFACT_TRACEABILITY } from "./realized-visual-artifact.js";
 
 export {
-  establishRealizedVisualArtifact,
-  REALIZED_VISUAL_ARTIFACT_TRACEABILITY,
-} from "./realized-visual-artifact.js";
+  REALIZATION_TRACEABILITY_PACKAGE_TRACEABILITY,
+} from "./traceability-package.js";
+
+export { REVIEW_ENTRY_READINESS_TRACEABILITY } from "./review-entry-readiness.js";
 
 export {
   createDomain2Repository,
@@ -157,8 +161,14 @@ export type {
   RealizationCommitmentId,
   RealizationPath,
   RealizationPostureStatus,
+  RealizationTraceabilityPackage,
   RealizedVisualArtifact,
   RealizedVisualArtifactId,
+  ReviewEntryReadiness,
+  ReviewEntryReadinessId,
+  RvaExecutablePosture,
+  RvaExistsPromotionRecord,
+  RvaTerminalTransition,
   RvaVersionLineage,
 } from "./domain2-types.js";
 

@@ -6,10 +6,12 @@ import type {
   ExplorationPostureRecord,
   RealizationCommitment,
   RealizedVisualArtifact,
+  ReviewEntryReadiness,
 } from "../domain2-types.js";
 import {
   validatePersistedExplorationPosture,
   validatePersistedRealizationCommitment,
+  validatePersistedReviewEntryReadiness,
   validatePersistedRva,
 } from "./domain2-validation.js";
 
@@ -42,5 +44,10 @@ export function rehydrateRealizationCommitment(raw: unknown): RealizationCommitm
 
 export function rehydrateRva(raw: unknown): RealizedVisualArtifact {
   validatePersistedRva(raw);
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateReviewEntryReadiness(raw: unknown): ReviewEntryReadiness {
+  validatePersistedReviewEntryReadiness(raw);
   return deepFreeze(structuredClone(raw));
 }

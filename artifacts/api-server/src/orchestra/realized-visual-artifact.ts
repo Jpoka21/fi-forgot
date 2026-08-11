@@ -34,9 +34,7 @@ const AUTHORIZED_REALIZATION_PATHS: readonly RealizationPath[] = [
   "licensed_or_acquired",
 ];
 
-export function createRealizedVisualArtifactId(): RealizedVisualArtifactId {
-  return `rva-${randomUUID()}` as RealizedVisualArtifactId;
-}
+import { createRealizedVisualArtifactId as createRvaId } from "./rva-lifecycle.js";
 
 /**
  * Establish governed Realized Visual Artifact (RVA) existence.
@@ -96,7 +94,7 @@ export function establishRealizedVisualArtifact(input: {
   }
 
   const now = input.establishedAt ?? new Date().toISOString();
-  const rvaId = createRealizedVisualArtifactId();
+  const rvaId = createRvaId();
 
   return Object.freeze({
     id: rvaId,
@@ -111,6 +109,8 @@ export function establishRealizedVisualArtifact(input: {
       priorVersionId: null,
     }),
     domain1EntryEvidence: input.realizationCommitment.domain1EntryEvidence,
+    existsPromotion: null,
+    terminalTransition: null,
     audit: Object.freeze({
       createdAt: now,
       createdBy: input.establishedBy,

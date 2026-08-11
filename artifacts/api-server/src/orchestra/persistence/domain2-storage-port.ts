@@ -1,6 +1,5 @@
 /**
  * Low-level storage port for Domain 2 constitutional aggregates.
- * Storage-independent — no database coupling.
  */
 
 import type {
@@ -10,6 +9,8 @@ import type {
   RealizationCommitmentId,
   RealizedVisualArtifact,
   RealizedVisualArtifactId,
+  ReviewEntryReadiness,
+  ReviewEntryReadinessId,
 } from "../domain2-types.js";
 import type { ProductionObligationId, ProductionProgramId } from "../types.js";
 
@@ -28,6 +29,14 @@ export interface Domain2StoragePort {
     commitmentId: RealizationCommitmentId,
   ): Promise<RealizationCommitment | null>;
 
-  putRva(rva: RealizedVisualArtifact): Promise<void>;
+  putRva(rva: RealizedVisualArtifact, options?: { allowUpdate?: boolean }): Promise<void>;
   getRva(rvaId: RealizedVisualArtifactId): Promise<RealizedVisualArtifact | null>;
+
+  putReviewEntryReadiness(readiness: ReviewEntryReadiness): Promise<void>;
+  getReviewEntryReadiness(
+    readinessId: ReviewEntryReadinessId,
+  ): Promise<ReviewEntryReadiness | null>;
+  getReviewEntryReadinessByRva(
+    rvaId: RealizedVisualArtifactId,
+  ): Promise<ReviewEntryReadiness | null>;
 }

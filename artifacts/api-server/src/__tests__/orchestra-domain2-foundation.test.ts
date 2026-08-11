@@ -599,7 +599,16 @@ expectThrows(
   "invalid_rva",
 );
 
-section("24. evaluateDomain2Readiness constitutional currentness required");
+section("24. ORCH-IMP-004 — raw Domain 2 chain functions not in primary barrel");
+
+const barrel = await import("../orchestra/index.js");
+expect("beginExplorationPosture not exported", (barrel as Record<string, unknown>).beginExplorationPosture, undefined);
+expect("achieveExplorationExitReady not exported", (barrel as Record<string, unknown>).achieveExplorationExitReady, undefined);
+expect("recordRealizationCommitment not exported", (barrel as Record<string, unknown>).recordRealizationCommitment, undefined);
+expect("establishRealizedVisualArtifact not exported", (barrel as Record<string, unknown>).establishRealizedVisualArtifact, undefined);
+expectTruthy("createDomain2Repository still exported", typeof barrel.createDomain2Repository === "function");
+
+section("25. evaluateDomain2Readiness constitutional currentness required");
 
 const { domain1: d1r, program: progR } = await buildGovernedDomain1();
 const storedR = await d1r.loadExplorationDetermination(progR.id);

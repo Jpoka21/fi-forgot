@@ -10,11 +10,17 @@ import type {
   RealizationCommitment,
   RealizationPath,
   RealizationPostureStatus,
+  RealizationTraceabilityPackage,
   RealizedVisualArtifact,
+  ReviewEntryReadiness,
+  RvaExecutablePosture,
+  RvaExistsPromotionRecord,
+  RvaTerminalTransition,
   RvaVersionLineage,
 } from "../domain2-types.js";
 import { isValidDomain2GovernedCreationMarker } from "../domain2-entry.js";
 import { OrchestraConstitutionalError } from "../errors.js";
+import { validateLineageCoherence } from "../rva-lifecycle.js";
 import type { ConstitutionalAuditMetadata } from "../types.js";
 
 const UUID_PATTERN =
@@ -26,6 +32,7 @@ const ID_PREFIXES = {
   rva: "rva-",
   program: "program-",
   obligation: "obligation-",
+  reviewEntryReadiness: "review-entry-readiness-",
 } as const;
 
 const EXPLORATION_POSTURE_STATUSES: readonly ExplorationPostureStatus[] = [
@@ -43,9 +50,11 @@ const REALIZATION_PATHS: readonly RealizationPath[] = [
   "licensed_or_acquired",
 ];
 
-const RVA_POSTURES: readonly RealizedVisualArtifact["posture"][] = [
+const RVA_POSTURES: readonly RvaExecutablePosture[] = [
   "rva_candidate",
   "rva_exists",
+  "rva_superseded",
+  "rva_invalidated",
 ];
 
 function assertBrandedId(id: unknown, prefix: string, label: string): void {
@@ -142,7 +151,7 @@ function validateGovernedMarker(marker: unknown): void {
   }
 }
 
-function validateLineage(lineage: unknown): asserts lineage is RvaVersionLineage {
+function validateLineage(lineage: unknown, rvaId: string): asserts lineage is RvaVersionLineage {
   if (!lineage || typeof lineage !== "object") {
     throw new OrchestraConstitutionalError(
       "RVA requires version lineage",
@@ -150,14 +159,53 @@ function validateLineage(lineage: unknown): asserts lineage is RvaVersionLineage
       ["FI-DSN-STD-013-R27"],
     );
   }
-  const record = lineage as Record<string, unknown>;
-  assertBrandedId(record.rootRvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
-  if (typeof record.versionSequence !== "number" || record.versionSequence < 1) {
+  validateLineageCoherence(lineage as RvaVersionLineage, rvaId as RealizedVisualArtifact["id"]);
+}
+
+function validateExistsPromotion(
+  promotion: unknown,
+  posture: RvaExecutablePosture,
+): void {
+  if (posture === "rva_exists" && (!promotion || typeof promotion !== "object")) {
     throw new OrchestraConstitutionalError(
-      "RVA version sequence must be at least 1",
+      "RVA Exists requires promotion provenance",
       "invalid_rva",
-      ["FI-DSN-STD-013-R27"],
+      ["FI-DSN-STD-013-R40"],
     );
+  }
+  if (promotion !== null && promotion !== undefined) {
+    const record = promotion as RvaExistsPromotionRecord;
+    if (typeof record.promotedAt !== "string" || typeof record.promotedBy !== "string") {
+      throw new OrchestraConstitutionalError(
+        "Invalid RVA Exists promotion provenance",
+        "invalid_rva",
+        ["FI-DSN-STD-013-R40"],
+      );
+    }
+  }
+}
+
+function validateTerminalTransition(
+  transition: unknown,
+  posture: RvaExecutablePosture,
+): void {
+  const terminal = posture === "rva_superseded" || posture === "rva_invalidated";
+  if (terminal && (!transition || typeof transition !== "object")) {
+    throw new OrchestraConstitutionalError(
+      "Terminal RVA requires transition provenance",
+      "invalid_rva",
+      ["FI-DSN-STD-013-R44", "FI-DSN-STD-013-R45"],
+    );
+  }
+  if (transition !== null && transition !== undefined) {
+    const record = transition as RvaTerminalTransition;
+    if (record.kind !== "superseded" && record.kind !== "invalidated") {
+      throw new OrchestraConstitutionalError(
+        "Invalid RVA terminal transition kind",
+        "invalid_rva",
+        ["FI-DSN-STD-013-R44"],
+      );
+    }
   }
 }
 
@@ -186,6 +234,16 @@ export function validatePersistedExplorationPosture(
   validateAuditMetadata(record.audit);
   validateDomain2Traceability(record.traceability);
   validateGovernedMarker(record.governedCreationMarker);
+  if (
+    record.posture === "exploration_waived" &&
+    (record.explorationWaiverRecordId === null || record.explorationWaiverRecordId === undefined)
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Exploration Waived requires linked Domain 1 waiver evidence",
+      "invalid_exploration_posture",
+      ["FI-DSN-STD-013-R14"],
+    );
+  }
 }
 
 export function validatePersistedRealizationCommitment(
@@ -237,7 +295,8 @@ export function validatePersistedRva(raw: unknown): asserts raw is RealizedVisua
     ID_PREFIXES.realizationCommitment,
     "Realization Commitment",
   );
-  if (!RVA_POSTURES.includes(record.posture as RealizedVisualArtifact["posture"])) {
+  const posture = record.posture as RvaExecutablePosture;
+  if (!RVA_POSTURES.includes(posture)) {
     throw new OrchestraConstitutionalError(
       "Invalid RVA posture",
       "invalid_rva",
@@ -251,14 +310,42 @@ export function validatePersistedRva(raw: unknown): asserts raw is RealizedVisua
       ["FI-DSN-STD-013-R36"],
     );
   }
-  validateLineage(record.lineage);
+  validateLineage(record.lineage, record.id as string);
+  validateExistsPromotion(record.existsPromotion, posture);
+  validateTerminalTransition(record.terminalTransition, posture);
   validateDomain1EntryEvidence(record.domain1EntryEvidence);
   validateAuditMetadata(record.audit);
   validateDomain2Traceability(record.traceability);
   validateGovernedMarker(record.governedCreationMarker);
 }
 
-/** Exported for type completeness — not all postures are persistable in foundation sprint. */
+export function validatePersistedReviewEntryReadiness(
+  raw: unknown,
+): asserts raw is ReviewEntryReadiness {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Review-Entry Readiness",
+      "invalid_review_entry_readiness",
+      ["FI-DSN-STD-013-R49"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.readinessId, ID_PREFIXES.reviewEntryReadiness, "Review-Entry Readiness");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+  if (record.posture !== "review_entry_ready") {
+    throw new OrchestraConstitutionalError(
+      "Invalid Review-Entry Readiness posture",
+      "invalid_review_entry_readiness",
+      ["FI-DSN-STD-013-R49"],
+    );
+  }
+  validateAuditMetadata(record.audit);
+  validateDomain2Traceability(record.traceability);
+  validateGovernedMarker(record.governedCreationMarker);
+}
+
 export const REALIZATION_POSTURE_STATUSES: readonly RealizationPostureStatus[] = [
   "realization_committed",
   "rva_candidate",
