@@ -24,7 +24,10 @@ import {
 } from "./domain2-validation.js";
 import type { Domain1EntryEvidence } from "../domain2-types.js";
 import { evaluateDomain2Readiness } from "../domain2-boundary.js";
-import { recordComplianceBoundaryChangeEvent } from "../compliance-boundary-change.js";
+import {
+  assertNoBlockingComplianceBoundaryConsequences,
+  recordComplianceBoundaryChangeEvent,
+} from "../compliance-boundary-change.js";
 import { assertEntryEvidenceMatchesActiveDetermination } from "../domain2-readiness.js";
 import type {
   ComplianceBoundaryChangeConsequence,
@@ -59,6 +62,7 @@ import { establishSharedSourceLinkage } from "../shared-source-linkage.js";
 import {
   createSuccessorRva,
   invalidateRva,
+  isForwardActiveRvaPosture,
   promoteRvaToExists,
 } from "../rva-lifecycle.js";
 import {
@@ -551,6 +555,11 @@ export function createDomain2RepositoryWithStorage(
       const rva = rehydrateRva(existing);
       const program = await loadActiveProgram(rva.programId);
       await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
+      if (isForwardActiveRvaPosture(rva.posture)) {
+        assertNoBlockingComplianceBoundaryConsequences(
+          await storage.listComplianceBoundaryChangeEventsByRva(rva.id),
+        );
+      }
 
       const promoted = promoteRvaToExists({
         rva,
@@ -588,7 +597,19 @@ export function createDomain2RepositoryWithStorage(
         const priorSuperseded = await updateRvaInternal(result.priorSuperseded);
         return { priorSuperseded, successor };
       } catch (error) {
-        await storage.deleteRva(successor.id);
+        try {
+          await storage.deleteRva(successor.id);
+        } catch (rollbackError) {
+          throw new OrchestraConstitutionalError(
+            `Successor supersession failed and rollback delete also failed: ${
+              error instanceof Error ? error.message : String(error)
+            }; rollback: ${
+              rollbackError instanceof Error ? rollbackError.message : String(rollbackError)
+            }`,
+            "invalid_domain2_persistence_state",
+            ["FI-DSN-STD-013-R31", "FI-DSN-STD-013-R44"],
+          );
+        }
         throw error;
       }
     },
@@ -641,6 +662,11 @@ export function createDomain2RepositoryWithStorage(
       const rva = rehydrateRva(rvaRaw);
       const program = await loadActiveProgram(rva.programId);
       await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
+      if (isForwardActiveRvaPosture(rva.posture)) {
+        assertNoBlockingComplianceBoundaryConsequences(
+          await storage.listComplianceBoundaryChangeEventsByRva(rva.id),
+        );
+      }
 
       const traceabilityPackage = await buildTraceabilityPackageForRva(rva);
       const readiness = determineReviewEntryReadiness({

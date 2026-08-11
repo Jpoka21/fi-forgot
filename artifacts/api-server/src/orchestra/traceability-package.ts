@@ -229,6 +229,30 @@ export function assertTraceabilityPackageComplete(
       ["FI-DSN-STD-013-R39", "FI-DSN-STD-013-R41"],
     );
   }
+
+  const isWaivedPath =
+    pkg.explorationWaiverRecordId !== null ||
+    pkg.explorationPostureHistory.some((entry) => entry.posture === "exploration_waived");
+
+  if (isWaivedPath) {
+    if (!pkg.explorationWaiverRecordId) {
+      throw new OrchestraConstitutionalError(
+        "Waived exploration path requires exploration waiver record identity in traceability package",
+        "invalid_rva",
+        ["FI-DSN-STD-013-R14", "FI-DSN-STD-013-R41"],
+      );
+    }
+    const hasWaiverEvidence = pkg.consumedWaiverEvidence.some(
+      (evidence) => evidence.waiverId === pkg.explorationWaiverRecordId,
+    );
+    if (!hasWaiverEvidence) {
+      throw new OrchestraConstitutionalError(
+        "Waived exploration path requires governing waiver evidence in traceability package",
+        "invalid_rva",
+        ["FI-DSN-STD-013-R14", "FI-DSN-STD-013-R41"],
+      );
+    }
+  }
 }
 
 export const REALIZATION_TRACEABILITY_PACKAGE_TRACEABILITY = createDomain2GovernanceTraceability([

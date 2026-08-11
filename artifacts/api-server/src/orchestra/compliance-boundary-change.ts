@@ -110,6 +110,46 @@ export function recordComplianceBoundaryChangeEvent(input: {
   });
 }
 
+/**
+ * Consequences that block Exists promotion and Review-Entry Readiness until
+ * the affected RVA is constitutionally acted upon — R29, R46.
+ *
+ * - rework_required / successor_required: forward progression blocked on this RVA
+ * - invalidation_required: blocked until invalidation is applied (then terminal)
+ * - reconsideration: documentary only; does not block progression
+ */
+export const BLOCKING_COMPLIANCE_BOUNDARY_CONSEQUENCES: readonly ComplianceBoundaryChangeConsequence[] =
+  Object.freeze(["rework_required", "successor_required", "invalidation_required"]);
+
+export function isBlockingComplianceBoundaryConsequence(
+  consequence: ComplianceBoundaryChangeConsequence,
+): boolean {
+  return (BLOCKING_COMPLIANCE_BOUNDARY_CONSEQUENCES as readonly string[]).includes(consequence);
+}
+
+/**
+ * Fail closed when unresolved blocking CB consequences remain on a forward-active RVA.
+ * Events are scoped to the RVA identity — successors do not inherit predecessor blocks.
+ */
+export function assertNoBlockingComplianceBoundaryConsequences(
+  events: readonly ComplianceBoundaryChangeEvent[],
+): void {
+  const blocking = events.filter((event) =>
+    isBlockingComplianceBoundaryConsequence(event.consequence),
+  );
+
+  if (blocking.length === 0) {
+    return;
+  }
+
+  const kinds = [...new Set(blocking.map((e) => e.consequence))].join(", ");
+  throw new OrchestraConstitutionalError(
+    `Unresolved Compliance Boundary consequence blocks Domain 2 progression: ${kinds}`,
+    "invalid_compliance_boundary_change",
+    ["FI-DSN-STD-013-R29", "FI-DSN-STD-013-R46"],
+  );
+}
+
 export const COMPLIANCE_BOUNDARY_CHANGE_TRACEABILITY = createDomain2GovernanceTraceability([
   ...CB_CHANGE_REQUIREMENTS,
 ]);
