@@ -485,6 +485,9 @@ section("BC-ORCH-018 persisted evidence validation");
       assertReviewEntryReadinessCurrentForAdmission: async () => {
         throw new Error("not used");
       },
+      assembleTraceabilityPackage: async () => {
+        throw new Error("not used");
+      },
     },
     storage,
   );

@@ -3,11 +3,13 @@
  */
 
 import type {
+  DesignTimeFeasibilityEvaluationRecord,
   ProductionReadinessReview,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
 } from "../domain3-types.js";
 import {
+  validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedProductionReadinessReview,
   validatePersistedReviewDimensionActivity,
   validatePersistedReviewEvidence,
@@ -42,5 +44,12 @@ export function rehydrateReviewEvidence(raw: unknown): ReviewEvidenceRecord {
 
 export function rehydrateReviewDimensionActivity(raw: unknown): ReviewDimensionActivityRecord {
   validatePersistedReviewDimensionActivity(raw);
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateDesignTimeFeasibilityEvaluation(
+  raw: unknown,
+): DesignTimeFeasibilityEvaluationRecord {
+  validatePersistedDesignTimeFeasibilityEvaluation(raw);
   return deepFreeze(structuredClone(raw));
 }

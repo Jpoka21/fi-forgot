@@ -55,7 +55,8 @@ export type OrchestraErrorCode =
   | "invalid_brain_domain2_proposal"
   | "invalid_review_entry_eligibility"
   | "invalid_domain3_persistence_state"
-  | "invalid_review_activity";
+  | "invalid_review_activity"
+  | "invalid_design_time_feasibility";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

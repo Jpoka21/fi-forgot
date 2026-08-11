@@ -81,6 +81,23 @@ export {
 } from "./review-dimensions.js";
 
 export {
+  FROZEN_BINDING_FI_MFG_STANDARDS,
+  createFrozenManufacturingAuthoritySource,
+  assertFrozenBindingManufacturingAuthority,
+  MANUFACTURING_VALIDATION_DEFERRED,
+  FULFILLMENT_EXECUTION_DEFERRED,
+  type ManufacturingAuthoritySource,
+  type ManufacturingComplianceBoundaryReference,
+  type ManufacturingAuthorityBindingPosture,
+} from "./manufacturing-authority.js";
+
+export {
+  DESIGN_TIME_FEASIBILITY_TRACEABILITY,
+  DESIGN_TIME_FEASIBILITY_DIMENSION_ID,
+  resolveApplicableManufacturingBoundaries,
+} from "./design-time-feasibility.js";
+
+export {
   createDomain3Repository,
   type Domain3Repository,
   type Domain2ReviewEntrySource,
@@ -99,6 +116,9 @@ export type {
   ReviewEvidenceRecord,
   ReviewDimensionActivityRecord,
   MandatoryReviewActivityCompleteness,
+  DesignTimeFeasibilityEvaluationId,
+  DesignTimeFeasibilityEvaluationRecord,
+  DesignTimeFeasibilityObservationKind,
 } from "./domain3-types.js";
 
 /**

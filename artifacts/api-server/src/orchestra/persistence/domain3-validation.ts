@@ -5,6 +5,7 @@
 import { DOMAIN3_GOVERNING_STANDARD } from "../domain3-authority.js";
 import { isValidDomain3GovernedCreationMarker } from "../domain3-entry.js";
 import type {
+  DesignTimeFeasibilityEvaluationRecord,
   ProductionReadinessReview,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
@@ -22,6 +23,7 @@ const ID_PREFIXES = {
   readiness: "review-entry-readiness-",
   evidence: "review-evidence-",
   activity: "review-dimension-activity-",
+  dtfEvaluation: "design-time-feasibility-evaluation-",
 } as const;
 
 const LEGAL_REALIZATION_PATHS: readonly RealizationPath[] = [
@@ -351,3 +353,151 @@ export function validatePersistedReviewDimensionActivity(
     );
   }
 }
+
+const LEGAL_DTF_OBSERVATION_KINDS = [
+  "compatibility_observation",
+  "feasibility_concern",
+  "boundary_conflict",
+  "applicability_gap",
+] as const;
+
+export function validatePersistedDesignTimeFeasibilityEvaluation(
+  raw: unknown,
+): asserts raw is DesignTimeFeasibilityEvaluationRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Design-Time Feasibility evaluation",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R21"],
+    );
+  }
+
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.evaluationId, ID_PREFIXES.dtfEvaluation, "Design-Time Feasibility evaluation");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+
+  if (record.dimensionId !== "design_time_feasibility") {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility evaluation dimension must be design_time_feasibility",
+      "invalid_design_time_feasibility",
+      ["FI-DSN-STD-014-R15", "FI-DSN-STD-014-R21"],
+    );
+  }
+
+  if (!Array.isArray(record.applicableManufacturingBoundaries)) {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility evaluation requires applicable manufacturing boundary list",
+      "invalid_design_time_feasibility",
+      ["FI-DSN-STD-014-R21"],
+    );
+  }
+
+  for (const boundary of record.applicableManufacturingBoundaries) {
+    if (!boundary || typeof boundary !== "object") {
+      throw new OrchestraConstitutionalError(
+        "Invalid applicable manufacturing boundary reference",
+        "invalid_design_time_feasibility",
+        ["FI-DSN-STD-014-R21"],
+      );
+    }
+    const item = boundary as Record<string, unknown>;
+    if (
+      typeof item.sourceStandardId !== "string" ||
+      !item.sourceStandardId.startsWith("FI-MFG-") ||
+      item.bindingPosture !== "frozen_binding"
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Applicable manufacturing boundary must be a frozen binding FI-MFG-* reference",
+        "invalid_design_time_feasibility",
+        ["FI-DSN-STD-014-R21"],
+      );
+    }
+  }
+
+  if (!Array.isArray(record.observations) || record.observations.length === 0) {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility evaluation requires observations",
+      "invalid_design_time_feasibility",
+      ["FI-DSN-STD-014-R25"],
+    );
+  }
+
+  for (const observation of record.observations) {
+    if (!observation || typeof observation !== "object") {
+      throw new OrchestraConstitutionalError(
+        "Invalid Design-Time Feasibility observation",
+        "invalid_design_time_feasibility",
+        ["FI-DSN-STD-014-R25"],
+      );
+    }
+    const item = observation as Record<string, unknown>;
+    if (
+      !(LEGAL_DTF_OBSERVATION_KINDS as readonly string[]).includes(item.kind as string) ||
+      typeof item.text !== "string" ||
+      !item.text.trim()
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Design-Time Feasibility observation kind/text is invalid",
+        "invalid_design_time_feasibility",
+        ["FI-DSN-STD-014-R25"],
+      );
+    }
+  }
+
+  if (
+    record.manufacturingValidationNotPerformed !== true ||
+    record.fulfillmentExecutionNotPerformed !== true ||
+    record.decisionStageAffirmed !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility must affirm decision-stage evaluation without Manufacturing Validation or Fulfillment Execution",
+      "invalid_design_time_feasibility",
+      ["FI-DSN-STD-014-R23", "FI-DSN-STD-014-R26"],
+    );
+  }
+
+  if (typeof record.evaluationMethodDescription !== "string" || !record.evaluationMethodDescription.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility requires method-neutral provenance",
+      "invalid_design_time_feasibility",
+      ["FI-DSN-STD-014-R24"],
+    );
+  }
+
+  if (!Array.isArray(record.evidenceIds) || record.evidenceIds.length === 0) {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility evaluation requires linked Review evidence identities",
+      "invalid_design_time_feasibility",
+      ["FI-DSN-STD-014-R25"],
+    );
+  }
+
+  for (const evidenceId of record.evidenceIds) {
+    assertBrandedId(evidenceId, ID_PREFIXES.evidence, "Review evidence");
+  }
+
+  if (
+    record.activityId !== null &&
+    (typeof record.activityId !== "string" ||
+      !record.activityId.startsWith(ID_PREFIXES.activity))
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility evaluation activity identity is malformed",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R25"],
+    );
+  }
+
+  assertAuditMetadata(record.audit, "Design-Time Feasibility evaluation");
+  assertDomain3Traceability(record.traceability, "Design-Time Feasibility evaluation");
+
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Design-Time Feasibility evaluation requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R21"],
+    );
+  }
+}
+

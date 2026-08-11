@@ -1,8 +1,9 @@
 /**
- * In-memory Domain 3 storage adapter — admission + append-only Review activity.
+ * In-memory Domain 3 storage adapter — admission + G3 activity + G4 DTF.
  */
 
 import type {
+  DesignTimeFeasibilityEvaluationRecord,
   ProductionReadinessReview,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
@@ -16,6 +17,8 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const evidenceByReview = new Map<string, string[]>();
   const activitiesById = new Map<string, ReviewDimensionActivityRecord>();
   const activitiesByReview = new Map<string, string[]>();
+  const dtfById = new Map<string, DesignTimeFeasibilityEvaluationRecord>();
+  const dtfByReview = new Map<string, string[]>();
 
   return {
     async putProductionReadinessReview(review) {
@@ -37,12 +40,13 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
     },
 
     async putReviewEvidence(evidence) {
+      if (evidenceById.has(evidence.evidenceId)) {
+        throw new Error(`Duplicate Review evidence identity: ${evidence.evidenceId}`);
+      }
       evidenceById.set(evidence.evidenceId, structuredClone(evidence));
       const list = evidenceByReview.get(evidence.reviewId) ?? [];
-      if (!list.includes(evidence.evidenceId)) {
-        list.push(evidence.evidenceId);
-        evidenceByReview.set(evidence.reviewId, list);
-      }
+      list.push(evidence.evidenceId);
+      evidenceByReview.set(evidence.reviewId, list);
     },
 
     async getReviewEvidence(evidenceId) {
@@ -61,12 +65,13 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
     },
 
     async putReviewDimensionActivity(activity) {
+      if (activitiesById.has(activity.activityId)) {
+        throw new Error(`Duplicate Review dimension activity identity: ${activity.activityId}`);
+      }
       activitiesById.set(activity.activityId, structuredClone(activity));
       const list = activitiesByReview.get(activity.reviewId) ?? [];
-      if (!list.includes(activity.activityId)) {
-        list.push(activity.activityId);
-        activitiesByReview.set(activity.reviewId, list);
-      }
+      list.push(activity.activityId);
+      activitiesByReview.set(activity.reviewId, list);
     },
 
     async getReviewDimensionActivity(activityId) {
@@ -80,6 +85,31 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
         ids
           .map((id) => activitiesById.get(id))
           .filter((item): item is ReviewDimensionActivityRecord => !!item)
+          .map((item) => structuredClone(item)),
+      );
+    },
+
+    async putDesignTimeFeasibilityEvaluation(evaluation) {
+      if (dtfById.has(evaluation.evaluationId)) {
+        throw new Error(`Duplicate Design-Time Feasibility evaluation identity: ${evaluation.evaluationId}`);
+      }
+      dtfById.set(evaluation.evaluationId, structuredClone(evaluation));
+      const list = dtfByReview.get(evaluation.reviewId) ?? [];
+      list.push(evaluation.evaluationId);
+      dtfByReview.set(evaluation.reviewId, list);
+    },
+
+    async getDesignTimeFeasibilityEvaluation(evaluationId) {
+      const evaluation = dtfById.get(evaluationId);
+      return evaluation ? structuredClone(evaluation) : null;
+    },
+
+    async listDesignTimeFeasibilityEvaluationsByReview(reviewId) {
+      const ids = dtfByReview.get(reviewId) ?? [];
+      return Object.freeze(
+        ids
+          .map((id) => dtfById.get(id))
+          .filter((item): item is DesignTimeFeasibilityEvaluationRecord => !!item)
           .map((item) => structuredClone(item)),
       );
     },

@@ -142,3 +142,56 @@ export interface MandatoryReviewActivityCompleteness {
   readonly addressedDimensionIds: readonly MandatoryReviewDimensionId[];
   readonly missingDimensionIds: readonly MandatoryReviewDimensionId[];
 }
+
+export type DesignTimeFeasibilityEvaluationId = string & {
+  readonly __brand: "DesignTimeFeasibilityEvaluationId";
+};
+
+/**
+ * Observation kinds for Design-Time Feasibility (G4) — evidence for later Determination.
+ * Not Review Determination outcomes (R25 / R23).
+ */
+export type DesignTimeFeasibilityObservationKind =
+  | "compatibility_observation"
+  | "feasibility_concern"
+  | "boundary_conflict"
+  | "applicability_gap";
+
+/**
+ * Append-only Design-Time Feasibility evaluation under design_time_feasibility (R21–R26).
+ * Does not grant Determination, Approval, or GPRA.
+ */
+export interface DesignTimeFeasibilityEvaluationRecord {
+  readonly evaluationId: DesignTimeFeasibilityEvaluationId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly dimensionId: "design_time_feasibility";
+  readonly applicableManufacturingBoundaries: readonly {
+    readonly sourceStandardId: string;
+    readonly title: string;
+    readonly kind: string;
+    readonly bindingPosture: "frozen_binding";
+    readonly governingVolume: "01";
+  }[];
+  /** FI-MFG-* ids bound on the program but not frozen/binding — not consumed as applicable. */
+  readonly consideredNonApplicableSourceStandardIds: readonly string[];
+  /** Method-neutral provenance (R24) — not an Approval or Determination. */
+  readonly evaluationMethodDescription: string;
+  readonly observations: readonly {
+    readonly kind: DesignTimeFeasibilityObservationKind;
+    readonly text: string;
+    readonly relatedSourceStandardId?: string;
+  }[];
+  /** R23 / R26 — DTF proceeds without Manufacturing Validation or Fulfillment Execution. */
+  readonly manufacturingValidationNotPerformed: true;
+  readonly fulfillmentExecutionNotPerformed: true;
+  readonly decisionStageAffirmed: true;
+  readonly evaluatedAt: string;
+  readonly evaluatedBy: string;
+  /** Linked after G3 evidence/activity persistence. */
+  readonly evidenceIds: readonly ReviewEvidenceId[];
+  readonly activityId: ReviewDimensionActivityId | null;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
