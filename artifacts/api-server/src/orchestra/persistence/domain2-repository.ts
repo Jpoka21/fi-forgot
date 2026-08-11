@@ -56,6 +56,7 @@ import type { ProductionProgram } from "../production-program.js";
 import { recordRealizationCommitment } from "../realization-commitment.js";
 import { establishRealizedVisualArtifact } from "../realized-visual-artifact.js";
 import { determineReviewEntryReadiness } from "../review-entry-readiness.js";
+import { assertReadinessRelevantPackageConsistency } from "../review-entry-readiness-freshness.js";
 import { recordLicensedAcquiredIntake } from "../licensed-acquired-intake.js";
 import { consumeExternalReworkTrigger } from "../rework-trigger.js";
 import { establishSharedSourceLinkage } from "../shared-source-linkage.js";
@@ -131,6 +132,19 @@ export interface Domain2Repository {
   assembleTraceabilityPackage(input: {
     rvaId: RealizedVisualArtifactId;
   }): Promise<RealizationTraceabilityPackage>;
+
+  /**
+   * Read-only: verify persisted Review-Entry Readiness remains currently usable
+   * for Domain 3 Review admission. Owns Domain 2 CB blocking + package freshness.
+   * Does not recreate or mutate readiness.
+   */
+  assertReviewEntryReadinessCurrentForAdmission(input: {
+    rvaId: RealizedVisualArtifactId;
+  }): Promise<{
+    rva: RealizedVisualArtifact;
+    readiness: ReviewEntryReadiness;
+    livePackage: RealizationTraceabilityPackage;
+  }>;
 
   determineReviewEntryReadiness(input: {
     rvaId: RealizedVisualArtifactId;
@@ -648,6 +662,58 @@ export function createDomain2RepositoryWithStorage(
       }
       const rva = rehydrateRva(rvaRaw);
       return buildTraceabilityPackageForRva(rva);
+    },
+
+    async assertReviewEntryReadinessCurrentForAdmission(input) {
+      const rvaRaw = await storage.getRva(input.rvaId);
+      if (!rvaRaw) {
+        throw new OrchestraConstitutionalError(
+          "RVA not found for Review-Entry Readiness freshness verification",
+          "invalid_review_entry_readiness",
+          ["FI-DSN-STD-013-R49"],
+        );
+      }
+      const rva = rehydrateRva(rvaRaw);
+
+      const readinessRaw = await storage.getReviewEntryReadinessByRva(input.rvaId);
+      if (!readinessRaw) {
+        throw new OrchestraConstitutionalError(
+          "Missing Review-Entry Readiness for Review admission freshness verification",
+          "invalid_review_entry_readiness",
+          ["FI-DSN-STD-013-R49"],
+        );
+      }
+      const readiness = rehydrateReviewEntryReadiness(readinessRaw);
+
+      if (readiness.posture !== "review_entry_ready") {
+        throw new OrchestraConstitutionalError(
+          "Persisted Review-Entry Readiness posture is not Review-Entry Ready",
+          "invalid_review_entry_readiness",
+          ["FI-DSN-STD-013-R49"],
+        );
+      }
+
+      if (readiness.rvaId !== rva.id) {
+        throw new OrchestraConstitutionalError(
+          "Review-Entry Readiness does not belong to the subject RVA",
+          "invalid_review_entry_readiness",
+          ["FI-DSN-STD-013-R49"],
+        );
+      }
+
+      const program = await loadActiveProgram(rva.programId);
+      await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
+
+      if (isForwardActiveRvaPosture(rva.posture)) {
+        assertNoBlockingComplianceBoundaryConsequences(
+          await storage.listComplianceBoundaryChangeEventsByRva(rva.id),
+        );
+      }
+
+      const livePackage = await buildTraceabilityPackageForRva(rva);
+      assertReadinessRelevantPackageConsistency(readiness.traceabilityPackage, livePackage);
+
+      return { rva, readiness, livePackage };
     },
 
     async determineReviewEntryReadiness(input) {

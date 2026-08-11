@@ -167,6 +167,9 @@ export function admitProductionReadinessReview(input: {
     posture: "under_review",
     eligibilityStatus: "review_entry_eligible",
     domain2EntryEvidence,
+    // Audit embeds STD-012-R40 as upstream Domain 1→2 consumption provenance
+    // (same pattern as Domain 2 objects). Primary STD-014 G2 admission authority
+    // is recorded on ProductionReadinessReview.traceability below (BC-ORCH-019).
     audit: Object.freeze({
       createdAt: now,
       createdBy: admittedBy,

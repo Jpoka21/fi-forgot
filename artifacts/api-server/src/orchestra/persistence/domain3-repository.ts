@@ -1,20 +1,19 @@
 /**
  * Governed Domain 3 repository — Review Entry Eligibility / Production-readiness Review admission.
  * FI-DSN-STD-014-R08 through R13.
+ * ORCH-IMP-006.2: Domain 2-owned readiness freshness; deep-freeze rehydration.
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
 import { createInMemoryDomain3Storage } from "./domain3-in-memory-storage.js";
+import { rehydrateProductionReadinessReview } from "./domain3-rehydration.js";
 import type { Domain3StoragePort } from "./domain3-storage-port.js";
 import { validatePersistedProductionReadinessReview } from "./domain3-validation.js";
 import type {
   ProductionReadinessReview,
   ProductionReadinessReviewId,
 } from "../domain3-types.js";
-import type {
-  RealizationTraceabilityPackage,
-  RealizedVisualArtifactId,
-} from "../domain2-types.js";
+import type { RealizedVisualArtifactId } from "../domain2-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
 import { admitProductionReadinessReview } from "../review-entry-eligibility.js";
 
@@ -24,7 +23,7 @@ import { admitProductionReadinessReview } from "../review-entry-eligibility.js";
  */
 export type Domain2ReviewEntrySource = Pick<
   Domain2Repository,
-  "loadRva" | "loadReviewEntryReadinessByRva" | "assembleTraceabilityPackage"
+  "assertReviewEntryReadinessCurrentForAdmission"
 >;
 
 export interface Domain3Repository {
@@ -44,29 +43,6 @@ export interface Domain3Repository {
   loadActiveProductionReadinessReviewByRva(
     rvaId: RealizedVisualArtifactId,
   ): Promise<ProductionReadinessReview | null>;
-}
-
-function assertLivePackageConsistentWithEntry(
-  entryPackage: RealizationTraceabilityPackage,
-  livePackage: RealizationTraceabilityPackage,
-): void {
-  if (
-    entryPackage.rvaId !== livePackage.rvaId ||
-    entryPackage.programId !== livePackage.programId ||
-    entryPackage.obligationId !== livePackage.obligationId ||
-    entryPackage.realizationCommitmentId !== livePackage.realizationCommitmentId ||
-    entryPackage.rvaPosture !== livePackage.rvaPosture ||
-    entryPackage.realizationPath !== livePackage.realizationPath ||
-    entryPackage.lineage.rootRvaId !== livePackage.lineage.rootRvaId ||
-    entryPackage.lineage.versionSequence !== livePackage.lineage.versionSequence ||
-    entryPackage.lineage.priorVersionId !== livePackage.lineage.priorVersionId
-  ) {
-    throw new OrchestraConstitutionalError(
-      "Review-Entry Readiness evidence is stale relative to live Domain 2 Traceability Package",
-      "invalid_review_entry_eligibility",
-      ["FI-DSN-STD-014-R08", "FI-DSN-STD-014-R10"],
-    );
-  }
 }
 
 export function createDomain3Repository(domain2: Domain2ReviewEntrySource): Domain3Repository {
@@ -98,31 +74,26 @@ export function createDomain3RepositoryWithStorage(
         ["FI-DSN-STD-014-R08"],
       );
     }
-    return Object.freeze(structuredClone(loaded));
+    return rehydrateProductionReadinessReview(loaded);
   }
 
   return {
     async admitToProductionReadinessReview(input) {
-      const rva = await domain2.loadRva(input.rvaId);
-      if (!rva) {
-        throw new OrchestraConstitutionalError(
-          "RVA not found for Review entry",
-          "invalid_review_entry_eligibility",
-          ["FI-DSN-STD-014-R08"],
-        );
+      let freshness;
+      try {
+        freshness = await domain2.assertReviewEntryReadinessCurrentForAdmission({
+          rvaId: input.rvaId,
+        });
+      } catch (error) {
+        if (error instanceof OrchestraConstitutionalError) {
+          throw new OrchestraConstitutionalError(
+            error.message,
+            "invalid_review_entry_eligibility",
+            ["FI-DSN-STD-014-R08", "FI-DSN-STD-014-R09", "FI-DSN-STD-014-R10"],
+          );
+        }
+        throw error;
       }
-
-      const readiness = await domain2.loadReviewEntryReadinessByRva(input.rvaId);
-      if (!readiness) {
-        throw new OrchestraConstitutionalError(
-          "Missing Review-Entry Readiness for Review entry",
-          "invalid_review_entry_eligibility",
-          ["FI-DSN-STD-014-R08", "FI-DSN-STD-014-R09"],
-        );
-      }
-
-      const livePackage = await domain2.assembleTraceabilityPackage({ rvaId: input.rvaId });
-      assertLivePackageConsistentWithEntry(readiness.traceabilityPackage, livePackage);
 
       const existingActive = await storage.getActiveProductionReadinessReviewByRva(input.rvaId);
       if (existingActive) {
@@ -134,9 +105,9 @@ export function createDomain3RepositoryWithStorage(
       }
 
       const review = admitProductionReadinessReview({
-        rva,
-        reviewEntryReadiness: readiness,
-        traceabilityPackage: readiness.traceabilityPackage,
+        rva: freshness.rva,
+        reviewEntryReadiness: freshness.readiness,
+        traceabilityPackage: freshness.readiness.traceabilityPackage,
         admittedBy: input.admittedBy,
       });
 
@@ -146,15 +117,13 @@ export function createDomain3RepositoryWithStorage(
     async loadProductionReadinessReview(reviewId) {
       const loaded = await storage.getProductionReadinessReview(reviewId);
       if (!loaded) return null;
-      validatePersistedProductionReadinessReview(loaded);
-      return Object.freeze(structuredClone(loaded));
+      return rehydrateProductionReadinessReview(loaded);
     },
 
     async loadActiveProductionReadinessReviewByRva(rvaId) {
       const loaded = await storage.getActiveProductionReadinessReviewByRva(rvaId);
       if (!loaded) return null;
-      validatePersistedProductionReadinessReview(loaded);
-      return Object.freeze(structuredClone(loaded));
+      return rehydrateProductionReadinessReview(loaded);
     },
   };
 }
