@@ -34,6 +34,9 @@ export {
 } from "./compliance-boundary.js";
 
 export {
+  DOMAIN3_GPRA_GRANT_DEFERRED,
+  DOMAIN3_REVIEW_DETERMINATION_DEFERRED,
+  DOMAIN3_QUEUE_WORKER_DEFERRED,
   DOMAIN3_IMPLEMENTATION_DEFERRED,
   DOMAIN4_IMPLEMENTATION_DEFERRED,
   evaluateDomain2Readiness,
@@ -48,6 +51,38 @@ export {
   type Domain2GovernanceTraceability,
   type Std013RequirementId,
 } from "./domain2-authority.js";
+
+export {
+  DOMAIN3_ARCHITECTURAL_DOMAIN,
+  DOMAIN3_DOMAIN_CLASSIFICATION,
+  DOMAIN3_GOVERNING_STANDARD,
+  DOMAIN3_GOVERNING_STANDARD_VERSION,
+  type Domain3GovernanceTraceability,
+  type Std014RequirementId,
+} from "./domain3-authority.js";
+
+export {
+  REVIEW_ENTRY_ELIGIBILITY_TRACEABILITY,
+  GPRA_GRANT_DEFERRED,
+  REVIEW_DETERMINATION_DEFERRED,
+  REVIEW_QUEUE_WORKER_DEFERRED,
+  DOMAIN3_HANDOFF_DEFERRED,
+} from "./review-entry-eligibility.js";
+
+export {
+  createDomain3Repository,
+  type Domain3Repository,
+  type Domain2ReviewEntrySource,
+} from "./persistence/domain3-repository.js";
+
+export type {
+  ProductionReadinessReview,
+  ProductionReadinessReviewId,
+  ProductionReadinessReviewPosture,
+  ReviewEntryEligibilityStatus,
+  Domain2ReviewEntryEvidence,
+  Domain3GovernedCreationMarker,
+} from "./domain3-types.js";
 
 /**
  * ORCH-IMP-004: Raw governed Domain 2 chain functions removed from primary barrel.

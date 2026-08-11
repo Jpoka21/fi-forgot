@@ -64,8 +64,18 @@ export function evaluateDomain2Readiness(input: {
   });
 }
 
-/** Placeholder marker — STD-014 GPRA behavior is not implemented. */
-export const DOMAIN3_IMPLEMENTATION_DEFERRED = "FI-DSN-STD-014" as const;
+/** Placeholder marker — STD-014 GPRA grant is not implemented. */
+export const DOMAIN3_GPRA_GRANT_DEFERRED = "FI-DSN-STD-014-GPRA-GRANT-DEFERRED" as const;
+
+/** Placeholder marker — STD-014 Review Determination is not implemented. */
+export const DOMAIN3_REVIEW_DETERMINATION_DEFERRED =
+  "FI-DSN-STD-014-REVIEW-DETERMINATION-DEFERRED" as const;
+
+/** Placeholder marker — STD-014 review queue/worker is not implemented. */
+export const DOMAIN3_QUEUE_WORKER_DEFERRED = "FI-DSN-STD-014-QUEUE-WORKER-DEFERRED" as const;
 
 /** Placeholder marker — STD-015 handoff behavior is not implemented. */
 export const DOMAIN4_IMPLEMENTATION_DEFERRED = "FI-DSN-STD-015" as const;
+
+/** @deprecated Prefer specific Domain 3 deferred markers; retained for compatibility. */
+export const DOMAIN3_IMPLEMENTATION_DEFERRED = "FI-DSN-STD-014" as const;

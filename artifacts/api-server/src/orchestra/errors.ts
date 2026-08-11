@@ -1,7 +1,11 @@
 import type { Std012RequirementId } from "./authority.js";
 import type { Std013RequirementId } from "./domain2-authority.js";
+import type { Std014RequirementId } from "./domain3-authority.js";
 
-export type OrchestraRequirementId = Std012RequirementId | Std013RequirementId;
+export type OrchestraRequirementId =
+  | Std012RequirementId
+  | Std013RequirementId
+  | Std014RequirementId;
 
 /**
  * Constitutional invariant or transition violation within Orchestra Domain 1.
@@ -48,7 +52,9 @@ export type OrchestraErrorCode =
   | "invalid_compliance_boundary_change"
   | "invalid_licensed_acquired_intake"
   | "invalid_rework_trigger"
-  | "invalid_brain_domain2_proposal";
+  | "invalid_brain_domain2_proposal"
+  | "invalid_review_entry_eligibility"
+  | "invalid_domain3_persistence_state";
 
 export function isOrchestraConstitutionalError(
   error: unknown,
