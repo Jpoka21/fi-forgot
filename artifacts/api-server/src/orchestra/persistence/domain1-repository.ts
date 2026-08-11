@@ -2,8 +2,9 @@
  * Governed Domain 1 repository — aggregate consistency over CRUD convenience.
  *
  * Enforces constitutional invariants at the persistence boundary:
+ * - parent intent existence (R11)
  * - current-program semantics (R11, R12, R41)
- * - waiver existence linkage (R31)
+ * - waiver existence and context linkage (R18, R31)
  * - exploration determination ownership (R26, R30)
  * - material amendment consequences (R34, R35)
  * - safe rehydration on load
@@ -21,6 +22,7 @@ import type {
   ProgramSplitRecord,
 } from "../types.js";
 import type { ExceptionRecord, WaiverRecord } from "../waiver.js";
+import { rehydrateWaiver } from "./rehydration.js";
 import {
   executeGovernedProgramSplit,
   type GovernedProgramSplitInput,
@@ -29,7 +31,7 @@ import {
 import { rehydrateIntent, rehydrateProgram, type StoredExplorationEntry } from "./rehydration.js";
 import { createInMemoryDomain1Storage } from "./in-memory-storage.js";
 import type { Domain1StoragePort } from "./storage-port.js";
-import { validatePersistedProgram } from "./validation.js";
+import { validateIntentIdShape, validatePersistedProgram } from "./validation.js";
 
 export interface Domain1Repository {
   persistIntent(intent: DeclaredProductionIntent): Promise<DeclaredProductionIntent>;
@@ -72,9 +74,35 @@ export interface Domain1Repository {
   ): Promise<ProductionProgram>;
 }
 
-export function createDomain1Repository(
-  storage: Domain1StoragePort = createInMemoryDomain1Storage(),
+/** Primary integration entry point — encapsulates in-memory storage internally. */
+export function createDomain1Repository(): Domain1Repository {
+  return createDomain1RepositoryWithStorage(createInMemoryDomain1Storage());
+}
+
+/** Internal factory for tests requiring custom storage — not part of the primary public barrel. */
+export function createDomain1RepositoryWithStorage(
+  storage: Domain1StoragePort,
 ): Domain1Repository {
+  async function assertParentIntentExists(program: ProductionProgram): Promise<DeclaredProductionIntent> {
+    validateIntentIdShape(program.intentId);
+    const intent = await storage.getIntent(program.intentId);
+    if (!intent) {
+      throw new OrchestraConstitutionalError(
+        "Production Program requires a persisted parent Production Intent",
+        "invalid_program_structure",
+        ["FI-DSN-STD-012-R11", "FI-DSN-STD-012-R13"],
+      );
+    }
+    if (intent.id !== program.intentId) {
+      throw new OrchestraConstitutionalError(
+        "Production Program intent relationship does not match persisted parent intent",
+        "invalid_program_structure",
+        ["FI-DSN-STD-012-R11"],
+      );
+    }
+    return intent;
+  }
+
   async function assertWaiverLinkage(program: ProductionProgram): Promise<void> {
     for (const obligation of program.obligations) {
       if (obligation.enforcementPosture !== "waived") continue;
@@ -99,6 +127,13 @@ export function createDomain1Repository(
           "Brain-derived waiver cannot authorize waived obligations",
           "invalid_waiver",
           ["FI-DSN-STD-012-R31", "FI-DSN-STD-012-R42"],
+        );
+      }
+      if (waiver.affectedTarget !== obligation.id) {
+        throw new OrchestraConstitutionalError(
+          "Waiver affected target does not match the waived Production Obligation",
+          "invalid_waiver",
+          ["FI-DSN-STD-012-R18", "FI-DSN-STD-012-R31"],
         );
       }
     }
@@ -147,6 +182,16 @@ export function createDomain1Repository(
     }
   }
 
+  async function persistProgramInternal(program: ProductionProgram): Promise<ProductionProgram> {
+    validatePersistedProgram(program);
+    await assertParentIntentExists(program);
+    await assertWaiverLinkage(program);
+    await assertCurrentProgramInvariant(program, program.id);
+    const frozen = rehydrateProgram(program);
+    await storage.putProgram(frozen);
+    return frozen;
+  }
+
   return {
     async persistIntent(intent) {
       const frozen = rehydrateIntent(intent);
@@ -159,12 +204,7 @@ export function createDomain1Repository(
     },
 
     async persistProgram(program) {
-      validatePersistedProgram(program);
-      await assertWaiverLinkage(program);
-      await assertCurrentProgramInvariant(program, program.id);
-      const frozen = rehydrateProgram(program);
-      await storage.putProgram(frozen);
-      return frozen;
+      return persistProgramInternal(program);
     },
 
     async loadProgram(programId) {
@@ -176,8 +216,9 @@ export function createDomain1Repository(
     },
 
     async persistWaiver(waiver) {
-      await storage.putWaiver(waiver);
-      return waiver;
+      const frozen = rehydrateWaiver(waiver);
+      await storage.putWaiver(frozen);
+      return frozen;
     },
 
     async loadWaiver(waiverId) {
@@ -227,6 +268,22 @@ export function createDomain1Repository(
     },
 
     async executeProgramSplit(input) {
+      const existingIntent = await storage.getIntent(input.intent.id);
+      if (!existingIntent) {
+        throw new OrchestraConstitutionalError(
+          "Program Split requires a persisted parent Production Intent",
+          "invalid_program_split",
+          ["FI-DSN-STD-012-R11", "FI-DSN-STD-012-R12"],
+        );
+      }
+      if (existingIntent.id !== input.sourceProgram.intentId) {
+        throw new OrchestraConstitutionalError(
+          "Program Split intent does not match source program intent",
+          "invalid_program_split",
+          ["FI-DSN-STD-012-R11", "FI-DSN-STD-012-R12"],
+        );
+      }
+
       const existingSource = await storage.getProgram(input.sourceProgram.id);
       if (!existingSource) {
         throw new OrchestraConstitutionalError(
@@ -241,8 +298,7 @@ export function createDomain1Repository(
       await storage.putProgramSplit(result.splitRecord);
       await storage.putProgram(rehydrateProgram(result.sourceProgram));
       for (const program of result.resultingPrograms) {
-        await assertWaiverLinkage(program);
-        await storage.putProgram(rehydrateProgram(program));
+        await persistProgramInternal(program);
       }
 
       return result;
@@ -290,7 +346,7 @@ export function createDomain1Repository(
         );
       }
 
-      return this.persistProgram(amended);
+      return persistProgramInternal(amended);
     },
   };
 }

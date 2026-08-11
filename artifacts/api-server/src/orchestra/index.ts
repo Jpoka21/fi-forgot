@@ -4,11 +4,14 @@
  * Governed implementation of Volume 06 Domain 1 per FI-DSN-STD-012.
  * Distinct from the pre-existing Brain orchestrator (artifacts/api-server/src/brain/orchestrator.ts).
  *
- * Public API review (ORCH-IMP-002):
- * REMOVED: createProductionIntentId, createProductionProgramId, createProductionObligationId,
- *          createGovernanceTraceability, INTENT_TRANSITIONS, PROGRAM_TRANSITIONS,
- *          mergeComplianceBoundaryConflicts — enable constitutional invariant bypass.
- * ADDED: persistence repository, governed program split, successor program ID.
+ * Public API review (ORCH-IMP-002.2):
+ * REMOVED from primary barrel: createInMemoryDomain1Storage, Domain1StoragePort,
+ *   executeGovernedProgramSplit, recordProgramAmendment, createProductionObligation —
+ *   enable repository invariant bypass.
+ * REMOVED (ORCH-IMP-002): createProductionIntentId, createProductionProgramId,
+ *   createProductionObligationId, createGovernanceTraceability, INTENT_TRANSITIONS,
+ *   PROGRAM_TRANSITIONS, mergeComplianceBoundaryConflicts.
+ * Primary integration entry point: createDomain1Repository().
  */
 
 export {
@@ -56,10 +59,6 @@ export {
   type Domain1Repository,
 } from "./persistence/domain1-repository.js";
 
-export { createInMemoryDomain1Storage } from "./persistence/in-memory-storage.js";
-
-export type { Domain1StoragePort } from "./persistence/storage-port.js";
-
 export type { StoredExplorationEntry } from "./persistence/rehydration.js";
 
 export {
@@ -71,7 +70,6 @@ export {
 } from "./production-intent.js";
 
 export {
-  createProductionObligation,
   resolveObligationConstraint,
   PRODUCTION_OBLIGATION_TRACEABILITY,
   type ProductionObligation,
@@ -82,7 +80,6 @@ export {
   addObligationToProgram,
   bindComplianceBoundariesToProgram,
   governProductionProgram,
-  recordProgramAmendment,
   supersedeProductionProgram,
   invalidateProductionProgram,
   isCurrentProgram,
@@ -91,13 +88,7 @@ export {
   type ProgramAmendmentRecord,
 } from "./production-program.js";
 
-export {
-  executeGovernedProgramSplit,
-  createSuccessorProgramId,
-  type GovernedProgramSplitInput,
-  type GovernedProgramSplitResult,
-  type ProgramSplitBranchDefinition,
-} from "./program-split.js";
+export { createSuccessorProgramId } from "./program-split.js";
 
 export {
   assertIntentPostureTransition,
@@ -113,6 +104,7 @@ export type {
   CurrentProgramStatus,
   ExplorationDeterminationStatus,
   ExplorationEntryPosture,
+  GovernanceWaiverGrantMarker,
   ObligationEnforcementPosture,
   ObligationResolutionRecord,
   ProductionIntentId,

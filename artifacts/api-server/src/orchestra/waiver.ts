@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 
 import { createGovernanceTraceability } from "./authority.js";
 import { OrchestraConstitutionalError } from "./errors.js";
-import type { WaiverSourceAttribution } from "./types.js";
+import type { GovernanceWaiverGrantMarker, WaiverSourceAttribution } from "./types.js";
+
+const GOVERNANCE_GRANT_MARKER_PREFIX = "gov-waiver-grant-";
 
 const WAIVER_REQUIREMENTS = [
   "FI-DSN-STD-012-R31",
@@ -30,6 +32,8 @@ export interface WaiverRecord {
   readonly grantedAt: string;
   readonly grantedBy: string;
   readonly sourceAttribution: WaiverSourceAttribution;
+  /** Set only by grantWaiver — required for repository persistence. */
+  readonly governanceGrantMarker: GovernanceWaiverGrantMarker;
 }
 
 /**
@@ -86,6 +90,7 @@ export function grantWaiver(input: {
     grantedAt: input.grantedAt ?? new Date().toISOString(),
     grantedBy: input.grantedBy,
     sourceAttribution: "governance_authority",
+    governanceGrantMarker: `${GOVERNANCE_GRANT_MARKER_PREFIX}${randomUUID()}` as GovernanceWaiverGrantMarker,
   });
 }
 

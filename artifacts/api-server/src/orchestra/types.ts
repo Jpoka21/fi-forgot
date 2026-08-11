@@ -80,6 +80,11 @@ export interface ObligationResolutionRecord {
 /** Waiver source attribution — prevents Brain authority spoofing. R31, R42 */
 export type WaiverSourceAttribution = "governance_authority" | "brain_derived";
 
+/** Opaque marker set only by grantWaiver — prevents forged waiver persistence. R31 */
+export type GovernanceWaiverGrantMarker = string & {
+  readonly __brand: "GovernanceWaiverGrantMarker";
+};
+
 /** Status of a persisted exploration determination. R30, R34 */
 export type ExplorationDeterminationStatus = "active" | "superseded";
 

@@ -447,6 +447,17 @@ export function validatePersistedWaiver(waiver: unknown): asserts waiver is Waiv
       ["FI-DSN-STD-012-R31", "FI-DSN-STD-012-R42"],
     );
   }
+  const marker = record.governanceGrantMarker;
+  if (
+    typeof marker !== "string" ||
+    !marker.startsWith("gov-waiver-grant-")
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Waiver must be created through the governed grant path",
+      "invalid_waiver",
+      ["FI-DSN-STD-012-R31"],
+    );
+  }
 }
 
 export function validatePersistedException(

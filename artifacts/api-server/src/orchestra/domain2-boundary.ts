@@ -2,6 +2,7 @@ import type { ExplorationEntryDetermination } from "./exploration-entry.js";
 import type { ProductionProgram } from "./production-program.js";
 import { assertProgramIsActiveAuthority } from "./transitions.js";
 import { OrchestraConstitutionalError } from "./errors.js";
+import type { ExplorationDeterminationStatus } from "./types.js";
 
 /**
  * Extension boundary for FI-DSN-STD-013 artifact realization.
@@ -21,17 +22,27 @@ export interface Domain2RealizationReadiness {
 export function evaluateDomain2Readiness(input: {
   program: ProductionProgram;
   explorationEntry: ExplorationEntryDetermination | null;
-  /** Contextual current-program check — required when constitutional currentness depends on repository state. */
-  isConstitutionallyCurrent?: boolean;
+  /** Must be active — superseded determinations cannot authorize progression. R30, R34 */
+  explorationEntryStatus: ExplorationDeterminationStatus;
+  /** Mandatory constitutional currentness under R11/R12 — must be explicitly true. */
+  isConstitutionallyCurrent: boolean;
 }): Domain2RealizationReadiness | null {
   assertProgramIsActiveAuthority(input.program.posture);
 
-  if (input.isConstitutionallyCurrent === false) {
+  if (input.isConstitutionallyCurrent !== true) {
     return null;
   }
 
   if (input.explorationEntry === null) {
     return null;
+  }
+
+  if (input.explorationEntryStatus !== "active") {
+    throw new OrchestraConstitutionalError(
+      "Superseded Exploration-Entry Determination cannot authorize Domain 2 readiness",
+      "invalid_exploration_entry",
+      ["FI-DSN-STD-012-R30", "FI-DSN-STD-012-R34", "FI-DSN-STD-012-R40"],
+    );
   }
 
   if (input.explorationEntry.programId !== input.program.id) {

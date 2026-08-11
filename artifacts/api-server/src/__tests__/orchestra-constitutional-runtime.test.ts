@@ -6,6 +6,7 @@
  */
 
 import * as orchestra from "../orchestra/index.js";
+import { recordProgramAmendment } from "../orchestra/production-program.js";
 
 const {
   ORCHESTRA_GOVERNING_STANDARD,
@@ -32,7 +33,6 @@ const {
   isTerminalProgramPosture,
   recordException,
   recordIntentChange,
-  recordProgramAmendment,
   resolveObligationConstraint,
   supersedeProductionProgram,
 } = orchestra;
@@ -337,6 +337,8 @@ expectThrows(
 const readiness = evaluateDomain2Readiness({
   program: explorationProgram,
   explorationEntry,
+  explorationEntryStatus: "active",
+  isConstitutionallyCurrent: true,
 });
 expect("domain 2 readiness evaluated", readiness?.isReadyForDomain2Integration, true);
 

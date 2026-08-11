@@ -9,24 +9,23 @@ import {
   addObligationToProgram,
   bindComplianceBoundary,
   bindComplianceBoundariesToProgram,
-  createDomain1Repository,
   createSuccessorProgramId,
   declareProductionIntent,
   determineExplorationEntry,
   draftProductionProgram,
   evaluateDomain2Readiness,
-  executeGovernedProgramSplit,
   governProductionProgram,
   grantWaiver,
   invalidateProductionProgram,
   isOrchestraConstitutionalError,
   recordException,
-  recordProgramAmendment,
   resolveObligationConstraint,
   supersedeProductionProgram,
   type Domain1Repository,
   type ProductionProgram,
 } from "../orchestra/index.js";
+import { createProductionObligation } from "../orchestra/production-obligation.js";
+import { executeGovernedProgramSplit } from "../orchestra/program-split.js";
 
 let passed = 0;
 let failed = 0;
@@ -140,6 +139,7 @@ function buildGovernedProgram(actor = "governance-authority-1"): {
 }
 
 async function buildRepository(): Promise<Domain1Repository> {
+  const { createDomain1Repository } = await import("../orchestra/index.js");
   return createDomain1Repository();
 }
 
@@ -251,21 +251,29 @@ await expectThrowsAsync(
 
 section("10. Real waiver linkage accepted");
 
+const pendingObligation = createProductionObligation({
+  programId: waiverProgram.id,
+  description: "Waived obligation with real waiver",
+  createdBy: "governance-authority-1",
+});
 const waiver = grantWaiver({
   waiverAuthority: "domain_1_governance_authority",
   scope: "Obligation precondition",
-  affectedTarget: "test-obligation",
+  affectedTarget: pendingObligation.id,
   constitutionalBasis: "FI-DSN-STD-012-R31",
   applicabilityPosture: "conditional",
   downstreamEligibilityEffect: "permitted",
   grantedBy: "governance-authority-1",
 });
 await repo2.persistWaiver(waiver);
-waivedProgram = addObligationToProgram(waiverProgram, {
-  description: "Waived obligation with real waiver",
-  enforcementPosture: "waived",
+const waivedObligation = Object.freeze({
+  ...pendingObligation,
+  enforcementPosture: "waived" as const,
   waiverRecordId: waiver.waiverId,
-  createdBy: "governance-authority-1",
+});
+waivedProgram = Object.freeze({
+  ...waiverProgram,
+  obligations: Object.freeze([...waiverProgram.obligations, waivedObligation]),
 });
 const savedWaived = await repo2.persistProgram(waivedProgram);
 expect(
@@ -580,6 +588,8 @@ expectThrows(
     evaluateDomain2Readiness({
       program: d2ProgramB,
       explorationEntry: crossExploration,
+      explorationEntryStatus: "active",
+      isConstitutionallyCurrent: true,
     }),
   "invalid_exploration_entry",
 );
@@ -596,6 +606,8 @@ expectThrows(
     evaluateDomain2Readiness({
       program: inactive,
       explorationEntry: crossExploration,
+      explorationEntryStatus: "active",
+      isConstitutionallyCurrent: true,
     }),
   "program_not_active",
 );
@@ -603,6 +615,7 @@ expectThrows(
 const nonCurrentReadiness = evaluateDomain2Readiness({
   program: d2ProgramA,
   explorationEntry: crossExploration,
+  explorationEntryStatus: "active",
   isConstitutionallyCurrent: false,
 });
 expect("noncurrent program returns null readiness", nonCurrentReadiness, null);
@@ -714,12 +727,11 @@ const repo15 = await buildRepository();
 const { intent: amdIntent, program: amdProgram } = buildGovernedProgram();
 await repo15.persistIntent(amdIntent);
 await repo15.persistProgram(amdProgram);
-const amendedProgram = recordProgramAmendment(amdProgram, {
+const amendedProgram = await repo15.recordAmendmentWithConsequences(amdProgram, {
   materiality: "material",
   reason: "Scope change",
   amendedBy: "governance-authority-1",
 });
-await repo15.persistProgram(amendedProgram);
 const reloadedAmended = await repo15.loadProgram(amdProgram.id);
 expect("amendment history preserved", reloadedAmended?.amendmentHistory.length, 1);
 

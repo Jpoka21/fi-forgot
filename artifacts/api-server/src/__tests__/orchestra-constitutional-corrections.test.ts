@@ -18,9 +18,9 @@ import {
   invalidateProductionProgram,
   isOrchestraConstitutionalError,
   recordException,
-  recordProgramAmendment,
   supersedeProductionProgram,
 } from "../orchestra/index.js";
+import { recordProgramAmendment } from "../orchestra/production-program.js";
 
 let passed = 0;
 let failed = 0;
