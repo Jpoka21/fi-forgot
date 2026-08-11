@@ -70,6 +70,17 @@ export {
 } from "./review-entry-eligibility.js";
 
 export {
+  MANDATORY_REVIEW_DIMENSION_IDS,
+  MANDATORY_REVIEW_DIMENSION_LABELS,
+  listMandatoryReviewDimensionIds,
+  isMandatoryReviewDimensionId,
+  REVIEW_ACTIVITY_TRACEABILITY,
+  GOVERNED_NON_CORE_DIMENSION_ACTIVATION_DEFERRED,
+  type MandatoryReviewDimensionId,
+  type ReviewEvidenceCategoryId,
+} from "./review-dimensions.js";
+
+export {
   createDomain3Repository,
   type Domain3Repository,
   type Domain2ReviewEntrySource,
@@ -82,6 +93,12 @@ export type {
   ReviewEntryEligibilityStatus,
   Domain2ReviewEntryEvidence,
   Domain3GovernedCreationMarker,
+  ReviewEvidenceId,
+  ReviewDimensionActivityId,
+  ReviewEvidenceSourceKind,
+  ReviewEvidenceRecord,
+  ReviewDimensionActivityRecord,
+  MandatoryReviewActivityCompleteness,
 } from "./domain3-types.js";
 
 /**

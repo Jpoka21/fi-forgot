@@ -1,5 +1,5 @@
 /**
- * Domain 3 constitutional types — FI-DSN-STD-014 G2 Review Entry Eligibility.
+ * Domain 3 constitutional types — FI-DSN-STD-014 G2 entry + G3 Review activity.
  */
 
 import type { Domain3GovernanceTraceability } from "./domain3-authority.js";
@@ -9,6 +9,10 @@ import type {
   ReviewEntryReadinessId,
   RvaVersionLineage,
 } from "./domain2-types.js";
+import type {
+  MandatoryReviewDimensionId,
+  ReviewEvidenceCategoryId,
+} from "./review-dimensions.js";
 import type {
   ConstitutionalAuditMetadata,
   ProductionObligationId,
@@ -68,4 +72,73 @@ export interface ProductionReadinessReview {
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain3GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+export type ReviewEvidenceId = string & {
+  readonly __brand: "ReviewEvidenceId";
+};
+
+export type ReviewDimensionActivityId = string & {
+  readonly __brand: "ReviewDimensionActivityId";
+};
+
+/**
+ * Provenance kind for immutable Review evidence snapshots (R20 / GOV-002).
+ * Does not grant Determination or GPRA.
+ */
+export type ReviewEvidenceSourceKind =
+  | "compliance_boundary"
+  | "domain2_entry_evidence"
+  | "realization_traceability_package"
+  | "observation";
+
+/**
+ * Immutable Review evidence record organized by dimension category (R20).
+ * Captures a snapshot of what was examined; later Domain 2 change cannot rewrite it.
+ */
+export interface ReviewEvidenceRecord {
+  readonly evidenceId: ReviewEvidenceId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly dimensionId: MandatoryReviewDimensionId;
+  readonly evidenceCategoryId: ReviewEvidenceCategoryId;
+  readonly sourceKind: ReviewEvidenceSourceKind;
+  readonly sourceRecordId: string;
+  /** Immutable snapshot of examined constitutional content. */
+  readonly sourceSnapshot: string;
+  readonly capturedAt: string;
+  readonly capturedBy: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Append-only Review dimension activity — records that a dimension was addressed
+ * with evidence under an under_review Production-readiness Review (R14–R16, R20).
+ * Not a Review Determination, Approval, or GPRA grant.
+ */
+export interface ReviewDimensionActivityRecord {
+  readonly activityId: ReviewDimensionActivityId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly dimensionId: MandatoryReviewDimensionId;
+  readonly evidenceIds: readonly ReviewEvidenceId[];
+  readonly observation: string;
+  readonly addressedAt: string;
+  readonly addressedBy: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Pure query: whether mandatory G3 Review activity is complete enough for a later
+ * constitutional stage to consider Determination/G4 — not a Determination itself.
+ */
+export interface MandatoryReviewActivityCompleteness {
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly allMandatoryDimensionsAddressed: boolean;
+  readonly addressedDimensionIds: readonly MandatoryReviewDimensionId[];
+  readonly missingDimensionIds: readonly MandatoryReviewDimensionId[];
 }

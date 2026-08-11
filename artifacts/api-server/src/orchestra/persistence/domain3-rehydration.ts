@@ -1,10 +1,17 @@
 /**
  * Safe rehydration for Domain 3 persisted state — validate, clone, deep-freeze.
- * Mirrors Domain 1/2 deep-freeze discipline (ORCH-IMP-006.2 / BC-ORCH-016).
  */
 
-import type { ProductionReadinessReview } from "../domain3-types.js";
-import { validatePersistedProductionReadinessReview } from "./domain3-validation.js";
+import type {
+  ProductionReadinessReview,
+  ReviewDimensionActivityRecord,
+  ReviewEvidenceRecord,
+} from "../domain3-types.js";
+import {
+  validatePersistedProductionReadinessReview,
+  validatePersistedReviewDimensionActivity,
+  validatePersistedReviewEvidence,
+} from "./domain3-validation.js";
 
 function deepFreeze<T>(value: T): T {
   if (value === null || typeof value !== "object") {
@@ -25,5 +32,15 @@ function deepFreeze<T>(value: T): T {
 
 export function rehydrateProductionReadinessReview(raw: unknown): ProductionReadinessReview {
   validatePersistedProductionReadinessReview(raw);
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateReviewEvidence(raw: unknown): ReviewEvidenceRecord {
+  validatePersistedReviewEvidence(raw);
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateReviewDimensionActivity(raw: unknown): ReviewDimensionActivityRecord {
+  validatePersistedReviewDimensionActivity(raw);
   return deepFreeze(structuredClone(raw));
 }

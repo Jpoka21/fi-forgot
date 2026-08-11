@@ -1,10 +1,14 @@
 /**
- * Domain 3 storage port — Production-readiness Review admission records.
+ * Domain 3 storage port — Review admission + G3 Review activity/evidence.
  */
 
 import type {
   ProductionReadinessReview,
   ProductionReadinessReviewId,
+  ReviewDimensionActivityId,
+  ReviewDimensionActivityRecord,
+  ReviewEvidenceId,
+  ReviewEvidenceRecord,
 } from "../domain3-types.js";
 import type { RealizedVisualArtifactId } from "../domain2-types.js";
 
@@ -16,4 +20,18 @@ export interface Domain3StoragePort {
   getActiveProductionReadinessReviewByRva(
     rvaId: RealizedVisualArtifactId,
   ): Promise<ProductionReadinessReview | null>;
+
+  putReviewEvidence(evidence: ReviewEvidenceRecord): Promise<void>;
+  getReviewEvidence(evidenceId: ReviewEvidenceId): Promise<ReviewEvidenceRecord | null>;
+  listReviewEvidenceByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<readonly ReviewEvidenceRecord[]>;
+
+  putReviewDimensionActivity(activity: ReviewDimensionActivityRecord): Promise<void>;
+  getReviewDimensionActivity(
+    activityId: ReviewDimensionActivityId,
+  ): Promise<ReviewDimensionActivityRecord | null>;
+  listReviewDimensionActivitiesByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<readonly ReviewDimensionActivityRecord[]>;
 }
