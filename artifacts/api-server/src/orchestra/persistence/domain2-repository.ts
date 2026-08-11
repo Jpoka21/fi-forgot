@@ -13,17 +13,27 @@ import {
 import type { StoredExplorationEntry } from "./rehydration.js";
 import type { Domain2StoragePort } from "./domain2-storage-port.js";
 import {
+  validatePersistedComplianceBoundaryChangeEvent,
   validatePersistedExplorationPosture,
+  validatePersistedExternalReworkTrigger,
+  validatePersistedLicensedAcquiredIntake,
   validatePersistedRealizationCommitment,
   validatePersistedReviewEntryReadiness,
   validatePersistedRva,
+  validatePersistedSharedSourceLinkage,
 } from "./domain2-validation.js";
 import type { Domain1EntryEvidence } from "../domain2-types.js";
 import { evaluateDomain2Readiness } from "../domain2-boundary.js";
+import { recordComplianceBoundaryChangeEvent } from "../compliance-boundary-change.js";
 import { assertEntryEvidenceMatchesActiveDetermination } from "../domain2-readiness.js";
 import type {
+  ComplianceBoundaryChangeConsequence,
+  ComplianceBoundaryChangeEvent,
+  ComplianceBoundaryChangeEventId,
   ExplorationPostureRecord,
   ExplorationPostureRecordId,
+  ExternalReworkTriggerRecord,
+  LicensedAcquiredRightsPosture,
   RealizationCommitment,
   RealizationCommitmentId,
   RealizationPath,
@@ -31,6 +41,7 @@ import type {
   RealizedVisualArtifact,
   RealizedVisualArtifactId,
   ReviewEntryReadiness,
+  SharedSourceLinkageRecord,
 } from "../domain2-types.js";
 import {
   achieveExplorationExitReady,
@@ -42,6 +53,9 @@ import type { ProductionProgram } from "../production-program.js";
 import { recordRealizationCommitment } from "../realization-commitment.js";
 import { establishRealizedVisualArtifact } from "../realized-visual-artifact.js";
 import { determineReviewEntryReadiness } from "../review-entry-readiness.js";
+import { recordLicensedAcquiredIntake } from "../licensed-acquired-intake.js";
+import { consumeExternalReworkTrigger } from "../rework-trigger.js";
+import { establishSharedSourceLinkage } from "../shared-source-linkage.js";
 import {
   createSuccessorRva,
   invalidateRva,
@@ -50,6 +64,7 @@ import {
 import {
   assembleRealizationTraceabilityPackage,
 } from "../traceability-package.js";
+import type { WaiverRecord } from "../waiver.js";
 import type { ProductionObligationId, ProductionProgramId } from "../types.js";
 
 export interface Domain2Repository {
@@ -131,6 +146,47 @@ export interface Domain2Repository {
   loadReviewEntryReadinessByRva(
     rvaId: RealizedVisualArtifactId,
   ): Promise<ReviewEntryReadiness | null>;
+
+  establishSharedSourceLinkage(input: {
+    sourceRvaId: RealizedVisualArtifactId;
+    consumerRvaId: RealizedVisualArtifactId;
+    linkageBasis: string;
+    establishedBy: string;
+  }): Promise<SharedSourceLinkageRecord>;
+
+  recordLicensedAcquiredIntake(input: {
+    rvaId: RealizedVisualArtifactId;
+    sourceReference: string;
+    rightsBasis: string;
+    attributionRequirement: string;
+    usageRestrictions?: string | null;
+    recordedBy: string;
+  }): Promise<LicensedAcquiredRightsPosture>;
+
+  recordComplianceBoundaryChange(input: {
+    rvaId: RealizedVisualArtifactId;
+    complianceBoundarySourceStandardId: string;
+    materiality: "material" | "nonmaterial";
+    consequence: ComplianceBoundaryChangeConsequence;
+    changeBasis: string;
+    recordedBy: string;
+  }): Promise<ComplianceBoundaryChangeEvent>;
+
+  resolveComplianceBoundaryChange(input: {
+    rvaId: RealizedVisualArtifactId;
+    complianceBoundarySourceStandardId: string;
+    materiality: "material" | "nonmaterial";
+    consequence: ComplianceBoundaryChangeConsequence;
+    changeBasis: string;
+    resolvedBy: string;
+  }): Promise<{ event: ComplianceBoundaryChangeEvent; rva: RealizedVisualArtifact }>;
+
+  consumeExternalReworkTrigger(input: {
+    rvaId: RealizedVisualArtifactId;
+    externalReviewReference: string;
+    triggerBasis: string;
+    consumedBy: string;
+  }): Promise<ExternalReworkTriggerRecord>;
 }
 
 export function createDomain2Repository(
@@ -295,6 +351,81 @@ export function createDomain2RepositoryWithStorage(
     return rehydrateReviewEntryReadiness(loaded);
   }
 
+  async function collectConsumedWaivers(
+    program: ProductionProgram,
+    explorationWaiverId: string | null,
+  ): Promise<WaiverRecord[]> {
+    const waivers: WaiverRecord[] = [];
+    const seen = new Set<string>();
+
+    if (explorationWaiverId) {
+      const waiver = await domain1.loadWaiver(explorationWaiverId);
+      if (waiver) {
+        waivers.push(waiver);
+        seen.add(waiver.waiverId);
+      }
+    }
+
+    for (const obligation of program.obligations) {
+      if (obligation.waiverRecordId && !seen.has(obligation.waiverRecordId)) {
+        const waiver = await domain1.loadWaiver(obligation.waiverRecordId);
+        if (waiver) {
+          waivers.push(waiver);
+          seen.add(waiver.waiverId);
+        }
+      }
+    }
+
+    return waivers;
+  }
+
+  async function buildTraceabilityPackageForRva(
+    rva: RealizedVisualArtifact,
+  ): Promise<RealizationTraceabilityPackage> {
+    const program = await loadActiveProgram(rva.programId);
+    await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
+
+    const commitmentRaw = await storage.getRealizationCommitment(rva.realizationCommitmentId);
+    if (!commitmentRaw) {
+      throw new OrchestraConstitutionalError(
+        "Realization Commitment not found for traceability package",
+        "invalid_realization_commitment",
+        ["FI-DSN-STD-013-R41"],
+      );
+    }
+    const commitment = rehydrateRealizationCommitment(commitmentRaw);
+    const explorationRaw = await storage.getExplorationPosture(commitment.explorationPostureRecordId);
+    if (!explorationRaw) {
+      throw new OrchestraConstitutionalError(
+        "Exploration Posture not found for traceability package",
+        "invalid_exploration_posture",
+        ["FI-DSN-STD-013-R41"],
+      );
+    }
+    const explorationPosture = rehydrateExplorationPosture(explorationRaw);
+    const consumedWaivers = await collectConsumedWaivers(
+      program,
+      explorationPosture.explorationWaiverRecordId,
+    );
+    const rightsPosture = await storage.getLicensedAcquiredIntakeByRva(rva.id);
+    const sharedSourceLinkages = await storage.listSharedSourceLinkagesByRva(rva.id);
+    const complianceBoundaryChangeEvents = await storage.listComplianceBoundaryChangeEventsByRva(
+      rva.id,
+    );
+
+    return assembleRealizationTraceabilityPackage({
+      rva,
+      commitment,
+      explorationPosture,
+      complianceBoundaryBindings: program.complianceBoundaries,
+      unresolvedConstraints: program.unresolvedConstraints,
+      consumedWaivers,
+      rightsPosture,
+      sharedSourceLinkages,
+      complianceBoundaryChangeEvents,
+    });
+  }
+
   return {
     async beginExplorationPosture(input) {
       const program = await loadActiveProgram(input.programId);
@@ -452,9 +583,14 @@ export function createDomain2RepositoryWithStorage(
         createdBy: input.createdBy,
       });
 
-      const priorSuperseded = await updateRvaInternal(result.priorSuperseded);
       const successor = await persistNewRvaInternal(result.successor);
-      return { priorSuperseded, successor };
+      try {
+        const priorSuperseded = await updateRvaInternal(result.priorSuperseded);
+        return { priorSuperseded, successor };
+      } catch (error) {
+        await storage.deleteRva(successor.id);
+        throw error;
+      }
     },
 
     async invalidateRva(input) {
@@ -490,29 +626,7 @@ export function createDomain2RepositoryWithStorage(
         );
       }
       const rva = rehydrateRva(rvaRaw);
-      const commitmentRaw = await storage.getRealizationCommitment(rva.realizationCommitmentId);
-      if (!commitmentRaw) {
-        throw new OrchestraConstitutionalError(
-          "Realization Commitment not found for traceability package",
-          "invalid_realization_commitment",
-          ["FI-DSN-STD-013-R41"],
-        );
-      }
-      const commitment = rehydrateRealizationCommitment(commitmentRaw);
-      const explorationRaw = await storage.getExplorationPosture(commitment.explorationPostureRecordId);
-      if (!explorationRaw) {
-        throw new OrchestraConstitutionalError(
-          "Exploration Posture not found for traceability package",
-          "invalid_exploration_posture",
-          ["FI-DSN-STD-013-R41"],
-        );
-      }
-      const explorationPosture = rehydrateExplorationPosture(explorationRaw);
-      return assembleRealizationTraceabilityPackage({
-        rva,
-        commitment,
-        explorationPosture,
-      });
+      return buildTraceabilityPackageForRva(rva);
     },
 
     async determineReviewEntryReadiness(input) {
@@ -528,7 +642,7 @@ export function createDomain2RepositoryWithStorage(
       const program = await loadActiveProgram(rva.programId);
       await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
 
-      const traceabilityPackage = await this.assembleTraceabilityPackage({ rvaId: input.rvaId });
+      const traceabilityPackage = await buildTraceabilityPackageForRva(rva);
       const readiness = determineReviewEntryReadiness({
         rva,
         traceabilityPackage,
@@ -556,6 +670,181 @@ export function createDomain2RepositoryWithStorage(
     async loadReviewEntryReadinessByRva(rvaId) {
       const raw = await storage.getReviewEntryReadinessByRva(rvaId);
       return raw ? rehydrateReviewEntryReadiness(raw) : null;
+    },
+
+    async establishSharedSourceLinkage(input) {
+      const sourceRaw = await storage.getRva(input.sourceRvaId);
+      const consumerRaw = await storage.getRva(input.consumerRvaId);
+      if (!sourceRaw || !consumerRaw) {
+        throw new OrchestraConstitutionalError(
+          "Shared-Source Linkage requires existing source and consumer RVAs",
+          "invalid_shared_source_linkage",
+          ["FI-DSN-STD-013-R47"],
+        );
+      }
+      const sourceRva = rehydrateRva(sourceRaw);
+      const consumerRva = rehydrateRva(consumerRaw);
+      const program = await loadActiveProgram(sourceRva.programId);
+      await assertLiveDomain1Context(program, sourceRva.domain1EntryEvidence);
+
+      const linkage = establishSharedSourceLinkage({
+        sourceRva,
+        consumerRva,
+        linkageBasis: input.linkageBasis,
+        establishedBy: input.establishedBy,
+      });
+      validatePersistedSharedSourceLinkage(linkage);
+      await storage.putSharedSourceLinkage(linkage);
+      const loaded = await storage.getSharedSourceLinkage(linkage.linkageId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Shared-Source Linkage",
+          "invalid_domain2_persistence_state",
+          ["FI-DSN-STD-013-R47"],
+        );
+      }
+      return Object.freeze(structuredClone(loaded));
+    },
+
+    async recordLicensedAcquiredIntake(input) {
+      const rvaRaw = await storage.getRva(input.rvaId);
+      if (!rvaRaw) {
+        throw new OrchestraConstitutionalError(
+          "RVA not found for licensed or acquired intake",
+          "invalid_licensed_acquired_intake",
+          ["FI-DSN-STD-013-R39"],
+        );
+      }
+      const rva = rehydrateRva(rvaRaw);
+      const program = await loadActiveProgram(rva.programId);
+      await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
+
+      const existing = await storage.getLicensedAcquiredIntakeByRva(rva.id);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "Licensed or acquired intake already recorded for this RVA",
+          "invalid_licensed_acquired_intake",
+          ["FI-DSN-STD-013-R39"],
+        );
+      }
+
+      const intake = recordLicensedAcquiredIntake({
+        rva,
+        sourceReference: input.sourceReference,
+        rightsBasis: input.rightsBasis,
+        attributionRequirement: input.attributionRequirement,
+        usageRestrictions: input.usageRestrictions,
+        recordedBy: input.recordedBy,
+      });
+      validatePersistedLicensedAcquiredIntake(intake);
+      await storage.putLicensedAcquiredIntake(intake);
+      const loaded = await storage.getLicensedAcquiredIntakeByRva(rva.id);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist licensed or acquired intake",
+          "invalid_domain2_persistence_state",
+          ["FI-DSN-STD-013-R39"],
+        );
+      }
+      return Object.freeze(structuredClone(loaded));
+    },
+
+    async recordComplianceBoundaryChange(input) {
+      const rvaRaw = await storage.getRva(input.rvaId);
+      if (!rvaRaw) {
+        throw new OrchestraConstitutionalError(
+          "RVA not found for Compliance Boundary change",
+          "invalid_compliance_boundary_change",
+          ["FI-DSN-STD-013-R29"],
+        );
+      }
+      const rva = rehydrateRva(rvaRaw);
+      const program = await loadActiveProgram(rva.programId);
+      await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
+
+      const event = recordComplianceBoundaryChangeEvent({
+        rva,
+        complianceBoundarySourceStandardId: input.complianceBoundarySourceStandardId,
+        materiality: input.materiality,
+        consequence: input.consequence,
+        changeBasis: input.changeBasis,
+        recordedBy: input.recordedBy,
+      });
+      validatePersistedComplianceBoundaryChangeEvent(event);
+      await storage.putComplianceBoundaryChangeEvent(event);
+      const loaded = await storage.getComplianceBoundaryChangeEvent(event.eventId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Compliance Boundary change event",
+          "invalid_domain2_persistence_state",
+          ["FI-DSN-STD-013-R29"],
+        );
+      }
+      return Object.freeze(structuredClone(loaded));
+    },
+
+    async resolveComplianceBoundaryChange(input) {
+      const event = await this.recordComplianceBoundaryChange({
+        rvaId: input.rvaId,
+        complianceBoundarySourceStandardId: input.complianceBoundarySourceStandardId,
+        materiality: input.materiality,
+        consequence: input.consequence,
+        changeBasis: input.changeBasis,
+        recordedBy: input.resolvedBy,
+      });
+
+      if (input.consequence === "invalidation_required") {
+        const invalidated = await this.invalidateRva({
+          rvaId: input.rvaId,
+          reason: input.changeBasis,
+          invalidatedBy: input.resolvedBy,
+        });
+        return { event, rva: invalidated };
+      }
+
+      const rvaRaw = await storage.getRva(input.rvaId);
+      return { event, rva: rehydrateRva(rvaRaw!) };
+    },
+
+    async consumeExternalReworkTrigger(input) {
+      const rvaRaw = await storage.getRva(input.rvaId);
+      if (!rvaRaw) {
+        throw new OrchestraConstitutionalError(
+          "RVA not found for external rework trigger consumption",
+          "invalid_rework_trigger",
+          ["FI-DSN-STD-013-R32"],
+        );
+      }
+      const rva = rehydrateRva(rvaRaw);
+      const program = await loadActiveProgram(rva.programId);
+      await assertLiveDomain1Context(program, rva.domain1EntryEvidence);
+
+      const existing = await storage.getExternalReworkTriggerByRva(rva.id);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "External rework trigger already consumed for this RVA",
+          "invalid_rework_trigger",
+          ["FI-DSN-STD-013-R32"],
+        );
+      }
+
+      const trigger = consumeExternalReworkTrigger({
+        rva,
+        externalReviewReference: input.externalReviewReference,
+        triggerBasis: input.triggerBasis,
+        consumedBy: input.consumedBy,
+      });
+      validatePersistedExternalReworkTrigger(trigger);
+      await storage.putExternalReworkTrigger(trigger);
+      const loaded = await storage.getExternalReworkTrigger(trigger.triggerId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist external rework trigger",
+          "invalid_domain2_persistence_state",
+          ["FI-DSN-STD-013-R32"],
+        );
+      }
+      return Object.freeze(structuredClone(loaded));
     },
   };
 }

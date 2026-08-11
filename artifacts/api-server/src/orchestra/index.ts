@@ -70,6 +70,31 @@ export {
 export { REVIEW_ENTRY_READINESS_TRACEABILITY } from "./review-entry-readiness.js";
 
 export {
+  SHARED_SOURCE_LINKAGE_TRACEABILITY,
+} from "./shared-source-linkage.js";
+
+export {
+  COMPLIANCE_BOUNDARY_CHANGE_TRACEABILITY,
+} from "./compliance-boundary-change.js";
+
+export {
+  LICENSED_ACQUIRED_INTAKE_TRACEABILITY,
+} from "./licensed-acquired-intake.js";
+
+export {
+  EXTERNAL_REWORK_TRIGGER_TRACEABILITY,
+} from "./rework-trigger.js";
+
+export {
+  validateBrainDomain2Proposal,
+  rejectBrainConstitutionalMutationAttempt,
+  isForbiddenBrainDomain2Action,
+  type BrainDomain2Proposal,
+  type BrainDomain2ProposalKind,
+  type ForbiddenBrainDomain2Action,
+} from "./brain-consumer-boundary.js";
+
+export {
   createDomain2Repository,
   type Domain2Repository,
 } from "./persistence/domain2-repository.js";
@@ -170,6 +195,18 @@ export type {
   RvaExistsPromotionRecord,
   RvaTerminalTransition,
   RvaVersionLineage,
+  SharedSourceLinkageId,
+  SharedSourceLinkageRecord,
+  ComplianceBoundaryChangeEvent,
+  ComplianceBoundaryChangeEventId,
+  ComplianceBoundaryChangeConsequence,
+  LicensedAcquiredIntakeId,
+  LicensedAcquiredRightsPosture,
+  ExternalReworkTriggerId,
+  ExternalReworkTriggerRecord,
+  TraceabilityWaiverEvidence,
+  TraceabilityExplorationPostureEntry,
+  TraceabilityDomain2DecisionEntry,
 } from "./domain2-types.js";
 
 export {

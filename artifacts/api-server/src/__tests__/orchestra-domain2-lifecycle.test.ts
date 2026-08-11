@@ -646,10 +646,7 @@ const { assembleRealizationTraceabilityPackage: rawPackage } = await import(
 );
 const incompletePkg = Object.freeze({
   ...pkg,
-  domain1EntryEvidence: Object.freeze({
-    ...pkg.domain1EntryEvidence,
-    constitutionalCurrentnessVerified: false as true,
-  }),
+  complianceBoundaryBindings: Object.freeze([]),
 });
 expectThrows(
   "Incomplete traceability blocks readiness",
@@ -659,7 +656,7 @@ expectThrows(
       traceabilityPackage: incompletePkg,
       determinedBy: ACTOR,
     }),
-  "domain2_not_ready",
+  "invalid_rva",
 );
 
 section("26. Valid Review-Entry Readiness created");

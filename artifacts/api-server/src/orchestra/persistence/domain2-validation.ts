@@ -33,6 +33,10 @@ const ID_PREFIXES = {
   program: "program-",
   obligation: "obligation-",
   reviewEntryReadiness: "review-entry-readiness-",
+  sharedSourceLinkage: "shared-source-linkage-",
+  cbChange: "cb-change-",
+  licensedAcquiredIntake: "licensed-acquired-intake-",
+  reworkTrigger: "rework-trigger-",
 } as const;
 
 const EXPLORATION_POSTURE_STATUSES: readonly ExplorationPostureStatus[] = [
@@ -343,6 +347,75 @@ export function validatePersistedReviewEntryReadiness(
   }
   validateAuditMetadata(record.audit);
   validateDomain2Traceability(record.traceability);
+  validateGovernedMarker(record.governedCreationMarker);
+}
+
+export function validatePersistedSharedSourceLinkage(
+  raw: unknown,
+): asserts raw is import("../domain2-types.js").SharedSourceLinkageRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Shared-Source Linkage",
+      "invalid_shared_source_linkage",
+      ["FI-DSN-STD-013-R47"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.linkageId, ID_PREFIXES.sharedSourceLinkage, "Shared-Source Linkage");
+  assertBrandedId(record.sourceRvaId, ID_PREFIXES.rva, "Source RVA");
+  assertBrandedId(record.consumerRvaId, ID_PREFIXES.rva, "Consumer RVA");
+  validateAuditMetadata(record.audit);
+  validateGovernedMarker(record.governedCreationMarker);
+}
+
+export function validatePersistedComplianceBoundaryChangeEvent(
+  raw: unknown,
+): asserts raw is import("../domain2-types.js").ComplianceBoundaryChangeEvent {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Compliance Boundary change event",
+      "invalid_compliance_boundary_change",
+      ["FI-DSN-STD-013-R29"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.eventId, ID_PREFIXES.cbChange, "Compliance Boundary change");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  validateAuditMetadata(record.audit);
+  validateGovernedMarker(record.governedCreationMarker);
+}
+
+export function validatePersistedLicensedAcquiredIntake(
+  raw: unknown,
+): asserts raw is import("../domain2-types.js").LicensedAcquiredRightsPosture {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted licensed or acquired intake",
+      "invalid_licensed_acquired_intake",
+      ["FI-DSN-STD-013-R39"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.intakeId, ID_PREFIXES.licensedAcquiredIntake, "Licensed acquired intake");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  validateAuditMetadata(record.audit);
+  validateGovernedMarker(record.governedCreationMarker);
+}
+
+export function validatePersistedExternalReworkTrigger(
+  raw: unknown,
+): asserts raw is import("../domain2-types.js").ExternalReworkTriggerRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted external rework trigger",
+      "invalid_rework_trigger",
+      ["FI-DSN-STD-013-R32"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.triggerId, ID_PREFIXES.reworkTrigger, "External rework trigger");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  validateAuditMetadata(record.audit);
   validateGovernedMarker(record.governedCreationMarker);
 }
 

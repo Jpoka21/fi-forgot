@@ -1,7 +1,9 @@
+import type { ComplianceBoundaryBinding } from "./compliance-boundary.js";
 import type { Domain2GovernanceTraceability } from "./domain2-authority.js";
 import type { ExplorationEntryDetermination } from "./exploration-entry.js";
 import type { ConstitutionalAuditMetadata } from "./types.js";
 import type { ProductionObligationId, ProductionProgramId } from "./types.js";
+import type { UnresolvedConstraintRecord } from "./compliance-boundary.js";
 
 /** Stable identifier for a Realized Visual Artifact. FI-DSN-STD-013-R26 */
 export type RealizedVisualArtifactId = string & {
@@ -22,6 +24,33 @@ export type ExplorationPostureRecordId = string & {
 export type ReviewEntryReadinessId = string & {
   readonly __brand: "ReviewEntryReadinessId";
 };
+
+/** Stable identifier for a Shared-Source Linkage record. FI-DSN-STD-013-R47 */
+export type SharedSourceLinkageId = string & {
+  readonly __brand: "SharedSourceLinkageId";
+};
+
+/** Stable identifier for a Compliance Boundary change event. FI-DSN-STD-013-R29/R46 */
+export type ComplianceBoundaryChangeEventId = string & {
+  readonly __brand: "ComplianceBoundaryChangeEventId";
+};
+
+/** Stable identifier for licensed/acquired intake traceability. FI-DSN-STD-013-R39 */
+export type LicensedAcquiredIntakeId = string & {
+  readonly __brand: "LicensedAcquiredIntakeId";
+};
+
+/** Stable identifier for consumed external rework trigger. FI-DSN-STD-013-R32 */
+export type ExternalReworkTriggerId = string & {
+  readonly __brand: "ExternalReworkTriggerId";
+};
+
+/** Governed consequence of a compliance-boundary change — R29, R46. */
+export type ComplianceBoundaryChangeConsequence =
+  | "reconsideration"
+  | "successor_required"
+  | "invalidation_required"
+  | "rework_required";
 
 /**
  * Exploration Posture constitutional postures — STD-013 §11.1.
@@ -157,6 +186,28 @@ export interface RealizedVisualArtifact {
   readonly governedCreationMarker: Domain2GovernedCreationMarker;
 }
 
+/** Consumed waiver evidence snapshot for traceability — R41. */
+export interface TraceabilityWaiverEvidence {
+  readonly waiverId: string;
+  readonly affectedTarget: string;
+  readonly constitutionalBasis: string;
+}
+
+/** Exploration posture history entry for traceability — R41. */
+export interface TraceabilityExplorationPostureEntry {
+  readonly recordId: ExplorationPostureRecordId;
+  readonly posture: ExplorationPostureStatus;
+  readonly governingBasis: string;
+}
+
+/** Material Domain 2 decision entry for traceability — R41. */
+export interface TraceabilityDomain2DecisionEntry {
+  readonly kind: "exists_promotion" | "superseded" | "invalidated";
+  readonly at: string;
+  readonly by: string;
+  readonly basis: string;
+}
+
 /**
  * Realization Traceability Package — derived assembly per R41.
  * Not a competing source of truth.
@@ -168,13 +219,87 @@ export interface RealizationTraceabilityPackage {
   readonly obligationId: ProductionObligationId;
   readonly realizationCommitmentId: RealizationCommitmentId;
   readonly explorationPostureRecordId: ExplorationPostureRecordId;
+  readonly realizationCommitmentBasis: string;
   readonly realizationPath: RealizationPath;
   readonly rvaPosture: RvaExecutablePosture;
   readonly lineage: RvaVersionLineage;
   readonly domain1EntryEvidence: Domain1EntryEvidence;
   readonly explorationWaiverRecordId: string | null;
+  readonly explorationPostureHistory: readonly TraceabilityExplorationPostureEntry[];
+  readonly complianceBoundaryBindings: readonly ComplianceBoundaryBinding[];
+  readonly unresolvedConstraints: readonly UnresolvedConstraintRecord[];
+  readonly consumedWaiverEvidence: readonly TraceabilityWaiverEvidence[];
+  readonly rightsPosture: LicensedAcquiredRightsPosture | null;
+  readonly sharedSourceLinkageIds: readonly SharedSourceLinkageId[];
+  readonly complianceBoundaryChangeEventIds: readonly ComplianceBoundaryChangeEventId[];
+  readonly domain2DecisionHistory: readonly TraceabilityDomain2DecisionEntry[];
   readonly assembledAt: string;
   readonly traceability: Domain2GovernanceTraceability;
+}
+
+/**
+ * Shared-Source Linkage — explicit governed multi-obligation realization link per R47.
+ */
+export interface SharedSourceLinkageRecord {
+  readonly linkageId: SharedSourceLinkageId;
+  readonly sourceRvaId: RealizedVisualArtifactId;
+  readonly sourceProgramId: ProductionProgramId;
+  readonly sourceObligationId: ProductionObligationId;
+  readonly consumerRvaId: RealizedVisualArtifactId;
+  readonly consumerProgramId: ProductionProgramId;
+  readonly consumerObligationId: ProductionObligationId;
+  readonly linkageBasis: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain2GovernanceTraceability;
+  readonly governedCreationMarker: Domain2GovernedCreationMarker;
+}
+
+/**
+ * Compliance Boundary change event — R29, R46.
+ */
+export interface ComplianceBoundaryChangeEvent {
+  readonly eventId: ComplianceBoundaryChangeEventId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly complianceBoundarySourceStandardId: string;
+  readonly materiality: "material" | "nonmaterial";
+  readonly consequence: ComplianceBoundaryChangeConsequence;
+  readonly changeBasis: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain2GovernanceTraceability;
+  readonly governedCreationMarker: Domain2GovernedCreationMarker;
+}
+
+/**
+ * Licensed or acquired intake rights posture — R39.
+ */
+export interface LicensedAcquiredRightsPosture {
+  readonly intakeId: LicensedAcquiredIntakeId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly sourceReference: string;
+  readonly rightsBasis: string;
+  readonly attributionRequirement: string;
+  readonly usageRestrictions: string | null;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain2GovernanceTraceability;
+  readonly governedCreationMarker: Domain2GovernedCreationMarker;
+}
+
+/**
+ * Consumed external rework trigger from STD-014 boundary — R32.
+ * Does not authorize rework; records consumption only.
+ */
+export interface ExternalReworkTriggerRecord {
+  readonly triggerId: ExternalReworkTriggerId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly externalReviewReference: string;
+  readonly triggerBasis: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain2GovernanceTraceability;
+  readonly governedCreationMarker: Domain2GovernedCreationMarker;
 }
 
 /**

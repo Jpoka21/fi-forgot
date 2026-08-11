@@ -43,7 +43,12 @@ export type OrchestraErrorCode =
   | "invalid_rva"
   | "domain2_not_ready"
   | "invalid_domain2_persistence_state"
-  | "invalid_review_entry_readiness";
+  | "invalid_review_entry_readiness"
+  | "invalid_shared_source_linkage"
+  | "invalid_compliance_boundary_change"
+  | "invalid_licensed_acquired_intake"
+  | "invalid_rework_trigger"
+  | "invalid_brain_domain2_proposal";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

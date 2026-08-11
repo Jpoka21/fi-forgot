@@ -87,42 +87,38 @@ export function assertExplorationPostureWaiver(
 
 /**
  * R15 — consume applicable Domain 1 waivers and unresolved constraints before Exit Ready.
+ * Typed constraint model — no description-string heuristics.
  */
 export function assertExitReadyPrerequisites(program: ProductionProgram): void {
-  const blockingConstraints = program.unresolvedConstraints.filter(
-    (c) => !c.description.includes("surfaced"),
+  const hasUnresolvedObligations = program.obligations.some(
+    (o) => o.enforcementPosture === "unresolved_constraint",
   );
 
-  const waivedObligationIds = new Set(
-    program.obligations
-      .filter((o) => o.enforcementPosture === "waived")
-      .map((o) => o.id),
-  );
-
-  const unresolvedObligations = program.obligations.filter(
-    (o) =>
-      o.enforcementPosture === "unresolved_constraint" ||
-      (o.enforcementPosture === "conditional" && o.conditions.length > 0),
-  );
-
-  if (unresolvedObligations.length > 0 && waivedObligationIds.size === 0) {
+  if (hasUnresolvedObligations) {
     throw new OrchestraConstitutionalError(
-      "Exploration Exit Ready requires consumed Domain 1 waivers and constraints",
+      "Exploration Exit Ready requires consumed Domain 1 obligation constraints",
       "invalid_exploration_posture",
       ["FI-DSN-STD-013-R09", "FI-DSN-STD-013-R15"],
     );
   }
 
-  if (blockingConstraints.length > 0 && program.unresolvedConstraints.length > 0) {
-    const hasWaivedCoverage = program.obligations.some(
-      (o) => o.enforcementPosture === "waived",
+  const hasUnconsumedConditional = program.obligations.some(
+    (o) => o.enforcementPosture === "conditional" && o.conditions.length > 0,
+  );
+
+  if (hasUnconsumedConditional) {
+    throw new OrchestraConstitutionalError(
+      "Exploration Exit Ready requires consumed conditional obligations",
+      "invalid_exploration_posture",
+      ["FI-DSN-STD-013-R09", "FI-DSN-STD-013-R15"],
     );
-    if (!hasWaivedCoverage && unresolvedObligations.length > 0) {
-      throw new OrchestraConstitutionalError(
-        "Unresolved constraints must be consumed before Exploration Exit Ready",
-        "invalid_exploration_posture",
-        ["FI-DSN-STD-013-R09", "FI-DSN-STD-013-R15"],
-      );
-    }
+  }
+
+  if (program.unresolvedConstraints.length > 0) {
+    throw new OrchestraConstitutionalError(
+      "Exploration Exit Ready requires consumed unresolved Compliance Boundary constraints",
+      "invalid_exploration_posture",
+      ["FI-DSN-STD-013-R09", "FI-DSN-STD-013-R15"],
+    );
   }
 }

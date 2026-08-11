@@ -3,14 +3,22 @@
  */
 
 import type {
+  ComplianceBoundaryChangeEvent,
+  ComplianceBoundaryChangeEventId,
   ExplorationPostureRecord,
   ExplorationPostureRecordId,
+  ExternalReworkTriggerRecord,
+  ExternalReworkTriggerId,
+  LicensedAcquiredRightsPosture,
+  LicensedAcquiredIntakeId,
   RealizationCommitment,
   RealizationCommitmentId,
   RealizedVisualArtifact,
   RealizedVisualArtifactId,
   ReviewEntryReadiness,
   ReviewEntryReadinessId,
+  SharedSourceLinkageRecord,
+  SharedSourceLinkageId,
 } from "../domain2-types.js";
 import type { ProductionObligationId, ProductionProgramId } from "../types.js";
 
@@ -31,6 +39,7 @@ export interface Domain2StoragePort {
 
   putRva(rva: RealizedVisualArtifact, options?: { allowUpdate?: boolean }): Promise<void>;
   getRva(rvaId: RealizedVisualArtifactId): Promise<RealizedVisualArtifact | null>;
+  deleteRva(rvaId: RealizedVisualArtifactId): Promise<void>;
 
   putReviewEntryReadiness(readiness: ReviewEntryReadiness): Promise<void>;
   getReviewEntryReadiness(
@@ -39,4 +48,36 @@ export interface Domain2StoragePort {
   getReviewEntryReadinessByRva(
     rvaId: RealizedVisualArtifactId,
   ): Promise<ReviewEntryReadiness | null>;
+
+  putSharedSourceLinkage(record: SharedSourceLinkageRecord): Promise<void>;
+  getSharedSourceLinkage(linkageId: SharedSourceLinkageId): Promise<SharedSourceLinkageRecord | null>;
+  listSharedSourceLinkagesByRva(
+    rvaId: RealizedVisualArtifactId,
+  ): Promise<readonly SharedSourceLinkageRecord[]>;
+
+  putComplianceBoundaryChangeEvent(event: ComplianceBoundaryChangeEvent): Promise<void>;
+  getComplianceBoundaryChangeEvent(
+    eventId: ComplianceBoundaryChangeEventId,
+  ): Promise<ComplianceBoundaryChangeEvent | null>;
+  listComplianceBoundaryChangeEventsByRva(
+    rvaId: RealizedVisualArtifactId,
+  ): Promise<readonly ComplianceBoundaryChangeEvent[]>;
+
+  putLicensedAcquiredIntake(record: LicensedAcquiredRightsPosture): Promise<void>;
+  getLicensedAcquiredIntakeByRva(
+    rvaId: RealizedVisualArtifactId,
+  ): Promise<LicensedAcquiredRightsPosture | null>;
+
+  putExternalReworkTrigger(record: ExternalReworkTriggerRecord): Promise<void>;
+  getExternalReworkTrigger(
+    triggerId: ExternalReworkTriggerId,
+  ): Promise<ExternalReworkTriggerRecord | null>;
+  getExternalReworkTriggerByRva(
+    rvaId: RealizedVisualArtifactId,
+  ): Promise<ExternalReworkTriggerRecord | null>;
+}
+
+export interface InMemoryDomain2StorageOptions {
+  /** When set, putRva throws for this RVA id (test fault injection). */
+  failPutRvaForId?: RealizedVisualArtifactId;
 }
