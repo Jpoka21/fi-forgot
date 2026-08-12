@@ -258,8 +258,8 @@ export type ApprovalAuthorityConstitutionalScope =
   | "production_program";
 
 /**
- * Frozen-established Approval authority class identity (MAGAC catalog entry).
- * Not an implementation role, reviewer title, or injectable authority.
+ * Runtime MAGAC class identity encoding (PD-STD-014-002 / R36–R38).
+ * Machine encodings of Section 20.16.2 scope kinds — not literal frozen Standard IDs.
  */
 export type ApprovalAuthorityClassId =
   | "approval_authority_production_obligation_scope"

@@ -310,6 +310,82 @@ export function createDomain3RepositoryWithStorage(
     return rehydrateProductionReadinessReview(raw);
   }
 
+  /**
+   * Load persisted Review, Determination, evidence, and activity for G6 rehydration.
+   * Rejects missing or contradictory Review↔Determination linkage before trust.
+   */
+  async function loadG6AuthorityRehydrationContext(reviewId: ProductionReadinessReviewId): Promise<{
+    review: ProductionReadinessReview;
+    determination: ReviewDeterminationRecord;
+    evidenceRecords: readonly ReviewEvidenceRecord[];
+    activityRecords: readonly ReviewDimensionActivityRecord[];
+  }> {
+    const reviewRaw = await storage.getProductionReadinessReview(reviewId);
+    if (!reviewRaw) {
+      throw new OrchestraConstitutionalError(
+        "G6 authority requires persisted Production-readiness Review",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34"],
+      );
+    }
+    const review = rehydrateProductionReadinessReview(reviewRaw);
+    if (review.posture !== "review_determined" || !review.determinationId) {
+      throw new OrchestraConstitutionalError(
+        "G6 authority requires completed Review with Determination linkage",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34", "FI-DSN-STD-014-R35"],
+      );
+    }
+
+    const byId = await storage.getReviewDetermination(review.determinationId);
+    const byReview = await storage.getReviewDeterminationByReview(review.reviewId);
+    if (!byId) {
+      throw new OrchestraConstitutionalError(
+        "review.determinationId points to no persisted Determination",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34", "FI-DSN-STD-014-R35"],
+      );
+    }
+    if (!byReview || byReview.determinationId !== byId.determinationId) {
+      throw new OrchestraConstitutionalError(
+        "Contradictory Review Determination linkage blocks G6 authority rehydration",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34", "FI-DSN-STD-014-R35"],
+      );
+    }
+
+    const determination = rehydrateReviewDetermination(byId);
+    const evidenceRecords = await storage.listReviewEvidenceByReview(review.reviewId);
+    const activityRecords = await storage.listReviewDimensionActivitiesByReview(review.reviewId);
+    return { review, determination, evidenceRecords, activityRecords };
+  }
+
+  async function rehydrateTrustedApprovalAct(raw: ApprovalActRecord): Promise<ApprovalActRecord> {
+    const context = await loadG6AuthorityRehydrationContext(raw.reviewId);
+    return rehydrateApprovalAct(raw, context);
+  }
+
+  async function rehydrateTrustedApprovalWithholding(
+    raw: ApprovalWithholdingRecord,
+  ): Promise<ApprovalWithholdingRecord> {
+    const context = await loadG6AuthorityRehydrationContext(raw.reviewId);
+    return rehydrateApprovalWithholding(raw, context);
+  }
+
+  async function rehydrateTrustedGpraGrant(raw: GpraGrantRecord): Promise<GpraGrantRecord> {
+    const context = await loadG6AuthorityRehydrationContext(raw.reviewId);
+    const approvalRaw = await storage.getApprovalAct(raw.approvalActId);
+    if (!approvalRaw) {
+      throw new OrchestraConstitutionalError(
+        "GPRA requires a persisted Approval act; missing Approval cannot support GPRA rehydration",
+        "invalid_gpra_grant",
+        ["FI-DSN-STD-014-R41", "FI-DSN-STD-014-R42"],
+      );
+    }
+    // Structural Approval validation only here — joint Approval↔Review coherence runs inside rehydrateGpraGrant.
+    return rehydrateGpraGrant(raw, { ...context, approval: approvalRaw });
+  }
+
   async function requireUnderReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ProductionReadinessReview> {
@@ -855,8 +931,12 @@ export function createDomain3RepositoryWithStorage(
       return evaluateApprovalConsiderationEligibility({
         review,
         determination,
-        withholding: withholdingRaw ? rehydrateApprovalWithholding(withholdingRaw) : null,
-        existingApproval: approvalRaw ? rehydrateApprovalAct(approvalRaw) : null,
+        withholding: withholdingRaw
+          ? await rehydrateTrustedApprovalWithholding(withholdingRaw)
+          : null,
+        existingApproval: approvalRaw
+          ? await rehydrateTrustedApprovalAct(approvalRaw)
+          : null,
       });
     },
 
@@ -905,7 +985,7 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R41"],
         );
       }
-      return rehydrateApprovalAct(loaded);
+      return rehydrateTrustedApprovalAct(loaded);
     },
 
     async withholdApproval(input) {
@@ -955,7 +1035,7 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R39"],
         );
       }
-      return rehydrateApprovalWithholding(loaded);
+      return rehydrateTrustedApprovalWithholding(loaded);
     },
 
     async grantGpra(input) {
@@ -978,7 +1058,7 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R41", "FI-DSN-STD-014-R42"],
         );
       }
-      const approval = rehydrateApprovalAct(approvalRaw);
+      const approval = await rehydrateTrustedApprovalAct(approvalRaw);
       const existingGpra = await storage.getGpraGrantByReview(review.reviewId);
       if (existingGpra) {
         throw new OrchestraConstitutionalError(
@@ -1023,49 +1103,49 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R42"],
         );
       }
-      return rehydrateGpraGrant(loaded);
+      return rehydrateTrustedGpraGrant(loaded);
     },
 
     async loadApprovalAct(approvalActId) {
       const loaded = await storage.getApprovalAct(approvalActId);
       if (!loaded) return null;
-      return rehydrateApprovalAct(loaded);
+      return rehydrateTrustedApprovalAct(loaded);
     },
 
     async loadApprovalActByReview(reviewId) {
       const loaded = await storage.getApprovalActByReview(reviewId);
       if (!loaded) return null;
-      return rehydrateApprovalAct(loaded);
+      return rehydrateTrustedApprovalAct(loaded);
     },
 
     async loadApprovalWithholding(withholdingId) {
       const loaded = await storage.getApprovalWithholding(withholdingId);
       if (!loaded) return null;
-      return rehydrateApprovalWithholding(loaded);
+      return rehydrateTrustedApprovalWithholding(loaded);
     },
 
     async loadApprovalWithholdingByReview(reviewId) {
       const loaded = await storage.getApprovalWithholdingByReview(reviewId);
       if (!loaded) return null;
-      return rehydrateApprovalWithholding(loaded);
+      return rehydrateTrustedApprovalWithholding(loaded);
     },
 
     async loadGpraGrant(gpraId) {
       const loaded = await storage.getGpraGrant(gpraId);
       if (!loaded) return null;
-      return rehydrateGpraGrant(loaded);
+      return rehydrateTrustedGpraGrant(loaded);
     },
 
     async loadGpraGrantByReview(reviewId) {
       const loaded = await storage.getGpraGrantByReview(reviewId);
       if (!loaded) return null;
-      return rehydrateGpraGrant(loaded);
+      return rehydrateTrustedGpraGrant(loaded);
     },
 
     async loadGpraGrantByRvaObligation(input) {
       const loaded = await storage.getGpraGrantByRvaObligation(input.rvaId, input.obligationId);
       if (!loaded) return null;
-      return rehydrateGpraGrant(loaded);
+      return rehydrateTrustedGpraGrant(loaded);
     },
   };
 }

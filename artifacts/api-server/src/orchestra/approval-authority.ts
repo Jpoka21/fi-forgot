@@ -25,7 +25,11 @@ export interface EstablishedApprovalAuthorityClass {
 
 /**
  * Sole constitutional trust boundary for established Approval authority classes.
- * Scope kinds named in Section 20.16.2; establishment by PD-STD-014-002.
+ *
+ * Runtime `authorityClassId` strings are machine encodings of the Production
+ * Program / Production Obligation scope kinds named in Section 20.16.2.
+ * They are not literal frozen Standard document identifiers; establishment
+ * and constitutional meaning trace to PD-STD-014-002 / R36–R38.
  */
 export const FROZEN_ESTABLISHED_APPROVAL_AUTHORITY_CLASSES: readonly EstablishedApprovalAuthorityClass[] =
   Object.freeze([

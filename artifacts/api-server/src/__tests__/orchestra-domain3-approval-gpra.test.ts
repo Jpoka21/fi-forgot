@@ -32,9 +32,18 @@ import { createDomain3RepositoryWithStorage } from "../orchestra/persistence/dom
 import { createInMemoryDomain3Storage } from "../orchestra/persistence/domain3-in-memory-storage.js";
 import {
   rehydrateApprovalAct,
+  rehydrateApprovalWithholding,
   rehydrateGpraGrant,
 } from "../orchestra/persistence/domain3-rehydration.js";
 import { validatePersistedGpraGrant } from "../orchestra/persistence/domain3-validation.js";
+import type {
+  ApprovalActRecord,
+  ApprovalWithholdingRecord,
+  GpraGrantRecord,
+  ReviewDeterminationRecord,
+} from "../orchestra/domain3-types.js";
+import type { ProductionObligationId, ProductionProgramId } from "../orchestra/types.js";
+import type { RealizedVisualArtifactId } from "../orchestra/domain2-types.js";
 
 let passed = 0;
 let failed = 0;
@@ -262,6 +271,17 @@ async function completePassReview() {
     determinedBy: ACTOR,
   });
   return { ...ctx, review: determined.review, determination: determined.determination };
+}
+
+async function g6RehydrationContext(domain3: Domain3Repository, reviewId: ProductionReadinessReview["reviewId"]) {
+  const review = await domain3.loadProductionReadinessReview(reviewId);
+  const determination = await domain3.loadReviewDeterminationByReview(reviewId);
+  const evidenceRecords = await domain3.listReviewEvidenceByReview(reviewId);
+  const activityRecords = await domain3.listReviewDimensionActivitiesByReview(reviewId);
+  if (!review || !determination) {
+    throw new Error("expected Review and Determination for G6 context");
+  }
+  return { review, determination, evidenceRecords, activityRecords };
 }
 
 section("MAGAC catalog");
@@ -559,12 +579,16 @@ section("Persistence / rehydration / immutability");
     approvedBy: ACTOR,
   });
   const gpra = await domain3.grantGpra({ reviewId: review.reviewId, grantedBy: ACTOR });
+  const context = await g6RehydrationContext(domain3, review.reviewId);
 
-  const frozenApproval = rehydrateApprovalAct(structuredClone(approval));
+  const frozenApproval = rehydrateApprovalAct(structuredClone(approval), context);
   expectThrows("Approval immutable", () => {
     (frozenApproval as { approvedBy: string }).approvedBy = "forged";
   });
-  const frozenGpra = rehydrateGpraGrant(structuredClone(gpra));
+  const frozenGpra = rehydrateGpraGrant(structuredClone(gpra), {
+    ...context,
+    approval: structuredClone(approval),
+  });
   expectThrows("GPRA immutable", () => {
     (frozenGpra as { grantedBy: string }).grantedBy = "forged";
   });
@@ -576,6 +600,653 @@ section("Persistence / rehydration / immutability");
         ...gpra,
         authorityClassId: "forged_class",
       }),
+    "invalid_gpra_grant",
+  );
+}
+
+section("ORCH-IMP-010.2 G6 rehydration authority integrity");
+
+{
+  const ctx = await completePassReview();
+  const approval = await ctx.domain3.recordApprovalAct({
+    reviewId: ctx.review.reviewId,
+    authorityClassId: "approval_authority_production_obligation_scope",
+    approvedBy: ACTOR,
+  });
+  const withholdingCtx = await completePassReview();
+  const withholding = await withholdingCtx.domain3.withholdApproval({
+    reviewId: withholdingCtx.review.reviewId,
+    groundFamily: "authority_or_provenance_defects",
+    grounds: "Authority defect for withholding coherence tests",
+    withheldBy: ACTOR,
+  });
+  const gpra = await ctx.domain3.grantGpra({
+    reviewId: ctx.review.reviewId,
+    grantedBy: ACTOR,
+  });
+
+  const passContext = await g6RehydrationContext(ctx.domain3, ctx.review.reviewId);
+  const withholdContext = await g6RehydrationContext(
+    withholdingCtx.domain3,
+    withholdingCtx.review.reviewId,
+  );
+
+  const validApproval = rehydrateApprovalAct(structuredClone(approval), passContext);
+  expectTruthy("Valid persisted Approval rehydrates", !!validApproval.approvalActId);
+  expectThrows("Valid Approval remains deeply frozen", () => {
+    (validApproval as { approvedBy: string }).approvedBy = "mutated";
+  });
+
+  const validWithholding = rehydrateApprovalWithholding(
+    structuredClone(withholding),
+    withholdContext,
+  );
+  expectTruthy("Valid persisted withholding rehydrates", !!validWithholding.withholdingId);
+  expectThrows("Valid withholding remains deeply frozen", () => {
+    (validWithholding as { withheldBy: string }).withheldBy = "mutated";
+  });
+
+  const validGpra = rehydrateGpraGrant(structuredClone(gpra), {
+    ...passContext,
+    approval: structuredClone(approval),
+  });
+  expectTruthy("Valid persisted GPRA rehydrates", !!validGpra.gpraId);
+  expectThrows("Valid GPRA remains deeply frozen", () => {
+    (validGpra as { grantedBy: string }).grantedBy = "mutated";
+  });
+
+  const eligibility = await ctx.domain3.evaluateApprovalConsiderationEligibility(
+    ctx.review.reviewId,
+  );
+  expectTruthy("Pass plus Approval without second GPRA still has Approval", !!eligibility);
+  const loadedGpra = await ctx.domain3.loadGpraGrantByReview(ctx.review.reviewId);
+  expectTruthy("Explicit GPRA grant present after grantGpra", !!loadedGpra);
+
+  const passOnly = await completePassReview();
+  const passOnlyEligibility = await passOnly.domain3.evaluateApprovalConsiderationEligibility(
+    passOnly.review.reviewId,
+  );
+  expect("Pass without Approval is not GPRA", passOnlyEligibility.approvalAlreadyRecorded, false);
+  expect(
+    "Pass plus Approval without GPRA remains no GPRA",
+    (await passOnly.domain3.loadGpraGrantByReview(passOnly.review.reviewId)) === null,
+    true,
+  );
+  const passOnlyApproval = await passOnly.domain3.recordApprovalAct({
+    reviewId: passOnly.review.reviewId,
+    authorityClassId: "approval_authority_production_obligation_scope",
+    approvedBy: ACTOR,
+  });
+  expectTruthy("Approval recorded", !!passOnlyApproval.approvalActId);
+  expect(
+    "Pass plus Approval without GPRA record remains no GPRA",
+    (await passOnly.domain3.loadGpraGrantByReview(passOnly.review.reviewId)) === null,
+    true,
+  );
+
+  // 1 — review.determinationId points to no Determination
+  {
+    const brokenReview = {
+      ...passContext.review,
+      determinationId: "review-determination-missing-00000000-0000-4000-8000-000000000001" as ReviewDeterminationRecord["determinationId"],
+    };
+    expectThrows(
+      "Rehydrate rejects missing Determination for review.determinationId",
+      () =>
+        rehydrateApprovalAct(structuredClone(approval), {
+          ...passContext,
+          review: brokenReview,
+          determination: passContext.determination,
+        }),
+      "invalid_approval_authority",
+    );
+  }
+
+  // 2 — determination belongs to another Review
+  {
+    const foreignDetermination = {
+      ...passContext.determination,
+      reviewId: "production-readiness-review-00000000-0000-4000-8000-ffffffffffff" as ProductionReadinessReview["reviewId"],
+    };
+    expectThrows(
+      "Rehydrate rejects Determination belonging to another Review",
+      () =>
+        rehydrateApprovalAct(structuredClone(approval), {
+          ...passContext,
+          determination: foreignDetermination,
+        }),
+      "invalid_approval_authority",
+    );
+  }
+
+  // 3 — Conditional Determination
+  {
+    const conditional = {
+      ...passContext.determination,
+      outcome: "conditional" as const,
+      conditions: Object.freeze(["Condition"]),
+    };
+    expectThrows(
+      "Rehydrate rejects Approval linked to Conditional Determination",
+      () =>
+        rehydrateApprovalAct(structuredClone(approval), {
+          ...passContext,
+          determination: conditional,
+        }),
+      "invalid_approval_authority",
+    );
+  }
+
+  // 4 — Fail Determination
+  {
+    const fail = { ...passContext.determination, outcome: "fail" as const, conditions: Object.freeze([]) };
+    expectThrows(
+      "Rehydrate rejects Approval linked to Fail Determination",
+      () =>
+        rehydrateApprovalAct(structuredClone(approval), {
+          ...passContext,
+          determination: fail,
+        }),
+      "invalid_approval_authority",
+    );
+  }
+
+  // 5 — Approval determinationId mismatch
+  expectThrows(
+    "Rehydrate rejects Approval whose Determination ID does not match Review",
+    () =>
+      rehydrateApprovalAct(
+        {
+          ...approval,
+          determinationId:
+            "review-determination-00000000-0000-4000-8000-ffffffffffff" as ReviewDeterminationRecord["determinationId"],
+        },
+        passContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 6 — Approval RVA mismatch
+  expectThrows(
+    "Rehydrate rejects Approval whose RVA differs from Review",
+    () =>
+      rehydrateApprovalAct(
+        {
+          ...approval,
+          rvaId: "rva-00000000-0000-4000-8000-ffffffffffff" as RealizedVisualArtifactId,
+        },
+        passContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 7 — Approval Program mismatch
+  expectThrows(
+    "Rehydrate rejects Approval whose Program differs from Review",
+    () =>
+      rehydrateApprovalAct(
+        {
+          ...approval,
+          programId: "program-00000000-0000-4000-8000-ffffffffffff" as ProductionProgramId,
+          activationScope: {
+            kind: "production_obligation",
+            obligationId: approval.obligationId,
+          },
+        },
+        passContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 8 — Approval Obligation mismatch
+  expectThrows(
+    "Rehydrate rejects Approval whose Obligation differs from Review",
+    () =>
+      rehydrateApprovalAct(
+        {
+          ...approval,
+          obligationId: "obligation-00000000-0000-4000-8000-ffffffffffff" as ProductionObligationId,
+          activationScope: {
+            kind: "production_obligation",
+            obligationId: "obligation-00000000-0000-4000-8000-ffffffffffff" as ProductionObligationId,
+          },
+        },
+        passContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 9 — Program-scoped class with Obligation activation
+  expectThrows(
+    "Rehydrate rejects Program-scoped MAGAC with Obligation activation scope",
+    () =>
+      rehydrateApprovalAct(
+        {
+          ...approval,
+          authorityClassId: "approval_authority_production_program_scope",
+          authorityConstitutionalScope: "production_program",
+          activationScope: {
+            kind: "production_obligation",
+            obligationId: approval.obligationId,
+          },
+        },
+        passContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 10 — Obligation-scoped class with Program activation
+  expectThrows(
+    "Rehydrate rejects Obligation-scoped MAGAC with Program activation scope",
+    () =>
+      rehydrateApprovalAct(
+        {
+          ...approval,
+          authorityClassId: "approval_authority_production_obligation_scope",
+          authorityConstitutionalScope: "production_obligation",
+          activationScope: {
+            kind: "production_program",
+            programId: approval.programId,
+          },
+        },
+        passContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 11 — Correct scope kind, wrong identity
+  expectThrows(
+    "Rehydrate rejects Obligation activation with wrong Obligation identity",
+    () =>
+      rehydrateApprovalAct(
+        {
+          ...approval,
+          activationScope: {
+            kind: "production_obligation",
+            obligationId: "obligation-00000000-0000-4000-8000-aaaaaaaaaaaa" as ProductionObligationId,
+          },
+        },
+        passContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 12 — Withholding foreign Review / Determination
+  expectThrows(
+    "Rehydrate rejects withholding linked to foreign Review",
+    () =>
+      rehydrateApprovalWithholding(
+        {
+          ...withholding,
+          reviewId: ctx.review.reviewId,
+        },
+        withholdContext,
+      ),
+    "invalid_approval_authority",
+  );
+  expectThrows(
+    "Rehydrate rejects withholding linked to foreign Determination",
+    () =>
+      rehydrateApprovalWithholding(
+        {
+          ...withholding,
+          determinationId: passContext.determination.determinationId,
+        },
+        withholdContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 13 — Noncanonical EGWG family
+  expectThrows(
+    "Rehydrate rejects withholding with noncanonical EGWG family",
+    () =>
+      rehydrateApprovalWithholding(
+        {
+          ...withholding,
+          groundFamily: "commercial_preference" as ApprovalWithholdingRecord["groundFamily"],
+        },
+        withholdContext,
+      ),
+    "invalid_approval_authority",
+  );
+
+  // 14 — GPRA with missing / non-matching Approval identity
+  expectThrows(
+    "Rehydrate rejects GPRA when Approval act identity does not match",
+    () =>
+      rehydrateGpraGrant(structuredClone(gpra), {
+        ...passContext,
+        approval: {
+          ...approval,
+          approvalActId:
+            "approval-act-00000000-0000-4000-8000-ffffffffffff" as ApprovalActRecord["approvalActId"],
+        },
+      }),
+    "invalid_gpra_grant",
+  );
+
+  await expectThrowsAsync(
+    "Repository load rejects GPRA when review.determinationId is missing from persistence",
+    async () => {
+      const storage = createInMemoryDomain3Storage();
+      const { domain1, program, obligationId } = await buildGovernedDomain1();
+      const domain2 = createDomain2Repository(domain1);
+      const domain3 = createDomain3RepositoryWithStorage(
+        domain2,
+        storage,
+        undefined,
+        domain1,
+      );
+      const exploration = await domain2.beginExplorationPosture({
+        programId: program.id,
+        obligationId,
+        governingBasis: "Exploration",
+        operatedBy: ACTOR,
+      });
+      const exitReady = await domain2.achieveExplorationExitReady({
+        recordId: exploration.recordId,
+        exitBasis: "Exit",
+        achievedBy: ACTOR,
+      });
+      const commitment = await domain2.recordRealizationCommitment({
+        programId: program.id,
+        obligationId,
+        explorationPostureRecordId: exitReady.recordId,
+        governingBasis: "Commitment",
+        committedBy: ACTOR,
+      });
+      const candidate = await domain2.establishRealizedVisualArtifact({
+        programId: program.id,
+        obligationId,
+        realizationCommitmentId: commitment.commitmentId,
+        realizationPath: "created",
+        establishedBy: ACTOR,
+      });
+      const rva = await domain2.promoteRvaToExists({
+        rvaId: candidate.id,
+        basis: "Exists",
+        promotedBy: ACTOR,
+      });
+      await domain2.determineReviewEntryReadiness({ rvaId: rva.id, determinedBy: ACTOR });
+      const review = await domain3.admitToProductionReadinessReview({
+        rvaId: rva.id,
+        admittedBy: ACTOR,
+      });
+      await completeMandatoryActivity(domain3, review);
+      await domain3.recordReviewDetermination({
+        reviewId: review.reviewId,
+        outcome: "pass",
+        grounds: "Pass",
+        determinedBy: ACTOR,
+      });
+      await domain3.recordApprovalAct({
+        reviewId: review.reviewId,
+        authorityClassId: "approval_authority_production_obligation_scope",
+        approvedBy: ACTOR,
+      });
+      const localGpra = await domain3.grantGpra({
+        reviewId: review.reviewId,
+        grantedBy: ACTOR,
+      });
+      const brokenReview = {
+        ...(await domain3.loadProductionReadinessReview(review.reviewId))!,
+        determinationId:
+          "review-determination-00000000-0000-4000-8000-deadbeefdead" as ReviewDeterminationRecord["determinationId"],
+      };
+      await storage.putProductionReadinessReview(brokenReview);
+      await domain3.loadGpraGrant(localGpra.gpraId);
+    },
+    "invalid_approval_authority",
+  );
+
+  await expectThrowsAsync(
+    "Repository load rejects GPRA when Approval act is absent from persistence",
+    async () => {
+      const base = createInMemoryDomain3Storage();
+      let hideApproval = false;
+      const storage = {
+        putProductionReadinessReview: base.putProductionReadinessReview.bind(base),
+        getProductionReadinessReview: base.getProductionReadinessReview.bind(base),
+        getActiveProductionReadinessReviewByRva:
+          base.getActiveProductionReadinessReviewByRva.bind(base),
+        putReviewEvidence: base.putReviewEvidence.bind(base),
+        getReviewEvidence: base.getReviewEvidence.bind(base),
+        listReviewEvidenceByReview: base.listReviewEvidenceByReview.bind(base),
+        putReviewDimensionActivity: base.putReviewDimensionActivity.bind(base),
+        getReviewDimensionActivity: base.getReviewDimensionActivity.bind(base),
+        listReviewDimensionActivitiesByReview:
+          base.listReviewDimensionActivitiesByReview.bind(base),
+        putDesignTimeFeasibilityEvaluation: base.putDesignTimeFeasibilityEvaluation.bind(base),
+        getDesignTimeFeasibilityEvaluation: base.getDesignTimeFeasibilityEvaluation.bind(base),
+        listDesignTimeFeasibilityEvaluationsByReview:
+          base.listDesignTimeFeasibilityEvaluationsByReview.bind(base),
+        putReviewDetermination: base.putReviewDetermination.bind(base),
+        getReviewDetermination: base.getReviewDetermination.bind(base),
+        getReviewDeterminationByReview: base.getReviewDeterminationByReview.bind(base),
+        putApprovalAct: base.putApprovalAct.bind(base),
+        getApprovalAct: async (id: ApprovalActRecord["approvalActId"]) => {
+          if (hideApproval) return null;
+          return base.getApprovalAct(id);
+        },
+        getApprovalActByReview: async (reviewId: ProductionReadinessReview["reviewId"]) => {
+          if (hideApproval) return null;
+          return base.getApprovalActByReview(reviewId);
+        },
+        putApprovalWithholding: base.putApprovalWithholding.bind(base),
+        getApprovalWithholding: base.getApprovalWithholding.bind(base),
+        getApprovalWithholdingByReview: base.getApprovalWithholdingByReview.bind(base),
+        putGpraGrant: base.putGpraGrant.bind(base),
+        getGpraGrant: base.getGpraGrant.bind(base),
+        getGpraGrantByReview: base.getGpraGrantByReview.bind(base),
+        getGpraGrantByRvaObligation: base.getGpraGrantByRvaObligation.bind(base),
+      };
+      const { domain1, program, obligationId } = await buildGovernedDomain1();
+      const domain2 = createDomain2Repository(domain1);
+      const domain3 = createDomain3RepositoryWithStorage(
+        domain2,
+        storage,
+        undefined,
+        domain1,
+      );
+      const exploration = await domain2.beginExplorationPosture({
+        programId: program.id,
+        obligationId,
+        governingBasis: "Exploration",
+        operatedBy: ACTOR,
+      });
+      const exitReady = await domain2.achieveExplorationExitReady({
+        recordId: exploration.recordId,
+        exitBasis: "Exit",
+        achievedBy: ACTOR,
+      });
+      const commitment = await domain2.recordRealizationCommitment({
+        programId: program.id,
+        obligationId,
+        explorationPostureRecordId: exitReady.recordId,
+        governingBasis: "Commitment",
+        committedBy: ACTOR,
+      });
+      const candidate = await domain2.establishRealizedVisualArtifact({
+        programId: program.id,
+        obligationId,
+        realizationCommitmentId: commitment.commitmentId,
+        realizationPath: "created",
+        establishedBy: ACTOR,
+      });
+      const rva = await domain2.promoteRvaToExists({
+        rvaId: candidate.id,
+        basis: "Exists",
+        promotedBy: ACTOR,
+      });
+      await domain2.determineReviewEntryReadiness({ rvaId: rva.id, determinedBy: ACTOR });
+      const review = await domain3.admitToProductionReadinessReview({
+        rvaId: rva.id,
+        admittedBy: ACTOR,
+      });
+      await completeMandatoryActivity(domain3, review);
+      await domain3.recordReviewDetermination({
+        reviewId: review.reviewId,
+        outcome: "pass",
+        grounds: "Pass",
+        determinedBy: ACTOR,
+      });
+      await domain3.recordApprovalAct({
+        reviewId: review.reviewId,
+        authorityClassId: "approval_authority_production_obligation_scope",
+        approvedBy: ACTOR,
+      });
+      const localGpra = await domain3.grantGpra({
+        reviewId: review.reviewId,
+        grantedBy: ACTOR,
+      });
+      hideApproval = true;
+      await domain3.loadGpraGrant(localGpra.gpraId);
+    },
+    "invalid_gpra_grant",
+  );
+
+  await expectThrowsAsync(
+    "Repository load rejects Approval when review.determinationId is missing from persistence",
+    async () => {
+      const storage = createInMemoryDomain3Storage();
+      const { domain1, program, obligationId } = await buildGovernedDomain1();
+      const domain2 = createDomain2Repository(domain1);
+      const domain3 = createDomain3RepositoryWithStorage(
+        domain2,
+        storage,
+        undefined,
+        domain1,
+      );
+      const exploration = await domain2.beginExplorationPosture({
+        programId: program.id,
+        obligationId,
+        governingBasis: "Exploration",
+        operatedBy: ACTOR,
+      });
+      const exitReady = await domain2.achieveExplorationExitReady({
+        recordId: exploration.recordId,
+        exitBasis: "Exit",
+        achievedBy: ACTOR,
+      });
+      const commitment = await domain2.recordRealizationCommitment({
+        programId: program.id,
+        obligationId,
+        explorationPostureRecordId: exitReady.recordId,
+        governingBasis: "Commitment",
+        committedBy: ACTOR,
+      });
+      const candidate = await domain2.establishRealizedVisualArtifact({
+        programId: program.id,
+        obligationId,
+        realizationCommitmentId: commitment.commitmentId,
+        realizationPath: "created",
+        establishedBy: ACTOR,
+      });
+      const rva = await domain2.promoteRvaToExists({
+        rvaId: candidate.id,
+        basis: "Exists",
+        promotedBy: ACTOR,
+      });
+      await domain2.determineReviewEntryReadiness({ rvaId: rva.id, determinedBy: ACTOR });
+      const review = await domain3.admitToProductionReadinessReview({
+        rvaId: rva.id,
+        admittedBy: ACTOR,
+      });
+      await completeMandatoryActivity(domain3, review);
+      await domain3.recordReviewDetermination({
+        reviewId: review.reviewId,
+        outcome: "pass",
+        grounds: "Pass",
+        determinedBy: ACTOR,
+      });
+      const localApproval = await domain3.recordApprovalAct({
+        reviewId: review.reviewId,
+        authorityClassId: "approval_authority_production_obligation_scope",
+        approvedBy: ACTOR,
+      });
+      const brokenReview = {
+        ...(await domain3.loadProductionReadinessReview(review.reviewId))!,
+        determinationId:
+          "review-determination-00000000-0000-4000-8000-missing000001" as ReviewDeterminationRecord["determinationId"],
+      };
+      await storage.putProductionReadinessReview(brokenReview);
+      await domain3.loadApprovalAct(localApproval.approvalActId);
+    },
+    "invalid_approval_authority",
+  );
+
+  // 15 — GPRA linked to Approval from another Review (GPRA Review identity diverges)
+  expectThrows(
+    "Rehydrate rejects GPRA linked to Approval from another Review",
+    () =>
+      rehydrateGpraGrant(
+        {
+          ...gpra,
+          reviewId: withholdingCtx.review.reviewId,
+        },
+        {
+          ...passContext,
+          approval: structuredClone(approval),
+        },
+      ),
+    "invalid_gpra_grant",
+  );
+
+  // 16 — GPRA Determination differs
+  expectThrows(
+    "Rehydrate rejects GPRA whose Determination differs from Approval/Review",
+    () =>
+      rehydrateGpraGrant(
+        {
+          ...gpra,
+          determinationId:
+            "review-determination-00000000-0000-4000-8000-ffffffffffff" as ReviewDeterminationRecord["determinationId"],
+        },
+        { ...passContext, approval: structuredClone(approval) },
+      ),
+    "invalid_gpra_grant",
+  );
+
+  // 17 — GPRA RVA differs
+  expectThrows(
+    "Rehydrate rejects GPRA whose RVA differs",
+    () =>
+      rehydrateGpraGrant(
+        {
+          ...gpra,
+          rvaId: "rva-00000000-0000-4000-8000-ffffffffffff" as RealizedVisualArtifactId,
+        },
+        { ...passContext, approval: structuredClone(approval) },
+      ),
+    "invalid_gpra_grant",
+  );
+
+  // 18 — GPRA Program differs
+  expectThrows(
+    "Rehydrate rejects GPRA whose Program differs",
+    () =>
+      rehydrateGpraGrant(
+        {
+          ...gpra,
+          programId: "program-00000000-0000-4000-8000-ffffffffffff" as ProductionProgramId,
+        },
+        { ...passContext, approval: structuredClone(approval) },
+      ),
+    "invalid_gpra_grant",
+  );
+
+  // 19 — GPRA Obligation differs
+  expectThrows(
+    "Rehydrate rejects GPRA whose Production Obligation differs",
+    () =>
+      rehydrateGpraGrant(
+        {
+          ...gpra,
+          obligationId: "obligation-00000000-0000-4000-8000-ffffffffffff" as ProductionObligationId,
+        },
+        { ...passContext, approval: structuredClone(approval) },
+      ),
     "invalid_gpra_grant",
   );
 }

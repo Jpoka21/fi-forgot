@@ -2,7 +2,10 @@
  * Domain 3 persistence validation — FI-DSN-STD-014 G2–G6.
  */
 
-import { isCanonicalEstablishedApprovalAuthorityClassId } from "../approval-authority.js";
+import {
+  isCanonicalEstablishedApprovalAuthorityClassId,
+  resolveEstablishedApprovalAuthorityClass,
+} from "../approval-authority.js";
 import { isMandatoryApprovalWithholdingGroundFamily } from "../approval-withholding-grounds.js";
 import { DOMAIN3_GOVERNING_STANDARD } from "../domain3-authority.js";
 import { isValidDomain3GovernedCreationMarker } from "../domain3-entry.js";
@@ -695,6 +698,65 @@ export function validatePersistedApprovalAct(raw: unknown): asserts raw is Appro
       ["FI-DSN-STD-014-R36", "FI-DSN-STD-014-R37"],
     );
   }
+
+  const established = resolveEstablishedApprovalAuthorityClass(
+    record.authorityClassId as ApprovalActRecord["authorityClassId"],
+  );
+  if (record.authorityConstitutionalScope !== established.authorizedConstitutionalScope) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Approval MAGAC scope does not match established authority class",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R36", "FI-DSN-STD-014-R37"],
+    );
+  }
+
+  const activation = record.activationScope;
+  if (!activation || typeof activation !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Approval act requires MAGAC activation scope",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R37", "FI-DSN-STD-014-R38"],
+    );
+  }
+  const activationRecord = activation as Record<string, unknown>;
+  if (established.authorizedConstitutionalScope === "production_program") {
+    if (activationRecord.kind !== "production_program") {
+      throw new OrchestraConstitutionalError(
+        "Program-scoped MAGAC class cannot activate under Production Obligation scope",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R36", "FI-DSN-STD-014-R37"],
+      );
+    }
+    assertBrandedId(activationRecord.programId, ID_PREFIXES.program, "MAGAC Program activation");
+    if (activationRecord.programId !== record.programId) {
+      throw new OrchestraConstitutionalError(
+        "MAGAC Program activation scope identity does not match Approval Program",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R37", "FI-DSN-STD-014-R38"],
+      );
+    }
+  } else {
+    if (activationRecord.kind !== "production_obligation") {
+      throw new OrchestraConstitutionalError(
+        "Obligation-scoped MAGAC class cannot activate under Production Program scope",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R36", "FI-DSN-STD-014-R37"],
+      );
+    }
+    assertBrandedId(
+      activationRecord.obligationId,
+      ID_PREFIXES.obligation,
+      "MAGAC Obligation activation",
+    );
+    if (activationRecord.obligationId !== record.obligationId) {
+      throw new OrchestraConstitutionalError(
+        "MAGAC Obligation activation scope identity does not match Approval Obligation",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R37", "FI-DSN-STD-014-R38"],
+      );
+    }
+  }
+
   if (record.gpraNotCreatedByThisAct !== true) {
     throw new OrchestraConstitutionalError(
       "Approval act must affirm GPRA is not created by Approval alone",
