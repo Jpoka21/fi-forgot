@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G9 (Review through GPRA Supersession / Succession).
+ * Governed Domain 3 repository — G2–G10 (Review through Brain Decision-Stage advisories).
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -9,6 +9,7 @@ import {
   rehydrateApprovalAct,
   rehydrateApprovalWithholding,
   rehydrateDesignTimeFeasibilityEvaluation,
+  rehydrateDomain3BrainAdvisory,
   rehydrateDownstreamDeficiencyRecord,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
@@ -27,6 +28,7 @@ import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
+  validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -49,6 +51,13 @@ import type {
   DesignTimeFeasibilityEvaluationId,
   DesignTimeFeasibilityEvaluationRecord,
   DesignTimeFeasibilityObservationKind,
+  Domain3BrainAdvisoryId,
+  Domain3BrainAdvisoryRecord,
+  Domain3BrainAuthorityRouteKind,
+  Domain3BrainOutputClass,
+  Domain3BrainReevaluationRequestType,
+  Domain3BrainSourceAttribution,
+  Domain3DecisionStage,
   DownstreamDeficiencyRecord,
   DownstreamDeficiencyRecordId,
   DownstreamDispositionAuthorityClassId,
@@ -61,6 +70,7 @@ import type {
   GpraSupersessionActId,
   GpraSupersessionActRecord,
   GpraValidityAssessment,
+  GpraValidityPosture,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
   MandatoryReviewActivityCompleteness,
@@ -92,6 +102,10 @@ import {
   createGpraGrant,
   evaluateApprovalConsiderationEligibility,
 } from "../approval-and-gpra.js";
+import {
+  createDomain3BrainAdvisoryRecord,
+  type CreateDomain3BrainAdvisoryInput,
+} from "../brain-domain3-advisory.js";
 import {
   attachDesignTimeFeasibilityEvidenceLinkage,
   buildDesignTimeFeasibilityEvidenceSnapshot,
@@ -131,7 +145,7 @@ import { admitProductionReadinessReview } from "../review-entry-eligibility.js";
 import type { MandatoryReviewDimensionId } from "../review-dimensions.js";
 import { isTerminalRvaPosture } from "../rva-lifecycle.js";
 import { assertProgramIsActiveAuthority, isActiveProgramPosture } from "../transitions.js";
-import type { ProductionObligationId } from "../types.js";
+import type { ProductionObligationId, ProductionProgramId } from "../types.js";
 
 /**
  * Narrow Domain 2 read surface consumed by Domain 3.
@@ -455,6 +469,46 @@ export interface Domain3Repository {
   loadResubmissionEligibilityByPriorReview(
     priorReviewId: ProductionReadinessReviewId,
   ): Promise<ResubmissionEligibilityRecord | null>;
+
+  /**
+   * R78 / R81 — append-only Brain advisory recording. Does not create Determination,
+   * Approval, GPRA, posture, or Handoff acts. Separate from grantGpra / invalidateGpra /
+   * supersedeGpra / recordDetermination (no automatic Brain hooks).
+   */
+  recordDomain3BrainAdvisory(input: {
+    sourceAttribution: Domain3BrainSourceAttribution;
+    brainRuntimeVersion: string;
+    decisionStage: Domain3DecisionStage;
+    outputClass: Domain3BrainOutputClass;
+    programId?: ProductionProgramId;
+    obligationId?: ProductionObligationId;
+    rvaId?: RealizedVisualArtifactId;
+    reviewId?: ProductionReadinessReviewId | null;
+    evidenceIds?: readonly ReviewEvidenceId[];
+    determinationId?: ReviewDeterminationId | null;
+    gpraId?: GpraId | null;
+    postureState?: GpraValidityPosture | null;
+    advisoryContent: string;
+    reevaluationRequestType?: Domain3BrainReevaluationRequestType | null;
+    routesToAuthorityKind?: Domain3BrainAuthorityRouteKind | null;
+    eventTime?: string;
+    createdBy?: string;
+    overridesConstitutionalRecord?: boolean;
+    claimsConstitutionalAuthority?: boolean;
+    emulatesConstitutionalAct?: boolean;
+    constitutionalActKind?: string;
+    handoffActId?: unknown;
+    handoffAuthorized?: unknown;
+    executesHandoff?: unknown;
+  }): Promise<Domain3BrainAdvisoryRecord>;
+
+  loadDomain3BrainAdvisory(
+    advisoryId: Domain3BrainAdvisoryId,
+  ): Promise<Domain3BrainAdvisoryRecord | null>;
+
+  listDomain3BrainAdvisoriesByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<readonly Domain3BrainAdvisoryRecord[]>;
 }
 
 export function createDomain3Repository(
@@ -855,6 +909,50 @@ export function createDomain3RepositoryWithStorage(
   ): Promise<ResubmissionEligibilityRecord> {
     const context = await loadG7DispositionRehydrationContext(raw.priorReviewId);
     return rehydrateResubmissionEligibility(raw, context);
+  }
+
+  async function rehydrateTrustedBrainAdvisory(
+    raw: Domain3BrainAdvisoryRecord,
+  ): Promise<Domain3BrainAdvisoryRecord> {
+    let review: ProductionReadinessReview | null = null;
+    let determination: ReviewDeterminationRecord | null = null;
+    let gpra: GpraGrantRecord | null = null;
+
+    if (raw.reviewId) {
+      const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+      if (!reviewRaw) {
+        throw new OrchestraConstitutionalError(
+          "Brain advisory reviewId points to no persisted Review",
+          "invalid_domain3_brain_advisory",
+          ["FI-DSN-STD-014-R78"],
+        );
+      }
+      review = rehydrateProductionReadinessReview(reviewRaw);
+      if (raw.determinationId) {
+        const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+        if (!determinationRaw) {
+          throw new OrchestraConstitutionalError(
+            "Brain advisory determinationId points to no persisted Determination",
+            "invalid_domain3_brain_advisory",
+            ["FI-DSN-STD-014-R78"],
+          );
+        }
+        determination = rehydrateReviewDetermination(determinationRaw);
+      }
+      if (raw.gpraId) {
+        const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+        if (!gpraRaw) {
+          throw new OrchestraConstitutionalError(
+            "Brain advisory gpraId points to no persisted GPRA",
+            "invalid_domain3_brain_advisory",
+            ["FI-DSN-STD-014-R78"],
+          );
+        }
+        gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+      }
+    }
+
+    return rehydrateDomain3BrainAdvisory(raw, { review, determination, gpra });
   }
 
   async function requireLinkedConditionalOrFailDetermination(
@@ -2372,6 +2470,142 @@ export function createDomain3RepositoryWithStorage(
       const loaded = await storage.getResubmissionEligibilityByPriorReview(priorReviewId);
       if (!loaded) return null;
       return rehydrateTrustedResubmissionEligibility(loaded);
+    },
+
+    async recordDomain3BrainAdvisory(input) {
+      let programId = input.programId;
+      let obligationId = input.obligationId;
+      let rvaId = input.rvaId;
+      let review: ProductionReadinessReview | null = null;
+      let determination: ReviewDeterminationRecord | null = null;
+      let gpra: GpraGrantRecord | null = null;
+
+      if (input.reviewId) {
+        review = await requireExistingReview(input.reviewId);
+        programId = programId ?? review.programId;
+        obligationId = obligationId ?? review.obligationId;
+        rvaId = rvaId ?? review.rvaId;
+        if (
+          review.programId !== programId ||
+          review.obligationId !== obligationId ||
+          review.rvaId !== rvaId
+        ) {
+          throw new OrchestraConstitutionalError(
+            "Brain advisory Program/Obligation/RVA must match Review lineage",
+            "invalid_domain3_brain_advisory",
+            ["FI-DSN-STD-014-R78"],
+          );
+        }
+
+        if (input.determinationId) {
+          const determinationRaw = await storage.getReviewDetermination(input.determinationId);
+          if (!determinationRaw) {
+            throw new OrchestraConstitutionalError(
+              "Brain advisory determinationId not found",
+              "invalid_domain3_brain_advisory",
+              ["FI-DSN-STD-014-R78"],
+            );
+          }
+          determination = rehydrateReviewDetermination(determinationRaw);
+          if (determination.reviewId !== review.reviewId) {
+            throw new OrchestraConstitutionalError(
+              "Brain advisory Determination does not belong to Review",
+              "invalid_domain3_brain_advisory",
+              ["FI-DSN-STD-014-R78"],
+            );
+          }
+        }
+
+        if (input.gpraId) {
+          const gpraRaw = await storage.getGpraGrant(input.gpraId);
+          if (!gpraRaw) {
+            throw new OrchestraConstitutionalError(
+              "Brain advisory gpraId not found",
+              "invalid_domain3_brain_advisory",
+              ["FI-DSN-STD-014-R78"],
+            );
+          }
+          gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+          if (gpra.reviewId !== review.reviewId) {
+            throw new OrchestraConstitutionalError(
+              "Brain advisory GPRA does not belong to Review",
+              "invalid_domain3_brain_advisory",
+              ["FI-DSN-STD-014-R78"],
+            );
+          }
+        }
+      }
+
+      if (!programId || !obligationId || !rvaId) {
+        throw new OrchestraConstitutionalError(
+          "Brain advisory requires programId, obligationId, and rvaId (or reviewId lineage)",
+          "invalid_domain3_brain_advisory",
+          ["FI-DSN-STD-014-R78"],
+        );
+      }
+
+      const createInput: CreateDomain3BrainAdvisoryInput = {
+        sourceAttribution: input.sourceAttribution,
+        brainRuntimeVersion: input.brainRuntimeVersion,
+        decisionStage: input.decisionStage,
+        outputClass: input.outputClass,
+        programId,
+        obligationId,
+        rvaId,
+        reviewId: input.reviewId ?? null,
+        evidenceIds: input.evidenceIds,
+        determinationId: input.determinationId ?? null,
+        gpraId: input.gpraId ?? null,
+        postureState: input.postureState ?? null,
+        advisoryContent: input.advisoryContent,
+        reevaluationRequestType: input.reevaluationRequestType ?? null,
+        routesToAuthorityKind: input.routesToAuthorityKind ?? null,
+        eventTime: input.eventTime,
+        createdBy: input.createdBy,
+        overridesConstitutionalRecord: input.overridesConstitutionalRecord,
+        claimsConstitutionalAuthority: input.claimsConstitutionalAuthority,
+        emulatesConstitutionalAct: input.emulatesConstitutionalAct,
+        constitutionalActKind: input.constitutionalActKind,
+        handoffActId: input.handoffActId,
+        handoffAuthorized: input.handoffAuthorized,
+        executesHandoff: input.executesHandoff,
+      };
+
+      const advisory = createDomain3BrainAdvisoryRecord(createInput);
+      validatePersistedDomain3BrainAdvisory(advisory);
+      try {
+        await storage.putDomain3BrainAdvisory(advisory);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Domain 3 Brain advisory",
+          "invalid_domain3_brain_advisory",
+          ["FI-DSN-STD-014-R78", "FI-DSN-STD-014-R81"],
+        );
+      }
+      const loaded = await storage.getDomain3BrainAdvisory(advisory.advisoryId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Domain 3 Brain advisory",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R78"],
+        );
+      }
+      return rehydrateDomain3BrainAdvisory(loaded, { review, determination, gpra });
+    },
+
+    async loadDomain3BrainAdvisory(advisoryId) {
+      const loaded = await storage.getDomain3BrainAdvisory(advisoryId);
+      if (!loaded) return null;
+      return rehydrateTrustedBrainAdvisory(loaded);
+    },
+
+    async listDomain3BrainAdvisoriesByReview(reviewId) {
+      const listed = await storage.listDomain3BrainAdvisoriesByReview(reviewId);
+      const out: Domain3BrainAdvisoryRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedBrainAdvisory(item));
+      }
+      return out;
     },
   };
 }

@@ -62,7 +62,8 @@ export type OrchestraErrorCode =
   | "invalid_gpra_grant"
   | "invalid_downstream_disposition"
   | "invalid_gpra_invalidation"
-  | "invalid_gpra_supersession";
+  | "invalid_gpra_supersession"
+  | "invalid_domain3_brain_advisory";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

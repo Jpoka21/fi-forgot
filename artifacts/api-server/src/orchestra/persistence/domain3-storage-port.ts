@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G9 (Review through GPRA Supersession / Succession).
+ * Domain 3 storage port — G2–G10 (Review through Brain Decision-Stage advisories).
  */
 
 import type {
@@ -9,6 +9,8 @@ import type {
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationId,
   DesignTimeFeasibilityEvaluationRecord,
+  Domain3BrainAdvisoryId,
+  Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   DownstreamDeficiencyRecordId,
   GpraGrantRecord,
@@ -179,4 +181,16 @@ export interface Domain3StoragePort {
   getResubmissionEligibilityByPriorReview(
     priorReviewId: ProductionReadinessReviewId,
   ): Promise<ResubmissionEligibilityRecord | null>;
+
+  /**
+   * Append-only Brain advisory (R81). Unique by advisoryId; multiple advisories per review allowed.
+   * No update or delete API — history must not be mutated.
+   */
+  putDomain3BrainAdvisory(advisory: Domain3BrainAdvisoryRecord): Promise<void>;
+  getDomain3BrainAdvisory(
+    advisoryId: Domain3BrainAdvisoryId,
+  ): Promise<Domain3BrainAdvisoryRecord | null>;
+  listDomain3BrainAdvisoriesByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<readonly Domain3BrainAdvisoryRecord[]>;
 }

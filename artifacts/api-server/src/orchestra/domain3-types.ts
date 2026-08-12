@@ -1,6 +1,6 @@
 /**
- * Domain 3 constitutional types — FI-DSN-STD-014 G2–G6
- * (Review entry through Approval Authority and GPRA Grant).
+ * Domain 3 constitutional types — FI-DSN-STD-014 G2–G10
+ * (Review entry through Brain Decision-Stage Interaction).
  */
 
 import type { Domain3GovernanceTraceability } from "./domain3-authority.js";
@@ -698,4 +698,92 @@ export interface GpraValidityAssessment {
   readonly supersessionActId: GpraSupersessionActId | null;
   readonly newHandoffEligibility: boolean;
   readonly newIntakeAuthority: boolean;
+}
+
+// --- G10 Brain and Decision-Stage Interaction (R73–R82) ---
+
+export type Domain3BrainAdvisoryId = string & {
+  readonly __brand: "Domain3BrainAdvisoryId";
+};
+
+/** DSIB Decision-stage catalog (R77). */
+export type Domain3DecisionStage =
+  | "pre_review"
+  | "active_review"
+  | "completed_review"
+  | "approval_consideration"
+  | "gpra_grant_consumed"
+  | "retention"
+  | "invalidated"
+  | "superseded"
+  | "downstream_disposition"
+  | "handoff_preparation";
+
+/** BOCM permitted output classes (R75). */
+export type Domain3BrainOutputClass =
+  | "evidence_consumption_analysis"
+  | "evaluative_treatment"
+  | "nonbinding_recommendation"
+  | "inconsistency_detection_signal"
+  | "routing_suggestion"
+  | "nonbinding_reevaluation_request";
+
+/** BRRM reevaluation request types (R80). */
+export type Domain3BrainReevaluationRequestType =
+  | "new_review"
+  | "re_review"
+  | "downstream_correction"
+  | "rework_authorization_review"
+  | "invalidation_review"
+  | "supersession_review"
+  | "approval_reconsideration"
+  | "handoff_eligibility_review";
+
+/** BRRM governed authority route kinds (R80). */
+export type Domain3BrainAuthorityRouteKind =
+  | "reviewer_path"
+  | "ddac"
+  | "dsra"
+  | "ivac"
+  | "ssac"
+  | "magac"
+  | "handoff_authority_boundary";
+
+/** BRPAM source attribution — Brain Runtime or Writing Engine only (R78). */
+export type Domain3BrainSourceAttribution = "brain_runtime" | "writing_engine";
+
+/**
+ * Append-only nonbinding Brain advisory operational record (BRPAM R78).
+ * Never constitutional authority; never Determination / Approval / GPRA / posture act.
+ */
+export interface Domain3BrainAdvisoryRecord {
+  readonly advisoryId: Domain3BrainAdvisoryId;
+  readonly sourceAttribution: Domain3BrainSourceAttribution;
+  /** Event time distinct from constitutional act time. */
+  readonly eventTime: string;
+  readonly brainRuntimeVersion: string;
+  readonly decisionStage: Domain3DecisionStage;
+  readonly outputClass: Domain3BrainOutputClass;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  /** Optional at pre_review entry context only; required for other stages. */
+  readonly reviewId: ProductionReadinessReviewId | null;
+  readonly evidenceIds: readonly ReviewEvidenceId[];
+  readonly determinationId: ReviewDeterminationId | null;
+  readonly gpraId: GpraId | null;
+  readonly postureState: GpraValidityPosture | null;
+  readonly advisoryContent: string;
+  /** Required iff outputClass is nonbinding_reevaluation_request. */
+  readonly reevaluationRequestType: Domain3BrainReevaluationRequestType | null;
+  /** Required iff outputClass is nonbinding_reevaluation_request. */
+  readonly routesToAuthorityKind: Domain3BrainAuthorityRouteKind | null;
+  readonly doesNotAuthorize: true;
+  readonly nonbinding: true;
+  readonly notConstitutionalAuthority: true;
+  readonly distinguishableFromConstitutionalActs: true;
+  readonly doesNotCompelConstitutionalAction: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }

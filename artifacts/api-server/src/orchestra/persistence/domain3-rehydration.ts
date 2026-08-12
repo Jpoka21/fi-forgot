@@ -6,12 +6,14 @@
  * G7 downstream disposition likewise requires joint Review/Determination coherence.
  * G8 GPRA invalidation requires GPRA + Approval + Review joint coherence.
  * G9 GPRA supersession requires predecessor + successor GPRA / Approval / Review joint coherence.
+ * G10 Brain advisories require BRPAM markers and Review/RVA/Program linkage coherence.
  */
 
 import type {
   ApprovalActRecord,
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -41,10 +43,12 @@ import {
 } from "./g7-rehydration-coherence.js";
 import { assertPersistedGpraInvalidationCoherence } from "./g8-rehydration-coherence.js";
 import { assertPersistedGpraSupersessionCoherence } from "./g9-rehydration-coherence.js";
+import { assertPersistedDomain3BrainAdvisoryCoherence } from "./g10-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
+  validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -392,3 +396,45 @@ export function rehydrateResubmissionEligibility(
   });
   return deepFreeze(structuredClone(raw));
 }
+
+export interface G10BrainAdvisoryRehydrationContext {
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+  readonly gpra?: unknown | null;
+}
+
+/**
+ * Trusted G10 Brain advisory rehydration — BRPAM markers + Review/RVA/Program coherence.
+ */
+export function rehydrateDomain3BrainAdvisory(
+  raw: unknown,
+  context: G10BrainAdvisoryRehydrationContext = {},
+): Domain3BrainAdvisoryRecord {
+  validatePersistedDomain3BrainAdvisory(raw);
+  const advisory = raw as Domain3BrainAdvisoryRecord;
+
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+  let gpra: GpraGrantRecord | null = null;
+  if (context.gpra != null) {
+    validatePersistedGpraGrant(context.gpra);
+    gpra = context.gpra as GpraGrantRecord;
+  }
+
+  assertPersistedDomain3BrainAdvisoryCoherence({
+    advisory,
+    review,
+    determination,
+    gpra,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+

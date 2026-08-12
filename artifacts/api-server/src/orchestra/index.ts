@@ -173,6 +173,31 @@ export {
 } from "./gpra-supersession-and-succession.js";
 
 export {
+  DOMAIN3_DECISION_STAGES,
+  DOMAIN3_BRAIN_OUTPUT_CLASSES,
+  DOMAIN3_STAGE_ALLOWED_OUTPUT_CLASSES,
+  FORBIDDEN_BRAIN_DOMAIN3_CONSTITUTIONAL_ACTIONS,
+  assertDecisionStage,
+  assertOutputClassAllowedForStage,
+  isDomain3DecisionStage,
+  isDomain3BrainOutputClass,
+  isForbiddenBrainDomain3ConstitutionalAction,
+  rejectBrainDomain3ConstitutionalMutationAttempt,
+  type ForbiddenBrainDomain3ConstitutionalAction,
+} from "./brain-domain3-decision-stage.js";
+
+export {
+  GPRA_BRAIN_DECISION_STAGE_TRACEABILITY,
+  DOMAIN3_BRAIN_REEVALUATION_REQUEST_TYPES,
+  DOMAIN3_BRAIN_AUTHORITY_ROUTE_KINDS,
+  DOMAIN3_REEVALUATION_REQUEST_ROUTE,
+  DOMAIN3_REEVALUATION_REQUEST_ALLOWED_STAGES,
+  assertBrainDoesNotOverrideConstitutionalAuthority,
+  isDomain3BrainReevaluationRequestType,
+  isDomain3BrainAuthorityRouteKind,
+} from "./brain-domain3-advisory.js";
+
+export {
   REVIEW_DETERMINATION_TRACEABILITY,
   LEGAL_REVIEW_DETERMINATION_OUTCOMES,
   isLegalReviewDeterminationOutcome,
@@ -243,6 +268,13 @@ export type {
   SupersessionTriggerFamily,
   SupersessionAuthorityConstitutionalScope,
   SupersessionAuthorityClassId,
+  Domain3BrainAdvisoryId,
+  Domain3BrainAdvisoryRecord,
+  Domain3DecisionStage,
+  Domain3BrainOutputClass,
+  Domain3BrainReevaluationRequestType,
+  Domain3BrainAuthorityRouteKind,
+  Domain3BrainSourceAttribution,
 } from "./domain3-types.js";
 
 /**

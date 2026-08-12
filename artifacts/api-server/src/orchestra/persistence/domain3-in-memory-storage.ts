@@ -1,11 +1,12 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G9.
+ * In-memory Domain 3 storage adapter — G2–G10.
  */
 
 import type {
   ApprovalActRecord,
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -58,6 +59,8 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const returnPostureByReview = new Map<string, string>();
   const resubmissionById = new Map<string, ResubmissionEligibilityRecord>();
   const resubmissionByPriorReview = new Map<string, string>();
+  const brainAdvisoriesById = new Map<string, Domain3BrainAdvisoryRecord>();
+  const brainAdvisoriesByReview = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -486,6 +489,31 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       const id = resubmissionByPriorReview.get(priorReviewId);
       if (!id) return null;
       return this.getResubmissionEligibility(id as ResubmissionEligibilityRecord["eligibilityId"]);
+    },
+
+    async putDomain3BrainAdvisory(advisory) {
+      if (brainAdvisoriesById.has(advisory.advisoryId)) {
+        throw new Error(`Duplicate Domain 3 Brain advisory identity: ${advisory.advisoryId}`);
+      }
+      brainAdvisoriesById.set(advisory.advisoryId, structuredClone(advisory));
+      if (advisory.reviewId) {
+        const list = brainAdvisoriesByReview.get(advisory.reviewId) ?? [];
+        list.push(advisory.advisoryId);
+        brainAdvisoriesByReview.set(advisory.reviewId, list);
+      }
+    },
+
+    async getDomain3BrainAdvisory(advisoryId) {
+      const advisory = brainAdvisoriesById.get(advisoryId);
+      return advisory ? structuredClone(advisory) : null;
+    },
+
+    async listDomain3BrainAdvisoriesByReview(reviewId) {
+      const ids = brainAdvisoriesByReview.get(reviewId) ?? [];
+      return ids
+        .map((id) => brainAdvisoriesById.get(id))
+        .filter((item): item is Domain3BrainAdvisoryRecord => !!item)
+        .map((item) => structuredClone(item));
     },
   };
 }

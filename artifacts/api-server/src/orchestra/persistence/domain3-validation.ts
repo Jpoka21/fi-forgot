@@ -1,5 +1,5 @@
 /**
- * Domain 3 persistence validation — FI-DSN-STD-014 G2–G9.
+ * Domain 3 persistence validation — FI-DSN-STD-014 G2–G10.
  */
 
 import {
@@ -7,6 +7,17 @@ import {
   resolveEstablishedApprovalAuthorityClass,
 } from "../approval-authority.js";
 import { isMandatoryApprovalWithholdingGroundFamily } from "../approval-withholding-grounds.js";
+import {
+  DOMAIN3_REEVALUATION_REQUEST_ALLOWED_STAGES,
+  DOMAIN3_REEVALUATION_REQUEST_ROUTE,
+  isDomain3BrainAuthorityRouteKind,
+  isDomain3BrainReevaluationRequestType,
+} from "../brain-domain3-advisory.js";
+import {
+  assertOutputClassAllowedForStage,
+  isDomain3BrainOutputClass,
+  isDomain3DecisionStage,
+} from "../brain-domain3-decision-stage.js";
 import { isMandatoryGovernedDeficiencyFamily } from "../deficiency-families.js";
 import { DOMAIN3_GOVERNING_STANDARD } from "../domain3-authority.js";
 import { isValidDomain3GovernedCreationMarker } from "../domain3-entry.js";
@@ -15,6 +26,7 @@ import type {
   ApprovalActRecord,
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -65,6 +77,7 @@ const ID_PREFIXES = {
   reworkAuthorizationWithholding: "rework-authorization-withholding-",
   returnPosture: "return-posture-",
   resubmissionEligibility: "resubmission-eligibility-",
+  brainAdvisory: "domain3-brain-advisory-",
 } as const;
 
 const LEGAL_CONDITIONAL_FAIL_ROUTES = ["conditional_route", "fail_route"] as const;
@@ -1649,4 +1662,175 @@ export function validatePersistedGpraSupersessionAct(
     );
   }
 }
+
+export function validatePersistedDomain3BrainAdvisory(
+  raw: unknown,
+): asserts raw is Domain3BrainAdvisoryRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Domain 3 Brain advisory",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.advisoryId, ID_PREFIXES.brainAdvisory, "Domain 3 Brain advisory");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+
+  if (
+    record.sourceAttribution !== "brain_runtime" &&
+    record.sourceAttribution !== "writing_engine"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory sourceAttribution must be brain_runtime or writing_engine",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+  if (typeof record.eventTime !== "string" || !record.eventTime.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory requires eventTime",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+  if (typeof record.brainRuntimeVersion !== "string" || !record.brainRuntimeVersion.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory requires brainRuntimeVersion",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+  if (!isDomain3DecisionStage(record.decisionStage)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory has unknown decisionStage",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R77"],
+    );
+  }
+  if (!isDomain3BrainOutputClass(record.outputClass)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory has unknown outputClass",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R75"],
+    );
+  }
+  assertOutputClassAllowedForStage(record.decisionStage, record.outputClass);
+
+  if (record.reviewId === null) {
+    if (record.decisionStage !== "pre_review") {
+      throw new OrchestraConstitutionalError(
+        "Persisted Brain advisory without reviewId is only valid at pre_review",
+        "invalid_domain3_brain_advisory",
+        ["FI-DSN-STD-014-R77", "FI-DSN-STD-014-R78"],
+      );
+    }
+  } else {
+    assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  }
+
+  if (record.determinationId != null) {
+    assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  }
+  if (record.gpraId != null) {
+    assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  }
+  if (
+    record.postureState !== null &&
+    record.postureState !== "retention" &&
+    record.postureState !== "invalidated" &&
+    record.postureState !== "superseded"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory postureState must be retention, invalidated, superseded, or null",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+  if (!Array.isArray(record.evidenceIds)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory requires evidenceIds array",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+  for (const evidenceId of record.evidenceIds) {
+    assertBrandedId(evidenceId, ID_PREFIXES.evidence, "Review evidence");
+  }
+  if (typeof record.advisoryContent !== "string" || !record.advisoryContent.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory requires non-empty advisoryContent",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+
+  if (record.outputClass === "nonbinding_reevaluation_request") {
+    if (!isDomain3BrainReevaluationRequestType(record.reevaluationRequestType)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted reevaluation advisory requires valid reevaluationRequestType",
+        "invalid_domain3_brain_advisory",
+        ["FI-DSN-STD-014-R80"],
+      );
+    }
+    if (!isDomain3BrainAuthorityRouteKind(record.routesToAuthorityKind)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted reevaluation advisory requires valid routesToAuthorityKind",
+        "invalid_domain3_brain_advisory",
+        ["FI-DSN-STD-014-R80"],
+      );
+    }
+    if (
+      DOMAIN3_REEVALUATION_REQUEST_ROUTE[record.reevaluationRequestType] !==
+      record.routesToAuthorityKind
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Persisted reevaluation advisory route does not match BRRM pairing",
+        "invalid_domain3_brain_advisory",
+        ["FI-DSN-STD-014-R80"],
+      );
+    }
+    const stages = DOMAIN3_REEVALUATION_REQUEST_ALLOWED_STAGES[record.reevaluationRequestType];
+    if (!(stages as readonly string[]).includes(record.decisionStage)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted reevaluation advisory stage does not match request type",
+        "invalid_domain3_brain_advisory",
+        ["FI-DSN-STD-014-R77", "FI-DSN-STD-014-R80"],
+      );
+    }
+  } else if (record.reevaluationRequestType != null || record.routesToAuthorityKind != null) {
+    throw new OrchestraConstitutionalError(
+      "Persisted non-reevaluation advisory must not carry reevaluation routing fields",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R80"],
+    );
+  }
+
+  if (
+    record.nonbinding !== true ||
+    record.notConstitutionalAuthority !== true ||
+    record.distinguishableFromConstitutionalActs !== true ||
+    record.doesNotCompelConstitutionalAction !== true ||
+    record.doesNotAuthorize !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Brain advisory must carry nonbinding non-authority BRPAM markers",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R76", "FI-DSN-STD-014-R78", "FI-DSN-STD-014-R79"],
+    );
+  }
+
+  assertAuditMetadata(record.audit, "Domain 3 Brain advisory");
+  assertDomain3Traceability(record.traceability, "Domain 3 Brain advisory");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Domain 3 Brain advisory requires valid governed creation marker",
+      "invalid_domain3_brain_advisory",
+      ["FI-DSN-STD-014-R78"],
+    );
+  }
+}
+
 
