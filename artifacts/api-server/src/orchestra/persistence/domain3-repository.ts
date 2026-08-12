@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G8 (Review through GPRA Retention / Invalidation).
+ * Governed Domain 3 repository — G2–G9 (Review through GPRA Supersession / Succession).
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -12,6 +12,7 @@ import {
   rehydrateDownstreamDeficiencyRecord,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
+  rehydrateGpraSupersessionAct,
   rehydrateProductionReadinessReview,
   rehydrateResubmissionEligibility,
   rehydrateReturnPosture,
@@ -29,6 +30,7 @@ import {
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
+  validatePersistedGpraSupersessionAct,
   validatePersistedProductionReadinessReview,
   validatePersistedResubmissionEligibility,
   validatePersistedReturnPosture,
@@ -56,6 +58,8 @@ import type {
   GpraId,
   GpraInvalidationActId,
   GpraInvalidationActRecord,
+  GpraSupersessionActId,
+  GpraSupersessionActRecord,
   GpraValidityAssessment,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
@@ -78,6 +82,8 @@ import type {
   ReworkAuthorizationRecord,
   ReworkAuthorizationWithholdingId,
   ReworkAuthorizationWithholdingRecord,
+  SupersessionAuthorityClassId,
+  SupersessionTriggerFamily,
 } from "../domain3-types.js";
 import type { RealizedVisualArtifactId } from "../domain2-types.js";
 import {
@@ -103,8 +109,13 @@ import {
 import { OrchestraConstitutionalError } from "../errors.js";
 import {
   createGpraInvalidationAct,
-  evaluateGpraValidityFromInvalidation,
 } from "../gpra-retention-and-invalidation.js";
+import {
+  createGpraSupersessionAct,
+  evaluateGpraValidityFromPostureActs,
+} from "../gpra-supersession-and-succession.js";
+import { assertEstablishedSupersessionAuthorityClass } from "../supersession-authority.js";
+import { assertSupersessionTriggerFamily } from "../supersession-trigger-families.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
 import {
   createFrozenManufacturingAuthoritySource,
@@ -271,16 +282,26 @@ export interface Domain3Repository {
   }): Promise<ApprovalWithholdingRecord>;
 
   /**
-   * R42–R43 / R62 — explicit GPRA grant after Approval. Binds RVA under Production Obligation.
-   * Allows replacement grant when all prior scope grants are Invalidated (not G9 supersession).
+   * R42–R43 / R62 / R66 ST-1 — explicit GPRA grant after Approval. Binds RVA under Production Obligation.
+   * Allows replacement grant when all prior scope grants are Invalidated (G8 R62, no supersession).
+   * When a Retention prior exists for the same obligation, requires st1Supersession (G9 ST-1).
    */
   grantGpra(input: {
     reviewId: ProductionReadinessReviewId;
     grantedBy: string;
+    st1Supersession?: {
+      predecessorGpraId: GpraId;
+      handoffConsumerContextId: string;
+      authorityClassId: SupersessionAuthorityClassId;
+      supersededBy: string;
+      triggeringGoverningSourceId: string;
+      constitutionalEvidence: string;
+    };
   }): Promise<GpraGrantRecord>;
 
   /**
    * R54–R59 — separate invalidation act establishing Invalidated posture for a GPRA.
+   * Allowed on Superseded historical GPRA (R70); does not remove supersession history.
    */
   invalidateGpra(input: {
     gpraId: GpraId;
@@ -292,6 +313,21 @@ export interface Domain3Repository {
     materialNonComplianceEstablished?: boolean;
   }): Promise<GpraInvalidationActRecord>;
 
+  /**
+   * R64–R71 — separate supersession act between existing Retention predecessor and successor GPRA.
+   * ST-2 / ST-3 (and ST-1 when successor already granted).
+   */
+  supersedeGpra(input: {
+    predecessorGpraId: GpraId;
+    successorGpraId: GpraId;
+    stFamily: SupersessionTriggerFamily;
+    handoffConsumerContextId: string;
+    authorityClassId: SupersessionAuthorityClassId;
+    supersededBy: string;
+    triggeringGoverningSourceId: string;
+    constitutionalEvidence: string;
+  }): Promise<GpraSupersessionActRecord>;
+
   loadApprovalAct(approvalActId: ApprovalActId): Promise<ApprovalActRecord | null>;
   loadApprovalActByReview(
     reviewId: ProductionReadinessReviewId,
@@ -302,11 +338,11 @@ export interface Domain3Repository {
   loadApprovalWithholdingByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ApprovalWithholdingRecord | null>;
-  /** Historical GPRA grant fact — returns invalidated grants. */
+  /** Historical GPRA grant fact — returns invalidated and superseded grants. */
   loadGpraGrant(gpraId: GpraId): Promise<GpraGrantRecord | null>;
   loadGpraGrantByReview(reviewId: ProductionReadinessReviewId): Promise<GpraGrantRecord | null>;
   /**
-   * Forward-active Retention GPRA only for RVA+obligation (null if only invalidated or none).
+   * Forward-active Retention GPRA only for RVA+obligation (null if only invalidated/superseded or none).
    */
   loadGpraGrantByRvaObligation(input: {
     rvaId: RealizedVisualArtifactId;
@@ -316,11 +352,33 @@ export interface Domain3Repository {
     invalidationActId: GpraInvalidationActId,
   ): Promise<GpraInvalidationActRecord | null>;
   loadGpraInvalidationActByGpra(gpraId: GpraId): Promise<GpraInvalidationActRecord | null>;
-  evaluateGpraValidity(gpraId: GpraId): Promise<GpraValidityAssessment>;
+  loadGpraSupersessionAct(
+    supersessionActId: GpraSupersessionActId,
+  ): Promise<GpraSupersessionActRecord | null>;
+  loadGpraSupersessionActByPredecessor(
+    predecessorGpraId: GpraId,
+  ): Promise<GpraSupersessionActRecord | null>;
+  /**
+   * R70 posture evaluation. When handoffConsumerContextId is provided, supersession only
+   * applies if act.handoffConsumerContextId matches. When omitted and a supersession exists,
+   * treat as superseded (fail-closed for forward force).
+   */
+  evaluateGpraValidity(
+    gpraId: GpraId,
+    handoffConsumerContextId?: string,
+  ): Promise<GpraValidityAssessment>;
   /** Retention-only forward-active GPRA for RVA under Production Obligation. */
   loadForwardActiveGpraByRvaObligation(input: {
     rvaId: RealizedVisualArtifactId;
     obligationId: ProductionObligationId;
+  }): Promise<GpraGrantRecord | null>;
+  /**
+   * R71 — Retention GPRA for obligation that is not invalidated and not superseded
+   * for the given handoff consumer context.
+   */
+  loadAuthoritativeGpraByObligationContext(input: {
+    obligationId: ProductionObligationId;
+    handoffConsumerContextId: string;
   }): Promise<GpraGrantRecord | null>;
 
   /** R47–R49 — Conditional/Fail disposition eligibility; Pass+withholding is block-without-return. */
@@ -560,6 +618,82 @@ export function createDomain3RepositoryWithStorage(
     });
   }
 
+  async function rehydrateTrustedGpraSupersessionAct(
+    raw: GpraSupersessionActRecord,
+    options?: { treatAsAlreadyPersisted?: boolean },
+  ): Promise<GpraSupersessionActRecord> {
+    const predecessorRaw = await storage.getGpraGrant(raw.predecessorGpraId);
+    const successorRaw = await storage.getGpraGrant(raw.successorGpraId);
+    if (!predecessorRaw || !successorRaw) {
+      throw new OrchestraConstitutionalError(
+        "GPRA supersession requires persisted predecessor and successor GPRA grants",
+        "invalid_gpra_supersession",
+        ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
+      );
+    }
+    const predecessorGpra = await rehydrateTrustedGpraGrant(predecessorRaw);
+    const successorGpra = await rehydrateTrustedGpraGrant(successorRaw);
+    const predecessorContext = await loadG6AuthorityRehydrationContext(predecessorGpra.reviewId);
+    const successorContext = await loadG6AuthorityRehydrationContext(successorGpra.reviewId);
+    const predecessorApprovalRaw = await storage.getApprovalAct(predecessorGpra.approvalActId);
+    const successorApprovalRaw = await storage.getApprovalAct(successorGpra.approvalActId);
+    if (!predecessorApprovalRaw || !successorApprovalRaw) {
+      throw new OrchestraConstitutionalError(
+        "GPRA supersession requires persisted Approvals in predecessor and successor grant lineages",
+        "invalid_gpra_supersession",
+        ["FI-DSN-STD-014-R69"],
+      );
+    }
+
+    const existingByPredecessor = await storage.getGpraSupersessionActByPredecessor(
+      raw.predecessorGpraId,
+    );
+    const predecessorHasInvalidation = !!(await storage.getGpraInvalidationActByGpra(
+      raw.predecessorGpraId,
+    ));
+    // When rehydrating an already-persisted act, Invalidated-after-Superseded (R70) and the
+    // map entry for this predecessor are expected and must not fail coherence.
+    const predecessorInvalidated = options?.treatAsAlreadyPersisted
+      ? false
+      : predecessorHasInvalidation;
+    const predecessorAlreadySupersededInContext = options?.treatAsAlreadyPersisted
+      ? false
+      : !!(
+          existingByPredecessor &&
+          existingByPredecessor.supersessionActId !== raw.supersessionActId
+        );
+
+    const predecessorRva = await domain2.loadRva(predecessorGpra.rvaId);
+    const successorRva = await domain2.loadRva(successorGpra.rvaId);
+
+    return rehydrateGpraSupersessionAct(raw, {
+      predecessorGpra,
+      successorGpra,
+      predecessorApproval: predecessorApprovalRaw,
+      successorApproval: successorApprovalRaw,
+      predecessorReview: predecessorContext.review,
+      successorReview: successorContext.review,
+      predecessorDetermination: predecessorContext.determination,
+      successorDetermination: successorContext.determination,
+      predecessorEvidenceRecords: predecessorContext.evidenceRecords,
+      predecessorActivityRecords: predecessorContext.activityRecords,
+      successorEvidenceRecords: successorContext.evidenceRecords,
+      successorActivityRecords: successorContext.activityRecords,
+      predecessorInvalidated,
+      predecessorAlreadySupersededInContext,
+      predecessorRva,
+      successorRva,
+    });
+  }
+
+  async function isRetentionForwardActive(gpraId: GpraId): Promise<boolean> {
+    const invalidation = await storage.getGpraInvalidationActByGpra(gpraId);
+    if (invalidation) return false;
+    const supersession = await storage.getGpraSupersessionActByPredecessor(gpraId);
+    if (supersession) return false;
+    return true;
+  }
+
   async function findForwardActiveGpraByRvaObligation(
     rvaId: RealizedVisualArtifactId,
     obligationId: ProductionObligationId,
@@ -567,8 +701,7 @@ export function createDomain3RepositoryWithStorage(
     const listed = await storage.listGpraGrantsByRvaObligation(rvaId, obligationId);
     const retention: GpraGrantRecord[] = [];
     for (const grant of listed) {
-      const invalidation = await storage.getGpraInvalidationActByGpra(grant.gpraId);
-      if (!invalidation) {
+      if (await isRetentionForwardActive(grant.gpraId)) {
         retention.push(grant);
       }
     }
@@ -577,6 +710,68 @@ export function createDomain3RepositoryWithStorage(
     const latest = sorted[sorted.length - 1];
     if (!latest) return null;
     return rehydrateTrustedGpraGrant(latest);
+  }
+
+  async function findAuthoritativeGpraByObligationContext(
+    obligationId: ProductionObligationId,
+    handoffConsumerContextId: string,
+  ): Promise<GpraGrantRecord | null> {
+    const contextId = handoffConsumerContextId.trim();
+    if (!contextId) {
+      throw new OrchestraConstitutionalError(
+        "Authoritative GPRA lookup requires non-empty handoffConsumerContextId",
+        "invalid_gpra_supersession",
+        ["FI-DSN-STD-014-R69", "FI-DSN-STD-014-R71"],
+      );
+    }
+    const listed = await storage.listGpraGrantsByObligation(obligationId);
+    const authoritative: GpraGrantRecord[] = [];
+    for (const grant of listed) {
+      const invalidation = await storage.getGpraInvalidationActByGpra(grant.gpraId);
+      if (invalidation) continue;
+      const supersession = await storage.getGpraSupersessionActByPredecessor(grant.gpraId);
+      if (supersession && supersession.handoffConsumerContextId === contextId) continue;
+      // Fail-closed: any supersession of this predecessor terminates forward authority
+      // for unspecified contexts when evaluating authority under a specific context —
+      // only skip when the act's context matches the queried context (R71).
+      if (supersession && supersession.handoffConsumerContextId !== contextId) {
+        // Predecessor superseded in a different context may still be Retention for this context.
+        authoritative.push(grant);
+        continue;
+      }
+      if (!supersession) {
+        authoritative.push(grant);
+      }
+    }
+    if (authoritative.length === 0) return null;
+    const sorted = [...authoritative].sort((a, b) => a.grantedAt.localeCompare(b.grantedAt));
+    const latest = sorted[sorted.length - 1];
+    if (!latest) return null;
+    return rehydrateTrustedGpraGrant(latest);
+  }
+
+  async function persistSupersessionAct(
+    act: GpraSupersessionActRecord,
+  ): Promise<GpraSupersessionActRecord> {
+    validatePersistedGpraSupersessionAct(act);
+    try {
+      await storage.putGpraSupersessionAct(act);
+    } catch (error) {
+      throw new OrchestraConstitutionalError(
+        error instanceof Error ? error.message : "Failed to persist GPRA supersession act",
+        "invalid_gpra_supersession",
+        ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
+      );
+    }
+    const loaded = await storage.getGpraSupersessionAct(act.supersessionActId);
+    if (!loaded) {
+      throw new OrchestraConstitutionalError(
+        "Failed to persist GPRA supersession act",
+        "invalid_domain3_persistence_state",
+        ["FI-DSN-STD-014-R65"],
+      );
+    }
+    return rehydrateTrustedGpraSupersessionAct(loaded, { treatAsAlreadyPersisted: true });
   }
 
   async function loadG7DispositionRehydrationContext(reviewId: ProductionReadinessReviewId): Promise<{
@@ -1423,17 +1618,100 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R42", "FI-DSN-STD-014-R43"],
         );
       }
-      const scopeGrants = await storage.listGpraGrantsByRvaObligation(
-        review.rvaId,
-        review.obligationId,
-      );
-      for (const prior of scopeGrants) {
+
+      const obligationGrants = await storage.listGpraGrantsByObligation(review.obligationId);
+      const retentionPriors: GpraGrantRecord[] = [];
+      let onlyInvalidatedOrSupersededPriors = true;
+      for (const prior of obligationGrants) {
         const priorInvalidation = await storage.getGpraInvalidationActByGpra(prior.gpraId);
-        if (!priorInvalidation) {
+        if (priorInvalidation) continue;
+        const priorSupersession = await storage.getGpraSupersessionActByPredecessor(prior.gpraId);
+        if (priorSupersession) continue;
+        onlyInvalidatedOrSupersededPriors = false;
+        retentionPriors.push(prior);
+      }
+
+      if (retentionPriors.length > 0) {
+        if (!input.st1Supersession) {
           throw new OrchestraConstitutionalError(
-            "Forward-active GPRA already exists for this RVA under the Production Obligation; supersession is deferred to G9",
-            "invalid_gpra_grant",
-            ["FI-DSN-STD-014-R43", "FI-DSN-STD-014-R62"],
+            "Forward-active Retention GPRA already exists for this Production Obligation; ST-1 supersession parameters are required for replacement grant succession",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R66", "FI-DSN-STD-014-R69", "FI-DSN-STD-014-R70"],
+          );
+        }
+        if (retentionPriors.length > 1) {
+          throw new OrchestraConstitutionalError(
+            "Multiple Retention GPRAs exist for this Production Obligation; cannot establish ST-1 succession without resolving conflicting Retention priors",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R69", "FI-DSN-STD-014-R70"],
+          );
+        }
+        const predecessor = retentionPriors[0]!;
+        if (input.st1Supersession.predecessorGpraId !== predecessor.gpraId) {
+          throw new OrchestraConstitutionalError(
+            "ST-1 st1Supersession.predecessorGpraId must identify the Retention predecessor GPRA for this obligation",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R66", "FI-DSN-STD-014-R69"],
+          );
+        }
+        const predInvalidation = await storage.getGpraInvalidationActByGpra(predecessor.gpraId);
+        if (predInvalidation) {
+          throw new OrchestraConstitutionalError(
+            "Invalidated predecessor cannot become Superseded; replacement after Invalidated remains G8/G6 path without supersession act",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R70"],
+          );
+        }
+        // Pre-validate SSAC / context / actor before persisting successor grant (avoid orphan grant).
+        assertEstablishedSupersessionAuthorityClass(input.st1Supersession.authorityClassId);
+        if (!input.st1Supersession.handoffConsumerContextId.trim()) {
+          throw new OrchestraConstitutionalError(
+            "GPRA supersession requires non-empty handoffConsumerContextId (opaque consumer context; catalog deferred G11)",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R69"],
+          );
+        }
+        if (!input.st1Supersession.triggeringGoverningSourceId.trim()) {
+          throw new OrchestraConstitutionalError(
+            "GPRA supersession requires a triggering governing source identifier",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
+          );
+        }
+        if (!input.st1Supersession.constitutionalEvidence.trim()) {
+          throw new OrchestraConstitutionalError(
+            "GPRA supersession requires documented constitutional evidence supporting the ST family finding",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R69"],
+          );
+        }
+        if (!input.st1Supersession.supersededBy.trim()) {
+          throw new OrchestraConstitutionalError(
+            "GPRA supersession requires attributable supersession authority actor",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R68"],
+          );
+        }
+      } else if (input.st1Supersession) {
+        // Caller offered ST-1 but no Retention prior — may be Invalidated-only path misuse
+        const nominated = await storage.getGpraGrant(input.st1Supersession.predecessorGpraId);
+        if (nominated) {
+          const nominatedInvalidation = await storage.getGpraInvalidationActByGpra(
+            nominated.gpraId,
+          );
+          if (nominatedInvalidation) {
+            throw new OrchestraConstitutionalError(
+              "Invalidated predecessor cannot become Superseded; grant without supersession after Invalidated (G8 R62)",
+              "invalid_gpra_supersession",
+              ["FI-DSN-STD-014-R62", "FI-DSN-STD-014-R70"],
+            );
+          }
+        }
+        if (!onlyInvalidatedOrSupersededPriors || obligationGrants.length === 0) {
+          throw new OrchestraConstitutionalError(
+            "ST-1 supersession requires an existing Retention predecessor GPRA",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R66", "FI-DSN-STD-014-R70"],
           );
         }
       }
@@ -1462,7 +1740,43 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R42"],
         );
       }
-      return rehydrateTrustedGpraGrant(loaded);
+      const successorGpra = await rehydrateTrustedGpraGrant(loaded);
+
+      if (input.st1Supersession && retentionPriors.length === 1) {
+        const predecessorRaw = retentionPriors[0]!;
+        const predecessorGpra = await rehydrateTrustedGpraGrant(predecessorRaw);
+        const predecessorContext = await loadG6AuthorityRehydrationContext(
+          predecessorGpra.reviewId,
+        );
+        const predecessorApprovalRaw = await storage.getApprovalAct(predecessorGpra.approvalActId);
+        if (!predecessorApprovalRaw) {
+          throw new OrchestraConstitutionalError(
+            "ST-1 supersession requires persisted Approval in predecessor GPRA grant lineage",
+            "invalid_gpra_supersession",
+            ["FI-DSN-STD-014-R69"],
+          );
+        }
+        const predecessorApproval = await rehydrateTrustedApprovalAct(predecessorApprovalRaw);
+        const act = createGpraSupersessionAct({
+          predecessorGpra,
+          successorGpra,
+          predecessorApproval,
+          successorApproval: approval,
+          predecessorReview: predecessorContext.review,
+          successorReview: review,
+          predecessorDetermination: predecessorContext.determination,
+          successorDetermination: determination,
+          stFamily: "replacement_gpra_grant",
+          handoffConsumerContextId: input.st1Supersession.handoffConsumerContextId,
+          triggeringGoverningSourceId: input.st1Supersession.triggeringGoverningSourceId,
+          constitutionalEvidence: input.st1Supersession.constitutionalEvidence,
+          authorityClassId: input.st1Supersession.authorityClassId,
+          supersededBy: input.st1Supersession.supersededBy,
+        });
+        await persistSupersessionAct(act);
+      }
+
+      return successorGpra;
     },
 
     async invalidateGpra(input) {
@@ -1527,6 +1841,105 @@ export function createDomain3RepositoryWithStorage(
       return rehydrateTrustedGpraInvalidationAct(loaded);
     },
 
+    async supersedeGpra(input) {
+      assertSupersessionTriggerFamily(input.stFamily);
+      assertEstablishedSupersessionAuthorityClass(input.authorityClassId);
+
+      const predecessorRaw = await storage.getGpraGrant(input.predecessorGpraId);
+      const successorRaw = await storage.getGpraGrant(input.successorGpraId);
+      if (!predecessorRaw || !successorRaw) {
+        throw new OrchestraConstitutionalError(
+          "GPRA supersession requires existing predecessor and successor GPRA grants",
+          "invalid_gpra_supersession",
+          ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
+        );
+      }
+      const predecessorGpra = await rehydrateTrustedGpraGrant(predecessorRaw);
+      const successorGpra = await rehydrateTrustedGpraGrant(successorRaw);
+
+      const predecessorInvalidation = await storage.getGpraInvalidationActByGpra(
+        predecessorGpra.gpraId,
+      );
+      if (predecessorInvalidation) {
+        throw new OrchestraConstitutionalError(
+          "Invalidated predecessor cannot become Superseded",
+          "invalid_gpra_supersession",
+          ["FI-DSN-STD-014-R70"],
+        );
+      }
+      const successorInvalidation = await storage.getGpraInvalidationActByGpra(
+        successorGpra.gpraId,
+      );
+      if (successorInvalidation) {
+        throw new OrchestraConstitutionalError(
+          "Successor GPRA must be Retention (not invalidated) to govern after supersession",
+          "invalid_gpra_supersession",
+          ["FI-DSN-STD-014-R70", "FI-DSN-STD-014-R71"],
+        );
+      }
+      const existingSupersession = await storage.getGpraSupersessionActByPredecessor(
+        predecessorGpra.gpraId,
+      );
+      if (existingSupersession) {
+        throw new OrchestraConstitutionalError(
+          "Predecessor GPRA already superseded; duplicate supersession is forbidden",
+          "invalid_gpra_supersession",
+          ["FI-DSN-STD-014-R69", "FI-DSN-STD-014-R70"],
+        );
+      }
+
+      if (
+        (input.stFamily === "replacement_gpra_grant" ||
+          input.stFamily === "authoritative_succession_rule") &&
+        predecessorGpra.obligationId !== successorGpra.obligationId
+      ) {
+        throw new OrchestraConstitutionalError(
+          "ST-1/ST-2 supersession requires same Production Obligation for predecessor and successor",
+          "invalid_gpra_supersession",
+          ["FI-DSN-STD-014-R66", "FI-DSN-STD-014-R69"],
+        );
+      }
+      if (predecessorGpra.programId !== successorGpra.programId) {
+        throw new OrchestraConstitutionalError(
+          "GPRA supersession requires same Production Program for predecessor and successor",
+          "invalid_gpra_supersession",
+          ["FI-DSN-STD-014-R69"],
+        );
+      }
+
+      const predecessorContext = await loadG6AuthorityRehydrationContext(predecessorGpra.reviewId);
+      const successorContext = await loadG6AuthorityRehydrationContext(successorGpra.reviewId);
+      const predecessorApprovalRaw = await storage.getApprovalAct(predecessorGpra.approvalActId);
+      const successorApprovalRaw = await storage.getApprovalAct(successorGpra.approvalActId);
+      if (!predecessorApprovalRaw || !successorApprovalRaw) {
+        throw new OrchestraConstitutionalError(
+          "GPRA supersession requires persisted Approvals in grant lineages",
+          "invalid_gpra_supersession",
+          ["FI-DSN-STD-014-R69"],
+        );
+      }
+      const predecessorApproval = await rehydrateTrustedApprovalAct(predecessorApprovalRaw);
+      const successorApproval = await rehydrateTrustedApprovalAct(successorApprovalRaw);
+
+      const act = createGpraSupersessionAct({
+        predecessorGpra,
+        successorGpra,
+        predecessorApproval,
+        successorApproval,
+        predecessorReview: predecessorContext.review,
+        successorReview: successorContext.review,
+        predecessorDetermination: predecessorContext.determination,
+        successorDetermination: successorContext.determination,
+        stFamily: input.stFamily,
+        handoffConsumerContextId: input.handoffConsumerContextId,
+        triggeringGoverningSourceId: input.triggeringGoverningSourceId,
+        constitutionalEvidence: input.constitutionalEvidence,
+        authorityClassId: input.authorityClassId,
+        supersededBy: input.supersededBy,
+      });
+      return persistSupersessionAct(act);
+    },
+
     async loadApprovalAct(approvalActId) {
       const loaded = await storage.getApprovalAct(approvalActId);
       if (!loaded) return null;
@@ -1579,7 +1992,19 @@ export function createDomain3RepositoryWithStorage(
       return rehydrateTrustedGpraInvalidationAct(loaded);
     },
 
-    async evaluateGpraValidity(gpraId) {
+    async loadGpraSupersessionAct(supersessionActId) {
+      const loaded = await storage.getGpraSupersessionAct(supersessionActId);
+      if (!loaded) return null;
+      return rehydrateTrustedGpraSupersessionAct(loaded, { treatAsAlreadyPersisted: true });
+    },
+
+    async loadGpraSupersessionActByPredecessor(predecessorGpraId) {
+      const loaded = await storage.getGpraSupersessionActByPredecessor(predecessorGpraId);
+      if (!loaded) return null;
+      return rehydrateTrustedGpraSupersessionAct(loaded, { treatAsAlreadyPersisted: true });
+    },
+
+    async evaluateGpraValidity(gpraId, handoffConsumerContextId) {
       const gpraRaw = await storage.getGpraGrant(gpraId);
       if (!gpraRaw) {
         throw new OrchestraConstitutionalError(
@@ -1593,11 +2018,38 @@ export function createDomain3RepositoryWithStorage(
       const invalidation = invalidationRaw
         ? await rehydrateTrustedGpraInvalidationAct(invalidationRaw)
         : null;
-      return evaluateGpraValidityFromInvalidation(invalidation, gpra.gpraId);
+      const supersessionRaw = await storage.getGpraSupersessionActByPredecessor(gpra.gpraId);
+      let supersession: GpraSupersessionActRecord | null = null;
+      if (supersessionRaw) {
+        const rehydrated = await rehydrateTrustedGpraSupersessionAct(supersessionRaw, {
+          treatAsAlreadyPersisted: true,
+        });
+        if (handoffConsumerContextId !== undefined) {
+          const ctx = handoffConsumerContextId.trim();
+          if (rehydrated.handoffConsumerContextId === ctx) {
+            supersession = rehydrated;
+          }
+        } else {
+          // Fail-closed for forward force when context omitted
+          supersession = rehydrated;
+        }
+      }
+      return evaluateGpraValidityFromPostureActs({
+        gpraId: gpra.gpraId,
+        invalidation,
+        supersession,
+      });
     },
 
     async loadForwardActiveGpraByRvaObligation(input) {
       return findForwardActiveGpraByRvaObligation(input.rvaId, input.obligationId);
+    },
+
+    async loadAuthoritativeGpraByObligationContext(input) {
+      return findAuthoritativeGpraByObligationContext(
+        input.obligationId,
+        input.handoffConsumerContextId,
+      );
     },
 
     async evaluateDownstreamDispositionEligibility(reviewId) {

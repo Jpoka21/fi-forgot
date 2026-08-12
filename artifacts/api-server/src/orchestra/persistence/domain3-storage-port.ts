@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G8 (Review through GPRA Retention / Invalidation).
+ * Domain 3 storage port — G2–G9 (Review through GPRA Supersession / Succession).
  */
 
 import type {
@@ -15,6 +15,8 @@ import type {
   GpraId,
   GpraInvalidationActId,
   GpraInvalidationActRecord,
+  GpraSupersessionActId,
+  GpraSupersessionActRecord,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
   ResubmissionEligibilityId,
@@ -122,6 +124,21 @@ export interface Domain3StoragePort {
     invalidationActId: GpraInvalidationActId,
   ): Promise<GpraInvalidationActRecord | null>;
   getGpraInvalidationActByGpra(gpraId: GpraId): Promise<GpraInvalidationActRecord | null>;
+
+  /** All GPRA grants for a Production Obligation across RVAs (chronological source of truth). */
+  listGpraGrantsByObligation(obligationId: ProductionObligationId): Promise<GpraGrantRecord[]>;
+
+  /**
+   * Persist supersession act. Unique supersessionActId and unique predecessorGpraId
+   * (one supersession act per predecessor GPRA identity — R69/R70).
+   */
+  putGpraSupersessionAct(act: GpraSupersessionActRecord): Promise<void>;
+  getGpraSupersessionAct(
+    supersessionActId: GpraSupersessionActId,
+  ): Promise<GpraSupersessionActRecord | null>;
+  getGpraSupersessionActByPredecessor(
+    predecessorGpraId: GpraId,
+  ): Promise<GpraSupersessionActRecord | null>;
 
   putDownstreamDeficiencyRecord(record: DownstreamDeficiencyRecord): Promise<void>;
   getDownstreamDeficiencyRecord(

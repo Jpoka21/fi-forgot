@@ -5,6 +5,7 @@
  * coherence (ORCH-IMP-010.2). Structural field shape alone is insufficient.
  * G7 downstream disposition likewise requires joint Review/Determination coherence.
  * G8 GPRA invalidation requires GPRA + Approval + Review joint coherence.
+ * G9 GPRA supersession requires predecessor + successor GPRA / Approval / Review joint coherence.
  */
 
 import type {
@@ -14,6 +15,7 @@ import type {
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
+  GpraSupersessionActRecord,
   ProductionReadinessReview,
   ResubmissionEligibilityRecord,
   ReturnPostureRecord,
@@ -23,6 +25,7 @@ import type {
   ReworkAuthorizationRecord,
   ReworkAuthorizationWithholdingRecord,
 } from "../domain3-types.js";
+import type { RealizedVisualArtifact } from "../domain2-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
 import {
   assertPersistedApprovalAuthorityCoherence,
@@ -37,6 +40,7 @@ import {
   assertPersistedReworkAuthorizationWithholdingCoherence,
 } from "./g7-rehydration-coherence.js";
 import { assertPersistedGpraInvalidationCoherence } from "./g8-rehydration-coherence.js";
+import { assertPersistedGpraSupersessionCoherence } from "./g9-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
@@ -44,6 +48,7 @@ import {
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
+  validatePersistedGpraSupersessionAct,
   validatePersistedProductionReadinessReview,
   validatePersistedResubmissionEligibility,
   validatePersistedReturnPosture,
@@ -84,6 +89,25 @@ export interface G6GpraRehydrationContext extends G6AuthorityRehydrationContext 
 
 export interface G8InvalidationRehydrationContext extends G6GpraRehydrationContext {
   readonly gpra: unknown;
+}
+
+export interface G9SupersessionRehydrationContext {
+  readonly predecessorGpra: unknown;
+  readonly successorGpra: unknown;
+  readonly predecessorApproval: unknown;
+  readonly successorApproval: unknown;
+  readonly predecessorReview: unknown;
+  readonly successorReview: unknown;
+  readonly predecessorDetermination: unknown;
+  readonly successorDetermination: unknown;
+  readonly predecessorEvidenceRecords: readonly unknown[];
+  readonly predecessorActivityRecords: readonly unknown[];
+  readonly successorEvidenceRecords: readonly unknown[];
+  readonly successorActivityRecords: readonly unknown[];
+  readonly predecessorInvalidated: boolean;
+  readonly predecessorAlreadySupersededInContext: boolean;
+  readonly predecessorRva?: RealizedVisualArtifact | null;
+  readonly successorRva?: RealizedVisualArtifact | null;
 }
 
 export interface G7DispositionRehydrationContext {
@@ -236,6 +260,52 @@ export function rehydrateGpraInvalidationAct(
     gpra: context.gpra as GpraGrantRecord,
     approval: context.approval as ApprovalActRecord,
     ...linked,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+/**
+ * Trusted G9 GPRA supersession rehydration — joint predecessor + successor coherence.
+ */
+export function rehydrateGpraSupersessionAct(
+  raw: unknown,
+  context: G9SupersessionRehydrationContext,
+): GpraSupersessionActRecord {
+  validatePersistedGpraSupersessionAct(raw);
+  validatePersistedGpraGrant(context.predecessorGpra);
+  validatePersistedGpraGrant(context.successorGpra);
+  validatePersistedApprovalAct(context.predecessorApproval);
+  validatePersistedApprovalAct(context.successorApproval);
+  const predecessorLinked = validateEvidenceAndActivityContext({
+    review: context.predecessorReview,
+    determination: context.predecessorDetermination,
+    evidenceRecords: context.predecessorEvidenceRecords,
+    activityRecords: context.predecessorActivityRecords,
+  });
+  const successorLinked = validateEvidenceAndActivityContext({
+    review: context.successorReview,
+    determination: context.successorDetermination,
+    evidenceRecords: context.successorEvidenceRecords,
+    activityRecords: context.successorActivityRecords,
+  });
+  assertPersistedGpraSupersessionCoherence({
+    supersession: raw as GpraSupersessionActRecord,
+    predecessorGpra: context.predecessorGpra as GpraGrantRecord,
+    successorGpra: context.successorGpra as GpraGrantRecord,
+    predecessorApproval: context.predecessorApproval as ApprovalActRecord,
+    successorApproval: context.successorApproval as ApprovalActRecord,
+    predecessorReview: predecessorLinked.review,
+    successorReview: successorLinked.review,
+    predecessorDetermination: predecessorLinked.determination,
+    successorDetermination: successorLinked.determination,
+    predecessorEvidenceRecords: predecessorLinked.evidenceRecords,
+    predecessorActivityRecords: predecessorLinked.activityRecords,
+    successorEvidenceRecords: successorLinked.evidenceRecords,
+    successorActivityRecords: successorLinked.activityRecords,
+    predecessorInvalidated: context.predecessorInvalidated,
+    predecessorAlreadySupersededInContext: context.predecessorAlreadySupersededInContext,
+    predecessorRva: context.predecessorRva,
+    successorRva: context.successorRva,
   });
   return deepFreeze(structuredClone(raw));
 }

@@ -569,9 +569,9 @@ export type GpraInvalidationActId = string & { readonly __brand: "GpraInvalidati
 
 /**
  * RIVP peer postures at Layer B. G8 owns Retention default and Invalidated.
- * Superseded is G9-owned and not established by G8 acts.
+ * G9 owns Superseded via separate supersession acts (R64–R72).
  */
-export type GpraValidityPosture = "retention" | "invalidated";
+export type GpraValidityPosture = "retention" | "invalidated" | "superseded";
 
 /** PVTA IT families (R56) — machine encodings of IT-1 / IT-2 / IT-3. */
 export type InvalidationTriggerFamily =
@@ -623,8 +623,71 @@ export interface GpraInvalidationActRecord {
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }
 
+// --- G9 GPRA Supersession and Succession (R64–R72) ---
+
+export type GpraSupersessionActId = string & { readonly __brand: "GpraSupersessionActId" };
+
+/** ST families (R66) — machine encodings of ST-1 / ST-2 / ST-3. */
+export type SupersessionTriggerFamily =
+  | "replacement_gpra_grant"
+  | "authoritative_succession_rule"
+  | "context_rebinding";
+
+export type SupersessionAuthorityConstitutionalScope =
+  | "production_obligation"
+  | "production_program";
+
+export type SupersessionAuthorityClassId =
+  | "supersession_authority_production_obligation_scope"
+  | "supersession_authority_production_program_scope";
+
 /**
- * Constitutional distinction: historical GPRA grant record vs forward-active force (R52–R53, R60–R62).
+ * Separate governed supersession act establishing GPRA Superseded posture for the
+ * predecessor in a handoff consumer context (R64–R71). Does not mutate GpraGrantRecord;
+ * additive and historically preservative (R65). Not invalidation (R70) and not lifecycle
+ * termination. Does not establish withdrawal/suspension/third-revocation posture (R72).
+ */
+export interface GpraSupersessionActRecord {
+  readonly supersessionActId: GpraSupersessionActId;
+  readonly predecessorGpraId: GpraId;
+  readonly successorGpraId: GpraId;
+  readonly predecessorApprovalActId: ApprovalActId;
+  readonly successorApprovalActId: ApprovalActId;
+  readonly predecessorReviewId: ProductionReadinessReviewId;
+  readonly successorReviewId: ProductionReadinessReviewId;
+  readonly predecessorDeterminationId: ReviewDeterminationId;
+  readonly successorDeterminationId: ReviewDeterminationId;
+  readonly predecessorRvaId: RealizedVisualArtifactId;
+  readonly successorRvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  /** Successor obligation; ST-1/ST-2 require match with predecessor (R69). */
+  readonly obligationId: ProductionObligationId;
+  readonly stFamily: SupersessionTriggerFamily;
+  /**
+   * Opaque handoff consumer context identifier (R69). Catalog deferred to G11 —
+   * do not invent catalog membership here. For ST-3, this is the superseded context.
+   */
+  readonly handoffConsumerContextId: string;
+  readonly triggeringGoverningSourceId: string;
+  readonly constitutionalEvidence: string;
+  readonly authorityClassId: SupersessionAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-014-014";
+  readonly supersededAt: string;
+  readonly supersededBy: string;
+  readonly historicalPredecessorPreserved: true;
+  readonly determinationNotRevised: true;
+  readonly notLifecycleTermination: true;
+  readonly notInvalidation: true;
+  readonly predecessorForwardAuthorityTerminatedInContext: true;
+  readonly successorAuthoritativeInContext: true;
+  readonly cannotOverwritePredecessor: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Constitutional distinction: historical GPRA grant record vs forward-active force (R52–R53, R60–R62, R70–R71).
  */
 export interface GpraValidityAssessment {
   readonly gpraId: GpraId;
@@ -632,6 +695,7 @@ export interface GpraValidityAssessment {
   /** True only under forward-active Retention. */
   readonly forwardActive: boolean;
   readonly invalidationActId: GpraInvalidationActId | null;
+  readonly supersessionActId: GpraSupersessionActId | null;
   readonly newHandoffEligibility: boolean;
   readonly newIntakeAuthority: boolean;
 }

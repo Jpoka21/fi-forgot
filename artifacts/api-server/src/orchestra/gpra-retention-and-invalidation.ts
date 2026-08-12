@@ -3,7 +3,8 @@
  *
  * Retention is the default after G6 grant until a separate invalidation act.
  * Invalidated terminates forward Handoff/intake on that GPRA only.
- * Does not implement Superseded (G9), withdrawal posture, suspension, or expiry.
+ * Superseded posture evaluation is owned by G9; this module keeps a thin
+ * invalidation-only wrapper for backward compatibility.
  */
 
 import { randomUUID } from "node:crypto";
@@ -23,6 +24,7 @@ import type {
   ReviewDeterminationRecord,
 } from "./domain3-types.js";
 import { OrchestraConstitutionalError } from "./errors.js";
+import { evaluateGpraValidityFromPostureActs } from "./gpra-supersession-and-succession.js";
 import {
   assertEstablishedInvalidationAuthorityClass,
   resolveEstablishedInvalidationAuthorityClass,
@@ -56,30 +58,10 @@ export function evaluateGpraValidityFromInvalidation(
   invalidation: GpraInvalidationActRecord | null,
   gpraId: GpraGrantRecord["gpraId"],
 ): GpraValidityAssessment {
-  if (!invalidation) {
-    return Object.freeze({
-      gpraId,
-      posture: "retention",
-      forwardActive: true,
-      invalidationActId: null,
-      newHandoffEligibility: true,
-      newIntakeAuthority: true,
-    });
-  }
-  if (invalidation.gpraId !== gpraId) {
-    throw new OrchestraConstitutionalError(
-      "GPRA validity assessment invalidation act does not bind the subject GPRA",
-      "invalid_gpra_invalidation",
-      ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
-    );
-  }
-  return Object.freeze({
+  return evaluateGpraValidityFromPostureActs({
     gpraId,
-    posture: "invalidated",
-    forwardActive: false,
-    invalidationActId: invalidation.invalidationActId,
-    newHandoffEligibility: false,
-    newIntakeAuthority: false,
+    invalidation,
+    supersession: null,
   });
 }
 

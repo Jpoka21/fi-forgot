@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G8.
+ * In-memory Domain 3 storage adapter — G2–G9.
  */
 
 import type {
@@ -9,6 +9,7 @@ import type {
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
+  GpraSupersessionActRecord,
   ProductionReadinessReview,
   ResubmissionEligibilityRecord,
   ReturnPostureRecord,
@@ -41,8 +42,12 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const gpraByReview = new Map<string, string>();
   /** Multiple GPRA ids per rva+obligation (R62 replacement after Invalidated). */
   const gpraIdsByRvaObligation = new Map<string, string[]>();
+  /** Multiple GPRA ids per obligation across RVAs (G9 ST-1 succession). */
+  const gpraIdsByObligation = new Map<string, string[]>();
   const invalidationsById = new Map<string, GpraInvalidationActRecord>();
   const invalidationByGpra = new Map<string, string>();
+  const supersessionsById = new Map<string, GpraSupersessionActRecord>();
+  const supersessionByPredecessor = new Map<string, string>();
   const deficienciesById = new Map<string, DownstreamDeficiencyRecord>();
   const deficiencyByReview = new Map<string, string>();
   const reworkAuthById = new Map<string, ReworkAuthorizationRecord>();
@@ -274,6 +279,9 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       const scopeList = gpraIdsByRvaObligation.get(key) ?? [];
       scopeList.push(gpra.gpraId);
       gpraIdsByRvaObligation.set(key, scopeList);
+      const obligationList = gpraIdsByObligation.get(gpra.obligationId) ?? [];
+      obligationList.push(gpra.gpraId);
+      gpraIdsByObligation.set(gpra.obligationId, obligationList);
       gprasById.set(gpra.gpraId, structuredClone(gpra));
       gpraByReview.set(gpra.reviewId, gpra.gpraId);
     },
@@ -324,6 +332,38 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       const id = invalidationByGpra.get(gpraId);
       if (!id) return null;
       return this.getGpraInvalidationAct(id as GpraInvalidationActRecord["invalidationActId"]);
+    },
+
+    async listGpraGrantsByObligation(obligationId) {
+      const ids = gpraIdsByObligation.get(obligationId) ?? [];
+      return ids
+        .map((id) => gprasById.get(id))
+        .filter((item): item is GpraGrantRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGpraSupersessionAct(act) {
+      if (supersessionsById.has(act.supersessionActId)) {
+        throw new Error(`Duplicate GPRA supersession act identity: ${act.supersessionActId}`);
+      }
+      if (supersessionByPredecessor.has(act.predecessorGpraId)) {
+        throw new Error(
+          `Duplicate GPRA supersession act for predecessor GPRA: ${act.predecessorGpraId}`,
+        );
+      }
+      supersessionsById.set(act.supersessionActId, structuredClone(act));
+      supersessionByPredecessor.set(act.predecessorGpraId, act.supersessionActId);
+    },
+
+    async getGpraSupersessionAct(supersessionActId) {
+      const act = supersessionsById.get(supersessionActId);
+      return act ? structuredClone(act) : null;
+    },
+
+    async getGpraSupersessionActByPredecessor(predecessorGpraId) {
+      const id = supersessionByPredecessor.get(predecessorGpraId);
+      if (!id) return null;
+      return this.getGpraSupersessionAct(id as GpraSupersessionActRecord["supersessionActId"]);
     },
 
     async putDownstreamDeficiencyRecord(record) {

@@ -156,6 +156,23 @@ export {
 } from "./gpra-retention-and-invalidation.js";
 
 export {
+  FROZEN_ESTABLISHED_SUPERSESSION_AUTHORITY_CLASSES,
+  isCanonicalEstablishedSupersessionAuthorityClassId,
+  assertEstablishedSupersessionAuthorityClass,
+  resolveEstablishedSupersessionAuthorityClass,
+} from "./supersession-authority.js";
+
+export {
+  MANDATORY_SUPERSESSION_TRIGGER_FAMILIES,
+  isMandatorySupersessionTriggerFamily,
+} from "./supersession-trigger-families.js";
+
+export {
+  GPRA_SUPERSESSION_AND_SUCCESSION_TRACEABILITY,
+  evaluateGpraValidityFromPostureActs,
+} from "./gpra-supersession-and-succession.js";
+
+export {
   REVIEW_DETERMINATION_TRACEABILITY,
   LEGAL_REVIEW_DETERMINATION_OUTCOMES,
   isLegalReviewDeterminationOutcome,
@@ -216,11 +233,16 @@ export type {
   DownstreamDispositionEligibility,
   GpraInvalidationActId,
   GpraInvalidationActRecord,
+  GpraSupersessionActId,
+  GpraSupersessionActRecord,
   GpraValidityAssessment,
   GpraValidityPosture,
   InvalidationTriggerFamily,
   InvalidationAuthorityConstitutionalScope,
   InvalidationAuthorityClassId,
+  SupersessionTriggerFamily,
+  SupersessionAuthorityConstitutionalScope,
+  SupersessionAuthorityClassId,
 } from "./domain3-types.js";
 
 /**

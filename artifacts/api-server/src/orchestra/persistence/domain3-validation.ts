@@ -1,5 +1,5 @@
 /**
- * Domain 3 persistence validation — FI-DSN-STD-014 G2–G8.
+ * Domain 3 persistence validation — FI-DSN-STD-014 G2–G9.
  */
 
 import {
@@ -18,6 +18,7 @@ import type {
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
+  GpraSupersessionActRecord,
   ProductionReadinessReview,
   ResubmissionEligibilityRecord,
   ReturnPostureRecord,
@@ -38,6 +39,11 @@ import { isCanonicalFrozenBindingFiMfgStandardId } from "../manufacturing-author
 import { isLegalReviewDeterminationOutcome } from "../review-determination.js";
 import { isMandatoryReviewDimensionId } from "../review-dimensions.js";
 import { validateLineageCoherence } from "../rva-lifecycle.js";
+import {
+  isCanonicalEstablishedSupersessionAuthorityClassId,
+  resolveEstablishedSupersessionAuthorityClass,
+} from "../supersession-authority.js";
+import { isMandatorySupersessionTriggerFamily } from "../supersession-trigger-families.js";
 
 const ID_PREFIXES = {
   review: "production-readiness-review-",
@@ -53,6 +59,7 @@ const ID_PREFIXES = {
   withholding: "approval-withholding-",
   gpra: "gpra-",
   gpraInvalidation: "gpra-invalidation-",
+  gpraSupersession: "gpra-supersession-",
   downstreamDeficiency: "downstream-deficiency-",
   reworkAuthorization: "rework-authorization-",
   reworkAuthorizationWithholding: "rework-authorization-withholding-",
@@ -1503,6 +1510,142 @@ export function validatePersistedGpraInvalidationAct(
       "GPRA invalidation act requires valid governed creation marker",
       "invalid_gpra_invalidation",
       ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
+    );
+  }
+}
+
+export function validatePersistedGpraSupersessionAct(
+  raw: unknown,
+): asserts raw is GpraSupersessionActRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted GPRA supersession act",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.supersessionActId, ID_PREFIXES.gpraSupersession, "GPRA supersession act");
+  assertBrandedId(record.predecessorGpraId, ID_PREFIXES.gpra, "predecessor GPRA");
+  assertBrandedId(record.successorGpraId, ID_PREFIXES.gpra, "successor GPRA");
+  assertBrandedId(record.predecessorApprovalActId, ID_PREFIXES.approvalAct, "predecessor Approval act");
+  assertBrandedId(record.successorApprovalActId, ID_PREFIXES.approvalAct, "successor Approval act");
+  assertBrandedId(
+    record.predecessorReviewId,
+    ID_PREFIXES.review,
+    "predecessor Production-readiness Review",
+  );
+  assertBrandedId(
+    record.successorReviewId,
+    ID_PREFIXES.review,
+    "successor Production-readiness Review",
+  );
+  assertBrandedId(
+    record.predecessorDeterminationId,
+    ID_PREFIXES.determination,
+    "predecessor Review Determination",
+  );
+  assertBrandedId(
+    record.successorDeterminationId,
+    ID_PREFIXES.determination,
+    "successor Review Determination",
+  );
+  assertBrandedId(record.predecessorRvaId, ID_PREFIXES.rva, "predecessor Realized Visual Artifact");
+  assertBrandedId(record.successorRvaId, ID_PREFIXES.rva, "successor Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (record.predecessorGpraId === record.successorGpraId) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA supersession requires distinct predecessor and successor GPRA identities",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
+    );
+  }
+
+  if (!isMandatorySupersessionTriggerFamily(record.stFamily)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA supersession requires mandatory ST family",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R66"],
+    );
+  }
+  if (!isCanonicalEstablishedSupersessionAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA supersession requires established SSAC authority class",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R68"],
+    );
+  }
+  resolveEstablishedSupersessionAuthorityClass(
+    record.authorityClassId as GpraSupersessionActRecord["authorityClassId"],
+  );
+  if (record.authorityGoverningSourceId !== "PD-STD-014-014") {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA supersession requires PD-STD-014-014 governing source",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R68"],
+    );
+  }
+
+  if (
+    typeof record.handoffConsumerContextId !== "string" ||
+    !record.handoffConsumerContextId.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "GPRA supersession requires non-empty handoffConsumerContextId",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R69"],
+    );
+  }
+  if (
+    typeof record.triggeringGoverningSourceId !== "string" ||
+    !record.triggeringGoverningSourceId.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "GPRA supersession requires triggeringGoverningSourceId",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
+    );
+  }
+  if (typeof record.constitutionalEvidence !== "string" || !record.constitutionalEvidence.trim()) {
+    throw new OrchestraConstitutionalError(
+      "GPRA supersession requires constitutionalEvidence",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R69"],
+    );
+  }
+  if (typeof record.supersededAt !== "string" || typeof record.supersededBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "GPRA supersession requires supersededAt and supersededBy",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R68", "FI-DSN-STD-014-R69"],
+    );
+  }
+
+  if (
+    record.historicalPredecessorPreserved !== true ||
+    record.determinationNotRevised !== true ||
+    record.notLifecycleTermination !== true ||
+    record.notInvalidation !== true ||
+    record.predecessorForwardAuthorityTerminatedInContext !== true ||
+    record.successorAuthoritativeInContext !== true ||
+    record.cannotOverwritePredecessor !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA supersession must preserve historical predecessor, terminate forward authority in context, and forbid overwrite without invalidation or lifecycle termination",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R70", "FI-DSN-STD-014-R71"],
+    );
+  }
+
+  assertAuditMetadata(record.audit, "GPRA supersession act");
+  assertDomain3Traceability(record.traceability, "GPRA supersession act");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "GPRA supersession act requires valid governed creation marker",
+      "invalid_gpra_supersession",
+      ["FI-DSN-STD-014-R65", "FI-DSN-STD-014-R69"],
     );
   }
 }
