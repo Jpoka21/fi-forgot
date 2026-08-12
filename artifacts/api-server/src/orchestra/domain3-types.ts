@@ -562,3 +562,76 @@ export interface DownstreamDispositionEligibility {
   readonly resubmissionEligibilityActEligible: boolean;
   readonly withholdingBlocksApprovalOnly: boolean;
 }
+
+// --- G8 GPRA Retention and Invalidated Posture (R52–R63) ---
+
+export type GpraInvalidationActId = string & { readonly __brand: "GpraInvalidationActId" };
+
+/**
+ * RIVP peer postures at Layer B. G8 owns Retention default and Invalidated.
+ * Superseded is G9-owned and not established by G8 acts.
+ */
+export type GpraValidityPosture = "retention" | "invalidated";
+
+/** PVTA IT families (R56) — machine encodings of IT-1 / IT-2 / IT-3. */
+export type InvalidationTriggerFamily =
+  | "governing_law_failure"
+  | "material_compliance_boundary_change"
+  | "post_grant_discovered_non_compliance";
+
+export type InvalidationAuthorityConstitutionalScope =
+  | "production_obligation"
+  | "production_program";
+
+export type InvalidationAuthorityClassId =
+  | "invalidation_authority_production_obligation_scope"
+  | "invalidation_authority_production_program_scope";
+
+/**
+ * Separate governed invalidation act establishing GPRA Invalidated posture (R54–R59).
+ * Does not mutate GpraGrantRecord; additive and historically preservative (R55, R60).
+ */
+export interface GpraInvalidationActRecord {
+  readonly invalidationActId: GpraInvalidationActId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly itFamily: InvalidationTriggerFamily;
+  /**
+   * For IT-2: must be true — propagated CB change renders GPRA-bound RVA non-compliant
+   * under Production Obligation scope (R58). Null for IT-1 / IT-3.
+   */
+  readonly materialNonComplianceEstablished: true | null;
+  readonly triggeringGoverningSourceId: string;
+  readonly constitutionalEvidence: string;
+  readonly authorityClassId: InvalidationAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-014-007";
+  readonly invalidatedAt: string;
+  readonly invalidatedBy: string;
+  readonly historicalGrantPreserved: true;
+  readonly determinationNotRevised: true;
+  readonly notLifecycleTermination: true;
+  readonly forwardHandoffEligibilityTerminated: true;
+  readonly newIntakeAuthorityTerminated: true;
+  readonly cannotSilentlyReactivate: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Constitutional distinction: historical GPRA grant record vs forward-active force (R52–R53, R60–R62).
+ */
+export interface GpraValidityAssessment {
+  readonly gpraId: GpraId;
+  readonly posture: GpraValidityPosture;
+  /** True only under forward-active Retention. */
+  readonly forwardActive: boolean;
+  readonly invalidationActId: GpraInvalidationActId | null;
+  readonly newHandoffEligibility: boolean;
+  readonly newIntakeAuthority: boolean;
+}

@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G7 (Review through downstream disposition).
+ * Domain 3 storage port — G2–G8 (Review through GPRA Retention / Invalidation).
  */
 
 import type {
@@ -13,6 +13,8 @@ import type {
   DownstreamDeficiencyRecordId,
   GpraGrantRecord,
   GpraId,
+  GpraInvalidationActId,
+  GpraInvalidationActRecord,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
   ResubmissionEligibilityId,
@@ -94,13 +96,32 @@ export interface Domain3StoragePort {
     reviewId: ProductionReadinessReviewId,
   ): Promise<ApprovalWithholdingRecord | null>;
 
+  /**
+   * Persist GPRA grant. Unique gpraId and reviewId; multiple grants per rva+obligation
+   * are allowed (R62 replacement after Invalidated). Use listGpraGrantsByRvaObligation
+   * as the source of truth for scope history.
+   */
   putGpraGrant(gpra: GpraGrantRecord): Promise<void>;
   getGpraGrant(gpraId: GpraId): Promise<GpraGrantRecord | null>;
   getGpraGrantByReview(reviewId: ProductionReadinessReviewId): Promise<GpraGrantRecord | null>;
+  /**
+   * Chronologically latest grant by grantedAt among listGpraGrantsByRvaObligation
+   * (historical; may be Invalidated). Prefer list + repository forward-active filters.
+   */
   getGpraGrantByRvaObligation(
     rvaId: RealizedVisualArtifactId,
     obligationId: ProductionObligationId,
   ): Promise<GpraGrantRecord | null>;
+  listGpraGrantsByRvaObligation(
+    rvaId: RealizedVisualArtifactId,
+    obligationId: ProductionObligationId,
+  ): Promise<GpraGrantRecord[]>;
+
+  putGpraInvalidationAct(act: GpraInvalidationActRecord): Promise<void>;
+  getGpraInvalidationAct(
+    invalidationActId: GpraInvalidationActId,
+  ): Promise<GpraInvalidationActRecord | null>;
+  getGpraInvalidationActByGpra(gpraId: GpraId): Promise<GpraInvalidationActRecord | null>;
 
   putDownstreamDeficiencyRecord(record: DownstreamDeficiencyRecord): Promise<void>;
   getDownstreamDeficiencyRecord(

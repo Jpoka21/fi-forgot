@@ -4,6 +4,7 @@
  * G6 Approval / withholding / GPRA require joint persisted constitutional
  * coherence (ORCH-IMP-010.2). Structural field shape alone is insufficient.
  * G7 downstream disposition likewise requires joint Review/Determination coherence.
+ * G8 GPRA invalidation requires GPRA + Approval + Review joint coherence.
  */
 
 import type {
@@ -12,6 +13,7 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
+  GpraInvalidationActRecord,
   ProductionReadinessReview,
   ResubmissionEligibilityRecord,
   ReturnPostureRecord,
@@ -34,12 +36,14 @@ import {
   assertPersistedReworkAuthorizationCoherence,
   assertPersistedReworkAuthorizationWithholdingCoherence,
 } from "./g7-rehydration-coherence.js";
+import { assertPersistedGpraInvalidationCoherence } from "./g8-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
+  validatePersistedGpraInvalidationAct,
   validatePersistedProductionReadinessReview,
   validatePersistedResubmissionEligibility,
   validatePersistedReturnPosture,
@@ -76,6 +80,10 @@ export interface G6AuthorityRehydrationContext {
 
 export interface G6GpraRehydrationContext extends G6AuthorityRehydrationContext {
   readonly approval: unknown;
+}
+
+export interface G8InvalidationRehydrationContext extends G6GpraRehydrationContext {
+  readonly gpra: unknown;
 }
 
 export interface G7DispositionRehydrationContext {
@@ -206,6 +214,26 @@ export function rehydrateGpraGrant(
   const linked = validateEvidenceAndActivityContext(context);
   assertPersistedGpraGrantCoherence({
     gpra: raw as GpraGrantRecord,
+    approval: context.approval as ApprovalActRecord,
+    ...linked,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+/**
+ * Trusted G8 GPRA invalidation rehydration — GPRA + Approval + Review joint coherence.
+ */
+export function rehydrateGpraInvalidationAct(
+  raw: unknown,
+  context: G8InvalidationRehydrationContext,
+): GpraInvalidationActRecord {
+  validatePersistedGpraInvalidationAct(raw);
+  validatePersistedGpraGrant(context.gpra);
+  validatePersistedApprovalAct(context.approval);
+  const linked = validateEvidenceAndActivityContext(context);
+  assertPersistedGpraInvalidationCoherence({
+    invalidation: raw as GpraInvalidationActRecord,
+    gpra: context.gpra as GpraGrantRecord,
     approval: context.approval as ApprovalActRecord,
     ...linked,
   });

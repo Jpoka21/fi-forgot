@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G7 (Review through downstream disposition).
+ * Governed Domain 3 repository — G2–G8 (Review through GPRA Retention / Invalidation).
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -11,6 +11,7 @@ import {
   rehydrateDesignTimeFeasibilityEvaluation,
   rehydrateDownstreamDeficiencyRecord,
   rehydrateGpraGrant,
+  rehydrateGpraInvalidationAct,
   rehydrateProductionReadinessReview,
   rehydrateResubmissionEligibility,
   rehydrateReturnPosture,
@@ -27,6 +28,7 @@ import {
   validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
+  validatePersistedGpraInvalidationAct,
   validatePersistedProductionReadinessReview,
   validatePersistedResubmissionEligibility,
   validatePersistedReturnPosture,
@@ -52,6 +54,11 @@ import type {
   GovernedDeficiencyFamily,
   GpraGrantRecord,
   GpraId,
+  GpraInvalidationActId,
+  GpraInvalidationActRecord,
+  GpraValidityAssessment,
+  InvalidationAuthorityClassId,
+  InvalidationTriggerFamily,
   MandatoryReviewActivityCompleteness,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
@@ -94,6 +101,10 @@ import {
   evaluateDownstreamDispositionEligibility,
 } from "../downstream-disposition.js";
 import { OrchestraConstitutionalError } from "../errors.js";
+import {
+  createGpraInvalidationAct,
+  evaluateGpraValidityFromInvalidation,
+} from "../gpra-retention-and-invalidation.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
 import {
   createFrozenManufacturingAuthoritySource,
@@ -260,12 +271,26 @@ export interface Domain3Repository {
   }): Promise<ApprovalWithholdingRecord>;
 
   /**
-   * R42–R43 — explicit GPRA grant after Approval. Binds RVA under Production Obligation.
+   * R42–R43 / R62 — explicit GPRA grant after Approval. Binds RVA under Production Obligation.
+   * Allows replacement grant when all prior scope grants are Invalidated (not G9 supersession).
    */
   grantGpra(input: {
     reviewId: ProductionReadinessReviewId;
     grantedBy: string;
   }): Promise<GpraGrantRecord>;
+
+  /**
+   * R54–R59 — separate invalidation act establishing Invalidated posture for a GPRA.
+   */
+  invalidateGpra(input: {
+    gpraId: GpraId;
+    itFamily: InvalidationTriggerFamily;
+    triggeringGoverningSourceId: string;
+    constitutionalEvidence: string;
+    authorityClassId: InvalidationAuthorityClassId;
+    invalidatedBy: string;
+    materialNonComplianceEstablished?: boolean;
+  }): Promise<GpraInvalidationActRecord>;
 
   loadApprovalAct(approvalActId: ApprovalActId): Promise<ApprovalActRecord | null>;
   loadApprovalActByReview(
@@ -277,9 +302,23 @@ export interface Domain3Repository {
   loadApprovalWithholdingByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ApprovalWithholdingRecord | null>;
+  /** Historical GPRA grant fact — returns invalidated grants. */
   loadGpraGrant(gpraId: GpraId): Promise<GpraGrantRecord | null>;
   loadGpraGrantByReview(reviewId: ProductionReadinessReviewId): Promise<GpraGrantRecord | null>;
+  /**
+   * Forward-active Retention GPRA only for RVA+obligation (null if only invalidated or none).
+   */
   loadGpraGrantByRvaObligation(input: {
+    rvaId: RealizedVisualArtifactId;
+    obligationId: ProductionObligationId;
+  }): Promise<GpraGrantRecord | null>;
+  loadGpraInvalidationAct(
+    invalidationActId: GpraInvalidationActId,
+  ): Promise<GpraInvalidationActRecord | null>;
+  loadGpraInvalidationActByGpra(gpraId: GpraId): Promise<GpraInvalidationActRecord | null>;
+  evaluateGpraValidity(gpraId: GpraId): Promise<GpraValidityAssessment>;
+  /** Retention-only forward-active GPRA for RVA under Production Obligation. */
+  loadForwardActiveGpraByRvaObligation(input: {
     rvaId: RealizedVisualArtifactId;
     obligationId: ProductionObligationId;
   }): Promise<GpraGrantRecord | null>;
@@ -491,6 +530,53 @@ export function createDomain3RepositoryWithStorage(
     }
     // Structural Approval validation only here — joint Approval↔Review coherence runs inside rehydrateGpraGrant.
     return rehydrateGpraGrant(raw, { ...context, approval: approvalRaw });
+  }
+
+  async function rehydrateTrustedGpraInvalidationAct(
+    raw: GpraInvalidationActRecord,
+  ): Promise<GpraInvalidationActRecord> {
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    if (!gpraRaw) {
+      throw new OrchestraConstitutionalError(
+        "GPRA invalidation requires a persisted GPRA grant",
+        "invalid_gpra_invalidation",
+        ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
+      );
+    }
+    const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+    const context = await loadG6AuthorityRehydrationContext(gpra.reviewId);
+    const approvalRaw = await storage.getApprovalAct(gpra.approvalActId);
+    if (!approvalRaw) {
+      throw new OrchestraConstitutionalError(
+        "GPRA invalidation requires persisted Approval in GPRA grant lineage",
+        "invalid_gpra_invalidation",
+        ["FI-DSN-STD-014-R59"],
+      );
+    }
+    return rehydrateGpraInvalidationAct(raw, {
+      ...context,
+      gpra,
+      approval: approvalRaw,
+    });
+  }
+
+  async function findForwardActiveGpraByRvaObligation(
+    rvaId: RealizedVisualArtifactId,
+    obligationId: ProductionObligationId,
+  ): Promise<GpraGrantRecord | null> {
+    const listed = await storage.listGpraGrantsByRvaObligation(rvaId, obligationId);
+    const retention: GpraGrantRecord[] = [];
+    for (const grant of listed) {
+      const invalidation = await storage.getGpraInvalidationActByGpra(grant.gpraId);
+      if (!invalidation) {
+        retention.push(grant);
+      }
+    }
+    if (retention.length === 0) return null;
+    const sorted = [...retention].sort((a, b) => a.grantedAt.localeCompare(b.grantedAt));
+    const latest = sorted[sorted.length - 1];
+    if (!latest) return null;
+    return rehydrateTrustedGpraGrant(latest);
   }
 
   async function loadG7DispositionRehydrationContext(reviewId: ProductionReadinessReviewId): Promise<{
@@ -1337,16 +1423,19 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R42", "FI-DSN-STD-014-R43"],
         );
       }
-      const existingByScope = await storage.getGpraGrantByRvaObligation(
+      const scopeGrants = await storage.listGpraGrantsByRvaObligation(
         review.rvaId,
         review.obligationId,
       );
-      if (existingByScope) {
-        throw new OrchestraConstitutionalError(
-          "GPRA already exists for this RVA under the Production Obligation; supersession is deferred to G9",
-          "invalid_gpra_grant",
-          ["FI-DSN-STD-014-R43"],
-        );
+      for (const prior of scopeGrants) {
+        const priorInvalidation = await storage.getGpraInvalidationActByGpra(prior.gpraId);
+        if (!priorInvalidation) {
+          throw new OrchestraConstitutionalError(
+            "Forward-active GPRA already exists for this RVA under the Production Obligation; supersession is deferred to G9",
+            "invalid_gpra_grant",
+            ["FI-DSN-STD-014-R43", "FI-DSN-STD-014-R62"],
+          );
+        }
       }
 
       const gpra = createGpraGrant({
@@ -1374,6 +1463,68 @@ export function createDomain3RepositoryWithStorage(
         );
       }
       return rehydrateTrustedGpraGrant(loaded);
+    },
+
+    async invalidateGpra(input) {
+      const gpraRaw = await storage.getGpraGrant(input.gpraId);
+      if (!gpraRaw) {
+        throw new OrchestraConstitutionalError(
+          "GPRA grant not found for invalidation",
+          "invalid_gpra_invalidation",
+          ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
+        );
+      }
+      const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+      const existingInvalidation = await storage.getGpraInvalidationActByGpra(gpra.gpraId);
+      if (existingInvalidation) {
+        throw new OrchestraConstitutionalError(
+          "GPRA is already invalidated; silent reactivation and duplicate invalidation are forbidden",
+          "invalid_gpra_invalidation",
+          ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R62"],
+        );
+      }
+      const context = await loadG6AuthorityRehydrationContext(gpra.reviewId);
+      const approvalRaw = await storage.getApprovalAct(gpra.approvalActId);
+      if (!approvalRaw) {
+        throw new OrchestraConstitutionalError(
+          "GPRA invalidation requires persisted Approval in GPRA grant lineage",
+          "invalid_gpra_invalidation",
+          ["FI-DSN-STD-014-R59"],
+        );
+      }
+      const approval = await rehydrateTrustedApprovalAct(approvalRaw);
+
+      const act = createGpraInvalidationAct({
+        gpra,
+        approval,
+        review: context.review,
+        determination: context.determination,
+        itFamily: input.itFamily,
+        triggeringGoverningSourceId: input.triggeringGoverningSourceId,
+        constitutionalEvidence: input.constitutionalEvidence,
+        authorityClassId: input.authorityClassId,
+        invalidatedBy: input.invalidatedBy,
+        materialNonComplianceEstablished: input.materialNonComplianceEstablished,
+      });
+      validatePersistedGpraInvalidationAct(act);
+      try {
+        await storage.putGpraInvalidationAct(act);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist GPRA invalidation act",
+          "invalid_gpra_invalidation",
+          ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
+        );
+      }
+      const loaded = await storage.getGpraInvalidationAct(act.invalidationActId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist GPRA invalidation act",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R54"],
+        );
+      }
+      return rehydrateTrustedGpraInvalidationAct(loaded);
     },
 
     async loadApprovalAct(approvalActId) {
@@ -1413,9 +1564,40 @@ export function createDomain3RepositoryWithStorage(
     },
 
     async loadGpraGrantByRvaObligation(input) {
-      const loaded = await storage.getGpraGrantByRvaObligation(input.rvaId, input.obligationId);
+      return findForwardActiveGpraByRvaObligation(input.rvaId, input.obligationId);
+    },
+
+    async loadGpraInvalidationAct(invalidationActId) {
+      const loaded = await storage.getGpraInvalidationAct(invalidationActId);
       if (!loaded) return null;
-      return rehydrateTrustedGpraGrant(loaded);
+      return rehydrateTrustedGpraInvalidationAct(loaded);
+    },
+
+    async loadGpraInvalidationActByGpra(gpraId) {
+      const loaded = await storage.getGpraInvalidationActByGpra(gpraId);
+      if (!loaded) return null;
+      return rehydrateTrustedGpraInvalidationAct(loaded);
+    },
+
+    async evaluateGpraValidity(gpraId) {
+      const gpraRaw = await storage.getGpraGrant(gpraId);
+      if (!gpraRaw) {
+        throw new OrchestraConstitutionalError(
+          "GPRA grant not found for validity assessment",
+          "invalid_gpra_invalidation",
+          ["FI-DSN-STD-014-R52", "FI-DSN-STD-014-R54"],
+        );
+      }
+      const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+      const invalidationRaw = await storage.getGpraInvalidationActByGpra(gpra.gpraId);
+      const invalidation = invalidationRaw
+        ? await rehydrateTrustedGpraInvalidationAct(invalidationRaw)
+        : null;
+      return evaluateGpraValidityFromInvalidation(invalidation, gpra.gpraId);
+    },
+
+    async loadForwardActiveGpraByRvaObligation(input) {
+      return findForwardActiveGpraByRvaObligation(input.rvaId, input.obligationId);
     },
 
     async evaluateDownstreamDispositionEligibility(reviewId) {

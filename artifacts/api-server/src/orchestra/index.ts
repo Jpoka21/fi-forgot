@@ -139,6 +139,23 @@ export {
 } from "./downstream-disposition.js";
 
 export {
+  FROZEN_ESTABLISHED_INVALIDATION_AUTHORITY_CLASSES,
+  isCanonicalEstablishedInvalidationAuthorityClassId,
+  assertEstablishedInvalidationAuthorityClass,
+  resolveEstablishedInvalidationAuthorityClass,
+} from "./invalidation-authority.js";
+
+export {
+  MANDATORY_INVALIDATION_TRIGGER_FAMILIES,
+  isMandatoryInvalidationTriggerFamily,
+} from "./invalidation-trigger-families.js";
+
+export {
+  GPRA_RETENTION_AND_INVALIDATION_TRACEABILITY,
+  evaluateGpraValidityFromInvalidation,
+} from "./gpra-retention-and-invalidation.js";
+
+export {
   REVIEW_DETERMINATION_TRACEABILITY,
   LEGAL_REVIEW_DETERMINATION_OUTCOMES,
   isLegalReviewDeterminationOutcome,
@@ -197,6 +214,13 @@ export type {
   ReturnPostureRecord,
   ResubmissionEligibilityRecord,
   DownstreamDispositionEligibility,
+  GpraInvalidationActId,
+  GpraInvalidationActRecord,
+  GpraValidityAssessment,
+  GpraValidityPosture,
+  InvalidationTriggerFamily,
+  InvalidationAuthorityConstitutionalScope,
+  InvalidationAuthorityClassId,
 } from "./domain3-types.js";
 
 /**

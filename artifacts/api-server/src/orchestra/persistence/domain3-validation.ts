@@ -1,5 +1,5 @@
 /**
- * Domain 3 persistence validation — FI-DSN-STD-014 G2–G7.
+ * Domain 3 persistence validation — FI-DSN-STD-014 G2–G8.
  */
 
 import {
@@ -17,6 +17,7 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   DownstreamDeficiencyRecord,
   GpraGrantRecord,
+  GpraInvalidationActRecord,
   ProductionReadinessReview,
   ResubmissionEligibilityRecord,
   ReturnPostureRecord,
@@ -28,6 +29,11 @@ import type {
 } from "../domain3-types.js";
 import type { RealizationPath, RealizedVisualArtifactId } from "../domain2-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
+import {
+  isCanonicalEstablishedInvalidationAuthorityClassId,
+  resolveEstablishedInvalidationAuthorityClass,
+} from "../invalidation-authority.js";
+import { isMandatoryInvalidationTriggerFamily } from "../invalidation-trigger-families.js";
 import { isCanonicalFrozenBindingFiMfgStandardId } from "../manufacturing-authority.js";
 import { isLegalReviewDeterminationOutcome } from "../review-determination.js";
 import { isMandatoryReviewDimensionId } from "../review-dimensions.js";
@@ -46,6 +52,7 @@ const ID_PREFIXES = {
   approvalAct: "approval-act-",
   withholding: "approval-withholding-",
   gpra: "gpra-",
+  gpraInvalidation: "gpra-invalidation-",
   downstreamDeficiency: "downstream-deficiency-",
   reworkAuthorization: "rework-authorization-",
   reworkAuthorizationWithholding: "rework-authorization-withholding-",
@@ -1384,6 +1391,118 @@ export function validatePersistedResubmissionEligibility(
       "Resubmission eligibility requires valid governed creation marker",
       "invalid_domain3_persistence_state",
       ["FI-DSN-STD-014-R51"],
+    );
+  }
+}
+
+export function validatePersistedGpraInvalidationAct(
+  raw: unknown,
+): asserts raw is GpraInvalidationActRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted GPRA invalidation act",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.invalidationActId, ID_PREFIXES.gpraInvalidation, "GPRA invalidation act");
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!isMandatoryInvalidationTriggerFamily(record.itFamily)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA invalidation requires mandatory PVTA IT family",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R56"],
+    );
+  }
+  if (!isCanonicalEstablishedInvalidationAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA invalidation requires established IVAC authority class",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R57"],
+    );
+  }
+  resolveEstablishedInvalidationAuthorityClass(
+    record.authorityClassId as GpraInvalidationActRecord["authorityClassId"],
+  );
+  if (record.authorityGoverningSourceId !== "PD-STD-014-007") {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA invalidation requires PD-STD-014-007 governing source",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R57"],
+    );
+  }
+
+  if (record.itFamily === "material_compliance_boundary_change") {
+    if (record.materialNonComplianceEstablished !== true) {
+      throw new OrchestraConstitutionalError(
+        "Persisted IT-2 invalidation requires materialNonComplianceEstablished",
+        "invalid_gpra_invalidation",
+        ["FI-DSN-STD-014-R58"],
+      );
+    }
+  } else if (record.materialNonComplianceEstablished !== null) {
+    throw new OrchestraConstitutionalError(
+      "Persisted non-IT-2 invalidation must not carry material non-compliance attribution",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R56", "FI-DSN-STD-014-R58"],
+    );
+  }
+
+  if (
+    typeof record.triggeringGoverningSourceId !== "string" ||
+    !record.triggeringGoverningSourceId.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "GPRA invalidation requires triggeringGoverningSourceId",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
+    );
+  }
+  if (typeof record.constitutionalEvidence !== "string" || !record.constitutionalEvidence.trim()) {
+    throw new OrchestraConstitutionalError(
+      "GPRA invalidation requires constitutionalEvidence",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R59"],
+    );
+  }
+  if (typeof record.invalidatedAt !== "string" || typeof record.invalidatedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "GPRA invalidation requires invalidatedAt and invalidatedBy",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R57", "FI-DSN-STD-014-R59"],
+    );
+  }
+
+  if (
+    record.historicalGrantPreserved !== true ||
+    record.determinationNotRevised !== true ||
+    record.notLifecycleTermination !== true ||
+    record.forwardHandoffEligibilityTerminated !== true ||
+    record.newIntakeAuthorityTerminated !== true ||
+    record.cannotSilentlyReactivate !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA invalidation must preserve historical grant and Determination, terminate forward force, and forbid silent reactivation",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R55", "FI-DSN-STD-014-R60", "FI-DSN-STD-014-R62"],
+    );
+  }
+
+  assertAuditMetadata(record.audit, "GPRA invalidation act");
+  assertDomain3Traceability(record.traceability, "GPRA invalidation act");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "GPRA invalidation act requires valid governed creation marker",
+      "invalid_gpra_invalidation",
+      ["FI-DSN-STD-014-R54", "FI-DSN-STD-014-R59"],
     );
   }
 }
