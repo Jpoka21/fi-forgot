@@ -1261,21 +1261,20 @@ export function validatePersistedReturnPosture(
     );
   }
   if (record.route === "withholding_return_only") {
-    if (record.returnKind !== "return_authorized_after_approval_withholding") {
-      throw new OrchestraConstitutionalError(
-        "Withholding-return route requires return_authorized_after_approval_withholding kind",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
-    if (record.approvalWithholdingId === null) {
-      throw new OrchestraConstitutionalError(
-        "Withholding-return route requires Approval withholding identity",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
-  } else if (record.approvalWithholdingId !== null) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Route C Return Posture is not authorized: frozen TRPM baseline after Pass plus Approval withholding is block-without-return and no exceptional return-authorizing source is currently established",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (record.returnKind === "return_authorized_after_approval_withholding") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Route C Return Posture kind is not authorized under the current frozen Route C authority catalog",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (record.approvalWithholdingId !== null) {
     throw new OrchestraConstitutionalError(
       "Conditional/Fail return posture must not carry Approval withholding identity",
       "invalid_downstream_disposition",

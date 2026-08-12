@@ -17,6 +17,7 @@ import type {
   ReworkAuthorizationWithholdingRecord,
 } from "../domain3-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
+import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
 
 /**
  * Review ↔ Conditional/Fail Determination joint identity required for EGDF/DSRA/resubmission.
@@ -273,6 +274,13 @@ export function assertPersistedReturnPostureCoherence(input: {
   determination: ReviewDeterminationRecord;
   approvalWithholding?: ApprovalWithholdingRecord | null;
 }): void {
+  if (
+    input.returnPosture.route === "withholding_return_only" ||
+    input.returnPosture.returnKind === "return_authorized_after_approval_withholding"
+  ) {
+    assertPersistedRouteCReturnNotAuthorized();
+  }
+
   assertDdacClassCoherent(input.returnPosture.authorityClassId);
   assertSubjectMatch(
     input.returnPosture,
@@ -281,35 +289,13 @@ export function assertPersistedReturnPostureCoherence(input: {
     "Return posture",
   );
 
-  if (input.returnPosture.route === "withholding_return_only") {
-    if (!input.approvalWithholding) {
-      throw new OrchestraConstitutionalError(
-        "Withholding-return posture rehydration requires persisted Approval withholding",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
-    assertPersistedPassWithholdingReturnCoherence({
-      review: input.review,
-      determination: input.determination,
-      approvalWithholding: input.approvalWithholding,
-    });
-    if (input.returnPosture.approvalWithholdingId !== input.approvalWithholding.withholdingId) {
-      throw new OrchestraConstitutionalError(
-        "Return posture approvalWithholdingId does not match provided Approval withholding",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
-  } else {
-    const route = assertPersistedConditionalOrFailReviewDeterminationCoherence(input);
-    if (input.returnPosture.route !== route) {
-      throw new OrchestraConstitutionalError(
-        "Return posture route does not match Determination outcome",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
+  const route = assertPersistedConditionalOrFailReviewDeterminationCoherence(input);
+  if (input.returnPosture.route !== route) {
+    throw new OrchestraConstitutionalError(
+      "Return posture route does not match Determination outcome",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
   }
 }
 

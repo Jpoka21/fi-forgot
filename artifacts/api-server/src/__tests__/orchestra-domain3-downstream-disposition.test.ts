@@ -15,7 +15,9 @@ import {
   declareProductionIntent,
   determineExplorationEntry,
   draftProductionProgram,
+  DOWNSTREAM_DISPOSITION_TRACEABILITY,
   FROZEN_ESTABLISHED_DOWNSTREAM_DISPOSITION_AUTHORITY_CLASSES,
+  FROZEN_ROUTE_C_RETURN_AUTHORIZING_SOURCES,
   governProductionProgram,
   isOrchestraConstitutionalError,
   listMandatoryReviewDimensionIds,
@@ -29,12 +31,14 @@ import {
   type ProductionReadinessReview,
   type RealizedVisualArtifact,
 } from "../orchestra/index.js";
+import { createDomain3GovernedCreationMarker } from "../orchestra/domain3-entry.js";
 import {
   rehydrateDownstreamDeficiencyRecord,
   rehydrateReworkAuthorization,
   rehydrateReturnPosture,
   rehydrateResubmissionEligibility,
 } from "../orchestra/persistence/domain3-rehydration.js";
+import { validatePersistedReturnPosture } from "../orchestra/persistence/domain3-validation.js";
 
 let passed = 0;
 let failed = 0;
@@ -268,6 +272,7 @@ section("DDAC and EGDF catalogs");
 {
   expect("Two DDAC classes", FROZEN_ESTABLISHED_DOWNSTREAM_DISPOSITION_AUTHORITY_CLASSES.length, 2);
   expect("Four EGDF families", MANDATORY_GOVERNED_DEFICIENCY_FAMILIES.length, 4);
+  expect("Route C authorizing catalog empty", FROZEN_ROUTE_C_RETURN_AUTHORIZING_SOURCES.length, 0);
 }
 
 section("Illegal G7 entry — Pass without withholding");
@@ -442,7 +447,7 @@ section("Fail path");
   expectTruthy("Fail path subsequent Review admitted", next.posture === "under_review");
 }
 
-section("Approval withholding path (Route C)");
+section("Approval withholding path (Route C) — block without return");
 
 {
   const ctx = await completeOutcome("pass");
@@ -458,7 +463,18 @@ section("Approval withholding path (Route C)");
   expect("Withholding blocks Approval only", eligibility.withholdingBlocksApprovalOnly, true);
   expect("Not EGDF eligible", eligibility.dispositionEligible, false);
   expect("Not rework eligible", eligibility.reworkAuthorizationEligible, false);
-  expect("Return eligible with ground", eligibility.returnPostureEligible, true);
+  expect("Route C return not eligible (dormant)", eligibility.returnPostureEligible, false);
+  expect("Route C identity retained", eligibility.route, "withholding_return_only");
+  expect(
+    "Pass Determination preserved after withholding",
+    (await ctx.domain3.loadReviewDeterminationByReview(ctx.review.reviewId))!.outcome,
+    "pass",
+  );
+  expect(
+    "G6 withholding unchanged",
+    (await ctx.domain3.loadApprovalWithholdingByReview(ctx.review.reviewId))!.withholdingId,
+    withholding.withholdingId,
+  );
 
   await expectThrowsAsync(
     "EGDF from withholding path rejected",
@@ -474,7 +490,18 @@ section("Approval withholding path (Route C)");
   );
 
   await expectThrowsAsync(
-    "Return after withholding without governing source rejected",
+    "DSRA from withholding path rejected",
+    () =>
+      ctx.domain3.authorizeRework({
+        reviewId: ctx.review.reviewId,
+        authorityClassId: DDAC,
+        authorizedBy: ACTOR,
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  await expectThrowsAsync(
+    "Return after withholding alone rejected",
     () =>
       ctx.domain3.establishReturnPosture({
         reviewId: ctx.review.reviewId,
@@ -484,19 +511,150 @@ section("Approval withholding path (Route C)");
     "invalid_downstream_disposition",
   );
 
-  const ret = await ctx.domain3.establishReturnPosture({
-    reviewId: ctx.review.reviewId,
-    authorityClassId: DDAC,
-    establishedBy: ACTOR,
-    returnGoverningSourceId: "PD-STD-014-010",
-  });
-  expect("Withholding return kind", ret.returnKind, "return_authorized_after_approval_withholding");
-  expect("Links withholding", ret.approvalWithholdingId, withholding.withholdingId);
-  expect(
-    "Pass Determination preserved",
-    (await ctx.domain3.loadReviewDeterminationByReview(ctx.review.reviewId))!.outcome,
-    "pass",
+  await expectThrowsAsync(
+    "Empty returnGoverningSourceId cannot authorize Route C",
+    () =>
+      ctx.domain3.establishReturnPosture({
+        reviewId: ctx.review.reviewId,
+        authorityClassId: DDAC,
+        establishedBy: ACTOR,
+        returnGoverningSourceId: "",
+      }),
+    "invalid_downstream_disposition",
   );
+
+  await expectThrowsAsync(
+    "Arbitrary string cannot authorize Route C",
+    () =>
+      ctx.domain3.establishReturnPosture({
+        reviewId: ctx.review.reviewId,
+        authorityClassId: DDAC,
+        establishedBy: ACTOR,
+        returnGoverningSourceId: "made-up-authority",
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  await expectThrowsAsync(
+    "Fabricated PD-STD identifier cannot authorize Route C",
+    () =>
+      ctx.domain3.establishReturnPosture({
+        reviewId: ctx.review.reviewId,
+        authorityClassId: DDAC,
+        establishedBy: ACTOR,
+        returnGoverningSourceId: "PD-STD-999-999",
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  await expectThrowsAsync(
+    "PD-STD-014-010 alone cannot authorize Route C",
+    () =>
+      ctx.domain3.establishReturnPosture({
+        reviewId: ctx.review.reviewId,
+        authorityClassId: DDAC,
+        establishedBy: ACTOR,
+        returnGoverningSourceId: "PD-STD-014-010",
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  await expectThrowsAsync(
+    "Actor assertion cannot authorize Route C",
+    () =>
+      ctx.domain3.establishReturnPosture({
+        reviewId: ctx.review.reviewId,
+        authorityClassId: DDAC,
+        establishedBy: "actor-claims-route-c-return",
+        returnGoverningSourceId: "actor-asserted-return-ground",
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  await expectThrowsAsync(
+    "Workflow or Brain markers cannot authorize Route C",
+    () =>
+      ctx.domain3.establishReturnPosture({
+        reviewId: ctx.review.reviewId,
+        authorityClassId: DDAC,
+        establishedBy: ACTOR,
+        returnGoverningSourceId: "brain_workflow_queue_return_authorization",
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  // Forged persisted Route C records must not survive validation / trusted rehydration.
+  const now = new Date().toISOString();
+  const forgedRouteC = {
+    returnPostureId: "return-posture-forged-route-c",
+    reviewId: ctx.review.reviewId,
+    determinationId: ctx.determination.determinationId,
+    rvaId: ctx.review.rvaId,
+    programId: ctx.review.programId,
+    obligationId: ctx.review.obligationId,
+    route: "withholding_return_only" as const,
+    returnKind: "return_authorized_after_approval_withholding" as const,
+    targetObligationScope: null,
+    approvalWithholdingId: withholding.withholdingId,
+    returnGoverningSourceId: "made-up-authority",
+    authorityClassId: DDAC,
+    establishedAt: now,
+    establishedBy: ACTOR,
+    determinationNotRevised: true as const,
+    terminationNotAuthorized: true as const,
+    audit: {
+      createdAt: now,
+      createdBy: ACTOR,
+      traceability: { requirementIds: ["FI-DSN-STD-012-R40"] },
+    },
+    traceability: DOWNSTREAM_DISPOSITION_TRACEABILITY,
+    governedCreationMarker: createDomain3GovernedCreationMarker(),
+  };
+
+  expectThrows(
+    "Persisted Route C with arbitrary source fails validation",
+    () => validatePersistedReturnPosture(structuredClone(forgedRouteC)),
+    "invalid_downstream_disposition",
+  );
+
+  expectThrows(
+    "Persisted Route C with arbitrary source fails rehydration",
+    () =>
+      rehydrateReturnPosture(structuredClone(forgedRouteC), {
+        review: ctx.review,
+        determination: ctx.determination,
+        approvalWithholding: withholding,
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  const forgedPd010 = {
+    ...forgedRouteC,
+    returnPostureId: "return-posture-forged-pd010",
+    returnGoverningSourceId: "PD-STD-014-010",
+    governedCreationMarker: createDomain3GovernedCreationMarker(),
+  };
+  expectThrows(
+    "Persisted Route C using only PD-STD-014-010 fails validation",
+    () => validatePersistedReturnPosture(structuredClone(forgedPd010)),
+    "invalid_downstream_disposition",
+  );
+  expectThrows(
+    "Persisted Route C using only PD-STD-014-010 fails rehydration",
+    () =>
+      rehydrateReturnPosture(structuredClone(forgedPd010), {
+        review: ctx.review,
+        determination: ctx.determination,
+        approvalWithholding: withholding,
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  const gpraBefore = await ctx.domain3.loadGpraGrantByRvaObligation({
+    rvaId: ctx.rva.id,
+    obligationId: ctx.review.obligationId,
+  });
+  expect("No GPRA created or altered on withholding path", gpraBefore, null);
 }
 
 section("GPRA / Pass path isolation");

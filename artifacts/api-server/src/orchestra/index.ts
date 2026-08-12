@@ -124,6 +124,11 @@ export {
 } from "./downstream-disposition-authority.js";
 
 export {
+  FROZEN_ROUTE_C_RETURN_AUTHORIZING_SOURCES,
+  isFrozenRouteCReturnAuthorizingSource,
+} from "./route-c-return-authority.js";
+
+export {
   MANDATORY_GOVERNED_DEFICIENCY_FAMILIES,
   isMandatoryGovernedDeficiencyFamily,
 } from "./deficiency-families.js";

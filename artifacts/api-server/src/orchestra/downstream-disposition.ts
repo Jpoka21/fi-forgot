@@ -39,6 +39,7 @@ import type {
   ReworkAuthorizationWithholdingRecord,
 } from "./domain3-types.js";
 import { OrchestraConstitutionalError } from "./errors.js";
+import { assertFrozenRouteCReturnAuthorityAvailable } from "./route-c-return-authority.js";
 
 const G7_REQUIREMENTS = [
   "FI-DSN-STD-014-R44",
@@ -161,13 +162,15 @@ export function evaluateDownstreamDispositionEligibility(input: {
   }
 
   if (passWithWithholding) {
+    // Route C baseline: block-without-return. Exceptional return is dormant until
+    // frozen authority enumerates Route C return-authorizing sources (ORCH-IMP-011.2).
     return Object.freeze({
       reviewId: input.review.reviewId,
       determinationId: determination!.determinationId,
       route: "withholding_return_only",
       dispositionEligible: false,
       reworkAuthorizationEligible: false,
-      returnPostureEligible: true,
+      returnPostureEligible: false,
       resubmissionEligibilityActEligible: false,
       withholdingBlocksApprovalOnly: true,
     });
@@ -379,36 +382,12 @@ export function createReturnPosture(input: {
         : null;
     returnGoverningSourceId = "PD-STD-014-010";
   } else if (input.determination.outcome === "pass") {
-    const withholding = input.approvalWithholding;
-    if (!withholding || withholding.reviewId !== input.review.reviewId) {
-      throw new OrchestraConstitutionalError(
-        "Return posture after Pass requires a recorded Approval withholding; withholding alone does not establish return",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
-    if (input.review.determinationId !== input.determination.determinationId) {
-      throw new OrchestraConstitutionalError(
-        "Return posture requires joint Review–Determination identity",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
-    route = "withholding_return_only";
-    returnKind = "return_authorized_after_approval_withholding";
-    approvalWithholdingId = withholding.withholdingId;
-    const source = (input.returnGoverningSourceId ?? "").trim();
-    if (!source) {
-      throw new OrchestraConstitutionalError(
-        "Return after Approval withholding requires a documented frozen governing source supporting return",
-        "invalid_downstream_disposition",
-        ["FI-DSN-STD-014-R49"],
-      );
-    }
-    returnGoverningSourceId = source;
+    // Trust boundary: nonempty returnGoverningSourceId never authorizes Route C.
+    // Empty catalog — refuse before consulting caller-supplied source strings.
+    assertFrozenRouteCReturnAuthorityAvailable();
   } else {
     throw new OrchestraConstitutionalError(
-      "Return posture requires Conditional, Fail, or Pass-with-withholding route",
+      "Return posture requires Conditional or Fail Determination; Route C return after Pass plus Approval withholding is not currently authorized by frozen sources",
       "invalid_downstream_disposition",
       ["FI-DSN-STD-014-R49"],
     );

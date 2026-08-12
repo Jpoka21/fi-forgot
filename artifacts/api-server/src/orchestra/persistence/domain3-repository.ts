@@ -94,6 +94,7 @@ import {
   evaluateDownstreamDispositionEligibility,
 } from "../downstream-disposition.js";
 import { OrchestraConstitutionalError } from "../errors.js";
+import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
 import {
   createFrozenManufacturingAuthoritySource,
   type ManufacturingAuthoritySource,
@@ -283,7 +284,7 @@ export interface Domain3Repository {
     obligationId: ProductionObligationId;
   }): Promise<GpraGrantRecord | null>;
 
-  /** R47–R49 — Conditional/Fail (or Pass+withholding return) disposition eligibility query. */
+  /** R47–R49 — Conditional/Fail disposition eligibility; Pass+withholding is block-without-return. */
   evaluateDownstreamDispositionEligibility(
     reviewId: ProductionReadinessReviewId,
   ): Promise<DownstreamDispositionEligibility>;
@@ -558,27 +559,14 @@ export function createDomain3RepositoryWithStorage(
   async function rehydrateTrustedReturnPosture(
     raw: ReturnPostureRecord,
   ): Promise<ReturnPostureRecord> {
-    const context = await loadG7DispositionRehydrationContext(raw.reviewId);
-    let approvalWithholding: ApprovalWithholdingRecord | null = null;
-    if (raw.route === "withholding_return_only") {
-      if (!raw.approvalWithholdingId) {
-        throw new OrchestraConstitutionalError(
-          "Withholding-return posture requires Approval withholding identity",
-          "invalid_downstream_disposition",
-          ["FI-DSN-STD-014-R49"],
-        );
-      }
-      const withholdingRaw = await storage.getApprovalWithholding(raw.approvalWithholdingId);
-      if (!withholdingRaw) {
-        throw new OrchestraConstitutionalError(
-          "Withholding-return posture references missing Approval withholding",
-          "invalid_downstream_disposition",
-          ["FI-DSN-STD-014-R49"],
-        );
-      }
-      approvalWithholding = await rehydrateTrustedApprovalWithholding(withholdingRaw);
+    if (
+      raw.route === "withholding_return_only" ||
+      raw.returnKind === "return_authorized_after_approval_withholding"
+    ) {
+      assertPersistedRouteCReturnNotAuthorized();
     }
-    return rehydrateReturnPosture(raw, { ...context, approvalWithholding });
+    const context = await loadG7DispositionRehydrationContext(raw.reviewId);
+    return rehydrateReturnPosture(raw, { ...context, approvalWithholding: null });
   }
 
   async function rehydrateTrustedResubmissionEligibility(
@@ -1610,18 +1598,14 @@ export function createDomain3RepositoryWithStorage(
 
       let approvalWithholding: ApprovalWithholdingRecord | null = null;
       if (determination.outcome === "pass") {
-        const withholdingRaw = await storage.getApprovalWithholdingByReview(review.reviewId);
-        if (!withholdingRaw) {
-          throw new OrchestraConstitutionalError(
-            "Return posture after Pass requires a recorded Approval withholding",
-            "invalid_downstream_disposition",
-            ["FI-DSN-STD-014-R49"],
-          );
-        }
-        approvalWithholding = await rehydrateTrustedApprovalWithholding(withholdingRaw);
+        throw new OrchestraConstitutionalError(
+          "Route C Return Posture after Pass plus Approval withholding is unavailable: frozen authority establishes block-without-return and does not currently enumerate exceptional return-authorizing sources",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R49"],
+        );
       } else if (determination.outcome !== "conditional" && determination.outcome !== "fail") {
         throw new OrchestraConstitutionalError(
-          "Return posture requires Conditional, Fail, or Pass-with-withholding route",
+          "Return posture requires Conditional or Fail Determination",
           "invalid_downstream_disposition",
           ["FI-DSN-STD-014-R49"],
         );

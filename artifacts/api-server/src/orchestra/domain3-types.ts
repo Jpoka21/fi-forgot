@@ -412,12 +412,19 @@ export type GovernedDeficiencyFamily =
 /**
  * TRPM route (R49 / PD-STD-014-010).
  * Route C (withholding) does not create EGDF/DSRA eligibility by itself.
+ * Route C Return Posture is currently dormant — no frozen exceptional
+ * return-authorizing source is established (ORCH-IMP-011.2 Outcome B).
  */
 export type DownstreamDispositionRoute =
   | "conditional_route"
   | "fail_route"
   | "withholding_return_only";
 
+/**
+ * Return posture kinds. `return_authorized_after_approval_withholding` is reserved
+ * vocabulary for a future frozen Route C ground catalog; creation and trusted
+ * rehydration currently reject it (block-without-return baseline).
+ */
 export type ReturnPostureKind =
   | "correction_return_to_realization"
   | "rework_return_to_realization"
