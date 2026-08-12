@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G10.
+ * In-memory Domain 3 storage adapter — G2–G11.
  */
 
 import type {
@@ -8,6 +8,7 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
+  GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
   GpraSupersessionActRecord,
@@ -61,6 +62,8 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const resubmissionByPriorReview = new Map<string, string>();
   const brainAdvisoriesById = new Map<string, Domain3BrainAdvisoryRecord>();
   const brainAdvisoriesByReview = new Map<string, string[]>();
+  const handoffPreparationsById = new Map<string, GovernedHandoffPreparationRecord>();
+  const handoffPreparationsByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -513,6 +516,31 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => brainAdvisoriesById.get(id))
         .filter((item): item is Domain3BrainAdvisoryRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffPreparation(record) {
+      if (handoffPreparationsById.has(record.preparationId)) {
+        throw new Error(
+          `Duplicate Governed Handoff preparation identity: ${record.preparationId}`,
+        );
+      }
+      handoffPreparationsById.set(record.preparationId, structuredClone(record));
+      const list = handoffPreparationsByGpra.get(record.gpraId) ?? [];
+      list.push(record.preparationId);
+      handoffPreparationsByGpra.set(record.gpraId, list);
+    },
+
+    async getGovernedHandoffPreparation(preparationId) {
+      const record = handoffPreparationsById.get(preparationId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffPreparationsByGpra(gpraId) {
+      const ids = handoffPreparationsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffPreparationsById.get(id))
+        .filter((item): item is GovernedHandoffPreparationRecord => !!item)
         .map((item) => structuredClone(item));
     },
   };

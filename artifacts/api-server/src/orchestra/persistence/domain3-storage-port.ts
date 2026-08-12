@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G10 (Review through Brain Decision-Stage advisories).
+ * Domain 3 storage port — G2–G11 (Review through Governed Handoff Preparation).
  */
 
 import type {
@@ -13,6 +13,8 @@ import type {
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   DownstreamDeficiencyRecordId,
+  GovernedHandoffPreparationId,
+  GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraId,
   GpraInvalidationActId,
@@ -193,4 +195,16 @@ export interface Domain3StoragePort {
   listDomain3BrainAdvisoriesByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<readonly Domain3BrainAdvisoryRecord[]>;
+
+  /**
+   * Append-only Handoff preparation (R94 HPAM). Unique by preparationId; multiple per GPRA allowed.
+   * No update or delete API — history must not be mutated.
+   */
+  putGovernedHandoffPreparation(record: GovernedHandoffPreparationRecord): Promise<void>;
+  getGovernedHandoffPreparation(
+    preparationId: GovernedHandoffPreparationId,
+  ): Promise<GovernedHandoffPreparationRecord | null>;
+  listGovernedHandoffPreparationsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffPreparationRecord[]>;
 }

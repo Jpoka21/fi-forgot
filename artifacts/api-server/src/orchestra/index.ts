@@ -198,6 +198,19 @@ export {
 } from "./brain-domain3-advisory.js";
 
 export {
+  GOVERNED_HANDOFF_PREPARATION_TRACEABILITY,
+  HANDOFF_CONSUMER_CATEGORY_KEYS,
+  HANDOFF_ELIGIBILITY_LAYER_CONDITIONS,
+  isHandoffConsumerCategoryKey,
+  isHandoffEligibilityLayerCondition,
+  assertHandoffConsumerCategoryKeys,
+  assessGovernedHandoffEligibility,
+  evaluateHandoffPreparationCurrencyFromFacts,
+  buildHandoffValidityExport,
+  buildHandoffEvidencePackage,
+} from "./handoff-preparation.js";
+
+export {
   REVIEW_DETERMINATION_TRACEABILITY,
   LEGAL_REVIEW_DETERMINATION_OUTCOMES,
   isLegalReviewDeterminationOutcome,
@@ -275,6 +288,14 @@ export type {
   Domain3BrainReevaluationRequestType,
   Domain3BrainAuthorityRouteKind,
   Domain3BrainSourceAttribution,
+  GovernedHandoffPreparationId,
+  GovernedHandoffPreparationRecord,
+  GovernedHandoffEligibilityAssessment,
+  HandoffConsumerCategoryKey,
+  HandoffEligibilityLayerCondition,
+  HandoffPreparationCurrency,
+  HandoffValidityExportSnapshot,
+  HandoffEvidencePackageRefs,
 } from "./domain3-types.js";
 
 /**

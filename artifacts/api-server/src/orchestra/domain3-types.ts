@@ -1,6 +1,6 @@
 /**
- * Domain 3 constitutional types — FI-DSN-STD-014 G2–G10
- * (Review entry through Brain Decision-Stage Interaction).
+ * Domain 3 constitutional types — FI-DSN-STD-014 G2–G11
+ * (Review entry through Governed Handoff Preparation / STD-015 consumption boundary).
  */
 
 import type { Domain3GovernanceTraceability } from "./domain3-authority.js";
@@ -783,6 +783,121 @@ export interface Domain3BrainAdvisoryRecord {
   readonly notConstitutionalAuthority: true;
   readonly distinguishableFromConstitutionalActs: true;
   readonly doesNotCompelConstitutionalAction: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+// --- G11 Governed Handoff Preparation / STD-015 Consumption Boundary (R83–R95) ---
+
+export type GovernedHandoffPreparationId = string & {
+  readonly __brand: "GovernedHandoffPreparationId";
+};
+
+/** HCBM consumer-category boundary keys (R89) — abstract classes only. */
+export type HandoffConsumerCategoryKey =
+  | "manufacturing"
+  | "production"
+  | "catalog"
+  | "fulfillment"
+  | "publication"
+  | "distribution"
+  | "archival";
+
+/** HSLM eligibility-layer condition (R90) — distinct from STD-015 act states. */
+export type HandoffEligibilityLayerCondition =
+  | "not_export_ready"
+  | "export_ready"
+  | "blocked";
+
+/** Historical preparation currency vs current authoritative posture (R88). */
+export type HandoffPreparationCurrency = "current" | "stale";
+
+/**
+ * HVEM validity export snapshot (R88) — evaluation-point identity for stale detection.
+ * Not a new validity act and not authorization.
+ */
+export interface HandoffValidityExportSnapshot {
+  readonly evaluationPoint: {
+    readonly gpraId: GpraId;
+    readonly posture: GpraValidityPosture;
+    readonly obligationId: ProductionObligationId;
+    readonly handoffConsumerContextId: string;
+  };
+  readonly authoritativeGpraId: GpraId;
+  readonly successorGpraId: GpraId | null;
+  readonly forwardHandoffEligibility: boolean;
+  readonly approvalActId: ApprovalActId;
+  readonly gpraGrantRef: GpraId;
+  readonly invalidationActId: GpraInvalidationActId | null;
+  readonly supersessionActId: GpraSupersessionActId | null;
+}
+
+/**
+ * HEPM evidence package (R87) — read-only references; does not rewrite sources.
+ */
+export interface HandoffEvidencePackageRefs {
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly approvalActId: ApprovalActId;
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly posture: GpraValidityPosture;
+  /** Optional G7 disposition ids where material. */
+  readonly dispositionRecordIds: readonly string[];
+  /** G9 supersession lineage where applicable. */
+  readonly supersessionActId: GpraSupersessionActId | null;
+  readonly unresolvedBlockers: readonly string[];
+  readonly handoffConsumerContextId: string;
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  /** Optional G10 BRPAM advisory ids (advisory only). */
+  readonly brainAdvisoryIds: readonly Domain3BrainAdvisoryId[];
+}
+
+/**
+ * Non-persisting HEIM eligibility assessment (R85) — may be *considered*; not authorization.
+ */
+export interface GovernedHandoffEligibilityAssessment {
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition;
+  readonly gpraId: GpraId | null;
+  readonly validityExport: HandoffValidityExportSnapshot | null;
+  readonly evidencePackage: HandoffEvidencePackageRefs | null;
+  readonly forwardHandoffEligibility: boolean;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly std015ConsumptionBoundaryOnly: true;
+  readonly reasons: readonly string[];
+}
+
+/**
+ * HPAM additive immutable preparation record (R83–R95).
+ * Preparation only — STD-015 owns authorization/execution. Never overwrites history.
+ */
+export interface GovernedHandoffPreparationRecord {
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  /** Persisted preparations are only created when export_ready (R90/R94). */
+  readonly eligibilityLayerCondition: "export_ready";
+  readonly validityExport: HandoffValidityExportSnapshot;
+  readonly evidencePackage: HandoffEvidencePackageRefs;
+  readonly brainAdvisoryIds: readonly Domain3BrainAdvisoryId[];
+  readonly forwardHandoffEligibility: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly std015ConsumptionBoundaryOnly: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly preparedAt: string;
+  readonly preparedBy: string;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain3GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;

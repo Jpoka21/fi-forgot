@@ -7,6 +7,7 @@
  * G8 GPRA invalidation requires GPRA + Approval + Review joint coherence.
  * G9 GPRA supersession requires predecessor + successor GPRA / Approval / Review joint coherence.
  * G10 Brain advisories require BRPAM markers and Review/RVA/Program linkage coherence.
+ * G11 Handoff preparations require HEPM/HVEM markers and GPRA lineage coherence.
  */
 
 import type {
@@ -15,6 +16,7 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
+  GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
   GpraSupersessionActRecord,
@@ -44,12 +46,14 @@ import {
 import { assertPersistedGpraInvalidationCoherence } from "./g8-rehydration-coherence.js";
 import { assertPersistedGpraSupersessionCoherence } from "./g9-rehydration-coherence.js";
 import { assertPersistedDomain3BrainAdvisoryCoherence } from "./g10-rehydration-coherence.js";
+import { assertPersistedGovernedHandoffPreparationCoherence } from "./g11-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
+  validatePersistedGovernedHandoffPreparation,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
   validatePersistedGpraSupersessionAct,
@@ -434,6 +438,44 @@ export function rehydrateDomain3BrainAdvisory(
     review,
     determination,
     gpra,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export interface G11HandoffPreparationRehydrationContext {
+  readonly gpra: unknown;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+/**
+ * Trusted G11 Handoff preparation rehydration — HEPM/HVEM markers + GPRA lineage coherence.
+ */
+export function rehydrateGovernedHandoffPreparation(
+  raw: unknown,
+  context: G11HandoffPreparationRehydrationContext,
+): GovernedHandoffPreparationRecord {
+  validatePersistedGovernedHandoffPreparation(raw);
+  validatePersistedGpraGrant(context.gpra);
+  const preparation = raw as GovernedHandoffPreparationRecord;
+  const gpra = context.gpra as GpraGrantRecord;
+
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+
+  assertPersistedGovernedHandoffPreparationCoherence({
+    preparation,
+    gpra,
+    review,
+    determination,
   });
   return deepFreeze(structuredClone(raw));
 }

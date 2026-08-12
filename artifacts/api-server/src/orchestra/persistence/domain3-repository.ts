@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G10 (Review through Brain Decision-Stage advisories).
+ * Governed Domain 3 repository — G2–G11 (Review through Governed Handoff Preparation).
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -11,6 +11,7 @@ import {
   rehydrateDesignTimeFeasibilityEvaluation,
   rehydrateDomain3BrainAdvisory,
   rehydrateDownstreamDeficiencyRecord,
+  rehydrateGovernedHandoffPreparation,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
   rehydrateGpraSupersessionAct,
@@ -30,6 +31,7 @@ import {
   validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
+  validatePersistedGovernedHandoffPreparation,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
   validatePersistedGpraSupersessionAct,
@@ -63,6 +65,9 @@ import type {
   DownstreamDispositionAuthorityClassId,
   DownstreamDispositionEligibility,
   GovernedDeficiencyFamily,
+  GovernedHandoffEligibilityAssessment,
+  GovernedHandoffPreparationId,
+  GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraId,
   GpraInvalidationActId,
@@ -71,6 +76,8 @@ import type {
   GpraSupersessionActRecord,
   GpraValidityAssessment,
   GpraValidityPosture,
+  HandoffConsumerCategoryKey,
+  HandoffPreparationCurrency,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
   MandatoryReviewActivityCompleteness,
@@ -128,6 +135,14 @@ import {
   createGpraSupersessionAct,
   evaluateGpraValidityFromPostureActs,
 } from "../gpra-supersession-and-succession.js";
+import {
+  assertGovernedPreparationActor,
+  assertHandoffConsumerCategoryKeys,
+  assertNoHandoffExecutionOrAuthorityClaims,
+  assessGovernedHandoffEligibility,
+  createGovernedHandoffPreparationRecord,
+  evaluateHandoffPreparationCurrencyFromFacts,
+} from "../handoff-preparation.js";
 import { assertEstablishedSupersessionAuthorityClass } from "../supersession-authority.js";
 import { assertSupersessionTriggerFamily } from "../supersession-trigger-families.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
@@ -509,6 +524,66 @@ export interface Domain3Repository {
   listDomain3BrainAdvisoriesByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<readonly Domain3BrainAdvisoryRecord[]>;
+
+  /**
+   * R83–R95 — non-persisting HEIM eligibility assessment + HVEM facts + HSLM condition.
+   * Does not authorize or execute Handoff (STD-015 ownership).
+   */
+  evaluateGovernedHandoffEligibility(input: {
+    obligationId: ProductionObligationId;
+    handoffConsumerContextId: string;
+    consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+    brainAdvisoryIds?: readonly Domain3BrainAdvisoryId[];
+    dispositionRecordIds?: readonly string[];
+    preparedBy?: string;
+    sourceAttribution?: unknown;
+    authorityClassId?: unknown;
+    handoffAuthorityClassId?: unknown;
+    handoffActId?: unknown;
+    handoffAuthorized?: unknown;
+    executesHandoff?: unknown;
+  }): Promise<GovernedHandoffEligibilityAssessment>;
+
+  /**
+   * R83–R95 — persist preparation only when assessment is export_ready.
+   * Additive immutable HPAM record; not Handoff authorization/execution.
+   */
+  prepareGovernedHandoff(input: {
+    obligationId: ProductionObligationId;
+    handoffConsumerContextId: string;
+    consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+    preparedBy: string;
+    brainAdvisoryIds?: readonly Domain3BrainAdvisoryId[];
+    dispositionRecordIds?: readonly string[];
+    sourceAttribution?: unknown;
+    authorityClassId?: unknown;
+    handoffAuthorityClassId?: unknown;
+    handoffActId?: unknown;
+    handoffAuthorized?: unknown;
+    executesHandoff?: unknown;
+    handoffAuthorization?: unknown;
+    performHandoff?: unknown;
+    handoffExecuted?: unknown;
+    manufacturingExecutionId?: unknown;
+    fulfillmentExecutionId?: unknown;
+  }): Promise<GovernedHandoffPreparationRecord>;
+
+  loadGovernedHandoffPreparation(
+    preparationId: GovernedHandoffPreparationId,
+  ): Promise<GovernedHandoffPreparationRecord | null>;
+
+  /** Append-only history of preparations for a GPRA (R94). */
+  listGovernedHandoffPreparationsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffPreparationRecord[]>;
+
+  /**
+   * R88 — compare historical preparation snapshot to current authoritative posture.
+   * Stale records remain loadable but are not currently usable export_ready without re-preparation.
+   */
+  evaluateHandoffPreparationCurrency(
+    preparationId: GovernedHandoffPreparationId,
+  ): Promise<HandoffPreparationCurrency>;
 }
 
 export function createDomain3Repository(
@@ -748,6 +823,40 @@ export function createDomain3RepositoryWithStorage(
     return true;
   }
 
+  async function evaluateGpraValidityForContext(
+    gpraId: GpraId,
+    handoffConsumerContextId: string,
+  ): Promise<GpraValidityAssessment> {
+    const gpraRaw = await storage.getGpraGrant(gpraId);
+    if (!gpraRaw) {
+      throw new OrchestraConstitutionalError(
+        "GPRA grant not found for validity assessment",
+        "invalid_gpra_invalidation",
+        ["FI-DSN-STD-014-R52", "FI-DSN-STD-014-R54"],
+      );
+    }
+    await rehydrateTrustedGpraGrant(gpraRaw);
+    const invalidationRaw = await storage.getGpraInvalidationActByGpra(gpraId);
+    const invalidation = invalidationRaw
+      ? await rehydrateTrustedGpraInvalidationAct(invalidationRaw)
+      : null;
+    const supersessionRaw = await storage.getGpraSupersessionActByPredecessor(gpraId);
+    let supersession: GpraSupersessionActRecord | null = null;
+    if (supersessionRaw) {
+      const rehydrated = await rehydrateTrustedGpraSupersessionAct(supersessionRaw, {
+        treatAsAlreadyPersisted: true,
+      });
+      if (rehydrated.handoffConsumerContextId === handoffConsumerContextId.trim()) {
+        supersession = rehydrated;
+      }
+    }
+    return evaluateGpraValidityFromPostureActs({
+      gpraId,
+      invalidation,
+      supersession,
+    });
+  }
+
   async function findForwardActiveGpraByRvaObligation(
     rvaId: RealizedVisualArtifactId,
     obligationId: ProductionObligationId,
@@ -953,6 +1062,200 @@ export function createDomain3RepositoryWithStorage(
     }
 
     return rehydrateDomain3BrainAdvisory(raw, { review, determination, gpra });
+  }
+
+  async function rehydrateTrustedHandoffPreparation(
+    raw: GovernedHandoffPreparationRecord,
+  ): Promise<GovernedHandoffPreparationRecord> {
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    if (!gpraRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff preparation gpraId points to no persisted GPRA",
+        "invalid_handoff_preparation",
+        ["FI-DSN-STD-014-R87", "FI-DSN-STD-014-R88"],
+      );
+    }
+    const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+    if (!reviewRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff preparation reviewId points to no persisted Review",
+        "invalid_handoff_preparation",
+        ["FI-DSN-STD-014-R87"],
+      );
+    }
+    const review = rehydrateProductionReadinessReview(reviewRaw);
+    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+    if (!determinationRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff preparation determinationId points to no persisted Determination",
+        "invalid_handoff_preparation",
+        ["FI-DSN-STD-014-R87"],
+      );
+    }
+    const determination = rehydrateReviewDetermination(determinationRaw);
+    return rehydrateGovernedHandoffPreparation(raw, { gpra, review, determination });
+  }
+
+  async function resolveBrainAdvisoriesForHandoff(
+    ids: readonly Domain3BrainAdvisoryId[] | undefined,
+  ): Promise<readonly Domain3BrainAdvisoryId[]> {
+    if (!ids || ids.length === 0) return Object.freeze([]);
+    const resolved: Domain3BrainAdvisoryId[] = [];
+    for (const advisoryId of ids) {
+      const loaded = await storage.getDomain3BrainAdvisory(advisoryId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          `Handoff preparation brainAdvisoryId not found: ${advisoryId}`,
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R87", "FI-DSN-STD-014-R92"],
+        );
+      }
+      await rehydrateTrustedBrainAdvisory(loaded);
+      resolved.push(advisoryId);
+    }
+    return Object.freeze(resolved);
+  }
+
+  async function resolveDispositionRecordIdsForHandoff(
+    ids: readonly string[] | undefined,
+  ): Promise<readonly string[]> {
+    if (!ids || ids.length === 0) return Object.freeze([]);
+    const resolved: string[] = [];
+    for (const id of ids) {
+      const trimmed = id.trim();
+      if (!trimmed) {
+        throw new OrchestraConstitutionalError(
+          "Handoff preparation dispositionRecordIds must be non-empty strings",
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R87"],
+        );
+      }
+      const deficiency = await storage.getDownstreamDeficiencyRecord(
+        trimmed as DownstreamDeficiencyRecordId,
+      );
+      const rework = await storage.getReworkAuthorization(trimmed as ReworkAuthorizationId);
+      const withholding = await storage.getReworkAuthorizationWithholding(
+        trimmed as ReworkAuthorizationWithholdingId,
+      );
+      const returnPosture = await storage.getReturnPosture(trimmed as ReturnPostureId);
+      const resubmission = await storage.getResubmissionEligibility(
+        trimmed as ResubmissionEligibilityId,
+      );
+      if (!deficiency && !rework && !withholding && !returnPosture && !resubmission) {
+        throw new OrchestraConstitutionalError(
+          `Handoff preparation dispositionRecordId not found: ${trimmed}`,
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R87"],
+        );
+      }
+      resolved.push(trimmed);
+    }
+    return Object.freeze(resolved);
+  }
+
+  async function hasBlockedPredecessorInContext(
+    obligationId: ProductionObligationId,
+    handoffConsumerContextId: string,
+  ): Promise<boolean> {
+    const listed = await storage.listGpraGrantsByObligation(obligationId);
+    for (const grant of listed) {
+      const invalidation = await storage.getGpraInvalidationActByGpra(grant.gpraId);
+      if (invalidation) return true;
+      const supersession = await storage.getGpraSupersessionActByPredecessor(grant.gpraId);
+      if (supersession && supersession.handoffConsumerContextId === handoffConsumerContextId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async function assessHandoffEligibilityInternal(input: {
+    obligationId: ProductionObligationId;
+    handoffConsumerContextId: string;
+    consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+    brainAdvisoryIds?: readonly Domain3BrainAdvisoryId[];
+    dispositionRecordIds?: readonly string[];
+  }): Promise<GovernedHandoffEligibilityAssessment> {
+    assertHandoffConsumerCategoryKeys(input.consumerCategoryKeys);
+    const contextId = input.handoffConsumerContextId.trim();
+    if (!contextId) {
+      throw new OrchestraConstitutionalError(
+        "Handoff eligibility evaluation requires non-empty handoffConsumerContextId",
+        "invalid_handoff_preparation",
+        ["FI-DSN-STD-014-R83", "FI-DSN-STD-014-R89"],
+      );
+    }
+
+    const brainAdvisoryIds = await resolveBrainAdvisoriesForHandoff(input.brainAdvisoryIds);
+    const dispositionRecordIds = await resolveDispositionRecordIdsForHandoff(
+      input.dispositionRecordIds,
+    );
+
+    const authoritative = await findAuthoritativeGpraByObligationContext(
+      input.obligationId,
+      contextId,
+    );
+
+    let authoritativeValidity: GpraValidityAssessment | null = null;
+    let missingRequiredLineage = false;
+    let successorGpraId: GpraId | null = null;
+
+    if (authoritative) {
+      if (
+        !authoritative.gpraId ||
+        !authoritative.approvalActId ||
+        !authoritative.reviewId ||
+        !authoritative.determinationId ||
+        !authoritative.rvaId ||
+        !authoritative.programId ||
+        !authoritative.obligationId
+      ) {
+        missingRequiredLineage = true;
+      } else {
+        const reviewRaw = await storage.getProductionReadinessReview(authoritative.reviewId);
+        const determinationRaw = await storage.getReviewDetermination(
+          authoritative.determinationId,
+        );
+        const approvalRaw = await storage.getApprovalAct(authoritative.approvalActId);
+        if (!reviewRaw || !determinationRaw || !approvalRaw) {
+          missingRequiredLineage = true;
+        } else if (
+          reviewRaw.programId !== authoritative.programId ||
+          reviewRaw.obligationId !== authoritative.obligationId ||
+          reviewRaw.rvaId !== authoritative.rvaId ||
+          determinationRaw.reviewId !== authoritative.reviewId ||
+          approvalRaw.reviewId !== authoritative.reviewId
+        ) {
+          missingRequiredLineage = true;
+        }
+      }
+      authoritativeValidity = await evaluateGpraValidityForContext(authoritative.gpraId, contextId);
+      const supersession = await storage.getGpraSupersessionActByPredecessor(authoritative.gpraId);
+      // If this GPRA is a successor, capture predecessor supersession pointing to it is N/A;
+      // successor id on export is only when this GPRA was superseded (then not authoritative).
+      if (authoritativeValidity.supersessionActId) {
+        const act = await storage.getGpraSupersessionAct(authoritativeValidity.supersessionActId);
+        successorGpraId = act?.successorGpraId ?? null;
+      }
+    }
+
+    const blocked =
+      !authoritative &&
+      (await hasBlockedPredecessorInContext(input.obligationId, contextId));
+
+    return assessGovernedHandoffEligibility({
+      obligationId: input.obligationId,
+      handoffConsumerContextId: contextId,
+      consumerCategoryKeys: input.consumerCategoryKeys,
+      authoritativeGpra: authoritative,
+      authoritativeValidity,
+      hasBlockedPredecessorInContext: blocked,
+      missingRequiredLineage,
+      dispositionRecordIds,
+      brainAdvisoryIds,
+      successorGpraId,
+    });
   }
 
   async function requireLinkedConditionalOrFailDetermination(
@@ -2606,6 +2909,160 @@ export function createDomain3RepositoryWithStorage(
         out.push(await rehydrateTrustedBrainAdvisory(item));
       }
       return out;
+    },
+
+    async evaluateGovernedHandoffEligibility(input) {
+      assertNoHandoffExecutionOrAuthorityClaims(input as unknown as Record<string, unknown>);
+      if (input.preparedBy !== undefined || input.sourceAttribution !== undefined) {
+        assertGovernedPreparationActor({
+          preparedBy: input.preparedBy ?? "eligibility-evaluator",
+          sourceAttribution: input.sourceAttribution,
+          authorityClassId: input.authorityClassId,
+          handoffAuthorityClassId: input.handoffAuthorityClassId,
+        });
+      } else if (input.authorityClassId != null || input.handoffAuthorityClassId != null) {
+        assertGovernedPreparationActor({
+          preparedBy: "eligibility-evaluator",
+          authorityClassId: input.authorityClassId,
+          handoffAuthorityClassId: input.handoffAuthorityClassId,
+        });
+      }
+      return assessHandoffEligibilityInternal(input);
+    },
+
+    async prepareGovernedHandoff(input) {
+      assertNoHandoffExecutionOrAuthorityClaims(input as unknown as Record<string, unknown>);
+      const preparedBy = assertGovernedPreparationActor(input);
+      assertHandoffConsumerCategoryKeys(input.consumerCategoryKeys);
+
+      const assessment = await assessHandoffEligibilityInternal({
+        obligationId: input.obligationId,
+        handoffConsumerContextId: input.handoffConsumerContextId,
+        consumerCategoryKeys: input.consumerCategoryKeys,
+        brainAdvisoryIds: input.brainAdvisoryIds,
+        dispositionRecordIds: input.dispositionRecordIds,
+      });
+
+      if (assessment.eligibilityLayerCondition !== "export_ready") {
+        throw new OrchestraConstitutionalError(
+          `Governed Handoff preparation rejected: eligibility is ${assessment.eligibilityLayerCondition} (requires export_ready)`,
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R85", "FI-DSN-STD-014-R90", "FI-DSN-STD-014-R91"],
+        );
+      }
+      if (!assessment.gpraId || !assessment.validityExport || !assessment.evidencePackage) {
+        throw new OrchestraConstitutionalError(
+          "export_ready assessment missing GPRA / validity export / evidence package",
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R87", "FI-DSN-STD-014-R88"],
+        );
+      }
+
+      const gpraRaw = await storage.getGpraGrant(assessment.gpraId);
+      if (!gpraRaw) {
+        throw new OrchestraConstitutionalError(
+          "Authoritative GPRA for Handoff preparation not found",
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R85", "FI-DSN-STD-014-R88"],
+        );
+      }
+      const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+
+      const preparation = createGovernedHandoffPreparationRecord({
+        gpra,
+        reviewId: gpra.reviewId,
+        determinationId: gpra.determinationId,
+        approvalActId: gpra.approvalActId,
+        rvaId: gpra.rvaId,
+        programId: gpra.programId,
+        obligationId: gpra.obligationId,
+        handoffConsumerContextId: input.handoffConsumerContextId,
+        consumerCategoryKeys: input.consumerCategoryKeys,
+        validityExport: assessment.validityExport,
+        evidencePackage: assessment.evidencePackage,
+        brainAdvisoryIds: assessment.evidencePackage.brainAdvisoryIds,
+        preparedBy,
+        sourceAttribution: input.sourceAttribution,
+        authorityClassId: input.authorityClassId,
+        handoffAuthorityClassId: input.handoffAuthorityClassId,
+        handoffActId: input.handoffActId,
+        handoffAuthorized: input.handoffAuthorized,
+        executesHandoff: input.executesHandoff,
+        handoffAuthorization: input.handoffAuthorization,
+        performHandoff: input.performHandoff,
+        handoffExecuted: input.handoffExecuted,
+        manufacturingExecutionId: input.manufacturingExecutionId,
+        fulfillmentExecutionId: input.fulfillmentExecutionId,
+      });
+
+      validatePersistedGovernedHandoffPreparation(preparation);
+      try {
+        await storage.putGovernedHandoffPreparation(preparation);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error
+            ? error.message
+            : "Failed to persist Governed Handoff preparation",
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R94"],
+        );
+      }
+      const loaded = await storage.getGovernedHandoffPreparation(preparation.preparationId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Governed Handoff preparation",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R94"],
+        );
+      }
+      return rehydrateTrustedHandoffPreparation(loaded);
+    },
+
+    async loadGovernedHandoffPreparation(preparationId) {
+      const loaded = await storage.getGovernedHandoffPreparation(preparationId);
+      if (!loaded) return null;
+      return rehydrateTrustedHandoffPreparation(loaded);
+    },
+
+    async listGovernedHandoffPreparationsByGpra(gpraId) {
+      const listed = await storage.listGovernedHandoffPreparationsByGpra(gpraId);
+      const out: GovernedHandoffPreparationRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffPreparation(item));
+      }
+      return out.sort((a, b) => a.preparedAt.localeCompare(b.preparedAt));
+    },
+
+    async evaluateHandoffPreparationCurrency(preparationId) {
+      const preparation = await this.loadGovernedHandoffPreparation(preparationId);
+      if (!preparation) {
+        throw new OrchestraConstitutionalError(
+          "Handoff preparation not found for currency evaluation",
+          "invalid_handoff_preparation",
+          ["FI-DSN-STD-014-R88"],
+        );
+      }
+      const currentAssessment = await assessHandoffEligibilityInternal({
+        obligationId: preparation.obligationId,
+        handoffConsumerContextId: preparation.handoffConsumerContextId,
+        consumerCategoryKeys: preparation.consumerCategoryKeys,
+      });
+      const currentAuthoritative = await findAuthoritativeGpraByObligationContext(
+        preparation.obligationId,
+        preparation.handoffConsumerContextId,
+      );
+      const currentValidity = currentAuthoritative
+        ? await evaluateGpraValidityForContext(
+            currentAuthoritative.gpraId,
+            preparation.handoffConsumerContextId,
+          )
+        : null;
+      return evaluateHandoffPreparationCurrencyFromFacts({
+        preparation,
+        currentAuthoritativeGpraId: currentAuthoritative?.gpraId ?? null,
+        currentValidity,
+        currentEligibilityCondition: currentAssessment.eligibilityLayerCondition,
+      });
     },
   };
 }
