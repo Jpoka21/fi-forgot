@@ -4,6 +4,10 @@
  * standards). Does not restate manufacturing requirement bodies.
  *
  * FI-DSN-STD-014-R21 — consume applicable frozen FI-MFG-* Compliance Boundaries only.
+ *
+ * ORCH-IMP-008.2: Canonical catalog is the sole constitutional trust boundary for
+ * frozen-binding eligibility. Injectable ManufacturingAuthoritySource adapters may
+ * resolve recognized authorities; they cannot mint or expand eligibility.
  */
 
 import { OrchestraConstitutionalError } from "./errors.js";
@@ -31,9 +35,9 @@ export interface ManufacturingComplianceBoundaryReference {
 }
 
 /**
- * Eight Volume 01 standards frozen and binding (Version 1.0).
+ * Canonical eight Volume 01 standards frozen and binding (Version 1.0).
+ * Sole runtime authority identity set for Design-Time Feasibility eligibility.
  * Source: playbook/design/volume-01-manufacturing/01-handwrytten-production-standard.md
- * (Structurally Complete — eight frozen FI-MFG-* standards).
  */
 export const FROZEN_BINDING_FI_MFG_STANDARDS: readonly ManufacturingComplianceBoundaryReference[] =
   Object.freeze([
@@ -95,15 +99,44 @@ export const FROZEN_BINDING_FI_MFG_STANDARDS: readonly ManufacturingComplianceBo
     }),
   ]);
 
+const CANONICAL_BY_ID = new Map(
+  FROZEN_BINDING_FI_MFG_STANDARDS.map((item) => [item.sourceStandardId, item] as const),
+);
+
 /**
  * Known non-binding manufacturing identifiers — rejected as DTF Compliance Boundary inputs.
  * FI-MFG-POL-003: Drafted, Pending Freeze (timing blocked).
- * Operational Continuity: Deferred — no Standard ID / nonbinding.
  */
 export const NONBINDING_MANUFACTURING_AUTHORITY_IDS = Object.freeze([
   "FI-MFG-POL-003",
 ] as const);
 
+/**
+ * Constitutional eligibility: identifier is in the canonical frozen binding set.
+ * Injectable providers cannot expand this set.
+ */
+export function isCanonicalFrozenBindingFiMfgStandardId(
+  sourceStandardId: unknown,
+): boolean {
+  return (
+    typeof sourceStandardId === "string" && CANONICAL_BY_ID.has(sourceStandardId.trim())
+  );
+}
+
+/**
+ * Resolve canonical frozen binding reference. Returns null for non-canonical IDs.
+ */
+export function resolveCanonicalFrozenBindingBoundary(
+  sourceStandardId: string,
+): ManufacturingComplianceBoundaryReference | null {
+  return CANONICAL_BY_ID.get(sourceStandardId.trim()) ?? null;
+}
+
+/**
+ * Injectable adapter — may resolve or surface recognized canonical authorities.
+ * Must not be treated as a source of constitutional eligibility.
+ * createFrozenManufacturingAuthoritySource always filters through the canonical set.
+ */
 export interface ManufacturingAuthoritySource {
   listFrozenBindingBoundaries(): readonly ManufacturingComplianceBoundaryReference[];
   resolveFrozenBindingBoundary(
@@ -112,26 +145,30 @@ export interface ManufacturingAuthoritySource {
   isFrozenBindingSourceStandardId(sourceStandardId: string): boolean;
 }
 
+/**
+ * Default adapter exposing only the canonical frozen binding catalog.
+ */
 export function createFrozenManufacturingAuthoritySource(): ManufacturingAuthoritySource {
-  const byId = new Map(
-    FROZEN_BINDING_FI_MFG_STANDARDS.map((item) => [item.sourceStandardId, item] as const),
-  );
-
   return {
     listFrozenBindingBoundaries() {
       return FROZEN_BINDING_FI_MFG_STANDARDS;
     },
     resolveFrozenBindingBoundary(sourceStandardId) {
-      return byId.get(sourceStandardId.trim()) ?? null;
+      return resolveCanonicalFrozenBindingBoundary(sourceStandardId);
     },
     isFrozenBindingSourceStandardId(sourceStandardId) {
-      return byId.has(sourceStandardId.trim());
+      return isCanonicalFrozenBindingFiMfgStandardId(sourceStandardId);
     },
   };
 }
 
+/**
+ * Assert constitutional frozen-binding eligibility using the canonical catalog only.
+ * The optional `source` argument is retained for call-site compatibility but cannot
+ * mint or expand eligibility — forged provider claims are ignored.
+ */
 export function assertFrozenBindingManufacturingAuthority(
-  source: ManufacturingAuthoritySource,
+  _source: ManufacturingAuthoritySource | null | undefined,
   sourceStandardId: string,
 ): ManufacturingComplianceBoundaryReference {
   const trimmed = sourceStandardId.trim();
@@ -142,15 +179,15 @@ export function assertFrozenBindingManufacturingAuthority(
       ["FI-DSN-STD-014-R21"],
     );
   }
-  const resolved = source.resolveFrozenBindingBoundary(trimmed);
-  if (!resolved || resolved.bindingPosture !== "frozen_binding") {
+  const canonical = resolveCanonicalFrozenBindingBoundary(trimmed);
+  if (!canonical || canonical.bindingPosture !== "frozen_binding") {
     throw new OrchestraConstitutionalError(
       "Unknown or unfrozen manufacturing authority cannot be consumed for Design-Time Feasibility",
       "invalid_design_time_feasibility",
       ["FI-DSN-STD-014-R21"],
     );
   }
-  return resolved;
+  return canonical;
 }
 
 /** R23 — Manufacturing Validation is not Design-Time Feasibility. */

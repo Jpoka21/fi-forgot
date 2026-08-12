@@ -18,6 +18,8 @@ import type {
 import { OrchestraConstitutionalError } from "./errors.js";
 import {
   assertFrozenBindingManufacturingAuthority,
+  isCanonicalFrozenBindingFiMfgStandardId,
+  resolveCanonicalFrozenBindingBoundary,
   type ManufacturingAuthoritySource,
   type ManufacturingComplianceBoundaryReference,
 } from "./manufacturing-authority.js";
@@ -53,7 +55,8 @@ export function createDesignTimeFeasibilityEvaluationId(): DesignTimeFeasibility
 
 /**
  * Applicable FI-MFG-* set = program-bound Compliance Boundaries whose sourceStandardId
- * is a frozen binding manufacturing standard (R21 / STD-012 obligation scope).
+ * is in the canonical frozen binding catalog (R21 / STD-012 obligation scope).
+ * Injectable ManufacturingAuthoritySource cannot expand this eligibility set.
  */
 export function resolveApplicableManufacturingBoundaries(input: {
   manufacturingAuthority: ManufacturingAuthoritySource;
@@ -62,6 +65,9 @@ export function resolveApplicableManufacturingBoundaries(input: {
   applicable: readonly ManufacturingComplianceBoundaryReference[];
   consideredNonApplicableSourceStandardIds: readonly string[];
 } {
+  // Retain parameter for repository call-site compatibility; eligibility is canonical-only.
+  void input.manufacturingAuthority;
+
   const applicable: ManufacturingComplianceBoundaryReference[] = [];
   const seen = new Set<string>();
   const consideredNonApplicable: string[] = [];
@@ -71,12 +77,13 @@ export function resolveApplicableManufacturingBoundaries(input: {
     if (!id.startsWith("FI-MFG-")) {
       continue;
     }
-    if (input.manufacturingAuthority.isFrozenBindingSourceStandardId(id)) {
+    if (isCanonicalFrozenBindingFiMfgStandardId(id)) {
       if (!seen.has(id)) {
         seen.add(id);
-        applicable.push(
-          assertFrozenBindingManufacturingAuthority(input.manufacturingAuthority, id),
-        );
+        const canonical = resolveCanonicalFrozenBindingBoundary(id);
+        if (canonical) {
+          applicable.push(canonical);
+        }
       }
     } else {
       consideredNonApplicable.push(id);

@@ -18,6 +18,7 @@ import {
   draftProductionProgram,
   FROZEN_BINDING_FI_MFG_STANDARDS,
   governProductionProgram,
+  isCanonicalFrozenBindingFiMfgStandardId,
   isOrchestraConstitutionalError,
   listMandatoryReviewDimensionIds,
   MANUFACTURING_VALIDATION_DEFERRED,
@@ -25,13 +26,17 @@ import {
   type Domain1Repository,
   type Domain2Repository,
   type Domain3Repository,
+  type ManufacturingAuthoritySource,
+  type ManufacturingComplianceBoundaryReference,
   type ProductionProgram,
   type ProductionReadinessReview,
   type RealizedVisualArtifact,
 } from "../orchestra/index.js";
+import { rehydrateDesignTimeFeasibilityEvaluation } from "../orchestra/persistence/domain3-rehydration.js";
 import { validatePersistedDesignTimeFeasibilityEvaluation } from "../orchestra/persistence/domain3-validation.js";
 import { assertFrozenBindingManufacturingAuthority } from "../orchestra/manufacturing-authority.js";
 import { createFrozenManufacturingAuthoritySource } from "../orchestra/manufacturing-authority.js";
+import { resolveApplicableManufacturingBoundaries } from "../orchestra/design-time-feasibility.js";
 
 let passed = 0;
 let failed = 0;
@@ -503,6 +508,251 @@ section("No second DTF dimension; primary path is repository");
     listMandatoryReviewDimensionIds().filter((id) => id === "design_time_feasibility").length,
     1,
   );
+}
+
+section("ORCH-IMP-008.2 canonical manufacturing authority boundary");
+
+{
+  for (const boundary of FROZEN_BINDING_FI_MFG_STANDARDS) {
+    expectTruthy(
+      `Canonical accepts ${boundary.sourceStandardId}`,
+      isCanonicalFrozenBindingFiMfgStandardId(boundary.sourceStandardId),
+    );
+    const resolved = assertFrozenBindingManufacturingAuthority(
+      createFrozenManufacturingAuthoritySource(),
+      boundary.sourceStandardId,
+    );
+    expect(`Canonical resolve ${boundary.sourceStandardId}`, resolved.sourceStandardId, boundary.sourceStandardId);
+  }
+
+  expectThrows(
+    "POL-003 cannot become consumable frozen authority",
+    () =>
+      assertFrozenBindingManufacturingAuthority(
+        createFrozenManufacturingAuthoritySource(),
+        "FI-MFG-POL-003",
+      ),
+    "invalid_design_time_feasibility",
+  );
+
+  const lyingSource: ManufacturingAuthoritySource = {
+    listFrozenBindingBoundaries() {
+      return [
+        {
+          sourceStandardId: "FI-MFG-CON-999",
+          title: "Forged Constraint",
+          kind: "manufacturing_constraint",
+          bindingPosture: "frozen_binding",
+          governingVolume: "01",
+        },
+        {
+          sourceStandardId: "FI-MFG-POL-003",
+          title: "Relabeled nonbinding as frozen",
+          kind: "operational_policy",
+          bindingPosture: "frozen_binding",
+          governingVolume: "01",
+        },
+      ] as ManufacturingComplianceBoundaryReference[];
+    },
+    resolveFrozenBindingBoundary(id) {
+      if (id === "FI-MFG-CON-999" || id === "FI-MFG-POL-003") {
+        return {
+          sourceStandardId: id,
+          title: "Forged",
+          kind: "manufacturing_constraint",
+          bindingPosture: "frozen_binding",
+          governingVolume: "01",
+        };
+      }
+      return null;
+    },
+    isFrozenBindingSourceStandardId(id) {
+      return id === "FI-MFG-CON-999" || id === "FI-MFG-POL-003";
+    },
+  };
+
+  expectThrows(
+    "Injected forged FI-MFG-CON-999 rejected",
+    () => assertFrozenBindingManufacturingAuthority(lyingSource, "FI-MFG-CON-999"),
+    "invalid_design_time_feasibility",
+  );
+  expectThrows(
+    "Injected cannot relabel POL-003 into frozen binding",
+    () => assertFrozenBindingManufacturingAuthority(lyingSource, "FI-MFG-POL-003"),
+    "invalid_design_time_feasibility",
+  );
+
+  const forgedApplicability = resolveApplicableManufacturingBoundaries({
+    manufacturingAuthority: lyingSource,
+    programComplianceBoundaries: [
+      bindComplianceBoundary({
+        sourceStandardId: "FI-MFG-CON-999",
+        scopeDescription: "forged",
+        boundBy: ACTOR,
+      }),
+      bindComplianceBoundary({
+        sourceStandardId: "FI-MFG-PRN-001",
+        scopeDescription: "lawful",
+        boundBy: ACTOR,
+      }),
+      bindComplianceBoundary({
+        sourceStandardId: "FI-MFG-POL-003",
+        scopeDescription: "draft",
+        boundBy: ACTOR,
+      }),
+    ],
+  });
+  expect("Lying source cannot expand applicable set", forgedApplicability.applicable.length, 1);
+  expect(
+    "Only canonical PRN-001 applicable",
+    forgedApplicability.applicable[0]?.sourceStandardId,
+    "FI-MFG-PRN-001",
+  );
+  expectTruthy(
+    "Forged and POL-003 considered non-applicable",
+    forgedApplicability.consideredNonApplicableSourceStandardIds.includes("FI-MFG-CON-999") &&
+      forgedApplicability.consideredNonApplicableSourceStandardIds.includes("FI-MFG-POL-003"),
+  );
+
+  const { domain1, program, obligationId } = await buildGovernedDomain1(true);
+  const domain2Lying = createDomain2Repository(domain1);
+  const domain3Lying = createDomain3Repository(domain2Lying, lyingSource);
+  const exploration = await domain2Lying.beginExplorationPosture({
+    programId: program.id,
+    obligationId,
+    governingBasis: "Exploration",
+    operatedBy: ACTOR,
+  });
+  const exitReady = await domain2Lying.achieveExplorationExitReady({
+    recordId: exploration.recordId,
+    exitBasis: "Exit",
+    achievedBy: ACTOR,
+  });
+  const commitment = await domain2Lying.recordRealizationCommitment({
+    programId: program.id,
+    obligationId,
+    explorationPostureRecordId: exitReady.recordId,
+    governingBasis: "Commitment",
+    committedBy: ACTOR,
+  });
+  const candidate = await domain2Lying.establishRealizedVisualArtifact({
+    programId: program.id,
+    obligationId,
+    realizationCommitmentId: commitment.commitmentId,
+    realizationPath: "created",
+    establishedBy: ACTOR,
+  });
+  const rvaLying = await domain2Lying.promoteRvaToExists({
+    rvaId: candidate.id,
+    basis: "Exists",
+    promotedBy: ACTOR,
+  });
+  await domain2Lying.determineReviewEntryReadiness({
+    rvaId: rvaLying.id,
+    determinedBy: ACTOR,
+  });
+  const reviewLying = await domain3Lying.admitToProductionReadinessReview({
+    rvaId: rvaLying.id,
+    admittedBy: ACTOR,
+  });
+
+  await expectThrowsAsync(
+    "Repository with lying source cannot create evidence from forged related authority",
+    () =>
+      domain3Lying.recordDesignTimeFeasibilityEvaluation({
+        reviewId: reviewLying.reviewId,
+        evaluationMethodDescription: "Attempt forged authority consumption",
+        observations: [
+          {
+            kind: "compatibility_observation",
+            text: "Trying to cite forged manufacturing authority",
+            relatedSourceStandardId: "FI-MFG-CON-999",
+          },
+        ],
+        affirmsDecisionStageWithoutManufacturingExecution: true,
+        evaluatedBy: ACTOR,
+      }),
+    "invalid_design_time_feasibility",
+  );
+
+  const lawful = await domain3Lying.recordDesignTimeFeasibilityEvaluation({
+    reviewId: reviewLying.reviewId,
+    evaluationMethodDescription: "Lawful evaluation despite lying adapter",
+    observations: [
+      {
+        kind: "compatibility_observation",
+        text: "Uses only canonical manufacturing authority",
+        relatedSourceStandardId: "FI-MFG-PRN-001",
+      },
+    ],
+    affirmsDecisionStageWithoutManufacturingExecution: true,
+    evaluatedBy: ACTOR,
+  });
+  expectTruthy(
+    "Lawful evaluation still succeeds with lying adapter",
+    lawful.evaluation.applicableManufacturingBoundaries.every((b) =>
+      isCanonicalFrozenBindingFiMfgStandardId(b.sourceStandardId),
+    ),
+  );
+  expectTruthy("No Determination introduced", !("determination" in lawful.evaluation));
+
+  const rehydrated = rehydrateDesignTimeFeasibilityEvaluation(lawful.evaluation);
+  expect("Lawful evaluation rehydrates", rehydrated.evaluationId, lawful.evaluation.evaluationId);
+
+  expectThrows(
+    "Persistence rejects forged applicable frozen authority",
+    () =>
+      validatePersistedDesignTimeFeasibilityEvaluation({
+        ...lawful.evaluation,
+        applicableManufacturingBoundaries: [
+          {
+            sourceStandardId: "FI-MFG-CON-999",
+            title: "Forged",
+            kind: "manufacturing_constraint",
+            bindingPosture: "frozen_binding",
+            governingVolume: "01",
+          },
+        ],
+      }),
+    "invalid_design_time_feasibility",
+  );
+
+  expectThrows(
+    "Rehydration rejects forged applicable authority",
+    () =>
+      rehydrateDesignTimeFeasibilityEvaluation({
+        ...lawful.evaluation,
+        applicableManufacturingBoundaries: [
+          {
+            sourceStandardId: "FI-MFG-CON-999",
+            title: "Forged",
+            kind: "manufacturing_constraint",
+            bindingPosture: "frozen_binding",
+            governingVolume: "01",
+          },
+        ],
+      }),
+    "invalid_design_time_feasibility",
+  );
+
+  // Empty lawful applicability + R26 gap still works
+  const noMfg = await admitReview(false);
+  const gap = await noMfg.domain3.recordDesignTimeFeasibilityEvaluation({
+    reviewId: noMfg.review.reviewId,
+    evaluationMethodDescription: "Gap scan",
+    observations: [
+      {
+        kind: "applicability_gap",
+        text: "No frozen FI-MFG Compliance Boundaries bound; decision-stage evaluation still required",
+      },
+    ],
+    affirmsDecisionStageWithoutManufacturingExecution: true,
+    evaluatedBy: ACTOR,
+  });
+  expect("R26 gap path intact", gap.evaluation.applicableManufacturingBoundaries.length, 0);
+
+  const history = await domain3Lying.listReviewDimensionActivitiesByReview(reviewLying.reviewId);
+  expectTruthy("Append-only activity history retained", history.length >= 1);
 }
 
 console.log(`\n--- Results: ${passed} passed, ${failed} failed ---`);

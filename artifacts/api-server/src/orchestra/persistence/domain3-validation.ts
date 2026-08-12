@@ -12,6 +12,7 @@ import type {
 } from "../domain3-types.js";
 import type { RealizationPath, RealizedVisualArtifactId } from "../domain2-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
+import { isCanonicalFrozenBindingFiMfgStandardId } from "../manufacturing-authority.js";
 import { isMandatoryReviewDimensionId } from "../review-dimensions.js";
 import { validateLineageCoherence } from "../rva-lifecycle.js";
 
@@ -404,11 +405,11 @@ export function validatePersistedDesignTimeFeasibilityEvaluation(
     const item = boundary as Record<string, unknown>;
     if (
       typeof item.sourceStandardId !== "string" ||
-      !item.sourceStandardId.startsWith("FI-MFG-") ||
+      !isCanonicalFrozenBindingFiMfgStandardId(item.sourceStandardId) ||
       item.bindingPosture !== "frozen_binding"
     ) {
       throw new OrchestraConstitutionalError(
-        "Applicable manufacturing boundary must be a frozen binding FI-MFG-* reference",
+        "Applicable manufacturing boundary must be a canonical frozen binding FI-MFG-* reference",
         "invalid_design_time_feasibility",
         ["FI-DSN-STD-014-R21"],
       );
@@ -441,6 +442,16 @@ export function validatePersistedDesignTimeFeasibilityEvaluation(
         "Design-Time Feasibility observation kind/text is invalid",
         "invalid_design_time_feasibility",
         ["FI-DSN-STD-014-R25"],
+      );
+    }
+    if (
+      item.relatedSourceStandardId !== undefined &&
+      !isCanonicalFrozenBindingFiMfgStandardId(item.relatedSourceStandardId)
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Design-Time Feasibility observation related manufacturing authority must be canonical frozen binding",
+        "invalid_design_time_feasibility",
+        ["FI-DSN-STD-014-R21"],
       );
     }
   }

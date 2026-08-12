@@ -84,6 +84,8 @@ export {
   FROZEN_BINDING_FI_MFG_STANDARDS,
   createFrozenManufacturingAuthoritySource,
   assertFrozenBindingManufacturingAuthority,
+  isCanonicalFrozenBindingFiMfgStandardId,
+  resolveCanonicalFrozenBindingBoundary,
   MANUFACTURING_VALIDATION_DEFERRED,
   FULFILLMENT_EXECUTION_DEFERRED,
   type ManufacturingAuthoritySource,
