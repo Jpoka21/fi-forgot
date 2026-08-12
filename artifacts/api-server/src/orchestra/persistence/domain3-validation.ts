@@ -1,11 +1,16 @@
 /**
- * Domain 3 persistence validation — FI-DSN-STD-014 G2–G5.
+ * Domain 3 persistence validation — FI-DSN-STD-014 G2–G6.
  */
 
+import { isCanonicalEstablishedApprovalAuthorityClassId } from "../approval-authority.js";
+import { isMandatoryApprovalWithholdingGroundFamily } from "../approval-withholding-grounds.js";
 import { DOMAIN3_GOVERNING_STANDARD } from "../domain3-authority.js";
 import { isValidDomain3GovernedCreationMarker } from "../domain3-entry.js";
 import type {
+  ApprovalActRecord,
+  ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  GpraGrantRecord,
   ProductionReadinessReview,
   ReviewDeterminationRecord,
   ReviewDimensionActivityRecord,
@@ -28,6 +33,9 @@ const ID_PREFIXES = {
   activity: "review-dimension-activity-",
   dtfEvaluation: "design-time-feasibility-evaluation-",
   determination: "review-determination-",
+  approvalAct: "approval-act-",
+  withholding: "approval-withholding-",
+  gpra: "gpra-",
 } as const;
 
 const LEGAL_REALIZATION_PATHS: readonly RealizationPath[] = [
@@ -643,6 +651,193 @@ export function validatePersistedReviewDetermination(
       "Review Determination requires valid governed creation marker",
       "invalid_domain3_persistence_state",
       ["FI-DSN-STD-014-R27"],
+    );
+  }
+}
+
+export function validatePersistedApprovalAct(raw: unknown): asserts raw is ApprovalActRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Approval act",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R41"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!isCanonicalEstablishedApprovalAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Approval act requires established MAGAC authority class",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R36", "FI-DSN-STD-014-R38"],
+    );
+  }
+  if (record.authorityGoverningSourceId !== "PD-STD-014-002") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Approval act requires PD-STD-014-002 governing source",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R36"],
+    );
+  }
+  if (
+    record.authorityConstitutionalScope !== "production_obligation" &&
+    record.authorityConstitutionalScope !== "production_program"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Approval act requires lawful MAGAC constitutional scope",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R36", "FI-DSN-STD-014-R37"],
+    );
+  }
+  if (record.gpraNotCreatedByThisAct !== true) {
+    throw new OrchestraConstitutionalError(
+      "Approval act must affirm GPRA is not created by Approval alone",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R41", "FI-DSN-STD-014-R42"],
+    );
+  }
+  if (
+    record.manufacturingValidationNotPerformed !== true ||
+    record.fulfillmentExecutionNotPerformed !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Approval must not claim Manufacturing Validation or Fulfillment Execution",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R41"],
+    );
+  }
+  if (typeof record.approvedAt !== "string" || typeof record.approvedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "Approval act requires approvedAt and approvedBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R38"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Approval act");
+  assertDomain3Traceability(record.traceability, "Approval act");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Approval act requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R41"],
+    );
+  }
+}
+
+export function validatePersistedApprovalWithholding(
+  raw: unknown,
+): asserts raw is ApprovalWithholdingRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Approval withholding",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R39"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.withholdingId, ID_PREFIXES.withholding, "Approval withholding");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!isMandatoryApprovalWithholdingGroundFamily(record.groundFamily)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Approval withholding requires mandatory EGWG ground family",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R39", "FI-DSN-STD-014-R40"],
+    );
+  }
+  if (typeof record.grounds !== "string" || !record.grounds.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Approval withholding requires documented grounds",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R39"],
+    );
+  }
+  if (record.passDeterminationPreserved !== true) {
+    throw new OrchestraConstitutionalError(
+      "Approval withholding must preserve Pass Determination",
+      "invalid_approval_authority",
+      ["FI-DSN-STD-014-R35", "FI-DSN-STD-014-R39"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Approval withholding");
+  assertDomain3Traceability(record.traceability, "Approval withholding");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Approval withholding requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R39"],
+    );
+  }
+}
+
+export function validatePersistedGpraGrant(raw: unknown): asserts raw is GpraGrantRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted GPRA grant",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R42"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!isCanonicalEstablishedApprovalAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted GPRA requires established MAGAC authority class",
+      "invalid_gpra_grant",
+      ["FI-DSN-STD-014-R36", "FI-DSN-STD-014-R42"],
+    );
+  }
+  if (
+    record.collectionMembershipNotConferred !== true ||
+    record.governedHandoffNotAuthorized !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "GPRA must exclude collection membership and Governed Handoff authorization",
+      "invalid_gpra_grant",
+      ["FI-DSN-STD-014-R43"],
+    );
+  }
+  if (
+    record.manufacturingValidationNotPerformed !== true ||
+    record.fulfillmentExecutionNotPerformed !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "GPRA must not claim Manufacturing Validation or Fulfillment Execution",
+      "invalid_gpra_grant",
+      ["FI-DSN-STD-014-R42"],
+    );
+  }
+  if (typeof record.grantedAt !== "string" || typeof record.grantedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "GPRA grant requires grantedAt and grantedBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R42"],
+    );
+  }
+  assertAuditMetadata(record.audit, "GPRA grant");
+  assertDomain3Traceability(record.traceability, "GPRA grant");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "GPRA grant requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R42"],
     );
   }
 }

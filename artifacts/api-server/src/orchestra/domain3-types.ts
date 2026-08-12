@@ -1,6 +1,6 @@
 /**
- * Domain 3 constitutional types — FI-DSN-STD-014 G2–G5
- * (Review entry, activity, Design-Time Feasibility, Review Determination).
+ * Domain 3 constitutional types — FI-DSN-STD-014 G2–G6
+ * (Review entry through Approval Authority and GPRA Grant).
  */
 
 import type { Domain3GovernanceTraceability } from "./domain3-authority.js";
@@ -240,6 +240,125 @@ export interface DesignTimeFeasibilityEvaluationRecord {
   /** Linked after G3 evidence/activity persistence. */
   readonly evidenceIds: readonly ReviewEvidenceId[];
   readonly activityId: ReviewDimensionActivityId | null;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+export type ApprovalActId = string & { readonly __brand: "ApprovalActId" };
+export type ApprovalWithholdingId = string & { readonly __brand: "ApprovalWithholdingId" };
+export type GpraId = string & { readonly __brand: "GpraId" };
+
+/**
+ * MAGAC constitutional scope kinds established by PD-STD-014-002 / R36–R37.
+ * Classes are established by frozen governance; Program/Obligation activate scope only.
+ */
+export type ApprovalAuthorityConstitutionalScope =
+  | "production_obligation"
+  | "production_program";
+
+/**
+ * Frozen-established Approval authority class identity (MAGAC catalog entry).
+ * Not an implementation role, reviewer title, or injectable authority.
+ */
+export type ApprovalAuthorityClassId =
+  | "approval_authority_production_obligation_scope"
+  | "approval_authority_production_program_scope";
+
+/**
+ * EGWG mandatory withholding ground families (R39 / PD-STD-014-003).
+ */
+export type ApprovalWithholdingGroundFamily =
+  | "bound_governing_prerequisites_not_satisfied"
+  | "authority_or_provenance_defects"
+  | "unresolved_production_program_or_obligation_conflicts";
+
+/**
+ * Approval consideration eligibility — distinct from Approval act and GPRA (R34).
+ */
+export interface ApprovalConsiderationEligibility {
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId | null;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly eligibleForApprovalConsideration: boolean;
+  readonly passDeterminationPresent: boolean;
+  readonly withholdingPresent: boolean;
+  readonly approvalAlreadyRecorded: boolean;
+}
+
+/**
+ * Decision-stage Approval act — distinct from Review Determination and GPRA (R41).
+ * Necessary but not sufficient for GPRA.
+ */
+export interface ApprovalActRecord {
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly authorityClassId: ApprovalAuthorityClassId;
+  readonly authorityGoverningSourceId: string;
+  readonly authorityConstitutionalScope: ApprovalAuthorityConstitutionalScope;
+  readonly activationScope:
+    | { readonly kind: "production_obligation"; readonly obligationId: ProductionObligationId }
+    | { readonly kind: "production_program"; readonly programId: ProductionProgramId };
+  readonly approvedAt: string;
+  readonly approvedBy: string;
+  /** R41/R42 — Approval does not itself create GPRA. */
+  readonly gpraNotCreatedByThisAct: true;
+  readonly manufacturingValidationNotPerformed: true;
+  readonly fulfillmentExecutionNotPerformed: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Approval withholding after Pass — EGWG (R39–R40). Preserves Pass Determination.
+ * Blocks Approval and GPRA only; does not create Conditional/Fail or return posture.
+ */
+export interface ApprovalWithholdingRecord {
+  readonly withholdingId: ApprovalWithholdingId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly groundFamily: ApprovalWithholdingGroundFamily;
+  readonly grounds: string;
+  /** Optional governed extension source — only when additional ground beyond mandatory families. */
+  readonly additionalGoverningSourceId: string | null;
+  readonly withheldAt: string;
+  readonly withheldBy: string;
+  readonly passDeterminationPreserved: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Explicit governed GPRA grant (R42–R43).
+ * Binds specific RVA version under defined Production Obligation scope.
+ * Distinct from Approval, membership, and STD-015 Handoff.
+ */
+export interface GpraGrantRecord {
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly authorityClassId: ApprovalAuthorityClassId;
+  readonly authorityGoverningSourceId: string;
+  readonly grantedAt: string;
+  readonly grantedBy: string;
+  /** Membership and Handoff exclusion (R43). */
+  readonly collectionMembershipNotConferred: true;
+  readonly governedHandoffNotAuthorized: true;
+  readonly manufacturingValidationNotPerformed: true;
+  readonly fulfillmentExecutionNotPerformed: true;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain3GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;

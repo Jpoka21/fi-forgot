@@ -185,7 +185,7 @@ export const REVIEW_ENTRY_ELIGIBILITY_TRACEABILITY = createDomain3GovernanceTrac
   ...REVIEW_ENTRY_REQUIREMENTS,
 ]);
 
-/** Deferred STD-014 Approval/GPRA — G6 (not G5 Determination recording). */
+/** Deferred STD-014 Approval/GPRA operational grant was G6 — recording is implemented; marker retained for barrel compatibility. */
 export const GPRA_GRANT_DEFERRED = "FI-DSN-STD-014-GPRA-GRANT-DEFERRED" as const;
 /** Historical marker — G5 Review Determination recording is implemented; retained for barrel compatibility. */
 export const REVIEW_DETERMINATION_DEFERRED = "FI-DSN-STD-014-REVIEW-DETERMINATION-DEFERRED" as const;

@@ -488,6 +488,7 @@ section("BC-ORCH-018 persisted evidence validation");
       assembleTraceabilityPackage: async () => {
         throw new Error("not used");
       },
+      loadRva: async () => null,
     },
     storage,
   );

@@ -1,11 +1,15 @@
 /**
- * Governed Domain 3 repository — G2 entry + G3 activity + G4 DTF + G5 Determination.
+ * Governed Domain 3 repository — G2–G6 (Review through GPRA grant).
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
+import type { Domain1Repository } from "./domain1-repository.js";
 import { createInMemoryDomain3Storage } from "./domain3-in-memory-storage.js";
 import {
+  rehydrateApprovalAct,
+  rehydrateApprovalWithholding,
   rehydrateDesignTimeFeasibilityEvaluation,
+  rehydrateGpraGrant,
   rehydrateProductionReadinessReview,
   rehydrateReviewDetermination,
   rehydrateReviewDimensionActivity,
@@ -13,14 +17,26 @@ import {
 } from "./domain3-rehydration.js";
 import type { Domain3StoragePort } from "./domain3-storage-port.js";
 import {
+  validatePersistedApprovalAct,
+  validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
+  validatePersistedGpraGrant,
   validatePersistedProductionReadinessReview,
   validatePersistedReviewDetermination,
 } from "./domain3-validation.js";
 import type {
+  ApprovalActId,
+  ApprovalActRecord,
+  ApprovalAuthorityClassId,
+  ApprovalConsiderationEligibility,
+  ApprovalWithholdingGroundFamily,
+  ApprovalWithholdingId,
+  ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationId,
   DesignTimeFeasibilityEvaluationRecord,
   DesignTimeFeasibilityObservationKind,
+  GpraGrantRecord,
+  GpraId,
   MandatoryReviewActivityCompleteness,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
@@ -34,6 +50,12 @@ import type {
   ReviewEvidenceSourceKind,
 } from "../domain3-types.js";
 import type { RealizedVisualArtifactId } from "../domain2-types.js";
+import {
+  createApprovalAct,
+  createApprovalWithholding,
+  createGpraGrant,
+  evaluateApprovalConsiderationEligibility,
+} from "../approval-and-gpra.js";
 import {
   attachDesignTimeFeasibilityEvidenceLinkage,
   buildDesignTimeFeasibilityEvidenceSnapshot,
@@ -53,6 +75,9 @@ import {
 import { createReviewDetermination } from "../review-determination.js";
 import { admitProductionReadinessReview } from "../review-entry-eligibility.js";
 import type { MandatoryReviewDimensionId } from "../review-dimensions.js";
+import { isTerminalRvaPosture } from "../rva-lifecycle.js";
+import { assertProgramIsActiveAuthority, isActiveProgramPosture } from "../transitions.js";
+import type { ProductionObligationId, ProductionProgramId } from "../types.js";
 
 /**
  * Narrow Domain 2 read surface consumed by Domain 3.
@@ -60,7 +85,13 @@ import type { MandatoryReviewDimensionId } from "../review-dimensions.js";
  */
 export type Domain2ReviewEntrySource = Pick<
   Domain2Repository,
-  "assertReviewEntryReadinessCurrentForAdmission" | "assembleTraceabilityPackage"
+  "assertReviewEntryReadinessCurrentForAdmission" | "assembleTraceabilityPackage" | "loadRva"
+>;
+
+/** Narrow Domain 1 Program surface for G6 Program/Obligation activation checks. */
+export type Domain1ProgramSource = Pick<
+  Domain1Repository,
+  "loadProgram" | "isConstitutionallyCurrent"
 >;
 
 export interface Domain3Repository {
@@ -170,16 +201,68 @@ export interface Domain3Repository {
   loadReviewDeterminationByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ReviewDeterminationRecord | null>;
+
+  /** R34 — Approval consideration eligibility (not Approval, not GPRA). */
+  evaluateApprovalConsiderationEligibility(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ApprovalConsiderationEligibility>;
+
+  /**
+   * R38/R41 — record Approval act after Pass. Does not create GPRA.
+   */
+  recordApprovalAct(input: {
+    reviewId: ProductionReadinessReviewId;
+    authorityClassId: ApprovalAuthorityClassId;
+    approvedBy: string;
+  }): Promise<ApprovalActRecord>;
+
+  /**
+   * R39–R40 — withhold Approval after Pass on EGWG grounds. Preserves Pass Determination.
+   */
+  withholdApproval(input: {
+    reviewId: ProductionReadinessReviewId;
+    groundFamily: ApprovalWithholdingGroundFamily;
+    grounds: string;
+    withheldBy: string;
+    additionalGoverningSourceId?: string | null;
+  }): Promise<ApprovalWithholdingRecord>;
+
+  /**
+   * R42–R43 — explicit GPRA grant after Approval. Binds RVA under Production Obligation.
+   */
+  grantGpra(input: {
+    reviewId: ProductionReadinessReviewId;
+    grantedBy: string;
+  }): Promise<GpraGrantRecord>;
+
+  loadApprovalAct(approvalActId: ApprovalActId): Promise<ApprovalActRecord | null>;
+  loadApprovalActByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ApprovalActRecord | null>;
+  loadApprovalWithholding(
+    withholdingId: ApprovalWithholdingId,
+  ): Promise<ApprovalWithholdingRecord | null>;
+  loadApprovalWithholdingByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ApprovalWithholdingRecord | null>;
+  loadGpraGrant(gpraId: GpraId): Promise<GpraGrantRecord | null>;
+  loadGpraGrantByReview(reviewId: ProductionReadinessReviewId): Promise<GpraGrantRecord | null>;
+  loadGpraGrantByRvaObligation(input: {
+    rvaId: RealizedVisualArtifactId;
+    obligationId: ProductionObligationId;
+  }): Promise<GpraGrantRecord | null>;
 }
 
 export function createDomain3Repository(
   domain2: Domain2ReviewEntrySource,
   manufacturingAuthority: ManufacturingAuthoritySource = createFrozenManufacturingAuthoritySource(),
+  domain1?: Domain1ProgramSource,
 ): Domain3Repository {
   return createDomain3RepositoryWithStorage(
     domain2,
     createInMemoryDomain3Storage(),
     manufacturingAuthority,
+    domain1,
   );
 }
 
@@ -187,6 +270,7 @@ export function createDomain3RepositoryWithStorage(
   domain2: Domain2ReviewEntrySource,
   storage: Domain3StoragePort,
   manufacturingAuthority: ManufacturingAuthoritySource = createFrozenManufacturingAuthoritySource(),
+  domain1?: Domain1ProgramSource,
 ): Domain3Repository {
   async function persistReview(
     review: ProductionReadinessReview,
@@ -277,7 +361,129 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R30"],
         );
       }
+      for (const evidenceId of activity.evidenceIds) {
+        const linked = await storage.getReviewEvidence(evidenceId);
+        if (!linked || linked.reviewId !== review.reviewId) {
+          throw new OrchestraConstitutionalError(
+            "Review activity evidence basis contains unresolved or foreign evidence",
+            "invalid_review_determination",
+            ["FI-DSN-STD-014-R30"],
+          );
+        }
+      }
     }
+  }
+
+  /**
+   * G6 trust boundary: jointly resolve Review ↔ Determination and re-verify evidence basis.
+   */
+  async function requireLinkedPassDeterminationForApproval(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<{
+    review: ProductionReadinessReview;
+    determination: ReviewDeterminationRecord;
+  }> {
+    const review = await requireExistingReview(reviewId);
+    if (review.posture !== "review_determined" || !review.determinationId) {
+      throw new OrchestraConstitutionalError(
+        "Approval requires completed Review with Determination linkage",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34"],
+      );
+    }
+
+    const byReview = await storage.getReviewDeterminationByReview(review.reviewId);
+    const byId = await storage.getReviewDetermination(review.determinationId);
+    if (!byReview || !byId) {
+      throw new OrchestraConstitutionalError(
+        "Review Determination required for Approval is missing",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34", "FI-DSN-STD-014-R35"],
+      );
+    }
+    if (byReview.determinationId !== byId.determinationId) {
+      throw new OrchestraConstitutionalError(
+        "Contradictory Review Determination linkage blocks Approval",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34", "FI-DSN-STD-014-R35"],
+      );
+    }
+    if (review.determinationId !== byId.determinationId) {
+      throw new OrchestraConstitutionalError(
+        "review.determinationId does not resolve to the persisted Determination for this Review",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34", "FI-DSN-STD-014-R35"],
+      );
+    }
+
+    const determination = rehydrateReviewDetermination(byId);
+    await assertEvidenceBasisIntegrity(review, determination);
+
+    if (!domain1) {
+      throw new OrchestraConstitutionalError(
+        "Approval requires Domain 1 Program authority source for Program/Obligation activation",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R37", "FI-DSN-STD-014-R39"],
+      );
+    }
+
+    const program = await domain1.loadProgram(review.programId);
+    if (!program) {
+      throw new OrchestraConstitutionalError(
+        "Approval requires existing Production Program",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R37", "FI-DSN-STD-014-R39"],
+      );
+    }
+    assertProgramIsActiveAuthority(program.posture);
+    if (!isActiveProgramPosture(program.posture)) {
+      throw new OrchestraConstitutionalError(
+        "Approval requires active Production Program authority",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R39"],
+      );
+    }
+    const current = await domain1.isConstitutionallyCurrent(program);
+    if (!current) {
+      throw new OrchestraConstitutionalError(
+        "Approval requires constitutionally current Production Program",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R39"],
+      );
+    }
+    const obligation = program.obligations.find((item) => item.id === review.obligationId);
+    if (!obligation) {
+      throw new OrchestraConstitutionalError(
+        "Approval requires Review Production Obligation on the Program",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R37", "FI-DSN-STD-014-R43"],
+      );
+    }
+
+    const rva = await domain2.loadRva(review.rvaId);
+    if (!rva) {
+      throw new OrchestraConstitutionalError(
+        "Approval requires the reviewed RVA to exist",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R34", "FI-DSN-STD-014-R43"],
+      );
+    }
+    if (isTerminalRvaPosture(rva.posture)) {
+      throw new OrchestraConstitutionalError(
+        "Approval cannot bind a superseded or invalidated RVA",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R43"],
+      );
+    }
+    if (rva.id !== review.rvaId || rva.programId !== review.programId || rva.obligationId !== review.obligationId) {
+      throw new OrchestraConstitutionalError(
+        "Live RVA identity does not match Review subject for Approval",
+        "invalid_approval_authority",
+        ["FI-DSN-STD-014-R43"],
+      );
+    }
+
+    return { review, determination };
   }
 
   async function persistEvidenceAndActivity(input: {
@@ -627,6 +833,239 @@ export function createDomain3RepositoryWithStorage(
       const loaded = await storage.getReviewDeterminationByReview(reviewId);
       if (!loaded) return null;
       return rehydrateReviewDetermination(loaded);
+    },
+
+    async evaluateApprovalConsiderationEligibility(reviewId) {
+      const review = await requireExistingReview(reviewId);
+      let determination: ReviewDeterminationRecord | null = null;
+      if (review.determinationId) {
+        const raw = await storage.getReviewDetermination(review.determinationId);
+        const byReview = await storage.getReviewDeterminationByReview(review.reviewId);
+        if (
+          raw &&
+          byReview &&
+          raw.determinationId === byReview.determinationId &&
+          review.determinationId === raw.determinationId
+        ) {
+          determination = rehydrateReviewDetermination(raw);
+        }
+      }
+      const withholdingRaw = await storage.getApprovalWithholdingByReview(reviewId);
+      const approvalRaw = await storage.getApprovalActByReview(reviewId);
+      return evaluateApprovalConsiderationEligibility({
+        review,
+        determination,
+        withholding: withholdingRaw ? rehydrateApprovalWithholding(withholdingRaw) : null,
+        existingApproval: approvalRaw ? rehydrateApprovalAct(approvalRaw) : null,
+      });
+    },
+
+    async recordApprovalAct(input) {
+      const { review, determination } = await requireLinkedPassDeterminationForApproval(
+        input.reviewId,
+      );
+      const existingWithholding = await storage.getApprovalWithholdingByReview(review.reviewId);
+      if (existingWithholding) {
+        throw new OrchestraConstitutionalError(
+          "Approval act blocked by recorded Approval withholding after Pass",
+          "invalid_approval_authority",
+          ["FI-DSN-STD-014-R39"],
+        );
+      }
+      const existingApproval = await storage.getApprovalActByReview(review.reviewId);
+      if (existingApproval) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Approval act may be recorded per completed Review",
+          "invalid_approval_authority",
+          ["FI-DSN-STD-014-R41"],
+        );
+      }
+
+      const approval = createApprovalAct({
+        review,
+        determination,
+        authorityClassId: input.authorityClassId,
+        approvedBy: input.approvedBy,
+      });
+      validatePersistedApprovalAct(approval);
+      try {
+        await storage.putApprovalAct(approval);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Approval act",
+          "invalid_approval_authority",
+          ["FI-DSN-STD-014-R41"],
+        );
+      }
+      const loaded = await storage.getApprovalAct(approval.approvalActId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Approval act",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R41"],
+        );
+      }
+      return rehydrateApprovalAct(loaded);
+    },
+
+    async withholdApproval(input) {
+      const { review, determination } = await requireLinkedPassDeterminationForApproval(
+        input.reviewId,
+      );
+      const existingApproval = await storage.getApprovalActByReview(review.reviewId);
+      if (existingApproval) {
+        throw new OrchestraConstitutionalError(
+          "Cannot withhold Approval after Approval act has been recorded",
+          "invalid_approval_authority",
+          ["FI-DSN-STD-014-R39"],
+        );
+      }
+      const existingWithholding = await storage.getApprovalWithholdingByReview(review.reviewId);
+      if (existingWithholding) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Approval withholding may be recorded per Review",
+          "invalid_approval_authority",
+          ["FI-DSN-STD-014-R39"],
+        );
+      }
+
+      const withholding = createApprovalWithholding({
+        review,
+        determination,
+        groundFamily: input.groundFamily,
+        grounds: input.grounds,
+        withheldBy: input.withheldBy,
+        additionalGoverningSourceId: input.additionalGoverningSourceId,
+      });
+      validatePersistedApprovalWithholding(withholding);
+      try {
+        await storage.putApprovalWithholding(withholding);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Approval withholding",
+          "invalid_approval_authority",
+          ["FI-DSN-STD-014-R39"],
+        );
+      }
+      const loaded = await storage.getApprovalWithholding(withholding.withholdingId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Approval withholding",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R39"],
+        );
+      }
+      return rehydrateApprovalWithholding(loaded);
+    },
+
+    async grantGpra(input) {
+      const { review, determination } = await requireLinkedPassDeterminationForApproval(
+        input.reviewId,
+      );
+      const existingWithholding = await storage.getApprovalWithholdingByReview(review.reviewId);
+      if (existingWithholding) {
+        throw new OrchestraConstitutionalError(
+          "GPRA grant blocked by Approval withholding",
+          "invalid_gpra_grant",
+          ["FI-DSN-STD-014-R39", "FI-DSN-STD-014-R42"],
+        );
+      }
+      const approvalRaw = await storage.getApprovalActByReview(review.reviewId);
+      if (!approvalRaw) {
+        throw new OrchestraConstitutionalError(
+          "GPRA requires a prior Approval act; Approval is necessary but not sufficient and does not auto-create GPRA",
+          "invalid_gpra_grant",
+          ["FI-DSN-STD-014-R41", "FI-DSN-STD-014-R42"],
+        );
+      }
+      const approval = rehydrateApprovalAct(approvalRaw);
+      const existingGpra = await storage.getGpraGrantByReview(review.reviewId);
+      if (existingGpra) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one GPRA grant may be recorded per Review",
+          "invalid_gpra_grant",
+          ["FI-DSN-STD-014-R42", "FI-DSN-STD-014-R43"],
+        );
+      }
+      const existingByScope = await storage.getGpraGrantByRvaObligation(
+        review.rvaId,
+        review.obligationId,
+      );
+      if (existingByScope) {
+        throw new OrchestraConstitutionalError(
+          "GPRA already exists for this RVA under the Production Obligation; supersession is deferred to G9",
+          "invalid_gpra_grant",
+          ["FI-DSN-STD-014-R43"],
+        );
+      }
+
+      const gpra = createGpraGrant({
+        review,
+        determination,
+        approval,
+        grantedBy: input.grantedBy,
+      });
+      validatePersistedGpraGrant(gpra);
+      try {
+        await storage.putGpraGrant(gpra);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist GPRA grant",
+          "invalid_gpra_grant",
+          ["FI-DSN-STD-014-R42"],
+        );
+      }
+      const loaded = await storage.getGpraGrant(gpra.gpraId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist GPRA grant",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R42"],
+        );
+      }
+      return rehydrateGpraGrant(loaded);
+    },
+
+    async loadApprovalAct(approvalActId) {
+      const loaded = await storage.getApprovalAct(approvalActId);
+      if (!loaded) return null;
+      return rehydrateApprovalAct(loaded);
+    },
+
+    async loadApprovalActByReview(reviewId) {
+      const loaded = await storage.getApprovalActByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateApprovalAct(loaded);
+    },
+
+    async loadApprovalWithholding(withholdingId) {
+      const loaded = await storage.getApprovalWithholding(withholdingId);
+      if (!loaded) return null;
+      return rehydrateApprovalWithholding(loaded);
+    },
+
+    async loadApprovalWithholdingByReview(reviewId) {
+      const loaded = await storage.getApprovalWithholdingByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateApprovalWithholding(loaded);
+    },
+
+    async loadGpraGrant(gpraId) {
+      const loaded = await storage.getGpraGrant(gpraId);
+      if (!loaded) return null;
+      return rehydrateGpraGrant(loaded);
+    },
+
+    async loadGpraGrantByReview(reviewId) {
+      const loaded = await storage.getGpraGrantByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateGpraGrant(loaded);
+    },
+
+    async loadGpraGrantByRvaObligation(input) {
+      const loaded = await storage.getGpraGrantByRvaObligation(input.rvaId, input.obligationId);
+      if (!loaded) return null;
+      return rehydrateGpraGrant(loaded);
     },
   };
 }

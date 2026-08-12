@@ -100,6 +100,23 @@ export {
 } from "./design-time-feasibility.js";
 
 export {
+  FROZEN_ESTABLISHED_APPROVAL_AUTHORITY_CLASSES,
+  isCanonicalEstablishedApprovalAuthorityClassId,
+  assertEstablishedApprovalAuthorityClass,
+  resolveEstablishedApprovalAuthorityClass,
+} from "./approval-authority.js";
+
+export {
+  MANDATORY_APPROVAL_WITHHOLDING_GROUND_FAMILIES,
+  isMandatoryApprovalWithholdingGroundFamily,
+} from "./approval-withholding-grounds.js";
+
+export {
+  APPROVAL_AND_GPRA_TRACEABILITY,
+  evaluateApprovalConsiderationEligibility,
+} from "./approval-and-gpra.js";
+
+export {
   REVIEW_DETERMINATION_TRACEABILITY,
   LEGAL_REVIEW_DETERMINATION_OUTCOMES,
   isLegalReviewDeterminationOutcome,
@@ -110,6 +127,7 @@ export {
   createDomain3Repository,
   type Domain3Repository,
   type Domain2ReviewEntrySource,
+  type Domain1ProgramSource,
 } from "./persistence/domain3-repository.js";
 
 export type {
@@ -131,6 +149,16 @@ export type {
   DesignTimeFeasibilityEvaluationId,
   DesignTimeFeasibilityEvaluationRecord,
   DesignTimeFeasibilityObservationKind,
+  ApprovalActId,
+  ApprovalWithholdingId,
+  GpraId,
+  ApprovalAuthorityClassId,
+  ApprovalAuthorityConstitutionalScope,
+  ApprovalWithholdingGroundFamily,
+  ApprovalConsiderationEligibility,
+  ApprovalActRecord,
+  ApprovalWithholdingRecord,
+  GpraGrantRecord,
 } from "./domain3-types.js";
 
 /**

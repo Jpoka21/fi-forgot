@@ -1,9 +1,12 @@
 /**
- * In-memory Domain 3 storage adapter — admission + G3/G4 + G5 Determination.
+ * In-memory Domain 3 storage adapter — G2–G6.
  */
 
 import type {
+  ApprovalActRecord,
+  ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  GpraGrantRecord,
   ProductionReadinessReview,
   ReviewDeterminationRecord,
   ReviewDimensionActivityRecord,
@@ -22,6 +25,17 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const dtfByReview = new Map<string, string[]>();
   const determinationsById = new Map<string, ReviewDeterminationRecord>();
   const determinationByReview = new Map<string, string>();
+  const approvalsById = new Map<string, ApprovalActRecord>();
+  const approvalByReview = new Map<string, string>();
+  const withholdingsById = new Map<string, ApprovalWithholdingRecord>();
+  const withholdingByReview = new Map<string, string>();
+  const gprasById = new Map<string, GpraGrantRecord>();
+  const gpraByReview = new Map<string, string>();
+  const gpraByRvaObligation = new Map<string, string>();
+
+  function rvaObligationKey(rvaId: string, obligationId: string): string {
+    return `${rvaId}::${obligationId}`;
+  }
 
   return {
     async putProductionReadinessReview(review) {
@@ -29,7 +43,6 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       if (review.posture === "under_review") {
         activeByRva.set(review.rvaId, review.reviewId);
       } else {
-        // Leave under_review: clear active index when this Review was the active entry (G5 P2).
         const current = activeByRva.get(review.rvaId);
         if (current === review.reviewId) {
           activeByRva.delete(review.rvaId);
@@ -100,7 +113,9 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
 
     async putDesignTimeFeasibilityEvaluation(evaluation) {
       if (dtfById.has(evaluation.evaluationId)) {
-        throw new Error(`Duplicate Design-Time Feasibility evaluation identity: ${evaluation.evaluationId}`);
+        throw new Error(
+          `Duplicate Design-Time Feasibility evaluation identity: ${evaluation.evaluationId}`,
+        );
       }
       dtfById.set(evaluation.evaluationId, structuredClone(evaluation));
       const list = dtfByReview.get(evaluation.reviewId) ?? [];
@@ -128,9 +143,7 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
         throw new Error(`Duplicate Review Determination identity: ${determination.determinationId}`);
       }
       if (determinationByReview.has(determination.reviewId)) {
-        throw new Error(
-          `Duplicate Review Determination for Review: ${determination.reviewId}`,
-        );
+        throw new Error(`Duplicate Review Determination for Review: ${determination.reviewId}`);
       }
       determinationsById.set(determination.determinationId, structuredClone(determination));
       determinationByReview.set(determination.reviewId, determination.determinationId);
@@ -147,6 +160,85 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return this.getReviewDetermination(
         determinationId as ReviewDeterminationRecord["determinationId"],
       );
+    },
+
+    async putApprovalAct(approval) {
+      if (approvalsById.has(approval.approvalActId)) {
+        throw new Error(`Duplicate Approval act identity: ${approval.approvalActId}`);
+      }
+      if (approvalByReview.has(approval.reviewId)) {
+        throw new Error(`Duplicate Approval act for Review: ${approval.reviewId}`);
+      }
+      approvalsById.set(approval.approvalActId, structuredClone(approval));
+      approvalByReview.set(approval.reviewId, approval.approvalActId);
+    },
+
+    async getApprovalAct(approvalActId) {
+      const approval = approvalsById.get(approvalActId);
+      return approval ? structuredClone(approval) : null;
+    },
+
+    async getApprovalActByReview(reviewId) {
+      const approvalActId = approvalByReview.get(reviewId);
+      if (!approvalActId) return null;
+      return this.getApprovalAct(approvalActId as ApprovalActRecord["approvalActId"]);
+    },
+
+    async putApprovalWithholding(withholding) {
+      if (withholdingsById.has(withholding.withholdingId)) {
+        throw new Error(`Duplicate Approval withholding identity: ${withholding.withholdingId}`);
+      }
+      if (withholdingByReview.has(withholding.reviewId)) {
+        throw new Error(`Duplicate Approval withholding for Review: ${withholding.reviewId}`);
+      }
+      withholdingsById.set(withholding.withholdingId, structuredClone(withholding));
+      withholdingByReview.set(withholding.reviewId, withholding.withholdingId);
+    },
+
+    async getApprovalWithholding(withholdingId) {
+      const withholding = withholdingsById.get(withholdingId);
+      return withholding ? structuredClone(withholding) : null;
+    },
+
+    async getApprovalWithholdingByReview(reviewId) {
+      const withholdingId = withholdingByReview.get(reviewId);
+      if (!withholdingId) return null;
+      return this.getApprovalWithholding(
+        withholdingId as ApprovalWithholdingRecord["withholdingId"],
+      );
+    },
+
+    async putGpraGrant(gpra) {
+      if (gprasById.has(gpra.gpraId)) {
+        throw new Error(`Duplicate GPRA identity: ${gpra.gpraId}`);
+      }
+      if (gpraByReview.has(gpra.reviewId)) {
+        throw new Error(`Duplicate GPRA for Review: ${gpra.reviewId}`);
+      }
+      const key = rvaObligationKey(gpra.rvaId, gpra.obligationId);
+      if (gpraByRvaObligation.has(key)) {
+        throw new Error(`Duplicate GPRA for RVA under Production Obligation: ${key}`);
+      }
+      gprasById.set(gpra.gpraId, structuredClone(gpra));
+      gpraByReview.set(gpra.reviewId, gpra.gpraId);
+      gpraByRvaObligation.set(key, gpra.gpraId);
+    },
+
+    async getGpraGrant(gpraId) {
+      const gpra = gprasById.get(gpraId);
+      return gpra ? structuredClone(gpra) : null;
+    },
+
+    async getGpraGrantByReview(reviewId) {
+      const gpraId = gpraByReview.get(reviewId);
+      if (!gpraId) return null;
+      return this.getGpraGrant(gpraId as GpraGrantRecord["gpraId"]);
+    },
+
+    async getGpraGrantByRvaObligation(rvaId, obligationId) {
+      const gpraId = gpraByRvaObligation.get(rvaObligationKey(rvaId, obligationId));
+      if (!gpraId) return null;
+      return this.getGpraGrant(gpraId as GpraGrantRecord["gpraId"]);
     },
   };
 }

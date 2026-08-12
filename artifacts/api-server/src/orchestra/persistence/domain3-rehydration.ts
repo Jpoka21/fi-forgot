@@ -3,14 +3,20 @@
  */
 
 import type {
+  ApprovalActRecord,
+  ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  GpraGrantRecord,
   ProductionReadinessReview,
   ReviewDeterminationRecord,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
 } from "../domain3-types.js";
 import {
+  validatePersistedApprovalAct,
+  validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
+  validatePersistedGpraGrant,
   validatePersistedProductionReadinessReview,
   validatePersistedReviewDetermination,
   validatePersistedReviewDimensionActivity,
@@ -58,5 +64,20 @@ export function rehydrateDesignTimeFeasibilityEvaluation(
 
 export function rehydrateReviewDetermination(raw: unknown): ReviewDeterminationRecord {
   validatePersistedReviewDetermination(raw);
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateApprovalAct(raw: unknown): ApprovalActRecord {
+  validatePersistedApprovalAct(raw);
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateApprovalWithholding(raw: unknown): ApprovalWithholdingRecord {
+  validatePersistedApprovalWithholding(raw);
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateGpraGrant(raw: unknown): GpraGrantRecord {
+  validatePersistedGpraGrant(raw);
   return deepFreeze(structuredClone(raw));
 }

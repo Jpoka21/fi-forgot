@@ -1,10 +1,16 @@
 /**
- * Domain 3 storage port — Review admission + G3/G4 + G5 Determination.
+ * Domain 3 storage port — G2–G6 (Review through GPRA grant).
  */
 
 import type {
+  ApprovalActId,
+  ApprovalActRecord,
+  ApprovalWithholdingId,
+  ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationId,
   DesignTimeFeasibilityEvaluationRecord,
+  GpraGrantRecord,
+  GpraId,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
   ReviewDeterminationId,
@@ -15,6 +21,7 @@ import type {
   ReviewEvidenceRecord,
 } from "../domain3-types.js";
 import type { RealizedVisualArtifactId } from "../domain2-types.js";
+import type { ProductionObligationId } from "../types.js";
 
 export interface Domain3StoragePort {
   putProductionReadinessReview(review: ProductionReadinessReview): Promise<void>;
@@ -56,4 +63,26 @@ export interface Domain3StoragePort {
   getReviewDeterminationByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ReviewDeterminationRecord | null>;
+
+  putApprovalAct(approval: ApprovalActRecord): Promise<void>;
+  getApprovalAct(approvalActId: ApprovalActId): Promise<ApprovalActRecord | null>;
+  getApprovalActByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ApprovalActRecord | null>;
+
+  putApprovalWithholding(withholding: ApprovalWithholdingRecord): Promise<void>;
+  getApprovalWithholding(
+    withholdingId: ApprovalWithholdingId,
+  ): Promise<ApprovalWithholdingRecord | null>;
+  getApprovalWithholdingByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ApprovalWithholdingRecord | null>;
+
+  putGpraGrant(gpra: GpraGrantRecord): Promise<void>;
+  getGpraGrant(gpraId: GpraId): Promise<GpraGrantRecord | null>;
+  getGpraGrantByReview(reviewId: ProductionReadinessReviewId): Promise<GpraGrantRecord | null>;
+  getGpraGrantByRvaObligation(
+    rvaId: RealizedVisualArtifactId,
+    obligationId: ProductionObligationId,
+  ): Promise<GpraGrantRecord | null>;
 }
