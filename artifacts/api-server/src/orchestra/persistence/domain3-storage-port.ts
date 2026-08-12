@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — Review admission + G3 activity + G4 DTF evaluation.
+ * Domain 3 storage port — Review admission + G3/G4 + G5 Determination.
  */
 
 import type {
@@ -7,6 +7,8 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
+  ReviewDeterminationId,
+  ReviewDeterminationRecord,
   ReviewDimensionActivityId,
   ReviewDimensionActivityRecord,
   ReviewEvidenceId,
@@ -46,4 +48,12 @@ export interface Domain3StoragePort {
   listDesignTimeFeasibilityEvaluationsByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<readonly DesignTimeFeasibilityEvaluationRecord[]>;
+
+  putReviewDetermination(determination: ReviewDeterminationRecord): Promise<void>;
+  getReviewDetermination(
+    determinationId: ReviewDeterminationId,
+  ): Promise<ReviewDeterminationRecord | null>;
+  getReviewDeterminationByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReviewDeterminationRecord | null>;
 }

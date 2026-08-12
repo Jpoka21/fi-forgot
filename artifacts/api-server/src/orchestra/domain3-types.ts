@@ -1,5 +1,6 @@
 /**
- * Domain 3 constitutional types — FI-DSN-STD-014 G2 entry + G3 Review activity.
+ * Domain 3 constitutional types — FI-DSN-STD-014 G2–G5
+ * (Review entry, activity, Design-Time Feasibility, Review Determination).
  */
 
 import type { Domain3GovernanceTraceability } from "./domain3-authority.js";
@@ -27,17 +28,29 @@ export type Domain3GovernedCreationMarker = string & {
   readonly __brand: "Domain3GovernedCreationMarker";
 };
 
+export type ReviewDeterminationId = string & {
+  readonly __brand: "ReviewDeterminationId";
+};
+
 /**
- * Lawful initial Domain 3 posture after Review entry admission — architecture §15.1.
- * Not Review Determination, Approval, or GPRA.
+ * Production-readiness Review posture (architecture §15.1 / §12).
+ * - under_review: admitted; G3/G4 activity may proceed (incomplete until Determination — R27)
+ * - review_determined: exactly one Review Determination recorded; Review completed (R27)
+ * Neither posture is Approval or GPRA (R29, R33).
  */
-export type ProductionReadinessReviewPosture = "under_review";
+export type ProductionReadinessReviewPosture = "under_review" | "review_determined";
 
 /**
  * Review entry eligibility posture — G2 gate outcome (R08–R13).
  * Eligibility admits into Review; it is not a Review Determination or GPRA grant.
  */
 export type ReviewEntryEligibilityStatus = "review_entry_eligible";
+
+/**
+ * Review Determination outcomes — exhaustive closed set (FI-DSN-STD-014-R28).
+ * Authority labels: Pass | Conditional | Fail (Failed Review Determination).
+ */
+export type ReviewDeterminationOutcome = "pass" | "conditional" | "fail";
 
 /**
  * Immutable Domain 2 entry evidence retained by Domain 3 — R10, R11.
@@ -56,10 +69,11 @@ export interface Domain2ReviewEntryEvidence {
 
 /**
  * Production-readiness Review — Domain 3 admission of a Review-Entry Ready RVA
- * into Under Review per FI-DSN-STD-014-R08–R13.
+ * into Under Review per FI-DSN-STD-014-R08–R13; completed by G5 Determination (R27).
  *
  * Principal subject: Review-Entry Ready RVA instance accepted into Review.
- * Does not grant Review Determination, Approval, or GPRA (R13).
+ * Admission does not grant Determination, Approval, or GPRA (R13).
+ * Determination does not grant Approval or GPRA (R29, R33).
  */
 export interface ProductionReadinessReview {
   readonly reviewId: ProductionReadinessReviewId;
@@ -69,6 +83,8 @@ export interface ProductionReadinessReview {
   readonly posture: ProductionReadinessReviewPosture;
   readonly eligibilityStatus: ReviewEntryEligibilityStatus;
   readonly domain2EntryEvidence: Domain2ReviewEntryEvidence;
+  /** Null while under_review; set to exactly one Determination when review_determined (R27). */
+  readonly determinationId: ReviewDeterminationId | null;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain3GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
@@ -81,6 +97,39 @@ export type ReviewEvidenceId = string & {
 export type ReviewDimensionActivityId = string & {
   readonly __brand: "ReviewDimensionActivityId";
 };
+
+/**
+ * Immutable Review Determination — constitutional G5 object (R27–R33).
+ * Distinct from Review Activity completeness, DTF evidence, Approval, and GPRA.
+ * Exactly one per completed Review; Conditional cannot mutate to Pass (R31).
+ */
+export interface ReviewDeterminationRecord {
+  readonly determinationId: ReviewDeterminationId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly outcome: ReviewDeterminationOutcome;
+  /** Immutable evidence IDs grounding the Determination (R30). */
+  readonly evidenceBasisIds: readonly ReviewEvidenceId[];
+  /** Immutable activity IDs grounding the Determination (R30). */
+  readonly activityBasisIds: readonly ReviewDimensionActivityId[];
+  /**
+   * Bounded documented conditions — required non-empty for Conditional (R29, R31);
+   * must be empty for Pass and Fail.
+   */
+  readonly conditions: readonly string[];
+  /**
+   * Documented grounds / rationale. Required for Fail (R29);
+   * required for Conditional (why conditions apply) and Pass (determination rationale).
+   */
+  readonly grounds: string;
+  readonly determinedAt: string;
+  readonly determinedBy: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
 
 /**
  * Provenance kind for immutable Review evidence snapshots (R20 / GOV-002).

@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2 entry + G3 activity + G4 Design-Time Feasibility.
+ * Governed Domain 3 repository — G2 entry + G3 activity + G4 DTF + G5 Determination.
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -7,6 +7,7 @@ import { createInMemoryDomain3Storage } from "./domain3-in-memory-storage.js";
 import {
   rehydrateDesignTimeFeasibilityEvaluation,
   rehydrateProductionReadinessReview,
+  rehydrateReviewDetermination,
   rehydrateReviewDimensionActivity,
   rehydrateReviewEvidence,
 } from "./domain3-rehydration.js";
@@ -14,6 +15,7 @@ import type { Domain3StoragePort } from "./domain3-storage-port.js";
 import {
   validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedProductionReadinessReview,
+  validatePersistedReviewDetermination,
 } from "./domain3-validation.js";
 import type {
   DesignTimeFeasibilityEvaluationId,
@@ -22,6 +24,9 @@ import type {
   MandatoryReviewActivityCompleteness,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
+  ReviewDeterminationId,
+  ReviewDeterminationOutcome,
+  ReviewDeterminationRecord,
   ReviewDimensionActivityId,
   ReviewDimensionActivityRecord,
   ReviewEvidenceId,
@@ -45,6 +50,7 @@ import {
   createReviewEvidenceRecord,
   evaluateMandatoryReviewActivityCompleteness,
 } from "../review-activity.js";
+import { createReviewDetermination } from "../review-determination.js";
 import { admitProductionReadinessReview } from "../review-entry-eligibility.js";
 import type { MandatoryReviewDimensionId } from "../review-dimensions.js";
 
@@ -136,10 +142,34 @@ export interface Domain3Repository {
 
   /**
    * Pure completeness query over persisted G3 activity — not Determination/GPRA.
+   * Readable while under_review or after review_determined.
    */
   evaluateMandatoryReviewActivityCompleteness(
     reviewId: ProductionReadinessReviewId,
   ): Promise<MandatoryReviewActivityCompleteness>;
+
+  /**
+   * G5 Review Determination Outcomes (R27–R33).
+   * Completes the Review (review_determined); does not grant Approval or GPRA.
+   */
+  recordReviewDetermination(input: {
+    reviewId: ProductionReadinessReviewId;
+    outcome: ReviewDeterminationOutcome;
+    conditions?: readonly string[];
+    grounds: string;
+    determinedBy: string;
+  }): Promise<{
+    determination: ReviewDeterminationRecord;
+    review: ProductionReadinessReview;
+  }>;
+
+  loadReviewDetermination(
+    determinationId: ReviewDeterminationId,
+  ): Promise<ReviewDeterminationRecord | null>;
+
+  loadReviewDeterminationByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReviewDeterminationRecord | null>;
 }
 
 export function createDomain3Repository(
@@ -182,18 +212,24 @@ export function createDomain3RepositoryWithStorage(
     return rehydrateProductionReadinessReview(loaded);
   }
 
-  async function requireUnderReview(
+  async function requireExistingReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ProductionReadinessReview> {
     const raw = await storage.getProductionReadinessReview(reviewId);
     if (!raw) {
       throw new OrchestraConstitutionalError(
-        "Production-readiness Review not found for Review activity",
+        "Production-readiness Review not found",
         "invalid_review_activity",
         ["FI-DSN-STD-014-R14"],
       );
     }
-    const review = rehydrateProductionReadinessReview(raw);
+    return rehydrateProductionReadinessReview(raw);
+  }
+
+  async function requireUnderReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ProductionReadinessReview> {
+    const review = await requireExistingReview(reviewId);
     if (review.posture !== "under_review") {
       throw new OrchestraConstitutionalError(
         "Review activity requires Under Review posture",
@@ -202,6 +238,46 @@ export function createDomain3RepositoryWithStorage(
       );
     }
     return review;
+  }
+
+  async function assertEvidenceBasisIntegrity(
+    review: ProductionReadinessReview,
+    determination: ReviewDeterminationRecord,
+  ): Promise<void> {
+    for (const evidenceId of determination.evidenceBasisIds) {
+      const evidence = await storage.getReviewEvidence(evidenceId);
+      if (!evidence) {
+        throw new OrchestraConstitutionalError(
+          "Review Determination evidence basis references nonexistent evidence",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R30"],
+        );
+      }
+      if (evidence.reviewId !== review.reviewId || evidence.rvaId !== review.rvaId) {
+        throw new OrchestraConstitutionalError(
+          "Review Determination evidence basis does not belong to the subject Review",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R30"],
+        );
+      }
+    }
+    for (const activityId of determination.activityBasisIds) {
+      const activity = await storage.getReviewDimensionActivity(activityId);
+      if (!activity) {
+        throw new OrchestraConstitutionalError(
+          "Review Determination activity basis references nonexistent activity",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R30"],
+        );
+      }
+      if (activity.reviewId !== review.reviewId || activity.rvaId !== review.rvaId) {
+        throw new OrchestraConstitutionalError(
+          "Review Determination activity basis does not belong to the subject Review",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R30"],
+        );
+      }
+    }
   }
 
   async function persistEvidenceAndActivity(input: {
@@ -407,13 +483,13 @@ export function createDomain3RepositoryWithStorage(
     },
 
     async listReviewEvidenceByReview(reviewId) {
-      await requireUnderReview(reviewId);
+      await requireExistingReview(reviewId);
       const list = await storage.listReviewEvidenceByReview(reviewId);
       return Object.freeze(list.map((item) => rehydrateReviewEvidence(item)));
     },
 
     async listReviewDimensionActivitiesByReview(reviewId) {
-      await requireUnderReview(reviewId);
+      await requireExistingReview(reviewId);
       const list = await storage.listReviewDimensionActivitiesByReview(reviewId);
       return Object.freeze(list.map((item) => rehydrateReviewDimensionActivity(item)));
     },
@@ -437,19 +513,120 @@ export function createDomain3RepositoryWithStorage(
     },
 
     async listDesignTimeFeasibilityEvaluationsByReview(reviewId) {
-      await requireUnderReview(reviewId);
+      await requireExistingReview(reviewId);
       const list = await storage.listDesignTimeFeasibilityEvaluationsByReview(reviewId);
       return Object.freeze(list.map((item) => rehydrateDesignTimeFeasibilityEvaluation(item)));
     },
 
     async evaluateMandatoryReviewActivityCompleteness(reviewId) {
-      const review = await requireUnderReview(reviewId);
+      const review = await requireExistingReview(reviewId);
       const activities = await storage.listReviewDimensionActivitiesByReview(reviewId);
       const frozenActivities = activities.map((item) => rehydrateReviewDimensionActivity(item));
       return evaluateMandatoryReviewActivityCompleteness({
         review,
         activities: frozenActivities,
       });
+    },
+
+    async recordReviewDetermination(input) {
+      const review = await requireExistingReview(input.reviewId);
+
+      if (review.posture === "review_determined" || review.determinationId !== null) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Review Determination may be recorded per completed Review",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R27"],
+        );
+      }
+
+      if (review.posture !== "under_review") {
+        throw new OrchestraConstitutionalError(
+          "Review Determination requires Under Review posture",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R27"],
+        );
+      }
+
+      const existing = await storage.getReviewDeterminationByReview(review.reviewId);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Review Determination may be recorded per completed Review",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R27"],
+        );
+      }
+
+      const evidenceRaw = await storage.listReviewEvidenceByReview(review.reviewId);
+      const activitiesRaw = await storage.listReviewDimensionActivitiesByReview(review.reviewId);
+      const evidence = evidenceRaw.map((item) => rehydrateReviewEvidence(item));
+      const activities = activitiesRaw.map((item) => rehydrateReviewDimensionActivity(item));
+
+      const completeness = evaluateMandatoryReviewActivityCompleteness({
+        review,
+        activities,
+      });
+
+      const { determination, completedReview } = createReviewDetermination({
+        review,
+        completeness,
+        evidence,
+        activities,
+        outcome: input.outcome,
+        conditions: input.conditions,
+        grounds: input.grounds,
+        determinedBy: input.determinedBy,
+      });
+
+      validatePersistedReviewDetermination(determination);
+      await assertEvidenceBasisIntegrity(review, determination);
+
+      try {
+        await storage.putReviewDetermination(determination);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Review Determination",
+          "invalid_review_determination",
+          ["FI-DSN-STD-014-R27"],
+        );
+      }
+
+      const persistedReview = await persistReview(completedReview);
+
+      const loadedDetermination = await storage.getReviewDetermination(
+        determination.determinationId,
+      );
+      if (!loadedDetermination) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Review Determination",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R27"],
+        );
+      }
+
+      if (persistedReview.determinationId !== determination.determinationId) {
+        throw new OrchestraConstitutionalError(
+          "Review Determination linkage integrity failure after persistence",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R27"],
+        );
+      }
+
+      return {
+        determination: rehydrateReviewDetermination(loadedDetermination),
+        review: persistedReview,
+      };
+    },
+
+    async loadReviewDetermination(determinationId) {
+      const loaded = await storage.getReviewDetermination(determinationId);
+      if (!loaded) return null;
+      return rehydrateReviewDetermination(loaded);
+    },
+
+    async loadReviewDeterminationByReview(reviewId) {
+      const loaded = await storage.getReviewDeterminationByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateReviewDetermination(loaded);
     },
   };
 }

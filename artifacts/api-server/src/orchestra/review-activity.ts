@@ -193,14 +193,25 @@ export function createReviewDimensionActivityRecord(input: {
   });
 }
 
+function assertReviewSubjectForCompleteness(review: ProductionReadinessReview): void {
+  if (review.posture !== "under_review" && review.posture !== "review_determined") {
+    throw new OrchestraConstitutionalError(
+      "Mandatory Review activity completeness requires a lawful Production-readiness Review",
+      "invalid_review_activity",
+      [...G3_REQUIREMENTS],
+    );
+  }
+}
+
 /**
  * Pure completeness query — not Review Determination, Approval, or GPRA (R20 / R13).
+ * Readable while under_review or after review_determined (G5).
  */
 export function evaluateMandatoryReviewActivityCompleteness(input: {
   review: ProductionReadinessReview;
   activities: readonly ReviewDimensionActivityRecord[];
 }): MandatoryReviewActivityCompleteness {
-  assertUnderReview(input.review);
+  assertReviewSubjectForCompleteness(input.review);
 
   const addressed = new Set<MandatoryReviewDimensionId>();
   for (const activity of input.activities) {

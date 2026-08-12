@@ -167,6 +167,7 @@ export function admitProductionReadinessReview(input: {
     posture: "under_review",
     eligibilityStatus: "review_entry_eligible",
     domain2EntryEvidence,
+    determinationId: null,
     // Audit embeds STD-012-R40 as upstream Domain 1→2 consumption provenance
     // (same pattern as Domain 2 objects). Primary STD-014 G2 admission authority
     // is recorded on ProductionReadinessReview.traceability below (BC-ORCH-019).
@@ -184,8 +185,9 @@ export const REVIEW_ENTRY_ELIGIBILITY_TRACEABILITY = createDomain3GovernanceTrac
   ...REVIEW_ENTRY_REQUIREMENTS,
 ]);
 
-/** Deferred STD-014 authority — not implemented in ORCH-IMP-006. */
+/** Deferred STD-014 Approval/GPRA — G6 (not G5 Determination recording). */
 export const GPRA_GRANT_DEFERRED = "FI-DSN-STD-014-GPRA-GRANT-DEFERRED" as const;
+/** Historical marker — G5 Review Determination recording is implemented; retained for barrel compatibility. */
 export const REVIEW_DETERMINATION_DEFERRED = "FI-DSN-STD-014-REVIEW-DETERMINATION-DEFERRED" as const;
 export const REVIEW_QUEUE_WORKER_DEFERRED = "FI-DSN-STD-014-QUEUE-WORKER-DEFERRED" as const;
 export const DOMAIN3_HANDOFF_DEFERRED = "FI-DSN-STD-015-HANDOFF-DEFERRED" as const;

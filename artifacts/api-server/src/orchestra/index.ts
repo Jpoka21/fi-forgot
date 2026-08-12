@@ -100,6 +100,13 @@ export {
 } from "./design-time-feasibility.js";
 
 export {
+  REVIEW_DETERMINATION_TRACEABILITY,
+  LEGAL_REVIEW_DETERMINATION_OUTCOMES,
+  isLegalReviewDeterminationOutcome,
+  reviewDeterminationConstitutesApprovalOrGpra,
+} from "./review-determination.js";
+
+export {
   createDomain3Repository,
   type Domain3Repository,
   type Domain2ReviewEntrySource,
@@ -114,6 +121,9 @@ export type {
   Domain3GovernedCreationMarker,
   ReviewEvidenceId,
   ReviewDimensionActivityId,
+  ReviewDeterminationId,
+  ReviewDeterminationOutcome,
+  ReviewDeterminationRecord,
   ReviewEvidenceSourceKind,
   ReviewEvidenceRecord,
   ReviewDimensionActivityRecord,

@@ -64,10 +64,13 @@ export function evaluateDomain2Readiness(input: {
   });
 }
 
-/** Placeholder marker — STD-014 GPRA grant is not implemented. */
+/** Placeholder marker — STD-014 GPRA grant is not implemented (G6). */
 export const DOMAIN3_GPRA_GRANT_DEFERRED = "FI-DSN-STD-014-GPRA-GRANT-DEFERRED" as const;
 
-/** Placeholder marker — STD-014 Review Determination is not implemented. */
+/**
+ * Historical placeholder — G5 Review Determination recording is implemented in Domain 3.
+ * Retained for barrel compatibility; does not indicate deferred G5 semantics.
+ */
 export const DOMAIN3_REVIEW_DETERMINATION_DEFERRED =
   "FI-DSN-STD-014-REVIEW-DETERMINATION-DEFERRED" as const;
 

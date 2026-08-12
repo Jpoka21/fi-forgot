@@ -1,5 +1,5 @@
 /**
- * Domain 3 persistence validation — FI-DSN-STD-014 G2 entry + G3 Review activity.
+ * Domain 3 persistence validation — FI-DSN-STD-014 G2–G5.
  */
 
 import { DOMAIN3_GOVERNING_STANDARD } from "../domain3-authority.js";
@@ -7,12 +7,14 @@ import { isValidDomain3GovernedCreationMarker } from "../domain3-entry.js";
 import type {
   DesignTimeFeasibilityEvaluationRecord,
   ProductionReadinessReview,
+  ReviewDeterminationRecord,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
 } from "../domain3-types.js";
 import type { RealizationPath, RealizedVisualArtifactId } from "../domain2-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
 import { isCanonicalFrozenBindingFiMfgStandardId } from "../manufacturing-authority.js";
+import { isLegalReviewDeterminationOutcome } from "../review-determination.js";
 import { isMandatoryReviewDimensionId } from "../review-dimensions.js";
 import { validateLineageCoherence } from "../rva-lifecycle.js";
 
@@ -25,6 +27,7 @@ const ID_PREFIXES = {
   evidence: "review-evidence-",
   activity: "review-dimension-activity-",
   dtfEvaluation: "design-time-feasibility-evaluation-",
+  determination: "review-determination-",
 } as const;
 
 const LEGAL_REALIZATION_PATHS: readonly RealizationPath[] = [
@@ -114,11 +117,30 @@ export function validatePersistedProductionReadinessReview(
   assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
   assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
 
-  if (record.posture !== "under_review") {
+  if (record.posture !== "under_review" && record.posture !== "review_determined") {
     throw new OrchestraConstitutionalError(
       "Invalid Production-readiness Review posture",
       "invalid_review_entry_eligibility",
-      ["FI-DSN-STD-014-R08"],
+      ["FI-DSN-STD-014-R08", "FI-DSN-STD-014-R27"],
+    );
+  }
+
+  if (record.posture === "under_review") {
+    if (record.determinationId !== null) {
+      throw new OrchestraConstitutionalError(
+        "Under Review posture must not carry a Review Determination identity",
+        "invalid_review_determination",
+        ["FI-DSN-STD-014-R27"],
+      );
+    }
+  } else if (
+    typeof record.determinationId !== "string" ||
+    !record.determinationId.startsWith(ID_PREFIXES.determination)
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Review Determined posture requires a valid Review Determination identity",
+      "invalid_review_determination",
+      ["FI-DSN-STD-014-R27"],
     );
   }
 
@@ -508,6 +530,119 @@ export function validatePersistedDesignTimeFeasibilityEvaluation(
       "Design-Time Feasibility evaluation requires valid governed creation marker",
       "invalid_domain3_persistence_state",
       ["FI-DSN-STD-014-R21"],
+    );
+  }
+}
+
+export function validatePersistedReviewDetermination(
+  raw: unknown,
+): asserts raw is ReviewDeterminationRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Review Determination",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R27"],
+    );
+  }
+
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!isLegalReviewDeterminationOutcome(record.outcome)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Review Determination requires legal outcome Pass, Conditional, or Fail",
+      "invalid_review_determination",
+      ["FI-DSN-STD-014-R28"],
+    );
+  }
+
+  if (!Array.isArray(record.evidenceBasisIds) || record.evidenceBasisIds.length === 0) {
+    throw new OrchestraConstitutionalError(
+      "Review Determination requires non-empty evidence basis",
+      "invalid_review_determination",
+      ["FI-DSN-STD-014-R30"],
+    );
+  }
+
+  for (const evidenceId of record.evidenceBasisIds) {
+    assertBrandedId(evidenceId, ID_PREFIXES.evidence, "Review evidence");
+  }
+
+  if (!Array.isArray(record.activityBasisIds) || record.activityBasisIds.length === 0) {
+    throw new OrchestraConstitutionalError(
+      "Review Determination requires non-empty activity basis",
+      "invalid_review_determination",
+      ["FI-DSN-STD-014-R30"],
+    );
+  }
+
+  for (const activityId of record.activityBasisIds) {
+    assertBrandedId(activityId, ID_PREFIXES.activity, "Review dimension activity");
+  }
+
+  if (!Array.isArray(record.conditions)) {
+    throw new OrchestraConstitutionalError(
+      "Review Determination requires conditions array",
+      "invalid_review_determination",
+      ["FI-DSN-STD-014-R29"],
+    );
+  }
+
+  const conditions = record.conditions as unknown[];
+  for (const condition of conditions) {
+    if (typeof condition !== "string" || !condition.trim()) {
+      throw new OrchestraConstitutionalError(
+        "Review Determination conditions must be non-empty strings",
+        "invalid_review_determination",
+        ["FI-DSN-STD-014-R29"],
+      );
+    }
+  }
+
+  if (typeof record.grounds !== "string" || !record.grounds.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Review Determination requires documented grounds",
+      "invalid_review_determination",
+      ["FI-DSN-STD-014-R29"],
+    );
+  }
+
+  if (record.outcome === "conditional") {
+    if (conditions.length === 0) {
+      throw new OrchestraConstitutionalError(
+        "Conditional Review Determination requires bounded documented conditions",
+        "invalid_review_determination",
+        ["FI-DSN-STD-014-R29", "FI-DSN-STD-014-R31"],
+      );
+    }
+  } else if (conditions.length > 0) {
+    throw new OrchestraConstitutionalError(
+      "Pass and Fail Review Determinations must not carry Conditional conditions",
+      "invalid_review_determination",
+      ["FI-DSN-STD-014-R28", "FI-DSN-STD-014-R29"],
+    );
+  }
+
+  if (typeof record.determinedAt !== "string" || typeof record.determinedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "Review Determination requires determinedAt and determinedBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R27"],
+    );
+  }
+
+  assertAuditMetadata(record.audit, "Review Determination");
+  assertDomain3Traceability(record.traceability, "Review Determination");
+
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Review Determination requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R27"],
     );
   }
 }
