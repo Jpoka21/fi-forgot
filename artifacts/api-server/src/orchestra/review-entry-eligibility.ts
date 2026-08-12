@@ -58,6 +58,9 @@ export function admitProductionReadinessReview(input: {
   traceabilityPackage: RealizationTraceabilityPackage;
   admittedBy: string;
   admittedAt?: string;
+  /** G7 R51 — required together when admitting after Conditional/Fail prior Review. */
+  priorReviewId?: ProductionReadinessReviewId | null;
+  resubmissionEligibilityId?: import("./domain3-types.js").ResubmissionEligibilityId | null;
 }): ProductionReadinessReview {
   if (input.reviewEntryReadiness.posture !== "review_entry_ready") {
     throw new OrchestraConstitutionalError(
@@ -159,6 +162,16 @@ export function admitProductionReadinessReview(input: {
     realizationPath: input.traceabilityPackage.realizationPath,
   });
 
+  const priorReviewId = input.priorReviewId ?? null;
+  const resubmissionEligibilityId = input.resubmissionEligibilityId ?? null;
+  if ((priorReviewId === null) !== (resubmissionEligibilityId === null)) {
+    throw new OrchestraConstitutionalError(
+      "Subsequent Review admission requires both priorReviewId and resubmissionEligibilityId together",
+      "invalid_review_entry_eligibility",
+      ["FI-DSN-STD-014-R51"],
+    );
+  }
+
   return Object.freeze({
     reviewId: createProductionReadinessReviewId(),
     rvaId: input.rva.id,
@@ -168,6 +181,8 @@ export function admitProductionReadinessReview(input: {
     eligibilityStatus: "review_entry_eligible",
     domain2EntryEvidence,
     determinationId: null,
+    priorReviewId,
+    resubmissionEligibilityId,
     // Audit embeds STD-012-R40 as upstream Domain 1→2 consumption provenance
     // (same pattern as Domain 2 objects). Primary STD-014 G2 admission authority
     // is recorded on ProductionReadinessReview.traceability below (BC-ORCH-019).

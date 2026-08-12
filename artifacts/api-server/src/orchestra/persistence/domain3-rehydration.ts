@@ -3,32 +3,51 @@
  *
  * G6 Approval / withholding / GPRA require joint persisted constitutional
  * coherence (ORCH-IMP-010.2). Structural field shape alone is insufficient.
+ * G7 downstream disposition likewise requires joint Review/Determination coherence.
  */
 
 import type {
   ApprovalActRecord,
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  DownstreamDeficiencyRecord,
   GpraGrantRecord,
   ProductionReadinessReview,
+  ResubmissionEligibilityRecord,
+  ReturnPostureRecord,
   ReviewDeterminationRecord,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
+  ReworkAuthorizationRecord,
+  ReworkAuthorizationWithholdingRecord,
 } from "../domain3-types.js";
+import { OrchestraConstitutionalError } from "../errors.js";
 import {
   assertPersistedApprovalAuthorityCoherence,
   assertPersistedApprovalWithholdingCoherence,
   assertPersistedGpraGrantCoherence,
 } from "./g6-rehydration-coherence.js";
 import {
+  assertPersistedDownstreamDeficiencyCoherence,
+  assertPersistedResubmissionEligibilityCoherence,
+  assertPersistedReturnPostureCoherence,
+  assertPersistedReworkAuthorizationCoherence,
+  assertPersistedReworkAuthorizationWithholdingCoherence,
+} from "./g7-rehydration-coherence.js";
+import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
+  validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
   validatePersistedProductionReadinessReview,
+  validatePersistedResubmissionEligibility,
+  validatePersistedReturnPosture,
   validatePersistedReviewDetermination,
   validatePersistedReviewDimensionActivity,
   validatePersistedReviewEvidence,
+  validatePersistedReworkAuthorization,
+  validatePersistedReworkAuthorizationWithholding,
 } from "./domain3-validation.js";
 
 function deepFreeze<T>(value: T): T {
@@ -59,6 +78,16 @@ export interface G6GpraRehydrationContext extends G6AuthorityRehydrationContext 
   readonly approval: unknown;
 }
 
+export interface G7DispositionRehydrationContext {
+  readonly review: unknown;
+  readonly determination: unknown;
+}
+
+export interface G7ReturnPostureRehydrationContext extends G7DispositionRehydrationContext {
+  /** Required when persisted return route is withholding_return_only. */
+  readonly approvalWithholding?: unknown | null;
+}
+
 function validateEvidenceAndActivityContext(context: G6AuthorityRehydrationContext): {
   review: ProductionReadinessReview;
   determination: ReviewDeterminationRecord;
@@ -83,9 +112,31 @@ function validateEvidenceAndActivityContext(context: G6AuthorityRehydrationConte
   };
 }
 
+function validateG7DispositionContext(context: G7DispositionRehydrationContext): {
+  review: ProductionReadinessReview;
+  determination: ReviewDeterminationRecord;
+} {
+  validatePersistedProductionReadinessReview(context.review);
+  validatePersistedReviewDetermination(context.determination);
+  return {
+    review: context.review as ProductionReadinessReview,
+    determination: context.determination as ReviewDeterminationRecord,
+  };
+}
+
 export function rehydrateProductionReadinessReview(raw: unknown): ProductionReadinessReview {
   validatePersistedProductionReadinessReview(raw);
-  return deepFreeze(structuredClone(raw));
+  const clone = structuredClone(raw) as ProductionReadinessReview & {
+    priorReviewId?: ProductionReadinessReview["priorReviewId"];
+    resubmissionEligibilityId?: ProductionReadinessReview["resubmissionEligibilityId"];
+  };
+  if (clone.priorReviewId === undefined) {
+    (clone as { priorReviewId: null }).priorReviewId = null;
+  }
+  if (clone.resubmissionEligibilityId === undefined) {
+    (clone as { resubmissionEligibilityId: null }).resubmissionEligibilityId = null;
+  }
+  return deepFreeze(clone);
 }
 
 export function rehydrateReviewEvidence(raw: unknown): ReviewEvidenceRecord {
@@ -156,6 +207,89 @@ export function rehydrateGpraGrant(
   assertPersistedGpraGrantCoherence({
     gpra: raw as GpraGrantRecord,
     approval: context.approval as ApprovalActRecord,
+    ...linked,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateDownstreamDeficiencyRecord(
+  raw: unknown,
+  context: G7DispositionRehydrationContext,
+): DownstreamDeficiencyRecord {
+  validatePersistedDownstreamDeficiencyRecord(raw);
+  const linked = validateG7DispositionContext(context);
+  assertPersistedDownstreamDeficiencyCoherence({
+    deficiency: raw as DownstreamDeficiencyRecord,
+    ...linked,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateReworkAuthorization(
+  raw: unknown,
+  context: G7DispositionRehydrationContext,
+): ReworkAuthorizationRecord {
+  validatePersistedReworkAuthorization(raw);
+  const linked = validateG7DispositionContext(context);
+  assertPersistedReworkAuthorizationCoherence({
+    authorization: raw as ReworkAuthorizationRecord,
+    ...linked,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateReworkAuthorizationWithholding(
+  raw: unknown,
+  context: G7DispositionRehydrationContext,
+): ReworkAuthorizationWithholdingRecord {
+  validatePersistedReworkAuthorizationWithholding(raw);
+  const linked = validateG7DispositionContext(context);
+  assertPersistedReworkAuthorizationWithholdingCoherence({
+    withholding: raw as ReworkAuthorizationWithholdingRecord,
+    ...linked,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateReturnPosture(
+  raw: unknown,
+  context: G7ReturnPostureRehydrationContext,
+): ReturnPostureRecord {
+  validatePersistedReturnPosture(raw);
+  const linked = validateG7DispositionContext(context);
+  const returnPosture = raw as ReturnPostureRecord;
+  let approvalWithholding: ApprovalWithholdingRecord | null = null;
+  if (returnPosture.route === "withholding_return_only") {
+    if (!context.approvalWithholding) {
+      throw new OrchestraConstitutionalError(
+        "Withholding-return posture rehydration requires Approval withholding context",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R49"],
+      );
+    }
+    validatePersistedApprovalWithholding(context.approvalWithholding);
+    approvalWithholding = context.approvalWithholding as ApprovalWithholdingRecord;
+  } else if (context.approvalWithholding) {
+    validatePersistedApprovalWithholding(context.approvalWithholding);
+    approvalWithholding = context.approvalWithholding as ApprovalWithholdingRecord;
+  }
+  assertPersistedReturnPostureCoherence({
+    returnPosture,
+    review: linked.review,
+    determination: linked.determination,
+    approvalWithholding,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export function rehydrateResubmissionEligibility(
+  raw: unknown,
+  context: G7DispositionRehydrationContext,
+): ResubmissionEligibilityRecord {
+  validatePersistedResubmissionEligibility(raw);
+  const linked = validateG7DispositionContext(context);
+  assertPersistedResubmissionEligibilityCoherence({
+    eligibility: raw as ResubmissionEligibilityRecord,
     ...linked,
   });
   return deepFreeze(structuredClone(raw));

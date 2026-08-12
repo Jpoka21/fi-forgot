@@ -457,7 +457,7 @@ section("Illegal outcome values (R28)");
   );
 }
 
-section("Subsequent Review after Conditional clears activeByRva (R32)");
+section("Subsequent Review after Conditional requires unused resubmission eligibility (R32/R51)");
 
 {
   const { domain2, domain3, review, rva } = await admitReview();
@@ -476,13 +476,35 @@ section("Subsequent Review after Conditional clears activeByRva (R32)");
     null,
   );
 
-  // Same RVA may re-enter G2 after prior Review completed (R32 subsequent Review).
+  await expectThrowsAsync(
+    "Subsequent Review without resubmission eligibility is rejected",
+    () =>
+      domain3.admitToProductionReadinessReview({
+        rvaId: rva.id,
+        admittedBy: ACTOR,
+      }),
+    "invalid_downstream_disposition",
+  );
+
+  const eligibility = await domain3.authorizeResubmissionEligibility({
+    reviewId: review.reviewId,
+    authorityClassId: "downstream_disposition_authority_production_obligation_scope",
+    authorizedBy: ACTOR,
+  });
+
+  // Same RVA may re-enter G2 after prior Review completed (R32) when R51 eligibility is unused.
   const subsequent = await domain3.admitToProductionReadinessReview({
     rvaId: rva.id,
     admittedBy: ACTOR,
   });
   expect("Subsequent Review under_review", subsequent.posture, "under_review");
   expect("Subsequent Review distinct identity", subsequent.reviewId !== review.reviewId, true);
+  expect("Subsequent Review links prior Review", subsequent.priorReviewId, review.reviewId);
+  expect(
+    "Subsequent Review consumes eligibility",
+    subsequent.resubmissionEligibilityId,
+    eligibility.eligibilityId,
+  );
   expect("Prior Determination preserved", (await domain3.loadReviewDeterminationByReview(review.reviewId))?.outcome, "conditional");
   expect("Domain 2 RVA still exists", (await domain2.loadRva(rva.id))?.posture, "rva_exists");
 }

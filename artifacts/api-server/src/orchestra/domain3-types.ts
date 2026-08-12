@@ -32,6 +32,10 @@ export type ReviewDeterminationId = string & {
   readonly __brand: "ReviewDeterminationId";
 };
 
+export type ResubmissionEligibilityId = string & {
+  readonly __brand: "ResubmissionEligibilityId";
+};
+
 /**
  * Production-readiness Review posture (architecture §15.1 / §12).
  * - under_review: admitted; G3/G4 activity may proceed (incomplete until Determination — R27)
@@ -85,6 +89,12 @@ export interface ProductionReadinessReview {
   readonly domain2EntryEvidence: Domain2ReviewEntryEvidence;
   /** Null while under_review; set to exactly one Determination when review_determined (R27). */
   readonly determinationId: ReviewDeterminationId | null;
+  /**
+   * G7 subsequent Review linkage (R51) — null for first Review on an RVA path.
+   * When set, admission was authorized by a resubmission eligibility act.
+   */
+  readonly priorReviewId: ProductionReadinessReviewId | null;
+  readonly resubmissionEligibilityId: ResubmissionEligibilityId | null;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain3GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
@@ -362,4 +372,186 @@ export interface GpraGrantRecord {
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain3GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+// --- G7 Downstream Disposition (R44–R51) ---
+
+export type DownstreamDeficiencyRecordId = string & {
+  readonly __brand: "DownstreamDeficiencyRecordId";
+};
+export type ReworkAuthorizationId = string & { readonly __brand: "ReworkAuthorizationId" };
+export type ReworkAuthorizationWithholdingId = string & {
+  readonly __brand: "ReworkAuthorizationWithholdingId";
+};
+export type ReturnPostureId = string & { readonly __brand: "ReturnPostureId" };
+
+/**
+ * DDAC constitutional scope kinds — PD-STD-014-012 / R45.
+ */
+export type DownstreamDispositionConstitutionalScope =
+  | "production_obligation"
+  | "production_program";
+
+/**
+ * Runtime DDAC class identity encoding under PD-STD-014-012.
+ * Machine encodings of constitutional scope kinds — not literal frozen Standard IDs.
+ */
+export type DownstreamDispositionAuthorityClassId =
+  | "downstream_disposition_authority_production_obligation_scope"
+  | "downstream_disposition_authority_production_program_scope";
+
+/**
+ * EGDF mandatory deficiency families (R46 / PD-STD-014-008).
+ */
+export type GovernedDeficiencyFamily =
+  | "identity_compliance"
+  | "surface_fit"
+  | "contextual_obligations"
+  | "design_time_feasibility";
+
+/**
+ * TRPM route (R49 / PD-STD-014-010).
+ * Route C (withholding) does not create EGDF/DSRA eligibility by itself.
+ */
+export type DownstreamDispositionRoute =
+  | "conditional_route"
+  | "fail_route"
+  | "withholding_return_only";
+
+export type ReturnPostureKind =
+  | "correction_return_to_realization"
+  | "rework_return_to_realization"
+  | "return_authorized_after_approval_withholding";
+
+/**
+ * EGDF downstream deficiency disposition record — distinct from Review evidence,
+ * Determination, Approval, and GPRA (R44, R46).
+ */
+export interface DownstreamDeficiencyRecord {
+  readonly deficiencyRecordId: DownstreamDeficiencyRecordId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly route: "conditional_route" | "fail_route";
+  readonly deficiencyFamily: GovernedDeficiencyFamily;
+  readonly grounds: string;
+  readonly evidenceBasisIds: readonly ReviewEvidenceId[];
+  readonly authorityClassId: DownstreamDispositionAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-014-012";
+  readonly recordedAt: string;
+  readonly recordedBy: string;
+  readonly determinationNotRevised: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * DSRA rework authorization — separate from Determination, deficiency, return (R47).
+ */
+export interface ReworkAuthorizationRecord {
+  readonly reworkAuthorizationId: ReworkAuthorizationId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly route: "conditional_route" | "fail_route";
+  readonly authorityClassId: DownstreamDispositionAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-014-012";
+  readonly authorizedAt: string;
+  readonly authorizedBy: string;
+  readonly determinationNotRevised: true;
+  readonly notApproval: true;
+  readonly notGpra: true;
+  readonly manufacturingValidationNotPerformed: true;
+  readonly fulfillmentExecutionNotPerformed: true;
+  readonly std013IterationNotPerformed: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * DSRA rework authorization withholding (R48).
+ */
+export interface ReworkAuthorizationWithholdingRecord {
+  readonly withholdingId: ReworkAuthorizationWithholdingId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly route: "conditional_route" | "fail_route";
+  readonly grounds: string;
+  readonly governingSourceId: "PD-STD-014-009";
+  readonly authorityClassId: DownstreamDispositionAuthorityClassId;
+  readonly withheldAt: string;
+  readonly withheldBy: string;
+  readonly determinationNotRevised: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * TRPM return posture — separate disposition act (R49). Does not mutate Domain 2.
+ */
+export interface ReturnPostureRecord {
+  readonly returnPostureId: ReturnPostureId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly route: DownstreamDispositionRoute;
+  readonly returnKind: ReturnPostureKind;
+  readonly targetObligationScope: "same_obligation" | "successor_obligation" | null;
+  readonly approvalWithholdingId: ApprovalWithholdingId | null;
+  readonly returnGoverningSourceId: string;
+  readonly authorityClassId: DownstreamDispositionAuthorityClassId;
+  readonly establishedAt: string;
+  readonly establishedBy: string;
+  readonly determinationNotRevised: true;
+  readonly terminationNotAuthorized: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Resubmission / re-entry eligibility for a subsequent Review (R51).
+ */
+export interface ResubmissionEligibilityRecord {
+  readonly eligibilityId: ResubmissionEligibilityId;
+  readonly priorReviewId: ProductionReadinessReviewId;
+  readonly priorDeterminationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly route: "conditional_route" | "fail_route";
+  readonly authorityClassId: DownstreamDispositionAuthorityClassId;
+  readonly authorizedAt: string;
+  readonly authorizedBy: string;
+  readonly priorDeterminationPreserved: true;
+  readonly satisfiedConditionalNotRecognized: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Query: Conditional/Fail create G7 disposition eligibility — not authorization (R47–R49).
+ */
+export interface DownstreamDispositionEligibility {
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId | null;
+  readonly route: DownstreamDispositionRoute | null;
+  readonly dispositionEligible: boolean;
+  readonly reworkAuthorizationEligible: boolean;
+  readonly returnPostureEligible: boolean;
+  readonly resubmissionEligibilityActEligible: boolean;
+  readonly withholdingBlocksApprovalOnly: boolean;
 }

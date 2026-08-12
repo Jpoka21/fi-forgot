@@ -1,5 +1,5 @@
 /**
- * Domain 3 persistence validation — FI-DSN-STD-014 G2–G6.
+ * Domain 3 persistence validation — FI-DSN-STD-014 G2–G7.
  */
 
 import {
@@ -7,17 +7,24 @@ import {
   resolveEstablishedApprovalAuthorityClass,
 } from "../approval-authority.js";
 import { isMandatoryApprovalWithholdingGroundFamily } from "../approval-withholding-grounds.js";
+import { isMandatoryGovernedDeficiencyFamily } from "../deficiency-families.js";
 import { DOMAIN3_GOVERNING_STANDARD } from "../domain3-authority.js";
 import { isValidDomain3GovernedCreationMarker } from "../domain3-entry.js";
+import { isCanonicalEstablishedDownstreamDispositionAuthorityClassId } from "../downstream-disposition-authority.js";
 import type {
   ApprovalActRecord,
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  DownstreamDeficiencyRecord,
   GpraGrantRecord,
   ProductionReadinessReview,
+  ResubmissionEligibilityRecord,
+  ReturnPostureRecord,
   ReviewDeterminationRecord,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
+  ReworkAuthorizationRecord,
+  ReworkAuthorizationWithholdingRecord,
 } from "../domain3-types.js";
 import type { RealizationPath, RealizedVisualArtifactId } from "../domain2-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
@@ -39,7 +46,24 @@ const ID_PREFIXES = {
   approvalAct: "approval-act-",
   withholding: "approval-withholding-",
   gpra: "gpra-",
+  downstreamDeficiency: "downstream-deficiency-",
+  reworkAuthorization: "rework-authorization-",
+  reworkAuthorizationWithholding: "rework-authorization-withholding-",
+  returnPosture: "return-posture-",
+  resubmissionEligibility: "resubmission-eligibility-",
 } as const;
+
+const LEGAL_CONDITIONAL_FAIL_ROUTES = ["conditional_route", "fail_route"] as const;
+const LEGAL_DOWNSTREAM_ROUTES = [
+  "conditional_route",
+  "fail_route",
+  "withholding_return_only",
+] as const;
+const LEGAL_RETURN_KINDS = [
+  "correction_return_to_realization",
+  "rework_return_to_realization",
+  "return_authorized_after_approval_withholding",
+] as const;
 
 const LEGAL_REALIZATION_PATHS: readonly RealizationPath[] = [
   "created",
@@ -161,6 +185,32 @@ export function validatePersistedProductionReadinessReview(
       "invalid_review_entry_eligibility",
       ["FI-DSN-STD-014-R13"],
     );
+  }
+
+  const priorNull = record.priorReviewId === null || record.priorReviewId === undefined;
+  const eligibilityNull =
+    record.resubmissionEligibilityId === null || record.resubmissionEligibilityId === undefined;
+  // Backward-compatible: missing fields treated as null (pre-G7 persisted reviews).
+  if (record.priorReviewId === undefined && record.resubmissionEligibilityId === undefined) {
+    // allow legacy — normalized at rehydration sites that construct reviews via admit
+  } else if (priorNull !== eligibilityNull) {
+    throw new OrchestraConstitutionalError(
+      "Review priorReviewId and resubmissionEligibilityId must both be null or both set",
+      "invalid_review_entry_eligibility",
+      ["FI-DSN-STD-014-R51"],
+    );
+  } else if (!priorNull) {
+    assertBrandedId(record.priorReviewId, ID_PREFIXES.review, "prior Production-readiness Review");
+    if (
+      typeof record.resubmissionEligibilityId !== "string" ||
+      !record.resubmissionEligibilityId.startsWith("resubmission-eligibility-")
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Invalid resubmission eligibility identity on Review",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R51"],
+      );
+    }
   }
 
   const evidence = record.domain2EntryEvidence as Record<string, unknown> | null;
@@ -900,6 +950,441 @@ export function validatePersistedGpraGrant(raw: unknown): asserts raw is GpraGra
       "GPRA grant requires valid governed creation marker",
       "invalid_domain3_persistence_state",
       ["FI-DSN-STD-014-R42"],
+    );
+  }
+}
+
+function assertReworkAuthorizationId(value: unknown): void {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith(ID_PREFIXES.reworkAuthorization) ||
+    value.startsWith(ID_PREFIXES.reworkAuthorizationWithholding)
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Invalid Domain 3 Rework authorization identity",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R47"],
+    );
+  }
+}
+
+export function validatePersistedDownstreamDeficiencyRecord(
+  raw: unknown,
+): asserts raw is DownstreamDeficiencyRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Downstream deficiency record",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R46"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.deficiencyRecordId,
+    ID_PREFIXES.downstreamDeficiency,
+    "Downstream deficiency record",
+  );
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!(LEGAL_CONDITIONAL_FAIL_ROUTES as readonly string[]).includes(record.route as string)) {
+    throw new OrchestraConstitutionalError(
+      "Downstream deficiency requires Conditional or Fail disposition route",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R46", "FI-DSN-STD-014-R49"],
+    );
+  }
+  if (!isMandatoryGovernedDeficiencyFamily(record.deficiencyFamily)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Downstream deficiency requires mandatory EGDF family",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R46"],
+    );
+  }
+  if (typeof record.grounds !== "string" || !record.grounds.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Downstream deficiency requires documented grounds",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R46"],
+    );
+  }
+  if (!Array.isArray(record.evidenceBasisIds)) {
+    throw new OrchestraConstitutionalError(
+      "Downstream deficiency requires evidenceBasisIds array",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R46"],
+    );
+  }
+  for (const evidenceId of record.evidenceBasisIds) {
+    assertBrandedId(evidenceId, ID_PREFIXES.evidence, "Review evidence");
+  }
+  if (!isCanonicalEstablishedDownstreamDispositionAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Downstream deficiency requires established DDAC authority class",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R45"],
+    );
+  }
+  if (record.authorityGoverningSourceId !== "PD-STD-014-012") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Downstream deficiency requires PD-STD-014-012 governing source",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R45"],
+    );
+  }
+  if (typeof record.recordedAt !== "string" || typeof record.recordedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "Downstream deficiency requires recordedAt and recordedBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R46"],
+    );
+  }
+  if (record.determinationNotRevised !== true) {
+    throw new OrchestraConstitutionalError(
+      "Downstream deficiency must affirm determinationNotRevised",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R44", "FI-DSN-STD-014-R46"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Downstream deficiency record");
+  assertDomain3Traceability(record.traceability, "Downstream deficiency record");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Downstream deficiency requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R46"],
+    );
+  }
+}
+
+export function validatePersistedReworkAuthorization(
+  raw: unknown,
+): asserts raw is ReworkAuthorizationRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Rework authorization",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R47"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertReworkAuthorizationId(record.reworkAuthorizationId);
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!(LEGAL_CONDITIONAL_FAIL_ROUTES as readonly string[]).includes(record.route as string)) {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization requires Conditional or Fail disposition route",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R47", "FI-DSN-STD-014-R49"],
+    );
+  }
+  if (!isCanonicalEstablishedDownstreamDispositionAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Rework authorization requires established DDAC authority class",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R45", "FI-DSN-STD-014-R47"],
+    );
+  }
+  if (record.authorityGoverningSourceId !== "PD-STD-014-012") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Rework authorization requires PD-STD-014-012 governing source",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R45"],
+    );
+  }
+  if (typeof record.authorizedAt !== "string" || typeof record.authorizedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization requires authorizedAt and authorizedBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R47"],
+    );
+  }
+  if (
+    record.determinationNotRevised !== true ||
+    record.notApproval !== true ||
+    record.notGpra !== true ||
+    record.manufacturingValidationNotPerformed !== true ||
+    record.fulfillmentExecutionNotPerformed !== true ||
+    record.std013IterationNotPerformed !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization must affirm determination preservation and exclusion markers",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R47"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Rework authorization");
+  assertDomain3Traceability(record.traceability, "Rework authorization");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R47"],
+    );
+  }
+}
+
+export function validatePersistedReworkAuthorizationWithholding(
+  raw: unknown,
+): asserts raw is ReworkAuthorizationWithholdingRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Rework authorization withholding",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R48"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.withholdingId,
+    ID_PREFIXES.reworkAuthorizationWithholding,
+    "Rework authorization withholding",
+  );
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!(LEGAL_CONDITIONAL_FAIL_ROUTES as readonly string[]).includes(record.route as string)) {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization withholding requires Conditional or Fail disposition route",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R48", "FI-DSN-STD-014-R49"],
+    );
+  }
+  if (typeof record.grounds !== "string" || !record.grounds.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization withholding requires documented grounds",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R48"],
+    );
+  }
+  if (record.governingSourceId !== "PD-STD-014-009") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Rework authorization withholding requires PD-STD-014-009 governing source",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R48"],
+    );
+  }
+  if (!isCanonicalEstablishedDownstreamDispositionAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Rework authorization withholding requires established DDAC authority class",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R45", "FI-DSN-STD-014-R48"],
+    );
+  }
+  if (typeof record.withheldAt !== "string" || typeof record.withheldBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization withholding requires withheldAt and withheldBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R48"],
+    );
+  }
+  if (record.determinationNotRevised !== true) {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization withholding must affirm determinationNotRevised",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R44", "FI-DSN-STD-014-R48"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Rework authorization withholding");
+  assertDomain3Traceability(record.traceability, "Rework authorization withholding");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Rework authorization withholding requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R48"],
+    );
+  }
+}
+
+export function validatePersistedReturnPosture(
+  raw: unknown,
+): asserts raw is ReturnPostureRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Return posture",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.returnPostureId, ID_PREFIXES.returnPosture, "Return posture");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!(LEGAL_DOWNSTREAM_ROUTES as readonly string[]).includes(record.route as string)) {
+    throw new OrchestraConstitutionalError(
+      "Return posture requires a legal Downstream disposition route",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (!(LEGAL_RETURN_KINDS as readonly string[]).includes(record.returnKind as string)) {
+    throw new OrchestraConstitutionalError(
+      "Return posture requires a legal return kind",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (
+    record.targetObligationScope !== null &&
+    record.targetObligationScope !== "same_obligation" &&
+    record.targetObligationScope !== "successor_obligation"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Return posture targetObligationScope is invalid",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (
+    record.approvalWithholdingId !== null &&
+    (typeof record.approvalWithholdingId !== "string" ||
+      !record.approvalWithholdingId.startsWith(ID_PREFIXES.withholding))
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Return posture Approval withholding identity is malformed",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (record.route === "withholding_return_only") {
+    if (record.returnKind !== "return_authorized_after_approval_withholding") {
+      throw new OrchestraConstitutionalError(
+        "Withholding-return route requires return_authorized_after_approval_withholding kind",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R49"],
+      );
+    }
+    if (record.approvalWithholdingId === null) {
+      throw new OrchestraConstitutionalError(
+        "Withholding-return route requires Approval withholding identity",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R49"],
+      );
+    }
+  } else if (record.approvalWithholdingId !== null) {
+    throw new OrchestraConstitutionalError(
+      "Conditional/Fail return posture must not carry Approval withholding identity",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (typeof record.returnGoverningSourceId !== "string" || !record.returnGoverningSourceId.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Return posture requires returnGoverningSourceId",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (!isCanonicalEstablishedDownstreamDispositionAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Return posture requires established DDAC authority class",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R45", "FI-DSN-STD-014-R49"],
+    );
+  }
+  if (typeof record.establishedAt !== "string" || typeof record.establishedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "Return posture requires establishedAt and establishedBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+  if (record.determinationNotRevised !== true || record.terminationNotAuthorized !== true) {
+    throw new OrchestraConstitutionalError(
+      "Return posture must affirm determinationNotRevised and terminationNotAuthorized",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R49", "FI-DSN-STD-014-R50"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Return posture");
+  assertDomain3Traceability(record.traceability, "Return posture");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Return posture requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R49"],
+    );
+  }
+}
+
+export function validatePersistedResubmissionEligibility(
+  raw: unknown,
+): asserts raw is ResubmissionEligibilityRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Resubmission eligibility",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R51"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.eligibilityId,
+    ID_PREFIXES.resubmissionEligibility,
+    "Resubmission eligibility",
+  );
+  assertBrandedId(record.priorReviewId, ID_PREFIXES.review, "prior Production-readiness Review");
+  assertBrandedId(
+    record.priorDeterminationId,
+    ID_PREFIXES.determination,
+    "prior Review Determination",
+  );
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (!(LEGAL_CONDITIONAL_FAIL_ROUTES as readonly string[]).includes(record.route as string)) {
+    throw new OrchestraConstitutionalError(
+      "Resubmission eligibility requires Conditional or Fail disposition route",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R51"],
+    );
+  }
+  if (!isCanonicalEstablishedDownstreamDispositionAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Resubmission eligibility requires established DDAC authority class",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R45", "FI-DSN-STD-014-R51"],
+    );
+  }
+  if (typeof record.authorizedAt !== "string" || typeof record.authorizedBy !== "string") {
+    throw new OrchestraConstitutionalError(
+      "Resubmission eligibility requires authorizedAt and authorizedBy",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R51"],
+    );
+  }
+  if (
+    record.priorDeterminationPreserved !== true ||
+    record.satisfiedConditionalNotRecognized !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Resubmission eligibility must affirm priorDeterminationPreserved and satisfiedConditionalNotRecognized",
+      "invalid_downstream_disposition",
+      ["FI-DSN-STD-014-R51"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Resubmission eligibility");
+  assertDomain3Traceability(record.traceability, "Resubmission eligibility");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Resubmission eligibility requires valid governed creation marker",
+      "invalid_domain3_persistence_state",
+      ["FI-DSN-STD-014-R51"],
     );
   }
 }

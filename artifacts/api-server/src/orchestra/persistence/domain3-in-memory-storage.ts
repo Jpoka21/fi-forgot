@@ -1,22 +1,29 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G6.
+ * In-memory Domain 3 storage adapter — G2–G7.
  */
 
 import type {
   ApprovalActRecord,
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationRecord,
+  DownstreamDeficiencyRecord,
   GpraGrantRecord,
   ProductionReadinessReview,
+  ResubmissionEligibilityRecord,
+  ReturnPostureRecord,
   ReviewDeterminationRecord,
   ReviewDimensionActivityRecord,
   ReviewEvidenceRecord,
+  ReworkAuthorizationRecord,
+  ReworkAuthorizationWithholdingRecord,
 } from "../domain3-types.js";
 import type { Domain3StoragePort } from "./domain3-storage-port.js";
 
 export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const reviews = new Map<string, ProductionReadinessReview>();
   const activeByRva = new Map<string, string>();
+  const reviewsByRva = new Map<string, string[]>();
+  const reviewByResubmissionEligibility = new Map<string, string>();
   const evidenceById = new Map<string, ReviewEvidenceRecord>();
   const evidenceByReview = new Map<string, string[]>();
   const activitiesById = new Map<string, ReviewDimensionActivityRecord>();
@@ -32,6 +39,16 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const gprasById = new Map<string, GpraGrantRecord>();
   const gpraByReview = new Map<string, string>();
   const gpraByRvaObligation = new Map<string, string>();
+  const deficienciesById = new Map<string, DownstreamDeficiencyRecord>();
+  const deficiencyByReview = new Map<string, string>();
+  const reworkAuthById = new Map<string, ReworkAuthorizationRecord>();
+  const reworkAuthByReview = new Map<string, string>();
+  const reworkWithholdingById = new Map<string, ReworkAuthorizationWithholdingRecord>();
+  const reworkWithholdingByReview = new Map<string, string>();
+  const returnPostureById = new Map<string, ReturnPostureRecord>();
+  const returnPostureByReview = new Map<string, string>();
+  const resubmissionById = new Map<string, ResubmissionEligibilityRecord>();
+  const resubmissionByPriorReview = new Map<string, string>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -39,7 +56,25 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
 
   return {
     async putProductionReadinessReview(review) {
+      const existing = reviews.get(review.reviewId);
       reviews.set(review.reviewId, structuredClone(review));
+
+      if (!existing) {
+        const list = reviewsByRva.get(review.rvaId) ?? [];
+        list.push(review.reviewId);
+        reviewsByRva.set(review.rvaId, list);
+      }
+
+      if (review.resubmissionEligibilityId) {
+        const current = reviewByResubmissionEligibility.get(review.resubmissionEligibilityId);
+        if (current && current !== review.reviewId) {
+          throw new Error(
+            `Duplicate subsequent Review for resubmission eligibility: ${review.resubmissionEligibilityId}`,
+          );
+        }
+        reviewByResubmissionEligibility.set(review.resubmissionEligibilityId, review.reviewId);
+      }
+
       if (review.posture === "under_review") {
         activeByRva.set(review.rvaId, review.reviewId);
       } else {
@@ -57,6 +92,22 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
 
     async getActiveProductionReadinessReviewByRva(rvaId) {
       const reviewId = activeByRva.get(rvaId);
+      if (!reviewId) return null;
+      return this.getProductionReadinessReview(reviewId as ProductionReadinessReview["reviewId"]);
+    },
+
+    async listProductionReadinessReviewsByRva(rvaId) {
+      const ids = reviewsByRva.get(rvaId) ?? [];
+      return Object.freeze(
+        ids
+          .map((id) => reviews.get(id))
+          .filter((item): item is ProductionReadinessReview => !!item)
+          .map((item) => structuredClone(item)),
+      );
+    },
+
+    async getReviewByResubmissionEligibilityId(eligibilityId) {
+      const reviewId = reviewByResubmissionEligibility.get(eligibilityId);
       if (!reviewId) return null;
       return this.getProductionReadinessReview(reviewId as ProductionReadinessReview["reviewId"]);
     },
@@ -239,6 +290,128 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       const gpraId = gpraByRvaObligation.get(rvaObligationKey(rvaId, obligationId));
       if (!gpraId) return null;
       return this.getGpraGrant(gpraId as GpraGrantRecord["gpraId"]);
+    },
+
+    async putDownstreamDeficiencyRecord(record) {
+      if (deficienciesById.has(record.deficiencyRecordId)) {
+        throw new Error(`Duplicate Downstream deficiency identity: ${record.deficiencyRecordId}`);
+      }
+      if (deficiencyByReview.has(record.reviewId)) {
+        throw new Error(`Duplicate Downstream deficiency for Review: ${record.reviewId}`);
+      }
+      deficienciesById.set(record.deficiencyRecordId, structuredClone(record));
+      deficiencyByReview.set(record.reviewId, record.deficiencyRecordId);
+    },
+
+    async getDownstreamDeficiencyRecord(deficiencyRecordId) {
+      const record = deficienciesById.get(deficiencyRecordId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async getDownstreamDeficiencyRecordByReview(reviewId) {
+      const id = deficiencyByReview.get(reviewId);
+      if (!id) return null;
+      return this.getDownstreamDeficiencyRecord(
+        id as DownstreamDeficiencyRecord["deficiencyRecordId"],
+      );
+    },
+
+    async putReworkAuthorization(authorization) {
+      if (reworkAuthById.has(authorization.reworkAuthorizationId)) {
+        throw new Error(
+          `Duplicate Rework authorization identity: ${authorization.reworkAuthorizationId}`,
+        );
+      }
+      if (reworkAuthByReview.has(authorization.reviewId)) {
+        throw new Error(`Duplicate Rework authorization for Review: ${authorization.reviewId}`);
+      }
+      reworkAuthById.set(authorization.reworkAuthorizationId, structuredClone(authorization));
+      reworkAuthByReview.set(authorization.reviewId, authorization.reworkAuthorizationId);
+    },
+
+    async getReworkAuthorization(reworkAuthorizationId) {
+      const authorization = reworkAuthById.get(reworkAuthorizationId);
+      return authorization ? structuredClone(authorization) : null;
+    },
+
+    async getReworkAuthorizationByReview(reviewId) {
+      const id = reworkAuthByReview.get(reviewId);
+      if (!id) return null;
+      return this.getReworkAuthorization(id as ReworkAuthorizationRecord["reworkAuthorizationId"]);
+    },
+
+    async putReworkAuthorizationWithholding(withholding) {
+      if (reworkWithholdingById.has(withholding.withholdingId)) {
+        throw new Error(
+          `Duplicate Rework authorization withholding identity: ${withholding.withholdingId}`,
+        );
+      }
+      if (reworkWithholdingByReview.has(withholding.reviewId)) {
+        throw new Error(
+          `Duplicate Rework authorization withholding for Review: ${withholding.reviewId}`,
+        );
+      }
+      reworkWithholdingById.set(withholding.withholdingId, structuredClone(withholding));
+      reworkWithholdingByReview.set(withholding.reviewId, withholding.withholdingId);
+    },
+
+    async getReworkAuthorizationWithholding(withholdingId) {
+      const withholding = reworkWithholdingById.get(withholdingId);
+      return withholding ? structuredClone(withholding) : null;
+    },
+
+    async getReworkAuthorizationWithholdingByReview(reviewId) {
+      const id = reworkWithholdingByReview.get(reviewId);
+      if (!id) return null;
+      return this.getReworkAuthorizationWithholding(
+        id as ReworkAuthorizationWithholdingRecord["withholdingId"],
+      );
+    },
+
+    async putReturnPosture(returnPosture) {
+      if (returnPostureById.has(returnPosture.returnPostureId)) {
+        throw new Error(`Duplicate Return posture identity: ${returnPosture.returnPostureId}`);
+      }
+      if (returnPostureByReview.has(returnPosture.reviewId)) {
+        throw new Error(`Duplicate Return posture for Review: ${returnPosture.reviewId}`);
+      }
+      returnPostureById.set(returnPosture.returnPostureId, structuredClone(returnPosture));
+      returnPostureByReview.set(returnPosture.reviewId, returnPosture.returnPostureId);
+    },
+
+    async getReturnPosture(returnPostureId) {
+      const returnPosture = returnPostureById.get(returnPostureId);
+      return returnPosture ? structuredClone(returnPosture) : null;
+    },
+
+    async getReturnPostureByReview(reviewId) {
+      const id = returnPostureByReview.get(reviewId);
+      if (!id) return null;
+      return this.getReturnPosture(id as ReturnPostureRecord["returnPostureId"]);
+    },
+
+    async putResubmissionEligibility(eligibility) {
+      if (resubmissionById.has(eligibility.eligibilityId)) {
+        throw new Error(`Duplicate Resubmission eligibility identity: ${eligibility.eligibilityId}`);
+      }
+      if (resubmissionByPriorReview.has(eligibility.priorReviewId)) {
+        throw new Error(
+          `Duplicate Resubmission eligibility for prior Review: ${eligibility.priorReviewId}`,
+        );
+      }
+      resubmissionById.set(eligibility.eligibilityId, structuredClone(eligibility));
+      resubmissionByPriorReview.set(eligibility.priorReviewId, eligibility.eligibilityId);
+    },
+
+    async getResubmissionEligibility(eligibilityId) {
+      const eligibility = resubmissionById.get(eligibilityId);
+      return eligibility ? structuredClone(eligibility) : null;
+    },
+
+    async getResubmissionEligibilityByPriorReview(priorReviewId) {
+      const id = resubmissionByPriorReview.get(priorReviewId);
+      if (!id) return null;
+      return this.getResubmissionEligibility(id as ResubmissionEligibilityRecord["eligibilityId"]);
     },
   };
 }

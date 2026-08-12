@@ -117,6 +117,23 @@ export {
 } from "./approval-and-gpra.js";
 
 export {
+  FROZEN_ESTABLISHED_DOWNSTREAM_DISPOSITION_AUTHORITY_CLASSES,
+  isCanonicalEstablishedDownstreamDispositionAuthorityClassId,
+  assertEstablishedDownstreamDispositionAuthorityClass,
+  resolveEstablishedDownstreamDispositionAuthorityClass,
+} from "./downstream-disposition-authority.js";
+
+export {
+  MANDATORY_GOVERNED_DEFICIENCY_FAMILIES,
+  isMandatoryGovernedDeficiencyFamily,
+} from "./deficiency-families.js";
+
+export {
+  DOWNSTREAM_DISPOSITION_TRACEABILITY,
+  evaluateDownstreamDispositionEligibility,
+} from "./downstream-disposition.js";
+
+export {
   REVIEW_DETERMINATION_TRACEABILITY,
   LEGAL_REVIEW_DETERMINATION_OUTCOMES,
   isLegalReviewDeterminationOutcome,
@@ -159,6 +176,22 @@ export type {
   ApprovalActRecord,
   ApprovalWithholdingRecord,
   GpraGrantRecord,
+  DownstreamDeficiencyRecordId,
+  ReworkAuthorizationId,
+  ReworkAuthorizationWithholdingId,
+  ReturnPostureId,
+  ResubmissionEligibilityId,
+  DownstreamDispositionConstitutionalScope,
+  DownstreamDispositionAuthorityClassId,
+  GovernedDeficiencyFamily,
+  DownstreamDispositionRoute,
+  ReturnPostureKind,
+  DownstreamDeficiencyRecord,
+  ReworkAuthorizationRecord,
+  ReworkAuthorizationWithholdingRecord,
+  ReturnPostureRecord,
+  ResubmissionEligibilityRecord,
+  DownstreamDispositionEligibility,
 } from "./domain3-types.js";
 
 /**

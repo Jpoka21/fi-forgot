@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G6 (Review through GPRA grant).
+ * Governed Domain 3 repository — G2–G7 (Review through downstream disposition).
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -9,20 +9,30 @@ import {
   rehydrateApprovalAct,
   rehydrateApprovalWithholding,
   rehydrateDesignTimeFeasibilityEvaluation,
+  rehydrateDownstreamDeficiencyRecord,
   rehydrateGpraGrant,
   rehydrateProductionReadinessReview,
+  rehydrateResubmissionEligibility,
+  rehydrateReturnPosture,
   rehydrateReviewDetermination,
   rehydrateReviewDimensionActivity,
   rehydrateReviewEvidence,
+  rehydrateReworkAuthorization,
+  rehydrateReworkAuthorizationWithholding,
 } from "./domain3-rehydration.js";
 import type { Domain3StoragePort } from "./domain3-storage-port.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
+  validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGpraGrant,
   validatePersistedProductionReadinessReview,
+  validatePersistedResubmissionEligibility,
+  validatePersistedReturnPosture,
   validatePersistedReviewDetermination,
+  validatePersistedReworkAuthorization,
+  validatePersistedReworkAuthorizationWithholding,
 } from "./domain3-validation.js";
 import type {
   ApprovalActId,
@@ -35,11 +45,20 @@ import type {
   DesignTimeFeasibilityEvaluationId,
   DesignTimeFeasibilityEvaluationRecord,
   DesignTimeFeasibilityObservationKind,
+  DownstreamDeficiencyRecord,
+  DownstreamDeficiencyRecordId,
+  DownstreamDispositionAuthorityClassId,
+  DownstreamDispositionEligibility,
+  GovernedDeficiencyFamily,
   GpraGrantRecord,
   GpraId,
   MandatoryReviewActivityCompleteness,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
+  ResubmissionEligibilityId,
+  ResubmissionEligibilityRecord,
+  ReturnPostureId,
+  ReturnPostureRecord,
   ReviewDeterminationId,
   ReviewDeterminationOutcome,
   ReviewDeterminationRecord,
@@ -48,6 +67,10 @@ import type {
   ReviewEvidenceId,
   ReviewEvidenceRecord,
   ReviewEvidenceSourceKind,
+  ReworkAuthorizationId,
+  ReworkAuthorizationRecord,
+  ReworkAuthorizationWithholdingId,
+  ReworkAuthorizationWithholdingRecord,
 } from "../domain3-types.js";
 import type { RealizedVisualArtifactId } from "../domain2-types.js";
 import {
@@ -62,6 +85,14 @@ import {
   createDesignTimeFeasibilityEvaluation,
   DESIGN_TIME_FEASIBILITY_DIMENSION_ID,
 } from "../design-time-feasibility.js";
+import {
+  createDownstreamDeficiencyRecord,
+  createResubmissionEligibility,
+  createReturnPosture,
+  createReworkAuthorization,
+  createReworkAuthorizationWithholding,
+  evaluateDownstreamDispositionEligibility,
+} from "../downstream-disposition.js";
 import { OrchestraConstitutionalError } from "../errors.js";
 import {
   createFrozenManufacturingAuthoritySource,
@@ -77,7 +108,7 @@ import { admitProductionReadinessReview } from "../review-entry-eligibility.js";
 import type { MandatoryReviewDimensionId } from "../review-dimensions.js";
 import { isTerminalRvaPosture } from "../rva-lifecycle.js";
 import { assertProgramIsActiveAuthority, isActiveProgramPosture } from "../transitions.js";
-import type { ProductionObligationId, ProductionProgramId } from "../types.js";
+import type { ProductionObligationId } from "../types.js";
 
 /**
  * Narrow Domain 2 read surface consumed by Domain 3.
@@ -251,6 +282,81 @@ export interface Domain3Repository {
     rvaId: RealizedVisualArtifactId;
     obligationId: ProductionObligationId;
   }): Promise<GpraGrantRecord | null>;
+
+  /** R47–R49 — Conditional/Fail (or Pass+withholding return) disposition eligibility query. */
+  evaluateDownstreamDispositionEligibility(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<DownstreamDispositionEligibility>;
+
+  /** R46 — record EGDF deficiency (one per Review). */
+  recordDownstreamDeficiency(input: {
+    reviewId: ProductionReadinessReviewId;
+    deficiencyFamily: GovernedDeficiencyFamily;
+    grounds: string;
+    authorityClassId: DownstreamDispositionAuthorityClassId;
+    recordedBy: string;
+    evidenceBasisIds?: readonly ReviewEvidenceId[];
+  }): Promise<DownstreamDeficiencyRecord>;
+
+  /** R47 — authorize DSRA rework (mutually exclusive with rework withholding). */
+  authorizeRework(input: {
+    reviewId: ProductionReadinessReviewId;
+    authorityClassId: DownstreamDispositionAuthorityClassId;
+    authorizedBy: string;
+  }): Promise<ReworkAuthorizationRecord>;
+
+  /** R48 — withhold DSRA rework authorization (mutually exclusive with rework auth). */
+  withholdReworkAuthorization(input: {
+    reviewId: ProductionReadinessReviewId;
+    authorityClassId: DownstreamDispositionAuthorityClassId;
+    grounds: string;
+    withheldBy: string;
+  }): Promise<ReworkAuthorizationWithholdingRecord>;
+
+  /** R49 — establish TRPM return posture. */
+  establishReturnPosture(input: {
+    reviewId: ProductionReadinessReviewId;
+    authorityClassId: DownstreamDispositionAuthorityClassId;
+    establishedBy: string;
+    targetObligationScope?: "same_obligation" | "successor_obligation" | null;
+    returnGoverningSourceId?: string;
+  }): Promise<ReturnPostureRecord>;
+
+  /** R51 — authorize resubmission eligibility for a subsequent Review (one per prior Review). */
+  authorizeResubmissionEligibility(input: {
+    reviewId: ProductionReadinessReviewId;
+    authorityClassId: DownstreamDispositionAuthorityClassId;
+    authorizedBy: string;
+  }): Promise<ResubmissionEligibilityRecord>;
+
+  loadDownstreamDeficiencyRecord(
+    deficiencyRecordId: DownstreamDeficiencyRecordId,
+  ): Promise<DownstreamDeficiencyRecord | null>;
+  loadDownstreamDeficiencyRecordByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<DownstreamDeficiencyRecord | null>;
+  loadReworkAuthorization(
+    reworkAuthorizationId: ReworkAuthorizationId,
+  ): Promise<ReworkAuthorizationRecord | null>;
+  loadReworkAuthorizationByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReworkAuthorizationRecord | null>;
+  loadReworkAuthorizationWithholding(
+    withholdingId: ReworkAuthorizationWithholdingId,
+  ): Promise<ReworkAuthorizationWithholdingRecord | null>;
+  loadReworkAuthorizationWithholdingByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReworkAuthorizationWithholdingRecord | null>;
+  loadReturnPosture(returnPostureId: ReturnPostureId): Promise<ReturnPostureRecord | null>;
+  loadReturnPostureByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReturnPostureRecord | null>;
+  loadResubmissionEligibility(
+    eligibilityId: ResubmissionEligibilityId,
+  ): Promise<ResubmissionEligibilityRecord | null>;
+  loadResubmissionEligibilityByPriorReview(
+    priorReviewId: ProductionReadinessReviewId,
+  ): Promise<ResubmissionEligibilityRecord | null>;
 }
 
 export function createDomain3Repository(
@@ -384,6 +490,146 @@ export function createDomain3RepositoryWithStorage(
     }
     // Structural Approval validation only here — joint Approval↔Review coherence runs inside rehydrateGpraGrant.
     return rehydrateGpraGrant(raw, { ...context, approval: approvalRaw });
+  }
+
+  async function loadG7DispositionRehydrationContext(reviewId: ProductionReadinessReviewId): Promise<{
+    review: ProductionReadinessReview;
+    determination: ReviewDeterminationRecord;
+  }> {
+    const reviewRaw = await storage.getProductionReadinessReview(reviewId);
+    if (!reviewRaw) {
+      throw new OrchestraConstitutionalError(
+        "G7 disposition requires persisted Production-readiness Review",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R44"],
+      );
+    }
+    const review = rehydrateProductionReadinessReview(reviewRaw);
+    if (review.posture !== "review_determined" || !review.determinationId) {
+      throw new OrchestraConstitutionalError(
+        "G7 disposition requires completed Review with Determination linkage",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R47", "FI-DSN-STD-014-R49"],
+      );
+    }
+    const byId = await storage.getReviewDetermination(review.determinationId);
+    const byReview = await storage.getReviewDeterminationByReview(review.reviewId);
+    if (!byId) {
+      throw new OrchestraConstitutionalError(
+        "review.determinationId points to no persisted Determination",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R44"],
+      );
+    }
+    if (!byReview || byReview.determinationId !== byId.determinationId) {
+      throw new OrchestraConstitutionalError(
+        "Contradictory Review Determination linkage blocks G7 disposition rehydration",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R44"],
+      );
+    }
+    return {
+      review,
+      determination: rehydrateReviewDetermination(byId),
+    };
+  }
+
+  async function rehydrateTrustedDownstreamDeficiency(
+    raw: DownstreamDeficiencyRecord,
+  ): Promise<DownstreamDeficiencyRecord> {
+    const context = await loadG7DispositionRehydrationContext(raw.reviewId);
+    return rehydrateDownstreamDeficiencyRecord(raw, context);
+  }
+
+  async function rehydrateTrustedReworkAuthorization(
+    raw: ReworkAuthorizationRecord,
+  ): Promise<ReworkAuthorizationRecord> {
+    const context = await loadG7DispositionRehydrationContext(raw.reviewId);
+    return rehydrateReworkAuthorization(raw, context);
+  }
+
+  async function rehydrateTrustedReworkAuthorizationWithholding(
+    raw: ReworkAuthorizationWithholdingRecord,
+  ): Promise<ReworkAuthorizationWithholdingRecord> {
+    const context = await loadG7DispositionRehydrationContext(raw.reviewId);
+    return rehydrateReworkAuthorizationWithholding(raw, context);
+  }
+
+  async function rehydrateTrustedReturnPosture(
+    raw: ReturnPostureRecord,
+  ): Promise<ReturnPostureRecord> {
+    const context = await loadG7DispositionRehydrationContext(raw.reviewId);
+    let approvalWithholding: ApprovalWithholdingRecord | null = null;
+    if (raw.route === "withholding_return_only") {
+      if (!raw.approvalWithholdingId) {
+        throw new OrchestraConstitutionalError(
+          "Withholding-return posture requires Approval withholding identity",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R49"],
+        );
+      }
+      const withholdingRaw = await storage.getApprovalWithholding(raw.approvalWithholdingId);
+      if (!withholdingRaw) {
+        throw new OrchestraConstitutionalError(
+          "Withholding-return posture references missing Approval withholding",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R49"],
+        );
+      }
+      approvalWithholding = await rehydrateTrustedApprovalWithholding(withholdingRaw);
+    }
+    return rehydrateReturnPosture(raw, { ...context, approvalWithholding });
+  }
+
+  async function rehydrateTrustedResubmissionEligibility(
+    raw: ResubmissionEligibilityRecord,
+  ): Promise<ResubmissionEligibilityRecord> {
+    const context = await loadG7DispositionRehydrationContext(raw.priorReviewId);
+    return rehydrateResubmissionEligibility(raw, context);
+  }
+
+  async function requireLinkedConditionalOrFailDetermination(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<{
+    review: ProductionReadinessReview;
+    determination: ReviewDeterminationRecord;
+  }> {
+    const context = await loadG7DispositionRehydrationContext(reviewId);
+    if (context.determination.outcome !== "conditional" && context.determination.outcome !== "fail") {
+      throw new OrchestraConstitutionalError(
+        "G7 EGDF/DSRA/resubmission requires Conditional or Fail Determination",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R49"],
+      );
+    }
+    return context;
+  }
+
+  async function resolveMostRecentDeterminedReviewForRva(
+    rvaId: RealizedVisualArtifactId,
+  ): Promise<{
+    review: ProductionReadinessReview;
+    determination: ReviewDeterminationRecord;
+  } | null> {
+    const listed = await storage.listProductionReadinessReviewsByRva(rvaId);
+    const determined = listed
+      .map((item) => rehydrateProductionReadinessReview(item))
+      .filter((item) => item.posture === "review_determined" && !!item.determinationId)
+      .sort((a, b) => b.audit.createdAt.localeCompare(a.audit.createdAt));
+    if (determined.length === 0) return null;
+    const review = determined[0]!;
+    const determinationRaw = await storage.getReviewDetermination(review.determinationId!);
+    if (!determinationRaw) {
+      throw new OrchestraConstitutionalError(
+        "Most recent determined Review lacks persisted Determination",
+        "invalid_downstream_disposition",
+        ["FI-DSN-STD-014-R51"],
+      );
+    }
+    return {
+      review,
+      determination: rehydrateReviewDetermination(determinationRaw),
+    };
   }
 
   async function requireUnderReview(
@@ -633,11 +879,47 @@ export function createDomain3RepositoryWithStorage(
         );
       }
 
+      let priorReviewId: ProductionReadinessReviewId | null = null;
+      let resubmissionEligibilityId: ResubmissionEligibilityId | null = null;
+
+      const priorDetermined = await resolveMostRecentDeterminedReviewForRva(input.rvaId);
+      if (priorDetermined) {
+        const { review: priorReview, determination: priorDetermination } = priorDetermined;
+        // Pass path isolation: Pass (with or without withholding) does not gate subsequent admission via R51.
+        if (priorDetermination.outcome === "conditional" || priorDetermination.outcome === "fail") {
+          const eligibilityRaw = await storage.getResubmissionEligibilityByPriorReview(
+            priorReview.reviewId,
+          );
+          if (!eligibilityRaw) {
+            throw new OrchestraConstitutionalError(
+              "Subsequent Review after Conditional/Fail requires unused resubmission eligibility for the prior Review",
+              "invalid_downstream_disposition",
+              ["FI-DSN-STD-014-R51"],
+            );
+          }
+          const eligibility = await rehydrateTrustedResubmissionEligibility(eligibilityRaw);
+          const consumer = await storage.getReviewByResubmissionEligibilityId(
+            eligibility.eligibilityId,
+          );
+          if (consumer) {
+            throw new OrchestraConstitutionalError(
+              "Resubmission eligibility has already been consumed by a subsequent Review",
+              "invalid_downstream_disposition",
+              ["FI-DSN-STD-014-R51"],
+            );
+          }
+          priorReviewId = priorReview.reviewId;
+          resubmissionEligibilityId = eligibility.eligibilityId;
+        }
+      }
+
       const review = admitProductionReadinessReview({
         rva: freshness.rva,
         reviewEntryReadiness: freshness.readiness,
         traceabilityPackage: freshness.readiness.traceabilityPackage,
         admittedBy: input.admittedBy,
+        priorReviewId,
+        resubmissionEligibilityId,
       });
 
       return persistReview(review);
@@ -1146,6 +1428,332 @@ export function createDomain3RepositoryWithStorage(
       const loaded = await storage.getGpraGrantByRvaObligation(input.rvaId, input.obligationId);
       if (!loaded) return null;
       return rehydrateTrustedGpraGrant(loaded);
+    },
+
+    async evaluateDownstreamDispositionEligibility(reviewId) {
+      const review = await requireExistingReview(reviewId);
+      let determination: ReviewDeterminationRecord | null = null;
+      if (review.determinationId) {
+        const raw = await storage.getReviewDetermination(review.determinationId);
+        const byReview = await storage.getReviewDeterminationByReview(review.reviewId);
+        if (
+          raw &&
+          byReview &&
+          raw.determinationId === byReview.determinationId &&
+          review.determinationId === raw.determinationId
+        ) {
+          determination = rehydrateReviewDetermination(raw);
+        }
+      }
+      const withholdingRaw = await storage.getApprovalWithholdingByReview(reviewId);
+      return evaluateDownstreamDispositionEligibility({
+        review,
+        determination,
+        approvalWithholding: withholdingRaw
+          ? await rehydrateTrustedApprovalWithholding(withholdingRaw)
+          : null,
+      });
+    },
+
+    async recordDownstreamDeficiency(input) {
+      const { review, determination } = await requireLinkedConditionalOrFailDetermination(
+        input.reviewId,
+      );
+      const existing = await storage.getDownstreamDeficiencyRecordByReview(review.reviewId);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Downstream deficiency record may be recorded per Review",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R46"],
+        );
+      }
+      const record = createDownstreamDeficiencyRecord({
+        review,
+        determination,
+        deficiencyFamily: input.deficiencyFamily,
+        grounds: input.grounds,
+        authorityClassId: input.authorityClassId,
+        recordedBy: input.recordedBy,
+        evidenceBasisIds: input.evidenceBasisIds,
+      });
+      validatePersistedDownstreamDeficiencyRecord(record);
+      try {
+        await storage.putDownstreamDeficiencyRecord(record);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Downstream deficiency",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R46"],
+        );
+      }
+      const loaded = await storage.getDownstreamDeficiencyRecord(record.deficiencyRecordId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Downstream deficiency",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R46"],
+        );
+      }
+      return rehydrateTrustedDownstreamDeficiency(loaded);
+    },
+
+    async authorizeRework(input) {
+      const { review, determination } = await requireLinkedConditionalOrFailDetermination(
+        input.reviewId,
+      );
+      const existingWithholding = await storage.getReworkAuthorizationWithholdingByReview(
+        review.reviewId,
+      );
+      if (existingWithholding) {
+        throw new OrchestraConstitutionalError(
+          "Rework authorization blocked by recorded Rework authorization withholding",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R47", "FI-DSN-STD-014-R48"],
+        );
+      }
+      const existing = await storage.getReworkAuthorizationByReview(review.reviewId);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Rework authorization may be recorded per Review",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R47"],
+        );
+      }
+      const authorization = createReworkAuthorization({
+        review,
+        determination,
+        authorityClassId: input.authorityClassId,
+        authorizedBy: input.authorizedBy,
+      });
+      validatePersistedReworkAuthorization(authorization);
+      try {
+        await storage.putReworkAuthorization(authorization);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Rework authorization",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R47"],
+        );
+      }
+      const loaded = await storage.getReworkAuthorization(authorization.reworkAuthorizationId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Rework authorization",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R47"],
+        );
+      }
+      return rehydrateTrustedReworkAuthorization(loaded);
+    },
+
+    async withholdReworkAuthorization(input) {
+      const { review, determination } = await requireLinkedConditionalOrFailDetermination(
+        input.reviewId,
+      );
+      const existingAuth = await storage.getReworkAuthorizationByReview(review.reviewId);
+      if (existingAuth) {
+        throw new OrchestraConstitutionalError(
+          "Cannot withhold Rework authorization after Rework authorization has been recorded",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R47", "FI-DSN-STD-014-R48"],
+        );
+      }
+      const existing = await storage.getReworkAuthorizationWithholdingByReview(review.reviewId);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Rework authorization withholding may be recorded per Review",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R48"],
+        );
+      }
+      const withholding = createReworkAuthorizationWithholding({
+        review,
+        determination,
+        authorityClassId: input.authorityClassId,
+        grounds: input.grounds,
+        withheldBy: input.withheldBy,
+      });
+      validatePersistedReworkAuthorizationWithholding(withholding);
+      try {
+        await storage.putReworkAuthorizationWithholding(withholding);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error
+            ? error.message
+            : "Failed to persist Rework authorization withholding",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R48"],
+        );
+      }
+      const loaded = await storage.getReworkAuthorizationWithholding(withholding.withholdingId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Rework authorization withholding",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R48"],
+        );
+      }
+      return rehydrateTrustedReworkAuthorizationWithholding(loaded);
+    },
+
+    async establishReturnPosture(input) {
+      const context = await loadG7DispositionRehydrationContext(input.reviewId);
+      const { review, determination } = context;
+      const existing = await storage.getReturnPostureByReview(review.reviewId);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Return posture may be recorded per Review",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R49"],
+        );
+      }
+
+      let approvalWithholding: ApprovalWithholdingRecord | null = null;
+      if (determination.outcome === "pass") {
+        const withholdingRaw = await storage.getApprovalWithholdingByReview(review.reviewId);
+        if (!withholdingRaw) {
+          throw new OrchestraConstitutionalError(
+            "Return posture after Pass requires a recorded Approval withholding",
+            "invalid_downstream_disposition",
+            ["FI-DSN-STD-014-R49"],
+          );
+        }
+        approvalWithholding = await rehydrateTrustedApprovalWithholding(withholdingRaw);
+      } else if (determination.outcome !== "conditional" && determination.outcome !== "fail") {
+        throw new OrchestraConstitutionalError(
+          "Return posture requires Conditional, Fail, or Pass-with-withholding route",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R49"],
+        );
+      }
+
+      const returnPosture = createReturnPosture({
+        review,
+        determination,
+        authorityClassId: input.authorityClassId,
+        establishedBy: input.establishedBy,
+        approvalWithholding,
+        targetObligationScope: input.targetObligationScope,
+        returnGoverningSourceId: input.returnGoverningSourceId,
+      });
+      validatePersistedReturnPosture(returnPosture);
+      try {
+        await storage.putReturnPosture(returnPosture);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Return posture",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R49"],
+        );
+      }
+      const loaded = await storage.getReturnPosture(returnPosture.returnPostureId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Return posture",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R49"],
+        );
+      }
+      return rehydrateTrustedReturnPosture(loaded);
+    },
+
+    async authorizeResubmissionEligibility(input) {
+      const { review, determination } = await requireLinkedConditionalOrFailDetermination(
+        input.reviewId,
+      );
+      const existing = await storage.getResubmissionEligibilityByPriorReview(review.reviewId);
+      if (existing) {
+        throw new OrchestraConstitutionalError(
+          "Exactly one Resubmission eligibility may be authorized per prior Review",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R51"],
+        );
+      }
+      const eligibility = createResubmissionEligibility({
+        review,
+        determination,
+        authorityClassId: input.authorityClassId,
+        authorizedBy: input.authorizedBy,
+      });
+      validatePersistedResubmissionEligibility(eligibility);
+      try {
+        await storage.putResubmissionEligibility(eligibility);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Resubmission eligibility",
+          "invalid_downstream_disposition",
+          ["FI-DSN-STD-014-R51"],
+        );
+      }
+      const loaded = await storage.getResubmissionEligibility(eligibility.eligibilityId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Resubmission eligibility",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-014-R51"],
+        );
+      }
+      return rehydrateTrustedResubmissionEligibility(loaded);
+    },
+
+    async loadDownstreamDeficiencyRecord(deficiencyRecordId) {
+      const loaded = await storage.getDownstreamDeficiencyRecord(deficiencyRecordId);
+      if (!loaded) return null;
+      return rehydrateTrustedDownstreamDeficiency(loaded);
+    },
+
+    async loadDownstreamDeficiencyRecordByReview(reviewId) {
+      const loaded = await storage.getDownstreamDeficiencyRecordByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateTrustedDownstreamDeficiency(loaded);
+    },
+
+    async loadReworkAuthorization(reworkAuthorizationId) {
+      const loaded = await storage.getReworkAuthorization(reworkAuthorizationId);
+      if (!loaded) return null;
+      return rehydrateTrustedReworkAuthorization(loaded);
+    },
+
+    async loadReworkAuthorizationByReview(reviewId) {
+      const loaded = await storage.getReworkAuthorizationByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateTrustedReworkAuthorization(loaded);
+    },
+
+    async loadReworkAuthorizationWithholding(withholdingId) {
+      const loaded = await storage.getReworkAuthorizationWithholding(withholdingId);
+      if (!loaded) return null;
+      return rehydrateTrustedReworkAuthorizationWithholding(loaded);
+    },
+
+    async loadReworkAuthorizationWithholdingByReview(reviewId) {
+      const loaded = await storage.getReworkAuthorizationWithholdingByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateTrustedReworkAuthorizationWithholding(loaded);
+    },
+
+    async loadReturnPosture(returnPostureId) {
+      const loaded = await storage.getReturnPosture(returnPostureId);
+      if (!loaded) return null;
+      return rehydrateTrustedReturnPosture(loaded);
+    },
+
+    async loadReturnPostureByReview(reviewId) {
+      const loaded = await storage.getReturnPostureByReview(reviewId);
+      if (!loaded) return null;
+      return rehydrateTrustedReturnPosture(loaded);
+    },
+
+    async loadResubmissionEligibility(eligibilityId) {
+      const loaded = await storage.getResubmissionEligibility(eligibilityId);
+      if (!loaded) return null;
+      return rehydrateTrustedResubmissionEligibility(loaded);
+    },
+
+    async loadResubmissionEligibilityByPriorReview(priorReviewId) {
+      const loaded = await storage.getResubmissionEligibilityByPriorReview(priorReviewId);
+      if (!loaded) return null;
+      return rehydrateTrustedResubmissionEligibility(loaded);
     },
   };
 }

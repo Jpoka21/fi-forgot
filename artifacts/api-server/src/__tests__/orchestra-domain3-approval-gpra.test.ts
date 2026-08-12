@@ -1006,25 +1006,7 @@ section("ORCH-IMP-010.2 G6 rehydration authority integrity");
       const base = createInMemoryDomain3Storage();
       let hideApproval = false;
       const storage = {
-        putProductionReadinessReview: base.putProductionReadinessReview.bind(base),
-        getProductionReadinessReview: base.getProductionReadinessReview.bind(base),
-        getActiveProductionReadinessReviewByRva:
-          base.getActiveProductionReadinessReviewByRva.bind(base),
-        putReviewEvidence: base.putReviewEvidence.bind(base),
-        getReviewEvidence: base.getReviewEvidence.bind(base),
-        listReviewEvidenceByReview: base.listReviewEvidenceByReview.bind(base),
-        putReviewDimensionActivity: base.putReviewDimensionActivity.bind(base),
-        getReviewDimensionActivity: base.getReviewDimensionActivity.bind(base),
-        listReviewDimensionActivitiesByReview:
-          base.listReviewDimensionActivitiesByReview.bind(base),
-        putDesignTimeFeasibilityEvaluation: base.putDesignTimeFeasibilityEvaluation.bind(base),
-        getDesignTimeFeasibilityEvaluation: base.getDesignTimeFeasibilityEvaluation.bind(base),
-        listDesignTimeFeasibilityEvaluationsByReview:
-          base.listDesignTimeFeasibilityEvaluationsByReview.bind(base),
-        putReviewDetermination: base.putReviewDetermination.bind(base),
-        getReviewDetermination: base.getReviewDetermination.bind(base),
-        getReviewDeterminationByReview: base.getReviewDeterminationByReview.bind(base),
-        putApprovalAct: base.putApprovalAct.bind(base),
+        ...base,
         getApprovalAct: async (id: ApprovalActRecord["approvalActId"]) => {
           if (hideApproval) return null;
           return base.getApprovalAct(id);
@@ -1033,13 +1015,6 @@ section("ORCH-IMP-010.2 G6 rehydration authority integrity");
           if (hideApproval) return null;
           return base.getApprovalActByReview(reviewId);
         },
-        putApprovalWithholding: base.putApprovalWithholding.bind(base),
-        getApprovalWithholding: base.getApprovalWithholding.bind(base),
-        getApprovalWithholdingByReview: base.getApprovalWithholdingByReview.bind(base),
-        putGpraGrant: base.putGpraGrant.bind(base),
-        getGpraGrant: base.getGpraGrant.bind(base),
-        getGpraGrantByReview: base.getGpraGrantByReview.bind(base),
-        getGpraGrantByRvaObligation: base.getGpraGrantByRvaObligation.bind(base),
       };
       const { domain1, program, obligationId } = await buildGovernedDomain1();
       const domain2 = createDomain2Repository(domain1);

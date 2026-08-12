@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G6 (Review through GPRA grant).
+ * Domain 3 storage port — G2–G7 (Review through downstream disposition).
  */
 
 import type {
@@ -9,16 +9,26 @@ import type {
   ApprovalWithholdingRecord,
   DesignTimeFeasibilityEvaluationId,
   DesignTimeFeasibilityEvaluationRecord,
+  DownstreamDeficiencyRecord,
+  DownstreamDeficiencyRecordId,
   GpraGrantRecord,
   GpraId,
   ProductionReadinessReview,
   ProductionReadinessReviewId,
+  ResubmissionEligibilityId,
+  ResubmissionEligibilityRecord,
+  ReturnPostureId,
+  ReturnPostureRecord,
   ReviewDeterminationId,
   ReviewDeterminationRecord,
   ReviewDimensionActivityId,
   ReviewDimensionActivityRecord,
   ReviewEvidenceId,
   ReviewEvidenceRecord,
+  ReworkAuthorizationId,
+  ReworkAuthorizationRecord,
+  ReworkAuthorizationWithholdingId,
+  ReworkAuthorizationWithholdingRecord,
 } from "../domain3-types.js";
 import type { RealizedVisualArtifactId } from "../domain2-types.js";
 import type { ProductionObligationId } from "../types.js";
@@ -30,6 +40,12 @@ export interface Domain3StoragePort {
   ): Promise<ProductionReadinessReview | null>;
   getActiveProductionReadinessReviewByRva(
     rvaId: RealizedVisualArtifactId,
+  ): Promise<ProductionReadinessReview | null>;
+  listProductionReadinessReviewsByRva(
+    rvaId: RealizedVisualArtifactId,
+  ): Promise<readonly ProductionReadinessReview[]>;
+  getReviewByResubmissionEligibilityId(
+    eligibilityId: ResubmissionEligibilityId,
   ): Promise<ProductionReadinessReview | null>;
 
   putReviewEvidence(evidence: ReviewEvidenceRecord): Promise<void>;
@@ -85,4 +101,44 @@ export interface Domain3StoragePort {
     rvaId: RealizedVisualArtifactId,
     obligationId: ProductionObligationId,
   ): Promise<GpraGrantRecord | null>;
+
+  putDownstreamDeficiencyRecord(record: DownstreamDeficiencyRecord): Promise<void>;
+  getDownstreamDeficiencyRecord(
+    deficiencyRecordId: DownstreamDeficiencyRecordId,
+  ): Promise<DownstreamDeficiencyRecord | null>;
+  getDownstreamDeficiencyRecordByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<DownstreamDeficiencyRecord | null>;
+
+  putReworkAuthorization(authorization: ReworkAuthorizationRecord): Promise<void>;
+  getReworkAuthorization(
+    reworkAuthorizationId: ReworkAuthorizationId,
+  ): Promise<ReworkAuthorizationRecord | null>;
+  getReworkAuthorizationByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReworkAuthorizationRecord | null>;
+
+  putReworkAuthorizationWithholding(
+    withholding: ReworkAuthorizationWithholdingRecord,
+  ): Promise<void>;
+  getReworkAuthorizationWithholding(
+    withholdingId: ReworkAuthorizationWithholdingId,
+  ): Promise<ReworkAuthorizationWithholdingRecord | null>;
+  getReworkAuthorizationWithholdingByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReworkAuthorizationWithholdingRecord | null>;
+
+  putReturnPosture(returnPosture: ReturnPostureRecord): Promise<void>;
+  getReturnPosture(returnPostureId: ReturnPostureId): Promise<ReturnPostureRecord | null>;
+  getReturnPostureByReview(
+    reviewId: ProductionReadinessReviewId,
+  ): Promise<ReturnPostureRecord | null>;
+
+  putResubmissionEligibility(eligibility: ResubmissionEligibilityRecord): Promise<void>;
+  getResubmissionEligibility(
+    eligibilityId: ResubmissionEligibilityId,
+  ): Promise<ResubmissionEligibilityRecord | null>;
+  getResubmissionEligibilityByPriorReview(
+    priorReviewId: ProductionReadinessReviewId,
+  ): Promise<ResubmissionEligibilityRecord | null>;
 }
