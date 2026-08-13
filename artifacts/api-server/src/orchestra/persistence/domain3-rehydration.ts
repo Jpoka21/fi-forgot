@@ -10,6 +10,7 @@
  * G11 Handoff preparations require HEPM/HVEM markers and GPRA lineage coherence.
  * HOF-G1 Handoff entries require preparation + GPRA lineage coherence (R01–R07).
  * HOF-G7 evidence consumption requires entry + preparation + GPRA lineage coherence (R08–R15).
+ * HOF-G10 preservation audit requires entry + consumption + lineage coherence (R16–R21).
  */
 
 import type {
@@ -21,6 +22,7 @@ import type {
   GovernedHandoffEntryRecord,
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
+  GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
   GpraSupersessionActRecord,
@@ -53,6 +55,7 @@ import { assertPersistedDomain3BrainAdvisoryCoherence } from "./g10-rehydration-
 import { assertPersistedGovernedHandoffPreparationCoherence } from "./g11-rehydration-coherence.js";
 import { assertPersistedGovernedHandoffEntryCoherence } from "./hof-g1-rehydration-coherence.js";
 import { assertPersistedGovernedHandoffEvidenceConsumptionCoherence } from "./hof-g7-rehydration-coherence.js";
+import { assertPersistedGovernedHandoffPreservationAuditCoherence } from "./hof-g10-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
@@ -62,6 +65,7 @@ import {
   validatePersistedGovernedHandoffEntry,
   validatePersistedGovernedHandoffEvidenceConsumption,
   validatePersistedGovernedHandoffPreparation,
+  validatePersistedGovernedHandoffPreservationAudit,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
   validatePersistedGpraSupersessionAct,
@@ -74,6 +78,7 @@ import {
   validatePersistedReworkAuthorization,
   validatePersistedReworkAuthorizationWithholding,
 } from "./domain3-validation.js";
+
 
 function deepFreeze<T>(value: T): T {
   if (value === null || typeof value !== "object") {
@@ -570,6 +575,64 @@ export function rehydrateGovernedHandoffEvidenceConsumption(
   assertPersistedGovernedHandoffEvidenceConsumptionCoherence({
     consumption,
     entry,
+    preparation,
+    gpra,
+    review,
+    determination,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export interface HofG10HandoffPreservationAuditRehydrationContext {
+  readonly entry: unknown;
+  readonly consumption: unknown;
+  readonly preparation?: unknown | null;
+  readonly gpra?: unknown | null;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+/**
+ * Trusted HOF-G10 preservation audit rehydration — entry + consumption + lineage coherence.
+ * Historical audits remain loadable after later invalidation (immutable history; R19).
+ * Does not restore constitutional force.
+ */
+export function rehydrateGovernedHandoffPreservationAudit(
+  raw: unknown,
+  context: HofG10HandoffPreservationAuditRehydrationContext,
+): GovernedHandoffPreservationAuditRecord {
+  validatePersistedGovernedHandoffPreservationAudit(raw);
+  validatePersistedGovernedHandoffEntry(context.entry);
+  validatePersistedGovernedHandoffEvidenceConsumption(context.consumption);
+  const audit = raw as GovernedHandoffPreservationAuditRecord;
+  const entry = context.entry as GovernedHandoffEntryRecord;
+  const consumption = context.consumption as GovernedHandoffEvidenceConsumptionRecord;
+
+  let preparation: GovernedHandoffPreparationRecord | null = null;
+  if (context.preparation != null) {
+    validatePersistedGovernedHandoffPreparation(context.preparation);
+    preparation = context.preparation as GovernedHandoffPreparationRecord;
+  }
+  let gpra: GpraGrantRecord | null = null;
+  if (context.gpra != null) {
+    validatePersistedGpraGrant(context.gpra);
+    gpra = context.gpra as GpraGrantRecord;
+  }
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+
+  assertPersistedGovernedHandoffPreservationAuditCoherence({
+    audit,
+    entry,
+    consumption,
     preparation,
     gpra,
     review,

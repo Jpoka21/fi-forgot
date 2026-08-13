@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption.
+ * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption + HOF-G10 preservation audit.
  */
 
 import type {
@@ -11,6 +11,7 @@ import type {
   GovernedHandoffEntryRecord,
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
+  GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
   GpraSupersessionActRecord,
@@ -75,6 +76,12 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   >();
   const handoffEvidenceConsumptionsByEntry = new Map<string, string[]>();
   const handoffEvidenceConsumptionsByGpra = new Map<string, string[]>();
+  const handoffPreservationAuditsById = new Map<
+    string,
+    GovernedHandoffPreservationAuditRecord
+  >();
+  const handoffPreservationAuditsByEntry = new Map<string, string[]>();
+  const handoffPreservationAuditsByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -622,6 +629,42 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffEvidenceConsumptionsById.get(id))
         .filter((item): item is GovernedHandoffEvidenceConsumptionRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffPreservationAudit(record) {
+      if (handoffPreservationAuditsById.has(record.preservationAuditId)) {
+        throw new Error(
+          `Duplicate Governed Handoff preservation audit identity: ${record.preservationAuditId}`,
+        );
+      }
+      handoffPreservationAuditsById.set(record.preservationAuditId, structuredClone(record));
+      const byEntry = handoffPreservationAuditsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.preservationAuditId);
+      handoffPreservationAuditsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffPreservationAuditsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.preservationAuditId);
+      handoffPreservationAuditsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffPreservationAudit(preservationAuditId) {
+      const record = handoffPreservationAuditsById.get(preservationAuditId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffPreservationAuditsByEntry(entryId) {
+      const ids = handoffPreservationAuditsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffPreservationAuditsById.get(id))
+        .filter((item): item is GovernedHandoffPreservationAuditRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffPreservationAuditsByGpra(gpraId) {
+      const ids = handoffPreservationAuditsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffPreservationAuditsById.get(id))
+        .filter((item): item is GovernedHandoffPreservationAuditRecord => !!item)
         .map((item) => structuredClone(item));
     },
   };

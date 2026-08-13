@@ -1127,3 +1127,88 @@ export interface GovernedHandoffEvidenceConsumptionRecord {
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }
+
+// --- STD-015 HOF-G10 Preservation and Audit (R16–R21) ---
+
+export type GovernedHandoffPreservationAuditId = string & {
+  readonly __brand: "GovernedHandoffPreservationAuditId";
+};
+
+/**
+ * R16 / R20 — deferred operative audit classes (framework catalog only).
+ * Does NOT create authorization/posture/completion/suspension/recall/withdrawal act instances.
+ */
+export type DeferredOperativeAuditClass =
+  | "authorization"
+  | "posture_declaration"
+  | "completion"
+  | "suspension"
+  | "recall"
+  | "withdrawal";
+
+/**
+ * History ≠ current authority — preservation audit never restores constitutional force.
+ * Always `"historical_only"`; never `"restores_authority"`.
+ */
+export type HandoffPreservationAuditAuthorityEffect = "historical_only";
+
+/**
+ * Optional linked-currency view: reports G1/G7 currency separately without elevating preservation.
+ */
+export interface HandoffPreservationAuditLinkedCurrency {
+  readonly authorityEffect: HandoffPreservationAuditAuthorityEffect;
+  readonly doesNotRestoreConstitutionalForce: true;
+  readonly linkedEntryCurrency: HandoffEntryCurrency;
+  readonly linkedConsumptionCurrency: HandoffEvidenceConsumptionCurrency;
+  readonly preservationAuditId: GovernedHandoffPreservationAuditId;
+}
+
+/**
+ * Additive immutable Governed Handoff preservation audit record (HOF-G10 R16–R21).
+ * Preserves consideration history (and framework for future operative acts) without
+ * restoring force, overwriting upstream, collapsing G11 prep history, or creating HOEM acts.
+ */
+export interface GovernedHandoffPreservationAuditRecord {
+  readonly preservationAuditId: GovernedHandoffPreservationAuditId;
+  /** G1 — required; must exist historically even if now stale. */
+  readonly entryId: GovernedHandoffEntryId;
+  /** G7 — required for R20 reconstruction of HEPM/HVEM consumption. */
+  readonly evidenceConsumptionId: GovernedHandoffEvidenceConsumptionId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  /** Provenance only — copied from consumption; nonbinding. */
+  readonly brainAdvisoryIds: readonly Domain3BrainAdvisoryId[];
+  readonly deferredOperativeAuditClasses: readonly DeferredOperativeAuditClass[];
+  readonly historicalPreservationOnly: true;
+  readonly doesNotRestoreConstitutionalForce: true;
+  readonly doesNotOverwriteUpstreamConstitutionalRecords: true;
+  readonly doesNotCollapsePreparationAndOperativeHistory: true;
+  readonly doesNotAuthorizeErasureOrRedaction: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly hpamExtensionFrameworkOnly: true;
+  readonly doesNotCreateOperativeHoemActRecords: true;
+  readonly evidencePackageIsNotErasureAuthorization: true;
+  readonly r16AdditiveHistoricalPreservation: true;
+  readonly r17NoOverwriteUpstreamConstitutionalRecords: true;
+  readonly r18HpamExtensionFrameworkOnly: true;
+  readonly r19HistoryRemainsLoadableAfterInvalidation: true;
+  readonly r20AuditableConsiderationEvents: true;
+  readonly r21EvidencePackageIsNotErasureAuthorization: true;
+  readonly preservedAt: string;
+  /** Governed actor string — NOT a preservation authority class. */
+  readonly preservedBy: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}

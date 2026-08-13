@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption.
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit.
  */
 
 import type {
@@ -19,6 +19,8 @@ import type {
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationId,
   GovernedHandoffPreparationRecord,
+  GovernedHandoffPreservationAuditId,
+  GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraId,
   GpraInvalidationActId,
@@ -44,6 +46,7 @@ import type {
 } from "../domain3-types.js";
 import type { RealizedVisualArtifactId } from "../domain2-types.js";
 import type { ProductionObligationId } from "../types.js";
+
 
 export interface Domain3StoragePort {
   putProductionReadinessReview(review: ProductionReadinessReview): Promise<void>;
@@ -243,4 +246,21 @@ export interface Domain3StoragePort {
   listGovernedHandoffEvidenceConsumptionsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffEvidenceConsumptionRecord[]>;
+
+  /**
+   * Append-only Handoff preservation audit (HOF-G10). Unique by preservationAuditId;
+   * multiple per entry allowed. No update or delete API — history must not be mutated.
+   */
+  putGovernedHandoffPreservationAudit(
+    record: GovernedHandoffPreservationAuditRecord,
+  ): Promise<void>;
+  getGovernedHandoffPreservationAudit(
+    preservationAuditId: GovernedHandoffPreservationAuditId,
+  ): Promise<GovernedHandoffPreservationAuditRecord | null>;
+  listGovernedHandoffPreservationAuditsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffPreservationAuditRecord[]>;
+  listGovernedHandoffPreservationAuditsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffPreservationAuditRecord[]>;
 }
