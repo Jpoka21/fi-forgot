@@ -776,7 +776,7 @@ section("Rehydration: foreign lineage / forged CC / posture claim");
   expect("lawful rehydrate preserves id", ok.bindingId, binding.bindingId);
 }
 
-section("R40 boundary: no posture declaration APIs");
+section("R48 boundary: binding ≠ posture; no completion APIs");
 
 {
   const ctx = await grantPassGpra();
@@ -787,7 +787,12 @@ section("R40 boundary: no posture declaration APIs");
     boundBy: ACTOR,
   });
   const repo = ctx.domain3 as unknown as Record<string, unknown>;
-  expect("no declareHandoffPosture", "declareHandoffPosture" in repo, false);
+  expectTruthy(
+    "declareHandoffPosture available as peer HOF-G4 act (not auto-created by binding)",
+    "declareHandoffPosture" in repo,
+  );
+  const postures = await ctx.domain3.listGovernedHandoffPostureDeclarationActsByEntry(entry.entryId);
+  expect("binding alone creates no posture records", postures.length, 0);
   expect("no completeGovernedHandoff", "completeGovernedHandoff" in repo, false);
   expect(
     "binding remains non-authorization non-posture",

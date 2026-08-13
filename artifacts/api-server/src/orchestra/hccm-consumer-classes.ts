@@ -2,8 +2,9 @@
  * HCCM consumer class catalog — FI-DSN-STD-015 HOF-G3 (R33) / PD-STD-015-002 §20.5.4.7.
  *
  * Closed CC-01..CC-06 catalog with HCBM mappings and posture-class affinities.
- * Consumed by HOF-G2 R28 (authorization scope) and owned operatively by HOF-G3 R33–R39 (binding).
- * HOF-G4 posture declaration mechanics remain deferred.
+ * Consumed by HOF-G2 R28 (authorization scope), owned operatively by HOF-G3 R33–R39 (binding),
+ * and consumed by HOF-G4 R40–R47 (posture declaration toward bound contexts).
+ * Catalog postureClassAffinity is affinity metadata — not an operative posture declaration.
  */
 
 import { OrchestraConstitutionalError } from "./errors.js";

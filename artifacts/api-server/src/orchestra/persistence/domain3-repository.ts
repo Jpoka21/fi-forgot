@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G11 + STD-015 HOF-G1 Upstream Entry + HOF-G7 Evidence Consumption + HOF-G10 Preservation Audit + HOF-G2 Authorization + HOF-G3 Consumer Binding.
+ * Governed Domain 3 repository — G2–G11 + STD-015 HOF-G1 Upstream Entry + HOF-G7 Evidence Consumption + HOF-G10 Preservation Audit + HOF-G2 Authorization + HOF-G3 Consumer Binding + HOF-G4 Posture Declaration.
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -16,6 +16,7 @@ import {
   rehydrateGovernedHandoffPreparation,
   rehydrateGovernedHandoffAuthorization,
   rehydrateGovernedHandoffConsumerBinding,
+  rehydrateGovernedHandoffPostureDeclaration,
   rehydrateGovernedHandoffPreservationAudit,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
@@ -41,6 +42,7 @@ import {
   validatePersistedGovernedHandoffPreparation,
   validatePersistedGovernedHandoffAuthorization,
   validatePersistedGovernedHandoffConsumerBinding,
+  validatePersistedGovernedHandoffPostureDeclaration,
   validatePersistedGovernedHandoffPreservationAudit,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -90,6 +92,9 @@ import type {
   GovernedHandoffConsumerBindingId,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffConsumerBindingAssessment,
+  GovernedHandoffPostureDeclarationActId,
+  GovernedHandoffPostureDeclarationActRecord,
+  GovernedHandoffPostureDeclarationAssessment,
   GovernedHandoffPreservationAuditId,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
@@ -107,6 +112,8 @@ import type {
   HandoffPreparationCurrency,
   HandoffAuthorizationCurrency,
   HandoffConsumerBindingCurrency,
+  HandoffPostureDeclarationCurrency,
+  HandoffPostureClass,
   HandoffPreservationAuditAuthorityEffect,
   HandoffPreservationAuditLinkedCurrency,
   HandoffAuthorityBoundaryAssessment,
@@ -203,6 +210,14 @@ import {
   assessGovernedHandoffConsumerBinding,
   createGovernedHandoffConsumerBindingRecord,
 } from "../handoff-consumer-binding.js";
+import {
+  assertGovernedHandoffPostureDeclarationActor,
+  assertNoHandoffPostureCompletionOrExecutionClaims,
+  assessGovernedHandoffPostureDeclaration,
+  createGovernedHandoffPostureDeclarationActRecord,
+  evaluateHandoffPostureDeclarationCurrencyFromFacts,
+  selectAuthoritativeHandoffPostureDeclaration,
+} from "../handoff-posture-declaration.js";
 import {
   assertEstablishedHandoffGovernanceAuthorityClass,
 } from "../handoff-governance-authority.js";
@@ -1070,6 +1085,106 @@ export interface Domain3Repository {
   evaluateHandoffConsumerBindingCurrency(
     bindingId: GovernedHandoffConsumerBindingId,
   ): Promise<HandoffConsumerBindingCurrency>;
+
+  /**
+   * HOF-G4 R40–R47 — assess whether a lawful HGA posture declaration may be recorded.
+   * Requires current HCCM binding + entry conditions. Does not require prior authorization act (R44).
+   */
+  evaluateGovernedHandoffPostureDeclaration(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    declaredPostureClass?: HandoffPostureClass | null;
+    declaredBy?: string;
+    authorityClassId?: unknown;
+    sourceAttribution?: unknown;
+    completionActId?: unknown;
+    suspensionActId?: unknown;
+    recallActId?: unknown;
+    withdrawalActId?: unknown;
+    executesHandoff?: unknown;
+    handoffExecuted?: unknown;
+    performHandoff?: unknown;
+    manufacturingExecutionId?: unknown;
+    fulfillmentExecutionId?: unknown;
+    executionQueueId?: unknown;
+    constitutionalQueueId?: unknown;
+    brainDeclareHandoffPosture?: unknown;
+    brainHandoffPosture?: unknown;
+    implicitPosture?: unknown;
+    automaticInheritancePosture?: unknown;
+    inferredEligibilityPosture?: unknown;
+    configurationDrivenPosture?: unknown;
+    downstreamAcceptanceId?: unknown;
+    permanentCollectionMembershipId?: unknown;
+    unifiedCc01Cc02Posture?: unknown;
+    mergedCrossCcPosture?: unknown;
+  }): Promise<GovernedHandoffPostureDeclarationAssessment>;
+
+  /**
+   * HOF-G4 R40–R47 — persist operative HGA posture declaration ONLY when mayDeclare.
+   * Additive immutable history; latest declaration is authoritative for the binding (R46).
+   */
+  declareHandoffPosture(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    authorityClassId: unknown;
+    declaredBy: string;
+    declaredAt?: string;
+    declaredPostureClass?: unknown;
+    sourceAttribution?: unknown;
+    completionActId?: unknown;
+    suspensionActId?: unknown;
+    recallActId?: unknown;
+    withdrawalActId?: unknown;
+    executesHandoff?: unknown;
+    handoffExecuted?: unknown;
+    performHandoff?: unknown;
+    manufacturingExecutionId?: unknown;
+    fulfillmentExecutionId?: unknown;
+    executionQueueId?: unknown;
+    constitutionalQueueId?: unknown;
+    brainDeclareHandoffPosture?: unknown;
+    brainHandoffPosture?: unknown;
+    implicitPosture?: unknown;
+    automaticInheritancePosture?: unknown;
+    inferredEligibilityPosture?: unknown;
+    configurationDrivenPosture?: unknown;
+    downstreamAcceptanceId?: unknown;
+    permanentCollectionMembershipId?: unknown;
+    unifiedCc01Cc02Posture?: unknown;
+    mergedCrossCcPosture?: unknown;
+  }): Promise<GovernedHandoffPostureDeclarationActRecord>;
+
+  loadGovernedHandoffPostureDeclarationAct(
+    postureDeclarationActId: GovernedHandoffPostureDeclarationActId,
+  ): Promise<GovernedHandoffPostureDeclarationActRecord | null>;
+
+  listGovernedHandoffPostureDeclarationActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
+
+  listGovernedHandoffPostureDeclarationActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
+
+  listGovernedHandoffPostureDeclarationActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
+
+  /**
+   * R46 — latest additive posture declaration for the binding is the authoritative forward chain.
+   */
+  getAuthoritativeHandoffPostureDeclarationForBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<GovernedHandoffPostureDeclarationActRecord | null>;
+
+  /**
+   * Optional: posture declaration currency — current only when entry+binding current
+   * and the act is the authoritative forward declaration for its binding.
+   */
+  evaluateHandoffPostureDeclarationCurrency(
+    postureDeclarationActId: GovernedHandoffPostureDeclarationActId,
+  ): Promise<HandoffPostureDeclarationCurrency>;
 
   /**
    * HOF-G9 R22–R24 — standing authority-boundary assessment (framework only).
@@ -2096,6 +2211,182 @@ export function createDomain3RepositoryWithStorage(
         eligibilityLayerCondition,
         consumerClassId: input.consumerClassId,
         lineageMatchesAuthoritativeGpra,
+      }),
+    };
+  }
+
+  async function rehydrateTrustedHandoffPostureDeclaration(
+    raw: GovernedHandoffPostureDeclarationActRecord,
+  ): Promise<GovernedHandoffPostureDeclarationActRecord> {
+    const entryRaw = await storage.getGovernedHandoffEntry(raw.entryId);
+    if (!entryRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff posture declaration entryId points to no persisted entry",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R43", "FI-DSN-STD-015-R47"],
+      );
+    }
+    const bindingRaw = await storage.getGovernedHandoffConsumerBinding(raw.bindingId);
+    if (!bindingRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff posture declaration bindingId points to no persisted HCCM binding",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R43"],
+      );
+    }
+    const entry = await rehydrateTrustedHandoffEntry(entryRaw);
+    const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
+    const prepRaw = await storage.getGovernedHandoffPreparation(raw.preparationId);
+    if (!prepRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff posture declaration preparationId points to no persisted preparation",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R47"],
+      );
+    }
+    const preparation = await rehydrateTrustedHandoffPreparation(prepRaw);
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    if (!gpraRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff posture declaration gpraId points to no persisted GPRA",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R43"],
+      );
+    }
+    const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+    if (!reviewRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff posture declaration reviewId points to no persisted Review",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R47"],
+      );
+    }
+    const review = rehydrateProductionReadinessReview(reviewRaw);
+    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+    if (!determinationRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff posture declaration determinationId points to no persisted Determination",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R47"],
+      );
+    }
+    const determination = rehydrateReviewDetermination(determinationRaw);
+    return rehydrateGovernedHandoffPostureDeclaration(raw, {
+      entry,
+      binding,
+      preparation,
+      gpra,
+      review,
+      determination,
+    });
+  }
+
+  async function assessHandoffPostureDeclarationInternal(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    declaredPostureClass?: HandoffPostureClass | null;
+  }): Promise<{
+    assessment: GovernedHandoffPostureDeclarationAssessment;
+    entry: GovernedHandoffEntryRecord | null;
+    binding: GovernedHandoffConsumerBindingRecord | null;
+    preparation: GovernedHandoffPreparationRecord | null;
+  }> {
+    const entryRaw = await storage.getGovernedHandoffEntry(input.entryId);
+    const bindingRaw = await storage.getGovernedHandoffConsumerBinding(input.bindingId);
+    if (!entryRaw || !bindingRaw) {
+      return {
+        entry: null,
+        binding: null,
+        preparation: null,
+        assessment: assessGovernedHandoffPostureDeclaration({
+          entry: null,
+          entryCurrency: null,
+          binding: null,
+          bindingCurrency: null,
+          preparation: null,
+          preparationCurrency: null,
+          gpraValidityPosture: null,
+          eligibilityLayerCondition: null,
+          lineageMatchesAuthoritativeGpra: false,
+          declaredPostureClass: input.declaredPostureClass ?? null,
+        }),
+      };
+    }
+    const entry = await rehydrateTrustedHandoffEntry(entryRaw);
+    const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
+
+    const prepRaw = await storage.getGovernedHandoffPreparation(entry.preparationId);
+    const preparation = prepRaw
+      ? await rehydrateTrustedHandoffPreparation(prepRaw)
+      : null;
+
+    let preparationCurrency: HandoffPreparationCurrency | null = null;
+    if (preparation) {
+      try {
+        preparationCurrency = await evaluateHandoffPreparationCurrencyInternal(preparation);
+      } catch {
+        preparationCurrency = "stale";
+      }
+    }
+
+    const entryCurrency: HandoffEntryCurrency = preparation
+      ? evaluateHandoffEntryCurrencyFromFacts({
+          entry,
+          currentPreparationCurrency: preparationCurrency ?? "stale",
+        })
+      : "stale";
+
+    const bindingCurrency: HandoffConsumerBindingCurrency =
+      entryCurrency === "current" ? "current" : "stale";
+
+    const authoritative = await findAuthoritativeGpraByObligationContext(
+      entry.obligationId,
+      entry.handoffConsumerContextId,
+    );
+    const lineageMatchesAuthoritativeGpra = authoritative
+      ? handoffEntryLineageMatchesGpra(entry, authoritative)
+      : false;
+
+    let gpraValidityPosture: GpraValidityPosture | null = null;
+    if (authoritative) {
+      const validity = await evaluateGpraValidityForContext(
+        authoritative.gpraId,
+        entry.handoffConsumerContextId,
+      );
+      gpraValidityPosture = validity.posture;
+    }
+
+    let eligibilityLayerCondition: HandoffEligibilityLayerCondition | null = null;
+    if (preparation) {
+      const eligibility = await assessHandoffEligibilityInternal({
+        obligationId: preparation.obligationId,
+        handoffConsumerContextId: preparation.handoffConsumerContextId,
+        consumerCategoryKeys: preparation.consumerCategoryKeys,
+      });
+      eligibilityLayerCondition = eligibility.eligibilityLayerCondition;
+    }
+
+    const declaredPostureClass =
+      input.declaredPostureClass === undefined || input.declaredPostureClass === null
+        ? binding.postureClassAffinity
+        : input.declaredPostureClass;
+
+    return {
+      entry,
+      binding,
+      preparation,
+      assessment: assessGovernedHandoffPostureDeclaration({
+        entry,
+        entryCurrency,
+        binding,
+        bindingCurrency,
+        preparation,
+        preparationCurrency,
+        gpraValidityPosture,
+        eligibilityLayerCondition,
+        lineageMatchesAuthoritativeGpra,
+        declaredPostureClass,
       }),
     };
   }
@@ -4874,6 +5165,210 @@ export function createDomain3RepositoryWithStorage(
         entryCurrency = "stale";
       }
       return entryCurrency === "current" ? "current" : "stale";
+    },
+
+    async evaluateGovernedHandoffPostureDeclaration(input) {
+      assertNoHandoffPostureCompletionOrExecutionClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      if (
+        input.declaredBy != null ||
+        input.authorityClassId != null ||
+        input.sourceAttribution != null
+      ) {
+        assertGovernedHandoffPostureDeclarationActor({
+          declaredBy: input.declaredBy ?? "posture-evaluator",
+          authorityClassId: input.authorityClassId ?? "handoff_governance_authority",
+          sourceAttribution: input.sourceAttribution,
+        });
+      }
+      const { assessment } = await assessHandoffPostureDeclarationInternal(input);
+      return assessment;
+    },
+
+    async declareHandoffPosture(input) {
+      assertNoHandoffPostureCompletionOrExecutionClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      const declaredBy = assertGovernedHandoffPostureDeclarationActor(input);
+
+      const entryRaw = await storage.getGovernedHandoffEntry(input.entryId);
+      if (!entryRaw) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff posture declaration rejected: entry not found",
+          "invalid_handoff_posture_declaration",
+          ["FI-DSN-STD-015-R47"],
+        );
+      }
+      const entry = await rehydrateTrustedHandoffEntry(entryRaw);
+
+      const bindingRaw = await storage.getGovernedHandoffConsumerBinding(input.bindingId);
+      if (!bindingRaw) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff posture declaration rejected: HCCM binding not found",
+          "invalid_handoff_posture_declaration",
+          ["FI-DSN-STD-015-R43"],
+        );
+      }
+      const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
+
+      if (binding.entryId !== entry.entryId) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff posture declaration rejected: binding does not belong to entry",
+          "invalid_handoff_posture_declaration",
+          ["FI-DSN-STD-015-R43"],
+        );
+      }
+
+      const declaredPostureClass =
+        input.declaredPostureClass === undefined || input.declaredPostureClass === null
+          ? binding.postureClassAffinity
+          : (input.declaredPostureClass as HandoffPostureClass);
+
+      const { assessment, preparation } = await assessHandoffPostureDeclarationInternal({
+        entryId: input.entryId,
+        bindingId: input.bindingId,
+        declaredPostureClass,
+      });
+
+      if (!assessment.mayDeclare || !preparation) {
+        throw new OrchestraConstitutionalError(
+          `Governed Handoff posture declaration rejected: ${assessment.denialReasons.join("; ") || "mayDeclare is false"}`,
+          "invalid_handoff_posture_declaration",
+          ["FI-DSN-STD-015-R43", "FI-DSN-STD-015-R47"],
+        );
+      }
+
+      const act = createGovernedHandoffPostureDeclarationActRecord({
+        entry,
+        binding,
+        authorityClassId: input.authorityClassId,
+        declaredBy,
+        declaredAt: input.declaredAt,
+        declaredPostureClass,
+        sourceAttribution: input.sourceAttribution,
+        completionActId: input.completionActId,
+        suspensionActId: input.suspensionActId,
+        recallActId: input.recallActId,
+        withdrawalActId: input.withdrawalActId,
+        executesHandoff: input.executesHandoff,
+        handoffExecuted: input.handoffExecuted,
+        performHandoff: input.performHandoff,
+        manufacturingExecutionId: input.manufacturingExecutionId,
+        fulfillmentExecutionId: input.fulfillmentExecutionId,
+        executionQueueId: input.executionQueueId,
+        constitutionalQueueId: input.constitutionalQueueId,
+        brainDeclareHandoffPosture: input.brainDeclareHandoffPosture,
+        brainHandoffPosture: input.brainHandoffPosture,
+        implicitPosture: input.implicitPosture,
+        automaticInheritancePosture: input.automaticInheritancePosture,
+        inferredEligibilityPosture: input.inferredEligibilityPosture,
+        configurationDrivenPosture: input.configurationDrivenPosture,
+        downstreamAcceptanceId: input.downstreamAcceptanceId,
+        permanentCollectionMembershipId: input.permanentCollectionMembershipId,
+        unifiedCc01Cc02Posture: input.unifiedCc01Cc02Posture,
+        mergedCrossCcPosture: input.mergedCrossCcPosture,
+      });
+
+      validatePersistedGovernedHandoffPostureDeclaration(act);
+      try {
+        await storage.putGovernedHandoffPostureDeclarationAct(act);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error
+            ? error.message
+            : "Failed to persist Governed Handoff posture declaration act",
+          "invalid_handoff_posture_declaration",
+          ["FI-DSN-STD-015-R40"],
+        );
+      }
+      const loaded = await storage.getGovernedHandoffPostureDeclarationAct(
+        act.postureDeclarationActId,
+      );
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Governed Handoff posture declaration act",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-015-R40"],
+        );
+      }
+      return rehydrateTrustedHandoffPostureDeclaration(loaded);
+    },
+
+    async loadGovernedHandoffPostureDeclarationAct(postureDeclarationActId) {
+      const loaded = await storage.getGovernedHandoffPostureDeclarationAct(
+        postureDeclarationActId,
+      );
+      if (!loaded) return null;
+      return rehydrateTrustedHandoffPostureDeclaration(loaded);
+    },
+
+    async listGovernedHandoffPostureDeclarationActsByBinding(bindingId) {
+      const listed = await storage.listGovernedHandoffPostureDeclarationActsByBinding(bindingId);
+      const out: GovernedHandoffPostureDeclarationActRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffPostureDeclaration(item));
+      }
+      return out.sort((a, b) => a.declaredAt.localeCompare(b.declaredAt));
+    },
+
+    async listGovernedHandoffPostureDeclarationActsByEntry(entryId) {
+      const listed = await storage.listGovernedHandoffPostureDeclarationActsByEntry(entryId);
+      const out: GovernedHandoffPostureDeclarationActRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffPostureDeclaration(item));
+      }
+      return out.sort((a, b) => a.declaredAt.localeCompare(b.declaredAt));
+    },
+
+    async listGovernedHandoffPostureDeclarationActsByGpra(gpraId) {
+      const listed = await storage.listGovernedHandoffPostureDeclarationActsByGpra(gpraId);
+      const out: GovernedHandoffPostureDeclarationActRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffPostureDeclaration(item));
+      }
+      return out.sort((a, b) => a.declaredAt.localeCompare(b.declaredAt));
+    },
+
+    async getAuthoritativeHandoffPostureDeclarationForBinding(bindingId) {
+      const listed = await this.listGovernedHandoffPostureDeclarationActsByBinding(bindingId);
+      return selectAuthoritativeHandoffPostureDeclaration(listed);
+    },
+
+    async evaluateHandoffPostureDeclarationCurrency(postureDeclarationActId) {
+      const declaration = await this.loadGovernedHandoffPostureDeclarationAct(
+        postureDeclarationActId,
+      );
+      if (!declaration) {
+        throw new OrchestraConstitutionalError(
+          "Handoff posture declaration act not found for currency evaluation",
+          "invalid_handoff_posture_declaration",
+          ["FI-DSN-STD-015-R47"],
+        );
+      }
+      let entryCurrency: HandoffEntryCurrency;
+      try {
+        entryCurrency = await this.evaluateHandoffEntryCurrency(declaration.entryId);
+      } catch {
+        entryCurrency = "stale";
+      }
+      let bindingCurrency: HandoffConsumerBindingCurrency;
+      try {
+        bindingCurrency = await this.evaluateHandoffConsumerBindingCurrency(
+          declaration.bindingId,
+        );
+      } catch {
+        bindingCurrency = "stale";
+      }
+      const authoritative = await this.getAuthoritativeHandoffPostureDeclarationForBinding(
+        declaration.bindingId,
+      );
+      return evaluateHandoffPostureDeclarationCurrencyFromFacts({
+        declaration,
+        currentEntryCurrency: entryCurrency,
+        currentBindingCurrency: bindingCurrency,
+        authoritativeDeclarationId: authoritative?.postureDeclarationActId ?? null,
+      });
     },
 
     async evaluateHandoffAuthorityBoundary() {

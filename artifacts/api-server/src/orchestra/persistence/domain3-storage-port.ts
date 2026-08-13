@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding.
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration.
  */
 
 import type {
@@ -23,6 +23,8 @@ import type {
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffConsumerBindingId,
   GovernedHandoffConsumerBindingRecord,
+  GovernedHandoffPostureDeclarationActId,
+  GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditId,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
@@ -301,4 +303,24 @@ export interface Domain3StoragePort {
   listGovernedHandoffConsumerBindingsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffConsumerBindingRecord[]>;
+
+  /**
+   * Append-only Handoff posture declaration (HOF-G4). Unique by postureDeclarationActId;
+   * multiple per binding allowed (additive history; latest authoritative). No update/delete.
+   */
+  putGovernedHandoffPostureDeclarationAct(
+    record: GovernedHandoffPostureDeclarationActRecord,
+  ): Promise<void>;
+  getGovernedHandoffPostureDeclarationAct(
+    postureDeclarationActId: GovernedHandoffPostureDeclarationActId,
+  ): Promise<GovernedHandoffPostureDeclarationActRecord | null>;
+  listGovernedHandoffPostureDeclarationActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
+  listGovernedHandoffPostureDeclarationActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
+  listGovernedHandoffPostureDeclarationActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
 }

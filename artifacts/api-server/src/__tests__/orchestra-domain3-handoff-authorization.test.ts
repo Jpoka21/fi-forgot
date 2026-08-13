@@ -1000,7 +1000,7 @@ section("Rehydration: foreign lineage / forged HGA / posture claim rejected");
   expect("lawful rehydrate preserves id", ok.authorizationActId, act.authorizationActId);
 }
 
-section("R33 boundary: no posture/completion/suspension/recall/withdrawal APIs");
+section("R48 boundary: authorization ≠ posture; no completion/suspension/recall/withdrawal APIs");
 
 {
   const ctx = await grantPassGpra();
@@ -1014,7 +1014,12 @@ section("R33 boundary: no posture/completion/suspension/recall/withdrawal APIs")
   });
 
   const repo = ctx.domain3 as unknown as Record<string, unknown>;
-  expect("no declareHandoffPosture on repository", "declareHandoffPosture" in repo, false);
+  expectTruthy(
+    "declareHandoffPosture available as peer HOF-G4 act (not auto-created by authorization)",
+    "declareHandoffPosture" in repo,
+  );
+  const postures = await ctx.domain3.listGovernedHandoffPostureDeclarationActsByEntry(entry.entryId);
+  expect("authorization alone creates no posture records", postures.length, 0);
   expect("no completeGovernedHandoff on repository", "completeGovernedHandoff" in repo, false);
   expect("no suspendGovernedHandoff on repository", "suspendGovernedHandoff" in repo, false);
   expect("no recallGovernedHandoff on repository", "recallGovernedHandoff" in repo, false);

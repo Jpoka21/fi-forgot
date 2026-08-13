@@ -72,7 +72,8 @@ export type OrchestraErrorCode =
   | "invalid_handoff_preservation_audit"
   | "invalid_handoff_authority_boundary"
   | "invalid_handoff_authorization"
-  | "invalid_handoff_consumer_binding";
+  | "invalid_handoff_consumer_binding"
+  | "invalid_handoff_posture_declaration";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

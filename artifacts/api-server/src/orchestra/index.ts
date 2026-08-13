@@ -251,10 +251,20 @@ export {
 } from "./handoff-consumer-binding.js";
 
 export {
+  GOVERNED_HANDOFF_POSTURE_DECLARATION_TRACEABILITY,
+  FROZEN_HANDOFF_POSTURE_CLASSES,
+  isFrozenHandoffPostureClass,
+  assessGovernedHandoffPostureDeclaration,
+  selectAuthoritativeHandoffPostureDeclaration,
+  evaluateHandoffPostureDeclarationCurrencyFromFacts,
+} from "./handoff-posture-declaration.js";
+
+export {
   FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES,
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
   resolveEstablishedHandoffGovernanceAuthorityClass,
   assertEstablishedHandoffGovernanceAuthorityClass,
+  assertEstablishedHandoffGovernanceAuthorityForPostureDeclaration,
 } from "./handoff-governance-authority.js";
 
 export {
@@ -389,6 +399,13 @@ export type {
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffConsumerBindingAssessment,
   HandoffConsumerBindingCurrency,
+  GovernedHandoffPostureDeclarationActId,
+  GovernedHandoffPostureDeclarationActRecord,
+  GovernedHandoffPostureDeclarationAssessment,
+  HandoffPostureDeclarationCurrency,
+  HandoffPostureClass,
+  HoemPostureDeclarationOperativeRecord,
+  HoemPostureDeclarationOperativeRecordId,
   HoemAuthorizationOperativeRecord,
   HoemAuthorizationOperativeRecordId,
   HccmConsumerClassId,

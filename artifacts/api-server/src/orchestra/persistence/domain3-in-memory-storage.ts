@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding.
+ * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration.
  */
 
 import type {
@@ -13,6 +13,7 @@ import type {
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffConsumerBindingRecord,
+  GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -93,6 +94,13 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const handoffConsumerBindingsById = new Map<string, GovernedHandoffConsumerBindingRecord>();
   const handoffConsumerBindingsByEntry = new Map<string, string[]>();
   const handoffConsumerBindingsByGpra = new Map<string, string[]>();
+  const handoffPostureDeclarationsById = new Map<
+    string,
+    GovernedHandoffPostureDeclarationActRecord
+  >();
+  const handoffPostureDeclarationsByBinding = new Map<string, string[]>();
+  const handoffPostureDeclarationsByEntry = new Map<string, string[]>();
+  const handoffPostureDeclarationsByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -748,6 +756,56 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffConsumerBindingsById.get(id))
         .filter((item): item is GovernedHandoffConsumerBindingRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffPostureDeclarationAct(record) {
+      if (handoffPostureDeclarationsById.has(record.postureDeclarationActId)) {
+        throw new Error(
+          `Duplicate Governed Handoff posture declaration act identity: ${record.postureDeclarationActId}`,
+        );
+      }
+      handoffPostureDeclarationsById.set(
+        record.postureDeclarationActId,
+        structuredClone(record),
+      );
+      const byBinding = handoffPostureDeclarationsByBinding.get(record.bindingId) ?? [];
+      byBinding.push(record.postureDeclarationActId);
+      handoffPostureDeclarationsByBinding.set(record.bindingId, byBinding);
+      const byEntry = handoffPostureDeclarationsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.postureDeclarationActId);
+      handoffPostureDeclarationsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffPostureDeclarationsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.postureDeclarationActId);
+      handoffPostureDeclarationsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffPostureDeclarationAct(postureDeclarationActId) {
+      const record = handoffPostureDeclarationsById.get(postureDeclarationActId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffPostureDeclarationActsByBinding(bindingId) {
+      const ids = handoffPostureDeclarationsByBinding.get(bindingId) ?? [];
+      return ids
+        .map((id) => handoffPostureDeclarationsById.get(id))
+        .filter((item): item is GovernedHandoffPostureDeclarationActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffPostureDeclarationActsByEntry(entryId) {
+      const ids = handoffPostureDeclarationsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffPostureDeclarationsById.get(id))
+        .filter((item): item is GovernedHandoffPostureDeclarationActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffPostureDeclarationActsByGpra(gpraId) {
+      const ids = handoffPostureDeclarationsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffPostureDeclarationsById.get(id))
+        .filter((item): item is GovernedHandoffPostureDeclarationActRecord => !!item)
         .map((item) => structuredClone(item));
     },
   };

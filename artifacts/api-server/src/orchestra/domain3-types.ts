@@ -1502,3 +1502,121 @@ export interface GovernedHandoffConsumerBindingRecord {
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }
+
+// --- STD-015 HOF-G4 Operative Handoff Posture Declaration (R40–R47) ---
+
+/**
+ * Frozen Handoff posture classes — Volume 06 §12.2 / HPPM affinity vocabulary.
+ * `none` is catalog affinity for CC-03–CC-06 bound contexts (not an invented lifecycle label).
+ */
+export type HandoffPostureClass =
+  | "library_intake_posture"
+  | "production_catalog_posture"
+  | "none";
+
+export type GovernedHandoffPostureDeclarationActId = string & {
+  readonly __brand: "GovernedHandoffPostureDeclarationActId";
+};
+
+export type HoemPostureDeclarationOperativeRecordId = string & {
+  readonly __brand: "HoemPostureDeclarationOperativeRecordId";
+};
+
+/**
+ * R45 — additive HOEM posture declaration operative record (posture_declaration act type only).
+ * Peer-distinct from authorization/completion/suspension/recall/withdrawal HOEM records.
+ */
+export interface HoemPostureDeclarationOperativeRecord {
+  readonly hoemPostureDeclarationRecordId: HoemPostureDeclarationOperativeRecordId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId;
+  readonly actType: "posture_declaration";
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly declaredPostureClass: HandoffPostureClass;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+}
+
+export type HandoffPostureDeclarationCurrency = "current" | "stale";
+
+/**
+ * Assessment for whether a lawful HGA posture declaration act may be performed.
+ */
+export interface GovernedHandoffPostureDeclarationAssessment {
+  readonly mayDeclare: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly preparationCurrency: HandoffPreparationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly declaredPostureClass: HandoffPostureClass | null;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffCompletion: true;
+  readonly notHandoffExecution: true;
+  readonly notCompletionSuspensionRecallOrWithdrawal: true;
+  readonly substitutesRejected: true;
+}
+
+/**
+ * Operative HGA Handoff posture declaration act — FI-DSN-STD-015-R40–R47.
+ * Does NOT authorize, complete, suspend, recall, withdraw, or execute Handoff.
+ */
+export interface GovernedHandoffPostureDeclarationActRecord {
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_posture_declaration_act";
+  /** Attributable actor within HGA scope — not the authority class itself. */
+  readonly declaredBy: string;
+  readonly declaredAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly declaredPostureClass: HandoffPostureClass;
+  /** Catalog affinity metadata from the binding — distinct from the operative declaration act. */
+  readonly postureClassAffinity: HandoffPostureClass;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly hoemPostureDeclarationRecord: HoemPostureDeclarationOperativeRecord;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffCompletion: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly r40HgaSolePostureOwner: true;
+  readonly r41PeerDistinctPostureClass: true;
+  readonly r42NoSubstituteInputs: true;
+  readonly r43BoundHccmConsumerContext: true;
+  readonly r44NotAuthorizationSubstitute: true;
+  readonly r45HoemPostureDeclarationOperativeRecord: true;
+  readonly r46HppmAuthoritativeCardinality: true;
+  readonly r47NoImplicitPostureEntryGated: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}

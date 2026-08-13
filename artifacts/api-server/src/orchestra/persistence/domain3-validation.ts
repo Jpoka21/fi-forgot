@@ -33,6 +33,7 @@ import type {
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffConsumerBindingRecord,
+  GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -67,6 +68,10 @@ import {
 import { isHccmConsumerClassId, resolveHccmConsumerClass } from "../hccm-consumer-classes.js";
 import { GOVERNED_HANDOFF_AUTHORIZATION_TRACEABILITY } from "../handoff-authorization.js";
 import { GOVERNED_HANDOFF_CONSUMER_BINDING_TRACEABILITY } from "../handoff-consumer-binding.js";
+import {
+  GOVERNED_HANDOFF_POSTURE_DECLARATION_TRACEABILITY,
+  isFrozenHandoffPostureClass,
+} from "../handoff-posture-declaration.js";
 import {
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
 } from "../handoff-governance-authority.js";
@@ -116,7 +121,9 @@ const ID_PREFIXES = {
   handoffPreservationAudit: "governed-handoff-preservation-audit-",
   handoffAuthorizationAct: "governed-handoff-authorization-act-",
   handoffConsumerBinding: "governed-handoff-consumer-binding-",
+  handoffPostureDeclarationAct: "governed-handoff-posture-declaration-act-",
   hoemAuthorizationOperative: "hoem-authorization-operative-",
+  hoemPostureDeclarationOperative: "hoem-posture-declaration-operative-",
 } as const;
 
 const LEGAL_CONDITIONAL_FAIL_ROUTES = ["conditional_route", "fail_route"] as const;
@@ -320,6 +327,32 @@ function assertStd015HofG3Traceability(traceability: unknown, label: string): vo
         `${label} traceability must include ${required}`,
         "invalid_handoff_consumer_binding",
         ["FI-DSN-STD-015-R33", "FI-DSN-STD-015-R39"],
+      );
+    }
+  }
+}
+
+function assertStd015HofG4Traceability(traceability: unknown, label: string): void {
+  if (
+    !traceability ||
+    typeof traceability !== "object" ||
+    (traceability as Record<string, unknown>).governingStandardId !== STD015_GOVERNING_STANDARD ||
+    !Array.isArray((traceability as Record<string, unknown>).requirementIds) ||
+    ((traceability as Record<string, unknown>).requirementIds as unknown[]).length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      `${label} requires FI-DSN-STD-015 HOF-G4 traceability`,
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R40", "FI-DSN-STD-015-R47"],
+    );
+  }
+  const ids = (traceability as Record<string, unknown>).requirementIds as unknown[];
+  for (const required of GOVERNED_HANDOFF_POSTURE_DECLARATION_TRACEABILITY.requirementIds) {
+    if (!ids.includes(required)) {
+      throw new OrchestraConstitutionalError(
+        `${label} traceability must include ${required}`,
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R40", "FI-DSN-STD-015-R47"],
       );
     }
   }
@@ -3353,6 +3386,285 @@ export function validatePersistedGovernedHandoffConsumerBinding(
       "Governed Handoff consumer binding requires valid governed creation marker",
       "invalid_handoff_consumer_binding",
       ["FI-DSN-STD-015-R33"],
+    );
+  }
+}
+
+export function validatePersistedGovernedHandoffPostureDeclaration(
+  raw: unknown,
+): asserts raw is GovernedHandoffPostureDeclarationActRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff posture declaration",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R40"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.postureDeclarationActId,
+    ID_PREFIXES.handoffPostureDeclarationAct,
+    "Governed Handoff posture declaration act",
+  );
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(
+    record.bindingId,
+    ID_PREFIXES.handoffConsumerBinding,
+    "Governed Handoff consumer binding",
+  );
+  assertBrandedId(
+    record.preparationId,
+    ID_PREFIXES.handoffPreparation,
+    "Governed Handoff preparation",
+  );
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (typeof record.handoffConsumerContextId !== "string" || !record.handoffConsumerContextId.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires non-empty handoffConsumerContextId",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R43"],
+    );
+  }
+  if (typeof record.declaredBy !== "string" || !record.declaredBy.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires declaredBy",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R40"],
+    );
+  }
+  if (typeof record.declaredAt !== "string" || !record.declaredAt.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires declaredAt",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R45"],
+    );
+  }
+
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires established HGA (R40)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R40", "FI-DSN-STD-015-R47"],
+    );
+  }
+  if (record.authorityGoverningSourceId !== "PD-STD-015-001") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration authorityGoverningSourceId must be PD-STD-015-001",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R40"],
+    );
+  }
+  if (record.authorityConstitutionalScope !== "handoff_posture_declaration_act") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration scope must be handoff_posture_declaration_act (R40/R45)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R40", "FI-DSN-STD-015-R45"],
+    );
+  }
+
+  if (!isHccmConsumerClassId(record.consumerClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires closed HCCM consumer class (R43)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R43"],
+    );
+  }
+  if (!isFrozenHandoffPostureClass(record.declaredPostureClass)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires frozen posture class (R46/R47)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R46", "FI-DSN-STD-015-R47"],
+    );
+  }
+  if (!isFrozenHandoffPostureClass(record.postureClassAffinity)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires frozen postureClassAffinity metadata",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R43", "FI-DSN-STD-015-R46"],
+    );
+  }
+  if (record.declaredPostureClass !== record.postureClassAffinity) {
+    throw new OrchestraConstitutionalError(
+      "Persisted declaredPostureClass must equal postureClassAffinity for the bound context (R46)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R46"],
+    );
+  }
+  const catalog = resolveHccmConsumerClass(record.consumerClassId);
+  if (record.declaredPostureClass !== catalog.postureClassAffinity) {
+    throw new OrchestraConstitutionalError(
+      "Persisted posture class must match HCCM catalog affinity for consumer class (R46)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R46"],
+    );
+  }
+
+  if (
+    !Array.isArray(record.consumedHcbmBoundaryKeys) ||
+    record.consumedHcbmBoundaryKeys.length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires consumedHcbmBoundaryKeys",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R43"],
+    );
+  }
+  for (const key of record.consumedHcbmBoundaryKeys) {
+    if (!isHandoffConsumerCategoryKey(key)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff posture declaration has invalid HCBM key",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R43"],
+      );
+    }
+  }
+  if (!Array.isArray(record.consumerCategoryKeys)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires consumerCategoryKeys",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R43"],
+    );
+  }
+
+  const hoemRecord = record.hoemPostureDeclarationRecord as Record<string, unknown> | null;
+  if (!hoemRecord || typeof hoemRecord !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration requires HOEM posture declaration operative record (R45)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R45"],
+    );
+  }
+  assertBrandedId(
+    hoemRecord.hoemPostureDeclarationRecordId,
+    ID_PREFIXES.hoemPostureDeclarationOperative,
+    "HOEM posture declaration operative record",
+  );
+  if (hoemRecord.postureDeclarationActId !== record.postureDeclarationActId) {
+    throw new OrchestraConstitutionalError(
+      "HOEM posture declaration operative record postureDeclarationActId must match parent act",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R45"],
+    );
+  }
+  if (hoemRecord.actType !== "posture_declaration") {
+    throw new OrchestraConstitutionalError(
+      "HOEM posture declaration operative record actType must be posture_declaration (R45)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R45"],
+    );
+  }
+  if (
+    hoemRecord.gpraId !== record.gpraId ||
+    hoemRecord.obligationId !== record.obligationId ||
+    hoemRecord.handoffConsumerContextId !== record.handoffConsumerContextId ||
+    hoemRecord.bindingId !== record.bindingId ||
+    hoemRecord.consumerClassId !== record.consumerClassId ||
+    hoemRecord.declaredPostureClass !== record.declaredPostureClass
+  ) {
+    throw new OrchestraConstitutionalError(
+      "HOEM posture declaration operative record must bind to parent act context (R45)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R45"],
+    );
+  }
+  if (
+    hoemRecord.doesNotMergeAuthorizationAttribution !== true ||
+    hoemRecord.doesNotMergeCompletionAttribution !== true ||
+    hoemRecord.doesNotMergeSuspensionAttribution !== true ||
+    hoemRecord.doesNotMergeWithdrawalAttribution !== true ||
+    hoemRecord.doesNotMergeRecallAttribution !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "HOEM posture declaration operative record must carry peer-distinct attribution markers (R45)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R45"],
+    );
+  }
+
+  if (
+    record.notHandoffAuthorization !== true ||
+    record.notHandoffExecution !== true ||
+    record.notHandoffCompletion !== true ||
+    record.notHandoffSuspension !== true ||
+    record.notHandoffRecall !== true ||
+    record.notHandoffWithdrawal !== true ||
+    record.notDownstreamAcceptance !== true ||
+    record.notPermanentCollectionMembership !== true ||
+    record.doesNotAuthorizeManufacturingOrFulfillment !== true ||
+    record.doesNotCollapsePeerDecisionClasses !== true ||
+    record.doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory !== true ||
+    record.doesNotMergeAcrossConsumerClasses !== true ||
+    record.r40HgaSolePostureOwner !== true ||
+    record.r41PeerDistinctPostureClass !== true ||
+    record.r42NoSubstituteInputs !== true ||
+    record.r43BoundHccmConsumerContext !== true ||
+    record.r44NotAuthorizationSubstitute !== true ||
+    record.r45HoemPostureDeclarationOperativeRecord !== true ||
+    record.r46HppmAuthoritativeCardinality !== true ||
+    record.r47NoImplicitPostureEntryGated !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff posture declaration must carry HOF-G4 constitutional markers (R40–R47)",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R41", "FI-DSN-STD-015-R45"],
+    );
+  }
+
+  const forbidden = [
+    "completionActId",
+    "suspensionActId",
+    "recallActId",
+    "withdrawalActId",
+    "executesHandoff",
+    "handoffExecuted",
+    "performHandoff",
+    "manufacturingExecutionId",
+    "fulfillmentExecutionId",
+    "productionExecutionId",
+    "executionQueueId",
+    "constitutionalQueueId",
+    "brainDeclareHandoffPosture",
+    "brainHandoffPosture",
+    "implicitPosture",
+    "automaticInheritancePosture",
+    "inferredEligibilityPosture",
+    "configurationDrivenPosture",
+    "downstreamAcceptanceId",
+    "permanentCollectionMembershipId",
+    "unifiedCc01Cc02Posture",
+    "mergedCrossCcPosture",
+    "authorizationActId",
+    "hoemAuthorizationRecordId",
+    "hoemCompletionRecordId",
+    "hoemSuspensionRecordId",
+    "hoemRecallRecordId",
+    "hoemWithdrawalRecordId",
+  ];
+  for (const key of forbidden) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff posture declaration must not carry completion/execution/implicit fields (R41/R47)",
+        "invalid_handoff_posture_declaration",
+        ["FI-DSN-STD-015-R41", "FI-DSN-STD-015-R47"],
+      );
+    }
+  }
+
+  assertAuditMetadata(record.audit, "Governed Handoff posture declaration act");
+  assertStd015HofG4Traceability(record.traceability, "Governed Handoff posture declaration act");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff posture declaration act requires valid governed creation marker",
+      "invalid_handoff_posture_declaration",
+      ["FI-DSN-STD-015-R40"],
     );
   }
 }
