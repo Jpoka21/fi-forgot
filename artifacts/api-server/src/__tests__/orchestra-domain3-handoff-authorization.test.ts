@@ -1020,7 +1020,8 @@ section("R48 boundary: authorization ≠ posture; no completion/suspension/recal
   );
   const postures = await ctx.domain3.listGovernedHandoffPostureDeclarationActsByEntry(entry.entryId);
   expect("authorization alone creates no posture records", postures.length, 0);
-  expect("no completeGovernedHandoff on repository", "completeGovernedHandoff" in repo, false);
+  expect("completeGovernedHandoff on repository (G5)", "completeGovernedHandoff" in repo, true);
+  expect("no suspendHandoff on repository", "suspendHandoff" in repo, false);
   expect("no suspendGovernedHandoff on repository", "suspendGovernedHandoff" in repo, false);
   expect("no recallGovernedHandoff on repository", "recallGovernedHandoff" in repo, false);
   expect("no withdrawGovernedHandoff on repository", "withdrawGovernedHandoff" in repo, false);

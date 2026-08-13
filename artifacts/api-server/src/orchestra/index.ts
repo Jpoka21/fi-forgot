@@ -260,11 +260,25 @@ export {
 } from "./handoff-posture-declaration.js";
 
 export {
+  GOVERNED_HANDOFF_ACT_LAYER_LIFECYCLE_TRACEABILITY,
+  FROZEN_HANDOFF_ACT_LAYER_LIFECYCLE_STATES,
+  isFrozenHandoffActLayerLifecycleState,
+  assessGovernedHandoffCompletion,
+  assessGovernedHandoffLifecycleRejection,
+  evaluateHandoffActLayerLifecycleFromFacts,
+  selectAuthoritativeGovernedHandoffCompletion,
+  selectAuthoritativeGovernedHandoffLifecycleRejection,
+  evaluateHandoffCompletionCurrencyFromFacts,
+} from "./handoff-act-lifecycle.js";
+
+export {
   FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES,
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
   resolveEstablishedHandoffGovernanceAuthorityClass,
   assertEstablishedHandoffGovernanceAuthorityClass,
   assertEstablishedHandoffGovernanceAuthorityForPostureDeclaration,
+  assertEstablishedHandoffGovernanceAuthorityForCompletion,
+  assertEstablishedHandoffGovernanceAuthorityForLifecycleRejection,
 } from "./handoff-governance-authority.js";
 
 export {
@@ -406,6 +420,19 @@ export type {
   HandoffPostureClass,
   HoemPostureDeclarationOperativeRecord,
   HoemPostureDeclarationOperativeRecordId,
+  GovernedHandoffCompletionActId,
+  GovernedHandoffCompletionActRecord,
+  GovernedHandoffCompletionAssessment,
+  GovernedHandoffLifecycleRejectionAttributionId,
+  GovernedHandoffLifecycleRejectionAttributionRecord,
+  GovernedHandoffLifecycleRejectionAssessment,
+  HandoffActLayerLifecycleEvaluation,
+  HandoffActLayerLifecycleState,
+  HandoffCompletionCurrency,
+  HoemCompletionOperativeRecord,
+  HoemCompletionOperativeRecordId,
+  HoemLifecycleStateAttributionOperativeRecord,
+  HoemLifecycleStateAttributionOperativeRecordId,
   HoemAuthorizationOperativeRecord,
   HoemAuthorizationOperativeRecordId,
   HccmConsumerClassId,

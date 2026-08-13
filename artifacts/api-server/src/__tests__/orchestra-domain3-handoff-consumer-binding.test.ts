@@ -793,7 +793,8 @@ section("R48 boundary: binding ≠ posture; no completion APIs");
   );
   const postures = await ctx.domain3.listGovernedHandoffPostureDeclarationActsByEntry(entry.entryId);
   expect("binding alone creates no posture records", postures.length, 0);
-  expect("no completeGovernedHandoff", "completeGovernedHandoff" in repo, false);
+  expect("completeGovernedHandoff now on repository (G5)", "completeGovernedHandoff" in repo, true);
+  expect("no suspendHandoff", "suspendHandoff" in repo, false);
   expect(
     "binding remains non-authorization non-posture",
     binding.notHandoffAuthorization && binding.notHandoffPostureDeclaration,

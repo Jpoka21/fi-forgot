@@ -1620,3 +1620,252 @@ export interface GovernedHandoffPostureDeclarationActRecord {
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }
+
+// --- STD-015 HOF-G5 Baseline Handoff Act-Layer Lifecycle (R48–R57) ---
+
+/**
+ * Closed HSLM act-layer vocabulary — FI-DSN-STD-015-R48.
+ * Suspended/withdrawn/recalled/expired remain catalog states; operative G6 acts deferred.
+ */
+export type HandoffActLayerLifecycleState =
+  | "eligible_for_consideration"
+  | "authorized"
+  | "completed"
+  | "rejected"
+  | "suspended"
+  | "withdrawn"
+  | "recalled"
+  | "expired";
+
+export type GovernedHandoffCompletionActId = string & {
+  readonly __brand: "GovernedHandoffCompletionActId";
+};
+
+export type HoemCompletionOperativeRecordId = string & {
+  readonly __brand: "HoemCompletionOperativeRecordId";
+};
+
+export type GovernedHandoffLifecycleRejectionAttributionId = string & {
+  readonly __brand: "GovernedHandoffLifecycleRejectionAttributionId";
+};
+
+export type HoemLifecycleStateAttributionOperativeRecordId = string & {
+  readonly __brand: "HoemLifecycleStateAttributionOperativeRecordId";
+};
+
+export type HandoffCompletionCurrency = "current" | "stale";
+
+/**
+ * R51 / R56 / §20.5.3.14 — additive HOEM completion operative record (completion act type only).
+ * Peer-distinct from authorization/posture/lifecycle/suspension/recall/withdrawal HOEM records.
+ */
+export interface HoemCompletionOperativeRecord {
+  readonly hoemCompletionRecordId: HoemCompletionOperativeRecordId;
+  readonly completionActId: GovernedHandoffCompletionActId;
+  readonly actType: "completion";
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId;
+  readonly declaredPostureClass: HandoffPostureClass;
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeLifecycleAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+}
+
+/**
+ * R51 / R56 / R57 — additive HOEM lifecycle state attribution record (rejected only at G5).
+ * Peer-distinct from authorization/posture/completion HOEM records.
+ */
+export interface HoemLifecycleStateAttributionOperativeRecord {
+  readonly hoemLifecycleAttributionRecordId: HoemLifecycleStateAttributionOperativeRecordId;
+  readonly lifecycleRejectionAttributionId: GovernedHandoffLifecycleRejectionAttributionId;
+  readonly actType: "lifecycle_state_attribution";
+  readonly lifecycleState: "rejected";
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+}
+
+/**
+ * Assessment for whether a lawful HGA completion act may be performed.
+ */
+export interface GovernedHandoffCompletionAssessment {
+  readonly mayComplete: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly postureDeclarationCurrency: HandoffPostureDeclarationCurrency | null;
+  readonly preparationCurrency: HandoffPreparationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly notCompletionSuspensionRecallOrWithdrawalMechanics: true;
+  readonly substitutesRejected: true;
+}
+
+/**
+ * Assessment for whether a lawful HGA lifecycle rejection attribution may be recorded.
+ */
+export interface GovernedHandoffLifecycleRejectionAssessment {
+  readonly mayReject: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly preparationCurrency: HandoffPreparationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffCompletion: true;
+  readonly notHandoffExecution: true;
+  readonly substitutesRejected: true;
+}
+
+/**
+ * Operative HGA Handoff completion act — FI-DSN-STD-015-R48–R57 (Completed meaning; R51/R56).
+ * Does NOT authorize, declare posture, suspend, recall, withdraw, accept downstream, or execute.
+ */
+export interface GovernedHandoffCompletionActRecord {
+  readonly completionActId: GovernedHandoffCompletionActId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_completion_act";
+  /** Attributable actor within HGA scope — not the authority class itself. */
+  readonly completedBy: string;
+  readonly completedAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly declaredPostureClass: HandoffPostureClass;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly hoemCompletionRecord: HoemCompletionOperativeRecord;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly r48ClosedHslmVocabulary: true;
+  readonly r49PeerDistinctLifecycle: true;
+  readonly r50SingleBindingPostureChain: true;
+  readonly r51CompletedMeaning: true;
+  readonly r56HoemCompletionOperativeRecord: true;
+  readonly r57NoImplicitLifecyclePromotion: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Operative HGA lifecycle rejection attribution — FI-DSN-STD-015-R51 / R56 / R57.
+ * Peer-distinct from authorization, posture, and completion acts.
+ */
+export interface GovernedHandoffLifecycleRejectionAttributionRecord {
+  readonly lifecycleRejectionAttributionId: GovernedHandoffLifecycleRejectionAttributionId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_lifecycle_rejection_act";
+  readonly attributedBy: string;
+  readonly attributedAt: string;
+  readonly grounds: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly lifecycleState: "rejected";
+  readonly hoemLifecycleAttributionRecord: HoemLifecycleStateAttributionOperativeRecord;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffCompletion: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notDownstreamAcceptance: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly r48ClosedHslmVocabulary: true;
+  readonly r49PeerDistinctLifecycle: true;
+  readonly r50SingleBindingPostureChain: true;
+  readonly r51RejectedMeaning: true;
+  readonly r56HoemLifecycleAttributionRecord: true;
+  readonly r57NoImplicitLifecyclePromotion: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Evaluation of baseline act-layer lifecycle state for one HCCM binding (R48–R57).
+ */
+export interface HandoffActLayerLifecycleEvaluation {
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly entryId: GovernedHandoffEntryId | null;
+  readonly consumerClassId: HccmConsumerClassId | null;
+  readonly currentState: HandoffActLayerLifecycleState | null;
+  readonly authoritativeCompletionActId: GovernedHandoffCompletionActId | null;
+  readonly authoritativeRejectionAttributionId: GovernedHandoffLifecycleRejectionAttributionId | null;
+  readonly authoritativePostureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly matchingAuthorizationActId: GovernedHandoffAuthorizationActId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffAcceptance: true;
+  readonly notManufacturingClearance: true;
+  readonly notG11EligibilityLayerState: true;
+  readonly suspendedWithdrawnRecalledExpiredMechanicsDeferred: true;
+  readonly r48ClosedHslmVocabulary: true;
+  readonly r49PeerDistinctLifecycle: true;
+  readonly r50SingleBindingPostureChain: true;
+  readonly r57NoImplicitLifecyclePromotion: true;
+}

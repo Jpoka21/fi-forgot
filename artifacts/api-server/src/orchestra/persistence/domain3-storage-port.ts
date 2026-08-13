@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration.
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration + HOF-G5 act-layer lifecycle.
  */
 
 import type {
@@ -21,8 +21,12 @@ import type {
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActId,
   GovernedHandoffAuthorizationActRecord,
+  GovernedHandoffCompletionActId,
+  GovernedHandoffCompletionActRecord,
   GovernedHandoffConsumerBindingId,
   GovernedHandoffConsumerBindingRecord,
+  GovernedHandoffLifecycleRejectionAttributionId,
+  GovernedHandoffLifecycleRejectionAttributionRecord,
   GovernedHandoffPostureDeclarationActId,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditId,
@@ -323,4 +327,44 @@ export interface Domain3StoragePort {
   listGovernedHandoffPostureDeclarationActsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
+
+  /**
+   * Append-only Handoff completion act (HOF-G5). Unique by completionActId;
+   * multiple per binding allowed (additive history; latest authoritative). No update/delete.
+   */
+  putGovernedHandoffCompletionAct(
+    record: GovernedHandoffCompletionActRecord,
+  ): Promise<void>;
+  getGovernedHandoffCompletionAct(
+    completionActId: GovernedHandoffCompletionActId,
+  ): Promise<GovernedHandoffCompletionActRecord | null>;
+  listGovernedHandoffCompletionActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffCompletionActRecord[]>;
+  listGovernedHandoffCompletionActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffCompletionActRecord[]>;
+  listGovernedHandoffCompletionActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffCompletionActRecord[]>;
+
+  /**
+   * Append-only Handoff lifecycle rejection attribution (HOF-G5). Unique by attribution id;
+   * multiple per binding allowed. No update/delete.
+   */
+  putGovernedHandoffLifecycleRejectionAttribution(
+    record: GovernedHandoffLifecycleRejectionAttributionRecord,
+  ): Promise<void>;
+  getGovernedHandoffLifecycleRejectionAttribution(
+    lifecycleRejectionAttributionId: GovernedHandoffLifecycleRejectionAttributionId,
+  ): Promise<GovernedHandoffLifecycleRejectionAttributionRecord | null>;
+  listGovernedHandoffLifecycleRejectionAttributionsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
+  listGovernedHandoffLifecycleRejectionAttributionsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
+  listGovernedHandoffLifecycleRejectionAttributionsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
 }

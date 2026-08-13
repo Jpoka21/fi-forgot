@@ -1,8 +1,9 @@
 /**
- * Handoff Governance Authority (HGA) — FI-DSN-STD-015-R25 / R40 / PD-STD-015-001.
+ * Handoff Governance Authority (HGA) — FI-DSN-STD-015-R25 / R40 / R48 / R51 / R56 / R57 / PD-STD-015-001.
  *
- * Sole constitutionally authorized owner of operative STD-015 Handoff authorization acts
- * and Handoff posture declaration acts (distinct act-type scopes; §20.5.3.14).
+ * Sole constitutionally authorized owner of operative STD-015 Handoff authorization acts,
+ * Handoff posture declaration acts, Handoff completion acts, and lifecycle rejection attributions
+ * (distinct act-type scopes; §20.5.3.14).
  * Actor strings alone cannot mint HGA. MAGAC/DDAC/DSRA/IVAC/SSAC/Brain cannot substitute.
  */
 
@@ -11,7 +12,9 @@ import type { HandoffGovernanceAuthorityClassId } from "./domain3-types.js";
 
 export type HandoffGovernanceAuthorityConstitutionalScope =
   | "handoff_authorization_act"
-  | "handoff_posture_declaration_act";
+  | "handoff_posture_declaration_act"
+  | "handoff_completion_act"
+  | "handoff_lifecycle_rejection_act";
 
 export interface EstablishedHandoffGovernanceAuthorityClass {
   readonly authorityClassId: HandoffGovernanceAuthorityClassId;
@@ -21,6 +24,10 @@ export interface EstablishedHandoffGovernanceAuthorityClass {
     "FI-DSN-STD-015-R32",
     "FI-DSN-STD-015-R40",
     "FI-DSN-STD-015-R47",
+    "FI-DSN-STD-015-R48",
+    "FI-DSN-STD-015-R51",
+    "FI-DSN-STD-015-R56",
+    "FI-DSN-STD-015-R57",
   ];
   /**
    * Legacy single-scope field retained for HOF-G2 authorization act records.
@@ -44,11 +51,17 @@ export const FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES: readonly E
         "FI-DSN-STD-015-R32",
         "FI-DSN-STD-015-R40",
         "FI-DSN-STD-015-R47",
+        "FI-DSN-STD-015-R48",
+        "FI-DSN-STD-015-R51",
+        "FI-DSN-STD-015-R56",
+        "FI-DSN-STD-015-R57",
       ] as const),
       authorizedConstitutionalScope: "handoff_authorization_act" as const,
       authorizedConstitutionalScopes: Object.freeze([
         "handoff_authorization_act",
         "handoff_posture_declaration_act",
+        "handoff_completion_act",
+        "handoff_lifecycle_rejection_act",
       ] as const),
     }),
   ]);
@@ -115,6 +128,52 @@ export function assertEstablishedHandoffGovernanceAuthorityForPostureDeclaration
       "Established HGA does not authorize handoff_posture_declaration_act scope (R40)",
       "invalid_handoff_posture_declaration",
       ["FI-DSN-STD-015-R40"],
+    );
+  }
+}
+
+export function assertEstablishedHandoffGovernanceAuthorityForCompletion(
+  authorityClassId: unknown,
+): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Handoff completion requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint Handoff completion authority (R51/R56/R57)",
+      "invalid_handoff_completion",
+      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56", "FI-DSN-STD-015-R57"],
+    );
+  }
+  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
+    authorityClassId as HandoffGovernanceAuthorityClassId,
+  );
+  if (!resolved.authorizedConstitutionalScopes.includes("handoff_completion_act")) {
+    throw new OrchestraConstitutionalError(
+      "Established HGA does not authorize handoff_completion_act scope (R51/R56)",
+      "invalid_handoff_completion",
+      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56"],
+    );
+  }
+}
+
+export function assertEstablishedHandoffGovernanceAuthorityForLifecycleRejection(
+  authorityClassId: unknown,
+): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Handoff lifecycle rejection attribution requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint lifecycle rejection authority (R51/R56/R57)",
+      "invalid_handoff_lifecycle_attribution",
+      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56", "FI-DSN-STD-015-R57"],
+    );
+  }
+  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
+    authorityClassId as HandoffGovernanceAuthorityClassId,
+  );
+  if (
+    !resolved.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act")
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Established HGA does not authorize handoff_lifecycle_rejection_act scope (R51/R56)",
+      "invalid_handoff_lifecycle_attribution",
+      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56"],
     );
   }
 }
