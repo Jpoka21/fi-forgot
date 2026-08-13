@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration + HOF-G5 act-layer lifecycle.
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration + HOF-G5 act-layer lifecycle + HOF-G8 downstream exit boundary.
  */
 
 import type {
@@ -23,6 +23,8 @@ import type {
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffCompletionActId,
   GovernedHandoffCompletionActRecord,
+  GovernedHandoffDownstreamExitBoundaryAttributionId,
+  GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingId,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActId,
@@ -345,5 +347,26 @@ export interface Domain3StoragePort {
   listGovernedHandoffCompletionActsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffCompletionActRecord[]>;
+
+  /**
+   * Append-only downstream exit-boundary attribution (HOF-G8 R58–R65).
+   * Unique by exitBoundaryAttributionId; multiple per binding allowed (additive tip).
+   * No update/delete. Does not mutate completion/auth/posture/binding.
+   */
+  putGovernedHandoffDownstreamExitBoundaryAttribution(
+    record: GovernedHandoffDownstreamExitBoundaryAttributionRecord,
+  ): Promise<void>;
+  getGovernedHandoffDownstreamExitBoundaryAttribution(
+    exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId,
+  ): Promise<GovernedHandoffDownstreamExitBoundaryAttributionRecord | null>;
+  listGovernedHandoffDownstreamExitBoundaryAttributionsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffDownstreamExitBoundaryAttributionRecord[]>;
+  listGovernedHandoffDownstreamExitBoundaryAttributionsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffDownstreamExitBoundaryAttributionRecord[]>;
+  listGovernedHandoffDownstreamExitBoundaryAttributionsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffDownstreamExitBoundaryAttributionRecord[]>;
 
 }

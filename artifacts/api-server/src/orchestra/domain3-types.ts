@@ -1776,3 +1776,166 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly r50SingleBindingPostureChain: true;
   readonly r57NoImplicitLifecyclePromotion: true;
 }
+
+/**
+ * HOF-G8 partial R58–R65 — downstream exit BOUNDARY attribution (NOT an HGA matrix act).
+ */
+export type GovernedHandoffDownstreamExitBoundaryAttributionId = string & {
+  readonly __brand: "GovernedHandoffDownstreamExitBoundaryAttributionId";
+};
+
+export type HoemExitBoundaryRecordId = string & {
+  readonly __brand: "HoemExitBoundaryRecordId";
+};
+
+export type HandoffDownstreamExitBoundaryCurrency = "current" | "stale";
+
+/**
+ * R64 — additive HOEM exit-boundary evidence linkage.
+ * Does NOT prescribe intake/acceptance/routing/storage/notification mechanics.
+ */
+export interface HoemExitBoundaryRecord {
+  readonly hoemExitBoundaryRecordId: HoemExitBoundaryRecordId;
+  readonly exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId;
+  readonly actType: "exit_boundary";
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId;
+  readonly completionActId: GovernedHandoffCompletionActId;
+  readonly downstreamConsiderationDomain: string;
+  readonly doesNotPrescribeIntakeWorkflow: true;
+  readonly doesNotPrescribeAcceptanceMechanics: true;
+  readonly doesNotPrescribeRoutingMechanics: true;
+  readonly doesNotPrescribeStorageMechanics: true;
+  readonly doesNotPrescribeNotificationMechanics: true;
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeLifecycleAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+}
+
+export interface Volume06HandoffAuthorityTerminus {
+  readonly volumeId: "volume_06";
+  readonly principalAuthorityLimit: "FI-DSN-STD-015";
+  readonly terminusKind: "handoff_governance_authority_terminus";
+  readonly doesNotAbsorbDownstreamAcceptance: true;
+  readonly doesNotAbsorbDownstreamAdmission: true;
+  readonly doesNotAbsorbDownstreamValidation: true;
+  readonly doesNotAbsorbDownstreamExecution: true;
+  readonly doesNotAbsorbDownstreamIntake: true;
+  readonly exitCompletenessDeferred: true;
+  readonly r58Volume06Terminus: true;
+}
+
+/**
+ * Assessment for whether a lawful downstream exit-boundary attribution may be recorded.
+ */
+export interface GovernedHandoffDownstreamExitBoundaryAssessment {
+  readonly mayAttribute: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly catalogDownstreamConsiderationDomain: string | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly postureDeclarationCurrency: HandoffPostureDeclarationCurrency | null;
+  readonly completionCurrency: HandoffCompletionCurrency | null;
+  readonly preparationCurrency: HandoffPreparationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly volume06Terminus: Volume06HandoffAuthorityTerminus;
+  readonly notHgaMatrixActType: true;
+  readonly notHandoffCompletionAct: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notMembershipAdmission: true;
+  readonly notManufacturingOrFulfillmentOrExecution: true;
+  readonly notExitCompletenessSatisfaction: true;
+  readonly exitCompletenessDeferred: true;
+  readonly r58Volume06Terminus: true;
+  readonly r59BoundedExportDenotation: true;
+  readonly r60CompletedEnablesConsiderationOnly: true;
+  readonly r65NoImplicitExit: true;
+}
+
+/**
+ * Operative downstream exit-boundary attribution — FI-DSN-STD-015-R58–R65.
+ * Denotes bounded export toward HCCM-mapped consideration domain.
+ * Does NOT accept, admit, manufacture, fulfill, or satisfy exit-completeness.
+ * NOT a ninth HGA matrix act type.
+ */
+export interface GovernedHandoffDownstreamExitBoundaryAttributionRecord {
+  readonly exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly attributionKind: "downstream_exit_boundary_attribution";
+  readonly constitutionalArtifactKind: "downstream_exit_boundary_attribution";
+  readonly attributedBy: string;
+  readonly attributedAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly downstreamConsiderationDomain: string;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId;
+  readonly completionActId: GovernedHandoffCompletionActId;
+  /** Optional export of auth facts when present — NOT a gate (R59). */
+  readonly authorizationActId: GovernedHandoffAuthorizationActId | null;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly hoemExitBoundaryRecord: HoemExitBoundaryRecord;
+  readonly volume06Terminus: Volume06HandoffAuthorityTerminus;
+  readonly notHgaMatrixActType: true;
+  readonly notHandoffCompletionAct: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notMembershipAdmission: true;
+  readonly notManufacturingOrFulfillmentOrExecution: true;
+  readonly notExitCompletenessSatisfaction: true;
+  readonly exitCompletenessDeferred: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffWithdrawal: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly r58Volume06Terminus: true;
+  readonly r59BoundedExportDenotation: true;
+  readonly r60CompletedEnablesConsiderationOnly: true;
+  readonly r61SingleBindingRouting: true;
+  readonly r62TupleConsistency: true;
+  readonly r63PeerDistinctExitBoundary: true;
+  readonly r64HoemExitBoundaryLinkage: true;
+  readonly r65NoImplicitExit: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * R60/R65 — Completed enables consideration; linkage establishes attributed exit.
+ */
+export interface HandoffDownstreamExitConsiderationEvaluation {
+  readonly considerationEnabled: boolean;
+  readonly exitAttributed: boolean;
+  readonly completionActId: GovernedHandoffCompletionActId | null;
+  readonly exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId | null;
+  readonly downstreamConsiderationDomain: string | null;
+  readonly notIntake: true;
+  readonly notAcceptance: true;
+  readonly notExitCompleteness: true;
+  readonly exitCompletenessDeferred: true;
+  readonly r60CompletedEnablesConsiderationOnly: true;
+  readonly r65NoImplicitExitFromCompletedAlone: true;
+}

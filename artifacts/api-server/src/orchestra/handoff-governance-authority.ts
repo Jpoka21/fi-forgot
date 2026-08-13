@@ -5,6 +5,8 @@
  * Handoff posture declaration acts, and Handoff completion acts
  * (distinct act-type scopes; §20.5.3.14). Rejected is an HSLM vocabulary meaning (R51),
  * not a ninth HGA act-type scope — it denotes withheld authorization or posture declaration.
+ * Downstream exit BOUNDARY attribution (HOF-G8 R58–R65) is performed under the established
+ * HGA class but is NOT an HGA matrix act type and must not be added to constitutional scopes.
  * Actor strings alone cannot mint HGA. MAGAC/DDAC/DSRA/IVAC/SSAC/Brain cannot substitute.
  */
 

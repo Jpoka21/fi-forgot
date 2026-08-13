@@ -270,6 +270,19 @@ export {
 } from "./handoff-act-lifecycle.js";
 
 export {
+  GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY,
+  VOLUME_06_HANDOFF_AUTHORITY_TERMINUS,
+  DOWNSTREAM_EXIT_BOUNDARY_ATTRIBUTION_KIND,
+  HOEM_EXIT_BOUNDARY_ACT_TYPE,
+  resolveDownstreamConsiderationDomain,
+  resolveDownstreamExitCatalogEntry,
+  assessGovernedHandoffDownstreamExitBoundary,
+  selectAuthoritativeGovernedHandoffDownstreamExitBoundary,
+  evaluateHandoffDownstreamExitBoundaryCurrencyFromFacts,
+  evaluateDownstreamExitConsiderationFromFacts,
+} from "./handoff-downstream-exit-boundary.js";
+
+export {
   FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES,
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
   resolveEstablishedHandoffGovernanceAuthorityClass,
@@ -420,6 +433,14 @@ export type {
   GovernedHandoffCompletionActId,
   GovernedHandoffCompletionActRecord,
   GovernedHandoffCompletionAssessment,
+  GovernedHandoffDownstreamExitBoundaryAttributionId,
+  GovernedHandoffDownstreamExitBoundaryAttributionRecord,
+  GovernedHandoffDownstreamExitBoundaryAssessment,
+  HandoffDownstreamExitBoundaryCurrency,
+  HandoffDownstreamExitConsiderationEvaluation,
+  HoemExitBoundaryRecord,
+  HoemExitBoundaryRecordId,
+  Volume06HandoffAuthorityTerminus,
   HandoffActLayerLifecycleEvaluation,
   HandoffActLayerLifecycleState,
   HandoffCompletionCurrency,

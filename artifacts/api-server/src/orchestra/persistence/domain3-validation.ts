@@ -33,6 +33,7 @@ import type {
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffCompletionActRecord,
+  GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
@@ -74,6 +75,7 @@ import {
   isFrozenHandoffPostureClass,
 } from "../handoff-posture-declaration.js";
 import { GOVERNED_HANDOFF_ACT_LAYER_LIFECYCLE_TRACEABILITY } from "../handoff-act-lifecycle.js";
+import { GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY } from "../handoff-downstream-exit-boundary.js";
 import {
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
 } from "../handoff-governance-authority.js";
@@ -125,9 +127,12 @@ const ID_PREFIXES = {
   handoffConsumerBinding: "governed-handoff-consumer-binding-",
   handoffPostureDeclarationAct: "governed-handoff-posture-declaration-act-",
   handoffCompletionAct: "governed-handoff-completion-act-",
+  handoffDownstreamExitBoundaryAttribution:
+    "governed-handoff-downstream-exit-boundary-attribution-",
   hoemAuthorizationOperative: "hoem-authorization-operative-",
   hoemPostureDeclarationOperative: "hoem-posture-declaration-operative-",
   hoemCompletionOperative: "hoem-completion-operative-",
+  hoemExitBoundary: "hoem-exit-boundary-",
 } as const;
 
 const LEGAL_CONDITIONAL_FAIL_ROUTES = ["conditional_route", "fail_route"] as const;
@@ -387,6 +392,36 @@ function assertStd015HofG5Traceability(
         `${label} traceability must include ${required}`,
         errorCode,
         ["FI-DSN-STD-015-R48", "FI-DSN-STD-015-R57"],
+      );
+    }
+  }
+}
+
+function assertStd015HofG8Traceability(
+  traceability: unknown,
+  label: string,
+  errorCode: "invalid_handoff_downstream_exit_boundary" = "invalid_handoff_downstream_exit_boundary",
+): void {
+  if (
+    !traceability ||
+    typeof traceability !== "object" ||
+    (traceability as Record<string, unknown>).governingStandardId !== STD015_GOVERNING_STANDARD ||
+    !Array.isArray((traceability as Record<string, unknown>).requirementIds) ||
+    ((traceability as Record<string, unknown>).requirementIds as unknown[]).length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      `${label} requires FI-DSN-STD-015 HOF-G8 exit-boundary traceability`,
+      errorCode,
+      ["FI-DSN-STD-015-R58", "FI-DSN-STD-015-R65"],
+    );
+  }
+  const ids = (traceability as Record<string, unknown>).requirementIds as unknown[];
+  for (const required of GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY.requirementIds) {
+    if (!ids.includes(required)) {
+      throw new OrchestraConstitutionalError(
+        `${label} traceability must include ${required}`,
+        errorCode,
+        ["FI-DSN-STD-015-R58", "FI-DSN-STD-015-R65"],
       );
     }
   }
@@ -3927,6 +3962,303 @@ export function validatePersistedGovernedHandoffCompletion(
       "Governed Handoff completion act requires valid governed creation marker",
       "invalid_handoff_completion",
       ["FI-DSN-STD-015-R51"],
+    );
+  }
+}
+
+export function validatePersistedGovernedHandoffDownstreamExitBoundary(
+  raw: unknown,
+): asserts raw is GovernedHandoffDownstreamExitBoundaryAttributionRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff downstream exit boundary",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.exitBoundaryAttributionId,
+    ID_PREFIXES.handoffDownstreamExitBoundaryAttribution,
+    "Governed Handoff downstream exit boundary attribution",
+  );
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(
+    record.bindingId,
+    ID_PREFIXES.handoffConsumerBinding,
+    "Governed Handoff consumer binding",
+  );
+  assertBrandedId(
+    record.postureDeclarationActId,
+    ID_PREFIXES.handoffPostureDeclarationAct,
+    "Governed Handoff posture declaration act",
+  );
+  assertBrandedId(
+    record.completionActId,
+    ID_PREFIXES.handoffCompletionAct,
+    "Governed Handoff completion act",
+  );
+  assertBrandedId(
+    record.preparationId,
+    ID_PREFIXES.handoffPreparation,
+    "Governed Handoff preparation",
+  );
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (typeof record.handoffConsumerContextId !== "string" || !record.handoffConsumerContextId.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires non-empty handoffConsumerContextId",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R62"],
+    );
+  }
+  if (typeof record.attributedBy !== "string" || !record.attributedBy.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires attributedBy",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R65"],
+    );
+  }
+  if (typeof record.attributedAt !== "string" || !record.attributedAt.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires attributedAt",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R64"],
+    );
+  }
+  if (
+    typeof record.downstreamConsiderationDomain !== "string" ||
+    !record.downstreamConsiderationDomain.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires downstreamConsiderationDomain",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R61"],
+    );
+  }
+
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(record.authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires established HGA class (R58)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58", "FI-DSN-STD-015-R65"],
+    );
+  }
+  if (record.authorityGoverningSourceId !== "PD-STD-015-001") {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary authorityGoverningSourceId must be PD-STD-015-001",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58"],
+    );
+  }
+  if (
+    record.attributionKind !== "downstream_exit_boundary_attribution" ||
+    record.constitutionalArtifactKind !== "downstream_exit_boundary_attribution"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary must use downstream_exit_boundary_attribution kind (not HGA matrix act)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58", "FI-DSN-STD-015-R63"],
+    );
+  }
+  if ("authorityConstitutionalScope" in record && record.authorityConstitutionalScope != null) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary must not claim HGA matrix authorityConstitutionalScope (R58/R63)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58", "FI-DSN-STD-015-R63"],
+    );
+  }
+
+  if (!isHccmConsumerClassId(record.consumerClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires closed HCCM consumer class (R61)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R61"],
+    );
+  }
+  const catalog = resolveHccmConsumerClass(record.consumerClassId as never);
+  if (record.downstreamConsiderationDomain !== catalog.downstreamConsiderationDomain) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary domain must equal HCCM catalog domain (R61/R62)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R61", "FI-DSN-STD-015-R62"],
+    );
+  }
+
+  if (
+    record.authorizationActId != null &&
+    (typeof record.authorizationActId !== "string" ||
+      !record.authorizationActId.startsWith(ID_PREFIXES.handoffAuthorizationAct))
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary authorizationActId must be null or a valid authorization act id",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R59"],
+    );
+  }
+
+  const hoemRecord = record.hoemExitBoundaryRecord as Record<string, unknown> | null;
+  if (!hoemRecord || typeof hoemRecord !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires HOEM exit-boundary record (R64)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R64"],
+    );
+  }
+  assertBrandedId(
+    hoemRecord.hoemExitBoundaryRecordId,
+    ID_PREFIXES.hoemExitBoundary,
+    "HOEM exit-boundary record",
+  );
+  if (hoemRecord.exitBoundaryAttributionId !== record.exitBoundaryAttributionId) {
+    throw new OrchestraConstitutionalError(
+      "HOEM exit-boundary record exitBoundaryAttributionId must match parent attribution",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R64"],
+    );
+  }
+  if (hoemRecord.actType !== "exit_boundary") {
+    throw new OrchestraConstitutionalError(
+      "HOEM exit-boundary record actType must be exit_boundary (R64)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R64"],
+    );
+  }
+  if (
+    hoemRecord.gpraId !== record.gpraId ||
+    hoemRecord.obligationId !== record.obligationId ||
+    hoemRecord.handoffConsumerContextId !== record.handoffConsumerContextId ||
+    hoemRecord.bindingId !== record.bindingId ||
+    hoemRecord.consumerClassId !== record.consumerClassId ||
+    hoemRecord.postureDeclarationActId !== record.postureDeclarationActId ||
+    hoemRecord.completionActId !== record.completionActId ||
+    hoemRecord.downstreamConsiderationDomain !== record.downstreamConsiderationDomain
+  ) {
+    throw new OrchestraConstitutionalError(
+      "HOEM exit-boundary record must bind to parent attribution context (R64)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R64"],
+    );
+  }
+  if (
+    hoemRecord.doesNotPrescribeIntakeWorkflow !== true ||
+    hoemRecord.doesNotPrescribeAcceptanceMechanics !== true ||
+    hoemRecord.doesNotPrescribeRoutingMechanics !== true ||
+    hoemRecord.doesNotPrescribeStorageMechanics !== true ||
+    hoemRecord.doesNotPrescribeNotificationMechanics !== true ||
+    hoemRecord.doesNotMergeAuthorizationAttribution !== true ||
+    hoemRecord.doesNotMergePostureDeclarationAttribution !== true ||
+    hoemRecord.doesNotMergeCompletionAttribution !== true ||
+    hoemRecord.doesNotMergeLifecycleAttribution !== true ||
+    hoemRecord.doesNotMergeSuspensionAttribution !== true ||
+    hoemRecord.doesNotMergeWithdrawalAttribution !== true ||
+    hoemRecord.doesNotMergeRecallAttribution !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "HOEM exit-boundary record must carry non-prescription / peer-distinct markers (R64)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R64"],
+    );
+  }
+
+  if (
+    record.notHgaMatrixActType !== true ||
+    record.notHandoffCompletionAct !== true ||
+    record.notDownstreamAcceptance !== true ||
+    record.notMembershipAdmission !== true ||
+    record.notManufacturingOrFulfillmentOrExecution !== true ||
+    record.notExitCompletenessSatisfaction !== true ||
+    record.exitCompletenessDeferred !== true ||
+    record.notHandoffAuthorization !== true ||
+    record.notHandoffPostureDeclaration !== true ||
+    record.notHandoffSuspension !== true ||
+    record.notHandoffRecall !== true ||
+    record.notHandoffWithdrawal !== true ||
+    record.doesNotCollapsePeerDecisionClasses !== true ||
+    record.doesNotMergeAcrossConsumerClasses !== true ||
+    record.r58Volume06Terminus !== true ||
+    record.r59BoundedExportDenotation !== true ||
+    record.r60CompletedEnablesConsiderationOnly !== true ||
+    record.r61SingleBindingRouting !== true ||
+    record.r62TupleConsistency !== true ||
+    record.r63PeerDistinctExitBoundary !== true ||
+    record.r64HoemExitBoundaryLinkage !== true ||
+    record.r65NoImplicitExit !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary must carry HOF-G8 constitutional markers (R58–R65)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58", "FI-DSN-STD-015-R65"],
+    );
+  }
+
+  const terminus = record.volume06Terminus as Record<string, unknown> | null;
+  if (
+    !terminus ||
+    terminus.volumeId !== "volume_06" ||
+    terminus.principalAuthorityLimit !== "FI-DSN-STD-015" ||
+    terminus.terminusKind !== "handoff_governance_authority_terminus" ||
+    terminus.doesNotAbsorbDownstreamAcceptance !== true ||
+    terminus.doesNotAbsorbDownstreamAdmission !== true ||
+    terminus.doesNotAbsorbDownstreamValidation !== true ||
+    terminus.doesNotAbsorbDownstreamExecution !== true ||
+    terminus.doesNotAbsorbDownstreamIntake !== true ||
+    terminus.exitCompletenessDeferred !== true ||
+    terminus.r58Volume06Terminus !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit boundary requires Volume 06 terminus markers (R58)",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58"],
+    );
+  }
+
+  const forbidden = [
+    "authorityConstitutionalScope",
+    "handoff_downstream_exit_act",
+    "handoff_lifecycle_rejection_act",
+    "suspensionActId",
+    "recallActId",
+    "withdrawalActId",
+    "executesHandoff",
+    "handoffExecuted",
+    "performHandoff",
+    "manufacturingExecutionId",
+    "fulfillmentExecutionId",
+    "productionExecutionId",
+    "executionQueueId",
+    "constitutionalQueueId",
+    "downstreamAcceptanceId",
+    "permanentCollectionMembershipId",
+    "exitCompletenessSatisfactionId",
+    "brainExit",
+    "implicitExit",
+    "rejectHandoffActLayer",
+  ];
+  for (const key of forbidden) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted downstream exit boundary must not carry acceptance/mfg/rejection/matrix-exit fields (R58/R63/R65)",
+        "invalid_handoff_downstream_exit_boundary",
+        ["FI-DSN-STD-015-R58", "FI-DSN-STD-015-R63", "FI-DSN-STD-015-R65"],
+      );
+    }
+  }
+
+  assertAuditMetadata(record.audit, "Governed Handoff downstream exit boundary");
+  assertStd015HofG8Traceability(record.traceability, "Governed Handoff downstream exit boundary");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff downstream exit boundary requires valid governed creation marker",
+      "invalid_handoff_downstream_exit_boundary",
+      ["FI-DSN-STD-015-R58"],
     );
   }
 }

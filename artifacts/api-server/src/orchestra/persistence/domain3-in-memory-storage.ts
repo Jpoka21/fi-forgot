@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration + HOF-G5 act-layer lifecycle.
+ * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding + HOF-G4 posture declaration + HOF-G5 act-layer lifecycle + HOF-G8 downstream exit boundary.
  */
 
 import type {
@@ -13,6 +13,7 @@ import type {
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffCompletionActRecord,
+  GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
@@ -106,6 +107,13 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const handoffCompletionActsByBinding = new Map<string, string[]>();
   const handoffCompletionActsByEntry = new Map<string, string[]>();
   const handoffCompletionActsByGpra = new Map<string, string[]>();
+  const handoffDownstreamExitBoundaryById = new Map<
+    string,
+    GovernedHandoffDownstreamExitBoundaryAttributionRecord
+  >();
+  const handoffDownstreamExitBoundaryByBinding = new Map<string, string[]>();
+  const handoffDownstreamExitBoundaryByEntry = new Map<string, string[]>();
+  const handoffDownstreamExitBoundaryByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -858,6 +866,62 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffCompletionActsById.get(id))
         .filter((item): item is GovernedHandoffCompletionActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffDownstreamExitBoundaryAttribution(record) {
+      if (handoffDownstreamExitBoundaryById.has(record.exitBoundaryAttributionId)) {
+        throw new Error(
+          `Duplicate Governed Handoff downstream exit boundary identity: ${record.exitBoundaryAttributionId}`,
+        );
+      }
+      handoffDownstreamExitBoundaryById.set(
+        record.exitBoundaryAttributionId,
+        structuredClone(record),
+      );
+      const byBinding = handoffDownstreamExitBoundaryByBinding.get(record.bindingId) ?? [];
+      byBinding.push(record.exitBoundaryAttributionId);
+      handoffDownstreamExitBoundaryByBinding.set(record.bindingId, byBinding);
+      const byEntry = handoffDownstreamExitBoundaryByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.exitBoundaryAttributionId);
+      handoffDownstreamExitBoundaryByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffDownstreamExitBoundaryByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.exitBoundaryAttributionId);
+      handoffDownstreamExitBoundaryByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffDownstreamExitBoundaryAttribution(exitBoundaryAttributionId) {
+      const record = handoffDownstreamExitBoundaryById.get(exitBoundaryAttributionId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffDownstreamExitBoundaryAttributionsByBinding(bindingId) {
+      const ids = handoffDownstreamExitBoundaryByBinding.get(bindingId) ?? [];
+      return ids
+        .map((id) => handoffDownstreamExitBoundaryById.get(id))
+        .filter(
+          (item): item is GovernedHandoffDownstreamExitBoundaryAttributionRecord => !!item,
+        )
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffDownstreamExitBoundaryAttributionsByEntry(entryId) {
+      const ids = handoffDownstreamExitBoundaryByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffDownstreamExitBoundaryById.get(id))
+        .filter(
+          (item): item is GovernedHandoffDownstreamExitBoundaryAttributionRecord => !!item,
+        )
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffDownstreamExitBoundaryAttributionsByGpra(gpraId) {
+      const ids = handoffDownstreamExitBoundaryByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffDownstreamExitBoundaryById.get(id))
+        .filter(
+          (item): item is GovernedHandoffDownstreamExitBoundaryAttributionRecord => !!item,
+        )
         .map((item) => structuredClone(item));
     },
   };

@@ -701,6 +701,13 @@ section("complete does not accept/manufacture/suspend/recall; no G6 APIs on repo
     typeof repo.loadGovernedHandoffLifecycleRejectionAttribution,
     "undefined",
   );
+  expect(
+    "attributeGovernedHandoffDownstreamExitBoundary present after G8",
+    typeof repo.attributeGovernedHandoffDownstreamExitBoundary,
+    "function",
+  );
+  expect("no exitCompletenessSatisfy", typeof repo.exitCompletenessSatisfy, "undefined");
+  expect("no satisfyExitCompleteness", typeof repo.satisfyExitCompleteness, "undefined");
 }
 
 section("stale GPRA invalidation blocks new completion");
