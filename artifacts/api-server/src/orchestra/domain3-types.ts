@@ -1212,3 +1212,108 @@ export interface GovernedHandoffPreservationAuditRecord {
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }
+
+// --- STD-015 HOF-G9 Partial Authority Prohibitions (R22–R24) ---
+
+/**
+ * Sole Handoff authorization authority class acknowledged at R24 (PD-STD-015-001).
+ * Framework acknowledgment only — operative HGA authorization acts are R25+ (HOF-G2).
+ */
+export type HandoffGovernanceAuthorityClassId = "handoff_governance_authority";
+
+/**
+ * R24 peer-distinct constitutional decision classes — must not collapse into one another.
+ */
+export type HandoffPeerDistinctDecisionClass =
+  | "handoff_eligibility"
+  | "handoff_authorization"
+  | "handoff_posture_declaration"
+  | "handoff_act_completion"
+  | "handoff_recall"
+  | "handoff_withdrawal"
+  | "handoff_suspension"
+  | "downstream_acceptance"
+  | "permanent_collection_membership"
+  | "manufacturing_validation_and_execution";
+
+/**
+ * R24 HAAM — upstream / non-Handoff domains that MUST NOT be assigned Handoff authorization.
+ */
+export type HaamProhibitedHandoffAuthorizationAssignee =
+  | "magac_approval_authority"
+  | "ddac_downstream_disposition"
+  | "dsra_rework_authorization"
+  | "ivac_invalidation_authority"
+  | "ssac_supersession_authority"
+  | "brain_domain3"
+  | "g11_export_contract"
+  | "downstream_consumer_domain";
+
+/**
+ * R23 — STD-014 subjects that remain exclusive principal authority (non-absorption).
+ */
+export type Std014NonabsorbedAuthoritySubject =
+  | "review"
+  | "review_determination"
+  | "approval"
+  | "approval_withholding"
+  | "gpra_grant"
+  | "invalidated_posture"
+  | "superseded_posture"
+  | "ddac_downstream_disposition"
+  | "dsra_rework_authorization"
+  | "g11_handoff_preparation";
+
+/**
+ * R22 — Brain may only occupy these roles at the Handoff boundary.
+ */
+export type BrainPermittedHandoffRole =
+  | "constitutional_input_consumer"
+  | "evidence_and_posture_evaluator"
+  | "advisory_treatment_recommender"
+  | "routing_participant";
+
+/**
+ * R22 — Brain SHALL NOT perform these Handoff acts.
+ */
+export type BrainProhibitedHandoffAct =
+  | "authorize_handoff"
+  | "declare_handoff_posture"
+  | "complete_handoff"
+  | "recall_handoff"
+  | "withdraw_handoff"
+  | "suspend_handoff"
+  | "terminate_downstream_reliance";
+
+/**
+ * Framework-only HOF-G9 authority-boundary assessment (R22–R24).
+ * Does NOT authorize Handoff, create HGA acts, or absorb STD-014 authority.
+ */
+export interface HandoffAuthorityBoundaryAssessment {
+  readonly brainMayAuthorizeHandoff: false;
+  readonly brainMayDeclareHandoffPosture: false;
+  readonly brainMayCompleteHandoff: false;
+  readonly brainMayRecallWithdrawOrSuspendHandoff: false;
+  readonly brainMayElevateAdvisoryToOperativeHoemEvidence: false;
+  readonly brainPermittedRolesOnly: true;
+  readonly std014AuthorityNotAbsorbed: true;
+  readonly haamProhibitionsPreserved: true;
+  readonly peerDistinctDecisionClassesPreserved: true;
+  readonly hgaAcknowledgedAsSoleHandoffAuthorizationClass: true;
+  readonly doesNotInventAdditionalHandoffAuthorizationClass: true;
+  readonly doesNotCreateOperativeHgaAuthorizationActs: true;
+  readonly operativeHgaAuthorizationActsDeferredToR25: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly r22BrainNonauthorityAtHandoff: true;
+  readonly r23Std014Nonabsorption: true;
+  readonly r24HaamPeerDistinctHgaAcknowledgment: true;
+  readonly peerDistinctDecisionClasses: readonly HandoffPeerDistinctDecisionClass[];
+  readonly haamProhibitedAssignees: readonly HaamProhibitedHandoffAuthorizationAssignee[];
+  readonly std014NonabsorbedSubjects: readonly Std014NonabsorbedAuthoritySubject[];
+  readonly brainPermittedRoles: readonly BrainPermittedHandoffRole[];
+  readonly brainProhibitedActs: readonly BrainProhibitedHandoffAct[];
+  readonly acknowledgedHandoffGovernanceAuthorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly traceability: Std015GovernanceTraceability;
+}

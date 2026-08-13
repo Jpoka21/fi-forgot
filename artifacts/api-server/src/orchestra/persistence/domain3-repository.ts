@@ -96,6 +96,7 @@ import type {
   HandoffPreparationCurrency,
   HandoffPreservationAuditAuthorityEffect,
   HandoffPreservationAuditLinkedCurrency,
+  HandoffAuthorityBoundaryAssessment,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
   MandatoryReviewActivityCompleteness,
@@ -183,6 +184,7 @@ import {
   evaluateHandoffPreservationAuditAuthorityEffectFromFacts,
   evaluateHandoffPreservationAuditLinkedCurrencyFromFacts,
 } from "../handoff-preservation-audit.js";
+import { evaluateHandoffAuthorityBoundaryFromFacts } from "../handoff-authority-boundaries.js";
 import { assertEstablishedSupersessionAuthorityClass } from "../supersession-authority.js";
 import { assertSupersessionTriggerFamily } from "../supersession-trigger-families.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
@@ -850,6 +852,12 @@ export interface Domain3Repository {
   evaluateHandoffPreservationAuditLinkedCurrency(
     preservationAuditId: GovernedHandoffPreservationAuditId,
   ): Promise<HandoffPreservationAuditLinkedCurrency>;
+
+  /**
+   * HOF-G9 R22–R24 — standing authority-boundary assessment (framework only).
+   * Does not authorize Handoff or create operative HGA acts (R25+ deferred).
+   */
+  evaluateHandoffAuthorityBoundary(): Promise<HandoffAuthorityBoundaryAssessment>;
 }
 
 export function createDomain3Repository(
@@ -4028,6 +4036,10 @@ export function createDomain3RepositoryWithStorage(
         entryCurrency,
         consumptionCurrency,
       });
+    },
+
+    async evaluateHandoffAuthorityBoundary() {
+      return evaluateHandoffAuthorityBoundaryFromFacts();
     },
   };
 }

@@ -241,6 +241,23 @@ export {
 } from "./handoff-preservation-audit.js";
 
 export {
+  HANDOFF_AUTHORITY_BOUNDARY_TRACEABILITY,
+  HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID,
+  PEER_DISTINCT_HANDOFF_DECISION_CLASSES,
+  HAAM_PROHIBITED_HANDOFF_AUTHORIZATION_ASSIGNEES,
+  STD014_NONABSORBED_AUTHORITY_SUBJECTS,
+  BRAIN_PERMITTED_HANDOFF_ROLES,
+  BRAIN_PROHIBITED_HANDOFF_ACTS,
+  isHandoffPeerDistinctDecisionClass,
+  isHaamProhibitedHandoffAuthorizationAssignee,
+  assertHandoffAuthorityBoundaryClaims,
+  assertBrainCannotAuthorizeHandoff,
+  assertStd014AuthorityNotAbsorbedAsHandoff,
+  acknowledgeHandoffGovernanceAuthorityFramework,
+  evaluateHandoffAuthorityBoundaryFromFacts,
+} from "./handoff-authority-boundaries.js";
+
+export {
   STD015_GOVERNING_STANDARD,
   STD015_GOVERNING_STANDARD_VERSION,
   STD015_DOMAIN_CLASSIFICATION,
@@ -353,6 +370,13 @@ export type {
   DeferredOperativeAuditClass,
   HandoffValidityExportSnapshot,
   HandoffEvidencePackageRefs,
+  HandoffGovernanceAuthorityClassId,
+  HandoffPeerDistinctDecisionClass,
+  HaamProhibitedHandoffAuthorizationAssignee,
+  Std014NonabsorbedAuthoritySubject,
+  BrainPermittedHandoffRole,
+  BrainProhibitedHandoffAct,
+  HandoffAuthorityBoundaryAssessment,
 } from "./domain3-types.js";
 
 /**
