@@ -131,6 +131,7 @@ import type {
   HandoffPreservationAuditAuthorityEffect,
   HandoffPreservationAuditLinkedCurrency,
   HandoffAuthorityBoundaryAssessment,
+  HandoffAuthorityCatalogIntegrationAssessment,
   HccmConsumerClassId,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
@@ -261,6 +262,9 @@ import {
   evaluateHandoffPreservationAuditLinkedCurrencyFromFacts,
 } from "../handoff-preservation-audit.js";
 import { evaluateHandoffAuthorityBoundaryFromFacts } from "../handoff-authority-boundaries.js";
+import {
+  assessHandoffAuthorityCatalogIntegration as assessHandoffAuthorityCatalogIntegrationFromCatalog,
+} from "../handoff-authority-catalog.js";
 import { assertEstablishedSupersessionAuthorityClass } from "../supersession-authority.js";
 import { assertSupersessionTriggerFamily } from "../supersession-trigger-families.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
@@ -1443,6 +1447,12 @@ export interface Domain3Repository {
    * Does not authorize Handoff or create operative HGA acts (R25+ deferred).
    */
   evaluateHandoffAuthorityBoundary(): Promise<HandoffAuthorityBoundaryAssessment>;
+
+  /**
+   * HOF-G9 R66–R69 — frozen handoff authority catalog integrity assessment (read-only).
+   * Catalog membership does not authorize, bind, declare, complete, or exit.
+   */
+  assessHandoffAuthorityCatalogIntegration(): Promise<HandoffAuthorityCatalogIntegrationAssessment>;
 }
 
 export function createDomain3Repository(
@@ -6688,6 +6698,10 @@ export function createDomain3RepositoryWithStorage(
 
     async evaluateHandoffAuthorityBoundary() {
       return evaluateHandoffAuthorityBoundaryFromFacts();
+    },
+
+    async assessHandoffAuthorityCatalogIntegration() {
+      return assessHandoffAuthorityCatalogIntegrationFromCatalog();
     },
   };
 }

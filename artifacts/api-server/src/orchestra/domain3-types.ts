@@ -4,7 +4,10 @@
  */
 
 import type { Domain3GovernanceTraceability } from "./domain3-authority.js";
-import type { Std015GovernanceTraceability } from "./std015-authority.js";
+import type {
+  Std015GovernanceTraceability,
+  Std015RequirementId,
+} from "./std015-authority.js";
 import type {
   RealizationTraceabilityPackage,
   RealizedVisualArtifactId,
@@ -1938,4 +1941,135 @@ export interface HandoffDownstreamExitConsiderationEvaluation {
   readonly exitCompletenessDeferred: true;
   readonly r60CompletedEnablesConsiderationOnly: true;
   readonly r65NoImplicitExitFromCompletedAlone: true;
+}
+
+// --- STD-015 HOF-G9 Catalog Integration (R66–R69) ---
+
+/**
+ * R66 — mandatory HGA act-type matrix (§20.5.3.14). Exactly six ids.
+ * suspension / withdrawal / recall remain cataloged_deferred (HOF-G6).
+ */
+export type HgaMatrixActType =
+  | "authorization"
+  | "posture_declaration"
+  | "completion"
+  | "suspension"
+  | "withdrawal"
+  | "recall";
+
+export type HgaMatrixActOperativeStatus = "operative" | "cataloged_deferred";
+
+export interface HgaMatrixActTypeCatalogEntry {
+  readonly actType: HgaMatrixActType;
+  readonly operativeStatus: HgaMatrixActOperativeStatus;
+  readonly hoemExpectation: HgaMatrixActType;
+  readonly hccmBoundRequired: true;
+  readonly hppmmPostureChainRequired: boolean;
+  readonly requirementIds: readonly Std015RequirementId[];
+  readonly catalogedDeferredHofG6: boolean;
+}
+
+export interface HoemExpectationCatalogEntry {
+  readonly hoemExpectation: string;
+  readonly matrixMembership: "matrix" | "peer_non_matrix";
+  readonly operativeStatus: HgaMatrixActOperativeStatus | "operative";
+  readonly isSeventhMatrixType: false;
+  readonly forbiddenAsMatrix: boolean;
+  readonly requirementIds: readonly Std015RequirementId[];
+}
+
+export type HslmCatalogStateStatusKind =
+  | "denotation"
+  | "operative_transition"
+  | "denotation_only"
+  | "vocabulary_deferred";
+
+export interface HslmCatalogStateEntry {
+  readonly stateId: HandoffActLayerLifecycleState;
+  readonly statusKind: HslmCatalogStateStatusKind;
+}
+
+/**
+ * R69 — performer classes that MUST NOT be assigned operative Handoff act performance.
+ */
+export type ProhibitedHandoffActPerformerClass =
+  | "gpra_grant"
+  | "magac_approval_authority"
+  | "approval"
+  | "ddac_downstream_disposition"
+  | "dsra_rework_authorization"
+  | "ivac_invalidation_authority"
+  | "ssac_supersession_authority"
+  | "brain_domain3"
+  | "g11_export_contract"
+  | "downstream_consumer_domain"
+  | "implementation_ad_hoc_class";
+
+/**
+ * R68 — assessment that an HGA act binds exactly one HCCM context (no multi-merge).
+ * Catalog membership alone never authorizes/binds/declares/completes/exits.
+ */
+export interface HgaActCatalogBindingScopeAssessment {
+  readonly mayBindSingleContext: boolean;
+  readonly denialReasons: readonly string[];
+  readonly actType: HgaMatrixActType | null;
+  readonly bindingId: string | null;
+  readonly hccmBoundRequired: boolean;
+  readonly hppmmPostureChainRequired: boolean;
+  readonly doesNotAllowMultiContextMerge: true;
+  readonly doesNotAllowActTypeMerge: true;
+  readonly catalogMembershipDoesNotCreateAuthority: true;
+  readonly catalogMembershipDoesNotAuthorize: true;
+  readonly catalogMembershipDoesNotBind: true;
+  readonly catalogMembershipDoesNotDeclare: true;
+  readonly catalogMembershipDoesNotComplete: true;
+  readonly catalogMembershipDoesNotExit: true;
+  readonly r68SingleHccmBoundConsumerContext: true;
+  readonly traceability: Std015GovernanceTraceability;
+}
+
+/**
+ * Frozen R66–R69 catalog integrity assessment (read-only; no minting).
+ */
+export interface HandoffAuthorityCatalogIntegrationAssessment {
+  readonly integrityOk: boolean;
+  readonly soleAuthorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly soleAuthorityClassCount: 1;
+  readonly matrixActTypes: readonly HgaMatrixActType[];
+  readonly matrixActTypeCount: 6;
+  readonly operativeMatrixActTypes: readonly HgaMatrixActType[];
+  readonly catalogedDeferredMatrixActTypes: readonly HgaMatrixActType[];
+  readonly hoemMatrixExpectations: readonly HgaMatrixActType[];
+  readonly peerNonMatrixHoemExpectation: "exit_boundary";
+  readonly exitBoundaryIsSeventhMatrixType: false;
+  readonly rejectionForbiddenAsMatrix: true;
+  readonly hslmStateIds: readonly HandoffActLayerLifecycleState[];
+  readonly hslmStateCount: 8;
+  readonly hslmExcludesExitedAndAccepted: true;
+  readonly hccmConsumerClassIds: readonly HccmConsumerClassId[];
+  readonly hccmConsumerClassCount: 6;
+  readonly hppmmAffinities: readonly HandoffPostureClass[];
+  readonly noneAffinityIsNotThirdVolume06PostureClass: true;
+  readonly volume06PostureClassCount: 2;
+  readonly prohibitedPerformerClasses: readonly ProhibitedHandoffActPerformerClass[];
+  readonly haamProhibitedAssigneesPreserved: readonly HaamProhibitedHandoffAuthorizationAssignee[];
+  readonly frozenHgaConstitutionalScopes: readonly string[];
+  readonly handoffLifecycleRejectionActAbsentFromHgaScopes: true;
+  readonly rejectHandoffActLayerUndefined: true;
+  readonly suspendWithdrawRecallApisNotProvided: true;
+  readonly performHgaActFactoryNotProvided: true;
+  readonly catalogMembershipDoesNotCreateAuthority: true;
+  readonly catalogMembershipDoesNotAuthorize: true;
+  readonly catalogMembershipDoesNotBind: true;
+  readonly catalogMembershipDoesNotDeclare: true;
+  readonly catalogMembershipDoesNotComplete: true;
+  readonly catalogMembershipDoesNotExit: true;
+  readonly r66SoleHgaAndSixTypeMatrix: true;
+  readonly r67DistinctActTypeAttributionAndHoem: true;
+  readonly r68SingleHccmBindingNoMerge: true;
+  readonly r69ProhibitedPerformers: true;
+  readonly r70PlusNotImplemented: true;
+  readonly hofG6MechanicsDeferred: true;
+  readonly hofG9CompletionThemesTranche3: true;
+  readonly traceability: Std015GovernanceTraceability;
 }

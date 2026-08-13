@@ -318,6 +318,36 @@ export {
 } from "./handoff-authority-boundaries.js";
 
 export {
+  HANDOFF_AUTHORITY_CATALOG_TRACEABILITY,
+  STD015_SOLE_HANDOFF_AUTHORITY_CLASS_CATALOG,
+  HGA_MATRIX_ACT_TYPES,
+  HGA_MATRIX_ACT_TYPE_CATALOG,
+  FORBIDDEN_INVENTED_HGA_ACT_SCOPES,
+  FORBIDDEN_ADDITIONAL_HANDOFF_AUTHORITY_CLASSES,
+  FORBIDDEN_HSLM_INVENTED_STATES,
+  HOEM_MATRIX_EXPECTATION_CATALOG,
+  HOEM_PEER_NON_MATRIX_EXIT_BOUNDARY_EXPECTATION,
+  HOEM_FORBIDDEN_MATRIX_EXPECTATIONS,
+  HSLM_EIGHT_STATE_CATALOG,
+  HPPM_POSTURE_AFFINITY_CATALOG,
+  VOLUME_06_HANDOFF_POSTURE_CLASSES,
+  PROHIBITED_HANDOFF_ACT_PERFORMER_CLASSES,
+  isStd015SoleHandoffAuthorityClass,
+  assertStd015SoleHandoffAuthorityClass,
+  isHgaMatrixActType,
+  resolveHgaMatrixActType,
+  assertHgaMatrixActType,
+  getHgaMatrixActOperativeStatus,
+  assertHgaMatrixActMayBePerformed,
+  assertHgaActTypeStringFailClosed,
+  assessHgaActCatalogBindingScope,
+  isProhibitedHandoffActPerformerClass,
+  assertNotProhibitedHandoffActPerformer,
+  validateHccmCrossCatalogTuple,
+  assessHandoffAuthorityCatalogIntegration,
+} from "./handoff-authority-catalog.js";
+
+export {
   STD015_GOVERNING_STANDARD,
   STD015_GOVERNING_STANDARD_VERSION,
   STD015_DOMAIN_CLASSIFICATION,
@@ -471,6 +501,15 @@ export type {
   BrainPermittedHandoffRole,
   BrainProhibitedHandoffAct,
   HandoffAuthorityBoundaryAssessment,
+  HgaMatrixActType,
+  HgaMatrixActOperativeStatus,
+  HgaMatrixActTypeCatalogEntry,
+  HoemExpectationCatalogEntry,
+  HslmCatalogStateEntry,
+  HslmCatalogStateStatusKind,
+  ProhibitedHandoffActPerformerClass,
+  HgaActCatalogBindingScopeAssessment,
+  HandoffAuthorityCatalogIntegrationAssessment,
 } from "./domain3-types.js";
 
 /**

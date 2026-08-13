@@ -77,6 +77,10 @@ import {
 import { GOVERNED_HANDOFF_ACT_LAYER_LIFECYCLE_TRACEABILITY } from "../handoff-act-lifecycle.js";
 import { GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY } from "../handoff-downstream-exit-boundary.js";
 import {
+  assertHgaActTypeStringFailClosed,
+  assertHgaMatrixActMayBePerformed,
+} from "../handoff-authority-catalog.js";
+import {
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
 } from "../handoff-governance-authority.js";
 import {
@@ -3160,6 +3164,10 @@ export function validatePersistedGovernedHandoffAuthorization(
       ["FI-DSN-STD-015-R29"],
     );
   }
+  assertHgaMatrixActMayBePerformed(hoemRecord.actType);
+  assertHgaActTypeStringFailClosed(hoemRecord.actType, {
+    requireOperativePerformance: true,
+  });
   assertBrandedId(hoemRecord.gpraId, ID_PREFIXES.gpra, "GPRA");
   assertBrandedId(hoemRecord.obligationId, ID_PREFIXES.obligation, "Production Obligation");
   if (
@@ -3629,6 +3637,10 @@ export function validatePersistedGovernedHandoffPostureDeclaration(
       ["FI-DSN-STD-015-R45"],
     );
   }
+  assertHgaMatrixActMayBePerformed(hoemRecord.actType);
+  assertHgaActTypeStringFailClosed(hoemRecord.actType, {
+    requireOperativePerformance: true,
+  });
   if (
     hoemRecord.gpraId !== record.gpraId ||
     hoemRecord.obligationId !== record.obligationId ||
@@ -3864,6 +3876,10 @@ export function validatePersistedGovernedHandoffCompletion(
       ["FI-DSN-STD-015-R56"],
     );
   }
+  assertHgaMatrixActMayBePerformed(hoemRecord.actType);
+  assertHgaActTypeStringFailClosed(hoemRecord.actType, {
+    requireOperativePerformance: true,
+  });
   if (
     hoemRecord.gpraId !== record.gpraId ||
     hoemRecord.obligationId !== record.obligationId ||
@@ -4130,6 +4146,10 @@ export function validatePersistedGovernedHandoffDownstreamExitBoundary(
       ["FI-DSN-STD-015-R64"],
     );
   }
+  // Peer NON-MATRIX only — never treat exit_boundary as an HGA matrix act type (R66/R67).
+  assertHgaActTypeStringFailClosed(hoemRecord.actType, {
+    allowPeerNonMatrixExitBoundary: true,
+  });
   if (
     hoemRecord.gpraId !== record.gpraId ||
     hoemRecord.obligationId !== record.obligationId ||

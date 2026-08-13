@@ -8,6 +8,12 @@
  * Downstream exit BOUNDARY attribution (HOF-G8 R58–R65) is performed under the established
  * HGA class but is NOT an HGA matrix act type and must not be added to constitutional scopes.
  * Actor strings alone cannot mint HGA. MAGAC/DDAC/DSRA/IVAC/SSAC/Brain cannot substitute.
+ *
+ * R66 catalog integration: the mandatory HGA act-type matrix catalogs six types
+ * (authorization, posture_declaration, completion, suspension, withdrawal, recall), but
+ * authorizedConstitutionalScopes remains exactly the three operative scopes below.
+ * Catalog presence of suspension/withdrawal/recall ≠ constitutional scope activation (HOF-G6).
+ * See handoff-authority-catalog.ts for the read-only R66–R69 catalogs.
  */
 
 import { OrchestraConstitutionalError } from "./errors.js";
