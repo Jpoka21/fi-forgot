@@ -223,6 +223,16 @@ export {
 } from "./handoff-entry.js";
 
 export {
+  GOVERNED_HANDOFF_EVIDENCE_CONSUMPTION_TRACEABILITY,
+  HANDOFF_EVIDENCE_MODELS,
+  DEFERRED_HOEM_OPERATIVE_RECORD_CLASSES,
+  isHandoffEvidenceModelId,
+  isDeferredHoemOperativeRecordClass,
+  assessGovernedHandoffEvidenceConsumption,
+  evaluateHandoffEvidenceConsumptionCurrencyFromFacts,
+} from "./handoff-evidence-consumption.js";
+
+export {
   STD015_GOVERNING_STANDARD,
   STD015_GOVERNING_STANDARD_VERSION,
   STD015_DOMAIN_CLASSIFICATION,
@@ -316,12 +326,18 @@ export type {
   GovernedHandoffEntryId,
   GovernedHandoffEntryRecord,
   GovernedHandoffEntryAssessment,
+  GovernedHandoffEvidenceConsumptionId,
+  GovernedHandoffEvidenceConsumptionRecord,
+  GovernedHandoffEvidenceConsumptionAssessment,
   HandoffConsumerCategoryKey,
   HandoffEligibilityLayerCondition,
   HandoffPreparationCurrency,
   HandoffEntryCurrency,
+  HandoffEvidenceConsumptionCurrency,
   HandoffDeferredPrincipalSubject,
   HandoffHofPDistinctionId,
+  HandoffEvidenceModelId,
+  DeferredHoemOperativeRecordClass,
   HandoffValidityExportSnapshot,
   HandoffEvidencePackageRefs,
 } from "./domain3-types.js";

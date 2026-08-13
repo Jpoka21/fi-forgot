@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry.
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption.
  */
 
 import type {
@@ -15,6 +15,8 @@ import type {
   DownstreamDeficiencyRecordId,
   GovernedHandoffEntryId,
   GovernedHandoffEntryRecord,
+  GovernedHandoffEvidenceConsumptionId,
+  GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationId,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
@@ -224,4 +226,21 @@ export interface Domain3StoragePort {
   listGovernedHandoffEntriesByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffEntryRecord[]>;
+
+  /**
+   * Append-only Handoff evidence consumption (HOF-G7). Unique by consumptionId;
+   * multiple per entry allowed. No update or delete API — history must not be mutated.
+   */
+  putGovernedHandoffEvidenceConsumption(
+    record: GovernedHandoffEvidenceConsumptionRecord,
+  ): Promise<void>;
+  getGovernedHandoffEvidenceConsumption(
+    consumptionId: GovernedHandoffEvidenceConsumptionId,
+  ): Promise<GovernedHandoffEvidenceConsumptionRecord | null>;
+  listGovernedHandoffEvidenceConsumptionsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffEvidenceConsumptionRecord[]>;
+  listGovernedHandoffEvidenceConsumptionsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffEvidenceConsumptionRecord[]>;
 }

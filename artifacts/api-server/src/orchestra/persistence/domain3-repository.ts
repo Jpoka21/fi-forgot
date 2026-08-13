@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G11 + STD-015 HOF-G1 Upstream Entry.
+ * Governed Domain 3 repository — G2–G11 + STD-015 HOF-G1 Upstream Entry + HOF-G7 Evidence Consumption.
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -12,6 +12,7 @@ import {
   rehydrateDomain3BrainAdvisory,
   rehydrateDownstreamDeficiencyRecord,
   rehydrateGovernedHandoffEntry,
+  rehydrateGovernedHandoffEvidenceConsumption,
   rehydrateGovernedHandoffPreparation,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
@@ -33,6 +34,7 @@ import {
   validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGovernedHandoffEntry,
+  validatePersistedGovernedHandoffEvidenceConsumption,
   validatePersistedGovernedHandoffPreparation,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -71,6 +73,9 @@ import type {
   GovernedHandoffEntryAssessment,
   GovernedHandoffEntryId,
   GovernedHandoffEntryRecord,
+  GovernedHandoffEvidenceConsumptionAssessment,
+  GovernedHandoffEvidenceConsumptionId,
+  GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationId,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
@@ -83,6 +88,7 @@ import type {
   GpraValidityPosture,
   HandoffConsumerCategoryKey,
   HandoffEntryCurrency,
+  HandoffEvidenceConsumptionCurrency,
   HandoffPreparationCurrency,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
@@ -157,6 +163,13 @@ import {
   evaluateHandoffEntryCurrencyFromFacts,
   handoffEntryLineageMatchesGpra,
 } from "../handoff-entry.js";
+import {
+  assertGovernedEvidenceConsumptionActor,
+  assertNoHandoffEvidenceConsumptionExecutionOrActClaims,
+  assessGovernedHandoffEvidenceConsumption,
+  createGovernedHandoffEvidenceConsumptionRecord,
+  evaluateHandoffEvidenceConsumptionCurrencyFromFacts,
+} from "../handoff-evidence-consumption.js";
 import { assertEstablishedSupersessionAuthorityClass } from "../supersession-authority.js";
 import { assertSupersessionTriggerFamily } from "../supersession-trigger-families.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
@@ -660,6 +673,95 @@ export interface Domain3Repository {
   evaluateHandoffEntryCurrency(
     entryId: GovernedHandoffEntryId,
   ): Promise<HandoffEntryCurrency>;
+
+  /**
+   * HOF-G7 R08–R15 — non-persisting evidence/validity consumption assessment.
+   * Does not authorize Handoff, declare Posture, or create HOEM act records.
+   */
+  evaluateGovernedHandoffEvidenceConsumption(input: {
+    entryId: GovernedHandoffEntryId;
+    brainAdvisoryIds?: readonly Domain3BrainAdvisoryId[];
+    sourceAttribution?: unknown;
+    authorityClassId?: unknown;
+    handoffAuthorityClassId?: unknown;
+    handoffActId?: unknown;
+    handoffAuthorized?: unknown;
+    executesHandoff?: unknown;
+    handoffAuthorizationActId?: unknown;
+    postureDeclarationActId?: unknown;
+    completionActId?: unknown;
+    suspensionActId?: unknown;
+    recallActId?: unknown;
+    withdrawalActId?: unknown;
+    hoemEvidenceId?: unknown;
+    hoemOperativeActRecords?: unknown;
+    hoemActInstances?: unknown;
+    preservationActId?: unknown;
+    hofG10PreservationActId?: unknown;
+    executionQueueId?: unknown;
+    constitutionalQueueId?: unknown;
+    unknownEvidenceModel?: unknown;
+    evidenceModels?: unknown;
+  }): Promise<GovernedHandoffEvidenceConsumptionAssessment>;
+
+  /**
+   * HOF-G7 R08–R15 — persist consumption ONLY when mayConsume. Additive immutable history.
+   * Does not authorize Handoff, declare Posture, or create HOEM act instances.
+   */
+  recordGovernedHandoffEvidenceConsumption(input: {
+    entryId: GovernedHandoffEntryId;
+    consumedBy: string;
+    brainAdvisoryIds?: readonly Domain3BrainAdvisoryId[];
+    sourceAttribution?: unknown;
+    authorityClassId?: unknown;
+    handoffAuthorityClassId?: unknown;
+    handoffActId?: unknown;
+    handoffAuthorized?: unknown;
+    executesHandoff?: unknown;
+    handoffAuthorization?: unknown;
+    performHandoff?: unknown;
+    handoffExecuted?: unknown;
+    handoffPosture?: unknown;
+    handoffAuthorizationActId?: unknown;
+    postureDeclarationActId?: unknown;
+    completionActId?: unknown;
+    suspensionActId?: unknown;
+    recallActId?: unknown;
+    withdrawalActId?: unknown;
+    hoemEvidenceId?: unknown;
+    hoemOperativeEvidenceId?: unknown;
+    hoemOperativeActRecords?: unknown;
+    hoemActInstances?: unknown;
+    preservationActId?: unknown;
+    hofG10PreservationActId?: unknown;
+    manufacturingExecutionId?: unknown;
+    fulfillmentExecutionId?: unknown;
+    executionQueueId?: unknown;
+    constitutionalQueueId?: unknown;
+    unknownEvidenceModel?: unknown;
+    evidenceModels?: unknown;
+    consumerCategoryKeys?: unknown;
+  }): Promise<GovernedHandoffEvidenceConsumptionRecord>;
+
+  loadGovernedHandoffEvidenceConsumption(
+    consumptionId: GovernedHandoffEvidenceConsumptionId,
+  ): Promise<GovernedHandoffEvidenceConsumptionRecord | null>;
+
+  listGovernedHandoffEvidenceConsumptionsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffEvidenceConsumptionRecord[]>;
+
+  listGovernedHandoffEvidenceConsumptionsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffEvidenceConsumptionRecord[]>;
+
+  /**
+   * Optional: historical consumption currency vs current entry/prep posture.
+   * Stale consumptions remain loadable (immutable history).
+   */
+  evaluateHandoffEvidenceConsumptionCurrency(
+    consumptionId: GovernedHandoffEvidenceConsumptionId,
+  ): Promise<HandoffEvidenceConsumptionCurrency>;
 }
 
 export function createDomain3Repository(
@@ -1255,6 +1357,129 @@ export function createDomain3RepositoryWithStorage(
     return {
       preparation,
       assessment: assessGovernedHandoffEntry({
+        preparation,
+        preparationCurrency,
+        authoritativeGpraId: authoritative?.gpraId ?? null,
+        lineageMatchesAuthoritativeGpra,
+      }),
+    };
+  }
+
+  async function rehydrateTrustedHandoffEvidenceConsumption(
+    raw: GovernedHandoffEvidenceConsumptionRecord,
+  ): Promise<GovernedHandoffEvidenceConsumptionRecord> {
+    const entryRaw = await storage.getGovernedHandoffEntry(raw.entryId);
+    if (!entryRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff evidence consumption entryId points to no persisted entry",
+        "invalid_handoff_evidence_consumption",
+        ["FI-DSN-STD-015-R14"],
+      );
+    }
+    const entry = await rehydrateTrustedHandoffEntry(entryRaw);
+    const prepRaw = await storage.getGovernedHandoffPreparation(raw.preparationId);
+    if (!prepRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff evidence consumption preparationId points to no persisted preparation",
+        "invalid_handoff_evidence_consumption",
+        ["FI-DSN-STD-015-R09", "FI-DSN-STD-015-R14"],
+      );
+    }
+    const preparation = await rehydrateTrustedHandoffPreparation(prepRaw);
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    if (!gpraRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff evidence consumption gpraId points to no persisted GPRA",
+        "invalid_handoff_evidence_consumption",
+        ["FI-DSN-STD-015-R14"],
+      );
+    }
+    const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+    if (!reviewRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff evidence consumption reviewId points to no persisted Review",
+        "invalid_handoff_evidence_consumption",
+        ["FI-DSN-STD-015-R14"],
+      );
+    }
+    const review = rehydrateProductionReadinessReview(reviewRaw);
+    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+    if (!determinationRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff evidence consumption determinationId points to no persisted Determination",
+        "invalid_handoff_evidence_consumption",
+        ["FI-DSN-STD-015-R14"],
+      );
+    }
+    const determination = rehydrateReviewDetermination(determinationRaw);
+    return rehydrateGovernedHandoffEvidenceConsumption(raw, {
+      entry,
+      preparation,
+      gpra,
+      review,
+      determination,
+    });
+  }
+
+  async function assessHandoffEvidenceConsumptionInternal(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<{
+    assessment: GovernedHandoffEvidenceConsumptionAssessment;
+    entry: GovernedHandoffEntryRecord | null;
+    preparation: GovernedHandoffPreparationRecord | null;
+  }> {
+    const entryRaw = await storage.getGovernedHandoffEntry(entryId);
+    if (!entryRaw) {
+      return {
+        entry: null,
+        preparation: null,
+        assessment: assessGovernedHandoffEvidenceConsumption({
+          entry: null,
+          entryCurrency: null,
+          preparation: null,
+          preparationCurrency: null,
+          authoritativeGpraId: null,
+          lineageMatchesAuthoritativeGpra: false,
+        }),
+      };
+    }
+    const entry = await rehydrateTrustedHandoffEntry(entryRaw);
+    const prepRaw = await storage.getGovernedHandoffPreparation(entry.preparationId);
+    const preparation = prepRaw
+      ? await rehydrateTrustedHandoffPreparation(prepRaw)
+      : null;
+
+    let preparationCurrency: HandoffPreparationCurrency | null = null;
+    if (preparation) {
+      try {
+        preparationCurrency = await evaluateHandoffPreparationCurrencyInternal(preparation);
+      } catch {
+        preparationCurrency = "stale";
+      }
+    }
+
+    const entryCurrency: HandoffEntryCurrency = preparation
+      ? evaluateHandoffEntryCurrencyFromFacts({
+          entry,
+          currentPreparationCurrency: preparationCurrency ?? "stale",
+        })
+      : "stale";
+
+    const authoritative = await findAuthoritativeGpraByObligationContext(
+      entry.obligationId,
+      entry.handoffConsumerContextId,
+    );
+    const lineageMatchesAuthoritativeGpra = authoritative
+      ? handoffEntryLineageMatchesGpra(entry, authoritative)
+      : false;
+
+    return {
+      entry,
+      preparation,
+      assessment: assessGovernedHandoffEvidenceConsumption({
+        entry,
+        entryCurrency,
         preparation,
         preparationCurrency,
         authoritativeGpraId: authoritative?.gpraId ?? null,
@@ -3351,6 +3576,156 @@ export function createDomain3RepositoryWithStorage(
         await evaluateHandoffPreparationCurrencyInternal(preparation);
       return evaluateHandoffEntryCurrencyFromFacts({
         entry,
+        currentPreparationCurrency,
+      });
+    },
+
+    async evaluateGovernedHandoffEvidenceConsumption(input) {
+      assertNoHandoffEvidenceConsumptionExecutionOrActClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      if (
+        input.sourceAttribution !== undefined ||
+        input.authorityClassId != null ||
+        input.handoffAuthorityClassId != null
+      ) {
+        assertGovernedEvidenceConsumptionActor({
+          consumedBy: "consumption-evaluator",
+          sourceAttribution: input.sourceAttribution,
+          authorityClassId: input.authorityClassId,
+          handoffAuthorityClassId: input.handoffAuthorityClassId,
+        });
+      }
+      if (input.brainAdvisoryIds?.length) {
+        await resolveBrainAdvisoriesForHandoff(input.brainAdvisoryIds);
+      }
+      const { assessment } = await assessHandoffEvidenceConsumptionInternal(input.entryId);
+      return assessment;
+    },
+
+    async recordGovernedHandoffEvidenceConsumption(input) {
+      assertNoHandoffEvidenceConsumptionExecutionOrActClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      const consumedBy = assertGovernedEvidenceConsumptionActor(input);
+      const brainAdvisoryIds = await resolveBrainAdvisoriesForHandoff(input.brainAdvisoryIds);
+      const { assessment, entry, preparation } = await assessHandoffEvidenceConsumptionInternal(
+        input.entryId,
+      );
+
+      if (!assessment.mayConsume || !entry || !preparation) {
+        throw new OrchestraConstitutionalError(
+          `Governed Handoff evidence consumption rejected: ${assessment.reasons.join("; ") || "mayConsume is false"}`,
+          "invalid_handoff_evidence_consumption",
+          ["FI-DSN-STD-015-R14", "FI-DSN-STD-015-R15"],
+        );
+      }
+
+      const consumption = createGovernedHandoffEvidenceConsumptionRecord({
+        entry,
+        preparation,
+        consumedBy,
+        brainAdvisoryIds,
+        sourceAttribution: input.sourceAttribution,
+        authorityClassId: input.authorityClassId,
+        handoffAuthorityClassId: input.handoffAuthorityClassId,
+        handoffActId: input.handoffActId,
+        handoffAuthorized: input.handoffAuthorized,
+        executesHandoff: input.executesHandoff,
+        handoffAuthorization: input.handoffAuthorization,
+        performHandoff: input.performHandoff,
+        handoffExecuted: input.handoffExecuted,
+        handoffPosture: input.handoffPosture,
+        handoffAuthorizationActId: input.handoffAuthorizationActId,
+        postureDeclarationActId: input.postureDeclarationActId,
+        completionActId: input.completionActId,
+        suspensionActId: input.suspensionActId,
+        recallActId: input.recallActId,
+        withdrawalActId: input.withdrawalActId,
+        hoemEvidenceId: input.hoemEvidenceId,
+        hoemOperativeEvidenceId: input.hoemOperativeEvidenceId,
+        hoemOperativeActRecords: input.hoemOperativeActRecords,
+        hoemActInstances: input.hoemActInstances,
+        preservationActId: input.preservationActId,
+        hofG10PreservationActId: input.hofG10PreservationActId,
+        manufacturingExecutionId: input.manufacturingExecutionId,
+        fulfillmentExecutionId: input.fulfillmentExecutionId,
+        executionQueueId: input.executionQueueId,
+        constitutionalQueueId: input.constitutionalQueueId,
+        unknownEvidenceModel: input.unknownEvidenceModel,
+        evidenceModels: input.evidenceModels,
+        consumerCategoryKeys: input.consumerCategoryKeys,
+      });
+
+      validatePersistedGovernedHandoffEvidenceConsumption(consumption);
+      try {
+        await storage.putGovernedHandoffEvidenceConsumption(consumption);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error
+            ? error.message
+            : "Failed to persist Governed Handoff evidence consumption",
+          "invalid_handoff_evidence_consumption",
+          ["FI-DSN-STD-015-R15"],
+        );
+      }
+      const loaded = await storage.getGovernedHandoffEvidenceConsumption(consumption.consumptionId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Governed Handoff evidence consumption",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-015-R15"],
+        );
+      }
+      return rehydrateTrustedHandoffEvidenceConsumption(loaded);
+    },
+
+    async loadGovernedHandoffEvidenceConsumption(consumptionId) {
+      const loaded = await storage.getGovernedHandoffEvidenceConsumption(consumptionId);
+      if (!loaded) return null;
+      return rehydrateTrustedHandoffEvidenceConsumption(loaded);
+    },
+
+    async listGovernedHandoffEvidenceConsumptionsByEntry(entryId) {
+      const listed = await storage.listGovernedHandoffEvidenceConsumptionsByEntry(entryId);
+      const out: GovernedHandoffEvidenceConsumptionRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffEvidenceConsumption(item));
+      }
+      return out.sort((a, b) => a.consumedAt.localeCompare(b.consumedAt));
+    },
+
+    async listGovernedHandoffEvidenceConsumptionsByGpra(gpraId) {
+      const listed = await storage.listGovernedHandoffEvidenceConsumptionsByGpra(gpraId);
+      const out: GovernedHandoffEvidenceConsumptionRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffEvidenceConsumption(item));
+      }
+      return out.sort((a, b) => a.consumedAt.localeCompare(b.consumedAt));
+    },
+
+    async evaluateHandoffEvidenceConsumptionCurrency(consumptionId) {
+      const consumption = await this.loadGovernedHandoffEvidenceConsumption(consumptionId);
+      if (!consumption) {
+        throw new OrchestraConstitutionalError(
+          "Handoff evidence consumption not found for currency evaluation",
+          "invalid_handoff_evidence_consumption",
+          ["FI-DSN-STD-015-R14"],
+        );
+      }
+      let currentEntryCurrency: HandoffEntryCurrency;
+      try {
+        currentEntryCurrency = await this.evaluateHandoffEntryCurrency(consumption.entryId);
+      } catch {
+        currentEntryCurrency = "stale";
+      }
+      const preparation = await this.loadGovernedHandoffPreparation(consumption.preparationId);
+      const currentPreparationCurrency = preparation
+        ? await evaluateHandoffPreparationCurrencyInternal(preparation)
+        : ("stale" as const);
+      return evaluateHandoffEvidenceConsumptionCurrencyFromFacts({
+        consumption,
+        currentEntryCurrency,
         currentPreparationCurrency,
       });
     },

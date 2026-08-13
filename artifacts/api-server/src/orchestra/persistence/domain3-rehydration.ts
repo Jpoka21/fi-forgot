@@ -9,6 +9,7 @@
  * G10 Brain advisories require BRPAM markers and Review/RVA/Program linkage coherence.
  * G11 Handoff preparations require HEPM/HVEM markers and GPRA lineage coherence.
  * HOF-G1 Handoff entries require preparation + GPRA lineage coherence (R01–R07).
+ * HOF-G7 evidence consumption requires entry + preparation + GPRA lineage coherence (R08–R15).
  */
 
 import type {
@@ -18,6 +19,7 @@ import type {
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   GovernedHandoffEntryRecord,
+  GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -50,6 +52,7 @@ import { assertPersistedGpraSupersessionCoherence } from "./g9-rehydration-coher
 import { assertPersistedDomain3BrainAdvisoryCoherence } from "./g10-rehydration-coherence.js";
 import { assertPersistedGovernedHandoffPreparationCoherence } from "./g11-rehydration-coherence.js";
 import { assertPersistedGovernedHandoffEntryCoherence } from "./hof-g1-rehydration-coherence.js";
+import { assertPersistedGovernedHandoffEvidenceConsumptionCoherence } from "./hof-g7-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
@@ -57,6 +60,7 @@ import {
   validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
   validatePersistedGovernedHandoffEntry,
+  validatePersistedGovernedHandoffEvidenceConsumption,
   validatePersistedGovernedHandoffPreparation,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -518,6 +522,53 @@ export function rehydrateGovernedHandoffEntry(
   }
 
   assertPersistedGovernedHandoffEntryCoherence({
+    entry,
+    preparation,
+    gpra,
+    review,
+    determination,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export interface HofG7HandoffEvidenceConsumptionRehydrationContext {
+  readonly entry: unknown;
+  readonly preparation: unknown;
+  readonly gpra: unknown;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+/**
+ * Trusted HOF-G7 evidence consumption rehydration — entry + preparation + GPRA coherence.
+ * Historical consumptions remain loadable after later invalidation (immutable history).
+ */
+export function rehydrateGovernedHandoffEvidenceConsumption(
+  raw: unknown,
+  context: HofG7HandoffEvidenceConsumptionRehydrationContext,
+): GovernedHandoffEvidenceConsumptionRecord {
+  validatePersistedGovernedHandoffEvidenceConsumption(raw);
+  validatePersistedGovernedHandoffEntry(context.entry);
+  validatePersistedGovernedHandoffPreparation(context.preparation);
+  validatePersistedGpraGrant(context.gpra);
+  const consumption = raw as GovernedHandoffEvidenceConsumptionRecord;
+  const entry = context.entry as GovernedHandoffEntryRecord;
+  const preparation = context.preparation as GovernedHandoffPreparationRecord;
+  const gpra = context.gpra as GpraGrantRecord;
+
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+
+  assertPersistedGovernedHandoffEvidenceConsumptionCoherence({
+    consumption,
     entry,
     preparation,
     gpra,

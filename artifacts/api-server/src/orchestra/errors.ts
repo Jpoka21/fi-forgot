@@ -67,7 +67,8 @@ export type OrchestraErrorCode =
   | "invalid_gpra_supersession"
   | "invalid_domain3_brain_advisory"
   | "invalid_handoff_preparation"
-  | "invalid_handoff_entry";
+  | "invalid_handoff_entry"
+  | "invalid_handoff_evidence_consumption";
 
 export function isOrchestraConstitutionalError(
   error: unknown,

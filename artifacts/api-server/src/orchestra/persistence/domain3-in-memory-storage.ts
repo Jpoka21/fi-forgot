@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry.
+ * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption.
  */
 
 import type {
@@ -9,6 +9,7 @@ import type {
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   GovernedHandoffEntryRecord,
+  GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -68,6 +69,12 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const handoffEntriesById = new Map<string, GovernedHandoffEntryRecord>();
   const handoffEntriesByPreparation = new Map<string, string[]>();
   const handoffEntriesByGpra = new Map<string, string[]>();
+  const handoffEvidenceConsumptionsById = new Map<
+    string,
+    GovernedHandoffEvidenceConsumptionRecord
+  >();
+  const handoffEvidenceConsumptionsByEntry = new Map<string, string[]>();
+  const handoffEvidenceConsumptionsByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -579,6 +586,42 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffEntriesById.get(id))
         .filter((item): item is GovernedHandoffEntryRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffEvidenceConsumption(record) {
+      if (handoffEvidenceConsumptionsById.has(record.consumptionId)) {
+        throw new Error(
+          `Duplicate Governed Handoff evidence consumption identity: ${record.consumptionId}`,
+        );
+      }
+      handoffEvidenceConsumptionsById.set(record.consumptionId, structuredClone(record));
+      const byEntry = handoffEvidenceConsumptionsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.consumptionId);
+      handoffEvidenceConsumptionsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffEvidenceConsumptionsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.consumptionId);
+      handoffEvidenceConsumptionsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffEvidenceConsumption(consumptionId) {
+      const record = handoffEvidenceConsumptionsById.get(consumptionId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffEvidenceConsumptionsByEntry(entryId) {
+      const ids = handoffEvidenceConsumptionsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffEvidenceConsumptionsById.get(id))
+        .filter((item): item is GovernedHandoffEvidenceConsumptionRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffEvidenceConsumptionsByGpra(gpraId) {
+      const ids = handoffEvidenceConsumptionsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffEvidenceConsumptionsById.get(id))
+        .filter((item): item is GovernedHandoffEvidenceConsumptionRecord => !!item)
         .map((item) => structuredClone(item));
     },
   };

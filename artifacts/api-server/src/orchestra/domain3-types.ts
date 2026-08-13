@@ -1007,3 +1007,123 @@ export interface GovernedHandoffEntryRecord {
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }
+
+// --- STD-015 HOF-G7 Evidence and Validity Consumption (R08–R15) ---
+
+export type GovernedHandoffEvidenceConsumptionId = string & {
+  readonly __brand: "GovernedHandoffEvidenceConsumptionId";
+};
+
+/**
+ * R08 — four peer-distinct evidence models (catalog only; no substitution).
+ * hepm / hvem / hoem / advisory remain distinct; HOEM is framework-only in G7.
+ */
+export type HandoffEvidenceModelId = "hepm" | "hvem" | "hoem" | "advisory";
+
+/**
+ * R11 — deferred HOEM operative record classes (framework catalog only).
+ * Does NOT create authorization/posture/completion/suspension/recall/withdrawal act instances.
+ */
+export type DeferredHoemOperativeRecordClass =
+  | "authorization"
+  | "posture_declaration"
+  | "completion"
+  | "suspension"
+  | "recall"
+  | "withdrawal";
+
+/** Historical consumption currency vs current entry/prep posture. */
+export type HandoffEvidenceConsumptionCurrency = "current" | "stale";
+
+/**
+ * Non-persisting R08–R15 consumption assessment — mayConsume means evidence/validity
+ * may be consumed for consideration; never authorization, posture, or execution.
+ */
+export interface GovernedHandoffEvidenceConsumptionAssessment {
+  readonly mayConsume: boolean;
+  readonly entryId: GovernedHandoffEntryId | null;
+  readonly preparationId: GovernedHandoffPreparationId | null;
+  readonly gpraId: GpraId | null;
+  readonly reasons: readonly string[];
+  readonly evidenceModelsPreserved: readonly HandoffEvidenceModelId[];
+  readonly deferredHoemOperativeRecordClasses: readonly DeferredHoemOperativeRecordClass[];
+  readonly upstreamFreshnessAtConsumption: "current" | null;
+  readonly hepmReferencesAvailable: boolean;
+  readonly hvemFactsCurrent: boolean;
+  readonly factualInputsToConsiderationOnly: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notEvidenceOfHandoffAuthorization: true;
+  readonly notEvidenceOfHandoffPostureDeclaration: true;
+  readonly doesNotElevateAdvisoryToConstitutionalFact: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly hoemFrameworkOnly: true;
+  readonly doesNotCreateOperativeHandoffActRecords: true;
+  readonly fourModelsPeerDistinct: true;
+  readonly r08FourPeerDistinctEvidenceModels: true;
+  readonly r09HepmReadOnlyConsumption: true;
+  readonly r10HvemEvaluationPointConsumption: true;
+  readonly r11HoemFrameworkOnly: true;
+  readonly r12AdvisoryNonbinding: true;
+  readonly r13EligibilityNotAuthorization: true;
+  readonly r14UpstreamFreshnessRequired: true;
+  readonly r15NoInventedConstitutionalQueueOrSchema: true;
+}
+
+/**
+ * Additive immutable Governed Handoff evidence/validity consumption record (HOF-G7 R08–R15).
+ * Consumes G1 entry + G11 HEPM/HVEM for consideration only.
+ * Does NOT authorize Handoff, declare Posture, create HOEM act instances, or execute.
+ */
+export interface GovernedHandoffEvidenceConsumptionRecord {
+  readonly consumptionId: GovernedHandoffEvidenceConsumptionId;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  /** R09 — frozen HEPM refs copied from preparation.evidencePackage (read-only). */
+  readonly hepmRefs: HandoffEvidencePackageRefs;
+  /** R10 — frozen HVEM snapshot copied from preparation.validityExport. */
+  readonly hvemSnapshot: HandoffValidityExportSnapshot;
+  /** R10 — evaluation-point identity for stale detection. */
+  readonly hvemEvaluationPoint: HandoffValidityExportSnapshot["evaluationPoint"];
+  readonly evidenceModelsPreserved: readonly HandoffEvidenceModelId[];
+  readonly deferredHoemOperativeRecordClasses: readonly DeferredHoemOperativeRecordClass[];
+  readonly brainAdvisoryIds: readonly Domain3BrainAdvisoryId[];
+  readonly upstreamFreshnessAtConsumption: "current";
+  readonly hepmReferencesAvailable: true;
+  readonly hvemFactsCurrent: true;
+  readonly factualInputsToConsiderationOnly: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notEvidenceOfHandoffAuthorization: true;
+  readonly notEvidenceOfHandoffPostureDeclaration: true;
+  readonly doesNotElevateAdvisoryToConstitutionalFact: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly hoemFrameworkOnly: true;
+  readonly doesNotCreateOperativeHandoffActRecords: true;
+  readonly fourModelsPeerDistinct: true;
+  readonly r08FourPeerDistinctEvidenceModels: true;
+  readonly r09HepmReadOnlyConsumption: true;
+  readonly r10HvemEvaluationPointConsumption: true;
+  readonly r11HoemFrameworkOnly: true;
+  readonly r12AdvisoryNonbinding: true;
+  readonly r13EligibilityNotAuthorization: true;
+  readonly r14UpstreamFreshnessRequired: true;
+  readonly r15NoInventedConstitutionalQueueOrSchema: true;
+  readonly consumedAt: string;
+  /** Governed actor string — not an authority class. */
+  readonly consumedBy: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
