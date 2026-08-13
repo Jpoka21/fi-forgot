@@ -1317,3 +1317,112 @@ export interface HandoffAuthorityBoundaryAssessment {
   readonly acknowledgedHandoffGovernanceAuthorityClassId: HandoffGovernanceAuthorityClassId;
   readonly traceability: Std015GovernanceTraceability;
 }
+
+// --- STD-015 HOF-G2 Operative Handoff Authorization (R25–R32) ---
+
+/** Closed HCCM catalog IDs — PD-STD-015-002 / Section 20.5.4.7; consumed by R28. */
+export type HccmConsumerClassId =
+  | "CC-01"
+  | "CC-02"
+  | "CC-03"
+  | "CC-04"
+  | "CC-05"
+  | "CC-06";
+
+export type GovernedHandoffAuthorizationActId = string & {
+  readonly __brand: "GovernedHandoffAuthorizationActId";
+};
+
+export type HoemAuthorizationOperativeRecordId = string & {
+  readonly __brand: "HoemAuthorizationOperativeRecordId";
+};
+
+/**
+ * R29 — additive HOEM authorization operative record (authorization act type only).
+ * Peer-distinct from posture/completion/suspension/recall/withdrawal HOEM records.
+ */
+export interface HoemAuthorizationOperativeRecord {
+  readonly hoemAuthorizationRecordId: HoemAuthorizationOperativeRecordId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly actType: "authorization";
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+}
+
+export type HandoffAuthorizationCurrency = "current" | "stale";
+
+/**
+ * Assessment for whether a lawful HGA authorization act may be performed.
+ */
+export interface GovernedHandoffAuthorizationAssessment {
+  readonly mayAuthorize: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly consumptionCurrency: HandoffEvidenceConsumptionCurrency | null;
+  readonly preparationCurrency: HandoffPreparationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notCompletionSuspensionRecallOrWithdrawal: true;
+  readonly substitutesRejected: true;
+}
+
+/**
+ * Operative HGA Handoff authorization act — FI-DSN-STD-015-R25–R32.
+ * Does NOT declare posture, complete, suspend, recall, withdraw, or execute Handoff.
+ */
+export interface GovernedHandoffAuthorizationActRecord {
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_authorization_act";
+  /** Attributable actor within HGA scope — not the authority class itself. */
+  readonly authorizedBy: string;
+  readonly authorizedAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly evidenceConsumptionId: GovernedHandoffEvidenceConsumptionId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly hoemAuthorizationRecord: HoemAuthorizationOperativeRecord;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffCompletion: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notDownstreamAcceptance: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAdvisory: true;
+  readonly r25HgaSoleAuthorizationOwner: true;
+  readonly r26PeerDistinctAuthorizationClass: true;
+  readonly r27NoSubstituteInputs: true;
+  readonly r28BoundHccmConsumerContext: true;
+  readonly r29HoemAuthorizationOperativeRecord: true;
+  readonly r30NoImplicitAuthorization: true;
+  readonly r31PrerequisiteGated: true;
+  readonly r32HaamProhibitedPerformersExcluded: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}

@@ -11,6 +11,7 @@ import type {
   GovernedHandoffEntryRecord,
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
+  GovernedHandoffAuthorizationActRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -82,6 +83,12 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   >();
   const handoffPreservationAuditsByEntry = new Map<string, string[]>();
   const handoffPreservationAuditsByGpra = new Map<string, string[]>();
+  const handoffAuthorizationActsById = new Map<
+    string,
+    GovernedHandoffAuthorizationActRecord
+  >();
+  const handoffAuthorizationActsByEntry = new Map<string, string[]>();
+  const handoffAuthorizationActsByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -665,6 +672,42 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffPreservationAuditsById.get(id))
         .filter((item): item is GovernedHandoffPreservationAuditRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffAuthorizationAct(record) {
+      if (handoffAuthorizationActsById.has(record.authorizationActId)) {
+        throw new Error(
+          `Duplicate Governed Handoff authorization act identity: ${record.authorizationActId}`,
+        );
+      }
+      handoffAuthorizationActsById.set(record.authorizationActId, structuredClone(record));
+      const byEntry = handoffAuthorizationActsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.authorizationActId);
+      handoffAuthorizationActsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffAuthorizationActsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.authorizationActId);
+      handoffAuthorizationActsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffAuthorizationAct(authorizationActId) {
+      const record = handoffAuthorizationActsById.get(authorizationActId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffAuthorizationActsByEntry(entryId) {
+      const ids = handoffAuthorizationActsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffAuthorizationActsById.get(id))
+        .filter((item): item is GovernedHandoffAuthorizationActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffAuthorizationActsByGpra(gpraId) {
+      const ids = handoffAuthorizationActsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffAuthorizationActsById.get(id))
+        .filter((item): item is GovernedHandoffAuthorizationActRecord => !!item)
         .map((item) => structuredClone(item));
     },
   };

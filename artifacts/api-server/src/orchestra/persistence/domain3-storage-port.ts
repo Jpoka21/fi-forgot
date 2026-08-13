@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit.
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization.
  */
 
 import type {
@@ -19,6 +19,8 @@ import type {
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationId,
   GovernedHandoffPreparationRecord,
+  GovernedHandoffAuthorizationActId,
+  GovernedHandoffAuthorizationActRecord,
   GovernedHandoffPreservationAuditId,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
@@ -263,4 +265,21 @@ export interface Domain3StoragePort {
   listGovernedHandoffPreservationAuditsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffPreservationAuditRecord[]>;
+
+  /**
+   * Append-only Handoff authorization act (HOF-G2). Unique by authorizationActId;
+   * multiple per entry allowed. No update or delete API — history must not be mutated.
+   */
+  putGovernedHandoffAuthorizationAct(
+    record: GovernedHandoffAuthorizationActRecord,
+  ): Promise<void>;
+  getGovernedHandoffAuthorizationAct(
+    authorizationActId: GovernedHandoffAuthorizationActId,
+  ): Promise<GovernedHandoffAuthorizationActRecord | null>;
+  listGovernedHandoffAuthorizationActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffAuthorizationActRecord[]>;
+  listGovernedHandoffAuthorizationActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffAuthorizationActRecord[]>;
 }

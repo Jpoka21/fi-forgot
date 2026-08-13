@@ -241,6 +241,26 @@ export {
 } from "./handoff-preservation-audit.js";
 
 export {
+  GOVERNED_HANDOFF_AUTHORIZATION_TRACEABILITY,
+  assessGovernedHandoffAuthorization,
+} from "./handoff-authorization.js";
+
+export {
+  FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES,
+  isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
+  resolveEstablishedHandoffGovernanceAuthorityClass,
+  assertEstablishedHandoffGovernanceAuthorityClass,
+} from "./handoff-governance-authority.js";
+
+export {
+  HCCM_CONSUMER_CLASS_CATALOG,
+  isHccmConsumerClassId,
+  resolveHccmConsumerClass,
+  assertHccmConsumerClassId,
+  resolveConsumedHcbmBoundaryKeysForAuthorization,
+} from "./hccm-consumer-classes.js";
+
+export {
   HANDOFF_AUTHORITY_BOUNDARY_TRACEABILITY,
   HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID,
   PEER_DISTINCT_HANDOFF_DECISION_CLASSES,
@@ -356,6 +376,13 @@ export type {
   GovernedHandoffEvidenceConsumptionAssessment,
   GovernedHandoffPreservationAuditId,
   GovernedHandoffPreservationAuditRecord,
+  GovernedHandoffAuthorizationActId,
+  GovernedHandoffAuthorizationActRecord,
+  GovernedHandoffAuthorizationAssessment,
+  HoemAuthorizationOperativeRecord,
+  HoemAuthorizationOperativeRecordId,
+  HccmConsumerClassId,
+  HandoffAuthorizationCurrency,
   HandoffConsumerCategoryKey,
   HandoffEligibilityLayerCondition,
   HandoffPreparationCurrency,
