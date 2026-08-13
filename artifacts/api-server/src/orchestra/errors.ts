@@ -75,7 +75,6 @@ export type OrchestraErrorCode =
   | "invalid_handoff_consumer_binding"
   | "invalid_handoff_posture_declaration"
   | "invalid_handoff_completion"
-  | "invalid_handoff_lifecycle_attribution"
   | "invalid_handoff_act_lifecycle";
 
 export function isOrchestraConstitutionalError(

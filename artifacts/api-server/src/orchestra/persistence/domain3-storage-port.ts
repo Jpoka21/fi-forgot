@@ -25,8 +25,6 @@ import type {
   GovernedHandoffCompletionActRecord,
   GovernedHandoffConsumerBindingId,
   GovernedHandoffConsumerBindingRecord,
-  GovernedHandoffLifecycleRejectionAttributionId,
-  GovernedHandoffLifecycleRejectionAttributionRecord,
   GovernedHandoffPostureDeclarationActId,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditId,
@@ -348,23 +346,4 @@ export interface Domain3StoragePort {
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffCompletionActRecord[]>;
 
-  /**
-   * Append-only Handoff lifecycle rejection attribution (HOF-G5). Unique by attribution id;
-   * multiple per binding allowed. No update/delete.
-   */
-  putGovernedHandoffLifecycleRejectionAttribution(
-    record: GovernedHandoffLifecycleRejectionAttributionRecord,
-  ): Promise<void>;
-  getGovernedHandoffLifecycleRejectionAttribution(
-    lifecycleRejectionAttributionId: GovernedHandoffLifecycleRejectionAttributionId,
-  ): Promise<GovernedHandoffLifecycleRejectionAttributionRecord | null>;
-  listGovernedHandoffLifecycleRejectionAttributionsByBinding(
-    bindingId: GovernedHandoffConsumerBindingId,
-  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
-  listGovernedHandoffLifecycleRejectionAttributionsByEntry(
-    entryId: GovernedHandoffEntryId,
-  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
-  listGovernedHandoffLifecycleRejectionAttributionsByGpra(
-    gpraId: GpraId,
-  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
 }

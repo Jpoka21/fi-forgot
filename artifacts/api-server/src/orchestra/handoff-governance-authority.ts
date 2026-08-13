@@ -2,8 +2,9 @@
  * Handoff Governance Authority (HGA) — FI-DSN-STD-015-R25 / R40 / R48 / R51 / R56 / R57 / PD-STD-015-001.
  *
  * Sole constitutionally authorized owner of operative STD-015 Handoff authorization acts,
- * Handoff posture declaration acts, Handoff completion acts, and lifecycle rejection attributions
- * (distinct act-type scopes; §20.5.3.14).
+ * Handoff posture declaration acts, and Handoff completion acts
+ * (distinct act-type scopes; §20.5.3.14). Rejected is an HSLM vocabulary meaning (R51),
+ * not a ninth HGA act-type scope — it denotes withheld authorization or posture declaration.
  * Actor strings alone cannot mint HGA. MAGAC/DDAC/DSRA/IVAC/SSAC/Brain cannot substitute.
  */
 
@@ -13,8 +14,7 @@ import type { HandoffGovernanceAuthorityClassId } from "./domain3-types.js";
 export type HandoffGovernanceAuthorityConstitutionalScope =
   | "handoff_authorization_act"
   | "handoff_posture_declaration_act"
-  | "handoff_completion_act"
-  | "handoff_lifecycle_rejection_act";
+  | "handoff_completion_act";
 
 export interface EstablishedHandoffGovernanceAuthorityClass {
   readonly authorityClassId: HandoffGovernanceAuthorityClassId;
@@ -61,7 +61,6 @@ export const FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES: readonly E
         "handoff_authorization_act",
         "handoff_posture_declaration_act",
         "handoff_completion_act",
-        "handoff_lifecycle_rejection_act",
       ] as const),
     }),
   ]);
@@ -149,30 +148,6 @@ export function assertEstablishedHandoffGovernanceAuthorityForCompletion(
     throw new OrchestraConstitutionalError(
       "Established HGA does not authorize handoff_completion_act scope (R51/R56)",
       "invalid_handoff_completion",
-      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56"],
-    );
-  }
-}
-
-export function assertEstablishedHandoffGovernanceAuthorityForLifecycleRejection(
-  authorityClassId: unknown,
-): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
-  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
-    throw new OrchestraConstitutionalError(
-      "Handoff lifecycle rejection attribution requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint lifecycle rejection authority (R51/R56/R57)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56", "FI-DSN-STD-015-R57"],
-    );
-  }
-  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
-    authorityClassId as HandoffGovernanceAuthorityClassId,
-  );
-  if (
-    !resolved.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act")
-  ) {
-    throw new OrchestraConstitutionalError(
-      "Established HGA does not authorize handoff_lifecycle_rejection_act scope (R51/R56)",
-      "invalid_handoff_lifecycle_attribution",
       ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56"],
     );
   }

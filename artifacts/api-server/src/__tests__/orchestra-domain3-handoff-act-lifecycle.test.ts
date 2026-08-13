@@ -370,10 +370,16 @@ section("HOF-G5 catalogs, R48–R57 traceability, HGA completion/rejection scope
     "HGA includes completion scope",
     hga.authorizedConstitutionalScopes.includes("handoff_completion_act"),
   );
-  expectTruthy(
-    "HGA includes lifecycle rejection scope",
-    hga.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act"),
+  expect(
+    "HGA does NOT include invented lifecycle rejection act scope",
+    hga.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act" as never),
+    false,
   );
+  expectTruthy(
+    "Rejected remains in frozen HSLM catalog (R48)",
+    FROZEN_HANDOFF_ACT_LAYER_LIFECYCLE_STATES.includes("rejected"),
+  );
+  expectTruthy("isFrozen rejected", isFrozenHandoffActLayerLifecycleState("rejected"));
 }
 
 section("constructors / completeGovernedHandoff not on barrel");
@@ -392,6 +398,16 @@ section("constructors / completeGovernedHandoff not on barrel");
   );
   expect("completeGovernedHandoff not on barrel", "completeGovernedHandoff" in mod, false);
   expect("rejectHandoffActLayer not on barrel", "rejectHandoffActLayer" in mod, false);
+  expect(
+    "assertEstablishedHandoffGovernanceAuthorityForLifecycleRejection not on barrel",
+    "assertEstablishedHandoffGovernanceAuthorityForLifecycleRejection" in mod,
+    false,
+  );
+  expect(
+    "assessGovernedHandoffLifecycleRejection not on barrel",
+    "assessGovernedHandoffLifecycleRejection" in mod,
+    false,
+  );
   expect(
     "assessGovernedHandoffCompletion on barrel",
     "assessGovernedHandoffCompletion" in mod,
@@ -525,7 +541,7 @@ section("complete without binding/posture rejected");
   );
 }
 
-section("Brain/MAGAC cannot complete or reject");
+section("Brain/MAGAC cannot complete");
 
 {
   const ctx = await grantPassGpra();
@@ -571,30 +587,6 @@ section("Brain/MAGAC cannot complete or reject");
         sourceAttribution: "brain_runtime",
       }),
     "invalid_handoff_completion",
-  );
-  await expectThrowsAsync(
-    "MAGAC cannot reject",
-    () =>
-      ctx.domain3.rejectHandoffActLayer({
-        entryId: entry.entryId,
-        bindingId: binding.bindingId,
-        authorityClassId: MAGAC,
-        attributedBy: ACTOR,
-        grounds: "withheld",
-      }),
-    "invalid_handoff_lifecycle_attribution",
-  );
-  await expectThrowsAsync(
-    "Brain attributedBy cannot reject",
-    () =>
-      ctx.domain3.rejectHandoffActLayer({
-        entryId: entry.entryId,
-        bindingId: binding.bindingId,
-        authorityClassId: HGA,
-        attributedBy: "brain_runtime",
-        grounds: "withheld",
-      }),
-    "invalid_handoff_lifecycle_attribution",
   );
 }
 
@@ -698,6 +690,17 @@ section("complete does not accept/manufacture/suspend/recall; no G6 APIs on repo
   expect("no recallHandoff", typeof repo.recallHandoff, "undefined");
   expect("no withdrawHandoff", typeof repo.withdrawHandoff, "undefined");
   expect("no expireHandoff", typeof repo.expireHandoff, "undefined");
+  expect("no rejectHandoffActLayer", typeof repo.rejectHandoffActLayer, "undefined");
+  expect(
+    "no evaluateHandoffLifecycleRejection",
+    typeof repo.evaluateHandoffLifecycleRejection,
+    "undefined",
+  );
+  expect(
+    "no loadGovernedHandoffLifecycleRejectionAttribution",
+    typeof repo.loadGovernedHandoffLifecycleRejectionAttribution,
+    "undefined",
+  );
 }
 
 section("stale GPRA invalidation blocks new completion");
@@ -792,38 +795,29 @@ section("rehydration rejects forged completion / foreign binding");
   );
 }
 
-section("reject attribution creates rejected state on evaluate");
+section("Rejected vocabulary kept; absence of auth/posture does not invent Rejected (R51/R57)");
 
 {
   const ctx = await grantPassGpra();
   const { entry } = await admitEntry(ctx);
   const binding = await bindCc(ctx, entry.entryId, "CC-01");
 
-  const attribution = await ctx.domain3.rejectHandoffActLayer({
-    entryId: entry.entryId,
-    bindingId: binding.bindingId,
-    authorityClassId: HGA,
-    attributedBy: ACTOR,
-    grounds: "Handoff authorization withheld on constitutional grounds",
-  });
-  expect(
-    "HOEM lifecycle_state_attribution",
-    attribution.hoemLifecycleAttributionRecord.actType,
-    "lifecycle_state_attribution",
+  expectTruthy(
+    "Rejected remains frozen catalog member",
+    FROZEN_HANDOFF_ACT_LAYER_LIFECYCLE_STATES.includes("rejected"),
   );
-  expect("lifecycleState rejected", attribution.lifecycleState, "rejected");
-  expect("scope rejection act", attribution.authorityConstitutionalScope, "handoff_lifecycle_rejection_act");
-  expect("not completion", attribution.notHandoffCompletion, true);
-  expect("not authorization", attribution.notHandoffAuthorization, true);
-  expect("not posture", attribution.notHandoffPostureDeclaration, true);
 
-  const lifecycle = await ctx.domain3.evaluateHandoffActLayerLifecycle(binding.bindingId);
-  expect("evaluate rejected", lifecycle.currentState, "rejected");
+  const eligible = await ctx.domain3.evaluateHandoffActLayerLifecycle(binding.bindingId);
+  expect("no auth/posture → eligible, not rejected", eligible.currentState, "eligible_for_consideration");
+  expect("no invented rejection attribution tip", eligible.authoritativeRejectionAttributionId, null);
   expect(
-    "authoritative rejection id",
-    lifecycle.authoritativeRejectionAttributionId,
-    attribution.lifecycleRejectionAttributionId,
+    "absence does not invent rejected",
+    eligible.currentState === "rejected",
+    false,
   );
+
+  const repo = ctx.domain3 as unknown as Record<string, unknown>;
+  expect("rejectHandoffActLayer absent from repo", typeof repo.rejectHandoffActLayer, "undefined");
 }
 
 section("G4 posture still works; cross-CC independent lifecycle");

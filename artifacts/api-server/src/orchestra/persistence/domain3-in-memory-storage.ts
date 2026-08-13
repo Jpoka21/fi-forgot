@@ -14,7 +14,6 @@ import type {
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffCompletionActRecord,
   GovernedHandoffConsumerBindingRecord,
-  GovernedHandoffLifecycleRejectionAttributionRecord,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
@@ -107,13 +106,6 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const handoffCompletionActsByBinding = new Map<string, string[]>();
   const handoffCompletionActsByEntry = new Map<string, string[]>();
   const handoffCompletionActsByGpra = new Map<string, string[]>();
-  const handoffLifecycleRejectionsById = new Map<
-    string,
-    GovernedHandoffLifecycleRejectionAttributionRecord
-  >();
-  const handoffLifecycleRejectionsByBinding = new Map<string, string[]>();
-  const handoffLifecycleRejectionsByEntry = new Map<string, string[]>();
-  const handoffLifecycleRejectionsByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -866,62 +858,6 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffCompletionActsById.get(id))
         .filter((item): item is GovernedHandoffCompletionActRecord => !!item)
-        .map((item) => structuredClone(item));
-    },
-
-    async putGovernedHandoffLifecycleRejectionAttribution(record) {
-      if (handoffLifecycleRejectionsById.has(record.lifecycleRejectionAttributionId)) {
-        throw new Error(
-          `Duplicate Governed Handoff lifecycle rejection attribution identity: ${record.lifecycleRejectionAttributionId}`,
-        );
-      }
-      handoffLifecycleRejectionsById.set(
-        record.lifecycleRejectionAttributionId,
-        structuredClone(record),
-      );
-      const byBinding = handoffLifecycleRejectionsByBinding.get(record.bindingId) ?? [];
-      byBinding.push(record.lifecycleRejectionAttributionId);
-      handoffLifecycleRejectionsByBinding.set(record.bindingId, byBinding);
-      const byEntry = handoffLifecycleRejectionsByEntry.get(record.entryId) ?? [];
-      byEntry.push(record.lifecycleRejectionAttributionId);
-      handoffLifecycleRejectionsByEntry.set(record.entryId, byEntry);
-      const byGpra = handoffLifecycleRejectionsByGpra.get(record.gpraId) ?? [];
-      byGpra.push(record.lifecycleRejectionAttributionId);
-      handoffLifecycleRejectionsByGpra.set(record.gpraId, byGpra);
-    },
-
-    async getGovernedHandoffLifecycleRejectionAttribution(lifecycleRejectionAttributionId) {
-      const record = handoffLifecycleRejectionsById.get(lifecycleRejectionAttributionId);
-      return record ? structuredClone(record) : null;
-    },
-
-    async listGovernedHandoffLifecycleRejectionAttributionsByBinding(bindingId) {
-      const ids = handoffLifecycleRejectionsByBinding.get(bindingId) ?? [];
-      return ids
-        .map((id) => handoffLifecycleRejectionsById.get(id))
-        .filter(
-          (item): item is GovernedHandoffLifecycleRejectionAttributionRecord => !!item,
-        )
-        .map((item) => structuredClone(item));
-    },
-
-    async listGovernedHandoffLifecycleRejectionAttributionsByEntry(entryId) {
-      const ids = handoffLifecycleRejectionsByEntry.get(entryId) ?? [];
-      return ids
-        .map((id) => handoffLifecycleRejectionsById.get(id))
-        .filter(
-          (item): item is GovernedHandoffLifecycleRejectionAttributionRecord => !!item,
-        )
-        .map((item) => structuredClone(item));
-    },
-
-    async listGovernedHandoffLifecycleRejectionAttributionsByGpra(gpraId) {
-      const ids = handoffLifecycleRejectionsByGpra.get(gpraId) ?? [];
-      return ids
-        .map((id) => handoffLifecycleRejectionsById.get(id))
-        .filter(
-          (item): item is GovernedHandoffLifecycleRejectionAttributionRecord => !!item,
-        )
         .map((item) => structuredClone(item));
     },
   };

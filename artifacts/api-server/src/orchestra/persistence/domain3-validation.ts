@@ -34,7 +34,6 @@ import type {
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffCompletionActRecord,
   GovernedHandoffConsumerBindingRecord,
-  GovernedHandoffLifecycleRejectionAttributionRecord,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
@@ -126,12 +125,9 @@ const ID_PREFIXES = {
   handoffConsumerBinding: "governed-handoff-consumer-binding-",
   handoffPostureDeclarationAct: "governed-handoff-posture-declaration-act-",
   handoffCompletionAct: "governed-handoff-completion-act-",
-  handoffLifecycleRejectionAttribution:
-    "governed-handoff-lifecycle-rejection-attribution-",
   hoemAuthorizationOperative: "hoem-authorization-operative-",
   hoemPostureDeclarationOperative: "hoem-posture-declaration-operative-",
   hoemCompletionOperative: "hoem-completion-operative-",
-  hoemLifecycleStateAttributionOperative: "hoem-lifecycle-state-attribution-operative-",
 } as const;
 
 const LEGAL_CONDITIONAL_FAIL_ROUTES = ["conditional_route", "fail_route"] as const;
@@ -369,9 +365,7 @@ function assertStd015HofG4Traceability(traceability: unknown, label: string): vo
 function assertStd015HofG5Traceability(
   traceability: unknown,
   label: string,
-  errorCode:
-    | "invalid_handoff_completion"
-    | "invalid_handoff_lifecycle_attribution" = "invalid_handoff_completion",
+  errorCode: "invalid_handoff_completion" = "invalid_handoff_completion",
 ): void {
   if (
     !traceability ||
@@ -3936,242 +3930,3 @@ export function validatePersistedGovernedHandoffCompletion(
     );
   }
 }
-
-export function validatePersistedGovernedHandoffLifecycleRejection(
-  raw: unknown,
-): asserts raw is GovernedHandoffLifecycleRejectionAttributionRecord {
-  if (!raw || typeof raw !== "object") {
-    throw new OrchestraConstitutionalError(
-      "Invalid persisted Governed Handoff lifecycle rejection attribution",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51"],
-    );
-  }
-  const record = raw as Record<string, unknown>;
-  assertBrandedId(
-    record.lifecycleRejectionAttributionId,
-    ID_PREFIXES.handoffLifecycleRejectionAttribution,
-    "Governed Handoff lifecycle rejection attribution",
-  );
-  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
-  assertBrandedId(
-    record.bindingId,
-    ID_PREFIXES.handoffConsumerBinding,
-    "Governed Handoff consumer binding",
-  );
-  assertBrandedId(
-    record.preparationId,
-    ID_PREFIXES.handoffPreparation,
-    "Governed Handoff preparation",
-  );
-  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
-  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
-  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
-  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
-  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
-  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
-  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
-
-  if (typeof record.handoffConsumerContextId !== "string" || !record.handoffConsumerContextId.trim()) {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection requires non-empty handoffConsumerContextId",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R50"],
-    );
-  }
-  if (typeof record.attributedBy !== "string" || !record.attributedBy.trim()) {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection requires attributedBy",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51"],
-    );
-  }
-  if (typeof record.attributedAt !== "string" || !record.attributedAt.trim()) {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection requires attributedAt",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R56"],
-    );
-  }
-  if (typeof record.grounds !== "string" || !record.grounds.trim()) {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection requires grounds",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51"],
-    );
-  }
-  if (record.lifecycleState !== "rejected") {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection lifecycleState must be rejected (R51)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51"],
-    );
-  }
-
-  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(record.authorityClassId)) {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection requires established HGA (R51)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R57"],
-    );
-  }
-  if (record.authorityGoverningSourceId !== "PD-STD-015-001") {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection authorityGoverningSourceId must be PD-STD-015-001",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51"],
-    );
-  }
-  if (record.authorityConstitutionalScope !== "handoff_lifecycle_rejection_act") {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection scope must be handoff_lifecycle_rejection_act (R51/R56)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56"],
-    );
-  }
-
-  if (!isHccmConsumerClassId(record.consumerClassId)) {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection requires closed HCCM consumer class (R50)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R50"],
-    );
-  }
-
-  const hoemRecord = record.hoemLifecycleAttributionRecord as Record<string, unknown> | null;
-  if (!hoemRecord || typeof hoemRecord !== "object") {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection requires HOEM lifecycle attribution record (R56)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R56"],
-    );
-  }
-  assertBrandedId(
-    hoemRecord.hoemLifecycleAttributionRecordId,
-    ID_PREFIXES.hoemLifecycleStateAttributionOperative,
-    "HOEM lifecycle state attribution operative record",
-  );
-  if (hoemRecord.lifecycleRejectionAttributionId !== record.lifecycleRejectionAttributionId) {
-    throw new OrchestraConstitutionalError(
-      "HOEM lifecycle attribution record id must match parent attribution",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R56"],
-    );
-  }
-  if (hoemRecord.actType !== "lifecycle_state_attribution") {
-    throw new OrchestraConstitutionalError(
-      "HOEM lifecycle attribution actType must be lifecycle_state_attribution (R56)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R56"],
-    );
-  }
-  if (hoemRecord.lifecycleState !== "rejected") {
-    throw new OrchestraConstitutionalError(
-      "HOEM lifecycle attribution lifecycleState must be rejected (R51/R56)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56"],
-    );
-  }
-  if (
-    hoemRecord.gpraId !== record.gpraId ||
-    hoemRecord.obligationId !== record.obligationId ||
-    hoemRecord.handoffConsumerContextId !== record.handoffConsumerContextId ||
-    hoemRecord.bindingId !== record.bindingId ||
-    hoemRecord.consumerClassId !== record.consumerClassId
-  ) {
-    throw new OrchestraConstitutionalError(
-      "HOEM lifecycle attribution record must bind to parent context (R56)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R56"],
-    );
-  }
-  if (
-    hoemRecord.doesNotMergeAuthorizationAttribution !== true ||
-    hoemRecord.doesNotMergePostureDeclarationAttribution !== true ||
-    hoemRecord.doesNotMergeCompletionAttribution !== true ||
-    hoemRecord.doesNotMergeSuspensionAttribution !== true ||
-    hoemRecord.doesNotMergeWithdrawalAttribution !== true ||
-    hoemRecord.doesNotMergeRecallAttribution !== true
-  ) {
-    throw new OrchestraConstitutionalError(
-      "HOEM lifecycle attribution record must carry peer-distinct markers (R56)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R56"],
-    );
-  }
-
-  if (
-    record.notHandoffAuthorization !== true ||
-    record.notHandoffPostureDeclaration !== true ||
-    record.notHandoffCompletion !== true ||
-    record.notHandoffExecution !== true ||
-    record.notHandoffSuspension !== true ||
-    record.notHandoffRecall !== true ||
-    record.notHandoffWithdrawal !== true ||
-    record.notDownstreamAcceptance !== true ||
-    record.doesNotAuthorizeManufacturingOrFulfillment !== true ||
-    record.doesNotCollapsePeerDecisionClasses !== true ||
-    record.doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory !== true ||
-    record.doesNotMergeAcrossConsumerClasses !== true ||
-    record.r48ClosedHslmVocabulary !== true ||
-    record.r49PeerDistinctLifecycle !== true ||
-    record.r50SingleBindingPostureChain !== true ||
-    record.r51RejectedMeaning !== true ||
-    record.r56HoemLifecycleAttributionRecord !== true ||
-    record.r57NoImplicitLifecyclePromotion !== true
-  ) {
-    throw new OrchestraConstitutionalError(
-      "Persisted Handoff lifecycle rejection must carry HOF-G5 constitutional markers (R48–R57)",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R49", "FI-DSN-STD-015-R56"],
-    );
-  }
-
-  const forbidden = [
-    "completionActId",
-    "suspensionActId",
-    "recallActId",
-    "withdrawalActId",
-    "expiryActId",
-    "executesHandoff",
-    "handoffExecuted",
-    "performHandoff",
-    "manufacturingExecutionId",
-    "fulfillmentExecutionId",
-    "executionQueueId",
-    "constitutionalQueueId",
-    "brainRejectHandoff",
-    "implicitRejection",
-    "automaticInheritanceRejection",
-    "configurationDrivenRejection",
-    "downstreamAcceptanceId",
-    "permanentCollectionMembershipId",
-    "authorizationActId",
-  ];
-  for (const key of forbidden) {
-    const value = record[key];
-    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
-      throw new OrchestraConstitutionalError(
-        "Persisted Handoff lifecycle rejection must not carry completion/execution/implicit fields (R51/R57)",
-        "invalid_handoff_lifecycle_attribution",
-        ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R57"],
-      );
-    }
-  }
-
-  assertAuditMetadata(record.audit, "Governed Handoff lifecycle rejection attribution");
-  assertStd015HofG5Traceability(
-    record.traceability,
-    "Governed Handoff lifecycle rejection attribution",
-    "invalid_handoff_lifecycle_attribution",
-  );
-  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
-    throw new OrchestraConstitutionalError(
-      "Governed Handoff lifecycle rejection attribution requires valid governed creation marker",
-      "invalid_handoff_lifecycle_attribution",
-      ["FI-DSN-STD-015-R51"],
-    );
-  }
-}
-
-

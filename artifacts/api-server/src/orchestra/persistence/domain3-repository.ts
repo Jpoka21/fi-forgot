@@ -18,7 +18,6 @@ import {
   rehydrateGovernedHandoffConsumerBinding,
   rehydrateGovernedHandoffPostureDeclaration,
   rehydrateGovernedHandoffCompletion,
-  rehydrateGovernedHandoffLifecycleRejection,
   rehydrateGovernedHandoffPreservationAudit,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
@@ -46,7 +45,6 @@ import {
   validatePersistedGovernedHandoffConsumerBinding,
   validatePersistedGovernedHandoffPostureDeclaration,
   validatePersistedGovernedHandoffCompletion,
-  validatePersistedGovernedHandoffLifecycleRejection,
   validatePersistedGovernedHandoffPreservationAudit,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -102,9 +100,6 @@ import type {
   GovernedHandoffCompletionActId,
   GovernedHandoffCompletionActRecord,
   GovernedHandoffCompletionAssessment,
-  GovernedHandoffLifecycleRejectionAttributionId,
-  GovernedHandoffLifecycleRejectionAttributionRecord,
-  GovernedHandoffLifecycleRejectionAssessment,
   HandoffActLayerLifecycleEvaluation,
   GovernedHandoffPreservationAuditId,
   GovernedHandoffPreservationAuditRecord,
@@ -232,17 +227,12 @@ import {
 } from "../handoff-posture-declaration.js";
 import {
   assertGovernedHandoffCompletionActor,
-  assertGovernedHandoffLifecycleRejectionActor,
   assertNoHandoffCompletionExecutionOrDeferredLifecycleClaims,
-  assertNoHandoffLifecycleRejectionForbiddenClaims,
   assessGovernedHandoffCompletion,
-  assessGovernedHandoffLifecycleRejection,
   createGovernedHandoffCompletionActRecord,
-  createGovernedHandoffLifecycleRejectionAttributionRecord,
   evaluateHandoffActLayerLifecycleFromFacts,
   evaluateHandoffCompletionCurrencyFromFacts,
   selectAuthoritativeGovernedHandoffCompletion,
-  selectAuthoritativeGovernedHandoffLifecycleRejection,
 } from "../handoff-act-lifecycle.js";
 import {
   assertEstablishedHandoffGovernanceAuthorityClass,
@@ -1319,77 +1309,6 @@ export interface Domain3Repository {
   evaluateHandoffCompletionCurrency(
     completionActId: GovernedHandoffCompletionActId,
   ): Promise<HandoffCompletionCurrency>;
-
-  /**
-   * HOF-G5 R51/R56/R57 — assess whether a lawful lifecycle rejection attribution may be recorded.
-   */
-  evaluateHandoffLifecycleRejection(input: {
-    entryId: GovernedHandoffEntryId;
-    bindingId: GovernedHandoffConsumerBindingId;
-    grounds?: string | null;
-    attributedBy?: string;
-    authorityClassId?: unknown;
-    sourceAttribution?: unknown;
-    completionActId?: unknown;
-    suspensionActId?: unknown;
-    recallActId?: unknown;
-    withdrawalActId?: unknown;
-    expiryActId?: unknown;
-    executesHandoff?: unknown;
-    brainRejectHandoff?: unknown;
-    implicitRejection?: unknown;
-  }): Promise<GovernedHandoffLifecycleRejectionAssessment>;
-
-  /**
-   * HOF-G5 R51/R56/R57 — persist additive rejected lifecycle attribution + HOEM record.
-   */
-  rejectHandoffActLayer(input: {
-    entryId: GovernedHandoffEntryId;
-    bindingId: GovernedHandoffConsumerBindingId;
-    authorityClassId: unknown;
-    attributedBy: string;
-    grounds: string;
-    attributedAt?: string;
-    sourceAttribution?: unknown;
-    completionActId?: unknown;
-    suspensionActId?: unknown;
-    recallActId?: unknown;
-    withdrawalActId?: unknown;
-    expiryActId?: unknown;
-    executesHandoff?: unknown;
-    handoffExecuted?: unknown;
-    performHandoff?: unknown;
-    manufacturingExecutionId?: unknown;
-    fulfillmentExecutionId?: unknown;
-    executionQueueId?: unknown;
-    constitutionalQueueId?: unknown;
-    brainRejectHandoff?: unknown;
-    implicitRejection?: unknown;
-    automaticInheritanceRejection?: unknown;
-    configurationDrivenRejection?: unknown;
-    downstreamAcceptanceId?: unknown;
-    permanentCollectionMembershipId?: unknown;
-    suspendHandoff?: unknown;
-    recallHandoff?: unknown;
-    withdrawHandoff?: unknown;
-    expireHandoff?: unknown;
-  }): Promise<GovernedHandoffLifecycleRejectionAttributionRecord>;
-
-  loadGovernedHandoffLifecycleRejectionAttribution(
-    lifecycleRejectionAttributionId: GovernedHandoffLifecycleRejectionAttributionId,
-  ): Promise<GovernedHandoffLifecycleRejectionAttributionRecord | null>;
-
-  listGovernedHandoffLifecycleRejectionAttributionsByBinding(
-    bindingId: GovernedHandoffConsumerBindingId,
-  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
-
-  listGovernedHandoffLifecycleRejectionAttributionsByEntry(
-    entryId: GovernedHandoffEntryId,
-  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
-
-  listGovernedHandoffLifecycleRejectionAttributionsByGpra(
-    gpraId: GpraId,
-  ): Promise<readonly GovernedHandoffLifecycleRejectionAttributionRecord[]>;
 
   /**
    * HOF-G9 R22–R24 — standing authority-boundary assessment (framework only).
@@ -2566,73 +2485,6 @@ export function createDomain3RepositoryWithStorage(
     });
   }
 
-  async function rehydrateTrustedHandoffLifecycleRejection(
-    raw: GovernedHandoffLifecycleRejectionAttributionRecord,
-  ): Promise<GovernedHandoffLifecycleRejectionAttributionRecord> {
-    const entryRaw = await storage.getGovernedHandoffEntry(raw.entryId);
-    if (!entryRaw) {
-      throw new OrchestraConstitutionalError(
-        "Handoff lifecycle rejection entryId points to no persisted entry",
-        "invalid_handoff_lifecycle_attribution",
-        ["FI-DSN-STD-015-R50", "FI-DSN-STD-015-R51"],
-      );
-    }
-    const bindingRaw = await storage.getGovernedHandoffConsumerBinding(raw.bindingId);
-    if (!bindingRaw) {
-      throw new OrchestraConstitutionalError(
-        "Handoff lifecycle rejection bindingId points to no persisted HCCM binding",
-        "invalid_handoff_lifecycle_attribution",
-        ["FI-DSN-STD-015-R50"],
-      );
-    }
-    const entry = await rehydrateTrustedHandoffEntry(entryRaw);
-    const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
-    const prepRaw = await storage.getGovernedHandoffPreparation(raw.preparationId);
-    if (!prepRaw) {
-      throw new OrchestraConstitutionalError(
-        "Handoff lifecycle rejection preparationId points to no persisted preparation",
-        "invalid_handoff_lifecycle_attribution",
-        ["FI-DSN-STD-015-R51"],
-      );
-    }
-    const preparation = await rehydrateTrustedHandoffPreparation(prepRaw);
-    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
-    if (!gpraRaw) {
-      throw new OrchestraConstitutionalError(
-        "Handoff lifecycle rejection gpraId points to no persisted GPRA",
-        "invalid_handoff_lifecycle_attribution",
-        ["FI-DSN-STD-015-R50"],
-      );
-    }
-    const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
-    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
-    if (!reviewRaw) {
-      throw new OrchestraConstitutionalError(
-        "Handoff lifecycle rejection reviewId points to no persisted Review",
-        "invalid_handoff_lifecycle_attribution",
-        ["FI-DSN-STD-015-R51"],
-      );
-    }
-    const review = rehydrateProductionReadinessReview(reviewRaw);
-    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
-    if (!determinationRaw) {
-      throw new OrchestraConstitutionalError(
-        "Handoff lifecycle rejection determinationId points to no persisted Determination",
-        "invalid_handoff_lifecycle_attribution",
-        ["FI-DSN-STD-015-R51"],
-      );
-    }
-    const determination = rehydrateReviewDetermination(determinationRaw);
-    return rehydrateGovernedHandoffLifecycleRejection(raw, {
-      entry,
-      binding,
-      preparation,
-      gpra,
-      review,
-      determination,
-    });
-  }
-
   async function assessHandoffCompletionInternal(input: {
     entryId: GovernedHandoffEntryId;
     bindingId: GovernedHandoffConsumerBindingId;
@@ -2755,110 +2607,6 @@ export function createDomain3RepositoryWithStorage(
         gpraValidityPosture,
         eligibilityLayerCondition,
         lineageMatchesAuthoritativeGpra,
-      }),
-    };
-  }
-
-  async function assessHandoffLifecycleRejectionInternal(input: {
-    entryId: GovernedHandoffEntryId;
-    bindingId: GovernedHandoffConsumerBindingId;
-    grounds: string | null;
-  }): Promise<{
-    assessment: GovernedHandoffLifecycleRejectionAssessment;
-    entry: GovernedHandoffEntryRecord | null;
-    binding: GovernedHandoffConsumerBindingRecord | null;
-    preparation: GovernedHandoffPreparationRecord | null;
-  }> {
-    const entryRaw = await storage.getGovernedHandoffEntry(input.entryId);
-    const bindingRaw = await storage.getGovernedHandoffConsumerBinding(input.bindingId);
-    if (!entryRaw || !bindingRaw) {
-      return {
-        entry: null,
-        binding: null,
-        preparation: null,
-        assessment: assessGovernedHandoffLifecycleRejection({
-          entry: null,
-          entryCurrency: null,
-          binding: null,
-          bindingCurrency: null,
-          preparation: null,
-          preparationCurrency: null,
-          gpraValidityPosture: null,
-          eligibilityLayerCondition: null,
-          lineageMatchesAuthoritativeGpra: false,
-          grounds: input.grounds,
-        }),
-      };
-    }
-    const entry = await rehydrateTrustedHandoffEntry(entryRaw);
-    const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
-
-    const prepRaw = await storage.getGovernedHandoffPreparation(entry.preparationId);
-    const preparation = prepRaw
-      ? await rehydrateTrustedHandoffPreparation(prepRaw)
-      : null;
-
-    let preparationCurrency: HandoffPreparationCurrency | null = null;
-    if (preparation) {
-      try {
-        preparationCurrency = await evaluateHandoffPreparationCurrencyInternal(preparation);
-      } catch {
-        preparationCurrency = "stale";
-      }
-    }
-
-    const entryCurrency: HandoffEntryCurrency = preparation
-      ? evaluateHandoffEntryCurrencyFromFacts({
-          entry,
-          currentPreparationCurrency: preparationCurrency ?? "stale",
-        })
-      : "stale";
-
-    const bindingCurrency: HandoffConsumerBindingCurrency =
-      entryCurrency === "current" ? "current" : "stale";
-
-    const authoritative = await findAuthoritativeGpraByObligationContext(
-      entry.obligationId,
-      entry.handoffConsumerContextId,
-    );
-    const lineageMatchesAuthoritativeGpra = authoritative
-      ? handoffEntryLineageMatchesGpra(entry, authoritative)
-      : false;
-
-    let gpraValidityPosture: GpraValidityPosture | null = null;
-    if (authoritative) {
-      const validity = await evaluateGpraValidityForContext(
-        authoritative.gpraId,
-        entry.handoffConsumerContextId,
-      );
-      gpraValidityPosture = validity.posture;
-    }
-
-    let eligibilityLayerCondition: HandoffEligibilityLayerCondition | null = null;
-    if (preparation) {
-      const eligibility = await assessHandoffEligibilityInternal({
-        obligationId: preparation.obligationId,
-        handoffConsumerContextId: preparation.handoffConsumerContextId,
-        consumerCategoryKeys: preparation.consumerCategoryKeys,
-      });
-      eligibilityLayerCondition = eligibility.eligibilityLayerCondition;
-    }
-
-    return {
-      entry,
-      binding,
-      preparation,
-      assessment: assessGovernedHandoffLifecycleRejection({
-        entry,
-        entryCurrency,
-        binding,
-        bindingCurrency,
-        preparation,
-        preparationCurrency,
-        gpraValidityPosture,
-        eligibilityLayerCondition,
-        lineageMatchesAuthoritativeGpra,
-        grounds: input.grounds,
       }),
     };
   }
@@ -6017,15 +5765,6 @@ export function createDomain3RepositoryWithStorage(
         eligibilityLayerCondition = eligibility.eligibilityLayerCondition;
       }
 
-      const rejections =
-        await this.listGovernedHandoffLifecycleRejectionAttributionsByBinding(bindingId);
-      const authoritativeRejection =
-        selectAuthoritativeGovernedHandoffLifecycleRejection(rejections);
-      const rejectionIsCurrent =
-        !!authoritativeRejection &&
-        entryCurrency === "current" &&
-        bindingCurrency === "current";
-
       const completions = await this.listGovernedHandoffCompletionActsByBinding(bindingId);
       const authoritativeCompletion =
         selectAuthoritativeGovernedHandoffCompletion(completions);
@@ -6068,8 +5807,6 @@ export function createDomain3RepositoryWithStorage(
         gpraValidityPosture,
         eligibilityLayerCondition,
         lineageMatchesAuthoritativeGpra,
-        authoritativeRejection,
-        rejectionIsCurrent,
         authoritativeCompletion,
         completionIsCurrent,
         matchingAuthorization,
@@ -6272,172 +6009,6 @@ export function createDomain3RepositoryWithStorage(
         currentBindingCurrency: bindingCurrency,
         authoritativeCompletionActId: authoritative?.completionActId ?? null,
       });
-    },
-
-    async evaluateHandoffLifecycleRejection(input) {
-      assertNoHandoffLifecycleRejectionForbiddenClaims(
-        input as unknown as Record<string, unknown>,
-      );
-      if (
-        input.attributedBy != null ||
-        input.authorityClassId != null ||
-        input.sourceAttribution != null
-      ) {
-        assertGovernedHandoffLifecycleRejectionActor({
-          attributedBy: input.attributedBy ?? "rejection-evaluator",
-          authorityClassId: input.authorityClassId ?? "handoff_governance_authority",
-          sourceAttribution: input.sourceAttribution,
-        });
-      }
-      const { assessment } = await assessHandoffLifecycleRejectionInternal({
-        entryId: input.entryId,
-        bindingId: input.bindingId,
-        grounds: input.grounds ?? null,
-      });
-      return assessment;
-    },
-
-    async rejectHandoffActLayer(input) {
-      assertNoHandoffLifecycleRejectionForbiddenClaims(
-        input as unknown as Record<string, unknown>,
-      );
-      const attributedBy = assertGovernedHandoffLifecycleRejectionActor(input);
-
-      const entryRaw = await storage.getGovernedHandoffEntry(input.entryId);
-      if (!entryRaw) {
-        throw new OrchestraConstitutionalError(
-          "Governed Handoff lifecycle rejection rejected: entry not found",
-          "invalid_handoff_lifecycle_attribution",
-          ["FI-DSN-STD-015-R51"],
-        );
-      }
-      const entry = await rehydrateTrustedHandoffEntry(entryRaw);
-
-      const bindingRaw = await storage.getGovernedHandoffConsumerBinding(input.bindingId);
-      if (!bindingRaw) {
-        throw new OrchestraConstitutionalError(
-          "Governed Handoff lifecycle rejection rejected: HCCM binding not found",
-          "invalid_handoff_lifecycle_attribution",
-          ["FI-DSN-STD-015-R50"],
-        );
-      }
-      const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
-
-      if (binding.entryId !== entry.entryId) {
-        throw new OrchestraConstitutionalError(
-          "Governed Handoff lifecycle rejection rejected: binding does not belong to entry",
-          "invalid_handoff_lifecycle_attribution",
-          ["FI-DSN-STD-015-R50"],
-        );
-      }
-
-      const { assessment, preparation } = await assessHandoffLifecycleRejectionInternal({
-        entryId: input.entryId,
-        bindingId: input.bindingId,
-        grounds: input.grounds,
-      });
-
-      if (!assessment.mayReject || !preparation) {
-        throw new OrchestraConstitutionalError(
-          `Governed Handoff lifecycle rejection rejected: ${assessment.denialReasons.join("; ") || "mayReject is false"}`,
-          "invalid_handoff_lifecycle_attribution",
-          ["FI-DSN-STD-015-R50", "FI-DSN-STD-015-R51"],
-        );
-      }
-
-      const attribution = createGovernedHandoffLifecycleRejectionAttributionRecord({
-        entry,
-        binding,
-        authorityClassId: input.authorityClassId,
-        attributedBy,
-        grounds: input.grounds,
-        attributedAt: input.attributedAt,
-        sourceAttribution: input.sourceAttribution,
-        completionActId: input.completionActId,
-        suspensionActId: input.suspensionActId,
-        recallActId: input.recallActId,
-        withdrawalActId: input.withdrawalActId,
-        expiryActId: input.expiryActId,
-        executesHandoff: input.executesHandoff,
-        handoffExecuted: input.handoffExecuted,
-        performHandoff: input.performHandoff,
-        manufacturingExecutionId: input.manufacturingExecutionId,
-        fulfillmentExecutionId: input.fulfillmentExecutionId,
-        executionQueueId: input.executionQueueId,
-        constitutionalQueueId: input.constitutionalQueueId,
-        brainRejectHandoff: input.brainRejectHandoff,
-        implicitRejection: input.implicitRejection,
-        automaticInheritanceRejection: input.automaticInheritanceRejection,
-        configurationDrivenRejection: input.configurationDrivenRejection,
-        downstreamAcceptanceId: input.downstreamAcceptanceId,
-        permanentCollectionMembershipId: input.permanentCollectionMembershipId,
-        suspendHandoff: input.suspendHandoff,
-        recallHandoff: input.recallHandoff,
-        withdrawHandoff: input.withdrawHandoff,
-        expireHandoff: input.expireHandoff,
-      });
-
-      validatePersistedGovernedHandoffLifecycleRejection(attribution);
-      try {
-        await storage.putGovernedHandoffLifecycleRejectionAttribution(attribution);
-      } catch (error) {
-        throw new OrchestraConstitutionalError(
-          error instanceof Error
-            ? error.message
-            : "Failed to persist Governed Handoff lifecycle rejection attribution",
-          "invalid_handoff_lifecycle_attribution",
-          ["FI-DSN-STD-015-R51"],
-        );
-      }
-      const loaded = await storage.getGovernedHandoffLifecycleRejectionAttribution(
-        attribution.lifecycleRejectionAttributionId,
-      );
-      if (!loaded) {
-        throw new OrchestraConstitutionalError(
-          "Failed to persist Governed Handoff lifecycle rejection attribution",
-          "invalid_domain3_persistence_state",
-          ["FI-DSN-STD-015-R51"],
-        );
-      }
-      return rehydrateTrustedHandoffLifecycleRejection(loaded);
-    },
-
-    async loadGovernedHandoffLifecycleRejectionAttribution(lifecycleRejectionAttributionId) {
-      const loaded = await storage.getGovernedHandoffLifecycleRejectionAttribution(
-        lifecycleRejectionAttributionId,
-      );
-      if (!loaded) return null;
-      return rehydrateTrustedHandoffLifecycleRejection(loaded);
-    },
-
-    async listGovernedHandoffLifecycleRejectionAttributionsByBinding(bindingId) {
-      const listed =
-        await storage.listGovernedHandoffLifecycleRejectionAttributionsByBinding(bindingId);
-      const out: GovernedHandoffLifecycleRejectionAttributionRecord[] = [];
-      for (const item of listed) {
-        out.push(await rehydrateTrustedHandoffLifecycleRejection(item));
-      }
-      return out.sort((a, b) => a.attributedAt.localeCompare(b.attributedAt));
-    },
-
-    async listGovernedHandoffLifecycleRejectionAttributionsByEntry(entryId) {
-      const listed =
-        await storage.listGovernedHandoffLifecycleRejectionAttributionsByEntry(entryId);
-      const out: GovernedHandoffLifecycleRejectionAttributionRecord[] = [];
-      for (const item of listed) {
-        out.push(await rehydrateTrustedHandoffLifecycleRejection(item));
-      }
-      return out.sort((a, b) => a.attributedAt.localeCompare(b.attributedAt));
-    },
-
-    async listGovernedHandoffLifecycleRejectionAttributionsByGpra(gpraId) {
-      const listed =
-        await storage.listGovernedHandoffLifecycleRejectionAttributionsByGpra(gpraId);
-      const out: GovernedHandoffLifecycleRejectionAttributionRecord[] = [];
-      for (const item of listed) {
-        out.push(await rehydrateTrustedHandoffLifecycleRejection(item));
-      }
-      return out.sort((a, b) => a.attributedAt.localeCompare(b.attributedAt));
     },
 
     async evaluateHandoffAuthorityBoundary() {
