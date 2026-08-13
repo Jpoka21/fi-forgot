@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption + HOF-G10 preservation audit.
+ * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding.
  */
 
 import type {
@@ -12,6 +12,7 @@ import type {
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActRecord,
+  GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -89,6 +90,9 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   >();
   const handoffAuthorizationActsByEntry = new Map<string, string[]>();
   const handoffAuthorizationActsByGpra = new Map<string, string[]>();
+  const handoffConsumerBindingsById = new Map<string, GovernedHandoffConsumerBindingRecord>();
+  const handoffConsumerBindingsByEntry = new Map<string, string[]>();
+  const handoffConsumerBindingsByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -708,6 +712,42 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffAuthorizationActsById.get(id))
         .filter((item): item is GovernedHandoffAuthorizationActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffConsumerBinding(record) {
+      if (handoffConsumerBindingsById.has(record.bindingId)) {
+        throw new Error(
+          `Duplicate Governed Handoff consumer binding identity: ${record.bindingId}`,
+        );
+      }
+      handoffConsumerBindingsById.set(record.bindingId, structuredClone(record));
+      const byEntry = handoffConsumerBindingsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.bindingId);
+      handoffConsumerBindingsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffConsumerBindingsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.bindingId);
+      handoffConsumerBindingsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffConsumerBinding(bindingId) {
+      const record = handoffConsumerBindingsById.get(bindingId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffConsumerBindingsByEntry(entryId) {
+      const ids = handoffConsumerBindingsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffConsumerBindingsById.get(id))
+        .filter((item): item is GovernedHandoffConsumerBindingRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffConsumerBindingsByGpra(gpraId) {
+      const ids = handoffConsumerBindingsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffConsumerBindingsById.get(id))
+        .filter((item): item is GovernedHandoffConsumerBindingRecord => !!item)
         .map((item) => structuredClone(item));
     },
   };

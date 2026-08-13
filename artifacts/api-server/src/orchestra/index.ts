@@ -246,6 +246,11 @@ export {
 } from "./handoff-authorization.js";
 
 export {
+  GOVERNED_HANDOFF_CONSUMER_BINDING_TRACEABILITY,
+  assessGovernedHandoffConsumerBinding,
+} from "./handoff-consumer-binding.js";
+
+export {
   FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES,
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
   resolveEstablishedHandoffGovernanceAuthorityClass,
@@ -258,6 +263,7 @@ export {
   resolveHccmConsumerClass,
   assertHccmConsumerClassId,
   resolveConsumedHcbmBoundaryKeysForAuthorization,
+  resolveConsumedHcbmBoundaryKeysForBinding,
 } from "./hccm-consumer-classes.js";
 
 export {
@@ -379,6 +385,10 @@ export type {
   GovernedHandoffAuthorizationActId,
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffAuthorizationAssessment,
+  GovernedHandoffConsumerBindingId,
+  GovernedHandoffConsumerBindingRecord,
+  GovernedHandoffConsumerBindingAssessment,
+  HandoffConsumerBindingCurrency,
   HoemAuthorizationOperativeRecord,
   HoemAuthorizationOperativeRecordId,
   HccmConsumerClassId,

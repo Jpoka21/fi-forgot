@@ -32,6 +32,7 @@ import type {
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActRecord,
+  GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -63,8 +64,9 @@ import {
   DEFERRED_OPERATIVE_AUDIT_CLASSES,
   isDeferredOperativeAuditClass,
 } from "../handoff-preservation-audit.js";
-import { isHccmConsumerClassId } from "../hccm-consumer-classes.js";
+import { isHccmConsumerClassId, resolveHccmConsumerClass } from "../hccm-consumer-classes.js";
 import { GOVERNED_HANDOFF_AUTHORIZATION_TRACEABILITY } from "../handoff-authorization.js";
+import { GOVERNED_HANDOFF_CONSUMER_BINDING_TRACEABILITY } from "../handoff-consumer-binding.js";
 import {
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
 } from "../handoff-governance-authority.js";
@@ -113,6 +115,7 @@ const ID_PREFIXES = {
   handoffEvidenceConsumption: "governed-handoff-evidence-consumption-",
   handoffPreservationAudit: "governed-handoff-preservation-audit-",
   handoffAuthorizationAct: "governed-handoff-authorization-act-",
+  handoffConsumerBinding: "governed-handoff-consumer-binding-",
   hoemAuthorizationOperative: "hoem-authorization-operative-",
 } as const;
 
@@ -291,6 +294,32 @@ function assertStd015HofG2Traceability(traceability: unknown, label: string): vo
         `${label} traceability must include ${required}`,
         "invalid_handoff_authorization",
         ["FI-DSN-STD-015-R25", "FI-DSN-STD-015-R32"],
+      );
+    }
+  }
+}
+
+function assertStd015HofG3Traceability(traceability: unknown, label: string): void {
+  if (
+    !traceability ||
+    typeof traceability !== "object" ||
+    (traceability as Record<string, unknown>).governingStandardId !== STD015_GOVERNING_STANDARD ||
+    !Array.isArray((traceability as Record<string, unknown>).requirementIds) ||
+    ((traceability as Record<string, unknown>).requirementIds as unknown[]).length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      `${label} requires FI-DSN-STD-015 HOF-G3 traceability`,
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R33", "FI-DSN-STD-015-R39"],
+    );
+  }
+  const ids = (traceability as Record<string, unknown>).requirementIds as unknown[];
+  for (const required of GOVERNED_HANDOFF_CONSUMER_BINDING_TRACEABILITY.requirementIds) {
+    if (!ids.includes(required)) {
+      throw new OrchestraConstitutionalError(
+        `${label} traceability must include ${required}`,
+        "invalid_handoff_consumer_binding",
+        ["FI-DSN-STD-015-R33", "FI-DSN-STD-015-R39"],
       );
     }
   }
@@ -3125,6 +3154,205 @@ export function validatePersistedGovernedHandoffAuthorization(
       "Governed Handoff authorization act requires valid governed creation marker",
       "invalid_handoff_authorization",
       ["FI-DSN-STD-015-R25"],
+    );
+  }
+}
+
+export function validatePersistedGovernedHandoffConsumerBinding(
+  raw: unknown,
+): asserts raw is GovernedHandoffConsumerBindingRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff consumer binding",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R33"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.bindingId,
+    ID_PREFIXES.handoffConsumerBinding,
+    "Governed Handoff consumer binding",
+  );
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(
+    record.preparationId,
+    ID_PREFIXES.handoffPreparation,
+    "Governed Handoff preparation",
+  );
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (typeof record.handoffConsumerContextId !== "string" || !record.handoffConsumerContextId.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding requires non-empty handoffConsumerContextId",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R35"],
+    );
+  }
+
+  if (!isHccmConsumerClassId(record.consumerClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding requires closed HCCM consumer class CC-01 through CC-06 (R33)",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R33"],
+    );
+  }
+  const catalog = resolveHccmConsumerClass(record.consumerClassId);
+  if (record.constitutionalConsumerClass !== catalog.constitutionalConsumerClass) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding constitutional class does not match catalog (R33)",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R33"],
+    );
+  }
+  if (record.postureClassAffinity !== catalog.postureClassAffinity) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding posture-class affinity does not match catalog (R33/R37)",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R33", "FI-DSN-STD-015-R37"],
+    );
+  }
+  if (record.downstreamConsiderationDomain !== catalog.downstreamConsiderationDomain) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding downstream consideration domain does not match catalog (R33)",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R33"],
+    );
+  }
+
+  if (
+    !Array.isArray(record.consumedHcbmBoundaryKeys) ||
+    record.consumedHcbmBoundaryKeys.length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding requires nonempty consumedHcbmBoundaryKeys (R34/R35)",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R34", "FI-DSN-STD-015-R35"],
+    );
+  }
+  for (const key of record.consumedHcbmBoundaryKeys) {
+    if (
+      !isHandoffConsumerCategoryKey(key) ||
+      !(catalog.hcbmBoundaryKeys as readonly string[]).includes(key)
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Persisted HCCM consumer binding has unknown or mismatched consumedHcbmBoundaryKey",
+        "invalid_handoff_consumer_binding",
+        ["FI-DSN-STD-015-R34"],
+      );
+    }
+  }
+
+  if (
+    !Array.isArray(record.entryConsumerCategoryKeys) ||
+    record.entryConsumerCategoryKeys.length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding requires nonempty entryConsumerCategoryKeys",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R34", "FI-DSN-STD-015-R39"],
+    );
+  }
+  for (const key of record.entryConsumerCategoryKeys) {
+    if (!isHandoffConsumerCategoryKey(key)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted HCCM consumer binding has unknown entryConsumerCategoryKey",
+        "invalid_handoff_consumer_binding",
+        ["FI-DSN-STD-015-R34"],
+      );
+    }
+  }
+
+  if (typeof record.boundBy !== "string" || !record.boundBy.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding requires boundBy",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R39"],
+    );
+  }
+  if (typeof record.boundAt !== "string" || !record.boundAt.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding requires boundAt",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R39"],
+    );
+  }
+
+  if (
+    record.notHandoffAuthorization !== true ||
+    record.notHandoffPostureDeclaration !== true ||
+    record.notHandoffCompletion !== true ||
+    record.notDownstreamAcceptance !== true ||
+    record.notPermanentCollectionMembership !== true ||
+    record.notOperationalIntake !== true ||
+    record.doesNotAuthorizeManufacturingOrFulfillment !== true ||
+    record.doesNotInferCc01VsCc02FromHcbmAlone !== true ||
+    record.r33ClosedHccmCatalog !== true ||
+    record.r34HcbmMappedToSelectedCc !== true ||
+    record.r35BoundConsumerContextTuple !== true ||
+    record.r36SingleCcPerBinding !== true ||
+    record.r37Cc01Cc02CatalogDisambiguation !== true ||
+    record.r38NotAuthorizationOrPostureOrIntake !== true ||
+    record.r39EligibilityGatedClosedCatalog !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted HCCM consumer binding must carry HOF-G3 peer-distinct / non-execution markers (R33–R39)",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R38"],
+    );
+  }
+
+  const forbidden = [
+    "handoffPosture",
+    "postureDeclarationActId",
+    "completionActId",
+    "suspensionActId",
+    "recallActId",
+    "withdrawalActId",
+    "executesHandoff",
+    "handoffExecuted",
+    "performHandoff",
+    "manufacturingExecutionId",
+    "fulfillmentExecutionId",
+    "productionExecutionId",
+    "executionQueueId",
+    "constitutionalQueueId",
+    "brainAuthorizesHandoff",
+    "brainAuthorizeHandoff",
+    "brainBindsConsumerClass",
+    "implicitAuthorization",
+    "implicitBinding",
+    "automaticInheritanceBinding",
+    "configurationDrivenBinding",
+    "downstreamAcceptanceId",
+    "permanentCollectionMembershipId",
+    "handoffAuthorizationActId",
+    "authorizationActId",
+  ];
+  for (const key of forbidden) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted HCCM consumer binding must not carry authorization/posture/execution fields (R38)",
+        "invalid_handoff_consumer_binding",
+        ["FI-DSN-STD-015-R38"],
+      );
+    }
+  }
+
+  assertAuditMetadata(record.audit, "Governed Handoff consumer binding");
+  assertStd015HofG3Traceability(record.traceability, "Governed Handoff consumer binding");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff consumer binding requires valid governed creation marker",
+      "invalid_handoff_consumer_binding",
+      ["FI-DSN-STD-015-R33"],
     );
   }
 }

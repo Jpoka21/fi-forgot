@@ -12,6 +12,7 @@
  * HOF-G7 evidence consumption requires entry + preparation + GPRA lineage coherence (R08–R15).
  * HOF-G10 preservation audit requires entry + consumption + lineage coherence (R16–R21).
  * HOF-G2 authorization act requires entry + consumption + lineage coherence (R25–R32).
+ * HOF-G3 consumer binding requires entry + lineage coherence (R33–R39).
  */
 
 import type {
@@ -24,6 +25,7 @@ import type {
   GovernedHandoffEvidenceConsumptionRecord,
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActRecord,
+  GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -59,6 +61,7 @@ import { assertPersistedGovernedHandoffEntryCoherence } from "./hof-g1-rehydrati
 import { assertPersistedGovernedHandoffEvidenceConsumptionCoherence } from "./hof-g7-rehydration-coherence.js";
 import { assertPersistedGovernedHandoffPreservationAuditCoherence } from "./hof-g10-rehydration-coherence.js";
 import { assertPersistedGovernedHandoffAuthorizationCoherence } from "./hof-g2-rehydration-coherence.js";
+import { assertPersistedGovernedHandoffConsumerBindingCoherence } from "./hof-g3-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
@@ -69,6 +72,7 @@ import {
   validatePersistedGovernedHandoffEvidenceConsumption,
   validatePersistedGovernedHandoffPreparation,
   validatePersistedGovernedHandoffAuthorization,
+  validatePersistedGovernedHandoffConsumerBinding,
   validatePersistedGovernedHandoffPreservationAudit,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -694,6 +698,59 @@ export function rehydrateGovernedHandoffAuthorization(
     act,
     entry,
     consumption,
+    preparation,
+    gpra,
+    review,
+    determination,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export interface HofG3HandoffConsumerBindingRehydrationContext {
+  readonly entry: unknown;
+  readonly preparation?: unknown | null;
+  readonly gpra?: unknown | null;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+/**
+ * Trusted HOF-G3 consumer binding rehydration — entry + lineage coherence.
+ * Does not authorize Handoff, declare posture, accept downstream, or execute.
+ */
+export function rehydrateGovernedHandoffConsumerBinding(
+  raw: unknown,
+  context: HofG3HandoffConsumerBindingRehydrationContext,
+): GovernedHandoffConsumerBindingRecord {
+  validatePersistedGovernedHandoffConsumerBinding(raw);
+  validatePersistedGovernedHandoffEntry(context.entry);
+  const binding = raw as GovernedHandoffConsumerBindingRecord;
+  const entry = context.entry as GovernedHandoffEntryRecord;
+
+  let preparation: GovernedHandoffPreparationRecord | null = null;
+  if (context.preparation != null) {
+    validatePersistedGovernedHandoffPreparation(context.preparation);
+    preparation = context.preparation as GovernedHandoffPreparationRecord;
+  }
+  let gpra: GpraGrantRecord | null = null;
+  if (context.gpra != null) {
+    validatePersistedGpraGrant(context.gpra);
+    gpra = context.gpra as GpraGrantRecord;
+  }
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+
+  assertPersistedGovernedHandoffConsumerBindingCoherence({
+    binding,
+    entry,
     preparation,
     gpra,
     review,

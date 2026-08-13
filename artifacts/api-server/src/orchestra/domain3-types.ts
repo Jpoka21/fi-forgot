@@ -1426,3 +1426,79 @@ export interface GovernedHandoffAuthorizationActRecord {
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }
+
+// --- STD-015 HOF-G3 Consumer Class Catalog and Binding (R33–R39) ---
+
+export type GovernedHandoffConsumerBindingId = string & {
+  readonly __brand: "GovernedHandoffConsumerBindingId";
+};
+
+export type HandoffConsumerBindingCurrency = "current" | "stale";
+
+/**
+ * Assessment for whether a lawful HCCM consumer class binding may be recorded.
+ * Binding is eligibility/entry-gated (R39) and is NOT Handoff authorization (R38).
+ */
+export interface GovernedHandoffConsumerBindingAssessment {
+  readonly mayBind: boolean;
+  readonly denialReasons: readonly string[];
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly preparationCurrency: HandoffPreparationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly catalogClosedCc01ThroughCc06: true;
+}
+
+/**
+ * Operative HCCM consumer class binding — FI-DSN-STD-015-R33–R39.
+ * Identifies the constitutional consideration target for HGA acts.
+ * Does NOT authorize Handoff, declare posture, accept downstream, or execute.
+ */
+export interface GovernedHandoffConsumerBindingRecord {
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly constitutionalConsumerClass: string;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly postureClassAffinity:
+    | "library_intake_posture"
+    | "production_catalog_posture"
+    | "none";
+  readonly downstreamConsiderationDomain: string;
+  /** Entry export keys (HCBM abstract) — binding selects CC; keys alone do not mint CC (R37). */
+  readonly entryConsumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly boundBy: string;
+  readonly boundAt: string;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffCompletion: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly notOperationalIntake: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotInferCc01VsCc02FromHcbmAlone: true;
+  readonly r33ClosedHccmCatalog: true;
+  readonly r34HcbmMappedToSelectedCc: true;
+  readonly r35BoundConsumerContextTuple: true;
+  readonly r36SingleCcPerBinding: true;
+  readonly r37Cc01Cc02CatalogDisambiguation: true;
+  readonly r38NotAuthorizationOrPostureOrIntake: true;
+  readonly r39EligibilityGatedClosedCatalog: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}

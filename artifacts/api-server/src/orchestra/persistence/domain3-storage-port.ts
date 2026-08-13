@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization.
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry + HOF-G7 evidence consumption + HOF-G10 preservation audit + HOF-G2 authorization + HOF-G3 consumer binding.
  */
 
 import type {
@@ -21,6 +21,8 @@ import type {
   GovernedHandoffPreparationRecord,
   GovernedHandoffAuthorizationActId,
   GovernedHandoffAuthorizationActRecord,
+  GovernedHandoffConsumerBindingId,
+  GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPreservationAuditId,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
@@ -282,4 +284,21 @@ export interface Domain3StoragePort {
   listGovernedHandoffAuthorizationActsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffAuthorizationActRecord[]>;
+
+  /**
+   * Append-only HCCM consumer binding (HOF-G3). Unique by bindingId;
+   * multiple per entry allowed. No update or delete API — history must not be mutated.
+   */
+  putGovernedHandoffConsumerBinding(
+    record: GovernedHandoffConsumerBindingRecord,
+  ): Promise<void>;
+  getGovernedHandoffConsumerBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<GovernedHandoffConsumerBindingRecord | null>;
+  listGovernedHandoffConsumerBindingsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffConsumerBindingRecord[]>;
+  listGovernedHandoffConsumerBindingsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffConsumerBindingRecord[]>;
 }
