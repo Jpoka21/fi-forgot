@@ -1,5 +1,5 @@
 /**
- * In-memory Domain 3 storage adapter — G2–G11.
+ * In-memory Domain 3 storage adapter — G2–G11 + STD-015 HOF-G1 entry.
  */
 
 import type {
@@ -8,6 +8,7 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
+  GovernedHandoffEntryRecord,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -64,6 +65,9 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const brainAdvisoriesByReview = new Map<string, string[]>();
   const handoffPreparationsById = new Map<string, GovernedHandoffPreparationRecord>();
   const handoffPreparationsByGpra = new Map<string, string[]>();
+  const handoffEntriesById = new Map<string, GovernedHandoffEntryRecord>();
+  const handoffEntriesByPreparation = new Map<string, string[]>();
+  const handoffEntriesByGpra = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -541,6 +545,40 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffPreparationsById.get(id))
         .filter((item): item is GovernedHandoffPreparationRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffEntry(record) {
+      if (handoffEntriesById.has(record.entryId)) {
+        throw new Error(`Duplicate Governed Handoff entry identity: ${record.entryId}`);
+      }
+      handoffEntriesById.set(record.entryId, structuredClone(record));
+      const byPrep = handoffEntriesByPreparation.get(record.preparationId) ?? [];
+      byPrep.push(record.entryId);
+      handoffEntriesByPreparation.set(record.preparationId, byPrep);
+      const byGpra = handoffEntriesByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.entryId);
+      handoffEntriesByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffEntry(entryId) {
+      const record = handoffEntriesById.get(entryId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffEntriesByPreparation(preparationId) {
+      const ids = handoffEntriesByPreparation.get(preparationId) ?? [];
+      return ids
+        .map((id) => handoffEntriesById.get(id))
+        .filter((item): item is GovernedHandoffEntryRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffEntriesByGpra(gpraId) {
+      const ids = handoffEntriesByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffEntriesById.get(id))
+        .filter((item): item is GovernedHandoffEntryRecord => !!item)
         .map((item) => structuredClone(item));
     },
   };

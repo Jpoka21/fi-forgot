@@ -1,5 +1,5 @@
 /**
- * Domain 3 storage port — G2–G11 (Review through Governed Handoff Preparation).
+ * Domain 3 storage port — G2–G11 + STD-015 HOF-G1 entry.
  */
 
 import type {
@@ -13,6 +13,8 @@ import type {
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
   DownstreamDeficiencyRecordId,
+  GovernedHandoffEntryId,
+  GovernedHandoffEntryRecord,
   GovernedHandoffPreparationId,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
@@ -207,4 +209,19 @@ export interface Domain3StoragePort {
   listGovernedHandoffPreparationsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffPreparationRecord[]>;
+
+  /**
+   * Append-only Handoff entry (HOF-G1). Unique by entryId; multiple per preparation allowed.
+   * No update or delete API — history must not be mutated.
+   */
+  putGovernedHandoffEntry(record: GovernedHandoffEntryRecord): Promise<void>;
+  getGovernedHandoffEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<GovernedHandoffEntryRecord | null>;
+  listGovernedHandoffEntriesByPreparation(
+    preparationId: GovernedHandoffPreparationId,
+  ): Promise<readonly GovernedHandoffEntryRecord[]>;
+  listGovernedHandoffEntriesByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffEntryRecord[]>;
 }

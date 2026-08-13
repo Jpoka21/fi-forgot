@@ -28,6 +28,7 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
+  GovernedHandoffEntryRecord,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -44,6 +45,12 @@ import type {
 import type { RealizationPath, RealizedVisualArtifactId } from "../domain2-types.js";
 import { OrchestraConstitutionalError } from "../errors.js";
 import {
+  HANDOFF_DEFERRED_PRINCIPAL_SUBJECTS,
+  HOF_P_DISTINCTIONS_PRESERVED,
+  isHandoffDeferredPrincipalSubject,
+  isHandoffHofPDistinctionId,
+} from "../handoff-entry.js";
+import {
   isHandoffConsumerCategoryKey,
 } from "../handoff-preparation.js";
 import {
@@ -55,6 +62,7 @@ import { isCanonicalFrozenBindingFiMfgStandardId } from "../manufacturing-author
 import { isLegalReviewDeterminationOutcome } from "../review-determination.js";
 import { isMandatoryReviewDimensionId } from "../review-dimensions.js";
 import { validateLineageCoherence } from "../rva-lifecycle.js";
+import { STD015_GOVERNING_STANDARD } from "../std015-authority.js";
 import {
   isCanonicalEstablishedSupersessionAuthorityClassId,
   resolveEstablishedSupersessionAuthorityClass,
@@ -83,6 +91,7 @@ const ID_PREFIXES = {
   resubmissionEligibility: "resubmission-eligibility-",
   brainAdvisory: "domain3-brain-advisory-",
   handoffPreparation: "governed-handoff-preparation-",
+  handoffEntry: "governed-handoff-entry-",
 } as const;
 
 const LEGAL_CONDITIONAL_FAIL_ROUTES = ["conditional_route", "fail_route"] as const;
@@ -134,6 +143,40 @@ function assertDomain3Traceability(traceability: unknown, label: string): void {
       "invalid_domain3_persistence_state",
       ["FI-DSN-STD-014-R14"],
     );
+  }
+}
+
+function assertStd015Traceability(traceability: unknown, label: string): void {
+  if (
+    !traceability ||
+    typeof traceability !== "object" ||
+    (traceability as Record<string, unknown>).governingStandardId !== STD015_GOVERNING_STANDARD ||
+    !Array.isArray((traceability as Record<string, unknown>).requirementIds) ||
+    ((traceability as Record<string, unknown>).requirementIds as unknown[]).length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      `${label} requires FI-DSN-STD-015 HOF-G1 traceability`,
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R01", "FI-DSN-STD-015-R07"],
+    );
+  }
+  const ids = (traceability as Record<string, unknown>).requirementIds as unknown[];
+  for (const required of [
+    "FI-DSN-STD-015-R01",
+    "FI-DSN-STD-015-R02",
+    "FI-DSN-STD-015-R03",
+    "FI-DSN-STD-015-R04",
+    "FI-DSN-STD-015-R05",
+    "FI-DSN-STD-015-R06",
+    "FI-DSN-STD-015-R07",
+  ]) {
+    if (!ids.includes(required)) {
+      throw new OrchestraConstitutionalError(
+        `${label} traceability must include ${required}`,
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R01", "FI-DSN-STD-015-R07"],
+      );
+    }
   }
 }
 
@@ -2089,6 +2132,187 @@ export function validatePersistedGovernedHandoffPreparation(
       "Governed Handoff preparation requires valid governed creation marker",
       "invalid_handoff_preparation",
       ["FI-DSN-STD-014-R94"],
+    );
+  }
+}
+
+export function validatePersistedGovernedHandoffEntry(
+  raw: unknown,
+): asserts raw is GovernedHandoffEntryRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff entry",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(
+    record.preparationId,
+    ID_PREFIXES.handoffPreparation,
+    "Governed Handoff preparation",
+  );
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (typeof record.handoffConsumerContextId !== "string" || !record.handoffConsumerContextId.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry requires non-empty handoffConsumerContextId",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
+    );
+  }
+  if (!Array.isArray(record.consumerCategoryKeys) || record.consumerCategoryKeys.length === 0) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry requires nonempty consumerCategoryKeys",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
+    );
+  }
+  for (const key of record.consumerCategoryKeys) {
+    if (!isHandoffConsumerCategoryKey(key)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff entry has unknown consumerCategoryKey",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R07"],
+      );
+    }
+  }
+
+  if (record.preparationCurrencyAtEntry !== "current") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry preparationCurrencyAtEntry must be current",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
+    );
+  }
+  if (record.eligibilityLayerConditionConsumed !== "export_ready") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry eligibilityLayerConditionConsumed must be export_ready",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
+    );
+  }
+
+  if (
+    record.considerationMayCommence !== true ||
+    record.notHandoffAuthorization !== true ||
+    record.notHandoffExecution !== true ||
+    record.notHandoffPostureDeclaration !== true ||
+    record.doesNotPerformG11Preparation !== true ||
+    record.doesNotGrantGpraOrApproval !== true ||
+    record.doesNotAuthorizeManufacturingOrFulfillment !== true ||
+    record.doesNotBindConsumerClassCatalog !== true ||
+    record.hofG1Only !== true ||
+    record.std015HofG1EntryBoundaryOnly !== true ||
+    record.r01InheritanceLock !== true ||
+    record.r02DoesNotWeakenStd012Or013 !== true ||
+    record.r03MfgComplianceBoundaryContextOnly !== true ||
+    record.r04DecisionStagePolicyOnly !== true ||
+    record.r05PrincipalSubjectsDeferred !== true ||
+    record.r06DoesNotPerformReviewApprovalGpraOrG11Prep !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry must carry HOF-G1 consideration-only / non-authorization markers",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R01", "FI-DSN-STD-015-R05", "FI-DSN-STD-015-R07"],
+    );
+  }
+
+  if (
+    !Array.isArray(record.deferredPrincipalSubjects) ||
+    record.deferredPrincipalSubjects.length !== HANDOFF_DEFERRED_PRINCIPAL_SUBJECTS.length
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry requires complete deferredPrincipalSubjects catalog (R05)",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R05"],
+    );
+  }
+  for (const subject of record.deferredPrincipalSubjects) {
+    if (!isHandoffDeferredPrincipalSubject(subject)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff entry has forged deferredPrincipalSubject",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R05"],
+      );
+    }
+  }
+
+  if (
+    !Array.isArray(record.hofPDistinctionsPreserved) ||
+    record.hofPDistinctionsPreserved.length !== HOF_P_DISTINCTIONS_PRESERVED.length
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry requires complete hofPDistinctionsPreserved catalog (R01)",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R01"],
+    );
+  }
+  for (const id of record.hofPDistinctionsPreserved) {
+    if (!isHandoffHofPDistinctionId(id)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff entry has forged HOF-P distinction id",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R01"],
+      );
+    }
+  }
+
+  if (typeof record.enteredAt !== "string" || !record.enteredAt.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry requires enteredAt",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
+    );
+  }
+  if (typeof record.enteredBy !== "string" || !record.enteredBy.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff entry requires enteredBy",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
+    );
+  }
+
+  const forbidden = [
+    "handoffActId",
+    "handoffAuthorized",
+    "executesHandoff",
+    "handoffAuthorization",
+    "performHandoff",
+    "handoffExecuted",
+    "handoffPosture",
+    "handoffAuthorizationActId",
+    "postureDeclarationActId",
+    "hoemEvidenceId",
+    "hoemOperativeEvidenceId",
+    "manufacturingExecutionId",
+    "fulfillmentExecutionId",
+  ];
+  for (const key of forbidden) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim())) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff entry must not carry R08+ HOEM / authorization / execution fields",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R04", "FI-DSN-STD-015-R05", "FI-DSN-STD-015-R07"],
+      );
+    }
+  }
+
+  assertAuditMetadata(record.audit, "Governed Handoff entry");
+  assertStd015Traceability(record.traceability, "Governed Handoff entry");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff entry requires valid governed creation marker",
+      "invalid_handoff_entry",
+      ["FI-DSN-STD-015-R07"],
     );
   }
 }

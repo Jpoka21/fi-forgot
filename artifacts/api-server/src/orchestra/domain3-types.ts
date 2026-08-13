@@ -4,6 +4,7 @@
  */
 
 import type { Domain3GovernanceTraceability } from "./domain3-authority.js";
+import type { Std015GovernanceTraceability } from "./std015-authority.js";
 import type {
   RealizationTraceabilityPackage,
   RealizedVisualArtifactId,
@@ -900,5 +901,109 @@ export interface GovernedHandoffPreparationRecord {
   readonly preparedBy: string;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Domain3GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+// --- STD-015 HOF-G1 Upstream Entry (R01–R07) ---
+
+export type GovernedHandoffEntryId = string & {
+  readonly __brand: "GovernedHandoffEntryId";
+};
+
+/** R05 deferred principal subjects — G1 only records consideration may commence. */
+export type HandoffDeferredPrincipalSubject =
+  | "handoff_authorization"
+  | "handoff_posture_declaration"
+  | "handoff_act_lifecycle"
+  | "handoff_recall_withdrawal_suspension"
+  | "handoff_evidence_consumption_at_authorization_boundary"
+  | "auditable_transition_rules";
+
+/** R01 permanent HOF-P distinctions preserved at entry (P1–P6, P9–P10). */
+export type HandoffHofPDistinctionId =
+  | "HOF-P1"
+  | "HOF-P2"
+  | "HOF-P3"
+  | "HOF-P4"
+  | "HOF-P5"
+  | "HOF-P6"
+  | "HOF-P9"
+  | "HOF-P10";
+
+/** Historical entry currency vs current preparation posture (optional; history remains loadable). */
+export type HandoffEntryCurrency = "current" | "stale";
+
+/**
+ * Non-persisting R07 entry assessment — mayCommence means consideration may begin;
+ * never authorization, posture, or execution.
+ */
+export interface GovernedHandoffEntryAssessment {
+  readonly mayCommence: boolean;
+  readonly preparationId: GovernedHandoffPreparationId | null;
+  readonly gpraId: GpraId | null;
+  readonly reasons: readonly string[];
+  readonly considerationMayCommence: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly doesNotPerformG11Preparation: true;
+  readonly doesNotGrantGpraOrApproval: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotBindConsumerClassCatalog: true;
+  readonly hofG1Only: true;
+  readonly std015HofG1EntryBoundaryOnly: true;
+  readonly deferredPrincipalSubjects: readonly HandoffDeferredPrincipalSubject[];
+  readonly hofPDistinctionsPreserved: readonly HandoffHofPDistinctionId[];
+  readonly r01InheritanceLock: true;
+  readonly r02DoesNotWeakenStd012Or013: true;
+  readonly r03MfgComplianceBoundaryContextOnly: true;
+  readonly r04DecisionStagePolicyOnly: true;
+  readonly r05PrincipalSubjectsDeferred: true;
+  readonly r06DoesNotPerformReviewApprovalGpraOrG11Prep: true;
+}
+
+/**
+ * Additive immutable Governed Handoff entry record (HOF-G1 R01–R07).
+ * Entry gate only — does not authorize Handoff, declare Posture, or execute.
+ * Historical entries remain loadable after later GPRA invalidation.
+ */
+export interface GovernedHandoffEntryRecord {
+  readonly entryId: GovernedHandoffEntryId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  /** Copied from preparation — abstract HCBM keys only; HOF-G3 binding deferred. */
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly preparationCurrencyAtEntry: "current";
+  readonly eligibilityLayerConditionConsumed: "export_ready";
+  readonly considerationMayCommence: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffExecution: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly doesNotPerformG11Preparation: true;
+  readonly doesNotGrantGpraOrApproval: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotBindConsumerClassCatalog: true;
+  readonly hofG1Only: true;
+  readonly std015HofG1EntryBoundaryOnly: true;
+  readonly deferredPrincipalSubjects: readonly HandoffDeferredPrincipalSubject[];
+  readonly hofPDistinctionsPreserved: readonly HandoffHofPDistinctionId[];
+  readonly r01InheritanceLock: true;
+  readonly r02DoesNotWeakenStd012Or013: true;
+  readonly r03MfgComplianceBoundaryContextOnly: true;
+  readonly r04DecisionStagePolicyOnly: true;
+  readonly r05PrincipalSubjectsDeferred: true;
+  readonly r06DoesNotPerformReviewApprovalGpraOrG11Prep: true;
+  readonly enteredAt: string;
+  /** Governed actor string — not an authority class. */
+  readonly enteredBy: string;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
 }

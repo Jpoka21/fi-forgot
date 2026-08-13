@@ -8,6 +8,7 @@
  * G9 GPRA supersession requires predecessor + successor GPRA / Approval / Review joint coherence.
  * G10 Brain advisories require BRPAM markers and Review/RVA/Program linkage coherence.
  * G11 Handoff preparations require HEPM/HVEM markers and GPRA lineage coherence.
+ * HOF-G1 Handoff entries require preparation + GPRA lineage coherence (R01–R07).
  */
 
 import type {
@@ -16,6 +17,7 @@ import type {
   DesignTimeFeasibilityEvaluationRecord,
   Domain3BrainAdvisoryRecord,
   DownstreamDeficiencyRecord,
+  GovernedHandoffEntryRecord,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
   GpraInvalidationActRecord,
@@ -47,12 +49,14 @@ import { assertPersistedGpraInvalidationCoherence } from "./g8-rehydration-coher
 import { assertPersistedGpraSupersessionCoherence } from "./g9-rehydration-coherence.js";
 import { assertPersistedDomain3BrainAdvisoryCoherence } from "./g10-rehydration-coherence.js";
 import { assertPersistedGovernedHandoffPreparationCoherence } from "./g11-rehydration-coherence.js";
+import { assertPersistedGovernedHandoffEntryCoherence } from "./hof-g1-rehydration-coherence.js";
 import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
+  validatePersistedGovernedHandoffEntry,
   validatePersistedGovernedHandoffPreparation,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -472,6 +476,49 @@ export function rehydrateGovernedHandoffPreparation(
   }
 
   assertPersistedGovernedHandoffPreparationCoherence({
+    preparation,
+    gpra,
+    review,
+    determination,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export interface HofG1HandoffEntryRehydrationContext {
+  readonly preparation: unknown;
+  readonly gpra: unknown;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+/**
+ * Trusted HOF-G1 Handoff entry rehydration — preparation + GPRA lineage coherence.
+ * Historical entries remain loadable after later invalidation (immutable history).
+ */
+export function rehydrateGovernedHandoffEntry(
+  raw: unknown,
+  context: HofG1HandoffEntryRehydrationContext,
+): GovernedHandoffEntryRecord {
+  validatePersistedGovernedHandoffEntry(raw);
+  validatePersistedGovernedHandoffPreparation(context.preparation);
+  validatePersistedGpraGrant(context.gpra);
+  const entry = raw as GovernedHandoffEntryRecord;
+  const preparation = context.preparation as GovernedHandoffPreparationRecord;
+  const gpra = context.gpra as GpraGrantRecord;
+
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+
+  assertPersistedGovernedHandoffEntryCoherence({
+    entry,
     preparation,
     gpra,
     review,

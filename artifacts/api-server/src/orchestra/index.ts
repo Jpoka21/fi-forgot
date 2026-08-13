@@ -211,6 +211,28 @@ export {
 } from "./handoff-preparation.js";
 
 export {
+  GOVERNED_HANDOFF_ENTRY_TRACEABILITY,
+  HANDOFF_DEFERRED_PRINCIPAL_SUBJECTS,
+  HOF_P_DISTINCTIONS_PRESERVED,
+  HOF_G1_BOUNDARY_INVARIANTS,
+  isHandoffDeferredPrincipalSubject,
+  isHandoffHofPDistinctionId,
+  assessGovernedHandoffEntry,
+  evaluateHandoffEntryCurrencyFromFacts,
+  handoffEntryLineageMatchesGpra,
+} from "./handoff-entry.js";
+
+export {
+  STD015_GOVERNING_STANDARD,
+  STD015_GOVERNING_STANDARD_VERSION,
+  STD015_DOMAIN_CLASSIFICATION,
+  STD015_ARCHITECTURAL_DOMAIN,
+  createStd015GovernanceTraceability,
+  type Std015RequirementId,
+  type Std015GovernanceTraceability,
+} from "./std015-authority.js";
+
+export {
   REVIEW_DETERMINATION_TRACEABILITY,
   LEGAL_REVIEW_DETERMINATION_OUTCOMES,
   isLegalReviewDeterminationOutcome,
@@ -291,9 +313,15 @@ export type {
   GovernedHandoffPreparationId,
   GovernedHandoffPreparationRecord,
   GovernedHandoffEligibilityAssessment,
+  GovernedHandoffEntryId,
+  GovernedHandoffEntryRecord,
+  GovernedHandoffEntryAssessment,
   HandoffConsumerCategoryKey,
   HandoffEligibilityLayerCondition,
   HandoffPreparationCurrency,
+  HandoffEntryCurrency,
+  HandoffDeferredPrincipalSubject,
+  HandoffHofPDistinctionId,
   HandoffValidityExportSnapshot,
   HandoffEvidencePackageRefs,
 } from "./domain3-types.js";

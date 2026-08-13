@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G11 (Review through Governed Handoff Preparation).
+ * Governed Domain 3 repository — G2–G11 + STD-015 HOF-G1 Upstream Entry.
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -11,6 +11,7 @@ import {
   rehydrateDesignTimeFeasibilityEvaluation,
   rehydrateDomain3BrainAdvisory,
   rehydrateDownstreamDeficiencyRecord,
+  rehydrateGovernedHandoffEntry,
   rehydrateGovernedHandoffPreparation,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
@@ -31,6 +32,7 @@ import {
   validatePersistedDesignTimeFeasibilityEvaluation,
   validatePersistedDomain3BrainAdvisory,
   validatePersistedDownstreamDeficiencyRecord,
+  validatePersistedGovernedHandoffEntry,
   validatePersistedGovernedHandoffPreparation,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -66,6 +68,9 @@ import type {
   DownstreamDispositionEligibility,
   GovernedDeficiencyFamily,
   GovernedHandoffEligibilityAssessment,
+  GovernedHandoffEntryAssessment,
+  GovernedHandoffEntryId,
+  GovernedHandoffEntryRecord,
   GovernedHandoffPreparationId,
   GovernedHandoffPreparationRecord,
   GpraGrantRecord,
@@ -77,6 +82,7 @@ import type {
   GpraValidityAssessment,
   GpraValidityPosture,
   HandoffConsumerCategoryKey,
+  HandoffEntryCurrency,
   HandoffPreparationCurrency,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
@@ -143,6 +149,14 @@ import {
   createGovernedHandoffPreparationRecord,
   evaluateHandoffPreparationCurrencyFromFacts,
 } from "../handoff-preparation.js";
+import {
+  assertGovernedEntryActor,
+  assertNoHandoffEntryExecutionOrAuthorityClaims,
+  assessGovernedHandoffEntry,
+  createGovernedHandoffEntryRecord,
+  evaluateHandoffEntryCurrencyFromFacts,
+  handoffEntryLineageMatchesGpra,
+} from "../handoff-entry.js";
 import { assertEstablishedSupersessionAuthorityClass } from "../supersession-authority.js";
 import { assertSupersessionTriggerFamily } from "../supersession-trigger-families.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
@@ -584,6 +598,68 @@ export interface Domain3Repository {
   evaluateHandoffPreparationCurrency(
     preparationId: GovernedHandoffPreparationId,
   ): Promise<HandoffPreparationCurrency>;
+
+  /**
+   * HOF-G1 R07 — non-persisting entry assessment: whether GPRA + G11 exports may be
+   * consumed for Handoff *consideration*. Does not authorize Handoff or declare Posture.
+   */
+  evaluateGovernedHandoffEntry(input: {
+    preparationId: GovernedHandoffPreparationId;
+    sourceAttribution?: unknown;
+    authorityClassId?: unknown;
+    handoffAuthorityClassId?: unknown;
+    handoffActId?: unknown;
+    handoffAuthorized?: unknown;
+    executesHandoff?: unknown;
+    handoffAuthorizationActId?: unknown;
+    postureDeclarationActId?: unknown;
+    hoemEvidenceId?: unknown;
+  }): Promise<GovernedHandoffEntryAssessment>;
+
+  /**
+   * HOF-G1 R07 — persist entry ONLY when mayCommence. Additive immutable history.
+   * Does not authorize Handoff, declare Posture, or perform G11 preparation.
+   */
+  admitGovernedHandoffEntry(input: {
+    preparationId: GovernedHandoffPreparationId;
+    enteredBy: string;
+    sourceAttribution?: unknown;
+    authorityClassId?: unknown;
+    handoffAuthorityClassId?: unknown;
+    handoffActId?: unknown;
+    handoffAuthorized?: unknown;
+    executesHandoff?: unknown;
+    handoffAuthorization?: unknown;
+    performHandoff?: unknown;
+    handoffExecuted?: unknown;
+    handoffPosture?: unknown;
+    handoffAuthorizationActId?: unknown;
+    postureDeclarationActId?: unknown;
+    hoemEvidenceId?: unknown;
+    manufacturingExecutionId?: unknown;
+    fulfillmentExecutionId?: unknown;
+    consumerCategoryKeys?: unknown;
+  }): Promise<GovernedHandoffEntryRecord>;
+
+  loadGovernedHandoffEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<GovernedHandoffEntryRecord | null>;
+
+  listGovernedHandoffEntriesByPreparation(
+    preparationId: GovernedHandoffPreparationId,
+  ): Promise<readonly GovernedHandoffEntryRecord[]>;
+
+  listGovernedHandoffEntriesByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffEntryRecord[]>;
+
+  /**
+   * Optional: historical entry currency vs current preparation posture.
+   * Stale entries remain loadable (immutable history).
+   */
+  evaluateHandoffEntryCurrency(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<HandoffEntryCurrency>;
 }
 
 export function createDomain3Repository(
@@ -1095,6 +1171,122 @@ export function createDomain3RepositoryWithStorage(
     }
     const determination = rehydrateReviewDetermination(determinationRaw);
     return rehydrateGovernedHandoffPreparation(raw, { gpra, review, determination });
+  }
+
+  async function rehydrateTrustedHandoffEntry(
+    raw: GovernedHandoffEntryRecord,
+  ): Promise<GovernedHandoffEntryRecord> {
+    const prepRaw = await storage.getGovernedHandoffPreparation(raw.preparationId);
+    if (!prepRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff entry preparationId points to no persisted preparation",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R07"],
+      );
+    }
+    const preparation = await rehydrateTrustedHandoffPreparation(prepRaw);
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    if (!gpraRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff entry gpraId points to no persisted GPRA",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R07"],
+      );
+    }
+    const gpra = await rehydrateTrustedGpraGrant(gpraRaw);
+    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+    if (!reviewRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff entry reviewId points to no persisted Review",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R07"],
+      );
+    }
+    const review = rehydrateProductionReadinessReview(reviewRaw);
+    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+    if (!determinationRaw) {
+      throw new OrchestraConstitutionalError(
+        "Handoff entry determinationId points to no persisted Determination",
+        "invalid_handoff_entry",
+        ["FI-DSN-STD-015-R07"],
+      );
+    }
+    const determination = rehydrateReviewDetermination(determinationRaw);
+    return rehydrateGovernedHandoffEntry(raw, {
+      preparation,
+      gpra,
+      review,
+      determination,
+    });
+  }
+
+  async function assessHandoffEntryInternal(
+    preparationId: GovernedHandoffPreparationId,
+  ): Promise<{
+    assessment: GovernedHandoffEntryAssessment;
+    preparation: GovernedHandoffPreparationRecord | null;
+  }> {
+    const prepRaw = await storage.getGovernedHandoffPreparation(preparationId);
+    if (!prepRaw) {
+      return {
+        preparation: null,
+        assessment: assessGovernedHandoffEntry({
+          preparation: null,
+          preparationCurrency: null,
+          authoritativeGpraId: null,
+          lineageMatchesAuthoritativeGpra: false,
+        }),
+      };
+    }
+    const preparation = await rehydrateTrustedHandoffPreparation(prepRaw);
+    let preparationCurrency: HandoffPreparationCurrency;
+    try {
+      preparationCurrency = await evaluateHandoffPreparationCurrencyInternal(preparation);
+    } catch {
+      preparationCurrency = "stale";
+    }
+    const authoritative = await findAuthoritativeGpraByObligationContext(
+      preparation.obligationId,
+      preparation.handoffConsumerContextId,
+    );
+    const lineageMatchesAuthoritativeGpra = authoritative
+      ? handoffEntryLineageMatchesGpra(preparation, authoritative)
+      : false;
+    return {
+      preparation,
+      assessment: assessGovernedHandoffEntry({
+        preparation,
+        preparationCurrency,
+        authoritativeGpraId: authoritative?.gpraId ?? null,
+        lineageMatchesAuthoritativeGpra,
+      }),
+    };
+  }
+
+  async function evaluateHandoffPreparationCurrencyInternal(
+    preparation: GovernedHandoffPreparationRecord,
+  ): Promise<HandoffPreparationCurrency> {
+    const currentAssessment = await assessHandoffEligibilityInternal({
+      obligationId: preparation.obligationId,
+      handoffConsumerContextId: preparation.handoffConsumerContextId,
+      consumerCategoryKeys: preparation.consumerCategoryKeys,
+    });
+    const currentAuthoritative = await findAuthoritativeGpraByObligationContext(
+      preparation.obligationId,
+      preparation.handoffConsumerContextId,
+    );
+    const currentValidity = currentAuthoritative
+      ? await evaluateGpraValidityForContext(
+          currentAuthoritative.gpraId,
+          preparation.handoffConsumerContextId,
+        )
+      : null;
+    return evaluateHandoffPreparationCurrencyFromFacts({
+      preparation,
+      currentAuthoritativeGpraId: currentAuthoritative?.gpraId ?? null,
+      currentValidity,
+      currentEligibilityCondition: currentAssessment.eligibilityLayerCondition,
+    });
   }
 
   async function resolveBrainAdvisoriesForHandoff(
@@ -3042,26 +3234,124 @@ export function createDomain3RepositoryWithStorage(
           ["FI-DSN-STD-014-R88"],
         );
       }
-      const currentAssessment = await assessHandoffEligibilityInternal({
-        obligationId: preparation.obligationId,
-        handoffConsumerContextId: preparation.handoffConsumerContextId,
-        consumerCategoryKeys: preparation.consumerCategoryKeys,
-      });
-      const currentAuthoritative = await findAuthoritativeGpraByObligationContext(
-        preparation.obligationId,
-        preparation.handoffConsumerContextId,
-      );
-      const currentValidity = currentAuthoritative
-        ? await evaluateGpraValidityForContext(
-            currentAuthoritative.gpraId,
-            preparation.handoffConsumerContextId,
-          )
-        : null;
-      return evaluateHandoffPreparationCurrencyFromFacts({
+      return evaluateHandoffPreparationCurrencyInternal(preparation);
+    },
+
+    async evaluateGovernedHandoffEntry(input) {
+      assertNoHandoffEntryExecutionOrAuthorityClaims(input as unknown as Record<string, unknown>);
+      if (
+        input.sourceAttribution !== undefined ||
+        input.authorityClassId != null ||
+        input.handoffAuthorityClassId != null
+      ) {
+        assertGovernedEntryActor({
+          enteredBy: "entry-evaluator",
+          sourceAttribution: input.sourceAttribution,
+          authorityClassId: input.authorityClassId,
+          handoffAuthorityClassId: input.handoffAuthorityClassId,
+        });
+      }
+      const { assessment } = await assessHandoffEntryInternal(input.preparationId);
+      return assessment;
+    },
+
+    async admitGovernedHandoffEntry(input) {
+      assertNoHandoffEntryExecutionOrAuthorityClaims(input as unknown as Record<string, unknown>);
+      const enteredBy = assertGovernedEntryActor(input);
+      const { assessment, preparation } = await assessHandoffEntryInternal(input.preparationId);
+
+      if (!assessment.mayCommence || !preparation) {
+        throw new OrchestraConstitutionalError(
+          `Governed Handoff entry rejected: ${assessment.reasons.join("; ") || "mayCommence is false"}`,
+          "invalid_handoff_entry",
+          ["FI-DSN-STD-015-R07"],
+        );
+      }
+
+      const entry = createGovernedHandoffEntryRecord({
         preparation,
-        currentAuthoritativeGpraId: currentAuthoritative?.gpraId ?? null,
-        currentValidity,
-        currentEligibilityCondition: currentAssessment.eligibilityLayerCondition,
+        enteredBy,
+        sourceAttribution: input.sourceAttribution,
+        authorityClassId: input.authorityClassId,
+        handoffAuthorityClassId: input.handoffAuthorityClassId,
+        handoffActId: input.handoffActId,
+        handoffAuthorized: input.handoffAuthorized,
+        executesHandoff: input.executesHandoff,
+        handoffAuthorization: input.handoffAuthorization,
+        performHandoff: input.performHandoff,
+        handoffExecuted: input.handoffExecuted,
+        handoffPosture: input.handoffPosture,
+        handoffAuthorizationActId: input.handoffAuthorizationActId,
+        postureDeclarationActId: input.postureDeclarationActId,
+        hoemEvidenceId: input.hoemEvidenceId,
+        manufacturingExecutionId: input.manufacturingExecutionId,
+        fulfillmentExecutionId: input.fulfillmentExecutionId,
+        consumerCategoryKeys: input.consumerCategoryKeys,
+      });
+
+      validatePersistedGovernedHandoffEntry(entry);
+      try {
+        await storage.putGovernedHandoffEntry(entry);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Governed Handoff entry",
+          "invalid_handoff_entry",
+          ["FI-DSN-STD-015-R07"],
+        );
+      }
+      const loaded = await storage.getGovernedHandoffEntry(entry.entryId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Governed Handoff entry",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-015-R07"],
+        );
+      }
+      return rehydrateTrustedHandoffEntry(loaded);
+    },
+
+    async loadGovernedHandoffEntry(entryId) {
+      const loaded = await storage.getGovernedHandoffEntry(entryId);
+      if (!loaded) return null;
+      return rehydrateTrustedHandoffEntry(loaded);
+    },
+
+    async listGovernedHandoffEntriesByPreparation(preparationId) {
+      const listed = await storage.listGovernedHandoffEntriesByPreparation(preparationId);
+      const out: GovernedHandoffEntryRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffEntry(item));
+      }
+      return out.sort((a, b) => a.enteredAt.localeCompare(b.enteredAt));
+    },
+
+    async listGovernedHandoffEntriesByGpra(gpraId) {
+      const listed = await storage.listGovernedHandoffEntriesByGpra(gpraId);
+      const out: GovernedHandoffEntryRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffEntry(item));
+      }
+      return out.sort((a, b) => a.enteredAt.localeCompare(b.enteredAt));
+    },
+
+    async evaluateHandoffEntryCurrency(entryId) {
+      const entry = await this.loadGovernedHandoffEntry(entryId);
+      if (!entry) {
+        throw new OrchestraConstitutionalError(
+          "Handoff entry not found for currency evaluation",
+          "invalid_handoff_entry",
+          ["FI-DSN-STD-015-R07"],
+        );
+      }
+      const preparation = await this.loadGovernedHandoffPreparation(entry.preparationId);
+      if (!preparation) {
+        return "stale";
+      }
+      const currentPreparationCurrency =
+        await evaluateHandoffPreparationCurrencyInternal(preparation);
+      return evaluateHandoffEntryCurrencyFromFacts({
+        entry,
+        currentPreparationCurrency,
       });
     },
   };

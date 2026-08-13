@@ -1,11 +1,13 @@
 import type { Std012RequirementId } from "./authority.js";
 import type { Std013RequirementId } from "./domain2-authority.js";
 import type { Std014RequirementId } from "./domain3-authority.js";
+import type { Std015RequirementId } from "./std015-authority.js";
 
 export type OrchestraRequirementId =
   | Std012RequirementId
   | Std013RequirementId
-  | Std014RequirementId;
+  | Std014RequirementId
+  | Std015RequirementId;
 
 /**
  * Constitutional invariant or transition violation within Orchestra Domain 1.
@@ -64,7 +66,8 @@ export type OrchestraErrorCode =
   | "invalid_gpra_invalidation"
   | "invalid_gpra_supersession"
   | "invalid_domain3_brain_advisory"
-  | "invalid_handoff_preparation";
+  | "invalid_handoff_preparation"
+  | "invalid_handoff_entry";
 
 export function isOrchestraConstitutionalError(
   error: unknown,
