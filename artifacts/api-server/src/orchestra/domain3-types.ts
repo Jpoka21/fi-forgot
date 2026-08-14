@@ -1661,6 +1661,16 @@ export type HoemSuspensionOperativeRecordId = string & {
 
 export type HandoffSuspensionCurrency = "current" | "stale";
 
+export type GovernedHandoffWithdrawalActId = string & {
+  readonly __brand: "GovernedHandoffWithdrawalActId";
+};
+
+export type HoemWithdrawalOperativeRecordId = string & {
+  readonly __brand: "HoemWithdrawalOperativeRecordId";
+};
+
+export type HandoffWithdrawalCurrency = "current" | "stale";
+
 /**
  * Closed vocabulary for HOF-G6-U2 constitutional suspension basis (R85b / R89).
  * Free-text notes MUST NOT be the sole basis.
@@ -1779,6 +1789,7 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly currentState: HandoffActLayerLifecycleState | null;
   readonly authoritativeCompletionActId: GovernedHandoffCompletionActId | null;
   readonly authoritativeSuspensionActId: GovernedHandoffSuspensionActId | null;
+  readonly authoritativeWithdrawalActId: GovernedHandoffWithdrawalActId | null;
   /** Always null at G5 — Rejected is not an HGA act tip and no G2/G4 withhold facts exist. */
   readonly authoritativeRejectionAttributionId: null;
   readonly authoritativePostureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
@@ -1792,8 +1803,10 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly notHandoffAcceptance: true;
   readonly notManufacturingClearance: true;
   readonly notG11EligibilityLayerState: true;
-  readonly withdrawalRecallExpiredMechanicsDeferred: true;
+  readonly withdrawalRecallExpiredMechanicsDeferred: false;
+  readonly recallExpiredMechanicsDeferred: true;
   readonly suspensionMechanicsOperative: true;
+  readonly withdrawalMechanicsOperative: true;
   readonly r48ClosedHslmVocabulary: true;
   readonly r49PeerDistinctLifecycle: true;
   readonly r50SingleBindingPostureChain: true;
@@ -1967,8 +1980,8 @@ export interface HandoffDownstreamExitConsiderationEvaluation {
 
 /**
  * R66 — mandatory HGA act-type matrix (§20.5.3.14). Exactly six ids.
- * suspension is operative (HOF-G6-U2 R84–R97). withdrawal / recall remain
- * cataloged_deferred for act-specific minting (HOF-G6-U3/U4 / R98+).
+ * suspension (HOF-G6-U2) and withdrawal (HOF-G6-U3) are operative.
+ * recall remains cataloged_deferred for act-specific minting (HOF-G6-U4 / R112+).
  */
 export type HgaMatrixActType =
   | "authorization"
@@ -2091,7 +2104,9 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly frozenHgaConstitutionalScopes: readonly string[];
   readonly handoffLifecycleRejectionActAbsentFromHgaScopes: true;
   readonly rejectHandoffActLayerUndefined: true;
-  readonly withdrawRecallApisNotProvided: true;
+  readonly withdrawRecallApisNotProvided: false;
+  readonly withdrawGovernedHandoffMayBeProvided: true;
+  readonly recallApisNotProvided: true;
   readonly suspendGovernedHandoffMayBeProvided: true;
   readonly performHgaActFactoryNotProvided: true;
   readonly catalogMembershipDoesNotCreateAuthority: true;
@@ -2106,8 +2121,9 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly r69ProhibitedPerformers: true;
   /** HOF-G6-U1 R70–R83 shared foundation is established. */
   readonly hofG6U1SharedFoundationEstablished: true;
-  /** Act-specific withdrawal/recall minting remains U3/U4 (R98+). */
-  readonly hofG6ActSpecificMechanicsDeferredToU3U4: true;
+  /** Act-specific recall minting remains U4 (R112+). */
+  readonly hofG6ActSpecificMechanicsDeferredToU3U4: false;
+  readonly hofG6RecallMechanicsDeferredToU4: true;
   readonly hofG9CompletionThemesTranche3: true;
   readonly traceability: Std015GovernanceTraceability;
 }
@@ -2172,15 +2188,18 @@ export interface HofG6U1SharedLifecycleFoundationAssessment {
   readonly noPeerAuthorityAbsorption: true;
   readonly noImpliedReentryOrResumption: true;
   readonly noAutomaticRetryOrRecovery: true;
-  readonly withdrawRecallMintApisAbsent: true;
+  readonly withdrawRecallMintApisAbsent: false;
+  readonly recallMintApisAbsent: true;
   readonly performHgaActFactoryAbsent: true;
   readonly rejectionActAbsent: true;
   readonly exitHgaMatrixActAbsent: true;
   readonly hslmEightStatesPreserved: true;
   readonly restorationResumptionReentryDeferred: true;
   readonly suspensionMechanicsOperative: true;
+  readonly withdrawalMechanicsOperative: true;
   readonly r84PlusUnavailable: false;
-  readonly r98PlusUnavailable: true;
+  readonly r98PlusUnavailable: false;
+  readonly r112PlusUnavailable: true;
   readonly r70ThroughR83: true;
   readonly traceability: Std015GovernanceTraceability;
 }
@@ -2312,6 +2331,153 @@ export interface GovernedHandoffSuspensionActRecord {
   readonly r95RepeatedSuspensionsAdditive: true;
   readonly r96InvalidAttemptsNonOperative: true;
   readonly r97NotWithdrawalRecallOrReentry: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Closed vocabulary for HOF-G6-U3 constitutional withdrawal basis (R99b / R103).
+ * Faithful encoding of R53 HGA-initiated retraction warrant — not a separately frozen catalog id.
+ */
+export type WithdrawalConstitutionalBasisKind =
+  "hga_initiated_forward_reliance_retraction_warranted";
+
+/** R105 / R107 — retraction target(s) identified in the withdrawal act. */
+export type WithdrawalRetractionTarget = "authorization" | "posture";
+
+/**
+ * R103 — provenance for a withdrawal constitutional basis.
+ * Optional notes cannot be the sole basis.
+ */
+export interface WithdrawalConstitutionalBasisProvenance {
+  readonly basisKind: WithdrawalConstitutionalBasisKind;
+  readonly notes: string | null;
+  readonly notesCannotBeSoleBasis: true;
+}
+
+/**
+ * R107 — additive HOEM withdrawal operative record (withdrawal act type only).
+ * Peer-distinct from authorization/posture/completion/suspension/recall HOEM records.
+ */
+export interface HoemWithdrawalOperativeRecord {
+  readonly hoemWithdrawalRecordId: HoemWithdrawalOperativeRecordId;
+  readonly withdrawalActId: GovernedHandoffWithdrawalActId;
+  readonly actType: "withdrawal";
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly retractionTargets: readonly WithdrawalRetractionTarget[];
+  readonly constitutionalBasisKind: WithdrawalConstitutionalBasisKind;
+  readonly effectiveAt: string;
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeLifecycleAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+}
+
+/**
+ * Assessment for whether a lawful HGA withdrawal act may be performed (R98–R111).
+ */
+export interface GovernedHandoffWithdrawalAssessment {
+  readonly mayWithdraw: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly authorizationCurrency: HandoffAuthorizationCurrency | null;
+  readonly postureDeclarationCurrency: HandoffPostureDeclarationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly constitutionalBasisKind: WithdrawalConstitutionalBasisKind | null;
+  readonly doesNotAuthorizeActMintViaCatalogAlone: true;
+  readonly doesNotAuthorizeActMintViaRtcCatalogAlone: true;
+  readonly doesNotAuthorizeActMintViaGpraInvalidatedOrSupersededAlone: true;
+  readonly doesNotAuthorizeActMintViaG11BlockedAlone: true;
+  readonly doesNotAuthorizeActMintViaHrwmLossAlone: true;
+  readonly doesNotAuthorizeActMintViaAdvisoryAlone: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffCompletion: true;
+  readonly notHercmReentryOrResumption: true;
+  readonly suspensionPauseDoesNotNegateAttributability: true;
+}
+
+/**
+ * Operative HGA Handoff withdrawal act — FI-DSN-STD-015-R98–R111.
+ * HGA-initiated retraction / active cessation of forward reliance.
+ * Does NOT recall, suspend-as-withdrawal, resume, restore, or reenter.
+ */
+export interface GovernedHandoffWithdrawalActRecord {
+  readonly withdrawalActId: GovernedHandoffWithdrawalActId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_withdrawal_act";
+  readonly withdrawnBy: string;
+  readonly withdrawnAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly declaredPostureClass: HandoffPostureClass | null;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly constitutionalBasisKind: WithdrawalConstitutionalBasisKind;
+  readonly constitutionalBasisProvenance: WithdrawalConstitutionalBasisProvenance;
+  readonly retractionTargets: readonly WithdrawalRetractionTarget[];
+  readonly forwardRelianceCeased: true;
+  readonly doesNotEraseAuthorization: true;
+  readonly doesNotErasePosture: true;
+  readonly doesNotEraseSuspensionHistory: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffCompletion: true;
+  readonly notHercmReentry: true;
+  readonly notResumption: true;
+  readonly notRestoration: true;
+  readonly effectFraming: "hga_initiated_retraction";
+  readonly hoemWithdrawalRecord: HoemWithdrawalOperativeRecord;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly notAutomaticHslmPromotion: true;
+  readonly hslmProjectionFromActFacts: true;
+  readonly r98DistinctHgaWithdrawalAct: true;
+  readonly r99SharedPreconditionsPlusTriggers: true;
+  readonly r100NoWithdrawAfterRelianceCeased: true;
+  readonly r101NoSoleRtcGpraG11HrwmBasis: true;
+  readonly r102SingleBindingPostureChain: true;
+  readonly r103ConstitutionalBasisAndProvenance: true;
+  readonly r104EffectFromWithdrawnAtForward: true;
+  readonly r105HgaInitiatedRetractionCessation: true;
+  readonly r106AttributedBindingOnly: true;
+  readonly r107HoemWithdrawalOperativeRecord: true;
+  readonly r108NotAutomaticHslmPromotion: true;
+  readonly r109NoAdditionalCessationAfterCeased: true;
+  readonly r110InvalidAttemptsNonOperative: true;
+  readonly r111NotSuspensionRecallOrReentry: true;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;

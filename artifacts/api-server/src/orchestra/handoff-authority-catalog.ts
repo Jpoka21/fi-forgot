@@ -10,10 +10,11 @@
  * R69 — Prohibited performer classes; suspension/withdrawal/recall mechanics remain HOF-G6.
  *
  * HOF-G6-U1 (R70–R83) shared foundation is established separately in
- * handoff-lifecycle-g6-foundation.ts; HOF-G6-U2 (R84–R97) makes suspension operative.
- * withdrawal/recall minting remains cataloged_deferred until HOF-G6-U3/U4 (R98+).
+ * handoff-lifecycle-g6-foundation.ts; HOF-G6-U2 (R84–R97) makes suspension operative;
+ * HOF-G6-U3 (R98–R111) makes withdrawal operative.
+ * recall minting remains cataloged_deferred until HOF-G6-U4 (R112+).
  * Does NOT implement exit-completeness, rejection acts, or exit matrix acts.
- * Does NOT mint withdraw/recall/reject APIs or a generic performHgaAct factory.
+ * Does NOT mint recall/reject APIs or a generic performHgaAct factory.
  */
 
 import type {
@@ -198,19 +199,34 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
     }),
     Object.freeze({
       actType: "withdrawal" as const,
-      operativeStatus: "cataloged_deferred" as const,
+      operativeStatus: "operative" as const,
       hoemExpectation: "withdrawal" as const,
       hccmBoundRequired: true as const,
-      hppmmPostureChainRequired: false,
+      hppmmPostureChainRequired: true,
       requirementIds: Object.freeze([
         "FI-DSN-STD-015-R66",
         "FI-DSN-STD-015-R67",
+        "FI-DSN-STD-015-R68",
         "FI-DSN-STD-015-R69",
         "FI-DSN-STD-015-R70",
         "FI-DSN-STD-015-R71",
         "FI-DSN-STD-015-R75",
+        "FI-DSN-STD-015-R98",
+        "FI-DSN-STD-015-R99",
+        "FI-DSN-STD-015-R100",
+        "FI-DSN-STD-015-R101",
+        "FI-DSN-STD-015-R102",
+        "FI-DSN-STD-015-R103",
+        "FI-DSN-STD-015-R104",
+        "FI-DSN-STD-015-R105",
+        "FI-DSN-STD-015-R106",
+        "FI-DSN-STD-015-R107",
+        "FI-DSN-STD-015-R108",
+        "FI-DSN-STD-015-R109",
+        "FI-DSN-STD-015-R110",
+        "FI-DSN-STD-015-R111",
       ] as const),
-      catalogedDeferredHofG6: true,
+      catalogedDeferredHofG6: false,
       sharedFoundationEstablishedHofG6U1: true,
     }),
     Object.freeze({
@@ -431,11 +447,12 @@ export function assertHgaMatrixActMayBePerformed(
   | "authorization"
   | "posture_declaration"
   | "completion"
-  | "suspension" {
+  | "suspension"
+  | "withdrawal" {
   const entry = resolveHgaMatrixActType(actType);
   if (entry.operativeStatus !== "operative") {
     throw new OrchestraConstitutionalError(
-      `HGA matrix act type ${entry.actType} is cataloged_deferred pending HOF-G6-U3/U4 act-specific mechanics; catalog membership does not authorize performance (R66/R69/R70–R83; R98+)`,
+      `HGA matrix act type ${entry.actType} is cataloged_deferred pending HOF-G6-U4 act-specific mechanics; catalog membership does not authorize performance (R66/R69/R70–R83; R112+)`,
       "invalid_handoff_authority_catalog",
       ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R69", "FI-DSN-STD-015-R70"],
     );
@@ -691,8 +708,8 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     STD015_SOLE_HANDOFF_AUTHORITY_CLASS_CATALOG[0] ===
       HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID &&
     matrixTypes.length === 6 &&
-    operative.length === 4 &&
-    deferred.length === 2 &&
+    operative.length === 5 &&
+    deferred.length === 1 &&
     hslmIds.length === 8 &&
     hccmIds.length === 6 &&
     !hgaScopes.includes("handoff_lifecycle_rejection_act" as never) &&
@@ -737,7 +754,9 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     frozenHgaConstitutionalScopes: Object.freeze([...hgaScopes]),
     handoffLifecycleRejectionActAbsentFromHgaScopes: true as const,
     rejectHandoffActLayerUndefined: true as const,
-    withdrawRecallApisNotProvided: true as const,
+    withdrawRecallApisNotProvided: false as const,
+    withdrawGovernedHandoffMayBeProvided: true as const,
+    recallApisNotProvided: true as const,
     suspendGovernedHandoffMayBeProvided: true as const,
     performHgaActFactoryNotProvided: true as const,
     catalogMembershipDoesNotCreateAuthority: true as const,
@@ -751,7 +770,8 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     r68SingleHccmBindingNoMerge: true as const,
     r69ProhibitedPerformers: true as const,
     hofG6U1SharedFoundationEstablished: true as const,
-    hofG6ActSpecificMechanicsDeferredToU3U4: true as const,
+    hofG6ActSpecificMechanicsDeferredToU3U4: false as const,
+    hofG6RecallMechanicsDeferredToU4: true as const,
     hofG9CompletionThemesTranche3: true as const,
     traceability: HANDOFF_AUTHORITY_CATALOG_TRACEABILITY,
   });

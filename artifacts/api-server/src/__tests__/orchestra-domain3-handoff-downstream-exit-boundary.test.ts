@@ -382,7 +382,7 @@ section("1. terminus / R58–R65 traceability");
     hga.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act" as never),
     false,
   );
-  expect("HGA scopes length includes suspension", hga.authorizedConstitutionalScopes.length, 4);
+  expect("HGA scopes length includes suspension and withdrawal", hga.authorizedConstitutionalScopes.length, 5);
 }
 
 section("2. lawful attribute after complete+posture+binding for CC-01 and CC-02");

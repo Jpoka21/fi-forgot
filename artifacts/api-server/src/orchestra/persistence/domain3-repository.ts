@@ -19,6 +19,7 @@ import {
   rehydrateGovernedHandoffPostureDeclaration,
   rehydrateGovernedHandoffCompletion,
   rehydrateGovernedHandoffSuspension,
+  rehydrateGovernedHandoffWithdrawal,
   rehydrateGovernedHandoffDownstreamExitBoundary,
   rehydrateGovernedHandoffPreservationAudit,
   rehydrateGpraGrant,
@@ -48,6 +49,7 @@ import {
   validatePersistedGovernedHandoffPostureDeclaration,
   validatePersistedGovernedHandoffCompletion,
   validatePersistedGovernedHandoffSuspension,
+  validatePersistedGovernedHandoffWithdrawal,
   validatePersistedGovernedHandoffDownstreamExitBoundary,
   validatePersistedGovernedHandoffPreservationAudit,
   validatePersistedGpraGrant,
@@ -107,6 +109,9 @@ import type {
   GovernedHandoffSuspensionActId,
   GovernedHandoffSuspensionActRecord,
   GovernedHandoffSuspensionAssessment,
+  GovernedHandoffWithdrawalActId,
+  GovernedHandoffWithdrawalActRecord,
+  GovernedHandoffWithdrawalAssessment,
   GovernedHandoffDownstreamExitBoundaryAssessment,
   GovernedHandoffDownstreamExitBoundaryAttributionId,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
@@ -133,6 +138,7 @@ import type {
   HandoffPostureDeclarationCurrency,
   HandoffCompletionCurrency,
   HandoffSuspensionCurrency,
+  HandoffWithdrawalCurrency,
   HandoffPostureClass,
   HandoffPreservationAuditAuthorityEffect,
   HandoffPreservationAuditLinkedCurrency,
@@ -257,6 +263,14 @@ import {
   evaluateHandoffSuspensionCurrencyFromFacts,
   selectAuthoritativeGovernedHandoffSuspension,
 } from "../handoff-suspension.js";
+import {
+  assertGovernedHandoffWithdrawalActor,
+  assertNoHandoffWithdrawalRecallOrReentryClaims,
+  assessGovernedHandoffWithdrawal,
+  createGovernedHandoffWithdrawalActRecord,
+  evaluateHandoffWithdrawalCurrencyFromFacts,
+  selectAuthoritativeGovernedHandoffWithdrawal,
+} from "../handoff-withdrawal.js";
 import {
   assertGovernedHandoffDownstreamExitBoundaryActor,
   assertNoDownstreamExitAcceptanceMembershipOrExecutionClaims,
@@ -1442,6 +1456,87 @@ export interface Domain3Repository {
   evaluateHandoffSuspensionCurrency(
     suspensionActId: GovernedHandoffSuspensionActId,
   ): Promise<HandoffSuspensionCurrency>;
+
+  evaluateGovernedHandoffWithdrawal(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    constitutionalBasisKind?: unknown;
+    constitutionalBasisNotes?: unknown;
+    withdrawnBy?: string;
+    authorityClassId?: unknown;
+    sourceAttribution?: unknown;
+    performerClass?: unknown;
+    advisoryEvidenceAlone?: unknown;
+    rtcCatalogAlone?: unknown;
+    gpraInvalidatedAlone?: unknown;
+    gpraSupersededAlone?: unknown;
+    g11BlockedAlone?: unknown;
+    hrwmLossAlone?: unknown;
+    withdrawalActId?: unknown;
+    recallActId?: unknown;
+    resumeHandoff?: unknown;
+    restoreHandoff?: unknown;
+    reenterHandoff?: unknown;
+    brainWithdrawHandoff?: unknown;
+  }): Promise<GovernedHandoffWithdrawalAssessment>;
+
+  withdrawGovernedHandoff(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    authorityClassId: unknown;
+    withdrawnBy: string;
+    constitutionalBasisKind: unknown;
+    constitutionalBasisNotes?: unknown;
+    withdrawnAt?: string;
+    sourceAttribution?: unknown;
+    performerClass?: unknown;
+    advisoryEvidenceAlone?: unknown;
+    rtcCatalogAlone?: unknown;
+    gpraInvalidatedAlone?: unknown;
+    gpraSupersededAlone?: unknown;
+    g11BlockedAlone?: unknown;
+    hrwmLossAlone?: unknown;
+    recallActId?: unknown;
+    expiryActId?: unknown;
+    resumeHandoff?: unknown;
+    restoreHandoff?: unknown;
+    reenterHandoff?: unknown;
+    recallHandoff?: unknown;
+    expireHandoff?: unknown;
+    executesHandoff?: unknown;
+    handoffExecuted?: unknown;
+    performHandoff?: unknown;
+    manufacturingExecutionId?: unknown;
+    fulfillmentExecutionId?: unknown;
+    executionQueueId?: unknown;
+    constitutionalQueueId?: unknown;
+    brainWithdrawHandoff?: unknown;
+    brainHandoffWithdrawal?: unknown;
+    implicitWithdrawal?: unknown;
+    rejectHandoff?: unknown;
+    hercmReentryId?: unknown;
+    resumptionActId?: unknown;
+    restorationActId?: unknown;
+  }): Promise<GovernedHandoffWithdrawalActRecord>;
+
+  loadGovernedHandoffWithdrawalAct(
+    withdrawalActId: GovernedHandoffWithdrawalActId,
+  ): Promise<GovernedHandoffWithdrawalActRecord | null>;
+  listGovernedHandoffWithdrawalActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffWithdrawalActRecord[]>;
+  listGovernedHandoffWithdrawalActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffWithdrawalActRecord[]>;
+  listGovernedHandoffWithdrawalActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffWithdrawalActRecord[]>;
+  getAuthoritativeHandoffWithdrawalForBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<GovernedHandoffWithdrawalActRecord | null>;
+  evaluateHandoffWithdrawalCurrency(
+    withdrawalActId: GovernedHandoffWithdrawalActId,
+  ): Promise<HandoffWithdrawalCurrency>;
 
   /**
    * HOF-G8 R58–R65 — assess whether a lawful downstream exit-boundary attribution may be recorded.
@@ -2840,6 +2935,49 @@ export function createDomain3RepositoryWithStorage(
     });
   }
 
+  async function rehydrateTrustedHandoffWithdrawal(
+    raw: GovernedHandoffWithdrawalActRecord,
+  ): Promise<GovernedHandoffWithdrawalActRecord> {
+    const entryRaw = await storage.getGovernedHandoffEntry(raw.entryId);
+    const bindingRaw = await storage.getGovernedHandoffConsumerBinding(raw.bindingId);
+    const authorizationRaw = await storage.getGovernedHandoffAuthorizationAct(
+      raw.authorizationActId,
+    );
+    const postureRaw = raw.postureDeclarationActId
+      ? await storage.getGovernedHandoffPostureDeclarationAct(raw.postureDeclarationActId)
+      : null;
+    const preparationRaw = await storage.getGovernedHandoffPreparation(raw.preparationId);
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+    if (
+      !entryRaw ||
+      !bindingRaw ||
+      !authorizationRaw ||
+      !postureRaw ||
+      !preparationRaw ||
+      !gpraRaw ||
+      !reviewRaw ||
+      !determinationRaw
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Handoff withdrawal points to missing persisted lineage",
+        "invalid_handoff_withdrawal",
+        ["FI-DSN-STD-015-R99", "FI-DSN-STD-015-R102"],
+      );
+    }
+    return rehydrateGovernedHandoffWithdrawal(raw, {
+      entry: await rehydrateTrustedHandoffEntry(entryRaw),
+      binding: await rehydrateTrustedHandoffConsumerBinding(bindingRaw),
+      authorization: await rehydrateTrustedHandoffAuthorization(authorizationRaw),
+      posture: await rehydrateTrustedHandoffPostureDeclaration(postureRaw),
+      preparation: await rehydrateTrustedHandoffPreparation(preparationRaw),
+      gpra: await rehydrateTrustedGpraGrant(gpraRaw),
+      review: rehydrateProductionReadinessReview(reviewRaw),
+      determination: rehydrateReviewDetermination(determinationRaw),
+    });
+  }
+
   async function rehydrateTrustedHandoffDownstreamExitBoundary(
     raw: GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   ): Promise<GovernedHandoffDownstreamExitBoundaryAttributionRecord> {
@@ -3427,6 +3565,129 @@ export function createDomain3RepositoryWithStorage(
         purportedWithdrawalRecordPresent: input.purportedWithdrawalRecordPresent,
         purportedRecallRecordPresent: input.purportedRecallRecordPresent,
         lifecycleProjectedState: preLifecycle.currentState,
+        priorRecordsPreservedReconstructable: input.priorRecordsPreservedReconstructable,
+      }),
+    };
+  }
+
+  async function assessHandoffWithdrawalInternal(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    constitutionalBasisKind?: unknown;
+    constitutionalBasisNotes?: unknown;
+    authorityClassId?: unknown;
+    performerClass?: unknown;
+    advisoryEvidenceAlone?: unknown;
+    implementationInferenceAlone?: unknown;
+    downstreamOperationalEventAlone?: unknown;
+    rtcCatalogAlone?: unknown;
+    gpraInvalidatedAlone?: unknown;
+    gpraSupersededAlone?: unknown;
+    g11BlockedAlone?: unknown;
+    hrwmLossAlone?: unknown;
+    purportedWithdrawalRecordPresent?: unknown;
+    purportedRecallRecordPresent?: unknown;
+    priorRecordsPreservedReconstructable?: unknown;
+  }): Promise<{
+    assessment: GovernedHandoffWithdrawalAssessment;
+    entry: GovernedHandoffEntryRecord | null;
+    binding: GovernedHandoffConsumerBindingRecord | null;
+    authorization: GovernedHandoffAuthorizationActRecord | null;
+    posture: GovernedHandoffPostureDeclarationActRecord | null;
+  }> {
+    const bundle = await assessHandoffSuspensionInternal(input);
+    const { entry, binding, authorization, posture } = bundle;
+    if (!entry || !binding) {
+      return {
+        entry,
+        binding,
+        authorization,
+        posture,
+        assessment: assessGovernedHandoffWithdrawal({
+          entry,
+          entryCurrency: bundle.assessment.entryCurrency,
+          binding,
+          bindingCurrency: bundle.assessment.bindingCurrency,
+          authorization,
+          authorizationCurrency: bundle.assessment.authorizationCurrency,
+          posture,
+          postureCurrency: bundle.assessment.postureDeclarationCurrency,
+          gpraValidityPosture: bundle.assessment.gpraValidityPosture,
+          eligibilityLayerCondition: bundle.assessment.eligibilityLayerCondition,
+          lineageMatchesAuthoritativeGpra: false,
+          constitutionalBasisKind: input.constitutionalBasisKind,
+          constitutionalBasisNotes: input.constitutionalBasisNotes,
+          authorityClassId: input.authorityClassId,
+          performerClass: input.performerClass,
+          advisoryEvidenceAlone: input.advisoryEvidenceAlone,
+          rtcCatalogAlone: input.rtcCatalogAlone,
+          gpraInvalidatedAlone: input.gpraInvalidatedAlone,
+          gpraSupersededAlone: input.gpraSupersededAlone,
+          g11BlockedAlone: input.g11BlockedAlone,
+          hrwmLossAlone: input.hrwmLossAlone,
+          purportedWithdrawalRecordPresent: input.purportedWithdrawalRecordPresent,
+          purportedRecallRecordPresent: input.purportedRecallRecordPresent,
+        }),
+      };
+    }
+
+    const authoritativeGpra = await findAuthoritativeGpraByObligationContext(
+      entry.obligationId,
+      entry.handoffConsumerContextId,
+    );
+    const lineageMatchesAuthoritativeGpra = authoritativeGpra
+      ? handoffEntryLineageMatchesGpra(entry, authoritativeGpra)
+      : false;
+    const listed = await storage.listGovernedHandoffWithdrawalActsByBinding(binding.bindingId);
+    const withdrawals: GovernedHandoffWithdrawalActRecord[] = [];
+    for (const item of listed) {
+      withdrawals.push(await rehydrateTrustedHandoffWithdrawal(item));
+    }
+    const tip = selectAuthoritativeGovernedHandoffWithdrawal(withdrawals);
+    const tipIsCurrent =
+      !!tip &&
+      evaluateHandoffWithdrawalCurrencyFromFacts({
+        withdrawal: tip,
+        currentEntryCurrency: bundle.assessment.entryCurrency ?? "stale",
+        currentBindingCurrency: bundle.assessment.bindingCurrency ?? "stale",
+        authoritativeWithdrawalActId: tip.withdrawalActId,
+        gpraValidityPosture: bundle.assessment.gpraValidityPosture,
+        lineageMatchesAuthoritativeGpra,
+      }) === "current";
+
+    return {
+      entry,
+      binding,
+      authorization,
+      posture,
+      assessment: assessGovernedHandoffWithdrawal({
+        entry,
+        entryCurrency: bundle.assessment.entryCurrency,
+        binding,
+        bindingCurrency: bundle.assessment.bindingCurrency,
+        authorization,
+        authorizationCurrency: bundle.assessment.authorizationCurrency,
+        posture,
+        postureCurrency: bundle.assessment.postureDeclarationCurrency,
+        gpraValidityPosture: bundle.assessment.gpraValidityPosture,
+        eligibilityLayerCondition: bundle.assessment.eligibilityLayerCondition,
+        lineageMatchesAuthoritativeGpra,
+        constitutionalBasisKind: input.constitutionalBasisKind,
+        constitutionalBasisNotes: input.constitutionalBasisNotes,
+        authorityClassId: input.authorityClassId,
+        performerClass: input.performerClass,
+        advisoryEvidenceAlone: input.advisoryEvidenceAlone,
+        implementationInferenceAlone: input.implementationInferenceAlone,
+        downstreamOperationalEventAlone: input.downstreamOperationalEventAlone,
+        rtcCatalogAlone: input.rtcCatalogAlone,
+        gpraInvalidatedAlone: input.gpraInvalidatedAlone,
+        gpraSupersededAlone: input.gpraSupersededAlone,
+        g11BlockedAlone: input.g11BlockedAlone,
+        hrwmLossAlone: input.hrwmLossAlone,
+        purportedWithdrawalRecordPresent:
+          tipIsCurrent || input.purportedWithdrawalRecordPresent === true,
+        purportedRecallRecordPresent: input.purportedRecallRecordPresent,
+        currentWithdrawalAlreadyCeasedReliance: tipIsCurrent,
         priorRecordsPreservedReconstructable: input.priorRecordsPreservedReconstructable,
       }),
     };
@@ -6634,6 +6895,20 @@ export function createDomain3RepositoryWithStorage(
           lineageMatchesAuthoritativeGpra,
         }) === "current";
 
+      const withdrawals = await this.listGovernedHandoffWithdrawalActsByBinding(bindingId);
+      const authoritativeWithdrawal =
+        selectAuthoritativeGovernedHandoffWithdrawal(withdrawals);
+      const withdrawalIsCurrent =
+        !!authoritativeWithdrawal &&
+        evaluateHandoffWithdrawalCurrencyFromFacts({
+          withdrawal: authoritativeWithdrawal,
+          currentEntryCurrency: entryCurrency,
+          currentBindingCurrency: bindingCurrency,
+          authoritativeWithdrawalActId: authoritativeWithdrawal.withdrawalActId,
+          gpraValidityPosture,
+          lineageMatchesAuthoritativeGpra,
+        }) === "current";
+
       return evaluateHandoffActLayerLifecycleFromFacts({
         binding,
         entry,
@@ -6649,6 +6924,8 @@ export function createDomain3RepositoryWithStorage(
         authoritativePosture,
         authoritativeSuspension,
         suspensionIsCurrent,
+        authoritativeWithdrawal,
+        withdrawalIsCurrent,
       });
     },
 
@@ -7081,6 +7358,210 @@ export function createDomain3RepositoryWithStorage(
         currentEntryCurrency: entryCurrency,
         currentBindingCurrency: bindingCurrency,
         authoritativeSuspensionActId: authoritative?.suspensionActId ?? null,
+        gpraValidityPosture,
+        lineageMatchesAuthoritativeGpra,
+      });
+    },
+
+    async evaluateGovernedHandoffWithdrawal(input) {
+      assertNoHandoffWithdrawalRecallOrReentryClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      if (
+        input.withdrawnBy != null ||
+        input.authorityClassId != null ||
+        input.sourceAttribution != null
+      ) {
+        assertGovernedHandoffWithdrawalActor({
+          withdrawnBy: input.withdrawnBy ?? "withdrawal-evaluator",
+          authorityClassId: input.authorityClassId ?? "handoff_governance_authority",
+          sourceAttribution: input.sourceAttribution,
+          performerClass: input.performerClass,
+        });
+      }
+      const { assessment } = await assessHandoffWithdrawalInternal({
+        ...input,
+        purportedWithdrawalRecordPresent: Boolean(input.withdrawalActId),
+        purportedRecallRecordPresent: Boolean(input.recallActId),
+      });
+      return assessment;
+    },
+
+    async withdrawGovernedHandoff(input) {
+      assertNoHandoffWithdrawalRecallOrReentryClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      const withdrawnBy = assertGovernedHandoffWithdrawalActor(input);
+      const entryRaw = await storage.getGovernedHandoffEntry(input.entryId);
+      const bindingRaw = await storage.getGovernedHandoffConsumerBinding(input.bindingId);
+      if (!entryRaw || !bindingRaw) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff withdrawal rejected: entry or binding not found",
+          "invalid_handoff_withdrawal",
+          ["FI-DSN-STD-015-R99", "FI-DSN-STD-015-R102"],
+        );
+      }
+      const entry = await rehydrateTrustedHandoffEntry(entryRaw);
+      const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
+      if (binding.entryId !== entry.entryId) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff withdrawal rejected: binding does not belong to entry",
+          "invalid_handoff_withdrawal",
+          ["FI-DSN-STD-015-R102"],
+        );
+      }
+      const { assessment, authorization, posture } = await assessHandoffWithdrawalInternal({
+        entryId: input.entryId,
+        bindingId: input.bindingId,
+        constitutionalBasisKind: input.constitutionalBasisKind,
+        constitutionalBasisNotes: input.constitutionalBasisNotes,
+        authorityClassId: input.authorityClassId,
+        performerClass: input.performerClass,
+        advisoryEvidenceAlone: input.advisoryEvidenceAlone,
+        rtcCatalogAlone: input.rtcCatalogAlone,
+        gpraInvalidatedAlone: input.gpraInvalidatedAlone,
+        gpraSupersededAlone: input.gpraSupersededAlone,
+        g11BlockedAlone: input.g11BlockedAlone,
+        hrwmLossAlone: input.hrwmLossAlone,
+        purportedRecallRecordPresent: Boolean(input.recallActId),
+      });
+      if (!assessment.mayWithdraw || !authorization || !posture) {
+        throw new OrchestraConstitutionalError(
+          `Governed Handoff withdrawal rejected: ${assessment.denialReasons.join("; ") || "mayWithdraw is false"}`,
+          "invalid_handoff_withdrawal",
+          ["FI-DSN-STD-015-R98", "FI-DSN-STD-015-R100"],
+        );
+      }
+      const act = createGovernedHandoffWithdrawalActRecord({
+        entry,
+        binding,
+        authorization,
+        posture,
+        authorityClassId: input.authorityClassId,
+        withdrawnBy,
+        withdrawnAt: input.withdrawnAt,
+        constitutionalBasisKind: input.constitutionalBasisKind,
+        constitutionalBasisNotes: input.constitutionalBasisNotes,
+        sourceAttribution: input.sourceAttribution,
+        performerClass: input.performerClass,
+        recallActId: input.recallActId,
+        expiryActId: input.expiryActId,
+        resumeHandoff: input.resumeHandoff,
+        restoreHandoff: input.restoreHandoff,
+        reenterHandoff: input.reenterHandoff,
+        recallHandoff: input.recallHandoff,
+        expireHandoff: input.expireHandoff,
+        executesHandoff: input.executesHandoff,
+        handoffExecuted: input.handoffExecuted,
+        performHandoff: input.performHandoff,
+        manufacturingExecutionId: input.manufacturingExecutionId,
+        fulfillmentExecutionId: input.fulfillmentExecutionId,
+        executionQueueId: input.executionQueueId,
+        constitutionalQueueId: input.constitutionalQueueId,
+        brainWithdrawHandoff: input.brainWithdrawHandoff,
+        brainHandoffWithdrawal: input.brainHandoffWithdrawal,
+        implicitWithdrawal: input.implicitWithdrawal,
+        rtcCatalogAlone: input.rtcCatalogAlone,
+        rejectHandoff: input.rejectHandoff,
+        hercmReentryId: input.hercmReentryId,
+        resumptionActId: input.resumptionActId,
+        restorationActId: input.restorationActId,
+      });
+      validatePersistedGovernedHandoffWithdrawal(act);
+      try {
+        await storage.putGovernedHandoffWithdrawalAct(act);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Governed Handoff withdrawal act",
+          "invalid_handoff_withdrawal",
+          ["FI-DSN-STD-015-R98"],
+        );
+      }
+      const loaded = await storage.getGovernedHandoffWithdrawalAct(act.withdrawalActId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Governed Handoff withdrawal act",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-015-R98"],
+        );
+      }
+      return rehydrateTrustedHandoffWithdrawal(loaded);
+    },
+
+    async loadGovernedHandoffWithdrawalAct(withdrawalActId) {
+      const loaded = await storage.getGovernedHandoffWithdrawalAct(withdrawalActId);
+      return loaded ? rehydrateTrustedHandoffWithdrawal(loaded) : null;
+    },
+
+    async listGovernedHandoffWithdrawalActsByBinding(bindingId) {
+      const listed = await storage.listGovernedHandoffWithdrawalActsByBinding(bindingId);
+      const out: GovernedHandoffWithdrawalActRecord[] = [];
+      for (const item of listed) out.push(await rehydrateTrustedHandoffWithdrawal(item));
+      return out.sort((a, b) => a.withdrawnAt.localeCompare(b.withdrawnAt));
+    },
+
+    async listGovernedHandoffWithdrawalActsByEntry(entryId) {
+      const listed = await storage.listGovernedHandoffWithdrawalActsByEntry(entryId);
+      const out: GovernedHandoffWithdrawalActRecord[] = [];
+      for (const item of listed) out.push(await rehydrateTrustedHandoffWithdrawal(item));
+      return out.sort((a, b) => a.withdrawnAt.localeCompare(b.withdrawnAt));
+    },
+
+    async listGovernedHandoffWithdrawalActsByGpra(gpraId) {
+      const listed = await storage.listGovernedHandoffWithdrawalActsByGpra(gpraId);
+      const out: GovernedHandoffWithdrawalActRecord[] = [];
+      for (const item of listed) out.push(await rehydrateTrustedHandoffWithdrawal(item));
+      return out.sort((a, b) => a.withdrawnAt.localeCompare(b.withdrawnAt));
+    },
+
+    async getAuthoritativeHandoffWithdrawalForBinding(bindingId) {
+      const listed = await this.listGovernedHandoffWithdrawalActsByBinding(bindingId);
+      return selectAuthoritativeGovernedHandoffWithdrawal(listed);
+    },
+
+    async evaluateHandoffWithdrawalCurrency(withdrawalActId) {
+      const withdrawal = await this.loadGovernedHandoffWithdrawalAct(withdrawalActId);
+      if (!withdrawal) {
+        throw new OrchestraConstitutionalError(
+          "Handoff withdrawal act not found for currency evaluation",
+          "invalid_handoff_withdrawal",
+          ["FI-DSN-STD-015-R98"],
+        );
+      }
+      let entryCurrency: HandoffEntryCurrency = "stale";
+      let bindingCurrency: HandoffConsumerBindingCurrency = "stale";
+      try {
+        entryCurrency = await this.evaluateHandoffEntryCurrency(withdrawal.entryId);
+        bindingCurrency = await this.evaluateHandoffConsumerBindingCurrency(withdrawal.bindingId);
+      } catch {
+        // Fail closed.
+      }
+      const authoritative = await this.getAuthoritativeHandoffWithdrawalForBinding(
+        withdrawal.bindingId,
+      );
+      const entryRaw = await storage.getGovernedHandoffEntry(withdrawal.entryId);
+      const entry = entryRaw ? await rehydrateTrustedHandoffEntry(entryRaw) : null;
+      let gpraValidityPosture: GpraValidityPosture | null = null;
+      let lineageMatchesAuthoritativeGpra = false;
+      if (entry) {
+        const gpra = await findAuthoritativeGpraByObligationContext(
+          entry.obligationId,
+          entry.handoffConsumerContextId,
+        );
+        lineageMatchesAuthoritativeGpra = gpra
+          ? handoffEntryLineageMatchesGpra(entry, gpra)
+          : false;
+        if (gpra) {
+          gpraValidityPosture = (
+            await evaluateGpraValidityForContext(gpra.gpraId, entry.handoffConsumerContextId)
+          ).posture;
+        }
+      }
+      return evaluateHandoffWithdrawalCurrencyFromFacts({
+        withdrawal,
+        currentEntryCurrency: entryCurrency,
+        currentBindingCurrency: bindingCurrency,
+        authoritativeWithdrawalActId: authoritative?.withdrawalActId ?? null,
         gpraValidityPosture,
         lineageMatchesAuthoritativeGpra,
       });

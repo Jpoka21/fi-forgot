@@ -120,15 +120,18 @@ section("1. Foundation integrity assessment");
   expect("no absorption", a.noPeerAuthorityAbsorption, true);
   expect("no reentry", a.noImpliedReentryOrResumption, true);
   expect("no retry", a.noAutomaticRetryOrRecovery, true);
-  expect("withdraw/recall mint APIs absent", a.withdrawRecallMintApisAbsent, true);
+  expect("withdraw/recall mint APIs absent", a.withdrawRecallMintApisAbsent, false);
+  expect("recall mint APIs absent", a.recallMintApisAbsent, true);
   expect("factory absent", a.performHgaActFactoryAbsent, true);
   expect("no rejection", a.rejectionActAbsent, true);
   expect("no exit matrix", a.exitHgaMatrixActAbsent, true);
   expect("hslm 8", a.hslmEightStatesPreserved, true);
   expect("restoration deferred", a.restorationResumptionReentryDeferred, true);
   expect("R84+ unavailable", a.r84PlusUnavailable, false);
-  expect("R98+ unavailable", a.r98PlusUnavailable, true);
+  expect("R98+ unavailable", a.r98PlusUnavailable, false);
+  expect("R112+ unavailable", a.r112PlusUnavailable, true);
   expect("suspension mechanics operative", a.suspensionMechanicsOperative, true);
+  expect("withdrawal mechanics operative", a.withdrawalMechanicsOperative, true);
   expect("R70–R83", a.r70ThroughR83, true);
 }
 
@@ -424,7 +427,24 @@ section("8. Deferred mint APIs; catalog gate; no generic factory (R69/R70–R83)
     failures.push("suspension assertMayBePerformed");
     console.log("  ✗ suspension assertMayBePerformed");
   }
-  for (const t of ["withdrawal", "recall"] as const) {
+  try {
+    assertHgaMatrixActMayBePerformed("withdrawal");
+    passed++;
+    console.log("  ✓ withdrawal assertMayBePerformed");
+  } catch {
+    failed++;
+    failures.push("withdrawal assertMayBePerformed");
+    console.log("  ✗ withdrawal assertMayBePerformed");
+  }
+  expect("withdrawal catalog operative", getHgaMatrixActOperativeStatus("withdrawal"), "operative");
+  expectTruthy(
+    "withdrawal catalog≠authority",
+    catalogMembershipDoesNotAuthorizeG6Performance("withdrawal"),
+  );
+  expectThrows("withdrawal performance deferred assert", () =>
+    assertG6LifecycleActPerformanceDeferred("withdrawal"),
+  );
+  for (const t of ["recall"] as const) {
     expect(`${t} catalog deferred`, getHgaMatrixActOperativeStatus(t), "cataloged_deferred");
     expectTruthy(
       `${t} catalog≠authority`,
@@ -435,19 +455,20 @@ section("8. Deferred mint APIs; catalog gate; no generic factory (R69/R70–R83)
       assertG6LifecycleActPerformanceDeferred(t),
     );
   }
-  expectThrows("refuse withdraw", () => refuseWithdrawGovernedHandoff());
+  expectThrows("refuse withdraw points to mint path", () => refuseWithdrawGovernedHandoff());
   expectThrows("refuse recall", () => refuseRecallGovernedHandoff());
   expectTruthy("mint API names listed", G6_FORBIDDEN_MINT_API_NAMES.includes("suspendHandoff"));
 }
 
-section("9. Invented rejection / exit; R84+ unavailable");
+section("9. Invented rejection / exit; R112+ unavailable");
 
 {
   expectThrows("rejection act", () =>
     assertNoInventedRejectionOrExitG6Act("handoff_lifecycle_rejection_act"),
   );
   expectThrows("exit act", () => assertNoInventedRejectionOrExitG6Act("exit_boundary"));
-  expectThrows("R98 claim", () => assertR84PlusUnavailable("r98"));
+  expectThrows("R112 claim", () => assertR84PlusUnavailable("r112"));
+  expectThrows("recall claim", () => assertR84PlusUnavailable("recall_operative_mechanics"));
   assertG6LifecycleMatrixActType("suspension");
   passed++;
   console.log("  ✓ matrix act type assert ok");
@@ -462,6 +483,11 @@ section("10. Forged / premature rehydration fail-closed");
   });
   passed++;
   console.log("  ✓ valid purported suspension is not blanket-rejected");
+  rejectForgedOrPrematureG6LifecycleActRehydration({
+    purportedActType: "withdrawal",
+  });
+  passed++;
+  console.log("  ✓ valid purported withdrawal is not blanket-rejected");
   expectThrows("purported HOEM recall", () =>
     rejectForgedOrPrematureG6LifecycleActRehydration({
       purportedHoemActType: "recall",
@@ -499,15 +525,18 @@ section("11. Catalog regression + public API bypass");
   const catalog = assessHandoffAuthorityCatalogIntegration();
   expect("catalog integrity", catalog.integrityOk, true);
   expect("matrix 6", catalog.matrixActTypeCount, 6);
-  expect("operative 4", catalog.operativeMatrixActTypes.length, 4);
-  expect("deferred 2", catalog.catalogedDeferredMatrixActTypes.length, 2);
+  expect("operative 5", catalog.operativeMatrixActTypes.length, 5);
+  expect("deferred 1", catalog.catalogedDeferredMatrixActTypes.length, 1);
   expect("U1 established", catalog.hofG6U1SharedFoundationEstablished, true);
   expect(
-    "U3–U4 deferred",
+    "U3–U4 deferred flag false",
     catalog.hofG6ActSpecificMechanicsDeferredToU3U4,
-    true,
+    false,
   );
-  expect("no withdraw/recall mint APIs flag", catalog.withdrawRecallApisNotProvided, true);
+  expect("U4 recall deferred", catalog.hofG6RecallMechanicsDeferredToU4, true);
+  expect("withdraw/recall mint APIs flag", catalog.withdrawRecallApisNotProvided, false);
+  expect("withdraw may be provided", catalog.withdrawGovernedHandoffMayBeProvided, true);
+  expect("recall APIs not provided", catalog.recallApisNotProvided, true);
   expect("matrix types frozen", [...HGA_MATRIX_ACT_TYPES], [
     "authorization",
     "posture_declaration",
@@ -524,6 +553,7 @@ section("11. Catalog regression + public API bypass");
   expect("no suspendHandoff", typeof repo.suspendHandoff, "undefined");
   expect("suspendGovernedHandoff present", typeof repo.suspendGovernedHandoff, "function");
   expect("no withdrawHandoff", typeof repo.withdrawHandoff, "undefined");
+  expect("withdrawGovernedHandoff present", typeof repo.withdrawGovernedHandoff, "function");
   expect("no recallHandoff", typeof repo.recallHandoff, "undefined");
   expect("no performHgaAct", typeof repo.performHgaAct, "undefined");
   expect("no restoreHandoff", typeof repo.restoreHandoff, "undefined");

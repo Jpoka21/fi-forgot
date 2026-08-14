@@ -11,9 +11,9 @@
  *
  * R66 catalog integration: the mandatory HGA act-type matrix catalogs six types
  * (authorization, posture_declaration, completion, suspension, withdrawal, recall).
- * authorizedConstitutionalScopes includes the four operative scopes below
- * (HOF-G6-U2 activates handoff_suspension_act). withdrawal/recall remain cataloged
- * without constitutional scope activation until HOF-G6-U3/U4.
+ * authorizedConstitutionalScopes includes the five operative scopes below
+ * (HOF-G6-U2 activates handoff_suspension_act; HOF-G6-U3 activates handoff_withdrawal_act).
+ * recall remains cataloged without constitutional scope activation until HOF-G6-U4.
  * See handoff-authority-catalog.ts and handoff-lifecycle-g6-foundation.ts.
  */
 
@@ -24,7 +24,8 @@ export type HandoffGovernanceAuthorityConstitutionalScope =
   | "handoff_authorization_act"
   | "handoff_posture_declaration_act"
   | "handoff_completion_act"
-  | "handoff_suspension_act";
+  | "handoff_suspension_act"
+  | "handoff_withdrawal_act";
 
 export interface EstablishedHandoffGovernanceAuthorityClass {
   readonly authorityClassId: HandoffGovernanceAuthorityClassId;
@@ -72,6 +73,7 @@ export const FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES: readonly E
         "handoff_posture_declaration_act",
         "handoff_completion_act",
         "handoff_suspension_act",
+        "handoff_withdrawal_act",
       ] as const),
     }),
   ]);
@@ -182,6 +184,28 @@ export function assertEstablishedHandoffGovernanceAuthorityForSuspension(
       "Established HGA does not authorize handoff_suspension_act scope (R84/R85)",
       "invalid_handoff_suspension",
       ["FI-DSN-STD-015-R84", "FI-DSN-STD-015-R85"],
+    );
+  }
+}
+
+export function assertEstablishedHandoffGovernanceAuthorityForWithdrawal(
+  authorityClassId: unknown,
+): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Handoff withdrawal requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint Handoff withdrawal authority (R70/R98)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R98"],
+    );
+  }
+  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
+    authorityClassId as HandoffGovernanceAuthorityClassId,
+  );
+  if (!resolved.authorizedConstitutionalScopes.includes("handoff_withdrawal_act")) {
+    throw new OrchestraConstitutionalError(
+      "Established HGA does not authorize handoff_withdrawal_act scope (R98/R99)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R98", "FI-DSN-STD-015-R99"],
     );
   }
 }

@@ -25,6 +25,8 @@ import type {
   GovernedHandoffCompletionActRecord,
   GovernedHandoffSuspensionActId,
   GovernedHandoffSuspensionActRecord,
+  GovernedHandoffWithdrawalActId,
+  GovernedHandoffWithdrawalActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionId,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingId,
@@ -369,6 +371,26 @@ export interface Domain3StoragePort {
   listGovernedHandoffSuspensionActsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffSuspensionActRecord[]>;
+
+  /**
+   * Append-only Handoff withdrawal act (HOF-G6-U3). Unique by withdrawalActId;
+   * multiple per binding allowed (additive history; latest authoritative). No update/delete.
+   */
+  putGovernedHandoffWithdrawalAct(
+    record: GovernedHandoffWithdrawalActRecord,
+  ): Promise<void>;
+  getGovernedHandoffWithdrawalAct(
+    withdrawalActId: GovernedHandoffWithdrawalActId,
+  ): Promise<GovernedHandoffWithdrawalActRecord | null>;
+  listGovernedHandoffWithdrawalActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffWithdrawalActRecord[]>;
+  listGovernedHandoffWithdrawalActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffWithdrawalActRecord[]>;
+  listGovernedHandoffWithdrawalActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffWithdrawalActRecord[]>;
 
   /**
    * Append-only downstream exit-boundary attribution (HOF-G8 R58–R65).

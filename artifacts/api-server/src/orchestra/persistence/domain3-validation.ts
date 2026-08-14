@@ -34,6 +34,7 @@ import type {
   GovernedHandoffAuthorizationActRecord,
   GovernedHandoffCompletionActRecord,
   GovernedHandoffSuspensionActRecord,
+  GovernedHandoffWithdrawalActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
@@ -80,6 +81,10 @@ import {
   GOVERNED_HANDOFF_SUSPENSION_TRACEABILITY,
   isSuspensionConstitutionalBasisKind,
 } from "../handoff-suspension.js";
+import {
+  GOVERNED_HANDOFF_WITHDRAWAL_TRACEABILITY,
+  isWithdrawalConstitutionalBasisKind,
+} from "../handoff-withdrawal.js";
 import { GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY } from "../handoff-downstream-exit-boundary.js";
 import {
   assertHgaActTypeStringFailClosed,
@@ -137,12 +142,14 @@ const ID_PREFIXES = {
   handoffPostureDeclarationAct: "governed-handoff-posture-declaration-act-",
   handoffCompletionAct: "governed-handoff-completion-act-",
   handoffSuspensionAct: "governed-handoff-suspension-act-",
+  handoffWithdrawalAct: "governed-handoff-withdrawal-act-",
   handoffDownstreamExitBoundaryAttribution:
     "governed-handoff-downstream-exit-boundary-attribution-",
   hoemAuthorizationOperative: "hoem-authorization-operative-",
   hoemPostureDeclarationOperative: "hoem-posture-declaration-operative-",
   hoemCompletionOperative: "hoem-completion-operative-",
   hoemSuspensionOperative: "hoem-suspension-operative-",
+  hoemWithdrawalOperative: "hoem-withdrawal-operative-",
   hoemExitBoundary: "hoem-exit-boundary-",
 } as const;
 
@@ -433,6 +440,36 @@ function assertStd015HofG6U2Traceability(
         `${label} traceability must include ${required}`,
         errorCode,
         ["FI-DSN-STD-015-R84", "FI-DSN-STD-015-R97"],
+      );
+    }
+  }
+}
+
+function assertStd015HofG6U3Traceability(
+  traceability: unknown,
+  label: string,
+  errorCode: "invalid_handoff_withdrawal" = "invalid_handoff_withdrawal",
+): void {
+  if (
+    !traceability ||
+    typeof traceability !== "object" ||
+    (traceability as Record<string, unknown>).governingStandardId !== STD015_GOVERNING_STANDARD ||
+    !Array.isArray((traceability as Record<string, unknown>).requirementIds) ||
+    ((traceability as Record<string, unknown>).requirementIds as unknown[]).length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      `${label} requires FI-DSN-STD-015 HOF-G6-U3 traceability`,
+      errorCode,
+      ["FI-DSN-STD-015-R98", "FI-DSN-STD-015-R111"],
+    );
+  }
+  const ids = (traceability as Record<string, unknown>).requirementIds as unknown[];
+  for (const required of GOVERNED_HANDOFF_WITHDRAWAL_TRACEABILITY.requirementIds) {
+    if (!ids.includes(required)) {
+      throw new OrchestraConstitutionalError(
+        `${label} traceability must include ${required}`,
+        errorCode,
+        ["FI-DSN-STD-015-R98", "FI-DSN-STD-015-R111"],
       );
     }
   }
@@ -4300,6 +4337,228 @@ export function validatePersistedGovernedHandoffSuspension(
       "Governed Handoff suspension act requires valid governed creation marker",
       "invalid_handoff_suspension",
       ["FI-DSN-STD-015-R84"],
+    );
+  }
+}
+
+export function validatePersistedGovernedHandoffWithdrawal(
+  raw: unknown,
+): asserts raw is GovernedHandoffWithdrawalActRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff withdrawal",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R98"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.withdrawalActId,
+    ID_PREFIXES.handoffWithdrawalAct,
+    "Governed Handoff withdrawal act",
+  );
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(record.bindingId, ID_PREFIXES.handoffConsumerBinding, "Governed Handoff consumer binding");
+  assertBrandedId(record.authorizationActId, ID_PREFIXES.handoffAuthorizationAct, "Governed Handoff authorization act");
+  if (record.postureDeclarationActId != null) {
+    assertBrandedId(record.postureDeclarationActId, ID_PREFIXES.handoffPostureDeclarationAct, "Governed Handoff posture declaration act");
+  }
+  assertBrandedId(record.preparationId, ID_PREFIXES.handoffPreparation, "Governed Handoff preparation");
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (
+    typeof record.handoffConsumerContextId !== "string" ||
+    !record.handoffConsumerContextId.trim() ||
+    typeof record.withdrawnBy !== "string" ||
+    !record.withdrawnBy.trim() ||
+    typeof record.withdrawnAt !== "string" ||
+    !record.withdrawnAt.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal requires context, withdrawnBy, and withdrawnAt",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R98", "FI-DSN-STD-015-R104"],
+    );
+  }
+  if (
+    !isCanonicalEstablishedHandoffGovernanceAuthorityClassId(record.authorityClassId) ||
+    record.authorityGoverningSourceId !== "PD-STD-015-001" ||
+    record.authorityConstitutionalScope !== "handoff_withdrawal_act"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal requires established HGA withdrawal scope (R98)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R98"],
+    );
+  }
+  if (
+    !isHccmConsumerClassId(record.consumerClassId) ||
+    (record.declaredPostureClass != null &&
+      !isFrozenHandoffPostureClass(record.declaredPostureClass))
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal requires closed consumer and posture classes (R99/R102)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R99", "FI-DSN-STD-015-R102"],
+    );
+  }
+  if (!isWithdrawalConstitutionalBasisKind(record.constitutionalBasisKind)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal requires closed constitutional basisKind (R103)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R103"],
+    );
+  }
+  const provenance = record.constitutionalBasisProvenance as Record<string, unknown> | null;
+  if (
+    !provenance ||
+    provenance.basisKind !== record.constitutionalBasisKind ||
+    provenance.notesCannotBeSoleBasis !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal requires coherent constitutional basis provenance (R103)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R103"],
+    );
+  }
+  const retractionTargets = record.retractionTargets;
+  if (
+    !Array.isArray(retractionTargets) ||
+    retractionTargets.length !== 2 ||
+    !retractionTargets.includes("authorization") ||
+    !retractionTargets.includes("posture")
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal requires authorization and posture retraction targets (R105/R107)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R105", "FI-DSN-STD-015-R107"],
+    );
+  }
+
+  const hoemRecord = record.hoemWithdrawalRecord as Record<string, unknown> | null;
+  if (!hoemRecord || typeof hoemRecord !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal requires HOEM withdrawal operative record (R107)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R107"],
+    );
+  }
+  assertBrandedId(hoemRecord.hoemWithdrawalRecordId, ID_PREFIXES.hoemWithdrawalOperative, "HOEM withdrawal operative record");
+  if (hoemRecord.withdrawalActId !== record.withdrawalActId || hoemRecord.actType !== "withdrawal") {
+    throw new OrchestraConstitutionalError(
+      "HOEM withdrawal operative record must match parent withdrawal act (R107)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R107"],
+    );
+  }
+  assertHgaMatrixActMayBePerformed(hoemRecord.actType);
+  assertHgaActTypeStringFailClosed(hoemRecord.actType, { requireOperativePerformance: true });
+  const hoemTargets = hoemRecord.retractionTargets;
+  if (
+    hoemRecord.gpraId !== record.gpraId ||
+    hoemRecord.obligationId !== record.obligationId ||
+    hoemRecord.handoffConsumerContextId !== record.handoffConsumerContextId ||
+    hoemRecord.bindingId !== record.bindingId ||
+    hoemRecord.consumerClassId !== record.consumerClassId ||
+    hoemRecord.authorizationActId !== record.authorizationActId ||
+    hoemRecord.postureDeclarationActId !== record.postureDeclarationActId ||
+    hoemRecord.constitutionalBasisKind !== record.constitutionalBasisKind ||
+    hoemRecord.effectiveAt !== record.withdrawnAt ||
+    !Array.isArray(hoemTargets) ||
+    hoemTargets.length !== 2 ||
+    !hoemTargets.includes("authorization") ||
+    !hoemTargets.includes("posture") ||
+    hoemRecord.doesNotMergeAuthorizationAttribution !== true ||
+    hoemRecord.doesNotMergePostureDeclarationAttribution !== true ||
+    hoemRecord.doesNotMergeCompletionAttribution !== true ||
+    hoemRecord.doesNotMergeSuspensionAttribution !== true ||
+    hoemRecord.doesNotMergeLifecycleAttribution !== true ||
+    hoemRecord.doesNotMergeRecallAttribution !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "HOEM withdrawal operative record is incoherent or merges peer act types (R107)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R107"],
+    );
+  }
+
+  if (
+    record.forwardRelianceCeased !== true ||
+    record.doesNotEraseAuthorization !== true ||
+    record.doesNotErasePosture !== true ||
+    record.doesNotEraseSuspensionHistory !== true ||
+    record.notHandoffSuspension !== true ||
+    record.notHandoffRecall !== true ||
+    record.notHandoffCompletion !== true ||
+    record.notHercmReentry !== true ||
+    record.notResumption !== true ||
+    record.notRestoration !== true ||
+    record.effectFraming !== "hga_initiated_retraction" ||
+    record.notHandoffAuthorization !== true ||
+    record.notHandoffPostureDeclaration !== true ||
+    record.notHandoffExecution !== true ||
+    record.notDownstreamAcceptance !== true ||
+    record.notPermanentCollectionMembership !== true ||
+    record.doesNotAuthorizeManufacturingOrFulfillment !== true ||
+    record.doesNotCollapsePeerDecisionClasses !== true ||
+    record.doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory !== true ||
+    record.doesNotMergeAcrossConsumerClasses !== true ||
+    record.notAutomaticHslmPromotion !== true ||
+    record.hslmProjectionFromActFacts !== true ||
+    record.r98DistinctHgaWithdrawalAct !== true ||
+    record.r99SharedPreconditionsPlusTriggers !== true ||
+    record.r100NoWithdrawAfterRelianceCeased !== true ||
+    record.r101NoSoleRtcGpraG11HrwmBasis !== true ||
+    record.r102SingleBindingPostureChain !== true ||
+    record.r103ConstitutionalBasisAndProvenance !== true ||
+    record.r104EffectFromWithdrawnAtForward !== true ||
+    record.r105HgaInitiatedRetractionCessation !== true ||
+    record.r106AttributedBindingOnly !== true ||
+    record.r107HoemWithdrawalOperativeRecord !== true ||
+    record.r108NotAutomaticHslmPromotion !== true ||
+    record.r109NoAdditionalCessationAfterCeased !== true ||
+    record.r110InvalidAttemptsNonOperative !== true ||
+    record.r111NotSuspensionRecallOrReentry !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff withdrawal must carry HOF-G6-U3 constitutional markers (R98–R111)",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R98", "FI-DSN-STD-015-R111"],
+    );
+  }
+
+  const forbidden = [
+    "recallActId", "expiryActId", "resumeHandoff", "restoreHandoff", "reenterHandoff",
+    "recallHandoff", "expireHandoff", "executesHandoff", "handoffExecuted", "performHandoff",
+    "manufacturingExecutionId", "fulfillmentExecutionId", "productionExecutionId",
+    "executionQueueId", "constitutionalQueueId", "brainWithdrawHandoff",
+    "brainHandoffWithdrawal", "implicitWithdrawal", "hoemRecallRecordId", "hercmReentryId",
+    "resumptionActId", "restorationActId", "rejectHandoff", "performHgaAct",
+    "performG6LifecycleAct", "applyLifecycleState",
+  ];
+  for (const key of forbidden) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff withdrawal must not carry recall/reentry/execution fields (R110/R111)",
+        "invalid_handoff_withdrawal",
+        ["FI-DSN-STD-015-R110", "FI-DSN-STD-015-R111"],
+      );
+    }
+  }
+  assertAuditMetadata(record.audit, "Governed Handoff withdrawal act");
+  assertStd015HofG6U3Traceability(record.traceability, "Governed Handoff withdrawal act");
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff withdrawal act requires valid governed creation marker",
+      "invalid_handoff_withdrawal",
+      ["FI-DSN-STD-015-R98"],
     );
   }
 }

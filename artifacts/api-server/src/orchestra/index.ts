@@ -281,6 +281,17 @@ export {
 } from "./handoff-suspension.js";
 
 export {
+  GOVERNED_HANDOFF_WITHDRAWAL_TRACEABILITY,
+  isWithdrawalConstitutionalBasisKind,
+  assertWithdrawalConstitutionalBasisKind,
+  assessGovernedHandoffWithdrawal,
+  selectAuthoritativeGovernedHandoffWithdrawal,
+  evaluateHandoffWithdrawalCurrencyFromFacts,
+  assertGovernedHandoffWithdrawalActor,
+  assertNoHandoffWithdrawalRecallOrReentryClaims,
+} from "./handoff-withdrawal.js";
+
+export {
   GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY,
   VOLUME_06_HANDOFF_AUTHORITY_TERMINUS,
   DOWNSTREAM_EXIT_BOUNDARY_ATTRIBUTION_KIND,
@@ -301,6 +312,7 @@ export {
   assertEstablishedHandoffGovernanceAuthorityForPostureDeclaration,
   assertEstablishedHandoffGovernanceAuthorityForCompletion,
   assertEstablishedHandoffGovernanceAuthorityForSuspension,
+  assertEstablishedHandoffGovernanceAuthorityForWithdrawal,
 } from "./handoff-governance-authority.js";
 
 export {
@@ -391,6 +403,7 @@ export {
   refuseRecallGovernedHandoff,
   rejectForgedOrPrematureG6LifecycleActRehydration,
   assertR84PlusUnavailable,
+  assertR112PlusUnavailable,
   assertNoInventedRejectionOrExitG6Act,
   assessHofG6U1SharedLifecycleFoundation,
   catalogMembershipDoesNotAuthorizeG6Performance,
@@ -533,6 +546,15 @@ export type {
   HoemSuspensionOperativeRecordId,
   SuspensionConstitutionalBasisKind,
   SuspensionConstitutionalBasisProvenance,
+  GovernedHandoffWithdrawalActId,
+  GovernedHandoffWithdrawalActRecord,
+  GovernedHandoffWithdrawalAssessment,
+  HandoffWithdrawalCurrency,
+  HoemWithdrawalOperativeRecord,
+  HoemWithdrawalOperativeRecordId,
+  WithdrawalConstitutionalBasisKind,
+  WithdrawalConstitutionalBasisProvenance,
+  WithdrawalRetractionTarget,
   HoemAuthorizationOperativeRecord,
   HoemAuthorizationOperativeRecordId,
   HccmConsumerClassId,

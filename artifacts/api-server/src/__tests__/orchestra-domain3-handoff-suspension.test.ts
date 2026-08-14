@@ -369,7 +369,7 @@ section("HOF-G6-U2 catalogs, R84–R97 traceability, HGA suspension scope");
     hga.authorizedConstitutionalScopes.includes("handoff_suspension_act"),
   );
   expect("suspension catalog operative", getHgaMatrixActOperativeStatus("suspension"), "operative");
-  expect("withdrawal still deferred", getHgaMatrixActOperativeStatus("withdrawal"), "cataloged_deferred");
+  expect("withdrawal catalog operative", getHgaMatrixActOperativeStatus("withdrawal"), "operative");
   expect("recall still deferred", getHgaMatrixActOperativeStatus("recall"), "cataloged_deferred");
   assertHgaMatrixActMayBePerformed("suspension");
   passed++;
@@ -456,11 +456,13 @@ section("lawful suspend → HOEM + HSLM suspended");
   expect("HSLM suspended after lawful act", lifecycle.currentState, "suspended");
   expect("authoritative suspension id", lifecycle.authoritativeSuspensionActId, act.suspensionActId);
   expect("suspension mechanics operative", lifecycle.suspensionMechanicsOperative, true);
+  expect("withdrawal mechanics operative", lifecycle.withdrawalMechanicsOperative, true);
   expect(
-    "withdrawal/recall still deferred",
+    "withdrawalRecallExpiredMechanicsDeferred false",
     lifecycle.withdrawalRecallExpiredMechanicsDeferred,
-    true,
+    false,
   );
+  expect("recallExpiredMechanicsDeferred", lifecycle.recallExpiredMechanicsDeferred, true);
 
   const currency = await ctx.domain3.evaluateHandoffSuspensionCurrency(act.suspensionActId);
   expect("suspension currency current", currency, "current");
@@ -755,7 +757,7 @@ section("no resume/withdraw/recall APIs");
   const repo = ctx.domain3 as unknown as Record<string, unknown>;
   expect("suspendGovernedHandoff present", typeof repo.suspendGovernedHandoff, "function");
   expect("no suspendHandoff", typeof repo.suspendHandoff, "undefined");
-  expect("no withdrawGovernedHandoff", typeof repo.withdrawGovernedHandoff, "undefined");
+  expect("withdrawGovernedHandoff present", typeof repo.withdrawGovernedHandoff, "function");
   expect("no recallGovernedHandoff", typeof repo.recallGovernedHandoff, "undefined");
   expect("no resumeHandoff", typeof repo.resumeHandoff, "undefined");
   expect("no restoreHandoff", typeof repo.restoreHandoff, "undefined");
@@ -806,17 +808,15 @@ section("forged rehydration rejected");
   );
 }
 
-section("catalog: suspension mayBePerformed; withdrawal/recall still deferred");
+section("catalog: suspension and withdrawal mayBePerformed; recall still deferred");
 
 {
   assertHgaMatrixActMayBePerformed("suspension");
   passed++;
   console.log("  ✓ suspension mayBePerformed");
-  expectThrows(
-    "withdrawal mayBePerformed throws",
-    () => assertHgaMatrixActMayBePerformed("withdrawal"),
-    "invalid_handoff_authority_catalog",
-  );
+  assertHgaMatrixActMayBePerformed("withdrawal");
+  passed++;
+  console.log("  ✓ withdrawal mayBePerformed");
   expectThrows(
     "recall mayBePerformed throws",
     () => assertHgaMatrixActMayBePerformed("recall"),
