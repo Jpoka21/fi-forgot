@@ -270,6 +270,17 @@ export {
 } from "./handoff-act-lifecycle.js";
 
 export {
+  GOVERNED_HANDOFF_SUSPENSION_TRACEABILITY,
+  isSuspensionConstitutionalBasisKind,
+  assertSuspensionConstitutionalBasisKind,
+  assessGovernedHandoffSuspension,
+  selectAuthoritativeGovernedHandoffSuspension,
+  evaluateHandoffSuspensionCurrencyFromFacts,
+  assertGovernedHandoffSuspensionActor,
+  assertNoHandoffSuspensionWithdrawalRecallOrReentryClaims,
+} from "./handoff-suspension.js";
+
+export {
   GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY,
   VOLUME_06_HANDOFF_AUTHORITY_TERMINUS,
   DOWNSTREAM_EXIT_BOUNDARY_ATTRIBUTION_KIND,
@@ -289,6 +300,7 @@ export {
   assertEstablishedHandoffGovernanceAuthorityClass,
   assertEstablishedHandoffGovernanceAuthorityForPostureDeclaration,
   assertEstablishedHandoffGovernanceAuthorityForCompletion,
+  assertEstablishedHandoffGovernanceAuthorityForSuspension,
 } from "./handoff-governance-authority.js";
 
 export {
@@ -513,6 +525,14 @@ export type {
   HandoffCompletionCurrency,
   HoemCompletionOperativeRecord,
   HoemCompletionOperativeRecordId,
+  GovernedHandoffSuspensionActId,
+  GovernedHandoffSuspensionActRecord,
+  GovernedHandoffSuspensionAssessment,
+  HandoffSuspensionCurrency,
+  HoemSuspensionOperativeRecord,
+  HoemSuspensionOperativeRecordId,
+  SuspensionConstitutionalBasisKind,
+  SuspensionConstitutionalBasisProvenance,
   HoemAuthorizationOperativeRecord,
   HoemAuthorizationOperativeRecordId,
   HccmConsumerClassId,

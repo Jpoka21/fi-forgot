@@ -41,7 +41,6 @@ import {
   refuseGenericHgaLifecycleFactory,
   refuseG6RestorationResumptionReentry,
   refuseRecallGovernedHandoff,
-  refuseSuspendGovernedHandoff,
   refuseWithdrawGovernedHandoff,
   rejectForgedOrPrematureG6LifecycleActRehydration,
   resolveG6SharedEffectFraming,
@@ -121,13 +120,15 @@ section("1. Foundation integrity assessment");
   expect("no absorption", a.noPeerAuthorityAbsorption, true);
   expect("no reentry", a.noImpliedReentryOrResumption, true);
   expect("no retry", a.noAutomaticRetryOrRecovery, true);
-  expect("mint APIs absent", a.suspendWithdrawRecallMintApisAbsent, true);
+  expect("withdraw/recall mint APIs absent", a.withdrawRecallMintApisAbsent, true);
   expect("factory absent", a.performHgaActFactoryAbsent, true);
   expect("no rejection", a.rejectionActAbsent, true);
   expect("no exit matrix", a.exitHgaMatrixActAbsent, true);
   expect("hslm 8", a.hslmEightStatesPreserved, true);
   expect("restoration deferred", a.restorationResumptionReentryDeferred, true);
-  expect("R84+ unavailable", a.r84PlusUnavailable, true);
+  expect("R84+ unavailable", a.r84PlusUnavailable, false);
+  expect("R98+ unavailable", a.r98PlusUnavailable, true);
+  expect("suspension mechanics operative", a.suspensionMechanicsOperative, true);
   expect("R70–R83", a.r70ThroughR83, true);
 }
 
@@ -409,7 +410,21 @@ section("7. Additive preservation / HOEM / absorption / reentry / retry (R77–R
 section("8. Deferred mint APIs; catalog gate; no generic factory (R69/R70–R83)");
 
 {
-  for (const t of G6_LIFECYCLE_MATRIX_ACT_TYPES) {
+  expect("suspension catalog operative", getHgaMatrixActOperativeStatus("suspension"), "operative");
+  expectTruthy(
+    "suspension catalog≠authority",
+    catalogMembershipDoesNotAuthorizeG6Performance("suspension"),
+  );
+  try {
+    assertHgaMatrixActMayBePerformed("suspension");
+    passed++;
+    console.log("  ✓ suspension assertMayBePerformed");
+  } catch {
+    failed++;
+    failures.push("suspension assertMayBePerformed");
+    console.log("  ✗ suspension assertMayBePerformed");
+  }
+  for (const t of ["withdrawal", "recall"] as const) {
     expect(`${t} catalog deferred`, getHgaMatrixActOperativeStatus(t), "cataloged_deferred");
     expectTruthy(
       `${t} catalog≠authority`,
@@ -420,7 +435,6 @@ section("8. Deferred mint APIs; catalog gate; no generic factory (R69/R70–R83)
       assertG6LifecycleActPerformanceDeferred(t),
     );
   }
-  expectThrows("refuse suspend", () => refuseSuspendGovernedHandoff());
   expectThrows("refuse withdraw", () => refuseWithdrawGovernedHandoff());
   expectThrows("refuse recall", () => refuseRecallGovernedHandoff());
   expectTruthy("mint API names listed", G6_FORBIDDEN_MINT_API_NAMES.includes("suspendHandoff"));
@@ -433,7 +447,7 @@ section("9. Invented rejection / exit; R84+ unavailable");
     assertNoInventedRejectionOrExitG6Act("handoff_lifecycle_rejection_act"),
   );
   expectThrows("exit act", () => assertNoInventedRejectionOrExitG6Act("exit_boundary"));
-  expectThrows("R84 claim", () => assertR84PlusUnavailable(true));
+  expectThrows("R98 claim", () => assertR84PlusUnavailable("r98"));
   assertG6LifecycleMatrixActType("suspension");
   passed++;
   console.log("  ✓ matrix act type assert ok");
@@ -443,14 +457,20 @@ section("9. Invented rejection / exit; R84+ unavailable");
 section("10. Forged / premature rehydration fail-closed");
 
 {
-  expectThrows("purported suspension act", () =>
-    rejectForgedOrPrematureG6LifecycleActRehydration({
-      purportedActType: "suspension",
-    }),
-  );
+  rejectForgedOrPrematureG6LifecycleActRehydration({
+    purportedActType: "suspension",
+  });
+  passed++;
+  console.log("  ✓ valid purported suspension is not blanket-rejected");
   expectThrows("purported HOEM recall", () =>
     rejectForgedOrPrematureG6LifecycleActRehydration({
       purportedHoemActType: "recall",
+    }),
+  );
+  expectThrows("forged suspension binding", () =>
+    rejectForgedOrPrematureG6LifecycleActRehydration({
+      purportedActType: "suspension",
+      forgedBinding: true,
     }),
   );
   expectThrows("HSLM as act", () =>
@@ -479,15 +499,15 @@ section("11. Catalog regression + public API bypass");
   const catalog = assessHandoffAuthorityCatalogIntegration();
   expect("catalog integrity", catalog.integrityOk, true);
   expect("matrix 6", catalog.matrixActTypeCount, 6);
-  expect("operative 3", catalog.operativeMatrixActTypes.length, 3);
-  expect("deferred 3", catalog.catalogedDeferredMatrixActTypes.length, 3);
+  expect("operative 4", catalog.operativeMatrixActTypes.length, 4);
+  expect("deferred 2", catalog.catalogedDeferredMatrixActTypes.length, 2);
   expect("U1 established", catalog.hofG6U1SharedFoundationEstablished, true);
   expect(
-    "U2–U4 deferred",
-    catalog.hofG6ActSpecificMechanicsDeferredToU2U3U4,
+    "U3–U4 deferred",
+    catalog.hofG6ActSpecificMechanicsDeferredToU3U4,
     true,
   );
-  expect("no mint APIs flag", catalog.suspendWithdrawRecallApisNotProvided, true);
+  expect("no withdraw/recall mint APIs flag", catalog.withdrawRecallApisNotProvided, true);
   expect("matrix types frozen", [...HGA_MATRIX_ACT_TYPES], [
     "authorization",
     "posture_declaration",
@@ -502,6 +522,7 @@ section("11. Catalog regression + public API bypass");
   const domain3 = createDomain3Repository(domain2, undefined, domain1) as Domain3Repository;
   const repo = domain3 as unknown as Record<string, unknown>;
   expect("no suspendHandoff", typeof repo.suspendHandoff, "undefined");
+  expect("suspendGovernedHandoff present", typeof repo.suspendGovernedHandoff, "function");
   expect("no withdrawHandoff", typeof repo.withdrawHandoff, "undefined");
   expect("no recallHandoff", typeof repo.recallHandoff, "undefined");
   expect("no performHgaAct", typeof repo.performHgaAct, "undefined");

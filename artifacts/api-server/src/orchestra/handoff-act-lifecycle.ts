@@ -4,7 +4,8 @@
  * Closed HSLM act-layer vocabulary + Completion act.
  * Rejected remains R48 vocabulary / R51 meaning (withheld auth or posture) — not an HGA act type.
  * Evaluation scoped to one HCCM binding + one authoritative HPPM posture chain (R50).
- * Does NOT create suspend/withdraw/recall/expire operative acts (HOF-G6 deferred).
+ * Does NOT create withdraw/recall/expire operative acts (HOF-G6-U3/U4 deferred).
+ * HOF-G6-U2 suspension projection is supplied by evaluate callers (R94).
  * Does NOT promote lifecycle via GPRA invalidation alone (R57).
  * Does NOT invent Rejected from absence of authorization or posture (R57).
  *
@@ -38,6 +39,7 @@ import type {
   HandoffPreparationCurrency,
   HoemCompletionOperativeRecord,
   HoemCompletionOperativeRecordId,
+  GovernedHandoffSuspensionActRecord,
 } from "./domain3-types.js";
 import { OrchestraConstitutionalError } from "./errors.js";
 import {
@@ -349,8 +351,8 @@ export function evaluateHandoffCompletionCurrencyFromFacts(input: {
 }
 
 /**
- * R48–R57 — resolve current act-layer state for one binding.
- * Priority: completed → authorized → eligible_for_consideration.
+ * R48–R57 / R94 — resolve current act-layer state for one binding.
+ * Priority: current authoritative suspension → completed → authorized → eligible_for_consideration.
  * Does NOT invent Rejected from absence of auth/posture (R57).
  * Does NOT invent suspended/withdrawn/recalled/expired from GPRA invalidation.
  * Rejected remains R48 vocabulary / R51 meaning until G2/G4 withhold facts exist.
@@ -368,10 +370,14 @@ export function evaluateHandoffActLayerLifecycleFromFacts(input: {
   matchingAuthorization: GovernedHandoffAuthorizationActRecord | null;
   authorizationCurrency: HandoffAuthorizationCurrency | null;
   authoritativePosture: GovernedHandoffPostureDeclarationActRecord | null;
+  authoritativeSuspension?: GovernedHandoffSuspensionActRecord | null;
+  suspensionIsCurrent?: boolean;
 }): HandoffActLayerLifecycleEvaluation {
   let currentState: HandoffActLayerLifecycleState | null = null;
 
-  if (input.authoritativeCompletion && input.completionIsCurrent) {
+  if (input.authoritativeSuspension && input.suspensionIsCurrent) {
+    currentState = "suspended";
+  } else if (input.authoritativeCompletion && input.completionIsCurrent) {
     currentState = "completed";
   } else if (
     input.matchingAuthorization &&
@@ -398,6 +404,7 @@ export function evaluateHandoffActLayerLifecycleFromFacts(input: {
     consumerClassId: input.binding?.consumerClassId ?? null,
     currentState,
     authoritativeCompletionActId: input.authoritativeCompletion?.completionActId ?? null,
+    authoritativeSuspensionActId: input.authoritativeSuspension?.suspensionActId ?? null,
     authoritativeRejectionAttributionId: null,
     authoritativePostureDeclarationActId:
       input.authoritativePosture?.postureDeclarationActId ?? null,
@@ -411,7 +418,8 @@ export function evaluateHandoffActLayerLifecycleFromFacts(input: {
     notHandoffAcceptance: true as const,
     notManufacturingClearance: true as const,
     notG11EligibilityLayerState: true as const,
-    suspendedWithdrawnRecalledExpiredMechanicsDeferred: true as const,
+    withdrawalRecallExpiredMechanicsDeferred: true as const,
+    suspensionMechanicsOperative: true as const,
     r48ClosedHslmVocabulary: true as const,
     r49PeerDistinctLifecycle: true as const,
     r50SingleBindingPostureChain: true as const,

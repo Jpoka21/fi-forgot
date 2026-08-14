@@ -10,12 +10,10 @@
  * Actor strings alone cannot mint HGA. MAGAC/DDAC/DSRA/IVAC/SSAC/Brain cannot substitute.
  *
  * R66 catalog integration: the mandatory HGA act-type matrix catalogs six types
- * (authorization, posture_declaration, completion, suspension, withdrawal, recall), but
- * authorizedConstitutionalScopes remains exactly the three operative scopes below.
- * Catalog presence of suspension/withdrawal/recall ≠ constitutional scope activation.
- * HOF-G6-U1 (R70–R83) establishes shared foundation only; act minting remains
- * HOF-G6-U2/U3/U4. authorizedConstitutionalScopes remains exactly the three
- * operative scopes below until those units activate scopes.
+ * (authorization, posture_declaration, completion, suspension, withdrawal, recall).
+ * authorizedConstitutionalScopes includes the four operative scopes below
+ * (HOF-G6-U2 activates handoff_suspension_act). withdrawal/recall remain cataloged
+ * without constitutional scope activation until HOF-G6-U3/U4.
  * See handoff-authority-catalog.ts and handoff-lifecycle-g6-foundation.ts.
  */
 
@@ -25,7 +23,8 @@ import type { HandoffGovernanceAuthorityClassId } from "./domain3-types.js";
 export type HandoffGovernanceAuthorityConstitutionalScope =
   | "handoff_authorization_act"
   | "handoff_posture_declaration_act"
-  | "handoff_completion_act";
+  | "handoff_completion_act"
+  | "handoff_suspension_act";
 
 export interface EstablishedHandoffGovernanceAuthorityClass {
   readonly authorityClassId: HandoffGovernanceAuthorityClassId;
@@ -72,6 +71,7 @@ export const FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES: readonly E
         "handoff_authorization_act",
         "handoff_posture_declaration_act",
         "handoff_completion_act",
+        "handoff_suspension_act",
       ] as const),
     }),
   ]);
@@ -160,6 +160,28 @@ export function assertEstablishedHandoffGovernanceAuthorityForCompletion(
       "Established HGA does not authorize handoff_completion_act scope (R51/R56)",
       "invalid_handoff_completion",
       ["FI-DSN-STD-015-R51", "FI-DSN-STD-015-R56"],
+    );
+  }
+}
+
+export function assertEstablishedHandoffGovernanceAuthorityForSuspension(
+  authorityClassId: unknown,
+): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Handoff suspension requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint Handoff suspension authority (R70/R84)",
+      "invalid_handoff_suspension",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R84"],
+    );
+  }
+  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
+    authorityClassId as HandoffGovernanceAuthorityClassId,
+  );
+  if (!resolved.authorizedConstitutionalScopes.includes("handoff_suspension_act")) {
+    throw new OrchestraConstitutionalError(
+      "Established HGA does not authorize handoff_suspension_act scope (R84/R85)",
+      "invalid_handoff_suspension",
+      ["FI-DSN-STD-015-R84", "FI-DSN-STD-015-R85"],
     );
   }
 }

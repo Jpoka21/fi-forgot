@@ -436,7 +436,8 @@ section("evaluate: eligible after entry+binding; authorized after auth; complete
   expect("eligible after entry+binding", eligible.currentState, "eligible_for_consideration");
   expect("eligible not authorization", eligible.notHandoffAuthorization, true);
   expect("eligible not posture", eligible.notHandoffPostureDeclaration, true);
-  expect("G6 mechanics deferred marker", eligible.suspendedWithdrawnRecalledExpiredMechanicsDeferred, true);
+  expect("G6 withdrawal/recall deferred marker", eligible.withdrawalRecallExpiredMechanicsDeferred, true);
+  expect("suspension mechanics operative", eligible.suspensionMechanicsOperative, true);
 
   await authorize(ctx, entry.entryId, "CC-01");
   const authorized = await ctx.domain3.evaluateHandoffActLayerLifecycle(binding.bindingId);

@@ -156,10 +156,21 @@ section("3. authorization/posture_declaration/completion OPERATIVE");
   }
 }
 
-section("4. suspension/withdrawal/recall CATALOGED_DEFERRED — mayBePerformed throws");
+section("4. withdrawal/recall CATALOGED_DEFERRED; suspension OPERATIVE");
 
 {
-  for (const t of ["suspension", "withdrawal", "recall"] as const) {
+  expect("suspension operative", getHgaMatrixActOperativeStatus("suspension"), "operative");
+  expectTruthy("suspension still matrix member", isHgaMatrixActType("suspension"));
+  try {
+    assertHgaMatrixActMayBePerformed("suspension");
+    passed++;
+    console.log("  ✓ suspension assertHgaMatrixActMayBePerformed ok");
+  } catch {
+    failed++;
+    failures.push("suspension assertHgaMatrixActMayBePerformed ok");
+    console.log("  ✗ suspension assertHgaMatrixActMayBePerformed ok");
+  }
+  for (const t of ["withdrawal", "recall"] as const) {
     expect(`${t} deferred`, getHgaMatrixActOperativeStatus(t), "cataloged_deferred");
     expectTruthy(`${t} still matrix member`, isHgaMatrixActType(t));
     expectThrows(
@@ -199,9 +210,9 @@ section("5. Unknown / rejection / exit matrix types rejected");
     "invalid_handoff_authority_catalog",
   );
   expectThrows(
-    "deferred as operative fails",
+    "deferred withdrawal as operative fails",
     () =>
-      assertHgaActTypeStringFailClosed("suspension", {
+      assertHgaActTypeStringFailClosed("withdrawal", {
         requireOperativePerformance: true,
       }),
     "invalid_handoff_authority_catalog",
@@ -344,9 +355,9 @@ section("10. HSLM still exactly eight; no exited/accepted");
     "denotation_only",
   );
   expect(
-    "suspended vocabulary_deferred",
+    "suspended operative_transition",
     HSLM_EIGHT_STATE_CATALOG.find((e) => e.stateId === "suspended")?.statusKind,
-    "vocabulary_deferred",
+    "operative_transition",
   );
 }
 
@@ -443,14 +454,15 @@ section("14. rejectHandoffActLayer undefined; handoff_lifecycle_rejection_act ab
     hga.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act" as never),
     false,
   );
-  expect("exactly three operative scopes", hga.authorizedConstitutionalScopes.length, 3);
+  expect("exactly four operative scopes", hga.authorizedConstitutionalScopes.length, 4);
   expect(
-    "scopes are auth/posture/completion only",
+    "scopes are auth/posture/completion/suspension",
     [...hga.authorizedConstitutionalScopes],
     [
       "handoff_authorization_act",
       "handoff_posture_declaration_act",
       "handoff_completion_act",
+      "handoff_suspension_act",
     ],
   );
 }
@@ -463,6 +475,7 @@ section("15. No suspend/recall/withdraw APIs on repo");
   const domain3 = createDomain3Repository(domain2, undefined, domain1) as Domain3Repository;
   const repo = domain3 as unknown as Record<string, unknown>;
   expect("no suspendHandoff", typeof repo.suspendHandoff, "undefined");
+  expect("suspendGovernedHandoff present", typeof repo.suspendGovernedHandoff, "function");
   expect("no recallHandoff", typeof repo.recallHandoff, "undefined");
   expect("no withdrawHandoff", typeof repo.withdrawHandoff, "undefined");
   expectTruthy(
@@ -495,19 +508,25 @@ section("16. Barrel exports catalog helpers not mint factories");
   );
 }
 
-section("17. HOF-G6-U1 foundation established; act minting still deferred");
+section("17. HOF-G6-U1 foundation established; withdrawal/recall minting still deferred");
 
 {
   const assessment = assessHandoffAuthorityCatalogIntegration();
   expect("hofG6U1SharedFoundationEstablished", assessment.hofG6U1SharedFoundationEstablished, true);
   expect(
-    "hofG6ActSpecificMechanicsDeferredToU2U3U4",
-    assessment.hofG6ActSpecificMechanicsDeferredToU2U3U4,
+    "hofG6ActSpecificMechanicsDeferredToU3U4",
+    assessment.hofG6ActSpecificMechanicsDeferredToU3U4,
     true,
   );
-  expect("suspendWithdrawRecallApisNotProvided", assessment.suspendWithdrawRecallApisNotProvided, true);
+  expect("withdrawRecallApisNotProvided", assessment.withdrawRecallApisNotProvided, true);
+  expect(
+    "suspendGovernedHandoffMayBeProvided",
+    assessment.suspendGovernedHandoffMayBeProvided,
+    true,
+  );
   expect("performHgaActFactoryNotProvided", assessment.performHgaActFactoryNotProvided, true);
-  for (const t of ["suspension", "withdrawal", "recall"] as const) {
+  expect("suspension operative", getHgaMatrixActOperativeStatus("suspension"), "operative");
+  for (const t of ["withdrawal", "recall"] as const) {
     expect(`${t} still cataloged_deferred`, getHgaMatrixActOperativeStatus(t), "cataloged_deferred");
     expectTruthy(`${t} U1 foundation flag`, resolveHgaMatrixActType(t).sharedFoundationEstablishedHofG6U1);
   }
