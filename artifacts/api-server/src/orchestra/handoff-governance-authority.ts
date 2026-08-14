@@ -12,8 +12,11 @@
  * R66 catalog integration: the mandatory HGA act-type matrix catalogs six types
  * (authorization, posture_declaration, completion, suspension, withdrawal, recall), but
  * authorizedConstitutionalScopes remains exactly the three operative scopes below.
- * Catalog presence of suspension/withdrawal/recall ≠ constitutional scope activation (HOF-G6).
- * See handoff-authority-catalog.ts for the read-only R66–R69 catalogs.
+ * Catalog presence of suspension/withdrawal/recall ≠ constitutional scope activation.
+ * HOF-G6-U1 (R70–R83) establishes shared foundation only; act minting remains
+ * HOF-G6-U2/U3/U4. authorizedConstitutionalScopes remains exactly the three
+ * operative scopes below until those units activate scopes.
+ * See handoff-authority-catalog.ts and handoff-lifecycle-g6-foundation.ts.
  */
 
 import { OrchestraConstitutionalError } from "./errors.js";

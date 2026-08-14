@@ -1947,7 +1947,8 @@ export interface HandoffDownstreamExitConsiderationEvaluation {
 
 /**
  * R66 — mandatory HGA act-type matrix (§20.5.3.14). Exactly six ids.
- * suspension / withdrawal / recall remain cataloged_deferred (HOF-G6).
+ * suspension / withdrawal / recall remain cataloged_deferred for act-specific
+ * minting (HOF-G6-U2/U3/U4) even after HOF-G6-U1 shared foundation (R70–R83).
  */
 export type HgaMatrixActType =
   | "authorization"
@@ -1956,6 +1957,18 @@ export type HgaMatrixActType =
   | "suspension"
   | "withdrawal"
   | "recall";
+
+/** R70–R83 — peer-distinct G6 lifecycle matrix act types (foundation only until U2–U4). */
+export type G6LifecycleMatrixActType = "suspension" | "withdrawal" | "recall";
+
+/**
+ * R76 shared effect framing vocabulary — descriptive only in U1;
+ * act-specific effect mechanics remain HOF-G6-U2 through U4.
+ */
+export type G6SharedEffectFramingKind =
+  | "temporary_forward_reliance_pause"
+  | "hga_initiated_retraction"
+  | "responsive_forward_reliance_termination";
 
 export type HgaMatrixActOperativeStatus = "operative" | "cataloged_deferred";
 
@@ -1967,6 +1980,8 @@ export interface HgaMatrixActTypeCatalogEntry {
   readonly hppmmPostureChainRequired: boolean;
   readonly requirementIds: readonly Std015RequirementId[];
   readonly catalogedDeferredHofG6: boolean;
+  /** U1 shared foundation established; act minting still deferred when true. */
+  readonly sharedFoundationEstablishedHofG6U1: boolean;
 }
 
 export interface HoemExpectationCatalogEntry {
@@ -2068,8 +2083,81 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly r67DistinctActTypeAttributionAndHoem: true;
   readonly r68SingleHccmBindingNoMerge: true;
   readonly r69ProhibitedPerformers: true;
-  readonly r70PlusNotImplemented: true;
-  readonly hofG6MechanicsDeferred: true;
+  /** HOF-G6-U1 R70–R83 shared foundation is established. */
+  readonly hofG6U1SharedFoundationEstablished: true;
+  /** Act-specific suspension/withdrawal/recall minting remains U2–U4 (R84+). */
+  readonly hofG6ActSpecificMechanicsDeferredToU2U3U4: true;
   readonly hofG9CompletionThemesTranche3: true;
+  readonly traceability: Std015GovernanceTraceability;
+}
+
+/**
+ * HOF-G6-U1 shared precondition categories (R75 a–e).
+ * Satisfaction of shared categories does not mint suspension/withdrawal/recall.
+ */
+export interface G6SharedPreconditionCategoryFlags {
+  readonly a_validGovernedHandoffTarget: boolean;
+  readonly b_hccmBoundContextEstablished: boolean;
+  readonly c_authorizedHgaPerformerAttributable: boolean;
+  readonly d_traceableConstitutionalBasis: boolean;
+  readonly e_priorRecordsPreservedReconstructable: boolean;
+}
+
+export interface G6SharedPreconditionAssessment {
+  readonly sharedCategoriesSatisfied: boolean;
+  readonly denialReasons: readonly string[];
+  readonly actType: G6LifecycleMatrixActType | null;
+  readonly bindingId: string | null;
+  readonly categories: G6SharedPreconditionCategoryFlags;
+  readonly actSpecificTriggersDeferredToU2U3U4: true;
+  readonly doesNotAuthorizeActMint: true;
+  readonly doesNotApplyActSpecificEffects: true;
+  readonly catalogMembershipDoesNotCreateAuthority: true;
+  readonly r75SharedPreconditionCategories: true;
+  readonly traceability: Std015GovernanceTraceability;
+}
+
+export interface G6LifecycleActSubjectScopeAssessment {
+  readonly scopeOk: boolean;
+  readonly denialReasons: readonly string[];
+  readonly actType: G6LifecycleMatrixActType | null;
+  readonly bindingId: string | null;
+  readonly singleHccmBoundContext: true;
+  readonly atMostOneAuthoritativePostureChain: true;
+  readonly noMultiContextSpan: true;
+  readonly noSilentCrossContextPropagation: true;
+  readonly r72R73ScopeRules: true;
+  readonly traceability: Std015GovernanceTraceability;
+}
+
+/**
+ * Frozen HOF-G6-U1 shared foundation integrity assessment (no act minting).
+ */
+export interface HofG6U1SharedLifecycleFoundationAssessment {
+  readonly integrityOk: boolean;
+  readonly g6LifecycleActTypes: readonly G6LifecycleMatrixActType[];
+  readonly g6LifecycleActTypeCount: 3;
+  readonly peerDistinctActsPreserved: true;
+  readonly noGenericLifecycleAction: true;
+  readonly hgaSolePerformerForG6Acts: true;
+  readonly actPerformanceDistinctFromHslmState: true;
+  readonly sharedPreconditionCategoriesDefined: true;
+  readonly actSpecificTriggersDeferred: true;
+  readonly sharedEffectFramingsDefined: true;
+  readonly actSpecificEffectMechanicsDeferred: true;
+  readonly additiveHoemModelPerActType: true;
+  readonly additivePreservationRequired: true;
+  readonly noHistoricalRewrite: true;
+  readonly noPeerAuthorityAbsorption: true;
+  readonly noImpliedReentryOrResumption: true;
+  readonly noAutomaticRetryOrRecovery: true;
+  readonly suspendWithdrawRecallMintApisAbsent: true;
+  readonly performHgaActFactoryAbsent: true;
+  readonly rejectionActAbsent: true;
+  readonly exitHgaMatrixActAbsent: true;
+  readonly hslmEightStatesPreserved: true;
+  readonly restorationResumptionReentryDeferred: true;
+  readonly r84PlusUnavailable: true;
+  readonly r70ThroughR83: true;
   readonly traceability: Std015GovernanceTraceability;
 }

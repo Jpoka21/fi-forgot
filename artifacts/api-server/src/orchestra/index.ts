@@ -348,6 +348,43 @@ export {
 } from "./handoff-authority-catalog.js";
 
 export {
+  HANDOFF_LIFECYCLE_G6_U1_FOUNDATION_TRACEABILITY,
+  G6_LIFECYCLE_MATRIX_ACT_TYPES,
+  G6_SHARED_EFFECT_FRAMING_BY_ACT,
+  G6_ACT_TO_HSLM_DENOTATION,
+  G6_HOEM_EXPECTATION_BY_ACT,
+  G6_FORBIDDEN_GENERIC_FACTORY_NAMES,
+  G6_FORBIDDEN_MINT_API_NAMES,
+  G6_DEFERRED_RESTORATION_API_NAMES,
+  isG6LifecycleMatrixActType,
+  assertG6LifecycleMatrixActType,
+  resolveG6SharedEffectFraming,
+  assertHgaSolePerformerForG6LifecycleAct,
+  assertBrainCannotPerformG6LifecycleAct,
+  assertG6LifecycleActsRemainPeerDistinct,
+  refuseGenericHgaLifecycleFactory,
+  assessG6LifecycleActSubjectScope,
+  assertG6LifecycleActSubjectScope,
+  assertG6ActDistinctFromHslmState,
+  assessG6SharedPreconditions,
+  assertG6AdditivePreservationNoRewrite,
+  assertG6HoemExpectationSeparatePerActType,
+  assertG6DoesNotAbsorbPeerAuthority,
+  assertG6ActDoesNotAuthorizeReentryOrResumption,
+  assertG6ActIsNotAutomaticRetryOrRecovery,
+  refuseG6RestorationResumptionReentry,
+  assertG6LifecycleActPerformanceDeferred,
+  refuseSuspendGovernedHandoff,
+  refuseWithdrawGovernedHandoff,
+  refuseRecallGovernedHandoff,
+  rejectForgedOrPrematureG6LifecycleActRehydration,
+  assertR84PlusUnavailable,
+  assertNoInventedRejectionOrExitG6Act,
+  assessHofG6U1SharedLifecycleFoundation,
+  catalogMembershipDoesNotAuthorizeG6Performance,
+} from "./handoff-lifecycle-g6-foundation.js";
+
+export {
   STD015_GOVERNING_STANDARD,
   STD015_GOVERNING_STANDARD_VERSION,
   STD015_DOMAIN_CLASSIFICATION,
@@ -510,6 +547,12 @@ export type {
   ProhibitedHandoffActPerformerClass,
   HgaActCatalogBindingScopeAssessment,
   HandoffAuthorityCatalogIntegrationAssessment,
+  G6LifecycleMatrixActType,
+  G6SharedEffectFramingKind,
+  G6SharedPreconditionCategoryFlags,
+  G6SharedPreconditionAssessment,
+  G6LifecycleActSubjectScopeAssessment,
+  HofG6U1SharedLifecycleFoundationAssessment,
 } from "./domain3-types.js";
 
 /**

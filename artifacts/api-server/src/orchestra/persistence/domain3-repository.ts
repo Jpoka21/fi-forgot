@@ -132,6 +132,7 @@ import type {
   HandoffPreservationAuditLinkedCurrency,
   HandoffAuthorityBoundaryAssessment,
   HandoffAuthorityCatalogIntegrationAssessment,
+  HofG6U1SharedLifecycleFoundationAssessment,
   HccmConsumerClassId,
   InvalidationAuthorityClassId,
   InvalidationTriggerFamily,
@@ -265,6 +266,7 @@ import { evaluateHandoffAuthorityBoundaryFromFacts } from "../handoff-authority-
 import {
   assessHandoffAuthorityCatalogIntegration as assessHandoffAuthorityCatalogIntegrationFromCatalog,
 } from "../handoff-authority-catalog.js";
+import { assessHofG6U1SharedLifecycleFoundation as assessHofG6U1SharedLifecycleFoundationFromModule } from "../handoff-lifecycle-g6-foundation.js";
 import { assertEstablishedSupersessionAuthorityClass } from "../supersession-authority.js";
 import { assertSupersessionTriggerFamily } from "../supersession-trigger-families.js";
 import { assertPersistedRouteCReturnNotAuthorized } from "../route-c-return-authority.js";
@@ -1453,6 +1455,12 @@ export interface Domain3Repository {
    * Catalog membership does not authorize, bind, declare, complete, or exit.
    */
   assessHandoffAuthorityCatalogIntegration(): Promise<HandoffAuthorityCatalogIntegrationAssessment>;
+
+  /**
+   * HOF-G6-U1 R70–R83 — shared lifecycle foundation integrity assessment.
+   * Does not mint suspension, withdrawal, or recall acts (U2–U4 deferred).
+   */
+  assessHofG6U1SharedLifecycleFoundation(): Promise<HofG6U1SharedLifecycleFoundationAssessment>;
 }
 
 export function createDomain3Repository(
@@ -6702,6 +6710,10 @@ export function createDomain3RepositoryWithStorage(
 
     async assessHandoffAuthorityCatalogIntegration() {
       return assessHandoffAuthorityCatalogIntegrationFromCatalog();
+    },
+
+    async assessHofG6U1SharedLifecycleFoundation() {
+      return assessHofG6U1SharedLifecycleFoundationFromModule();
     },
   };
 }

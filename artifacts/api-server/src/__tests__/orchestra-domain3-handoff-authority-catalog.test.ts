@@ -495,19 +495,29 @@ section("16. Barrel exports catalog helpers not mint factories");
   );
 }
 
-section("17. R70+ not available");
+section("17. HOF-G6-U1 foundation established; act minting still deferred");
 
 {
   const assessment = assessHandoffAuthorityCatalogIntegration();
-  expect("r70PlusNotImplemented", assessment.r70PlusNotImplemented, true);
-  expect("hofG6MechanicsDeferred", assessment.hofG6MechanicsDeferred, true);
+  expect("hofG6U1SharedFoundationEstablished", assessment.hofG6U1SharedFoundationEstablished, true);
+  expect(
+    "hofG6ActSpecificMechanicsDeferredToU2U3U4",
+    assessment.hofG6ActSpecificMechanicsDeferredToU2U3U4,
+    true,
+  );
   expect("suspendWithdrawRecallApisNotProvided", assessment.suspendWithdrawRecallApisNotProvided, true);
   expect("performHgaActFactoryNotProvided", assessment.performHgaActFactoryNotProvided, true);
+  for (const t of ["suspension", "withdrawal", "recall"] as const) {
+    expect(`${t} still cataloged_deferred`, getHgaMatrixActOperativeStatus(t), "cataloged_deferred");
+    expectTruthy(`${t} U1 foundation flag`, resolveHgaMatrixActType(t).sharedFoundationEstablishedHofG6U1);
+  }
   const mod = await import("../orchestra/index.js");
   expect("no suspendHandoffAct", "suspendHandoffAct" in mod, false);
   expect("no withdrawHandoffAct", "withdrawHandoffAct" in mod, false);
   expect("no recallHandoffAct", "recallHandoffAct" in mod, false);
   expect("no expireHandoff", "expireHandoff" in mod, false);
+  expect("assessHofG6U1 exported", "assessHofG6U1SharedLifecycleFoundation" in mod, true);
+  expect("performHgaAct not exported", "performHgaAct" in mod, false);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

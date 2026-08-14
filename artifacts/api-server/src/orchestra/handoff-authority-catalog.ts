@@ -9,7 +9,10 @@
  * R68 — Each operative act binds exactly one HCCM context; posture-relevant → HPPM chain.
  * R69 — Prohibited performer classes; suspension/withdrawal/recall mechanics remain HOF-G6.
  *
- * Does NOT implement R70+ (HOF-G6), exit-completeness, rejection acts, or exit matrix acts.
+ * HOF-G6-U1 (R70–R83) shared foundation is established separately in
+ * handoff-lifecycle-g6-foundation.ts; suspension/withdrawal/recall minting remains
+ * cataloged_deferred until HOF-G6-U2/U3/U4 (R84+).
+ * Does NOT implement exit-completeness, rejection acts, or exit matrix acts.
  * Does NOT mint suspend/withdraw/recall/reject APIs or a generic performHgaAct factory.
  */
 
@@ -128,6 +131,7 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
         "FI-DSN-STD-015-R25",
       ] as const),
       catalogedDeferredHofG6: false,
+      sharedFoundationEstablishedHofG6U1: false,
     }),
     Object.freeze({
       actType: "posture_declaration" as const,
@@ -142,6 +146,7 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
         "FI-DSN-STD-015-R40",
       ] as const),
       catalogedDeferredHofG6: false,
+      sharedFoundationEstablishedHofG6U1: false,
     }),
     Object.freeze({
       actType: "completion" as const,
@@ -157,6 +162,7 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
         "FI-DSN-STD-015-R56",
       ] as const),
       catalogedDeferredHofG6: false,
+      sharedFoundationEstablishedHofG6U1: false,
     }),
     Object.freeze({
       actType: "suspension" as const,
@@ -168,8 +174,12 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
         "FI-DSN-STD-015-R66",
         "FI-DSN-STD-015-R67",
         "FI-DSN-STD-015-R69",
+        "FI-DSN-STD-015-R70",
+        "FI-DSN-STD-015-R71",
+        "FI-DSN-STD-015-R75",
       ] as const),
       catalogedDeferredHofG6: true,
+      sharedFoundationEstablishedHofG6U1: true,
     }),
     Object.freeze({
       actType: "withdrawal" as const,
@@ -181,8 +191,12 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
         "FI-DSN-STD-015-R66",
         "FI-DSN-STD-015-R67",
         "FI-DSN-STD-015-R69",
+        "FI-DSN-STD-015-R70",
+        "FI-DSN-STD-015-R71",
+        "FI-DSN-STD-015-R75",
       ] as const),
       catalogedDeferredHofG6: true,
+      sharedFoundationEstablishedHofG6U1: true,
     }),
     Object.freeze({
       actType: "recall" as const,
@@ -194,8 +208,12 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
         "FI-DSN-STD-015-R66",
         "FI-DSN-STD-015-R67",
         "FI-DSN-STD-015-R69",
+        "FI-DSN-STD-015-R70",
+        "FI-DSN-STD-015-R71",
+        "FI-DSN-STD-015-R75",
       ] as const),
       catalogedDeferredHofG6: true,
+      sharedFoundationEstablishedHofG6U1: true,
     }),
   ]);
 
@@ -398,9 +416,9 @@ export function assertHgaMatrixActMayBePerformed(
   const entry = resolveHgaMatrixActType(actType);
   if (entry.operativeStatus !== "operative") {
     throw new OrchestraConstitutionalError(
-      `HGA matrix act type ${entry.actType} is cataloged_deferred (HOF-G6); catalog membership does not authorize performance (R66/R69)`,
+      `HGA matrix act type ${entry.actType} is cataloged_deferred pending HOF-G6-U2/U3/U4 act-specific mechanics; HOF-G6-U1 shared foundation and catalog membership do not authorize performance (R66/R69/R70–R83)`,
       "invalid_handoff_authority_catalog",
-      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R69"],
+      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R69", "FI-DSN-STD-015-R70"],
     );
   }
 }
@@ -712,8 +730,8 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     r67DistinctActTypeAttributionAndHoem: true as const,
     r68SingleHccmBindingNoMerge: true as const,
     r69ProhibitedPerformers: true as const,
-    r70PlusNotImplemented: true as const,
-    hofG6MechanicsDeferred: true as const,
+    hofG6U1SharedFoundationEstablished: true as const,
+    hofG6ActSpecificMechanicsDeferredToU2U3U4: true as const,
     hofG9CompletionThemesTranche3: true as const,
     traceability: HANDOFF_AUTHORITY_CATALOG_TRACEABILITY,
   });
