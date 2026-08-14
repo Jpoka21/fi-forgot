@@ -635,6 +635,13 @@ export function assertG6LifecycleActPerformanceDeferred(actType: unknown): never
       ["FI-DSN-STD-015-R98"],
     );
   }
+  if (actType === "recall") {
+    throw new OrchestraConstitutionalError(
+      "HOF-G6-U4 recall is operative; U1 deferred-performance assert does not apply. Use Domain3Repository.recallGovernedHandoff (R112–R125)",
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R112"],
+    );
+  }
   try {
     assertHgaMatrixActMayBePerformed(actType);
   } catch (err) {
@@ -676,13 +683,17 @@ export function refuseWithdrawGovernedHandoff(): never {
 }
 
 export function refuseRecallGovernedHandoff(): never {
-  return assertG6LifecycleActPerformanceDeferred("recall");
+  throw new OrchestraConstitutionalError(
+    "refuseRecallGovernedHandoff is not the mint path; HOF-G6-U4 recall is operative via Domain3Repository.recallGovernedHandoff (R112–R125)",
+    "invalid_handoff_g6_lifecycle_foundation",
+    ["FI-DSN-STD-015-R112"],
+  );
 }
 
 /**
  * Fail-closed trusted rehydration gate for purported G6 act artifacts.
- * Valid HOF-G6-U2 suspension and HOF-G6-U3 withdrawal are not blanket-rejected.
- * Recall and forged fields still fail closed.
+ * Valid HOF-G6-U2 suspension, HOF-G6-U3 withdrawal, and HOF-G6-U4 recall are not blanket-rejected.
+ * Forged fields still fail closed.
  */
 export function rejectForgedOrPrematureG6LifecycleActRehydration(input: {
   readonly purportedActType?: unknown;
@@ -704,11 +715,26 @@ export function rejectForgedOrPrematureG6LifecycleActRehydration(input: {
     input.purportedActType === "recall" || input.purportedHoemActType === "recall";
 
   if (purportedIsRecall) {
-    throw new OrchestraConstitutionalError(
-      "Purported recall act or HOEM record cannot be rehydrated as operative under HOF-G6-U1–U3; act minting remains U4 (R70–R83; R112+)",
-      "invalid_handoff_g6_lifecycle_foundation",
-      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R77", "FI-DSN-STD-015-R78"],
-    );
+    if (
+      input.forgedAuthorityClass === true ||
+      input.forgedScope === true ||
+      input.forgedBinding === true ||
+      input.forgedLineage === true ||
+      input.forgedTimestamp === true ||
+      input.forgedPredecessor === true ||
+      input.restorationFieldPresent === true ||
+      input.reentryFieldPresent === true ||
+      input.expiryFieldPresent === true ||
+      input.acceptanceFieldPresent === true ||
+      input.executionFieldPresent === true
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Forged or premature G6 recall fields fail closed under HOF-G6-U4; no normalize/repair (R77/R79/R83)",
+        "invalid_handoff_g6_lifecycle_foundation",
+        ["FI-DSN-STD-015-R77", "FI-DSN-STD-015-R79", "FI-DSN-STD-015-R83"],
+      );
+    }
+    return;
   }
   if (input.purportedHslmStateAsAct === true) {
     throw new OrchestraConstitutionalError(
@@ -740,33 +766,31 @@ export function rejectForgedOrPrematureG6LifecycleActRehydration(input: {
     input.purportedActType === "suspension" ||
     input.purportedHoemActType === "suspension" ||
     input.purportedActType === "withdrawal" ||
-    input.purportedHoemActType === "withdrawal"
+    input.purportedHoemActType === "withdrawal" ||
+    input.purportedActType === "recall" ||
+    input.purportedHoemActType === "recall"
   ) {
     return;
   }
   throw new OrchestraConstitutionalError(
-    "No operative G6 recall act artifacts exist under HOF-G6-U1–U3; rehydration refuses closed (R70–R83)",
+    "No operative G6 lifecycle act artifacts match the purported act type; rehydration refuses closed (R70–R83)",
     "invalid_handoff_g6_lifecycle_foundation",
     ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R78"],
   );
 }
 
 export function assertR84PlusUnavailable(claim?: unknown): void {
-  if (
-    claim === "r112" ||
-    claim === "r112_plus" ||
-    claim === "recall_operative_mechanics"
-  ) {
+  if (claim === "r84_plus_unavailable" || claim === "suspension_operative_mechanics_unavailable") {
     throw new OrchestraConstitutionalError(
-      "HOF-G6-U4 recall operative mechanics (R112+) remain unavailable (R70–R111 boundary)",
+      "HOF-G6-U2 suspension operative mechanics are available (R84–R97)",
       "invalid_handoff_g6_lifecycle_foundation",
-      ["FI-DSN-STD-015-R76", "FI-DSN-STD-015-R75"],
+      ["FI-DSN-STD-015-R84"],
     );
   }
 }
 
-export function assertR112PlusUnavailable(claim?: unknown): void {
-  assertR84PlusUnavailable(claim ?? "r112_plus");
+export function assertR112PlusUnavailable(_claim?: unknown): void {
+  // HOF-G6-U4 recall operative mechanics (R112–R125) are available; no-op guard retained for API stability.
 }
 
 // ---------------------------------------------------------------------------
@@ -795,8 +819,8 @@ export function assertNoInventedRejectionOrExitG6Act(actType: unknown): void {
 // ---------------------------------------------------------------------------
 
 export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycleFoundationAssessment {
-  const recallStillDeferred =
-    resolveHgaMatrixActType("recall").operativeStatus === "cataloged_deferred";
+  const recallOperative =
+    resolveHgaMatrixActType("recall").operativeStatus === "operative";
   const suspensionOperative =
     resolveHgaMatrixActType("suspension").operativeStatus === "operative";
   const withdrawalOperative =
@@ -806,7 +830,7 @@ export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycle
   const hslmEight = FROZEN_HANDOFF_ACT_LAYER_LIFECYCLE_STATES.length === 8;
 
   const integrityOk =
-    recallStillDeferred &&
+    recallOperative &&
     suspensionOperative &&
     withdrawalOperative &&
     matrixStillSix &&
@@ -837,7 +861,7 @@ export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycle
     noImpliedReentryOrResumption: true as const,
     noAutomaticRetryOrRecovery: true as const,
     withdrawRecallMintApisAbsent: false as const,
-    recallMintApisAbsent: true as const,
+    recallMintApisAbsent: false as const,
     performHgaActFactoryAbsent: true as const,
     rejectionActAbsent: true as const,
     exitHgaMatrixActAbsent: true as const,
@@ -845,9 +869,10 @@ export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycle
     restorationResumptionReentryDeferred: true as const,
     suspensionMechanicsOperative: true as const,
     withdrawalMechanicsOperative: true as const,
+    recallMechanicsOperative: true as const,
     r84PlusUnavailable: false as const,
     r98PlusUnavailable: false as const,
-    r112PlusUnavailable: true as const,
+    r112PlusUnavailable: false as const,
     r70ThroughR83: true as const,
     traceability: HANDOFF_LIFECYCLE_G6_U1_FOUNDATION_TRACEABILITY,
   });

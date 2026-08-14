@@ -292,6 +292,24 @@ export {
 } from "./handoff-withdrawal.js";
 
 export {
+  GOVERNED_HANDOFF_RECALL_TRACEABILITY,
+  assessGovernedHandoffRecall,
+  selectAuthoritativeGovernedHandoffRecall,
+  evaluateHandoffRecallCurrencyFromFacts,
+  assertGovernedHandoffRecallActor,
+  assertNoHandoffRecallWithdrawalOrReentryClaims,
+} from "./handoff-recall.js";
+
+export {
+  HRTCM_RECALL_TRIGGER_TRACEABILITY,
+  HRTCM_RECALL_TRIGGER_IDS,
+  isHrtcmRecallTriggerId,
+  assertHrtcmRecallTriggerId,
+  assertNonEmptySatisfiedHrtcmTriggers,
+  normalizeSatisfiedHrtcmTriggers,
+} from "./handoff-hrtcm.js";
+
+export {
   GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY,
   VOLUME_06_HANDOFF_AUTHORITY_TERMINUS,
   DOWNSTREAM_EXIT_BOUNDARY_ATTRIBUTION_KIND,
@@ -313,6 +331,7 @@ export {
   assertEstablishedHandoffGovernanceAuthorityForCompletion,
   assertEstablishedHandoffGovernanceAuthorityForSuspension,
   assertEstablishedHandoffGovernanceAuthorityForWithdrawal,
+  assertEstablishedHandoffGovernanceAuthorityForRecall,
 } from "./handoff-governance-authority.js";
 
 export {
@@ -555,6 +574,13 @@ export type {
   WithdrawalConstitutionalBasisKind,
   WithdrawalConstitutionalBasisProvenance,
   WithdrawalRetractionTarget,
+  HrtcmRecallTriggerId,
+  GovernedHandoffRecallActId,
+  GovernedHandoffRecallActRecord,
+  GovernedHandoffRecallAssessment,
+  HandoffRecallCurrency,
+  HoemRecallOperativeRecord,
+  HoemRecallOperativeRecordId,
   HoemAuthorizationOperativeRecord,
   HoemAuthorizationOperativeRecordId,
   HccmConsumerClassId,

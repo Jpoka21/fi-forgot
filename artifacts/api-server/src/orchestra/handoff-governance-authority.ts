@@ -12,8 +12,8 @@
  * R66 catalog integration: the mandatory HGA act-type matrix catalogs six types
  * (authorization, posture_declaration, completion, suspension, withdrawal, recall).
  * authorizedConstitutionalScopes includes the five operative scopes below
- * (HOF-G6-U2 activates handoff_suspension_act; HOF-G6-U3 activates handoff_withdrawal_act).
- * recall remains cataloged without constitutional scope activation until HOF-G6-U4.
+ * (HOF-G6-U2 activates handoff_suspension_act; HOF-G6-U3 activates handoff_withdrawal_act;
+ * HOF-G6-U4 activates handoff_recall_act).
  * See handoff-authority-catalog.ts and handoff-lifecycle-g6-foundation.ts.
  */
 
@@ -25,7 +25,8 @@ export type HandoffGovernanceAuthorityConstitutionalScope =
   | "handoff_posture_declaration_act"
   | "handoff_completion_act"
   | "handoff_suspension_act"
-  | "handoff_withdrawal_act";
+  | "handoff_withdrawal_act"
+  | "handoff_recall_act";
 
 export interface EstablishedHandoffGovernanceAuthorityClass {
   readonly authorityClassId: HandoffGovernanceAuthorityClassId;
@@ -74,6 +75,7 @@ export const FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES: readonly E
         "handoff_completion_act",
         "handoff_suspension_act",
         "handoff_withdrawal_act",
+        "handoff_recall_act",
       ] as const),
     }),
   ]);
@@ -206,6 +208,28 @@ export function assertEstablishedHandoffGovernanceAuthorityForWithdrawal(
       "Established HGA does not authorize handoff_withdrawal_act scope (R98/R99)",
       "invalid_handoff_withdrawal",
       ["FI-DSN-STD-015-R98", "FI-DSN-STD-015-R99"],
+    );
+  }
+}
+
+export function assertEstablishedHandoffGovernanceAuthorityForRecall(
+  authorityClassId: unknown,
+): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Handoff recall requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint Handoff recall authority (R70/R112)",
+      "invalid_handoff_recall",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R112"],
+    );
+  }
+  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
+    authorityClassId as HandoffGovernanceAuthorityClassId,
+  );
+  if (!resolved.authorizedConstitutionalScopes.includes("handoff_recall_act")) {
+    throw new OrchestraConstitutionalError(
+      "Established HGA does not authorize handoff_recall_act scope (R112/R113)",
+      "invalid_handoff_recall",
+      ["FI-DSN-STD-015-R112", "FI-DSN-STD-015-R113"],
     );
   }
 }

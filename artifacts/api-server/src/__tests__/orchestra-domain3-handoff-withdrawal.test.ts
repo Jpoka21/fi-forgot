@@ -399,15 +399,13 @@ section("catalogs, R98–R111 traceability, and barrel boundary");
     hga.authorizedConstitutionalScopes.includes("handoff_withdrawal_act"),
   );
   expect("withdrawal catalog operative", getHgaMatrixActOperativeStatus("withdrawal"), "operative");
-  expect("recall still deferred", getHgaMatrixActOperativeStatus("recall"), "cataloged_deferred");
+  expect("recall catalog operative", getHgaMatrixActOperativeStatus("recall"), "operative");
   assertHgaMatrixActMayBePerformed("withdrawal");
   passed++;
   console.log("  ✓ withdrawal mayBePerformed");
-  expectThrows(
-    "recall mayBePerformed throws",
-    () => assertHgaMatrixActMayBePerformed("recall"),
-    "invalid_handoff_authority_catalog",
-  );
+  assertHgaMatrixActMayBePerformed("recall");
+  passed++;
+  console.log("  ✓ recall mayBePerformed");
 
   const mod = await import("../orchestra/index.js");
   expect(
@@ -487,7 +485,7 @@ section("lawful withdrawal without suspension projects withdrawn");
   expect("HSLM withdrawn", lifecycle.currentState, "withdrawn");
   expect("authoritative withdrawal", lifecycle.authoritativeWithdrawalActId, act.withdrawalActId);
   expect("withdrawal mechanics operative", lifecycle.withdrawalMechanicsOperative, true);
-  expect("recall mechanics deferred", lifecycle.recallExpiredMechanicsDeferred, true);
+  expect("recall mechanics operative", lifecycle.recallMechanicsOperative, true);
   expect("withdrawal currency current", await ctx.domain3.evaluateHandoffWithdrawalCurrency(act.withdrawalActId), "current");
 }
 
@@ -649,13 +647,13 @@ section("existing exit boundary does not block or rewrite withdrawal");
   );
 }
 
-section("no recall, reentry, restore, or generic mint APIs");
+section("recallGovernedHandoff present; no reentry, restore, or generic mint APIs");
 
 {
   const ctx = await grantPassGpra();
   const repo = ctx.domain3 as unknown as Record<string, unknown>;
   expect("withdrawGovernedHandoff repository method present", typeof repo.withdrawGovernedHandoff, "function");
-  expect("no recallGovernedHandoff", typeof repo.recallGovernedHandoff, "undefined");
+  expect("recallGovernedHandoff repository method present", typeof repo.recallGovernedHandoff, "function");
   expect("no reenterHandoff", typeof repo.reenterHandoff, "undefined");
   expect("no restoreHandoff", typeof repo.restoreHandoff, "undefined");
   expect("no resumeHandoff", typeof repo.resumeHandoff, "undefined");

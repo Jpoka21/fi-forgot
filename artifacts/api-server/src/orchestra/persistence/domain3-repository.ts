@@ -1,5 +1,5 @@
 /**
- * Governed Domain 3 repository — G2–G11 + STD-015 HOF-G1 Upstream Entry + HOF-G7 Evidence Consumption + HOF-G10 Preservation Audit + HOF-G2 Authorization + HOF-G3 Consumer Binding + HOF-G4 Posture Declaration + HOF-G5 Act-Layer Lifecycle + HOF-G8 Downstream Exit Boundary.
+ * Governed Domain 3 repository â€” G2â€“G11 + STD-015 HOF-G1 Upstream Entry + HOF-G7 Evidence Consumption + HOF-G10 Preservation Audit + HOF-G2 Authorization + HOF-G3 Consumer Binding + HOF-G4 Posture Declaration + HOF-G5 Act-Layer Lifecycle + HOF-G8 Downstream Exit Boundary.
  */
 
 import type { Domain2Repository } from "./domain2-repository.js";
@@ -20,6 +20,7 @@ import {
   rehydrateGovernedHandoffCompletion,
   rehydrateGovernedHandoffSuspension,
   rehydrateGovernedHandoffWithdrawal,
+  rehydrateGovernedHandoffRecall,
   rehydrateGovernedHandoffDownstreamExitBoundary,
   rehydrateGovernedHandoffPreservationAudit,
   rehydrateGpraGrant,
@@ -50,6 +51,7 @@ import {
   validatePersistedGovernedHandoffCompletion,
   validatePersistedGovernedHandoffSuspension,
   validatePersistedGovernedHandoffWithdrawal,
+  validatePersistedGovernedHandoffRecall,
   validatePersistedGovernedHandoffDownstreamExitBoundary,
   validatePersistedGovernedHandoffPreservationAudit,
   validatePersistedGpraGrant,
@@ -112,6 +114,10 @@ import type {
   GovernedHandoffWithdrawalActId,
   GovernedHandoffWithdrawalActRecord,
   GovernedHandoffWithdrawalAssessment,
+  GovernedHandoffRecallActId,
+  GovernedHandoffRecallActRecord,
+  GovernedHandoffRecallAssessment,
+  HandoffRecallCurrency,
   GovernedHandoffDownstreamExitBoundaryAssessment,
   GovernedHandoffDownstreamExitBoundaryAttributionId,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
@@ -272,6 +278,14 @@ import {
   selectAuthoritativeGovernedHandoffWithdrawal,
 } from "../handoff-withdrawal.js";
 import {
+  assertGovernedHandoffRecallActor,
+  assertNoHandoffRecallWithdrawalOrReentryClaims,
+  assessGovernedHandoffRecall,
+  createGovernedHandoffRecallActRecord,
+  evaluateHandoffRecallCurrencyFromFacts,
+  selectAuthoritativeGovernedHandoffRecall,
+} from "../handoff-recall.js";
+import {
   assertGovernedHandoffDownstreamExitBoundaryActor,
   assertNoDownstreamExitAcceptanceMembershipOrExecutionClaims,
   assessGovernedHandoffDownstreamExitBoundary,
@@ -344,7 +358,7 @@ export interface Domain3Repository {
   ): Promise<ProductionReadinessReview | null>;
 
   /**
-   * Record immutable Review evidence and append dimension activity (R14–R20).
+   * Record immutable Review evidence and append dimension activity (R14â€“R20).
    * Does not produce Review Determination, Approval, or GPRA.
    */
   recordReviewDimensionActivity(input: {
@@ -361,7 +375,7 @@ export interface Domain3Repository {
   }>;
 
   /**
-   * G4 Design-Time Feasibility evaluation under design_time_feasibility (R21–R26).
+   * G4 Design-Time Feasibility evaluation under design_time_feasibility (R21â€“R26).
    * Internally creates governed G3 evidence/activity; does not create Determination/GPRA.
    */
   recordDesignTimeFeasibilityEvaluation(input: {
@@ -407,7 +421,7 @@ export interface Domain3Repository {
   ): Promise<readonly DesignTimeFeasibilityEvaluationRecord[]>;
 
   /**
-   * Pure completeness query over persisted G3 activity — not Determination/GPRA.
+   * Pure completeness query over persisted G3 activity â€” not Determination/GPRA.
    * Readable while under_review or after review_determined.
    */
   evaluateMandatoryReviewActivityCompleteness(
@@ -415,7 +429,7 @@ export interface Domain3Repository {
   ): Promise<MandatoryReviewActivityCompleteness>;
 
   /**
-   * G5 Review Determination Outcomes (R27–R33).
+   * G5 Review Determination Outcomes (R27â€“R33).
    * Completes the Review (review_determined); does not grant Approval or GPRA.
    */
   recordReviewDetermination(input: {
@@ -437,13 +451,13 @@ export interface Domain3Repository {
     reviewId: ProductionReadinessReviewId,
   ): Promise<ReviewDeterminationRecord | null>;
 
-  /** R34 — Approval consideration eligibility (not Approval, not GPRA). */
+  /** R34 â€” Approval consideration eligibility (not Approval, not GPRA). */
   evaluateApprovalConsiderationEligibility(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ApprovalConsiderationEligibility>;
 
   /**
-   * R38/R41 — record Approval act after Pass. Does not create GPRA.
+   * R38/R41 â€” record Approval act after Pass. Does not create GPRA.
    */
   recordApprovalAct(input: {
     reviewId: ProductionReadinessReviewId;
@@ -452,7 +466,7 @@ export interface Domain3Repository {
   }): Promise<ApprovalActRecord>;
 
   /**
-   * R39–R40 — withhold Approval after Pass on EGWG grounds. Preserves Pass Determination.
+   * R39â€“R40 â€” withhold Approval after Pass on EGWG grounds. Preserves Pass Determination.
    */
   withholdApproval(input: {
     reviewId: ProductionReadinessReviewId;
@@ -463,7 +477,7 @@ export interface Domain3Repository {
   }): Promise<ApprovalWithholdingRecord>;
 
   /**
-   * R42–R43 / R62 / R66 ST-1 — explicit GPRA grant after Approval. Binds RVA under Production Obligation.
+   * R42â€“R43 / R62 / R66 ST-1 â€” explicit GPRA grant after Approval. Binds RVA under Production Obligation.
    * Allows replacement grant when all prior scope grants are Invalidated (G8 R62, no supersession).
    * When a Retention prior exists for the same obligation, requires st1Supersession (G9 ST-1).
    */
@@ -481,7 +495,7 @@ export interface Domain3Repository {
   }): Promise<GpraGrantRecord>;
 
   /**
-   * R54–R59 — separate invalidation act establishing Invalidated posture for a GPRA.
+   * R54â€“R59 â€” separate invalidation act establishing Invalidated posture for a GPRA.
    * Allowed on Superseded historical GPRA (R70); does not remove supersession history.
    */
   invalidateGpra(input: {
@@ -495,7 +509,7 @@ export interface Domain3Repository {
   }): Promise<GpraInvalidationActRecord>;
 
   /**
-   * R64–R71 — separate supersession act between existing Retention predecessor and successor GPRA.
+   * R64â€“R71 â€” separate supersession act between existing Retention predecessor and successor GPRA.
    * ST-2 / ST-3 (and ST-1 when successor already granted).
    */
   supersedeGpra(input: {
@@ -519,7 +533,7 @@ export interface Domain3Repository {
   loadApprovalWithholdingByReview(
     reviewId: ProductionReadinessReviewId,
   ): Promise<ApprovalWithholdingRecord | null>;
-  /** Historical GPRA grant fact — returns invalidated and superseded grants. */
+  /** Historical GPRA grant fact â€” returns invalidated and superseded grants. */
   loadGpraGrant(gpraId: GpraId): Promise<GpraGrantRecord | null>;
   loadGpraGrantByReview(reviewId: ProductionReadinessReviewId): Promise<GpraGrantRecord | null>;
   /**
@@ -554,7 +568,7 @@ export interface Domain3Repository {
     obligationId: ProductionObligationId;
   }): Promise<GpraGrantRecord | null>;
   /**
-   * R71 — Retention GPRA for obligation that is not invalidated and not superseded
+   * R71 â€” Retention GPRA for obligation that is not invalidated and not superseded
    * for the given handoff consumer context.
    */
   loadAuthoritativeGpraByObligationContext(input: {
@@ -562,12 +576,12 @@ export interface Domain3Repository {
     handoffConsumerContextId: string;
   }): Promise<GpraGrantRecord | null>;
 
-  /** R47–R49 — Conditional/Fail disposition eligibility; Pass+withholding is block-without-return. */
+  /** R47â€“R49 â€” Conditional/Fail disposition eligibility; Pass+withholding is block-without-return. */
   evaluateDownstreamDispositionEligibility(
     reviewId: ProductionReadinessReviewId,
   ): Promise<DownstreamDispositionEligibility>;
 
-  /** R46 — record EGDF deficiency (one per Review). */
+  /** R46 â€” record EGDF deficiency (one per Review). */
   recordDownstreamDeficiency(input: {
     reviewId: ProductionReadinessReviewId;
     deficiencyFamily: GovernedDeficiencyFamily;
@@ -577,14 +591,14 @@ export interface Domain3Repository {
     evidenceBasisIds?: readonly ReviewEvidenceId[];
   }): Promise<DownstreamDeficiencyRecord>;
 
-  /** R47 — authorize DSRA rework (mutually exclusive with rework withholding). */
+  /** R47 â€” authorize DSRA rework (mutually exclusive with rework withholding). */
   authorizeRework(input: {
     reviewId: ProductionReadinessReviewId;
     authorityClassId: DownstreamDispositionAuthorityClassId;
     authorizedBy: string;
   }): Promise<ReworkAuthorizationRecord>;
 
-  /** R48 — withhold DSRA rework authorization (mutually exclusive with rework auth). */
+  /** R48 â€” withhold DSRA rework authorization (mutually exclusive with rework auth). */
   withholdReworkAuthorization(input: {
     reviewId: ProductionReadinessReviewId;
     authorityClassId: DownstreamDispositionAuthorityClassId;
@@ -592,7 +606,7 @@ export interface Domain3Repository {
     withheldBy: string;
   }): Promise<ReworkAuthorizationWithholdingRecord>;
 
-  /** R49 — establish TRPM return posture. */
+  /** R49 â€” establish TRPM return posture. */
   establishReturnPosture(input: {
     reviewId: ProductionReadinessReviewId;
     authorityClassId: DownstreamDispositionAuthorityClassId;
@@ -601,7 +615,7 @@ export interface Domain3Repository {
     returnGoverningSourceId?: string;
   }): Promise<ReturnPostureRecord>;
 
-  /** R51 — authorize resubmission eligibility for a subsequent Review (one per prior Review). */
+  /** R51 â€” authorize resubmission eligibility for a subsequent Review (one per prior Review). */
   authorizeResubmissionEligibility(input: {
     reviewId: ProductionReadinessReviewId;
     authorityClassId: DownstreamDispositionAuthorityClassId;
@@ -638,7 +652,7 @@ export interface Domain3Repository {
   ): Promise<ResubmissionEligibilityRecord | null>;
 
   /**
-   * R78 / R81 — append-only Brain advisory recording. Does not create Determination,
+   * R78 / R81 â€” append-only Brain advisory recording. Does not create Determination,
    * Approval, GPRA, posture, or Handoff acts. Separate from grantGpra / invalidateGpra /
    * supersedeGpra / recordDetermination (no automatic Brain hooks).
    */
@@ -678,7 +692,7 @@ export interface Domain3Repository {
   ): Promise<readonly Domain3BrainAdvisoryRecord[]>;
 
   /**
-   * R83–R95 — non-persisting HEIM eligibility assessment + HVEM facts + HSLM condition.
+   * R83â€“R95 â€” non-persisting HEIM eligibility assessment + HVEM facts + HSLM condition.
    * Does not authorize or execute Handoff (STD-015 ownership).
    */
   evaluateGovernedHandoffEligibility(input: {
@@ -697,7 +711,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffEligibilityAssessment>;
 
   /**
-   * R83–R95 — persist preparation only when assessment is export_ready.
+   * R83â€“R95 â€” persist preparation only when assessment is export_ready.
    * Additive immutable HPAM record; not Handoff authorization/execution.
    */
   prepareGovernedHandoff(input: {
@@ -730,7 +744,7 @@ export interface Domain3Repository {
   ): Promise<readonly GovernedHandoffPreparationRecord[]>;
 
   /**
-   * R88 — compare historical preparation snapshot to current authoritative posture.
+   * R88 â€” compare historical preparation snapshot to current authoritative posture.
    * Stale records remain loadable but are not currently usable export_ready without re-preparation.
    */
   evaluateHandoffPreparationCurrency(
@@ -738,7 +752,7 @@ export interface Domain3Repository {
   ): Promise<HandoffPreparationCurrency>;
 
   /**
-   * HOF-G1 R07 — non-persisting entry assessment: whether GPRA + G11 exports may be
+   * HOF-G1 R07 â€” non-persisting entry assessment: whether GPRA + G11 exports may be
    * consumed for Handoff *consideration*. Does not authorize Handoff or declare Posture.
    */
   evaluateGovernedHandoffEntry(input: {
@@ -755,7 +769,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffEntryAssessment>;
 
   /**
-   * HOF-G1 R07 — persist entry ONLY when mayCommence. Additive immutable history.
+   * HOF-G1 R07 â€” persist entry ONLY when mayCommence. Additive immutable history.
    * Does not authorize Handoff, declare Posture, or perform G11 preparation.
    */
   admitGovernedHandoffEntry(input: {
@@ -800,7 +814,7 @@ export interface Domain3Repository {
   ): Promise<HandoffEntryCurrency>;
 
   /**
-   * HOF-G7 R08–R15 — non-persisting evidence/validity consumption assessment.
+   * HOF-G7 R08â€“R15 â€” non-persisting evidence/validity consumption assessment.
    * Does not authorize Handoff, declare Posture, or create HOEM act records.
    */
   evaluateGovernedHandoffEvidenceConsumption(input: {
@@ -830,7 +844,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffEvidenceConsumptionAssessment>;
 
   /**
-   * HOF-G7 R08–R15 — persist consumption ONLY when mayConsume. Additive immutable history.
+   * HOF-G7 R08â€“R15 â€” persist consumption ONLY when mayConsume. Additive immutable history.
    * Does not authorize Handoff, declare Posture, or create HOEM act instances.
    */
   recordGovernedHandoffEvidenceConsumption(input: {
@@ -889,7 +903,7 @@ export interface Domain3Repository {
   ): Promise<HandoffEvidenceConsumptionCurrency>;
 
   /**
-   * HOF-G10 R16–R21 — persist additive preservation audit linking G1 entry + G7 consumption.
+   * HOF-G10 R16â€“R21 â€” persist additive preservation audit linking G1 entry + G7 consumption.
    * May succeed when upstream is already stale (R19). Does NOT restore constitutional force,
    * create HOEM act instances, or authorize erasure/redaction.
    */
@@ -950,7 +964,7 @@ export interface Domain3Repository {
   ): Promise<readonly GovernedHandoffPreservationAuditRecord[]>;
 
   /**
-   * History ≠ current authority — always `"historical_only"`; never restores force.
+   * History â‰  current authority â€” always `"historical_only"`; never restores force.
    */
   evaluateHandoffPreservationAuditAuthorityEffect(
     preservationAuditId: GovernedHandoffPreservationAuditId,
@@ -968,7 +982,7 @@ export interface Domain3Repository {
   ): Promise<HandoffPreservationAuditLinkedCurrency>;
 
   /**
-   * HOF-G2 R25–R32 — non-persisting authorization assessment.
+   * HOF-G2 R25â€“R32 â€” non-persisting authorization assessment.
    * Does not declare posture, complete, suspend, recall, withdraw, or execute Handoff.
    */
   evaluateGovernedHandoffAuthorization(input: {
@@ -1000,7 +1014,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffAuthorizationAssessment>;
 
   /**
-   * HOF-G2 R25–R32 — persist operative HGA authorization act ONLY when mayAuthorize.
+   * HOF-G2 R25â€“R32 â€” persist operative HGA authorization act ONLY when mayAuthorize.
    * Additive immutable history; multiple authorization acts per entry allowed.
    */
   authorizeGovernedHandoff(input: {
@@ -1059,7 +1073,7 @@ export interface Domain3Repository {
   ): Promise<HandoffAuthorizationCurrency>;
 
   /**
-   * HOF-G3 R33–R39 — non-persisting consumer binding assessment.
+   * HOF-G3 R33â€“R39 â€” non-persisting consumer binding assessment.
    * Does not authorize Handoff, declare posture, accept downstream, or execute.
    */
   evaluateGovernedHandoffConsumerBinding(input: {
@@ -1095,7 +1109,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffConsumerBindingAssessment>;
 
   /**
-   * HOF-G3 R33–R39 — persist operative HCCM consumer binding ONLY when mayBind.
+   * HOF-G3 R33â€“R39 â€” persist operative HCCM consumer binding ONLY when mayBind.
    * Additive immutable history; multiple bindings per entry allowed.
    */
   bindHccmConsumerClass(input: {
@@ -1153,7 +1167,7 @@ export interface Domain3Repository {
   ): Promise<HandoffConsumerBindingCurrency>;
 
   /**
-   * HOF-G4 R40–R47 — assess whether a lawful HGA posture declaration may be recorded.
+   * HOF-G4 R40â€“R47 â€” assess whether a lawful HGA posture declaration may be recorded.
    * Requires current HCCM binding + entry conditions. Does not require prior authorization act (R44).
    */
   evaluateGovernedHandoffPostureDeclaration(input: {
@@ -1187,7 +1201,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffPostureDeclarationAssessment>;
 
   /**
-   * HOF-G4 R40–R47 — persist operative HGA posture declaration ONLY when mayDeclare.
+   * HOF-G4 R40â€“R47 â€” persist operative HGA posture declaration ONLY when mayDeclare.
    * Additive immutable history; latest declaration is authoritative for the binding (R46).
    */
   declareHandoffPosture(input: {
@@ -1238,14 +1252,14 @@ export interface Domain3Repository {
   ): Promise<readonly GovernedHandoffPostureDeclarationActRecord[]>;
 
   /**
-   * R46 — latest additive posture declaration for the binding is the authoritative forward chain.
+   * R46 â€” latest additive posture declaration for the binding is the authoritative forward chain.
    */
   getAuthoritativeHandoffPostureDeclarationForBinding(
     bindingId: GovernedHandoffConsumerBindingId,
   ): Promise<GovernedHandoffPostureDeclarationActRecord | null>;
 
   /**
-   * Optional: posture declaration currency — current only when entry+binding current
+   * Optional: posture declaration currency â€” current only when entry+binding current
    * and the act is the authoritative forward declaration for its binding.
    */
   evaluateHandoffPostureDeclarationCurrency(
@@ -1253,7 +1267,7 @@ export interface Domain3Repository {
   ): Promise<HandoffPostureDeclarationCurrency>;
 
   /**
-   * HOF-G5 R48–R57 — evaluate baseline act-layer lifecycle for one HCCM binding.
+   * HOF-G5 R48â€“R57 â€” evaluate baseline act-layer lifecycle for one HCCM binding.
    * Does not invent suspended/withdrawn/recalled/expired from GPRA invalidation.
    */
   evaluateHandoffActLayerLifecycle(
@@ -1261,7 +1275,7 @@ export interface Domain3Repository {
   ): Promise<HandoffActLayerLifecycleEvaluation>;
 
   /**
-   * HOF-G5 R51/R56 — assess whether a lawful HGA completion act may be recorded.
+   * HOF-G5 R51/R56 â€” assess whether a lawful HGA completion act may be recorded.
    * Requires current authoritative posture; does not require prior authorization.
    */
   evaluateGovernedHandoffCompletion(input: {
@@ -1298,7 +1312,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffCompletionAssessment>;
 
   /**
-   * HOF-G5 R51/R56 — persist operative HGA completion ONLY when mayComplete.
+   * HOF-G5 R51/R56 â€” persist operative HGA completion ONLY when mayComplete.
    * Additive immutable history; latest completion is authoritative for the binding.
    * Does not mutate posture or authorization records.
    */
@@ -1361,7 +1375,7 @@ export interface Domain3Repository {
   ): Promise<HandoffCompletionCurrency>;
 
   /**
-   * HOF-G6-U2 R84–R97 — assess whether a lawful HGA suspension act may be recorded.
+   * HOF-G6-U2 R84â€“R97 â€” assess whether a lawful HGA suspension act may be recorded.
    * Requires current matching authorization + authoritative posture. Does not require export_ready.
    */
   evaluateGovernedHandoffSuspension(input: {
@@ -1388,7 +1402,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffSuspensionAssessment>;
 
   /**
-   * HOF-G6-U2 R84–R97 — persist operative HGA suspension ONLY when maySuspend.
+   * HOF-G6-U2 R84â€“R97 â€” persist operative HGA suspension ONLY when maySuspend.
    * Additive immutable history; latest suspension is authoritative for the binding.
    * Does not mutate posture, authorization, or completion records.
    */
@@ -1538,8 +1552,97 @@ export interface Domain3Repository {
     withdrawalActId: GovernedHandoffWithdrawalActId,
   ): Promise<HandoffWithdrawalCurrency>;
 
+  evaluateGovernedHandoffRecall(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    satisfiedHrtcmTriggers?: unknown;
+    hrtcmTriggerEvidenceNotes?: unknown;
+    hrwmEligibilityLossSatisfied?: unknown;
+    postureChainGovernanceCessationSatisfied?: unknown;
+    authorityClassId?: unknown;
+    performerClass?: unknown;
+    recalledBy?: string;
+    sourceAttribution?: unknown;
+    advisoryEvidenceAlone?: unknown;
+    implementationInferenceAlone?: unknown;
+    downstreamOperationalEventAlone?: unknown;
+    rtcCatalogAlone?: unknown;
+    hrtcmRtcAlone?: unknown;
+    gpraInvalidatedAlone?: unknown;
+    gpraSupersededAlone?: unknown;
+    g11BlockedAlone?: unknown;
+    hrwmLossAlone?: unknown;
+    withdrawalActId?: unknown;
+    recallActId?: unknown;
+    resumeHandoff?: unknown;
+    restoreHandoff?: unknown;
+    reenterHandoff?: unknown;
+    brainRecallHandoff?: unknown;
+  }): Promise<GovernedHandoffRecallAssessment>;
+
+  recallGovernedHandoff(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    authorityClassId: unknown;
+    recalledBy: string;
+    satisfiedHrtcmTriggers?: unknown;
+    hrtcmTriggerEvidenceNotes?: unknown;
+    hrwmEligibilityLossSatisfied?: unknown;
+    postureChainGovernanceCessationSatisfied?: unknown;
+    recalledAt?: string;
+    sourceAttribution?: unknown;
+    performerClass?: unknown;
+    advisoryEvidenceAlone?: unknown;
+    rtcCatalogAlone?: unknown;
+    hrtcmRtcAlone?: unknown;
+    gpraInvalidatedAlone?: unknown;
+    gpraSupersededAlone?: unknown;
+    g11BlockedAlone?: unknown;
+    hrwmLossAlone?: unknown;
+    withdrawalActId?: unknown;
+    expiryActId?: unknown;
+    resumeHandoff?: unknown;
+    restoreHandoff?: unknown;
+    reenterHandoff?: unknown;
+    withdrawHandoff?: unknown;
+    expireHandoff?: unknown;
+    executesHandoff?: unknown;
+    handoffExecuted?: unknown;
+    performHandoff?: unknown;
+    manufacturingExecutionId?: unknown;
+    fulfillmentExecutionId?: unknown;
+    executionQueueId?: unknown;
+    constitutionalQueueId?: unknown;
+    brainRecallHandoff?: unknown;
+    brainHandoffRecall?: unknown;
+    implicitRecall?: unknown;
+    rejectHandoff?: unknown;
+    hercmReentryId?: unknown;
+    resumptionActId?: unknown;
+    restorationActId?: unknown;
+  }): Promise<GovernedHandoffRecallActRecord>;
+
+  loadGovernedHandoffRecallAct(
+    recallActId: GovernedHandoffRecallActId,
+  ): Promise<GovernedHandoffRecallActRecord | null>;
+  listGovernedHandoffRecallActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffRecallActRecord[]>;
+  listGovernedHandoffRecallActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffRecallActRecord[]>;
+  listGovernedHandoffRecallActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffRecallActRecord[]>;
+  getAuthoritativeHandoffRecallForBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<GovernedHandoffRecallActRecord | null>;
+  evaluateHandoffRecallCurrency(
+    recallActId: GovernedHandoffRecallActId,
+  ): Promise<HandoffRecallCurrency>;
+
   /**
-   * HOF-G8 R58–R65 — assess whether a lawful downstream exit-boundary attribution may be recorded.
+   * HOF-G8 R58â€“R65 â€” assess whether a lawful downstream exit-boundary attribution may be recorded.
    * Requires current completion + posture + binding; does not require prior authorization.
    * Does NOT implement exit-completeness.
    */
@@ -1566,7 +1669,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffDownstreamExitBoundaryAssessment>;
 
   /**
-   * HOF-G8 R58–R65 — persist exit-boundary attribution ONLY when mayAttribute.
+   * HOF-G8 R58â€“R65 â€” persist exit-boundary attribution ONLY when mayAttribute.
    * Additive immutable history; latest tip is authoritative for the binding.
    * Does not mutate auth/binding/posture/completion/GPRA.
    */
@@ -1615,7 +1718,7 @@ export interface Domain3Repository {
   }): Promise<GovernedHandoffDownstreamExitBoundaryAttributionRecord>;
 
   /**
-   * HOF-G8 R60/R65 — Completed enables consideration; linkage establishes attributed exit.
+   * HOF-G8 R60/R65 â€” Completed enables consideration; linkage establishes attributed exit.
    */
   evaluateDownstreamExitConsideration(
     bindingId: GovernedHandoffConsumerBindingId,
@@ -1651,19 +1754,19 @@ export interface Domain3Repository {
   ): Promise<HandoffDownstreamExitBoundaryCurrency>;
 
   /**
-   * HOF-G9 R22–R24 — standing authority-boundary assessment (framework only).
+   * HOF-G9 R22â€“R24 â€” standing authority-boundary assessment (framework only).
    * Does not authorize Handoff or create operative HGA acts (R25+ deferred).
    */
   evaluateHandoffAuthorityBoundary(): Promise<HandoffAuthorityBoundaryAssessment>;
 
   /**
-   * HOF-G9 R66–R69 — frozen handoff authority catalog integrity assessment (read-only).
+   * HOF-G9 R66â€“R69 â€” frozen handoff authority catalog integrity assessment (read-only).
    * Catalog membership does not authorize, bind, declare, complete, or exit.
    */
   assessHandoffAuthorityCatalogIntegration(): Promise<HandoffAuthorityCatalogIntegrationAssessment>;
 
   /**
-   * HOF-G6-U1 R70–R83 — shared lifecycle foundation integrity assessment.
+   * HOF-G6-U1 R70â€“R83 â€” shared lifecycle foundation integrity assessment.
    * Suspension minting is HOF-G6-U2; withdrawal/recall remain U3/U4 deferred.
    */
   assessHofG6U1SharedLifecycleFoundation(): Promise<HofG6U1SharedLifecycleFoundationAssessment>;
@@ -1728,7 +1831,7 @@ export function createDomain3RepositoryWithStorage(
 
   /**
    * Load persisted Review, Determination, evidence, and activity for G6 rehydration.
-   * Rejects missing or contradictory Review↔Determination linkage before trust.
+   * Rejects missing or contradictory Reviewâ†”Determination linkage before trust.
    */
   async function loadG6AuthorityRehydrationContext(reviewId: ProductionReadinessReviewId): Promise<{
     review: ProductionReadinessReview;
@@ -1798,7 +1901,7 @@ export function createDomain3RepositoryWithStorage(
         ["FI-DSN-STD-014-R41", "FI-DSN-STD-014-R42"],
       );
     }
-    // Structural Approval validation only here — joint Approval↔Review coherence runs inside rehydrateGpraGrant.
+    // Structural Approval validation only here â€” joint Approvalâ†”Review coherence runs inside rehydrateGpraGrant.
     return rehydrateGpraGrant(raw, { ...context, approval: approvalRaw });
   }
 
@@ -1978,7 +2081,7 @@ export function createDomain3RepositoryWithStorage(
       const supersession = await storage.getGpraSupersessionActByPredecessor(grant.gpraId);
       if (supersession && supersession.handoffConsumerContextId === contextId) continue;
       // Fail-closed: any supersession of this predecessor terminates forward authority
-      // for unspecified contexts when evaluating authority under a specific context —
+      // for unspecified contexts when evaluating authority under a specific context â€”
       // only skip when the act's context matches the queried context (R71).
       if (supersession && supersession.handoffConsumerContextId !== contextId) {
         // Predecessor superseded in a different context may still be Retention for this context.
@@ -2978,6 +3081,49 @@ export function createDomain3RepositoryWithStorage(
     });
   }
 
+  async function rehydrateTrustedHandoffRecall(
+    raw: GovernedHandoffRecallActRecord,
+  ): Promise<GovernedHandoffRecallActRecord> {
+    const entryRaw = await storage.getGovernedHandoffEntry(raw.entryId);
+    const bindingRaw = await storage.getGovernedHandoffConsumerBinding(raw.bindingId);
+    const authorizationRaw = await storage.getGovernedHandoffAuthorizationAct(
+      raw.authorizationActId,
+    );
+    const postureRaw = raw.postureDeclarationActId
+      ? await storage.getGovernedHandoffPostureDeclarationAct(raw.postureDeclarationActId)
+      : null;
+    const preparationRaw = await storage.getGovernedHandoffPreparation(raw.preparationId);
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+    if (
+      !entryRaw ||
+      !bindingRaw ||
+      !authorizationRaw ||
+      !postureRaw ||
+      !preparationRaw ||
+      !gpraRaw ||
+      !reviewRaw ||
+      !determinationRaw
+    ) {
+      throw new OrchestraConstitutionalError(
+        "Handoff recall points to missing persisted lineage",
+        "invalid_handoff_recall",
+        ["FI-DSN-STD-015-R113", "FI-DSN-STD-015-R116"],
+      );
+    }
+    return rehydrateGovernedHandoffRecall(raw, {
+      entry: await rehydrateTrustedHandoffEntry(entryRaw),
+      binding: await rehydrateTrustedHandoffConsumerBinding(bindingRaw),
+      authorization: await rehydrateTrustedHandoffAuthorization(authorizationRaw),
+      posture: await rehydrateTrustedHandoffPostureDeclaration(postureRaw),
+      preparation: await rehydrateTrustedHandoffPreparation(preparationRaw),
+      gpra: await rehydrateTrustedGpraGrant(gpraRaw),
+      review: rehydrateProductionReadinessReview(reviewRaw),
+      determination: rehydrateReviewDetermination(determinationRaw),
+    });
+  }
+
   async function rehydrateTrustedHandoffDownstreamExitBoundary(
     raw: GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   ): Promise<GovernedHandoffDownstreamExitBoundaryAttributionRecord> {
@@ -3655,6 +3801,23 @@ export function createDomain3RepositoryWithStorage(
         lineageMatchesAuthoritativeGpra,
       }) === "current";
 
+    const recallListed = await storage.listGovernedHandoffRecallActsByBinding(binding.bindingId);
+    const recalls: GovernedHandoffRecallActRecord[] = [];
+    for (const item of recallListed) {
+      recalls.push(await rehydrateTrustedHandoffRecall(item));
+    }
+    const recallTip = selectAuthoritativeGovernedHandoffRecall(recalls);
+    const recallTipIsCurrent =
+      !!recallTip &&
+      evaluateHandoffRecallCurrencyFromFacts({
+        recall: recallTip,
+        currentEntryCurrency: bundle.assessment.entryCurrency ?? "stale",
+        currentBindingCurrency: bundle.assessment.bindingCurrency ?? "stale",
+        authoritativeRecallActId: recallTip.recallActId,
+        gpraValidityPosture: bundle.assessment.gpraValidityPosture,
+        lineageMatchesAuthoritativeGpra,
+      }) === "current";
+
     return {
       entry,
       binding,
@@ -3684,10 +3847,218 @@ export function createDomain3RepositoryWithStorage(
         gpraSupersededAlone: input.gpraSupersededAlone,
         g11BlockedAlone: input.g11BlockedAlone,
         hrwmLossAlone: input.hrwmLossAlone,
+        // R100/R114 â€” attributable cessation tip blocks further withdrawal even when
+        // tip currency later becomes stale (e.g. GPRA Invalidated after withdrawal/recall).
         purportedWithdrawalRecordPresent:
-          tipIsCurrent || input.purportedWithdrawalRecordPresent === true,
-        purportedRecallRecordPresent: input.purportedRecallRecordPresent,
-        currentWithdrawalAlreadyCeasedReliance: tipIsCurrent,
+          !!tip || tipIsCurrent || input.purportedWithdrawalRecordPresent === true,
+        purportedRecallRecordPresent:
+          !!recallTip ||
+          recallTipIsCurrent ||
+          input.purportedRecallRecordPresent === true,
+        currentWithdrawalAlreadyCeasedReliance:
+          !!tip || tipIsCurrent || !!recallTip || recallTipIsCurrent,
+        priorRecordsPreservedReconstructable: input.priorRecordsPreservedReconstructable,
+      }),
+    };
+  }
+
+  async function assessHandoffRecallInternal(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    satisfiedHrtcmTriggers?: unknown;
+    hrtcmTriggerEvidenceNotes?: unknown;
+    hrwmEligibilityLossSatisfied?: unknown;
+    postureChainGovernanceCessationSatisfied?: unknown;
+    authorityClassId?: unknown;
+    performerClass?: unknown;
+    advisoryEvidenceAlone?: unknown;
+    implementationInferenceAlone?: unknown;
+    downstreamOperationalEventAlone?: unknown;
+    rtcCatalogAlone?: unknown;
+    hrtcmRtcAlone?: unknown;
+    gpraInvalidatedAlone?: unknown;
+    gpraSupersededAlone?: unknown;
+    g11BlockedAlone?: unknown;
+    hrwmLossAlone?: unknown;
+    purportedWithdrawalRecordPresent?: unknown;
+    purportedRecallRecordPresent?: unknown;
+    priorRecordsPreservedReconstructable?: unknown;
+  }): Promise<{
+    assessment: GovernedHandoffRecallAssessment;
+    entry: GovernedHandoffEntryRecord | null;
+    binding: GovernedHandoffConsumerBindingRecord | null;
+    authorization: GovernedHandoffAuthorizationActRecord | null;
+    posture: GovernedHandoffPostureDeclarationActRecord | null;
+  }> {
+    const bundle = await assessHandoffSuspensionInternal(input);
+    const { entry, binding, authorization, posture } = bundle;
+    if (!entry || !binding) {
+      return {
+        entry,
+        binding,
+        authorization,
+        posture,
+        assessment: assessGovernedHandoffRecall({
+          entry,
+          entryCurrency: bundle.assessment.entryCurrency,
+          binding,
+          bindingCurrency: bundle.assessment.bindingCurrency,
+          authorization,
+          authorizationCurrency: bundle.assessment.authorizationCurrency,
+          posture,
+          postureCurrency: bundle.assessment.postureDeclarationCurrency,
+          gpraValidityPosture: bundle.assessment.gpraValidityPosture,
+          eligibilityLayerCondition: bundle.assessment.eligibilityLayerCondition,
+          lineageMatchesAuthoritativeGpra: false,
+          satisfiedHrtcmTriggers: input.satisfiedHrtcmTriggers,
+          hrtcmTriggerEvidenceNotes: input.hrtcmTriggerEvidenceNotes,
+          hrwmEligibilityLossSatisfied: input.hrwmEligibilityLossSatisfied,
+          postureChainGovernanceCessationSatisfied:
+            input.postureChainGovernanceCessationSatisfied,
+          authorityClassId: input.authorityClassId,
+          performerClass: input.performerClass,
+          advisoryEvidenceAlone: input.advisoryEvidenceAlone,
+          rtcCatalogAlone: input.rtcCatalogAlone,
+          hrtcmRtcAlone: input.hrtcmRtcAlone,
+          gpraInvalidatedAlone: input.gpraInvalidatedAlone,
+          gpraSupersededAlone: input.gpraSupersededAlone,
+          g11BlockedAlone: input.g11BlockedAlone,
+          hrwmLossAlone: input.hrwmLossAlone,
+        }),
+      };
+    }
+
+    const authoritativeGpra = await findAuthoritativeGpraByObligationContext(
+      entry.obligationId,
+      entry.handoffConsumerContextId,
+    );
+    const lineageMatchesAuthoritativeGpra = authoritativeGpra
+      ? handoffEntryLineageMatchesGpra(entry, authoritativeGpra)
+      : false;
+
+    let gpraValidityPostureForRecall = bundle.assessment.gpraValidityPosture;
+    let lineageMatchesForRecall = lineageMatchesAuthoritativeGpra;
+    const recallUsesHistoricalAttribution =
+      Array.isArray(input.satisfiedHrtcmTriggers) &&
+      (input.satisfiedHrtcmTriggers.includes("RTC-01") ||
+        input.satisfiedHrtcmTriggers.includes("RTC-02"));
+    if (recallUsesHistoricalAttribution) {
+      const entryBoundValidity = await evaluateGpraValidityForContext(
+        entry.gpraId,
+        entry.handoffConsumerContextId,
+      );
+      gpraValidityPostureForRecall = entryBoundValidity.posture;
+      const entryBoundGpraRaw = await storage.getGpraGrant(entry.gpraId);
+      if (entryBoundGpraRaw) {
+        const entryBoundGpra = await rehydrateTrustedGpraGrant(entryBoundGpraRaw);
+        lineageMatchesForRecall = handoffEntryLineageMatchesGpra(entry, entryBoundGpra);
+      }
+    }
+
+    const withdrawalListed = await storage.listGovernedHandoffWithdrawalActsByBinding(
+      binding.bindingId,
+    );
+    const withdrawals: GovernedHandoffWithdrawalActRecord[] = [];
+    for (const item of withdrawalListed) {
+      withdrawals.push(await rehydrateTrustedHandoffWithdrawal(item));
+    }
+    const withdrawalTip = selectAuthoritativeGovernedHandoffWithdrawal(withdrawals);
+    const withdrawalTipIsCurrent =
+      !!withdrawalTip &&
+      evaluateHandoffWithdrawalCurrencyFromFacts({
+        withdrawal: withdrawalTip,
+        currentEntryCurrency: bundle.assessment.entryCurrency ?? "stale",
+        currentBindingCurrency: bundle.assessment.bindingCurrency ?? "stale",
+        authoritativeWithdrawalActId: withdrawalTip.withdrawalActId,
+        gpraValidityPosture: gpraValidityPostureForRecall,
+        lineageMatchesAuthoritativeGpra: lineageMatchesForRecall,
+      }) === "current";
+
+    const recallListed = await storage.listGovernedHandoffRecallActsByBinding(binding.bindingId);
+    const recalls: GovernedHandoffRecallActRecord[] = [];
+    for (const item of recallListed) {
+      recalls.push(await rehydrateTrustedHandoffRecall(item));
+    }
+    const recallTip = selectAuthoritativeGovernedHandoffRecall(recalls);
+    const recallTipIsCurrent =
+      !!recallTip &&
+      evaluateHandoffRecallCurrencyFromFacts({
+        recall: recallTip,
+        currentEntryCurrency: bundle.assessment.entryCurrency ?? "stale",
+        currentBindingCurrency: bundle.assessment.bindingCurrency ?? "stale",
+        authoritativeRecallActId: recallTip.recallActId,
+        gpraValidityPosture: gpraValidityPostureForRecall,
+        lineageMatchesAuthoritativeGpra: lineageMatchesForRecall,
+      }) === "current";
+
+    const preLifecycle = evaluateHandoffActLayerLifecycleFromFacts({
+      binding,
+      entry,
+      entryCurrency: bundle.assessment.entryCurrency,
+      bindingCurrency: bundle.assessment.bindingCurrency,
+      gpraValidityPosture: gpraValidityPostureForRecall,
+      eligibilityLayerCondition: bundle.assessment.eligibilityLayerCondition,
+      lineageMatchesAuthoritativeGpra: lineageMatchesForRecall,
+      authoritativeCompletion: null,
+      completionIsCurrent: false,
+      matchingAuthorization: authorization,
+      authorizationCurrency: bundle.assessment.authorizationCurrency,
+      authoritativePosture: posture,
+      authoritativeWithdrawal: withdrawalTip,
+      withdrawalIsCurrent: withdrawalTipIsCurrent,
+      authoritativeRecall: recallTip,
+      recallIsCurrent: recallTipIsCurrent,
+    });
+
+    return {
+      entry,
+      binding,
+      authorization,
+      posture,
+      assessment: assessGovernedHandoffRecall({
+        entry,
+        entryCurrency: bundle.assessment.entryCurrency,
+        binding,
+        bindingCurrency: bundle.assessment.bindingCurrency,
+        authorization,
+        authorizationCurrency: bundle.assessment.authorizationCurrency,
+        posture,
+        postureCurrency: bundle.assessment.postureDeclarationCurrency,
+        gpraValidityPosture: gpraValidityPostureForRecall,
+        eligibilityLayerCondition: bundle.assessment.eligibilityLayerCondition,
+        lineageMatchesAuthoritativeGpra: lineageMatchesForRecall,
+        satisfiedHrtcmTriggers: input.satisfiedHrtcmTriggers,
+        hrtcmTriggerEvidenceNotes: input.hrtcmTriggerEvidenceNotes,
+        hrwmEligibilityLossSatisfied: input.hrwmEligibilityLossSatisfied,
+        postureChainGovernanceCessationSatisfied:
+          input.postureChainGovernanceCessationSatisfied,
+        authorityClassId: input.authorityClassId,
+        performerClass: input.performerClass,
+        advisoryEvidenceAlone: input.advisoryEvidenceAlone,
+        implementationInferenceAlone: input.implementationInferenceAlone,
+        downstreamOperationalEventAlone: input.downstreamOperationalEventAlone,
+        rtcCatalogAlone: input.rtcCatalogAlone,
+        hrtcmRtcAlone: input.hrtcmRtcAlone,
+        gpraInvalidatedAlone: input.gpraInvalidatedAlone,
+        gpraSupersededAlone: input.gpraSupersededAlone,
+        g11BlockedAlone: input.g11BlockedAlone,
+        hrwmLossAlone: input.hrwmLossAlone,
+        // R114 â€” attributable withdrawal/recall tip blocks further recall even when
+        // tip currency later becomes stale (e.g. GPRA Invalidated after withdrawal).
+        purportedWithdrawalRecordPresent:
+          !!withdrawalTip ||
+          withdrawalTipIsCurrent ||
+          input.purportedWithdrawalRecordPresent === true,
+        purportedRecallRecordPresent:
+          !!recallTip ||
+          recallTipIsCurrent ||
+          input.purportedRecallRecordPresent === true,
+        currentRecallAlreadyCeasedReliance:
+          !!withdrawalTip ||
+          withdrawalTipIsCurrent ||
+          !!recallTip ||
+          recallTipIsCurrent,
+        lifecycleProjectedState: preLifecycle.currentState,
         priorRecordsPreservedReconstructable: input.priorRecordsPreservedReconstructable,
       }),
     };
@@ -4164,7 +4535,7 @@ export function createDomain3RepositoryWithStorage(
   }
 
   /**
-   * G6 trust boundary: jointly resolve Review ↔ Determination and re-verify evidence basis.
+   * G6 trust boundary: jointly resolve Review â†” Determination and re-verify evidence basis.
    */
   async function requireLinkedPassDeterminationForApproval(
     reviewId: ProductionReadinessReviewId,
@@ -4891,7 +5262,7 @@ export function createDomain3RepositoryWithStorage(
           );
         }
       } else if (input.st1Supersession) {
-        // Caller offered ST-1 but no Retention prior — may be Invalidated-only path misuse
+        // Caller offered ST-1 but no Retention prior â€” may be Invalidated-only path misuse
         const nominated = await storage.getGpraGrant(input.st1Supersession.predecessorGpraId);
         if (nominated) {
           const nominatedInvalidation = await storage.getGpraInvalidationActByGpra(
@@ -6909,6 +7280,41 @@ export function createDomain3RepositoryWithStorage(
           lineageMatchesAuthoritativeGpra,
         }) === "current";
 
+      const recalls = await this.listGovernedHandoffRecallActsByBinding(bindingId);
+      let recallGpraValidityPosture = gpraValidityPosture;
+      let recallLineageMatchesAuthoritativeGpra = lineageMatchesAuthoritativeGpra;
+      const authoritativeRecall = selectAuthoritativeGovernedHandoffRecall(recalls);
+      if (authoritativeRecall) {
+        const recallUsesHistoricalAttribution =
+          authoritativeRecall.satisfiedHrtcmTriggers.includes("RTC-01") ||
+          authoritativeRecall.satisfiedHrtcmTriggers.includes("RTC-02");
+        if (recallUsesHistoricalAttribution) {
+          const entryBoundValidity = await evaluateGpraValidityForContext(
+            entry.gpraId,
+            entry.handoffConsumerContextId,
+          );
+          recallGpraValidityPosture = entryBoundValidity.posture;
+          const entryBoundGpraRaw = await storage.getGpraGrant(entry.gpraId);
+          if (entryBoundGpraRaw) {
+            const entryBoundGpra = await rehydrateTrustedGpraGrant(entryBoundGpraRaw);
+            recallLineageMatchesAuthoritativeGpra = handoffEntryLineageMatchesGpra(
+              entry,
+              entryBoundGpra,
+            );
+          }
+        }
+      }
+      const recallIsCurrent =
+        !!authoritativeRecall &&
+        evaluateHandoffRecallCurrencyFromFacts({
+          recall: authoritativeRecall,
+          currentEntryCurrency: entryCurrency,
+          currentBindingCurrency: bindingCurrency,
+          authoritativeRecallActId: authoritativeRecall.recallActId,
+          gpraValidityPosture: recallGpraValidityPosture,
+          lineageMatchesAuthoritativeGpra: recallLineageMatchesAuthoritativeGpra,
+        }) === "current";
+
       return evaluateHandoffActLayerLifecycleFromFacts({
         binding,
         entry,
@@ -6926,6 +7332,8 @@ export function createDomain3RepositoryWithStorage(
         suspensionIsCurrent,
         authoritativeWithdrawal,
         withdrawalIsCurrent,
+        authoritativeRecall,
+        recallIsCurrent,
       });
     },
 
@@ -7562,6 +7970,215 @@ export function createDomain3RepositoryWithStorage(
         currentEntryCurrency: entryCurrency,
         currentBindingCurrency: bindingCurrency,
         authoritativeWithdrawalActId: authoritative?.withdrawalActId ?? null,
+        gpraValidityPosture,
+        lineageMatchesAuthoritativeGpra,
+      });
+    },
+
+    async evaluateGovernedHandoffRecall(input) {
+      assertNoHandoffRecallWithdrawalOrReentryClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      if (
+        input.recalledBy != null ||
+        input.authorityClassId != null ||
+        input.sourceAttribution != null
+      ) {
+        assertGovernedHandoffRecallActor({
+          recalledBy: input.recalledBy ?? "recall-evaluator",
+          authorityClassId: input.authorityClassId ?? "handoff_governance_authority",
+          sourceAttribution: input.sourceAttribution,
+          performerClass: input.performerClass,
+        });
+      }
+      const { assessment } = await assessHandoffRecallInternal({
+        ...input,
+        purportedWithdrawalRecordPresent: Boolean(input.withdrawalActId),
+        purportedRecallRecordPresent: Boolean(input.recallActId),
+      });
+      return assessment;
+    },
+
+    async recallGovernedHandoff(input) {
+      assertNoHandoffRecallWithdrawalOrReentryClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      const recalledBy = assertGovernedHandoffRecallActor(input);
+      const entryRaw = await storage.getGovernedHandoffEntry(input.entryId);
+      const bindingRaw = await storage.getGovernedHandoffConsumerBinding(input.bindingId);
+      if (!entryRaw || !bindingRaw) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff recall rejected: entry or binding not found",
+          "invalid_handoff_recall",
+          ["FI-DSN-STD-015-R113", "FI-DSN-STD-015-R116"],
+        );
+      }
+      const entry = await rehydrateTrustedHandoffEntry(entryRaw);
+      const binding = await rehydrateTrustedHandoffConsumerBinding(bindingRaw);
+      if (binding.entryId !== entry.entryId) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff recall rejected: binding does not belong to entry",
+          "invalid_handoff_recall",
+          ["FI-DSN-STD-015-R116"],
+        );
+      }
+      const { assessment, authorization, posture } = await assessHandoffRecallInternal({
+        entryId: input.entryId,
+        bindingId: input.bindingId,
+        satisfiedHrtcmTriggers: input.satisfiedHrtcmTriggers,
+        hrtcmTriggerEvidenceNotes: input.hrtcmTriggerEvidenceNotes,
+        hrwmEligibilityLossSatisfied: input.hrwmEligibilityLossSatisfied,
+        postureChainGovernanceCessationSatisfied:
+          input.postureChainGovernanceCessationSatisfied,
+        authorityClassId: input.authorityClassId,
+        performerClass: input.performerClass,
+        advisoryEvidenceAlone: input.advisoryEvidenceAlone,
+        rtcCatalogAlone: input.rtcCatalogAlone,
+        hrtcmRtcAlone: input.hrtcmRtcAlone,
+        gpraInvalidatedAlone: input.gpraInvalidatedAlone,
+        gpraSupersededAlone: input.gpraSupersededAlone,
+        g11BlockedAlone: input.g11BlockedAlone,
+        hrwmLossAlone: input.hrwmLossAlone,
+        purportedWithdrawalRecordPresent: Boolean(input.withdrawalActId),
+      });
+      if (!assessment.mayRecall || !authorization || !posture) {
+        throw new OrchestraConstitutionalError(
+          `Governed Handoff recall rejected: ${assessment.denialReasons.join("; ") || "mayRecall is false"}`,
+          "invalid_handoff_recall",
+          ["FI-DSN-STD-015-R112", "FI-DSN-STD-015-R114"],
+        );
+      }
+      const act = createGovernedHandoffRecallActRecord({
+        entry,
+        binding,
+        authorization,
+        posture,
+        authorityClassId: input.authorityClassId,
+        recalledBy,
+        recalledAt: input.recalledAt,
+        satisfiedHrtcmTriggers: input.satisfiedHrtcmTriggers,
+        hrtcmTriggerEvidenceNotes: input.hrtcmTriggerEvidenceNotes,
+        sourceAttribution: input.sourceAttribution,
+        performerClass: input.performerClass,
+        withdrawalActId: input.withdrawalActId,
+        expiryActId: input.expiryActId,
+        resumeHandoff: input.resumeHandoff,
+        restoreHandoff: input.restoreHandoff,
+        reenterHandoff: input.reenterHandoff,
+        withdrawHandoff: input.withdrawHandoff,
+        expireHandoff: input.expireHandoff,
+        executesHandoff: input.executesHandoff,
+        handoffExecuted: input.handoffExecuted,
+        performHandoff: input.performHandoff,
+        manufacturingExecutionId: input.manufacturingExecutionId,
+        fulfillmentExecutionId: input.fulfillmentExecutionId,
+        executionQueueId: input.executionQueueId,
+        constitutionalQueueId: input.constitutionalQueueId,
+        brainRecallHandoff: input.brainRecallHandoff,
+        brainHandoffRecall: input.brainHandoffRecall,
+        implicitRecall: input.implicitRecall,
+        rtcCatalogAlone: input.rtcCatalogAlone,
+        hrtcmRtcAlone: input.hrtcmRtcAlone,
+        rejectHandoff: input.rejectHandoff,
+        hercmReentryId: input.hercmReentryId,
+        resumptionActId: input.resumptionActId,
+        restorationActId: input.restorationActId,
+      });
+      validatePersistedGovernedHandoffRecall(act);
+      try {
+        await storage.putGovernedHandoffRecallAct(act);
+      } catch (error) {
+        throw new OrchestraConstitutionalError(
+          error instanceof Error ? error.message : "Failed to persist Governed Handoff recall act",
+          "invalid_handoff_recall",
+          ["FI-DSN-STD-015-R112"],
+        );
+      }
+      const loaded = await storage.getGovernedHandoffRecallAct(act.recallActId);
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Failed to persist Governed Handoff recall act",
+          "invalid_domain3_persistence_state",
+          ["FI-DSN-STD-015-R112"],
+        );
+      }
+      return rehydrateTrustedHandoffRecall(loaded);
+    },
+
+    async loadGovernedHandoffRecallAct(recallActId) {
+      const loaded = await storage.getGovernedHandoffRecallAct(recallActId);
+      return loaded ? rehydrateTrustedHandoffRecall(loaded) : null;
+    },
+
+    async listGovernedHandoffRecallActsByBinding(bindingId) {
+      const listed = await storage.listGovernedHandoffRecallActsByBinding(bindingId);
+      const out: GovernedHandoffRecallActRecord[] = [];
+      for (const item of listed) out.push(await rehydrateTrustedHandoffRecall(item));
+      return out.sort((a, b) => a.recalledAt.localeCompare(b.recalledAt));
+    },
+
+    async listGovernedHandoffRecallActsByEntry(entryId) {
+      const listed = await storage.listGovernedHandoffRecallActsByEntry(entryId);
+      const out: GovernedHandoffRecallActRecord[] = [];
+      for (const item of listed) out.push(await rehydrateTrustedHandoffRecall(item));
+      return out.sort((a, b) => a.recalledAt.localeCompare(b.recalledAt));
+    },
+
+    async listGovernedHandoffRecallActsByGpra(gpraId) {
+      const listed = await storage.listGovernedHandoffRecallActsByGpra(gpraId);
+      const out: GovernedHandoffRecallActRecord[] = [];
+      for (const item of listed) out.push(await rehydrateTrustedHandoffRecall(item));
+      return out.sort((a, b) => a.recalledAt.localeCompare(b.recalledAt));
+    },
+
+    async getAuthoritativeHandoffRecallForBinding(bindingId) {
+      const listed = await this.listGovernedHandoffRecallActsByBinding(bindingId);
+      return selectAuthoritativeGovernedHandoffRecall(listed);
+    },
+
+    async evaluateHandoffRecallCurrency(recallActId) {
+      const recall = await this.loadGovernedHandoffRecallAct(recallActId);
+      if (!recall) {
+        throw new OrchestraConstitutionalError(
+          "Handoff recall act not found for currency evaluation",
+          "invalid_handoff_recall",
+          ["FI-DSN-STD-015-R112"],
+        );
+      }
+      let entryCurrency: HandoffEntryCurrency = "stale";
+      let bindingCurrency: HandoffConsumerBindingCurrency = "stale";
+      try {
+        entryCurrency = await this.evaluateHandoffEntryCurrency(recall.entryId);
+        bindingCurrency = await this.evaluateHandoffConsumerBindingCurrency(recall.bindingId);
+      } catch {
+        // Fail closed.
+      }
+      const authoritative = await this.getAuthoritativeHandoffRecallForBinding(
+        recall.bindingId,
+      );
+      const entryRaw = await storage.getGovernedHandoffEntry(recall.entryId);
+      const entry = entryRaw ? await rehydrateTrustedHandoffEntry(entryRaw) : null;
+      let gpraValidityPosture: GpraValidityPosture | null = null;
+      let lineageMatchesAuthoritativeGpra = false;
+      if (entry) {
+        const gpra = await findAuthoritativeGpraByObligationContext(
+          entry.obligationId,
+          entry.handoffConsumerContextId,
+        );
+        lineageMatchesAuthoritativeGpra = gpra
+          ? handoffEntryLineageMatchesGpra(entry, gpra)
+          : false;
+        if (gpra) {
+          gpraValidityPosture = (
+            await evaluateGpraValidityForContext(gpra.gpraId, entry.handoffConsumerContextId)
+          ).posture;
+        }
+      }
+      return evaluateHandoffRecallCurrencyFromFacts({
+        recall,
+        currentEntryCurrency: entryCurrency,
+        currentBindingCurrency: bindingCurrency,
+        authoritativeRecallActId: authoritative?.recallActId ?? null,
         gpraValidityPosture,
         lineageMatchesAuthoritativeGpra,
       });

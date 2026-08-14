@@ -12,7 +12,7 @@
  * HOF-G6-U1 (R70–R83) shared foundation is established separately in
  * handoff-lifecycle-g6-foundation.ts; HOF-G6-U2 (R84–R97) makes suspension operative;
  * HOF-G6-U3 (R98–R111) makes withdrawal operative.
- * recall minting remains cataloged_deferred until HOF-G6-U4 (R112+).
+ * recall minting is operative at HOF-G6-U4 (R112+).
  * Does NOT implement exit-completeness, rejection acts, or exit matrix acts.
  * Does NOT mint recall/reject APIs or a generic performHgaAct factory.
  */
@@ -231,10 +231,10 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
     }),
     Object.freeze({
       actType: "recall" as const,
-      operativeStatus: "cataloged_deferred" as const,
+      operativeStatus: "operative" as const,
       hoemExpectation: "recall" as const,
       hccmBoundRequired: true as const,
-      hppmmPostureChainRequired: false,
+      hppmmPostureChainRequired: true,
       requirementIds: Object.freeze([
         "FI-DSN-STD-015-R66",
         "FI-DSN-STD-015-R67",
@@ -242,8 +242,22 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
         "FI-DSN-STD-015-R70",
         "FI-DSN-STD-015-R71",
         "FI-DSN-STD-015-R75",
+        "FI-DSN-STD-015-R112",
+        "FI-DSN-STD-015-R113",
+        "FI-DSN-STD-015-R114",
+        "FI-DSN-STD-015-R115",
+        "FI-DSN-STD-015-R116",
+        "FI-DSN-STD-015-R117",
+        "FI-DSN-STD-015-R118",
+        "FI-DSN-STD-015-R119",
+        "FI-DSN-STD-015-R120",
+        "FI-DSN-STD-015-R121",
+        "FI-DSN-STD-015-R122",
+        "FI-DSN-STD-015-R123",
+        "FI-DSN-STD-015-R124",
+        "FI-DSN-STD-015-R125",
       ] as const),
-      catalogedDeferredHofG6: true,
+      catalogedDeferredHofG6: false,
       sharedFoundationEstablishedHofG6U1: true,
     }),
   ]);
@@ -448,11 +462,12 @@ export function assertHgaMatrixActMayBePerformed(
   | "posture_declaration"
   | "completion"
   | "suspension"
-  | "withdrawal" {
+  | "withdrawal"
+  | "recall" {
   const entry = resolveHgaMatrixActType(actType);
   if (entry.operativeStatus !== "operative") {
     throw new OrchestraConstitutionalError(
-      `HGA matrix act type ${entry.actType} is cataloged_deferred pending HOF-G6-U4 act-specific mechanics; catalog membership does not authorize performance (R66/R69/R70–R83; R112+)`,
+      `HGA matrix act type ${entry.actType} is cataloged_deferred; catalog membership does not authorize performance (R66/R69/R70–R83)`,
       "invalid_handoff_authority_catalog",
       ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R69", "FI-DSN-STD-015-R70"],
     );
@@ -708,8 +723,8 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     STD015_SOLE_HANDOFF_AUTHORITY_CLASS_CATALOG[0] ===
       HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID &&
     matrixTypes.length === 6 &&
-    operative.length === 5 &&
-    deferred.length === 1 &&
+    operative.length === 6 &&
+    deferred.length === 0 &&
     hslmIds.length === 8 &&
     hccmIds.length === 6 &&
     !hgaScopes.includes("handoff_lifecycle_rejection_act" as never) &&
@@ -756,7 +771,8 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     rejectHandoffActLayerUndefined: true as const,
     withdrawRecallApisNotProvided: false as const,
     withdrawGovernedHandoffMayBeProvided: true as const,
-    recallApisNotProvided: true as const,
+    recallApisNotProvided: false as const,
+    recallGovernedHandoffMayBeProvided: true as const,
     suspendGovernedHandoffMayBeProvided: true as const,
     performHgaActFactoryNotProvided: true as const,
     catalogMembershipDoesNotCreateAuthority: true as const,
@@ -771,7 +787,7 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     r69ProhibitedPerformers: true as const,
     hofG6U1SharedFoundationEstablished: true as const,
     hofG6ActSpecificMechanicsDeferredToU3U4: false as const,
-    hofG6RecallMechanicsDeferredToU4: true as const,
+    hofG6RecallMechanicsDeferredToU4: false as const,
     hofG9CompletionThemesTranche3: true as const,
     traceability: HANDOFF_AUTHORITY_CATALOG_TRACEABILITY,
   });

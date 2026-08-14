@@ -1629,7 +1629,7 @@ export interface GovernedHandoffPostureDeclarationActRecord {
 /**
  * Closed HSLM act-layer vocabulary — FI-DSN-STD-015-R48.
  * Suspended is projectable from an authoritative current HOF-G6-U2 suspension act (R84–R97).
- * Withdrawn/recalled/expired remain catalog states; operative G6-U3/U4 acts deferred.
+ * Withdrawn/recalled/expired HSLM states; operative G6-U3 withdrawal and G6-U4 recall acts project lifecycle.
  */
 export type HandoffActLayerLifecycleState =
   | "eligible_for_consideration"
@@ -1790,6 +1790,7 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly authoritativeCompletionActId: GovernedHandoffCompletionActId | null;
   readonly authoritativeSuspensionActId: GovernedHandoffSuspensionActId | null;
   readonly authoritativeWithdrawalActId: GovernedHandoffWithdrawalActId | null;
+  readonly authoritativeRecallActId: GovernedHandoffRecallActId | null;
   /** Always null at G5 — Rejected is not an HGA act tip and no G2/G4 withhold facts exist. */
   readonly authoritativeRejectionAttributionId: null;
   readonly authoritativePostureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
@@ -1804,9 +1805,10 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly notManufacturingClearance: true;
   readonly notG11EligibilityLayerState: true;
   readonly withdrawalRecallExpiredMechanicsDeferred: false;
-  readonly recallExpiredMechanicsDeferred: true;
+  readonly recallExpiredMechanicsDeferred: false;
   readonly suspensionMechanicsOperative: true;
   readonly withdrawalMechanicsOperative: true;
+  readonly recallMechanicsOperative: true;
   readonly r48ClosedHslmVocabulary: true;
   readonly r49PeerDistinctLifecycle: true;
   readonly r50SingleBindingPostureChain: true;
@@ -1981,7 +1983,7 @@ export interface HandoffDownstreamExitConsiderationEvaluation {
 /**
  * R66 — mandatory HGA act-type matrix (§20.5.3.14). Exactly six ids.
  * suspension (HOF-G6-U2) and withdrawal (HOF-G6-U3) are operative.
- * recall remains cataloged_deferred for act-specific minting (HOF-G6-U4 / R112+).
+ * recall (HOF-G6-U4) is operative alongside suspension and withdrawal.
  */
 export type HgaMatrixActType =
   | "authorization"
@@ -2106,7 +2108,8 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly rejectHandoffActLayerUndefined: true;
   readonly withdrawRecallApisNotProvided: false;
   readonly withdrawGovernedHandoffMayBeProvided: true;
-  readonly recallApisNotProvided: true;
+  readonly recallApisNotProvided: false;
+  readonly recallGovernedHandoffMayBeProvided: true;
   readonly suspendGovernedHandoffMayBeProvided: true;
   readonly performHgaActFactoryNotProvided: true;
   readonly catalogMembershipDoesNotCreateAuthority: true;
@@ -2121,9 +2124,9 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly r69ProhibitedPerformers: true;
   /** HOF-G6-U1 R70–R83 shared foundation is established. */
   readonly hofG6U1SharedFoundationEstablished: true;
-  /** Act-specific recall minting remains U4 (R112+). */
+  /** Act-specific recall minting is operative at HOF-G6-U4 (R112+). */
   readonly hofG6ActSpecificMechanicsDeferredToU3U4: false;
-  readonly hofG6RecallMechanicsDeferredToU4: true;
+  readonly hofG6RecallMechanicsDeferredToU4: false;
   readonly hofG9CompletionThemesTranche3: true;
   readonly traceability: Std015GovernanceTraceability;
 }
@@ -2189,7 +2192,7 @@ export interface HofG6U1SharedLifecycleFoundationAssessment {
   readonly noImpliedReentryOrResumption: true;
   readonly noAutomaticRetryOrRecovery: true;
   readonly withdrawRecallMintApisAbsent: false;
-  readonly recallMintApisAbsent: true;
+  readonly recallMintApisAbsent: false;
   readonly performHgaActFactoryAbsent: true;
   readonly rejectionActAbsent: true;
   readonly exitHgaMatrixActAbsent: true;
@@ -2199,7 +2202,8 @@ export interface HofG6U1SharedLifecycleFoundationAssessment {
   readonly withdrawalMechanicsOperative: true;
   readonly r84PlusUnavailable: false;
   readonly r98PlusUnavailable: false;
-  readonly r112PlusUnavailable: true;
+  readonly r112PlusUnavailable: false;
+  readonly recallMechanicsOperative: true;
   readonly r70ThroughR83: true;
   readonly traceability: Std015GovernanceTraceability;
 }
@@ -2478,6 +2482,145 @@ export interface GovernedHandoffWithdrawalActRecord {
   readonly r109NoAdditionalCessationAfterCeased: true;
   readonly r110InvalidAttemptsNonOperative: true;
   readonly r111NotSuspensionRecallOrReentry: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/** HRTCM closed recall trigger ids — PD-STD-015-004 / §20.5.6. */
+export type HrtcmRecallTriggerId = "RTC-01" | "RTC-02" | "RTC-03" | "RTC-04";
+
+export type GovernedHandoffRecallActId = string & {
+  readonly __brand: "GovernedHandoffRecallActId";
+};
+
+export type HoemRecallOperativeRecordId = string & {
+  readonly __brand: "HoemRecallOperativeRecordId";
+};
+
+export type HandoffRecallCurrency = "current" | "stale";
+
+/**
+ * R121 — additive HOEM recall operative record (recall act type only).
+ * Peer-distinct from authorization/posture/completion/suspension/withdrawal HOEM records.
+ */
+export interface HoemRecallOperativeRecord {
+  readonly hoemRecallRecordId: HoemRecallOperativeRecordId;
+  readonly recallActId: GovernedHandoffRecallActId;
+  readonly actType: "recall";
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly satisfiedHrtcmTriggers: readonly HrtcmRecallTriggerId[];
+  readonly effectiveAt: string;
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeLifecycleAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+}
+
+/**
+ * Assessment for whether a lawful HGA recall act may be performed (R112–R125).
+ */
+export interface GovernedHandoffRecallAssessment {
+  readonly mayRecall: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly authorizationCurrency: HandoffAuthorizationCurrency | null;
+  readonly postureDeclarationCurrency: HandoffPostureDeclarationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly satisfiedHrtcmTriggers: readonly HrtcmRecallTriggerId[];
+  readonly doesNotAuthorizeActMintViaCatalogAlone: true;
+  readonly doesNotAuthorizeActMintViaRtcCatalogAlone: true;
+  readonly doesNotAuthorizeActMintViaGpraInvalidatedOrSupersededAlone: true;
+  readonly doesNotAuthorizeActMintViaG11BlockedAlone: true;
+  readonly doesNotAuthorizeActMintViaHrwmLossAlone: true;
+  readonly doesNotAuthorizeActMintViaAdvisoryAlone: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notHandoffCompletion: true;
+  readonly notHercmReentryOrResumption: true;
+  readonly suspensionPauseDoesNotNegateAttributability: true;
+}
+
+/**
+ * Operative HGA Handoff recall act — FI-DSN-STD-015-R112–R125.
+ * Responsive forward-reliance termination via satisfied HRTCM triggers.
+ * Does NOT suspend-as-recall, withdraw-as-recall, resume, restore, or reenter.
+ */
+export interface GovernedHandoffRecallActRecord {
+  readonly recallActId: GovernedHandoffRecallActId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_recall_act";
+  readonly recalledBy: string;
+  readonly recalledAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly declaredPostureClass: HandoffPostureClass | null;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly satisfiedHrtcmTriggers: readonly HrtcmRecallTriggerId[];
+  readonly hrtcmTriggerEvidenceNotes: string | null;
+  readonly forwardRelianceCeased: true;
+  readonly doesNotEraseAuthorization: true;
+  readonly doesNotErasePosture: true;
+  readonly doesNotEraseSuspensionHistory: true;
+  readonly doesNotEraseWithdrawalHistory: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notHandoffCompletion: true;
+  readonly notHercmReentry: true;
+  readonly notResumption: true;
+  readonly notRestoration: true;
+  readonly effectFraming: "responsive_forward_reliance_termination";
+  readonly hoemRecallRecord: HoemRecallOperativeRecord;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly notAutomaticHslmPromotion: true;
+  readonly hslmProjectionFromActFacts: true;
+  readonly r112DistinctHgaRecallAct: true;
+  readonly r113SharedPreconditionsPlusTriggers: true;
+  readonly r114NoRecallAfterRelianceCeased: true;
+  readonly r115NoSoleRtcGpraG11HrwmBasis: true;
+  readonly r116SingleBindingPostureChain: true;
+  readonly r117HrtcmTriggerEvidenceRecording: true;
+  readonly r118EffectFromRecalledAtForward: true;
+  readonly r119ResponsiveForwardRelianceCessation: true;
+  readonly r120AttributedBindingOnly: true;
+  readonly r121HoemRecallOperativeRecord: true;
+  readonly r122NotAutomaticHslmPromotion: true;
+  readonly r123RepeatedRecallsAdditive: true;
+  readonly r124InvalidAttemptsNonOperative: true;
+  readonly r125NotSuspensionWithdrawalOrReentry: true;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;

@@ -437,7 +437,7 @@ section("evaluate: eligible after entry+binding; authorized after auth; complete
   expect("eligible not authorization", eligible.notHandoffAuthorization, true);
   expect("eligible not posture", eligible.notHandoffPostureDeclaration, true);
   expect("G6 withdrawal/recall deferred marker", eligible.withdrawalRecallExpiredMechanicsDeferred, false);
-  expect("G6 recall/expired deferred marker", eligible.recallExpiredMechanicsDeferred, true);
+  expect("G6 recall mechanics operative", eligible.recallMechanicsOperative, true);
   expect("withdrawal mechanics operative", eligible.withdrawalMechanicsOperative, true);
   expect("suspension mechanics operative", eligible.suspensionMechanicsOperative, true);
 

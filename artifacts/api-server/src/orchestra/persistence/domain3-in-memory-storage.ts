@@ -15,6 +15,7 @@ import type {
   GovernedHandoffCompletionActRecord,
   GovernedHandoffSuspensionActRecord,
   GovernedHandoffWithdrawalActRecord,
+  GovernedHandoffRecallActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
@@ -117,6 +118,10 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const handoffWithdrawalActsByBinding = new Map<string, string[]>();
   const handoffWithdrawalActsByEntry = new Map<string, string[]>();
   const handoffWithdrawalActsByGpra = new Map<string, string[]>();
+  const handoffRecallActsById = new Map<string, GovernedHandoffRecallActRecord>();
+  const handoffRecallActsByBinding = new Map<string, string[]>();
+  const handoffRecallActsByEntry = new Map<string, string[]>();
+  const handoffRecallActsByGpra = new Map<string, string[]>();
   const handoffDownstreamExitBoundaryById = new Map<
     string,
     GovernedHandoffDownstreamExitBoundaryAttributionRecord
@@ -970,6 +975,53 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffWithdrawalActsById.get(id))
         .filter((item): item is GovernedHandoffWithdrawalActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffRecallAct(record) {
+      if (handoffRecallActsById.has(record.recallActId)) {
+        throw new Error(
+          `Duplicate Governed Handoff recall act identity: ${record.recallActId}`,
+        );
+      }
+      handoffRecallActsById.set(record.recallActId, structuredClone(record));
+      const byBinding = handoffRecallActsByBinding.get(record.bindingId) ?? [];
+      byBinding.push(record.recallActId);
+      handoffRecallActsByBinding.set(record.bindingId, byBinding);
+      const byEntry = handoffRecallActsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.recallActId);
+      handoffRecallActsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffRecallActsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.recallActId);
+      handoffRecallActsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffRecallAct(recallActId) {
+      const record = handoffRecallActsById.get(recallActId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffRecallActsByBinding(bindingId) {
+      const ids = handoffRecallActsByBinding.get(bindingId) ?? [];
+      return ids
+        .map((id) => handoffRecallActsById.get(id))
+        .filter((item): item is GovernedHandoffRecallActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffRecallActsByEntry(entryId) {
+      const ids = handoffRecallActsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffRecallActsById.get(id))
+        .filter((item): item is GovernedHandoffRecallActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffRecallActsByGpra(gpraId) {
+      const ids = handoffRecallActsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffRecallActsById.get(id))
+        .filter((item): item is GovernedHandoffRecallActRecord => !!item)
         .map((item) => structuredClone(item));
     },
 

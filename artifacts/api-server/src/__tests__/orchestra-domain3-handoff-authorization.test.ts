@@ -1023,7 +1023,7 @@ section("R48 boundary: authorization ≠ posture; no completion/suspension/recal
   expect("completeGovernedHandoff on repository (G5)", "completeGovernedHandoff" in repo, true);
   expect("no suspendHandoff on repository", "suspendHandoff" in repo, false);
   expect("suspendGovernedHandoff on repository (G6-U2)", "suspendGovernedHandoff" in repo, true);
-  expect("no recallGovernedHandoff on repository", "recallGovernedHandoff" in repo, false);
+  expect("recallGovernedHandoff on repository", "recallGovernedHandoff" in repo, true);
   expect("withdrawGovernedHandoff on repository", "withdrawGovernedHandoff" in repo, true);
   expect(
     "authorization remains non-execution",
