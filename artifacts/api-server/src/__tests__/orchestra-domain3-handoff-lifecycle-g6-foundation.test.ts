@@ -193,10 +193,17 @@ section("3. HGA sole performer; wrong authority; Brain (R70)");
       actType: "withdrawal",
     }),
   );
-  expectThrows("brain performer", () =>
+  expectThrows("brain performer with HGA still denied", () =>
     assertHgaSolePerformerForG6LifecycleAct({
+      authorityClassId: "handoff_governance_authority",
       performerClass: "brain_domain3",
       actType: "recall",
+    }),
+  );
+  expectThrows("performerClass alone insufficient", () =>
+    assertHgaSolePerformerForG6LifecycleAct({
+      performerClass: "workflow_operator",
+      actType: "suspension",
     }),
   );
   expectThrows("Brain cannot perform", () => assertBrainCannotPerformG6LifecycleAct());
@@ -302,6 +309,46 @@ section("6. Shared preconditions; triggers deferred (R75)");
     traceableConstitutionalBasis: true,
   });
   expect("incomplete target fails", staleTarget.sharedCategoriesSatisfied, false);
+
+  const barePerformerClaim = assessG6SharedPreconditions({
+    actType: "suspension",
+    bindingId: "b1",
+    hasPriorAuthorization: true,
+    hasPriorPosture: true,
+    hasLifecycleOperativeHistory: true,
+    hccmBoundContextEstablished: true,
+    hgaPerformerAttributable: true,
+    traceableConstitutionalBasis: true,
+    priorRecordsPreservedReconstructable: true,
+  });
+  expect(
+    "bare hgaPerformerAttributable fails without HGA class",
+    barePerformerClaim.sharedCategoriesSatisfied,
+    false,
+  );
+  expectTruthy(
+    "bare claim denies c",
+    barePerformerClaim.denialReasons.includes(
+      "authorized_hga_performer_not_attributable",
+    ),
+  );
+
+  const nonProhibitedPerformerOnly = assessG6SharedPreconditions({
+    actType: "withdrawal",
+    bindingId: "b1",
+    hasPriorAuthorization: true,
+    hasPriorPosture: true,
+    hasLifecycleOperativeHistory: true,
+    hccmBoundContextEstablished: true,
+    performerClass: "workflow_operator",
+    traceableConstitutionalBasis: true,
+    priorRecordsPreservedReconstructable: true,
+  });
+  expect(
+    "non-prohibited performerClass alone fails",
+    nonProhibitedPerformerOnly.sharedCategoriesSatisfied,
+    false,
+  );
 }
 
 section("7. Additive preservation / HOEM / absorption / reentry / retry (R77–R83)");

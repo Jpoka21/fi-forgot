@@ -192,30 +192,27 @@ export function assertHgaSolePerformerForG6LifecycleAct(input: {
     assertG6LifecycleMatrixActType(input.actType);
   }
 
-  if (input.authorityClassId !== undefined) {
-    assertEstablishedHandoffGovernanceAuthorityClass(input.authorityClassId);
-    if (input.authorityClassId !== HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID) {
-      throw new OrchestraConstitutionalError(
-        "Only Handoff Governance Authority (HGA) may perform suspension, withdrawal, or recall operative acts (R70)",
-        "invalid_handoff_g6_lifecycle_foundation",
-        ["FI-DSN-STD-015-R70"],
-      );
-    }
+  // R70 — HGA attribution is mandatory. A non-prohibited performerClass token
+  // alone never satisfies sole-performer attribution.
+  if (input.authorityClassId === undefined) {
+    throw new OrchestraConstitutionalError(
+      "HGA sole performer attribution requires established handoff_governance_authority class id (R70)",
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R70"],
+    );
+  }
+
+  assertEstablishedHandoffGovernanceAuthorityClass(input.authorityClassId);
+  if (input.authorityClassId !== HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID) {
+    throw new OrchestraConstitutionalError(
+      "Only Handoff Governance Authority (HGA) may perform suspension, withdrawal, or recall operative acts (R70)",
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R70"],
+    );
   }
 
   if (input.performerClass !== undefined) {
     assertNotProhibitedHandoffActPerformer(input.performerClass);
-  }
-
-  if (
-    input.authorityClassId === undefined &&
-    input.performerClass === undefined
-  ) {
-    throw new OrchestraConstitutionalError(
-      "HGA sole performer attribution is required for G6 lifecycle acts (R70)",
-      "invalid_handoff_g6_lifecycle_foundation",
-      ["FI-DSN-STD-015-R70"],
-    );
   }
 }
 
@@ -430,24 +427,19 @@ export function assessG6SharedPreconditions(input: {
     denialReasons.push("hccm_bound_context_not_established");
   }
 
-  let c = input.hgaPerformerAttributable === true;
+  // R75(c) — authorized HGA performer must be attributable. Bare
+  // hgaPerformerAttributable / non-prohibited performerClass claims are insufficient.
+  let c = false;
   try {
-    if (input.authorityClassId !== undefined || input.performerClass !== undefined) {
-      assertHgaSolePerformerForG6LifecycleAct({
-        authorityClassId: input.authorityClassId,
-        performerClass: input.performerClass,
-        actType: actType ?? undefined,
-      });
-      c = true;
-    }
+    assertHgaSolePerformerForG6LifecycleAct({
+      authorityClassId: input.authorityClassId,
+      performerClass: input.performerClass,
+      actType: actType ?? undefined,
+    });
+    c = true;
   } catch {
     c = false;
     denialReasons.push("authorized_hga_performer_not_attributable");
-  }
-  if (!c) {
-    if (!denialReasons.includes("authorized_hga_performer_not_attributable")) {
-      denialReasons.push("authorized_hga_performer_not_attributable");
-    }
   }
 
   const basisSubstituted =
