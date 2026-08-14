@@ -727,6 +727,11 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     deferred.length === 0 &&
     hslmIds.length === 8 &&
     hccmIds.length === 6 &&
+    hgaScopes.length === 8 &&
+    hgaScopes.includes("handoff_resumption_act") &&
+    hgaScopes.includes("handoff_reentry_act") &&
+    !(matrixTypes as readonly string[]).includes("resumption") &&
+    !(matrixTypes as readonly string[]).includes("reentry") &&
     !hgaScopes.includes("handoff_lifecycle_rejection_act" as never) &&
     !(matrixTypes as readonly string[]).includes("exit_boundary") &&
     !(matrixTypes as readonly string[]).includes("rejection") &&
@@ -767,6 +772,9 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
       ...HAAM_PROHIBITED_HANDOFF_AUTHORIZATION_ASSIGNEES,
     ]),
     frozenHgaConstitutionalScopes: Object.freeze([...hgaScopes]),
+    frozenHgaConstitutionalScopeCount: 8 as const,
+    hercmConstitutionalScopesPresent: true as const,
+    hercmActsAreNotMatrixActTypes: true as const,
     handoffLifecycleRejectionActAbsentFromHgaScopes: true as const,
     rejectHandoffActLayerUndefined: true as const,
     withdrawRecallApisNotProvided: false as const,

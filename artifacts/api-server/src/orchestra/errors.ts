@@ -80,6 +80,8 @@ export type OrchestraErrorCode =
   | "invalid_handoff_suspension"
   | "invalid_handoff_withdrawal"
   | "invalid_handoff_recall"
+  | "invalid_handoff_resumption"
+  | "invalid_handoff_reentry"
   | "invalid_handoff_downstream_exit_boundary"
   | "invalid_handoff_g6_lifecycle_foundation";
 

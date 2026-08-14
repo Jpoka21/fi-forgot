@@ -32,6 +32,8 @@ import type {
   GovernedHandoffSuspensionActRecord,
   GovernedHandoffWithdrawalActRecord,
   GovernedHandoffRecallActRecord,
+  GovernedHandoffResumptionActRecord,
+  GovernedHandoffReentryActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
@@ -85,6 +87,10 @@ import {
   assertPersistedGovernedHandoffRecallCoherence,
 } from "./hof-g6-u4-rehydration-coherence.js";
 import {
+  assertPersistedGovernedHandoffReentryCoherence,
+  assertPersistedGovernedHandoffResumptionCoherence,
+} from "./hof-g6-hercm-rehydration-coherence.js";
+import {
   assertPersistedGovernedHandoffDownstreamExitBoundaryCoherence,
 } from "./hof-g8-rehydration-coherence.js";
 import {
@@ -101,6 +107,8 @@ import {
   validatePersistedGovernedHandoffSuspension,
   validatePersistedGovernedHandoffWithdrawal,
   validatePersistedGovernedHandoffRecall,
+  validatePersistedGovernedHandoffResumption,
+  validatePersistedGovernedHandoffReentry,
   validatePersistedGovernedHandoffDownstreamExitBoundary,
   validatePersistedGovernedHandoffConsumerBinding,
   validatePersistedGovernedHandoffPostureDeclaration,
@@ -1167,4 +1175,145 @@ export function rehydrateGovernedHandoffRecall(
     determination,
   });
   return deepFreeze(structuredClone(raw));
+}
+
+export interface HercmHandoffResumptionRehydrationContext {
+  readonly entry: unknown;
+  readonly binding: unknown;
+  readonly authorization: unknown;
+  readonly posture: unknown;
+  readonly suspension: unknown;
+  readonly preparation?: unknown | null;
+  readonly gpra?: unknown | null;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+/**
+ * Trusted HERCM REC-02 resumption rehydration — entry + binding + authorization +
+ * posture + the suspension it resumes + lineage.
+ * Does not suspend, withdraw, recall, reenter, restore, authorize, or execute Handoff.
+ */
+export function rehydrateGovernedHandoffResumption(
+  raw: unknown,
+  context: HercmHandoffResumptionRehydrationContext,
+): GovernedHandoffResumptionActRecord {
+  validatePersistedGovernedHandoffResumption(raw);
+  validatePersistedGovernedHandoffEntry(context.entry);
+  validatePersistedGovernedHandoffConsumerBinding(context.binding);
+  validatePersistedGovernedHandoffAuthorization(context.authorization);
+  validatePersistedGovernedHandoffPostureDeclaration(context.posture);
+  validatePersistedGovernedHandoffSuspension(context.suspension);
+  const resumption = raw as GovernedHandoffResumptionActRecord;
+  const entry = context.entry as GovernedHandoffEntryRecord;
+  const binding = context.binding as GovernedHandoffConsumerBindingRecord;
+  const authorization = context.authorization as GovernedHandoffAuthorizationActRecord;
+  const posture = context.posture as GovernedHandoffPostureDeclarationActRecord;
+  const suspension = context.suspension as GovernedHandoffSuspensionActRecord;
+
+  const lineage = rehydrateHercmOptionalLineage(context);
+
+  assertPersistedGovernedHandoffResumptionCoherence({
+    resumption,
+    entry,
+    binding,
+    authorization,
+    posture,
+    suspension,
+    ...lineage,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export interface HercmHandoffReentryRehydrationContext {
+  readonly entry: unknown;
+  readonly binding: unknown;
+  readonly authorization: unknown;
+  readonly posture: unknown;
+  readonly withdrawal?: unknown | null;
+  readonly recall?: unknown | null;
+  readonly preparation?: unknown | null;
+  readonly gpra?: unknown | null;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+/**
+ * Trusted HERCM REC-01/03/04/05 re-entry rehydration — entry + binding + the predecessor
+ * authorization and posture (lineage only, never resurrected) + the qualifying cessation act.
+ * Does not resume, restore, authorize anew, declare posture, or execute Handoff.
+ */
+export function rehydrateGovernedHandoffReentry(
+  raw: unknown,
+  context: HercmHandoffReentryRehydrationContext,
+): GovernedHandoffReentryActRecord {
+  validatePersistedGovernedHandoffReentry(raw);
+  validatePersistedGovernedHandoffEntry(context.entry);
+  validatePersistedGovernedHandoffConsumerBinding(context.binding);
+  validatePersistedGovernedHandoffAuthorization(context.authorization);
+  validatePersistedGovernedHandoffPostureDeclaration(context.posture);
+  const reentry = raw as GovernedHandoffReentryActRecord;
+  const entry = context.entry as GovernedHandoffEntryRecord;
+  const binding = context.binding as GovernedHandoffConsumerBindingRecord;
+  const authorization = context.authorization as GovernedHandoffAuthorizationActRecord;
+  const posture = context.posture as GovernedHandoffPostureDeclarationActRecord;
+
+  let withdrawal: GovernedHandoffWithdrawalActRecord | null = null;
+  if (context.withdrawal != null) {
+    validatePersistedGovernedHandoffWithdrawal(context.withdrawal);
+    withdrawal = context.withdrawal as GovernedHandoffWithdrawalActRecord;
+  }
+  let recall: GovernedHandoffRecallActRecord | null = null;
+  if (context.recall != null) {
+    validatePersistedGovernedHandoffRecall(context.recall);
+    recall = context.recall as GovernedHandoffRecallActRecord;
+  }
+
+  const lineage = rehydrateHercmOptionalLineage(context);
+
+  assertPersistedGovernedHandoffReentryCoherence({
+    reentry,
+    entry,
+    binding,
+    authorization,
+    posture,
+    withdrawal,
+    recall,
+    ...lineage,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+function rehydrateHercmOptionalLineage(context: {
+  readonly preparation?: unknown | null;
+  readonly gpra?: unknown | null;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}): {
+  preparation: GovernedHandoffPreparationRecord | null;
+  gpra: GpraGrantRecord | null;
+  review: ProductionReadinessReview | null;
+  determination: ReviewDeterminationRecord | null;
+} {
+  let preparation: GovernedHandoffPreparationRecord | null = null;
+  if (context.preparation != null) {
+    validatePersistedGovernedHandoffPreparation(context.preparation);
+    preparation = context.preparation as GovernedHandoffPreparationRecord;
+  }
+  let gpra: GpraGrantRecord | null = null;
+  if (context.gpra != null) {
+    validatePersistedGpraGrant(context.gpra);
+    gpra = context.gpra as GpraGrantRecord;
+  }
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+  return { preparation, gpra, review, determination };
 }

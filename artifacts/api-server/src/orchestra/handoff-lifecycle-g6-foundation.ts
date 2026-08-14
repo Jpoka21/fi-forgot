@@ -4,7 +4,9 @@
  * Shared machinery consumed by HOF-G6-U2 (suspension), U3 (withdrawal), U4 (recall).
  * Does NOT mint withdrawal / recall acts (U3/U4). Suspension minting is HOF-G6-U2.
  * Does NOT implement withdrawal/recall act-specific triggers or effect mechanics (R98+).
- * Does NOT implement HERCM re-entry, resumption, restoration, or expiry acts.
+ * Does NOT implement HERCM re-entry or resumption acts — those are peer NON-matrix
+ * HGA acts in handoff-reentry.ts / handoff-resumption.ts (R126–R139). Restoration and
+ * expiry acts remain deferred (R140+).
  * Does NOT create a generic performHgaAct / mintHgaAct factory.
  * Does NOT invent rejection or exit HGA matrix acts.
  *
@@ -600,11 +602,31 @@ export function assertG6ActIsNotAutomaticRetryOrRecovery(input?: Record<string, 
   }
 }
 
+/**
+ * HERCM resumption/re-entry are operative under R126–R139 but ONLY via their own
+ * peer act paths (Domain3Repository.resumeGovernedHandoff / reenterGovernedHandoff).
+ * Generic restoration/reinstate/revive/expire APIs remain prohibited, and the U1
+ * foundation itself still authorizes none of them.
+ */
 export function refuseG6RestorationResumptionReentry(apiName?: unknown): never {
   const name =
     typeof apiName === "string" && apiName.trim() ? apiName.trim() : "restoreHandoff";
+  if (name === "resumeHandoff" || name === "unsuspendByMutation") {
+    throw new OrchestraConstitutionalError(
+      `${name} is not the mint path; HERCM REC-02 resumption is operative via Domain3Repository.resumeGovernedHandoff (R126–R139)`,
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R81", "FI-DSN-STD-015-R126"],
+    );
+  }
+  if (name === "reenterHandoff") {
+    throw new OrchestraConstitutionalError(
+      `${name} is not the mint path; HERCM REC-01/03/04/05 re-entry is operative via Domain3Repository.reenterGovernedHandoff (R126–R139)`,
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R81", "FI-DSN-STD-015-R126"],
+    );
+  }
   throw new OrchestraConstitutionalError(
-    `${name} remains deferred; HOF-G6-U1 does not authorize restoration, resumption, or re-entry (R81/R82)`,
+    `${name} remains deferred; HOF-G6-U1 does not authorize restoration, resumption, or re-entry, and generic restoration/expiry acts remain deferred to R140+ (R81/R82)`,
     "invalid_handoff_g6_lifecycle_foundation",
     ["FI-DSN-STD-015-R81", "FI-DSN-STD-015-R82"],
   );
@@ -768,7 +790,13 @@ export function rejectForgedOrPrematureG6LifecycleActRehydration(input: {
     input.purportedActType === "withdrawal" ||
     input.purportedHoemActType === "withdrawal" ||
     input.purportedActType === "recall" ||
-    input.purportedHoemActType === "recall"
+    input.purportedHoemActType === "recall" ||
+    // HERCM R126–R139 acts are operative peer NON-MATRIX artifacts; forged fields above
+    // still fail closed, but the act type itself is no longer premature.
+    input.purportedActType === "resumption" ||
+    input.purportedHoemActType === "resumption" ||
+    input.purportedActType === "reentry" ||
+    input.purportedHoemActType === "reentry"
   ) {
     return;
   }
@@ -791,6 +819,28 @@ export function assertR84PlusUnavailable(claim?: unknown): void {
 
 export function assertR112PlusUnavailable(_claim?: unknown): void {
   // HOF-G6-U4 recall operative mechanics (R112–R125) are available; no-op guard retained for API stability.
+}
+
+/**
+ * R140+ (restoration acts as matrix types, expiry acts, HGA matrix expansion beyond six)
+ * remains unavailable. HERCM R126–R139 is operative and is NOT R140+.
+ */
+export function assertR140PlusUnavailable(claim?: unknown): void {
+  if (
+    claim === "r140_plus_available" ||
+    claim === "seventh_matrix_act_type" ||
+    claim === "eighth_matrix_act_type" ||
+    claim === "resumption_is_matrix_act_type" ||
+    claim === "reentry_is_matrix_act_type" ||
+    claim === "restoration_operative_mechanics_available" ||
+    claim === "expiry_operative_mechanics_available"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "R140+ remains unavailable: the HGA matrix stays exactly six act types and restoration/expiry operative mechanics are not implemented; HERCM resumption and re-entry are peer NON-matrix acts (R66/R126)",
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R126"],
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -866,7 +916,11 @@ export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycle
     rejectionActAbsent: true as const,
     exitHgaMatrixActAbsent: true as const,
     hslmEightStatesPreserved: true as const,
-    restorationResumptionReentryDeferred: true as const,
+    restorationResumptionReentryDeferred: false as const,
+    resumptionMechanicsOperative: true as const,
+    reentryMechanicsOperative: true as const,
+    hercmActsAreNotMatrixActTypes: true as const,
+    r140PlusUnavailable: true as const,
     suspensionMechanicsOperative: true as const,
     withdrawalMechanicsOperative: true as const,
     recallMechanicsOperative: true as const,

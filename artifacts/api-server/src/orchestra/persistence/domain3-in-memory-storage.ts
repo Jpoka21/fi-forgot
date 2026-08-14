@@ -16,6 +16,8 @@ import type {
   GovernedHandoffSuspensionActRecord,
   GovernedHandoffWithdrawalActRecord,
   GovernedHandoffRecallActRecord,
+  GovernedHandoffReentryActRecord,
+  GovernedHandoffResumptionActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
@@ -122,6 +124,14 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const handoffRecallActsByBinding = new Map<string, string[]>();
   const handoffRecallActsByEntry = new Map<string, string[]>();
   const handoffRecallActsByGpra = new Map<string, string[]>();
+  const handoffResumptionActsById = new Map<string, GovernedHandoffResumptionActRecord>();
+  const handoffResumptionActsByBinding = new Map<string, string[]>();
+  const handoffResumptionActsByEntry = new Map<string, string[]>();
+  const handoffResumptionActsByGpra = new Map<string, string[]>();
+  const handoffReentryActsById = new Map<string, GovernedHandoffReentryActRecord>();
+  const handoffReentryActsByBinding = new Map<string, string[]>();
+  const handoffReentryActsByEntry = new Map<string, string[]>();
+  const handoffReentryActsByGpra = new Map<string, string[]>();
   const handoffDownstreamExitBoundaryById = new Map<
     string,
     GovernedHandoffDownstreamExitBoundaryAttributionRecord
@@ -1022,6 +1032,100 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
       return ids
         .map((id) => handoffRecallActsById.get(id))
         .filter((item): item is GovernedHandoffRecallActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffResumptionAct(record) {
+      if (handoffResumptionActsById.has(record.resumptionActId)) {
+        throw new Error(
+          `Duplicate Governed Handoff resumption act identity: ${record.resumptionActId}`,
+        );
+      }
+      handoffResumptionActsById.set(record.resumptionActId, structuredClone(record));
+      const byBinding = handoffResumptionActsByBinding.get(record.bindingId) ?? [];
+      byBinding.push(record.resumptionActId);
+      handoffResumptionActsByBinding.set(record.bindingId, byBinding);
+      const byEntry = handoffResumptionActsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.resumptionActId);
+      handoffResumptionActsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffResumptionActsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.resumptionActId);
+      handoffResumptionActsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffResumptionAct(resumptionActId) {
+      const record = handoffResumptionActsById.get(resumptionActId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffResumptionActsByBinding(bindingId) {
+      const ids = handoffResumptionActsByBinding.get(bindingId) ?? [];
+      return ids
+        .map((id) => handoffResumptionActsById.get(id))
+        .filter((item): item is GovernedHandoffResumptionActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffResumptionActsByEntry(entryId) {
+      const ids = handoffResumptionActsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffResumptionActsById.get(id))
+        .filter((item): item is GovernedHandoffResumptionActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffResumptionActsByGpra(gpraId) {
+      const ids = handoffResumptionActsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffResumptionActsById.get(id))
+        .filter((item): item is GovernedHandoffResumptionActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffReentryAct(record) {
+      if (handoffReentryActsById.has(record.reentryActId)) {
+        throw new Error(
+          `Duplicate Governed Handoff re-entry act identity: ${record.reentryActId}`,
+        );
+      }
+      handoffReentryActsById.set(record.reentryActId, structuredClone(record));
+      const byBinding = handoffReentryActsByBinding.get(record.bindingId) ?? [];
+      byBinding.push(record.reentryActId);
+      handoffReentryActsByBinding.set(record.bindingId, byBinding);
+      const byEntry = handoffReentryActsByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.reentryActId);
+      handoffReentryActsByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffReentryActsByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.reentryActId);
+      handoffReentryActsByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffReentryAct(reentryActId) {
+      const record = handoffReentryActsById.get(reentryActId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffReentryActsByBinding(bindingId) {
+      const ids = handoffReentryActsByBinding.get(bindingId) ?? [];
+      return ids
+        .map((id) => handoffReentryActsById.get(id))
+        .filter((item): item is GovernedHandoffReentryActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffReentryActsByEntry(entryId) {
+      const ids = handoffReentryActsByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffReentryActsById.get(id))
+        .filter((item): item is GovernedHandoffReentryActRecord => !!item)
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffReentryActsByGpra(gpraId) {
+      const ids = handoffReentryActsByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffReentryActsById.get(id))
+        .filter((item): item is GovernedHandoffReentryActRecord => !!item)
         .map((item) => structuredClone(item));
     },
 

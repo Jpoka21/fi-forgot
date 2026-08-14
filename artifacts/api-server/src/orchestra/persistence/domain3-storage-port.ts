@@ -29,6 +29,10 @@ import type {
   GovernedHandoffWithdrawalActRecord,
   GovernedHandoffRecallActId,
   GovernedHandoffRecallActRecord,
+  GovernedHandoffReentryActId,
+  GovernedHandoffReentryActRecord,
+  GovernedHandoffResumptionActId,
+  GovernedHandoffResumptionActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionId,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingId,
@@ -413,6 +417,46 @@ export interface Domain3StoragePort {
   listGovernedHandoffRecallActsByGpra(
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffRecallActRecord[]>;
+
+  /**
+   * Append-only HERCM REC-02 resumption act (R126–R139). Unique by resumptionActId;
+   * repeated resumptions per binding are additive (latest authoritative). No update/delete.
+   */
+  putGovernedHandoffResumptionAct(
+    record: GovernedHandoffResumptionActRecord,
+  ): Promise<void>;
+  getGovernedHandoffResumptionAct(
+    resumptionActId: GovernedHandoffResumptionActId,
+  ): Promise<GovernedHandoffResumptionActRecord | null>;
+  listGovernedHandoffResumptionActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffResumptionActRecord[]>;
+  listGovernedHandoffResumptionActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffResumptionActRecord[]>;
+  listGovernedHandoffResumptionActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffResumptionActRecord[]>;
+
+  /**
+   * Append-only HERCM REC-01/03/04/05 re-entry act (R126–R139). Unique by reentryActId;
+   * repeated re-entries per binding are additive (latest authoritative). No update/delete.
+   */
+  putGovernedHandoffReentryAct(
+    record: GovernedHandoffReentryActRecord,
+  ): Promise<void>;
+  getGovernedHandoffReentryAct(
+    reentryActId: GovernedHandoffReentryActId,
+  ): Promise<GovernedHandoffReentryActRecord | null>;
+  listGovernedHandoffReentryActsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffReentryActRecord[]>;
+  listGovernedHandoffReentryActsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffReentryActRecord[]>;
+  listGovernedHandoffReentryActsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffReentryActRecord[]>;
 
   /**
    * Append-only downstream exit-boundary attribution (HOF-G8 R58–R65).

@@ -300,6 +300,64 @@ export {
   assertNoHandoffRecallWithdrawalOrReentryClaims,
 } from "./handoff-recall.js";
 
+/**
+ * HERCM R126–R139 — re-entry / resumption are peer NON-MATRIX HGA constitutional scopes.
+ * Constructors (create*) stay module-internal; minting is only reachable through the
+ * Domain3Repository so lineage and persistence gates cannot be bypassed.
+ */
+export {
+  GOVERNED_HANDOFF_HERCM_TRACEABILITY,
+  HERCM_CATEGORY_IDS,
+  HERCM_RESUMPTION_CATEGORY_IDS,
+  HERCM_REENTRY_CATEGORY_IDS,
+  HERCM_CATEGORY_CATALOG,
+  HERCM_FORBIDDEN_MATRIX_ACT_LABELS,
+  isHercmCategoryId,
+  isHercmResumptionCategoryId,
+  isHercmReentryCategoryId,
+  resolveHercmCategory,
+  assertHercmCategoryId,
+  assertHercmResumptionCategoryId,
+  assertHercmReentryCategoryId,
+  normalizeHercmCategoryId,
+  resolveHercmQualifyingPriorState,
+  resolveHercmActKind,
+  isResumptionConstitutionalBasisKind,
+  isReentryConstitutionalBasisKind,
+  assertResumptionConstitutionalBasisKind,
+  assertReentryConstitutionalBasisKind,
+  resolveHercmBasisKindForCategory,
+  assertHercmBasisKindMatchesCategory,
+  assertHercmActIsNotHgaMatrixActType,
+  assertHgaSolePerformerForHercmAct,
+  assessHercmActSubjectScope,
+  assertHercmActSubjectScope,
+  assessHercmSharedPreconditions,
+  assertExportReadyDoesNotMintHercmAct,
+  assertNoAutomaticHercmRecovery,
+  assessHercmCatalogIntegrity,
+} from "./handoff-hercm.js";
+
+export {
+  GOVERNED_HANDOFF_RESUMPTION_TRACEABILITY,
+  assessGovernedHandoffResumption,
+  selectAuthoritativeGovernedHandoffResumption,
+  evaluateHandoffResumptionCurrencyFromFacts,
+  resumptionSupersedesSuspension,
+  assertGovernedHandoffResumptionActor,
+  assertNoHandoffResumptionReentryRestorationOrAutoRecoveryClaims,
+} from "./handoff-resumption.js";
+
+export {
+  GOVERNED_HANDOFF_REENTRY_TRACEABILITY,
+  assessGovernedHandoffReentry,
+  selectAuthoritativeGovernedHandoffReentry,
+  evaluateHandoffReentryCurrencyFromFacts,
+  reentrySupersedesCessation,
+  assertGovernedHandoffReentryActor,
+  assertNoHandoffReentryResumptionRestorationOrResurrectionClaims,
+} from "./handoff-reentry.js";
+
 export {
   HRTCM_RECALL_TRIGGER_TRACEABILITY,
   HRTCM_RECALL_TRIGGER_IDS,
@@ -332,6 +390,8 @@ export {
   assertEstablishedHandoffGovernanceAuthorityForSuspension,
   assertEstablishedHandoffGovernanceAuthorityForWithdrawal,
   assertEstablishedHandoffGovernanceAuthorityForRecall,
+  assertEstablishedHandoffGovernanceAuthorityForResumption,
+  assertEstablishedHandoffGovernanceAuthorityForReentry,
 } from "./handoff-governance-authority.js";
 
 export {
@@ -423,6 +483,7 @@ export {
   rejectForgedOrPrematureG6LifecycleActRehydration,
   assertR84PlusUnavailable,
   assertR112PlusUnavailable,
+  assertR140PlusUnavailable,
   assertNoInventedRejectionOrExitG6Act,
   assessHofG6U1SharedLifecycleFoundation,
   catalogMembershipDoesNotAuthorizeG6Performance,

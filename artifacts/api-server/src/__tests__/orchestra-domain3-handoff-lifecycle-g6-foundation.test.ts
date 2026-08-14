@@ -127,7 +127,12 @@ section("1. Foundation integrity assessment");
   expect("no rejection", a.rejectionActAbsent, true);
   expect("no exit matrix", a.exitHgaMatrixActAbsent, true);
   expect("hslm 8", a.hslmEightStatesPreserved, true);
-  expect("restoration deferred", a.restorationResumptionReentryDeferred, true);
+  // HERCM R126–R139 landed: resumption/re-entry are operative peer non-matrix acts.
+  expect("restoration deferred", a.restorationResumptionReentryDeferred, false);
+  expect("resumption mechanics operative", a.resumptionMechanicsOperative, true);
+  expect("reentry mechanics operative", a.reentryMechanicsOperative, true);
+  expect("hercm not matrix act types", a.hercmActsAreNotMatrixActTypes, true);
+  expect("R140+ unavailable", a.r140PlusUnavailable, true);
   expect("R84+ unavailable", a.r84PlusUnavailable, false);
   expect("R98+ unavailable", a.r98PlusUnavailable, false);
   expect("R112+ unavailable", a.r112PlusUnavailable, false);

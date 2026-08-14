@@ -452,9 +452,11 @@ section("14. rejectHandoffActLayer undefined; handoff_lifecycle_rejection_act ab
     hga.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act" as never),
     false,
   );
-  expect("exactly six operative scopes", hga.authorizedConstitutionalScopes.length, 6);
+  // Six matrix scopes plus the two peer NON-MATRIX HERCM scopes (R126–R139). The matrix
+  // itself stays at exactly six until R140.
+  expect("exactly eight constitutional scopes", hga.authorizedConstitutionalScopes.length, 8);
   expect(
-    "scopes are auth/posture/completion/suspension/withdrawal/recall",
+    "scopes are the six matrix acts plus resumption/reentry",
     [...hga.authorizedConstitutionalScopes],
     [
       "handoff_authorization_act",
@@ -463,6 +465,8 @@ section("14. rejectHandoffActLayer undefined; handoff_lifecycle_rejection_act ab
       "handoff_suspension_act",
       "handoff_withdrawal_act",
       "handoff_recall_act",
+      "handoff_resumption_act",
+      "handoff_reentry_act",
     ],
   );
 }

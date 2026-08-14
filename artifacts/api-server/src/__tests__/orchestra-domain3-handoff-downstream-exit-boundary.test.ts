@@ -382,10 +382,11 @@ section("1. terminus / R58–R65 traceability");
     hga.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act" as never),
     false,
   );
+  // Six matrix scopes plus the two peer NON-MATRIX HERCM scopes (R126–R139).
   expect(
-    "HGA scopes length includes suspension, withdrawal, and recall",
+    "HGA scopes length includes suspension, withdrawal, recall, resumption, and reentry",
     hga.authorizedConstitutionalScopes.length,
-    6,
+    8,
   );
 }
 

@@ -36,6 +36,8 @@ import type {
   GovernedHandoffSuspensionActRecord,
   GovernedHandoffWithdrawalActRecord,
   GovernedHandoffRecallActRecord,
+  GovernedHandoffReentryActRecord,
+  GovernedHandoffResumptionActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
@@ -90,6 +92,14 @@ import {
   GOVERNED_HANDOFF_RECALL_TRACEABILITY,
 } from "../handoff-recall.js";
 import { isHrtcmRecallTriggerId } from "../handoff-hrtcm.js";
+import {
+  GOVERNED_HANDOFF_HERCM_TRACEABILITY,
+  isHercmReentryCategoryId,
+  isHercmResumptionCategoryId,
+  isReentryConstitutionalBasisKind,
+  isResumptionConstitutionalBasisKind,
+  resolveHercmCategory,
+} from "../handoff-hercm.js";
 import { GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY } from "../handoff-downstream-exit-boundary.js";
 import {
   assertHgaActTypeStringFailClosed,
@@ -149,6 +159,8 @@ const ID_PREFIXES = {
   handoffSuspensionAct: "governed-handoff-suspension-act-",
   handoffWithdrawalAct: "governed-handoff-withdrawal-act-",
   handoffRecallAct: "governed-handoff-recall-act-",
+  handoffResumptionAct: "governed-handoff-resumption-act-",
+  handoffReentryAct: "governed-handoff-reentry-act-",
   handoffDownstreamExitBoundaryAttribution:
     "governed-handoff-downstream-exit-boundary-attribution-",
   hoemAuthorizationOperative: "hoem-authorization-operative-",
@@ -157,8 +169,85 @@ const ID_PREFIXES = {
   hoemSuspensionOperative: "hoem-suspension-operative-",
   hoemWithdrawalOperative: "hoem-withdrawal-operative-",
   hoemRecallOperative: "hoem-recall-operative-",
+  hoemResumptionOperative: "hoem-resumption-operative-",
+  hoemReentryOperative: "hoem-reentry-operative-",
   hoemExitBoundary: "hoem-exit-boundary-",
 } as const;
+
+/**
+ * R132/R138/R139 — keys a persisted HERCM act may never carry. Restoration, resurrection,
+ * automatic recovery, peer-act substitution, and execution are all non-operative here.
+ * Legitimate HERCM linkage fields (resumedSuspensionActId, predecessorWithdrawalActId,
+ * predecessorRecallActId) are deliberately absent from this list.
+ */
+const HERCM_FORBIDDEN_PERSISTED_KEYS = [
+  "restoreHandoff",
+  "restorationActId",
+  "reinstateHandoff",
+  "reviveHandoff",
+  "reactivateHandoff",
+  "resurrectAuthorization",
+  "resurrectPosture",
+  "autoResume",
+  "autoReenter",
+  "autoRestore",
+  "automaticRecovery",
+  "automaticRetry",
+  "exportReadyAlone",
+  "eligibilityAlone",
+  "suspendHandoff",
+  "withdrawHandoff",
+  "recallHandoff",
+  "expireHandoff",
+  "completeHandoff",
+  "suspensionActId",
+  "withdrawalActId",
+  "recallActId",
+  "expiryActId",
+  "completionActId",
+  "newAuthorizationActId",
+  "mintAuthorization",
+  "authorizeHandoff",
+  "declarePosture",
+  "newPostureDeclarationActId",
+  "executesHandoff",
+  "handoffExecuted",
+  "performHandoff",
+  "manufacturingExecutionId",
+  "fulfillmentExecutionId",
+  "productionExecutionId",
+  "executionQueueId",
+  "constitutionalQueueId",
+  "brainResumeHandoff",
+  "brainReenterHandoff",
+  "brainHandoffResumption",
+  "brainHandoffReentry",
+  "brainAuthorizesHandoff",
+  "rejectHandoff",
+  "performHgaAct",
+  "performG6LifecycleAct",
+  "applyLifecycleState",
+  "hslmState",
+  "hgaMatrixActType",
+  "matrixActType",
+  "constitutionalBasisNotes",
+] as const;
+
+/** Cross-kind leakage: a resumption may not carry re-entry identity, and vice versa. */
+const HERCM_FORBIDDEN_RESUMPTION_KEYS = [
+  "reentryActId",
+  "hoemReentryRecord",
+  "reenterHandoff",
+  "predecessorWithdrawalActId",
+  "predecessorRecallActId",
+] as const;
+
+const HERCM_FORBIDDEN_REENTRY_KEYS = [
+  "resumptionActId",
+  "hoemResumptionRecord",
+  "resumeHandoff",
+  "resumedSuspensionActId",
+] as const;
 
 const LEGAL_CONDITIONAL_FAIL_ROUTES = ["conditional_route", "fail_route"] as const;
 const LEGAL_DOWNSTREAM_ROUTES = [
@@ -507,6 +596,36 @@ function assertStd015HofG6U4Traceability(
         `${label} traceability must include ${required}`,
         errorCode,
         ["FI-DSN-STD-015-R112", "FI-DSN-STD-015-R125"],
+      );
+    }
+  }
+}
+
+function assertStd015HercmTraceability(
+  traceability: unknown,
+  label: string,
+  errorCode: "invalid_handoff_resumption" | "invalid_handoff_reentry",
+): void {
+  if (
+    !traceability ||
+    typeof traceability !== "object" ||
+    (traceability as Record<string, unknown>).governingStandardId !== STD015_GOVERNING_STANDARD ||
+    !Array.isArray((traceability as Record<string, unknown>).requirementIds) ||
+    ((traceability as Record<string, unknown>).requirementIds as unknown[]).length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      `${label} requires FI-DSN-STD-015 HERCM traceability`,
+      errorCode,
+      ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R139"],
+    );
+  }
+  const ids = (traceability as Record<string, unknown>).requirementIds as unknown[];
+  for (const required of GOVERNED_HANDOFF_HERCM_TRACEABILITY.requirementIds) {
+    if (!ids.includes(required)) {
+      throw new OrchestraConstitutionalError(
+        `${label} traceability must include ${required}`,
+        errorCode,
+        ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R139"],
       );
     }
   }
@@ -4798,6 +4917,514 @@ export function validatePersistedGovernedHandoffRecall(
       "Governed Handoff recall act requires valid governed creation marker",
       "invalid_handoff_recall",
       ["FI-DSN-STD-015-R112"],
+    );
+  }
+}
+
+/**
+ * HERCM REC-02 resumption (R126–R139).
+ *
+ * Deliberately does NOT call assertHgaMatrixActMayBePerformed: resumption is a peer
+ * NON-MATRIX HGA act and routing it through the six-type matrix would fail closed (R126).
+ */
+export function validatePersistedGovernedHandoffResumption(
+  raw: unknown,
+): asserts raw is GovernedHandoffResumptionActRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff resumption",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R126"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.resumptionActId,
+    ID_PREFIXES.handoffResumptionAct,
+    "Governed Handoff resumption act",
+  );
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(record.bindingId, ID_PREFIXES.handoffConsumerBinding, "Governed Handoff consumer binding");
+  assertBrandedId(record.authorizationActId, ID_PREFIXES.handoffAuthorizationAct, "Governed Handoff authorization act");
+  assertBrandedId(record.resumedSuspensionActId, ID_PREFIXES.handoffSuspensionAct, "Governed Handoff suspension act");
+  if (record.postureDeclarationActId != null) {
+    assertBrandedId(record.postureDeclarationActId, ID_PREFIXES.handoffPostureDeclarationAct, "Governed Handoff posture declaration act");
+  }
+  assertBrandedId(record.preparationId, ID_PREFIXES.handoffPreparation, "Governed Handoff preparation");
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (
+    typeof record.handoffConsumerContextId !== "string" ||
+    !record.handoffConsumerContextId.trim() ||
+    typeof record.resumedBy !== "string" ||
+    !record.resumedBy.trim() ||
+    typeof record.resumedAt !== "string" ||
+    !record.resumedAt.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption requires context, resumedBy, and resumedAt",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R134"],
+    );
+  }
+  if (
+    !isCanonicalEstablishedHandoffGovernanceAuthorityClassId(record.authorityClassId) ||
+    record.authorityGoverningSourceId !== "PD-STD-015-001" ||
+    record.authorityConstitutionalScope !== "handoff_resumption_act"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption requires established HGA resumption scope (R126)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R126"],
+    );
+  }
+  if (!isHercmResumptionCategoryId(record.hercmCategory)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption requires closed HERCM resumption category REC-02 (R127/R131)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R127", "FI-DSN-STD-015-R131"],
+    );
+  }
+  if (
+    record.hercmQualifyingPriorState !==
+    resolveHercmCategory(record.hercmCategory).qualifyingPriorState
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption qualifying prior state must be suspended (R131/R133)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R131", "FI-DSN-STD-015-R133"],
+    );
+  }
+  if (!isResumptionConstitutionalBasisKind(record.constitutionalBasisKind)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption requires the closed REC-02 constitutional basis kind (R131)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R131"],
+    );
+  }
+  const resumptionProvenance = record.constitutionalBasisProvenance as
+    | Record<string, unknown>
+    | null;
+  if (
+    !resumptionProvenance ||
+    typeof resumptionProvenance !== "object" ||
+    resumptionProvenance.basisKind !== record.constitutionalBasisKind ||
+    resumptionProvenance.notesCannotBeSoleBasis !== true ||
+    (resumptionProvenance.notes !== null && typeof resumptionProvenance.notes !== "string")
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption basis provenance is incoherent; notes cannot be the sole basis (R131)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R131"],
+    );
+  }
+  if (
+    !isHccmConsumerClassId(record.consumerClassId) ||
+    (record.declaredPostureClass != null &&
+      !isFrozenHandoffPostureClass(record.declaredPostureClass))
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption requires closed consumer and posture classes (R130/R133)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R130", "FI-DSN-STD-015-R133"],
+    );
+  }
+
+  const hoemResumption = record.hoemResumptionRecord as Record<string, unknown> | null;
+  if (!hoemResumption || typeof hoemResumption !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption requires HOEM resumption operative record (R136)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R136"],
+    );
+  }
+  assertBrandedId(
+    hoemResumption.hoemResumptionRecordId,
+    ID_PREFIXES.hoemResumptionOperative,
+    "HOEM resumption operative record",
+  );
+  if (
+    hoemResumption.resumptionActId !== record.resumptionActId ||
+    hoemResumption.actType !== "resumption" ||
+    hoemResumption.hercmCategory !== record.hercmCategory ||
+    hoemResumption.qualifyingPriorState !== record.hercmQualifyingPriorState ||
+    hoemResumption.gpraId !== record.gpraId ||
+    hoemResumption.obligationId !== record.obligationId ||
+    hoemResumption.handoffConsumerContextId !== record.handoffConsumerContextId ||
+    hoemResumption.bindingId !== record.bindingId ||
+    hoemResumption.consumerClassId !== record.consumerClassId ||
+    hoemResumption.authorizationActId !== record.authorizationActId ||
+    hoemResumption.postureDeclarationActId !== record.postureDeclarationActId ||
+    hoemResumption.resumedSuspensionActId !== record.resumedSuspensionActId ||
+    hoemResumption.constitutionalBasisKind !== record.constitutionalBasisKind ||
+    hoemResumption.effectiveAt !== record.resumedAt ||
+    hoemResumption.doesNotMergeAuthorizationAttribution !== true ||
+    hoemResumption.doesNotMergePostureDeclarationAttribution !== true ||
+    hoemResumption.doesNotMergeCompletionAttribution !== true ||
+    hoemResumption.doesNotMergeSuspensionAttribution !== true ||
+    hoemResumption.doesNotMergeWithdrawalAttribution !== true ||
+    hoemResumption.doesNotMergeRecallAttribution !== true ||
+    hoemResumption.doesNotMergeReentryAttribution !== true ||
+    hoemResumption.doesNotMergeLifecycleAttribution !== true ||
+    hoemResumption.notHgaMatrixActType !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "HOEM resumption operative record is incoherent or merges peer act types (R136)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R136"],
+    );
+  }
+
+  if (
+    record.forwardRelianceRestoredOnExistingAuthorization !== true ||
+    record.samePostureChainRetained !== true ||
+    record.doesNotMintNewAuthorization !== true ||
+    record.doesNotMintNewPostureDeclaration !== true ||
+    record.doesNotEraseSuspensionHistory !== true ||
+    record.doesNotEraseWithdrawalHistory !== true ||
+    record.doesNotEraseRecallHistory !== true ||
+    record.notHandoffSuspension !== true ||
+    record.notHandoffWithdrawal !== true ||
+    record.notHandoffRecall !== true ||
+    record.notHandoffCompletion !== true ||
+    record.notHercmReentry !== true ||
+    record.notRestoration !== true ||
+    record.notAutomaticRecovery !== true ||
+    record.effectFraming !== "forward_reliance_resumption_on_existing_authorization" ||
+    record.notHandoffAuthorization !== true ||
+    record.notHandoffPostureDeclaration !== true ||
+    record.notHandoffExecution !== true ||
+    record.notDownstreamAcceptance !== true ||
+    record.notPermanentCollectionMembership !== true ||
+    record.doesNotAuthorizeManufacturingOrFulfillment !== true ||
+    record.doesNotCollapsePeerDecisionClasses !== true ||
+    record.doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory !== true ||
+    record.doesNotMergeAcrossConsumerClasses !== true ||
+    record.notAutomaticHslmPromotion !== true ||
+    record.hslmProjectionFromActFacts !== true ||
+    record.hslmRemainsEightStates !== true ||
+    record.notHgaMatrixActType !== true ||
+    record.r126DistinctHercmResumptionAct !== true ||
+    record.r127ClosedHercmCategorySet !== true ||
+    record.r128ExportReadyAuthorizesConsiderationOnly !== true ||
+    record.r129NoAutomaticRecoveryAndInvalidatedBlocks !== true ||
+    record.r130SingleBindingPostureChain !== true ||
+    record.r131CategoryConditionsSatisfied !== true ||
+    record.r132ForwardRelianceOnExistingAuthorization !== true ||
+    record.r133SamePostureChainAndQualifyingPriorState !== true ||
+    record.r134ProspectiveFromResumedAtNoRewrite !== true ||
+    record.r135AdditivePreservationOfPriorHistory !== true ||
+    record.r136HoemResumptionOperativeRecord !== true ||
+    record.r137NotAutomaticHslmPromotionHslmStaysEight !== true ||
+    record.r138InvalidAttemptsNonOperative !== true ||
+    record.r139RepeatedHercmActsAdditiveNotSubstitute !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff resumption must carry HERCM constitutional markers (R126–R139)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R139"],
+    );
+  }
+
+  for (const key of [
+    ...HERCM_FORBIDDEN_PERSISTED_KEYS,
+    ...HERCM_FORBIDDEN_RESUMPTION_KEYS,
+  ]) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff resumption must not carry re-entry/restoration/authorization/execution fields (R132/R138/R139)",
+        "invalid_handoff_resumption",
+        ["FI-DSN-STD-015-R132", "FI-DSN-STD-015-R139"],
+      );
+    }
+  }
+  assertAuditMetadata(record.audit, "Governed Handoff resumption act");
+  assertStd015HercmTraceability(
+    record.traceability,
+    "Governed Handoff resumption act",
+    "invalid_handoff_resumption",
+  );
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff resumption act requires valid governed creation marker",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R126"],
+    );
+  }
+}
+
+/**
+ * HERCM REC-01/03/04/05 re-entry (R126–R139).
+ *
+ * Deliberately does NOT call assertHgaMatrixActMayBePerformed: re-entry is a peer
+ * NON-MATRIX HGA act and routing it through the six-type matrix would fail closed (R126).
+ */
+export function validatePersistedGovernedHandoffReentry(
+  raw: unknown,
+): asserts raw is GovernedHandoffReentryActRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff re-entry",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R126"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.reentryActId,
+    ID_PREFIXES.handoffReentryAct,
+    "Governed Handoff re-entry act",
+  );
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(record.bindingId, ID_PREFIXES.handoffConsumerBinding, "Governed Handoff consumer binding");
+  assertBrandedId(record.predecessorAuthorizationActId, ID_PREFIXES.handoffAuthorizationAct, "Governed Handoff authorization act");
+  if (record.predecessorPostureDeclarationActId != null) {
+    assertBrandedId(record.predecessorPostureDeclarationActId, ID_PREFIXES.handoffPostureDeclarationAct, "Governed Handoff posture declaration act");
+  }
+  if (record.predecessorWithdrawalActId != null) {
+    assertBrandedId(record.predecessorWithdrawalActId, ID_PREFIXES.handoffWithdrawalAct, "Governed Handoff withdrawal act");
+  }
+  if (record.predecessorRecallActId != null) {
+    assertBrandedId(record.predecessorRecallActId, ID_PREFIXES.handoffRecallAct, "Governed Handoff recall act");
+  }
+  assertBrandedId(record.preparationId, ID_PREFIXES.handoffPreparation, "Governed Handoff preparation");
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (
+    typeof record.handoffConsumerContextId !== "string" ||
+    !record.handoffConsumerContextId.trim() ||
+    typeof record.reenteredBy !== "string" ||
+    !record.reenteredBy.trim() ||
+    typeof record.reenteredAt !== "string" ||
+    !record.reenteredAt.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry requires context, reenteredBy, and reenteredAt",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R134"],
+    );
+  }
+  if (
+    !isCanonicalEstablishedHandoffGovernanceAuthorityClassId(record.authorityClassId) ||
+    record.authorityGoverningSourceId !== "PD-STD-015-001" ||
+    record.authorityConstitutionalScope !== "handoff_reentry_act"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry requires established HGA re-entry scope (R126)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R126"],
+    );
+  }
+  if (!isHercmReentryCategoryId(record.hercmCategory)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry requires closed HERCM re-entry category REC-01/03/04/05 (R127/R131)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R127", "FI-DSN-STD-015-R131"],
+    );
+  }
+  const reentryCategory = resolveHercmCategory(record.hercmCategory);
+  if (
+    record.hercmQualifyingPriorState !== reentryCategory.qualifyingPriorState ||
+    record.constitutionalBasisKind !== reentryCategory.basisKind ||
+    record.requiresNewPostureAfterNewAuthorization !==
+      reentryCategory.requiresNewPostureAfterNewAuthorization
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry does not match its HERCM category conditions (R131/R132/R133)",
+      "invalid_handoff_reentry",
+      [
+        "FI-DSN-STD-015-R131",
+        "FI-DSN-STD-015-R132",
+        "FI-DSN-STD-015-R133",
+      ],
+    );
+  }
+  if (!isReentryConstitutionalBasisKind(record.constitutionalBasisKind)) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry requires a closed HERCM constitutional basis kind (R131)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R131"],
+    );
+  }
+  const reentryProvenance = record.constitutionalBasisProvenance as
+    | Record<string, unknown>
+    | null;
+  if (
+    !reentryProvenance ||
+    typeof reentryProvenance !== "object" ||
+    reentryProvenance.basisKind !== record.constitutionalBasisKind ||
+    reentryProvenance.notesCannotBeSoleBasis !== true ||
+    (reentryProvenance.notes !== null && typeof reentryProvenance.notes !== "string")
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry basis provenance is incoherent; notes cannot be the sole basis (R131)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R131"],
+    );
+  }
+  // Rejected is denotation-only (R48/R51) and expiry acts remain deferred to R140+.
+  if (
+    record.predecessorRejectionAttributionId !== null ||
+    record.predecessorExpiryActId !== null
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry must not forge a rejection or expiry act predecessor (R133/R137)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R133", "FI-DSN-STD-015-R137"],
+    );
+  }
+  if (
+    !isHccmConsumerClassId(record.consumerClassId) ||
+    (record.declaredPostureClass != null &&
+      !isFrozenHandoffPostureClass(record.declaredPostureClass))
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry requires closed consumer and posture classes (R130)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R130"],
+    );
+  }
+
+  const hoemReentry = record.hoemReentryRecord as Record<string, unknown> | null;
+  if (!hoemReentry || typeof hoemReentry !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry requires HOEM re-entry operative record (R136)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R136"],
+    );
+  }
+  assertBrandedId(
+    hoemReentry.hoemReentryRecordId,
+    ID_PREFIXES.hoemReentryOperative,
+    "HOEM re-entry operative record",
+  );
+  if (
+    hoemReentry.reentryActId !== record.reentryActId ||
+    hoemReentry.actType !== "reentry" ||
+    hoemReentry.hercmCategory !== record.hercmCategory ||
+    hoemReentry.qualifyingPriorState !== record.hercmQualifyingPriorState ||
+    hoemReentry.gpraId !== record.gpraId ||
+    hoemReentry.obligationId !== record.obligationId ||
+    hoemReentry.handoffConsumerContextId !== record.handoffConsumerContextId ||
+    hoemReentry.bindingId !== record.bindingId ||
+    hoemReentry.consumerClassId !== record.consumerClassId ||
+    hoemReentry.predecessorAuthorizationActId !== record.predecessorAuthorizationActId ||
+    hoemReentry.predecessorPostureDeclarationActId !==
+      record.predecessorPostureDeclarationActId ||
+    hoemReentry.predecessorWithdrawalActId !== record.predecessorWithdrawalActId ||
+    hoemReentry.predecessorRecallActId !== record.predecessorRecallActId ||
+    hoemReentry.predecessorRejectionAttributionId !== null ||
+    hoemReentry.predecessorExpiryActId !== null ||
+    hoemReentry.constitutionalBasisKind !== record.constitutionalBasisKind ||
+    hoemReentry.effectiveAt !== record.reenteredAt ||
+    hoemReentry.doesNotMergeAuthorizationAttribution !== true ||
+    hoemReentry.doesNotMergePostureDeclarationAttribution !== true ||
+    hoemReentry.doesNotMergeCompletionAttribution !== true ||
+    hoemReentry.doesNotMergeSuspensionAttribution !== true ||
+    hoemReentry.doesNotMergeWithdrawalAttribution !== true ||
+    hoemReentry.doesNotMergeRecallAttribution !== true ||
+    hoemReentry.doesNotMergeResumptionAttribution !== true ||
+    hoemReentry.doesNotMergeLifecycleAttribution !== true ||
+    hoemReentry.notHgaMatrixActType !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "HOEM re-entry operative record is incoherent or merges peer act types (R136)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R136"],
+    );
+  }
+
+  if (
+    record.returnsTowardEligibleForConsiderationOnly !== true ||
+    record.requiresNewAuthorizationViaG2 !== true ||
+    typeof record.requiresNewPostureAfterNewAuthorization !== "boolean" ||
+    record.doesNotResurrectAuthorization !== true ||
+    record.doesNotResurrectPosture !== true ||
+    record.doesNotMintNewAuthorization !== true ||
+    record.doesNotMintNewPostureDeclaration !== true ||
+    record.doesNotEraseSuspensionHistory !== true ||
+    record.doesNotEraseWithdrawalHistory !== true ||
+    record.doesNotEraseRecallHistory !== true ||
+    record.notHandoffSuspension !== true ||
+    record.notHandoffWithdrawal !== true ||
+    record.notHandoffRecall !== true ||
+    record.notHandoffCompletion !== true ||
+    record.notHercmResumption !== true ||
+    record.notRestoration !== true ||
+    record.notAutomaticRecovery !== true ||
+    record.effectFraming !== "return_toward_eligible_for_consideration" ||
+    record.notHandoffAuthorization !== true ||
+    record.notHandoffPostureDeclaration !== true ||
+    record.notHandoffExecution !== true ||
+    record.notDownstreamAcceptance !== true ||
+    record.notPermanentCollectionMembership !== true ||
+    record.doesNotAuthorizeManufacturingOrFulfillment !== true ||
+    record.doesNotCollapsePeerDecisionClasses !== true ||
+    record.doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory !== true ||
+    record.doesNotMergeAcrossConsumerClasses !== true ||
+    record.notAutomaticHslmPromotion !== true ||
+    record.hslmProjectionFromActFacts !== true ||
+    record.hslmRemainsEightStates !== true ||
+    record.notHgaMatrixActType !== true ||
+    record.r126DistinctHercmReentryAct !== true ||
+    record.r127ClosedHercmCategorySet !== true ||
+    record.r128ExportReadyAuthorizesConsiderationOnly !== true ||
+    record.r129NoAutomaticRecoveryAndInvalidatedBlocks !== true ||
+    record.r130SingleBindingPostureChain !== true ||
+    record.r131CategoryConditionsSatisfied !== true ||
+    record.r132ReturnTowardEligibleRequiresNewAuthorization !== true ||
+    record.r133QualifyingPriorStateRequired !== true ||
+    record.r134ProspectiveFromReenteredAtNoRewrite !== true ||
+    record.r135AdditivePreservationOfPriorHistory !== true ||
+    record.r136HoemReentryOperativeRecord !== true ||
+    record.r137NotAutomaticHslmPromotionHslmStaysEight !== true ||
+    record.r138InvalidAttemptsNonOperative !== true ||
+    record.r139RepeatedHercmActsAdditiveNotSubstitute !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted Handoff re-entry must carry HERCM constitutional markers (R126–R139)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R139"],
+    );
+  }
+
+  for (const key of [
+    ...HERCM_FORBIDDEN_PERSISTED_KEYS,
+    ...HERCM_FORBIDDEN_REENTRY_KEYS,
+  ]) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted Handoff re-entry must not carry resumption/restoration/authorization/execution fields (R132/R138/R139)",
+        "invalid_handoff_reentry",
+        ["FI-DSN-STD-015-R132", "FI-DSN-STD-015-R139"],
+      );
+    }
+  }
+  assertAuditMetadata(record.audit, "Governed Handoff re-entry act");
+  assertStd015HercmTraceability(
+    record.traceability,
+    "Governed Handoff re-entry act",
+    "invalid_handoff_reentry",
+  );
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff re-entry act requires valid governed creation marker",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R126"],
     );
   }
 }

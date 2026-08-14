@@ -42,6 +42,8 @@ import type {
   GovernedHandoffSuspensionActRecord,
   GovernedHandoffWithdrawalActRecord,
   GovernedHandoffRecallActRecord,
+  GovernedHandoffResumptionActRecord,
+  GovernedHandoffReentryActRecord,
 } from "./domain3-types.js";
 import { OrchestraConstitutionalError } from "./errors.js";
 import {
@@ -358,6 +360,21 @@ export function evaluateHandoffCompletionCurrencyFromFacts(input: {
  * Does NOT invent Rejected from absence of auth/posture (R57).
  * Does NOT invent suspended/withdrawn/recalled/expired from GPRA invalidation.
  * Rejected remains R48 vocabulary / R51 meaning until G2/G4 withhold facts exist.
+ *
+ * HERCM (R126–R139) is additive and adds NO HSLM state — the vocabulary stays exactly
+ * eight, with no `reentered` or `resumed` (R137). A current HERCM tip only changes which
+ * prior tip controls the projection:
+ *
+ * - A current REC-02 resumption lifts the suspension pause, so `suspended` is no longer
+ *   projected and the binding continues to completed/authorized/eligible on its EXISTING
+ *   authorization and posture chain (R132/R133).
+ * - A current REC-01/03/04/05 re-entry makes the qualifying cessation tip historical, so
+ *   `withdrawn`/`recalled` are no longer projected. Re-entry returns the binding toward
+ *   `eligible_for_consideration` ONLY: the predecessor authorization is never resurrected,
+ *   and `authorized` requires a NEW authorization minted at or after the re-entry (R132).
+ *
+ * Neither act deletes a tip (R135) — cessation records remain loadable and still block a
+ * second withdrawal or recall under R100/R114.
  */
 export function evaluateHandoffActLayerLifecycleFromFacts(input: {
   binding: GovernedHandoffConsumerBindingRecord | null;
@@ -378,33 +395,92 @@ export function evaluateHandoffActLayerLifecycleFromFacts(input: {
   withdrawalIsCurrent?: boolean;
   authoritativeRecall?: GovernedHandoffRecallActRecord | null;
   recallIsCurrent?: boolean;
+  authoritativeResumption?: GovernedHandoffResumptionActRecord | null;
+  resumptionIsCurrent?: boolean;
+  authoritativeReentry?: GovernedHandoffReentryActRecord | null;
+  reentryIsCurrent?: boolean;
 }): HandoffActLayerLifecycleEvaluation {
+  const recallControls = Boolean(input.authoritativeRecall && input.recallIsCurrent);
+  const withdrawalControls = Boolean(
+    input.authoritativeWithdrawal && input.withdrawalIsCurrent,
+  );
+  const suspensionControls = Boolean(
+    input.authoritativeSuspension && input.suspensionIsCurrent,
+  );
+
+  const resumption =
+    input.authoritativeResumption && input.resumptionIsCurrent
+      ? input.authoritativeResumption
+      : null;
+  const reentry =
+    input.authoritativeReentry && input.reentryIsCurrent ? input.authoritativeReentry : null;
+
+  // R132/R133 — a resumption only lifts the pause of the suspension it targets, and only
+  // when nothing later re-suspended the binding.
+  const resumptionClearsSuspendedProjection = Boolean(
+    resumption &&
+      suspensionControls &&
+      input.authoritativeSuspension &&
+      resumption.resumedSuspensionActId ===
+        input.authoritativeSuspension.suspensionActId &&
+      resumption.resumedAt.localeCompare(input.authoritativeSuspension.suspendedAt) >= 0,
+  );
+
+  // R135 — the cessation tip survives; it simply stops controlling once a later re-entry
+  // is current. A cessation minted after the re-entry controls again.
+  const cessationAt = recallControls
+    ? input.authoritativeRecall!.recalledAt
+    : withdrawalControls
+      ? input.authoritativeWithdrawal!.withdrawnAt
+      : null;
+  const reentryClearsCessationProjection = Boolean(
+    reentry &&
+      cessationAt != null &&
+      reentry.reenteredAt.localeCompare(cessationAt) >= 0,
+  );
+
+  const bindingLineageEligible = Boolean(
+    input.entry &&
+      input.binding &&
+      input.entryCurrency === "current" &&
+      input.bindingCurrency === "current" &&
+      input.eligibilityLayerCondition === "export_ready" &&
+      input.gpraValidityPosture === "retention" &&
+      input.lineageMatchesAuthoritativeGpra,
+  );
+
+  const authorizationControls = Boolean(
+    input.matchingAuthorization &&
+      input.authorizationCurrency === "current" &&
+      input.binding &&
+      input.matchingAuthorization.consumerClassId === input.binding.consumerClassId,
+  );
+
   let currentState: HandoffActLayerLifecycleState | null = null;
 
-  if (input.authoritativeRecall && input.recallIsCurrent) {
+  if (reentryClearsCessationProjection && reentry) {
+    // R132 — return toward Eligible-for-consideration ONLY. The predecessor authorization
+    // is not resurrected: `authorized` requires a NEW authorization at or after re-entry.
+    const newAuthorizationAfterReentry = Boolean(
+      authorizationControls &&
+        input.matchingAuthorization!.authorizedAt.localeCompare(reentry.reenteredAt) >= 0,
+    );
+    if (newAuthorizationAfterReentry) {
+      currentState = "authorized";
+    } else if (bindingLineageEligible) {
+      currentState = "eligible_for_consideration";
+    }
+  } else if (recallControls) {
     currentState = "recalled";
-  } else if (input.authoritativeWithdrawal && input.withdrawalIsCurrent) {
+  } else if (withdrawalControls) {
     currentState = "withdrawn";
-  } else if (input.authoritativeSuspension && input.suspensionIsCurrent) {
+  } else if (suspensionControls && !resumptionClearsSuspendedProjection) {
     currentState = "suspended";
   } else if (input.authoritativeCompletion && input.completionIsCurrent) {
     currentState = "completed";
-  } else if (
-    input.matchingAuthorization &&
-    input.authorizationCurrency === "current" &&
-    input.binding &&
-    input.matchingAuthorization.consumerClassId === input.binding.consumerClassId
-  ) {
+  } else if (authorizationControls) {
     currentState = "authorized";
-  } else if (
-    input.entry &&
-    input.binding &&
-    input.entryCurrency === "current" &&
-    input.bindingCurrency === "current" &&
-    input.eligibilityLayerCondition === "export_ready" &&
-    input.gpraValidityPosture === "retention" &&
-    input.lineageMatchesAuthoritativeGpra
-  ) {
+  } else if (bindingLineageEligible) {
     currentState = "eligible_for_consideration";
   }
 
@@ -417,6 +493,10 @@ export function evaluateHandoffActLayerLifecycleFromFacts(input: {
     authoritativeSuspensionActId: input.authoritativeSuspension?.suspensionActId ?? null,
     authoritativeWithdrawalActId: input.authoritativeWithdrawal?.withdrawalActId ?? null,
     authoritativeRecallActId: input.authoritativeRecall?.recallActId ?? null,
+    authoritativeResumptionActId: resumption?.resumptionActId ?? null,
+    authoritativeReentryActId: reentry?.reentryActId ?? null,
+    resumptionClearsSuspendedProjection,
+    reentryClearsCessationProjection,
     authoritativeRejectionAttributionId: null,
     authoritativePostureDeclarationActId:
       input.authoritativePosture?.postureDeclarationActId ?? null,
@@ -435,6 +515,10 @@ export function evaluateHandoffActLayerLifecycleFromFacts(input: {
     suspensionMechanicsOperative: true as const,
     withdrawalMechanicsOperative: true as const,
     recallMechanicsOperative: true as const,
+    hercmMechanicsOperative: true as const,
+    hslmRemainsEightStates: true as const,
+    noReenteredOrResumedHslmState: true as const,
+    r140PlusUnavailable: true as const,
     r48ClosedHslmVocabulary: true as const,
     r49PeerDistinctLifecycle: true as const,
     r50SingleBindingPostureChain: true as const,

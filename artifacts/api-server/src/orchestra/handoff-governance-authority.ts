@@ -11,10 +11,13 @@
  *
  * R66 catalog integration: the mandatory HGA act-type matrix catalogs six types
  * (authorization, posture_declaration, completion, suspension, withdrawal, recall).
- * authorizedConstitutionalScopes includes the five operative scopes below
+ * authorizedConstitutionalScopes includes those six matrix scopes
  * (HOF-G6-U2 activates handoff_suspension_act; HOF-G6-U3 activates handoff_withdrawal_act;
- * HOF-G6-U4 activates handoff_recall_act).
- * See handoff-authority-catalog.ts and handoff-lifecycle-g6-foundation.ts.
+ * HOF-G6-U4 activates handoff_recall_act) PLUS the two peer NON-MATRIX HERCM scopes
+ * handoff_resumption_act and handoff_reentry_act (R126–R139). HERCM acts are performed
+ * under the established HGA class but are NOT matrix act types — adding them to the
+ * matrix remains prohibited until R140.
+ * See handoff-authority-catalog.ts, handoff-hercm.ts, and handoff-lifecycle-g6-foundation.ts.
  */
 
 import { OrchestraConstitutionalError } from "./errors.js";
@@ -26,7 +29,9 @@ export type HandoffGovernanceAuthorityConstitutionalScope =
   | "handoff_completion_act"
   | "handoff_suspension_act"
   | "handoff_withdrawal_act"
-  | "handoff_recall_act";
+  | "handoff_recall_act"
+  | "handoff_resumption_act"
+  | "handoff_reentry_act";
 
 export interface EstablishedHandoffGovernanceAuthorityClass {
   readonly authorityClassId: HandoffGovernanceAuthorityClassId;
@@ -76,6 +81,8 @@ export const FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES: readonly E
         "handoff_suspension_act",
         "handoff_withdrawal_act",
         "handoff_recall_act",
+        "handoff_resumption_act",
+        "handoff_reentry_act",
       ] as const),
     }),
   ]);
@@ -230,6 +237,50 @@ export function assertEstablishedHandoffGovernanceAuthorityForRecall(
       "Established HGA does not authorize handoff_recall_act scope (R112/R113)",
       "invalid_handoff_recall",
       ["FI-DSN-STD-015-R112", "FI-DSN-STD-015-R113"],
+    );
+  }
+}
+
+export function assertEstablishedHandoffGovernanceAuthorityForResumption(
+  authorityClassId: unknown,
+): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Handoff resumption requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint HERCM resumption authority (R70/R126)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R126"],
+    );
+  }
+  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
+    authorityClassId as HandoffGovernanceAuthorityClassId,
+  );
+  if (!resolved.authorizedConstitutionalScopes.includes("handoff_resumption_act")) {
+    throw new OrchestraConstitutionalError(
+      "Established HGA does not authorize handoff_resumption_act scope (R126/R130)",
+      "invalid_handoff_resumption",
+      ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R130"],
+    );
+  }
+}
+
+export function assertEstablishedHandoffGovernanceAuthorityForReentry(
+  authorityClassId: unknown,
+): asserts authorityClassId is HandoffGovernanceAuthorityClassId {
+  if (!isCanonicalEstablishedHandoffGovernanceAuthorityClassId(authorityClassId)) {
+    throw new OrchestraConstitutionalError(
+      "Handoff re-entry requires constitutionally established HGA; Brain, MAGAC, DDAC, DSRA, IVAC, SSAC, GPRA, workflow, actor string, or fabricated ID cannot mint HERCM re-entry authority (R70/R126)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R70", "FI-DSN-STD-015-R126"],
+    );
+  }
+  const resolved = resolveEstablishedHandoffGovernanceAuthorityClass(
+    authorityClassId as HandoffGovernanceAuthorityClassId,
+  );
+  if (!resolved.authorizedConstitutionalScopes.includes("handoff_reentry_act")) {
+    throw new OrchestraConstitutionalError(
+      "Established HGA does not authorize handoff_reentry_act scope (R126/R130)",
+      "invalid_handoff_reentry",
+      ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R130"],
     );
   }
 }

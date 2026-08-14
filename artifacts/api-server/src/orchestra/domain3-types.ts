@@ -1791,6 +1791,13 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly authoritativeSuspensionActId: GovernedHandoffSuspensionActId | null;
   readonly authoritativeWithdrawalActId: GovernedHandoffWithdrawalActId | null;
   readonly authoritativeRecallActId: GovernedHandoffRecallActId | null;
+  /** HERCM tips (R126–R139) — additive; they do not add HSLM states. */
+  readonly authoritativeResumptionActId: GovernedHandoffResumptionActId | null;
+  readonly authoritativeReentryActId: GovernedHandoffReentryActId | null;
+  /** True when a current resumption tip supersedes the suspension tip for projection. */
+  readonly resumptionClearsSuspendedProjection: boolean;
+  /** True when a current re-entry tip supersedes withdrawn/recalled projection. */
+  readonly reentryClearsCessationProjection: boolean;
   /** Always null at G5 — Rejected is not an HGA act tip and no G2/G4 withhold facts exist. */
   readonly authoritativeRejectionAttributionId: null;
   readonly authoritativePostureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
@@ -1809,6 +1816,11 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly suspensionMechanicsOperative: true;
   readonly withdrawalMechanicsOperative: true;
   readonly recallMechanicsOperative: true;
+  readonly hercmMechanicsOperative: true;
+  readonly hslmRemainsEightStates: true;
+  readonly noReenteredOrResumedHslmState: true;
+  /** R140+ (catalog matrix integration to 8) remains deferred; matrix stays exactly 6. */
+  readonly r140PlusUnavailable: true;
   readonly r48ClosedHslmVocabulary: true;
   readonly r49PeerDistinctLifecycle: true;
   readonly r50SingleBindingPostureChain: true;
@@ -2104,6 +2116,10 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly prohibitedPerformerClasses: readonly ProhibitedHandoffActPerformerClass[];
   readonly haamProhibitedAssigneesPreserved: readonly HaamProhibitedHandoffAuthorizationAssignee[];
   readonly frozenHgaConstitutionalScopes: readonly string[];
+  /** Six matrix scopes plus the two peer non-matrix HERCM scopes (R126–R139). */
+  readonly frozenHgaConstitutionalScopeCount: 8;
+  readonly hercmConstitutionalScopesPresent: true;
+  readonly hercmActsAreNotMatrixActTypes: true;
   readonly handoffLifecycleRejectionActAbsentFromHgaScopes: true;
   readonly rejectHandoffActLayerUndefined: true;
   readonly withdrawRecallApisNotProvided: false;
@@ -2197,7 +2213,12 @@ export interface HofG6U1SharedLifecycleFoundationAssessment {
   readonly rejectionActAbsent: true;
   readonly exitHgaMatrixActAbsent: true;
   readonly hslmEightStatesPreserved: true;
-  readonly restorationResumptionReentryDeferred: true;
+  /** HERCM R126–R139 is operative; restoration/expiry acts remain deferred (R140+). */
+  readonly restorationResumptionReentryDeferred: false;
+  readonly resumptionMechanicsOperative: true;
+  readonly reentryMechanicsOperative: true;
+  readonly hercmActsAreNotMatrixActTypes: true;
+  readonly r140PlusUnavailable: true;
   readonly suspensionMechanicsOperative: true;
   readonly withdrawalMechanicsOperative: true;
   readonly r84PlusUnavailable: false;
@@ -2621,6 +2642,487 @@ export interface GovernedHandoffRecallActRecord {
   readonly r123RepeatedRecallsAdditive: true;
   readonly r124InvalidAttemptsNonOperative: true;
   readonly r125NotSuspensionWithdrawalOrReentry: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+// --- STD-015 HERCM re-entry / resumption (R126–R139) ---
+
+/**
+ * HERCM closed category ids — Handoff Re-entry & Resumption Category Model.
+ * REC-02 is the sole resumption category; REC-01/03/04/05 are re-entry categories.
+ * HERCM acts are performed under the established HGA class but are NOT HGA matrix
+ * act types — matrix membership remains exactly six (R66; R140 deferred).
+ */
+export type HercmCategoryId = "REC-01" | "REC-02" | "REC-03" | "REC-04" | "REC-05";
+
+/** REC-02 only — restores forward reliance on existing authorization + posture. */
+export type HercmResumptionCategoryId = "REC-02";
+
+/** Re-entry categories — return toward Eligible-for-consideration only. */
+export type HercmReentryCategoryId = "REC-01" | "REC-03" | "REC-04" | "REC-05";
+
+export type HercmActKind = "resumption" | "reentry";
+
+/**
+ * Closed vocabulary for the REC-02 resumption constitutional basis.
+ * R131 supplies the category condition (suspension grounds cleared); the basis is
+ * recorded additively on the HOEM record under R136.
+ */
+export type ResumptionConstitutionalBasisKind =
+  "suspension_grounds_constitutionally_cleared";
+
+/**
+ * Closed vocabulary for HERCM re-entry constitutional basis, per R131 category condition.
+ */
+export type ReentryConstitutionalBasisKind =
+  | "rejection_grounds_constitutionally_addressable"
+  | "g11_export_ready_and_entry_inputs_satisfied_anew"
+  | "validity_or_time_boundary_addressed_upstream";
+
+/**
+ * HSLM state each HERCM category requires as the qualifying prior state.
+ * R131 fixes which prior state belongs to which category; R133 requires the
+ * qualifying prior state to actually hold (and, for REC-02, on the same posture chain).
+ */
+export type HercmQualifyingPriorState =
+  | "rejected"
+  | "suspended"
+  | "withdrawn"
+  | "recalled"
+  | "expired";
+
+/**
+ * Frozen HERCM category catalog entry — catalog membership does not mint HERCM acts.
+ */
+export interface HercmCategoryCatalogEntry {
+  readonly categoryId: HercmCategoryId;
+  readonly actKind: HercmActKind;
+  readonly qualifyingPriorState: HercmQualifyingPriorState;
+  readonly basisKind: ResumptionConstitutionalBasisKind | ReentryConstitutionalBasisKind;
+  /**
+   * R128 — G11 export_ready authorizes consideration only. Re-entry categories require it
+   * anew before the act may be considered; REC-02 does not (the pause is lifted, not re-entered).
+   */
+  readonly requiresExportReadyAnew: boolean;
+  /** R132 — re-entry returns toward eligible only; new authorization is required via HOF-G2. */
+  readonly requiresNewAuthorizationViaG2: boolean;
+  /** R132 — REC-04 additionally requires a new posture path after the new authorization. */
+  readonly requiresNewPostureAfterNewAuthorization: boolean;
+  /** R126 — HERCM acts are peer non-matrix; matrix membership stays six (R140 deferred). */
+  readonly isHgaMatrixActType: false;
+  readonly hgaConstitutionalScope:
+    | "handoff_resumption_act"
+    | "handoff_reentry_act";
+  readonly requirementIds: readonly Std015RequirementId[];
+}
+
+/**
+ * Frozen HERCM catalog integrity assessment (read-only; no minting).
+ */
+export interface HercmCatalogIntegrityAssessment {
+  readonly integrityOk: boolean;
+  readonly categoryIds: readonly HercmCategoryId[];
+  readonly categoryCount: 5;
+  readonly resumptionCategoryIds: readonly HercmResumptionCategoryId[];
+  readonly reentryCategoryIds: readonly HercmReentryCategoryId[];
+  readonly hgaMatrixActTypeCount: 6;
+  readonly hercmActsAreNotMatrixActTypes: true;
+  readonly hercmConstitutionalScopesPresent: true;
+  readonly hslmStateCount: 8;
+  readonly noReenteredHslmState: true;
+  readonly noResumedHslmState: true;
+  readonly catalogMembershipDoesNotCreateAuthority: true;
+  readonly catalogMembershipDoesNotReenter: true;
+  readonly catalogMembershipDoesNotResume: true;
+  readonly exportReadyAloneDoesNotReenterOrResume: true;
+  readonly noAutomaticRecovery: true;
+  readonly r126ThroughR139: true;
+  readonly r140PlusDeferred: true;
+  readonly traceability: Std015GovernanceTraceability;
+}
+
+export type GovernedHandoffResumptionActId = string & {
+  readonly __brand: "GovernedHandoffResumptionActId";
+};
+
+export type HoemResumptionOperativeRecordId = string & {
+  readonly __brand: "HoemResumptionOperativeRecordId";
+};
+
+export type GovernedHandoffReentryActId = string & {
+  readonly __brand: "GovernedHandoffReentryActId";
+};
+
+export type HoemReentryOperativeRecordId = string & {
+  readonly __brand: "HoemReentryOperativeRecordId";
+};
+
+export type HandoffResumptionCurrency = "current" | "stale";
+
+export type HandoffReentryCurrency = "current" | "stale";
+
+/**
+ * R131 — provenance for the REC-02 resumption category basis.
+ * Optional notes cannot be the sole basis.
+ */
+export interface ResumptionConstitutionalBasisProvenance {
+  readonly basisKind: ResumptionConstitutionalBasisKind;
+  readonly notes: string | null;
+  readonly notesCannotBeSoleBasis: true;
+}
+
+/**
+ * R131 — provenance for a HERCM re-entry category basis.
+ * Optional notes cannot be the sole basis.
+ */
+export interface ReentryConstitutionalBasisProvenance {
+  readonly basisKind: ReentryConstitutionalBasisKind;
+  readonly notes: string | null;
+  readonly notesCannotBeSoleBasis: true;
+}
+
+/**
+ * R136 — additive HOEM resumption operative record (resumption act type only), carrying
+ * the REC category and the qualifying prior-state linkage.
+ * Peer-distinct from authorization/posture/completion/suspension/withdrawal/recall/reentry.
+ */
+export interface HoemResumptionOperativeRecord {
+  readonly hoemResumptionRecordId: HoemResumptionOperativeRecordId;
+  readonly resumptionActId: GovernedHandoffResumptionActId;
+  readonly actType: "resumption";
+  readonly hercmCategory: HercmResumptionCategoryId;
+  /** R136 — prior-state linkage; always "suspended" for REC-02. */
+  readonly qualifyingPriorState: HercmQualifyingPriorState;
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly resumedSuspensionActId: GovernedHandoffSuspensionActId;
+  readonly constitutionalBasisKind: ResumptionConstitutionalBasisKind;
+  readonly effectiveAt: string;
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+  readonly doesNotMergeReentryAttribution: true;
+  readonly doesNotMergeLifecycleAttribution: true;
+  readonly notHgaMatrixActType: true;
+}
+
+/**
+ * R136 — additive HOEM re-entry operative record (reentry act type only), carrying
+ * the REC category and the qualifying prior-state linkage.
+ */
+export interface HoemReentryOperativeRecord {
+  readonly hoemReentryRecordId: HoemReentryOperativeRecordId;
+  readonly reentryActId: GovernedHandoffReentryActId;
+  readonly actType: "reentry";
+  readonly hercmCategory: HercmReentryCategoryId;
+  /** R136 — prior-state linkage: rejected | withdrawn | recalled | expired. */
+  readonly qualifyingPriorState: HercmQualifyingPriorState;
+  readonly gpraId: GpraId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly predecessorAuthorizationActId: GovernedHandoffAuthorizationActId;
+  readonly predecessorPostureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly predecessorWithdrawalActId: GovernedHandoffWithdrawalActId | null;
+  readonly predecessorRecallActId: GovernedHandoffRecallActId | null;
+  /**
+   * REC-01 Rejected is an HSLM denotation (R48/R51), not an HGA act — no rejection act
+   * id can exist in this runtime, so the linkage is the projected/attributable rejected
+   * fact and this stays null. REC-05 Expired likewise has no operative expiry act
+   * (deferred to R140+).
+   */
+  readonly predecessorRejectionAttributionId: null;
+  readonly predecessorExpiryActId: null;
+  readonly constitutionalBasisKind: ReentryConstitutionalBasisKind;
+  readonly effectiveAt: string;
+  readonly doesNotMergeAuthorizationAttribution: true;
+  readonly doesNotMergePostureDeclarationAttribution: true;
+  readonly doesNotMergeCompletionAttribution: true;
+  readonly doesNotMergeSuspensionAttribution: true;
+  readonly doesNotMergeWithdrawalAttribution: true;
+  readonly doesNotMergeRecallAttribution: true;
+  readonly doesNotMergeResumptionAttribution: true;
+  readonly doesNotMergeLifecycleAttribution: true;
+  readonly notHgaMatrixActType: true;
+}
+
+/**
+ * Assessment for whether a lawful HGA REC-02 resumption act may be performed (R126–R139).
+ */
+export interface GovernedHandoffResumptionAssessment {
+  readonly mayResume: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly hercmCategory: HercmResumptionCategoryId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly authorizationCurrency: HandoffAuthorizationCurrency | null;
+  readonly postureDeclarationCurrency: HandoffPostureDeclarationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly constitutionalBasisKind: ResumptionConstitutionalBasisKind | null;
+  readonly qualifyingPriorState: HercmQualifyingPriorState | null;
+  readonly resumedSuspensionActId: GovernedHandoffSuspensionActId | null;
+  readonly resumedPostureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly doesNotAuthorizeActMintViaCatalogAlone: true;
+  readonly doesNotAuthorizeActMintViaExportReadyAlone: true;
+  readonly doesNotAuthorizeActMintViaAdvisoryAlone: true;
+  readonly doesNotAuthorizeAutomaticRecovery: true;
+  readonly notNewHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffCompletion: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notHandoffRecall: true;
+  readonly notHercmReentry: true;
+  readonly notHgaMatrixActType: true;
+}
+
+/**
+ * Assessment for whether a lawful HGA REC-01/03/04/05 re-entry act may be performed (R126–R139).
+ */
+export interface GovernedHandoffReentryAssessment {
+  readonly mayReenter: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly hercmCategory: HercmReentryCategoryId | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly authorizationCurrency: HandoffAuthorizationCurrency | null;
+  readonly postureDeclarationCurrency: HandoffPostureDeclarationCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly eligibilityLayerCondition: HandoffEligibilityLayerCondition | null;
+  readonly constitutionalBasisKind: ReentryConstitutionalBasisKind | null;
+  readonly qualifyingPriorState: HercmQualifyingPriorState | null;
+  readonly predecessorWithdrawalActId: GovernedHandoffWithdrawalActId | null;
+  readonly predecessorRecallActId: GovernedHandoffRecallActId | null;
+  readonly requiresNewPostureAfterNewAuthorization: boolean;
+  readonly returnsTowardEligibleForConsiderationOnly: true;
+  readonly requiresNewAuthorizationViaG2: true;
+  readonly doesNotResurrectAuthorization: true;
+  readonly doesNotResurrectPosture: true;
+  readonly doesNotAuthorizeActMintViaCatalogAlone: true;
+  readonly doesNotAuthorizeActMintViaExportReadyAlone: true;
+  readonly doesNotAuthorizeActMintViaAdvisoryAlone: true;
+  readonly doesNotAuthorizeAutomaticRecovery: true;
+  readonly notNewHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffCompletion: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notHandoffRecall: true;
+  readonly notHercmResumption: true;
+  readonly notHgaMatrixActType: true;
+}
+
+/**
+ * Operative HGA Handoff resumption act (REC-02) — FI-DSN-STD-015-R126–R139.
+ * Restores forward reliance on the EXISTING authorization + posture chain after
+ * Suspension. Does NOT authorize anew, declare posture, complete, or reenter.
+ * NOT an HGA matrix act type (R140 deferred).
+ */
+export interface GovernedHandoffResumptionActRecord {
+  readonly resumptionActId: GovernedHandoffResumptionActId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_resumption_act";
+  readonly hercmCategory: HercmResumptionCategoryId;
+  readonly resumedBy: string;
+  readonly resumedAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly resumedSuspensionActId: GovernedHandoffSuspensionActId;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly declaredPostureClass: HandoffPostureClass | null;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly hercmQualifyingPriorState: HercmQualifyingPriorState;
+  readonly constitutionalBasisKind: ResumptionConstitutionalBasisKind;
+  readonly constitutionalBasisProvenance: ResumptionConstitutionalBasisProvenance;
+  readonly forwardRelianceRestoredOnExistingAuthorization: true;
+  readonly samePostureChainRetained: true;
+  readonly doesNotMintNewAuthorization: true;
+  readonly doesNotMintNewPostureDeclaration: true;
+  readonly doesNotEraseSuspensionHistory: true;
+  readonly doesNotEraseWithdrawalHistory: true;
+  readonly doesNotEraseRecallHistory: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffCompletion: true;
+  readonly notHercmReentry: true;
+  readonly notRestoration: true;
+  readonly notAutomaticRecovery: true;
+  readonly effectFraming: "forward_reliance_resumption_on_existing_authorization";
+  readonly hoemResumptionRecord: HoemResumptionOperativeRecord;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly notAutomaticHslmPromotion: true;
+  readonly hslmProjectionFromActFacts: true;
+  readonly hslmRemainsEightStates: true;
+  readonly notHgaMatrixActType: true;
+  /** R126 — distinct peer NON-matrix HGA resumption act-type attribution. */
+  readonly r126DistinctHercmResumptionAct: true;
+  /** R127 — closed HERCM category set REC-01..REC-05. */
+  readonly r127ClosedHercmCategorySet: true;
+  /** R128 — export_ready / eligibility authorize consideration only, never the act. */
+  readonly r128ExportReadyAuthorizesConsiderationOnly: true;
+  /** R129 — no automatic recovery; Invalidated/Superseded GPRA blocks predecessor-context HERCM. */
+  readonly r129NoAutomaticRecoveryAndInvalidatedBlocks: true;
+  /** R130 — one HCCM binding; at most one authoritative posture chain. */
+  readonly r130SingleBindingPostureChain: true;
+  /** R131 — REC-02 category conditions satisfied (suspension grounds cleared, not withdrawal/recall). */
+  readonly r131CategoryConditionsSatisfied: true;
+  /** R132 — restores forward reliance on the EXISTING authorization + posture; mints neither. */
+  readonly r132ForwardRelianceOnExistingAuthorization: true;
+  /** R133 — same posture chain as the suspension; qualifying prior state required. */
+  readonly r133SamePostureChainAndQualifyingPriorState: true;
+  /** R134 — prospective from resumedAt; no retroactive rewrite. */
+  readonly r134ProspectiveFromResumedAtNoRewrite: true;
+  /** R135 — additive preservation of all prior Handoff constitutional history. */
+  readonly r135AdditivePreservationOfPriorHistory: true;
+  /** R136 — additive HOEM resumption record with REC category + prior-state linkage. */
+  readonly r136HoemResumptionOperativeRecord: true;
+  /** R137 — not automatic HSLM promotion; HSLM remains exactly eight states. */
+  readonly r137NotAutomaticHslmPromotionHslmStaysEight: true;
+  /** R138 — invalid attempts are non-operative. */
+  readonly r138InvalidAttemptsNonOperative: true;
+  /** R139 — repeated HERCM acts are additive and substitute for no peer act. */
+  readonly r139RepeatedHercmActsAdditiveNotSubstitute: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * Operative HGA Handoff re-entry act (REC-01/03/04/05) — FI-DSN-STD-015-R126–R139.
+ * Returns the binding toward Eligible-for-consideration only. Requires NEW
+ * authorization via HOF-G2 afterward; REC-04 additionally requires a new posture
+ * declaration after the new authorization. Does NOT resurrect withdrawn/recalled
+ * authorization or posture. NOT an HGA matrix act type (R140 deferred).
+ */
+export interface GovernedHandoffReentryActRecord {
+  readonly reentryActId: GovernedHandoffReentryActId;
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly authorityConstitutionalScope: "handoff_reentry_act";
+  readonly hercmCategory: HercmReentryCategoryId;
+  readonly reenteredBy: string;
+  readonly reenteredAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly predecessorAuthorizationActId: GovernedHandoffAuthorizationActId;
+  readonly predecessorPostureDeclarationActId: GovernedHandoffPostureDeclarationActId | null;
+  readonly predecessorWithdrawalActId: GovernedHandoffWithdrawalActId | null;
+  readonly predecessorRecallActId: GovernedHandoffRecallActId | null;
+  /** Rejected is denotation-only and expiry acts are deferred — these stay null. */
+  readonly predecessorRejectionAttributionId: null;
+  readonly predecessorExpiryActId: null;
+  readonly hercmQualifyingPriorState: HercmQualifyingPriorState;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly declaredPostureClass: HandoffPostureClass | null;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly consumerCategoryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly constitutionalBasisKind: ReentryConstitutionalBasisKind;
+  readonly constitutionalBasisProvenance: ReentryConstitutionalBasisProvenance;
+  readonly returnsTowardEligibleForConsiderationOnly: true;
+  readonly requiresNewAuthorizationViaG2: true;
+  readonly requiresNewPostureAfterNewAuthorization: boolean;
+  readonly doesNotResurrectAuthorization: true;
+  readonly doesNotResurrectPosture: true;
+  readonly doesNotMintNewAuthorization: true;
+  readonly doesNotMintNewPostureDeclaration: true;
+  readonly doesNotEraseSuspensionHistory: true;
+  readonly doesNotEraseWithdrawalHistory: true;
+  readonly doesNotEraseRecallHistory: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notHandoffRecall: true;
+  readonly notHandoffCompletion: true;
+  readonly notHercmResumption: true;
+  readonly notRestoration: true;
+  readonly notAutomaticRecovery: true;
+  readonly effectFraming: "return_toward_eligible_for_consideration";
+  readonly hoemReentryRecord: HoemReentryOperativeRecord;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffExecution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notPermanentCollectionMembership: true;
+  readonly doesNotAuthorizeManufacturingOrFulfillment: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotSubstituteGpraOrEligibilityOrAuthorizationOrAdvisory: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly notAutomaticHslmPromotion: true;
+  readonly hslmProjectionFromActFacts: true;
+  readonly hslmRemainsEightStates: true;
+  readonly notHgaMatrixActType: true;
+  /** R126 — distinct peer NON-matrix HGA re-entry act-type attribution. */
+  readonly r126DistinctHercmReentryAct: true;
+  /** R127 — closed HERCM category set REC-01..REC-05. */
+  readonly r127ClosedHercmCategorySet: true;
+  /** R128 — export_ready / eligibility authorize consideration only, never the act. */
+  readonly r128ExportReadyAuthorizesConsiderationOnly: true;
+  /** R129 — no automatic recovery; Invalidated/Superseded GPRA blocks predecessor-context HERCM. */
+  readonly r129NoAutomaticRecoveryAndInvalidatedBlocks: true;
+  /** R130 — one HCCM binding; at most one authoritative posture chain. */
+  readonly r130SingleBindingPostureChain: true;
+  /** R131 — category conditions satisfied for REC-01/03/04/05. */
+  readonly r131CategoryConditionsSatisfied: true;
+  /** R132 — returns toward Eligible-for-consideration only; new G2 authorization required after. */
+  readonly r132ReturnTowardEligibleRequiresNewAuthorization: true;
+  /** R133 — qualifying prior state required. */
+  readonly r133QualifyingPriorStateRequired: true;
+  /** R134 — prospective from reenteredAt; no retroactive rewrite. */
+  readonly r134ProspectiveFromReenteredAtNoRewrite: true;
+  /** R135 — additive preservation of all prior Handoff constitutional history. */
+  readonly r135AdditivePreservationOfPriorHistory: true;
+  /** R136 — additive HOEM re-entry record with REC category + prior-state linkage. */
+  readonly r136HoemReentryOperativeRecord: true;
+  /** R137 — not automatic HSLM promotion; HSLM remains exactly eight states. */
+  readonly r137NotAutomaticHslmPromotionHslmStaysEight: true;
+  /** R138 — invalid attempts are non-operative. */
+  readonly r138InvalidAttemptsNonOperative: true;
+  /** R139 — repeated HERCM acts are additive and substitute for no peer act. */
+  readonly r139RepeatedHercmActsAdditiveNotSubstitute: true;
   readonly audit: ConstitutionalAuditMetadata;
   readonly traceability: Std015GovernanceTraceability;
   readonly governedCreationMarker: Domain3GovernedCreationMarker;
