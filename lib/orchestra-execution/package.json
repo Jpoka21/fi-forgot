@@ -1,0 +1,21 @@
+{
+  "name": "@workspace/orchestra-execution",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx src/__tests__/run-all.ts",
+    "test:live": "tsx src/__tests__/run-live.ts"
+  },
+  "dependencies": {
+    "@cursor/sdk": "1.0.28"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:"
+  }
+}

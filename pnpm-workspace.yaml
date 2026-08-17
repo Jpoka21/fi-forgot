@@ -33,6 +33,8 @@ minimumReleaseAgeExclude:
   # this setting guards against does not apply to our own packages.
   - '@replit/*'
   - stripe-replit-sync
+  # Official Cursor SDK, authorized only for @workspace/orchestra-execution.
+  - '@cursor/sdk'
 
 packages:
   - artifacts/*
