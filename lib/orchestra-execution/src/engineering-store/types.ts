@@ -96,6 +96,27 @@ export interface CrashReceipt {
   reason: string;
 }
 
+export const VERIFIER_AUTHORIZATION_SOURCE = "authorizeAndFreezeVerifierAssignment" as const;
+
+/**
+ * Append-only proof that a verifier assignment passed the governed IMP 035
+ * human-authorization path. `humanAuthority` on FrozenAssignmentRecord is an
+ * IMP 034 schema constant and does not prove this gate.
+ */
+export interface VerifierAuthorizationReceipt {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "verifier_authorization_receipt";
+  receiptId: string;
+  assignmentId: string;
+  assignmentHash: string;
+  authorizedAt: string;
+  source: typeof VERIFIER_AUTHORIZATION_SOURCE;
+  humanAuthorized: true;
+  executorAssignmentId: string;
+  executionEvidenceId: string;
+  receiptHash: string;
+}
+
 export interface AuditEvent {
   timestamp: string;
   action: string;

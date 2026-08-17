@@ -64,15 +64,31 @@ export type {
   FrozenAssignmentRecord,
   StatusEvent,
   VerificationPosture,
+  VerifierAuthorizationReceipt,
 } from "./engineering-store/types.js";
 export {
   ASSIGNMENT_STATUSES,
   DEFAULT_EVIDENCE_SOURCES,
   ENGINEERING_STORE_SCHEMA_VERSION,
   VERIFICATION_POSTURES,
+  VERIFIER_AUTHORIZATION_SOURCE,
 } from "./engineering-store/types.js";
 export { FileEngineeringStore, createFileEngineeringStore, EngineeringStoreError } from "./engineering-store/store.js";
 export { dispatchFrozenAssignment } from "./engineering-store/dispatch.js";
+export {
+  dispatchGovernedVerifierAssignment,
+  VERIFIER_DISPATCH_REFUSALS,
+} from "./engineering-store/dispatch-verifier.js";
+export type {
+  DispatchGovernedVerifierAssignmentInput,
+  GovernedVerifierDispatchResult,
+  VerifierDispatchRefusal,
+} from "./engineering-store/dispatch-verifier.js";
+export {
+  buildVerifierAuthorizationReceipt,
+  hashVerifierAuthorizationReceipt,
+  validateVerifierAuthorizationReceipt,
+} from "./engineering-store/authorization-receipt.js";
 export { buildExecutionEvidence, validateEvidenceHash } from "./engineering-store/evidence.js";
 export {
   authorizeAndFreezeVerifierAssignment,

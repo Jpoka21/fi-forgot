@@ -4,6 +4,10 @@ import { createAssignment, hashAssignment } from "../assignment-hash.js";
 import { deepFreeze, type FrozenAssignment } from "../assignment.js";
 import { isForgotIdentifierRepository } from "../hooks/project-hook.js";
 import { appendLineAtomic, writeFileExclusiveAtomic } from "./atomic-write.js";
+import {
+  buildVerifierAuthorizationReceipt,
+  validateVerifierAuthorizationReceipt,
+} from "./authorization-receipt.js";
 import { validateEvidenceHash } from "./evidence.js";
 import {
   ENGINEERING_STORE_SCHEMA_VERSION,
@@ -16,6 +20,7 @@ import {
   type FrozenAssignmentRecord,
   type StatusEvent,
   type VerificationPosture,
+  type VerifierAuthorizationReceipt,
 } from "./types.js";
 
 const SAFE_ID = /^[A-Za-z0-9._-]+$/;
@@ -229,6 +234,73 @@ export class FileEngineeringStore {
       .sort();
   }
 
+  persistVerifierAuthorizationReceipt(input: {
+    assignmentId: string;
+    assignmentHash: string;
+    executorAssignmentId: string;
+    executionEvidenceId: string;
+  }): VerifierAuthorizationReceipt {
+    const assignmentId = assertSafeId("assignmentId", input.assignmentId);
+    const frozen = this.loadFrozenAssignment(assignmentId);
+    if (frozen.assignmentHash !== input.assignmentHash) {
+      throw new EngineeringStoreError(
+        "verifier authorization receipt assignmentHash does not match frozen assignment",
+      );
+    }
+    if (frozen.assignment.role !== "verifier") {
+      throw new EngineeringStoreError("verifier authorization receipts require role verifier");
+    }
+    const existing = this.findValidVerifierAuthorizationReceipt(assignmentId, input.assignmentHash);
+    if (existing) return existing;
+    const receipt = buildVerifierAuthorizationReceipt(input);
+    appendLineAtomic(this.authorizationPath(assignmentId), JSON.stringify(receipt));
+    this.audit({
+      timestamp: receipt.authorizedAt,
+      action: "persist_verifier_authorization_receipt",
+      assignmentId,
+      detail: receipt.receiptId,
+    });
+    return receipt;
+  }
+
+  loadVerifierAuthorizationReceipts(assignmentId: string): VerifierAuthorizationReceipt[] {
+    const path = this.authorizationPath(assertSafeId("assignmentId", assignmentId));
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as VerifierAuthorizationReceipt);
+  }
+
+  findValidVerifierAuthorizationReceipt(
+    assignmentId: string,
+    assignmentHash: string,
+  ): VerifierAuthorizationReceipt | null {
+    const matches = this.loadVerifierAuthorizationReceipts(assignmentId).filter(
+      (receipt) =>
+        validateVerifierAuthorizationReceipt(receipt) &&
+        receipt.assignmentId === assignmentId &&
+        receipt.assignmentHash === assignmentHash,
+    );
+    return matches[matches.length - 1] ?? null;
+  }
+
+  inspectVerifierAuthorizationProvenance(
+    assignmentId: string,
+    assignmentHash: string,
+  ): "missing" | "corrupt" | "assignment_id_mismatch" | "assignment_hash_mismatch" | "valid" {
+    const rows = this.loadVerifierAuthorizationReceipts(assignmentId);
+    if (rows.length === 0) return "missing";
+    const validRows = rows.filter((receipt) => validateVerifierAuthorizationReceipt(receipt));
+    if (validRows.length === 0) return "corrupt";
+    if (validRows.some((receipt) => receipt.assignmentId !== assignmentId)) {
+      return "assignment_id_mismatch";
+    }
+    const hashMatch = validRows.find((receipt) => receipt.assignmentHash === assignmentHash);
+    if (!hashMatch) return "assignment_hash_mismatch";
+    return "valid";
+  }
+
   findVerifierAssignments(
     executorAssignmentId: string,
     executionEvidenceId?: string,
@@ -370,6 +442,10 @@ export class FileEngineeringStore {
 
   private statusPath(assignmentId: string): string {
     return join(this.assignmentsDir(), assignmentId, "status.ndjson");
+  }
+
+  private authorizationPath(assignmentId: string): string {
+    return join(this.assignmentsDir(), assignmentId, "governed-authorization.ndjson");
   }
 
   private evidencePath(assignmentId: string, evidenceId: string): string {

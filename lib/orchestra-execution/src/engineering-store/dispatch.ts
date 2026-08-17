@@ -11,6 +11,11 @@ export interface DispatchFrozenAssignmentInput {
   provider: ExecutionProvider;
   assignmentId: string;
   projectHooks?: boolean;
+  /**
+   * Set only by dispatchGovernedVerifierAssignment after eligibility validation.
+   * Direct callers must not use this to bypass governed verifier authorization.
+   */
+  allowVerifierRole?: boolean;
 }
 
 export interface DispatchFrozenAssignmentOutput {
@@ -28,6 +33,11 @@ export async function dispatchFrozenAssignment(
 ): Promise<DispatchFrozenAssignmentOutput> {
   const assignmentRecord = input.store.loadAssignmentRecord(input.assignmentId);
   const frozen = assignmentRecord.frozen;
+  if (frozen.assignment.role === "verifier" && input.allowVerifierRole !== true) {
+    throw new Error(
+      "verifier assignments must be dispatched through dispatchGovernedVerifierAssignment",
+    );
+  }
   if (input.store.loadLatestExecutionEvidence(input.assignmentId)) {
     throw new Error(
       `assignment ${input.assignmentId} already has execution evidence; refusing to dispatch again`,

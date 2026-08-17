@@ -2,7 +2,11 @@ import { createAssignment } from "../assignment-hash.js";
 import type { FrozenAssignment } from "../assignment.js";
 import type { HookDecisionRecord } from "../hooks/policy-decision.js";
 import { EngineeringStoreError, FileEngineeringStore } from "./store.js";
-import type { ExecutionEvidence, FrozenAssignmentRecord } from "./types.js";
+import type {
+  ExecutionEvidence,
+  FrozenAssignmentRecord,
+  VerifierAuthorizationReceipt,
+} from "./types.js";
 
 export const VERIFIER_PREPARATION_REFUSALS = [
   "executor_not_found",
@@ -45,6 +49,7 @@ export interface VerifierPreparationResult {
   candidate: FrozenAssignment | null;
   persisted: FrozenAssignmentRecord | null;
   verifierAssignmentHash: string | null;
+  authorization: VerifierAuthorizationReceipt | null;
 }
 
 function refused(
@@ -63,6 +68,7 @@ function refused(
     candidate: extras.candidate ?? null,
     persisted: extras.persisted ?? null,
     verifierAssignmentHash: extras.verifierAssignmentHash ?? null,
+    authorization: extras.authorization ?? null,
   };
 }
 
@@ -83,6 +89,7 @@ function readyResult(
     candidate,
     persisted: extras.persisted ?? null,
     verifierAssignmentHash: extras.persisted?.frozen.assignmentHash ?? candidate.assignmentHash,
+    authorization: extras.authorization ?? null,
   };
 }
 
@@ -356,18 +363,24 @@ export function authorizeAndFreezeVerifierAssignment(
       warnings: prepared.warnings,
     });
   }
-  if (prepared.persisted) {
-    return prepared;
-  }
-  const persisted = input.store.persistFrozenAssignment(prepared.candidate, {
-    relationship: {
-      verifiesAssignmentId: input.executorAssignmentId,
-      verifiesExecutionEvidenceId: input.executionEvidenceId,
-    },
+  const persisted =
+    prepared.persisted ??
+    input.store.persistFrozenAssignment(prepared.candidate, {
+      relationship: {
+        verifiesAssignmentId: input.executorAssignmentId,
+        verifiesExecutionEvidenceId: input.executionEvidenceId,
+      },
+    });
+  const authorization = input.store.persistVerifierAuthorizationReceipt({
+    assignmentId: persisted.frozen.assignment.assignmentId,
+    assignmentHash: persisted.frozen.assignmentHash,
+    executorAssignmentId: input.executorAssignmentId,
+    executionEvidenceId: input.executionEvidenceId,
   });
   return readyResult(input, prepared.executorAssignmentHash ?? persisted.frozen.assignmentHash, prepared.candidate, {
     warnings: prepared.warnings,
     persisted,
+    authorization,
   });
 }
 

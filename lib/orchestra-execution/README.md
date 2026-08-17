@@ -96,7 +96,40 @@ Refused as not reviewable: provider failure, baseline mismatch (provider never s
 
 `findVerifierAssignments(store, executorAssignmentId, executionEvidenceId?)` lists persisted verifier records.
 
-Future step: a separately authorized sprint may dispatch this frozen verifier assignment. IMP 035 ends before transport.
+`humanAuthority: "explicit_human"` on a `FrozenAssignmentRecord` is an IMP 034 schema constant. It does **not** prove the IMP 035 authorization gate. Governed authorization is an append-only `verifier_authorization_receipt` written only by `authorizeAndFreezeVerifierAssignment`, bound to the exact verifier assignment id and hash.
+
+## Governed verifier dispatch
+
+IMP 036 dispatches one already prepared and explicitly human-authorized verifier assignment through the closed execution adapter, then persists verifier `ExecutionEvidence`.
+
+Preferred governed flow:
+
+1. `prepareVerifierAssignment` — candidate only.
+2. `authorizeAndFreezeVerifierAssignment({ humanAuthorized: true })` — persist verifier and authorization receipt.
+3. `dispatchGovernedVerifierAssignment({ store, provider, verifierAssignmentId })` — eligibility, then closed adapter dispatch.
+
+Dispatch eligibility requires all of:
+
+- trusted load of a `role: verifier` assignment
+- valid governed authorization receipt for that exact assignment id and hash
+- `verifiesAssignmentId` / `verifiesExecutionEvidenceId` linkage to a trusted executor assignment and the selected executor evidence
+- read-only policy: empty `allowedPaths`, `commitAuthorization: false`, `pushAuthorization: false`, `requireNoPush: true`
+- protected paths coherent with the executor
+- current repository branch and HEAD matching the frozen verifier baseline (post-executor Git evidence)
+
+A homemade verifier persisted only through `persistFrozenAssignment` is not dispatch-eligible. `dispatchFrozenAssignment` refuses `role: verifier` unless the governed path has already validated eligibility.
+
+Duplicate dispatch reuses existing verifier execution evidence and does not start another provider run.
+
+This slice does **not**:
+
+- persist PASS, FAIL, verified, approved, closed, or correction-required
+- generate a correction assignment
+- select the next implementation requirement
+- commit or push
+- treat provider prose or the verifier technical verdict as a verification decision
+
+Future step: a separately authorized sprint may consume persisted verifier evidence and decide what, if anything, becomes an authoritative verification outcome. IMP 036 ends after verifier execution evidence is persisted.
 
 ## Current limitations
 
