@@ -52,3 +52,25 @@ export { filesystemMarkerPresent, runBoundedAssignment } from "./run-assignment.
 export { CursorExecutionProvider, isCursorSdkAuthenticated } from "./providers/cursor/cursor-provider.js";
 export { normalizeCursorEvent } from "./providers/cursor/normalize-events.js";
 export { MockExecutionProvider } from "./providers/mock-provider.js";
+export type {
+  AssignmentCurrentState,
+  AssignmentRelationship,
+  AssignmentStatus,
+  AuditEvent,
+  CrashReceipt,
+  EvidenceSourceClass,
+  EvidenceSourceClassification,
+  ExecutionEvidence,
+  FrozenAssignmentRecord,
+  StatusEvent,
+  VerificationPosture,
+} from "./engineering-store/types.js";
+export {
+  ASSIGNMENT_STATUSES,
+  DEFAULT_EVIDENCE_SOURCES,
+  ENGINEERING_STORE_SCHEMA_VERSION,
+  VERIFICATION_POSTURES,
+} from "./engineering-store/types.js";
+export { FileEngineeringStore, createFileEngineeringStore, EngineeringStoreError } from "./engineering-store/store.js";
+export { dispatchFrozenAssignment } from "./engineering-store/dispatch.js";
+export { buildExecutionEvidence, validateEvidenceHash } from "./engineering-store/evidence.js";

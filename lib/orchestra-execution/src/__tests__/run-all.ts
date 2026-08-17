@@ -6,6 +6,7 @@ import { runPathNormalizationTests } from "./path-normalize.test.js";
 import { runHookDecisionTests, runHookParserTests } from "./hook-policy.test.js";
 import { runResultTests } from "./result.test.js";
 import { runAdapterNegativeTests, runFixtureIntegrationTests } from "./fixture-integration.test.js";
+import { runEngineeringStoreTests } from "./engineering-store.test.js";
 import { liveCursorReport, runLiveCursorIntegrationTest } from "./live-cursor.integration.test.js";
 import { failed, reportAndExit } from "./harness.js";
 
@@ -20,6 +21,7 @@ async function main(): Promise<void> {
   runResultTests();
   await runFixtureIntegrationTests();
   await runAdapterNegativeTests();
+  await runEngineeringStoreTests();
   await runLiveCursorIntegrationTest();
   console.log("\nLive Cursor report:", JSON.stringify(liveCursorReport, null, 2));
   if (failed > 0) reportAndExit();

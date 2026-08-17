@@ -49,6 +49,22 @@ For every adapter run:
 
 Do not trust the assistant's textual answer as the sole truth.
 
+## Authoritative engineering store
+
+IMP 034 adds a file-backed Orchestra **engineering** store inside this package. It is not constitutional Domain 3 authority and not Product Brain.
+
+Preferred governed flow:
+
+1. `createAssignment()` — freeze the assignment and hash it.
+2. `createFileEngineeringStore(storeRoot)` — store root must be outside F.I. Forgot.
+3. `store.persistFrozenAssignment(frozen)` — durable, append-only identity.
+4. `dispatchFrozenAssignment({ store, provider, assignmentId })` — reload and validate from disk, then dispatch that exact frozen assignment.
+5. Execution evidence is persisted separately. Verification posture remains `pending`.
+
+Do not dispatch an assignment that was never persisted. Historical assignment and evidence files are exclusive-create; they cannot be silently overwritten. Status and audit are append-only NDJSON.
+
+Provider session/run ids remain correlators. The store does not mark work verified, approved, or closed.
+
 ## Current limitations
 
 Observed Cursor provider facts, not solved by this slice:
@@ -95,6 +111,6 @@ Requires an already authenticated official Cursor SDK environment (`Cursor.auth.
 pnpm --filter @workspace/orchestra-execution test:live
 ```
 
-The live test creates a disposable temporary Git repository, projects hooks there, and asks Cursor to change `allowed.txt` while attempting to change `protected.txt`. It must not target F.I. Forgot.
+The live test creates a disposable temporary Git repository and a disposable engineering store, freezes the assignment on disk, dispatches through the closed Cursor adapter, then reconstructs assignment and evidence from a fresh store instance. It must not target F.I. Forgot.
 
 If authentication is unavailable, the live test is skipped and reported blocked. Production code is not weakened to fake a pass.
