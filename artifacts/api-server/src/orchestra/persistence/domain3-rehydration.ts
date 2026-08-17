@@ -35,6 +35,7 @@ import type {
   GovernedHandoffResumptionActRecord,
   GovernedHandoffReentryActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
@@ -94,6 +95,9 @@ import {
   assertPersistedGovernedHandoffDownstreamExitBoundaryCoherence,
 } from "./hof-g8-rehydration-coherence.js";
 import {
+  assertPersistedGovernedHandoffDownstreamExitCompletenessCoherence,
+} from "./hof-g8-completion-rehydration-coherence.js";
+import {
   validatePersistedApprovalAct,
   validatePersistedApprovalWithholding,
   validatePersistedDesignTimeFeasibilityEvaluation,
@@ -110,6 +114,7 @@ import {
   validatePersistedGovernedHandoffResumption,
   validatePersistedGovernedHandoffReentry,
   validatePersistedGovernedHandoffDownstreamExitBoundary,
+  validatePersistedGovernedHandoffDownstreamExitCompleteness,
   validatePersistedGovernedHandoffConsumerBinding,
   validatePersistedGovernedHandoffPostureDeclaration,
   validatePersistedGovernedHandoffPreservationAudit,
@@ -974,6 +979,72 @@ export function rehydrateGovernedHandoffDownstreamExitBoundary(
     binding,
     posture,
     completion,
+    preparation,
+    gpra,
+    review,
+    determination,
+  });
+  return deepFreeze(structuredClone(raw));
+}
+
+export interface HofG8HandoffDownstreamExitCompletenessRehydrationContext {
+  readonly entry: unknown;
+  readonly binding: unknown;
+  readonly posture: unknown;
+  readonly completion: unknown;
+  readonly exitBoundary: unknown;
+  readonly preparation?: unknown | null;
+  readonly gpra?: unknown | null;
+  readonly review?: unknown | null;
+  readonly determination?: unknown | null;
+}
+
+export function rehydrateGovernedHandoffDownstreamExitCompleteness(
+  raw: unknown,
+  context: HofG8HandoffDownstreamExitCompletenessRehydrationContext,
+): GovernedHandoffDownstreamExitCompletenessSatisfactionRecord {
+  validatePersistedGovernedHandoffDownstreamExitCompleteness(raw);
+  validatePersistedGovernedHandoffEntry(context.entry);
+  validatePersistedGovernedHandoffConsumerBinding(context.binding);
+  validatePersistedGovernedHandoffPostureDeclaration(context.posture);
+  validatePersistedGovernedHandoffCompletion(context.completion);
+  validatePersistedGovernedHandoffDownstreamExitBoundary(context.exitBoundary);
+  const satisfaction = raw as GovernedHandoffDownstreamExitCompletenessSatisfactionRecord;
+  const entry = context.entry as GovernedHandoffEntryRecord;
+  const binding = context.binding as GovernedHandoffConsumerBindingRecord;
+  const posture = context.posture as GovernedHandoffPostureDeclarationActRecord;
+  const completion = context.completion as GovernedHandoffCompletionActRecord;
+  const exitBoundary =
+    context.exitBoundary as GovernedHandoffDownstreamExitBoundaryAttributionRecord;
+
+  let preparation: GovernedHandoffPreparationRecord | null = null;
+  if (context.preparation != null) {
+    validatePersistedGovernedHandoffPreparation(context.preparation);
+    preparation = context.preparation as GovernedHandoffPreparationRecord;
+  }
+  let gpra: GpraGrantRecord | null = null;
+  if (context.gpra != null) {
+    validatePersistedGpraGrant(context.gpra);
+    gpra = context.gpra as GpraGrantRecord;
+  }
+  let review: ProductionReadinessReview | null = null;
+  if (context.review != null) {
+    validatePersistedProductionReadinessReview(context.review);
+    review = context.review as ProductionReadinessReview;
+  }
+  let determination: ReviewDeterminationRecord | null = null;
+  if (context.determination != null) {
+    validatePersistedReviewDetermination(context.determination);
+    determination = context.determination as ReviewDeterminationRecord;
+  }
+
+  assertPersistedGovernedHandoffDownstreamExitCompletenessCoherence({
+    satisfaction,
+    entry,
+    binding,
+    posture,
+    completion,
+    exitBoundary,
     preparation,
     gpra,
     review,

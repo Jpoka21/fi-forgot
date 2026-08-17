@@ -24,6 +24,7 @@ import {
   rehydrateGovernedHandoffResumption,
   rehydrateGovernedHandoffReentry,
   rehydrateGovernedHandoffDownstreamExitBoundary,
+  rehydrateGovernedHandoffDownstreamExitCompleteness,
   rehydrateGovernedHandoffPreservationAudit,
   rehydrateGpraGrant,
   rehydrateGpraInvalidationAct,
@@ -57,6 +58,7 @@ import {
   validatePersistedGovernedHandoffResumption,
   validatePersistedGovernedHandoffReentry,
   validatePersistedGovernedHandoffDownstreamExitBoundary,
+  validatePersistedGovernedHandoffDownstreamExitCompleteness,
   validatePersistedGovernedHandoffPreservationAudit,
   validatePersistedGpraGrant,
   validatePersistedGpraInvalidationAct,
@@ -135,7 +137,14 @@ import type {
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
   HandoffDownstreamExitBoundaryCurrency,
   HandoffDownstreamExitConsiderationEvaluation,
+  GovernedHandoffDownstreamExitCompletenessAssessment,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionId,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  GovernedHandoffDownstreamExitCompletenessAttemptRecord,
+  HandoffDownstreamExitCompletenessCurrency,
+  HandoffDownstreamExitCompletenessEvaluation,
   HandoffActLayerLifecycleEvaluation,
+  HandoffActLayerLifecycleState,
   GovernedHandoffPreservationAuditId,
   GovernedHandoffPreservationAuditRecord,
   GpraGrantRecord,
@@ -323,6 +332,16 @@ import {
   evaluateHandoffDownstreamExitBoundaryCurrencyFromFacts,
   selectAuthoritativeGovernedHandoffDownstreamExitBoundary,
 } from "../handoff-downstream-exit-boundary.js";
+import {
+  assertGovernedHandoffDownstreamExitCompletenessActor,
+  assertNoDownstreamExitCompletenessAcceptanceMembershipOrExecutionClaims,
+  assessGovernedHandoffDownstreamExitCompleteness,
+  createGovernedHandoffDownstreamExitCompletenessAttemptRecord,
+  createGovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  evaluateDownstreamExitCompletenessFromFacts,
+  evaluateHandoffDownstreamExitCompletenessCurrencyFromFacts,
+  selectAuthoritativeGovernedHandoffDownstreamExitCompleteness,
+} from "../handoff-downstream-exit-completeness.js";
 import {
   assertEstablishedHandoffGovernanceAuthorityClass,
   assertEstablishedHandoffGovernanceAuthorityForReentry,
@@ -1979,8 +1998,81 @@ export interface Domain3Repository {
     exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId,
   ): Promise<HandoffDownstreamExitBoundaryCurrency>;
 
+  assessGovernedHandoffDownstreamExitCompleteness(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    exitBoundaryAttributionId?: GovernedHandoffDownstreamExitBoundaryAttributionId;
+    downstreamConsiderationDomain?: string;
+    satisfiedBy?: string;
+    authorityClassId?: unknown;
+    sourceAttribution?: unknown;
+    acceptDownstream?: unknown;
+    membershipAdmission?: unknown;
+    manufacturingExecution?: unknown;
+    fulfillment?: unknown;
+    booleanComplete?: unknown;
+    catalogMembershipAlone?: unknown;
+    exportReadyAlone?: unknown;
+    completionAlone?: unknown;
+    exitBoundaryAlone?: unknown;
+    resumptionAlone?: unknown;
+  }): Promise<GovernedHandoffDownstreamExitCompletenessAssessment>;
+
+  satisfyGovernedHandoffDownstreamExitCompleteness(input: {
+    entryId: GovernedHandoffEntryId;
+    bindingId: GovernedHandoffConsumerBindingId;
+    authorityClassId: unknown;
+    satisfiedBy: string;
+    satisfiedAt?: string;
+    exitBoundaryAttributionId?: GovernedHandoffDownstreamExitBoundaryAttributionId;
+    downstreamConsiderationDomain?: string;
+    sourceAttribution?: unknown;
+    acceptDownstream?: unknown;
+    downstreamAcceptanceId?: unknown;
+    membershipAdmission?: unknown;
+    manufacturingExecution?: unknown;
+    fulfillment?: unknown;
+    publication?: unknown;
+    distribution?: unknown;
+    booleanComplete?: unknown;
+    brainExitCompleteness?: unknown;
+    resumptionSatisfiesCompleteness?: unknown;
+  }): Promise<GovernedHandoffDownstreamExitCompletenessSatisfactionRecord>;
+
+  evaluateDownstreamExitCompleteness(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<HandoffDownstreamExitCompletenessEvaluation>;
+
+  loadGovernedHandoffDownstreamExitCompletenessSatisfaction(
+    exitCompletenessSatisfactionId: GovernedHandoffDownstreamExitCompletenessSatisfactionId,
+  ): Promise<GovernedHandoffDownstreamExitCompletenessSatisfactionRecord | null>;
+
+  listGovernedHandoffDownstreamExitCompletenessSatisfactionsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[]>;
+
+  listGovernedHandoffDownstreamExitCompletenessSatisfactionsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[]>;
+
+  listGovernedHandoffDownstreamExitCompletenessSatisfactionsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[]>;
+
+  getAuthoritativeHandoffDownstreamExitCompletenessForBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<GovernedHandoffDownstreamExitCompletenessSatisfactionRecord | null>;
+
+  evaluateHandoffDownstreamExitCompletenessCurrency(
+    exitCompletenessSatisfactionId: GovernedHandoffDownstreamExitCompletenessSatisfactionId,
+  ): Promise<HandoffDownstreamExitCompletenessCurrency>;
+
+  listGovernedHandoffDownstreamExitCompletenessAttemptsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessAttemptRecord[]>;
+
   /**
-   * HOF-G9 R22â€“R24 â€” standing authority-boundary assessment (framework only).
+   * HOF-G9 R22–R24 — standing authority-boundary assessment (framework only).
    * Does not authorize Handoff or create operative HGA acts (R25+ deferred).
    */
   evaluateHandoffAuthorityBoundary(): Promise<HandoffAuthorityBoundaryAssessment>;
@@ -3547,6 +3639,75 @@ export function createDomain3RepositoryWithStorage(
       gpra,
       review,
       determination,
+    });
+  }
+
+  async function rehydrateTrustedHandoffDownstreamExitCompleteness(
+    raw: GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  ): Promise<GovernedHandoffDownstreamExitCompletenessSatisfactionRecord> {
+    const exitBoundaryRaw = await storage.getGovernedHandoffDownstreamExitBoundaryAttribution(
+      raw.exitBoundaryAttributionId,
+    );
+    if (!exitBoundaryRaw) {
+      throw new OrchestraConstitutionalError(
+        "Downstream exit completeness exitBoundaryAttributionId points to no persisted exit boundary",
+        "invalid_handoff_downstream_exit_completeness",
+        ["FI-DSN-STD-015-R143", "FI-DSN-STD-015-R64"],
+      );
+    }
+    const exitBoundary = await rehydrateTrustedHandoffDownstreamExitBoundary(exitBoundaryRaw);
+    const entryRaw = await storage.getGovernedHandoffEntry(raw.entryId);
+    if (!entryRaw) {
+      throw new OrchestraConstitutionalError(
+        "Downstream exit completeness entryId points to no persisted entry",
+        "invalid_handoff_downstream_exit_completeness",
+        ["FI-DSN-STD-015-R143"],
+      );
+    }
+    const bindingRaw = await storage.getGovernedHandoffConsumerBinding(raw.bindingId);
+    if (!bindingRaw) {
+      throw new OrchestraConstitutionalError(
+        "Downstream exit completeness bindingId points to no persisted HCCM binding",
+        "invalid_handoff_downstream_exit_completeness",
+        ["FI-DSN-STD-015-R143"],
+      );
+    }
+    const postureRaw = await storage.getGovernedHandoffPostureDeclarationAct(
+      raw.postureDeclarationActId,
+    );
+    if (!postureRaw) {
+      throw new OrchestraConstitutionalError(
+        "Downstream exit completeness postureDeclarationActId points to no persisted posture",
+        "invalid_handoff_downstream_exit_completeness",
+        ["FI-DSN-STD-015-R143"],
+      );
+    }
+    const completionRaw = await storage.getGovernedHandoffCompletionAct(raw.completionActId);
+    if (!completionRaw) {
+      throw new OrchestraConstitutionalError(
+        "Downstream exit completeness completionActId points to no persisted completion",
+        "invalid_handoff_downstream_exit_completeness",
+        ["FI-DSN-STD-015-R143"],
+      );
+    }
+    const preparationRaw = await storage.getGovernedHandoffPreparation(raw.preparationId);
+    const gpraRaw = await storage.getGpraGrant(raw.gpraId);
+    const reviewRaw = await storage.getProductionReadinessReview(raw.reviewId);
+    const determinationRaw = await storage.getReviewDetermination(raw.determinationId);
+    return rehydrateGovernedHandoffDownstreamExitCompleteness(raw, {
+      entry: await rehydrateTrustedHandoffEntry(entryRaw),
+      binding: await rehydrateTrustedHandoffConsumerBinding(bindingRaw),
+      posture: await rehydrateTrustedHandoffPostureDeclaration(postureRaw),
+      completion: await rehydrateTrustedHandoffCompletion(completionRaw),
+      exitBoundary,
+      preparation: preparationRaw
+        ? await rehydrateTrustedHandoffPreparation(preparationRaw)
+        : null,
+      gpra: gpraRaw ? await rehydrateTrustedGpraGrant(gpraRaw) : null,
+      review: reviewRaw ? rehydrateProductionReadinessReview(reviewRaw) : null,
+      determination: determinationRaw
+        ? rehydrateReviewDetermination(determinationRaw)
+        : null,
     });
   }
 
@@ -9745,6 +9906,323 @@ export function createDomain3RepositoryWithStorage(
         authoritativeExitBoundaryAttributionId:
           authoritative?.exitBoundaryAttributionId ?? null,
       });
+    },
+
+    async assessGovernedHandoffDownstreamExitCompleteness(input) {
+      assertNoDownstreamExitCompletenessAcceptanceMembershipOrExecutionClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      if (
+        input.satisfiedBy != null ||
+        input.authorityClassId != null ||
+        input.sourceAttribution != null
+      ) {
+        assertGovernedHandoffDownstreamExitCompletenessActor({
+          satisfiedBy: input.satisfiedBy ?? "exit-completeness-evaluator",
+          authorityClassId: input.authorityClassId ?? "handoff_governance_authority",
+          sourceAttribution: input.sourceAttribution,
+        });
+      }
+      const boundaryBundle = await assessHandoffDownstreamExitBoundaryInternal({
+        entryId: input.entryId,
+        bindingId: input.bindingId,
+        downstreamConsiderationDomain: input.downstreamConsiderationDomain,
+      });
+      const exitBoundary =
+        await this.getAuthoritativeHandoffDownstreamExitBoundaryForBinding(input.bindingId);
+      let exitBoundaryCurrency: HandoffDownstreamExitBoundaryCurrency | null = null;
+      if (exitBoundary) {
+        try {
+          exitBoundaryCurrency = await this.evaluateHandoffDownstreamExitBoundaryCurrency(
+            exitBoundary.exitBoundaryAttributionId,
+          );
+        } catch {
+          exitBoundaryCurrency = "stale";
+        }
+      }
+      let currentLifecycleState: HandoffActLayerLifecycleState | null = null;
+      try {
+        const lifecycle = await this.evaluateHandoffActLayerLifecycle(input.bindingId);
+        currentLifecycleState = lifecycle.currentState;
+      } catch {
+        currentLifecycleState = null;
+      }
+      const authoritative = boundaryBundle.entry
+        ? await findAuthoritativeGpraByObligationContext(
+            boundaryBundle.entry.obligationId,
+            boundaryBundle.entry.handoffConsumerContextId,
+          )
+        : null;
+      const lineageMatchesAuthoritativeGpra =
+        !!boundaryBundle.entry &&
+        !!authoritative &&
+        handoffEntryLineageMatchesGpra(boundaryBundle.entry, authoritative);
+      let gpraValidityPosture = null;
+      if (authoritative && boundaryBundle.entry) {
+        const validity = await evaluateGpraValidityForContext(
+          authoritative.gpraId,
+          boundaryBundle.entry.handoffConsumerContextId,
+        );
+        gpraValidityPosture = validity.posture;
+      }
+      return assessGovernedHandoffDownstreamExitCompleteness({
+        entry: boundaryBundle.entry,
+        entryCurrency: boundaryBundle.assessment.entryCurrency,
+        binding: boundaryBundle.binding,
+        bindingCurrency: boundaryBundle.assessment.bindingCurrency,
+        posture: boundaryBundle.posture,
+        postureCurrency: boundaryBundle.assessment.postureDeclarationCurrency,
+        completion: boundaryBundle.completion,
+        completionCurrency: boundaryBundle.assessment.completionCurrency,
+        exitBoundary,
+        exitBoundaryCurrency,
+        currentLifecycleState,
+        gpraValidityPosture,
+        lineageMatchesAuthoritativeGpra,
+        requestedExitBoundaryAttributionId: input.exitBoundaryAttributionId ?? null,
+        requestedDownstreamConsiderationDomain: input.downstreamConsiderationDomain ?? null,
+        booleanComplete: input.booleanComplete,
+        catalogMembershipAlone: input.catalogMembershipAlone,
+        exportReadyAlone: input.exportReadyAlone,
+        completionAlone: input.completionAlone,
+        exitBoundaryAlone: input.exitBoundaryAlone,
+        resumptionAlone: input.resumptionAlone,
+      });
+    },
+
+    async satisfyGovernedHandoffDownstreamExitCompleteness(input) {
+      assertNoDownstreamExitCompletenessAcceptanceMembershipOrExecutionClaims(
+        input as unknown as Record<string, unknown>,
+      );
+      const satisfiedBy = assertGovernedHandoffDownstreamExitCompletenessActor(input);
+
+      const assessment = await this.assessGovernedHandoffDownstreamExitCompleteness(input);
+      if (!assessment.maySatisfy) {
+        const attempt = createGovernedHandoffDownstreamExitCompletenessAttemptRecord({
+          attemptedBy: satisfiedBy,
+          denialReasons: assessment.denialReasons,
+          entryId: input.entryId,
+          bindingId: input.bindingId,
+          currentLifecycleState: assessment.currentLifecycleState,
+          exitBoundaryAttributionId: input.exitBoundaryAttributionId ?? null,
+        });
+        await storage.putGovernedHandoffDownstreamExitCompletenessAttempt(attempt);
+        throw new OrchestraConstitutionalError(
+          `Governed Handoff downstream exit completeness rejected: ${assessment.denialReasons.join("; ") || "maySatisfy is false"}`,
+          "invalid_handoff_downstream_exit_completeness",
+          ["FI-DSN-STD-015-R142", "FI-DSN-STD-015-R143", "FI-DSN-STD-015-R145"],
+        );
+      }
+
+      const boundaryBundle = await assessHandoffDownstreamExitBoundaryInternal({
+        entryId: input.entryId,
+        bindingId: input.bindingId,
+        downstreamConsiderationDomain: input.downstreamConsiderationDomain,
+      });
+      const { entry, binding, posture, completion } = boundaryBundle;
+      const exitBoundary =
+        await this.getAuthoritativeHandoffDownstreamExitBoundaryForBinding(input.bindingId);
+      if (!entry || !binding || !posture || !completion || !exitBoundary) {
+        throw new OrchestraConstitutionalError(
+          "Governed Handoff downstream exit completeness rejected: required current chain missing",
+          "invalid_handoff_downstream_exit_completeness",
+          ["FI-DSN-STD-015-R143"],
+        );
+      }
+
+      const satisfaction = createGovernedHandoffDownstreamExitCompletenessSatisfactionRecord({
+        entry,
+        binding,
+        posture,
+        completion,
+        exitBoundary,
+        authorityClassId: input.authorityClassId,
+        satisfiedBy,
+        satisfiedAt: input.satisfiedAt,
+        authorizationActId: exitBoundary.authorizationActId,
+        sourceAttribution: input.sourceAttribution,
+        acceptDownstream: input.acceptDownstream,
+        downstreamAcceptanceId: input.downstreamAcceptanceId,
+        membershipAdmission: input.membershipAdmission,
+        manufacturingExecution: input.manufacturingExecution,
+        fulfillment: input.fulfillment,
+        publication: input.publication,
+        distribution: input.distribution,
+        booleanComplete: input.booleanComplete,
+        brainExitCompleteness: input.brainExitCompleteness,
+        resumptionSatisfiesCompleteness: input.resumptionSatisfiesCompleteness,
+      });
+      validatePersistedGovernedHandoffDownstreamExitCompleteness(satisfaction);
+      await storage.putGovernedHandoffDownstreamExitCompletenessSatisfaction(satisfaction);
+      const loaded = await storage.getGovernedHandoffDownstreamExitCompletenessSatisfaction(
+        satisfaction.exitCompletenessSatisfactionId,
+      );
+      if (!loaded) {
+        throw new OrchestraConstitutionalError(
+          "Downstream exit completeness failed to persist",
+          "invalid_handoff_downstream_exit_completeness",
+          ["FI-DSN-STD-015-R142"],
+        );
+      }
+      return rehydrateTrustedHandoffDownstreamExitCompleteness(loaded);
+    },
+
+    async evaluateDownstreamExitCompleteness(bindingId) {
+      const satisfaction =
+        await this.getAuthoritativeHandoffDownstreamExitCompletenessForBinding(bindingId);
+      let current = false;
+      if (satisfaction) {
+        try {
+          current =
+            (await this.evaluateHandoffDownstreamExitCompletenessCurrency(
+              satisfaction.exitCompletenessSatisfactionId,
+            )) === "current";
+        } catch {
+          current = false;
+        }
+      }
+      const exitBoundary =
+        await this.getAuthoritativeHandoffDownstreamExitBoundaryForBinding(bindingId);
+      const completions = await this.listGovernedHandoffCompletionActsByBinding(bindingId);
+      const completion = selectAuthoritativeGovernedHandoffCompletion(completions);
+      return evaluateDownstreamExitCompletenessFromFacts({
+        satisfaction,
+        satisfactionIsCurrent: current,
+        exitBoundary,
+        completion,
+      });
+    },
+
+    async loadGovernedHandoffDownstreamExitCompletenessSatisfaction(
+      exitCompletenessSatisfactionId,
+    ) {
+      const loaded = await storage.getGovernedHandoffDownstreamExitCompletenessSatisfaction(
+        exitCompletenessSatisfactionId,
+      );
+      if (!loaded) return null;
+      return rehydrateTrustedHandoffDownstreamExitCompleteness(loaded);
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessSatisfactionsByBinding(bindingId) {
+      const listed =
+        await storage.listGovernedHandoffDownstreamExitCompletenessSatisfactionsByBinding(
+          bindingId,
+        );
+      const out: GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffDownstreamExitCompleteness(item));
+      }
+      return out;
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessSatisfactionsByEntry(entryId) {
+      const listed =
+        await storage.listGovernedHandoffDownstreamExitCompletenessSatisfactionsByEntry(
+          entryId,
+        );
+      const out: GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffDownstreamExitCompleteness(item));
+      }
+      return out;
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessSatisfactionsByGpra(gpraId) {
+      const listed =
+        await storage.listGovernedHandoffDownstreamExitCompletenessSatisfactionsByGpra(gpraId);
+      const out: GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[] = [];
+      for (const item of listed) {
+        out.push(await rehydrateTrustedHandoffDownstreamExitCompleteness(item));
+      }
+      return out;
+    },
+
+    async getAuthoritativeHandoffDownstreamExitCompletenessForBinding(bindingId) {
+      const listed =
+        await this.listGovernedHandoffDownstreamExitCompletenessSatisfactionsByBinding(
+          bindingId,
+        );
+      return selectAuthoritativeGovernedHandoffDownstreamExitCompleteness(listed);
+    },
+
+    async evaluateHandoffDownstreamExitCompletenessCurrency(
+      exitCompletenessSatisfactionId,
+    ) {
+      const satisfaction =
+        await this.loadGovernedHandoffDownstreamExitCompletenessSatisfaction(
+          exitCompletenessSatisfactionId,
+        );
+      if (!satisfaction) {
+        throw new OrchestraConstitutionalError(
+          "Downstream exit completeness satisfaction not found for currency evaluation",
+          "invalid_handoff_downstream_exit_completeness",
+          ["FI-DSN-STD-015-R144"],
+        );
+      }
+      let entryCurrency: HandoffEntryCurrency;
+      try {
+        entryCurrency = await this.evaluateHandoffEntryCurrency(satisfaction.entryId);
+      } catch {
+        entryCurrency = "stale";
+      }
+      let bindingCurrency: HandoffConsumerBindingCurrency;
+      try {
+        bindingCurrency = await this.evaluateHandoffConsumerBindingCurrency(
+          satisfaction.bindingId,
+        );
+      } catch {
+        bindingCurrency = "stale";
+      }
+      let completionCurrency: HandoffCompletionCurrency;
+      try {
+        completionCurrency = await this.evaluateHandoffCompletionCurrency(
+          satisfaction.completionActId,
+        );
+      } catch {
+        completionCurrency = "stale";
+      }
+      let postureCurrency: HandoffPostureDeclarationCurrency;
+      try {
+        postureCurrency = await this.evaluateHandoffPostureDeclarationCurrency(
+          satisfaction.postureDeclarationActId,
+        );
+      } catch {
+        postureCurrency = "stale";
+      }
+      let exitBoundaryCurrency: HandoffDownstreamExitBoundaryCurrency;
+      try {
+        exitBoundaryCurrency = await this.evaluateHandoffDownstreamExitBoundaryCurrency(
+          satisfaction.exitBoundaryAttributionId,
+        );
+      } catch {
+        exitBoundaryCurrency = "stale";
+      }
+      let currentLifecycleState: HandoffActLayerLifecycleState | null = null;
+      try {
+        const lifecycle = await this.evaluateHandoffActLayerLifecycle(satisfaction.bindingId);
+        currentLifecycleState = lifecycle.currentState;
+      } catch {
+        currentLifecycleState = null;
+      }
+      const authoritative =
+        await this.getAuthoritativeHandoffDownstreamExitCompletenessForBinding(
+          satisfaction.bindingId,
+        );
+      return evaluateHandoffDownstreamExitCompletenessCurrencyFromFacts({
+        satisfaction,
+        currentEntryCurrency: entryCurrency,
+        currentBindingCurrency: bindingCurrency,
+        currentCompletionCurrency: completionCurrency,
+        currentPostureCurrency: postureCurrency,
+        currentExitBoundaryCurrency: exitBoundaryCurrency,
+        currentLifecycleState,
+        authoritativeSatisfactionId:
+          authoritative?.exitCompletenessSatisfactionId ?? null,
+      });
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessAttemptsByBinding(bindingId) {
+      return storage.listGovernedHandoffDownstreamExitCompletenessAttemptsByBinding(bindingId);
     },
 
     async evaluateHandoffAuthorityBoundary() {

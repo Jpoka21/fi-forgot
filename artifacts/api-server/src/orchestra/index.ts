@@ -383,6 +383,16 @@ export {
 } from "./handoff-downstream-exit-boundary.js";
 
 export {
+  GOVERNED_HANDOFF_DOWNSTREAM_EXIT_COMPLETENESS_TRACEABILITY,
+  DOWNSTREAM_EXIT_COMPLETENESS_SATISFACTION_KIND,
+  EXIT_COMPLETENESS_SATISFACTION_EVIDENCE_CATEGORIES,
+  assessGovernedHandoffDownstreamExitCompleteness,
+  selectAuthoritativeGovernedHandoffDownstreamExitCompleteness,
+  evaluateHandoffDownstreamExitCompletenessCurrencyFromFacts,
+  evaluateDownstreamExitCompletenessFromFacts,
+} from "./handoff-downstream-exit-completeness.js";
+
+export {
   FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES,
   isCanonicalEstablishedHandoffGovernanceAuthorityClassId,
   resolveEstablishedHandoffGovernanceAuthorityClass,
@@ -487,6 +497,7 @@ export {
   assertR112PlusUnavailable,
   assertR140PlusUnavailable,
   assertR142PlusUnavailable,
+  assertR146PlusUnavailable,
   assertNoInventedRejectionOrExitG6Act,
   assessHofG6U1SharedLifecycleFoundation,
   catalogMembershipDoesNotAuthorizeG6Performance,
@@ -616,6 +627,15 @@ export type {
   HoemExitBoundaryRecord,
   HoemExitBoundaryRecordId,
   Volume06HandoffAuthorityTerminus,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionId,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  GovernedHandoffDownstreamExitCompletenessAttemptId,
+  GovernedHandoffDownstreamExitCompletenessAttemptRecord,
+  GovernedHandoffDownstreamExitCompletenessAssessment,
+  HandoffDownstreamExitCompletenessCurrency,
+  HandoffDownstreamExitCompletenessEvaluation,
+  ExitCompletenessSatisfactionEvidenceCategory,
+  ExitCompletenessSatisfactionEvidence,
   HandoffActLayerLifecycleEvaluation,
   HandoffActLayerLifecycleState,
   HandoffCompletionCurrency,

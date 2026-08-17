@@ -35,6 +35,10 @@ import type {
   GovernedHandoffResumptionActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionId,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionId,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  GovernedHandoffDownstreamExitCompletenessAttemptId,
+  GovernedHandoffDownstreamExitCompletenessAttemptRecord,
   GovernedHandoffConsumerBindingId,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActId,
@@ -479,4 +483,34 @@ export interface Domain3StoragePort {
     gpraId: GpraId,
   ): Promise<readonly GovernedHandoffDownstreamExitBoundaryAttributionRecord[]>;
 
+  /**
+   * Append-only downstream exit-completeness satisfaction (HOF-G8 R142–R145).
+   * Unique by exitCompletenessSatisfactionId; multiple per binding allowed (additive tip).
+   * No update/delete. Does not mutate exit-boundary/completion/auth/posture/binding.
+   */
+  putGovernedHandoffDownstreamExitCompletenessSatisfaction(
+    record: GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  ): Promise<void>;
+  getGovernedHandoffDownstreamExitCompletenessSatisfaction(
+    exitCompletenessSatisfactionId: GovernedHandoffDownstreamExitCompletenessSatisfactionId,
+  ): Promise<GovernedHandoffDownstreamExitCompletenessSatisfactionRecord | null>;
+  listGovernedHandoffDownstreamExitCompletenessSatisfactionsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[]>;
+  listGovernedHandoffDownstreamExitCompletenessSatisfactionsByEntry(
+    entryId: GovernedHandoffEntryId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[]>;
+  listGovernedHandoffDownstreamExitCompletenessSatisfactionsByGpra(
+    gpraId: GpraId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessSatisfactionRecord[]>;
+
+  putGovernedHandoffDownstreamExitCompletenessAttempt(
+    record: GovernedHandoffDownstreamExitCompletenessAttemptRecord,
+  ): Promise<void>;
+  getGovernedHandoffDownstreamExitCompletenessAttempt(
+    attemptId: GovernedHandoffDownstreamExitCompletenessAttemptId,
+  ): Promise<GovernedHandoffDownstreamExitCompletenessAttemptRecord | null>;
+  listGovernedHandoffDownstreamExitCompletenessAttemptsByBinding(
+    bindingId: GovernedHandoffConsumerBindingId,
+  ): Promise<readonly GovernedHandoffDownstreamExitCompletenessAttemptRecord[]>;
 }

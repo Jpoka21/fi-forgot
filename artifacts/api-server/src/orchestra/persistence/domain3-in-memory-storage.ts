@@ -19,6 +19,8 @@ import type {
   GovernedHandoffReentryActRecord,
   GovernedHandoffResumptionActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  GovernedHandoffDownstreamExitCompletenessAttemptRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
@@ -139,6 +141,18 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
   const handoffDownstreamExitBoundaryByBinding = new Map<string, string[]>();
   const handoffDownstreamExitBoundaryByEntry = new Map<string, string[]>();
   const handoffDownstreamExitBoundaryByGpra = new Map<string, string[]>();
+  const handoffDownstreamExitCompletenessById = new Map<
+    string,
+    GovernedHandoffDownstreamExitCompletenessSatisfactionRecord
+  >();
+  const handoffDownstreamExitCompletenessByBinding = new Map<string, string[]>();
+  const handoffDownstreamExitCompletenessByEntry = new Map<string, string[]>();
+  const handoffDownstreamExitCompletenessByGpra = new Map<string, string[]>();
+  const handoffDownstreamExitCompletenessAttemptById = new Map<
+    string,
+    GovernedHandoffDownstreamExitCompletenessAttemptRecord
+  >();
+  const handoffDownstreamExitCompletenessAttemptByBinding = new Map<string, string[]>();
 
   function rvaObligationKey(rvaId: string, obligationId: string): string {
     return `${rvaId}::${obligationId}`;
@@ -1181,6 +1195,102 @@ export function createInMemoryDomain3Storage(): Domain3StoragePort {
         .map((id) => handoffDownstreamExitBoundaryById.get(id))
         .filter(
           (item): item is GovernedHandoffDownstreamExitBoundaryAttributionRecord => !!item,
+        )
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffDownstreamExitCompletenessSatisfaction(record) {
+      if (handoffDownstreamExitCompletenessById.has(record.exitCompletenessSatisfactionId)) {
+        throw new Error(
+          `Duplicate Governed Handoff downstream exit completeness identity: ${record.exitCompletenessSatisfactionId}`,
+        );
+      }
+      handoffDownstreamExitCompletenessById.set(
+        record.exitCompletenessSatisfactionId,
+        structuredClone(record),
+      );
+      const byBinding = handoffDownstreamExitCompletenessByBinding.get(record.bindingId) ?? [];
+      byBinding.push(record.exitCompletenessSatisfactionId);
+      handoffDownstreamExitCompletenessByBinding.set(record.bindingId, byBinding);
+      const byEntry = handoffDownstreamExitCompletenessByEntry.get(record.entryId) ?? [];
+      byEntry.push(record.exitCompletenessSatisfactionId);
+      handoffDownstreamExitCompletenessByEntry.set(record.entryId, byEntry);
+      const byGpra = handoffDownstreamExitCompletenessByGpra.get(record.gpraId) ?? [];
+      byGpra.push(record.exitCompletenessSatisfactionId);
+      handoffDownstreamExitCompletenessByGpra.set(record.gpraId, byGpra);
+    },
+
+    async getGovernedHandoffDownstreamExitCompletenessSatisfaction(
+      exitCompletenessSatisfactionId,
+    ) {
+      const record = handoffDownstreamExitCompletenessById.get(
+        exitCompletenessSatisfactionId,
+      );
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessSatisfactionsByBinding(bindingId) {
+      const ids = handoffDownstreamExitCompletenessByBinding.get(bindingId) ?? [];
+      return ids
+        .map((id) => handoffDownstreamExitCompletenessById.get(id))
+        .filter(
+          (item): item is GovernedHandoffDownstreamExitCompletenessSatisfactionRecord =>
+            !!item,
+        )
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessSatisfactionsByEntry(entryId) {
+      const ids = handoffDownstreamExitCompletenessByEntry.get(entryId) ?? [];
+      return ids
+        .map((id) => handoffDownstreamExitCompletenessById.get(id))
+        .filter(
+          (item): item is GovernedHandoffDownstreamExitCompletenessSatisfactionRecord =>
+            !!item,
+        )
+        .map((item) => structuredClone(item));
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessSatisfactionsByGpra(gpraId) {
+      const ids = handoffDownstreamExitCompletenessByGpra.get(gpraId) ?? [];
+      return ids
+        .map((id) => handoffDownstreamExitCompletenessById.get(id))
+        .filter(
+          (item): item is GovernedHandoffDownstreamExitCompletenessSatisfactionRecord =>
+            !!item,
+        )
+        .map((item) => structuredClone(item));
+    },
+
+    async putGovernedHandoffDownstreamExitCompletenessAttempt(record) {
+      if (handoffDownstreamExitCompletenessAttemptById.has(record.attemptId)) {
+        throw new Error(
+          `Duplicate Governed Handoff downstream exit completeness attempt identity: ${record.attemptId}`,
+        );
+      }
+      handoffDownstreamExitCompletenessAttemptById.set(
+        record.attemptId,
+        structuredClone(record),
+      );
+      if (record.bindingId) {
+        const byBinding =
+          handoffDownstreamExitCompletenessAttemptByBinding.get(record.bindingId) ?? [];
+        byBinding.push(record.attemptId);
+        handoffDownstreamExitCompletenessAttemptByBinding.set(record.bindingId, byBinding);
+      }
+    },
+
+    async getGovernedHandoffDownstreamExitCompletenessAttempt(attemptId) {
+      const record = handoffDownstreamExitCompletenessAttemptById.get(attemptId);
+      return record ? structuredClone(record) : null;
+    },
+
+    async listGovernedHandoffDownstreamExitCompletenessAttemptsByBinding(bindingId) {
+      const ids = handoffDownstreamExitCompletenessAttemptByBinding.get(bindingId) ?? [];
+      return ids
+        .map((id) => handoffDownstreamExitCompletenessAttemptById.get(id))
+        .filter(
+          (item): item is GovernedHandoffDownstreamExitCompletenessAttemptRecord => !!item,
         )
         .map((item) => structuredClone(item));
     },

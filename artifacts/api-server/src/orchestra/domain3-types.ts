@@ -1995,6 +1995,167 @@ export interface HandoffDownstreamExitConsiderationEvaluation {
   readonly r65NoImplicitExitFromCompletedAlone: true;
 }
 
+/**
+ * HOF-G8 completion R142–R145 — operative downstream exit-completeness SATISFACTION.
+ * Distinct from R58–R65 exit-boundary attribution. NOT an HGA matrix act. NOT an HSLM state.
+ */
+export type GovernedHandoffDownstreamExitCompletenessSatisfactionId = string & {
+  readonly __brand: "GovernedHandoffDownstreamExitCompletenessSatisfactionId";
+};
+
+export type GovernedHandoffDownstreamExitCompletenessAttemptId = string & {
+  readonly __brand: "GovernedHandoffDownstreamExitCompletenessAttemptId";
+};
+
+export type HandoffDownstreamExitCompletenessCurrency = "current" | "stale";
+
+/**
+ * Closed R143 satisfaction-evidence categories. Boolean complete=true is never sufficient.
+ */
+export type ExitCompletenessSatisfactionEvidenceCategory =
+  | "completed_lifecycle_attributable"
+  | "single_hccm_binding"
+  | "authoritative_hppm_posture_chain_forward_reliance_not_paused"
+  | "catalog_downstream_domain_routing"
+  | "hcbm_tuple_domain_consistency"
+  | "existing_exit_boundary_hoem_linkage";
+
+export interface ExitCompletenessSatisfactionEvidence {
+  readonly categories: readonly ExitCompletenessSatisfactionEvidenceCategory[];
+  readonly booleanCompleteFlagInsufficient: true;
+  readonly freeTextInsufficient: true;
+  readonly brainRecommendationInsufficient: true;
+  readonly catalogMembershipInsufficient: true;
+  readonly exportReadyAloneInsufficient: true;
+  readonly completionAloneInsufficient: true;
+  readonly exitBoundaryAloneInsufficient: true;
+}
+
+export interface GovernedHandoffDownstreamExitCompletenessAssessment {
+  readonly maySatisfy: boolean;
+  readonly denialReasons: readonly string[];
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId | null;
+  readonly catalogDownstreamConsiderationDomain: string | null;
+  readonly currentLifecycleState: HandoffActLayerLifecycleState | null;
+  readonly entryCurrency: HandoffEntryCurrency | null;
+  readonly bindingCurrency: HandoffConsumerBindingCurrency | null;
+  readonly postureDeclarationCurrency: HandoffPostureDeclarationCurrency | null;
+  readonly completionCurrency: HandoffCompletionCurrency | null;
+  readonly exitBoundaryCurrency: HandoffDownstreamExitBoundaryCurrency | null;
+  readonly gpraValidityPosture: GpraValidityPosture | null;
+  readonly volume06Terminus: Volume06HandoffAuthorityTerminus;
+  readonly notHgaMatrixActType: true;
+  readonly notNinthHgaMatrixAct: true;
+  readonly notHandoffCompletionAct: true;
+  readonly notExitBoundaryAttribution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notMembershipAdmission: true;
+  readonly notManufacturingOrFulfillmentOrExecution: true;
+  readonly notHslmStateTransition: true;
+  readonly catalogMembershipDoesNotSatisfy: true;
+  readonly resumptionAloneDoesNotSatisfy: true;
+  readonly r142Volume06TerminusSatisfaction: true;
+  readonly r143QualifyingConditions: true;
+  readonly r144PeerDistinctFromExitBoundary: true;
+  readonly r145GenericCcRoutingNoClassInvention: true;
+}
+
+export interface GovernedHandoffDownstreamExitCompletenessSatisfactionRecord {
+  readonly exitCompletenessSatisfactionId: GovernedHandoffDownstreamExitCompletenessSatisfactionId;
+  readonly constitutionalArtifactKind: "downstream_exit_completeness_satisfaction";
+  readonly authorityClassId: HandoffGovernanceAuthorityClassId;
+  readonly authorityGoverningSourceId: "PD-STD-015-001";
+  readonly satisfiedBy: string;
+  readonly satisfiedAt: string;
+  readonly entryId: GovernedHandoffEntryId;
+  readonly bindingId: GovernedHandoffConsumerBindingId;
+  readonly consumerClassId: HccmConsumerClassId;
+  readonly consumedHcbmBoundaryKeys: readonly HandoffConsumerCategoryKey[];
+  readonly downstreamConsiderationDomain: string;
+  readonly exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId;
+  readonly completionActId: GovernedHandoffCompletionActId;
+  readonly postureDeclarationActId: GovernedHandoffPostureDeclarationActId;
+  readonly authorizationActId: GovernedHandoffAuthorizationActId | null;
+  readonly preparationId: GovernedHandoffPreparationId;
+  readonly gpraId: GpraId;
+  readonly approvalActId: ApprovalActId;
+  readonly reviewId: ProductionReadinessReviewId;
+  readonly determinationId: ReviewDeterminationId;
+  readonly rvaId: RealizedVisualArtifactId;
+  readonly programId: ProductionProgramId;
+  readonly obligationId: ProductionObligationId;
+  readonly handoffConsumerContextId: string;
+  readonly hoemExitBoundaryRecord: HoemExitBoundaryRecord;
+  readonly satisfactionEvidence: ExitCompletenessSatisfactionEvidence;
+  readonly volume06Terminus: Volume06HandoffAuthorityTerminus;
+  readonly notHgaMatrixActType: true;
+  readonly notNinthHgaMatrixAct: true;
+  readonly notHandoffCompletionAct: true;
+  readonly notExitBoundaryAttribution: true;
+  readonly notDownstreamAcceptance: true;
+  readonly notMembershipAdmission: true;
+  readonly notManufacturingOrFulfillmentOrExecution: true;
+  readonly notHandoffAuthorization: true;
+  readonly notHandoffPostureDeclaration: true;
+  readonly notHandoffSuspension: true;
+  readonly notHandoffWithdrawal: true;
+  readonly notHandoffRecall: true;
+  readonly notHercmReentry: true;
+  readonly notHercmResumption: true;
+  readonly notHslmState: true;
+  readonly doesNotCollapsePeerDecisionClasses: true;
+  readonly doesNotMergeAcrossConsumerClasses: true;
+  readonly doesNotRewriteHistoricalRecords: true;
+  readonly producesR64HoemExitBoundaryLinkage: true;
+  readonly r142Volume06TerminusSatisfaction: true;
+  readonly r143QualifyingConditionsSatisfied: true;
+  readonly r144PeerDistinctProspective: true;
+  readonly r145SeparatelyAttributable: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+/**
+ * R145/R79 — non-operative attempt evidence. MUST NOT constitute completeness or HOEM linkage.
+ */
+export interface GovernedHandoffDownstreamExitCompletenessAttemptRecord {
+  readonly attemptId: GovernedHandoffDownstreamExitCompletenessAttemptId;
+  readonly constitutionalArtifactKind: "downstream_exit_completeness_attempt_evidence";
+  readonly attemptedBy: string;
+  readonly attemptedAt: string;
+  readonly entryId: GovernedHandoffEntryId | null;
+  readonly bindingId: GovernedHandoffConsumerBindingId | null;
+  readonly denialReasons: readonly string[];
+  readonly currentLifecycleState: HandoffActLayerLifecycleState | null;
+  readonly exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId | null;
+  readonly notSatisfaction: true;
+  readonly notHoemOperativeRecord: true;
+  readonly notHgaMatrixActType: true;
+  readonly notDownstreamAcceptance: true;
+  readonly r79AttemptEvidenceOnly: true;
+  readonly r145InvalidAttemptNonOperative: true;
+  readonly audit: ConstitutionalAuditMetadata;
+  readonly traceability: Std015GovernanceTraceability;
+  readonly governedCreationMarker: Domain3GovernedCreationMarker;
+}
+
+export interface HandoffDownstreamExitCompletenessEvaluation {
+  readonly completenessSatisfied: boolean;
+  readonly current: boolean;
+  readonly exitCompletenessSatisfactionId: GovernedHandoffDownstreamExitCompletenessSatisfactionId | null;
+  readonly exitBoundaryAttributionId: GovernedHandoffDownstreamExitBoundaryAttributionId | null;
+  readonly completionActId: GovernedHandoffCompletionActId | null;
+  readonly downstreamConsiderationDomain: string | null;
+  readonly notIntake: true;
+  readonly notAcceptance: true;
+  readonly notMembership: true;
+  readonly notManufacturingOrExecution: true;
+  readonly notHgaMatrixAct: true;
+  readonly notHslmState: true;
+  readonly r142SatisfactionDistinctFromBoundary: true;
+}
+
 // --- STD-015 HOF-G9 Catalog Integration (R66–R69) ---
 
 /**
@@ -2131,7 +2292,8 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly catalogMembershipDoesNotReenter: true;
   readonly catalogMembershipDoesNotResume: true;
   readonly r140EightTypeMatrixComplete: true;
-  readonly r142PlusDeferred: true;
+  readonly r142PlusDeferred: false;
+  readonly r142R145Complete: true;
   readonly handoffLifecycleRejectionActAbsentFromHgaScopes: true;
   readonly rejectHandoffActLayerUndefined: true;
   readonly withdrawRecallApisNotProvided: false;
@@ -2231,7 +2393,8 @@ export interface HofG6U1SharedLifecycleFoundationAssessment {
   readonly reentryMechanicsOperative: true;
   readonly hercmActsAreMatrixActTypes: true;
   readonly r140PlusUnavailable: false;
-  readonly r142PlusUnavailable: true;
+  readonly r142PlusUnavailable: false;
+  readonly r142R145Complete: true;
   readonly suspensionMechanicsOperative: true;
   readonly withdrawalMechanicsOperative: true;
   readonly r84PlusUnavailable: false;
@@ -2753,7 +2916,8 @@ export interface HercmCatalogIntegrityAssessment {
   readonly noAutomaticRecovery: true;
   readonly r126ThroughR139: true;
   readonly r140R141Complete: true;
-  readonly r142PlusDeferred: true;
+  readonly r142PlusDeferred: false;
+  readonly r142R145Complete: true;
   readonly traceability: Std015GovernanceTraceability;
 }
 

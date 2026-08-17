@@ -83,6 +83,7 @@ export type OrchestraErrorCode =
   | "invalid_handoff_resumption"
   | "invalid_handoff_reentry"
   | "invalid_handoff_downstream_exit_boundary"
+  | "invalid_handoff_downstream_exit_completeness"
   | "invalid_handoff_g6_lifecycle_foundation";
 
 export function isOrchestraConstitutionalError(

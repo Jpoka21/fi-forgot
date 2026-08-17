@@ -791,7 +791,8 @@ export function assessHercmCatalogIntegrity(): HercmCatalogIntegrityAssessment {
     noAutomaticRecovery: true as const,
     r126ThroughR139: true as const,
     r140R141Complete: true as const,
-    r142PlusDeferred: true as const,
+    r142PlusDeferred: false as const,
+    r142R145Complete: true as const,
     traceability: GOVERNED_HANDOFF_HERCM_TRACEABILITY,
   });
 }

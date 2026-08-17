@@ -185,7 +185,8 @@ section("3. Catalog membership does not mint HERCM; R142 remains deferred");
   expect("does not create authority", catalog.catalogMembershipDoesNotCreateAuthority, true);
   expect("no performHgaAct factory", catalog.performHgaActFactoryNotProvided, true);
   expect("r140 complete", catalog.r140EightTypeMatrixComplete, true);
-  expect("r142 deferred", catalog.r142PlusDeferred, true);
+  expect("r142 deferred", catalog.r142PlusDeferred, false);
+  expect("r142-r145 complete", catalog.r142R145Complete, true);
   expect("rejection forbidden", catalog.rejectionForbiddenAsMatrix, true);
   expect("exit not seventh", catalog.exitBoundaryIsSeventhMatrixType, false);
   expect("exit not ninth", catalog.exitBoundaryIsNinthMatrixType, false);
@@ -195,9 +196,10 @@ section("3. Catalog membership does not mint HERCM; R142 remains deferred");
   expect("HERCM matrix count 8", hercm.hgaMatrixActTypeCount, 8);
   expect("HERCM catalog does not reenter", hercm.catalogMembershipDoesNotReenter, true);
   expect("HERCM catalog does not resume", hercm.catalogMembershipDoesNotResume, true);
-  expect("R126–R139 remain", hercm.r126ThroughR139, true);
+  expect("R140–R141 remain", hercm.r126ThroughR139, true);
   expect("R140–R141 complete", hercm.r140R141Complete, true);
-  expect("R142 deferred on HERCM", hercm.r142PlusDeferred, true);
+  expect("R142 deferred on HERCM", hercm.r142PlusDeferred, false);
+  expect("R142–R145 complete on HERCM", hercm.r142R145Complete, true);
   expect("REC-02 still no new auth", HERCM_CATEGORY_CATALOG.find((e) => e.categoryId === "REC-02")?.requiresNewAuthorizationViaG2, false);
   expect("REC-03 still new auth", HERCM_CATEGORY_CATALOG.find((e) => e.categoryId === "REC-03")?.requiresNewAuthorizationViaG2, true);
   expect("REC-04 still new posture path", HERCM_CATEGORY_CATALOG.find((e) => e.categoryId === "REC-04")?.requiresNewPostureAfterNewAuthorization, true);
@@ -211,11 +213,9 @@ section("3. Catalog membership does not mint HERCM; R142 remains deferred");
     () => assertR142PlusUnavailable("ninth_matrix_act_type"),
     "invalid_handoff_g6_lifecycle_foundation",
   );
-  expectThrows(
-    "exit completeness unavailable",
-    () => assertR142PlusUnavailable("exit_completeness_operative"),
-    "invalid_handoff_g6_lifecycle_foundation",
-  );
+  assertR142PlusUnavailable("exit_completeness_operative");
+  passed++;
+  console.log("  ✓ exit_completeness_operative is no longer a deferred R142+ claim");
 }
 
 section("4. HSLM remains eight; Brain prohibited list covers reenter/resume");

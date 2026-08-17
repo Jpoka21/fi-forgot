@@ -439,7 +439,8 @@ section(
   expect("export_ready alone does not reenter or resume", integrity.exportReadyAloneDoesNotReenterOrResume, true);
   expect("R126–R139 operative", integrity.r126ThroughR139, true);
   expect("R140–R141 complete", integrity.r140R141Complete, true);
-  expect("R142+ deferred", integrity.r142PlusDeferred, true);
+  expect("R142+ deferred", integrity.r142PlusDeferred, false);
+  expect("R142–R145 complete", integrity.r142R145Complete, true);
 
   expect("HGA matrix exactly eight", HGA_MATRIX_ACT_TYPES.length, 8);
   const hga = FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES[0]!;
@@ -481,7 +482,6 @@ section(
     "ninth_matrix_act_type",
     "restoration_operative_mechanics_available",
     "expiry_operative_mechanics_available",
-    "r142_plus_available",
   ]) {
     expectThrows(
       `assertR142PlusUnavailable rejects ${claim}`,

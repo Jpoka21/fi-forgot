@@ -39,6 +39,8 @@ import type {
   GovernedHandoffReentryActRecord,
   GovernedHandoffResumptionActRecord,
   GovernedHandoffDownstreamExitBoundaryAttributionRecord,
+  GovernedHandoffDownstreamExitCompletenessSatisfactionRecord,
+  GovernedHandoffDownstreamExitCompletenessAttemptRecord,
   GovernedHandoffConsumerBindingRecord,
   GovernedHandoffPostureDeclarationActRecord,
   GovernedHandoffPreservationAuditRecord,
@@ -101,6 +103,10 @@ import {
   resolveHercmCategory,
 } from "../handoff-hercm.js";
 import { GOVERNED_HANDOFF_DOWNSTREAM_EXIT_BOUNDARY_TRACEABILITY } from "../handoff-downstream-exit-boundary.js";
+import {
+  EXIT_COMPLETENESS_SATISFACTION_EVIDENCE_CATEGORIES,
+  DOWNSTREAM_EXIT_COMPLETENESS_SATISFACTION_KIND,
+} from "../handoff-downstream-exit-completeness.js";
 import {
   assertHgaActTypeStringFailClosed,
   assertHgaMatrixActMayBePerformed,
@@ -172,6 +178,10 @@ const ID_PREFIXES = {
   hoemResumptionOperative: "hoem-resumption-operative-",
   hoemReentryOperative: "hoem-reentry-operative-",
   hoemExitBoundary: "hoem-exit-boundary-",
+  handoffDownstreamExitCompletenessSatisfaction:
+    "governed-handoff-downstream-exit-completeness-satisfaction-",
+  handoffDownstreamExitCompletenessAttempt:
+    "governed-handoff-downstream-exit-completeness-attempt-",
 } as const;
 
 /**
@@ -626,6 +636,35 @@ function assertStd015HercmTraceability(
         `${label} traceability must include ${required}`,
         errorCode,
         ["FI-DSN-STD-015-R126", "FI-DSN-STD-015-R139"],
+      );
+    }
+  }
+}
+
+function assertStd015HofG8CompletionTraceability(
+  traceability: unknown,
+  label: string,
+): void {
+  if (
+    !traceability ||
+    typeof traceability !== "object" ||
+    (traceability as Record<string, unknown>).governingStandardId !== STD015_GOVERNING_STANDARD ||
+    !Array.isArray((traceability as Record<string, unknown>).requirementIds) ||
+    ((traceability as Record<string, unknown>).requirementIds as unknown[]).length === 0
+  ) {
+    throw new OrchestraConstitutionalError(
+      `${label} requires FI-DSN-STD-015 HOF-G8 completion traceability`,
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R142", "FI-DSN-STD-015-R145"],
+    );
+  }
+  const ids = (traceability as Record<string, unknown>).requirementIds as unknown[];
+  for (const required of ["FI-DSN-STD-015-R142", "FI-DSN-STD-015-R143", "FI-DSN-STD-015-R144", "FI-DSN-STD-015-R145"]) {
+    if (!ids.includes(required)) {
+      throw new OrchestraConstitutionalError(
+        `${label} traceability must include ${required}`,
+        "invalid_handoff_downstream_exit_completeness",
+        ["FI-DSN-STD-015-R142", "FI-DSN-STD-015-R145"],
       );
     }
   }
@@ -5730,4 +5769,210 @@ export function validatePersistedGovernedHandoffDownstreamExitBoundary(
       ["FI-DSN-STD-015-R58"],
     );
   }
+}
+
+export function validatePersistedGovernedHandoffDownstreamExitCompleteness(
+  raw: unknown,
+): asserts raw is GovernedHandoffDownstreamExitCompletenessSatisfactionRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff downstream exit completeness",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R142"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.exitCompletenessSatisfactionId,
+    ID_PREFIXES.handoffDownstreamExitCompletenessSatisfaction,
+    "Governed Handoff downstream exit completeness satisfaction",
+  );
+  assertBrandedId(record.entryId, ID_PREFIXES.handoffEntry, "Governed Handoff entry");
+  assertBrandedId(
+    record.bindingId,
+    ID_PREFIXES.handoffConsumerBinding,
+    "Governed Handoff consumer binding",
+  );
+  assertBrandedId(
+    record.exitBoundaryAttributionId,
+    ID_PREFIXES.handoffDownstreamExitBoundaryAttribution,
+    "Governed Handoff downstream exit boundary attribution",
+  );
+  assertBrandedId(
+    record.completionActId,
+    ID_PREFIXES.handoffCompletionAct,
+    "Governed Handoff completion act",
+  );
+  assertBrandedId(
+    record.postureDeclarationActId,
+    ID_PREFIXES.handoffPostureDeclarationAct,
+    "Governed Handoff posture declaration act",
+  );
+  assertBrandedId(
+    record.preparationId,
+    ID_PREFIXES.handoffPreparation,
+    "Governed Handoff preparation",
+  );
+  assertBrandedId(record.gpraId, ID_PREFIXES.gpra, "GPRA");
+  assertBrandedId(record.approvalActId, ID_PREFIXES.approvalAct, "Approval act");
+  assertBrandedId(record.reviewId, ID_PREFIXES.review, "Production-readiness Review");
+  assertBrandedId(record.determinationId, ID_PREFIXES.determination, "Review Determination");
+  assertBrandedId(record.rvaId, ID_PREFIXES.rva, "Realized Visual Artifact");
+  assertBrandedId(record.programId, ID_PREFIXES.program, "Production Program");
+  assertBrandedId(record.obligationId, ID_PREFIXES.obligation, "Production Obligation");
+
+  if (record.constitutionalArtifactKind !== DOWNSTREAM_EXIT_COMPLETENESS_SATISFACTION_KIND) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit completeness requires satisfaction artifact kind (R142)",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R142"],
+    );
+  }
+  if (typeof record.satisfiedBy !== "string" || !record.satisfiedBy.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit completeness requires satisfiedBy",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R142"],
+    );
+  }
+  if (typeof record.satisfiedAt !== "string" || !record.satisfiedAt.trim()) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit completeness requires satisfiedAt",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R144"],
+    );
+  }
+  if (
+    typeof record.downstreamConsiderationDomain !== "string" ||
+    !record.downstreamConsiderationDomain.trim()
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit completeness requires downstreamConsiderationDomain",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R145"],
+    );
+  }
+
+  const hoem = record.hoemExitBoundaryRecord as Record<string, unknown> | null;
+  if (!hoem || hoem.actType !== "exit_boundary") {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit completeness must carry R64 HOEM exit_boundary linkage (R144)",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R144", "FI-DSN-STD-015-R64"],
+    );
+  }
+  assertBrandedId(
+    hoem.hoemExitBoundaryRecordId,
+    ID_PREFIXES.hoemExitBoundary,
+    "HOEM exit-boundary record",
+  );
+
+  const evidence = record.satisfactionEvidence as Record<string, unknown> | null;
+  const categories = evidence?.categories;
+  if (
+    !Array.isArray(categories) ||
+    categories.length !== EXIT_COMPLETENESS_SATISFACTION_EVIDENCE_CATEGORIES.length ||
+    EXIT_COMPLETENESS_SATISFACTION_EVIDENCE_CATEGORIES.some((c) => !categories.includes(c))
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit completeness requires the closed R143 evidence categories",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R143", "FI-DSN-STD-015-R145"],
+    );
+  }
+
+  if (
+    record.notHgaMatrixActType !== true ||
+    record.notNinthHgaMatrixAct !== true ||
+    record.notHandoffCompletionAct !== true ||
+    record.notExitBoundaryAttribution !== true ||
+    record.notDownstreamAcceptance !== true ||
+    record.notMembershipAdmission !== true ||
+    record.notManufacturingOrFulfillmentOrExecution !== true ||
+    record.notHslmState !== true ||
+    record.producesR64HoemExitBoundaryLinkage !== true ||
+    record.doesNotRewriteHistoricalRecords !== true
+  ) {
+    throw new OrchestraConstitutionalError(
+      "Persisted downstream exit completeness must carry HOF-G8 completion constitutional markers (R142–R145)",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R142", "FI-DSN-STD-015-R145"],
+    );
+  }
+
+  const forbidden = [
+    "authorityConstitutionalScope",
+    "handoff_exit_completeness_act",
+    "handoff_exit_act",
+    "downstreamAcceptanceId",
+    "permanentCollectionMembershipId",
+    "manufacturingExecutionId",
+    "fulfillmentExecutionId",
+    "executesHandoff",
+    "booleanComplete",
+    "brainExitCompleteness",
+  ];
+  for (const key of forbidden) {
+    const value = record[key];
+    if (value === true || (typeof value === "string" && value.trim()) || Array.isArray(value)) {
+      throw new OrchestraConstitutionalError(
+        "Persisted downstream exit completeness must not carry acceptance/mfg/matrix-exit fields (R142/R144)",
+        "invalid_handoff_downstream_exit_completeness",
+        ["FI-DSN-STD-015-R142", "FI-DSN-STD-015-R144"],
+      );
+    }
+  }
+
+  assertAuditMetadata(record.audit, "Governed Handoff downstream exit completeness");
+  assertStd015HofG8CompletionTraceability(
+    record.traceability,
+    "Governed Handoff downstream exit completeness",
+  );
+  if (!isValidDomain3GovernedCreationMarker(record.governedCreationMarker)) {
+    throw new OrchestraConstitutionalError(
+      "Governed Handoff downstream exit completeness requires valid governed creation marker",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R142"],
+    );
+  }
+}
+
+export function validatePersistedGovernedHandoffDownstreamExitCompletenessAttempt(
+  raw: unknown,
+): asserts raw is GovernedHandoffDownstreamExitCompletenessAttemptRecord {
+  if (!raw || typeof raw !== "object") {
+    throw new OrchestraConstitutionalError(
+      "Invalid persisted Governed Handoff downstream exit completeness attempt",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R145", "FI-DSN-STD-015-R79"],
+    );
+  }
+  const record = raw as Record<string, unknown>;
+  assertBrandedId(
+    record.attemptId,
+    ID_PREFIXES.handoffDownstreamExitCompletenessAttempt,
+    "Governed Handoff downstream exit completeness attempt",
+  );
+  if (record.constitutionalArtifactKind !== "downstream_exit_completeness_attempt_evidence") {
+    throw new OrchestraConstitutionalError(
+      "Attempt evidence must not be recorded as completeness satisfaction (R145)",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R145"],
+    );
+  }
+  if (record.notSatisfaction !== true || record.notHoemOperativeRecord !== true) {
+    throw new OrchestraConstitutionalError(
+      "Attempt evidence must remain non-operative (R145/R79)",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R145", "FI-DSN-STD-015-R79"],
+    );
+  }
+  if (!Array.isArray(record.denialReasons)) {
+    throw new OrchestraConstitutionalError(
+      "Attempt evidence requires denialReasons reconstructable at the Handoff boundary (R79)",
+      "invalid_handoff_downstream_exit_completeness",
+      ["FI-DSN-STD-015-R79", "FI-DSN-STD-015-R145"],
+    );
+  }
+  assertAuditMetadata(record.audit, "Governed Handoff downstream exit completeness attempt");
 }

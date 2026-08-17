@@ -840,21 +840,35 @@ export function assertR140PlusUnavailable(claim?: unknown): void {
 }
 
 /**
- * R142+ (exit-completeness, invented ninth matrix types, restoration/expiry acts)
- * remains unavailable. R140–R141 catalog completion is NOT R142+.
+ * R142–R145 exit-completeness is operative as a non-matrix G8 satisfaction artifact.
+ * Invented ninth matrix types, restoration acts, and expiry acts remain unavailable.
  */
 export function assertR142PlusUnavailable(claim?: unknown): void {
   if (
-    claim === "r142_plus_available" ||
     claim === "ninth_matrix_act_type" ||
-    claim === "exit_completeness_operative" ||
+    claim === "handoff_exit_completeness_act" ||
+    claim === "exit_completeness_matrix_act" ||
     claim === "restoration_operative_mechanics_available" ||
     claim === "expiry_operative_mechanics_available"
   ) {
     throw new OrchestraConstitutionalError(
-      "R142+ remains unavailable: exit-completeness, invented ninth matrix types, and restoration/expiry operative mechanics are not implemented (R142)",
+      "Invented ninth HGA matrix types, exit-completeness-as-matrix-act, restoration, and expiry operative mechanics remain unavailable (R140–R145)",
       "invalid_handoff_g6_lifecycle_foundation",
-      ["FI-DSN-STD-015-R140", "FI-DSN-STD-015-R141"],
+      ["FI-DSN-STD-015-R140", "FI-DSN-STD-015-R141", "FI-DSN-STD-015-R142"],
+    );
+  }
+}
+
+/** R146 is undrafted; no authorized STD-015 requirement remains after R145. */
+export function assertR146PlusUnavailable(claim?: unknown): void {
+  if (
+    claim === "r146_plus_available" ||
+    claim === "std015_runtime_extends_past_r145"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "R146 remains undrafted with no authorized purpose; STD-015 runtime ends at R145",
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R145"],
     );
   }
 }
@@ -939,7 +953,8 @@ export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycle
     reentryMechanicsOperative: true as const,
     hercmActsAreMatrixActTypes: true as const,
     r140PlusUnavailable: false as const,
-    r142PlusUnavailable: true as const,
+    r142PlusUnavailable: false as const,
+    r142R145Complete: true as const,
     suspensionMechanicsOperative: true as const,
     withdrawalMechanicsOperative: true as const,
     recallMechanicsOperative: true as const,
