@@ -4,9 +4,10 @@
  * Closed REC-01 through REC-05 (R127). Catalog membership does not mint a HERCM act,
  * and G11 export_ready authorizes consideration only, never the act itself (R128).
  *
- * HERCM resumption and re-entry are performed under the established HGA class but are
- * peer NON-MATRIX act types (R126). The HGA act-type matrix stays exactly six until
- * R140; nothing here may add a seventh or eighth matrix type.
+ * Re-entry and resumption are HGA-performed HERCM acts. R140–R141 integrate them
+ * into the eight-type HGA matrix without changing REC-01 through REC-05 semantics.
+ * Catalog membership does not mint HERCM acts; minting remains resumeGovernedHandoff
+ * / reenterGovernedHandoff. Nothing here may add a ninth matrix type.
  *
  * This module also supplies the HERCM-local mirror of the R75 shared precondition
  * categories and the R130 subject-scope check, so the HERCM assessors never have to
@@ -81,17 +82,21 @@ export const HERCM_REENTRY_CATEGORY_IDS = Object.freeze([
   "REC-05",
 ] as const satisfies readonly HercmReentryCategoryId[]);
 
-/** Labels that MUST NEVER be treated as HGA matrix act types (R126; R140 deferred). */
+/** Invented labels that MUST NEVER join the HGA matrix (R137; R140–R141 eight-type close). */
 export const HERCM_FORBIDDEN_MATRIX_ACT_LABELS = Object.freeze([
-  "reentry",
   "re_entry",
   "re-entry",
-  "resumption",
   "resume",
   "restoration",
   "restore",
   "reinstatement",
   "revival",
+] as const);
+
+/** Lawful R140–R141 matrix ids for HERCM acts. */
+export const HERCM_MATRIX_ACT_TYPES = Object.freeze([
+  "reentry",
+  "resumption",
 ] as const);
 
 /**
@@ -114,7 +119,7 @@ export const HERCM_CATEGORY_CATALOG: readonly HercmCategoryCatalogEntry[] = Obje
     requiresExportReadyAnew: true,
     requiresNewAuthorizationViaG2: true,
     requiresNewPostureAfterNewAuthorization: false,
-    isHgaMatrixActType: false as const,
+    isHgaMatrixActType: true as const,
     hgaConstitutionalScope: "handoff_reentry_act" as const,
     requirementIds: Object.freeze([
       "FI-DSN-STD-015-R127",
@@ -132,7 +137,7 @@ export const HERCM_CATEGORY_CATALOG: readonly HercmCategoryCatalogEntry[] = Obje
     requiresExportReadyAnew: false,
     requiresNewAuthorizationViaG2: false,
     requiresNewPostureAfterNewAuthorization: false,
-    isHgaMatrixActType: false as const,
+    isHgaMatrixActType: true as const,
     hgaConstitutionalScope: "handoff_resumption_act" as const,
     requirementIds: Object.freeze([
       "FI-DSN-STD-015-R127",
@@ -149,7 +154,7 @@ export const HERCM_CATEGORY_CATALOG: readonly HercmCategoryCatalogEntry[] = Obje
     requiresExportReadyAnew: true,
     requiresNewAuthorizationViaG2: true,
     requiresNewPostureAfterNewAuthorization: false,
-    isHgaMatrixActType: false as const,
+    isHgaMatrixActType: true as const,
     hgaConstitutionalScope: "handoff_reentry_act" as const,
     requirementIds: Object.freeze([
       "FI-DSN-STD-015-R127",
@@ -167,7 +172,7 @@ export const HERCM_CATEGORY_CATALOG: readonly HercmCategoryCatalogEntry[] = Obje
     requiresExportReadyAnew: true,
     requiresNewAuthorizationViaG2: true,
     requiresNewPostureAfterNewAuthorization: true,
-    isHgaMatrixActType: false as const,
+    isHgaMatrixActType: true as const,
     hgaConstitutionalScope: "handoff_reentry_act" as const,
     requirementIds: Object.freeze([
       "FI-DSN-STD-015-R127",
@@ -185,7 +190,7 @@ export const HERCM_CATEGORY_CATALOG: readonly HercmCategoryCatalogEntry[] = Obje
     requiresExportReadyAnew: true,
     requiresNewAuthorizationViaG2: true,
     requiresNewPostureAfterNewAuthorization: false,
-    isHgaMatrixActType: false as const,
+    isHgaMatrixActType: true as const,
     hgaConstitutionalScope: "handoff_reentry_act" as const,
     requirementIds: Object.freeze([
       "FI-DSN-STD-015-R127",
@@ -356,12 +361,28 @@ export function assertHercmBasisKindMatchesCategory(
 }
 
 // ---------------------------------------------------------------------------
-// R126 — HERCM acts are peer NON-MATRIX
+// R140 — HERCM acts ARE matrix members; invented aliases remain forbidden
 // ---------------------------------------------------------------------------
 
 /**
- * Fails closed when a caller tries to route a HERCM act through the six-type matrix,
- * or to register resumption/re-entry as a seventh or eighth matrix act type.
+ * Asserts that a lawful HERCM matrix id (`reentry` | `resumption`) is cataloged.
+ * Catalog membership does not mint the act.
+ */
+export function assertHercmActIsHgaMatrixActType(value: unknown): void {
+  if (typeof value !== "string" || !value.trim()) return;
+  const lower = value.trim().toLowerCase();
+  if ((HERCM_MATRIX_ACT_TYPES as readonly string[]).includes(lower) && !isHgaMatrixActType(lower)) {
+    throw new OrchestraConstitutionalError(
+      "HERCM reentry and resumption SHALL appear in the eight-type HGA matrix (R140/R141)",
+      "invalid_handoff_authority_catalog",
+      ["FI-DSN-STD-015-R140", "FI-DSN-STD-015-R141"],
+    );
+  }
+}
+
+/**
+ * Fails closed when an invented restoration/alias label is treated as a matrix act type.
+ * Lawful `reentry` and `resumption` ids are matrix members after R140 and are not rejected here.
  */
 export function assertHercmActIsNotHgaMatrixActType(value: unknown): void {
   if (typeof value !== "string" || !value.trim()) return;
@@ -371,9 +392,9 @@ export function assertHercmActIsNotHgaMatrixActType(value: unknown): void {
     isHgaMatrixActType(lower)
   ) {
     throw new OrchestraConstitutionalError(
-      "HERCM resumption and re-entry MUST NOT appear in the HGA act-type matrix; matrix membership stays exactly six until R140 (R66/R126)",
+      "Invented restoration/reinstatement/revival labels MUST NOT appear in the HGA act-type matrix (R66/R140)",
       "invalid_handoff_authority_catalog",
-      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R126"],
+      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R140"],
     );
   }
 }
@@ -533,13 +554,14 @@ export type HercmSharedPreconditionAssessment = Omit<
   readonly hercmCategory: HercmCategoryId | null;
   readonly actKind: HercmActKind | null;
   readonly r75SharedPreconditionCategories: true;
-  readonly hercmActIsNotHgaMatrixActType: true;
+  readonly hercmActsAreHgaMatrixActTypes: true;
+  readonly catalogMembershipDoesNotAuthorizeHercm: true;
 };
 
 /**
- * Mirrors the R75(a)–(e) categories for HERCM without asserting a matrix act type.
- * Resumption and re-entry are NOT matrix acts, so assertHgaMatrixActMayBePerformed
- * and assessG6SharedPreconditions must never be called on their behalf.
+ * Mirrors the R75(a)–(e) categories for HERCM without treating catalog membership
+ * as authorization. R140 catalog status is matrix; minting still does not route
+ * through assertHgaMatrixActMayBePerformed.
  */
 export function assessHercmSharedPreconditions(input: {
   readonly hercmCategory: unknown;
@@ -627,7 +649,8 @@ export function assessHercmSharedPreconditions(input: {
     doesNotApplyActSpecificEffects: true as const,
     catalogMembershipDoesNotCreateAuthority: true as const,
     r75SharedPreconditionCategories: true as const,
-    hercmActIsNotHgaMatrixActType: true as const,
+    hercmActsAreHgaMatrixActTypes: true as const,
+    catalogMembershipDoesNotAuthorizeHercm: true as const,
   });
 }
 
@@ -723,13 +746,13 @@ export function assessHercmCatalogIntegrity(): HercmCatalogIntegrityAssessment {
     resumptionIds.length === 1 &&
     resumptionIds[0] === "REC-02" &&
     reentryIds.length === 4 &&
-    HERCM_CATEGORY_CATALOG.every((e) => e.isHgaMatrixActType === false) &&
+    HERCM_CATEGORY_CATALOG.every((e) => e.isHgaMatrixActType === true) &&
     HERCM_CATEGORY_CATALOG.every(
       (e) => !(HGA_MATRIX_ACT_TYPES as readonly string[]).includes(e.categoryId),
     ) &&
-    HGA_MATRIX_ACT_TYPES.length === 6 &&
-    !(HGA_MATRIX_ACT_TYPES as readonly string[]).includes("resumption") &&
-    !(HGA_MATRIX_ACT_TYPES as readonly string[]).includes("reentry") &&
+    HGA_MATRIX_ACT_TYPES.length === 8 &&
+    (HGA_MATRIX_ACT_TYPES as readonly string[]).includes("resumption") &&
+    (HGA_MATRIX_ACT_TYPES as readonly string[]).includes("reentry") &&
     hgaScopes.includes("handoff_resumption_act") &&
     hgaScopes.includes("handoff_reentry_act") &&
     hslmStateIds.length === 8 &&
@@ -755,8 +778,8 @@ export function assessHercmCatalogIntegrity(): HercmCatalogIntegrityAssessment {
     reentryCategoryIds: Object.freeze([
       ...reentryIds,
     ]) as readonly HercmReentryCategoryId[],
-    hgaMatrixActTypeCount: 6 as const,
-    hercmActsAreNotMatrixActTypes: true as const,
+    hgaMatrixActTypeCount: 8 as const,
+    hercmActsAreMatrixActTypes: true as const,
     hercmConstitutionalScopesPresent: true as const,
     hslmStateCount: 8 as const,
     noReenteredHslmState: true as const,
@@ -767,7 +790,8 @@ export function assessHercmCatalogIntegrity(): HercmCatalogIntegrityAssessment {
     exportReadyAloneDoesNotReenterOrResume: true as const,
     noAutomaticRecovery: true as const,
     r126ThroughR139: true as const,
-    r140PlusDeferred: true as const,
+    r140R141Complete: true as const,
+    r142PlusDeferred: true as const,
     traceability: GOVERNED_HANDOFF_HERCM_TRACEABILITY,
   });
 }

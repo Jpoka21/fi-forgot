@@ -1,20 +1,20 @@
 /**
- * Governed Handoff Authority Catalog Integration — FI-DSN-STD-015 HOF-G9 (R66–R69).
+ * Governed Handoff Authority Catalog Integration — FI-DSN-STD-015 HOF-G9
+ * (R66–R69 completed by R140–R141).
  *
  * Read-only catalogs + assessment/resolve/assert helpers only.
  * Catalog presence ≠ constitutional authority / act activation / operative performance.
  *
- * R66 — HGA sole STD-015 authority class; mandatory six-type act matrix (§20.5.3.14).
+ * R66 — HGA sole STD-015 authority class; original six-type act matrix (§20.5.3.14).
  * R67 — Distinct HGA attribution + separate HOEM expectation per matrix act type.
  * R68 — Each operative act binds exactly one HCCM context; posture-relevant → HPPM chain.
  * R69 — Prohibited performer classes; suspension/withdrawal/recall mechanics remain HOF-G6.
+ * R140 — Integrate reentry and resumption as peer matrix members (six → eight).
+ * R141 — Distinct HOEM, one HCCM binding, posture-relevant HPPM, collapse and performer prohibitions.
  *
- * HOF-G6-U1 (R70–R83) shared foundation is established separately in
- * handoff-lifecycle-g6-foundation.ts; HOF-G6-U2 (R84–R97) makes suspension operative;
- * HOF-G6-U3 (R98–R111) makes withdrawal operative.
- * recall minting is operative at HOF-G6-U4 (R112+).
- * Does NOT implement exit-completeness, rejection acts, or exit matrix acts.
- * Does NOT mint recall/reject APIs or a generic performHgaAct factory.
+ * Does NOT redraft R66–R69 or HERCM R126–R139 mechanics.
+ * Does NOT implement exit-completeness (R142+), rejection acts, or exit matrix acts.
+ * Does NOT mint a generic performHgaAct factory.
  */
 
 import type {
@@ -59,6 +59,8 @@ const HOF_G9_CATALOG_REQUIREMENTS = [
   "FI-DSN-STD-015-R67",
   "FI-DSN-STD-015-R68",
   "FI-DSN-STD-015-R69",
+  "FI-DSN-STD-015-R140",
+  "FI-DSN-STD-015-R141",
 ] as const satisfies readonly Std015RequirementId[];
 
 export const HANDOFF_AUTHORITY_CATALOG_TRACEABILITY =
@@ -105,7 +107,7 @@ export const FORBIDDEN_ADDITIONAL_HANDOFF_AUTHORITY_CLASSES = Object.freeze([
 ] as const);
 
 // ---------------------------------------------------------------------------
-// R66 — HGA act-type matrix (exactly six)
+// R66 + R140 — HGA act-type matrix (exactly eight)
 // ---------------------------------------------------------------------------
 
 export const HGA_MATRIX_ACT_TYPES = [
@@ -115,6 +117,8 @@ export const HGA_MATRIX_ACT_TYPES = [
   "suspension",
   "withdrawal",
   "recall",
+  "reentry",
+  "resumption",
 ] as const satisfies readonly HgaMatrixActType[];
 
 export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[] =
@@ -260,6 +264,47 @@ export const HGA_MATRIX_ACT_TYPE_CATALOG: readonly HgaMatrixActTypeCatalogEntry[
       catalogedDeferredHofG6: false,
       sharedFoundationEstablishedHofG6U1: true,
     }),
+    Object.freeze({
+      actType: "reentry" as const,
+      operativeStatus: "operative" as const,
+      hoemExpectation: "reentry" as const,
+      hccmBoundRequired: true as const,
+      hppmmPostureChainRequired: false,
+      requirementIds: Object.freeze([
+        "FI-DSN-STD-015-R66",
+        "FI-DSN-STD-015-R67",
+        "FI-DSN-STD-015-R68",
+        "FI-DSN-STD-015-R69",
+        "FI-DSN-STD-015-R126",
+        "FI-DSN-STD-015-R130",
+        "FI-DSN-STD-015-R136",
+        "FI-DSN-STD-015-R140",
+        "FI-DSN-STD-015-R141",
+      ] as const),
+      catalogedDeferredHofG6: false,
+      sharedFoundationEstablishedHofG6U1: true,
+    }),
+    Object.freeze({
+      actType: "resumption" as const,
+      operativeStatus: "operative" as const,
+      hoemExpectation: "resumption" as const,
+      hccmBoundRequired: true as const,
+      hppmmPostureChainRequired: true,
+      requirementIds: Object.freeze([
+        "FI-DSN-STD-015-R66",
+        "FI-DSN-STD-015-R67",
+        "FI-DSN-STD-015-R68",
+        "FI-DSN-STD-015-R69",
+        "FI-DSN-STD-015-R126",
+        "FI-DSN-STD-015-R130",
+        "FI-DSN-STD-015-R133",
+        "FI-DSN-STD-015-R136",
+        "FI-DSN-STD-015-R140",
+        "FI-DSN-STD-015-R141",
+      ] as const),
+      catalogedDeferredHofG6: false,
+      sharedFoundationEstablishedHofG6U1: true,
+    }),
   ]);
 
 const MATRIX_BY_TYPE = new Map(
@@ -284,6 +329,8 @@ export const FORBIDDEN_HSLM_INVENTED_STATES = Object.freeze([
   "accepted",
   "rejected_as_hga_act",
   "exit_complete",
+  "reentered",
+  "resumed",
 ] as const);
 
 // ---------------------------------------------------------------------------
@@ -294,26 +341,35 @@ export const HOEM_MATRIX_EXPECTATION_CATALOG: readonly HoemExpectationCatalogEnt
   Object.freeze(
     HGA_MATRIX_ACT_TYPES.map((actType) => {
       const matrix = MATRIX_BY_TYPE.get(actType)!;
+      const requirementIds: readonly Std015RequirementId[] =
+        actType === "reentry" || actType === "resumption"
+          ? [
+              "FI-DSN-STD-015-R66",
+              "FI-DSN-STD-015-R67",
+              "FI-DSN-STD-015-R136",
+              "FI-DSN-STD-015-R140",
+              "FI-DSN-STD-015-R141",
+            ]
+          : ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R67"];
       return Object.freeze({
         hoemExpectation: actType,
         matrixMembership: "matrix" as const,
         operativeStatus: matrix.operativeStatus,
         isSeventhMatrixType: false as const,
+        isNinthMatrixType: false as const,
         forbiddenAsMatrix: false as const,
-        requirementIds: Object.freeze([
-          "FI-DSN-STD-015-R66",
-          "FI-DSN-STD-015-R67",
-        ] as const),
+        requirementIds: Object.freeze([...requirementIds]),
       });
     }),
   );
 
-/** Peer NON-MATRIX HOEM expectation — G8 exit_boundary (not a seventh matrix type). */
+/** Peer NON-MATRIX HOEM expectation — G8 exit_boundary (not a seventh or ninth matrix type). */
 export const HOEM_PEER_NON_MATRIX_EXIT_BOUNDARY_EXPECTATION = Object.freeze({
   hoemExpectation: HOEM_EXIT_BOUNDARY_ACT_TYPE,
   matrixMembership: "peer_non_matrix" as const,
   operativeStatus: "operative" as const,
   isSeventhMatrixType: false as const,
+  isNinthMatrixType: false as const,
   forbiddenAsMatrix: false as const,
   peerDistinctFromMatrix: true as const,
   g8DownstreamExitBoundary: true as const,
@@ -432,9 +488,9 @@ export function isHgaMatrixActType(value: unknown): value is HgaMatrixActType {
 export function resolveHgaMatrixActType(value: unknown): HgaMatrixActTypeCatalogEntry {
   if (!isHgaMatrixActType(value)) {
     throw new OrchestraConstitutionalError(
-      "Value is not one of the six frozen HGA matrix act types (authorization|posture_declaration|completion|suspension|withdrawal|recall) (R66/R67)",
+      "Value is not one of the eight frozen HGA matrix act types (authorization|posture_declaration|completion|suspension|withdrawal|recall|reentry|resumption) (R66/R67/R140)",
       "invalid_handoff_authority_catalog",
-      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R67"],
+      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R67", "FI-DSN-STD-015-R140"],
     );
   }
   return MATRIX_BY_TYPE.get(value)!;
@@ -463,7 +519,9 @@ export function assertHgaMatrixActMayBePerformed(
   | "completion"
   | "suspension"
   | "withdrawal"
-  | "recall" {
+  | "recall"
+  | "reentry"
+  | "resumption" {
   const entry = resolveHgaMatrixActType(actType);
   if (entry.operativeStatus !== "operative") {
     throw new OrchestraConstitutionalError(
@@ -525,9 +583,9 @@ export function assertHgaActTypeStringFailClosed(
 
   if (!isHgaMatrixActType(lower)) {
     throw new OrchestraConstitutionalError(
-      "Unknown HGA/HOEM act-type string is not in the frozen six-type matrix (R66)",
+      "Unknown HGA/HOEM act-type string is not in the frozen eight-type matrix (R66/R140)",
       "invalid_handoff_authority_catalog",
-      ["FI-DSN-STD-015-R66"],
+      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R140"],
     );
   }
 
@@ -722,19 +780,20 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     STD015_SOLE_HANDOFF_AUTHORITY_CLASS_CATALOG.length === 1 &&
     STD015_SOLE_HANDOFF_AUTHORITY_CLASS_CATALOG[0] ===
       HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID &&
-    matrixTypes.length === 6 &&
-    operative.length === 6 &&
+    matrixTypes.length === 8 &&
+    operative.length === 8 &&
     deferred.length === 0 &&
     hslmIds.length === 8 &&
     hccmIds.length === 6 &&
     hgaScopes.length === 8 &&
     hgaScopes.includes("handoff_resumption_act") &&
     hgaScopes.includes("handoff_reentry_act") &&
-    !(matrixTypes as readonly string[]).includes("resumption") &&
-    !(matrixTypes as readonly string[]).includes("reentry") &&
+    (matrixTypes as readonly string[]).includes("resumption") &&
+    (matrixTypes as readonly string[]).includes("reentry") &&
     !hgaScopes.includes("handoff_lifecycle_rejection_act" as never) &&
     !(matrixTypes as readonly string[]).includes("exit_boundary") &&
     !(matrixTypes as readonly string[]).includes("rejection") &&
+    !(matrixTypes as readonly string[]).includes("exit") &&
     HPPM_POSTURE_AFFINITY_CATALOG.includes("none") &&
     VOLUME_06_HANDOFF_POSTURE_CLASSES.length === 2 &&
     FROZEN_HANDOFF_POSTURE_CLASSES.length === 3;
@@ -744,7 +803,7 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     soleAuthorityClassId: HANDOFF_GOVERNANCE_AUTHORITY_CLASS_ID,
     soleAuthorityClassCount: 1 as const,
     matrixActTypes: Object.freeze([...matrixTypes]) as readonly HgaMatrixActType[],
-    matrixActTypeCount: 6 as const,
+    matrixActTypeCount: 8 as const,
     operativeMatrixActTypes: Object.freeze([
       ...operative,
     ]) as readonly HgaMatrixActType[],
@@ -754,6 +813,7 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     hoemMatrixExpectations: Object.freeze([...HGA_MATRIX_ACT_TYPES]),
     peerNonMatrixHoemExpectation: HOEM_EXIT_BOUNDARY_ACT_TYPE,
     exitBoundaryIsSeventhMatrixType: false as const,
+    exitBoundaryIsNinthMatrixType: false as const,
     rejectionForbiddenAsMatrix: true as const,
     hslmStateIds: Object.freeze([
       ...hslmIds,
@@ -774,7 +834,11 @@ export function assessHandoffAuthorityCatalogIntegration(): HandoffAuthorityCata
     frozenHgaConstitutionalScopes: Object.freeze([...hgaScopes]),
     frozenHgaConstitutionalScopeCount: 8 as const,
     hercmConstitutionalScopesPresent: true as const,
-    hercmActsAreNotMatrixActTypes: true as const,
+    hercmActsAreMatrixActTypes: true as const,
+    catalogMembershipDoesNotReenter: true as const,
+    catalogMembershipDoesNotResume: true as const,
+    r140EightTypeMatrixComplete: true as const,
+    r142PlusDeferred: true as const,
     handoffLifecycleRejectionActAbsentFromHgaScopes: true as const,
     rejectHandoffActLayerUndefined: true as const,
     withdrawRecallApisNotProvided: false as const,

@@ -131,8 +131,9 @@ section("1. Foundation integrity assessment");
   expect("restoration deferred", a.restorationResumptionReentryDeferred, false);
   expect("resumption mechanics operative", a.resumptionMechanicsOperative, true);
   expect("reentry mechanics operative", a.reentryMechanicsOperative, true);
-  expect("hercm not matrix act types", a.hercmActsAreNotMatrixActTypes, true);
-  expect("R140+ unavailable", a.r140PlusUnavailable, true);
+  expect("hercm are matrix act types", a.hercmActsAreMatrixActTypes, true);
+  expect("R140+ unavailable", a.r140PlusUnavailable, false);
+  expect("R142+ unavailable", a.r142PlusUnavailable, true);
   expect("R84+ unavailable", a.r84PlusUnavailable, false);
   expect("R98+ unavailable", a.r98PlusUnavailable, false);
   expect("R112+ unavailable", a.r112PlusUnavailable, false);
@@ -541,8 +542,8 @@ section("11. Catalog regression + public API bypass");
 {
   const catalog = assessHandoffAuthorityCatalogIntegration();
   expect("catalog integrity", catalog.integrityOk, true);
-  expect("matrix 6", catalog.matrixActTypeCount, 6);
-  expect("operative 6", catalog.operativeMatrixActTypes.length, 6);
+  expect("matrix 8", catalog.matrixActTypeCount, 8);
+  expect("operative 8", catalog.operativeMatrixActTypes.length, 8);
   expect("deferred 0", catalog.catalogedDeferredMatrixActTypes.length, 0);
   expect("U1 established", catalog.hofG6U1SharedFoundationEstablished, true);
   expect(
@@ -562,6 +563,8 @@ section("11. Catalog regression + public API bypass");
     "suspension",
     "withdrawal",
     "recall",
+    "reentry",
+    "resumption",
   ]);
 
   const domain1 = createDomain1Repository();

@@ -1286,6 +1286,8 @@ export type BrainProhibitedHandoffAct =
   | "recall_handoff"
   | "withdraw_handoff"
   | "suspend_handoff"
+  | "reenter_handoff"
+  | "resume_handoff"
   | "terminate_downstream_reliance";
 
 /**
@@ -1297,6 +1299,7 @@ export interface HandoffAuthorityBoundaryAssessment {
   readonly brainMayDeclareHandoffPosture: false;
   readonly brainMayCompleteHandoff: false;
   readonly brainMayRecallWithdrawOrSuspendHandoff: false;
+  readonly brainMayReenterOrResumeHandoff: false;
   readonly brainMayElevateAdvisoryToOperativeHoemEvidence: false;
   readonly brainPermittedRolesOnly: true;
   readonly std014AuthorityNotAbsorbed: true;
@@ -1819,8 +1822,10 @@ export interface HandoffActLayerLifecycleEvaluation {
   readonly hercmMechanicsOperative: true;
   readonly hslmRemainsEightStates: true;
   readonly noReenteredOrResumedHslmState: true;
-  /** R140+ (catalog matrix integration to 8) remains deferred; matrix stays exactly 6. */
-  readonly r140PlusUnavailable: true;
+  /** R140–R141 catalog integration is complete; the matrix has eight types. */
+  readonly r140PlusUnavailable: false;
+  /** R142+ exit-completeness and invented ninth/expiry/restoration acts remain deferred. */
+  readonly r142PlusUnavailable: true;
   readonly r48ClosedHslmVocabulary: true;
   readonly r49PeerDistinctLifecycle: true;
   readonly r50SingleBindingPostureChain: true;
@@ -1993,9 +1998,8 @@ export interface HandoffDownstreamExitConsiderationEvaluation {
 // --- STD-015 HOF-G9 Catalog Integration (R66–R69) ---
 
 /**
- * R66 — mandatory HGA act-type matrix (§20.5.3.14). Exactly six ids.
- * suspension (HOF-G6-U2) and withdrawal (HOF-G6-U3) are operative.
- * recall (HOF-G6-U4) is operative alongside suspension and withdrawal.
+ * R66 adopted six matrix ids; R140–R141 complete the catalog to eight by integrating
+ * reentry and resumption without redrafting R66–R69. Rejection and exit remain absent.
  */
 export type HgaMatrixActType =
   | "authorization"
@@ -2003,7 +2007,9 @@ export type HgaMatrixActType =
   | "completion"
   | "suspension"
   | "withdrawal"
-  | "recall";
+  | "recall"
+  | "reentry"
+  | "resumption";
 
 /** R70–R83 — peer-distinct G6 lifecycle matrix act types (foundation only until U2–U4). */
 export type G6LifecycleMatrixActType = "suspension" | "withdrawal" | "recall";
@@ -2036,6 +2042,7 @@ export interface HoemExpectationCatalogEntry {
   readonly matrixMembership: "matrix" | "peer_non_matrix";
   readonly operativeStatus: HgaMatrixActOperativeStatus | "operative";
   readonly isSeventhMatrixType: false;
+  readonly isNinthMatrixType: false;
   readonly forbiddenAsMatrix: boolean;
   readonly requirementIds: readonly Std015RequirementId[];
 }
@@ -2098,12 +2105,13 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly soleAuthorityClassId: HandoffGovernanceAuthorityClassId;
   readonly soleAuthorityClassCount: 1;
   readonly matrixActTypes: readonly HgaMatrixActType[];
-  readonly matrixActTypeCount: 6;
+  readonly matrixActTypeCount: 8;
   readonly operativeMatrixActTypes: readonly HgaMatrixActType[];
   readonly catalogedDeferredMatrixActTypes: readonly HgaMatrixActType[];
   readonly hoemMatrixExpectations: readonly HgaMatrixActType[];
   readonly peerNonMatrixHoemExpectation: "exit_boundary";
   readonly exitBoundaryIsSeventhMatrixType: false;
+  readonly exitBoundaryIsNinthMatrixType: false;
   readonly rejectionForbiddenAsMatrix: true;
   readonly hslmStateIds: readonly HandoffActLayerLifecycleState[];
   readonly hslmStateCount: 8;
@@ -2116,10 +2124,14 @@ export interface HandoffAuthorityCatalogIntegrationAssessment {
   readonly prohibitedPerformerClasses: readonly ProhibitedHandoffActPerformerClass[];
   readonly haamProhibitedAssigneesPreserved: readonly HaamProhibitedHandoffAuthorizationAssignee[];
   readonly frozenHgaConstitutionalScopes: readonly string[];
-  /** Six matrix scopes plus the two peer non-matrix HERCM scopes (R126–R139). */
+  /** Eight HGA scopes: six R66 matrix acts plus reentry and resumption (R140–R141). */
   readonly frozenHgaConstitutionalScopeCount: 8;
   readonly hercmConstitutionalScopesPresent: true;
-  readonly hercmActsAreNotMatrixActTypes: true;
+  readonly hercmActsAreMatrixActTypes: true;
+  readonly catalogMembershipDoesNotReenter: true;
+  readonly catalogMembershipDoesNotResume: true;
+  readonly r140EightTypeMatrixComplete: true;
+  readonly r142PlusDeferred: true;
   readonly handoffLifecycleRejectionActAbsentFromHgaScopes: true;
   readonly rejectHandoffActLayerUndefined: true;
   readonly withdrawRecallApisNotProvided: false;
@@ -2213,12 +2225,13 @@ export interface HofG6U1SharedLifecycleFoundationAssessment {
   readonly rejectionActAbsent: true;
   readonly exitHgaMatrixActAbsent: true;
   readonly hslmEightStatesPreserved: true;
-  /** HERCM R126–R139 is operative; restoration/expiry acts remain deferred (R140+). */
+  /** HERCM R126–R139 is operative; invented restoration/expiry acts remain deferred (R142+). */
   readonly restorationResumptionReentryDeferred: false;
   readonly resumptionMechanicsOperative: true;
   readonly reentryMechanicsOperative: true;
-  readonly hercmActsAreNotMatrixActTypes: true;
-  readonly r140PlusUnavailable: true;
+  readonly hercmActsAreMatrixActTypes: true;
+  readonly r140PlusUnavailable: false;
+  readonly r142PlusUnavailable: true;
   readonly suspensionMechanicsOperative: true;
   readonly withdrawalMechanicsOperative: true;
   readonly r84PlusUnavailable: false;
@@ -2652,8 +2665,8 @@ export interface GovernedHandoffRecallActRecord {
 /**
  * HERCM closed category ids — Handoff Re-entry & Resumption Category Model.
  * REC-02 is the sole resumption category; REC-01/03/04/05 are re-entry categories.
- * HERCM acts are performed under the established HGA class but are NOT HGA matrix
- * act types — matrix membership remains exactly six (R66; R140 deferred).
+ * HERCM acts are performed under the established HGA class. R140–R141 integrate
+ * reentry and resumption into the eight-type HGA matrix without changing REC semantics.
  */
 export type HercmCategoryId = "REC-01" | "REC-02" | "REC-03" | "REC-04" | "REC-05";
 
@@ -2710,8 +2723,8 @@ export interface HercmCategoryCatalogEntry {
   readonly requiresNewAuthorizationViaG2: boolean;
   /** R132 — REC-04 additionally requires a new posture path after the new authorization. */
   readonly requiresNewPostureAfterNewAuthorization: boolean;
-  /** R126 — HERCM acts are peer non-matrix; matrix membership stays six (R140 deferred). */
-  readonly isHgaMatrixActType: false;
+  /** R140–R141 — reentry and resumption are HGA matrix act types. Catalog membership does not mint. */
+  readonly isHgaMatrixActType: true;
   readonly hgaConstitutionalScope:
     | "handoff_resumption_act"
     | "handoff_reentry_act";
@@ -2727,8 +2740,8 @@ export interface HercmCatalogIntegrityAssessment {
   readonly categoryCount: 5;
   readonly resumptionCategoryIds: readonly HercmResumptionCategoryId[];
   readonly reentryCategoryIds: readonly HercmReentryCategoryId[];
-  readonly hgaMatrixActTypeCount: 6;
-  readonly hercmActsAreNotMatrixActTypes: true;
+  readonly hgaMatrixActTypeCount: 8;
+  readonly hercmActsAreMatrixActTypes: true;
   readonly hercmConstitutionalScopesPresent: true;
   readonly hslmStateCount: 8;
   readonly noReenteredHslmState: true;
@@ -2739,7 +2752,8 @@ export interface HercmCatalogIntegrityAssessment {
   readonly exportReadyAloneDoesNotReenterOrResume: true;
   readonly noAutomaticRecovery: true;
   readonly r126ThroughR139: true;
-  readonly r140PlusDeferred: true;
+  readonly r140R141Complete: true;
+  readonly r142PlusDeferred: true;
   readonly traceability: Std015GovernanceTraceability;
 }
 
@@ -2930,7 +2944,9 @@ export interface GovernedHandoffReentryAssessment {
  * Operative HGA Handoff resumption act (REC-02) — FI-DSN-STD-015-R126–R139.
  * Restores forward reliance on the EXISTING authorization + posture chain after
  * Suspension. Does NOT authorize anew, declare posture, complete, or reenter.
- * NOT an HGA matrix act type (R140 deferred).
+ * R140–R141 catalog membership is matrix; minting remains the HERCM path, not a
+ * generic HGA factory. Persisted `notHgaMatrixActType` is the pre-R140 mint-path
+ * marker and remains lawful on historical records.
  */
 export interface GovernedHandoffResumptionActRecord {
   readonly resumptionActId: GovernedHandoffResumptionActId;
@@ -3028,7 +3044,8 @@ export interface GovernedHandoffResumptionActRecord {
  * Returns the binding toward Eligible-for-consideration only. Requires NEW
  * authorization via HOF-G2 afterward; REC-04 additionally requires a new posture
  * declaration after the new authorization. Does NOT resurrect withdrawn/recalled
- * authorization or posture. NOT an HGA matrix act type (R140 deferred).
+ * authorization or posture. R140–R141 catalog membership is matrix; minting remains
+ * the HERCM path. Persisted `notHgaMatrixActType` remains lawful on historical records.
  */
 export interface GovernedHandoffReentryActRecord {
   readonly reentryActId: GovernedHandoffReentryActId;

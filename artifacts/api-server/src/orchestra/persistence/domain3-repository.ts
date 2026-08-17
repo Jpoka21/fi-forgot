@@ -1674,7 +1674,7 @@ export interface Domain3Repository {
 
   /**
    * HERCM REC-02 (R126–R139) — assess whether a lawful resumption may be performed.
-   * Resumption is a peer NON-MATRIX HGA act; it is never routed through the six-type matrix.
+   * R140–R141 catalog resumption as a matrix member; minting is never a generic matrix factory.
    */
   assessGovernedHandoffResumption(input: {
     entryId: GovernedHandoffEntryId;
@@ -1770,7 +1770,7 @@ export interface Domain3Repository {
 
   /**
    * HERCM REC-01/03/04/05 (R126–R139) — assess whether a lawful re-entry may be performed.
-   * Re-entry is a peer NON-MATRIX HGA act; it is never routed through the six-type matrix.
+   * R140–R141 catalog re-entry as a matrix member; minting is never a generic matrix factory.
    */
   assessGovernedHandoffReentry(input: {
     entryId: GovernedHandoffEntryId;

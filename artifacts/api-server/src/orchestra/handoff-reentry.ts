@@ -1,13 +1,13 @@
 /**
  * Governed Handoff Re-entry — FI-DSN-STD-015 HERCM REC-01/03/04/05 (R126–R139).
  *
- * Distinct peer NON-MATRIX HGA act (R126). Re-entry returns the binding toward
+ * Distinct HGA act (R126). Re-entry returns the binding toward
  * Eligible-for-consideration ONLY (R132): it resurrects no withdrawn or recalled
  * authorization or posture, and a NEW HOF-G2 authorization is required afterward.
  * REC-04 additionally requires a new posture path after that new authorization.
  *
- * REC-02 resumption lives in handoff-resumption.ts. The HGA act-type matrix stays
- * exactly six — re-entry is never routed through assertHgaMatrixActMayBePerformed.
+ * REC-02 resumption lives in handoff-resumption.ts. R140–R141 catalog re-entry as a
+ * matrix member; minting is never routed through assertHgaMatrixActMayBePerformed.
  *
  * Raw constructors — prefer Domain3Repository.reenterGovernedHandoff.
  * NOT exported from orchestra barrel.
@@ -415,7 +415,7 @@ export function assessGovernedHandoffReentry(input: {
         denialReasons.push("qualifying_prior_rejected_missing");
       }
     } else if (category.categoryId === "REC-05") {
-      // Expiry acts remain deferred to R140+; the qualifying prior fact is the
+      // Expiry acts remain deferred to R142+; the qualifying prior fact is the
       // projected/attributable Expired state.
       if (projected !== "expired") {
         denialReasons.push("qualifying_prior_expired_missing");

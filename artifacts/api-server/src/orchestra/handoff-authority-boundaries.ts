@@ -30,6 +30,7 @@ const HOF_G9_REQUIREMENTS = [
   "FI-DSN-STD-015-R22",
   "FI-DSN-STD-015-R23",
   "FI-DSN-STD-015-R24",
+  "FI-DSN-STD-015-R141",
 ] as const satisfies readonly Std015RequirementId[];
 
 export const HANDOFF_AUTHORITY_BOUNDARY_TRACEABILITY =
@@ -93,6 +94,8 @@ export const BRAIN_PROHIBITED_HANDOFF_ACTS = [
   "recall_handoff",
   "withdraw_handoff",
   "suspend_handoff",
+  "reenter_handoff",
+  "resume_handoff",
   "terminate_downstream_reliance",
 ] as const satisfies readonly BrainProhibitedHandoffAct[];
 
@@ -154,6 +157,8 @@ const HANDOFF_AUTHORITY_BOUNDARY_FORBIDDEN_KEYS = [
   "brainRecallsHandoff",
   "brainWithdrawsHandoff",
   "brainSuspendsHandoff",
+  "brainReentersHandoff",
+  "brainResumesHandoff",
   "advisoryIsOperativeHoemEvidence",
   "elevateAdvisoryToHoem",
   "absorbsStd014Authority",
@@ -390,6 +395,7 @@ export function evaluateHandoffAuthorityBoundaryFromFacts(): HandoffAuthorityBou
     brainMayDeclareHandoffPosture: false as const,
     brainMayCompleteHandoff: false as const,
     brainMayRecallWithdrawOrSuspendHandoff: false as const,
+    brainMayReenterOrResumeHandoff: false as const,
     brainMayElevateAdvisoryToOperativeHoemEvidence: false as const,
     brainPermittedRolesOnly: true as const,
     std014AuthorityNotAbsorbed: true as const,

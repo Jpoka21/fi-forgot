@@ -314,7 +314,7 @@ section("HOF-G9 catalogs and STD-015 R22–R24 traceability");
   expect("HAAM prohibited assignees length", HAAM_PROHIBITED_HANDOFF_AUTHORIZATION_ASSIGNEES.length, 8);
   expect("STD-014 nonabsorbed subjects length", STD014_NONABSORBED_AUTHORITY_SUBJECTS.length, 10);
   expect("Brain permitted roles length", BRAIN_PERMITTED_HANDOFF_ROLES.length, 4);
-  expect("Brain prohibited acts length", BRAIN_PROHIBITED_HANDOFF_ACTS.length, 7);
+  expect("Brain prohibited acts length", BRAIN_PROHIBITED_HANDOFF_ACTS.length, 9);
   expect(
     "includes handoff_authorization peer class",
     PEER_DISTINCT_HANDOFF_DECISION_CLASSES.includes("handoff_authorization"),

@@ -1,8 +1,8 @@
 /**
  * ORCH-IMP-030 — STD-015 HERCM Handoff Re-entry & Resumption (R126–R139).
  *
- * Re-entry and resumption are peer NON-MATRIX HGA constitutional scopes. The HGA act-type
- * matrix stays at exactly six until R140, which remains deferred.
+ * Re-entry and resumption remain HERCM-governed. R140–R141 catalog them as HGA
+ * matrix members without changing REC semantics.
  *
  * Run with:
  *   npx tsx artifacts/api-server/src/__tests__/orchestra-domain3-handoff-hercm.test.ts
@@ -11,8 +11,10 @@
 import {
   addObligationToProgram,
   assertHgaMatrixActType,
+  assertHercmActIsHgaMatrixActType,
   assertHercmActIsNotHgaMatrixActType,
   assertR140PlusUnavailable,
+  assertR142PlusUnavailable,
   assessGovernedHandoffReentry,
   assessHercmCatalogIntegrity,
   bindComplianceBoundary,
@@ -406,7 +408,7 @@ async function recall(ctx: Ctx, ready: Ready) {
 }
 
 section(
-  "1. catalog integrity; matrix still six; scopes include resumption/reentry; R140 deferred",
+  "1. catalog integrity; matrix is eight; scopes include resumption/reentry; R140–R141 complete",
 );
 
 {
@@ -428,17 +430,18 @@ section(
     "REC-04",
     "REC-05",
   ]);
-  expect("hercm acts are not matrix act types", integrity.hercmActsAreNotMatrixActTypes, true);
+  expect("hercm acts are matrix act types", integrity.hercmActsAreMatrixActTypes, true);
   expect("hercm constitutional scopes present", integrity.hercmConstitutionalScopesPresent, true);
-  expect("HGA matrix act type count six", integrity.hgaMatrixActTypeCount, 6);
+  expect("HGA matrix act type count eight", integrity.hgaMatrixActTypeCount, 8);
   expect("HSLM remains eight states", integrity.hslmStateCount, 8);
   expect("no reentered HSLM state", integrity.noReenteredHslmState, true);
   expect("no resumed HSLM state", integrity.noResumedHslmState, true);
   expect("export_ready alone does not reenter or resume", integrity.exportReadyAloneDoesNotReenterOrResume, true);
   expect("R126–R139 operative", integrity.r126ThroughR139, true);
-  expect("R140+ deferred", integrity.r140PlusDeferred, true);
+  expect("R140–R141 complete", integrity.r140R141Complete, true);
+  expect("R142+ deferred", integrity.r142PlusDeferred, true);
 
-  expect("HGA matrix still exactly six", HGA_MATRIX_ACT_TYPES.length, 6);
+  expect("HGA matrix exactly eight", HGA_MATRIX_ACT_TYPES.length, 8);
   const hga = FROZEN_ESTABLISHED_HANDOFF_GOVERNANCE_AUTHORITY_CLASSES[0]!;
   expect("HGA constitutional scopes now eight", hga.authorizedConstitutionalScopes.length, 8);
   expectTruthy(
@@ -475,19 +478,28 @@ section(
   );
 
   for (const claim of [
-    "seventh_matrix_act_type",
-    "resumption_is_matrix_act_type",
-    "reentry_is_matrix_act_type",
+    "ninth_matrix_act_type",
+    "restoration_operative_mechanics_available",
+    "expiry_operative_mechanics_available",
+    "r142_plus_available",
   ]) {
     expectThrows(
-      `assertR140PlusUnavailable rejects ${claim}`,
-      () => assertR140PlusUnavailable(claim),
+      `assertR142PlusUnavailable rejects ${claim}`,
+      () => assertR142PlusUnavailable(claim),
       "invalid_handoff_g6_lifecycle_foundation",
     );
   }
+  expectThrows(
+    "assertR140PlusUnavailable rejects matrix_still_six",
+    () => assertR140PlusUnavailable("matrix_still_six"),
+    "invalid_handoff_g6_lifecycle_foundation",
+  );
   assertR140PlusUnavailable();
   passed++;
-  console.log("  ✓ assertR140PlusUnavailable() passes without an R140+ claim");
+  console.log("  ✓ assertR140PlusUnavailable() no-arg is a no-op after R140–R141");
+  assertR142PlusUnavailable();
+  passed++;
+  console.log("  ✓ assertR142PlusUnavailable() passes without an R142+ claim");
 
   const mod = await import("../orchestra/index.js");
   expect(
@@ -557,7 +569,8 @@ section("2. lawful REC-02 resumption after suspension lifts the pause on existin
   expect("suspension history preserved", lifecycle.authoritativeSuspensionActId, suspension.suspensionActId);
   expect("hercm mechanics operative", lifecycle.hercmMechanicsOperative, true);
   expect("no reentered/resumed HSLM state", lifecycle.noReenteredOrResumedHslmState, true);
-  expect("R140+ unavailable on lifecycle", lifecycle.r140PlusUnavailable, true);
+  expect("R140–R141 complete on lifecycle", lifecycle.r140PlusUnavailable, false);
+  expect("R142+ unavailable on lifecycle", lifecycle.r142PlusUnavailable, true);
   expect(
     "authorization still current",
     await ctx.domain3.evaluateHandoffAuthorizationCurrency(
@@ -979,25 +992,38 @@ section("9. R128/R129 — export_ready alone and automatic recovery never mint a
   );
 }
 
-section("10. no seventh matrix act; reentry/resumption are not matrix act types");
+section("10. eight-type matrix; reentry/resumption are matrix members; no ninth type");
 
 {
-  for (const label of ["reentry", "re-entry", "resumption", "resume", "restoration"]) {
+  for (const label of ["reentry", "resumption"] as const) {
+    try {
+      assertHgaMatrixActType(label);
+      assertHercmActIsHgaMatrixActType(label);
+      passed++;
+      console.log(`  ✓ ${label} is an HGA matrix act type`);
+    } catch {
+      failed++;
+      failures.push(`${label} is an HGA matrix act type`);
+      console.log(`  ✗ ${label} is an HGA matrix act type`);
+    }
+  }
+  for (const label of ["re-entry", "resume", "restoration", "rejection", "exit_boundary"]) {
     expectThrows(`assertHgaMatrixActType(${label}) throws`, () =>
       assertHgaMatrixActType(label),
     );
-    // The regression guard passes precisely because the matrix has not absorbed the label.
     assertHercmActIsNotHgaMatrixActType(label);
     passed++;
     console.log(`  ✓ ${label} absent from the HGA matrix`);
   }
-  expect("matrix act types unchanged", [...HGA_MATRIX_ACT_TYPES], [
+  expect("matrix act types eight", [...HGA_MATRIX_ACT_TYPES], [
     "authorization",
     "posture_declaration",
     "completion",
     "suspension",
     "withdrawal",
     "recall",
+    "reentry",
+    "resumption",
   ]);
 
   const domain1 = createDomain1Repository();

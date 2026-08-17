@@ -120,13 +120,13 @@ section("1. Sole HGA class; no other authority class");
   );
 }
 
-section("2. Exact six matrix act types");
+section("2. Exact eight matrix act types");
 
 {
-  expect("matrix length 6", HGA_MATRIX_ACT_TYPES.length, 6);
-  expect("catalog length 6", HGA_MATRIX_ACT_TYPE_CATALOG.length, 6);
+  expect("matrix length 8", HGA_MATRIX_ACT_TYPES.length, 8);
+  expect("catalog length 8", HGA_MATRIX_ACT_TYPE_CATALOG.length, 8);
   expect(
-    "exact six ids",
+    "exact eight ids",
     [...HGA_MATRIX_ACT_TYPES],
     [
       "authorization",
@@ -135,6 +135,8 @@ section("2. Exact six matrix act types");
       "suspension",
       "withdrawal",
       "recall",
+      "reentry",
+      "resumption",
     ],
   );
 }
@@ -156,10 +158,10 @@ section("3. authorization/posture_declaration/completion OPERATIVE");
   }
 }
 
-section("4. suspension/withdrawal/recall OPERATIVE");
+section("4. suspension/withdrawal/recall/reentry/resumption OPERATIVE");
 
 {
-  for (const t of ["suspension", "withdrawal", "recall"] as const) {
+  for (const t of ["suspension", "withdrawal", "recall", "reentry", "resumption"] as const) {
     expect(`${t} operative`, getHgaMatrixActOperativeStatus(t), "operative");
     expectTruthy(`${t} still matrix member`, isHgaMatrixActType(t));
     try {
@@ -226,9 +228,9 @@ section("5. Unknown / rejection / exit matrix types rejected");
 section("6. Separate HOEM expectations; collapse denied");
 
 {
-  expect("six matrix HOEM expectations", HOEM_MATRIX_EXPECTATION_CATALOG.length, 6);
+  expect("eight matrix HOEM expectations", HOEM_MATRIX_EXPECTATION_CATALOG.length, 8);
   const ids = HOEM_MATRIX_EXPECTATION_CATALOG.map((e) => e.hoemExpectation);
-  expect("distinct HOEM ids", new Set(ids).size, 6);
+  expect("distinct HOEM ids", new Set(ids).size, 8);
   for (const entry of HOEM_MATRIX_EXPECTATION_CATALOG) {
     expect(
       `${entry.hoemExpectation} matrix membership`,
@@ -236,6 +238,7 @@ section("6. Separate HOEM expectations; collapse denied");
       "matrix",
     );
     expect(`${entry.hoemExpectation} not seventh`, entry.isSeventhMatrixType, false);
+    expect(`${entry.hoemExpectation} not ninth`, entry.isNinthMatrixType, false);
   }
   expectTruthy(
     "rejection forbidden as matrix",
@@ -281,6 +284,28 @@ section("7. R68 single binding; multi-binding span denied");
     hppmmPostureChainPresent: false,
   });
   expect("posture chain required", missingPosture.mayBindSingleContext, false);
+
+  expect(
+    "resumption requires HPPM chain",
+    resolveHgaMatrixActType("resumption").hppmmPostureChainRequired,
+    true,
+  );
+  expect(
+    "reentry does not require current HPPM chain",
+    resolveHgaMatrixActType("reentry").hppmmPostureChainRequired,
+    false,
+  );
+  const reentryScope = assessHgaActCatalogBindingScope({
+    actType: "reentry",
+    bindingId: "binding-1",
+  });
+  expect("reentry single binding without current posture", reentryScope.mayBindSingleContext, true);
+  const resumptionScope = assessHgaActCatalogBindingScope({
+    actType: "resumption",
+    bindingId: "binding-1",
+    hppmmPostureChainPresent: false,
+  });
+  expect("resumption without posture denied", resumptionScope.mayBindSingleContext, false);
 }
 
 section("8. Catalog membership does not authorize/bind/declare/complete/exit");
@@ -298,6 +323,13 @@ section("8. Catalog membership does not authorize/bind/declare/complete/exit");
   expect("r67", assessment.r67DistinctActTypeAttributionAndHoem, true);
   expect("r68", assessment.r68SingleHccmBindingNoMerge, true);
   expect("r69", assessment.r69ProhibitedPerformers, true);
+  expect("r140 eight-type complete", assessment.r140EightTypeMatrixComplete, true);
+  expect("r142 deferred", assessment.r142PlusDeferred, true);
+  expect("hercm acts are matrix types", assessment.hercmActsAreMatrixActTypes, true);
+  expect("catalog does not reenter", assessment.catalogMembershipDoesNotReenter, true);
+  expect("catalog does not resume", assessment.catalogMembershipDoesNotResume, true);
+  expect("matrixActTypeCount 8", assessment.matrixActTypeCount, 8);
+  expect("exit not ninth", assessment.exitBoundaryIsNinthMatrixType, false);
 }
 
 section("9. Prohibited performers R69");
@@ -452,8 +484,7 @@ section("14. rejectHandoffActLayer undefined; handoff_lifecycle_rejection_act ab
     hga.authorizedConstitutionalScopes.includes("handoff_lifecycle_rejection_act" as never),
     false,
   );
-  // Six matrix scopes plus the two peer NON-MATRIX HERCM scopes (R126–R139). The matrix
-  // itself stays at exactly six until R140.
+  // Eight HGA scopes: original six R66 matrix acts plus reentry and resumption (R140–R141).
   expect("exactly eight constitutional scopes", hga.authorizedConstitutionalScopes.length, 8);
   expect(
     "scopes are the six matrix acts plus resumption/reentry",
@@ -503,6 +534,8 @@ section("16. Barrel exports catalog helpers not mint factories");
   expect("isProhibitedHandoffActPerformerClass exported", "isProhibitedHandoffActPerformerClass" in mod, true);
   expect("HGA_MATRIX_ACT_TYPE_CATALOG exported", "HGA_MATRIX_ACT_TYPE_CATALOG" in mod, true);
   expect("performHgaAct not exported", "performHgaAct" in mod, false);
+  expect("createHgaAct not exported", "createHgaAct" in mod, false);
+  expect("mintMatrixAct not exported", "mintMatrixAct" in mod, false);
   expect("suspendHandoff not exported", "suspendHandoff" in mod, false);
   expect("withdrawHandoff not exported", "withdrawHandoff" in mod, false);
   expect("recallHandoff not exported", "recallHandoff" in mod, false);
@@ -543,7 +576,7 @@ section("17. HOF-G6-U1 foundation established; suspension/withdrawal/recall oper
     true,
   );
   expect("performHgaActFactoryNotProvided", assessment.performHgaActFactoryNotProvided, true);
-  expect("operative 6", assessment.operativeMatrixActTypes.length, 6);
+  expect("operative 8", assessment.operativeMatrixActTypes.length, 8);
   expect("deferred 0", assessment.catalogedDeferredMatrixActTypes.length, 0);
   expect("suspension operative", getHgaMatrixActOperativeStatus("suspension"), "operative");
   expect("withdrawal operative", getHgaMatrixActOperativeStatus("withdrawal"), "operative");

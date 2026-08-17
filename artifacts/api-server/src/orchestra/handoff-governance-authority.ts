@@ -9,14 +9,11 @@
  * HGA class but is NOT an HGA matrix act type and must not be added to constitutional scopes.
  * Actor strings alone cannot mint HGA. MAGAC/DDAC/DSRA/IVAC/SSAC/Brain cannot substitute.
  *
- * R66 catalog integration: the mandatory HGA act-type matrix catalogs six types
- * (authorization, posture_declaration, completion, suspension, withdrawal, recall).
- * authorizedConstitutionalScopes includes those six matrix scopes
- * (HOF-G6-U2 activates handoff_suspension_act; HOF-G6-U3 activates handoff_withdrawal_act;
- * HOF-G6-U4 activates handoff_recall_act) PLUS the two peer NON-MATRIX HERCM scopes
- * handoff_resumption_act and handoff_reentry_act (R126–R139). HERCM acts are performed
- * under the established HGA class but are NOT matrix act types — adding them to the
- * matrix remains prohibited until R140.
+ * R66 catalog integration: the mandatory HGA act-type matrix catalogs eight types
+ * (authorization, posture_declaration, completion, suspension, withdrawal, recall,
+ * reentry, resumption). authorizedConstitutionalScopes includes those eight matrix
+ * scopes. R140–R141 integrate reentry and resumption as peer matrix members without
+ * duplicating scopes. Adding a ninth type remains prohibited.
  * See handoff-authority-catalog.ts, handoff-hercm.ts, and handoff-lifecycle-g6-foundation.ts.
  */
 

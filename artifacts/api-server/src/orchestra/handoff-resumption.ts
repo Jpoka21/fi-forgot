@@ -1,12 +1,12 @@
 /**
  * Governed Handoff Resumption — FI-DSN-STD-015 HERCM REC-02 (R126–R139).
  *
- * Distinct peer NON-MATRIX HGA act (R126): the suspension pause is lifted and forward
+ * Distinct HGA act (R126): the suspension pause is lifted and forward
  * reliance resumes on the EXISTING authorization + posture chain (R132). Resumption
  * mints no authorization, declares no posture, and completes/withdraws/recalls nothing.
  *
  * REC-02 only. Re-entry (REC-01/03/04/05) lives in handoff-reentry.ts.
- * The HGA act-type matrix stays exactly six — resumption is never routed through
+ * R140–R141 catalog resumption as a matrix member; minting is never routed through
  * assertHgaMatrixActMayBePerformed.
  *
  * Raw constructors — prefer Domain3Repository.resumeGovernedHandoff.

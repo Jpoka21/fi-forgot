@@ -4925,7 +4925,8 @@ export function validatePersistedGovernedHandoffRecall(
  * HERCM REC-02 resumption (R126–R139).
  *
  * Deliberately does NOT call assertHgaMatrixActMayBePerformed: resumption is a peer
- * NON-MATRIX HGA act and routing it through the six-type matrix would fail closed (R126).
+ * HGA matrix member (R140–R141). Routing minting through a generic matrix factory
+ * would fail closed; HERCM persistence remains the governed HERCM artifact.
  */
 export function validatePersistedGovernedHandoffResumption(
   raw: unknown,
@@ -5164,7 +5165,8 @@ export function validatePersistedGovernedHandoffResumption(
  * HERCM REC-01/03/04/05 re-entry (R126–R139).
  *
  * Deliberately does NOT call assertHgaMatrixActMayBePerformed: re-entry is a peer
- * NON-MATRIX HGA act and routing it through the six-type matrix would fail closed (R126).
+ * HGA matrix member (R140–R141). Routing minting through a generic matrix factory
+ * would fail closed; HERCM persistence remains the governed HERCM artifact.
  */
 export function validatePersistedGovernedHandoffReentry(
   raw: unknown,

@@ -4,9 +4,9 @@
  * Shared machinery consumed by HOF-G6-U2 (suspension), U3 (withdrawal), U4 (recall).
  * Does NOT mint withdrawal / recall acts (U3/U4). Suspension minting is HOF-G6-U2.
  * Does NOT implement withdrawal/recall act-specific triggers or effect mechanics (R98+).
- * Does NOT implement HERCM re-entry or resumption acts — those are peer NON-matrix
- * HGA acts in handoff-reentry.ts / handoff-resumption.ts (R126–R139). Restoration and
- * expiry acts remain deferred (R140+).
+ * Does NOT implement HERCM re-entry or resumption minting — those remain the
+ * governed HERCM paths (R126–R139). R140–R141 catalog them as matrix members.
+ * Restoration and expiry acts remain deferred (R142+).
  * Does NOT create a generic performHgaAct / mintHgaAct factory.
  * Does NOT invent rejection or exit HGA matrix acts.
  *
@@ -822,23 +822,39 @@ export function assertR112PlusUnavailable(_claim?: unknown): void {
 }
 
 /**
- * R140+ (restoration acts as matrix types, expiry acts, HGA matrix expansion beyond six)
- * remains unavailable. HERCM R126–R139 is operative and is NOT R140+.
+ * R140–R141 are complete. Claims that the matrix is still six, or that HERCM acts
+ * are still non-matrix, fail closed. Use assertR142PlusUnavailable for later deferrals.
  */
 export function assertR140PlusUnavailable(claim?: unknown): void {
   if (
-    claim === "r140_plus_available" ||
-    claim === "seventh_matrix_act_type" ||
-    claim === "eighth_matrix_act_type" ||
-    claim === "resumption_is_matrix_act_type" ||
-    claim === "reentry_is_matrix_act_type" ||
+    claim === "r140_plus_unavailable" ||
+    claim === "matrix_still_six" ||
+    claim === "hercm_acts_are_not_matrix_act_types"
+  ) {
+    throw new OrchestraConstitutionalError(
+      "R140–R141 are complete: the HGA matrix has eight act types and reentry/resumption are matrix members; HERCM minting remains the governed HERCM paths (R140/R141)",
+      "invalid_handoff_g6_lifecycle_foundation",
+      ["FI-DSN-STD-015-R140", "FI-DSN-STD-015-R141"],
+    );
+  }
+}
+
+/**
+ * R142+ (exit-completeness, invented ninth matrix types, restoration/expiry acts)
+ * remains unavailable. R140–R141 catalog completion is NOT R142+.
+ */
+export function assertR142PlusUnavailable(claim?: unknown): void {
+  if (
+    claim === "r142_plus_available" ||
+    claim === "ninth_matrix_act_type" ||
+    claim === "exit_completeness_operative" ||
     claim === "restoration_operative_mechanics_available" ||
     claim === "expiry_operative_mechanics_available"
   ) {
     throw new OrchestraConstitutionalError(
-      "R140+ remains unavailable: the HGA matrix stays exactly six act types and restoration/expiry operative mechanics are not implemented; HERCM resumption and re-entry are peer NON-matrix acts (R66/R126)",
+      "R142+ remains unavailable: exit-completeness, invented ninth matrix types, and restoration/expiry operative mechanics are not implemented (R142)",
       "invalid_handoff_g6_lifecycle_foundation",
-      ["FI-DSN-STD-015-R66", "FI-DSN-STD-015-R126"],
+      ["FI-DSN-STD-015-R140", "FI-DSN-STD-015-R141"],
     );
   }
 }
@@ -876,14 +892,16 @@ export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycle
   const withdrawalOperative =
     resolveHgaMatrixActType("withdrawal").operativeStatus === "operative";
 
-  const matrixStillSix = HGA_MATRIX_ACT_TYPES.length === 6;
+  const matrixIsEight = HGA_MATRIX_ACT_TYPES.length === 8;
   const hslmEight = FROZEN_HANDOFF_ACT_LAYER_LIFECYCLE_STATES.length === 8;
 
   const integrityOk =
     recallOperative &&
     suspensionOperative &&
     withdrawalOperative &&
-    matrixStillSix &&
+    matrixIsEight &&
+    isHgaMatrixActType("reentry") &&
+    isHgaMatrixActType("resumption") &&
     hslmEight &&
     G6_LIFECYCLE_MATRIX_ACT_TYPES.length === 3 &&
     G6_SHARED_EFFECT_FRAMING_BY_ACT.suspension ===
@@ -919,8 +937,9 @@ export function assessHofG6U1SharedLifecycleFoundation(): HofG6U1SharedLifecycle
     restorationResumptionReentryDeferred: false as const,
     resumptionMechanicsOperative: true as const,
     reentryMechanicsOperative: true as const,
-    hercmActsAreNotMatrixActTypes: true as const,
-    r140PlusUnavailable: true as const,
+    hercmActsAreMatrixActTypes: true as const,
+    r140PlusUnavailable: false as const,
+    r142PlusUnavailable: true as const,
     suspensionMechanicsOperative: true as const,
     withdrawalMechanicsOperative: true as const,
     recallMechanicsOperative: true as const,
