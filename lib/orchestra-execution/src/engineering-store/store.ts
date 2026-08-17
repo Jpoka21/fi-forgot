@@ -214,6 +214,41 @@ export class FileEngineeringStore {
     return all.length === 0 ? null : all[all.length - 1] ?? null;
   }
 
+  loadExecutionEvidenceById(assignmentId: string, evidenceId: string): ExecutionEvidence {
+    const dest = this.evidencePath(assertSafeId("assignmentId", assignmentId), assertSafeId("evidenceId", evidenceId));
+    if (!existsSync(dest)) {
+      throw new EngineeringStoreError(`execution evidence not found: ${assignmentId}/${evidenceId}`);
+    }
+    return this.readEvidenceFile(dest);
+  }
+
+  listAssignmentIds(): string[] {
+    if (!existsSync(this.assignmentsDir())) return [];
+    return readdirSync(this.assignmentsDir())
+      .filter((name) => existsSync(this.assignmentPath(name)))
+      .sort();
+  }
+
+  findVerifierAssignments(
+    executorAssignmentId: string,
+    executionEvidenceId?: string,
+  ): FrozenAssignmentRecord[] {
+    const matches: FrozenAssignmentRecord[] = [];
+    for (const assignmentId of this.listAssignmentIds()) {
+      const record = this.loadAssignmentRecord(assignmentId);
+      if (record.frozen.assignment.role !== "verifier") continue;
+      if (record.relationship.verifiesAssignmentId !== executorAssignmentId) continue;
+      if (
+        executionEvidenceId &&
+        record.relationship.verifiesExecutionEvidenceId !== executionEvidenceId
+      ) {
+        continue;
+      }
+      matches.push(record);
+    }
+    return matches;
+  }
+
   getAssignmentStatus(assignmentId: string): AssignmentStatus {
     const events = this.readStatusEvents(assignmentId);
     const last = events[events.length - 1];

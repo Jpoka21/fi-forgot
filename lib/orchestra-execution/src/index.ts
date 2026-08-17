@@ -74,3 +74,15 @@ export {
 export { FileEngineeringStore, createFileEngineeringStore, EngineeringStoreError } from "./engineering-store/store.js";
 export { dispatchFrozenAssignment } from "./engineering-store/dispatch.js";
 export { buildExecutionEvidence, validateEvidenceHash } from "./engineering-store/evidence.js";
+export {
+  authorizeAndFreezeVerifierAssignment,
+  findVerifierAssignments,
+  prepareVerifierAssignment,
+  VERIFIER_PREPARATION_REFUSALS,
+} from "./engineering-store/prepare-verifier.js";
+export type {
+  AuthorizeAndFreezeVerifierAssignmentInput,
+  PrepareVerifierAssignmentInput,
+  VerifierPreparationRefusal,
+  VerifierPreparationResult,
+} from "./engineering-store/prepare-verifier.js";

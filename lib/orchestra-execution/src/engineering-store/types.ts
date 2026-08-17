@@ -46,6 +46,7 @@ export const DEFAULT_EVIDENCE_SOURCES: EvidenceSourceClassification = {
 export interface AssignmentRelationship {
   parentAssignmentId?: string;
   verifiesAssignmentId?: string;
+  verifiesExecutionEvidenceId?: string;
   correctionOfAssignmentId?: string;
 }
 

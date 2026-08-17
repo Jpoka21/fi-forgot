@@ -65,6 +65,39 @@ Do not dispatch an assignment that was never persisted. Historical assignment an
 
 Provider session/run ids remain correlators. The store does not mark work verified, approved, or closed.
 
+## Verifier assignment preparation
+
+IMP 035 derives a bounded vendor-neutral **verifier** assignment from persisted executor `FrozenAssignment` and `ExecutionEvidence`. It does not dispatch a provider and does not decide PASS or FAIL.
+
+Inputs:
+
+- `executorAssignmentId`
+- `executionEvidenceId` (required; no latest-by-timestamp guess)
+
+Both records are reloaded from the engineering store. Provider prose is not authority.
+
+Human authorization:
+
+- `prepareVerifierAssignment` returns a candidate only.
+- `authorizeAndFreezeVerifierAssignment({ humanAuthorized: true })` persists the verifier.
+- Executor completion, evidence existence, provider `finished`, and verification-pending do not freeze a verifier.
+
+The persisted verifier:
+
+- role `verifier`
+- `verifiesAssignmentId` = executor assignment id
+- `verifiesExecutionEvidenceId` = execution evidence id
+- read-only: empty write scope, original protected paths retained, `commitAuthorization: false`, `pushAuthorization: false`, `requireNoPush: true`
+- inspection baseline from persisted post-run Git HEAD/branch
+
+Technical execution verdict is copied into the verifier instruction as **input only**. It is not converted into a verification decision.
+
+Refused as not reviewable: provider failure, baseline mismatch (provider never started), and incomplete evidence. Repository-state violation and policy denial remain reviewable and are included in the instruction.
+
+`findVerifierAssignments(store, executorAssignmentId, executionEvidenceId?)` lists persisted verifier records.
+
+Future step: a separately authorized sprint may dispatch this frozen verifier assignment. IMP 035 ends before transport.
+
 ## Current limitations
 
 Observed Cursor provider facts, not solved by this slice:

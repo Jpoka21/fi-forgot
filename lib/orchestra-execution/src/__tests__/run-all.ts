@@ -7,6 +7,7 @@ import { runHookDecisionTests, runHookParserTests } from "./hook-policy.test.js"
 import { runResultTests } from "./result.test.js";
 import { runAdapterNegativeTests, runFixtureIntegrationTests } from "./fixture-integration.test.js";
 import { runEngineeringStoreTests } from "./engineering-store.test.js";
+import { runVerifierPreparationTests } from "./verifier-preparation.test.js";
 import { liveCursorReport, runLiveCursorIntegrationTest } from "./live-cursor.integration.test.js";
 import { failed, reportAndExit } from "./harness.js";
 
@@ -22,6 +23,7 @@ async function main(): Promise<void> {
   await runFixtureIntegrationTests();
   await runAdapterNegativeTests();
   await runEngineeringStoreTests();
+  await runVerifierPreparationTests();
   await runLiveCursorIntegrationTest();
   console.log("\nLive Cursor report:", JSON.stringify(liveCursorReport, null, 2));
   if (failed > 0) reportAndExit();
