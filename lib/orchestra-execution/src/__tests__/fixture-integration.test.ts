@@ -141,4 +141,40 @@ export async function runAdapterNegativeTests(): Promise<void> {
     { projectHooks: false },
   );
   expect("provider error", failed.executionVerdict, "provider_failed");
+
+  const scopeFixture = createDisposableExecutionFixture({ assignmentId: "scope-violation" });
+  const scopeResult = await runBoundedAssignment(
+    new MockExecutionProvider({
+      resultText: "Everything was within policy: PASS",
+      onSubmit: () => {
+        appendFileSync(scopeFixture.allowedPath, "AUTHORIZED\n");
+        writeFileSync(join(scopeFixture.repositoryPath, "unauthorized.txt"), "UNAUTHORIZED\n");
+        appendFileSync(scopeFixture.protectedPath, "PROTECTED_MUTATION\n");
+      },
+    }),
+    scopeFixture.assignment,
+    { projectHooks: false },
+  );
+  expect("scope violation technical verdict", scopeResult.executionVerdict, "repository_state_violation");
+  expectTrue("authorized change evidenced", scopeResult.changedPaths.includes("allowed.txt"));
+  expectTrue("unauthorized change evidenced", scopeResult.unexpectedChanges.includes("unauthorized.txt"));
+  expectTrue("protected mutation evidenced", scopeResult.protectedPathMutationOccurred);
+  expectFalse("technical violation is not semantic FAIL", scopeResult.executionVerdict === ("FAIL" as never));
+  expect("provider prose cannot hide machine violation", scopeResult.providerFinalResultText, "Everything was within policy: PASS");
+
+  const basenameFixture = createDisposableExecutionFixture({ assignmentId: "same-basename-violation" });
+  const basenameAssignment = createAssignment({
+    ...basenameFixture.assignment.assignment,
+    allowedPaths: ["authorized/shared.txt"],
+    protectedPaths: [],
+  });
+  const basenameResult = await runBoundedAssignment(
+    new MockExecutionProvider({
+      onSubmit: () => writeFileSync(join(basenameFixture.repositoryPath, "shared.txt"), "OUTSIDE_SCOPE\n"),
+    }),
+    basenameAssignment,
+    { projectHooks: false },
+  );
+  expectTrue("same basename outside authorized directory detected", basenameResult.unexpectedChanges.includes("shared.txt"));
+  expect("same basename technical violation", basenameResult.executionVerdict, "repository_state_violation");
 }

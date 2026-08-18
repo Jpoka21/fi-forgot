@@ -3,7 +3,7 @@ import { join } from "node:path";
 import type { FrozenAssignment } from "./assignment.js";
 import { collectGitEvidence, diffGitEvidence } from "./git-evidence.js";
 import { correlateHookDenials, readHookInvocations } from "./hooks/hook-evidence.js";
-import { pathMentionsProtected } from "./hooks/path-normalize.js";
+import { normalizePathKey, pathMentionsProtected } from "./hooks/path-normalize.js";
 import { isForgotIdentifierRepository, projectCursorHookPolicy } from "./hooks/project-hook.js";
 import type { NormalizedExecutionEvent } from "./events.js";
 import type { ExecutionProvider, ProviderSession } from "./provider-contract.js";
@@ -27,8 +27,15 @@ function unexpectedChangedPaths(
   protectedPaths: string[],
   repositoryPath: string,
 ): string[] {
+  const withinAllowedScope = (path: string): boolean => {
+    const candidate = normalizePathKey(path);
+    return allowedPaths.some((allowedPath) => {
+      const allowed = normalizePathKey(allowedPath).replace(/^\.\//, "");
+      return candidate === allowed || candidate.startsWith(`${allowed}/`);
+    });
+  };
   return changedPaths.filter((path) => {
-    if (pathMentionsProtected(path, allowedPaths, repositoryPath)) return false;
+    if (withinAllowedScope(path)) return false;
     if (path.startsWith(".cursor/") || path.startsWith(".cursor\\")) return false;
     if (pathMentionsProtected(path, protectedPaths, repositoryPath)) return true;
     return true;

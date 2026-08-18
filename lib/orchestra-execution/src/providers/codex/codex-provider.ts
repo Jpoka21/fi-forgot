@@ -22,7 +22,7 @@ import {
   codexNotificationTurnId,
   normalizeCodexEvent,
 } from "./normalize-events.js";
-import { projectCodexReadOnlyPolicy } from "./permission-projection.js";
+import { projectCodexPolicy, type CodexExecutionMode } from "./permission-projection.js";
 
 interface InternalSession {
   session: ProviderSession;
@@ -50,6 +50,7 @@ export interface CodexProviderOptions {
   transport?: CodexAppServerTransport;
   transportFactory?: () => CodexAppServerTransport;
   model?: string;
+  mode?: CodexExecutionMode;
 }
 
 function finalAgentText(notification: AppServerNotification): string | null {
@@ -84,12 +85,13 @@ function terminalReport(
   };
 }
 
-/** Official Codex App Server provider restricted to Orchestra read-only assignments. */
+/** Official Codex App Server provider with explicit read-only or governed workspace-write mode. */
 export class CodexExecutionProvider implements ExecutionProvider {
   readonly providerId = CODEX_PROVIDER_ID;
   private transport: CodexAppServerTransport | null;
   private readonly transportFactory: () => CodexAppServerTransport;
   private readonly model?: string;
+  private readonly mode: CodexExecutionMode;
   private readonly sessions = new Map<string, InternalSession>();
   private readonly runs = new Map<string, InternalRun>();
   private readonly pendingNotifications = new Map<string, AppServerNotification[]>();
@@ -99,6 +101,7 @@ export class CodexExecutionProvider implements ExecutionProvider {
     this.transport = options.transport ?? null;
     this.transportFactory = options.transportFactory ?? (() => new StdioCodexAppServerTransport());
     this.model = options.model;
+    this.mode = options.mode ?? "read-only";
     if (this.transport) this.subscribe(this.transport);
   }
 
@@ -145,13 +148,13 @@ export class CodexExecutionProvider implements ExecutionProvider {
     assertAssignmentUnchanged(frozen, frozen.assignment);
     const internal = this.sessions.get(session.sessionId);
     if (!internal) throw new Error(`unknown Codex provider session: ${session.sessionId}`);
-    const policy = projectCodexReadOnlyPolicy(frozen.assignment);
+    const policy = projectCodexPolicy(frozen.assignment, this.mode);
     const response = await this.client().request<TurnResponse>("turn/start", {
       threadId: session.sessionId,
       input: [{ type: "text", text: renderAssignmentPrompt(frozen.assignment, frozen.assignmentHash) }],
       cwd: frozen.assignment.repositoryPath,
       approvalPolicy: policy.approvalPolicy,
-      sandboxPolicy: { type: policy.turnSandbox, access: { type: "fullAccess" } },
+      sandboxPolicy: policy.turnSandboxPolicy,
       model: this.model,
     });
     const run = {

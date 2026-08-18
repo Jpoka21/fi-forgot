@@ -8,6 +8,7 @@ import { normalizeCodexEvent } from "../providers/codex/normalize-events.js";
 import {
   CodexPermissionProjectionError,
   projectCodexReadOnlyPolicy,
+  projectCodexWorkspaceWritePolicy,
 } from "../providers/codex/permission-projection.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
 
@@ -79,7 +80,7 @@ export async function runCodexProviderTests(): Promise<void> {
   );
   expect(
     "read-only turn sandbox",
-    projectCodexReadOnlyPolicy(readOnlyAssignment().assignment).turnSandbox,
+    projectCodexReadOnlyPolicy(readOnlyAssignment().assignment).turnSandboxPolicy.type,
     "readOnly",
   );
   expect(
@@ -96,6 +97,40 @@ export async function runCodexProviderTests(): Promise<void> {
     { prohibitedCommandClasses: ["git_push", "force_push", "destructive_git"] },
     "required_prohibition_missing",
   );
+
+  section("Codex governed workspace-write projection");
+  const writeAssignment = readOnlyAssignment({ role: "executor", allowedPaths: ["src/z.ts", "src/a.ts"] });
+  const writePolicy = projectCodexWorkspaceWritePolicy(writeAssignment.assignment);
+  expect("write sandbox", writePolicy.turnSandboxPolicy.type, "workspaceWrite");
+  expect("write scope deterministic", writePolicy.allowedPaths, ["src/a.ts", "src/z.ts"]);
+  expect("no extra writable roots", writePolicy.turnSandboxPolicy.writableRoots, []);
+  expectFalse("network disabled", writePolicy.turnSandboxPolicy.networkAccess);
+  for (const [label, overrides, code] of [
+    ["empty scope refused", { allowedPaths: [] }, "write_scope_empty"],
+    ["direct protected overlap refused", { allowedPaths: ["protected.txt"] }, "protected_path_overlap"],
+    ["nested protected overlap refused", { allowedPaths: ["src"], protectedPaths: ["src/private/key.txt"] }, "protected_path_overlap"],
+    ["protected parent overlap refused", { allowedPaths: ["src/file.ts"], protectedPaths: ["src"] }, "protected_path_overlap"],
+    ["traversal refused", { allowedPaths: ["../outside.txt"] }, "invalid_write_scope"],
+    ["write commit refused", { allowedPaths: ["allowed.txt"], commitAuthorization: true }, "commit_authorized"],
+    ["write push refused", { allowedPaths: ["allowed.txt"], pushAuthorization: true }, "push_authorized"],
+    ["write no-push false refused", { allowedPaths: ["allowed.txt"], requireNoPush: false }, "no_push_not_required"],
+  ] as const) {
+    try {
+      projectCodexWorkspaceWritePolicy(readOnlyAssignment(overrides).assignment);
+      expect(label, "accepted", code);
+    } catch (error) {
+      expect(label, (error as CodexPermissionProjectionError).code, code);
+    }
+  }
+
+  const writeTransport = new FakeAppServerTransport();
+  const writeProvider = new CodexExecutionProvider({ transport: writeTransport, mode: "governed-workspace-write" });
+  const writeSession = await writeProvider.createSession({ repositoryPath: "C:/fixture", branch: "main", startingHead: "a".repeat(40) });
+  await writeProvider.submitAssignment(writeSession, writeAssignment);
+  const writeTurn = writeTransport.requests.find((request) => request.method === "turn/start")!;
+  expect("provider sends workspaceWrite", (writeTurn.params.sandboxPolicy as { type: string }).type, "workspaceWrite");
+  expect("provider approvals remain never", writeTurn.params.approvalPolicy, "never");
+  await writeProvider.closeSession(writeSession);
   expectRefusal(
     "unsupported policy refused",
     { prohibitedCommandClasses: ["git_push", "force_push", "destructive_git", "hook_tamper", "network"] },

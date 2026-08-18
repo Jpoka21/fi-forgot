@@ -15,6 +15,7 @@ export interface MockProviderBehavior {
   terminalStatus?: ProviderTerminalReport["status"];
   resultText?: string;
   events?: NormalizedExecutionEvent[];
+  onSubmit?: (assignment: FrozenAssignment) => void | Promise<void>;
 }
 
 /**
@@ -52,6 +53,7 @@ export class MockExecutionProvider implements ExecutionProvider {
     if (this.behavior.failOnSubmit) {
       throw new Error("mock provider failed to submit assignment");
     }
+    await this.behavior.onSubmit?.(assignment);
     return {
       providerId: this.providerId,
       sessionId: session.sessionId,

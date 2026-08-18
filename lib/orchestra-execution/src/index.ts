@@ -56,12 +56,18 @@ export type { CodexProviderOptions } from "./providers/codex/codex-provider.js";
 export { normalizeCodexEvent } from "./providers/codex/normalize-events.js";
 export {
   CODEX_PERMISSION_REFUSALS,
+  CODEX_EXECUTION_MODES,
   CodexPermissionProjectionError,
+  projectCodexPolicy,
   projectCodexReadOnlyPolicy,
+  projectCodexWorkspaceWritePolicy,
 } from "./providers/codex/permission-projection.js";
 export type {
   CodexPermissionRefusal,
+  CodexExecutionMode,
+  CodexProjectedPolicy,
   CodexReadOnlyPolicy,
+  CodexWorkspaceWritePolicy,
 } from "./providers/codex/permission-projection.js";
 export { StdioCodexAppServerTransport } from "./providers/codex/app-server-transport.js";
 export type {
