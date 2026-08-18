@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx src/__tests__/run-all.ts",
+    "test:codex-transport": "tsx src/__tests__/run-codex-transport.ts",
     "test:live": "tsx src/__tests__/run-live.ts",
     "test:live:codex": "tsx src/__tests__/run-live-codex.ts"
   },

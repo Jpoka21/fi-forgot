@@ -11,11 +11,13 @@ import { runVerifierPreparationTests } from "./verifier-preparation.test.js";
 import { runVerifierDispatchTests } from "./verifier-dispatch.test.js";
 import { liveCursorReport, runLiveCursorIntegrationTest } from "./live-cursor.integration.test.js";
 import { runCodexProviderTests } from "./codex-provider.test.js";
+import { runCodexAppServerTransportTests } from "./codex-app-server-transport.test.js";
 import { failed, reportAndExit } from "./harness.js";
 
 async function main(): Promise<void> {
   runAssignmentTests();
   await runProviderContractTests();
+  await runCodexAppServerTransportTests();
   await runCodexProviderTests();
   runEventNormalizationTests();
   await runGitEvidenceTests();
