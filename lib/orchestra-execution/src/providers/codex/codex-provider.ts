@@ -13,6 +13,7 @@ import {
 } from "../../provider-contract.js";
 import {
   StdioCodexAppServerTransport,
+  redactCodexText,
   type AppServerNotification,
   type CodexAppServerTransport,
 } from "./app-server-transport.js";
@@ -55,7 +56,7 @@ function finalAgentText(notification: AppServerNotification): string | null {
   if (notification.method !== "item/completed") return null;
   const params = asRecord(notification.params);
   const item = asRecord(params?.item);
-  return item?.type === "agentMessage" && typeof item.text === "string" ? item.text : null;
+  return item?.type === "agentMessage" && typeof item.text === "string" ? redactCodexText(item.text) : null;
 }
 
 function terminalReport(
@@ -72,7 +73,12 @@ function terminalReport(
     sessionId: run.run.sessionId,
     status: status === "interrupted" ? "cancelled" : status === "completed" ? "finished" : "error",
     resultText: run.finalResponse,
-    errorMessage: typeof error?.message === "string" ? error.message : status === "failed" ? "Codex turn failed" : null,
+    errorMessage:
+      typeof error?.message === "string"
+        ? redactCodexText(error.message)
+        : status === "failed"
+          ? "Codex turn failed"
+          : null,
     durationMs:
       typeof turn?.durationMs === "number" ? turn.durationMs : Math.max(0, Date.now() - run.startedAt),
   };

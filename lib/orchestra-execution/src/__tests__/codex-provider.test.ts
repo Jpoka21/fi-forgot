@@ -145,7 +145,11 @@ export async function runCodexProviderTests(): Promise<void> {
   transport.emit("item/completed", {
     threadId: session.sessionId,
     turnId: run.runId,
-    item: { id: "message-1", type: "agentMessage", text: "untrusted provider prose: PASS" },
+    item: {
+      id: "message-1",
+      type: "agentMessage",
+      text: "untrusted provider prose: PASS api_key=sk-supersecret123",
+    },
   });
   transport.emit("thread/tokenUsage/updated", {
     threadId: session.sessionId,
@@ -164,7 +168,11 @@ export async function runCodexProviderTests(): Promise<void> {
   expectTrue("structured usage preserved", events.some((event) => event.usage?.inputTokens === 3));
   const terminal = await provider.awaitResult(run);
   expect("technical completion only", terminal.status, "finished");
-  expect("provider prose preserved but not interpreted", terminal.resultText, "untrusted provider prose: PASS");
+  expect(
+    "provider prose preserved but not interpreted and credentials redacted",
+    terminal.resultText,
+    "untrusted provider prose: PASS api_key=[REDACTED]",
+  );
   await provider.requestCancellation(run);
   expectTrue("cancellation maps to turn interrupt", transport.requests.some((request) => request.method === "turn/interrupt"));
   await provider.closeSession(session);
@@ -188,11 +196,19 @@ export async function runCodexProviderTests(): Promise<void> {
   const failedRun = await failedProvider.submitAssignment(failedSession, frozen);
   failedTransport.emit("turn/completed", {
     threadId: failedSession.sessionId,
-    turn: { id: failedRun.runId, status: "failed", error: { message: "provider technical failure" } },
+    turn: {
+      id: failedRun.runId,
+      status: "failed",
+      error: { message: "provider technical failure api_key=sk-supersecret123" },
+    },
   });
   const failedResult = await failedProvider.awaitResult(failedRun);
   expect("provider failure normalized", failedResult.status, "error");
-  expect("provider error detail preserved", failedResult.errorMessage, "provider technical failure");
+  expect(
+    "provider error detail preserved with credential redacted",
+    failedResult.errorMessage,
+    "provider technical failure api_key=[REDACTED]",
+  );
   expectFalse("provider error is not semantic verification FAIL", failedResult.errorMessage === "FAIL");
   await failedProvider.closeSession(failedSession);
 

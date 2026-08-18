@@ -1,6 +1,6 @@
 import type { NormalizedExecutionEvent, NormalizedEventType } from "../../events.js";
 import { CODEX_PROVIDER_ID } from "../../provider-contract.js";
-import type { AppServerNotification } from "./app-server-transport.js";
+import { redactCodexText, type AppServerNotification } from "./app-server-transport.js";
 
 export function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -61,7 +61,7 @@ export function normalizeCodexEvent(
     message = status;
   } else if (providerType === "error" || providerType === "warning") {
     type = "provider_error";
-    message = stringField(params, "message") ?? stringField(params, "summary") ?? providerType;
+    message = redactCodexText(stringField(params, "message") ?? stringField(params, "summary") ?? providerType);
   } else if (providerType === "thread/tokenUsage/updated") {
     type = "usage";
     const tokenUsage = asRecord(params?.tokenUsage);
@@ -88,6 +88,8 @@ export function normalizeCodexEvent(
   } else {
     message = `unmapped_codex_event:${providerType}`;
   }
+
+  if (message !== undefined) message = redactCodexText(message);
 
   return {
     type,

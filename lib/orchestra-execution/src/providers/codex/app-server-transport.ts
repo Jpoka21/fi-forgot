@@ -35,10 +35,10 @@ function resolveCodexLauncher(): string {
 
 function rpcError(error: RpcResponse["error"]): Error {
   const code = error?.code === undefined ? "unknown" : String(error.code);
-  return new Error(`Codex App Server JSON-RPC ${code}: ${redact(error?.message ?? "unknown error")}`);
+  return new Error(`Codex App Server JSON-RPC ${code}: ${redactCodexText(error?.message ?? "unknown error")}`);
 }
 
-function redact(value: string): string {
+export function redactCodexText(value: string): string {
   return value
     .replace(/\b(sk-[A-Za-z0-9_-]{8,})\b/g, "[REDACTED]")
     .replace(/(authorization\s*:\s*bearer\s+)[^\s]+/gi, "$1[REDACTED]")
@@ -69,7 +69,7 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
       if (!this.closed) {
         this.rejectAll(
           new Error(
-            `Codex App Server exited (${signal ? `signal ${signal}` : `code ${code ?? 1}`}): ${redact(this.stderr)}`,
+            `Codex App Server exited (${signal ? `signal ${signal}` : `code ${code ?? 1}`}): ${redactCodexText(this.stderr)}`,
           ),
         );
       }
