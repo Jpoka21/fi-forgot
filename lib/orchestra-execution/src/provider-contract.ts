@@ -2,6 +2,7 @@ import type { FrozenAssignment, OrchestraAssignment } from "./assignment.js";
 import type { NormalizedExecutionEvent } from "./events.js";
 
 export const CURSOR_PROVIDER_ID = "cursor";
+export const CODEX_PROVIDER_ID = "codex";
 
 export interface ProviderSessionIdentity {
   providerId: string;
@@ -12,6 +13,7 @@ export interface ProviderSessionIdentity {
    */
   correlation?: {
     agentId?: string;
+    threadId?: string;
     storeDirectory?: string;
   };
 }

@@ -23,7 +23,7 @@ export type {
   ProviderSessionIdentity,
   ProviderTerminalReport,
 } from "./provider-contract.js";
-export { CURSOR_PROVIDER_ID, renderAssignmentPrompt } from "./provider-contract.js";
+export { CODEX_PROVIDER_ID, CURSOR_PROVIDER_ID, renderAssignmentPrompt } from "./provider-contract.js";
 export type { NormalizedEventType, NormalizedExecutionEvent, ProviderCorrelation } from "./events.js";
 export { NORMALIZED_EVENT_TYPES, isNormalizedEventType } from "./events.js";
 export type { GitCommitIdentity, GitEvidence, GitEvidenceDelta } from "./git-evidence.js";
@@ -51,6 +51,23 @@ export type { DisposableFixture } from "./fixture.js";
 export { filesystemMarkerPresent, runBoundedAssignment } from "./run-assignment.js";
 export { CursorExecutionProvider, isCursorSdkAuthenticated } from "./providers/cursor/cursor-provider.js";
 export { normalizeCursorEvent } from "./providers/cursor/normalize-events.js";
+export { CodexExecutionProvider } from "./providers/codex/codex-provider.js";
+export type { CodexProviderOptions } from "./providers/codex/codex-provider.js";
+export { normalizeCodexEvent } from "./providers/codex/normalize-events.js";
+export {
+  CODEX_PERMISSION_REFUSALS,
+  CodexPermissionProjectionError,
+  projectCodexReadOnlyPolicy,
+} from "./providers/codex/permission-projection.js";
+export type {
+  CodexPermissionRefusal,
+  CodexReadOnlyPolicy,
+} from "./providers/codex/permission-projection.js";
+export { StdioCodexAppServerTransport } from "./providers/codex/app-server-transport.js";
+export type {
+  AppServerNotification,
+  CodexAppServerTransport,
+} from "./providers/codex/app-server-transport.js";
 export { MockExecutionProvider } from "./providers/mock-provider.js";
 export type {
   AssignmentCurrentState,

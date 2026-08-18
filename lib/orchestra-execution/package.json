@@ -9,9 +9,11 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx src/__tests__/run-all.ts",
-    "test:live": "tsx src/__tests__/run-live.ts"
+    "test:live": "tsx src/__tests__/run-live.ts",
+    "test:live:codex": "tsx src/__tests__/run-live-codex.ts"
   },
   "dependencies": {
+    "@openai/codex": "0.147.0",
     "@cursor/sdk": "1.0.28"
   },
   "devDependencies": {

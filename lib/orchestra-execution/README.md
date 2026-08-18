@@ -1,6 +1,6 @@
 # @workspace/orchestra-execution
 
-Thin Orchestra execution-provider package. Orchestra owns governance and assignment identity. This package supplies replaceable transport, starting with official `@cursor/sdk`.
+Thin Orchestra execution-provider package. Orchestra owns governance and assignment identity. This package supplies replaceable transport through the official Cursor SDK and official Codex App Server.
 
 This is **not** constitutional Domain 3 runtime and **not** Product Brain.
 
@@ -19,6 +19,24 @@ Cursor `agentId`, `runId`, request ids, Jsonl store contents, and assistant pros
 - which HEAD is authoritative
 
 Those remain Orchestra facts. Provider `finished` is not Orchestra PASS.
+
+The same boundary applies to Codex `thread.id`, `turn.id`, streamed telemetry, structured technical results, and `finalResponse`. Codex prose remains untrusted even when it is formatted as JSON.
+
+## Read-only Codex provider
+
+`CodexExecutionProvider` is the ORCH IMP 036C second provider. It uses the official Codex App Server JSON-RPC protocol through the exactly pinned `@openai/codex` runtime. The higher-level TypeScript SDK was not selected because version `0.147.0` does not expose the provider turn id required by Orchestra's existing `ProviderRun.runId` correlator.
+
+Production Codex dispatch is read-only only:
+
+- thread sandbox: `read-only`
+- turn sandbox policy: `readOnly`
+- approval policy: `never`
+- `allowedPaths`: empty
+- commit and push authorization: false
+- `requireNoPush`: true
+- all default destructive Git, push, and hook-tamper prohibitions present
+
+Any policy that cannot be represented exactly by this bounded mapping is refused before `turn/start`. Workspace-write and full-access Codex execution are not implemented. Codex is not the default provider.
 
 ## Assignment objects
 
@@ -167,6 +185,8 @@ pnpm --filter @workspace/orchestra-execution test
 pnpm --filter @workspace/orchestra-execution typecheck
 ```
 
+The deterministic suite covers both provider adapters. Codex tests use an injected App Server transport and do not require authentication.
+
 Deterministic tests use mocks and a disposable temporary Git repository. They do not require live Cursor authentication.
 
 ## How to run the authorized live disposable integration test
@@ -180,3 +200,14 @@ pnpm --filter @workspace/orchestra-execution test:live
 The live test creates a disposable temporary Git repository and a disposable engineering store, freezes the assignment on disk, dispatches through the closed Cursor adapter, then reconstructs assignment and evidence from a fresh store instance. It must not target F.I. Forgot.
 
 If authentication is unavailable, the live test is skipped and reported blocked. Production code is not weakened to fake a pass.
+
+## How to run the authorized live Codex read-only test
+
+The Codex live test requires an existing official Codex login and an explicit opt-in. It creates disposable Git repositories, removes Cursor-specific fixture hooks before capturing its baseline, runs only with provider-enforced read-only/never policy, verifies independent Git state, and proves interruption.
+
+```powershell
+$env:RUN_LIVE_CODEX_INTEGRATION='1'
+pnpm --filter @workspace/orchestra-execution test:live:codex
+```
+
+It never targets the governed F.I. Forgot repository and never enables workspace-write or full access.

@@ -35,6 +35,8 @@ minimumReleaseAgeExclude:
   - stripe-replit-sync
   # Official Cursor SDK, authorized only for @workspace/orchestra-execution.
   - '@cursor/sdk'
+  # Official OpenAI Codex runtime, pinned for the read-only Orchestra provider.
+  - '@openai/codex'
 
 packages:
   - artifacts/*
