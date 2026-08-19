@@ -137,6 +137,29 @@ export function applyCandidatePatch(governedRepository: string, candidate: Candi
     throw new Error("refusing atomic candidate application with unauthorized or protected paths");
   }
   if (candidate.patch.length === 0) return;
+  const validated = [...new Set(candidate.authorizedPaths.map(normalized))].sort();
+  const declared = [...new Set(candidate.paths.map(normalized))].sort();
+  if (validated.length !== declared.length || validated.some((path, index) => path !== declared[index])) {
+    throw new Error("candidate authorized paths do not exactly match declared candidate paths");
+  }
+  const numstat = git(
+    governedRepository,
+    ["apply", "--numstat", "-z", "-"],
+    candidate.patch,
+  ).toString("utf8");
+  const patchPaths = numstat
+    .split("\0")
+    .filter(Boolean)
+    .map((row) => {
+      const first = row.indexOf("\t");
+      const second = first < 0 ? -1 : row.indexOf("\t", first + 1);
+      if (second < 0) throw new Error("malformed candidate patch path evidence");
+      return normalized(row.slice(second + 1));
+    })
+    .sort();
+  if (patchPaths.length !== validated.length || patchPaths.some((path, index) => path !== validated[index])) {
+    throw new Error("candidate patch paths do not exactly match validated authorized paths");
+  }
   git(governedRepository, ["apply", "--binary", "--whitespace=nowarn", "-"], candidate.patch);
 }
 

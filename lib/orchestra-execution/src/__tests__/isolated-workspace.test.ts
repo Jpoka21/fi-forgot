@@ -7,6 +7,7 @@ import { MockExecutionProvider } from "../providers/mock-provider.js";
 import { runBoundedAssignment } from "../run-assignment.js";
 import { createFileEngineeringStore } from "../engineering-store/store.js";
 import { dispatchFrozenAssignment } from "../engineering-store/dispatch.js";
+import { applyCandidatePatch, type CandidateChangeSet } from "../isolated-workspace.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
 
 function isolatedMock(onSubmit: NonNullable<ConstructorParameters<typeof MockExecutionProvider>[0]["onSubmit"]>) {
@@ -174,4 +175,31 @@ export async function runIsolatedWorkspaceTests(): Promise<void> {
   expect("persisted isolation evidence records cleanup boundary", dispatched.evidence.result.isolationEvidence?.cleanupStatus, "pending");
   expectFalse("workspace cleaned only after evidence persisted", existsSync(dispatched.result.isolationEvidence!.workspacePath));
   expectTrue("persisted authorized application visible", readFileSync(persisted.allowedPath, "utf8").includes("PERSISTED_AUTHORIZED"));
+
+  const smuggle = createDisposableExecutionFixture({ assignmentId: "isolated-patch-smuggle" });
+  const smuggleProtected = readFileSync(smuggle.protectedPath);
+  const forged: CandidateChangeSet = {
+    paths: ["allowed.txt"],
+    statuses: ["M:allowed.txt"],
+    authorizedPaths: ["allowed.txt"],
+    unauthorizedPaths: [],
+    protectedPaths: [],
+    patch: Buffer.from([
+      "diff --git a/protected.txt b/protected.txt",
+      "--- a/protected.txt",
+      "+++ b/protected.txt",
+      "@@ -1 +1 @@",
+      "-protected-initial",
+      "+PATCH_SMUGGLED_PROTECTED",
+      "",
+    ].join("\n")),
+  };
+  let smuggleRefused = false;
+  try {
+    applyCandidatePatch(smuggle.repositoryPath, forged);
+  } catch {
+    smuggleRefused = true;
+  }
+  expectTrue("patch header smuggling refused", smuggleRefused);
+  expect("patch smuggling preserves protected bytes", readFileSync(smuggle.protectedPath), smuggleProtected);
 }
