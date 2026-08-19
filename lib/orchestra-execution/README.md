@@ -165,6 +165,34 @@ This slice does **not**:
 
 Future step: a separately authorized sprint may consume persisted verifier evidence and decide what, if anything, becomes an authoritative verification outcome. IMP 036 ends after verifier execution evidence is persisted.
 
+## Semantic verification decision
+
+IMP 037 adjudicates persisted verifier `ExecutionEvidence` from the authoritative engineering store. It does not invoke providers, rerun verifiers, or trust provider prose.
+
+Preferred governed flow:
+
+1. `prepareVerifierAssignment` — candidate only.
+2. `authorizeAndFreezeVerifierAssignment({ humanAuthorized: true })` — persist verifier and authorization receipt.
+3. `routeGovernedVerifierAssignment({ store, verifierAssignmentId })` — programmatic verifier execution and evidence persistence.
+4. `adjudicateVerifierExecution({ store, verifierAssignmentId })` — machine semantic decision from trusted records only.
+
+Semantic vocabulary:
+
+- `VERIFIED`
+- `CORRECTION_REQUIRED`
+- `INDETERMINATE`
+
+Decisions persist as append-only hashed `verification_decision` records bound to exact verifier assignment id/hash and verifier execution evidence id. Duplicate adjudication of the same evidence reuses the existing record. Provider prose and technical execution verdicts are inputs only; they do not directly become semantic decisions.
+
+This slice does **not**:
+
+- generate a correction assignment
+- select the next implementation requirement
+- commit or push
+- continue workflow automatically
+
+Human final authority remains outside automatic continuation. James adjudicates only where ambiguity or major governed action still requires him.
+
 ## Current limitations
 
 Observed Cursor provider facts, not solved by this slice:

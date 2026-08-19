@@ -14,8 +14,40 @@ export const ASSIGNMENT_STATUSES = [
 
 export type AssignmentStatus = (typeof ASSIGNMENT_STATUSES)[number];
 
-export const VERIFICATION_POSTURES = ["pending"] as const;
+export const VERIFICATION_POSTURES = [
+  "pending",
+  "verified",
+  "correction_required",
+  "indeterminate",
+] as const;
 export type VerificationPosture = (typeof VERIFICATION_POSTURES)[number];
+
+export const VERIFICATION_DECISIONS = ["VERIFIED", "CORRECTION_REQUIRED", "INDETERMINATE"] as const;
+export type VerificationDecision = (typeof VERIFICATION_DECISIONS)[number];
+
+export const VERIFICATION_DECISION_AUTHORITY = "orchestra_machine_adjudication" as const;
+
+/**
+ * Append-only semantic verification decision bound to persisted verifier evidence.
+ * Provider prose is never an authoritative field.
+ */
+export interface VerificationDecisionRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "verification_decision";
+  verificationDecisionId: string;
+  verifierAssignmentId: string;
+  verifierAssignmentHash: string;
+  verifierExecutionEvidenceId: string;
+  verifiedExecutorAssignmentId: string;
+  verifiedExecutorExecutionEvidenceId: string;
+  decision: VerificationDecision;
+  decisionReasonCodes: string[];
+  decidedAt: string;
+  decisionAuthority: typeof VERIFICATION_DECISION_AUTHORITY;
+  humanFinalAuthority: "explicit_human";
+  recordVersion: 1;
+  decisionHash: string;
+}
 
 export type EvidenceSourceClass =
   | "orchestra_authoritative"

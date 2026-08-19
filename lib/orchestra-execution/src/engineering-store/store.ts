@@ -10,6 +10,9 @@ import {
 } from "./authorization-receipt.js";
 import { validateEvidenceHash } from "./evidence.js";
 import {
+  validateVerificationDecision,
+} from "./verification-decision-record.js";
+import {
   ENGINEERING_STORE_SCHEMA_VERSION,
   type AssignmentCurrentState,
   type AssignmentRelationship,
@@ -19,6 +22,7 @@ import {
   type ExecutionEvidence,
   type FrozenAssignmentRecord,
   type StatusEvent,
+  type VerificationDecisionRecord,
   type VerificationPosture,
   type VerifierAuthorizationReceipt,
 } from "./types.js";
@@ -321,6 +325,81 @@ export class FileEngineeringStore {
     return matches;
   }
 
+  assertTrustedExecutionEvidence(evidence: ExecutionEvidence): void {
+    validateEvidenceHash(evidence);
+    const assignment = this.loadFrozenAssignment(evidence.assignmentId);
+    if (assignment.assignmentHash !== evidence.assignmentHash) {
+      throw new EngineeringStoreError("execution evidence assignmentHash does not match frozen assignment");
+    }
+  }
+
+  persistVerificationDecision(record: VerificationDecisionRecord): VerificationDecisionRecord {
+    if (!validateVerificationDecision(record)) {
+      throw new EngineeringStoreError("verification decision record failed validation");
+    }
+    const assignmentId = assertSafeId("assignmentId", record.verifierAssignmentId);
+    const frozen = this.loadFrozenAssignment(assignmentId);
+    if (frozen.assignmentHash !== record.verifierAssignmentHash) {
+      throw new EngineeringStoreError("verification decision assignmentHash does not match frozen assignment");
+    }
+    const existing = this.findVerificationDecisionForEvidence(
+      record.verifierAssignmentId,
+      record.verifierExecutionEvidenceId,
+    );
+    if (existing) {
+      if (existing.decisionHash !== record.decisionHash) {
+        throw new EngineeringStoreError(
+          "duplicate verification decision for evidence with a different hash; refusing overwrite",
+        );
+      }
+      return existing;
+    }
+    appendLineAtomic(this.verificationDecisionPath(assignmentId), JSON.stringify(record));
+    const posture: VerificationPosture =
+      record.decision === "VERIFIED"
+        ? "verified"
+        : record.decision === "CORRECTION_REQUIRED"
+          ? "correction_required"
+          : "indeterminate";
+    this.appendStatus({
+      timestamp: record.decidedAt,
+      assignmentId,
+      assignmentHash: record.verifierAssignmentHash,
+      status: "verification_pending",
+      verificationPosture: posture,
+      detail: `semantic verification decision ${record.decision} recorded`,
+    });
+    this.audit({
+      timestamp: record.decidedAt,
+      action: "persist_verification_decision",
+      assignmentId,
+      evidenceId: record.verifierExecutionEvidenceId,
+      detail: record.decision,
+    });
+    return record;
+  }
+
+  loadVerificationDecisions(verifierAssignmentId: string): VerificationDecisionRecord[] {
+    const path = this.verificationDecisionPath(assertSafeId("assignmentId", verifierAssignmentId));
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as VerificationDecisionRecord);
+  }
+
+  findVerificationDecisionForEvidence(
+    verifierAssignmentId: string,
+    verifierExecutionEvidenceId: string,
+  ): VerificationDecisionRecord | null {
+    const matches = this.loadVerificationDecisions(verifierAssignmentId).filter(
+      (record) =>
+        validateVerificationDecision(record) &&
+        record.verifierExecutionEvidenceId === verifierExecutionEvidenceId,
+    );
+    return matches[matches.length - 1] ?? null;
+  }
+
   getAssignmentStatus(assignmentId: string): AssignmentStatus {
     const events = this.readStatusEvents(assignmentId);
     const last = events[events.length - 1];
@@ -446,6 +525,10 @@ export class FileEngineeringStore {
 
   private authorizationPath(assignmentId: string): string {
     return join(this.assignmentsDir(), assignmentId, "governed-authorization.ndjson");
+  }
+
+  private verificationDecisionPath(assignmentId: string): string {
+    return join(this.assignmentsDir(), assignmentId, "verification-decisions.ndjson");
   }
 
   private evidencePath(assignmentId: string, evidenceId: string): string {

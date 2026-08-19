@@ -27,7 +27,12 @@ export function classifyRequiredEvidence(
         (result.policyDenials.length > 0 || result.providerStatus !== "not_started")) ||
       (key === "filesystem" && Array.isArray(result.changedPaths)) ||
       (key === "events" && Array.isArray(result.normalizedEvents)) ||
-      (key === "executor_execution_evidence" && frozen?.assignment.role === "verifier");
+      (key === "executor_execution_evidence" && frozen?.assignment.role === "verifier") ||
+      ((key === "tests" || key === "test") &&
+        result.normalizedEvents.some((event) => {
+          const outcome = event.rawSummary?.testOutcome;
+          return outcome === "pass" || outcome === "fail";
+        }));
     if (ok) present.push(item);
     else missing.push(item);
   }

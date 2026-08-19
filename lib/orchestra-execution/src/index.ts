@@ -98,6 +98,8 @@ export type {
   StatusEvent,
   VerificationPosture,
   VerifierAuthorizationReceipt,
+  VerificationDecision,
+  VerificationDecisionRecord,
 } from "./engineering-store/types.js";
 export {
   ASSIGNMENT_STATUSES,
@@ -105,6 +107,8 @@ export {
   ENGINEERING_STORE_SCHEMA_VERSION,
   VERIFICATION_POSTURES,
   VERIFIER_AUTHORIZATION_SOURCE,
+  VERIFICATION_DECISIONS,
+  VERIFICATION_DECISION_AUTHORITY,
 } from "./engineering-store/types.js";
 export { FileEngineeringStore, createFileEngineeringStore, EngineeringStoreError } from "./engineering-store/store.js";
 export { dispatchFrozenAssignment } from "./engineering-store/dispatch.js";
@@ -127,6 +131,29 @@ export type {
   GovernedVerifierRoutingResult,
   ResolveActiveExecutionProviderOptions,
 } from "./engineering-store/route-verifier.js";
+export {
+  adjudicateVerifierExecution,
+  VERIFICATION_ADJUDICATION_REFUSALS,
+} from "./engineering-store/adjudicate-verifier.js";
+export type {
+  AdjudicateVerifierExecutionInput,
+  AdjudicateVerifierExecutionResult,
+  VerificationAdjudicationRefusal,
+} from "./engineering-store/adjudicate-verifier.js";
+export {
+  buildVerificationDecisionRecord,
+  hashVerificationDecision,
+  validateVerificationDecision,
+  verificationDecisionId,
+} from "./engineering-store/verification-decision-record.js";
+export {
+  VERIFICATION_DECISION_REASON_CODES,
+  deriveVerificationDecision,
+  evaluateExecutorImplementation,
+  evaluateVerifierExecution,
+  machineTestOutcome,
+} from "./engineering-store/verification-decision-logic.js";
+export type { VerificationDecisionReasonCode } from "./engineering-store/verification-decision-logic.js";
 export {
   buildVerifierAuthorizationReceipt,
   hashVerifierAuthorizationReceipt,
