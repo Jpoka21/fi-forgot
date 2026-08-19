@@ -49,6 +49,7 @@ export { correlateHookDenials, readHookInvocations } from "./hooks/hook-evidence
 export { createDisposableExecutionFixture } from "./fixture.js";
 export type { DisposableFixture } from "./fixture.js";
 export { filesystemMarkerPresent, runBoundedAssignment } from "./run-assignment.js";
+export { isReadOnlyVerifierAssignment } from "./execution-policy.js";
 export {
   applyCandidatePatch,
   cleanupIsolatedExecutionWorkspace,
@@ -116,6 +117,16 @@ export type {
   GovernedVerifierDispatchResult,
   VerifierDispatchRefusal,
 } from "./engineering-store/dispatch-verifier.js";
+export {
+  routeGovernedVerifierAssignment,
+  resolveActiveExecutionProvider,
+  ACTIVE_EXECUTION_PROVIDER_ID,
+} from "./engineering-store/route-verifier.js";
+export type {
+  RouteGovernedVerifierAssignmentInput,
+  GovernedVerifierRoutingResult,
+  ResolveActiveExecutionProviderOptions,
+} from "./engineering-store/route-verifier.js";
 export {
   buildVerifierAuthorizationReceipt,
   hashVerifierAuthorizationReceipt,

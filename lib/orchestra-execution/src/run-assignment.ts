@@ -1,12 +1,17 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FrozenAssignment } from "./assignment.js";
+import { isReadOnlyVerifierAssignment } from "./execution-policy.js";
 import { collectGitEvidence, diffGitEvidence } from "./git-evidence.js";
 import { correlateHookDenials, readHookInvocations } from "./hooks/hook-evidence.js";
 import { normalizePathKey, pathMentionsProtected } from "./hooks/path-normalize.js";
 import { isForgotIdentifierRepository, projectCursorHookPolicy } from "./hooks/project-hook.js";
 import type { NormalizedExecutionEvent } from "./events.js";
-import type { ExecutionProvider, ProviderSession } from "./provider-contract.js";
+import {
+  CURSOR_PROVIDER_ID,
+  type ExecutionProvider,
+  type ProviderSession,
+} from "./provider-contract.js";
 import { synthesizeExecutionResult, type ExecutionResult } from "./result.js";
 import { runIsolatedWorkspaceAssignment } from "./run-isolated-assignment.js";
 
@@ -63,7 +68,10 @@ export async function runBoundedAssignment(
   options: RunBoundedAssignmentOptions = {},
 ): Promise<ExecutionResult> {
   const assignment = frozen.assignment;
-  if (isForgotIdentifierRepository(assignment.repositoryPath)) {
+  if (
+    isForgotIdentifierRepository(assignment.repositoryPath) &&
+    !isReadOnlyVerifierAssignment(assignment)
+  ) {
     throw new Error(
       "Refusing to run a modifying assignment against the F.I. Forgot repository in this slice.",
     );
@@ -124,7 +132,11 @@ export async function runBoundedAssignment(
     return runIsolatedWorkspaceAssignment(provider, frozen, preRunGitEvidence, options.deferIsolationCleanup === true);
   }
 
-  if (options.projectHooks !== false) {
+  if (
+    options.projectHooks !== false &&
+    provider.providerId === CURSOR_PROVIDER_ID &&
+    !isForgotIdentifierRepository(assignment.repositoryPath)
+  ) {
     projectCursorHookPolicy(assignment.repositoryPath, assignment);
   }
 
@@ -134,6 +146,9 @@ export async function runBoundedAssignment(
       repositoryPath: assignment.repositoryPath,
       branch: assignment.branch,
       startingHead: assignment.startingHead,
+      governedReadOnlyVerifier:
+        isForgotIdentifierRepository(assignment.repositoryPath) &&
+        isReadOnlyVerifierAssignment(assignment),
     });
     sessionId = session.sessionId;
     events.push({

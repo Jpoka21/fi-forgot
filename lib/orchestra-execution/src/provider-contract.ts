@@ -35,6 +35,11 @@ export interface CreateSessionTarget {
   repositoryPath: string;
   branch: string;
   startingHead: string;
+  /**
+   * Set by runBoundedAssignment when dispatching a governed read-only verifier
+   * against the F.I. Forgot repository. Not Orchestra authoritative state.
+   */
+  governedReadOnlyVerifier?: boolean;
 }
 
 export interface ProviderTerminalReport {

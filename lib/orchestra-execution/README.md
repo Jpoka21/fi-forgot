@@ -139,6 +139,22 @@ A homemade verifier persisted only through `persistFrozenAssignment` is not disp
 
 Duplicate dispatch reuses existing verifier execution evidence and does not start another provider run.
 
+## Programmatic verifier routing
+
+IMP 036G closes the routing gap between governed verifier authorization and the active Cursor execution provider.
+
+Preferred governed flow:
+
+1. `prepareVerifierAssignment` — candidate only.
+2. `authorizeAndFreezeVerifierAssignment({ humanAuthorized: true })` — persist verifier and authorization receipt.
+3. `routeGovernedVerifierAssignment({ store, verifierAssignmentId })` — resolve the active provider, run closed eligibility, dispatch the exact frozen verifier through the provider API, persist verifier `ExecutionEvidence`.
+
+`routeGovernedVerifierAssignment` wraps `dispatchGovernedVerifierAssignment` with explicit active provider resolution. The frozen verifier assignment is delivered programmatically through `ExecutionProvider.submitAssignment`. No Cursor chat paste or manual assignment transport is required.
+
+`ACTIVE_EXECUTION_PROVIDER_ID` is `cursor`. Pass an explicit `ExecutionProvider` instance to route through another supported provider (for example read-only Codex in tests).
+
+F.I. Forgot modifying execution remains refused. Governed read-only verifier assignments may execute against F.I. Forgot through the verified Cursor path. Hook projection is skipped on F.I. Forgot because this slice refuses to install new Cursor hooks into the real repository; read-only enforcement relies on assignment policy, independent Git evidence, and any existing project hooks.
+
 This slice does **not**:
 
 - persist PASS, FAIL, verified, approved, closed, or correction-required

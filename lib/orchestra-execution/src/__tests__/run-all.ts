@@ -9,6 +9,7 @@ import { runAdapterNegativeTests, runFixtureIntegrationTests } from "./fixture-i
 import { runEngineeringStoreTests } from "./engineering-store.test.js";
 import { runVerifierPreparationTests } from "./verifier-preparation.test.js";
 import { runVerifierDispatchTests } from "./verifier-dispatch.test.js";
+import { runVerifierRoutingTests } from "./verifier-routing.test.js";
 import { liveCursorReport, runLiveCursorIntegrationTest } from "./live-cursor.integration.test.js";
 import { runCodexProviderTests } from "./codex-provider.test.js";
 import { runCodexAppServerTransportTests } from "./codex-app-server-transport.test.js";
@@ -32,6 +33,7 @@ async function main(): Promise<void> {
   await runEngineeringStoreTests();
   await runVerifierPreparationTests();
   await runVerifierDispatchTests();
+  await runVerifierRoutingTests();
   await runLiveCursorIntegrationTest();
   console.log("\nLive Cursor report:", JSON.stringify(liveCursorReport, null, 2));
   if (failed > 0) reportAndExit();

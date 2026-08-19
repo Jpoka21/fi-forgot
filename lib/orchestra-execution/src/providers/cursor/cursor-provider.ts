@@ -68,7 +68,7 @@ export class CursorExecutionProvider implements ExecutionProvider {
   }
 
   async createSession(target: CreateSessionTarget): Promise<ProviderSession> {
-    if (isForgotIdentifierRepository(target.repositoryPath)) {
+    if (isForgotIdentifierRepository(target.repositoryPath) && !target.governedReadOnlyVerifier) {
       throw new Error(
         "Refusing to dispatch a Cursor execution session against the F.I. Forgot repository in this slice.",
       );
