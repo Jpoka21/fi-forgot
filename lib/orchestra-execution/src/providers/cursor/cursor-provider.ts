@@ -6,6 +6,7 @@ import type { FrozenAssignment } from "../../assignment.js";
 import { assertAssignmentUnchanged } from "../../assignment-hash.js";
 import type { NormalizedExecutionEvent } from "../../events.js";
 import { isForgotIdentifierRepository } from "../../hooks/project-hook.js";
+import { isGovernedVerifierExecutionCapability } from "../../governed-verifier-capability.js";
 import {
   CURSOR_PROVIDER_ID,
   renderAssignmentPrompt,
@@ -68,10 +69,23 @@ export class CursorExecutionProvider implements ExecutionProvider {
   }
 
   async createSession(target: CreateSessionTarget): Promise<ProviderSession> {
-    if (isForgotIdentifierRepository(target.repositoryPath) && !target.governedReadOnlyVerifier) {
-      throw new Error(
-        "Refusing to dispatch a Cursor execution session against the F.I. Forgot repository in this slice.",
-      );
+    if (isForgotIdentifierRepository(target.repositoryPath)) {
+      if (!target.governedVerifierExecution) {
+        throw new Error(
+          "Refusing to dispatch a Cursor execution session against the F.I. Forgot repository in this slice.",
+        );
+      }
+      if (
+        !isGovernedVerifierExecutionCapability(
+          target.governedVerifierExecution,
+          target.governedVerifierExecution.assignmentId,
+          target.governedVerifierExecution.assignmentHash,
+        )
+      ) {
+        throw new Error(
+          "Refusing to dispatch a Cursor execution session against the F.I. Forgot repository without governed verifier execution capability.",
+        );
+      }
     }
     const store = new JsonlLocalAgentStore(this.storeDirectory);
     const agent = await Agent.create({

@@ -152,7 +152,9 @@ export async function runVerifierRoutingTests(): Promise<void> {
   } catch (error) {
     modifyingForgotRefused =
       error instanceof Error &&
-      error.message.includes("Refusing to run a modifying assignment against the F.I. Forgot repository");
+      error.message.includes(
+        "Refusing to run an assignment against the F.I. Forgot repository without governed verifier execution capability",
+      );
   }
   expectTrue("modifying F.I. Forgot executor still refused", modifyingForgotRefused);
 

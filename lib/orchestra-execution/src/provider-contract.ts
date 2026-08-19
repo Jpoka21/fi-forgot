@@ -1,5 +1,6 @@
 import type { FrozenAssignment, OrchestraAssignment } from "./assignment.js";
 import type { NormalizedExecutionEvent } from "./events.js";
+import type { GovernedVerifierExecutionCapability } from "./governed-verifier-capability.js";
 
 export const CURSOR_PROVIDER_ID = "cursor";
 export const CODEX_PROVIDER_ID = "codex";
@@ -36,10 +37,10 @@ export interface CreateSessionTarget {
   branch: string;
   startingHead: string;
   /**
-   * Set by runBoundedAssignment when dispatching a governed read-only verifier
-   * against the F.I. Forgot repository. Not Orchestra authoritative state.
+   * Internal execution capability supplied only by governed verifier dispatch.
+   * Not Orchestra authoritative state and not constructible through public API.
    */
-  governedReadOnlyVerifier?: boolean;
+  governedVerifierExecution?: GovernedVerifierExecutionCapability;
 }
 
 export interface ProviderTerminalReport {

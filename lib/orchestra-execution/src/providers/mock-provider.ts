@@ -1,5 +1,7 @@
 import type { FrozenAssignment } from "../assignment.js";
 import type { NormalizedExecutionEvent } from "../events.js";
+import { isForgotIdentifierRepository } from "../hooks/project-hook.js";
+import { isGovernedVerifierExecutionCapability } from "../governed-verifier-capability.js";
 import type {
   CreateSessionTarget,
   ExecutionProvider,
@@ -38,6 +40,18 @@ export class MockExecutionProvider implements ExecutionProvider {
   async createSession(target: CreateSessionTarget): Promise<ProviderSession> {
     if (this.behavior.failOnCreate) {
       throw new Error("mock provider failed to create session");
+    }
+    if (
+      isForgotIdentifierRepository(target.repositoryPath) &&
+      !isGovernedVerifierExecutionCapability(
+        target.governedVerifierExecution,
+        target.governedVerifierExecution?.assignmentId ?? "",
+        target.governedVerifierExecution?.assignmentHash ?? "",
+      )
+    ) {
+      throw new Error(
+        "Refusing to dispatch a mock execution session against the F.I. Forgot repository without governed verifier execution capability.",
+      );
     }
     return {
       providerId: this.providerId,

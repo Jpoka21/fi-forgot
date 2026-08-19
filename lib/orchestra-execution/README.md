@@ -153,7 +153,7 @@ Preferred governed flow:
 
 `ACTIVE_EXECUTION_PROVIDER_ID` is `cursor`. Pass an explicit `ExecutionProvider` instance to route through another supported provider (for example read-only Codex in tests).
 
-F.I. Forgot modifying execution remains refused. Governed read-only verifier assignments may execute against F.I. Forgot through the verified Cursor path. Hook projection is skipped on F.I. Forgot because this slice refuses to install new Cursor hooks into the real repository; read-only enforcement relies on assignment policy, independent Git evidence, and any existing project hooks.
+F.I. Forgot modifying execution remains refused. Governed read-only verifier assignments may execute against F.I. Forgot only after `dispatchGovernedVerifierAssignment` establishes an internal, non-forgeable execution capability proving governed authorization and eligibility. Assignment shape alone is insufficient. Hook projection is skipped on F.I. Forgot because this slice refuses to install new Cursor hooks into the real repository; read-only enforcement relies on assignment policy, independent Git evidence, and any existing project hooks.
 
 This slice does **not**:
 

@@ -2,6 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FrozenAssignment } from "./assignment.js";
 import { isReadOnlyVerifierAssignment } from "./execution-policy.js";
+import {
+  type GovernedVerifierExecutionCapability,
+  isGovernedVerifierExecutionCapability,
+} from "./governed-verifier-capability.js";
 import { collectGitEvidence, diffGitEvidence } from "./git-evidence.js";
 import { correlateHookDenials, readHookInvocations } from "./hooks/hook-evidence.js";
 import { normalizePathKey, pathMentionsProtected } from "./hooks/path-normalize.js";
@@ -18,6 +22,10 @@ import { runIsolatedWorkspaceAssignment } from "./run-isolated-assignment.js";
 export interface RunBoundedAssignmentOptions {
   projectHooks?: boolean;
   deferIsolationCleanup?: boolean;
+  /**
+   * Internal only. Established by dispatchGovernedVerifierAssignment after eligibility.
+   */
+  governedVerifierCapability?: GovernedVerifierExecutionCapability;
 }
 
 function protectedMutationOccurred(
@@ -68,12 +76,17 @@ export async function runBoundedAssignment(
   options: RunBoundedAssignmentOptions = {},
 ): Promise<ExecutionResult> {
   const assignment = frozen.assignment;
-  if (
+  const governedForgotVerifierExecution =
     isForgotIdentifierRepository(assignment.repositoryPath) &&
-    !isReadOnlyVerifierAssignment(assignment)
-  ) {
+    isReadOnlyVerifierAssignment(assignment) &&
+    isGovernedVerifierExecutionCapability(
+      options.governedVerifierCapability,
+      assignment.assignmentId,
+      frozen.assignmentHash,
+    );
+  if (isForgotIdentifierRepository(assignment.repositoryPath) && !governedForgotVerifierExecution) {
     throw new Error(
-      "Refusing to run a modifying assignment against the F.I. Forgot repository in this slice.",
+      "Refusing to run an assignment against the F.I. Forgot repository without governed verifier execution capability.",
     );
   }
 
@@ -146,9 +159,9 @@ export async function runBoundedAssignment(
       repositoryPath: assignment.repositoryPath,
       branch: assignment.branch,
       startingHead: assignment.startingHead,
-      governedReadOnlyVerifier:
-        isForgotIdentifierRepository(assignment.repositoryPath) &&
-        isReadOnlyVerifierAssignment(assignment),
+      governedVerifierExecution: governedForgotVerifierExecution
+        ? options.governedVerifierCapability
+        : undefined,
     });
     sessionId = session.sessionId;
     events.push({

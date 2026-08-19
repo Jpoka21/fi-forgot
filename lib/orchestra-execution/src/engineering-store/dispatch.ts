@@ -1,4 +1,6 @@
 import { collectGitEvidence } from "../git-evidence.js";
+import type { GovernedVerifierExecutionCapability } from "../governed-verifier-capability.js";
+import { isGovernedVerifierExecutionCapability } from "../governed-verifier-capability.js";
 import type { ExecutionProvider } from "../provider-contract.js";
 import { synthesizeExecutionResult, type ExecutionResult } from "../result.js";
 import { runBoundedAssignment } from "../run-assignment.js";
@@ -13,10 +15,9 @@ export interface DispatchFrozenAssignmentInput {
   assignmentId: string;
   projectHooks?: boolean;
   /**
-   * Set only by dispatchGovernedVerifierAssignment after eligibility validation.
-   * Direct callers must not use this to bypass governed verifier authorization.
+   * Internal only. Set by dispatchGovernedVerifierAssignment after full eligibility validation.
    */
-  allowVerifierRole?: boolean;
+  governedVerifierCapability?: GovernedVerifierExecutionCapability;
 }
 
 export interface DispatchFrozenAssignmentOutput {
@@ -34,10 +35,18 @@ export async function dispatchFrozenAssignment(
 ): Promise<DispatchFrozenAssignmentOutput> {
   const assignmentRecord = input.store.loadAssignmentRecord(input.assignmentId);
   const frozen = assignmentRecord.frozen;
-  if (frozen.assignment.role === "verifier" && input.allowVerifierRole !== true) {
-    throw new Error(
-      "verifier assignments must be dispatched through dispatchGovernedVerifierAssignment",
-    );
+  if (frozen.assignment.role === "verifier") {
+    if (
+      !isGovernedVerifierExecutionCapability(
+        input.governedVerifierCapability,
+        frozen.assignment.assignmentId,
+        frozen.assignmentHash,
+      )
+    ) {
+      throw new Error(
+        "verifier assignments must be dispatched through dispatchGovernedVerifierAssignment",
+      );
+    }
   }
   if (input.store.loadLatestExecutionEvidence(input.assignmentId)) {
     throw new Error(
@@ -85,7 +94,10 @@ export async function dispatchFrozenAssignment(
     pre.head !== frozen.assignment.startingHead.toLowerCase() ||
     pre.branch !== frozen.assignment.branch
   ) {
-    const mismatch = await runBoundedAssignment(input.provider, frozen, { projectHooks: false });
+    const mismatch = await runBoundedAssignment(input.provider, frozen, {
+      projectHooks: false,
+      governedVerifierCapability: input.governedVerifierCapability,
+    });
     const evidence = input.store.persistExecutionEvidence(
       buildExecutionEvidence({ frozen, result: mismatch, providerStarted: false }),
     );
@@ -98,6 +110,7 @@ export async function dispatchFrozenAssignment(
     result = await runBoundedAssignment(input.provider, frozen, {
       projectHooks: input.projectHooks,
       deferIsolationCleanup: true,
+      governedVerifierCapability: input.governedVerifierCapability,
     });
   } catch (error) {
     input.store.persistCrashReceipt({

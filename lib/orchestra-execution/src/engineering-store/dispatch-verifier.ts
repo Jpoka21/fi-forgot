@@ -1,5 +1,6 @@
 import { DEFAULT_PROHIBITED_COMMAND_CLASSES } from "../assignment.js";
 import { isReadOnlyVerifierAssignment } from "../execution-policy.js";
+import { createGovernedVerifierExecutionCapability } from "../governed-verifier-capability.js";
 import { collectGitEvidence } from "../git-evidence.js";
 import { isForgotIdentifierRepository } from "../hooks/project-hook.js";
 import type { ExecutionProvider } from "../provider-contract.js";
@@ -264,12 +265,16 @@ export async function dispatchGovernedVerifierAssignment(
     );
 
   try {
+    const governedVerifierCapability = createGovernedVerifierExecutionCapability(
+      assignment.assignmentId,
+      verifier.assignmentHash,
+    );
     const output = await dispatchFrozenAssignment({
       store: input.store,
       provider: input.provider,
       assignmentId: assignment.assignmentId,
       projectHooks,
-      allowVerifierRole: true,
+      governedVerifierCapability,
     });
     return {
       dispatched: true,
