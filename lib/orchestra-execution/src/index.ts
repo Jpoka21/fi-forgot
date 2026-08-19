@@ -28,7 +28,7 @@ export type { NormalizedEventType, NormalizedExecutionEvent, ProviderCorrelation
 export { NORMALIZED_EVENT_TYPES, isNormalizedEventType } from "./events.js";
 export type { GitCommitIdentity, GitEvidence, GitEvidenceDelta } from "./git-evidence.js";
 export { collectGitEvidence, diffGitEvidence, parseStatusPorcelain } from "./git-evidence.js";
-export type { ExecutionResult, ExecutionVerdict } from "./result.js";
+export type { ExecutionResult, ExecutionVerdict, IsolationEvidence } from "./result.js";
 export { EXECUTION_VERDICTS, synthesizeExecutionResult } from "./result.js";
 export type { HookPolicy, HookDecisionRecord, PolicyDecision } from "./hooks/policy-decision.js";
 export { decideHookPolicy, detectProhibitedCommand, toHookDecisionRecord } from "./hooks/policy-decision.js";
@@ -49,6 +49,15 @@ export { correlateHookDenials, readHookInvocations } from "./hooks/hook-evidence
 export { createDisposableExecutionFixture } from "./fixture.js";
 export type { DisposableFixture } from "./fixture.js";
 export { filesystemMarkerPresent, runBoundedAssignment } from "./run-assignment.js";
+export {
+  applyCandidatePatch,
+  cleanupIsolatedExecutionWorkspace,
+  cleanupIsolatedWorkspacePath,
+  createIsolatedExecutionWorkspace,
+  extractCandidateChanges,
+  governedStateUnchanged,
+} from "./isolated-workspace.js";
+export type { CandidateChangeSet, IsolatedExecutionWorkspace } from "./isolated-workspace.js";
 export { CursorExecutionProvider, isCursorSdkAuthenticated } from "./providers/cursor/cursor-provider.js";
 export { normalizeCursorEvent } from "./providers/cursor/normalize-events.js";
 export { CodexExecutionProvider } from "./providers/codex/codex-provider.js";

@@ -5,6 +5,7 @@ import { runBoundedAssignment } from "../run-assignment.js";
 import { buildExecutionEvidence } from "./evidence.js";
 import { FileEngineeringStore } from "./store.js";
 import { ENGINEERING_STORE_SCHEMA_VERSION, type ExecutionEvidence, type FrozenAssignmentRecord } from "./types.js";
+import { cleanupIsolatedWorkspacePath } from "../isolated-workspace.js";
 
 export interface DispatchFrozenAssignmentInput {
   store: FileEngineeringStore;
@@ -96,6 +97,7 @@ export async function dispatchFrozenAssignment(
   try {
     result = await runBoundedAssignment(input.provider, frozen, {
       projectHooks: input.projectHooks,
+      deferIsolationCleanup: true,
     });
   } catch (error) {
     input.store.persistCrashReceipt({
@@ -116,6 +118,21 @@ export async function dispatchFrozenAssignment(
     const evidence = input.store.persistExecutionEvidence(
       buildExecutionEvidence({ frozen, result, providerStarted }),
     );
+    if (result.isolationEvidence?.cleanupStatus === "pending") {
+      const cleaned = cleanupIsolatedWorkspacePath(result.isolationEvidence.workspacePath);
+      if (!cleaned) {
+        input.store.persistCrashReceipt({
+          schemaVersion: ENGINEERING_STORE_SCHEMA_VERSION,
+          recordKind: "crash_receipt",
+          timestamp: new Date().toISOString(),
+          assignmentId: frozen.assignment.assignmentId,
+          assignmentHash: frozen.assignmentHash,
+          providerSessionId: result.providerSessionId,
+          runId: result.runId,
+          reason: "isolated workspace cleanup failed after execution evidence persistence",
+        });
+      }
+    }
     return { assignmentRecord, evidence, result };
   } catch (error) {
     input.store.persistCrashReceipt({
@@ -128,7 +145,7 @@ export async function dispatchFrozenAssignment(
       runId: result.runId,
       reason: `execution evidence persistence failed after provider activity: ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }${result.isolationEvidence ? `; isolated workspace preserved at ${result.isolationEvidence.workspacePath}` : ""}`,
     });
     throw error;
   }

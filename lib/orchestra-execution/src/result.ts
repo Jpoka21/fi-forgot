@@ -35,6 +35,22 @@ export interface ExecutionResult {
   pushIndependentlyEvidenced: boolean;
   unexpectedChanges: string[];
   executionVerdict: ExecutionVerdict;
+  isolationEvidence?: IsolationEvidence;
+}
+
+export interface IsolationEvidence {
+  workspacePath: string;
+  startingHead: string;
+  candidateChangedPaths: string[];
+  authorizedCandidatePaths: string[];
+  unauthorizedCandidatePaths: string[];
+  protectedCandidatePaths: string[];
+  candidateStatuses: string[];
+  applicationAttempted: boolean;
+  applicationSucceeded: boolean;
+  governedPreApplicationGitEvidence: GitEvidence;
+  governedPostApplicationGitEvidence: GitEvidence;
+  cleanupStatus: "pending" | "completed" | "failed";
 }
 
 export interface SynthesizeResultInput {
@@ -56,6 +72,7 @@ export interface SynthesizeResultInput {
   unexpectedChanges: string[];
   evidenceIncomplete?: boolean;
   providerFailed?: boolean;
+  isolationEvidence?: IsolationEvidence;
 }
 
 export function synthesizeExecutionResult(input: SynthesizeResultInput): ExecutionResult {
@@ -108,5 +125,6 @@ export function synthesizeExecutionResult(input: SynthesizeResultInput): Executi
     pushIndependentlyEvidenced: false,
     unexpectedChanges: input.unexpectedChanges,
     executionVerdict,
+    ...(input.isolationEvidence ? { isolationEvidence: input.isolationEvidence } : {}),
   };
 }

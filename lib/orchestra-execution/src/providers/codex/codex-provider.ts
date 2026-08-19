@@ -91,7 +91,7 @@ export class CodexExecutionProvider implements ExecutionProvider {
   private transport: CodexAppServerTransport | null;
   private readonly transportFactory: () => CodexAppServerTransport;
   private readonly model?: string;
-  private readonly mode: CodexExecutionMode;
+  readonly executionMode: CodexExecutionMode;
   private readonly sessions = new Map<string, InternalSession>();
   private readonly runs = new Map<string, InternalRun>();
   private readonly pendingNotifications = new Map<string, AppServerNotification[]>();
@@ -101,7 +101,7 @@ export class CodexExecutionProvider implements ExecutionProvider {
     this.transport = options.transport ?? null;
     this.transportFactory = options.transportFactory ?? (() => new StdioCodexAppServerTransport());
     this.model = options.model;
-    this.mode = options.mode ?? "read-only";
+    this.executionMode = options.mode ?? "read-only";
     if (this.transport) this.subscribe(this.transport);
   }
 
@@ -148,11 +148,11 @@ export class CodexExecutionProvider implements ExecutionProvider {
     assertAssignmentUnchanged(frozen, frozen.assignment);
     const internal = this.sessions.get(session.sessionId);
     if (!internal) throw new Error(`unknown Codex provider session: ${session.sessionId}`);
-    const policy = projectCodexPolicy(frozen.assignment, this.mode);
+    const policy = projectCodexPolicy(frozen.assignment, this.executionMode);
     const response = await this.client().request<TurnResponse>("turn/start", {
       threadId: session.sessionId,
       input: [{ type: "text", text: renderAssignmentPrompt(frozen.assignment, frozen.assignmentHash) }],
-      cwd: frozen.assignment.repositoryPath,
+      cwd: internal.target.repositoryPath,
       approvalPolicy: policy.approvalPolicy,
       sandboxPolicy: policy.turnSandboxPolicy,
       model: this.model,

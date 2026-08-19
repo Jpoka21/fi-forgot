@@ -13,6 +13,7 @@ import { liveCursorReport, runLiveCursorIntegrationTest } from "./live-cursor.in
 import { runCodexProviderTests } from "./codex-provider.test.js";
 import { runCodexAppServerTransportTests } from "./codex-app-server-transport.test.js";
 import { failed, reportAndExit } from "./harness.js";
+import { runIsolatedWorkspaceTests } from "./isolated-workspace.test.js";
 
 async function main(): Promise<void> {
   runAssignmentTests();
@@ -26,6 +27,7 @@ async function main(): Promise<void> {
   runHookParserTests();
   runResultTests();
   await runFixtureIntegrationTests();
+  await runIsolatedWorkspaceTests();
   await runAdapterNegativeTests();
   await runEngineeringStoreTests();
   await runVerifierPreparationTests();

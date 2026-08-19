@@ -125,10 +125,11 @@ export async function runCodexProviderTests(): Promise<void> {
 
   const writeTransport = new FakeAppServerTransport();
   const writeProvider = new CodexExecutionProvider({ transport: writeTransport, mode: "governed-workspace-write" });
-  const writeSession = await writeProvider.createSession({ repositoryPath: "C:/fixture", branch: "main", startingHead: "a".repeat(40) });
+  const writeSession = await writeProvider.createSession({ repositoryPath: "C:/isolated", branch: "main", startingHead: "a".repeat(40) });
   await writeProvider.submitAssignment(writeSession, writeAssignment);
   const writeTurn = writeTransport.requests.find((request) => request.method === "turn/start")!;
   expect("provider sends workspaceWrite", (writeTurn.params.sandboxPolicy as { type: string }).type, "workspaceWrite");
+  expect("provider turn cwd is isolated session target", writeTurn.params.cwd, "C:/isolated");
   expect("provider approvals remain never", writeTurn.params.approvalPolicy, "never");
   await writeProvider.closeSession(writeSession);
   expectRefusal(

@@ -10,24 +10,29 @@ import type {
 } from "../provider-contract.js";
 
 export interface MockProviderBehavior {
+  providerId?: string;
+  executionMode?: string;
   failOnCreate?: boolean;
   failOnSubmit?: boolean;
   terminalStatus?: ProviderTerminalReport["status"];
   resultText?: string;
   events?: NormalizedExecutionEvent[];
-  onSubmit?: (assignment: FrozenAssignment) => void | Promise<void>;
+  onSubmit?: (assignment: FrozenAssignment, session: ProviderSession) => void | Promise<void>;
 }
 
 /**
  * In-process provider used by deterministic tests. Does not import @cursor/sdk.
  */
 export class MockExecutionProvider implements ExecutionProvider {
-  readonly providerId = "mock";
+  readonly providerId: string;
+  readonly executionMode?: string;
   private readonly behavior: MockProviderBehavior;
   private closed = false;
 
   constructor(behavior: MockProviderBehavior = {}) {
     this.behavior = behavior;
+    this.providerId = behavior.providerId ?? "mock";
+    this.executionMode = behavior.executionMode;
   }
 
   async createSession(target: CreateSessionTarget): Promise<ProviderSession> {
@@ -53,7 +58,7 @@ export class MockExecutionProvider implements ExecutionProvider {
     if (this.behavior.failOnSubmit) {
       throw new Error("mock provider failed to submit assignment");
     }
-    await this.behavior.onSubmit?.(assignment);
+    await this.behavior.onSubmit?.(assignment, session);
     return {
       providerId: this.providerId,
       sessionId: session.sessionId,

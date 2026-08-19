@@ -8,9 +8,11 @@ import { isForgotIdentifierRepository, projectCursorHookPolicy } from "./hooks/p
 import type { NormalizedExecutionEvent } from "./events.js";
 import type { ExecutionProvider, ProviderSession } from "./provider-contract.js";
 import { synthesizeExecutionResult, type ExecutionResult } from "./result.js";
+import { runIsolatedWorkspaceAssignment } from "./run-isolated-assignment.js";
 
 export interface RunBoundedAssignmentOptions {
   projectHooks?: boolean;
+  deferIsolationCleanup?: boolean;
 }
 
 function protectedMutationOccurred(
@@ -52,7 +54,8 @@ function fileContains(path: string, needle: string): boolean {
 
 /**
  * Orchestrate one bounded assignment through a vendor-neutral provider.
- * Does not commit, push, or update Orchestra authoritative project state.
+ * Does not commit or push. Governed Codex writes are isolated and only an
+ * entirely authorized candidate patch may update the governed working tree.
  */
 export async function runBoundedAssignment(
   provider: ExecutionProvider,
@@ -112,6 +115,13 @@ export async function runBoundedAssignment(
       evidenceIncomplete: false,
       providerFailed: false,
     });
+  }
+
+  if (
+    provider.providerId === "codex" &&
+    (provider as ExecutionProvider & { executionMode?: string }).executionMode === "governed-workspace-write"
+  ) {
+    return runIsolatedWorkspaceAssignment(provider, frozen, preRunGitEvidence, options.deferIsolationCleanup === true);
   }
 
   if (options.projectHooks !== false) {
