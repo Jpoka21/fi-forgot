@@ -3,6 +3,8 @@
  * Cursor SDK types must never appear here.
  */
 
+import type { StructuredObligation, VerificationRequirementRef } from "./verification-requirements.js";
+
 export const ASSIGNMENT_ROLES = ["executor", "verifier"] as const;
 export type AssignmentRole = (typeof ASSIGNMENT_ROLES)[number];
 
@@ -36,6 +38,14 @@ export interface OrchestraAssignment {
    */
   pushAuthorization: boolean;
   requiredEvidence: string[];
+  /**
+   * Governed obligations the executor must satisfy. Verifier semantic findings bind to these ids.
+   */
+  structuredObligations?: StructuredObligation[];
+  /**
+   * Verifier-only structured requirement catalog for semantic adjudication.
+   */
+  verificationRequirements?: VerificationRequirementRef[];
   createdAt: string;
 }
 
@@ -54,6 +64,8 @@ export interface AssignmentInput {
   commitAuthorization?: boolean;
   pushAuthorization?: boolean;
   requiredEvidence?: string[];
+  structuredObligations?: StructuredObligation[];
+  verificationRequirements?: VerificationRequirementRef[];
   createdAt?: string;
 }
 
@@ -111,6 +123,17 @@ export function normalizeAssignment(input: AssignmentInput): OrchestraAssignment
     commitAuthorization: input.commitAuthorization === true,
     pushAuthorization: input.pushAuthorization === true,
     requiredEvidence: uniqueStrings(input.requiredEvidence),
+    ...(input.structuredObligations && input.structuredObligations.length > 0
+      ? {
+          structuredObligations: input.structuredObligations.map((row) => ({
+            obligationId: assertNonEmpty("obligationId", row.obligationId),
+            summary: assertNonEmpty("summary", row.summary),
+          })),
+        }
+      : {}),
+    ...(input.verificationRequirements && input.verificationRequirements.length > 0
+      ? { verificationRequirements: input.verificationRequirements }
+      : {}),
     createdAt: input.createdAt ?? new Date().toISOString(),
   };
 }

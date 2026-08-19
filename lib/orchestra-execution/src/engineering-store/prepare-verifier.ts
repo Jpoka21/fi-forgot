@@ -1,6 +1,7 @@
 import { createAssignment } from "../assignment-hash.js";
 import type { FrozenAssignment } from "../assignment.js";
 import type { HookDecisionRecord } from "../hooks/policy-decision.js";
+import { deriveVerifierVerificationRequirements } from "../verification-requirements.js";
 import { EngineeringStoreError, FileEngineeringStore } from "./store.js";
 import type {
   ExecutionEvidence,
@@ -193,9 +194,8 @@ function verifierRequiredEvidence(executorRequired: string[], evidence: Executio
   if (evidence.result.policyDenials.length > 0 || executorRequired.includes("hooks")) {
     required.push("hooks");
   }
-  if (executorRequired.includes("tests") || executorRequired.includes("test")) {
-    required.push("tests");
-  }
+  // Machine "tests" evidence is not trusted from caller-controlled events; semantic
+  // required_tests coverage is enforced via verificationRequirements and structured findings.
   return [...new Set(required)];
 }
 
@@ -256,6 +256,7 @@ function buildCandidate(executor: FrozenAssignment, evidence: ExecutionEvidence)
     commitAuthorization: false,
     pushAuthorization: false,
     requiredEvidence: verifierRequiredEvidence(executor.assignment.requiredEvidence, evidence),
+    verificationRequirements: deriveVerifierVerificationRequirements(executor.assignment, evidence),
     createdAt: evidence.recordedAt,
   });
   return { candidate, warnings };

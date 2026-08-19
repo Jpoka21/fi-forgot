@@ -1,6 +1,13 @@
 import type { FrozenAssignment } from "../assignment.js";
+import type { VerificationRequirementRef } from "../verification-requirements.js";
 import type { ExecutionResult } from "../result.js";
-import type { ExecutionEvidence, FrozenAssignmentRecord, VerificationDecision } from "./types.js";
+import type {
+  ExecutionEvidence,
+  FrozenAssignmentRecord,
+  VerificationDecision,
+  VerifierRequirementOutcome,
+  VerifierSemanticFindingRecord,
+} from "./types.js";
 
 export const VERIFICATION_DECISION_REASON_CODES = [
   "verifier_execution_reviewable",
@@ -9,14 +16,20 @@ export const VERIFICATION_DECISION_REASON_CODES = [
   "verifier_policy_denial_noninvalidating",
   "verifier_relationship_coherent",
   "executor_implementation_posture_clean",
-  "executor_required_tests_passed",
   "executor_repository_state_violation",
   "executor_protected_mutation",
   "executor_unexpected_mutation",
   "executor_commit_violation",
   "executor_push_violation",
-  "executor_required_test_failure",
   "executor_scope_violation",
+  "semantic_findings_missing",
+  "semantic_findings_incomplete",
+  "semantic_requirement_failed",
+  "semantic_requirement_not_evaluated",
+  "semantic_evidence_insufficient",
+  "semantic_findings_corrupt",
+  "unknown_push_evidence",
+  "unknown_commit_evidence",
   "verifier_provider_failed",
   "verifier_evidence_incomplete",
   "verifier_required_evidence_missing",
@@ -29,6 +42,7 @@ export const VERIFICATION_DECISION_REASON_CODES = [
   "verifier_execution_not_terminal",
   "executor_provider_failed_indeterminate",
   "executor_evidence_incomplete_indeterminate",
+  "semantic_requirements_satisfied",
 ] as const;
 
 export type VerificationDecisionReasonCode = (typeof VERIFICATION_DECISION_REASON_CODES)[number];
@@ -40,20 +54,108 @@ function isBaselineMismatch(result: ExecutionResult): boolean {
   );
 }
 
-function isScopeViolation(result: ExecutionResult, allowedPaths: string[]): boolean {
+function isScopeViolation(result: ExecutionResult): boolean {
   if (result.unexpectedChanges.length === 0) return false;
-  const nonBaseline = result.unexpectedChanges.filter(
+  return result.unexpectedChanges.some(
     (item) => item !== "starting_head_mismatch" && item !== "branch_mismatch",
   );
-  return nonBaseline.length > 0;
 }
 
-export function machineTestOutcome(result: ExecutionResult): "pass" | "fail" | "missing" {
-  for (const event of result.normalizedEvents) {
-    const summary = event.rawSummary?.testOutcome;
-    if (summary === "pass" || summary === "fail") return summary;
+function pushEvidenceKnown(result: ExecutionResult): boolean {
+  return result.pushKnown || result.pushIndependentlyEvidenced;
+}
+
+function commitEvidenceKnown(result: ExecutionResult): boolean {
+  return result.commitKnown || result.commitOccurred;
+}
+
+export function evaluateSemanticFindings(input: {
+  requirements: VerificationRequirementRef[];
+  findings: VerifierSemanticFindingRecord[];
+}): { decision: VerificationDecision | null; reasonCodes: string[]; indeterminate: boolean } {
+  const codes: string[] = [];
+  const byRequirement = new Map<string, VerifierSemanticFindingRecord>();
+  for (const finding of input.findings) {
+    if (byRequirement.has(finding.requirementId)) {
+      return {
+        decision: "INDETERMINATE",
+        reasonCodes: ["semantic_findings_corrupt"],
+        indeterminate: true,
+      };
+    }
+    byRequirement.set(finding.requirementId, finding);
   }
-  return "missing";
+
+  if (input.requirements.length === 0) {
+    return {
+      decision: "INDETERMINATE",
+      reasonCodes: ["semantic_findings_incomplete"],
+      indeterminate: true,
+    };
+  }
+
+  if (input.findings.length === 0) {
+    return {
+      decision: "INDETERMINATE",
+      reasonCodes: ["semantic_findings_missing"],
+      indeterminate: true,
+    };
+  }
+
+  for (const requirement of input.requirements) {
+    const finding = byRequirement.get(requirement.requirementId);
+    if (!finding) {
+      return {
+        decision: "INDETERMINATE",
+        reasonCodes: ["semantic_findings_incomplete"],
+        indeterminate: true,
+      };
+    }
+    const outcome = finding.outcome;
+    if (outcome === "requirement_failed") {
+      codes.push("semantic_requirement_failed");
+      return { decision: "CORRECTION_REQUIRED", reasonCodes: codes, indeterminate: false };
+    }
+    if (outcome === "requirement_not_evaluated") {
+      return {
+        decision: "INDETERMINATE",
+        reasonCodes: ["semantic_requirement_not_evaluated"],
+        indeterminate: true,
+      };
+    }
+    if (outcome === "evidence_insufficient") {
+      return {
+        decision: "INDETERMINATE",
+        reasonCodes: ["semantic_evidence_insufficient"],
+        indeterminate: true,
+      };
+    }
+  }
+
+  for (const requirement of input.requirements) {
+    const extra = byRequirement.get(requirement.requirementId);
+    if (extra && extra.outcome !== "requirement_satisfied") {
+      return {
+        decision: "INDETERMINATE",
+        reasonCodes: ["semantic_findings_incomplete"],
+        indeterminate: true,
+      };
+    }
+  }
+
+  const unknownFindings = input.findings.filter(
+    (finding) => !input.requirements.some((req) => req.requirementId === finding.requirementId),
+  );
+  if (unknownFindings.length > 0) {
+    return {
+      decision: "INDETERMINATE",
+      reasonCodes: ["semantic_findings_corrupt"],
+      indeterminate: true,
+    };
+  }
+
+  codes.push("semantic_requirements_satisfied");
+  return { decision: null, reasonCodes: codes, indeterminate: false };
 }
 
 export function evaluateExecutorImplementation(
@@ -78,6 +180,20 @@ export function evaluateExecutorImplementation(
       indeterminate: true,
     };
   }
+  if (assignment.requireNoPush && !pushEvidenceKnown(result)) {
+    return {
+      decision: "INDETERMINATE",
+      reasonCodes: ["unknown_push_evidence"],
+      indeterminate: true,
+    };
+  }
+  if (!assignment.commitAuthorization && !commitEvidenceKnown(result)) {
+    return {
+      decision: "INDETERMINATE",
+      reasonCodes: ["unknown_commit_evidence"],
+      indeterminate: true,
+    };
+  }
 
   let defect = false;
 
@@ -89,7 +205,7 @@ export function evaluateExecutorImplementation(
     codes.push("executor_repository_state_violation");
     defect = true;
   }
-  if (isScopeViolation(result, assignment.allowedPaths)) {
+  if (isScopeViolation(result)) {
     codes.push("executor_unexpected_mutation");
     defect = true;
   }
@@ -100,25 +216,6 @@ export function evaluateExecutorImplementation(
   if (result.pushIndependentlyEvidenced && assignment.requireNoPush) {
     codes.push("executor_push_violation");
     defect = true;
-  }
-
-  const requiresTests =
-    assignment.requiredEvidence.some((item) => item.toLowerCase() === "tests" || item.toLowerCase() === "test") ||
-    executorEvidence.requiredEvidence.some((item) => item.toLowerCase() === "tests" || item.toLowerCase() === "test");
-  if (requiresTests) {
-    const testOutcome = machineTestOutcome(result);
-    if (testOutcome === "fail") {
-      codes.push("executor_required_test_failure");
-      defect = true;
-    } else if (testOutcome === "missing") {
-      return {
-        decision: "INDETERMINATE",
-        reasonCodes: ["verifier_required_evidence_missing"],
-        indeterminate: true,
-      };
-    } else {
-      codes.push("executor_required_tests_passed");
-    }
   }
 
   if (defect) {
@@ -206,7 +303,7 @@ export function evaluateVerifierExecution(
       indeterminateDecision: "INDETERMINATE",
     };
   }
-  if (isScopeViolation(result, [])) {
+  if (isScopeViolation(result)) {
     return {
       adjudicable: false,
       reasonCodes: ["verifier_unauthorized_mutation"],
@@ -228,6 +325,7 @@ export function deriveVerificationDecision(input: {
   verifierEvidence: ExecutionEvidence;
   executorRecord: FrozenAssignmentRecord;
   executorEvidence: ExecutionEvidence;
+  semanticFindings: VerifierSemanticFindingRecord[];
 }): { decision: VerificationDecision; reasonCodes: string[] } {
   const verifierEval = evaluateVerifierExecution(input.verifierEvidence);
   if (!verifierEval.adjudicable) {
@@ -254,12 +352,36 @@ export function deriveVerificationDecision(input: {
     };
   }
 
+  const requirements = input.verifierRecord.frozen.assignment.verificationRequirements ?? [];
+  const semanticEval = evaluateSemanticFindings({
+    requirements,
+    findings: input.semanticFindings,
+  });
+  if (semanticEval.indeterminate) {
+    return {
+      decision: semanticEval.decision ?? "INDETERMINATE",
+      reasonCodes: [...verifierEval.reasonCodes, ...semanticEval.reasonCodes],
+    };
+  }
+  if (semanticEval.decision === "CORRECTION_REQUIRED") {
+    return {
+      decision: "CORRECTION_REQUIRED",
+      reasonCodes: [
+        ...verifierEval.reasonCodes,
+        "verifier_relationship_coherent",
+        ...executorEval.reasonCodes,
+        ...semanticEval.reasonCodes,
+      ],
+    };
+  }
+
   return {
     decision: "VERIFIED",
     reasonCodes: [
       ...verifierEval.reasonCodes,
       "verifier_relationship_coherent",
       ...executorEval.reasonCodes,
+      ...semanticEval.reasonCodes,
     ],
   };
 }

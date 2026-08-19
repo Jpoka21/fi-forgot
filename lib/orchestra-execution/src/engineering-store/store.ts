@@ -13,6 +13,9 @@ import {
   validateVerificationDecision,
 } from "./verification-decision-record.js";
 import {
+  validateVerifierSemanticFinding,
+} from "./semantic-finding-record.js";
+import {
   ENGINEERING_STORE_SCHEMA_VERSION,
   type AssignmentCurrentState,
   type AssignmentRelationship,
@@ -25,6 +28,7 @@ import {
   type VerificationDecisionRecord,
   type VerificationPosture,
   type VerifierAuthorizationReceipt,
+  type VerifierSemanticFindingRecord,
 } from "./types.js";
 
 const SAFE_ID = /^[A-Za-z0-9._-]+$/;
@@ -400,6 +404,65 @@ export class FileEngineeringStore {
     return matches[matches.length - 1] ?? null;
   }
 
+  persistVerifierSemanticFinding(record: VerifierSemanticFindingRecord): VerifierSemanticFindingRecord {
+    if (!validateVerifierSemanticFinding(record)) {
+      throw new EngineeringStoreError("verifier semantic finding record failed validation");
+    }
+    const assignmentId = assertSafeId("assignmentId", record.verifierAssignmentId);
+    const frozen = this.loadFrozenAssignment(assignmentId);
+    if (frozen.assignmentHash !== record.verifierAssignmentHash) {
+      throw new EngineeringStoreError("semantic finding assignmentHash does not match frozen assignment");
+    }
+    const existing = this.findVerifierSemanticFindingForRequirement(
+      record.verifierAssignmentId,
+      record.verifierExecutionEvidenceId,
+      record.requirementId,
+    );
+    if (existing) {
+      if (existing.findingHash !== record.findingHash) {
+        throw new EngineeringStoreError(
+          "duplicate semantic finding for requirement with a different hash; refusing overwrite",
+        );
+      }
+      return existing;
+    }
+    appendLineAtomic(this.semanticFindingsPath(assignmentId), JSON.stringify(record));
+    this.audit({
+      timestamp: record.capturedAt,
+      action: "persist_verifier_semantic_finding",
+      assignmentId,
+      evidenceId: record.verifierExecutionEvidenceId,
+      detail: `${record.requirementId}:${record.outcome}`,
+    });
+    return record;
+  }
+
+  loadVerifierSemanticFindings(
+    verifierAssignmentId: string,
+    verifierExecutionEvidenceId?: string,
+  ): VerifierSemanticFindingRecord[] {
+    const path = this.semanticFindingsPath(assertSafeId("assignmentId", verifierAssignmentId));
+    if (!existsSync(path)) return [];
+    const rows = readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as VerifierSemanticFindingRecord)
+      .filter((row) => validateVerifierSemanticFinding(row));
+    if (!verifierExecutionEvidenceId) return rows;
+    return rows.filter((row) => row.verifierExecutionEvidenceId === verifierExecutionEvidenceId);
+  }
+
+  findVerifierSemanticFindingForRequirement(
+    verifierAssignmentId: string,
+    verifierExecutionEvidenceId: string,
+    requirementId: string,
+  ): VerifierSemanticFindingRecord | null {
+    const matches = this.loadVerifierSemanticFindings(verifierAssignmentId, verifierExecutionEvidenceId).filter(
+      (row) => row.requirementId === requirementId,
+    );
+    return matches[matches.length - 1] ?? null;
+  }
+
   getAssignmentStatus(assignmentId: string): AssignmentStatus {
     const events = this.readStatusEvents(assignmentId);
     const last = events[events.length - 1];
@@ -529,6 +592,10 @@ export class FileEngineeringStore {
 
   private verificationDecisionPath(assignmentId: string): string {
     return join(this.assignmentsDir(), assignmentId, "verification-decisions.ndjson");
+  }
+
+  private semanticFindingsPath(assignmentId: string): string {
+    return join(this.assignmentsDir(), assignmentId, "semantic-findings.ndjson");
   }
 
   private evidencePath(assignmentId: string, evidenceId: string): string {

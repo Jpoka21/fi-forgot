@@ -5,8 +5,10 @@ import type {
   VerificationDecision,
   VerificationDecisionRecord,
   VerifierAuthorizationReceipt,
+  VerifierSemanticFindingRecord,
 } from "./types.js";
 import { deriveVerificationDecision } from "./verification-decision-logic.js";
+import { captureVerifierSemanticFindingsFromEvidence } from "./capture-verifier-findings.js";
 import {
   buildVerificationDecisionRecord,
   validateVerificationDecision,
@@ -102,6 +104,30 @@ function adjudicated(
     decisionRecord: extras.decisionRecord ?? null,
     duplicateDecisionReused: extras.duplicateDecisionReused ?? false,
   };
+}
+
+function semanticFindingsBoundToEvidence(
+  findings: VerifierSemanticFindingRecord[],
+  expected: {
+    verifierAssignmentId: string;
+    verifierAssignmentHash: string;
+    verifierExecutionEvidenceId: string;
+    executorAssignmentId: string;
+    executorExecutionEvidenceId: string;
+  },
+): { findings: VerifierSemanticFindingRecord[]; corrupt: boolean } {
+  for (const finding of findings) {
+    if (
+      finding.verifierAssignmentId !== expected.verifierAssignmentId ||
+      finding.verifierAssignmentHash !== expected.verifierAssignmentHash ||
+      finding.verifierExecutionEvidenceId !== expected.verifierExecutionEvidenceId ||
+      finding.executorAssignmentId !== expected.executorAssignmentId ||
+      finding.executorExecutionEvidenceId !== expected.executorExecutionEvidenceId
+    ) {
+      return { findings: [], corrupt: true };
+    }
+  }
+  return { findings, corrupt: false };
 }
 
 /**
@@ -222,6 +248,24 @@ export function adjudicateVerifierExecution(
     return refused(input, "evidence_incomplete", extras);
   }
 
+  captureVerifierSemanticFindingsFromEvidence({
+    store: input.store,
+    verifierAssignmentId: verifier.assignment.assignmentId,
+  });
+
+  const loadedFindings = input.store.loadVerifierSemanticFindings(
+    verifier.assignment.assignmentId,
+    verifierEvidence.evidenceId,
+  );
+  const boundFindings = semanticFindingsBoundToEvidence(loadedFindings, {
+    verifierAssignmentId: verifier.assignment.assignmentId,
+    verifierAssignmentHash: verifier.assignmentHash,
+    verifierExecutionEvidenceId: verifierEvidence.evidenceId,
+    executorAssignmentId,
+    executorExecutionEvidenceId: executorEvidenceId,
+  });
+  const semanticFindings = boundFindings.corrupt ? [] : boundFindings.findings;
+
   const existing = input.store.findVerificationDecisionForEvidence(
     verifier.assignment.assignmentId,
     verifierEvidence.evidenceId,
@@ -244,6 +288,7 @@ export function adjudicateVerifierExecution(
     verifierEvidence,
     executorRecord,
     executorEvidence,
+    semanticFindings,
   });
 
   const conflicting = input.store.loadVerificationDecisions(verifier.assignment.assignmentId).find(

@@ -59,6 +59,16 @@ export function createDisposableExecutionFixture(options?: {
     commitAuthorization: false,
     pushAuthorization: false,
     requiredEvidence: ["git", "hooks", "filesystem"],
+    structuredObligations: [
+      {
+        obligationId: "allowed-file-update",
+        summary: "Append ADAPTER_ALLOWED_TEST to allowed.txt",
+      },
+      {
+        obligationId: "protected-write-blocked",
+        summary: "Attempt to append ADAPTER_BLOCKED_TEST to protected.txt must be blocked",
+      },
+    ],
     createdAt: "2026-08-17T00:00:00.000Z",
   });
   projectCursorHookPolicy(repositoryPath, assignment.assignment);

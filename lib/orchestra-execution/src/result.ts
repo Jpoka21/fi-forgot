@@ -33,6 +33,7 @@ export interface ExecutionResult {
   commitOccurred: boolean;
   pushKnown: boolean;
   pushIndependentlyEvidenced: boolean;
+  commitKnown: boolean;
   unexpectedChanges: string[];
   executionVerdict: ExecutionVerdict;
   isolationEvidence?: IsolationEvidence;
@@ -121,8 +122,9 @@ export function synthesizeExecutionResult(input: SynthesizeResultInput): Executi
     branchChanged: input.branchChanged,
     headChanged: input.headChanged,
     commitOccurred: input.commitOccurred,
-    pushKnown: false,
+    pushKnown: Boolean(input.postRunGitEvidence),
     pushIndependentlyEvidenced: false,
+    commitKnown: Boolean(input.postRunGitEvidence),
     unexpectedChanges: input.unexpectedChanges,
     executionVerdict,
     ...(input.isolationEvidence ? { isolationEvidence: input.isolationEvidence } : {}),

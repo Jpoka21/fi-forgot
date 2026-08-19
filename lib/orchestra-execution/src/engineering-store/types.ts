@@ -27,6 +27,38 @@ export type VerificationDecision = (typeof VERIFICATION_DECISIONS)[number];
 
 export const VERIFICATION_DECISION_AUTHORITY = "orchestra_machine_adjudication" as const;
 
+export const VERIFIER_REQUIREMENT_OUTCOMES = [
+  "requirement_satisfied",
+  "requirement_failed",
+  "requirement_not_evaluated",
+  "evidence_insufficient",
+] as const;
+export type VerifierRequirementOutcome = (typeof VERIFIER_REQUIREMENT_OUTCOMES)[number];
+
+export const VERIFIER_SEMANTIC_FINDING_SOURCE = "verifier_execution_event" as const;
+
+/**
+ * Append-only structured verifier semantic finding. Provider prose is never authoritative.
+ */
+export interface VerifierSemanticFindingRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "verifier_semantic_finding";
+  findingId: string;
+  verifierAssignmentId: string;
+  verifierAssignmentHash: string;
+  verifierExecutionEvidenceId: string;
+  executorAssignmentId: string;
+  executorExecutionEvidenceId: string;
+  requirementId: string;
+  outcome: VerifierRequirementOutcome;
+  reasonCode: string;
+  evidenceReferences: string[];
+  capturedAt: string;
+  source: typeof VERIFIER_SEMANTIC_FINDING_SOURCE;
+  recordVersion: 1;
+  findingHash: string;
+}
+
 /**
  * Append-only semantic verification decision bound to persisted verifier evidence.
  * Provider prose is never an authoritative field.

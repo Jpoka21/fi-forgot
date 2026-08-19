@@ -7,6 +7,7 @@ export const NORMALIZED_EVENT_TYPES = [
   "provider_error",
   "run_finished",
   "usage",
+  "verification_finding",
 ] as const;
 
 export type NormalizedEventType = (typeof NORMALIZED_EVENT_TYPES)[number];

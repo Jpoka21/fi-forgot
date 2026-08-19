@@ -184,6 +184,8 @@ Semantic vocabulary:
 
 Decisions persist as append-only hashed `verification_decision` records bound to exact verifier assignment id/hash and verifier execution evidence id. Duplicate adjudication of the same evidence reuses the existing record. Provider prose and technical execution verdicts are inputs only; they do not directly become semantic decisions.
 
+Structured verifier semantic findings are captured from validated `verification_finding` normalized events in persisted verifier execution evidence via `captureVerifierSemanticFindingsFromEvidence`. `VERIFIED` requires complete structured coverage of every verifier `verificationRequirements` entry with `requirement_satisfied` outcomes, plus clean machine posture evidence. Clean technical posture alone is insufficient and yields `INDETERMINATE`.
+
 This slice does **not**:
 
 - generate a correction assignment
