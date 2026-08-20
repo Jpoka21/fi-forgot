@@ -253,6 +253,65 @@ export async function runPostDecisionActionTests(): Promise<void> {
     "setPreparedAction" in packageExports || "forcePostDecisionAction" in packageExports,
   );
 
+  // P1 regression: hand-built mismatched action (INDETERMINATE + PREPARE_CONTINUATION) must not persist or reuse.
+  {
+    const forge = await adjudicateFor("pda-forge-mismatch", {
+      writeAllowedAdapterMarker: true,
+      structuredObligations: [
+        {
+          obligationId: "subjective-ux",
+          summary: "UI must feel polished",
+          verificationMode: "HUMAN_JUDGMENT_REQUIRED",
+        },
+      ],
+    });
+    expect("forge base INDETERMINATE", forge.adjudication.decision, "INDETERMINATE");
+    const dec = forge.adjudication.decisionRecord!;
+    const { hashPostDecisionAction, postDecisionActionId, validatePostDecisionAction } =
+      await import("../engineering-store/post-decision-action-record.js");
+    const mismatchedBody = {
+      schemaVersion: 1 as const,
+      recordKind: "post_decision_action" as const,
+      postDecisionActionId: postDecisionActionId(dec.verificationDecisionId),
+      verificationDecisionId: dec.verificationDecisionId,
+      verifierAssignmentId: dec.verifierAssignmentId,
+      verifierExecutionEvidenceId: dec.verifierExecutionEvidenceId,
+      executorAssignmentId: dec.verifiedExecutorAssignmentId,
+      executorExecutionEvidenceId: dec.verifiedExecutorExecutionEvidenceId,
+      decision: "INDETERMINATE" as const,
+      preparedAction: "PREPARE_CONTINUATION" as const,
+      reasonCodes: ["forged"],
+      failedRequirementIds: [] as string[],
+      acceptanceCheckIds: [] as string[],
+      machineViolationReasonCodes: [] as string[],
+      startingBranch: "fixture-main",
+      startingHead: "abc",
+      allowedPaths: [] as string[],
+      protectedPaths: [] as string[],
+      humanAuthorityRequired: true as const,
+      preparedAt: new Date().toISOString(),
+      source: "orchestra_post_decision_preparation" as const,
+      recordVersion: 1 as const,
+    };
+    const mismatched = {
+      ...mismatchedBody,
+      actionHash: hashPostDecisionAction(mismatchedBody),
+    };
+    expectFalse("mismatched action fails validate", validatePostDecisionAction(mismatched));
+    let persistRejected = false;
+    try {
+      forge.store.persistPostDecisionAction(mismatched);
+    } catch {
+      persistRejected = true;
+    }
+    expectTrue("store rejects mismatched preparedAction", persistRejected);
+    const prepared = preparePostDecisionAction({
+      store: forge.store,
+      verificationDecisionId: dec.verificationDecisionId,
+    });
+    expect("forge prepare remains REQUIRE_HUMAN_DECISION", prepared.preparedAction, "REQUIRE_HUMAN_DECISION");
+  }
+
   // No correction / next executor / continuation dispatch side effects on records.
   expectFalse(
     "no correction relationship invented",

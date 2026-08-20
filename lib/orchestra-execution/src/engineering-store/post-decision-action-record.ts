@@ -19,6 +19,25 @@ export function hashPostDecisionAction(body: PostDecisionActionRecordBody): stri
   return sha256Utf8(JSON.stringify(sortKeys(body)));
 }
 
+/** Deterministic mapping: decision → prepared action. No other combinations are valid. */
+export function preparedActionForDecision(decision: VerificationDecision): PostDecisionAction {
+  if (decision === "VERIFIED") return "PREPARE_CONTINUATION";
+  if (decision === "CORRECTION_REQUIRED") return "PREPARE_CORRECTION";
+  if (decision === "INDETERMINATE") return "REQUIRE_HUMAN_DECISION";
+  throw new Error(`unsupported verification decision: ${decision as string}`);
+}
+
+export function preparedActionMatchesDecision(
+  decision: VerificationDecision,
+  preparedAction: PostDecisionAction,
+): boolean {
+  try {
+    return preparedActionForDecision(decision) === preparedAction;
+  } catch {
+    return false;
+  }
+}
+
 export function buildPostDecisionActionRecord(input: {
   verificationDecisionId: string;
   verifierAssignmentId: string;
@@ -39,6 +58,11 @@ export function buildPostDecisionActionRecord(input: {
 }): PostDecisionActionRecord {
   if (!POST_DECISION_ACTIONS.includes(input.preparedAction)) {
     throw new Error(`unsupported preparedAction: ${input.preparedAction}`);
+  }
+  if (!preparedActionMatchesDecision(input.decision, input.preparedAction)) {
+    throw new Error(
+      `preparedAction ${input.preparedAction} is incompatible with decision ${input.decision}`,
+    );
   }
   const body: PostDecisionActionRecordBody = {
     schemaVersion: ENGINEERING_STORE_SCHEMA_VERSION,
@@ -74,6 +98,7 @@ export function validatePostDecisionAction(record: PostDecisionActionRecord): bo
   if (record.humanAuthorityRequired !== true) return false;
   if (record.recordVersion !== 1) return false;
   if (!POST_DECISION_ACTIONS.includes(record.preparedAction)) return false;
+  if (!preparedActionMatchesDecision(record.decision, record.preparedAction)) return false;
   if (record.postDecisionActionId !== postDecisionActionId(record.verificationDecisionId)) return false;
   const { actionHash, ...body } = record;
   return hashPostDecisionAction(body) === actionHash;

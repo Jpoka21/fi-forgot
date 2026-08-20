@@ -2,6 +2,8 @@ import type { VerificationRequirementRef } from "../verification-requirements.js
 import { EngineeringStoreError, FileEngineeringStore } from "./store.js";
 import {
   buildPostDecisionActionRecord,
+  preparedActionForDecision,
+  preparedActionMatchesDecision,
   validatePostDecisionAction,
 } from "./post-decision-action-record.js";
 import { validateVerificationDecision } from "./verification-decision-record.js";
@@ -187,10 +189,15 @@ export function preparePostDecisionAction(
   const decision = loaded.decision;
   const existing = input.store.findPostDecisionActionForDecision(decision.verificationDecisionId);
   if (existing) {
-    if (!validatePostDecisionAction(existing)) {
+    if (
+      !validatePostDecisionAction(existing) ||
+      existing.decision !== decision.decision ||
+      !preparedActionMatchesDecision(decision.decision, existing.preparedAction)
+    ) {
       return refused(input, "decision_corrupt", {
         verificationDecisionId: decision.verificationDecisionId,
         decision: decision.decision,
+        warnings: ["existing post-decision action failed decision/action coherence validation"],
       });
     }
     return prepared({
@@ -303,7 +310,7 @@ export function preparePostDecisionAction(
         decision: decision.decision,
       });
     }
-    preparedAction = "PREPARE_CONTINUATION";
+    preparedAction = preparedActionForDecision("VERIFIED");
     reasonCodes = [
       "decision_verified",
       "continuation_intent_prepared",
@@ -317,7 +324,7 @@ export function preparePostDecisionAction(
         decision: decision.decision,
       });
     }
-    preparedAction = "PREPARE_CORRECTION";
+    preparedAction = preparedActionForDecision("CORRECTION_REQUIRED");
     reasonCodes = [
       "decision_correction_required",
       "correction_intent_prepared",
@@ -325,7 +332,7 @@ export function preparePostDecisionAction(
       ...decision.decisionReasonCodes,
     ];
   } else if (decision.decision === "INDETERMINATE") {
-    preparedAction = "REQUIRE_HUMAN_DECISION";
+    preparedAction = preparedActionForDecision("INDETERMINATE");
     reasonCodes = [
       "decision_indeterminate",
       "machine_continuation_unsafe",
@@ -338,11 +345,8 @@ export function preparePostDecisionAction(
     });
   }
 
-  // Safety: INDETERMINATE must never become continuation/correction (enforced by branch above).
-  if (
-    decision.decision === "INDETERMINATE" &&
-    (preparedAction === "PREPARE_CONTINUATION" || preparedAction === "PREPARE_CORRECTION")
-  ) {
+  // Safety: action must always match decision (blocks INDETERMINATE→continuation/correction).
+  if (!preparedActionMatchesDecision(decision.decision, preparedAction)) {
     return refused(input, "indeterminate_cannot_continue", {
       verificationDecisionId: decision.verificationDecisionId,
       decision: decision.decision,
