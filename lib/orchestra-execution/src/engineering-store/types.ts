@@ -115,6 +115,49 @@ export interface VerificationDecisionRecord {
   decisionHash: string;
 }
 
+/**
+ * Bounded post-decision action vocabulary (IMP 038).
+ * Preparation only — never implies dispatch, commit, or push.
+ */
+export const POST_DECISION_ACTIONS = [
+  "PREPARE_CONTINUATION",
+  "PREPARE_CORRECTION",
+  "REQUIRE_HUMAN_DECISION",
+] as const;
+export type PostDecisionAction = (typeof POST_DECISION_ACTIONS)[number];
+
+export const POST_DECISION_ACTION_SOURCE = "orchestra_post_decision_preparation" as const;
+
+/**
+ * Append-only prepared next-action intent bound to a persisted verification decision.
+ * Does not dispatch correction, continuation, commit, or push.
+ */
+export interface PostDecisionActionRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "post_decision_action";
+  postDecisionActionId: string;
+  verificationDecisionId: string;
+  verifierAssignmentId: string;
+  verifierExecutionEvidenceId: string;
+  executorAssignmentId: string;
+  executorExecutionEvidenceId: string;
+  decision: VerificationDecision;
+  preparedAction: PostDecisionAction;
+  reasonCodes: string[];
+  failedRequirementIds: string[];
+  acceptanceCheckIds: string[];
+  machineViolationReasonCodes: string[];
+  startingBranch: string | null;
+  startingHead: string | null;
+  allowedPaths: string[];
+  protectedPaths: string[];
+  humanAuthorityRequired: true;
+  preparedAt: string;
+  source: typeof POST_DECISION_ACTION_SOURCE;
+  recordVersion: 1;
+  actionHash: string;
+}
+
 export type EvidenceSourceClass =
   | "orchestra_authoritative"
   | "machine"

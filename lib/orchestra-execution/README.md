@@ -201,6 +201,31 @@ This slice does **not**:
 
 Human final authority remains outside automatic continuation. James adjudicates only where ambiguity or major governed action still requires him.
 
+## Post-decision action preparation
+
+IMP 038 consumes a persisted `VerificationDecisionRecord` and prepares the next governed **intent** only. It does not invoke providers, dispatch correction, create the next executor, commit, or push.
+
+Preferred governed flow continuation:
+
+5. `preparePostDecisionAction({ store, verificationDecisionId })` — or `{ store, verifierAssignmentId }` when a trusted decision already exists for the latest verifier evidence.
+
+Prepared action vocabulary:
+
+- `PREPARE_CONTINUATION` — from `VERIFIED` (continuation intent; human authorization still required before any later execution)
+- `PREPARE_CORRECTION` — from `CORRECTION_REQUIRED` (machine-grounded failure context; no dispatch)
+- `REQUIRE_HUMAN_DECISION` — from `INDETERMINATE` (machine continuation unsafe)
+
+Actions persist as append-only hashed `post_decision_action` records bound to the exact verification decision id and relationship identities. Duplicate preparation reuses the existing record. Caller-supplied action values are not accepted; provider prose is ignored.
+
+This slice does **not**:
+
+- dispatch a correction assignment
+- dispatch the next executor
+- continue workflow automatically
+- commit or push
+
+Human final authority remains required before any execution of a prepared action.
+
 ## Current limitations
 
 Observed Cursor provider facts, not solved by this slice:

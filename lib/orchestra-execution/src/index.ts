@@ -100,6 +100,8 @@ export type {
   VerifierAuthorizationReceipt,
   VerificationDecision,
   VerificationDecisionRecord,
+  PostDecisionAction,
+  PostDecisionActionRecord,
   VerifierRequirementOutcome,
   VerifierSemanticFindingRecord,
   VerifierSemanticFindingProposal,
@@ -113,6 +115,8 @@ export {
   VERIFIER_AUTHORIZATION_SOURCE,
   VERIFICATION_DECISIONS,
   VERIFICATION_DECISION_AUTHORITY,
+  POST_DECISION_ACTIONS,
+  POST_DECISION_ACTION_SOURCE,
   VERIFIER_REQUIREMENT_OUTCOMES,
   VERIFIER_SEMANTIC_FINDING_SOURCE,
   VERIFIER_SEMANTIC_PROPOSAL_SOURCE,
@@ -216,3 +220,16 @@ export type {
   VerifierPreparationRefusal,
   VerifierPreparationResult,
 } from "./engineering-store/prepare-verifier.js";
+export {
+  preparePostDecisionAction,
+  POST_DECISION_PREPARATION_REFUSALS,
+} from "./engineering-store/prepare-post-decision-action.js";
+export type {
+  PreparePostDecisionActionInput,
+  PreparePostDecisionActionResult,
+  PostDecisionPreparationRefusal,
+} from "./engineering-store/prepare-post-decision-action.js";
+export {
+  validatePostDecisionAction,
+  postDecisionActionId,
+} from "./engineering-store/post-decision-action-record.js";

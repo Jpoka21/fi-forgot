@@ -13,6 +13,9 @@ import {
   validateVerificationDecision,
 } from "./verification-decision-record.js";
 import {
+  validatePostDecisionAction,
+} from "./post-decision-action-record.js";
+import {
   validateVerifierSemanticFinding,
 } from "./semantic-finding-record.js";
 import {
@@ -27,6 +30,7 @@ import {
   type CrashReceipt,
   type ExecutionEvidence,
   type FrozenAssignmentRecord,
+  type PostDecisionActionRecord,
   type StatusEvent,
   type VerificationDecisionRecord,
   type VerificationPosture,
@@ -408,6 +412,96 @@ export class FileEngineeringStore {
     return matches[matches.length - 1] ?? null;
   }
 
+  findVerificationDecisionById(verificationDecisionId: string): VerificationDecisionRecord | null {
+    assertSafeId("verificationDecisionId", verificationDecisionId);
+    for (const assignmentId of this.listAssignmentIds()) {
+      const matches = this.loadVerificationDecisions(assignmentId).filter(
+        (record) =>
+          validateVerificationDecision(record) &&
+          record.verificationDecisionId === verificationDecisionId,
+      );
+      if (matches.length > 0) return matches[matches.length - 1] ?? null;
+    }
+    return null;
+  }
+
+  persistPostDecisionAction(record: PostDecisionActionRecord): PostDecisionActionRecord {
+    if (!validatePostDecisionAction(record)) {
+      throw new EngineeringStoreError("post-decision action record failed validation");
+    }
+    const assignmentId = assertSafeId("assignmentId", record.verifierAssignmentId);
+    const frozen = this.loadFrozenAssignment(assignmentId);
+    if (frozen.assignment.role !== "verifier") {
+      throw new EngineeringStoreError("post-decision actions must be persisted under the verifier assignment");
+    }
+    const decision = this.findVerificationDecisionById(record.verificationDecisionId);
+    if (!decision || !validateVerificationDecision(decision)) {
+      throw new EngineeringStoreError("post-decision action requires a valid persisted verification decision");
+    }
+    if (
+      decision.verifierAssignmentId !== record.verifierAssignmentId ||
+      decision.verifierExecutionEvidenceId !== record.verifierExecutionEvidenceId ||
+      decision.verifiedExecutorAssignmentId !== record.executorAssignmentId ||
+      decision.verifiedExecutorExecutionEvidenceId !== record.executorExecutionEvidenceId ||
+      decision.decision !== record.decision
+    ) {
+      throw new EngineeringStoreError("post-decision action relationship does not match verification decision");
+    }
+    const existing = this.findPostDecisionActionForDecision(record.verificationDecisionId);
+    if (existing) {
+      if (existing.actionHash !== record.actionHash) {
+        throw new EngineeringStoreError(
+          "duplicate post-decision action for decision with a different hash; refusing overwrite",
+        );
+      }
+      return existing;
+    }
+    appendLineAtomic(this.postDecisionActionPath(assignmentId), JSON.stringify(record));
+    this.appendStatus({
+      timestamp: record.preparedAt,
+      assignmentId,
+      assignmentHash: frozen.assignmentHash,
+      status: "verification_pending",
+      verificationPosture:
+        record.decision === "VERIFIED"
+          ? "verified"
+          : record.decision === "CORRECTION_REQUIRED"
+            ? "correction_required"
+            : "indeterminate",
+      detail: `post-decision action ${record.preparedAction} prepared`,
+    });
+    this.audit({
+      timestamp: record.preparedAt,
+      action: "persist_post_decision_action",
+      assignmentId,
+      evidenceId: record.verifierExecutionEvidenceId,
+      detail: `${record.preparedAction}:${record.verificationDecisionId}`,
+    });
+    return record;
+  }
+
+  loadPostDecisionActions(verifierAssignmentId: string): PostDecisionActionRecord[] {
+    const path = this.postDecisionActionPath(assertSafeId("assignmentId", verifierAssignmentId));
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as PostDecisionActionRecord);
+  }
+
+  findPostDecisionActionForDecision(verificationDecisionId: string): PostDecisionActionRecord | null {
+    assertSafeId("verificationDecisionId", verificationDecisionId);
+    for (const assignmentId of this.listAssignmentIds()) {
+      const matches = this.loadPostDecisionActions(assignmentId).filter(
+        (record) =>
+          validatePostDecisionAction(record) &&
+          record.verificationDecisionId === verificationDecisionId,
+      );
+      if (matches.length > 0) return matches[matches.length - 1] ?? null;
+    }
+    return null;
+  }
+
   persistAuthoritativeSemanticFinding(record: VerifierSemanticFindingRecord): VerifierSemanticFindingRecord {
     if (!validateVerifierSemanticFinding(record)) {
       throw new EngineeringStoreError("authoritative semantic finding record failed validation");
@@ -696,6 +790,10 @@ export class FileEngineeringStore {
 
   private verificationDecisionPath(assignmentId: string): string {
     return join(this.assignmentsDir(), assignmentId, "verification-decisions.ndjson");
+  }
+
+  private postDecisionActionPath(assignmentId: string): string {
+    return join(this.assignmentsDir(), assignmentId, "post-decision-actions.ndjson");
   }
 
   private semanticProposalsPath(assignmentId: string): string {
