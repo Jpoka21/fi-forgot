@@ -184,7 +184,7 @@ Semantic vocabulary:
 
 Decisions persist as append-only hashed `verification_decision` records bound to exact verifier assignment id/hash and verifier execution evidence id. Duplicate adjudication of the same evidence reuses the existing record. Provider prose and technical execution verdicts are inputs only; they do not directly become semantic decisions.
 
-Structured verifier semantic findings are captured from validated `verification_finding` normalized events in persisted verifier execution evidence via `captureVerifierSemanticFindingsFromEvidence`. `VERIFIED` requires complete structured coverage of every verifier `verificationRequirements` entry with `requirement_satisfied` outcomes, plus clean machine posture evidence. Clean technical posture alone is insufficient and yields `INDETERMINATE`.
+Structured verifier events are captured as **provider proposals** only via `captureVerifierSemanticProposalsFromEvidence`. Orchestra promotes authoritative findings through `resolveVerifierSemanticFindings`: machine-resolvable requirements are derived from trusted machine evidence; semantic-review obligations require two independently governed verifier executions with agreeing proposals and resolved evidence references. A complete set of provider-asserted `requirement_satisfied` proposals alone cannot produce `VERIFIED`.
 
 This slice does **not**:
 

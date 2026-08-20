@@ -8,7 +8,8 @@ import type {
   VerifierSemanticFindingRecord,
 } from "./types.js";
 import { deriveVerificationDecision } from "./verification-decision-logic.js";
-import { captureVerifierSemanticFindingsFromEvidence } from "./capture-verifier-findings.js";
+import { captureVerifierSemanticProposalsFromEvidence } from "./capture-verifier-findings.js";
+import { resolveVerifierSemanticFindings } from "./resolve-verifier-findings.js";
 import {
   buildVerificationDecisionRecord,
   validateVerificationDecision,
@@ -29,6 +30,7 @@ export const VERIFICATION_ADJUDICATION_REFUSALS = [
   "relationship_mismatch",
   "evidence_incomplete",
   "decision_already_conflicts",
+  "authoritative_resolution_refused",
 ] as const;
 
 export type VerificationAdjudicationRefusal = (typeof VERIFICATION_ADJUDICATION_REFUSALS)[number];
@@ -54,6 +56,7 @@ export interface AdjudicateVerifierExecutionResult {
   decision: VerificationDecision | null;
   decisionRecord: VerificationDecisionRecord | null;
   duplicateDecisionReused: boolean;
+  authoritativeFindings: VerifierSemanticFindingRecord[];
 }
 
 function refused(
@@ -77,6 +80,7 @@ function refused(
     decision: extras.decision ?? null,
     decisionRecord: extras.decisionRecord ?? null,
     duplicateDecisionReused: extras.duplicateDecisionReused ?? false,
+    authoritativeFindings: extras.authoritativeFindings ?? [],
   };
 }
 
@@ -89,7 +93,8 @@ function adjudicated(
     refused: false,
     reason: null,
     warnings: extras.warnings ?? [
-      "semantic decision is machine evidence only; provider prose is not authority",
+      "semantic decision uses Orchestra authoritative findings only",
+      "provider proposals and prose are not authority",
       "human final authority remains outside automatic continuation",
     ],
     verifierAssignmentId: input.verifierAssignmentId,
@@ -103,36 +108,14 @@ function adjudicated(
     decision: extras.decision ?? null,
     decisionRecord: extras.decisionRecord ?? null,
     duplicateDecisionReused: extras.duplicateDecisionReused ?? false,
+    authoritativeFindings: extras.authoritativeFindings ?? [],
   };
 }
 
-function semanticFindingsBoundToEvidence(
-  findings: VerifierSemanticFindingRecord[],
-  expected: {
-    verifierAssignmentId: string;
-    verifierAssignmentHash: string;
-    verifierExecutionEvidenceId: string;
-    executorAssignmentId: string;
-    executorExecutionEvidenceId: string;
-  },
-): { findings: VerifierSemanticFindingRecord[]; corrupt: boolean } {
-  for (const finding of findings) {
-    if (
-      finding.verifierAssignmentId !== expected.verifierAssignmentId ||
-      finding.verifierAssignmentHash !== expected.verifierAssignmentHash ||
-      finding.verifierExecutionEvidenceId !== expected.verifierExecutionEvidenceId ||
-      finding.executorAssignmentId !== expected.executorAssignmentId ||
-      finding.executorExecutionEvidenceId !== expected.executorExecutionEvidenceId
-    ) {
-      return { findings: [], corrupt: true };
-    }
-  }
-  return { findings, corrupt: false };
-}
-
 /**
- * Governed semantic verification decision from persisted authoritative evidence only.
- * Does not invoke providers, rerun verifiers, or trust provider prose.
+ * Governed semantic verification decision from authoritative findings only.
+ * Captures provider proposals, resolves Orchestra findings, then adjudicates.
+ * Does not invoke providers.
  */
 export function adjudicateVerifierExecution(
   input: AdjudicateVerifierExecutionInput,
@@ -248,23 +231,27 @@ export function adjudicateVerifierExecution(
     return refused(input, "evidence_incomplete", extras);
   }
 
-  captureVerifierSemanticFindingsFromEvidence({
-    store: input.store,
-    verifierAssignmentId: verifier.assignment.assignmentId,
-  });
+  // Capture proposals from every sibling verifier execution for this executor evidence.
+  const siblings = input.store.findVerifierAssignments(executorAssignmentId, executorEvidenceId);
+  for (const sibling of siblings) {
+    captureVerifierSemanticProposalsFromEvidence({
+      store: input.store,
+      verifierAssignmentId: sibling.frozen.assignment.assignmentId,
+    });
+  }
 
-  const loadedFindings = input.store.loadVerifierSemanticFindings(
-    verifier.assignment.assignmentId,
-    verifierEvidence.evidenceId,
-  );
-  const boundFindings = semanticFindingsBoundToEvidence(loadedFindings, {
-    verifierAssignmentId: verifier.assignment.assignmentId,
-    verifierAssignmentHash: verifier.assignmentHash,
-    verifierExecutionEvidenceId: verifierEvidence.evidenceId,
+  const resolution = resolveVerifierSemanticFindings({
+    store: input.store,
     executorAssignmentId,
     executorExecutionEvidenceId: executorEvidenceId,
   });
-  const semanticFindings = boundFindings.corrupt ? [] : boundFindings.findings;
+  if (resolution.refused) {
+    return refused(input, "authoritative_resolution_refused", {
+      ...extras,
+      warnings: [`authoritative resolution refused: ${resolution.reason}`],
+    });
+  }
+  extras.authoritativeFindings = resolution.findings;
 
   const existing = input.store.findVerificationDecisionForEvidence(
     verifier.assignment.assignmentId,
@@ -288,7 +275,7 @@ export function adjudicateVerifierExecution(
     verifierEvidence,
     executorRecord,
     executorEvidence,
-    semanticFindings,
+    semanticFindings: resolution.findings,
   });
 
   const conflicting = input.store.loadVerificationDecisions(verifier.assignment.assignmentId).find(

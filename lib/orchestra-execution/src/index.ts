@@ -102,6 +102,8 @@ export type {
   VerificationDecisionRecord,
   VerifierRequirementOutcome,
   VerifierSemanticFindingRecord,
+  VerifierSemanticFindingProposal,
+  VerifierSemanticFindingResolution,
 } from "./engineering-store/types.js";
 export {
   ASSIGNMENT_STATUSES,
@@ -113,6 +115,8 @@ export {
   VERIFICATION_DECISION_AUTHORITY,
   VERIFIER_REQUIREMENT_OUTCOMES,
   VERIFIER_SEMANTIC_FINDING_SOURCE,
+  VERIFIER_SEMANTIC_PROPOSAL_SOURCE,
+  VERIFIER_SEMANTIC_FINDING_RESOLUTION,
 } from "./engineering-store/types.js";
 export { FileEngineeringStore, createFileEngineeringStore, EngineeringStoreError } from "./engineering-store/store.js";
 export { dispatchFrozenAssignment } from "./engineering-store/dispatch.js";
@@ -145,26 +149,47 @@ export type {
   VerificationAdjudicationRefusal,
 } from "./engineering-store/adjudicate-verifier.js";
 export {
+  captureVerifierSemanticProposalsFromEvidence,
   captureVerifierSemanticFindingsFromEvidence,
+  SEMANTIC_PROPOSAL_CAPTURE_REFUSALS,
   SEMANTIC_FINDING_CAPTURE_REFUSALS,
 } from "./engineering-store/capture-verifier-findings.js";
 export type {
+  CaptureVerifierSemanticProposalsInput,
+  CaptureVerifierSemanticProposalsResult,
   CaptureVerifierSemanticFindingsInput,
   CaptureVerifierSemanticFindingsResult,
+  SemanticProposalCaptureRefusal,
   SemanticFindingCaptureRefusal,
 } from "./engineering-store/capture-verifier-findings.js";
+export {
+  resolveVerifierSemanticFindings,
+} from "./engineering-store/resolve-verifier-findings.js";
+export type {
+  ResolveVerifierSemanticFindingsInput,
+  ResolveVerifierSemanticFindingsResult,
+} from "./engineering-store/resolve-verifier-findings.js";
+export {
+  formatEvidenceReference,
+  parseEvidenceReference,
+  resolveEvidenceReferences,
+  defaultSemanticEvidenceReferences,
+} from "./engineering-store/evidence-reference-resolution.js";
 export { structuredFindingEvent, parseStructuredFindingEvent } from "./structured-finding-event.js";
 export type { ParsedStructuredFindingEvent } from "./structured-finding-event.js";
 export {
   deriveVerifierVerificationRequirements,
   obligationRequirementId,
   standardRequirementId,
+  classifyRequirementKind,
   VERIFIER_REQUIREMENT_KINDS,
+  VERIFIER_REQUIREMENT_CLASSES,
 } from "./verification-requirements.js";
 export type {
   StructuredObligation,
   VerificationRequirementRef,
   VerifierRequirementKind,
+  VerifierRequirementClass,
 } from "./verification-requirements.js";
 export {
   buildVerifierAuthorizationReceipt,

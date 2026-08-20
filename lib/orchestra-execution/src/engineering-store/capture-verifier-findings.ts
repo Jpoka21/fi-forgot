@@ -1,63 +1,62 @@
 import { EngineeringStoreError, FileEngineeringStore } from "./store.js";
-import type { ExecutionEvidence, VerifierSemanticFindingRecord } from "./types.js";
+import type { ExecutionEvidence, VerifierSemanticFindingProposal } from "./types.js";
 import { parseStructuredFindingEvent } from "../structured-finding-event.js";
-import {
-  buildVerifierSemanticFindingRecord,
-  validateVerifierSemanticFinding,
-} from "./semantic-finding-record.js";
+import { buildVerifierSemanticFindingProposal } from "./semantic-proposal-record.js";
 
-export const SEMANTIC_FINDING_CAPTURE_REFUSALS = [
+export const SEMANTIC_PROPOSAL_CAPTURE_REFUSALS = [
   "verifier_not_found",
   "verifier_role_required",
   "verifier_execution_evidence_not_found",
   "verifier_evidence_corrupt",
   "relationship_mismatch",
-  "unknown_requirement_finding",
-  "duplicate_conflicting_finding",
+  "unknown_requirement_proposal",
+  "duplicate_conflicting_proposal",
 ] as const;
 
-export type SemanticFindingCaptureRefusal = (typeof SEMANTIC_FINDING_CAPTURE_REFUSALS)[number];
+export type SemanticProposalCaptureRefusal = (typeof SEMANTIC_PROPOSAL_CAPTURE_REFUSALS)[number];
 
-export interface CaptureVerifierSemanticFindingsInput {
+export interface CaptureVerifierSemanticProposalsInput {
   store: FileEngineeringStore;
   verifierAssignmentId: string;
 }
 
-export interface CaptureVerifierSemanticFindingsResult {
+export interface CaptureVerifierSemanticProposalsResult {
   captured: boolean;
   refused: boolean;
-  reason: SemanticFindingCaptureRefusal | null;
+  reason: SemanticProposalCaptureRefusal | null;
   warnings: string[];
   verifierAssignmentId: string;
   verifierExecutionEvidenceId: string | null;
-  findings: VerifierSemanticFindingRecord[];
-  duplicateFindingsReused: boolean;
+  proposals: VerifierSemanticFindingProposal[];
+  duplicateProposalsReused: boolean;
 }
 
 function refused(
-  input: CaptureVerifierSemanticFindingsInput,
-  reason: SemanticFindingCaptureRefusal,
-  extras: Partial<CaptureVerifierSemanticFindingsResult> = {},
-): CaptureVerifierSemanticFindingsResult {
+  input: CaptureVerifierSemanticProposalsInput,
+  reason: SemanticProposalCaptureRefusal,
+  extras: Partial<CaptureVerifierSemanticProposalsResult> = {},
+): CaptureVerifierSemanticProposalsResult {
   return {
     captured: false,
     refused: true,
     reason,
-    warnings: extras.warnings ?? [],
+    warnings: extras.warnings ?? [
+      "captured records are provider proposals only and are not Orchestra semantic authority",
+    ],
     verifierAssignmentId: input.verifierAssignmentId,
     verifierExecutionEvidenceId: extras.verifierExecutionEvidenceId ?? null,
-    findings: extras.findings ?? [],
-    duplicateFindingsReused: extras.duplicateFindingsReused ?? false,
+    proposals: extras.proposals ?? [],
+    duplicateProposalsReused: extras.duplicateProposalsReused ?? false,
   };
 }
 
 /**
- * Capture governed structured semantic findings from persisted verifier execution events.
- * Provider prose is never parsed or promoted.
+ * Capture provider semantic proposals from persisted verifier execution events.
+ * Proposals are never authoritative findings.
  */
-export function captureVerifierSemanticFindingsFromEvidence(
-  input: CaptureVerifierSemanticFindingsInput,
-): CaptureVerifierSemanticFindingsResult {
+export function captureVerifierSemanticProposalsFromEvidence(
+  input: CaptureVerifierSemanticProposalsInput,
+): CaptureVerifierSemanticProposalsResult {
   let verifierRecord;
   try {
     verifierRecord = input.store.loadAssignmentRecord(input.verifierAssignmentId);
@@ -94,7 +93,7 @@ export function captureVerifierSemanticFindingsFromEvidence(
     .map(parseStructuredFindingEvent)
     .filter((row): row is NonNullable<typeof row> => row !== null);
 
-  const existing = input.store.loadVerifierSemanticFindings(
+  const existing = input.store.loadVerifierSemanticProposals(
     input.verifierAssignmentId,
     verifierEvidence.evidenceId,
   );
@@ -103,55 +102,66 @@ export function captureVerifierSemanticFindingsFromEvidence(
       captured: true,
       refused: false,
       reason: null,
-      warnings: ["existing structured semantic findings reused"],
+      warnings: [
+        "existing semantic proposals reused",
+        "proposals are not Orchestra semantic authority",
+      ],
       verifierAssignmentId: input.verifierAssignmentId,
       verifierExecutionEvidenceId: verifierEvidence.evidenceId,
-      findings: existing,
-      duplicateFindingsReused: true,
+      proposals: existing,
+      duplicateProposalsReused: true,
     };
   }
 
-  const byRequirement = new Map<string, ReturnType<typeof parseStructuredFindingEvent>>();
+  const byRequirement = new Map<string, NonNullable<ReturnType<typeof parseStructuredFindingEvent>>>();
   for (const finding of parsed) {
     if (!requiredIds.has(finding.requirementId)) {
-      return refused(input, "unknown_requirement_finding", {
+      return refused(input, "unknown_requirement_proposal", {
         verifierExecutionEvidenceId: verifierEvidence.evidenceId,
       });
     }
     if (byRequirement.has(finding.requirementId)) {
-      return refused(input, "duplicate_conflicting_finding", {
+      return refused(input, "duplicate_conflicting_proposal", {
         verifierExecutionEvidenceId: verifierEvidence.evidenceId,
       });
     }
     byRequirement.set(finding.requirementId, finding);
   }
 
-  const persisted: VerifierSemanticFindingRecord[] = [];
+  const persisted: VerifierSemanticFindingProposal[] = [];
   for (const finding of byRequirement.values()) {
-    if (!finding) continue;
-    const record = buildVerifierSemanticFindingRecord({
+    const record = buildVerifierSemanticFindingProposal({
       verifierAssignmentId: verifierRecord.frozen.assignment.assignmentId,
       verifierAssignmentHash: verifierRecord.frozen.assignmentHash,
       verifierExecutionEvidenceId: verifierEvidence.evidenceId,
       executorAssignmentId,
       executorExecutionEvidenceId: executorEvidenceId,
       requirementId: finding.requirementId,
-      outcome: finding.outcome,
+      proposedOutcome: finding.outcome,
       reasonCode: finding.reasonCode,
       evidenceReferences: finding.evidenceReferences,
+      providerSessionId: verifierEvidence.result.providerSessionId,
+      providerRunId: verifierEvidence.result.runId,
       capturedAt: finding.eventTimestamp,
     });
-    persisted.push(input.store.persistVerifierSemanticFinding(record));
+    persisted.push(input.store.persistVerifierSemanticProposal(record));
   }
 
   return {
     captured: true,
     refused: false,
     reason: null,
-    warnings: [],
+    warnings: ["captured provider proposals only; authoritative findings require resolveVerifierSemanticFindings"],
     verifierAssignmentId: input.verifierAssignmentId,
     verifierExecutionEvidenceId: verifierEvidence.evidenceId,
-    findings: persisted,
-    duplicateFindingsReused: false,
+    proposals: persisted,
+    duplicateProposalsReused: false,
   };
 }
+
+/** @deprecated Use captureVerifierSemanticProposalsFromEvidence */
+export const captureVerifierSemanticFindingsFromEvidence = captureVerifierSemanticProposalsFromEvidence;
+export const SEMANTIC_FINDING_CAPTURE_REFUSALS = SEMANTIC_PROPOSAL_CAPTURE_REFUSALS;
+export type SemanticFindingCaptureRefusal = SemanticProposalCaptureRefusal;
+export type CaptureVerifierSemanticFindingsInput = CaptureVerifierSemanticProposalsInput;
+export type CaptureVerifierSemanticFindingsResult = CaptureVerifierSemanticProposalsResult;

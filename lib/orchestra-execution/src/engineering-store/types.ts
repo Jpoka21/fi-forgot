@@ -35,25 +35,58 @@ export const VERIFIER_REQUIREMENT_OUTCOMES = [
 ] as const;
 export type VerifierRequirementOutcome = (typeof VERIFIER_REQUIREMENT_OUTCOMES)[number];
 
-export const VERIFIER_SEMANTIC_FINDING_SOURCE = "verifier_execution_event" as const;
+export const VERIFIER_SEMANTIC_PROPOSAL_SOURCE = "provider_verification_finding_proposal" as const;
+
+export const VERIFIER_SEMANTIC_FINDING_RESOLUTION = [
+  "machine_evidence_resolution",
+  "governed_semantic_corroboration",
+] as const;
+export type VerifierSemanticFindingResolution = (typeof VERIFIER_SEMANTIC_FINDING_RESOLUTION)[number];
+
+export const VERIFIER_SEMANTIC_FINDING_SOURCE = "orchestra_authoritative_resolution" as const;
 
 /**
- * Append-only structured verifier semantic finding. Provider prose is never authoritative.
+ * Append-only provider semantic proposal. Not Orchestra authority.
  */
-export interface VerifierSemanticFindingRecord {
+export interface VerifierSemanticFindingProposal {
   schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
-  recordKind: "verifier_semantic_finding";
-  findingId: string;
+  recordKind: "verifier_semantic_finding_proposal";
+  proposalId: string;
   verifierAssignmentId: string;
   verifierAssignmentHash: string;
   verifierExecutionEvidenceId: string;
   executorAssignmentId: string;
   executorExecutionEvidenceId: string;
   requirementId: string;
+  proposedOutcome: VerifierRequirementOutcome;
+  reasonCode: string;
+  evidenceReferences: string[];
+  providerSessionId: string | null;
+  providerRunId: string | null;
+  capturedAt: string;
+  source: typeof VERIFIER_SEMANTIC_PROPOSAL_SOURCE;
+  recordVersion: 1;
+  proposalHash: string;
+}
+
+/**
+ * Append-only Orchestra authoritative semantic finding.
+ * Provider proposals never become this record without governed resolution.
+ */
+export interface VerifierSemanticFindingRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "verifier_semantic_finding";
+  findingId: string;
+  executorAssignmentId: string;
+  executorExecutionEvidenceId: string;
+  requirementId: string;
   outcome: VerifierRequirementOutcome;
   reasonCode: string;
   evidenceReferences: string[];
-  capturedAt: string;
+  resolutionAuthority: VerifierSemanticFindingResolution;
+  supportingProposalIds: string[];
+  supportingVerifierExecutionEvidenceIds: string[];
+  resolvedAt: string;
   source: typeof VERIFIER_SEMANTIC_FINDING_SOURCE;
   recordVersion: 1;
   findingHash: string;

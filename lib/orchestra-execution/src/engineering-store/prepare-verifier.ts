@@ -33,6 +33,8 @@ export interface PrepareVerifierAssignmentInput {
   store: FileEngineeringStore;
   executorAssignmentId: string;
   executionEvidenceId: string;
+  /** Distinct governed verifier identity for corroboration. Default primary. */
+  verifierSlot?: "primary" | "corroborator";
 }
 
 export interface AuthorizeAndFreezeVerifierAssignmentInput extends PrepareVerifierAssignmentInput {
@@ -216,11 +218,22 @@ function notReviewable(evidence: ExecutionEvidence): VerifierPreparationRefusal 
   return null;
 }
 
-export function verifierAssignmentId(executorAssignmentId: string, executionEvidenceId: string): string {
+export function verifierAssignmentId(
+  executorAssignmentId: string,
+  executionEvidenceId: string,
+  verifierSlot: "primary" | "corroborator" = "primary",
+): string {
+  if (verifierSlot === "corroborator") {
+    return `vrf-${executorAssignmentId}-${executionEvidenceId}-corroborator`;
+  }
   return `vrf-${executorAssignmentId}-${executionEvidenceId}`;
 }
 
-function buildCandidate(executor: FrozenAssignment, evidence: ExecutionEvidence): {
+function buildCandidate(
+  executor: FrozenAssignment,
+  evidence: ExecutionEvidence,
+  verifierSlot: "primary" | "corroborator" = "primary",
+): {
   candidate: FrozenAssignment;
   warnings: string[];
   refuse?: VerifierPreparationRefusal;
@@ -229,6 +242,9 @@ function buildCandidate(executor: FrozenAssignment, evidence: ExecutionEvidence)
     "technical execution verdict is input only and is not a verification PASS or FAIL",
     "provider prose is untrusted",
   ];
+  if (verifierSlot === "corroborator") {
+    warnings.push("corroborator verifier slot: independent semantic proposals only; not sole authority");
+  }
   const baseline = verifierStartingBaseline(evidence, executor.assignment.branch);
   if (baseline.refuse) return { candidate: executor, warnings, refuse: baseline.refuse };
   if (baseline.warning) warnings.push(baseline.warning);
@@ -240,7 +256,7 @@ function buildCandidate(executor: FrozenAssignment, evidence: ExecutionEvidence)
   if (evidence.result.policyDenials.length > 0) {
     warnings.push(`policy denials present: ${summarizeDenials(evidence.result.policyDenials)}`);
   }
-  const assignmentId = verifierAssignmentId(executor.assignment.assignmentId, evidence.evidenceId);
+  const assignmentId = verifierAssignmentId(executor.assignment.assignmentId, evidence.evidenceId, verifierSlot);
   const candidate = createAssignment({
     assignmentId,
     projectId: executor.assignment.projectId,
@@ -256,6 +272,7 @@ function buildCandidate(executor: FrozenAssignment, evidence: ExecutionEvidence)
     commitAuthorization: false,
     pushAuthorization: false,
     requiredEvidence: verifierRequiredEvidence(executor.assignment.requiredEvidence, evidence),
+    structuredObligations: executor.assignment.structuredObligations,
     verificationRequirements: deriveVerifierVerificationRequirements(executor.assignment, evidence),
     createdAt: evidence.recordedAt,
   });
@@ -325,23 +342,26 @@ export function prepareVerifierAssignment(input: PrepareVerifierAssignmentInput)
     input.executorAssignmentId,
     input.executionEvidenceId,
   );
-  const built = buildCandidate(executor, evidence);
+  const slot = input.verifierSlot === "corroborator" ? "corroborator" : "primary";
+  const built = buildCandidate(executor, evidence, slot);
   if (built.refuse) {
     return refused(input, built.refuse, { executorAssignmentHash: executor.assignmentHash });
   }
-  if (existing.length > 0) {
-    const match = existing.find((row) => row.frozen.assignmentHash === built.candidate.assignmentHash);
-    if (match) {
+  const existingSameId = existing.find(
+    (row) => row.frozen.assignment.assignmentId === built.candidate.assignment.assignmentId,
+  );
+  if (existingSameId) {
+    if (existingSameId.frozen.assignmentHash === built.candidate.assignmentHash) {
       return readyResult(input, executor.assignmentHash, built.candidate, {
         warnings: built.warnings,
-        persisted: match,
+        persisted: existingSameId,
       });
     }
     return refused(input, "conflicting_verifier_assignment_exists", {
       executorAssignmentHash: executor.assignmentHash,
       candidate: built.candidate,
-      persisted: existing[0],
-      verifierAssignmentHash: existing[0]?.frozen.assignmentHash ?? null,
+      persisted: existingSameId,
+      verifierAssignmentHash: existingSameId.frozen.assignmentHash,
       warnings: built.warnings,
     });
   }
