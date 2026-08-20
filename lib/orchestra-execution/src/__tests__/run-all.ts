@@ -13,6 +13,7 @@ import { runVerifierRoutingTests } from "./verifier-routing.test.js";
 import { runVerifierTrustBoundaryTests } from "./verifier-trust-boundary.test.js";
 import { runVerificationDecisionTests } from "./verification-decision.test.js";
 import { runPostDecisionActionTests } from "./post-decision-action.test.js";
+import { runPostDecisionExecutionTests } from "./post-decision-execution.test.js";
 import { liveCursorReport, runLiveCursorIntegrationTest } from "./live-cursor.integration.test.js";
 import { runCodexProviderTests } from "./codex-provider.test.js";
 import { runCodexAppServerTransportTests } from "./codex-app-server-transport.test.js";
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
   await runVerifierTrustBoundaryTests();
   await runVerificationDecisionTests();
   await runPostDecisionActionTests();
+  await runPostDecisionExecutionTests();
   await runLiveCursorIntegrationTest();
   console.log("\nLive Cursor report:", JSON.stringify(liveCursorReport, null, 2));
   if (failed > 0) reportAndExit();

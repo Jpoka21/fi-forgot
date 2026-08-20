@@ -16,6 +16,9 @@ import {
   validatePostDecisionAction,
 } from "./post-decision-action-record.js";
 import {
+  validatePostDecisionExecutionAuthorization,
+} from "./post-decision-execution-authorization.js";
+import {
   validateVerifierSemanticFinding,
 } from "./semantic-finding-record.js";
 import {
@@ -31,6 +34,7 @@ import {
   type ExecutionEvidence,
   type FrozenAssignmentRecord,
   type PostDecisionActionRecord,
+  type PostDecisionExecutionAuthorizationRecord,
   type StatusEvent,
   type VerificationDecisionRecord,
   type VerificationPosture,
@@ -502,6 +506,114 @@ export class FileEngineeringStore {
     return null;
   }
 
+  findPostDecisionActionById(postDecisionActionId: string): PostDecisionActionRecord | null {
+    assertSafeId("postDecisionActionId", postDecisionActionId);
+    for (const assignmentId of this.listAssignmentIds()) {
+      const matches = this.loadPostDecisionActions(assignmentId).filter(
+        (record) =>
+          validatePostDecisionAction(record) &&
+          record.postDecisionActionId === postDecisionActionId,
+      );
+      if (matches.length > 0) return matches[matches.length - 1] ?? null;
+    }
+    return null;
+  }
+
+  persistPostDecisionExecutionAuthorization(
+    record: PostDecisionExecutionAuthorizationRecord,
+  ): PostDecisionExecutionAuthorizationRecord {
+    if (!validatePostDecisionExecutionAuthorization(record)) {
+      throw new EngineeringStoreError("post-decision execution authorization failed validation");
+    }
+    const action = this.findPostDecisionActionById(record.postDecisionActionId);
+    if (!action || !validatePostDecisionAction(action)) {
+      throw new EngineeringStoreError(
+        "post-decision execution authorization requires a valid prepared action",
+      );
+    }
+    if (
+      action.actionHash !== record.postDecisionActionHash ||
+      action.preparedAction !== record.preparedAction ||
+      action.verificationDecisionId !== record.verificationDecisionId ||
+      action.executorAssignmentId !== record.executorAssignmentId ||
+      action.executorExecutionEvidenceId !== record.executorExecutionEvidenceId
+    ) {
+      throw new EngineeringStoreError(
+        "post-decision execution authorization does not match prepared action",
+      );
+    }
+    if (action.preparedAction === "REQUIRE_HUMAN_DECISION") {
+      throw new EngineeringStoreError(
+        "REQUIRE_HUMAN_DECISION cannot receive execution authorization",
+      );
+    }
+    const assignmentId = assertSafeId("assignmentId", action.verifierAssignmentId);
+    const existing = this.findValidPostDecisionExecutionAuthorization(
+      record.postDecisionActionId,
+      record.postDecisionActionHash,
+    );
+    if (existing) {
+      if (existing.authorizationHash !== record.authorizationHash) {
+        throw new EngineeringStoreError(
+          "duplicate post-decision execution authorization with a different hash; refusing overwrite",
+        );
+      }
+      return existing;
+    }
+    appendLineAtomic(this.postDecisionExecutionAuthorizationPath(assignmentId), JSON.stringify(record));
+    this.audit({
+      timestamp: record.authorizedAt,
+      action: "persist_post_decision_execution_authorization",
+      assignmentId,
+      detail: `${record.authorizationId}:${record.preparedAction}`,
+    });
+    return record;
+  }
+
+  loadPostDecisionExecutionAuthorizations(
+    verifierAssignmentId: string,
+  ): PostDecisionExecutionAuthorizationRecord[] {
+    const path = this.postDecisionExecutionAuthorizationPath(
+      assertSafeId("assignmentId", verifierAssignmentId),
+    );
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as PostDecisionExecutionAuthorizationRecord);
+  }
+
+  findPostDecisionExecutionAuthorizationById(
+    authorizationId: string,
+  ): PostDecisionExecutionAuthorizationRecord | null {
+    assertSafeId("authorizationId", authorizationId);
+    for (const assignmentId of this.listAssignmentIds()) {
+      const matches = this.loadPostDecisionExecutionAuthorizations(assignmentId).filter(
+        (row) =>
+          validatePostDecisionExecutionAuthorization(row) && row.authorizationId === authorizationId,
+      );
+      if (matches.length > 0) return matches[matches.length - 1] ?? null;
+    }
+    return null;
+  }
+
+  findValidPostDecisionExecutionAuthorization(
+    postDecisionActionId: string,
+    postDecisionActionHash: string,
+  ): PostDecisionExecutionAuthorizationRecord | null {
+    assertSafeId("postDecisionActionId", postDecisionActionId);
+    for (const assignmentId of this.listAssignmentIds()) {
+      const matches = this.loadPostDecisionExecutionAuthorizations(assignmentId).filter(
+        (row) =>
+          validatePostDecisionExecutionAuthorization(row) &&
+          row.postDecisionActionId === postDecisionActionId &&
+          row.postDecisionActionHash === postDecisionActionHash,
+      );
+      if (matches.length > 0) return matches[matches.length - 1] ?? null;
+    }
+    return null;
+  }
+
   persistAuthoritativeSemanticFinding(record: VerifierSemanticFindingRecord): VerifierSemanticFindingRecord {
     if (!validateVerifierSemanticFinding(record)) {
       throw new EngineeringStoreError("authoritative semantic finding record failed validation");
@@ -794,6 +906,10 @@ export class FileEngineeringStore {
 
   private postDecisionActionPath(assignmentId: string): string {
     return join(this.assignmentsDir(), assignmentId, "post-decision-actions.ndjson");
+  }
+
+  private postDecisionExecutionAuthorizationPath(assignmentId: string): string {
+    return join(this.assignmentsDir(), assignmentId, "post-decision-execution-authorizations.ndjson");
   }
 
   private semanticProposalsPath(assignmentId: string): string {

@@ -158,6 +158,36 @@ export interface PostDecisionActionRecord {
   actionHash: string;
 }
 
+/**
+ * Explicit human authorization to execute one prepared post-decision action (IMP 039).
+ * Existence of a PostDecisionActionRecord is not execution authority.
+ */
+export const POST_DECISION_EXECUTION_AUTHORIZATION_SOURCE =
+  "authorizePostDecisionExecution" as const;
+
+export const POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE = "single_post_decision_action" as const;
+
+export interface PostDecisionExecutionAuthorizationRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "post_decision_execution_authorization";
+  authorizationId: string;
+  postDecisionActionId: string;
+  postDecisionActionHash: string;
+  verificationDecisionId: string;
+  preparedAction: PostDecisionAction;
+  executorAssignmentId: string;
+  executorExecutionEvidenceId: string;
+  authorizedBy: "explicit_human";
+  authorizedAt: string;
+  authorizationScope: typeof POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE;
+  startingBranch: string;
+  startingHead: string;
+  humanAuthorized: true;
+  source: typeof POST_DECISION_EXECUTION_AUTHORIZATION_SOURCE;
+  recordVersion: 1;
+  authorizationHash: string;
+}
+
 export type EvidenceSourceClass =
   | "orchestra_authoritative"
   | "machine"

@@ -102,6 +102,7 @@ export type {
   VerificationDecisionRecord,
   PostDecisionAction,
   PostDecisionActionRecord,
+  PostDecisionExecutionAuthorizationRecord,
   VerifierRequirementOutcome,
   VerifierSemanticFindingRecord,
   VerifierSemanticFindingProposal,
@@ -117,6 +118,8 @@ export {
   VERIFICATION_DECISION_AUTHORITY,
   POST_DECISION_ACTIONS,
   POST_DECISION_ACTION_SOURCE,
+  POST_DECISION_EXECUTION_AUTHORIZATION_SOURCE,
+  POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE,
   VERIFIER_REQUIREMENT_OUTCOMES,
   VERIFIER_SEMANTIC_FINDING_SOURCE,
   VERIFIER_SEMANTIC_PROPOSAL_SOURCE,
@@ -233,3 +236,26 @@ export {
   validatePostDecisionAction,
   postDecisionActionId,
 } from "./engineering-store/post-decision-action-record.js";
+export {
+  authorizePostDecisionExecution,
+  POST_DECISION_AUTHORIZATION_REFUSALS,
+} from "./engineering-store/authorize-post-decision-execution.js";
+export type {
+  AuthorizePostDecisionExecutionInput,
+  AuthorizePostDecisionExecutionResult,
+  PostDecisionAuthorizationRefusal,
+} from "./engineering-store/authorize-post-decision-execution.js";
+export {
+  executeAuthorizedPostDecisionAction,
+  POST_DECISION_EXECUTION_REFUSALS,
+} from "./engineering-store/execute-authorized-post-decision-action.js";
+export type {
+  ExecuteAuthorizedPostDecisionActionInput,
+  ExecuteAuthorizedPostDecisionActionResult,
+  PostDecisionExecutionRefusal,
+} from "./engineering-store/execute-authorized-post-decision-action.js";
+export {
+  validatePostDecisionExecutionAuthorization,
+  postDecisionExecutionAuthorizationId,
+} from "./engineering-store/post-decision-execution-authorization.js";
+export { correctionAssignmentId } from "./engineering-store/build-correction-assignment.js";

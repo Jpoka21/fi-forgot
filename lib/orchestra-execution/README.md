@@ -226,6 +226,31 @@ This slice does **not**:
 
 Human final authority remains required before any execution of a prepared action.
 
+## Authorized post-decision execution
+
+IMP 039 executes an already prepared post-decision action only after a separate explicit human authorization record. A prepared action alone is not execution authority.
+
+Preferred governed flow continuation:
+
+6. `authorizePostDecisionExecution({ store, postDecisionActionId, humanAuthorized: true })` — persist action-specific authorization.
+7. `executeAuthorizedPostDecisionAction({ store, postDecisionActionId, provider })` — load trusted records and execute.
+
+Behavior:
+
+- `PREPARE_CORRECTION` → generate a bounded correction executor assignment from authoritative failure context, then dispatch through the existing governed provider path (Mock or Cursor).
+- `PREPARE_CONTINUATION` → refuse with `continuation_target_not_available` until a governed continuation target exists (this sprint does not invent next requirements).
+- `REQUIRE_HUMAN_DECISION` → always refuse with `human_decision_required`.
+
+Authorization binds the exact `postDecisionActionId` / `actionHash`, decision id, prepared action, executor evidence linkage, and starting branch/HEAD. Baseline drift refuses before provider session. Duplicate execution reuses existing correction evidence. No standing auto-authorization, no continue-until-blocked, no automatic commit/push.
+
+This slice does **not**:
+
+- invent next requirements or R146
+- authorize actions automatically
+- convert human-decision intents into execution
+- open Cursor chat or require manual assignment paste
+- commit or push
+
 ## Current limitations
 
 Observed Cursor provider facts, not solved by this slice:
