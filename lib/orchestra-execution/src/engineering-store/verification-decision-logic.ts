@@ -40,6 +40,7 @@ export const VERIFICATION_DECISION_REASON_CODES = [
   "verifier_commit_violation",
   "verifier_push_violation",
   "verifier_execution_not_terminal",
+  "verifier_tolerated_executor_dirty_paths",
   "executor_provider_failed_indeterminate",
   "executor_evidence_incomplete_indeterminate",
   "semantic_requirements_satisfied",
@@ -226,11 +227,45 @@ export function evaluateExecutorImplementation(
   return { decision: null, reasonCodes: codes, indeterminate: false };
 }
 
+function normalizeRepoPath(path: string): string {
+  return path.replace(/\\/g, "/");
+}
+
+/** Provider/harness noise that must not block verifier adjudication. */
+function isVerifierInfraNoisePath(path: string): boolean {
+  const normalized = normalizeRepoPath(path);
+  return normalized === ".cursor" || normalized.startsWith(".cursor/");
+}
+
 export function evaluateVerifierExecution(
   verifierEvidence: ExecutionEvidence,
+  options?: {
+    toleratedDirtyPaths?: string[];
+    /** When the executor already evidenced a protected mutation, verifier observation of the same dirt is not independently disqualifying. */
+    tolerateExecutorProtectedMutation?: boolean;
+  },
 ): { adjudicable: boolean; reasonCodes: string[]; indeterminateDecision: VerificationDecision | null } {
   const result = verifierEvidence.result;
   const codes: string[] = [];
+  const tolerated = new Set(
+    (options?.toleratedDirtyPaths ?? []).map((path) => normalizeRepoPath(path)),
+  );
+
+  function isToleratedDirtyOnly(): boolean {
+    const unexpected = result.unexpectedChanges.filter(
+      (item) => item !== "starting_head_mismatch" && item !== "branch_mismatch",
+    );
+    if (unexpected.length === 0 && result.changedPaths.length === 0) return false;
+    const dirty = [...new Set([...unexpected, ...result.changedPaths])]
+      .map((path) => normalizeRepoPath(path))
+      .filter((path) => !isVerifierInfraNoisePath(path));
+    if (dirty.length === 0) {
+      // Only harness/infra paths remain dirty.
+      return true;
+    }
+    if (tolerated.size === 0) return false;
+    return dirty.every((path) => tolerated.has(path));
+  }
 
   if (result.executionVerdict === "provider_failed") {
     return {
@@ -268,7 +303,7 @@ export function evaluateVerifierExecution(
     };
   }
 
-  if (result.protectedPathMutationOccurred) {
+  if (result.protectedPathMutationOccurred && !options?.tolerateExecutorProtectedMutation) {
     return {
       adjudicable: false,
       reasonCodes: ["verifier_protected_mutation"],
@@ -296,14 +331,14 @@ export function evaluateVerifierExecution(
       indeterminateDecision: "INDETERMINATE",
     };
   }
-  if (result.executionVerdict === "repository_state_violation") {
+  if (result.executionVerdict === "repository_state_violation" && !isToleratedDirtyOnly()) {
     return {
       adjudicable: false,
       reasonCodes: ["verifier_repository_state_unresolved"],
       indeterminateDecision: "INDETERMINATE",
     };
   }
-  if (isScopeViolation(result)) {
+  if (isScopeViolation(result) && !isToleratedDirtyOnly()) {
     return {
       adjudicable: false,
       reasonCodes: ["verifier_unauthorized_mutation"],
@@ -317,6 +352,12 @@ export function evaluateVerifierExecution(
   if (result.executionVerdict === "completed_with_policy_denial") {
     codes.push("verifier_policy_denial_noninvalidating");
   }
+  if (isToleratedDirtyOnly()) {
+    codes.push("verifier_tolerated_executor_dirty_paths");
+  }
+  if (result.protectedPathMutationOccurred && options?.tolerateExecutorProtectedMutation) {
+    codes.push("verifier_tolerated_executor_protected_mutation");
+  }
   return { adjudicable: true, reasonCodes: codes, indeterminateDecision: null };
 }
 
@@ -327,7 +368,50 @@ export function deriveVerificationDecision(input: {
   executorEvidence: ExecutionEvidence;
   semanticFindings: VerifierSemanticFindingRecord[];
 }): { decision: VerificationDecision; reasonCodes: string[] } {
-  const verifierEval = evaluateVerifierExecution(input.verifierEvidence);
+  const executorEval = evaluateExecutorImplementation(
+    input.executorRecord.frozen,
+    input.executorEvidence,
+  );
+  const verifierEval = evaluateVerifierExecution(input.verifierEvidence, {
+    toleratedDirtyPaths: [
+      ...input.executorEvidence.result.changedPaths,
+      ...input.executorEvidence.result.unexpectedChanges.filter(
+        (item) => item !== "starting_head_mismatch" && item !== "branch_mismatch",
+      ),
+    ],
+    tolerateExecutorProtectedMutation: input.executorEvidence.result.protectedPathMutationOccurred,
+  });
+
+  // Objective executor defects win over verifier dirt that merely observes the same mutation.
+  if (executorEval.decision === "CORRECTION_REQUIRED") {
+    const independentVerifierBlockers = new Set([
+      "verifier_provider_failed",
+      "verifier_evidence_incomplete",
+      "verifier_execution_not_terminal",
+      "verifier_baseline_unresolved",
+      "verifier_required_evidence_missing",
+      "verifier_commit_violation",
+      "verifier_push_violation",
+    ]);
+    if (
+      !verifierEval.adjudicable &&
+      verifierEval.reasonCodes.some((code) => independentVerifierBlockers.has(code))
+    ) {
+      return {
+        decision: verifierEval.indeterminateDecision ?? "INDETERMINATE",
+        reasonCodes: verifierEval.reasonCodes,
+      };
+    }
+    return {
+      decision: "CORRECTION_REQUIRED",
+      reasonCodes: [
+        ...(verifierEval.adjudicable ? verifierEval.reasonCodes : ["verifier_shared_executor_defect_observed"]),
+        "verifier_relationship_coherent",
+        ...executorEval.reasonCodes,
+      ],
+    };
+  }
+
   if (!verifierEval.adjudicable) {
     return {
       decision: verifierEval.indeterminateDecision ?? "INDETERMINATE",
@@ -335,20 +419,10 @@ export function deriveVerificationDecision(input: {
     };
   }
 
-  const executorEval = evaluateExecutorImplementation(
-    input.executorRecord.frozen,
-    input.executorEvidence,
-  );
   if (executorEval.indeterminate) {
     return {
       decision: executorEval.decision ?? "INDETERMINATE",
       reasonCodes: executorEval.reasonCodes,
-    };
-  }
-  if (executorEval.decision === "CORRECTION_REQUIRED") {
-    return {
-      decision: "CORRECTION_REQUIRED",
-      reasonCodes: [...verifierEval.reasonCodes, "verifier_relationship_coherent", ...executorEval.reasonCodes],
     };
   }
 

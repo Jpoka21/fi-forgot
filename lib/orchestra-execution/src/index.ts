@@ -177,6 +177,8 @@ export {
 } from "./engineering-store/evidence-reference-resolution.js";
 export { structuredFindingEvent, parseStructuredFindingEvent } from "./structured-finding-event.js";
 export type { ParsedStructuredFindingEvent } from "./structured-finding-event.js";
+export { evaluateFrozenAcceptanceCheck } from "./engineering-store/acceptance-check-evaluation.js";
+export type { AcceptanceCheckEvaluation } from "./engineering-store/acceptance-check-evaluation.js";
 export {
   deriveVerifierVerificationRequirements,
   obligationRequirementId,
@@ -184,12 +186,17 @@ export {
   classifyRequirementKind,
   VERIFIER_REQUIREMENT_KINDS,
   VERIFIER_REQUIREMENT_CLASSES,
+  VERIFICATION_MODES,
+  ACCEPTANCE_CHECK_KINDS,
 } from "./verification-requirements.js";
 export type {
   StructuredObligation,
   VerificationRequirementRef,
   VerifierRequirementKind,
   VerifierRequirementClass,
+  VerificationMode,
+  AcceptanceCheckKind,
+  FrozenAcceptanceCheckSpec,
 } from "./verification-requirements.js";
 export {
   buildVerifierAuthorizationReceipt,

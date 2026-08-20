@@ -1,12 +1,11 @@
 import type { VerificationRequirementRef } from "../verification-requirements.js";
-import { resolveEvidenceReferences } from "./evidence-reference-resolution.js";
+import { evaluateFrozenAcceptanceCheck } from "./acceptance-check-evaluation.js";
 import { resolveMachineRequirement } from "./machine-requirement-resolver.js";
 import { buildAuthoritativeSemanticFindingRecord } from "./semantic-finding-record.js";
 import { EngineeringStoreError, FileEngineeringStore } from "./store.js";
 import type {
   ExecutionEvidence,
   FrozenAssignmentRecord,
-  VerifierRequirementOutcome,
   VerifierSemanticFindingProposal,
   VerifierSemanticFindingRecord,
 } from "./types.js";
@@ -47,122 +46,22 @@ function refused(
   };
 }
 
-function proposalsForRequirement(
-  proposals: VerifierSemanticFindingProposal[],
-  requirementId: string,
-): VerifierSemanticFindingProposal[] {
-  return proposals.filter((row) => row.requirementId === requirementId);
-}
-
-function proposalSupportsPromotion(
-  proposal: VerifierSemanticFindingProposal,
-  context: {
-    executorRecord: FrozenAssignmentRecord;
-    executorEvidence: ExecutionEvidence;
-    verifierEvidences: ExecutionEvidence[];
-  },
+function isAuthorizedVerifier(
+  store: FileEngineeringStore,
+  verifier: FrozenAssignmentRecord,
 ): boolean {
-  if (
-    proposal.executorAssignmentId !== context.executorRecord.frozen.assignment.assignmentId ||
-    proposal.executorExecutionEvidenceId !== context.executorEvidence.evidenceId
-  ) {
-    return false;
-  }
-  const resolution = resolveEvidenceReferences(proposal.evidenceReferences, {
-    executorRecord: context.executorRecord,
-    executorEvidence: context.executorEvidence,
-    verifierEvidences: context.verifierEvidences,
-    proposingVerifierExecutionEvidenceId: proposal.verifierExecutionEvidenceId,
-  });
-  return resolution.validForSemanticSatisfaction;
-}
-
-/**
- * Promote semantic proposals into authoritative findings only under corroboration policy.
- * Distinct verifier execution evidence IDs required. Same-execution duplicates are not independent.
- */
-function resolveSemanticRequirement(input: {
-  requirement: VerificationRequirementRef;
-  proposals: VerifierSemanticFindingProposal[];
-  executorRecord: FrozenAssignmentRecord;
-  executorEvidence: ExecutionEvidence;
-  verifierEvidences: ExecutionEvidence[];
-}): {
-  outcome: VerifierRequirementOutcome;
-  reasonCode: string;
-  evidenceReferences: string[];
-  supportingProposalIds: string[];
-  supportingVerifierExecutionEvidenceIds: string[];
-} {
-  const candidates = proposalsForRequirement(input.proposals, input.requirement.requirementId).filter((proposal) =>
-    proposalSupportsPromotion(proposal, {
-      executorRecord: input.executorRecord,
-      executorEvidence: input.executorEvidence,
-      verifierEvidences: input.verifierEvidences,
-    }),
+  if (verifier.frozen.assignment.role !== "verifier") return false;
+  const provenance = store.inspectVerifierAuthorizationProvenance(
+    verifier.frozen.assignment.assignmentId,
+    verifier.frozen.assignmentHash,
   );
-
-  const byEvidence = new Map<string, VerifierSemanticFindingProposal>();
-  for (const proposal of candidates) {
-    if (!byEvidence.has(proposal.verifierExecutionEvidenceId)) {
-      byEvidence.set(proposal.verifierExecutionEvidenceId, proposal);
-    }
-  }
-  const independent = [...byEvidence.values()];
-  if (independent.length < 2) {
-    return {
-      outcome: "requirement_not_evaluated",
-      reasonCode: independent.length === 0 ? "semantic_proposals_missing_or_invalid" : "semantic_corroboration_missing",
-      evidenceReferences: [],
-      supportingProposalIds: independent.map((row) => row.proposalId),
-      supportingVerifierExecutionEvidenceIds: independent.map((row) => row.verifierExecutionEvidenceId),
-    };
-  }
-
-  const first = independent[0]!;
-  const second = independent[1]!;
-  if (first.proposedOutcome !== second.proposedOutcome) {
-    return {
-      outcome: "evidence_insufficient",
-      reasonCode: "semantic_proposal_disagreement",
-      evidenceReferences: [...first.evidenceReferences, ...second.evidenceReferences],
-      supportingProposalIds: [first.proposalId, second.proposalId],
-      supportingVerifierExecutionEvidenceIds: [
-        first.verifierExecutionEvidenceId,
-        second.verifierExecutionEvidenceId,
-      ],
-    };
-  }
-  if (
-    first.proposedOutcome !== "requirement_satisfied" &&
-    first.proposedOutcome !== "requirement_failed"
-  ) {
-    return {
-      outcome: first.proposedOutcome,
-      reasonCode: `corroborated_${first.proposedOutcome}`,
-      evidenceReferences: [...first.evidenceReferences, ...second.evidenceReferences],
-      supportingProposalIds: [first.proposalId, second.proposalId],
-      supportingVerifierExecutionEvidenceIds: [
-        first.verifierExecutionEvidenceId,
-        second.verifierExecutionEvidenceId,
-      ],
-    };
-  }
-  return {
-    outcome: first.proposedOutcome,
-    reasonCode: `governed_corroboration_${first.proposedOutcome}`,
-    evidenceReferences: [...new Set([...first.evidenceReferences, ...second.evidenceReferences])],
-    supportingProposalIds: [first.proposalId, second.proposalId],
-    supportingVerifierExecutionEvidenceIds: [
-      first.verifierExecutionEvidenceId,
-      second.verifierExecutionEvidenceId,
-    ],
-  };
+  return provenance === "valid";
 }
 
 /**
  * Governed resolution of authoritative semantic findings.
- * Does not invoke providers. Provider proposals are never authority by themselves.
+ * Provider proposals and verifier consensus are never semantic proof.
+ * Does not invoke providers.
  */
 export function resolveVerifierSemanticFindings(
   input: ResolveVerifierSemanticFindingsInput,
@@ -215,11 +114,11 @@ export function resolveVerifierSemanticFindings(
     };
   }
 
-  const verifierRecords = input.store.findVerifierAssignments(
-    input.executorAssignmentId,
-    input.executorExecutionEvidenceId,
-  );
-  const verifierEvidences: ExecutionEvidence[] = [];
+  const verifierRecords = input.store
+    .findVerifierAssignments(input.executorAssignmentId, input.executorExecutionEvidenceId)
+    .filter((row) => isAuthorizedVerifier(input.store, row));
+
+  // Advisory proposals only from authorized verifiers; never used as proof.
   const proposals: VerifierSemanticFindingProposal[] = [];
   for (const verifier of verifierRecords) {
     let evidence: ExecutionEvidence | null = null;
@@ -229,7 +128,6 @@ export function resolveVerifierSemanticFindings(
       continue;
     }
     if (!evidence) continue;
-    verifierEvidences.push(evidence);
     proposals.push(
       ...input.store.loadVerifierSemanticProposals(
         verifier.frozen.assignment.assignmentId,
@@ -238,26 +136,22 @@ export function resolveVerifierSemanticFindings(
     );
   }
 
-  const requirements =
+  const requirementSet: VerificationRequirementRef[] =
     verifierRecords[0]?.frozen.assignment.verificationRequirements ??
     [];
 
-  // Prefer requirements from any verifier; if none prepared, cannot resolve semantic set.
-  if (requirements.length === 0 && verifierRecords.length === 0) {
-    return refused(input, "verifier_assignments_required");
-  }
-  const requirementSet: VerificationRequirementRef[] =
-    requirements.length > 0
-      ? requirements
-      : [];
-
   if (requirementSet.length === 0) {
+    // Fall back to deriving from executor if no authorized verifier prepared yet.
     return refused(input, "verification_requirements_missing");
   }
 
   const findings: VerifierSemanticFindingRecord[] = [];
+  const warnings: string[] = [
+    "provider proposals are advisory only and never establish requirement_satisfied",
+  ];
+
   for (const requirement of requirementSet) {
-    if (requirement.requirementClass === "MACHINE_RESOLVABLE") {
+    if (requirement.verificationMode === "MACHINE_EVIDENCE") {
       const machine = resolveMachineRequirement({
         requirement,
         executorRecord,
@@ -279,25 +173,62 @@ export function resolveVerifierSemanticFindings(
       continue;
     }
 
-    const semantic = resolveSemanticRequirement({
-      requirement,
-      proposals,
-      executorRecord,
-      executorEvidence,
-      verifierEvidences,
-    });
+    if (requirement.verificationMode === "ACCEPTANCE_CHECK") {
+      const spec = requirement.acceptanceCheck;
+      if (!spec) {
+        findings.push(
+          input.store.persistAuthoritativeSemanticFinding(
+            buildAuthoritativeSemanticFindingRecord({
+              executorAssignmentId: input.executorAssignmentId,
+              executorExecutionEvidenceId: input.executorExecutionEvidenceId,
+              requirementId: requirement.requirementId,
+              outcome: "evidence_insufficient",
+              reasonCode: "acceptance_check_specification_missing",
+              evidenceReferences: [],
+              resolutionAuthority: "acceptance_check_resolution",
+            }),
+          ),
+        );
+        continue;
+      }
+      const evaluation = evaluateFrozenAcceptanceCheck({
+        spec,
+        executorRecord,
+        executorEvidence,
+      });
+      findings.push(
+        input.store.persistAuthoritativeSemanticFinding(
+          buildAuthoritativeSemanticFindingRecord({
+            executorAssignmentId: input.executorAssignmentId,
+            executorExecutionEvidenceId: input.executorExecutionEvidenceId,
+            requirementId: requirement.requirementId,
+            outcome: evaluation.outcome,
+            reasonCode: evaluation.reasonCode,
+            evidenceReferences: [
+              `orchestra:executor_evidence:${executorEvidence.evidenceId}`,
+              `orchestra:acceptance_check:${spec.acceptanceCheckId}`,
+              ...(requirement.obligationId
+                ? [`orchestra:obligation:${requirement.obligationId}`]
+                : []),
+            ],
+            resolutionAuthority: "acceptance_check_resolution",
+          }),
+        ),
+      );
+      continue;
+    }
+
+    // HUMAN_JUDGMENT_REQUIRED — provider consensus cannot satisfy.
     findings.push(
       input.store.persistAuthoritativeSemanticFinding(
         buildAuthoritativeSemanticFindingRecord({
           executorAssignmentId: input.executorAssignmentId,
           executorExecutionEvidenceId: input.executorExecutionEvidenceId,
           requirementId: requirement.requirementId,
-          outcome: semantic.outcome,
-          reasonCode: semantic.reasonCode,
-          evidenceReferences: semantic.evidenceReferences,
-          resolutionAuthority: "governed_semantic_corroboration",
-          supportingProposalIds: semantic.supportingProposalIds,
-          supportingVerifierExecutionEvidenceIds: semantic.supportingVerifierExecutionEvidenceIds,
+          outcome: "requirement_not_evaluated",
+          reasonCode: "human_judgment_required",
+          evidenceReferences: [],
+          resolutionAuthority: "human_judgment_unresolved",
         }),
       ),
     );
@@ -307,7 +238,7 @@ export function resolveVerifierSemanticFindings(
     resolved: true,
     refused: false,
     reason: null,
-    warnings: [],
+    warnings,
     executorAssignmentId: input.executorAssignmentId,
     executorExecutionEvidenceId: input.executorExecutionEvidenceId,
     findings,

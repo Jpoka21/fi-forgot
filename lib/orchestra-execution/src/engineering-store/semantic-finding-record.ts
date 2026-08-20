@@ -67,7 +67,8 @@ export function validateVerifierSemanticFinding(record: VerifierSemanticFindingR
   if (record.recordVersion !== 1) return false;
   if (
     record.resolutionAuthority !== "machine_evidence_resolution" &&
-    record.resolutionAuthority !== "governed_semantic_corroboration"
+    record.resolutionAuthority !== "acceptance_check_resolution" &&
+    record.resolutionAuthority !== "human_judgment_unresolved"
   ) {
     return false;
   }

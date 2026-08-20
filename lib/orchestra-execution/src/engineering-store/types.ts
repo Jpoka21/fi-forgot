@@ -39,7 +39,8 @@ export const VERIFIER_SEMANTIC_PROPOSAL_SOURCE = "provider_verification_finding_
 
 export const VERIFIER_SEMANTIC_FINDING_RESOLUTION = [
   "machine_evidence_resolution",
-  "governed_semantic_corroboration",
+  "acceptance_check_resolution",
+  "human_judgment_unresolved",
 ] as const;
 export type VerifierSemanticFindingResolution = (typeof VERIFIER_SEMANTIC_FINDING_RESOLUTION)[number];
 

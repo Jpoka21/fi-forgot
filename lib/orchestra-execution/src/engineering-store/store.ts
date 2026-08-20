@@ -542,7 +542,13 @@ export class FileEngineeringStore {
     executorAssignmentId: string,
     executorExecutionEvidenceId: string,
   ): VerifierSemanticFindingProposal[] {
-    const verifiers = this.findVerifierAssignments(executorAssignmentId, executorExecutionEvidenceId);
+    const verifiers = this.findVerifierAssignments(executorAssignmentId, executorExecutionEvidenceId).filter(
+      (row) =>
+        this.inspectVerifierAuthorizationProvenance(
+          row.frozen.assignment.assignmentId,
+          row.frozen.assignmentHash,
+        ) === "valid",
+    );
     const out: VerifierSemanticFindingProposal[] = [];
     for (const verifier of verifiers) {
       out.push(...this.loadVerifierSemanticProposals(verifier.frozen.assignment.assignmentId));

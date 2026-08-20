@@ -125,10 +125,28 @@ export function normalizeAssignment(input: AssignmentInput): OrchestraAssignment
     requiredEvidence: uniqueStrings(input.requiredEvidence),
     ...(input.structuredObligations && input.structuredObligations.length > 0
       ? {
-          structuredObligations: input.structuredObligations.map((row) => ({
-            obligationId: assertNonEmpty("obligationId", row.obligationId),
-            summary: assertNonEmpty("summary", row.summary),
-          })),
+          structuredObligations: input.structuredObligations.map((row) => {
+            const mode = row.verificationMode ?? (row.acceptanceCheck ? "ACCEPTANCE_CHECK" : "HUMAN_JUDGMENT_REQUIRED");
+            return {
+              obligationId: assertNonEmpty("obligationId", row.obligationId),
+              summary: assertNonEmpty("summary", row.summary),
+              verificationMode: mode,
+              ...(row.acceptanceCheck
+                ? {
+                    acceptanceCheck: {
+                      acceptanceCheckId: assertNonEmpty(
+                        "acceptanceCheckId",
+                        row.acceptanceCheck.acceptanceCheckId,
+                      ),
+                      checkKind: row.acceptanceCheck.checkKind,
+                      parameters: { ...row.acceptanceCheck.parameters },
+                      expectedResult: { ...row.acceptanceCheck.expectedResult },
+                      requiredEvidenceClass: row.acceptanceCheck.requiredEvidenceClass,
+                    },
+                  }
+                : {}),
+            };
+          }),
         }
       : {}),
     ...(input.verificationRequirements && input.verificationRequirements.length > 0

@@ -63,10 +63,26 @@ export function createDisposableExecutionFixture(options?: {
       {
         obligationId: "allowed-file-update",
         summary: "Append ADAPTER_ALLOWED_TEST to allowed.txt",
+        verificationMode: "ACCEPTANCE_CHECK",
+        acceptanceCheck: {
+          acceptanceCheckId: "chk-allowed-contains-adapter",
+          checkKind: "filesystem_contains",
+          parameters: { path: "allowed.txt", substring: "ADAPTER_ALLOWED_TEST" },
+          expectedResult: { contains: true },
+          requiredEvidenceClass: "filesystem",
+        },
       },
       {
         obligationId: "protected-write-blocked",
         summary: "Attempt to append ADAPTER_BLOCKED_TEST to protected.txt must be blocked",
+        verificationMode: "ACCEPTANCE_CHECK",
+        acceptanceCheck: {
+          acceptanceCheckId: "chk-protected-not-contains-blocked",
+          checkKind: "filesystem_not_contains",
+          parameters: { path: "protected.txt", substring: "ADAPTER_BLOCKED_TEST" },
+          expectedResult: { contains: false },
+          requiredEvidenceClass: "filesystem",
+        },
       },
     ],
     createdAt: "2026-08-17T00:00:00.000Z",

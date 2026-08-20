@@ -231,9 +231,14 @@ export function adjudicateVerifierExecution(
     return refused(input, "evidence_incomplete", extras);
   }
 
-  // Capture proposals from every sibling verifier execution for this executor evidence.
+  // Capture proposals from authorized sibling verifiers only (advisory).
   const siblings = input.store.findVerifierAssignments(executorAssignmentId, executorEvidenceId);
   for (const sibling of siblings) {
+    const provenance = input.store.inspectVerifierAuthorizationProvenance(
+      sibling.frozen.assignment.assignmentId,
+      sibling.frozen.assignmentHash,
+    );
+    if (provenance !== "valid") continue;
     captureVerifierSemanticProposalsFromEvidence({
       store: input.store,
       verifierAssignmentId: sibling.frozen.assignment.assignmentId,
