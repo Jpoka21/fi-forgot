@@ -199,6 +199,14 @@ export interface PostDecisionExecutionAuthorizationRecord {
  * Already-authorized next bounded work unit — never invented from provider prose.
  */
 export const GOVERNED_CONTINUATION_TARGET_SOURCE = "registerGovernedContinuationTarget" as const;
+export const GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE =
+  "materializeFromGovernedContinuationSequence" as const;
+export const GOVERNED_CONTINUATION_TARGET_AUTHORITY_SOURCES = [
+  GOVERNED_CONTINUATION_TARGET_SOURCE,
+  GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE,
+] as const;
+export type GovernedContinuationTargetAuthoritySource =
+  (typeof GOVERNED_CONTINUATION_TARGET_AUTHORITY_SOURCES)[number];
 
 export const GOVERNED_CONTINUATION_TARGET_STATUSES = [
   "eligible",
@@ -239,9 +247,14 @@ export interface GovernedContinuationTargetRecord {
   }>;
   orderingKey: number;
   status: "eligible";
-  authoritySource: typeof GOVERNED_CONTINUATION_TARGET_SOURCE;
+  /** Null when manually registered; set when materialized from sequence. */
+  sequenceId: string | null;
+  sequenceConfigHash: string | null;
+  sequenceEntryKey: string | null;
+  sequenceEntryHash: string | null;
+  authoritySource: GovernedContinuationTargetAuthoritySource;
   registeredAt: string;
-  source: typeof GOVERNED_CONTINUATION_TARGET_SOURCE;
+  source: GovernedContinuationTargetAuthoritySource;
   recordVersion: 1;
   targetHash: string;
 }
@@ -265,6 +278,68 @@ export interface GovernedContinuationTargetLifecycleRecord {
   source: typeof GOVERNED_CONTINUATION_TARGET_LIFECYCLE_SOURCE;
   recordVersion: 1;
   lifecycleHash: string;
+}
+
+/** Project-supplied governed continuation sequence (IMP 041). */
+export const GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE =
+  "projectGovernedContinuationSequence" as const;
+
+export interface GovernedContinuationSequenceEntry {
+  entryKey: string;
+  orderingKey: number;
+  /**
+   * null = bootstrap entry (fulfilled by first matching VERIFIED predecessor for the project).
+   * otherwise must equal a prior entryKey in the same sequence.
+   */
+  predecessorEntryKey: string | null;
+  assignmentText: string;
+  allowedPaths: string[];
+  protectedPaths: string[];
+  prohibitedCommandClasses: string[];
+  requiredEvidence: string[];
+  structuredObligations: Array<{
+    obligationId: string;
+    summary: string;
+    verificationMode?: string;
+  }>;
+  entryHash: string;
+}
+
+export interface GovernedContinuationSequenceConfigRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "governed_continuation_sequence_config";
+  sequenceId: string;
+  projectId: string;
+  configurationVersion: number;
+  repositoryPath: string;
+  branch: string;
+  entries: GovernedContinuationSequenceEntry[];
+  authoritySource: typeof GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE;
+  registeredAt: string;
+  source: typeof GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE;
+  recordVersion: 1;
+  configHash: string;
+}
+
+export const GOVERNED_CONTINUATION_SEQUENCE_FULFILLMENT_SOURCE =
+  "governedContinuationSequenceFulfillment" as const;
+
+/** Records that a VERIFIED decision fulfilled a sequence entry (append-only). */
+export interface GovernedContinuationSequenceFulfillmentRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "governed_continuation_sequence_fulfillment";
+  fulfillmentId: string;
+  sequenceId: string;
+  sequenceConfigHash: string;
+  entryKey: string;
+  entryHash: string;
+  verificationDecisionId: string;
+  executorAssignmentId: string;
+  executorExecutionEvidenceId: string;
+  fulfilledAt: string;
+  source: typeof GOVERNED_CONTINUATION_SEQUENCE_FULFILLMENT_SOURCE;
+  recordVersion: 1;
+  fulfillmentHash: string;
 }
 
 export type EvidenceSourceClass =

@@ -106,6 +106,10 @@ export type {
   GovernedContinuationTargetRecord,
   GovernedContinuationTargetLifecycleRecord,
   GovernedContinuationTargetStatus,
+  GovernedContinuationSequenceConfigRecord,
+  GovernedContinuationSequenceEntry,
+  GovernedContinuationSequenceFulfillmentRecord,
+  GovernedContinuationTargetAuthoritySource,
   VerifierRequirementOutcome,
   VerifierSemanticFindingRecord,
   VerifierSemanticFindingProposal,
@@ -124,8 +128,12 @@ export {
   POST_DECISION_EXECUTION_AUTHORIZATION_SOURCE,
   POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE,
   GOVERNED_CONTINUATION_TARGET_SOURCE,
+  GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE,
+  GOVERNED_CONTINUATION_TARGET_AUTHORITY_SOURCES,
   GOVERNED_CONTINUATION_TARGET_STATUSES,
   GOVERNED_CONTINUATION_TARGET_LIFECYCLE_SOURCE,
+  GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE,
+  GOVERNED_CONTINUATION_SEQUENCE_FULFILLMENT_SOURCE,
   VERIFIER_REQUIREMENT_OUTCOMES,
   VERIFIER_SEMANTIC_FINDING_SOURCE,
   VERIFIER_SEMANTIC_PROPOSAL_SOURCE,
@@ -293,5 +301,18 @@ export type {
 export {
   validateGovernedContinuationTarget,
   governedContinuationTargetId,
+  buildGovernedContinuationSequenceConfig,
+  validateGovernedContinuationSequenceConfig,
+  governedContinuationSequenceId,
 } from "./engineering-store/governed-continuation-target-record.js";
 export { markGovernedContinuationTargetStatus } from "./engineering-store/mark-governed-continuation-target.js";
+export {
+  persistGovernedContinuationSequenceConfig,
+  materializeNextGovernedContinuationTargetFromSequence,
+  SEQUENCE_CONFIG_REFUSALS,
+  MATERIALIZE_SEQUENCE_REFUSALS,
+} from "./engineering-store/materialize-continuation-from-sequence.js";
+export type {
+  SequenceConfigRefusal,
+  MaterializeSequenceRefusal,
+} from "./engineering-store/materialize-continuation-from-sequence.js";

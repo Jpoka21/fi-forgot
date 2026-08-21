@@ -15,6 +15,7 @@ import { runVerificationDecisionTests } from "./verification-decision.test.js";
 import { runPostDecisionActionTests } from "./post-decision-action.test.js";
 import { runPostDecisionExecutionTests } from "./post-decision-execution.test.js";
 import { runGovernedContinuationTargetTests } from "./governed-continuation-target.test.js";
+import { runGovernedContinuationSequenceTests } from "./governed-continuation-sequence.test.js";
 import { liveCursorReport, runLiveCursorIntegrationTest } from "./live-cursor.integration.test.js";
 import { runCodexProviderTests } from "./codex-provider.test.js";
 import { runCodexAppServerTransportTests } from "./codex-app-server-transport.test.js";
@@ -44,6 +45,7 @@ async function main(): Promise<void> {
   await runPostDecisionActionTests();
   await runPostDecisionExecutionTests();
   await runGovernedContinuationTargetTests();
+  await runGovernedContinuationSequenceTests();
   await runLiveCursorIntegrationTest();
   console.log("\nLive Cursor report:", JSON.stringify(liveCursorReport, null, 2));
   if (failed > 0) reportAndExit();

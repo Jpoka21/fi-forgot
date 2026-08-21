@@ -9,7 +9,12 @@ import {
   isSubsetPaths,
 } from "./predecessor-path-authority.js";
 import { validateVerificationDecision } from "./verification-decision-record.js";
-import type { GovernedContinuationTargetRecord } from "./types.js";
+import {
+  GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE,
+  GOVERNED_CONTINUATION_TARGET_SOURCE,
+  type GovernedContinuationTargetAuthoritySource,
+  type GovernedContinuationTargetRecord,
+} from "./types.js";
 
 export const GOVERNED_CONTINUATION_TARGET_REGISTRATION_REFUSALS = [
   "decision_not_found",
@@ -51,6 +56,11 @@ export interface RegisterGovernedContinuationTargetInput {
     summary: string;
     verificationMode?: string;
   }>;
+  authoritySource?: GovernedContinuationTargetAuthoritySource;
+  sequenceId?: string | null;
+  sequenceConfigHash?: string | null;
+  sequenceEntryKey?: string | null;
+  sequenceEntryHash?: string | null;
 }
 
 export interface RegisterGovernedContinuationTargetResult {
@@ -174,9 +184,21 @@ export function registerGovernedContinuationTarget(
       requiredEvidence: input.requiredEvidence ?? ["git", "hooks", "filesystem"],
       structuredObligations: input.structuredObligations,
       orderingKey: input.orderingKey,
+      authoritySource: input.authoritySource ?? GOVERNED_CONTINUATION_TARGET_SOURCE,
+      sequenceId: input.sequenceId ?? null,
+      sequenceConfigHash: input.sequenceConfigHash ?? null,
+      sequenceEntryKey: input.sequenceEntryKey ?? null,
+      sequenceEntryHash: input.sequenceEntryHash ?? null,
     });
   } catch (error) {
     return refused("policy_invalid", { warnings: [String(error)] });
+  }
+
+  if (
+    record.authoritySource !== GOVERNED_CONTINUATION_TARGET_SOURCE &&
+    record.authoritySource !== GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE
+  ) {
+    return refused("policy_invalid", { warnings: ["unsupported continuation target authority"] });
   }
 
   if (!validateGovernedContinuationTarget(record)) {

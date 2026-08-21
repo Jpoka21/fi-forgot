@@ -2,8 +2,16 @@ import { sortKeys } from "../assignment.js";
 import { sha256Utf8 } from "./atomic-write.js";
 import {
   ENGINEERING_STORE_SCHEMA_VERSION,
+  GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE,
+  GOVERNED_CONTINUATION_SEQUENCE_FULFILLMENT_SOURCE,
   GOVERNED_CONTINUATION_TARGET_LIFECYCLE_SOURCE,
+  GOVERNED_CONTINUATION_TARGET_AUTHORITY_SOURCES,
+  GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE,
   GOVERNED_CONTINUATION_TARGET_SOURCE,
+  type GovernedContinuationSequenceConfigRecord,
+  type GovernedContinuationSequenceEntry,
+  type GovernedContinuationSequenceFulfillmentRecord,
+  type GovernedContinuationTargetAuthoritySource,
   type GovernedContinuationTargetLifecycleRecord,
   type GovernedContinuationTargetRecord,
 } from "./types.js";
@@ -49,6 +57,14 @@ function uniquePaths(values: string[]): string[] {
   return out;
 }
 
+function isAuthoritySource(
+  value: string,
+): value is GovernedContinuationTargetAuthoritySource {
+  return (GOVERNED_CONTINUATION_TARGET_AUTHORITY_SOURCES as readonly string[]).includes(
+    value,
+  );
+}
+
 export function buildGovernedContinuationTargetRecord(input: {
   verificationDecisionId: string;
   targetKey: string;
@@ -70,11 +86,30 @@ export function buildGovernedContinuationTargetRecord(input: {
   }>;
   orderingKey: number;
   registeredAt?: string;
+  authoritySource?: GovernedContinuationTargetAuthoritySource;
+  sequenceId?: string | null;
+  sequenceConfigHash?: string | null;
+  sequenceEntryKey?: string | null;
+  sequenceEntryHash?: string | null;
 }): GovernedContinuationTargetRecord {
   const targetKey = input.targetKey.trim();
   if (!targetKey) throw new Error("targetKey is required");
   if (!Number.isInteger(input.orderingKey) || input.orderingKey < 0) {
     throw new Error("orderingKey must be a non-negative integer");
+  }
+  const authoritySource = input.authoritySource ?? GOVERNED_CONTINUATION_TARGET_SOURCE;
+  const sequenceId = input.sequenceId ?? null;
+  const sequenceConfigHash = input.sequenceConfigHash ?? null;
+  const sequenceEntryKey = input.sequenceEntryKey ?? null;
+  const sequenceEntryHash = input.sequenceEntryHash ?? null;
+  if (authoritySource === GOVERNED_CONTINUATION_TARGET_SOURCE) {
+    if (sequenceId || sequenceConfigHash || sequenceEntryKey || sequenceEntryHash) {
+      throw new Error("manual registration must not bind sequence fields");
+    }
+  } else if (authoritySource === GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE) {
+    if (!sequenceId || !sequenceConfigHash || !sequenceEntryKey || !sequenceEntryHash) {
+      throw new Error("sequence-materialized targets require complete sequence bindings");
+    }
   }
   const body: GovernedContinuationTargetRecordBody = {
     schemaVersion: ENGINEERING_STORE_SCHEMA_VERSION,
@@ -106,9 +141,13 @@ export function buildGovernedContinuationTargetRecord(input: {
     })),
     orderingKey: input.orderingKey,
     status: "eligible",
-    authoritySource: GOVERNED_CONTINUATION_TARGET_SOURCE,
+    sequenceId,
+    sequenceConfigHash,
+    sequenceEntryKey,
+    sequenceEntryHash,
+    authoritySource,
     registeredAt: input.registeredAt ?? new Date().toISOString(),
-    source: GOVERNED_CONTINUATION_TARGET_SOURCE,
+    source: authoritySource,
     recordVersion: 1,
   };
   if (!body.projectId) throw new Error("projectId is required");
@@ -127,8 +166,9 @@ export function validateGovernedContinuationTarget(
 ): boolean {
   if (record.recordKind !== "governed_continuation_target") return false;
   if (record.schemaVersion !== ENGINEERING_STORE_SCHEMA_VERSION) return false;
-  if (record.source !== GOVERNED_CONTINUATION_TARGET_SOURCE) return false;
-  if (record.authoritySource !== GOVERNED_CONTINUATION_TARGET_SOURCE) return false;
+  if (!isAuthoritySource(record.source) || record.source !== record.authoritySource) {
+    return false;
+  }
   if (record.status !== "eligible") return false;
   if (record.requireNoPush !== true) return false;
   if (record.commitAuthorization !== false) return false;
@@ -138,6 +178,27 @@ export function validateGovernedContinuationTarget(
     record.continuationTargetId !==
     governedContinuationTargetId(record.verificationDecisionId, record.targetKey)
   ) {
+    return false;
+  }
+  if (record.authoritySource === GOVERNED_CONTINUATION_TARGET_SOURCE) {
+    if (
+      record.sequenceId !== null ||
+      record.sequenceConfigHash !== null ||
+      record.sequenceEntryKey !== null ||
+      record.sequenceEntryHash !== null
+    ) {
+      return false;
+    }
+  } else if (record.authoritySource === GOVERNED_CONTINUATION_TARGET_SEQUENCE_SOURCE) {
+    if (
+      !record.sequenceId ||
+      !record.sequenceConfigHash ||
+      !record.sequenceEntryKey ||
+      !record.sequenceEntryHash
+    ) {
+      return false;
+    }
+  } else {
     return false;
   }
   const { targetHash, ...body } = record;
@@ -189,4 +250,223 @@ export function validateGovernedContinuationTargetLifecycle(
   if (record.status === ("eligible" as string)) return false;
   const { lifecycleHash, ...body } = record;
   return hashGovernedContinuationTargetLifecycle(body) === lifecycleHash;
+}
+
+function uniquePathsEntry(values: string[]): string[] {
+  return uniquePaths(values);
+}
+
+export type SequenceEntryBody = Omit<GovernedContinuationSequenceEntry, "entryHash">;
+
+export function hashSequenceEntry(body: SequenceEntryBody): string {
+  return sha256Utf8(JSON.stringify(sortKeys(body)));
+}
+
+export function buildSequenceEntry(input: {
+  entryKey: string;
+  orderingKey: number;
+  predecessorEntryKey: string | null;
+  assignmentText: string;
+  allowedPaths: string[];
+  protectedPaths: string[];
+  prohibitedCommandClasses: string[];
+  requiredEvidence: string[];
+  structuredObligations?: Array<{
+    obligationId: string;
+    summary: string;
+    verificationMode?: string;
+  }>;
+}): GovernedContinuationSequenceEntry {
+  const entryKey = input.entryKey.trim();
+  if (!entryKey) throw new Error("entryKey is required");
+  if (!Number.isInteger(input.orderingKey) || input.orderingKey < 0) {
+    throw new Error("orderingKey must be a non-negative integer");
+  }
+  const body: SequenceEntryBody = {
+    entryKey,
+    orderingKey: input.orderingKey,
+    predecessorEntryKey: input.predecessorEntryKey,
+    assignmentText: input.assignmentText.trim(),
+    allowedPaths: uniquePathsEntry(input.allowedPaths),
+    protectedPaths: uniquePathsEntry(input.protectedPaths),
+    prohibitedCommandClasses: [...input.prohibitedCommandClasses],
+    requiredEvidence: [...input.requiredEvidence],
+    structuredObligations: (input.structuredObligations ?? []).map((row) => ({
+      obligationId: row.obligationId.trim(),
+      summary: row.summary.trim(),
+      ...(row.verificationMode ? { verificationMode: row.verificationMode } : {}),
+    })),
+  };
+  if (!body.assignmentText) throw new Error("assignmentText is required");
+  return { ...body, entryHash: hashSequenceEntry(body) };
+}
+
+export function validateSequenceEntry(entry: GovernedContinuationSequenceEntry): boolean {
+  const { entryHash, ...body } = entry;
+  return hashSequenceEntry(body) === entryHash;
+}
+
+export type SequenceConfigBody = Omit<GovernedContinuationSequenceConfigRecord, "configHash">;
+
+export function governedContinuationSequenceId(
+  projectId: string,
+  sequenceKey: string,
+): string {
+  return `gcs-${projectId.trim()}-${sequenceKey.trim()}`;
+}
+
+export function hashSequenceConfig(body: SequenceConfigBody): string {
+  return sha256Utf8(JSON.stringify(sortKeys(body)));
+}
+
+export function buildGovernedContinuationSequenceConfig(input: {
+  projectId: string;
+  sequenceKey: string;
+  configurationVersion: number;
+  repositoryPath: string;
+  branch: string;
+  entries: Array<{
+    entryKey: string;
+    orderingKey: number;
+    predecessorEntryKey: string | null;
+    assignmentText: string;
+    allowedPaths: string[];
+    protectedPaths: string[];
+    prohibitedCommandClasses: string[];
+    requiredEvidence?: string[];
+    structuredObligations?: Array<{
+      obligationId: string;
+      summary: string;
+      verificationMode?: string;
+    }>;
+  }>;
+  registeredAt?: string;
+}): GovernedContinuationSequenceConfigRecord {
+  const projectId = input.projectId.trim();
+  const sequenceKey = input.sequenceKey.trim();
+  if (!projectId || !sequenceKey) throw new Error("projectId and sequenceKey are required");
+  if (!Number.isInteger(input.configurationVersion) || input.configurationVersion < 1) {
+    throw new Error("configurationVersion must be a positive integer");
+  }
+  if (input.entries.length === 0) throw new Error("sequence requires at least one entry");
+
+  const entries = input.entries.map((row) =>
+    buildSequenceEntry({
+      ...row,
+      requiredEvidence: row.requiredEvidence ?? ["git", "hooks", "filesystem"],
+    }),
+  );
+  const keys = new Set<string>();
+  const orderings = new Set<number>();
+  let bootstrapCount = 0;
+  for (const entry of entries) {
+    if (keys.has(entry.entryKey)) throw new Error(`duplicate entryKey ${entry.entryKey}`);
+    keys.add(entry.entryKey);
+    if (orderings.has(entry.orderingKey)) {
+      throw new Error(`duplicate orderingKey ${entry.orderingKey}`);
+    }
+    orderings.add(entry.orderingKey);
+    if (entry.predecessorEntryKey === null) bootstrapCount += 1;
+    else if (!keys.has(entry.predecessorEntryKey) && !input.entries.some((e) => e.entryKey === entry.predecessorEntryKey)) {
+      // predecessor may appear later in input list — check full set after
+    }
+  }
+  if (bootstrapCount !== 1) {
+    throw new Error("sequence must contain exactly one bootstrap entry (predecessorEntryKey null)");
+  }
+  for (const entry of entries) {
+    if (entry.predecessorEntryKey !== null && !keys.has(entry.predecessorEntryKey)) {
+      throw new Error(`unknown predecessorEntryKey ${entry.predecessorEntryKey}`);
+    }
+    if (entry.predecessorEntryKey === entry.entryKey) {
+      throw new Error("entry cannot precede itself");
+    }
+  }
+
+  const body: SequenceConfigBody = {
+    schemaVersion: ENGINEERING_STORE_SCHEMA_VERSION,
+    recordKind: "governed_continuation_sequence_config",
+    sequenceId: governedContinuationSequenceId(projectId, sequenceKey),
+    projectId,
+    configurationVersion: input.configurationVersion,
+    repositoryPath: input.repositoryPath.trim(),
+    branch: input.branch.trim(),
+    entries,
+    authoritySource: GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE,
+    registeredAt: input.registeredAt ?? new Date().toISOString(),
+    source: GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE,
+    recordVersion: 1,
+  };
+  if (!body.repositoryPath || !body.branch) {
+    throw new Error("repositoryPath and branch are required");
+  }
+  return { ...body, configHash: hashSequenceConfig(body) };
+}
+
+export function validateGovernedContinuationSequenceConfig(
+  record: GovernedContinuationSequenceConfigRecord,
+): boolean {
+  if (record.recordKind !== "governed_continuation_sequence_config") return false;
+  if (record.schemaVersion !== ENGINEERING_STORE_SCHEMA_VERSION) return false;
+  if (record.source !== GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE) return false;
+  if (record.authoritySource !== GOVERNED_CONTINUATION_SEQUENCE_AUTHORITY_SOURCE) return false;
+  if (record.recordVersion !== 1) return false;
+  if (!Array.isArray(record.entries) || record.entries.length === 0) return false;
+  if (!record.entries.every(validateSequenceEntry)) return false;
+  const bootstraps = record.entries.filter((e) => e.predecessorEntryKey === null);
+  if (bootstraps.length !== 1) return false;
+  const { configHash, ...body } = record;
+  return hashSequenceConfig(body) === configHash;
+}
+
+export type FulfillmentBody = Omit<
+  GovernedContinuationSequenceFulfillmentRecord,
+  "fulfillmentHash"
+>;
+
+export function hashSequenceFulfillment(body: FulfillmentBody): string {
+  return sha256Utf8(JSON.stringify(sortKeys(body)));
+}
+
+export function buildSequenceFulfillmentRecord(input: {
+  sequenceId: string;
+  sequenceConfigHash: string;
+  entryKey: string;
+  entryHash: string;
+  verificationDecisionId: string;
+  executorAssignmentId: string;
+  executorExecutionEvidenceId: string;
+  fulfilledAt?: string;
+}): GovernedContinuationSequenceFulfillmentRecord {
+  const fulfilledAt = input.fulfilledAt ?? new Date().toISOString();
+  const fulfillmentId = `gcsf-${input.sequenceId}-${input.entryKey}-${sha256Utf8(
+    `${input.verificationDecisionId}:${input.sequenceConfigHash}`,
+  ).slice(0, 16)}`;
+  const body: FulfillmentBody = {
+    schemaVersion: ENGINEERING_STORE_SCHEMA_VERSION,
+    recordKind: "governed_continuation_sequence_fulfillment",
+    fulfillmentId,
+    sequenceId: input.sequenceId,
+    sequenceConfigHash: input.sequenceConfigHash,
+    entryKey: input.entryKey,
+    entryHash: input.entryHash,
+    verificationDecisionId: input.verificationDecisionId,
+    executorAssignmentId: input.executorAssignmentId,
+    executorExecutionEvidenceId: input.executorExecutionEvidenceId,
+    fulfilledAt,
+    source: GOVERNED_CONTINUATION_SEQUENCE_FULFILLMENT_SOURCE,
+    recordVersion: 1,
+  };
+  return { ...body, fulfillmentHash: hashSequenceFulfillment(body) };
+}
+
+export function validateSequenceFulfillment(
+  record: GovernedContinuationSequenceFulfillmentRecord,
+): boolean {
+  if (record.recordKind !== "governed_continuation_sequence_fulfillment") return false;
+  if (record.schemaVersion !== ENGINEERING_STORE_SCHEMA_VERSION) return false;
+  if (record.source !== GOVERNED_CONTINUATION_SEQUENCE_FULFILLMENT_SOURCE) return false;
+  if (record.recordVersion !== 1) return false;
+  const { fulfillmentHash, ...body } = record;
+  return hashSequenceFulfillment(body) === fulfillmentHash;
 }

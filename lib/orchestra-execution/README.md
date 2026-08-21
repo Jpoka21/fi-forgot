@@ -252,7 +252,18 @@ IMP 040 adds machine-addressable continuation targets so Orchestra can continue 
 3. `authorizePostDecisionExecution` resolves the unique eligible target (lowest `orderingKey`) and binds it into the authorization record.
 4. `executeAuthorizedPostDecisionAction` rebuilds the bounded continuation assignment from that target and dispatches programmatically.
 
-Eligibility fails closed for missing, ambiguous (tied ordering), consumed, superseded, blocked, repository/branch/HEAD/predecessor mismatch, or policy-invalid targets. Consumed targets are not reusable. Provider prose cannot select or broaden a target.
+Eligibility fails closed for missing, ambiguous (tied ordering), consumed, superseded, blocked, repository/branch/HEAD/predecessor mismatch, policy-invalid targets, or predecessor path-authority violations. Consumed targets are not reusable. Provider prose cannot select or broaden a target.
+
+## Project governed continuation sequences
+
+IMP 041 adds durable project sequence configuration so Orchestra can materialize the next continuation target without manual per-step registration:
+
+1. Persist a project sequence with `persistGovernedContinuationSequenceConfig` (exactly one bootstrap entry; later entries name `predecessorEntryKey`).
+2. After a trusted `VERIFIED` decision, call `materializeNextGovernedContinuationTargetFromSequence`.
+3. Orchestra records predecessor fulfillment, selects the unique next entry, and registers a sequence-bound continuation target through the existing IMP 040 registration/path-authority gates.
+4. Explicit `authorizePostDecisionExecution` remains required before dispatch.
+
+Sequence configuration is not execution authority. Standing automatic authorization is out of scope.
 
 This slice does **not**:
 

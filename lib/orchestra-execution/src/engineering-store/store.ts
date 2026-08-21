@@ -21,6 +21,8 @@ import {
 import {
   validateGovernedContinuationTarget,
   validateGovernedContinuationTargetLifecycle,
+  validateGovernedContinuationSequenceConfig,
+  validateSequenceFulfillment,
 } from "./governed-continuation-target-record.js";
 import { evaluatePredecessorPathAuthority } from "./predecessor-path-authority.js";
 import {
@@ -38,6 +40,8 @@ import {
   type CrashReceipt,
   type ExecutionEvidence,
   type FrozenAssignmentRecord,
+  type GovernedContinuationSequenceConfigRecord,
+  type GovernedContinuationSequenceFulfillmentRecord,
   type GovernedContinuationTargetLifecycleRecord,
   type GovernedContinuationTargetRecord,
   type GovernedContinuationTargetStatus,
@@ -813,6 +817,181 @@ export class FileEngineeringStore {
     return latest?.status ?? "eligible";
   }
 
+  persistGovernedContinuationSequenceConfig(
+    record: GovernedContinuationSequenceConfigRecord,
+  ): GovernedContinuationSequenceConfigRecord {
+    if (!validateGovernedContinuationSequenceConfig(record)) {
+      throw new EngineeringStoreError("governed continuation sequence config failed validation");
+    }
+    assertSafeId("projectId", record.projectId);
+    assertSafeId("sequenceId", record.sequenceId);
+    const existing = this.loadGovernedContinuationSequenceConfigs(record.projectId).filter(
+      (row) =>
+        validateGovernedContinuationSequenceConfig(row) &&
+        row.sequenceId === record.sequenceId &&
+        row.configurationVersion === record.configurationVersion,
+    );
+    if (existing.length > 0) {
+      const prior = existing[existing.length - 1]!;
+      if (prior.configHash !== record.configHash) {
+        throw new EngineeringStoreError(
+          "duplicate sequence configurationVersion with a different hash; refusing overwrite",
+        );
+      }
+      return prior;
+    }
+    appendLineAtomic(this.sequenceConfigPath(record.projectId), JSON.stringify(record));
+    this.audit({
+      timestamp: record.registeredAt,
+      action: "persist_governed_continuation_sequence_config",
+      assignmentId: record.sequenceId,
+      detail: `v${record.configurationVersion}:${record.configHash.slice(0, 12)}`,
+    });
+    return record;
+  }
+
+  loadGovernedContinuationSequenceConfigs(
+    projectId: string,
+  ): GovernedContinuationSequenceConfigRecord[] {
+    const path = this.sequenceConfigPath(assertSafeId("projectId", projectId));
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as GovernedContinuationSequenceConfigRecord);
+  }
+
+  findActiveGovernedContinuationSequenceConfig(
+    sequenceId: string,
+  ): GovernedContinuationSequenceConfigRecord | null {
+    assertSafeId("sequenceId", sequenceId);
+    let best: GovernedContinuationSequenceConfigRecord | null = null;
+    for (const projectId of this.listSequenceProjectIds()) {
+      for (const row of this.loadGovernedContinuationSequenceConfigs(projectId)) {
+        if (!validateGovernedContinuationSequenceConfig(row)) continue;
+        if (row.sequenceId !== sequenceId) continue;
+        if (!best || row.configurationVersion > best.configurationVersion) best = row;
+      }
+    }
+    return best;
+  }
+
+  findActiveGovernedContinuationSequenceConfigForProject(
+    projectId: string,
+  ): GovernedContinuationSequenceConfigRecord | null {
+    assertSafeId("projectId", projectId);
+    let best: GovernedContinuationSequenceConfigRecord | null = null;
+    for (const row of this.loadGovernedContinuationSequenceConfigs(projectId)) {
+      if (!validateGovernedContinuationSequenceConfig(row)) continue;
+      if (!best || row.configurationVersion > best.configurationVersion) best = row;
+    }
+    return best;
+  }
+
+  persistSequenceFulfillment(
+    record: GovernedContinuationSequenceFulfillmentRecord,
+  ): GovernedContinuationSequenceFulfillmentRecord {
+    if (!validateSequenceFulfillment(record)) {
+      throw new EngineeringStoreError("sequence fulfillment failed validation");
+    }
+    const config = this.findActiveGovernedContinuationSequenceConfig(record.sequenceId);
+    if (!config || !validateGovernedContinuationSequenceConfig(config)) {
+      throw new EngineeringStoreError("sequence fulfillment requires a valid sequence config");
+    }
+    const existing = this.loadSequenceFulfillments(record.sequenceId).filter(
+      (row) =>
+        validateSequenceFulfillment(row) &&
+        row.fulfillmentId === record.fulfillmentId,
+    );
+    if (existing.length > 0) {
+      const prior = existing[existing.length - 1]!;
+      if (prior.fulfillmentHash !== record.fulfillmentHash) {
+        throw new EngineeringStoreError(
+          "duplicate sequence fulfillment with a different hash; refusing overwrite",
+        );
+      }
+      return prior;
+    }
+    // Same decision+entry under same config is reuse by content
+    const sameDecision = this.loadSequenceFulfillments(record.sequenceId).find(
+      (row) =>
+        validateSequenceFulfillment(row) &&
+        row.verificationDecisionId === record.verificationDecisionId &&
+        row.entryKey === record.entryKey,
+    );
+    if (sameDecision) {
+      if (sameDecision.fulfillmentHash !== record.fulfillmentHash) {
+        throw new EngineeringStoreError(
+          "conflicting sequence fulfillment for decision/entry; refusing overwrite",
+        );
+      }
+      return sameDecision;
+    }
+    appendLineAtomic(
+      this.sequenceFulfillmentPath(config.projectId),
+      JSON.stringify(record),
+    );
+    this.audit({
+      timestamp: record.fulfilledAt,
+      action: "persist_sequence_fulfillment",
+      assignmentId: record.executorAssignmentId,
+      detail: `${record.sequenceId}:${record.entryKey}`,
+    });
+    return record;
+  }
+
+  loadSequenceFulfillments(
+    sequenceId: string,
+  ): GovernedContinuationSequenceFulfillmentRecord[] {
+    assertSafeId("sequenceId", sequenceId);
+    const out: GovernedContinuationSequenceFulfillmentRecord[] = [];
+    for (const projectId of this.listSequenceProjectIds()) {
+      const path = this.sequenceFulfillmentPath(projectId);
+      if (!existsSync(path)) continue;
+      for (const line of readFileSync(path, "utf8").split(/\r?\n/).filter(Boolean)) {
+        const row = JSON.parse(line) as GovernedContinuationSequenceFulfillmentRecord;
+        if (row.sequenceId === sequenceId) out.push(row);
+      }
+    }
+    return out;
+  }
+
+  findSequenceFulfillmentByExecutor(
+    sequenceId: string,
+    executorAssignmentId: string,
+  ): GovernedContinuationSequenceFulfillmentRecord | null {
+    const matches = this.loadSequenceFulfillments(sequenceId).filter(
+      (row) =>
+        validateSequenceFulfillment(row) &&
+        row.executorAssignmentId === executorAssignmentId,
+    );
+    return matches.length > 0 ? matches[matches.length - 1]! : null;
+  }
+
+  findSequenceFulfillmentByDecision(
+    sequenceId: string,
+    verificationDecisionId: string,
+  ): GovernedContinuationSequenceFulfillmentRecord | null {
+    const matches = this.loadSequenceFulfillments(sequenceId).filter(
+      (row) =>
+        validateSequenceFulfillment(row) &&
+        row.verificationDecisionId === verificationDecisionId,
+    );
+    return matches.length > 0 ? matches[matches.length - 1]! : null;
+  }
+
+  private listSequenceProjectIds(): string[] {
+    const root = this.sequencesDir();
+    if (!existsSync(root)) return [];
+    return readdirSync(root).filter((name) => {
+      try {
+        return lstatSync(join(root, name)).isDirectory();
+      } catch {
+        return false;
+      }
+    });
+  }
+
   persistAuthoritativeSemanticFinding(record: VerifierSemanticFindingRecord): VerifierSemanticFindingRecord {
     if (!validateVerifierSemanticFinding(record)) {
       throw new EngineeringStoreError("authoritative semantic finding record failed validation");
@@ -1121,6 +1300,18 @@ export class FileEngineeringStore {
       assignmentId,
       "governed-continuation-target-lifecycle.ndjson",
     );
+  }
+
+  private sequencesDir(): string {
+    return join(this.storeRoot, "sequences");
+  }
+
+  private sequenceConfigPath(projectId: string): string {
+    return join(this.sequencesDir(), projectId, "governed-continuation-sequences.ndjson");
+  }
+
+  private sequenceFulfillmentPath(projectId: string): string {
+    return join(this.sequencesDir(), projectId, "governed-continuation-sequence-fulfillments.ndjson");
   }
 
   private semanticProposalsPath(assignmentId: string): string {
