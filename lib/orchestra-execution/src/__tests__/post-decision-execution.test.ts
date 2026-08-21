@@ -184,18 +184,24 @@ export async function runPostDecisionExecutionTests(): Promise<void> {
   section("039 — continuation target absent");
 
   const cont = await buildDecisionCase("pdaex-cont", { writeMarker: true });
+  expect(
+    "cont decision VERIFIED",
+    cont.adjudication.decisionRecord!.decision,
+    "VERIFIED",
+  );
   expect("prepared PREPARE_CONTINUATION", cont.prepared.preparedAction, "PREPARE_CONTINUATION");
-  authorizePostDecisionExecution({
+  const contAuthAbsent = authorizePostDecisionExecution({
     store: cont.store,
     postDecisionActionId: cont.prepared.actionRecord!.postDecisionActionId,
     humanAuthorized: true,
   });
+  expect("continuation auth refused without target", contAuthAbsent.reason, "continuation_target_not_available");
   const contExec = await executeAuthorizedPostDecisionAction({
     store: cont.store,
     postDecisionActionId: cont.prepared.actionRecord!.postDecisionActionId,
     provider: new CountingMock(),
   });
-  expect("continuation refused", contExec.reason, "continuation_target_not_available");
+  expect("continuation exec refused without auth", contExec.reason, "authorization_not_found");
 
   section("039 — programmatic correction execution (no courier)");
 
@@ -294,19 +300,21 @@ export async function runPostDecisionExecutionTests(): Promise<void> {
 
   // Authorization/action mismatch: authorize corr, try execute cont action id won't work;
   // forge auth for wrong preparedAction via hand-build against correct action hash but wrong preparedAction fails validate.
-  const mismatchAuth = buildPostDecisionExecutionAuthorizationRecord({
-    postDecisionActionId: corr2.prepared.actionRecord!.postDecisionActionId,
-    postDecisionActionHash: corr2.prepared.actionRecord!.actionHash,
-    verificationDecisionId: corr2.prepared.actionRecord!.verificationDecisionId,
-    preparedAction: "PREPARE_CONTINUATION",
-    executorAssignmentId: corr2.prepared.actionRecord!.executorAssignmentId,
-    executorExecutionEvidenceId: corr2.prepared.actionRecord!.executorExecutionEvidenceId,
-    startingBranch: corr2.prepared.actionRecord!.startingBranch!,
-    startingHead: corr2.prepared.actionRecord!.startingHead!,
-  });
-  // Builder allows any preparedAction; store must refuse mismatch with action.
   let mismatchPersisted = false;
   try {
+    const mismatchAuth = buildPostDecisionExecutionAuthorizationRecord({
+      postDecisionActionId: corr2.prepared.actionRecord!.postDecisionActionId,
+      postDecisionActionHash: corr2.prepared.actionRecord!.actionHash,
+      verificationDecisionId: corr2.prepared.actionRecord!.verificationDecisionId,
+      preparedAction: "PREPARE_CONTINUATION",
+      executorAssignmentId: corr2.prepared.actionRecord!.executorAssignmentId,
+      executorExecutionEvidenceId: corr2.prepared.actionRecord!.executorExecutionEvidenceId,
+      startingBranch: corr2.prepared.actionRecord!.startingBranch!,
+      startingHead: corr2.prepared.actionRecord!.startingHead!,
+      continuationTargetId: "gct-forged-target",
+      continuationTargetHash: "ab".repeat(32),
+    });
+    // Builder allows constructed record; store must refuse mismatch with action.
     corr2.store.persistPostDecisionExecutionAuthorization(mismatchAuth);
     mismatchPersisted = true;
   } catch {

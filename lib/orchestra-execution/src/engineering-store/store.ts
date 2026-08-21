@@ -19,6 +19,10 @@ import {
   validatePostDecisionExecutionAuthorization,
 } from "./post-decision-execution-authorization.js";
 import {
+  validateGovernedContinuationTarget,
+  validateGovernedContinuationTargetLifecycle,
+} from "./governed-continuation-target-record.js";
+import {
   validateVerifierSemanticFinding,
 } from "./semantic-finding-record.js";
 import {
@@ -33,6 +37,9 @@ import {
   type CrashReceipt,
   type ExecutionEvidence,
   type FrozenAssignmentRecord,
+  type GovernedContinuationTargetLifecycleRecord,
+  type GovernedContinuationTargetRecord,
+  type GovernedContinuationTargetStatus,
   type PostDecisionActionRecord,
   type PostDecisionExecutionAuthorizationRecord,
   type StatusEvent,
@@ -542,6 +549,17 @@ export class FileEngineeringStore {
         "post-decision execution authorization does not match prepared action",
       );
     }
+    if (action.preparedAction === "PREPARE_CONTINUATION") {
+      if (!record.continuationTargetId || !record.continuationTargetHash) {
+        throw new EngineeringStoreError(
+          "PREPARE_CONTINUATION authorization requires continuation target binding",
+        );
+      }
+    } else if (record.continuationTargetId !== null || record.continuationTargetHash !== null) {
+      throw new EngineeringStoreError(
+        "non-continuation authorization must not bind a continuation target",
+      );
+    }
     if (action.preparedAction === "REQUIRE_HUMAN_DECISION") {
       throw new EngineeringStoreError(
         "REQUIRE_HUMAN_DECISION cannot receive execution authorization",
@@ -612,6 +630,148 @@ export class FileEngineeringStore {
       if (matches.length > 0) return matches[matches.length - 1] ?? null;
     }
     return null;
+  }
+
+  persistGovernedContinuationTarget(
+    record: GovernedContinuationTargetRecord,
+  ): GovernedContinuationTargetRecord {
+    if (!validateGovernedContinuationTarget(record)) {
+      throw new EngineeringStoreError("governed continuation target failed validation");
+    }
+    const decision = this.findVerificationDecisionById(record.verificationDecisionId);
+    if (!decision || !validateVerificationDecision(decision)) {
+      throw new EngineeringStoreError(
+        "governed continuation target requires a valid VERIFIED decision",
+      );
+    }
+    if (decision.decision !== "VERIFIED") {
+      throw new EngineeringStoreError(
+        "governed continuation target requires a VERIFIED decision",
+      );
+    }
+    if (
+      decision.verifiedExecutorAssignmentId !== record.predecessorExecutorAssignmentId ||
+      decision.verifiedExecutorExecutionEvidenceId !==
+        record.predecessorExecutorExecutionEvidenceId
+    ) {
+      throw new EngineeringStoreError(
+        "governed continuation target predecessor does not match verification decision",
+      );
+    }
+    const assignmentId = assertSafeId("assignmentId", decision.verifierAssignmentId);
+    const frozen = this.loadFrozenAssignment(assignmentId);
+    if (frozen.assignment.role !== "verifier") {
+      throw new EngineeringStoreError(
+        "governed continuation targets must be persisted under the verifier assignment",
+      );
+    }
+    const existing = this.findGovernedContinuationTargetById(record.continuationTargetId);
+    if (existing) {
+      if (existing.targetHash !== record.targetHash) {
+        throw new EngineeringStoreError(
+          "duplicate governed continuation target with a different hash; refusing overwrite",
+        );
+      }
+      return existing;
+    }
+    appendLineAtomic(this.governedContinuationTargetPath(assignmentId), JSON.stringify(record));
+    this.audit({
+      timestamp: record.registeredAt,
+      action: "persist_governed_continuation_target",
+      assignmentId,
+      detail: `${record.continuationTargetId}:o${record.orderingKey}`,
+    });
+    return record;
+  }
+
+  loadGovernedContinuationTargets(
+    verifierAssignmentId: string,
+  ): GovernedContinuationTargetRecord[] {
+    const path = this.governedContinuationTargetPath(
+      assertSafeId("assignmentId", verifierAssignmentId),
+    );
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as GovernedContinuationTargetRecord);
+  }
+
+  findGovernedContinuationTargetById(
+    continuationTargetId: string,
+  ): GovernedContinuationTargetRecord | null {
+    assertSafeId("continuationTargetId", continuationTargetId);
+    for (const assignmentId of this.listAssignmentIds()) {
+      const matches = this.loadGovernedContinuationTargets(assignmentId).filter(
+        (row) =>
+          validateGovernedContinuationTarget(row) &&
+          row.continuationTargetId === continuationTargetId,
+      );
+      if (matches.length > 0) return matches[matches.length - 1] ?? null;
+    }
+    return null;
+  }
+
+  persistGovernedContinuationTargetLifecycle(
+    record: GovernedContinuationTargetLifecycleRecord,
+  ): GovernedContinuationTargetLifecycleRecord {
+    if (!validateGovernedContinuationTargetLifecycle(record)) {
+      throw new EngineeringStoreError(
+        "governed continuation target lifecycle failed validation",
+      );
+    }
+    const target = this.findGovernedContinuationTargetById(record.continuationTargetId);
+    if (!target || target.targetHash !== record.targetHash) {
+      throw new EngineeringStoreError(
+        "lifecycle requires a matching persisted governed continuation target",
+      );
+    }
+    const decision = this.findVerificationDecisionById(target.verificationDecisionId);
+    if (!decision) {
+      throw new EngineeringStoreError("lifecycle requires verification decision");
+    }
+    const assignmentId = assertSafeId("assignmentId", decision.verifierAssignmentId);
+    appendLineAtomic(
+      this.governedContinuationTargetLifecyclePath(assignmentId),
+      JSON.stringify(record),
+    );
+    this.audit({
+      timestamp: record.recordedAt,
+      action: "persist_governed_continuation_target_lifecycle",
+      assignmentId,
+      detail: `${record.continuationTargetId}:${record.status}`,
+    });
+    return record;
+  }
+
+  loadGovernedContinuationTargetLifecycles(
+    verifierAssignmentId: string,
+  ): GovernedContinuationTargetLifecycleRecord[] {
+    const path = this.governedContinuationTargetLifecyclePath(
+      assertSafeId("assignmentId", verifierAssignmentId),
+    );
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as GovernedContinuationTargetLifecycleRecord);
+  }
+
+  effectiveGovernedContinuationTargetStatus(
+    continuationTargetId: string,
+    targetHash: string,
+  ): GovernedContinuationTargetStatus {
+    assertSafeId("continuationTargetId", continuationTargetId);
+    let latest: GovernedContinuationTargetLifecycleRecord | null = null;
+    for (const assignmentId of this.listAssignmentIds()) {
+      for (const row of this.loadGovernedContinuationTargetLifecycles(assignmentId)) {
+        if (!validateGovernedContinuationTargetLifecycle(row)) continue;
+        if (row.continuationTargetId !== continuationTargetId) continue;
+        if (row.targetHash !== targetHash) continue;
+        latest = row;
+      }
+    }
+    return latest?.status ?? "eligible";
   }
 
   persistAuthoritativeSemanticFinding(record: VerifierSemanticFindingRecord): VerifierSemanticFindingRecord {
@@ -910,6 +1070,18 @@ export class FileEngineeringStore {
 
   private postDecisionExecutionAuthorizationPath(assignmentId: string): string {
     return join(this.assignmentsDir(), assignmentId, "post-decision-execution-authorizations.ndjson");
+  }
+
+  private governedContinuationTargetPath(assignmentId: string): string {
+    return join(this.assignmentsDir(), assignmentId, "governed-continuation-targets.ndjson");
+  }
+
+  private governedContinuationTargetLifecyclePath(assignmentId: string): string {
+    return join(
+      this.assignmentsDir(),
+      assignmentId,
+      "governed-continuation-target-lifecycle.ndjson",
+    );
   }
 
   private semanticProposalsPath(assignmentId: string): string {

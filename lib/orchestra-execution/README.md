@@ -238,10 +238,21 @@ Preferred governed flow continuation:
 Behavior:
 
 - `PREPARE_CORRECTION` → generate a bounded correction executor assignment from authoritative failure context, then dispatch through the existing governed provider path (Mock or Cursor).
-- `PREPARE_CONTINUATION` → refuse with `continuation_target_not_available` until a governed continuation target exists (this sprint does not invent next requirements).
+- `PREPARE_CONTINUATION` → resolve a registered governed continuation target (IMP 040), bind authorization to that exact target, then dispatch a bounded continuation assignment through the existing governed provider path. Missing/ambiguous/stale targets fail closed.
 - `REQUIRE_HUMAN_DECISION` → always refuse with `human_decision_required`.
 
-Authorization binds the exact `postDecisionActionId` / `actionHash`, decision id, prepared action, executor evidence linkage, and starting branch/HEAD. Baseline drift refuses before provider session. Duplicate execution reuses existing correction evidence. No standing auto-authorization, no continue-until-blocked, no automatic commit/push.
+Authorization binds the exact `postDecisionActionId` / `actionHash`, decision id, prepared action, executor evidence linkage, and starting branch/HEAD. For continuation, authorization also binds `continuationTargetId` / `continuationTargetHash`. Baseline drift refuses before provider session. Duplicate execution reuses existing correction/continuation evidence. No standing auto-authorization, no continue-until-blocked, no automatic commit/push.
+
+## Governed continuation targets
+
+IMP 040 adds machine-addressable continuation targets so Orchestra can continue only already-authorized next work:
+
+1. After a trusted `VERIFIED` decision, register a target with `registerGovernedContinuationTarget` (project-supplied governed state / config — never provider prose).
+2. Prepare `PREPARE_CONTINUATION` as before.
+3. `authorizePostDecisionExecution` resolves the unique eligible target (lowest `orderingKey`) and binds it into the authorization record.
+4. `executeAuthorizedPostDecisionAction` rebuilds the bounded continuation assignment from that target and dispatches programmatically.
+
+Eligibility fails closed for missing, ambiguous (tied ordering), consumed, superseded, blocked, repository/branch/HEAD/predecessor mismatch, or policy-invalid targets. Consumed targets are not reusable. Provider prose cannot select or broaden a target.
 
 This slice does **not**:
 

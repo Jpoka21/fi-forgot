@@ -103,6 +103,9 @@ export type {
   PostDecisionAction,
   PostDecisionActionRecord,
   PostDecisionExecutionAuthorizationRecord,
+  GovernedContinuationTargetRecord,
+  GovernedContinuationTargetLifecycleRecord,
+  GovernedContinuationTargetStatus,
   VerifierRequirementOutcome,
   VerifierSemanticFindingRecord,
   VerifierSemanticFindingProposal,
@@ -120,6 +123,9 @@ export {
   POST_DECISION_ACTION_SOURCE,
   POST_DECISION_EXECUTION_AUTHORIZATION_SOURCE,
   POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE,
+  GOVERNED_CONTINUATION_TARGET_SOURCE,
+  GOVERNED_CONTINUATION_TARGET_STATUSES,
+  GOVERNED_CONTINUATION_TARGET_LIFECYCLE_SOURCE,
   VERIFIER_REQUIREMENT_OUTCOMES,
   VERIFIER_SEMANTIC_FINDING_SOURCE,
   VERIFIER_SEMANTIC_PROPOSAL_SOURCE,
@@ -259,3 +265,26 @@ export {
   postDecisionExecutionAuthorizationId,
 } from "./engineering-store/post-decision-execution-authorization.js";
 export { correctionAssignmentId } from "./engineering-store/build-correction-assignment.js";
+export { continuationAssignmentId } from "./engineering-store/build-continuation-assignment.js";
+export {
+  registerGovernedContinuationTarget,
+  GOVERNED_CONTINUATION_TARGET_REGISTRATION_REFUSALS,
+} from "./engineering-store/register-governed-continuation-target.js";
+export type {
+  RegisterGovernedContinuationTargetInput,
+  RegisterGovernedContinuationTargetResult,
+  GovernedContinuationTargetRegistrationRefusal,
+} from "./engineering-store/register-governed-continuation-target.js";
+export {
+  resolveGovernedContinuationTargetForAction,
+  CONTINUATION_TARGET_RESOLUTION_REFUSALS,
+} from "./engineering-store/resolve-governed-continuation-target.js";
+export type {
+  ResolveGovernedContinuationTargetResult,
+  ContinuationTargetResolutionRefusal,
+} from "./engineering-store/resolve-governed-continuation-target.js";
+export {
+  validateGovernedContinuationTarget,
+  governedContinuationTargetId,
+} from "./engineering-store/governed-continuation-target-record.js";
+export { markGovernedContinuationTargetStatus } from "./engineering-store/mark-governed-continuation-target.js";

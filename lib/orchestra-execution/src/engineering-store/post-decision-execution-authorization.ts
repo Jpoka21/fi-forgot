@@ -32,8 +32,25 @@ export function buildPostDecisionExecutionAuthorizationRecord(input: {
   executorExecutionEvidenceId: string;
   startingBranch: string;
   startingHead: string;
+  continuationTargetId?: string | null;
+  continuationTargetHash?: string | null;
   authorizedAt?: string;
 }): PostDecisionExecutionAuthorizationRecord {
+  const continuationTargetId =
+    input.preparedAction === "PREPARE_CONTINUATION"
+      ? (input.continuationTargetId ?? null)
+      : null;
+  const continuationTargetHash =
+    input.preparedAction === "PREPARE_CONTINUATION"
+      ? (input.continuationTargetHash ?? null)
+      : null;
+  if (input.preparedAction === "PREPARE_CONTINUATION") {
+    if (!continuationTargetId || !continuationTargetHash) {
+      throw new Error(
+        "PREPARE_CONTINUATION authorization requires continuationTargetId and continuationTargetHash",
+      );
+    }
+  }
   const body: PostDecisionExecutionAuthorizationRecordBody = {
     schemaVersion: ENGINEERING_STORE_SCHEMA_VERSION,
     recordKind: "post_decision_execution_authorization",
@@ -44,6 +61,8 @@ export function buildPostDecisionExecutionAuthorizationRecord(input: {
     preparedAction: input.preparedAction,
     executorAssignmentId: input.executorAssignmentId,
     executorExecutionEvidenceId: input.executorExecutionEvidenceId,
+    continuationTargetId,
+    continuationTargetHash,
     authorizedBy: "explicit_human",
     authorizedAt: input.authorizedAt ?? new Date().toISOString(),
     authorizationScope: POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE,
@@ -70,6 +89,14 @@ export function validatePostDecisionExecutionAuthorization(
   if (record.authorizationScope !== POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE) return false;
   if (record.recordVersion !== 1) return false;
   if (record.authorizationId !== postDecisionExecutionAuthorizationId(record.postDecisionActionId)) {
+    return false;
+  }
+  if (record.preparedAction === "PREPARE_CONTINUATION") {
+    if (!record.continuationTargetId || !record.continuationTargetHash) return false;
+  } else if (
+    record.continuationTargetId !== null ||
+    record.continuationTargetHash !== null
+  ) {
     return false;
   }
   const { authorizationHash, ...body } = record;

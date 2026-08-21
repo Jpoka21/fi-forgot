@@ -177,6 +177,12 @@ export interface PostDecisionExecutionAuthorizationRecord {
   preparedAction: PostDecisionAction;
   executorAssignmentId: string;
   executorExecutionEvidenceId: string;
+  /**
+   * Bound only for PREPARE_CONTINUATION (IMP 040). Null for PREPARE_CORRECTION.
+   * Authorization for continuation is invalid without an exact target binding.
+   */
+  continuationTargetId: string | null;
+  continuationTargetHash: string | null;
   authorizedBy: "explicit_human";
   authorizedAt: string;
   authorizationScope: typeof POST_DECISION_EXECUTION_AUTHORIZATION_SCOPE;
@@ -186,6 +192,79 @@ export interface PostDecisionExecutionAuthorizationRecord {
   source: typeof POST_DECISION_EXECUTION_AUTHORIZATION_SOURCE;
   recordVersion: 1;
   authorizationHash: string;
+}
+
+/**
+ * Governed continuation target (IMP 040).
+ * Already-authorized next bounded work unit — never invented from provider prose.
+ */
+export const GOVERNED_CONTINUATION_TARGET_SOURCE = "registerGovernedContinuationTarget" as const;
+
+export const GOVERNED_CONTINUATION_TARGET_STATUSES = [
+  "eligible",
+  "consumed",
+  "superseded",
+  "blocked",
+] as const;
+export type GovernedContinuationTargetStatus =
+  (typeof GOVERNED_CONTINUATION_TARGET_STATUSES)[number];
+
+export const GOVERNED_CONTINUATION_TARGET_LIFECYCLE_SOURCE =
+  "governedContinuationTargetLifecycle" as const;
+
+export interface GovernedContinuationTargetRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "governed_continuation_target";
+  continuationTargetId: string;
+  targetKey: string;
+  projectId: string;
+  verificationDecisionId: string;
+  predecessorExecutorAssignmentId: string;
+  predecessorExecutorExecutionEvidenceId: string;
+  repositoryPath: string;
+  branch: string;
+  baselineHead: string;
+  assignmentText: string;
+  allowedPaths: string[];
+  protectedPaths: string[];
+  prohibitedCommandClasses: string[];
+  requireNoPush: true;
+  commitAuthorization: false;
+  pushAuthorization: false;
+  requiredEvidence: string[];
+  structuredObligations: Array<{
+    obligationId: string;
+    summary: string;
+    verificationMode?: string;
+  }>;
+  orderingKey: number;
+  status: "eligible";
+  authoritySource: typeof GOVERNED_CONTINUATION_TARGET_SOURCE;
+  registeredAt: string;
+  source: typeof GOVERNED_CONTINUATION_TARGET_SOURCE;
+  recordVersion: 1;
+  targetHash: string;
+}
+
+/**
+ * Append-only lifecycle transition for a governed continuation target.
+ * Registration records stay immutable; eligibility is registration + latest lifecycle.
+ */
+export interface GovernedContinuationTargetLifecycleRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "governed_continuation_target_lifecycle";
+  lifecycleId: string;
+  continuationTargetId: string;
+  targetHash: string;
+  status: Exclude<GovernedContinuationTargetStatus, "eligible">;
+  postDecisionActionId: string | null;
+  generatedAssignmentId: string | null;
+  executionEvidenceId: string | null;
+  reasonCode: string;
+  recordedAt: string;
+  source: typeof GOVERNED_CONTINUATION_TARGET_LIFECYCLE_SOURCE;
+  recordVersion: 1;
+  lifecycleHash: string;
 }
 
 export type EvidenceSourceClass =
@@ -219,6 +298,8 @@ export interface AssignmentRelationship {
   verifiesAssignmentId?: string;
   verifiesExecutionEvidenceId?: string;
   correctionOfAssignmentId?: string;
+  continuationOfAssignmentId?: string;
+  continuationTargetId?: string;
 }
 
 export interface FrozenAssignmentRecord {

@@ -5,6 +5,7 @@ import {
 } from "./post-decision-execution-authorization.js";
 import { validatePostDecisionAction } from "./post-decision-action-record.js";
 import { validateVerificationDecision } from "./verification-decision-record.js";
+import { resolveGovernedContinuationTargetForAction } from "./resolve-governed-continuation-target.js";
 import type {
   PostDecisionAction,
   PostDecisionActionRecord,
@@ -21,6 +22,19 @@ export const POST_DECISION_AUTHORIZATION_REFUSALS = [
   "human_decision_not_executable",
   "starting_baseline_missing",
   "relationship_mismatch",
+  "continuation_target_not_available",
+  "continuation_target_ambiguous",
+  "continuation_target_stale",
+  "continuation_target_superseded",
+  "continuation_target_blocked",
+  "continuation_target_consumed",
+  "continuation_target_corrupt",
+  "continuation_target_repository_mismatch",
+  "continuation_target_branch_mismatch",
+  "continuation_target_head_mismatch",
+  "continuation_target_predecessor_mismatch",
+  "continuation_target_project_mismatch",
+  "continuation_target_policy_invalid",
 ] as const;
 
 export type PostDecisionAuthorizationRefusal =
@@ -64,6 +78,7 @@ function refused(
 /**
  * Record explicit human authorization to execute one prepared post-decision action.
  * Does not execute. Does not invent authorization from VERIFIED/CORRECTION_REQUIRED.
+ * For PREPARE_CONTINUATION, binds authorization to the unique eligible governed target.
  */
 export function authorizePostDecisionExecution(
   input: AuthorizePostDecisionExecutionInput,
@@ -121,6 +136,26 @@ export function authorizePostDecisionExecution(
     };
   }
 
+  let continuationTargetId: string | null = null;
+  let continuationTargetHash: string | null = null;
+  if (action.preparedAction === "PREPARE_CONTINUATION") {
+    const resolved = resolveGovernedContinuationTargetForAction({
+      store: input.store,
+      action,
+    });
+    if (!resolved.resolved || !resolved.target) {
+      const reason =
+        (resolved.reason as PostDecisionAuthorizationRefusal | null) ??
+        "continuation_target_not_available";
+      return refused(input, reason, {
+        preparedAction: action.preparedAction,
+        warnings: resolved.warnings,
+      });
+    }
+    continuationTargetId = resolved.target.continuationTargetId;
+    continuationTargetHash = resolved.target.targetHash;
+  }
+
   const record = buildPostDecisionExecutionAuthorizationRecord({
     postDecisionActionId: action.postDecisionActionId,
     postDecisionActionHash: action.actionHash,
@@ -130,6 +165,8 @@ export function authorizePostDecisionExecution(
     executorExecutionEvidenceId: action.executorExecutionEvidenceId,
     startingBranch: action.startingBranch,
     startingHead: action.startingHead,
+    continuationTargetId,
+    continuationTargetHash,
   });
   const persisted = input.store.persistPostDecisionExecutionAuthorization(record);
   return {
@@ -140,6 +177,12 @@ export function authorizePostDecisionExecution(
       "explicit human authorization recorded for a single prepared post-decision action",
       "authorization is not execution; call executeAuthorizedPostDecisionAction separately",
       "does not grant standing continuation or automatic commit/push",
+      ...(action.preparedAction === "PREPARE_CONTINUATION"
+        ? [
+            `continuation authorization bound to target ${continuationTargetId}`,
+            "authorization does not transfer across continuation targets",
+          ]
+        : []),
     ],
     postDecisionActionId: action.postDecisionActionId,
     preparedAction: action.preparedAction,

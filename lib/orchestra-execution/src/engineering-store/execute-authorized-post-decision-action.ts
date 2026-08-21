@@ -4,6 +4,12 @@ import type { ExecutionProvider } from "../provider-contract.js";
 import { resolveActiveExecutionProvider } from "./route-verifier.js";
 import { dispatchFrozenAssignment } from "./dispatch.js";
 import { buildCorrectionAssignmentFromPreparedAction, correctionAssignmentId } from "./build-correction-assignment.js";
+import {
+  buildContinuationAssignmentFromTarget,
+  continuationAssignmentId,
+} from "./build-continuation-assignment.js";
+import { buildGovernedContinuationTargetLifecycleRecord } from "./governed-continuation-target-record.js";
+import { resolveGovernedContinuationTargetForAction } from "./resolve-governed-continuation-target.js";
 import { EngineeringStoreError, FileEngineeringStore } from "./store.js";
 import { validatePostDecisionAction } from "./post-decision-action-record.js";
 import { validatePostDecisionExecutionAuthorization } from "./post-decision-execution-authorization.js";
@@ -24,12 +30,26 @@ export const POST_DECISION_EXECUTION_REFUSALS = [
   "authorization_corrupt",
   "authorization_action_mismatch",
   "authorization_hash_mismatch",
+  "authorization_target_mismatch",
   "decision_not_found",
   "decision_corrupt",
   "decision_action_mismatch",
   "relationship_mismatch",
   "human_decision_required",
   "continuation_target_not_available",
+  "continuation_target_ambiguous",
+  "continuation_target_stale",
+  "continuation_target_superseded",
+  "continuation_target_blocked",
+  "continuation_target_consumed",
+  "continuation_target_corrupt",
+  "continuation_target_repository_mismatch",
+  "continuation_target_branch_mismatch",
+  "continuation_target_head_mismatch",
+  "continuation_target_predecessor_mismatch",
+  "continuation_target_project_mismatch",
+  "continuation_target_policy_invalid",
+  "continuation_scope_invalid",
   "branch_drift",
   "head_drift",
   "baseline_incomplete",
@@ -102,7 +122,7 @@ function refused(
 /**
  * Execute an explicitly human-authorized post-decision action from store authority only.
  * PREPARE_CORRECTION → generate bounded correction + dispatch.
- * PREPARE_CONTINUATION → refuse unless architecture has a continuation target (none yet).
+ * PREPARE_CONTINUATION → resolve governed continuation target + dispatch.
  * REQUIRE_HUMAN_DECISION → always refuse.
  */
 export async function executeAuthorizedPostDecisionAction(
@@ -258,17 +278,12 @@ export async function executeAuthorizedPostDecisionAction(
   }
 
   if (action.preparedAction === "PREPARE_CONTINUATION") {
-    return refused(input, "continuation_target_not_available", {
+    return executeContinuation({
+      input,
       action,
       authorization,
       decision,
-      preparedAction: action.preparedAction,
-      authorizationId: authorization.authorizationId,
-      verificationDecisionId: decision.verificationDecisionId,
-      warnings: [
-        "no governed continuation target assignment exists in closed architecture",
-        "IMP 039 does not invent next requirements",
-      ],
+      predecessorProjectId: executorRecord.frozen.assignment.projectId,
     });
   }
 
@@ -402,6 +417,227 @@ export async function executeAuthorizedPostDecisionAction(
     verificationDecisionId: decision.verificationDecisionId,
     generatedAssignmentId: corrId,
     assignmentHash: correctionFrozen.assignmentHash,
+    providerStarted: dispatched.evidence.providerStarted,
+    executionEvidenceId: dispatched.evidence.evidenceId,
+    technicalStatus: dispatched.result.executionVerdict,
+    duplicateExecutionReused: false,
+    action,
+    authorization,
+    decision,
+    evidence: dispatched.evidence,
+  };
+}
+
+async function executeContinuation(args: {
+  input: ExecuteAuthorizedPostDecisionActionInput;
+  action: PostDecisionActionRecord;
+  authorization: PostDecisionExecutionAuthorizationRecord;
+  decision: VerificationDecisionRecord;
+  predecessorProjectId: string;
+}): Promise<ExecuteAuthorizedPostDecisionActionResult> {
+  const { input, action, authorization, decision } = args;
+
+  if (!authorization.continuationTargetId || !authorization.continuationTargetHash) {
+    return refused(input, "authorization_target_mismatch", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      warnings: ["continuation authorization missing target binding"],
+    });
+  }
+
+  const contId = continuationAssignmentId(action.postDecisionActionId);
+  const existingEvidence = input.store.loadLatestExecutionEvidence(contId);
+  if (existingEvidence) {
+    let existingRecord;
+    try {
+      existingRecord = input.store.loadAssignmentRecord(contId);
+    } catch {
+      existingRecord = null;
+    }
+    return {
+      executed: true,
+      refused: false,
+      reason: null,
+      warnings: [
+        "existing continuation execution evidence reused",
+        "duplicate authorized execution refused",
+      ],
+      postDecisionActionId: action.postDecisionActionId,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      verificationDecisionId: decision.verificationDecisionId,
+      generatedAssignmentId: contId,
+      assignmentHash: existingRecord?.frozen.assignmentHash ?? null,
+      providerStarted: existingEvidence.providerStarted,
+      executionEvidenceId: existingEvidence.evidenceId,
+      technicalStatus: existingEvidence.result.executionVerdict,
+      duplicateExecutionReused: true,
+      action,
+      authorization,
+      decision,
+      evidence: existingEvidence,
+    };
+  }
+
+  const resolved = resolveGovernedContinuationTargetForAction({
+    store: input.store,
+    action,
+    boundContinuationTargetId: authorization.continuationTargetId,
+    boundContinuationTargetHash: authorization.continuationTargetHash,
+  });
+  if (!resolved.resolved || !resolved.target) {
+    const reason =
+      (resolved.reason as PostDecisionExecutionRefusal | null) ??
+      "continuation_target_not_available";
+    return refused(input, reason, {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      warnings: resolved.warnings,
+    });
+  }
+  const target = resolved.target;
+  if (target.projectId !== args.predecessorProjectId) {
+    return refused(input, "continuation_target_project_mismatch", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+    });
+  }
+
+  const current = (() => {
+    try {
+      return input.store.getCurrentState(contId);
+    } catch {
+      return null;
+    }
+  })();
+  if (current && current.crashReceipts.length > 0) {
+    return refused(input, "crash_ambiguous", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      generatedAssignmentId: contId,
+      warnings: ["continuation assignment has crash receipts; refusing automatic replay"],
+    });
+  }
+
+  let continuationFrozen;
+  try {
+    continuationFrozen = buildContinuationAssignmentFromTarget({ action, target });
+  } catch (error) {
+    return refused(input, "continuation_scope_invalid", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      warnings: [String(error)],
+    });
+  }
+
+  if (continuationFrozen.assignment.commitAuthorization !== false) {
+    return refused(input, "continuation_scope_invalid", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      warnings: ["continuation assignment must not grant commitAuthorization"],
+    });
+  }
+  if (continuationFrozen.assignment.pushAuthorization !== false) {
+    return refused(input, "continuation_scope_invalid", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      warnings: ["continuation assignment must not grant pushAuthorization"],
+    });
+  }
+  if (continuationFrozen.assignment.requireNoPush !== true) {
+    return refused(input, "continuation_scope_invalid", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      warnings: ["continuation assignment must requireNoPush"],
+    });
+  }
+
+  input.store.persistFrozenAssignment(continuationFrozen, {
+    relationship: {
+      parentAssignmentId: action.executorAssignmentId,
+      continuationOfAssignmentId: action.executorAssignmentId,
+      continuationTargetId: target.continuationTargetId,
+    },
+  });
+
+  let provider: ExecutionProvider;
+  if (input.provider) {
+    provider = input.provider;
+  } else if (input.providerId && input.providerId !== CURSOR_PROVIDER_ID) {
+    return refused(input, "provider_required", {
+      action,
+      authorization,
+      decision,
+      preparedAction: action.preparedAction,
+      authorizationId: authorization.authorizationId,
+      generatedAssignmentId: contId,
+      assignmentHash: continuationFrozen.assignmentHash,
+      warnings: [`unsupported providerId ${input.providerId}; pass ExecutionProvider explicitly`],
+    });
+  } else {
+    provider = resolveActiveExecutionProvider();
+  }
+
+  const dispatched = await dispatchFrozenAssignment({
+    store: input.store,
+    provider,
+    assignmentId: contId,
+    projectHooks: input.projectHooks,
+  });
+
+  input.store.persistGovernedContinuationTargetLifecycle(
+    buildGovernedContinuationTargetLifecycleRecord({
+      continuationTargetId: target.continuationTargetId,
+      targetHash: target.targetHash,
+      status: "consumed",
+      postDecisionActionId: action.postDecisionActionId,
+      generatedAssignmentId: contId,
+      executionEvidenceId: dispatched.evidence.evidenceId,
+      reasonCode: "continuation_executed",
+    }),
+  );
+
+  return {
+    executed: true,
+    refused: false,
+    reason: null,
+    warnings: [
+      "authorized continuation executed programmatically through governed provider path",
+      "no Cursor chat courier",
+      "no automatic commit or push",
+      "continuation target marked consumed",
+      "authorization does not grant standing automatic continuation",
+    ],
+    postDecisionActionId: action.postDecisionActionId,
+    preparedAction: action.preparedAction,
+    authorizationId: authorization.authorizationId,
+    verificationDecisionId: decision.verificationDecisionId,
+    generatedAssignmentId: contId,
+    assignmentHash: continuationFrozen.assignmentHash,
     providerStarted: dispatched.evidence.providerStarted,
     executionEvidenceId: dispatched.evidence.evidenceId,
     technicalStatus: dispatched.result.executionVerdict,
