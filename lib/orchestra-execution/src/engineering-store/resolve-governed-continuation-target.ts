@@ -1,5 +1,6 @@
 import type { FileEngineeringStore } from "./store.js";
 import { validateGovernedContinuationTarget } from "./governed-continuation-target-record.js";
+import { evaluatePredecessorPathAuthority } from "./predecessor-path-authority.js";
 import type {
   GovernedContinuationTargetRecord,
   GovernedContinuationTargetStatus,
@@ -20,6 +21,8 @@ export const CONTINUATION_TARGET_RESOLUTION_REFUSALS = [
   "continuation_target_predecessor_mismatch",
   "continuation_target_project_mismatch",
   "continuation_target_policy_invalid",
+  "continuation_target_scope_broadening",
+  "continuation_target_protected_path_weakening",
 ] as const;
 
 export type ContinuationTargetResolutionRefusal =
@@ -71,29 +74,31 @@ export function resolveGovernedContinuationTargetForAction(input: {
   }
 
   const registered = store
-    .loadGovernedContinuationTargets(action.verifierAssignmentId)
-    .filter((row) => validateGovernedContinuationTarget(row))
+    .loadValidGovernedContinuationTargets(action.verifierAssignmentId)
     .filter((row) => row.verificationDecisionId === action.verificationDecisionId);
 
   if (input.boundContinuationTargetId) {
-    const bound = registered.find(
-      (row) => row.continuationTargetId === input.boundContinuationTargetId,
-    );
-    if (!bound) {
+    // Bound lookups must still fail closed if raw storage holds a hash-valid but
+    // predecessor-path-invalid target (defense in depth beyond loadValid filtering).
+    const rawBound = store
+      .loadGovernedContinuationTargets(action.verifierAssignmentId)
+      .filter((row) => validateGovernedContinuationTarget(row))
+      .find((row) => row.continuationTargetId === input.boundContinuationTargetId);
+    if (!rawBound) {
       return refused("continuation_target_not_available", {
         warnings: ["bound continuation target not found"],
       });
     }
     if (
       input.boundContinuationTargetHash &&
-      bound.targetHash !== input.boundContinuationTargetHash
+      rawBound.targetHash !== input.boundContinuationTargetHash
     ) {
       return refused("continuation_target_stale", {
-        target: bound,
+        target: rawBound,
         warnings: ["authorization target hash does not match registered target"],
       });
     }
-    return validateCandidate(store, action, bound);
+    return validateCandidate(store, action, rawBound);
   }
 
   const eligible: GovernedContinuationTargetRecord[] = [];
@@ -228,6 +233,38 @@ function validateCandidate(
   }
   if (target.requireNoPush !== true || target.commitAuthorization !== false || target.pushAuthorization !== false) {
     return refused("continuation_target_policy_invalid", { target, effectiveStatus });
+  }
+
+  const pathAuthority = evaluatePredecessorPathAuthority({ target, predecessor });
+  if (!pathAuthority.valid) {
+    if (pathAuthority.reason === "scope_broadening") {
+      return refused("continuation_target_scope_broadening", {
+        target,
+        effectiveStatus,
+        warnings: ["target allowedPaths exceed authoritative predecessor allowedPaths"],
+      });
+    }
+    if (pathAuthority.reason === "protected_path_weakening") {
+      return refused("continuation_target_protected_path_weakening", {
+        target,
+        effectiveStatus,
+        warnings: ["target protectedPaths omit authoritative predecessor protections"],
+      });
+    }
+    if (pathAuthority.reason === "project_mismatch") {
+      return refused("continuation_target_project_mismatch", { target, effectiveStatus });
+    }
+    if (pathAuthority.reason === "repository_mismatch") {
+      return refused("continuation_target_repository_mismatch", { target, effectiveStatus });
+    }
+    if (pathAuthority.reason === "branch_mismatch") {
+      return refused("continuation_target_branch_mismatch", { target, effectiveStatus });
+    }
+    return refused("continuation_target_predecessor_mismatch", {
+      target,
+      effectiveStatus,
+      warnings: [pathAuthority.reason ?? "predecessor path authority failed"],
+    });
   }
 
   return {

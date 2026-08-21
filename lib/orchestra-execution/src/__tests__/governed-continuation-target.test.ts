@@ -26,6 +26,7 @@ import { createFileEngineeringStore } from "../engineering-store/store.js";
 import { CURSOR_PROVIDER_ID } from "../provider-contract.js";
 import { MockExecutionProvider } from "../providers/mock-provider.js";
 import { synthesizeExecutionResult } from "../result.js";
+import { DEFAULT_PROHIBITED_COMMAND_CLASSES } from "../assignment.js";
 import * as packageExports from "../index.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
 
@@ -682,4 +683,351 @@ export async function runGovernedContinuationTargetTests(): Promise<void> {
     provider: new CountingMock(),
   });
   expect("head drift refused", drifted.reason, "head_drift");
+
+  section("040-C — predecessor path authority at persist / resolve / execute");
+
+  async function attackBroadened(
+    assignmentId: string,
+    mode: "store" | "raw" | "restart",
+  ) {
+    const ctx = await buildVerifiedContinuationCase(assignmentId);
+    const pred = ctx.assignment.assignment;
+    const broadened = buildGovernedContinuationTargetRecord({
+      verificationDecisionId: ctx.decisionId,
+      targetKey: `broad-${mode}`,
+      projectId: pred.projectId,
+      predecessorExecutorAssignmentId: ctx.prepared.actionRecord!.executorAssignmentId,
+      predecessorExecutorExecutionEvidenceId:
+        ctx.prepared.actionRecord!.executorExecutionEvidenceId,
+      repositoryPath: pred.repositoryPath,
+      branch: pred.branch,
+      baselineHead: pred.startingHead,
+      assignmentText: "broadened",
+      allowedPaths: [...pred.allowedPaths, "secret-extra.txt"],
+      protectedPaths: [...pred.protectedPaths],
+      prohibitedCommandClasses: [...DEFAULT_PROHIBITED_COMMAND_CLASSES],
+      requiredEvidence: ["git", "hooks", "filesystem"],
+      orderingKey: 1,
+    });
+    expectTrue(
+      `${mode} broadened hash coherent`,
+      validateGovernedContinuationTarget(broadened),
+    );
+
+    let persistOk = false;
+    try {
+      ctx.store.persistGovernedContinuationTarget(broadened);
+      persistOk = true;
+    } catch {
+      persistOk = false;
+    }
+    expectFalse(`${mode} store persist broaden refused`, persistOk);
+
+    if (mode === "raw" || mode === "restart") {
+      appendFileSync(
+        join(
+          ctx.store.storeRoot,
+          "assignments",
+          ctx.verifierId,
+          "governed-continuation-targets.ndjson",
+        ),
+        `${JSON.stringify(broadened)}\n`,
+        "utf8",
+      );
+    }
+
+    const storeView =
+      mode === "restart" ? createFileEngineeringStore(ctx.store.storeRoot) : ctx.store;
+    expect(
+      `${mode} find ignores broadened`,
+      storeView.findGovernedContinuationTargetById(broadened.continuationTargetId),
+      null,
+    );
+
+    const provider = new CountingMock();
+    const createsBefore = provider.creates;
+    const auth = authorizePostDecisionExecution({
+      store: storeView,
+      postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+      humanAuthorized: true,
+    });
+    expect(
+      `${mode} authorize broaden refused`,
+      auth.reason,
+      "continuation_target_not_available",
+    );
+    const exec = await executeAuthorizedPostDecisionAction({
+      store: storeView,
+      postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+      provider,
+    });
+    expect(
+      `${mode} execute without auth`,
+      exec.reason,
+      "authorization_not_found",
+    );
+    expect("provider creates unchanged", provider.creates, createsBefore);
+
+    // Defense in depth: even if coherent auth is hand-persisted to the broadened target,
+    // resolve/execute must refuse and never dispatch.
+    const forgedAuth = buildPostDecisionExecutionAuthorizationRecord({
+      postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+      postDecisionActionHash: ctx.prepared.actionRecord!.actionHash,
+      verificationDecisionId: ctx.prepared.actionRecord!.verificationDecisionId,
+      preparedAction: "PREPARE_CONTINUATION",
+      executorAssignmentId: ctx.prepared.actionRecord!.executorAssignmentId,
+      executorExecutionEvidenceId: ctx.prepared.actionRecord!.executorExecutionEvidenceId,
+      startingBranch: ctx.prepared.actionRecord!.startingBranch!,
+      startingHead: ctx.prepared.actionRecord!.startingHead!,
+      continuationTargetId: broadened.continuationTargetId,
+      continuationTargetHash: broadened.targetHash,
+    });
+    if (mode === "raw" || mode === "restart") {
+      storeView.persistPostDecisionExecutionAuthorization(forgedAuth);
+      const boundExec = await executeAuthorizedPostDecisionAction({
+        store: storeView,
+        postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+        provider,
+      });
+      expect(
+        `${mode} bound execute broaden refused`,
+        boundExec.reason,
+        "continuation_target_scope_broadening",
+      );
+      expect(`${mode} no provider after bound`, provider.creates, createsBefore);
+    }
+  }
+
+  async function attackWeakened(
+    assignmentId: string,
+    mode: "store" | "raw" | "restart",
+  ) {
+    const ctx = await buildVerifiedContinuationCase(assignmentId);
+    const pred = ctx.assignment.assignment;
+    const weakened = buildGovernedContinuationTargetRecord({
+      verificationDecisionId: ctx.decisionId,
+      targetKey: `weak-${mode}`,
+      projectId: pred.projectId,
+      predecessorExecutorAssignmentId: ctx.prepared.actionRecord!.executorAssignmentId,
+      predecessorExecutorExecutionEvidenceId:
+        ctx.prepared.actionRecord!.executorExecutionEvidenceId,
+      repositoryPath: pred.repositoryPath,
+      branch: pred.branch,
+      baselineHead: pred.startingHead,
+      assignmentText: "weakened",
+      allowedPaths: [...pred.allowedPaths],
+      protectedPaths: [],
+      prohibitedCommandClasses: [...DEFAULT_PROHIBITED_COMMAND_CLASSES],
+      requiredEvidence: ["git", "hooks", "filesystem"],
+      orderingKey: 1,
+    });
+    expectTrue(
+      `${mode} weakened hash coherent`,
+      validateGovernedContinuationTarget(weakened),
+    );
+    let persistOk = false;
+    try {
+      ctx.store.persistGovernedContinuationTarget(weakened);
+      persistOk = true;
+    } catch {
+      persistOk = false;
+    }
+    expectFalse(`${mode} store persist weaken refused`, persistOk);
+
+    if (mode === "raw" || mode === "restart") {
+      appendFileSync(
+        join(
+          ctx.store.storeRoot,
+          "assignments",
+          ctx.verifierId,
+          "governed-continuation-targets.ndjson",
+        ),
+        `${JSON.stringify(weakened)}\n`,
+        "utf8",
+      );
+    }
+    const storeView =
+      mode === "restart" ? createFileEngineeringStore(ctx.store.storeRoot) : ctx.store;
+    expect(
+      `${mode} find ignores weakened`,
+      storeView.findGovernedContinuationTargetById(weakened.continuationTargetId),
+      null,
+    );
+    const provider = new CountingMock();
+    const createsBefore = provider.creates;
+    const auth = authorizePostDecisionExecution({
+      store: storeView,
+      postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+      humanAuthorized: true,
+    });
+    expect(
+      `${mode} authorize weaken refused`,
+      auth.reason,
+      "continuation_target_not_available",
+    );
+    const exec = await executeAuthorizedPostDecisionAction({
+      store: storeView,
+      postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+      provider,
+    });
+    expect(`${mode} execute weaken no auth`, exec.reason, "authorization_not_found");
+    expect(`${mode} weaken provider creates`, provider.creates, createsBefore);
+
+    if (mode === "raw" || mode === "restart") {
+      const forgedAuth = buildPostDecisionExecutionAuthorizationRecord({
+        postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+        postDecisionActionHash: ctx.prepared.actionRecord!.actionHash,
+        verificationDecisionId: ctx.prepared.actionRecord!.verificationDecisionId,
+        preparedAction: "PREPARE_CONTINUATION",
+        executorAssignmentId: ctx.prepared.actionRecord!.executorAssignmentId,
+        executorExecutionEvidenceId: ctx.prepared.actionRecord!.executorExecutionEvidenceId,
+        startingBranch: ctx.prepared.actionRecord!.startingBranch!,
+        startingHead: ctx.prepared.actionRecord!.startingHead!,
+        continuationTargetId: weakened.continuationTargetId,
+        continuationTargetHash: weakened.targetHash,
+      });
+      storeView.persistPostDecisionExecutionAuthorization(forgedAuth);
+      const boundExec = await executeAuthorizedPostDecisionAction({
+        store: storeView,
+        postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+        provider,
+      });
+      expect(
+        `${mode} bound execute weaken refused`,
+        boundExec.reason,
+        "continuation_target_protected_path_weakening",
+      );
+      expect(`${mode} weaken no provider after bound`, provider.creates, createsBefore);
+    }
+  }
+
+  await attackBroadened("gct-c-store-broad", "store");
+  await attackBroadened("gct-c-raw-broad", "raw");
+  await attackBroadened("gct-c-restart-broad", "restart");
+  await attackWeakened("gct-c-store-weak", "store");
+  await attackWeakened("gct-c-raw-weak", "raw");
+  await attackWeakened("gct-c-restart-weak", "restart");
+
+  // Both violations in one record
+  {
+    const ctx = await buildVerifiedContinuationCase("gct-c-both");
+    const pred = ctx.assignment.assignment;
+    const both = buildGovernedContinuationTargetRecord({
+      verificationDecisionId: ctx.decisionId,
+      targetKey: "both",
+      projectId: pred.projectId,
+      predecessorExecutorAssignmentId: ctx.prepared.actionRecord!.executorAssignmentId,
+      predecessorExecutorExecutionEvidenceId:
+        ctx.prepared.actionRecord!.executorExecutionEvidenceId,
+      repositoryPath: pred.repositoryPath,
+      branch: pred.branch,
+      baselineHead: pred.startingHead,
+      assignmentText: "both",
+      allowedPaths: [...pred.allowedPaths, "extra.txt"],
+      protectedPaths: [],
+      prohibitedCommandClasses: [...DEFAULT_PROHIBITED_COMMAND_CLASSES],
+      requiredEvidence: ["git"],
+      orderingKey: 1,
+    });
+    let persistOk = false;
+    try {
+      ctx.store.persistGovernedContinuationTarget(both);
+      persistOk = true;
+    } catch {
+      persistOk = false;
+    }
+    expectFalse("both violations persist refused", persistOk);
+  }
+
+  section("040-C — legitimate narrowing and stronger protection still work");
+
+  {
+    const ctx = await buildVerifiedContinuationCase("gct-c-narrow");
+    const pred = ctx.assignment.assignment;
+    // Fixture typically has allowed.txt; narrowing to exact preserved path is valid.
+    const narrow = registerDefaultTarget(ctx, {
+      targetKey: "narrow",
+      allowedPaths: [pred.allowedPaths[0]!],
+      protectedPaths: [...pred.protectedPaths, "extra-protect.txt"],
+    });
+    expectTrue("legitimate narrow+stronger registered", narrow.registered);
+    const auth = authorizePostDecisionExecution({
+      store: ctx.store,
+      postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+      humanAuthorized: true,
+    });
+    expectTrue("narrow authorize", auth.authorized);
+    const provider = new CountingMock({
+      events: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    });
+    const exec = await executeAuthorizedPostDecisionAction({
+      store: ctx.store,
+      postDecisionActionId: ctx.prepared.actionRecord!.postDecisionActionId,
+      provider,
+    });
+    expectTrue("narrow execute", exec.executed);
+    const cont = ctx.store.loadAssignmentRecord(exec.generatedAssignmentId!);
+    expect(
+      "narrow allowed exact",
+      cont.frozen.assignment.allowedPaths,
+      [pred.allowedPaths[0]!],
+    );
+    expectTrue(
+      "stronger protect retained",
+      cont.frozen.assignment.protectedPaths.includes("extra-protect.txt"),
+    );
+  }
+
+  section("040-C — nontrivial path comparison attacks");
+
+  {
+    const ctx = await buildVerifiedContinuationCase("gct-c-paths");
+    const pred = ctx.assignment.assignment;
+    expect(
+      "sibling path broaden refuse",
+      registerDefaultTarget(ctx, {
+        targetKey: "sib",
+        allowedPaths: [...pred.allowedPaths, "sibling-other.txt"],
+      }).reason,
+      "scope_broadening",
+    );
+    expect(
+      "parent directory broaden refuse",
+      registerDefaultTarget(ctx, {
+        targetKey: "parent",
+        allowedPaths: ["..", ...pred.allowedPaths],
+      }).reason,
+      "scope_broadening",
+    );
+    expect(
+      "wildcard style broaden refuse",
+      registerDefaultTarget(ctx, {
+        targetKey: "wild",
+        allowedPaths: [...pred.allowedPaths, "*"],
+      }).reason,
+      "scope_broadening",
+    );
+    expect(
+      "protected removal refuse",
+      registerDefaultTarget(ctx, {
+        targetKey: "rmprot",
+        protectedPaths: pred.protectedPaths.slice(1),
+      }).reason,
+      "protected_path_weakening",
+    );
+    expect(
+      "protected substitution refuse",
+      registerDefaultTarget(ctx, {
+        targetKey: "subprot",
+        protectedPaths: ["unrelated-protect.txt"],
+      }).reason,
+      "protected_path_weakening",
+    );
+    const exact = registerDefaultTarget(ctx, {
+      targetKey: "exact",
+      allowedPaths: [...pred.allowedPaths],
+      protectedPaths: [...pred.protectedPaths],
+    });
+    expectTrue("exact path preservation registers", exact.registered);
+  }
 }

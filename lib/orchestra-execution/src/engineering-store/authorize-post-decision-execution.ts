@@ -35,6 +35,8 @@ export const POST_DECISION_AUTHORIZATION_REFUSALS = [
   "continuation_target_predecessor_mismatch",
   "continuation_target_project_mismatch",
   "continuation_target_policy_invalid",
+  "continuation_target_scope_broadening",
+  "continuation_target_protected_path_weakening",
 ] as const;
 
 export type PostDecisionAuthorizationRefusal =

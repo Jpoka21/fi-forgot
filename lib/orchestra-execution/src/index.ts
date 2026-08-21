@@ -267,6 +267,13 @@ export {
 export { correctionAssignmentId } from "./engineering-store/build-correction-assignment.js";
 export { continuationAssignmentId } from "./engineering-store/build-continuation-assignment.js";
 export {
+  evaluatePredecessorPathAuthority,
+  includesAllPaths,
+  isSubsetPaths,
+  PREDECESSOR_PATH_AUTHORITY_REFUSALS,
+} from "./engineering-store/predecessor-path-authority.js";
+export type { PredecessorPathAuthorityRefusal } from "./engineering-store/predecessor-path-authority.js";
+export {
   registerGovernedContinuationTarget,
   GOVERNED_CONTINUATION_TARGET_REGISTRATION_REFUSALS,
 } from "./engineering-store/register-governed-continuation-target.js";

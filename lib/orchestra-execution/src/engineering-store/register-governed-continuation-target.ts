@@ -4,6 +4,10 @@ import {
   buildGovernedContinuationTargetRecord,
   validateGovernedContinuationTarget,
 } from "./governed-continuation-target-record.js";
+import {
+  includesAllPaths,
+  isSubsetPaths,
+} from "./predecessor-path-authority.js";
 import { validateVerificationDecision } from "./verification-decision-record.js";
 import type { GovernedContinuationTargetRecord } from "./types.js";
 
@@ -22,16 +26,6 @@ export const GOVERNED_CONTINUATION_TARGET_REGISTRATION_REFUSALS = [
   "target_corrupt",
   "duplicate_target_conflict",
 ] as const;
-
-function isSubsetPaths(candidate: string[], allowed: string[]): boolean {
-  const set = new Set(allowed.map((p) => p.replace(/\\/g, "/")));
-  return candidate.every((p) => set.has(p.replace(/\\/g, "/")));
-}
-
-function includesAllPaths(candidate: string[], required: string[]): boolean {
-  const set = new Set(candidate.map((p) => p.replace(/\\/g, "/")));
-  return required.every((p) => set.has(p.replace(/\\/g, "/")));
-}
 
 export type GovernedContinuationTargetRegistrationRefusal =
   (typeof GOVERNED_CONTINUATION_TARGET_REGISTRATION_REFUSALS)[number];

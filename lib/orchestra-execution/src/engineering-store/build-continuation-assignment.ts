@@ -1,5 +1,9 @@
 import { createAssignment } from "../assignment-hash.js";
 import type { FrozenAssignment } from "../assignment.js";
+import {
+  includesAllPaths,
+  isSubsetPaths,
+} from "./predecessor-path-authority.js";
 import type {
   GovernedContinuationTargetRecord,
   PostDecisionActionRecord,
@@ -7,16 +11,6 @@ import type {
 
 export function continuationAssignmentId(postDecisionActionId: string): string {
   return `cont-${postDecisionActionId}`;
-}
-
-function isSubsetPaths(candidate: string[], allowed: string[]): boolean {
-  const set = new Set(allowed.map((p) => p.replace(/\\/g, "/")));
-  return candidate.every((p) => set.has(p.replace(/\\/g, "/")));
-}
-
-function includesAllPaths(candidate: string[], required: string[]): boolean {
-  const set = new Set(candidate.map((p) => p.replace(/\\/g, "/")));
-  return required.every((p) => set.has(p.replace(/\\/g, "/")));
 }
 
 /**

@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createAssignment, hashAssignment } from "../assignment-hash.js";
-import { deepFreeze, type FrozenAssignment } from "../assignment.js";
+import { deepFreeze, type FrozenAssignment, type OrchestraAssignment } from "../assignment.js";
 import { isForgotIdentifierRepository } from "../hooks/project-hook.js";
 import { appendLineAtomic, writeFileExclusiveAtomic } from "./atomic-write.js";
 import {
@@ -22,6 +22,7 @@ import {
   validateGovernedContinuationTarget,
   validateGovernedContinuationTargetLifecycle,
 } from "./governed-continuation-target-record.js";
+import { evaluatePredecessorPathAuthority } from "./predecessor-path-authority.js";
 import {
   validateVerifierSemanticFinding,
 } from "./semantic-finding-record.js";
@@ -632,6 +633,27 @@ export class FileEngineeringStore {
     return null;
   }
 
+  /**
+   * Recompute predecessor path authority from authoritative executor assignment state.
+   * Hash-valid targets that broaden allowedPaths or weaken protectedPaths fail closed.
+   */
+  predecessorPathAuthorityHolds(record: GovernedContinuationTargetRecord): boolean {
+    return this.evaluateGovernedContinuationTargetPredecessorAuthority(record).valid;
+  }
+
+  evaluateGovernedContinuationTargetPredecessorAuthority(
+    record: GovernedContinuationTargetRecord,
+  ): ReturnType<typeof evaluatePredecessorPathAuthority> {
+    let predecessor: OrchestraAssignment | null = null;
+    try {
+      const executorRecord = this.loadAssignmentRecord(record.predecessorExecutorAssignmentId);
+      predecessor = executorRecord.frozen.assignment;
+    } catch {
+      predecessor = null;
+    }
+    return evaluatePredecessorPathAuthority({ target: record, predecessor });
+  }
+
   persistGovernedContinuationTarget(
     record: GovernedContinuationTargetRecord,
   ): GovernedContinuationTargetRecord {
@@ -656,6 +678,12 @@ export class FileEngineeringStore {
     ) {
       throw new EngineeringStoreError(
         "governed continuation target predecessor does not match verification decision",
+      );
+    }
+    const pathAuthority = this.evaluateGovernedContinuationTargetPredecessorAuthority(record);
+    if (!pathAuthority.valid) {
+      throw new EngineeringStoreError(
+        `governed continuation target predecessor path authority failed: ${pathAuthority.reason}`,
       );
     }
     const assignmentId = assertSafeId("assignmentId", decision.verifierAssignmentId);
@@ -697,15 +725,26 @@ export class FileEngineeringStore {
       .map((line) => JSON.parse(line) as GovernedContinuationTargetRecord);
   }
 
+  /**
+   * Load structurally valid targets, ignoring records that violate predecessor path authority.
+   * Malicious/raw NDJSON broadened targets are not executable authority.
+   */
+  loadValidGovernedContinuationTargets(
+    verifierAssignmentId: string,
+  ): GovernedContinuationTargetRecord[] {
+    return this.loadGovernedContinuationTargets(verifierAssignmentId).filter(
+      (row) =>
+        validateGovernedContinuationTarget(row) && this.predecessorPathAuthorityHolds(row),
+    );
+  }
+
   findGovernedContinuationTargetById(
     continuationTargetId: string,
   ): GovernedContinuationTargetRecord | null {
     assertSafeId("continuationTargetId", continuationTargetId);
     for (const assignmentId of this.listAssignmentIds()) {
-      const matches = this.loadGovernedContinuationTargets(assignmentId).filter(
-        (row) =>
-          validateGovernedContinuationTarget(row) &&
-          row.continuationTargetId === continuationTargetId,
+      const matches = this.loadValidGovernedContinuationTargets(assignmentId).filter(
+        (row) => row.continuationTargetId === continuationTargetId,
       );
       if (matches.length > 0) return matches[matches.length - 1] ?? null;
     }
