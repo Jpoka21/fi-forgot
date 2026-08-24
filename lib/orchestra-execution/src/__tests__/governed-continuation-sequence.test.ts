@@ -1,4 +1,4 @@
-import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDisposableExecutionFixture } from "../fixture.js";
@@ -127,11 +127,9 @@ function appendRawFulfillment(
   projectId: string,
   record: ReturnType<typeof buildSequenceFulfillmentRecord> | Record<string, unknown>,
 ): void {
-  appendFileSync(
-    fulfillmentNdjsonPath(storeRoot, projectId),
-    `${JSON.stringify(record)}\n`,
-    "utf8",
-  );
+  const path = fulfillmentNdjsonPath(storeRoot, projectId);
+  mkdirSync(join(storeRoot, "sequences", projectId), { recursive: true });
+  appendFileSync(path, `${JSON.stringify(record)}\n`, "utf8");
 }
 
 async function addUnrelatedVerified(
@@ -1072,6 +1070,7 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
   expect("041c2 B entry", c2B.target!.sequenceEntryKey, "entry-b");
   const c2BootFul = c2.store.findSequenceFulfillmentByEntryKey(
     c2B.config!.sequenceId,
+    c2Pred.projectId,
     "entry-a",
   );
   expectTrue("041c2 bootstrap fulfillment present", Boolean(c2BootFul));
@@ -1093,13 +1092,20 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
   // Before restart: lookup must still prefer legitimate first
   expect(
     "041c2 before restart entry authority",
-    c2.store.findSequenceFulfillmentByEntryKey(c2B.config!.sequenceId, "entry-a")!
-      .executorAssignmentId,
+    c2.store.findSequenceFulfillmentByEntryKey(
+      c2B.config!.sequenceId,
+      c2Pred.projectId,
+      "entry-a",
+    )!.executorAssignmentId,
     c2Pred.assignmentId,
   );
   expect(
     "041c2 forged executor lookup not authoritative",
-    c2.store.findSequenceFulfillmentByExecutor(c2B.config!.sequenceId, c2X.assignmentId),
+    c2.store.findSequenceFulfillmentByExecutor(
+      c2B.config!.sequenceId,
+      c2Pred.projectId,
+      c2X.assignmentId,
+    ),
     null,
   );
   const c2XBefore = materializeNextGovernedContinuationTargetFromSequence({
@@ -1140,6 +1146,7 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
   const c2Restart = createFileEngineeringStore(c2.store.storeRoot);
   const authAfterRestart = c2Restart.findSequenceFulfillmentByEntryKey(
     c2B.config!.sequenceId,
+    c2Pred.projectId,
     "entry-a",
   );
   expect(
@@ -1215,8 +1222,11 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
   appendRawFulfillment(forgeFirst.store.storeRoot, ffPred.projectId, ffLegit);
   expect(
     "041c2 forged-first authority is forged",
-    forgeFirst.store.findSequenceFulfillmentByEntryKey(ffCfg.config!.sequenceId, "entry-a")!
-      .executorAssignmentId,
+    forgeFirst.store.findSequenceFulfillmentByEntryKey(
+      ffCfg.config!.sequenceId,
+      ffPred.projectId,
+      "entry-a",
+    )!.executorAssignmentId,
     ffX.assignmentId,
   );
   const ffLegitMat = materializeNextGovernedContinuationTargetFromSequence({
@@ -1305,7 +1315,11 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
   });
   expectTrue("041c2-nb C materialized once", nbC.materialized);
   expect("041c2-nb C entry", nbC.target!.sequenceEntryKey, "entry-c");
-  const nbBFul = nb.store.findSequenceFulfillmentByEntryKey(nbB.config!.sequenceId, "entry-b");
+  const nbBFul = nb.store.findSequenceFulfillmentByEntryKey(
+    nbB.config!.sequenceId,
+    nbPred.projectId,
+    "entry-b",
+  );
   expectTrue("041c2-nb B fulfillment present", Boolean(nbBFul));
 
   const nbY = await addUnrelatedVerified(nb.store, nbPred, "seq-041c2-nb-y");
@@ -1322,8 +1336,11 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
   const nbRestart = createFileEngineeringStore(nb.store.storeRoot);
   expect(
     "041c2-nb B authority after forge",
-    nbRestart.findSequenceFulfillmentByEntryKey(nbB.config!.sequenceId, "entry-b")!
-      .executorAssignmentId,
+    nbRestart.findSequenceFulfillmentByEntryKey(
+      nbB.config!.sequenceId,
+      nbPred.projectId,
+      "entry-b",
+    )!.executorAssignmentId,
     nbBId,
   );
   const nbYMat = materializeNextGovernedContinuationTargetFromSequence({
@@ -1506,8 +1523,384 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
   const delAfter = createFileEngineeringStore(del.store.storeRoot);
   expect(
     "041c2-del after deleting first line later forge becomes authority",
-    delAfter.findSequenceFulfillmentByEntryKey(delCfg.config!.sequenceId, "entry-a")!
-      .executorAssignmentId,
+    delAfter.findSequenceFulfillmentByEntryKey(
+      delCfg.config!.sequenceId,
+      delPred.projectId,
+      "entry-a",
+    )!.executorAssignmentId,
     delX.assignmentId,
   );
+
+  section("041-C3 — project-scoped fulfillment; alien readdir order cannot rebind");
+
+  const c3 = await buildVerifiedCase("seq-041c3-home");
+  const c3Pred = c3.assignment.assignment;
+  const c3Cfg = persistGovernedContinuationSequenceConfig({
+    store: c3.store,
+    ...threeEntryDefs(c3Pred),
+    sequenceKey: "041c3",
+  });
+  expectTrue("041c3 config", c3Cfg.persisted);
+  const c3B = materializeNextGovernedContinuationTargetFromSequence({
+    store: c3.store,
+    verificationDecisionId: c3.decisionId,
+  });
+  expectTrue("041c3 B once", c3B.materialized);
+  const c3Boot = c3.store.findSequenceFulfillmentByEntryKey(
+    c3Cfg.config!.sequenceId,
+    c3Pred.projectId,
+    "entry-a",
+  )!;
+  expect("041c3 home project id", c3Pred.projectId, "orchestra-execution-fixture");
+
+  const c3X = await addUnrelatedVerified(c3.store, c3Pred, "seq-041c3-x");
+  const alienForge = buildSequenceFulfillmentRecord({
+    sequenceId: c3Cfg.config!.sequenceId,
+    sequenceConfigHash: c3Cfg.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: c3Cfg.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+    verificationDecisionId: c3X.decisionId,
+    executorAssignmentId: c3X.assignmentId,
+    executorExecutionEvidenceId: c3X.evidenceId,
+  });
+  expectTrue("041c3 alien forge hash-valid", validateSequenceFulfillment(alienForge));
+
+  // ALIEN sorts before HOME (aaa-… < orchestra-execution-fixture)
+  appendRawFulfillment(c3.store.storeRoot, "aaa-alien-before-home", alienForge);
+  appendRawFulfillment(c3.store.storeRoot, "bbb-alien-mid", alienForge);
+  appendRawFulfillment(c3.store.storeRoot, "zzz-alien-after-home", alienForge);
+
+  const c3R = createFileEngineeringStore(c3.store.storeRoot);
+  expect(
+    "041c3 alien-before-home authority stays home",
+    c3R.findSequenceFulfillmentByEntryKey(
+      c3Cfg.config!.sequenceId,
+      c3Pred.projectId,
+      "entry-a",
+    )!.fulfillmentHash,
+    c3Boot.fulfillmentHash,
+  );
+  expect(
+    "041c3 byExecutor alien null",
+    c3R.findSequenceFulfillmentByExecutor(
+      c3Cfg.config!.sequenceId,
+      c3Pred.projectId,
+      c3X.assignmentId,
+    ),
+    null,
+  );
+  expect(
+    "041c3 byDecision alien null",
+    c3R.findSequenceFulfillmentByDecision(
+      c3Cfg.config!.sequenceId,
+      c3Pred.projectId,
+      c3X.decisionId,
+    ),
+    null,
+  );
+  const c3XMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: c3R,
+    verificationDecisionId: c3X.decisionId,
+  });
+  expect("041c3 READDIR alien refused", c3XMat.reason, "bootstrap_already_fulfilled");
+  expectFalse("041c3 alien cannot materialize B", c3XMat.materialized);
+  expect("041c3 alien target null", c3XMat.target, null);
+  const c3Provider = new CountingMock();
+  expect("041c3 alien create=0", c3Provider.creates, 0);
+  expect("041c3 alien submit=0", c3Provider.submitted.length, 0);
+  const c3BReuse = materializeNextGovernedContinuationTargetFromSequence({
+    store: c3R,
+    verificationDecisionId: c3.decisionId,
+  });
+  expectTrue("041c3 HOME B remains", c3BReuse.duplicateTargetReused);
+  expect(
+    "041c3 same B id",
+    c3BReuse.target!.continuationTargetId,
+    c3B.target!.continuationTargetId,
+  );
+
+  // HOME-before-ALIEN ordering (zzz already present) — identical security outcome
+  const c3R2 = createFileEngineeringStore(c3.store.storeRoot);
+  expect(
+    "041c3 home-before-alien still home",
+    c3R2.findSequenceFulfillmentByEntryKey(
+      c3Cfg.config!.sequenceId,
+      c3Pred.projectId,
+      "entry-a",
+    )!.executorAssignmentId,
+    c3Pred.assignmentId,
+  );
+  expectFalse(
+    "041c3 ordering irrelevant",
+    materializeNextGovernedContinuationTargetFromSequence({
+      store: c3R2,
+      verificationDecisionId: c3X.decisionId,
+    }).materialized,
+  );
+
+  // Multiple restart stability
+  const c3R3 = createFileEngineeringStore(c3.store.storeRoot);
+  expect(
+    "041c3 multi-restart authority",
+    c3R3.findSequenceFulfillmentByEntryKey(
+      c3Cfg.config!.sequenceId,
+      c3Pred.projectId,
+      "entry-a",
+    )!.fulfillmentHash,
+    c3Boot.fulfillmentHash,
+  );
+
+  // Mixed identity / coherent malicious hash under alien still ignored
+  appendRawFulfillment(c3.store.storeRoot, "aaa-mixed-identity", {
+    ...alienForge,
+    sequenceConfigHash: c3Cfg.config!.configHash,
+    entryHash: c3Cfg.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+  });
+  expect(
+    "041c3 mixed alien still ignored",
+    createFileEngineeringStore(c3.store.storeRoot).findSequenceFulfillmentByEntryKey(
+      c3Cfg.config!.sequenceId,
+      c3Pred.projectId,
+      "entry-a",
+    )!.fulfillmentHash,
+    c3Boot.fulfillmentHash,
+  );
+
+  // Same-file C2 regression still holds
+  appendRawFulfillment(c3.store.storeRoot, c3Pred.projectId, alienForge);
+  expect(
+    "041c3 same-file C2 first-wins",
+    createFileEngineeringStore(c3.store.storeRoot).findSequenceFulfillmentByEntryKey(
+      c3Cfg.config!.sequenceId,
+      c3Pred.projectId,
+      "entry-a",
+    )!.fulfillmentHash,
+    c3Boot.fulfillmentHash,
+  );
+
+  // Two projects, same sequenceKey/entry names, isolated
+  const pA = await buildVerifiedCase("seq-041c3-pa");
+  const pB = await buildVerifiedCase("seq-041c3-pb");
+  // Force distinct projectIds by writing configs under different store roots (already isolated)
+  // and also same store with distinct project dirs via raw projectId override is not available
+  // on fixture — use two stores to prove independent advancement, plus same-store collision:
+  persistGovernedContinuationSequenceConfig({
+    store: pA.store,
+    ...threeEntryDefs(pA.assignment.assignment),
+    sequenceKey: "shared-name",
+  });
+  persistGovernedContinuationSequenceConfig({
+    store: pB.store,
+    ...threeEntryDefs(pB.assignment.assignment),
+    sequenceKey: "shared-name",
+  });
+  const pAMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: pA.store,
+    verificationDecisionId: pA.decisionId,
+  });
+  const pBMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: pB.store,
+    verificationDecisionId: pB.decisionId,
+  });
+  expectTrue("041c3 project A advances", pAMat.materialized);
+  expectTrue("041c3 project B advances", pBMat.materialized);
+  expect(
+    "041c3 A and B distinct targets",
+    pAMat.target!.continuationTargetId !== pBMat.target!.continuationTargetId,
+    true,
+  );
+
+  // Same store, same sequenceId collision across project dirs: HOME vs twin project dir
+  // with identical sequenceId string (forged twin projectId directory containing sibling sequence)
+  const twin = await buildVerifiedCase("seq-041c3-twin");
+  const twinPred = twin.assignment.assignment;
+  const twinCfg = persistGovernedContinuationSequenceConfig({
+    store: twin.store,
+    ...threeEntryDefs(twinPred),
+    sequenceKey: "twin-seq",
+  });
+  const twinB = materializeNextGovernedContinuationTargetFromSequence({
+    store: twin.store,
+    verificationDecisionId: twin.decisionId,
+  });
+  expectTrue("041c3 twin B", twinB.materialized);
+  const twinBoot = twin.store.findSequenceFulfillmentByEntryKey(
+    twinCfg.config!.sequenceId,
+    twinPred.projectId,
+    "entry-a",
+  )!;
+  const twinX = await addUnrelatedVerified(twin.store, twinPred, "seq-041c3-twin-x");
+  // Second "project" dir using an alternate projectId string but HOME's sequenceId
+  const otherProjectId = "other-project-same-seq";
+  appendRawFulfillment(
+    twin.store.storeRoot,
+    otherProjectId,
+    buildSequenceFulfillmentRecord({
+      sequenceId: twinCfg.config!.sequenceId,
+      sequenceConfigHash: twinCfg.config!.configHash,
+      entryKey: "entry-a",
+      entryHash: twinCfg.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+      verificationDecisionId: twinX.decisionId,
+      executorAssignmentId: twinX.assignmentId,
+      executorExecutionEvidenceId: twinX.evidenceId,
+    }),
+  );
+  // Also place a legitimate-looking fulfillment for a different sequence under other project
+  // Authority for HOME must ignore other project's file entirely
+  expect(
+    "041c3 same sequenceId other project ignored",
+    createFileEngineeringStore(twin.store.storeRoot).findSequenceFulfillmentByEntryKey(
+      twinCfg.config!.sequenceId,
+      twinPred.projectId,
+      "entry-a",
+    )!.fulfillmentHash,
+    twinBoot.fulfillmentHash,
+  );
+  expectFalse(
+    "041c3 other project cannot unlock HOME B",
+    materializeNextGovernedContinuationTargetFromSequence({
+      store: createFileEngineeringStore(twin.store.storeRoot),
+      verificationDecisionId: twinX.decisionId,
+    }).materialized,
+  );
+
+  // Full A→B→C with alien forges
+  const c3Full = await buildVerifiedCase("seq-041c3-full");
+  const c3FullPred = c3Full.assignment.assignment;
+  persistGovernedContinuationSequenceConfig({
+    store: c3Full.store,
+    ...threeEntryDefs(c3FullPred),
+    sequenceKey: "041c3-full",
+  });
+  const c3FullB = materializeNextGovernedContinuationTargetFromSequence({
+    store: c3Full.store,
+    verificationDecisionId: c3Full.decisionId,
+  });
+  expectTrue("041c3-full B", c3FullB.materialized);
+  const c3FullX = await addUnrelatedVerified(c3Full.store, c3FullPred, "seq-041c3-full-x");
+  appendRawFulfillment(
+    c3Full.store.storeRoot,
+    "aaa-full-alien",
+    buildSequenceFulfillmentRecord({
+      sequenceId: c3FullB.config!.sequenceId,
+      sequenceConfigHash: c3FullB.config!.configHash,
+      entryKey: "entry-a",
+      entryHash: c3FullB.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+      verificationDecisionId: c3FullX.decisionId,
+      executorAssignmentId: c3FullX.assignmentId,
+      executorExecutionEvidenceId: c3FullX.evidenceId,
+    }),
+  );
+  const c3FullR = createFileEngineeringStore(c3Full.store.storeRoot);
+  expectFalse(
+    "041c3-full alien no second B",
+    materializeNextGovernedContinuationTargetFromSequence({
+      store: c3FullR,
+      verificationDecisionId: c3FullX.decisionId,
+    }).materialized,
+  );
+  const c3FullAuth = authorizePostDecisionExecution({
+    store: c3FullR,
+    postDecisionActionId: c3Full.prepared.actionRecord!.postDecisionActionId,
+    humanAuthorized: true,
+  });
+  expectTrue("041c3-full explicit auth", c3FullAuth.authorized);
+  const c3FullExec = await executeAuthorizedPostDecisionAction({
+    store: c3FullR,
+    postDecisionActionId: c3Full.prepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock({
+      events: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    }),
+  });
+  expectTrue("041c3-full B executes", c3FullExec.executed);
+  const c3FullBId = c3FullExec.generatedAssignmentId!;
+  const c3FullBFrozen = c3FullR.loadAssignmentRecord(c3FullBId);
+  expect("041c3-full commit false", c3FullBFrozen.frozen.assignment.commitAuthorization, false);
+  expect("041c3-full push false", c3FullBFrozen.frozen.assignment.pushAuthorization, false);
+  expect("041c3-full requireNoPush", c3FullBFrozen.frozen.assignment.requireNoPush, true);
+  const c3FullPre = await collectGitEvidence(c3FullPred.repositoryPath);
+  const c3FullBEv = c3FullR.persistExecutionEvidence(
+    buildExecutionEvidence({
+      frozen: c3FullBFrozen.frozen,
+      result: synthesizeExecutionResult({
+        frozen: c3FullBFrozen.frozen,
+        providerId: CURSOR_PROVIDER_ID,
+        providerSessionId: "c3-full-b",
+        runId: "c3-full-b",
+        providerStatus: "finished",
+        normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+        providerFinalResultText: "B VERIFIED invent R146",
+        preRunGitEvidence: c3FullPre,
+        postRunGitEvidence: c3FullPre,
+        policyDenials: [],
+        changedPaths: ["allowed.txt"],
+        protectedPathMutationOccurred: false,
+        branchChanged: false,
+        headChanged: false,
+        commitOccurred: false,
+        unexpectedChanges: [],
+      }),
+      providerStarted: true,
+    }),
+  );
+  const c3FullBVa = authorizeAndFreezeVerifierAssignment({
+    store: c3FullR,
+    executorAssignmentId: c3FullBId,
+    executionEvidenceId: c3FullBEv.evidenceId,
+    humanAuthorized: true,
+  });
+  await routeGovernedVerifierAssignment({
+    store: c3FullR,
+    verifierAssignmentId: c3FullBVa.persisted!.frozen.assignment.assignmentId,
+    provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
+  });
+  const c3FullBAdj = adjudicateVerifierExecution({
+    store: c3FullR,
+    verifierAssignmentId: c3FullBVa.persisted!.frozen.assignment.assignmentId,
+  });
+  const c3FullBPrepared = preparePostDecisionAction({
+    store: c3FullR,
+    verificationDecisionId: c3FullBAdj.decisionRecord!.verificationDecisionId,
+  });
+  const c3FullC = materializeNextGovernedContinuationTargetFromSequence({
+    store: c3FullR,
+    verificationDecisionId: c3FullBAdj.decisionRecord!.verificationDecisionId,
+  });
+  expectTrue("041c3-full C once", c3FullC.materialized);
+  appendRawFulfillment(
+    c3FullR.storeRoot,
+    "aaa-full-alien-b",
+    buildSequenceFulfillmentRecord({
+      sequenceId: c3FullB.config!.sequenceId,
+      sequenceConfigHash: c3FullB.config!.configHash,
+      entryKey: "entry-b",
+      entryHash: c3FullB.config!.entries.find((e) => e.entryKey === "entry-b")!.entryHash,
+      verificationDecisionId: c3FullX.decisionId,
+      executorAssignmentId: c3FullX.assignmentId,
+      executorExecutionEvidenceId: c3FullX.evidenceId,
+    }),
+  );
+  const c3FullR2 = createFileEngineeringStore(c3FullR.storeRoot);
+  expectFalse(
+    "041c3-full alien B cannot unlock C",
+    materializeNextGovernedContinuationTargetFromSequence({
+      store: c3FullR2,
+      verificationDecisionId: c3FullX.decisionId,
+    }).materialized,
+  );
+  const c3FullCWait = await executeAuthorizedPostDecisionAction({
+    store: c3FullR2,
+    postDecisionActionId: c3FullBPrepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock(),
+  });
+  expect("041c3-full C waits for auth", c3FullCWait.reason, "authorization_not_found");
+
+  // Direct store conflict still refused
+  let c3PersistConflict = false;
+  try {
+    c3R.persistSequenceFulfillment(alienForge);
+  } catch (error) {
+    c3PersistConflict = error instanceof EngineeringStoreError;
+  }
+  expectTrue("041c3 persist still refuses conflict", c3PersistConflict);
 }

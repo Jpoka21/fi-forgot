@@ -241,6 +241,7 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
   let fulfilledEntryHash: string | null = null;
   const existingByExecutor = input.store.findSequenceFulfillmentByExecutor(
     config.sequenceId,
+    config.projectId,
     decision.verifiedExecutorAssignmentId,
   );
   if (existingByExecutor && validateSequenceFulfillment(existingByExecutor)) {
@@ -277,6 +278,7 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
     const bootstrap = bootstraps[0]!;
     const existingBootstrap = input.store.findSequenceFulfillmentByEntryKey(
       config.sequenceId,
+      config.projectId,
       bootstrap.entryKey,
     );
     if (existingBootstrap && validateSequenceFulfillment(existingBootstrap)) {
@@ -313,6 +315,7 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
           // Race: another executor may have claimed bootstrap first.
           const raced = input.store.findSequenceFulfillmentByEntryKey(
             config.sequenceId,
+            config.projectId,
             bootstrap.entryKey,
           );
           if (
@@ -361,6 +364,7 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
           // Duplicate fulfillment for same decision/entry is reuse.
           const prior = input.store.findSequenceFulfillmentByDecision(
             config.sequenceId,
+            config.projectId,
             decision.verificationDecisionId,
           );
           if (prior && validateSequenceFulfillment(prior)) {
@@ -395,6 +399,7 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
   }
   const priorEntryFulfillment = input.store.findSequenceFulfillmentByEntryKey(
     config.sequenceId,
+    config.projectId,
     fulfilledEntryKey,
   );
   if (
@@ -438,7 +443,7 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
   const next = winners[0]!;
 
   const alreadyFulfilled = input.store
-    .loadAuthoritativeSequenceFulfillments(config.sequenceId)
+    .loadAuthoritativeSequenceFulfillments(config.sequenceId, config.projectId)
     .some(
       (row) =>
         row.entryKey === next.entryKey &&

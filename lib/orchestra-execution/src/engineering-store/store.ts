@@ -899,7 +899,10 @@ export class FileEngineeringStore {
     if (!config || !validateGovernedContinuationSequenceConfig(config)) {
       throw new EngineeringStoreError("sequence fulfillment requires a valid sequence config");
     }
-    const authoritative = this.loadAuthoritativeSequenceFulfillments(record.sequenceId);
+    const authoritative = this.loadAuthoritativeSequenceFulfillments(
+      record.sequenceId,
+      config.projectId,
+    );
     const existing = authoritative.filter(
       (row) => row.fulfillmentId === record.fulfillmentId,
     );
@@ -994,42 +997,50 @@ export class FileEngineeringStore {
     return record;
   }
 
+  /**
+   * Load fulfillment NDJSON for one project namespace only.
+   * Alien sequences/{otherProject}/ files never participate — even with matching sequenceId.
+   */
   loadSequenceFulfillments(
     sequenceId: string,
+    projectId: string,
   ): GovernedContinuationSequenceFulfillmentRecord[] {
     assertSafeId("sequenceId", sequenceId);
+    assertSafeId("projectId", projectId);
+    const path = this.sequenceFulfillmentPath(projectId);
+    if (!existsSync(path)) return [];
     const out: GovernedContinuationSequenceFulfillmentRecord[] = [];
-    for (const projectId of this.listSequenceProjectIds()) {
-      const path = this.sequenceFulfillmentPath(projectId);
-      if (!existsSync(path)) continue;
-      for (const line of readFileSync(path, "utf8").split(/\r?\n/).filter(Boolean)) {
-        let row: GovernedContinuationSequenceFulfillmentRecord;
-        try {
-          row = JSON.parse(line) as GovernedContinuationSequenceFulfillmentRecord;
-        } catch {
-          continue;
-        }
-        if (row.sequenceId === sequenceId) out.push(row);
+    for (const line of readFileSync(path, "utf8").split(/\r?\n/).filter(Boolean)) {
+      let row: GovernedContinuationSequenceFulfillmentRecord;
+      try {
+        row = JSON.parse(line) as GovernedContinuationSequenceFulfillmentRecord;
+      } catch {
+        continue;
       }
+      if (row.sequenceId === sequenceId) out.push(row);
     }
     return out;
   }
 
   /**
-   * Fail-closed reconstruction: first valid fulfillment per entryKey wins.
-   * Later conflicting NDJSON lines never become authoritative.
+   * Fail-closed reconstruction within one project namespace:
+   * first valid fulfillment per entryKey wins; alien project files are never loaded.
    */
   loadAuthoritativeSequenceFulfillments(
     sequenceId: string,
+    projectId: string,
   ): GovernedContinuationSequenceFulfillmentRecord[] {
-    return selectAuthoritativeSequenceFulfillments(this.loadSequenceFulfillments(sequenceId));
+    return selectAuthoritativeSequenceFulfillments(
+      this.loadSequenceFulfillments(sequenceId, projectId),
+    );
   }
 
   findSequenceFulfillmentByExecutor(
     sequenceId: string,
+    projectId: string,
     executorAssignmentId: string,
   ): GovernedContinuationSequenceFulfillmentRecord | null {
-    const matches = this.loadAuthoritativeSequenceFulfillments(sequenceId).filter(
+    const matches = this.loadAuthoritativeSequenceFulfillments(sequenceId, projectId).filter(
       (row) => row.executorAssignmentId === executorAssignmentId,
     );
     return matches.length > 0 ? matches[0]! : null;
@@ -1037,9 +1048,10 @@ export class FileEngineeringStore {
 
   findSequenceFulfillmentByDecision(
     sequenceId: string,
+    projectId: string,
     verificationDecisionId: string,
   ): GovernedContinuationSequenceFulfillmentRecord | null {
-    const matches = this.loadAuthoritativeSequenceFulfillments(sequenceId).filter(
+    const matches = this.loadAuthoritativeSequenceFulfillments(sequenceId, projectId).filter(
       (row) => row.verificationDecisionId === verificationDecisionId,
     );
     return matches.length > 0 ? matches[0]! : null;
@@ -1047,9 +1059,10 @@ export class FileEngineeringStore {
 
   findSequenceFulfillmentByEntryKey(
     sequenceId: string,
+    projectId: string,
     entryKey: string,
   ): GovernedContinuationSequenceFulfillmentRecord | null {
-    const matches = this.loadAuthoritativeSequenceFulfillments(sequenceId).filter(
+    const matches = this.loadAuthoritativeSequenceFulfillments(sequenceId, projectId).filter(
       (row) => row.entryKey === entryKey,
     );
     return matches.length > 0 ? matches[0]! : null;
