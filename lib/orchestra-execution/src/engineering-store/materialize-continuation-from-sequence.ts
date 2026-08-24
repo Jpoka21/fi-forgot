@@ -438,8 +438,7 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
   const next = winners[0]!;
 
   const alreadyFulfilled = input.store
-    .loadSequenceFulfillments(config.sequenceId)
-    .filter(validateSequenceFulfillment)
+    .loadAuthoritativeSequenceFulfillments(config.sequenceId)
     .some(
       (row) =>
         row.entryKey === next.entryKey &&

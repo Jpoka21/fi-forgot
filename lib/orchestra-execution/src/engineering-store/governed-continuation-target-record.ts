@@ -470,3 +470,32 @@ export function validateSequenceFulfillment(
   const { fulfillmentHash, ...body } = record;
   return hashSequenceFulfillment(body) === fulfillmentHash;
 }
+
+/**
+ * Authoritative fulfillment identity: first valid record per (sequenceId, entryKey).
+ * Later identical fulfillmentHash lines are idempotent (ignored, first retained).
+ * Later conflicting records are non-authoritative (ignored).
+ * Invalid hashes are skipped and never become authority.
+ * Append order must not replace an established fulfillment identity.
+ */
+export function selectAuthoritativeSequenceFulfillments(
+  rows: readonly GovernedContinuationSequenceFulfillmentRecord[],
+): GovernedContinuationSequenceFulfillmentRecord[] {
+  const byEntry = new Map<string, GovernedContinuationSequenceFulfillmentRecord>();
+  const out: GovernedContinuationSequenceFulfillmentRecord[] = [];
+  for (const row of rows) {
+    if (!validateSequenceFulfillment(row)) continue;
+    const key = `${row.sequenceId}\u0000${row.entryKey}`;
+    const prior = byEntry.get(key);
+    if (!prior) {
+      byEntry.set(key, row);
+      out.push(row);
+      continue;
+    }
+    // Identical duplicate — keep first; do not replace.
+    if (prior.fulfillmentHash === row.fulfillmentHash) continue;
+    // Conflicting later record — non-authoritative; ignore.
+    continue;
+  }
+  return out;
+}

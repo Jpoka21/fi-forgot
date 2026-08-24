@@ -304,6 +304,9 @@ export {
   buildGovernedContinuationSequenceConfig,
   validateGovernedContinuationSequenceConfig,
   governedContinuationSequenceId,
+  selectAuthoritativeSequenceFulfillments,
+  buildSequenceFulfillmentRecord,
+  validateSequenceFulfillment,
 } from "./engineering-store/governed-continuation-target-record.js";
 export { markGovernedContinuationTargetStatus } from "./engineering-store/mark-governed-continuation-target.js";
 export {

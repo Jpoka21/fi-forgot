@@ -1,4 +1,4 @@
-import { appendFileSync, mkdtempSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDisposableExecutionFixture } from "../fixture.js";
@@ -19,6 +19,8 @@ import {
   validateGovernedContinuationSequenceConfig,
   hashSequenceConfig,
   buildSequenceFulfillmentRecord,
+  selectAuthoritativeSequenceFulfillments,
+  validateSequenceFulfillment,
 } from "../engineering-store/governed-continuation-target-record.js";
 import { routeGovernedVerifierAssignment } from "../engineering-store/route-verifier.js";
 import { buildExecutionEvidence } from "../engineering-store/evidence.js";
@@ -108,6 +110,101 @@ async function buildVerifiedCase(assignmentId: string, prose = "VERIFIED") {
     adjudication,
     prepared,
     decisionId: adjudication.decisionRecord!.verificationDecisionId,
+  };
+}
+
+function fulfillmentNdjsonPath(storeRoot: string, projectId: string): string {
+  return join(
+    storeRoot,
+    "sequences",
+    projectId,
+    "governed-continuation-sequence-fulfillments.ndjson",
+  );
+}
+
+function appendRawFulfillment(
+  storeRoot: string,
+  projectId: string,
+  record: ReturnType<typeof buildSequenceFulfillmentRecord> | Record<string, unknown>,
+): void {
+  appendFileSync(
+    fulfillmentNdjsonPath(storeRoot, projectId),
+    `${JSON.stringify(record)}\n`,
+    "utf8",
+  );
+}
+
+async function addUnrelatedVerified(
+  store: ReturnType<typeof createFileEngineeringStore>,
+  pred: {
+    projectId: string;
+    repositoryPath: string;
+    branch: string;
+    startingHead: string;
+    allowedPaths: string[];
+    protectedPaths: string[];
+  },
+  assignmentId: string,
+) {
+  const unrelated = createAssignment({
+    assignmentId,
+    projectId: pred.projectId,
+    role: "executor",
+    repositoryPath: pred.repositoryPath,
+    branch: pred.branch,
+    startingHead: pred.startingHead,
+    assignmentText: "unrelated verified work outside sequence",
+    allowedPaths: [...pred.allowedPaths],
+    protectedPaths: [...pred.protectedPaths],
+    requireNoPush: true,
+    commitAuthorization: false,
+    pushAuthorization: false,
+    requiredEvidence: ["git", "hooks", "filesystem"],
+    structuredObligations: [],
+    createdAt: "2026-08-24T00:00:00.000Z",
+  });
+  store.persistFrozenAssignment(unrelated);
+  const preU = await collectGitEvidence(pred.repositoryPath);
+  const uRes = synthesizeExecutionResult({
+    frozen: unrelated,
+    providerId: CURSOR_PROVIDER_ID,
+    providerSessionId: `u-${assignmentId}`,
+    runId: `u-${assignmentId}`,
+    providerStatus: "finished",
+    normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    providerFinalResultText: "unrelated invent R146",
+    preRunGitEvidence: preU,
+    postRunGitEvidence: preU,
+    policyDenials: [],
+    changedPaths: ["allowed.txt"],
+    protectedPathMutationOccurred: false,
+    branchChanged: false,
+    headChanged: false,
+    commitOccurred: false,
+    unexpectedChanges: [],
+  });
+  const uEv = store.persistExecutionEvidence(
+    buildExecutionEvidence({ frozen: unrelated, result: uRes, providerStarted: true }),
+  );
+  const uAuth = authorizeAndFreezeVerifierAssignment({
+    store,
+    executorAssignmentId: assignmentId,
+    executionEvidenceId: uEv.evidenceId,
+    humanAuthorized: true,
+  });
+  await routeGovernedVerifierAssignment({
+    store,
+    verifierAssignmentId: uAuth.persisted!.frozen.assignment.assignmentId,
+    provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
+  });
+  const uAdj = adjudicateVerifierExecution({
+    store,
+    verifierAssignmentId: uAuth.persisted!.frozen.assignment.assignmentId,
+  });
+  return {
+    decisionId: uAdj.decisionRecord!.verificationDecisionId,
+    evidenceId: uEv.evidenceId,
+    assignmentId,
   };
 }
 
@@ -659,80 +756,6 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
 
   section("041-C — unrelated VERIFIED cannot rebootstrap or rematerialize next");
 
-  async function addUnrelatedVerified(
-    store: ReturnType<typeof createFileEngineeringStore>,
-    pred: {
-      projectId: string;
-      repositoryPath: string;
-      branch: string;
-      startingHead: string;
-      allowedPaths: string[];
-      protectedPaths: string[];
-    },
-    assignmentId: string,
-  ) {
-    const unrelated = createAssignment({
-      assignmentId,
-      projectId: pred.projectId,
-      role: "executor",
-      repositoryPath: pred.repositoryPath,
-      branch: pred.branch,
-      startingHead: pred.startingHead,
-      assignmentText: "unrelated verified work outside sequence",
-      allowedPaths: [...pred.allowedPaths],
-      protectedPaths: [...pred.protectedPaths],
-      requireNoPush: true,
-      commitAuthorization: false,
-      pushAuthorization: false,
-      requiredEvidence: ["git", "hooks", "filesystem"],
-      structuredObligations: [],
-      createdAt: "2026-08-24T00:00:00.000Z",
-    });
-    store.persistFrozenAssignment(unrelated);
-    const preU = await collectGitEvidence(pred.repositoryPath);
-    const uRes = synthesizeExecutionResult({
-      frozen: unrelated,
-      providerId: CURSOR_PROVIDER_ID,
-      providerSessionId: `u-${assignmentId}`,
-      runId: `u-${assignmentId}`,
-      providerStatus: "finished",
-      normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
-      providerFinalResultText: "unrelated invent R146",
-      preRunGitEvidence: preU,
-      postRunGitEvidence: preU,
-      policyDenials: [],
-      changedPaths: ["allowed.txt"],
-      protectedPathMutationOccurred: false,
-      branchChanged: false,
-      headChanged: false,
-      commitOccurred: false,
-      unexpectedChanges: [],
-    });
-    const uEv = store.persistExecutionEvidence(
-      buildExecutionEvidence({ frozen: unrelated, result: uRes, providerStarted: true }),
-    );
-    const uAuth = authorizeAndFreezeVerifierAssignment({
-      store,
-      executorAssignmentId: assignmentId,
-      executionEvidenceId: uEv.evidenceId,
-      humanAuthorized: true,
-    });
-    await routeGovernedVerifierAssignment({
-      store,
-      verifierAssignmentId: uAuth.persisted!.frozen.assignment.assignmentId,
-      provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
-    });
-    const uAdj = adjudicateVerifierExecution({
-      store,
-      verifierAssignmentId: uAuth.persisted!.frozen.assignment.assignmentId,
-    });
-    return {
-      decisionId: uAdj.decisionRecord!.verificationDecisionId,
-      evidenceId: uEv.evidenceId,
-      assignmentId,
-    };
-  }
-
   const boot = await buildVerifiedCase("seq-041c-boot");
   const bootPred = boot.assignment.assignment;
   persistGovernedContinuationSequenceConfig({
@@ -967,4 +990,524 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
     conflictThrew = error instanceof EngineeringStoreError;
   }
   expectTrue("conflicting bootstrap fulfillment refused at store", conflictThrew);
+
+  section("041-C2 — first authoritative fulfillment wins; raw NDJSON cannot rebind");
+
+  // Pure reconstruction unit: first wins, identical idempotent, conflicts ignored
+  const unitA = buildSequenceFulfillmentRecord({
+    sequenceId: "seq-unit",
+    sequenceConfigHash: "a".repeat(64),
+    entryKey: "entry-a",
+    entryHash: "b".repeat(64),
+    verificationDecisionId: "dec-a",
+    executorAssignmentId: "exec-a",
+    executorExecutionEvidenceId: "ev-a",
+  });
+  const unitX = buildSequenceFulfillmentRecord({
+    sequenceId: "seq-unit",
+    sequenceConfigHash: "a".repeat(64),
+    entryKey: "entry-a",
+    entryHash: "b".repeat(64),
+    verificationDecisionId: "dec-x",
+    executorAssignmentId: "exec-x",
+    executorExecutionEvidenceId: "ev-x",
+  });
+  const unitBad = { ...unitX, fulfillmentHash: "0".repeat(64) };
+  expect(
+    "unit legitimate-first",
+    selectAuthoritativeSequenceFulfillments([unitA, unitX])[0]!.executorAssignmentId,
+    "exec-a",
+  );
+  expect(
+    "unit forged-first",
+    selectAuthoritativeSequenceFulfillments([unitX, unitA])[0]!.executorAssignmentId,
+    "exec-x",
+  );
+  expect(
+    "unit identical duplicate keeps one",
+    selectAuthoritativeSequenceFulfillments([unitA, unitA]).length,
+    1,
+  );
+  expect(
+    "unit reverse still first of reversed",
+    selectAuthoritativeSequenceFulfillments([unitX, unitA, unitX])[0]!.fulfillmentHash,
+    unitX.fulfillmentHash,
+  );
+  expect(
+    "unit malformed hash skipped then legitimate",
+    selectAuthoritativeSequenceFulfillments([
+      unitBad as typeof unitA,
+      unitA,
+    ])[0]!.executorAssignmentId,
+    "exec-a",
+  );
+  expect(
+    "unit legitimate then malformed keeps legitimate",
+    selectAuthoritativeSequenceFulfillments([
+      unitA,
+      unitBad as typeof unitA,
+    ])[0]!.executorAssignmentId,
+    "exec-a",
+  );
+  expect(
+    "unit multiple conflicts keep first",
+    selectAuthoritativeSequenceFulfillments([unitA, unitX, unitX, unitA]).length,
+    1,
+  );
+
+  // Critical raw P1 regression: legitimate A → B, then raw forge X bootstrap, restart, X cannot rematerialize B
+  const c2 = await buildVerifiedCase("seq-041c2-boot");
+  const c2Pred = c2.assignment.assignment;
+  const c2Cfg = persistGovernedContinuationSequenceConfig({
+    store: c2.store,
+    ...threeEntryDefs(c2Pred),
+    sequenceKey: "041c2",
+  });
+  expectTrue("041c2 config persisted", c2Cfg.persisted);
+  const c2B = materializeNextGovernedContinuationTargetFromSequence({
+    store: c2.store,
+    verificationDecisionId: c2.decisionId,
+  });
+  expectTrue("041c2 B materialized once", c2B.materialized);
+  expect("041c2 B entry", c2B.target!.sequenceEntryKey, "entry-b");
+  const c2BootFul = c2.store.findSequenceFulfillmentByEntryKey(
+    c2B.config!.sequenceId,
+    "entry-a",
+  );
+  expectTrue("041c2 bootstrap fulfillment present", Boolean(c2BootFul));
+  expect("041c2 bootstrap executor", c2BootFul!.executorAssignmentId, c2Pred.assignmentId);
+
+  const c2X = await addUnrelatedVerified(c2.store, c2Pred, "seq-041c2-x");
+  const forgedBoot = buildSequenceFulfillmentRecord({
+    sequenceId: c2B.config!.sequenceId,
+    sequenceConfigHash: c2B.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: c2B.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+    verificationDecisionId: c2X.decisionId,
+    executorAssignmentId: c2X.assignmentId,
+    executorExecutionEvidenceId: c2X.evidenceId,
+  });
+  expectTrue("forged bootstrap hash-valid", validateSequenceFulfillment(forgedBoot));
+  appendRawFulfillment(c2.store.storeRoot, c2Pred.projectId, forgedBoot);
+
+  // Before restart: lookup must still prefer legitimate first
+  expect(
+    "041c2 before restart entry authority",
+    c2.store.findSequenceFulfillmentByEntryKey(c2B.config!.sequenceId, "entry-a")!
+      .executorAssignmentId,
+    c2Pred.assignmentId,
+  );
+  expect(
+    "041c2 forged executor lookup not authoritative",
+    c2.store.findSequenceFulfillmentByExecutor(c2B.config!.sequenceId, c2X.assignmentId),
+    null,
+  );
+  const c2XBefore = materializeNextGovernedContinuationTargetFromSequence({
+    store: c2.store,
+    verificationDecisionId: c2X.decisionId,
+  });
+  expect("041c2 X before restart refused", c2XBefore.reason, "bootstrap_already_fulfilled");
+  expectFalse("041c2 X before restart no target", c2XBefore.materialized);
+
+  // Conflicting evidence / decision / continuation-target-shaped fields via raw variants
+  const forgedEvidence = buildSequenceFulfillmentRecord({
+    sequenceId: c2B.config!.sequenceId,
+    sequenceConfigHash: c2B.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: c2B.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+    verificationDecisionId: c2.decisionId,
+    executorAssignmentId: c2Pred.assignmentId,
+    executorExecutionEvidenceId: c2X.evidenceId,
+  });
+  appendRawFulfillment(c2.store.storeRoot, c2Pred.projectId, forgedEvidence);
+  const forgedDecision = buildSequenceFulfillmentRecord({
+    sequenceId: c2B.config!.sequenceId,
+    sequenceConfigHash: c2B.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: c2B.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+    verificationDecisionId: c2X.decisionId,
+    executorAssignmentId: c2Pred.assignmentId,
+    executorExecutionEvidenceId: c2.evidence.evidenceId,
+  });
+  appendRawFulfillment(c2.store.storeRoot, c2Pred.projectId, forgedDecision);
+  appendRawFulfillment(c2.store.storeRoot, c2Pred.projectId, forgedBoot);
+  appendRawFulfillment(c2.store.storeRoot, c2Pred.projectId, c2BootFul!);
+  appendRawFulfillment(c2.store.storeRoot, c2Pred.projectId, {
+    ...forgedBoot,
+    fulfillmentHash: "f".repeat(64),
+  });
+
+  const c2Restart = createFileEngineeringStore(c2.store.storeRoot);
+  const authAfterRestart = c2Restart.findSequenceFulfillmentByEntryKey(
+    c2B.config!.sequenceId,
+    "entry-a",
+  );
+  expect(
+    "041c2 restart authority unchanged",
+    authAfterRestart!.executorAssignmentId,
+    c2Pred.assignmentId,
+  );
+  expect(
+    "041c2 restart fulfillment hash",
+    authAfterRestart!.fulfillmentHash,
+    c2BootFul!.fulfillmentHash,
+  );
+  const c2XAfter = materializeNextGovernedContinuationTargetFromSequence({
+    store: c2Restart,
+    verificationDecisionId: c2X.decisionId,
+  });
+  expect("041c2 AFTER_RAW_FORGE refused", c2XAfter.reason, "bootstrap_already_fulfilled");
+  expectFalse("041c2 forged X cannot materialize B", c2XAfter.materialized);
+  expect("041c2 forged X target null", c2XAfter.target, null);
+  const c2BReuse = materializeNextGovernedContinuationTargetFromSequence({
+    store: c2Restart,
+    verificationDecisionId: c2.decisionId,
+  });
+  expectTrue("041c2 legitimate B remains", c2BReuse.duplicateTargetReused);
+  expect(
+    "041c2 same B id after forge",
+    c2BReuse.target!.continuationTargetId,
+    c2B.target!.continuationTargetId,
+  );
+  const providerForge = new CountingMock();
+  expect("041c2 forged attack create=0", providerForge.creates, 0);
+  expect("041c2 forged attack submit=0", providerForge.submitted.length, 0);
+
+  // Direct store still refuses conflicting persist
+  let c2StoreConflict = false;
+  try {
+    c2Restart.persistSequenceFulfillment(forgedBoot);
+  } catch (error) {
+    c2StoreConflict = error instanceof EngineeringStoreError;
+  }
+  expectTrue("041c2 persist still refuses conflict", c2StoreConflict);
+
+  // Forged-first raw ordering: first line wins deterministically
+  const forgeFirst = await buildVerifiedCase("seq-041c2-ff");
+  const ffPred = forgeFirst.assignment.assignment;
+  const ffCfg = persistGovernedContinuationSequenceConfig({
+    store: forgeFirst.store,
+    ...threeEntryDefs(ffPred),
+    sequenceKey: "041c2-ff",
+  });
+  const ffX = await addUnrelatedVerified(forgeFirst.store, ffPred, "seq-041c2-ff-x");
+  // Seed empty file by writing forged first via raw before any legitimate persist path materialize
+  const ffEntryA = ffCfg.config!.entries.find((e) => e.entryKey === "entry-a")!;
+  const ffForged = buildSequenceFulfillmentRecord({
+    sequenceId: ffCfg.config!.sequenceId,
+    sequenceConfigHash: ffCfg.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: ffEntryA.entryHash,
+    verificationDecisionId: ffX.decisionId,
+    executorAssignmentId: ffX.assignmentId,
+    executorExecutionEvidenceId: ffX.evidenceId,
+  });
+  appendRawFulfillment(forgeFirst.store.storeRoot, ffPred.projectId, ffForged);
+  const ffLegit = buildSequenceFulfillmentRecord({
+    sequenceId: ffCfg.config!.sequenceId,
+    sequenceConfigHash: ffCfg.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: ffEntryA.entryHash,
+    verificationDecisionId: forgeFirst.decisionId,
+    executorAssignmentId: ffPred.assignmentId,
+    executorExecutionEvidenceId: forgeFirst.evidence.evidenceId,
+  });
+  appendRawFulfillment(forgeFirst.store.storeRoot, ffPred.projectId, ffLegit);
+  expect(
+    "041c2 forged-first authority is forged",
+    forgeFirst.store.findSequenceFulfillmentByEntryKey(ffCfg.config!.sequenceId, "entry-a")!
+      .executorAssignmentId,
+    ffX.assignmentId,
+  );
+  const ffLegitMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: forgeFirst.store,
+    verificationDecisionId: forgeFirst.decisionId,
+  });
+  expect(
+    "041c2 legitimate second cannot steal first forge",
+    ffLegitMat.reason,
+    "bootstrap_already_fulfilled",
+  );
+
+  // Non-bootstrap raw forge must not unlock C
+  const nb = await buildVerifiedCase("seq-041c2-nb");
+  const nbPred = nb.assignment.assignment;
+  persistGovernedContinuationSequenceConfig({
+    store: nb.store,
+    ...threeEntryDefs(nbPred),
+    sequenceKey: "041c2-nb",
+  });
+  const nbB = materializeNextGovernedContinuationTargetFromSequence({
+    store: nb.store,
+    verificationDecisionId: nb.decisionId,
+  });
+  expectTrue("041c2-nb B materialized", nbB.materialized);
+  const nbAuthB = authorizePostDecisionExecution({
+    store: nb.store,
+    postDecisionActionId: nb.prepared.actionRecord!.postDecisionActionId,
+    humanAuthorized: true,
+  });
+  expectTrue("041c2-nb B authorized", nbAuthB.authorized);
+  const nbExecB = await executeAuthorizedPostDecisionAction({
+    store: nb.store,
+    postDecisionActionId: nb.prepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock({
+      events: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    }),
+  });
+  expectTrue("041c2-nb B executed", nbExecB.executed);
+  const nbBId = nbExecB.generatedAssignmentId!;
+  const nbBFrozen = nb.store.loadAssignmentRecord(nbBId);
+  const nbPreB = await collectGitEvidence(nbPred.repositoryPath);
+  const nbBRes = synthesizeExecutionResult({
+    frozen: nbBFrozen.frozen,
+    providerId: CURSOR_PROVIDER_ID,
+    providerSessionId: "nb-b",
+    runId: "nb-b",
+    providerStatus: "finished",
+    normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    providerFinalResultText: "B done",
+    preRunGitEvidence: nbPreB,
+    postRunGitEvidence: nbPreB,
+    policyDenials: [],
+    changedPaths: ["allowed.txt"],
+    protectedPathMutationOccurred: false,
+    branchChanged: false,
+    headChanged: false,
+    commitOccurred: false,
+    unexpectedChanges: [],
+  });
+  const nbBEv = nb.store.persistExecutionEvidence(
+    buildExecutionEvidence({
+      frozen: nbBFrozen.frozen,
+      result: nbBRes,
+      providerStarted: true,
+    }),
+  );
+  const nbBVa = authorizeAndFreezeVerifierAssignment({
+    store: nb.store,
+    executorAssignmentId: nbBId,
+    executionEvidenceId: nbBEv.evidenceId,
+    humanAuthorized: true,
+  });
+  await routeGovernedVerifierAssignment({
+    store: nb.store,
+    verifierAssignmentId: nbBVa.persisted!.frozen.assignment.assignmentId,
+    provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
+  });
+  const nbBAdj = adjudicateVerifierExecution({
+    store: nb.store,
+    verifierAssignmentId: nbBVa.persisted!.frozen.assignment.assignmentId,
+  });
+  const nbC = materializeNextGovernedContinuationTargetFromSequence({
+    store: nb.store,
+    verificationDecisionId: nbBAdj.decisionRecord!.verificationDecisionId,
+  });
+  expectTrue("041c2-nb C materialized once", nbC.materialized);
+  expect("041c2-nb C entry", nbC.target!.sequenceEntryKey, "entry-c");
+  const nbBFul = nb.store.findSequenceFulfillmentByEntryKey(nbB.config!.sequenceId, "entry-b");
+  expectTrue("041c2-nb B fulfillment present", Boolean(nbBFul));
+
+  const nbY = await addUnrelatedVerified(nb.store, nbPred, "seq-041c2-nb-y");
+  const forgedB = buildSequenceFulfillmentRecord({
+    sequenceId: nbB.config!.sequenceId,
+    sequenceConfigHash: nbB.config!.configHash,
+    entryKey: "entry-b",
+    entryHash: nbB.config!.entries.find((e) => e.entryKey === "entry-b")!.entryHash,
+    verificationDecisionId: nbY.decisionId,
+    executorAssignmentId: nbY.assignmentId,
+    executorExecutionEvidenceId: nbY.evidenceId,
+  });
+  appendRawFulfillment(nb.store.storeRoot, nbPred.projectId, forgedB);
+  const nbRestart = createFileEngineeringStore(nb.store.storeRoot);
+  expect(
+    "041c2-nb B authority after forge",
+    nbRestart.findSequenceFulfillmentByEntryKey(nbB.config!.sequenceId, "entry-b")!
+      .executorAssignmentId,
+    nbBId,
+  );
+  const nbYMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: nbRestart,
+    verificationDecisionId: nbY.decisionId,
+  });
+  expectFalse("041c2-nb forged cannot materialize C", nbYMat.materialized);
+  expect(
+    "041c2-nb forged Y refused",
+    nbYMat.reason === "bootstrap_already_fulfilled" ||
+      nbYMat.reason === "unrelated_verified_predecessor",
+    true,
+  );
+  const nbCReuse = materializeNextGovernedContinuationTargetFromSequence({
+    store: nbRestart,
+    verificationDecisionId: nbBAdj.decisionRecord!.verificationDecisionId,
+  });
+  expectTrue("041c2-nb legitimate C remains", nbCReuse.duplicateTargetReused);
+  expect(
+    "041c2-nb same C id",
+    nbCReuse.target!.continuationTargetId,
+    nbC.target!.continuationTargetId,
+  );
+
+  // Full A→B→C with raw forge between steps still fail-closed; C waits for auth
+  const full = await buildVerifiedCase("seq-041c2-full");
+  const fullPred = full.assignment.assignment;
+  persistGovernedContinuationSequenceConfig({
+    store: full.store,
+    ...threeEntryDefs(fullPred),
+    sequenceKey: "041c2-full",
+  });
+  const fullB = materializeNextGovernedContinuationTargetFromSequence({
+    store: full.store,
+    verificationDecisionId: full.decisionId,
+  });
+  expectTrue("041c2-full B once", fullB.materialized);
+  const fullX = await addUnrelatedVerified(full.store, fullPred, "seq-041c2-full-x");
+  appendRawFulfillment(
+    full.store.storeRoot,
+    fullPred.projectId,
+    buildSequenceFulfillmentRecord({
+      sequenceId: fullB.config!.sequenceId,
+      sequenceConfigHash: fullB.config!.configHash,
+      entryKey: "entry-a",
+      entryHash: fullB.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+      verificationDecisionId: fullX.decisionId,
+      executorAssignmentId: fullX.assignmentId,
+      executorExecutionEvidenceId: fullX.evidenceId,
+    }),
+  );
+  const fullRestart = createFileEngineeringStore(full.store.storeRoot);
+  expectFalse(
+    "041c2-full X cannot rematerialize B",
+    materializeNextGovernedContinuationTargetFromSequence({
+      store: fullRestart,
+      verificationDecisionId: fullX.decisionId,
+    }).materialized,
+  );
+  const fullAuthB = authorizePostDecisionExecution({
+    store: fullRestart,
+    postDecisionActionId: full.prepared.actionRecord!.postDecisionActionId,
+    humanAuthorized: true,
+  });
+  expectTrue("041c2-full explicit auth B", fullAuthB.authorized);
+  const fullExecB = await executeAuthorizedPostDecisionAction({
+    store: fullRestart,
+    postDecisionActionId: full.prepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock({
+      events: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    }),
+  });
+  expectTrue("041c2-full B executes", fullExecB.executed);
+  const fullBId = fullExecB.generatedAssignmentId!;
+  const fullBFrozen = fullRestart.loadAssignmentRecord(fullBId);
+  const fullPreB = await collectGitEvidence(fullPred.repositoryPath);
+  const fullBEv = fullRestart.persistExecutionEvidence(
+    buildExecutionEvidence({
+      frozen: fullBFrozen.frozen,
+      result: synthesizeExecutionResult({
+        frozen: fullBFrozen.frozen,
+        providerId: CURSOR_PROVIDER_ID,
+        providerSessionId: "full-b",
+        runId: "full-b",
+        providerStatus: "finished",
+        normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+        providerFinalResultText: "B verified",
+        preRunGitEvidence: fullPreB,
+        postRunGitEvidence: fullPreB,
+        policyDenials: [],
+        changedPaths: ["allowed.txt"],
+        protectedPathMutationOccurred: false,
+        branchChanged: false,
+        headChanged: false,
+        commitOccurred: false,
+        unexpectedChanges: [],
+      }),
+      providerStarted: true,
+    }),
+  );
+  const fullBVa = authorizeAndFreezeVerifierAssignment({
+    store: fullRestart,
+    executorAssignmentId: fullBId,
+    executionEvidenceId: fullBEv.evidenceId,
+    humanAuthorized: true,
+  });
+  await routeGovernedVerifierAssignment({
+    store: fullRestart,
+    verifierAssignmentId: fullBVa.persisted!.frozen.assignment.assignmentId,
+    provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
+  });
+  const fullBAdj = adjudicateVerifierExecution({
+    store: fullRestart,
+    verifierAssignmentId: fullBVa.persisted!.frozen.assignment.assignmentId,
+  });
+  const fullBPrepared = preparePostDecisionAction({
+    store: fullRestart,
+    verificationDecisionId: fullBAdj.decisionRecord!.verificationDecisionId,
+  });
+  const fullC = materializeNextGovernedContinuationTargetFromSequence({
+    store: fullRestart,
+    verificationDecisionId: fullBAdj.decisionRecord!.verificationDecisionId,
+  });
+  expectTrue("041c2-full C once", fullC.materialized);
+  appendRawFulfillment(
+    fullRestart.storeRoot,
+    fullPred.projectId,
+    buildSequenceFulfillmentRecord({
+      sequenceId: fullB.config!.sequenceId,
+      sequenceConfigHash: fullB.config!.configHash,
+      entryKey: "entry-b",
+      entryHash: fullB.config!.entries.find((e) => e.entryKey === "entry-b")!.entryHash,
+      verificationDecisionId: fullX.decisionId,
+      executorAssignmentId: fullX.assignmentId,
+      executorExecutionEvidenceId: fullX.evidenceId,
+    }),
+  );
+  const fullRestart2 = createFileEngineeringStore(fullRestart.storeRoot);
+  expectFalse(
+    "041c2-full forged B fulfillment cannot create another C",
+    materializeNextGovernedContinuationTargetFromSequence({
+      store: fullRestart2,
+      verificationDecisionId: fullX.decisionId,
+    }).materialized,
+  );
+  const fullNoAuto = await executeAuthorizedPostDecisionAction({
+    store: fullRestart2,
+    postDecisionActionId: fullBPrepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock(),
+  });
+  expect("041c2-full C waits for explicit auth", fullNoAuto.reason, "authorization_not_found");
+
+  // Fulfillment deletion assessment: deleting authoritative line exposes later conflict as authority
+  const del = await buildVerifiedCase("seq-041c2-del");
+  const delPred = del.assignment.assignment;
+  const delCfg = persistGovernedContinuationSequenceConfig({
+    store: del.store,
+    ...threeEntryDefs(delPred),
+    sequenceKey: "041c2-del",
+  });
+  materializeNextGovernedContinuationTargetFromSequence({
+    store: del.store,
+    verificationDecisionId: del.decisionId,
+  });
+  const delX = await addUnrelatedVerified(del.store, delPred, "seq-041c2-del-x");
+  const delPath = fulfillmentNdjsonPath(del.store.storeRoot, delPred.projectId);
+  const delForged = buildSequenceFulfillmentRecord({
+    sequenceId: delCfg.config!.sequenceId,
+    sequenceConfigHash: delCfg.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: delCfg.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+    verificationDecisionId: delX.decisionId,
+    executorAssignmentId: delX.assignmentId,
+    executorExecutionEvidenceId: delX.evidenceId,
+  });
+  appendRawFulfillment(del.store.storeRoot, delPred.projectId, delForged);
+  const delLines = readFileSync(delPath, "utf8").split(/\r?\n/).filter(Boolean);
+  expectTrue("041c2-del has multiple lines", delLines.length >= 2);
+  writeFileSync(delPath, `${delLines.slice(1).join("\n")}\n`, "utf8");
+  const delAfter = createFileEngineeringStore(del.store.storeRoot);
+  expect(
+    "041c2-del after deleting first line later forge becomes authority",
+    delAfter.findSequenceFulfillmentByEntryKey(delCfg.config!.sequenceId, "entry-a")!
+      .executorAssignmentId,
+    delX.assignmentId,
+  );
 }
