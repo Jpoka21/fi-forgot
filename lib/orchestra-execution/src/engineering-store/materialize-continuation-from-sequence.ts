@@ -35,6 +35,8 @@ export const MATERIALIZE_SEQUENCE_REFUSALS = [
   "sequence_repository_mismatch",
   "sequence_branch_mismatch",
   "bootstrap_ambiguous",
+  "bootstrap_already_fulfilled",
+  "unrelated_verified_predecessor",
   "predecessor_not_fulfilled",
   "no_next_entry",
   "next_entry_ambiguous",
@@ -266,34 +268,74 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
 
   let predecessorFulfillment: GovernedContinuationSequenceFulfillmentRecord | null = null;
   if (!fulfilledEntryKey) {
-    // Bootstrap path: first VERIFIED for project with no prior fulfillment binds unique bootstrap.
+    // Bootstrap is a one-time governed predecessor relationship for this sequence.
+    // Same project/repo/branch + VERIFIED alone is not sufficient after bootstrap is bound.
     const bootstraps = config.entries.filter((e) => e.predecessorEntryKey === null);
     if (bootstraps.length !== 1) {
       return refusedMaterialize("bootstrap_ambiguous", { config });
     }
     const bootstrap = bootstraps[0]!;
-    const fulfillment = buildSequenceFulfillmentRecord({
-      sequenceId: config.sequenceId,
-      sequenceConfigHash: config.configHash,
-      entryKey: bootstrap.entryKey,
-      entryHash: bootstrap.entryHash,
-      verificationDecisionId: decision.verificationDecisionId,
-      executorAssignmentId: decision.verifiedExecutorAssignmentId,
-      executorExecutionEvidenceId: decision.verifiedExecutorExecutionEvidenceId,
-    });
-    try {
-      predecessorFulfillment = input.store.persistSequenceFulfillment(fulfillment);
-    } catch (error) {
-      if (error instanceof EngineeringStoreError) {
-        return refusedMaterialize("predecessor_not_fulfilled", {
+    const existingBootstrap = input.store.findSequenceFulfillmentByEntryKey(
+      config.sequenceId,
+      bootstrap.entryKey,
+    );
+    if (existingBootstrap && validateSequenceFulfillment(existingBootstrap)) {
+      const samePredecessor =
+        existingBootstrap.executorAssignmentId === decision.verifiedExecutorAssignmentId &&
+        existingBootstrap.verificationDecisionId === decision.verificationDecisionId;
+      if (!samePredecessor) {
+        return refusedMaterialize("bootstrap_already_fulfilled", {
           config,
-          warnings: [error.message],
+          warnings: [
+            "bootstrap entry already fulfilled by a governed predecessor",
+            "unrelated VERIFIED cannot rebind bootstrap or unlock the next entry",
+          ],
         });
       }
-      throw error;
+      // Idempotent replay of the exact bootstrap predecessor.
+      predecessorFulfillment = existingBootstrap;
+      fulfilledEntryKey = existingBootstrap.entryKey;
+      fulfilledEntryHash = existingBootstrap.entryHash;
+    } else {
+      const fulfillment = buildSequenceFulfillmentRecord({
+        sequenceId: config.sequenceId,
+        sequenceConfigHash: config.configHash,
+        entryKey: bootstrap.entryKey,
+        entryHash: bootstrap.entryHash,
+        verificationDecisionId: decision.verificationDecisionId,
+        executorAssignmentId: decision.verifiedExecutorAssignmentId,
+        executorExecutionEvidenceId: decision.verifiedExecutorExecutionEvidenceId,
+      });
+      try {
+        predecessorFulfillment = input.store.persistSequenceFulfillment(fulfillment);
+      } catch (error) {
+        if (error instanceof EngineeringStoreError) {
+          // Race: another executor may have claimed bootstrap first.
+          const raced = input.store.findSequenceFulfillmentByEntryKey(
+            config.sequenceId,
+            bootstrap.entryKey,
+          );
+          if (
+            raced &&
+            validateSequenceFulfillment(raced) &&
+            (raced.executorAssignmentId !== decision.verifiedExecutorAssignmentId ||
+              raced.verificationDecisionId !== decision.verificationDecisionId)
+          ) {
+            return refusedMaterialize("bootstrap_already_fulfilled", {
+              config,
+              warnings: [error.message],
+            });
+          }
+          return refusedMaterialize("predecessor_not_fulfilled", {
+            config,
+            warnings: [error.message],
+          });
+        }
+        throw error;
+      }
+      fulfilledEntryKey = bootstrap.entryKey;
+      fulfilledEntryHash = bootstrap.entryHash;
     }
-    fulfilledEntryKey = bootstrap.entryKey;
-    fulfilledEntryHash = bootstrap.entryHash;
   } else {
     const entry = config.entries.find((e) => e.entryKey === fulfilledEntryKey);
     if (!entry || entry.entryHash !== fulfilledEntryHash) {
@@ -336,6 +378,38 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
     } else {
       predecessorFulfillment = existingByExecutor;
     }
+  }
+
+  if (!fulfilledEntryKey || !fulfilledEntryHash) {
+    return refusedMaterialize("unrelated_verified_predecessor", {
+      config,
+      warnings: ["VERIFIED decision is not bound to a governed sequence predecessor"],
+    });
+  }
+  const activeFulfilledEntry = config.entries.find((e) => e.entryKey === fulfilledEntryKey);
+  if (!activeFulfilledEntry || activeFulfilledEntry.entryHash !== fulfilledEntryHash) {
+    return refusedMaterialize("predecessor_not_fulfilled", {
+      config,
+      warnings: ["fulfilled entry does not match active sequence configuration"],
+    });
+  }
+  const priorEntryFulfillment = input.store.findSequenceFulfillmentByEntryKey(
+    config.sequenceId,
+    fulfilledEntryKey,
+  );
+  if (
+    priorEntryFulfillment &&
+    validateSequenceFulfillment(priorEntryFulfillment) &&
+    (priorEntryFulfillment.executorAssignmentId !==
+      decision.verifiedExecutorAssignmentId ||
+      priorEntryFulfillment.verificationDecisionId !== decision.verificationDecisionId)
+  ) {
+    return refusedMaterialize("unrelated_verified_predecessor", {
+      config,
+      warnings: [
+        "sequence entry already fulfilled by a different governed predecessor",
+      ],
+    });
   }
 
   const nextCandidates = config.entries.filter(

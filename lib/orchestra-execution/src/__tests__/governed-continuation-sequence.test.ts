@@ -12,14 +12,16 @@ import {
   persistGovernedContinuationSequenceConfig,
   materializeNextGovernedContinuationTargetFromSequence,
 } from "../engineering-store/materialize-continuation-from-sequence.js";
+import { createAssignment } from "../assignment-hash.js";
+import { createFileEngineeringStore, EngineeringStoreError } from "../engineering-store/store.js";
 import {
   buildGovernedContinuationSequenceConfig,
   validateGovernedContinuationSequenceConfig,
   hashSequenceConfig,
+  buildSequenceFulfillmentRecord,
 } from "../engineering-store/governed-continuation-target-record.js";
 import { routeGovernedVerifierAssignment } from "../engineering-store/route-verifier.js";
 import { buildExecutionEvidence } from "../engineering-store/evidence.js";
-import { createFileEngineeringStore } from "../engineering-store/store.js";
 import { CURSOR_PROVIDER_ID } from "../provider-contract.js";
 import { MockExecutionProvider } from "../providers/mock-provider.js";
 import { synthesizeExecutionResult } from "../result.js";
@@ -654,4 +656,315 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
     verificationDecisionId: weak.decisionId,
   });
   expect("protected weaken refused", weakMat.reason, "protected_path_weakening");
+
+  section("041-C — unrelated VERIFIED cannot rebootstrap or rematerialize next");
+
+  async function addUnrelatedVerified(
+    store: ReturnType<typeof createFileEngineeringStore>,
+    pred: {
+      projectId: string;
+      repositoryPath: string;
+      branch: string;
+      startingHead: string;
+      allowedPaths: string[];
+      protectedPaths: string[];
+    },
+    assignmentId: string,
+  ) {
+    const unrelated = createAssignment({
+      assignmentId,
+      projectId: pred.projectId,
+      role: "executor",
+      repositoryPath: pred.repositoryPath,
+      branch: pred.branch,
+      startingHead: pred.startingHead,
+      assignmentText: "unrelated verified work outside sequence",
+      allowedPaths: [...pred.allowedPaths],
+      protectedPaths: [...pred.protectedPaths],
+      requireNoPush: true,
+      commitAuthorization: false,
+      pushAuthorization: false,
+      requiredEvidence: ["git", "hooks", "filesystem"],
+      structuredObligations: [],
+      createdAt: "2026-08-24T00:00:00.000Z",
+    });
+    store.persistFrozenAssignment(unrelated);
+    const preU = await collectGitEvidence(pred.repositoryPath);
+    const uRes = synthesizeExecutionResult({
+      frozen: unrelated,
+      providerId: CURSOR_PROVIDER_ID,
+      providerSessionId: `u-${assignmentId}`,
+      runId: `u-${assignmentId}`,
+      providerStatus: "finished",
+      normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+      providerFinalResultText: "unrelated invent R146",
+      preRunGitEvidence: preU,
+      postRunGitEvidence: preU,
+      policyDenials: [],
+      changedPaths: ["allowed.txt"],
+      protectedPathMutationOccurred: false,
+      branchChanged: false,
+      headChanged: false,
+      commitOccurred: false,
+      unexpectedChanges: [],
+    });
+    const uEv = store.persistExecutionEvidence(
+      buildExecutionEvidence({ frozen: unrelated, result: uRes, providerStarted: true }),
+    );
+    const uAuth = authorizeAndFreezeVerifierAssignment({
+      store,
+      executorAssignmentId: assignmentId,
+      executionEvidenceId: uEv.evidenceId,
+      humanAuthorized: true,
+    });
+    await routeGovernedVerifierAssignment({
+      store,
+      verifierAssignmentId: uAuth.persisted!.frozen.assignment.assignmentId,
+      provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
+    });
+    const uAdj = adjudicateVerifierExecution({
+      store,
+      verifierAssignmentId: uAuth.persisted!.frozen.assignment.assignmentId,
+    });
+    return {
+      decisionId: uAdj.decisionRecord!.verificationDecisionId,
+      evidenceId: uEv.evidenceId,
+      assignmentId,
+    };
+  }
+
+  const boot = await buildVerifiedCase("seq-041c-boot");
+  const bootPred = boot.assignment.assignment;
+  persistGovernedContinuationSequenceConfig({
+    store: boot.store,
+    ...threeEntryDefs(bootPred),
+    sequenceKey: "041c",
+  });
+  const bootMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: boot.store,
+    verificationDecisionId: boot.decisionId,
+  });
+  expectTrue("041c bootstrap materializes B once", bootMat.materialized);
+  expect("041c B entry", bootMat.target!.sequenceEntryKey, "entry-b");
+  const bootReplay = materializeNextGovernedContinuationTargetFromSequence({
+    store: boot.store,
+    verificationDecisionId: boot.decisionId,
+  });
+  expectTrue("041c same predecessor replay reuses B", bootReplay.duplicateTargetReused);
+  expect(
+    "041c replay same B id",
+    bootReplay.target!.continuationTargetId,
+    bootMat.target!.continuationTargetId,
+  );
+
+  const x = await addUnrelatedVerified(boot.store, bootPred, "seq-041c-x");
+  const xMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: boot.store,
+    verificationDecisionId: x.decisionId,
+  });
+  expect("041c unrelated after bootstrap refused", xMat.reason, "bootstrap_already_fulfilled");
+  expectFalse("041c unrelated does not materialize", xMat.materialized);
+  expect("041c unrelated target null", xMat.target, null);
+
+  const providerX = new CountingMock();
+  expect("041c unrelated never reached provider", providerX.creates, 0);
+
+  // Restart preserves bootstrap refusal
+  const bootRestart = createFileEngineeringStore(boot.store.storeRoot);
+  const xMatRestart = materializeNextGovernedContinuationTargetFromSequence({
+    store: bootRestart,
+    verificationDecisionId: x.decisionId,
+  });
+  expect(
+    "041c restart still refuses unrelated",
+    xMatRestart.reason,
+    "bootstrap_already_fulfilled",
+  );
+  const bootReplayRestart = materializeNextGovernedContinuationTargetFromSequence({
+    store: bootRestart,
+    verificationDecisionId: boot.decisionId,
+  });
+  expectTrue("041c restart same predecessor still reuses", bootReplayRestart.duplicateTargetReused);
+
+  // Config v2 must not reopen bootstrap for unrelated VERIFIED
+  persistGovernedContinuationSequenceConfig({
+    store: boot.store,
+    ...threeEntryDefs(bootPred),
+    sequenceKey: "041c",
+    configurationVersion: 2,
+    entries: threeEntryDefs(bootPred).entries.map((e) =>
+      e.entryKey === "entry-b" ? { ...e, assignmentText: "Entry B after config v2" } : e,
+    ),
+  });
+  const xAfterV2 = materializeNextGovernedContinuationTargetFromSequence({
+    store: boot.store,
+    verificationDecisionId: x.decisionId,
+  });
+  expect(
+    "041c config v2 does not reopen bootstrap for unrelated",
+    xAfterV2.reason,
+    "bootstrap_already_fulfilled",
+  );
+
+  // Raw forged fulfillment claiming a non-bootstrap entry without continuation binding
+  const forgedFul = buildSequenceFulfillmentRecord({
+    sequenceId: bootMat.config!.sequenceId,
+    sequenceConfigHash: bootMat.config!.configHash,
+    entryKey: "entry-b",
+    entryHash: bootMat.config!.entries.find((e) => e.entryKey === "entry-b")!.entryHash,
+    verificationDecisionId: x.decisionId,
+    executorAssignmentId: x.assignmentId,
+    executorExecutionEvidenceId: x.evidenceId,
+  });
+  let forgedThrew = false;
+  try {
+    boot.store.persistSequenceFulfillment(forgedFul);
+  } catch (error) {
+    forgedThrew = error instanceof EngineeringStoreError;
+  }
+  expectTrue("forged non-bootstrap fulfillment without target binding refused", forgedThrew);
+  const xAfterForge = materializeNextGovernedContinuationTargetFromSequence({
+    store: boot.store,
+    verificationDecisionId: x.decisionId,
+  });
+  expect(
+    "forged fulfillment still cannot unlock next",
+    xAfterForge.reason,
+    "bootstrap_already_fulfilled",
+  );
+
+  section("041-C — three-entry with unrelated VERIFIED X and Y fail closed");
+
+  const chain = await buildVerifiedCase("seq-041c-chain");
+  const chainPred = chain.assignment.assignment;
+  persistGovernedContinuationSequenceConfig({
+    store: chain.store,
+    ...threeEntryDefs(chainPred),
+    sequenceKey: "041c-chain",
+  });
+  const chainB = materializeNextGovernedContinuationTargetFromSequence({
+    store: chain.store,
+    verificationDecisionId: chain.decisionId,
+  });
+  expectTrue("chain B materialized", chainB.materialized);
+  const between = await addUnrelatedVerified(chain.store, chainPred, "seq-041c-between");
+  const betweenMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: chain.store,
+    verificationDecisionId: between.decisionId,
+  });
+  expect("X between A and B refused", betweenMat.reason, "bootstrap_already_fulfilled");
+  expect(
+    "B still unique",
+    chain.store.findGovernedContinuationTargetById(chainB.target!.continuationTargetId)!
+      .continuationTargetId,
+    chainB.target!.continuationTargetId,
+  );
+
+  const chainAuthB = authorizePostDecisionExecution({
+    store: chain.store,
+    postDecisionActionId: chain.prepared.actionRecord!.postDecisionActionId,
+    humanAuthorized: true,
+  });
+  expectTrue("chain B authorized", chainAuthB.authorized);
+  const chainExecB = await executeAuthorizedPostDecisionAction({
+    store: chain.store,
+    postDecisionActionId: chain.prepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock({
+      events: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    }),
+  });
+  expectTrue("chain B executed", chainExecB.executed);
+
+  const chainBId = chainExecB.generatedAssignmentId!;
+  const chainBFrozen = chain.store.loadAssignmentRecord(chainBId);
+  const chainPreB = await collectGitEvidence(chainPred.repositoryPath);
+  const chainBRes = synthesizeExecutionResult({
+    frozen: chainBFrozen.frozen,
+    providerId: CURSOR_PROVIDER_ID,
+    providerSessionId: "chain-b",
+    runId: "chain-b",
+    providerStatus: "finished",
+    normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    providerFinalResultText: "B done R146",
+    preRunGitEvidence: chainPreB,
+    postRunGitEvidence: chainPreB,
+    policyDenials: [],
+    changedPaths: ["allowed.txt"],
+    protectedPathMutationOccurred: false,
+    branchChanged: false,
+    headChanged: false,
+    commitOccurred: false,
+    unexpectedChanges: [],
+  });
+  const chainBEv = chain.store.persistExecutionEvidence(
+    buildExecutionEvidence({
+      frozen: chainBFrozen.frozen,
+      result: chainBRes,
+      providerStarted: true,
+    }),
+  );
+  const chainBVa = authorizeAndFreezeVerifierAssignment({
+    store: chain.store,
+    executorAssignmentId: chainBId,
+    executionEvidenceId: chainBEv.evidenceId,
+    humanAuthorized: true,
+  });
+  await routeGovernedVerifierAssignment({
+    store: chain.store,
+    verifierAssignmentId: chainBVa.persisted!.frozen.assignment.assignmentId,
+    provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
+  });
+  const chainBAdj = adjudicateVerifierExecution({
+    store: chain.store,
+    verifierAssignmentId: chainBVa.persisted!.frozen.assignment.assignmentId,
+  });
+  const chainBPrepared = preparePostDecisionAction({
+    store: chain.store,
+    verificationDecisionId: chainBAdj.decisionRecord!.verificationDecisionId,
+  });
+  const chainC = materializeNextGovernedContinuationTargetFromSequence({
+    store: chain.store,
+    verificationDecisionId: chainBAdj.decisionRecord!.verificationDecisionId,
+  });
+  expectTrue("chain C from B relationship", chainC.materialized);
+  expect("chain C entry", chainC.target!.sequenceEntryKey, "entry-c");
+  const chainC2 = materializeNextGovernedContinuationTargetFromSequence({
+    store: chain.store,
+    verificationDecisionId: chainBAdj.decisionRecord!.verificationDecisionId,
+  });
+  expectTrue("chain C exactly once (reuse)", chainC2.duplicateTargetReused);
+
+  const y = await addUnrelatedVerified(chain.store, chainPred, "seq-041c-y");
+  const yMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: chain.store,
+    verificationDecisionId: y.decisionId,
+  });
+  expect("Y cannot impersonate B", yMat.reason, "bootstrap_already_fulfilled");
+  expectFalse("Y no target", yMat.materialized);
+
+  expect("C still waits — prepared continuation", chainBPrepared.preparedAction, "PREPARE_CONTINUATION");
+  const noAuto = await executeAuthorizedPostDecisionAction({
+    store: chain.store,
+    postDecisionActionId: chainBPrepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock(),
+  });
+  expect("C not auto-executed", noAuto.reason, "authorization_not_found");
+
+  // Direct store: conflicting bootstrap fulfillment refused
+  const conflictBoot = buildSequenceFulfillmentRecord({
+    sequenceId: chainB.config!.sequenceId,
+    sequenceConfigHash: chainB.config!.configHash,
+    entryKey: "entry-a",
+    entryHash: chainB.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+    verificationDecisionId: y.decisionId,
+    executorAssignmentId: y.assignmentId,
+    executorExecutionEvidenceId: y.evidenceId,
+  });
+  let conflictThrew = false;
+  try {
+    chain.store.persistSequenceFulfillment(conflictBoot);
+  } catch (error) {
+    conflictThrew = error instanceof EngineeringStoreError;
+  }
+  expectTrue("conflicting bootstrap fulfillment refused at store", conflictThrew);
 }

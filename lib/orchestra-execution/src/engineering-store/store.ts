@@ -927,6 +927,63 @@ export class FileEngineeringStore {
       }
       return sameDecision;
     }
+    // One governed fulfillment per sequence entry: different executor/decision cannot rebind.
+    const sameEntry = this.loadSequenceFulfillments(record.sequenceId).find(
+      (row) => validateSequenceFulfillment(row) && row.entryKey === record.entryKey,
+    );
+    if (sameEntry) {
+      if (
+        sameEntry.executorAssignmentId !== record.executorAssignmentId ||
+        sameEntry.verificationDecisionId !== record.verificationDecisionId ||
+        sameEntry.executorExecutionEvidenceId !== record.executorExecutionEvidenceId
+      ) {
+        throw new EngineeringStoreError(
+          "sequence entry already fulfilled by a different governed predecessor; refusing rebind",
+        );
+      }
+      if (sameEntry.fulfillmentHash !== record.fulfillmentHash) {
+        throw new EngineeringStoreError(
+          "conflicting sequence fulfillment for entry; refusing overwrite",
+        );
+      }
+      return sameEntry;
+    }
+
+    const entryDef = config.entries.find((e) => e.entryKey === record.entryKey);
+    if (!entryDef) {
+      throw new EngineeringStoreError("sequence fulfillment entryKey is not in active config");
+    }
+    if (entryDef.entryHash !== record.entryHash) {
+      throw new EngineeringStoreError(
+        "sequence fulfillment entryHash does not match active sequence entry",
+      );
+    }
+    // Non-bootstrap fulfillments require the executor to be the sequence-bound continuation
+    // assignment for that entry — project/repo/branch VERIFIED alone is insufficient.
+    if (entryDef.predecessorEntryKey !== null) {
+      let boundOk = false;
+      try {
+        const executorRecord = this.loadAssignmentRecord(record.executorAssignmentId);
+        const targetId = executorRecord.relationship.continuationTargetId;
+        if (targetId) {
+          const target = this.findGovernedContinuationTargetById(targetId);
+          boundOk = Boolean(
+            target &&
+              target.sequenceId === record.sequenceId &&
+              target.sequenceEntryKey === record.entryKey &&
+              target.sequenceEntryHash === record.entryHash,
+          );
+        }
+      } catch {
+        boundOk = false;
+      }
+      if (!boundOk) {
+        throw new EngineeringStoreError(
+          "non-bootstrap sequence fulfillment requires governed continuation target binding",
+        );
+      }
+    }
+
     appendLineAtomic(
       this.sequenceFulfillmentPath(config.projectId),
       JSON.stringify(record),
@@ -976,6 +1033,16 @@ export class FileEngineeringStore {
       (row) =>
         validateSequenceFulfillment(row) &&
         row.verificationDecisionId === verificationDecisionId,
+    );
+    return matches.length > 0 ? matches[matches.length - 1]! : null;
+  }
+
+  findSequenceFulfillmentByEntryKey(
+    sequenceId: string,
+    entryKey: string,
+  ): GovernedContinuationSequenceFulfillmentRecord | null {
+    const matches = this.loadSequenceFulfillments(sequenceId).filter(
+      (row) => validateSequenceFulfillment(row) && row.entryKey === entryKey,
     );
     return matches.length > 0 ? matches[matches.length - 1]! : null;
   }
