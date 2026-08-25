@@ -18,10 +18,13 @@ import {
   buildGovernedContinuationSequenceConfig,
   validateGovernedContinuationSequenceConfig,
   hashSequenceConfig,
+  hashSequenceEntry,
   buildSequenceFulfillmentRecord,
   selectAuthoritativeSequenceFulfillments,
   validateSequenceFulfillment,
+  type SequenceConfigBody,
 } from "../engineering-store/governed-continuation-target-record.js";
+import type { GovernedContinuationSequenceConfigRecord } from "../engineering-store/types.js";
 import { routeGovernedVerifierAssignment } from "../engineering-store/route-verifier.js";
 import { buildExecutionEvidence } from "../engineering-store/evidence.js";
 import { CURSOR_PROVIDER_ID } from "../provider-contract.js";
@@ -130,6 +133,58 @@ function appendRawFulfillment(
   const path = fulfillmentNdjsonPath(storeRoot, projectId);
   mkdirSync(join(storeRoot, "sequences", projectId), { recursive: true });
   appendFileSync(path, `${JSON.stringify(record)}\n`, "utf8");
+}
+
+function sequenceConfigNdjsonPath(storeRoot: string, projectId: string): string {
+  return join(
+    storeRoot,
+    "sequences",
+    projectId,
+    "governed-continuation-sequences.ndjson",
+  );
+}
+
+function appendRawConfig(
+  storeRoot: string,
+  projectId: string,
+  record: GovernedContinuationSequenceConfigRecord | Record<string, unknown>,
+): void {
+  const path = sequenceConfigNdjsonPath(storeRoot, projectId);
+  mkdirSync(join(storeRoot, "sequences", projectId), { recursive: true });
+  appendFileSync(path, `${JSON.stringify(record)}\n`, "utf8");
+}
+
+/** Clone a hash-valid config with a new version and optional entry-b assignment text. */
+function cloneSequenceConfigVariant(
+  home: GovernedContinuationSequenceConfigRecord,
+  configurationVersion: number,
+  entryBText?: string,
+): GovernedContinuationSequenceConfigRecord {
+  const entries = home.entries.map((entry) => {
+    if (entry.entryKey !== "entry-b" || entryBText === undefined) return entry;
+    const { entryHash: _ignored, ...body } = entry;
+    return {
+      ...body,
+      assignmentText: entryBText,
+      entryHash: hashSequenceEntry({ ...body, assignmentText: entryBText }),
+    };
+  });
+  const { configHash: _ch, ...rest } = home;
+  const body: SequenceConfigBody = {
+    ...rest,
+    configurationVersion,
+    entries,
+  };
+  return { ...body, configHash: hashSequenceConfig(body) };
+}
+
+function withForcedSequenceId(
+  config: GovernedContinuationSequenceConfigRecord,
+  sequenceId: string,
+): GovernedContinuationSequenceConfigRecord {
+  const { configHash: _ch, ...rest } = config;
+  const body: SequenceConfigBody = { ...rest, sequenceId };
+  return { ...body, configHash: hashSequenceConfig(body) };
 }
 
 async function addUnrelatedVerified(
@@ -1903,4 +1958,455 @@ export async function runGovernedContinuationSequenceTests(): Promise<void> {
     c3PersistConflict = error instanceof EngineeringStoreError;
   }
   expectTrue("041c3 persist still refuses conflict", c3PersistConflict);
+
+  // ── ORCH IMP 041-C4: project-scoped sequence config resolution ──────────
+  section("041-C4 — explicit sequenceId config must not scan alien projects");
+
+  const c4 = await buildVerifiedCase("seq-041c4");
+  const c4Pred = c4.assignment.assignment;
+  const c4Home = persistGovernedContinuationSequenceConfig({
+    store: c4.store,
+    ...threeEntryDefs(c4Pred),
+    sequenceKey: "041c4",
+    configurationVersion: 1,
+  });
+  expectTrue("041c4 home v1", c4Home.persisted);
+  const c4SeqId = c4Home.config!.sequenceId;
+  const c4HomeHash = c4Home.config!.configHash;
+  const c4HomeBText = c4Home.config!.entries.find((e) => e.entryKey === "entry-b")!.assignmentText;
+  const c4HomeEntryBHash = c4Home.config!.entries.find((e) => e.entryKey === "entry-b")!.entryHash;
+
+  const alienV99 = cloneSequenceConfigVariant(
+    c4Home.config!,
+    99,
+    "ALIEN-HIJACK-B-TEXT",
+  );
+  expectTrue("041c4 alien v99 hash-valid", validateGovernedContinuationSequenceConfig(alienV99));
+  expect("041c4 alien claims HOME projectId", alienV99.projectId, c4Pred.projectId);
+  expect("041c4 alien claims HOME sequenceId", alienV99.sequenceId, c4SeqId);
+
+  // Alien directories before and after HOME alphabetically + mid
+  appendRawConfig(c4.store.storeRoot, "aaa-alien-cfg-before", alienV99);
+  appendRawConfig(
+    c4.store.storeRoot,
+    "mmm-alien-cfg-mid",
+    cloneSequenceConfigVariant(c4Home.config!, 50, "ALIEN-MID-TEXT"),
+  );
+  appendRawConfig(
+    c4.store.storeRoot,
+    "zzz-alien-cfg-after",
+    cloneSequenceConfigVariant(c4Home.config!, 80, "ALIEN-AFTER-TEXT"),
+  );
+
+  const c4Active = c4.store.findActiveGovernedContinuationSequenceConfigForProject(
+    c4Pred.projectId,
+    c4SeqId,
+  );
+  expect("041c4 active ignores alien-before", c4Active!.configHash, c4HomeHash);
+  expect("041c4 active version still 1", c4Active!.configurationVersion, 1);
+
+  const c4Provider = new CountingMock();
+  const c4Mat = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4.store,
+    verificationDecisionId: c4.decisionId,
+    sequenceId: c4SeqId,
+  });
+  expectTrue("041c4 explicit HOME materializes", c4Mat.materialized);
+  expect("041c4 HOME assignment text", c4Mat.target!.assignmentText, c4HomeBText);
+  expectFalse(
+    "041c4 no alien hijack text",
+    c4Mat.target!.assignmentText.includes("ALIEN"),
+  );
+  expect("041c4 HOME config hash on target", c4Mat.target!.sequenceConfigHash, c4HomeHash);
+  expect("041c4 HOME entry hash on target", c4Mat.target!.sequenceEntryHash, c4HomeEntryBHash);
+  expect("041c4 HOME project on target", c4Mat.target!.projectId, c4Pred.projectId);
+  expect("041c4 HOME sequenceId on target", c4Mat.target!.sequenceId, c4SeqId);
+  expect("041c4 provider creates=0", c4Provider.creates, 0);
+
+  // Default no-sequenceId path still project-scoped and safe
+  const c4Default = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4.store,
+    verificationDecisionId: c4.decisionId,
+  });
+  expectTrue("041c4 default reuses HOME B", c4Default.duplicateTargetReused);
+  expect("041c4 default text HOME", c4Default.target!.assignmentText, c4HomeBText);
+
+  // HOME v1 vs ALIEN v2/v99 — still HOME (active lookup)
+  expect(
+    "041c4 v1 beats alien v99",
+    c4.store.findActiveGovernedContinuationSequenceConfigForProject(c4Pred.projectId, c4SeqId)!
+      .configurationVersion,
+    1,
+  );
+
+  // Restart stability while HOME v1 remains active (before version bump)
+  const c4R1 = createFileEngineeringStore(c4.store.storeRoot);
+  const c4R2 = createFileEngineeringStore(c4.store.storeRoot);
+  expect(
+    "041c4 restart1 HOME v1",
+    c4R1.findActiveGovernedContinuationSequenceConfigForProject(c4Pred.projectId, c4SeqId)!
+      .configHash,
+    c4HomeHash,
+  );
+  expect(
+    "041c4 restart2 HOME v1",
+    c4R2.findActiveGovernedContinuationSequenceConfigForProject(c4Pred.projectId, c4SeqId)!
+      .configHash,
+    c4HomeHash,
+  );
+  const c4MatRestart = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4R2,
+    verificationDecisionId: c4.decisionId,
+    sequenceId: c4SeqId,
+  });
+  expectTrue("041c4 restart explicit materialize", c4MatRestart.duplicateTargetReused);
+  expect(
+    "041c4 restart no alien text",
+    c4MatRestart.target!.assignmentText.includes("ALIEN"),
+    false,
+  );
+
+  // Promote HOME to v2 — active resolution must beat any alien version (fresh lookup; no rematerialize)
+  const c4HomeV2 = persistGovernedContinuationSequenceConfig({
+    store: c4.store,
+    ...threeEntryDefs(c4Pred),
+    sequenceKey: "041c4",
+    configurationVersion: 2,
+    entries: threeEntryDefs(c4Pred).entries.map((e) =>
+      e.entryKey === "entry-b"
+        ? { ...e, assignmentText: "HOME-V2-LEGITIMATE-B" }
+        : e,
+    ),
+  });
+  expectTrue("041c4 home v2", c4HomeV2.persisted);
+  appendRawConfig(
+    c4.store.storeRoot,
+    "aaa-alien-cfg-before",
+    cloneSequenceConfigVariant(c4HomeV2.config!, 99, "ALIEN-STILL-HIJACK"),
+  );
+  const c4AfterV2 = createFileEngineeringStore(c4.store.storeRoot);
+  expect(
+    "041c4 HOME v2 wins vs alien v99",
+    c4AfterV2.findActiveGovernedContinuationSequenceConfigForProject(c4Pred.projectId, c4SeqId)!
+      .configurationVersion,
+    2,
+  );
+  expect(
+    "041c4 HOME v2 hash",
+    c4AfterV2.findActiveGovernedContinuationSequenceConfigForProject(c4Pred.projectId, c4SeqId)!
+      .configHash,
+    c4HomeV2.config!.configHash,
+  );
+
+  // Namespace vs record projectId: HOME-claiming rows under ALIEN are ignored for ALIEN load
+  expect(
+    "041c4 ALIEN load drops HOME-claim rows",
+    c4AfterV2.loadGovernedContinuationSequenceConfigs("aaa-alien-cfg-before").length,
+    0,
+  );
+  expect(
+    "041c4 ALIEN active null when only mismatched",
+    c4AfterV2.findActiveGovernedContinuationSequenceConfigForProject("aaa-alien-cfg-before"),
+    null,
+  );
+
+  // Same sequenceId across two project namespaces (forced collision)
+  const sharedSeqId = "shared-sequence-c4";
+  const projA = "project-a-shared-seq";
+  const projB = "project-b-shared-seq";
+  const builtA = withForcedSequenceId(
+    buildGovernedContinuationSequenceConfig({
+      ...threeEntryDefs({ ...c4Pred, projectId: projA }),
+      sequenceKey: "ignored-for-id",
+      configurationVersion: 1,
+      entries: threeEntryDefs({ ...c4Pred, projectId: projA }).entries.map((e) =>
+        e.entryKey === "entry-b" ? { ...e, assignmentText: "PROJECT-A-B-TEXT" } : e,
+      ),
+    }),
+    sharedSeqId,
+  );
+  const builtB = withForcedSequenceId(
+    buildGovernedContinuationSequenceConfig({
+      ...threeEntryDefs({ ...c4Pred, projectId: projB }),
+      sequenceKey: "ignored-for-id",
+      configurationVersion: 99,
+      entries: threeEntryDefs({ ...c4Pred, projectId: projB }).entries.map((e) =>
+        e.entryKey === "entry-b" ? { ...e, assignmentText: "PROJECT-B-B-TEXT" } : e,
+      ),
+    }),
+    sharedSeqId,
+  );
+  expectTrue("041c4 shared A valid", validateGovernedContinuationSequenceConfig(builtA));
+  expectTrue("041c4 shared B valid", validateGovernedContinuationSequenceConfig(builtB));
+  expect("041c4 shared same sequenceId", builtA.sequenceId, builtB.sequenceId);
+  appendRawConfig(c4.store.storeRoot, projA, builtA);
+  appendRawConfig(c4.store.storeRoot, projB, builtB);
+  const c4SharedStore = createFileEngineeringStore(c4.store.storeRoot);
+  expect(
+    "041c4 explicit A → A only",
+    c4SharedStore.findActiveGovernedContinuationSequenceConfigForProject(projA, sharedSeqId)!
+      .configurationVersion,
+    1,
+  );
+  expect(
+    "041c4 explicit B → B only",
+    c4SharedStore.findActiveGovernedContinuationSequenceConfigForProject(projB, sharedSeqId)!
+      .configurationVersion,
+    99,
+  );
+  expect(
+    "041c4 A text isolated",
+    c4SharedStore
+      .findActiveGovernedContinuationSequenceConfigForProject(projA, sharedSeqId)!
+      .entries.find((e) => e.entryKey === "entry-b")!.assignmentText,
+    "PROJECT-A-B-TEXT",
+  );
+  expect(
+    "041c4 B text isolated",
+    c4SharedStore
+      .findActiveGovernedContinuationSequenceConfigForProject(projB, sharedSeqId)!
+      .entries.find((e) => e.entryKey === "entry-b")!.assignmentText,
+    "PROJECT-B-B-TEXT",
+  );
+
+  // Mixed coherent malicious identity under ALIEN still ignored for HOME
+  const mixed = cloneSequenceConfigVariant(c4HomeV2.config!, 77, "ALIEN-MIXED-HOME-CLAIM");
+  appendRawConfig(c4.store.storeRoot, "aaa-mixed-cfg", mixed);
+  expect(
+    "041c4 mixed identity ignored",
+    createFileEngineeringStore(c4.store.storeRoot).findActiveGovernedContinuationSequenceConfigForProject(
+      c4Pred.projectId,
+      c4SeqId,
+    )!.configHash,
+    c4HomeV2.config!.configHash,
+  );
+
+  // Raw ALIEN config + restart
+  appendRawConfig(
+    c4.store.storeRoot,
+    "zzz-raw-alien-cfg",
+    cloneSequenceConfigVariant(c4HomeV2.config!, 1000, "RAW-ALIEN-AFTER-RESTART"),
+  );
+  expect(
+    "041c4 raw alien after restart ignored",
+    createFileEngineeringStore(c4.store.storeRoot).findActiveGovernedContinuationSequenceConfigForProject(
+      c4Pred.projectId,
+      c4SeqId,
+    )!.configHash,
+    c4HomeV2.config!.configHash,
+  );
+
+  // Direct store: namespace-consistent ALIEN config with HOME sequenceId has no HOME authority
+  const alienNsOk = withForcedSequenceId(
+    buildGovernedContinuationSequenceConfig({
+      ...threeEntryDefs({ ...c4Pred, projectId: "direct-alien-ns" }),
+      sequenceKey: "direct",
+      configurationVersion: 500,
+      entries: threeEntryDefs({ ...c4Pred, projectId: "direct-alien-ns" }).entries.map((e) =>
+        e.entryKey === "entry-b" ? { ...e, assignmentText: "DIRECT-ALIEN-NS" } : e,
+      ),
+    }),
+    c4SeqId,
+  );
+  c4.store.persistGovernedContinuationSequenceConfig(alienNsOk);
+  expect(
+    "041c4 direct alien ns persist no HOME bleed",
+    createFileEngineeringStore(c4.store.storeRoot).findActiveGovernedContinuationSequenceConfigForProject(
+      c4Pred.projectId,
+      c4SeqId,
+    )!.configHash,
+    c4HomeV2.config!.configHash,
+  );
+  expect(
+    "041c4 direct alien ns resolves for itself",
+    createFileEngineeringStore(c4.store.storeRoot).findActiveGovernedContinuationSequenceConfigForProject(
+      "direct-alien-ns",
+      c4SeqId,
+    )!.configurationVersion,
+    500,
+  );
+
+  // Two projects (separate stores), same sequenceKey — independent advancement
+  const c4Pa = await buildVerifiedCase("seq-041c4-pa");
+  const c4Pb = await buildVerifiedCase("seq-041c4-pb");
+  const c4PaCfg = persistGovernedContinuationSequenceConfig({
+    store: c4Pa.store,
+    ...threeEntryDefs(c4Pa.assignment.assignment),
+    sequenceKey: "shared-c4-name",
+  });
+  const c4PbCfg = persistGovernedContinuationSequenceConfig({
+    store: c4Pb.store,
+    ...threeEntryDefs(c4Pb.assignment.assignment),
+    sequenceKey: "shared-c4-name",
+  });
+  const c4PaMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4Pa.store,
+    verificationDecisionId: c4Pa.decisionId,
+    sequenceId: c4PaCfg.config!.sequenceId,
+  });
+  const c4PbMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4Pb.store,
+    verificationDecisionId: c4Pb.decisionId,
+    sequenceId: c4PbCfg.config!.sequenceId,
+  });
+  expectTrue("041c4 project A advances", c4PaMat.materialized);
+  expectTrue("041c4 project B advances", c4PbMat.materialized);
+  expect(
+    "041c4 A/B distinct targets",
+    c4PaMat.target!.continuationTargetId !== c4PbMat.target!.continuationTargetId,
+    true,
+  );
+
+  // Legitimate A→B→C with explicit project-scoped sequenceId
+  const c4Full = await buildVerifiedCase("seq-041c4-full");
+  const c4FullPred = c4Full.assignment.assignment;
+  const c4FullCfg = persistGovernedContinuationSequenceConfig({
+    store: c4Full.store,
+    ...threeEntryDefs(c4FullPred),
+    sequenceKey: "041c4-full",
+  });
+  appendRawConfig(
+    c4Full.store.storeRoot,
+    "aaa-c4-full-alien",
+    cloneSequenceConfigVariant(c4FullCfg.config!, 99, "ALIEN-FULL-HIJACK"),
+  );
+  const c4FullB = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4Full.store,
+    verificationDecisionId: c4Full.decisionId,
+    sequenceId: c4FullCfg.config!.sequenceId,
+  });
+  expectTrue("041c4-full B", c4FullB.materialized);
+  expectFalse("041c4-full no alien text", c4FullB.target!.assignmentText.includes("ALIEN"));
+  const c4FullAuth = authorizePostDecisionExecution({
+    store: c4Full.store,
+    postDecisionActionId: c4Full.prepared.actionRecord!.postDecisionActionId,
+    humanAuthorized: true,
+  });
+  expectTrue("041c4-full explicit auth", c4FullAuth.authorized);
+  const c4FullExec = await executeAuthorizedPostDecisionAction({
+    store: c4Full.store,
+    postDecisionActionId: c4Full.prepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock({
+      events: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+    }),
+  });
+  expectTrue("041c4-full B executes", c4FullExec.executed);
+  const c4FullBId = c4FullExec.generatedAssignmentId!;
+  const c4FullBFrozen = c4Full.store.loadAssignmentRecord(c4FullBId);
+  expect("041c4-full commit false", c4FullBFrozen.frozen.assignment.commitAuthorization, false);
+  expect("041c4-full push false", c4FullBFrozen.frozen.assignment.pushAuthorization, false);
+  expect("041c4-full requireNoPush", c4FullBFrozen.frozen.assignment.requireNoPush, true);
+  const c4FullPre = await collectGitEvidence(c4FullPred.repositoryPath);
+  const c4FullBEv = c4Full.store.persistExecutionEvidence(
+    buildExecutionEvidence({
+      frozen: c4FullBFrozen.frozen,
+      result: synthesizeExecutionResult({
+        frozen: c4FullBFrozen.frozen,
+        providerId: CURSOR_PROVIDER_ID,
+        providerSessionId: "c4-full-b",
+        runId: "c4-full-b",
+        providerStatus: "finished",
+        normalizedEvents: [{ type: "run_finished", timestamp: new Date().toISOString() }],
+        providerFinalResultText: "B VERIFIED invent R146",
+        preRunGitEvidence: c4FullPre,
+        postRunGitEvidence: c4FullPre,
+        policyDenials: [],
+        changedPaths: ["allowed.txt"],
+        protectedPathMutationOccurred: false,
+        branchChanged: false,
+        headChanged: false,
+        commitOccurred: false,
+        unexpectedChanges: [],
+      }),
+      providerStarted: true,
+    }),
+  );
+  const c4FullBVa = authorizeAndFreezeVerifierAssignment({
+    store: c4Full.store,
+    executorAssignmentId: c4FullBId,
+    executionEvidenceId: c4FullBEv.evidenceId,
+    humanAuthorized: true,
+  });
+  await routeGovernedVerifierAssignment({
+    store: c4Full.store,
+    verifierAssignmentId: c4FullBVa.persisted!.frozen.assignment.assignmentId,
+    provider: new CountingMock({ resultText: "VERIFIED", events: [] }),
+  });
+  const c4FullBAdj = adjudicateVerifierExecution({
+    store: c4Full.store,
+    verifierAssignmentId: c4FullBVa.persisted!.frozen.assignment.assignmentId,
+  });
+  const c4FullBPrepared = preparePostDecisionAction({
+    store: c4Full.store,
+    verificationDecisionId: c4FullBAdj.decisionRecord!.verificationDecisionId,
+  });
+  const c4FullC = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4Full.store,
+    verificationDecisionId: c4FullBAdj.decisionRecord!.verificationDecisionId,
+    sequenceId: c4FullCfg.config!.sequenceId,
+  });
+  expectTrue("041c4-full C once", c4FullC.materialized);
+  const c4FullCWait = await executeAuthorizedPostDecisionAction({
+    store: c4Full.store,
+    postDecisionActionId: c4FullBPrepared.actionRecord!.postDecisionActionId,
+    provider: new CountingMock(),
+  });
+  expect("041c4-full C waits for auth", c4FullCWait.reason, "authorization_not_found");
+
+  // C1 runtime bootstrap regression: unrelated VERIFIED cannot rebind
+  const c4X = await addUnrelatedVerified(c4Full.store, c4FullPred, "seq-041c4-x");
+  const c4XMat = materializeNextGovernedContinuationTargetFromSequence({
+    store: c4Full.store,
+    verificationDecisionId: c4X.decisionId,
+    sequenceId: c4FullCfg.config!.sequenceId,
+  });
+  expect("041c4 C1 bootstrap_already_fulfilled", c4XMat.reason, "bootstrap_already_fulfilled");
+  expectFalse("041c4 C1 no materialize", c4XMat.materialized);
+
+  // C3 fulfillment alien regression
+  appendRawFulfillment(
+    c4Full.store.storeRoot,
+    "aaa-c4-ful-alien",
+    buildSequenceFulfillmentRecord({
+      sequenceId: c4FullCfg.config!.sequenceId,
+      sequenceConfigHash: c4FullCfg.config!.configHash,
+      entryKey: "entry-a",
+      entryHash: c4FullCfg.config!.entries.find((e) => e.entryKey === "entry-a")!.entryHash,
+      verificationDecisionId: c4X.decisionId,
+      executorAssignmentId: c4X.assignmentId,
+      executorExecutionEvidenceId: c4X.evidenceId,
+    }),
+  );
+  expectFalse(
+    "041c4 C3 fulfillment isolation",
+    materializeNextGovernedContinuationTargetFromSequence({
+      store: createFileEngineeringStore(c4Full.store.storeRoot),
+      verificationDecisionId: c4X.decisionId,
+      sequenceId: c4FullCfg.config!.sequenceId,
+    }).materialized,
+  );
+
+  // Multi-sequence same-project P2 retained: omitting sequenceId still picks highest version across sequences
+  const c4Multi = await buildVerifiedCase("seq-041c4-multi");
+  const c4MultiPred = c4Multi.assignment.assignment;
+  persistGovernedContinuationSequenceConfig({
+    store: c4Multi.store,
+    ...threeEntryDefs(c4MultiPred),
+    sequenceKey: "multi-low",
+    configurationVersion: 1,
+  });
+  const c4MultiHi = persistGovernedContinuationSequenceConfig({
+    store: c4Multi.store,
+    ...threeEntryDefs(c4MultiPred),
+    sequenceKey: "multi-high",
+    configurationVersion: 2,
+  });
+  const c4MultiActive = c4Multi.store.findActiveGovernedContinuationSequenceConfigForProject(
+    c4MultiPred.projectId,
+  );
+  expect(
+    "041c4 P2 multi-seq omit still highest",
+    c4MultiActive!.sequenceId,
+    c4MultiHi.config!.sequenceId,
+  );
 }

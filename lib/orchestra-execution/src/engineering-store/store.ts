@@ -854,36 +854,41 @@ export class FileEngineeringStore {
   loadGovernedContinuationSequenceConfigs(
     projectId: string,
   ): GovernedContinuationSequenceConfigRecord[] {
-    const path = this.sequenceConfigPath(assertSafeId("projectId", projectId));
+    const safeProjectId = assertSafeId("projectId", projectId);
+    const path = this.sequenceConfigPath(safeProjectId);
     if (!existsSync(path)) return [];
-    return readFileSync(path, "utf8")
-      .split(/\r?\n/)
-      .filter(Boolean)
-      .map((line) => JSON.parse(line) as GovernedContinuationSequenceConfigRecord);
-  }
-
-  findActiveGovernedContinuationSequenceConfig(
-    sequenceId: string,
-  ): GovernedContinuationSequenceConfigRecord | null {
-    assertSafeId("sequenceId", sequenceId);
-    let best: GovernedContinuationSequenceConfigRecord | null = null;
-    for (const projectId of this.listSequenceProjectIds()) {
-      for (const row of this.loadGovernedContinuationSequenceConfigs(projectId)) {
-        if (!validateGovernedContinuationSequenceConfig(row)) continue;
-        if (row.sequenceId !== sequenceId) continue;
-        if (!best || row.configurationVersion > best.configurationVersion) best = row;
+    const out: GovernedContinuationSequenceConfigRecord[] = [];
+    for (const line of readFileSync(path, "utf8").split(/\r?\n/).filter(Boolean)) {
+      let row: GovernedContinuationSequenceConfigRecord;
+      try {
+        row = JSON.parse(line) as GovernedContinuationSequenceConfigRecord;
+      } catch {
+        continue;
       }
+      // Fail closed: alien/mismatched records claiming another projectId never become authority.
+      if (row.projectId !== safeProjectId) continue;
+      out.push(row);
     }
-    return best;
+    return out;
   }
 
+  /**
+   * Active sequence config for one project namespace only.
+   * When sequenceId is omitted, highest validating version across that project's sequences wins
+   * (retained same-project multi-sequence selection).
+   * When sequenceId is supplied, only that sequence within the project is considered.
+   * Never scans other projects' sequences/* directories.
+   */
   findActiveGovernedContinuationSequenceConfigForProject(
     projectId: string,
+    sequenceId?: string,
   ): GovernedContinuationSequenceConfigRecord | null {
     assertSafeId("projectId", projectId);
+    if (sequenceId !== undefined) assertSafeId("sequenceId", sequenceId);
     let best: GovernedContinuationSequenceConfigRecord | null = null;
     for (const row of this.loadGovernedContinuationSequenceConfigs(projectId)) {
       if (!validateGovernedContinuationSequenceConfig(row)) continue;
+      if (sequenceId !== undefined && row.sequenceId !== sequenceId) continue;
       if (!best || row.configurationVersion > best.configurationVersion) best = row;
     }
     return best;
@@ -895,9 +900,26 @@ export class FileEngineeringStore {
     if (!validateSequenceFulfillment(record)) {
       throw new EngineeringStoreError("sequence fulfillment failed validation");
     }
-    const config = this.findActiveGovernedContinuationSequenceConfig(record.sequenceId);
+    let projectId: string;
+    try {
+      projectId = this.loadAssignmentRecord(record.executorAssignmentId).frozen.assignment
+        .projectId;
+    } catch {
+      throw new EngineeringStoreError(
+        "sequence fulfillment requires a resolvable executor assignment projectId",
+      );
+    }
+    const config = this.findActiveGovernedContinuationSequenceConfigForProject(
+      projectId,
+      record.sequenceId,
+    );
     if (!config || !validateGovernedContinuationSequenceConfig(config)) {
       throw new EngineeringStoreError("sequence fulfillment requires a valid sequence config");
+    }
+    if (config.projectId !== projectId) {
+      throw new EngineeringStoreError(
+        "sequence fulfillment config projectId does not match executor project",
+      );
     }
     const authoritative = this.loadAuthoritativeSequenceFulfillments(
       record.sequenceId,
@@ -1066,18 +1088,6 @@ export class FileEngineeringStore {
       (row) => row.entryKey === entryKey,
     );
     return matches.length > 0 ? matches[0]! : null;
-  }
-
-  private listSequenceProjectIds(): string[] {
-    const root = this.sequencesDir();
-    if (!existsSync(root)) return [];
-    return readdirSync(root).filter((name) => {
-      try {
-        return lstatSync(join(root, name)).isDirectory();
-      } catch {
-        return false;
-      }
-    });
   }
 
   persistAuthoritativeSemanticFinding(record: VerifierSemanticFindingRecord): VerifierSemanticFindingRecord {

@@ -219,9 +219,10 @@ export function materializeNextGovernedContinuationTargetFromSequence(input: {
   const predecessor = executorRecord.frozen.assignment;
   if (predecessor.role !== "executor") return refusedMaterialize("executor_not_found");
 
-  const config = input.sequenceId
-    ? input.store.findActiveGovernedContinuationSequenceConfig(input.sequenceId)
-    : input.store.findActiveGovernedContinuationSequenceConfigForProject(predecessor.projectId);
+  const config = input.store.findActiveGovernedContinuationSequenceConfigForProject(
+    predecessor.projectId,
+    input.sequenceId,
+  );
   if (!config) return refusedMaterialize("sequence_not_found");
   if (!validateGovernedContinuationSequenceConfig(config)) {
     return refusedMaterialize("sequence_corrupt", { config });
