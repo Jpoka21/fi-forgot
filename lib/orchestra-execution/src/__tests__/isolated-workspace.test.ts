@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDisposableExecutionFixture } from "../fixture.js";
 import { MockExecutionProvider } from "../providers/mock-provider.js";
+import { CODEX_WORKSPACE_WRITE_BASELINE_UNAVAILABLE } from "../providers/codex/workspace-write-baseline.js";
 import { runBoundedAssignment } from "../run-assignment.js";
 import { createFileEngineeringStore } from "../engineering-store/store.js";
 import { dispatchFrozenAssignment } from "../engineering-store/dispatch.js";
@@ -158,7 +159,12 @@ export async function runIsolatedWorkspaceTests(): Promise<void> {
     applicationFailure.assignment,
     { projectHooks: false },
   );
-  expectTrue("application failure recorded", failureResult.unexpectedChanges.includes("candidate_application_failed"));
+  // ORCH IMP 042.2: Codex write refuses dirty allowed-scope baseline before isolation/provider work.
+  expectTrue(
+    "dirty allowed baseline refused before apply",
+    failureResult.unexpectedChanges.includes(CODEX_WORKSPACE_WRITE_BASELINE_UNAVAILABLE),
+  );
+  expect("dirty baseline not started", failureResult.providerStatus, "not_started");
   expect("application failure preserves governed dirty file", readFileSync(applicationFailure.allowedPath, "utf8"), dirtyBefore);
 
   const persisted = createDisposableExecutionFixture({ assignmentId: "isolated-persist-cleanup" });

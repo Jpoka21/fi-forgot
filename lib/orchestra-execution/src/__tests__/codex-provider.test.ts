@@ -139,7 +139,7 @@ export async function runCodexProviderTests(): Promise<void> {
   );
 
   const refusalTransport = new FakeAppServerTransport();
-  const refusalProvider = new CodexExecutionProvider({ transport: refusalTransport });
+  const refusalProvider = new CodexExecutionProvider({ transport: refusalTransport, mode: "read-only" });
   const refusalSession = await refusalProvider.createSession({
     repositoryPath: "C:/fixture",
     branch: "main",
@@ -156,8 +156,37 @@ export async function runCodexProviderTests(): Promise<void> {
   );
   await refusalProvider.closeSession(refusalSession);
 
+  section("Codex auto mode derivation (IMP 042.2)");
+  const autoRead = new CodexExecutionProvider({ transport: new FakeAppServerTransport() });
+  expect("auto mode without assignment is read-only", autoRead.executionMode, "read-only");
+  expect(
+    "auto mode empty allowedPaths is read-only",
+    autoRead.executionModeFor({ allowedPaths: [] }),
+    "read-only",
+  );
+  expect(
+    "auto mode non-empty allowedPaths is workspace-write",
+    autoRead.executionModeFor({ allowedPaths: ["allowed.txt"] }),
+    "governed-workspace-write",
+  );
+  const autoWriteTransport = new FakeAppServerTransport();
+  const autoWrite = new CodexExecutionProvider({ transport: autoWriteTransport });
+  const autoWriteSession = await autoWrite.createSession({
+    repositoryPath: "C:/isolated",
+    branch: "main",
+    startingHead: "a".repeat(40),
+  });
+  await autoWrite.submitAssignment(autoWriteSession, writeAssignment);
+  const autoWriteTurn = autoWriteTransport.requests.find((request) => request.method === "turn/start")!;
+  expect(
+    "auto write assignment projects workspaceWrite",
+    (autoWriteTurn.params.sandboxPolicy as { type: string }).type,
+    "workspaceWrite",
+  );
+  await autoWrite.closeSession(autoWriteSession);
+
   const transport = new FakeAppServerTransport();
-  const provider = new CodexExecutionProvider({ transport });
+  const provider = new CodexExecutionProvider({ transport, mode: "read-only" });
   const frozen = readOnlyAssignment();
   const session = await provider.createSession({
     repositoryPath: frozen.assignment.repositoryPath,

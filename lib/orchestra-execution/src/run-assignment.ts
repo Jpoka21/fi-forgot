@@ -12,12 +12,32 @@ import { normalizePathKey, pathMentionsProtected } from "./hooks/path-normalize.
 import { isForgotIdentifierRepository, projectCursorHookPolicy } from "./hooks/project-hook.js";
 import type { NormalizedExecutionEvent } from "./events.js";
 import {
+  CODEX_PROVIDER_ID,
   CURSOR_PROVIDER_ID,
   type ExecutionProvider,
   type ProviderSession,
 } from "./provider-contract.js";
+import { CodexExecutionProvider } from "./providers/codex/codex-provider.js";
+import {
+  assessCodexWorkspaceWriteBaseline,
+  CODEX_WORKSPACE_WRITE_BASELINE_UNAVAILABLE,
+} from "./providers/codex/workspace-write-baseline.js";
 import { synthesizeExecutionResult, type ExecutionResult } from "./result.js";
 import { runIsolatedWorkspaceAssignment } from "./run-isolated-assignment.js";
+
+function isCodexGovernedWorkspaceWrite(
+  provider: ExecutionProvider,
+  assignment: FrozenAssignment["assignment"],
+): boolean {
+  if (provider.providerId !== CODEX_PROVIDER_ID) return false;
+  if (provider instanceof CodexExecutionProvider) {
+    return provider.executionModeFor(assignment) === "governed-workspace-write";
+  }
+  return (
+    (provider as ExecutionProvider & { executionMode?: string }).executionMode ===
+    "governed-workspace-write"
+  );
+}
 
 export interface RunBoundedAssignmentOptions {
   projectHooks?: boolean;
@@ -138,11 +158,45 @@ export async function runBoundedAssignment(
     });
   }
 
-  if (
-    provider.providerId === "codex" &&
-    (provider as ExecutionProvider & { executionMode?: string }).executionMode === "governed-workspace-write"
-  ) {
-    return runIsolatedWorkspaceAssignment(provider, frozen, preRunGitEvidence, options.deferIsolationCleanup === true);
+  if (isCodexGovernedWorkspaceWrite(provider, assignment)) {
+    const baseline = assessCodexWorkspaceWriteBaseline(assignment, preRunGitEvidence);
+    if (!baseline.eligible) {
+      const postRunGitEvidence = await collectGitEvidence(assignment.repositoryPath);
+      const delta = diffGitEvidence(preRunGitEvidence, postRunGitEvidence);
+      return synthesizeExecutionResult({
+        frozen,
+        providerId: provider.providerId,
+        providerSessionId: null,
+        runId: null,
+        providerStatus: "not_started",
+        normalizedEvents: events,
+        providerFinalResultText: null,
+        preRunGitEvidence,
+        postRunGitEvidence,
+        policyDenials: [],
+        changedPaths: delta.changedPaths,
+        protectedPathMutationOccurred: protectedMutationOccurred(
+          delta.changedPaths,
+          assignment.protectedPaths,
+          assignment.repositoryPath,
+        ),
+        branchChanged: delta.branchChanged,
+        headChanged: delta.headChanged,
+        commitOccurred: delta.commitOccurred,
+        unexpectedChanges: [
+          CODEX_WORKSPACE_WRITE_BASELINE_UNAVAILABLE,
+          ...baseline.violations.map((path) => `codex_baseline_dirty:${path}`),
+        ],
+        evidenceIncomplete: false,
+        providerFailed: false,
+      });
+    }
+    return runIsolatedWorkspaceAssignment(
+      provider,
+      frozen,
+      preRunGitEvidence,
+      options.deferIsolationCleanup === true,
+    );
   }
 
   if (

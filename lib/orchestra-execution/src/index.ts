@@ -153,13 +153,21 @@ export type {
 export {
   routeGovernedVerifierAssignment,
   resolveActiveExecutionProvider,
+  resolveFallbackExecutionProvider,
+  resolveConfiguredExecutionProvider,
   ACTIVE_EXECUTION_PROVIDER_ID,
+  FALLBACK_EXECUTION_PROVIDER_ID,
 } from "./engineering-store/route-verifier.js";
 export type {
   RouteGovernedVerifierAssignmentInput,
   GovernedVerifierRoutingResult,
   ResolveActiveExecutionProviderOptions,
 } from "./engineering-store/route-verifier.js";
+export {
+  assessCodexWorkspaceWriteBaseline,
+  findCodexWorkspaceWriteBaselineViolations,
+  CODEX_WORKSPACE_WRITE_BASELINE_UNAVAILABLE,
+} from "./providers/codex/workspace-write-baseline.js";
 export {
   adjudicateVerifierExecution,
   VERIFICATION_ADJUDICATION_REFUSALS,

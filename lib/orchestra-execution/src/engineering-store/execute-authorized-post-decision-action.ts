@@ -1,7 +1,6 @@
 import { collectGitEvidence } from "../git-evidence.js";
-import { CURSOR_PROVIDER_ID } from "../provider-contract.js";
 import type { ExecutionProvider } from "../provider-contract.js";
-import { resolveActiveExecutionProvider } from "./route-verifier.js";
+import { resolveConfiguredExecutionProvider } from "./route-verifier.js";
 import { dispatchFrozenAssignment } from "./dispatch.js";
 import { buildCorrectionAssignmentFromPreparedAction, correctionAssignmentId } from "./build-correction-assignment.js";
 import {
@@ -379,9 +378,12 @@ export async function executeAuthorizedPostDecisionAction(
   });
 
   let provider: ExecutionProvider;
-  if (input.provider) {
-    provider = input.provider;
-  } else if (input.providerId && input.providerId !== CURSOR_PROVIDER_ID) {
+  try {
+    provider = resolveConfiguredExecutionProvider({
+      provider: input.provider,
+      providerId: input.providerId,
+    });
+  } catch (error) {
     return refused(input, "provider_required", {
       action,
       authorization,
@@ -390,10 +392,8 @@ export async function executeAuthorizedPostDecisionAction(
       authorizationId: authorization.authorizationId,
       generatedAssignmentId: corrId,
       assignmentHash: correctionFrozen.assignmentHash,
-      warnings: [`unsupported providerId ${input.providerId}; pass ExecutionProvider explicitly`],
+      warnings: [error instanceof Error ? error.message : String(error)],
     });
-  } else {
-    provider = resolveActiveExecutionProvider();
   }
 
   const dispatched = await dispatchFrozenAssignment({
@@ -587,9 +587,12 @@ async function executeContinuation(args: {
   });
 
   let provider: ExecutionProvider;
-  if (input.provider) {
-    provider = input.provider;
-  } else if (input.providerId && input.providerId !== CURSOR_PROVIDER_ID) {
+  try {
+    provider = resolveConfiguredExecutionProvider({
+      provider: input.provider,
+      providerId: input.providerId,
+    });
+  } catch (error) {
     return refused(input, "provider_required", {
       action,
       authorization,
@@ -598,10 +601,8 @@ async function executeContinuation(args: {
       authorizationId: authorization.authorizationId,
       generatedAssignmentId: contId,
       assignmentHash: continuationFrozen.assignmentHash,
-      warnings: [`unsupported providerId ${input.providerId}; pass ExecutionProvider explicitly`],
+      warnings: [error instanceof Error ? error.message : String(error)],
     });
-  } else {
-    provider = resolveActiveExecutionProvider();
   }
 
   const dispatched = await dispatchFrozenAssignment({

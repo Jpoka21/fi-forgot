@@ -21,6 +21,7 @@ import { runCodexProviderTests } from "./codex-provider.test.js";
 import { runCodexAppServerTransportTests } from "./codex-app-server-transport.test.js";
 import { failed, reportAndExit } from "./harness.js";
 import { runIsolatedWorkspaceTests } from "./isolated-workspace.test.js";
+import { runImp0422CodexPromotion, imp0422Report } from "./orch-imp-042.2-codex-promotion.test.js";
 
 async function main(): Promise<void> {
   runAssignmentTests();
@@ -46,6 +47,8 @@ async function main(): Promise<void> {
   await runPostDecisionExecutionTests();
   await runGovernedContinuationTargetTests();
   await runGovernedContinuationSequenceTests();
+  await runImp0422CodexPromotion();
+  console.log("\nIMP 042.2 promotion report:", JSON.stringify(imp0422Report, null, 2));
   await runLiveCursorIntegrationTest();
   console.log("\nLive Cursor report:", JSON.stringify(liveCursorReport, null, 2));
   if (failed > 0) reportAndExit();

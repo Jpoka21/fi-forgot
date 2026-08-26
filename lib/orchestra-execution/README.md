@@ -22,21 +22,21 @@ Those remain Orchestra facts. Provider `finished` is not Orchestra PASS.
 
 The same boundary applies to Codex `thread.id`, `turn.id`, streamed telemetry, structured technical results, and `finalResponse`. Codex prose remains untrusted even when it is formatted as JSON.
 
-## Read-only Codex provider
+## Codex provider (promoted default)
 
-`CodexExecutionProvider` is the ORCH IMP 036C second provider. It uses the official Codex App Server JSON-RPC protocol through the exactly pinned `@openai/codex` runtime. The higher-level TypeScript SDK was not selected because version `0.147.0` does not expose the provider turn id required by Orchestra's existing `ProviderRun.runId` correlator.
+`ACTIVE_EXECUTION_PROVIDER_ID` is `codex` (ORCH IMP 042.2). `FALLBACK_EXECUTION_PROVIDER_ID` remains `cursor`. Resolve the default with `resolveActiveExecutionProvider()` or omit `provider`/`providerId` on governed routes. Pass `providerId: "cursor"` or an explicit `CursorExecutionProvider` for fallback. Do not rely on environment variables for routine provider selection.
 
-Production Codex dispatch is read-only only:
+`CodexExecutionProvider` uses the official Codex App Server JSON-RPC protocol through the exactly pinned `@openai/codex` runtime. Mode is assignment-derived when `mode` is omitted: non-empty `allowedPaths` → `governed-workspace-write`; otherwise read-only.
+
+Governed Codex workspace-write runs in an isolated candidate workspace. Candidate application onto the governed tree is permitted only when the clean baseline gate holds: no dirty paths inside the assignment's `allowedPaths` (protected-path-only dirt is tolerated so intentional protected unrelated dirt does not permanently block Codex). Unqualified dirty same-tree state fails closed with `codex_workspace_write_baseline_unavailable` before App Server launch. There is no silent Cursor fallback.
+
+Read-only Codex turns use:
 
 - thread sandbox: `read-only`
 - turn sandbox policy: `readOnly`
 - approval policy: `never`
-- `allowedPaths`: empty
-- commit and push authorization: false
-- `requireNoPush`: true
-- all default destructive Git, push, and hook-tamper prohibitions present
 
-Any policy that cannot be represented exactly by this bounded mapping is refused before `turn/start`. Workspace-write and full-access Codex execution are not implemented. Codex is not the default provider.
+Workspace-write turns use `workspaceWrite` with Orchestra Git-evidence scope enforcement. Commit and push authorization remain false; `requireNoPush` remains true.
 
 ## Assignment objects
 
@@ -151,7 +151,7 @@ Preferred governed flow:
 
 `routeGovernedVerifierAssignment` wraps `dispatchGovernedVerifierAssignment` with explicit active provider resolution. The frozen verifier assignment is delivered programmatically through `ExecutionProvider.submitAssignment`. No Cursor chat paste or manual assignment transport is required.
 
-`ACTIVE_EXECUTION_PROVIDER_ID` is `cursor`. Pass an explicit `ExecutionProvider` instance to route through another supported provider (for example read-only Codex in tests).
+`ACTIVE_EXECUTION_PROVIDER_ID` is `codex`. Cursor remains available as `FALLBACK_EXECUTION_PROVIDER_ID` / `providerId: "cursor"`. Pass an explicit `ExecutionProvider` instance to inject a test double or specialized transport.
 
 F.I. Forgot modifying execution remains refused. Governed read-only verifier assignments may execute against F.I. Forgot only after `dispatchGovernedVerifierAssignment` establishes an internal, non-forgeable execution capability proving governed authorization and eligibility. Assignment shape alone is insufficient. Hook projection is skipped on F.I. Forgot because this slice refuses to install new Cursor hooks into the real repository; read-only enforcement relies on assignment policy, independent Git evidence, and any existing project hooks.
 

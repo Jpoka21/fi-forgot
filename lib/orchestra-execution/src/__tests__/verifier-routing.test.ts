@@ -7,14 +7,17 @@ import type { FrozenAssignment } from "../assignment.js";
 import { createDisposableExecutionFixture } from "../fixture.js";
 import { dispatchFrozenAssignment } from "../engineering-store/dispatch.js";
 import { authorizeAndFreezeVerifierAssignment } from "../engineering-store/prepare-verifier.js";
+import { CURSOR_PROVIDER_ID, CODEX_PROVIDER_ID } from "../provider-contract.js";
+import { CursorExecutionProvider } from "../providers/cursor/cursor-provider.js";
 import {
   ACTIVE_EXECUTION_PROVIDER_ID,
+  FALLBACK_EXECUTION_PROVIDER_ID,
   resolveActiveExecutionProvider,
+  resolveConfiguredExecutionProvider,
+  resolveFallbackExecutionProvider,
   routeGovernedVerifierAssignment,
 } from "../engineering-store/route-verifier.js";
 import { createFileEngineeringStore } from "../engineering-store/store.js";
-import { CURSOR_PROVIDER_ID } from "../provider-contract.js";
-import { CursorExecutionProvider } from "../providers/cursor/cursor-provider.js";
 import { MockExecutionProvider } from "../providers/mock-provider.js";
 import { runBoundedAssignment } from "../run-assignment.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
@@ -96,12 +99,28 @@ export async function runVerifierRoutingTests(): Promise<void> {
     verifierAssignmentId: verifierId,
     provider: mock,
   });
-  expect("active provider id constant", ACTIVE_EXECUTION_PROVIDER_ID, CURSOR_PROVIDER_ID);
-  expectTrue("resolved active provider is cursor", resolveActiveExecutionProvider().providerId === CURSOR_PROVIDER_ID);
+  expect("active provider id constant", ACTIVE_EXECUTION_PROVIDER_ID, CODEX_PROVIDER_ID);
+  expectTrue("resolved active provider is codex", resolveActiveExecutionProvider().providerId === CODEX_PROVIDER_ID);
   expectTrue("governed verifier routed", routed.dispatched);
   expectFalse("routing not refused", routed.refused);
-  expectTrue("routed through active provider id", routed.routedThroughActiveProvider);
-  expect("routing provider id", routed.routingProviderId, CURSOR_PROVIDER_ID);
+  expectFalse(
+    "injected cursor mock is not active default",
+    routed.routedThroughActiveProvider,
+  );
+  expect("routing provider id (explicit cursor fallback mock)", routed.routingProviderId, CURSOR_PROVIDER_ID);
+  expect("fallback provider id constant", FALLBACK_EXECUTION_PROVIDER_ID, CURSOR_PROVIDER_ID);
+  expectTrue(
+    "explicit fallback resolver returns cursor",
+    resolveFallbackExecutionProvider().providerId === CURSOR_PROVIDER_ID,
+  );
+  expectTrue(
+    "configured default without id is codex",
+    resolveConfiguredExecutionProvider({}).providerId === CODEX_PROVIDER_ID,
+  );
+  expectTrue(
+    "configured providerId cursor selects fallback",
+    resolveConfiguredExecutionProvider({ providerId: CURSOR_PROVIDER_ID }).providerId === CURSOR_PROVIDER_ID,
+  );
   expect("exact frozen verifier hash delivered", mock.submitted?.assignmentHash, authorized.verifierAssignmentHash);
   expect("exact frozen verifier id delivered", mock.submitted?.assignment.assignmentId, verifierId);
   expect("verifier role delivered", mock.submitted?.assignment.role, "verifier");

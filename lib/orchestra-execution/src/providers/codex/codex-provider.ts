@@ -50,6 +50,10 @@ export interface CodexProviderOptions {
   transport?: CodexAppServerTransport;
   transportFactory?: () => CodexAppServerTransport;
   model?: string;
+  /**
+   * When omitted, mode is derived per assignment:
+   * non-empty allowedPaths → governed-workspace-write; otherwise read-only.
+   */
   mode?: CodexExecutionMode;
 }
 
@@ -85,13 +89,13 @@ function terminalReport(
   };
 }
 
-/** Official Codex App Server provider with explicit read-only or governed workspace-write mode. */
+/** Official Codex App Server provider with explicit or assignment-derived execution mode. */
 export class CodexExecutionProvider implements ExecutionProvider {
   readonly providerId = CODEX_PROVIDER_ID;
   private transport: CodexAppServerTransport | null;
   private readonly transportFactory: () => CodexAppServerTransport;
   private readonly model?: string;
-  readonly executionMode: CodexExecutionMode;
+  private readonly configuredMode: CodexExecutionMode | undefined;
   private readonly sessions = new Map<string, InternalSession>();
   private readonly runs = new Map<string, InternalRun>();
   private readonly pendingNotifications = new Map<string, AppServerNotification[]>();
@@ -101,8 +105,19 @@ export class CodexExecutionProvider implements ExecutionProvider {
     this.transport = options.transport ?? null;
     this.transportFactory = options.transportFactory ?? (() => new StdioCodexAppServerTransport());
     this.model = options.model;
-    this.executionMode = options.mode ?? "read-only";
+    this.configuredMode = options.mode;
     if (this.transport) this.subscribe(this.transport);
+  }
+
+  /** Effective mode for an assignment. Explicit constructor mode wins over auto. */
+  executionModeFor(assignment: { allowedPaths: string[] }): CodexExecutionMode {
+    if (this.configuredMode) return this.configuredMode;
+    return assignment.allowedPaths.length > 0 ? "governed-workspace-write" : "read-only";
+  }
+
+  /** Configured mode, or read-only when auto (before an assignment is known). */
+  get executionMode(): CodexExecutionMode {
+    return this.configuredMode ?? "read-only";
   }
 
   private client(): CodexAppServerTransport {
@@ -148,7 +163,7 @@ export class CodexExecutionProvider implements ExecutionProvider {
     assertAssignmentUnchanged(frozen, frozen.assignment);
     const internal = this.sessions.get(session.sessionId);
     if (!internal) throw new Error(`unknown Codex provider session: ${session.sessionId}`);
-    const policy = projectCodexPolicy(frozen.assignment, this.executionMode);
+    const policy = projectCodexPolicy(frozen.assignment, this.executionModeFor(frozen.assignment));
     const response = await this.client().request<TurnResponse>("turn/start", {
       threadId: session.sessionId,
       input: [{ type: "text", text: renderAssignmentPrompt(frozen.assignment, frozen.assignmentHash) }],
