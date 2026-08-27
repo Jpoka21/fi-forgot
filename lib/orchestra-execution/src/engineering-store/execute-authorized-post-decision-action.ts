@@ -1,7 +1,7 @@
 import { collectGitEvidence } from "../git-evidence.js";
+import { dispatchAuthorizedGovernedExecutorAssignment } from "../governed-executor-capability.js";
 import type { ExecutionProvider } from "../provider-contract.js";
 import { resolveConfiguredExecutionProvider } from "./route-verifier.js";
-import { dispatchFrozenAssignment } from "./dispatch.js";
 import { buildCorrectionAssignmentFromPreparedAction, correctionAssignmentId } from "./build-correction-assignment.js";
 import {
   buildContinuationAssignmentFromTarget,
@@ -396,10 +396,12 @@ export async function executeAuthorizedPostDecisionAction(
     });
   }
 
-  const dispatched = await dispatchFrozenAssignment({
+  const dispatched = await dispatchAuthorizedGovernedExecutorAssignment({
     store: input.store,
     provider,
     assignmentId: corrId,
+    postDecisionActionId: action.postDecisionActionId,
+    authorizationId: authorization.authorizationId,
     projectHooks: input.projectHooks,
   });
 
@@ -605,10 +607,12 @@ async function executeContinuation(args: {
     });
   }
 
-  const dispatched = await dispatchFrozenAssignment({
+  const dispatched = await dispatchAuthorizedGovernedExecutorAssignment({
     store: input.store,
     provider,
     assignmentId: contId,
+    postDecisionActionId: action.postDecisionActionId,
+    authorizationId: authorization.authorizationId,
     projectHooks: input.projectHooks,
   });
 

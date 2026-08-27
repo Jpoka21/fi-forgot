@@ -6,6 +6,10 @@ import {
   type GovernedVerifierExecutionCapability,
   isGovernedVerifierExecutionCapability,
 } from "./governed-verifier-capability.js";
+import {
+  type GovernedExecutorExecutionCapability,
+  beginGovernedExecutorRun,
+} from "./governed-executor-capability.js";
 import { collectGitEvidence, diffGitEvidence } from "./git-evidence.js";
 import { correlateHookDenials, readHookInvocations } from "./hooks/hook-evidence.js";
 import { normalizePathKey, pathMentionsProtected } from "./hooks/path-normalize.js";
@@ -46,6 +50,8 @@ export interface RunBoundedAssignmentOptions {
    * Internal only. Established by dispatchGovernedVerifierAssignment after eligibility.
    */
   governedVerifierCapability?: GovernedVerifierExecutionCapability;
+  /** Internal only. Minted after governed post-decision executor authorization. */
+  governedExecutorCapability?: GovernedExecutorExecutionCapability;
 }
 
 function protectedMutationOccurred(
@@ -104,9 +110,19 @@ export async function runBoundedAssignment(
       assignment.assignmentId,
       frozen.assignmentHash,
     );
-  if (isForgotIdentifierRepository(assignment.repositoryPath) && !governedForgotVerifierExecution) {
+  const governedForgotExecutorExecution =
+    isForgotIdentifierRepository(assignment.repositoryPath) &&
+    assignment.role === "executor" &&
+    beginGovernedExecutorRun(options.governedExecutorCapability, frozen);
+  if (
+    isForgotIdentifierRepository(assignment.repositoryPath) &&
+    !governedForgotVerifierExecution &&
+    !governedForgotExecutorExecution
+  ) {
     throw new Error(
-      "Refusing to run an assignment against the F.I. Forgot repository without governed verifier execution capability.",
+      assignment.role === "verifier"
+        ? "Refusing to run an assignment against the F.I. Forgot repository without governed verifier execution capability."
+        : "Refusing to run an assignment against the F.I. Forgot repository without governed verifier execution capability; modifying executor execution additionally requires the exact governed executor execution capability.",
     );
   }
 

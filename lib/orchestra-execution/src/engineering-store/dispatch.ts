@@ -1,6 +1,9 @@
 import { collectGitEvidence } from "../git-evidence.js";
 import type { GovernedVerifierExecutionCapability } from "../governed-verifier-capability.js";
 import { isGovernedVerifierExecutionCapability } from "../governed-verifier-capability.js";
+import type { GovernedExecutorExecutionCapability } from "../governed-executor-capability.js";
+import { beginGovernedExecutorDispatch } from "../governed-executor-capability.js";
+import { isForgotIdentifierRepository } from "../hooks/project-hook.js";
 import type { ExecutionProvider } from "../provider-contract.js";
 import { synthesizeExecutionResult, type ExecutionResult } from "../result.js";
 import { runBoundedAssignment } from "../run-assignment.js";
@@ -18,6 +21,8 @@ export interface DispatchFrozenAssignmentInput {
    * Internal only. Set by dispatchGovernedVerifierAssignment after full eligibility validation.
    */
   governedVerifierCapability?: GovernedVerifierExecutionCapability;
+  /** Internal only. Minted by the authorized correction/continuation execution path. */
+  governedExecutorCapability?: GovernedExecutorExecutionCapability;
 }
 
 export interface DispatchFrozenAssignmentOutput {
@@ -47,6 +52,15 @@ export async function dispatchFrozenAssignment(
         "verifier assignments must be dispatched through dispatchGovernedVerifierAssignment",
       );
     }
+  }
+  if (
+    frozen.assignment.role === "executor" &&
+    isForgotIdentifierRepository(frozen.assignment.repositoryPath) &&
+    !beginGovernedExecutorDispatch(input.governedExecutorCapability, frozen)
+  ) {
+    throw new Error(
+      "F.I. Forgot executor assignments must be dispatched through authorized post-decision execution",
+    );
   }
   if (input.store.loadLatestExecutionEvidence(input.assignmentId)) {
     throw new Error(
@@ -97,6 +111,7 @@ export async function dispatchFrozenAssignment(
     const mismatch = await runBoundedAssignment(input.provider, frozen, {
       projectHooks: false,
       governedVerifierCapability: input.governedVerifierCapability,
+      governedExecutorCapability: input.governedExecutorCapability,
     });
     const evidence = input.store.persistExecutionEvidence(
       buildExecutionEvidence({ frozen, result: mismatch, providerStarted: false }),
@@ -111,6 +126,7 @@ export async function dispatchFrozenAssignment(
       projectHooks: input.projectHooks,
       deferIsolationCleanup: true,
       governedVerifierCapability: input.governedVerifierCapability,
+      governedExecutorCapability: input.governedExecutorCapability,
     });
   } catch (error) {
     input.store.persistCrashReceipt({

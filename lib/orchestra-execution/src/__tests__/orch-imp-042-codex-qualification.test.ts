@@ -4,6 +4,7 @@
  * Does not modify F.I. Forgot product files or protected writing-quality trio.
  */
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createAssignment } from "../assignment-hash.js";
@@ -34,6 +35,10 @@ import { runBoundedAssignment } from "../run-assignment.js";
 import { synthesizeExecutionResult } from "../result.js";
 import { DEFAULT_PROHIBITED_COMMAND_CLASSES } from "../assignment.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
+
+function git(repositoryPath: string, args: string[]): string {
+  return execFileSync("git", args, { cwd: repositoryPath, encoding: "utf8" }).trim();
+}
 
 export interface Imp042QualificationReport {
   liveEnabled: boolean;
@@ -229,14 +234,21 @@ export async function runImp042CodexQualification(): Promise<void> {
   // Re-route with VERIFIED for continuation auth proof
   const authFix2 = createDisposableExecutionFixture({ assignmentId: "orch-imp-042-auth2" });
   writeFileSync(authFix2.allowedPath, "allowed-initial\nADAPTER_ALLOWED_TEST\n", "utf8");
+  git(authFix2.repositoryPath, ["add", "allowed.txt"]);
+  git(authFix2.repositoryPath, ["commit", "-m", "fixture: acceptance marker committed"]);
+  const authHead2 = git(authFix2.repositoryPath, ["rev-parse", "HEAD"]).toLowerCase();
+  const authAssignment2 = createAssignment({
+    ...authFix2.assignment.assignment,
+    startingHead: authHead2,
+  });
   const store2 = createFileEngineeringStore(mkdtempSync(join(tmpdir(), "orch-042b-")));
-  store2.persistFrozenAssignment(authFix2.assignment);
+  store2.persistFrozenAssignment(authAssignment2);
   const pre2 = await collectGitEvidence(authFix2.repositoryPath);
   const okEv = store2.persistExecutionEvidence(
     buildExecutionEvidence({
-      frozen: authFix2.assignment,
+      frozen: authAssignment2,
       result: synthesizeExecutionResult({
-        frozen: authFix2.assignment,
+        frozen: authAssignment2,
         providerId: CODEX_PROVIDER_ID,
         providerSessionId: "s2",
         runId: "r2",
@@ -258,7 +270,7 @@ export async function runImp042CodexQualification(): Promise<void> {
   );
   const v2 = authorizeAndFreezeVerifierAssignment({
     store: store2,
-    executorAssignmentId: authFix2.assignment.assignment.assignmentId,
+    executorAssignmentId: authAssignment2.assignment.assignmentId,
     executionEvidenceId: okEv.evidenceId,
     humanAuthorized: true,
   });
@@ -280,13 +292,13 @@ export async function runImp042CodexQualification(): Promise<void> {
     verificationDecisionId: adj2.decisionRecord!.verificationDecisionId,
     targetKey: "entry-b",
     orderingKey: 20,
-    projectId: authFix2.assignment.assignment.projectId,
-    repositoryPath: authFix2.assignment.assignment.repositoryPath,
-    branch: authFix2.assignment.assignment.branch,
-    baselineHead: authFix2.assignment.assignment.startingHead,
+    projectId: authAssignment2.assignment.projectId,
+    repositoryPath: authAssignment2.assignment.repositoryPath,
+    branch: authAssignment2.assignment.branch,
+    baselineHead: authAssignment2.assignment.startingHead,
     assignmentText: "Append CONT_CODEX_MARKER to allowed.txt. Do not commit or push.",
-    allowedPaths: [...authFix2.assignment.assignment.allowedPaths],
-    protectedPaths: [...authFix2.assignment.assignment.protectedPaths],
+    allowedPaths: [...authAssignment2.assignment.allowedPaths],
+    protectedPaths: [...authAssignment2.assignment.protectedPaths],
     prohibitedCommandClasses: [...DEFAULT_PROHIBITED_COMMAND_CLASSES],
     requiredEvidence: ["git", "hooks", "filesystem"],
   });

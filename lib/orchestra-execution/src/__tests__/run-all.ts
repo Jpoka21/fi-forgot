@@ -11,6 +11,7 @@ import { runVerifierPreparationTests } from "./verifier-preparation.test.js";
 import { runVerifierDispatchTests } from "./verifier-dispatch.test.js";
 import { runVerifierRoutingTests } from "./verifier-routing.test.js";
 import { runVerifierTrustBoundaryTests } from "./verifier-trust-boundary.test.js";
+import { runGovernedExecutorTrustBoundaryTests } from "./governed-executor-trust-boundary.test.js";
 import { runVerificationDecisionTests } from "./verification-decision.test.js";
 import { runPostDecisionActionTests } from "./post-decision-action.test.js";
 import { runPostDecisionExecutionTests } from "./post-decision-execution.test.js";
@@ -42,6 +43,7 @@ async function main(): Promise<void> {
   await runVerifierDispatchTests();
   await runVerifierRoutingTests();
   await runVerifierTrustBoundaryTests();
+  await runGovernedExecutorTrustBoundaryTests();
   await runVerificationDecisionTests();
   await runPostDecisionActionTests();
   await runPostDecisionExecutionTests();
