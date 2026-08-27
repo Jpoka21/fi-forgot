@@ -273,6 +273,25 @@ This slice does **not**:
 - open Cursor chat or require manual assignment paste
 - commit or push
 
+## Owner CLI (ORCH IMP 043B)
+
+From the F.I. Forgot repository root, use the Windows launcher without knowing package or provider internals:
+
+```text
+.\orchestra.cmd status
+.\orchestra.cmd status --json
+.\orchestra.cmd submit
+.\orchestra.cmd authorize ACTION_ID --confirm ACTION_ID --store C:\path\outside\repo\engineering-store
+.\orchestra.cmd continue ACTION_ID --authorization AUTHORIZATION_ID --store C:\path\outside\repo\engineering-store
+.\orchestra.cmd resume --store C:\path\outside\repo\engineering-store
+```
+
+`ORCHESTRA_ENGINEERING_STORE` may supply the external store path. `status` never creates a store; an omitted store is reported as `not_configured`, and an invalid store as `unavailable`. `submit` deliberately refuses arbitrary prose because no existing authority safely converts it into a `FrozenAssignment`.
+
+`authorize` requires the exact pending `PostDecisionActionRecord` id twice and calls `authorizePostDecisionExecution`. It records authorization for only that action and does not execute. `continue` requires the exact authorization id and calls `executeAuthorizedPostDecisionAction`; Codex is the default and `--provider cursor` is the explicit fallback. `resume` is inspection-only in this slice: it reports the next safe owner action and never manufactures authorization or dispatches.
+
+The CLI does not commit or push. Existing repository, branch, HEAD, continuation-target, sequence, policy, duplicate-execution, and crash-ambiguity protections remain enforced by the governed APIs.
+
 ## Current limitations
 
 Observed Cursor provider facts, not solved by this slice:

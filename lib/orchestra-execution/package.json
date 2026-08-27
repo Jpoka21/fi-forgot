@@ -7,6 +7,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "orchestra": "tsx src/owner-cli-main.ts",
+    "test:imp-043b": "tsx src/__tests__/run-imp-043b.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx src/__tests__/run-all.ts",
     "test:codex-transport": "tsx src/__tests__/run-codex-transport.ts",
