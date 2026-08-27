@@ -8,6 +8,7 @@ import {
   executeAuthorizedPostDecisionAction,
 } from "./index.js";
 import { FileEngineeringStore } from "./engineering-store/store.js";
+import { defaultEngineeringStoreRoot, submitOwnerRequest, validateProjectBinding } from "./owner-submit.js";
 import type {
   AssignmentCurrentState,
   PostDecisionActionRecord,
@@ -110,7 +111,7 @@ function parseArgs(argv: string[], cwd: string): ParsedArgs {
     }
   }
   const repositoryPath = resolve(options.get("--repository") ?? cwd);
-  const rawStore = options.get("--store") ?? process.env.ORCHESTRA_ENGINEERING_STORE ?? null;
+  const rawStore = options.get("--store") ?? process.env.ORCHESTRA_ENGINEERING_STORE ?? defaultEngineeringStoreRoot(repositoryPath);
   return {
     command: positionals.shift() ?? null,
     positionals,
@@ -139,6 +140,7 @@ function assertExternalStore(repositoryPath: string, storeRoot: string): void {
   if (!existsSync(join(storeRoot, "assignments")) || !existsSync(join(storeRoot, "executions"))) {
     throw new Error("store_invalid: required engineering store directories are missing");
   }
+  if (existsSync(join(storeRoot, "PROJECT.json"))) validateProjectBinding(storeRoot, repositoryPath);
 }
 
 function openExistingStore(args: ParsedArgs): FileEngineeringStore {
@@ -154,6 +156,7 @@ function collectStoreStatus(store: FileEngineeringStore): {
   pendingAction: PostDecisionActionRecord | null;
   pendingAuthorization: PostDecisionActionRecord | null;
   pendingContinuation: PostDecisionActionRecord | null;
+  pendingSubmission: AssignmentCurrentState | null;
 } {
   const states = store.listAssignmentIds().map((id) => store.getCurrentState(id));
   const latestExecutionState = states
@@ -170,6 +173,9 @@ function collectStoreStatus(store: FileEngineeringStore): {
   const pendingAuthorization = pending.find((action) => !store.findValidPostDecisionExecutionAuthorization(action.postDecisionActionId, action.actionHash)) ?? null;
   const pendingContinuation = pending.find((action) => action.preparedAction === "PREPARE_CONTINUATION") ?? null;
   const latestState = latestExecutionState ?? states[0] ?? null;
+  const pendingSubmission = states
+    .filter((state) => state.status === "frozen" && !state.latestEvidence)
+    .sort((a, b) => b.frozen.assignment.createdAt.localeCompare(a.frozen.assignment.createdAt))[0] ?? null;
   return {
     project: latestState?.frozen.assignment.projectId ?? null,
     latestExecutionState,
@@ -177,6 +183,7 @@ function collectStoreStatus(store: FileEngineeringStore): {
     pendingAction,
     pendingAuthorization,
     pendingContinuation,
+    pendingSubmission,
   };
 }
 
@@ -219,6 +226,7 @@ function buildStatus(args: ParsedArgs): unknown {
     pendingGovernedAction: storeStatus?.pendingAction?.postDecisionActionId ?? null,
     pendingHumanAuthorization: storeStatus?.pendingAuthorization?.postDecisionActionId ?? null,
     pendingContinuation: storeStatus?.pendingContinuation?.postDecisionActionId ?? null,
+    pendingGovernedSubmission: storeStatus?.pendingSubmission?.assignmentId ?? null,
     latestExecutionState: storeStatus?.latestExecutionState ? {
       assignmentId: storeStatus.latestExecutionState.assignmentId,
       status: storeStatus.latestExecutionState.status,
@@ -243,6 +251,7 @@ function printStatus(payload: any, io: OwnerCliIo): void {
     `Pending governed action: ${payload.pendingGovernedAction ?? "none"}`,
     `Pending human authorization: ${payload.pendingHumanAuthorization ?? "none"}`,
     `Pending continuation: ${payload.pendingContinuation ?? "none"}`,
+    `Pending governed submission: ${payload.pendingGovernedSubmission ?? "none"}`,
     `Latest execution state: ${payload.latestExecutionState?.status ?? "none"}`,
     `Latest verification state: ${payload.latestVerificationState ?? "none"}`,
   ].join("\n"));
@@ -272,13 +281,12 @@ export async function runOwnerCli(argv: string[], io: OwnerCliIo, cwd = process.
       if (args.confirmation || args.authorizationId || args.providerId) {
         throw new Error("submit accepts only owner text, --json, --store, and --repository");
       }
-      const payload = {
-        refused: true,
-        reason: "frozen_assignment_authority_required",
-        message: "Owner prose is not a FrozenAssignment and cannot create execution authority. Use an existing governed assignment-creation path.",
-      };
-      output(payload, args.json, io);
-      return { exitCode: OWNER_CLI_EXIT.refused, payload };
+      if (args.positionals.length !== 1) throw new Error("submit requires exactly one quoted OWNER REQUEST");
+      const storeRoot = args.storeRoot ?? defaultEngineeringStoreRoot(args.repositoryPath);
+      const payload = submitOwnerRequest({ repository: args.repositoryPath, storeRoot, ownerText: args.positionals[0]!, protectedPaths: PROTECTED_WRITING_QUALITY_PATHS });
+      if (args.json) output(payload, true, io);
+      else io.out([`Frozen assignment ${payload.duplicate ? "already exists" : "created"}: ${payload.assignmentId}`, `Project: ${payload.project}`, `Scope: ${payload.allowedPaths.join(", ")}`, `Authorized: no`, `Executed: no`, `Commit / push: no / no`, `Next: ${payload.nextSafeOwnerAction}`].join("\n"));
+      return { exitCode: 0, payload };
     }
     if (args.command === "authorize") {
       if (args.positionals.length !== 1 || args.authorizationId || args.providerId) throw new Error("authorize requires exactly: authorize ACTION_ID --confirm ACTION_ID");

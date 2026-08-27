@@ -9,6 +9,7 @@
   "scripts": {
     "orchestra": "tsx src/owner-cli-main.ts",
     "test:imp-043b": "tsx src/__tests__/run-imp-043b.ts",
+    "test:imp-044": "tsx src/__tests__/run-imp-044.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx src/__tests__/run-all.ts",
     "test:codex-transport": "tsx src/__tests__/run-codex-transport.ts",
