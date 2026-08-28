@@ -57,6 +57,15 @@ export async function runOwnerCliTests(): Promise<void> {
     createHash("sha256").update(readFileSync(join(repo, path))).digest("hex"),
   );
 
+  for (const helpArgs of [["--help"], ["-h"], ["help"], ["status", "--help"]]) {
+    const help = await invoke(repo, helpArgs);
+    expect(`${helpArgs[0]} succeeds`, help.result.exitCode, 0);
+    expectTrue(`${helpArgs[0]} shows command usage`, help.capture.stdout[0]?.includes("Usage: orchestra <command> [options]") === true);
+    expectTrue(`${helpArgs[0]} states the authorization boundary`, help.capture.stdout[0]?.includes("planning input, not execution authorization") === true);
+    expect(`${helpArgs[0]} writes no errors`, help.capture.stderr, []);
+  }
+  expect("help does not mutate repository", git(repo, ["status", "--porcelain=v1", "--untracked-files=all"]), beforeGit);
+
   const status = await invoke(repo, ["status", "--json", "--repository", repo]);
   expect("status succeeds", status.result.exitCode, 0);
   const parsed = JSON.parse(status.capture.stdout[0]!) as any;

@@ -34,9 +34,29 @@ export interface OwnerCliResult {
   payload?: unknown;
 }
 
+export const OWNER_CLI_HELP = `Usage: orchestra <command> [options]
+
+Commands:
+  status
+  submit "OWNER REQUEST"
+  dispatch ASSIGNMENT_ID --confirm ASSIGNMENT_ID [--provider codex|cursor]
+  authorize ACTION_ID --confirm ACTION_ID
+  continue ACTION_ID --authorization AUTHORIZATION_ID [--provider codex|cursor]
+  resume
+  help
+
+Global options:
+  --repository PATH  Repository root (defaults to the current directory)
+  --store PATH       Existing external engineering store
+  --json             Emit JSON for command results
+  -h, --help         Show this help
+
+Owner prose is planning input, not execution authorization. The CLI does not commit or push.`;
+
 interface ParsedArgs {
   command: string | null;
   positionals: string[];
+  help: boolean;
   json: boolean;
   storeRoot: string | null;
   repositoryPath: string;
@@ -96,10 +116,14 @@ function parseArgs(argv: string[], cwd: string): ParsedArgs {
   const valueOptions = new Set(["--store", "--repository", "--confirm", "--authorization", "--provider"]);
   const options = new Map<string, string>();
   const positionals: string[] = [];
+  let help = false;
   let json = false;
   for (let i = 0; i < argv.length; i++) {
     const token = argv[i]!;
-    if (token === "--json") {
+    if (token === "--help" || token === "-h") {
+      if (help) throw new Error(`duplicate option ${token}`);
+      help = true;
+    } else if (token === "--json") {
       if (json) throw new Error("duplicate option --json");
       json = true;
     } else if (valueOptions.has(token)) {
@@ -118,6 +142,7 @@ function parseArgs(argv: string[], cwd: string): ParsedArgs {
   return {
     command: positionals.shift() ?? null,
     positionals,
+    help,
     json,
     storeRoot: rawStore ? resolve(repositoryPath, rawStore) : null,
     repositoryPath,
@@ -286,7 +311,14 @@ export async function runOwnerCli(argv: string[], io: OwnerCliIo, cwd = process.
     return { exitCode: OWNER_CLI_EXIT.usage };
   }
   try {
-    if (!args.command) throw new Error("command_required: use status, submit, dispatch, authorize, continue, or resume");
+    if (args.help || args.command === "help") {
+      if ((!args.help && args.positionals.length) || args.confirmation || args.authorizationId || args.providerId || args.json) {
+        throw new Error("help accepts only --repository and --store");
+      }
+      io.out(OWNER_CLI_HELP);
+      return { exitCode: OWNER_CLI_EXIT.ok };
+    }
+    if (!args.command) throw new Error("command_required: use help, status, submit, dispatch, authorize, continue, or resume");
     if (args.command === "status") {
       if (args.positionals.length || args.confirmation || args.authorizationId || args.providerId) throw new Error("status accepts only --json, --store, and --repository");
       const payload = buildStatus(args);
