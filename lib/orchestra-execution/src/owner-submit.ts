@@ -82,21 +82,50 @@ function normalizePath(value: string): string {
   return value.replace(/\\/g, "/").replace(/^\.\//, "").replace(/[),.;:'"`]+$/g, "");
 }
 
+const NEGATIVE_SCOPE_DIRECTIVE = /\b(?:do\s+not|never)\s+(?:modify|touch)|\b(?:exclude|excluding|except)\b/gi;
+const POSITIVE_SCOPE_DIRECTIVE = /\b(?:modify|touch|change|edit|implement|update|work\s+(?:in|under)|only\s+(?:in|under)|scope(?:d)?\s+to|under|within)\b/gi;
+
+function negativeScopeRanges(ownerText: string): Array<{ start: number; end: number }> {
+  const ranges: Array<{ start: number; end: number }> = [];
+  for (const match of ownerText.matchAll(NEGATIVE_SCOPE_DIRECTIVE)) {
+    const start = match.index!;
+    const contentStart = start + match[0].length;
+    const remainder = ownerText.slice(contentStart);
+    const sentenceBoundary = remainder.search(/[.;\n]/);
+    const sentenceEnd = sentenceBoundary < 0 ? ownerText.length : contentStart + sentenceBoundary;
+    POSITIVE_SCOPE_DIRECTIVE.lastIndex = 0;
+    const positive = POSITIVE_SCOPE_DIRECTIVE.exec(remainder);
+    const positiveStart = positive ? contentStart + positive.index : ownerText.length;
+    ranges.push({ start, end: Math.min(sentenceEnd, positiveStart) });
+  }
+  return ranges;
+}
+
 function deriveAllowedPaths(ownerText: string, trackedPaths: string[], protectedPaths: readonly string[]): string[] {
   if (/\b(all|every|entire|whole)\s+(files?|repository|repo|tree|project)\b/i.test(ownerText) || /(^|\s)[*](?:[*]|\/)/.test(ownerText)) {
     throw new Error("scope_too_broad: name specific repository paths or uniquely named files");
   }
   const tracked = new Set(trackedPaths);
-  const candidates = ownerText.split(/\s+/).map(normalizePath).filter(Boolean);
-  const found = new Set<string>();
-  for (const candidate of candidates) {
+  const exclusions = negativeScopeRanges(ownerText);
+  const positive = new Set<string>();
+  const negative = new Set<string>();
+  for (const token of ownerText.matchAll(/\S+/g)) {
+    const candidate = normalizePath(token[0]);
+    if (!candidate) continue;
+    const found = new Set<string>();
     if (tracked.has(candidate)) found.add(candidate);
     const directory = candidate.replace(/\/$/, "");
     if (directory && trackedPaths.some((path) => path.startsWith(`${directory}/`))) found.add(directory);
     const byBasename = trackedPaths.filter((path) => basename(path).toLowerCase() === candidate.toLowerCase());
     if (byBasename.length === 1) found.add(byBasename[0]!);
+    const target = exclusions.some(({ start, end }) => token.index! >= start && token.index! < end) ? negative : positive;
+    for (const path of found) target.add(path);
   }
-  const allowed = [...found].sort();
+  const conflicts = [...positive].filter((path) => negative.has(path)).sort();
+  if (conflicts.length) {
+    throw new Error(`scope_conflict: path(s) appear in both positive and negative scope: ${conflicts.join(", ")}`);
+  }
+  const allowed = [...positive].sort();
   if (!allowed.length) {
     throw new Error("safe_scope_required: include one or more existing repository paths or uniquely named files in the owner request");
   }

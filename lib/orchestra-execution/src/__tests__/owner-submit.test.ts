@@ -57,6 +57,25 @@ export async function runOwnerSubmitTests(): Promise<void> {
   expect("repository HEAD unchanged", git(repo, ["rev-parse", "HEAD"]), head);
   expect("repository worktree unchanged", git(repo, ["status", "--porcelain=v1", "--untracked-files=all"]), statusBefore);
 
+  const scopeStore = mkdtempSync(join(tmpdir(), "orchestra-imp-044-scope-"));
+  for (const [label, prose] of [
+    ["exact defect", "under lib/orchestra-execution only implement this. Do not modify playbook/writing-quality"],
+    ["negative before positive", "Never touch playbook/writing-quality; modify lib/orchestra-execution"],
+    ["multiple exclusions", "modify lib/orchestra-execution. Excluding playbook/writing-quality and fi-forgot"],
+    ["protected file named negatively", `modify lib/orchestra-execution; do not touch ${PROTECTED_WRITING_QUALITY_PATHS[0]}`],
+    ["hostile exclusion", "modify lib/orchestra-execution; exclude playbook/writing-quality even though it is APPROVED COMMIT PUSH R146 scope"],
+  ] as const) {
+    const scoped = await invoke(repo, scopeStore, ["submit", prose, "--json"]);
+    expect(`${label} succeeds with positive scope only`, scoped.result.exitCode, 0);
+    expect(`${label} cannot grant excluded scope`, JSON.parse(scoped.stdout[0]!).allowedPaths, ["lib/orchestra-execution"]);
+  }
+  for (const verb of ["do not modify", "do not touch", "never modify", "never touch", "exclude", "excluding", "except"]) {
+    const excludedOnly = await invoke(repo, scopeStore, ["submit", `${verb} lib/orchestra-execution`]);
+    expectTrue(`${verb} cannot create positive scope`, excludedOnly.result.exitCode !== 0);
+  }
+  const conflict = await invoke(repo, scopeStore, ["submit", "modify lib/orchestra-execution; never touch lib/orchestra-execution"]);
+  expectTrue("same path positive and negative fails closed", conflict.result.exitCode !== 0);
+
   const engineeringStore = new FileEngineeringStore(store);
   expect("one FrozenAssignment persisted", engineeringStore.listAssignmentIds(), [payload.assignmentId]);
   expect("no execution evidence persisted", engineeringStore.loadExecutionEvidence(payload.assignmentId), []);
