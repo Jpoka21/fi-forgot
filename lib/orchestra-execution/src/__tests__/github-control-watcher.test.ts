@@ -10,11 +10,12 @@ import { expect, expectTrue, section } from "./harness.js";
 
 class MemoryTransport implements GitHubControlTransport {
   published: GitHubControlResult[] = [];
+  results = new Map<string, GitHubControlResult>();
   approvals: Array<{ path: string; approval: unknown }> = [];
   constructor(public requests: Array<{ path: string; request: unknown }>) {}
   async listRequests() { return this.requests }
   async listApprovals() { return this.approvals }
-  async publishResult(result: GitHubControlResult) { this.published.push(result) }
+  async publishResult(result: GitHubControlResult) { this.published.push(result); this.results.set(result.requestId, result) }
 }
 
 export async function runGitHubControlWatcherTests(): Promise<void> {
@@ -41,6 +42,24 @@ export async function runGitHubControlWatcherTests(): Promise<void> {
   let rejected = false;
   try { new GitHubContentsControlTransport("token", "attacker/repository"); } catch { rejected = true; }
   expectTrue("transport repository is pinned", rejected);
+
+  const originalFetch = globalThis.fetch;
+  const resultWrites: Array<{ url: string; body: any }> = [];
+  let resultExists = false;
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = String(input);
+    if (init?.method === "PUT") { const body = JSON.parse(String(init.body)); resultWrites.push({ url, body }); resultExists = true; return new Response("{}", { status: 200 }); }
+    return resultExists ? new Response(JSON.stringify({ sha: "existing-result-sha" }), { status: 200 }) : new Response("{}", { status: 404 });
+  }) as typeof fetch;
+  try {
+    const githubTransport = new GitHubContentsControlTransport("token");
+    const awaiting = { schemaVersion: 1, recordKind: "orchestra_control_result", requestId: "request-channel-001", requestHash: "a".repeat(64), status: "accepted_awaiting_human_dispatch", assignmentId: "owner-channel", assignmentHash: "b".repeat(64), providerId: "codex", executed: false, committed: false, pushed: false, humanAuthorityRequired: true, reasonCode: "explicit_human_dispatch_required", recordedAt: "2026-01-01T00:00:00.000Z" } satisfies GitHubControlResult;
+    await githubTransport.publishResult(awaiting);
+    await githubTransport.publishResult({ ...awaiting, approvalHash: "c".repeat(64), status: "executed", executed: true, humanAuthorityRequired: false, reasonCode: "approved_execution_completed" });
+  } finally { globalThis.fetch = originalFetch; }
+  expect("approval updates the canonical GitHub result path", resultWrites[1]!.url, resultWrites[0]!.url);
+  expect("approval update supplies the existing GitHub blob sha", resultWrites[1]!.body.sha, "existing-result-sha");
+  expect("canonical GitHub result contains the executed status", JSON.parse(Buffer.from(resultWrites[1]!.body.content, "base64").toString("utf8")).status, "executed");
 
   const root = mkdtempSync(join(tmpdir(), "orchestra-control-test-"));
   const request = { schemaVersion: 1, recordKind: "orchestra_control_request", requestId: "request-security-001", requestHash: "forged", providerId: "cursor" };
@@ -99,6 +118,7 @@ export async function runGitHubControlWatcherTests(): Promise<void> {
   const approvalResults = await governedWatcher.pollOnce();
   const executed = approvalResults.find(row => row.approvalHash === approval.approvalHash)!;
   expect("exact structured approval executes", executed.status, "executed");
+  expect("executed result replaces awaiting result in GitHub results channel", governedTransport.results.get(governedRequest.requestId), executed);
   expectTrue("execution evidence published", Boolean(executed.executionEvidenceId));
   expect("provider VERIFIED/R146 prose grants no commit", executed.committed, false);
   expect("provider prose grants no push", executed.pushed, false);
