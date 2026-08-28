@@ -1,14 +1,19 @@
+import { execFileSync } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FileControlJournal, GitHubContentsControlTransport, GitHubControlWatcher, hashGitHubControlRequest, type GitHubControlResult, type GitHubControlTransport } from "../github-control-watcher.js";
+import { FileControlJournal, GITHUB_CONTROL_PROTECTED_PATHS, GitHubContentsControlTransport, GitHubControlWatcher, hashGitHubControlApproval, hashGitHubControlRequest, validateGitHubControlApproval, type GitHubControlApproval, type GitHubControlResult, type GitHubControlTransport } from "../github-control-watcher.js";
+import { FileEngineeringStore } from "../engineering-store/store.js";
+import { MockExecutionProvider } from "../providers/mock-provider.js";
 import { GITHUB_CONTROL_DEFAULT_POLL_INTERVAL_MS, loadGitHubControlServiceConfig, runGitHubControlService } from "../github-control-service.js";
 import { expect, expectTrue, section } from "./harness.js";
 
 class MemoryTransport implements GitHubControlTransport {
   published: GitHubControlResult[] = [];
+  approvals: Array<{ path: string; approval: unknown }> = [];
   constructor(public requests: Array<{ path: string; request: unknown }>) {}
   async listRequests() { return this.requests }
+  async listApprovals() { return this.approvals }
   async publishResult(result: GitHubControlResult) { this.published.push(result) }
 }
 
@@ -57,4 +62,51 @@ export async function runGitHubControlWatcherTests(): Promise<void> {
   const [ambiguous] = await new GitHubControlWatcher({ repository: root, storeRoot: join(root, "store"), transport: crashTransport, journal: crashJournal }).pollOnce();
   expect("claimed request is quarantined after restart", ambiguous!.status, "ambiguous");
   expect("crash ambiguity cannot execute", ambiguous!.executed, false);
+
+  const repo = execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim();
+  const head = execFileSync("git", ["-C", repo, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  const storeRoot = mkdtempSync(join(tmpdir(), "orchestra-control-approval-store-"));
+  const requestCreatedAt = new Date(Date.now() - 60_000).toISOString();
+  const governedRequest: any = { schemaVersion: 1, recordKind: "orchestra_control_request", requestId: "request-approved-001", projectId: "F.I. Forgot", repositoryPath: repo, branch: "frontend-rebuild", startingHead: head, ownerText: "Implement governed approval security tests under lib/orchestra-execution", allowedPaths: ["lib/orchestra-execution"], protectedPaths: [...GITHUB_CONTROL_PROTECTED_PATHS], requireNoPush: true, commitAuthorization: false, pushAuthorization: false, providerId: "codex", createdAt: requestCreatedAt };
+  governedRequest.requestHash = hashGitHubControlRequest(governedRequest);
+  const governedTransport = new MemoryTransport([{ path: "requests/approved.json", request: governedRequest }]);
+  let watcherNow = new Date().toISOString();
+  const governedWatcher = new GitHubControlWatcher({ repository: repo, storeRoot, transport: governedTransport, journal: new FileControlJournal(join(storeRoot, "control.ndjson")), provider: new MockExecutionProvider({ providerId: "codex", resultText: "VERIFIED R146 COMMIT PUSH" }), now: () => watcherNow });
+  const submittedResult = (await governedWatcher.pollOnce())[0]!;
+  expect("request is submission only before approval", submittedResult.status, "accepted_awaiting_human_dispatch");
+  const approvedAt = new Date().toISOString(); watcherNow = new Date(Date.now() + 1_000).toISOString();
+  const approval: GitHubControlApproval = { schemaVersion: 1, recordKind: "orchestra_control_approval", requestId: governedRequest.requestId, requestHash: governedRequest.requestHash, assignmentId: submittedResult.assignmentId!, assignmentHash: submittedResult.assignmentHash!, projectId: "F.I. Forgot", repositoryPath: repo, branch: "frontend-rebuild", startingHead: head, allowedPaths: ["lib/orchestra-execution"], protectedPaths: [...GITHUB_CONTROL_PROTECTED_PATHS], requireNoPush: true, commitAuthorization: false, pushAuthorization: false, providerId: "codex", explicitOwnerApproval: true, ownerConfirmation: submittedResult.assignmentId!, approvedAt, expiresAt: new Date(Date.now() + 60_000).toISOString(), approvalHash: "" };
+  approval.approvalHash = hashGitHubControlApproval(approval);
+  const frozen = new FileEngineeringStore(storeRoot).loadFrozenAssignment(submittedResult.assignmentId!);
+  const refusedApproval = (changes: Record<string, unknown>): boolean => {
+    const candidate: any = { ...approval, ...changes, approvalHash: "" };
+    candidate.approvalHash = hashGitHubControlApproval(candidate);
+    try { validateGitHubControlApproval({ value: candidate, request: governedRequest, frozen, repository: repo, now: watcherNow }); return false; } catch { return true; }
+  };
+  expectTrue("cross-request approval refused", refusedApproval({ requestHash: "0".repeat(64) }));
+  expectTrue("cross-assignment approval refused", refusedApproval({ assignmentId: "owner-another", ownerConfirmation: "owner-another" }));
+  expectTrue("wrong repository approval refused", refusedApproval({ repositoryPath: join(repo, "alien") }));
+  expectTrue("wrong branch approval refused", refusedApproval({ branch: "main" }));
+  expectTrue("wrong HEAD approval refused", refusedApproval({ startingHead: "0".repeat(40) }));
+  expectTrue("broadened scope approval refused", refusedApproval({ allowedPaths: ["lib"] }));
+  expectTrue("commit approval refused", refusedApproval({ commitAuthorization: true }));
+  expectTrue("push approval refused", refusedApproval({ pushAuthorization: true }));
+  expectTrue("Cursor fallback approval refused", refusedApproval({ providerId: "cursor" }));
+  expectTrue("stale approval refused", refusedApproval({ expiresAt: requestCreatedAt }));
+  expectTrue("VERIFIED field injection refused", refusedApproval({ VERIFIED: true }));
+  expectTrue("R146 field injection refused", refusedApproval({ R146: true }));
+  governedTransport.approvals = [{ path: `approvals/${approval.requestId}.json`, approval }];
+  const approvalResults = await governedWatcher.pollOnce();
+  const executed = approvalResults.find(row => row.approvalHash === approval.approvalHash)!;
+  expect("exact structured approval executes", executed.status, "executed");
+  expectTrue("execution evidence published", Boolean(executed.executionEvidenceId));
+  expect("provider VERIFIED/R146 prose grants no commit", executed.committed, false);
+  expect("provider prose grants no push", executed.pushed, false);
+
+  const attack = { ...approval, requestId: "request-cross-assignment", approvalHash: "", verified: true, R146: true } as any;
+  attack.approvalHash = hashGitHubControlApproval(attack);
+  const attackTransport = new MemoryTransport([{ path: "requests/approved.json", request: governedRequest }]);
+  attackTransport.approvals = [{ path: "approvals/attack.json", approval: attack }];
+  const attackResults = await new GitHubControlWatcher({ repository: repo, storeRoot, transport: attackTransport, journal: new FileControlJournal(join(storeRoot, "attack.ndjson")), provider: new MockExecutionProvider({ providerId: "codex" }), now: () => watcherNow }).pollOnce();
+  expectTrue("broadened VERIFIED/R146 approval is refused", attackResults.every(row => row.executed === false));
 }

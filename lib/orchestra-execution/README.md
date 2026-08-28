@@ -294,7 +294,9 @@ The CLI does not commit or push. Existing repository, branch, HEAD, continuation
 
 ## GitHub control watcher
 
-The production watcher is pinned to the private `Jpoka21/fi-forgot-control` repository. It accepts only the existing hashed control-request schema and creates an assignment awaiting explicit human dispatch. It never executes an assignment, grants authority, commits, pushes, or falls back to Cursor.
+The production watcher is pinned to the private `Jpoka21/fi-forgot-control` repository. A hashed record under `requests/` creates a frozen assignment but supplies no execution authority. Execution requires a separate hashed `orchestra_control_approval` under `approvals/` with `explicitOwnerApproval: true`. The approval binds the exact request ID/hash, assignment ID/hash, project, repository, branch, starting HEAD, allowed and protected paths, no-push/commit/push policy, Codex provider, owner confirmation, approval time, and expiry.
+
+Before dispatch, the watcher reloads the persisted `FrozenAssignment`, rejects unknown approval fields and every mismatch or stale approval, rechecks the live Git baseline, and enters the existing governed initial-dispatch path. Approval prose is unsupported and provider prose cannot grant authority. Cursor fallback, commit, and push remain unavailable. Request results are published under `results/<requestId>.json`; approval/execution results use `results/<requestId>-<approvalHash>.json` so later hostile records cannot overwrite durable execution outcomes.
 
 Set the governed repository, its external engineering store, and a GitHub token with Contents read/write access, then start the long-running process from the repository root:
 
@@ -305,7 +307,7 @@ $env:GITHUB_TOKEN='github-token'
 pnpm --filter @workspace/orchestra-execution start:github-control
 ```
 
-The watcher polls immediately and every 30 seconds thereafter. `GITHUB_CONTROL_POLL_INTERVAL_MS` may override the interval, with a minimum of 1000 ms. Its durable claim/completion journal is `github-control-watcher.ndjson` in the engineering-store root. Completed results are safely republished after restart; a request interrupted after its durable claim is quarantined as ambiguous for manual reconciliation. Any GitHub transport failure stops the process with a nonzero exit code so a process supervisor may restart it without silently crossing an uncertain boundary.
+The watcher polls immediately and every 30 seconds thereafter. `GITHUB_CONTROL_POLL_INTERVAL_MS` may override the interval, with a minimum of 1000 ms. Its durable claim/completion journal is `github-control-watcher.ndjson` in the engineering-store root. Request and approval claims are journaled separately. Completed results are safely republished after restart; either phase interrupted after its durable claim is quarantined as ambiguous for manual reconciliation. Any GitHub transport failure stops the process with a nonzero exit code so a process supervisor may restart it without silently crossing an uncertain boundary.
 
 ## Current limitations
 
