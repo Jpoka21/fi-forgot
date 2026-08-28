@@ -71,11 +71,17 @@ export async function runOwnerCliTests(): Promise<void> {
   const parsed = JSON.parse(status.capture.stdout[0]!) as any;
   expect("status JSON active provider is Codex", parsed.activeExecutionProvider, "codex");
   expect("status JSON fallback provider is Cursor", parsed.fallbackProvider, "cursor");
+  expect("status JSON exposes GitHub control watcher availability", parsed.githubControlWatcher.available, true);
+  expect("status JSON identifies the pinned GitHub control repository", parsed.githubControlWatcher.repository, "Jpoka21/fi-forgot-control");
+  expect("status JSON identifies the GitHub control provider", parsed.githubControlWatcher.defaultProvider, "codex");
+  expect("status JSON provides the watcher start command", parsed.githubControlWatcher.startCommand, "pnpm --filter @workspace/orchestra-execution start:github-control");
   expect("status JSON repository identity", resolve(parsed.repository), repo);
   expect("status JSON branch", parsed.branch, git(repo, ["branch", "--show-current"]));
   expect("status JSON HEAD", parsed.head, git(repo, ["rev-parse", "HEAD"]));
   expect("status JSON preserves every changed path", parsed.workingTree.changedPaths, gitChangedPaths(repo));
   expect("status does not mutate repository", git(repo, ["status", "--porcelain=v1", "--untracked-files=all"]), beforeGit);
+  const humanStatus = await invoke(repo, ["status", "--repository", repo]);
+  expectTrue("human status shows GitHub control watcher capability", humanStatus.capture.stdout[0]?.includes("GitHub control watcher: available (Jpoka21/fi-forgot-control, provider codex)") === true);
   expect("protected trio remains byte-identical", PROTECTED_WRITING_QUALITY_PATHS.map((path) =>
     createHash("sha256").update(readFileSync(join(repo, path))).digest("hex"),
   ), protectedBefore);
