@@ -292,6 +292,21 @@ From the F.I. Forgot repository root, use the Windows launcher without knowing p
 
 The CLI does not commit or push. Existing repository, branch, HEAD, continuation-target, sequence, policy, duplicate-execution, and crash-ambiguity protections remain enforced by the governed APIs.
 
+## GitHub control watcher
+
+The production watcher is pinned to the private `Jpoka21/fi-forgot-control` repository. It accepts only the existing hashed control-request schema and creates an assignment awaiting explicit human dispatch. It never executes an assignment, grants authority, commits, pushes, or falls back to Cursor.
+
+Set the governed repository, its external engineering store, and a GitHub token with Contents read/write access, then start the long-running process from the repository root:
+
+```powershell
+$env:ORCHESTRA_REPOSITORY_PATH=(Get-Location).Path
+$env:ORCHESTRA_ENGINEERING_STORE='C:\path\outside\repo\engineering-store'
+$env:GITHUB_TOKEN='github-token'
+pnpm --filter @workspace/orchestra-execution start:github-control
+```
+
+The watcher polls immediately and every 30 seconds thereafter. `GITHUB_CONTROL_POLL_INTERVAL_MS` may override the interval, with a minimum of 1000 ms. Its durable claim/completion journal is `github-control-watcher.ndjson` in the engineering-store root. Completed results are safely republished after restart; a request interrupted after its durable claim is quarantined as ambiguous for manual reconciliation. Any GitHub transport failure stops the process with a nonzero exit code so a process supervisor may restart it without silently crossing an uncertain boundary.
+
 ## Current limitations
 
 Observed Cursor provider facts, not solved by this slice:

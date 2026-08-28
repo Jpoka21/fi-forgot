@@ -335,3 +335,11 @@ export type {
   SequenceConfigRefusal,
   MaterializeSequenceRefusal,
 } from "./engineering-store/materialize-continuation-from-sequence.js";
+export {
+  GITHUB_CONTROL_DEFAULT_POLL_INTERVAL_MS,
+  GITHUB_CONTROL_JOURNAL_NAME,
+  createProductionGitHubControlWatcher,
+  loadGitHubControlServiceConfig,
+  runGitHubControlService,
+} from "./github-control-service.js";
+export type { GitHubControlServiceConfig } from "./github-control-service.js";

@@ -2,6 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileControlJournal, GitHubContentsControlTransport, GitHubControlWatcher, hashGitHubControlRequest, type GitHubControlResult, type GitHubControlTransport } from "../github-control-watcher.js";
+import { GITHUB_CONTROL_DEFAULT_POLL_INTERVAL_MS, loadGitHubControlServiceConfig, runGitHubControlService } from "../github-control-service.js";
 import { expect, expectTrue, section } from "./harness.js";
 
 class MemoryTransport implements GitHubControlTransport {
@@ -13,6 +14,24 @@ class MemoryTransport implements GitHubControlTransport {
 
 export async function runGitHubControlWatcherTests(): Promise<void> {
   section("GitHub control watcher security boundary");
+  const config = loadGitHubControlServiceConfig({
+    ORCHESTRA_REPOSITORY_PATH: join(tmpdir(), "repository"),
+    ORCHESTRA_ENGINEERING_STORE: join(tmpdir(), "store"),
+    GITHUB_TOKEN: "secret",
+  });
+  expect("production poll interval defaults safely", config.pollIntervalMs, GITHUB_CONTROL_DEFAULT_POLL_INTERVAL_MS);
+  let configurationRejected = false;
+  try { loadGitHubControlServiceConfig({ ORCHESTRA_REPOSITORY_PATH: join(tmpdir(), "repository"), ORCHESTRA_ENGINEERING_STORE: join(tmpdir(), "store") }); } catch { configurationRejected = true; }
+  expectTrue("production service requires GitHub credentials", configurationRejected);
+
+  let transportFailureClosed = false;
+  try {
+    await runGitHubControlService({ watcher: { pollOnce: async () => { throw new Error("transport_down"); } }, pollIntervalMs: 1_000 });
+  } catch (error) {
+    transportFailureClosed = error instanceof Error && error.message === "transport_down";
+  }
+  expectTrue("transport failure stops the service", transportFailureClosed);
+
   expectTrue("hash is insensitive to requestHash", hashGitHubControlRequest({ a: 1, requestHash: "hostile" }) === hashGitHubControlRequest({ a: 1 }));
   let rejected = false;
   try { new GitHubContentsControlTransport("token", "attacker/repository"); } catch { rejected = true; }
