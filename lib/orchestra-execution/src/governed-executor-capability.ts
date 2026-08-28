@@ -1,6 +1,8 @@
-import type { FrozenAssignment } from "./assignment.js";
+import { sortKeys, type FrozenAssignment } from "./assignment.js";
+import { createHash } from "node:crypto";
 import { collectGitEvidence } from "./git-evidence.js";
 import type { ExecutionProvider } from "./provider-contract.js";
+import { join, resolve } from "node:path";
 import { buildCorrectionAssignmentFromPreparedAction, correctionAssignmentId } from "./engineering-store/build-correction-assignment.js";
 import { buildContinuationAssignmentFromTarget, continuationAssignmentId } from "./engineering-store/build-continuation-assignment.js";
 import { dispatchFrozenAssignment, type DispatchFrozenAssignmentOutput } from "./engineering-store/dispatch.js";
@@ -9,6 +11,15 @@ import { validatePostDecisionExecutionAuthorization } from "./engineering-store/
 import { resolveGovernedContinuationTargetForAction } from "./engineering-store/resolve-governed-continuation-target.js";
 import type { FileEngineeringStore } from "./engineering-store/store.js";
 import { validateVerificationDecision } from "./engineering-store/verification-decision-record.js";
+import {
+  loadInitialDispatchAuthorities,
+  loadOwnerSubmissionReceipt,
+  validateInitialDispatchAuthority,
+} from "./engineering-store/initial-dispatch-authority.js";
+import { appendLineAtomic } from "./engineering-store/atomic-write.js";
+import { ENGINEERING_STORE_SCHEMA_VERSION, INITIAL_DISPATCH_AUTHORITY_SOURCE, type InitialDispatchAuthorityRecord } from "./engineering-store/types.js";
+import { isReconstructableLegacyOwnerSubmission } from "./owner-submit.js";
+import { persistOwnerSubmissionReceipt } from "./engineering-store/initial-dispatch-authority.js";
 
 const CAPABILITY_BRAND = Symbol("GovernedExecutorExecutionCapability");
 type CapabilityPhase = "issued" | "dispatching" | "running";
@@ -23,10 +34,19 @@ export interface GovernedExecutorExecutionCapability {
   readonly repositoryPath: string;
   readonly branch: string;
   readonly startingHead: string;
-  readonly postDecisionActionId: string;
+  readonly authorityKind: "initial_dispatch" | "post_decision";
+  readonly postDecisionActionId?: string;
   readonly authorizationHash: string;
-  readonly actionHash: string;
-  readonly action: "PREPARE_CORRECTION" | "PREPARE_CONTINUATION";
+  readonly actionHash?: string;
+  readonly action?: "PREPARE_CORRECTION" | "PREPARE_CONTINUATION";
+}
+
+export interface DispatchInitialGovernedExecutorInput {
+  store: FileEngineeringStore;
+  provider: ExecutionProvider;
+  assignmentId: string;
+  ownerConfirmation: string;
+  projectHooks?: boolean;
 }
 
 export interface DispatchAuthorizedGovernedExecutorInput {
@@ -158,6 +178,7 @@ export async function dispatchAuthorizedGovernedExecutorAssignment(
 
   const capability = Object.freeze({
     [CAPABILITY_BRAND]: true as const,
+    authorityKind: "post_decision" as const,
     assignmentId: assignment.assignmentId,
     assignmentHash: generated.frozen.assignmentHash,
     projectId: assignment.projectId,
@@ -168,6 +189,135 @@ export async function dispatchAuthorizedGovernedExecutorAssignment(
     authorizationHash: authorization.authorizationHash,
     actionHash: action.actionHash,
     action: action.preparedAction,
+  });
+  issuedCapabilities.set(capability, "issued");
+  return dispatchFrozenAssignment({
+    store: input.store,
+    provider: input.provider,
+    assignmentId: input.assignmentId,
+    projectHooks: input.projectHooks,
+    governedExecutorCapability: capability,
+  });
+}
+
+function sameStrings(left: string[], right: string[]): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function changedPaths(git: Awaited<ReturnType<typeof collectGitEvidence>>): string[] {
+  return [...new Set([...git.stagedPaths, ...git.unstagedChangedPaths, ...git.untrackedPaths])].sort();
+}
+
+function persistInitialAuthorityInsideGovernedBoundary(input: {
+  store: FileEngineeringStore; frozen: FrozenAssignment; ownerConfirmation: string;
+  providerId: string; protectedDirtyPaths: string[];
+}): InitialDispatchAuthorityRecord {
+  const assignment = input.frozen.assignment;
+  const existing = loadInitialDispatchAuthorities(input.store.storeRoot, assignment.assignmentId);
+  if (existing.length) {
+    if (existing.length !== 1 || !validateInitialDispatchAuthority(existing[0]!)) refuse("initial dispatch authority is corrupt");
+    return existing[0]!;
+  }
+  const authorizedAt = new Date().toISOString();
+  const authorityIdSuffix = createHash("sha256").update(input.frozen.assignmentHash + authorizedAt).digest("hex").slice(0, 16);
+  const body = {
+    schemaVersion: ENGINEERING_STORE_SCHEMA_VERSION as typeof ENGINEERING_STORE_SCHEMA_VERSION,
+    recordKind: "initial_dispatch_authority" as const,
+    authorityId: `initial-${assignment.assignmentId}-${authorityIdSuffix}`,
+    source: INITIAL_DISPATCH_AUTHORITY_SOURCE,
+    authorizedAt, projectId: assignment.projectId, assignmentId: assignment.assignmentId,
+    assignmentHash: input.frozen.assignmentHash, repositoryPath: assignment.repositoryPath,
+    branch: assignment.branch, startingHead: assignment.startingHead.toLowerCase(),
+    allowedPaths: [...assignment.allowedPaths], protectedPaths: [...assignment.protectedPaths],
+    protectedDirtyPaths: [...input.protectedDirtyPaths].sort(), requireNoPush: true as const,
+    commitAuthorization: false as const, pushAuthorization: false as const,
+    ownerConfirmation: input.ownerConfirmation, explicitOwnerConfirmation: true as const,
+    providerId: input.providerId,
+  };
+  const authorityHash = createHash("sha256").update(JSON.stringify(sortKeys(body)), "utf8").digest("hex");
+  const authority: InitialDispatchAuthorityRecord = { ...body, authorityHash };
+  appendLineAtomic(
+    join(input.store.storeRoot, "assignments", assignment.assignmentId, "initial-dispatch-authorities.ndjson"),
+    JSON.stringify(authority),
+  );
+  return authority;
+}
+
+/** Explicit owner-confirmed first dispatch. Persists authority, revalidates it, then uses the existing dispatcher. */
+export async function dispatchInitialGovernedExecutorAssignment(
+  input: DispatchInitialGovernedExecutorInput,
+): Promise<DispatchFrozenAssignmentOutput> {
+  const record = input.store.loadAssignmentRecord(input.assignmentId);
+  const frozen = record.frozen;
+  const assignment = frozen.assignment;
+  if (assignment.role !== "executor") refuse("initial dispatch requires an executor assignment");
+  if (record.relationship.parentAssignmentId || record.relationship.correctionOfAssignmentId ||
+      record.relationship.continuationOfAssignmentId || record.relationship.verifiesAssignmentId) {
+    refuse("initial dispatch is only valid for an owner-submitted root assignment");
+  }
+  let submission = loadOwnerSubmissionReceipt(input.store.storeRoot, input.assignmentId);
+  if (!submission && isReconstructableLegacyOwnerSubmission(frozen)) {
+    submission = persistOwnerSubmissionReceipt(input.store.storeRoot, frozen);
+  }
+  if (!submission || submission.assignmentHash !== frozen.assignmentHash ||
+      submission.projectId !== assignment.projectId || submission.repositoryPath !== assignment.repositoryPath) {
+    refuse("owner submission provenance is absent or corrupt");
+  }
+  if (input.ownerConfirmation !== input.assignmentId) refuse("exact owner confirmation is required");
+  if (assignment.commitAuthorization !== false || assignment.pushAuthorization !== false || assignment.requireNoPush !== true) {
+    refuse("initial assignment expands commit/push authority");
+  }
+  if (input.store.loadLatestExecutionEvidence(input.assignmentId)) refuse("duplicate execution evidence exists");
+  const state = input.store.getCurrentState(input.assignmentId);
+  if (state.crashReceipts.length) refuse("crash ambiguity prevents replay");
+  if (state.status !== "frozen") refuse(`assignment is not dispatchable from status ${state.status}`);
+
+  const before = await collectGitEvidence(assignment.repositoryPath);
+  if (!before.toplevel || !before.branch || !before.head ||
+      resolve(before.toplevel).toLowerCase() !== resolve(assignment.repositoryPath).toLowerCase() ||
+      before.branch !== assignment.branch || before.head !== assignment.startingHead.toLowerCase()) {
+    refuse("repository identity, branch, or starting HEAD no longer matches");
+  }
+  const dirt = changedPaths(before);
+  const protectedDirtyPaths = dirt.filter((path) => assignment.protectedPaths.includes(path));
+  const allowed = (path: string) => assignment.allowedPaths.some((root) => path === root || path.startsWith(`${root}/`));
+  const unexpected = dirt.filter((path) => !assignment.protectedPaths.includes(path) && !allowed(path));
+  if (unexpected.length) refuse(`working tree contains out-of-authority paths: ${unexpected.join(", ")}`);
+
+  const authority = persistInitialAuthorityInsideGovernedBoundary({
+    store: input.store,
+    frozen,
+    ownerConfirmation: input.ownerConfirmation,
+    providerId: input.provider.providerId,
+    protectedDirtyPaths,
+  });
+  const allAuthorities = loadInitialDispatchAuthorities(input.store.storeRoot, input.assignmentId);
+  if (allAuthorities.length !== 1 || !validateInitialDispatchAuthority(authority) ||
+      authority.projectId !== assignment.projectId || authority.assignmentId !== assignment.assignmentId ||
+      authority.assignmentHash !== frozen.assignmentHash || authority.repositoryPath !== assignment.repositoryPath ||
+      authority.branch !== assignment.branch || authority.startingHead !== assignment.startingHead.toLowerCase() ||
+      !sameStrings(authority.allowedPaths, assignment.allowedPaths) ||
+      !sameStrings(authority.protectedPaths, assignment.protectedPaths) ||
+      !sameStrings(authority.protectedDirtyPaths, protectedDirtyPaths) ||
+      authority.providerId !== input.provider.providerId) {
+    refuse("initial dispatch authority is absent, forged, stale, or mismatched");
+  }
+  const after = await collectGitEvidence(assignment.repositoryPath);
+  if (!after.toplevel || resolve(after.toplevel).toLowerCase() !== resolve(authority.repositoryPath).toLowerCase() ||
+      after.branch !== authority.branch || after.head !== authority.startingHead ||
+      !sameStrings(changedPaths(after).filter((path) => assignment.protectedPaths.includes(path)), authority.protectedDirtyPaths)) {
+    refuse("baseline changed after initial authority persistence");
+  }
+  const capability = Object.freeze({
+    [CAPABILITY_BRAND]: true as const,
+    authorityKind: "initial_dispatch" as const,
+    assignmentId: assignment.assignmentId,
+    assignmentHash: frozen.assignmentHash,
+    projectId: assignment.projectId,
+    repositoryPath: assignment.repositoryPath,
+    branch: assignment.branch,
+    startingHead: assignment.startingHead.toLowerCase(),
+    authorizationHash: authority.authorityHash,
   });
   issuedCapabilities.set(capability, "issued");
   return dispatchFrozenAssignment({

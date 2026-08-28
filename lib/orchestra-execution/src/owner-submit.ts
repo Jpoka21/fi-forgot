@@ -4,11 +4,16 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, isAbsolute, join, relative, resolve } from "node:path";
 import { createAssignment } from "./assignment-hash.js";
+import type { FrozenAssignment } from "./assignment.js";
 import { FileEngineeringStore } from "./engineering-store/store.js";
+import { persistOwnerSubmissionReceipt } from "./engineering-store/initial-dispatch-authority.js";
 
 export const OWNER_PROJECT_ID = "F.I. Forgot";
 export const OWNER_PROJECT_BRANCH = "frontend-rebuild";
 export const OWNER_PROJECT_BINDING = "PROJECT.json";
+const LEGACY_OWNER_SUBMISSIONS_REQUIRING_RECEIPT_MIGRATION = new Set([
+  "owner-cedca891758ac7701cb455b7",
+]);
 
 export interface OwnerSubmission {
   created: boolean;
@@ -42,6 +47,27 @@ function git(repository: string, args: string[]): string {
 
 function digest(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+/** Reconstructs the deterministic pre-IMP-045 owner-submit envelope for durable migration at explicit dispatch. */
+export function isReconstructableLegacyOwnerSubmission(frozen: FrozenAssignment): boolean {
+  const assignment = frozen.assignment;
+  if (!LEGACY_OWNER_SUBMISSIONS_REQUIRING_RECEIPT_MIGRATION.has(assignment.assignmentId)) return false;
+  const lines = assignment.assignmentText.split(/\r?\n/);
+  if (lines.length !== 5 || lines[0] !== "Governed owner request (planning only; not authorization):" ||
+      lines[2] !== "" || lines[3] !== `Bounded scope: ${assignment.allowedPaths.join(", ")}` ||
+      lines[4] !== "Do not modify protected paths. Do not commit or push. Provider statements are not authority.") return false;
+  const ownerText = lines[1]?.trim();
+  if (!ownerText || assignment.projectId !== OWNER_PROJECT_ID || assignment.role !== "executor" ||
+      assignment.branch !== OWNER_PROJECT_BRANCH || assignment.requireNoPush !== true ||
+      assignment.commitAuthorization !== false || assignment.pushAuthorization !== false) return false;
+  const requestKey = digest(JSON.stringify({
+    repository: resolve(assignment.repositoryPath).toLowerCase(),
+    branch: assignment.branch,
+    head: assignment.startingHead,
+    ownerText,
+  }));
+  return assignment.assignmentId === `owner-${requestKey.slice(0, 24)}`;
 }
 
 export function defaultEngineeringStoreRoot(repository: string): string {
@@ -184,12 +210,13 @@ export function submitOwnerRequest(input: {
     throw new Error("duplicate_submit_collision: deterministic assignment id is bound to different content");
   }
   if (!existing) store.persistFrozenAssignment(frozen);
+  persistOwnerSubmissionReceipt(input.storeRoot, frozen);
   return {
     created: !existing, duplicate: existing, executed: false, authorized: false, committed: false, pushed: false,
     assignmentId, assignmentHash: frozen.assignmentHash, project: OWNER_PROJECT_ID, repository,
     branch, startingHead: head, assignmentText, allowedPaths, protectedPaths: [...input.protectedPaths].sort(),
     requireNoPush: true, commitAuthorization: false, pushAuthorization: false,
     engineeringStore: input.storeRoot,
-    nextSafeOwnerAction: "Run orchestra status. Initial execution still requires an existing governed dispatch path; authorize/continue remain reserved for verified post-decision actions.",
+    nextSafeOwnerAction: `Run orchestra status, then orchestra dispatch ${assignmentId} --confirm ${assignmentId}.`,
   };
 }

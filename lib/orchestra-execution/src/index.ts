@@ -95,6 +95,7 @@ export type {
   EvidenceSourceClassification,
   ExecutionEvidence,
   FrozenAssignmentRecord,
+  InitialDispatchAuthorityRecord,
   StatusEvent,
   VerificationPosture,
   VerifierAuthorizationReceipt,
@@ -137,9 +138,14 @@ export {
   VERIFIER_REQUIREMENT_OUTCOMES,
   VERIFIER_SEMANTIC_FINDING_SOURCE,
   VERIFIER_SEMANTIC_PROPOSAL_SOURCE,
+  INITIAL_DISPATCH_AUTHORITY_SOURCE,
   VERIFIER_SEMANTIC_FINDING_RESOLUTION,
 } from "./engineering-store/types.js";
 export { FileEngineeringStore, createFileEngineeringStore, EngineeringStoreError } from "./engineering-store/store.js";
+export {
+  loadInitialDispatchAuthorities,
+  validateInitialDispatchAuthority,
+} from "./engineering-store/initial-dispatch-authority.js";
 export { dispatchFrozenAssignment } from "./engineering-store/dispatch.js";
 export {
   dispatchGovernedVerifierAssignment,

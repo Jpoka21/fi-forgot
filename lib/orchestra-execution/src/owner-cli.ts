@@ -6,7 +6,10 @@ import {
   FALLBACK_EXECUTION_PROVIDER_ID,
   authorizePostDecisionExecution,
   executeAuthorizedPostDecisionAction,
+  resolveConfiguredExecutionProvider,
 } from "./index.js";
+import { dispatchInitialGovernedExecutorAssignment } from "./governed-executor-capability.js";
+import { loadInitialDispatchAuthorities, validateInitialDispatchAuthority } from "./engineering-store/initial-dispatch-authority.js";
 import { FileEngineeringStore } from "./engineering-store/store.js";
 import { defaultEngineeringStoreRoot, submitOwnerRequest, validateProjectBinding } from "./owner-submit.js";
 import type {
@@ -157,6 +160,7 @@ function collectStoreStatus(store: FileEngineeringStore): {
   pendingAuthorization: PostDecisionActionRecord | null;
   pendingContinuation: PostDecisionActionRecord | null;
   pendingSubmission: AssignmentCurrentState | null;
+  pendingInitialAuthorization: AssignmentCurrentState | null;
 } {
   const states = store.listAssignmentIds().map((id) => store.getCurrentState(id));
   const latestExecutionState = states
@@ -174,8 +178,13 @@ function collectStoreStatus(store: FileEngineeringStore): {
   const pendingContinuation = pending.find((action) => action.preparedAction === "PREPARE_CONTINUATION") ?? null;
   const latestState = latestExecutionState ?? states[0] ?? null;
   const pendingSubmission = states
-    .filter((state) => state.status === "frozen" && !state.latestEvidence)
+    .filter((state) => state.status === "frozen" && !state.latestEvidence &&
+      !loadInitialDispatchAuthorities(store.storeRoot, state.assignmentId).some(validateInitialDispatchAuthority))
     .sort((a, b) => b.frozen.assignment.createdAt.localeCompare(a.frozen.assignment.createdAt))[0] ?? null;
+  const pendingInitialAuthorization = states.find((state) =>
+    state.status === "frozen" && !state.latestEvidence &&
+    loadInitialDispatchAuthorities(store.storeRoot, state.assignmentId).some(validateInitialDispatchAuthority)
+  ) ?? null;
   return {
     project: latestState?.frozen.assignment.projectId ?? null,
     latestExecutionState,
@@ -184,6 +193,7 @@ function collectStoreStatus(store: FileEngineeringStore): {
     pendingAuthorization,
     pendingContinuation,
     pendingSubmission,
+    pendingInitialAuthorization,
   };
 }
 
@@ -227,6 +237,10 @@ function buildStatus(args: ParsedArgs): unknown {
     pendingHumanAuthorization: storeStatus?.pendingAuthorization?.postDecisionActionId ?? null,
     pendingContinuation: storeStatus?.pendingContinuation?.postDecisionActionId ?? null,
     pendingGovernedSubmission: storeStatus?.pendingSubmission?.assignmentId ?? null,
+    pendingInitialDispatchAuthorization: storeStatus?.pendingInitialAuthorization?.assignmentId ?? null,
+    nextInitialDispatchAction: storeStatus?.pendingSubmission
+      ? `orchestra dispatch ${storeStatus.pendingSubmission.assignmentId} --confirm ${storeStatus.pendingSubmission.assignmentId}`
+      : null,
     latestExecutionState: storeStatus?.latestExecutionState ? {
       assignmentId: storeStatus.latestExecutionState.assignmentId,
       status: storeStatus.latestExecutionState.status,
@@ -252,6 +266,8 @@ function printStatus(payload: any, io: OwnerCliIo): void {
     `Pending human authorization: ${payload.pendingHumanAuthorization ?? "none"}`,
     `Pending continuation: ${payload.pendingContinuation ?? "none"}`,
     `Pending governed submission: ${payload.pendingGovernedSubmission ?? "none"}`,
+    `Initial dispatch authorization: ${payload.pendingInitialDispatchAuthorization ?? "none"}`,
+    `Next initial action: ${payload.nextInitialDispatchAction ?? "none"}`,
     `Latest execution state: ${payload.latestExecutionState?.status ?? "none"}`,
     `Latest verification state: ${payload.latestVerificationState ?? "none"}`,
   ].join("\n"));
@@ -270,7 +286,7 @@ export async function runOwnerCli(argv: string[], io: OwnerCliIo, cwd = process.
     return { exitCode: OWNER_CLI_EXIT.usage };
   }
   try {
-    if (!args.command) throw new Error("command_required: use status, submit, authorize, continue, or resume");
+    if (!args.command) throw new Error("command_required: use status, submit, dispatch, authorize, continue, or resume");
     if (args.command === "status") {
       if (args.positionals.length || args.confirmation || args.authorizationId || args.providerId) throw new Error("status accepts only --json, --store, and --repository");
       const payload = buildStatus(args);
@@ -296,6 +312,36 @@ export async function runOwnerCli(argv: string[], io: OwnerCliIo, cwd = process.
       const result = authorizePostDecisionExecution({ store, postDecisionActionId: actionId, humanAuthorized: true });
       output(result, args.json, io);
       return { exitCode: result.authorized ? 0 : OWNER_CLI_EXIT.refused, payload: result };
+    }
+    if (args.command === "dispatch") {
+      if (args.positionals.length !== 1 || args.authorizationId) {
+        throw new Error("dispatch requires exactly: dispatch ASSIGNMENT_ID --confirm ASSIGNMENT_ID [--provider codex|cursor]");
+      }
+      const assignmentId = args.positionals[0]!;
+      if (args.confirmation !== assignmentId) {
+        throw new Error("explicit_confirmation_required: --confirm must exactly equal ASSIGNMENT_ID");
+      }
+      if (args.providerId && ![ACTIVE_EXECUTION_PROVIDER_ID, FALLBACK_EXECUTION_PROVIDER_ID].includes(args.providerId as any)) {
+        throw new Error("provider must be codex or cursor");
+      }
+      const store = openExistingStore(args);
+      const provider = resolveConfiguredExecutionProvider({ providerId: args.providerId ?? undefined });
+      const dispatched = await dispatchInitialGovernedExecutorAssignment({
+        store, provider, assignmentId, ownerConfirmation: args.confirmation, projectHooks: true,
+      });
+      const payload = {
+        executed: true,
+        assignmentId,
+        assignmentHash: dispatched.assignmentRecord.frozen.assignmentHash,
+        providerId: provider.providerId,
+        evidenceId: dispatched.evidence.evidenceId,
+        verification: "pending",
+        committed: false,
+        pushed: false,
+        nextSafeOwnerAction: "Inspect execution evidence and use the governed verifier path; execution is not semantic verification.",
+      };
+      output(payload, args.json, io);
+      return { exitCode: 0, payload };
     }
     if (args.command === "continue") {
       if (args.positionals.length !== 1 || args.confirmation) throw new Error("continue requires exactly: continue ACTION_ID --authorization AUTHORIZATION_ID [--provider codex|cursor]");

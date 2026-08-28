@@ -386,6 +386,46 @@ export interface FrozenAssignmentRecord {
   relationship: AssignmentRelationship;
 }
 
+export const INITIAL_DISPATCH_AUTHORITY_SOURCE = "owner_cli_exact_initial_dispatch" as const;
+export const OWNER_SUBMISSION_SOURCE = "owner_cli_submit" as const;
+
+export interface OwnerSubmissionReceipt {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "owner_submission_receipt";
+  source: typeof OWNER_SUBMISSION_SOURCE;
+  assignmentId: string;
+  assignmentHash: string;
+  projectId: string;
+  repositoryPath: string;
+  submittedAt: string;
+  receiptHash: string;
+}
+
+/** Append-only, single-assignment authority for the first executor dispatch. */
+export interface InitialDispatchAuthorityRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "initial_dispatch_authority";
+  authorityId: string;
+  authorityHash: string;
+  source: typeof INITIAL_DISPATCH_AUTHORITY_SOURCE;
+  authorizedAt: string;
+  projectId: string;
+  assignmentId: string;
+  assignmentHash: string;
+  repositoryPath: string;
+  branch: string;
+  startingHead: string;
+  allowedPaths: string[];
+  protectedPaths: string[];
+  protectedDirtyPaths: string[];
+  requireNoPush: true;
+  commitAuthorization: false;
+  pushAuthorization: false;
+  ownerConfirmation: string;
+  explicitOwnerConfirmation: true;
+  providerId: string;
+}
+
 export interface StatusEvent {
   timestamp: string;
   assignmentId: string;
