@@ -11,6 +11,7 @@
     "test:imp-043b": "tsx src/__tests__/run-imp-043b.ts",
     "test:imp-044": "tsx src/__tests__/run-imp-044.ts",
     "test:imp-045": "tsx src/__tests__/run-imp-045.ts",
+    "test:github-control": "tsx src/__tests__/run-github-control.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx src/__tests__/run-all.ts",
     "test:codex-transport": "tsx src/__tests__/run-codex-transport.ts",

@@ -85,6 +85,8 @@ export type {
   CodexAppServerTransport,
 } from "./providers/codex/app-server-transport.js";
 export { MockExecutionProvider } from "./providers/mock-provider.js";
+export { FileControlJournal, GitHubContentsControlTransport, GitHubControlWatcher, GITHUB_CONTROL_DEFAULT_PROVIDER, GITHUB_CONTROL_PROTECTED_PATHS, GITHUB_CONTROL_REPOSITORY, hashGitHubControlRequest, validateGitHubControlRequest } from "./github-control-watcher.js";
+export type { GitHubControlEnvelope, GitHubControlRequest, GitHubControlResult, GitHubControlStatus, GitHubControlTransport } from "./github-control-watcher.js";
 export type {
   AssignmentCurrentState,
   AssignmentRelationship,
