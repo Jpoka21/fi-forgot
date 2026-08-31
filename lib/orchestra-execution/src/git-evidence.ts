@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
@@ -22,6 +23,8 @@ export interface GitEvidence {
   stagedPaths: string[];
   unstagedChangedPaths: string[];
   untrackedPaths: string[];
+  /** Content/index state for paths dirty at capture time, keyed by repository-relative path. */
+  dirtyPathStateDigests?: Record<string, string>;
   commitIdentity: GitCommitIdentity | null;
 }
 
@@ -111,6 +114,24 @@ export async function collectGitEvidence(repositoryPath: string): Promise<GitEvi
   }
 
   const parsed = parseStatusPorcelain(status.stdout);
+  const dirtyPaths = [
+    ...new Set([...parsed.stagedPaths, ...parsed.unstagedChangedPaths, ...parsed.untrackedPaths]),
+  ];
+  const dirtyPathStateDigests: Record<string, string> = {};
+  await Promise.all(
+    dirtyPaths.map(async (path) => {
+      const staged = await git(repositoryPath, ["diff", "--cached", "--binary", "HEAD", "--", path]);
+      const unstaged = await git(repositoryPath, ["diff", "--binary", "--", path]);
+      const untracked = parsed.untrackedPaths.includes(path)
+        ? await git(repositoryPath, ["hash-object", "--no-filters", "--", path])
+        : { stdout: "", stderr: "", code: 0 };
+      dirtyPathStateDigests[path] = createHash("sha256")
+        .update(
+          `${staged.code}\0${staged.stdout}\0${unstaged.code}\0${unstaged.stdout}\0${untracked.code}\0${untracked.stdout}`,
+        )
+        .digest("hex");
+    }),
+  );
   const identityLines = splitLines(identity.stdout);
   const commitIdentity: GitCommitIdentity | null =
     identity.code === 0 && identityLines[0]
@@ -134,6 +155,7 @@ export async function collectGitEvidence(repositoryPath: string): Promise<GitEvi
     stagedPaths: parsed.stagedPaths,
     unstagedChangedPaths: parsed.unstagedChangedPaths,
     untrackedPaths: parsed.untrackedPaths,
+    dirtyPathStateDigests,
     commitIdentity,
   };
 }
@@ -146,6 +168,8 @@ export interface GitEvidenceDelta {
   unstagedAfter: string[];
   untrackedAfter: string[];
   changedPaths: string[];
+  /** Paths whose actual index/worktree state differs between the two captures. */
+  mutatedPaths: string[];
   unexpectedUntrackedPaths: string[];
 }
 
@@ -155,6 +179,13 @@ export function diffGitEvidence(pre: GitEvidence, post: GitEvidence): GitEvidenc
     ...post.stagedPaths,
     ...post.untrackedPaths,
   ]);
+  const observed = new Set<string>([
+    ...Object.keys(pre.dirtyPathStateDigests ?? {}),
+    ...Object.keys(post.dirtyPathStateDigests ?? {}),
+  ]);
+  const mutatedPaths = [...observed].filter(
+    (path) => pre.dirtyPathStateDigests?.[path] !== post.dirtyPathStateDigests?.[path],
+  );
   return {
     branchChanged: pre.branch !== post.branch,
     headChanged: pre.head !== post.head,
@@ -163,6 +194,7 @@ export function diffGitEvidence(pre: GitEvidence, post: GitEvidence): GitEvidenc
     unstagedAfter: post.unstagedChangedPaths,
     untrackedAfter: post.untrackedPaths,
     changedPaths: [...changed],
+    mutatedPaths,
     unexpectedUntrackedPaths: post.untrackedPaths.filter((path) => !pre.untrackedPaths.includes(path)),
   };
 }

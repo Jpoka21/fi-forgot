@@ -162,6 +162,47 @@ export async function runAdapterNegativeTests(): Promise<void> {
   expectFalse("technical violation is not semantic FAIL", scopeResult.executionVerdict === ("FAIL" as never));
   expect("provider prose cannot hide machine violation", scopeResult.providerFinalResultText, "Everything was within policy: PASS");
 
+  const preexistingProtectedFixture = createDisposableExecutionFixture({
+    assignmentId: "preexisting-protected-dirt",
+  });
+  const preexistingProtectedVerifier = createAssignment({
+    ...preexistingProtectedFixture.assignment.assignment,
+    role: "verifier",
+    allowedPaths: [],
+  });
+  appendFileSync(preexistingProtectedFixture.protectedPath, "PREEXISTING_DIRT\n");
+  const preexistingProtectedResult = await runBoundedAssignment(
+    new MockExecutionProvider(),
+    preexistingProtectedVerifier,
+    { projectHooks: false },
+  );
+  expectFalse(
+    "preexisting protected dirt is not attributed to verifier execution",
+    preexistingProtectedResult.protectedPathMutationOccurred,
+  );
+
+  const verifierProtectedMutationFixture = createDisposableExecutionFixture({
+    assignmentId: "verifier-protected-mutation",
+  });
+  const verifierProtectedMutationAssignment = createAssignment({
+    ...verifierProtectedMutationFixture.assignment.assignment,
+    role: "verifier",
+    allowedPaths: [],
+  });
+  appendFileSync(verifierProtectedMutationFixture.protectedPath, "PREEXISTING_DIRT\n");
+  const verifierProtectedMutationResult = await runBoundedAssignment(
+    new MockExecutionProvider({
+      onSubmit: () =>
+        appendFileSync(verifierProtectedMutationFixture.protectedPath, "VERIFIER_MUTATION\n"),
+    }),
+    verifierProtectedMutationAssignment,
+    { projectHooks: false },
+  );
+  expectTrue(
+    "a verifier change to already-dirty protected content remains fail closed",
+    verifierProtectedMutationResult.protectedPathMutationOccurred,
+  );
+
   const basenameFixture = createDisposableExecutionFixture({ assignmentId: "same-basename-violation" });
   const basenameAssignment = createAssignment({
     ...basenameFixture.assignment.assignment,

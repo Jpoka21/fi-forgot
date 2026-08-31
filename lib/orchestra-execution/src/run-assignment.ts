@@ -156,7 +156,7 @@ export async function runBoundedAssignment(
       policyDenials: [],
       changedPaths: delta.changedPaths,
       protectedPathMutationOccurred: protectedMutationOccurred(
-        delta.changedPaths,
+        delta.mutatedPaths,
         assignment.protectedPaths,
         assignment.repositoryPath,
       ),
@@ -192,7 +192,7 @@ export async function runBoundedAssignment(
         policyDenials: [],
         changedPaths: delta.changedPaths,
         protectedPathMutationOccurred: protectedMutationOccurred(
-          delta.changedPaths,
+          delta.mutatedPaths,
           assignment.protectedPaths,
           assignment.repositoryPath,
         ),
@@ -313,7 +313,7 @@ export async function runBoundedAssignment(
   }
 
   const protectedMutated = protectedMutationOccurred(
-    delta.changedPaths,
+    delta.mutatedPaths,
     assignment.protectedPaths,
     assignment.repositoryPath,
   );
