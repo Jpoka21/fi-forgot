@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync } from "node:fs";
+import { appendFileSync, mkdirSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createAssignment } from "../assignment-hash.js";
@@ -307,5 +307,58 @@ export async function runVerifierTrustBoundaryTests(): Promise<void> {
     "valid capability matches assignment",
     validCapability.assignmentId === verifierId &&
       validCapability.assignmentHash === authorized.verifierAssignmentHash,
+  );
+
+  section("verifier trust boundary — dirty candidate mutation accounting");
+
+  const unchangedDirty = createDisposableExecutionFixture({ assignmentId: "trust-verifier-dirty-unchanged" });
+  markForgotIdentifierRepository(unchangedDirty.repositoryPath);
+  appendFileSync(unchangedDirty.allowedPath, "preexisting candidate change\n");
+  const unchangedVerifier = readOnlyVerifierShape(
+    unchangedDirty.assignment,
+    "trust-verifier-dirty-unchanged-check",
+    unchangedDirty.repositoryPath,
+  );
+  const unchangedResult = await runBoundedAssignment(
+    new MockExecutionProvider({ providerId: CURSOR_PROVIDER_ID }),
+    unchangedVerifier,
+    {
+      projectHooks: false,
+      governedVerifierCapability: createGovernedVerifierExecutionCapability(
+        unchangedVerifier.assignment.assignmentId,
+        unchangedVerifier.assignmentHash,
+      ),
+    },
+  );
+  expectFalse(
+    "unchanged preexisting dirty candidate path not attributed to verifier",
+    unchangedResult.unexpectedChanges.includes("allowed.txt"),
+  );
+
+  const mutatedDirty = createDisposableExecutionFixture({ assignmentId: "trust-verifier-dirty-mutated" });
+  markForgotIdentifierRepository(mutatedDirty.repositoryPath);
+  appendFileSync(mutatedDirty.allowedPath, "preexisting candidate change\n");
+  const mutatedVerifier = readOnlyVerifierShape(
+    mutatedDirty.assignment,
+    "trust-verifier-dirty-mutated-check",
+    mutatedDirty.repositoryPath,
+  );
+  const mutatedResult = await runBoundedAssignment(
+    new MockExecutionProvider({
+      providerId: CURSOR_PROVIDER_ID,
+      onSubmit: () => appendFileSync(mutatedDirty.allowedPath, "verifier mutation\n"),
+    }),
+    mutatedVerifier,
+    {
+      projectHooks: false,
+      governedVerifierCapability: createGovernedVerifierExecutionCapability(
+        mutatedVerifier.assignment.assignmentId,
+        mutatedVerifier.assignmentHash,
+      ),
+    },
+  );
+  expectTrue(
+    "verifier mutation of preexisting dirty candidate path fails closed",
+    mutatedResult.unexpectedChanges.includes("allowed.txt"),
   );
 }

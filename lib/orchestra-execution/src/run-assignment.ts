@@ -317,14 +317,17 @@ export async function runBoundedAssignment(
     assignment.protectedPaths,
     assignment.repositoryPath,
   );
+  const attributableChangedPaths = isReadOnlyVerifierAssignment(assignment)
+    ? delta.mutatedPaths
+    : delta.changedPaths;
   const unexpected = unexpectedChangedPaths(
-    delta.changedPaths,
+    attributableChangedPaths,
     assignment.allowedPaths,
     assignment.protectedPaths,
     assignment.repositoryPath,
   ).filter((path) => !pathMentionsProtected(path, assignment.protectedPaths, assignment.repositoryPath));
 
-  if (preRunGitEvidence.untrackedPaths.length > 0) {
+  if (!isReadOnlyVerifierAssignment(assignment) && preRunGitEvidence.untrackedPaths.length > 0) {
     unexpected.push(
       ...preRunGitEvidence.untrackedPaths
         .filter((path) => !path.startsWith(".cursor"))
