@@ -8,6 +8,7 @@
   },
   "scripts": {
     "orchestra": "tsx src/owner-cli-main.ts",
+    "gateway": "tsx src/interactive-codex-gateway-main.ts",
     "start:github-control": "tsx src/github-control-main.ts",
     "test:imp-043b": "tsx src/__tests__/run-imp-043b.ts",
     "test:imp-044": "tsx src/__tests__/run-imp-044.ts",

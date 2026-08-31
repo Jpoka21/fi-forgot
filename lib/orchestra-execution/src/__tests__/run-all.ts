@@ -26,6 +26,7 @@ import { runImp0422CodexPromotion, imp0422Report } from "./orch-imp-042.2-codex-
 import { runOwnerCliTests } from "./owner-cli.test.js";
 import { runOwnerSubmitTests } from "./owner-submit.test.js";
 import { runInitialDispatchTests } from "./initial-dispatch.test.js";
+import { runInteractiveCodexGatewayTests } from "./interactive-codex-gateway.test.js";
 
 async function main(): Promise<void> {
   runAssignmentTests();
@@ -56,6 +57,7 @@ async function main(): Promise<void> {
   await runOwnerCliTests();
   await runOwnerSubmitTests();
   await runInitialDispatchTests();
+  await runInteractiveCodexGatewayTests();
   console.log("\nIMP 042.2 promotion report:", JSON.stringify(imp0422Report, null, 2));
   await runLiveCursorIntegrationTest();
   console.log("\nLive Cursor report:", JSON.stringify(liveCursorReport, null, 2));

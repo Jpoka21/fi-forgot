@@ -275,6 +275,26 @@ This slice does **not**:
 
 ## Owner CLI (ORCH IMP 043B)
 
+## Interactive Codex Gateway
+
+Launch the Codex-only conversational interface from the repository root:
+
+```powershell
+$env:ORCHESTRA_REPOSITORY_PATH=(Get-Location).Path
+$env:ORCHESTRA_ENGINEERING_STORE='C:\path\outside\repo\engineering-store'
+pnpm --filter @workspace/orchestra-execution gateway
+```
+
+Enter a bounded development request. The gateway freezes it but does not execute it. Repeat the
+exact assignment ID in the returned `/dispatch` command to grant owner authority. `/verify`
+similarly returns an exact verifier identity to confirm. Correction and continuation require
+`/authorize ACTION ACTION` and the returned one-use `/continue ACTION AUTHORIZATION`.
+`/help` lists commands and `/exit` closes the gateway.
+
+The gateway reuses Orchestra's engineering store, isolated Codex provider, evidence, protected-path,
+verification, correction, and continuation APIs. It does not use GitHub or Cursor, never commits or
+pushes, and fails closed if Codex cannot start. Provider conversation is evidence, not authority.
+
 From the F.I. Forgot repository root, use the Windows launcher without knowing package or provider internals:
 
 ```text

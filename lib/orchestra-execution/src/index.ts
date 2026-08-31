@@ -343,3 +343,5 @@ export {
   runGitHubControlService,
 } from "./github-control-service.js";
 export type { GitHubControlServiceConfig } from "./github-control-service.js";
+export { InteractiveCodexGateway, HELP as INTERACTIVE_CODEX_GATEWAY_HELP } from "./interactive-codex-gateway.js";
+export type { GatewayResponse, InteractiveCodexGatewayOptions } from "./interactive-codex-gateway.js";
