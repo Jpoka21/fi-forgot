@@ -43,7 +43,7 @@ export type GitHarnessInspection = {
   branch: string;
   upstream: string;
   stagedPaths: string[];
-  commitParent: string;
+  commitParent: string | null;
   commitSubject: string;
   changedPaths: string[];
   candidateBytes: string;
@@ -163,6 +163,9 @@ export function createDisposableGitHarness(): DisposableGitHarness {
     inspect() {
       const branch = git(repository, ["branch", "--show-current"]);
       const upstream = git(repository, ["rev-parse", "--abbrev-ref", "@{upstream}"]);
+      const [, commitParent = null] = git(repository, [
+        "rev-list", "--parents", "-n", "1", "HEAD",
+      ]).split(/\s+/);
       const [ahead = 0, behind = 0] = git(repository, [
         "rev-list", "--left-right", "--count", "HEAD...@{upstream}",
       ]).split(/\s+/).map(Number);
@@ -172,7 +175,7 @@ export function createDisposableGitHarness(): DisposableGitHarness {
         branch,
         upstream,
         stagedPaths: stagedPaths(fixture.repository),
-        commitParent: git(repository, ["rev-parse", "HEAD^"]),
+        commitParent,
         commitSubject: git(repository, ["show", "-s", "--format=%s", "HEAD"]),
         changedPaths: lines(git(repository, ["diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"])).sort(),
         candidateBytes: readFileSync(join(repository, CANDIDATE_PATH), "utf8"),
@@ -188,6 +191,30 @@ export function createDisposableGitHarness(): DisposableGitHarness {
     },
   };
   return fixture;
+}
+
+/** Focused proof that inspection handles both a root commit and its first real child. */
+export function runDisposableGitHarnessRootInspectionTests(): void {
+  section("Disposable Git harness root inspection");
+  const fixture = createDisposableGitHarness();
+  try {
+    const root = fixture.inspect();
+    expect("root commit has no parent", root.commitParent, null);
+    expect("root HEAD inspected", root.localTip, fixture.baselineTip);
+    expect("root remote tip inspected", root.remoteTip, fixture.baselineTip);
+    expect("root branch inspected", root.branch, "frontend-rebuild");
+    expect("root upstream inspected", root.upstream, "origin/frontend-rebuild");
+    expect("root working tree is clean", root.porcelainStatus, "");
+    expect("root staged state is empty", root.stagedPaths, []);
+
+    const priorHead = root.localTip;
+    const childHead = fixture.advanceLocalHead("fixture: child of root");
+    const child = fixture.inspect();
+    expect("child HEAD inspected", child.localTip, childHead);
+    expect("child commit parent is exact prior HEAD", child.commitParent, priorHead);
+  } finally {
+    fixture.dispose();
+  }
 }
 
 function proveGitHarness(): void {
