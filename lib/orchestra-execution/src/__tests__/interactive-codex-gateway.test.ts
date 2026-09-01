@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { InteractiveCodexGateway } from "../interactive-codex-gateway.js";
@@ -8,12 +8,38 @@ import { MockExecutionProvider } from "../providers/mock-provider.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
 
 function git(repo: string, args: string[]): string {
-  return execFileSync("git", ["-C", repo, ...args], { encoding: "utf8", windowsHide: true }).trim();
+  return execFileSync("git", ["-C", repo, ...args], {
+    encoding: "utf8",
+    windowsHide: true,
+    env: {
+      ...process.env,
+      GIT_AUTHOR_DATE: "2026-08-17T00:00:00Z",
+      GIT_COMMITTER_DATE: "2026-08-17T00:00:00Z",
+    },
+  }).trim();
+}
+
+function createGatewayRepository(): string {
+  const repository = mkdtempSync(join(tmpdir(), "orchestra-gateway-repo-"));
+  const upstream = mkdtempSync(join(tmpdir(), "orchestra-gateway-upstream-"));
+  const scope = join(repository, "lib", "orchestra-execution");
+  mkdirSync(scope, { recursive: true });
+  writeFileSync(join(scope, "gateway-fixture.txt"), "tracked gateway scope\n", "utf8");
+  git(repository, ["init", "-b", "frontend-rebuild"]);
+  git(repository, ["config", "user.email", "orchestra-gateway@example.invalid"]);
+  git(repository, ["config", "user.name", "Orchestra Gateway Fixture"]);
+  git(repository, ["add", "lib/orchestra-execution/gateway-fixture.txt"]);
+  git(repository, ["commit", "-m", "fixture: initialize gateway scope"]);
+  git(upstream, ["init", "--bare"]);
+  git(repository, ["remote", "add", "origin", upstream]);
+  git(repository, ["push", "--set-upstream", "origin", "frontend-rebuild"]);
+  return repository;
 }
 
 export async function runInteractiveCodexGatewayTests(): Promise<void> {
   section("Interactive Codex Gateway governance");
-  const repository = resolve(git(process.cwd(), ["rev-parse", "--show-toplevel"]));
+  const createdRepository = createGatewayRepository();
+  const repository = resolve(git(createdRepository, ["rev-parse", "--show-toplevel"]));
   const storeRoot = mkdtempSync(join(tmpdir(), "orchestra-gateway-"));
   let providersCreated = 0;
   const gateway = new InteractiveCodexGateway({ repository, storeRoot, providerFactory: () => {
