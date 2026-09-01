@@ -83,6 +83,21 @@ export type DisposableGitHarness = {
   dispose(): void;
 };
 
+export type CandidateContentDrift = {
+  acceptedCandidateBytes: string;
+  changedCandidateBytes: string;
+};
+
+/** Captures the accepted candidate content, then changes only its working-tree bytes. */
+export function introduceCandidateContentDrift(
+  fixture: DisposableGitHarness,
+  changedCandidateBytes = "candidate content drift\n",
+): CandidateContentDrift {
+  const acceptedCandidateBytes = readFileSync(join(fixture.repository, fixture.candidatePath), "utf8");
+  write(fixture.repository, fixture.candidatePath, changedCandidateBytes);
+  return { acceptedCandidateBytes, changedCandidateBytes };
+}
+
 /** A real, isolated work repository plus bare origin used only by this test module. */
 export function createDisposableGitHarness(): DisposableGitHarness {
   const root = mkdtempSync(join(tmpdir(), "orchestra-gateway-fixture-"));
@@ -281,6 +296,71 @@ export async function runInteractiveCodexGatewayTests(): Promise<void> {
     expect("Cursor fallback refused", fallback.phase, "refused");
     expectTrue("fallback refusal is explicit", fallback.message.includes("no Cursor fallback"));
     expect("fallback refusal persists no execution evidence", store.loadExecutionEvidence(submission.assignmentId), []);
+  } finally {
+    fixture.dispose();
+  }
+}
+
+export type InteractiveCodexGatewayTestSelection = "baseline" | "publication-contract";
+export type InteractiveCodexGatewayTestRunner = () => Promise<void>;
+
+/** Selects independently invokable test runners without coupling publication smoke to the baseline. */
+export function selectInteractiveCodexGatewayTestRunner(
+  selection: InteractiveCodexGatewayTestSelection,
+): InteractiveCodexGatewayTestRunner {
+  return selection === "baseline"
+    ? runInteractiveCodexGatewayTests
+    : runInteractiveCodexGatewayPublicationContractTests;
+}
+
+/** Test-architecture smoke proof only; intentionally contains no publication behavior. */
+export async function runInteractiveCodexGatewayPublicationContractTests(): Promise<void> {
+  section("Interactive Codex Gateway publication-contract selection smoke");
+  expect(
+    "baseline selection remains independently invokable",
+    selectInteractiveCodexGatewayTestRunner("baseline"),
+    runInteractiveCodexGatewayTests,
+  );
+  expect(
+    "publication selection is independently invokable",
+    selectInteractiveCodexGatewayTestRunner("publication-contract"),
+    runInteractiveCodexGatewayPublicationContractTests,
+  );
+
+  const fixture = createDisposableGitHarness();
+  try {
+    write(fixture.repository, fixture.unrelatedPath, "accepted unrelated staged bytes\n");
+    git(fixture.repository, ["add", fixture.unrelatedPath]);
+    const before = {
+      localTip: git(fixture.repository, ["rev-parse", "HEAD"]),
+      remoteTip: git(fixture.repository, ["rev-parse", "@{upstream}"]),
+      branch: git(fixture.repository, ["branch", "--show-current"]),
+      upstream: git(fixture.repository, ["rev-parse", "--abbrev-ref", "@{upstream}"]),
+      stagedPaths: stagedPaths(fixture.repository),
+      candidateBytes: readFileSync(join(fixture.repository, fixture.candidatePath), "utf8"),
+      protectedBytes: readFileSync(join(fixture.repository, fixture.protectedPath), "utf8"),
+    };
+    const drift = introduceCandidateContentDrift(fixture);
+    const after = {
+      localTip: git(fixture.repository, ["rev-parse", "HEAD"]),
+      remoteTip: git(fixture.repository, ["rev-parse", "@{upstream}"]),
+      branch: git(fixture.repository, ["branch", "--show-current"]),
+      upstream: git(fixture.repository, ["rev-parse", "--abbrev-ref", "@{upstream}"]),
+      stagedPaths: stagedPaths(fixture.repository),
+      candidateBytes: readFileSync(join(fixture.repository, fixture.candidatePath), "utf8"),
+      protectedBytes: readFileSync(join(fixture.repository, fixture.protectedPath), "utf8"),
+    };
+
+    expect("accepted candidate bytes captured", drift.acceptedCandidateBytes, before.candidateBytes);
+    expect("candidate bytes changed", after.candidateBytes, drift.changedCandidateBytes);
+    expectFalse("candidate bytes differ from accepted bytes", after.candidateBytes === drift.acceptedCandidateBytes);
+    expect("content drift leaves HEAD unchanged", after.localTip, before.localTip);
+    expect("content drift leaves branch unchanged", after.branch, before.branch);
+    expect("content drift leaves upstream unchanged", after.upstream, before.upstream);
+    expect("content drift leaves remote tip unchanged", after.remoteTip, before.remoteTip);
+    expect("content drift leaves protected bytes unchanged", after.protectedBytes, before.protectedBytes);
+    expect("content drift leaves staged paths unchanged", after.stagedPaths, before.stagedPaths);
+    expect("unrelated staged state remains isolated", after.stagedPaths, [UNRELATED_PATH]);
   } finally {
     fixture.dispose();
   }
