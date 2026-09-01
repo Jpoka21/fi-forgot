@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { InteractiveCodexGateway } from "../interactive-codex-gateway.js";
@@ -401,9 +401,65 @@ export async function runInteractiveCodexGatewayPublicationContractTests(): Prom
   }
 }
 
-/** Batch 1 selection smoke only; it deliberately exercises no publication contract. */
+type PublicationBaseline = {
+  head: string;
+  remote: string;
+  branch: string;
+  upstream: string;
+  protectedBytes: string;
+  stagedPaths: string[];
+};
+
+function publicationBaseline(fixture: DisposableGitHarness): PublicationBaseline {
+  return {
+    head: git(fixture.repository, ["rev-parse", "HEAD"]),
+    remote: git(fixture.repository, ["rev-parse", "@{upstream}"]),
+    branch: git(fixture.repository, ["branch", "--show-current"]),
+    upstream: git(fixture.repository, ["rev-parse", "--abbrev-ref", "@{upstream}"]),
+    protectedBytes: readFileSync(join(fixture.repository, fixture.protectedPath), "utf8"),
+    stagedPaths: stagedPaths(fixture.repository),
+  };
+}
+
+async function requestPublication(
+  gateway: InteractiveCodexGateway,
+  fixture: DisposableGitHarness,
+): Promise<Awaited<ReturnType<InteractiveCodexGateway["converse"]>>> {
+  try {
+    return await gateway.converse(`/publish ${fixture.baselineTip} ${fixture.candidatePath}`);
+  } catch (error) {
+    return {
+      ok: false,
+      phase: "refused",
+      message: `publication_infrastructure_exception: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+}
+
+function expectPublicationSuccess(label: string, response: Awaited<ReturnType<InteractiveCodexGateway["converse"]>>): void {
+  expectTrue(`${label} reports success`, response.ok);
+  expect(`${label} completes publication`, response.phase, "executed");
+}
+
+function publicationGateway(fixture: DisposableGitHarness, suffix: string): InteractiveCodexGateway {
+  return new InteractiveCodexGateway({
+    repository: fixture.repository,
+    storeRoot: join(dirname(fixture.rawRepository), `store-${suffix}`),
+    providerFactory: () => new MockExecutionProvider({ providerId: "codex" }),
+  });
+}
+
+async function runPublicationScenario(label: string, scenario: () => Promise<void>, failures: string[]): Promise<void> {
+  try {
+    await scenario();
+  } catch (error) {
+    failures.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/** Four independently isolated real-Git publication contracts. */
 export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promise<void> {
-  section("Interactive Codex Gateway publication-batch-1 selection smoke");
+  section("Interactive Codex Gateway publication-batch-1 contracts");
   const baselineRunsBeforeSelection = baselineRuns;
   const publicationContractRunsBeforeSelection = publicationContractRuns;
   expect(
@@ -421,28 +477,109 @@ export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promis
     publicationContractRuns,
     publicationContractRunsBeforeSelection,
   );
+  const failures: string[] = [];
 
-  const fixture = createDisposableGitHarness();
-  try {
-    const storeRoot = mkdtempSync(join(tmpdir(), "orchestra-gateway-batch-1-"));
-    const gateway = new InteractiveCodexGateway({
-      repository: fixture.repository,
-      storeRoot,
-      providerFactory: () => new MockExecutionProvider({ providerId: "codex" }),
-    });
-    expectTrue("disposable repository raw path captured", fixture.rawRepository.length > 0);
-    expect(
-      "disposable repository canonical root comes from Git",
-      fixture.repository,
-      resolve(git(fixture.rawRepository, ["rev-parse", "--show-toplevel"])),
-    );
-    expect("gateway receives canonical repository root", gateway.repository, fixture.repository);
+  await runPublicationScenario("exact candidate-only commit", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      fixture.addDirt();
+      fixture.stageContamination();
+      const acceptedHead = git(fixture.repository, ["rev-parse", "HEAD"]);
+      const response = await requestPublication(publicationGateway(fixture, "commit"), fixture);
+      expectFalse("candidate-only publication is not wrong_repository", response.message.includes("wrong_repository"));
+      const published = response.ok && response.phase === "executed";
+      expectPublicationSuccess("candidate-only publication", response);
+      if (published) {
+        const inspection = fixture.inspect();
+        expectFalse("candidate-only publication creates a real commit", inspection.localTip === acceptedHead);
+        expect("publication commit has accepted HEAD parent", inspection.commitParent, acceptedHead);
+        expect("publication commit contains exact candidate paths", inspection.changedPaths, [fixture.candidatePath]);
+        expectFalse("publication commit excludes unrelated path", inspection.changedPaths.includes(fixture.unrelatedPath));
+        expectFalse("publication commit excludes protected path", inspection.changedPaths.includes(fixture.protectedPath));
+      }
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
 
-    const intendedRequest = `Exercise publication Batch 1 gateway smoke scaffolding in ${fixture.candidatePath}`;
-    const response = await gateway.converse(intendedRequest);
-    expect("intended smoke request completes without infrastructure exception", response.phase, "authority_required");
-    expectFalse("canonical repository request does not fail with wrong_repository", response.message.includes("wrong_repository"));
-  } finally {
-    fixture.dispose();
-  }
+  await runPublicationScenario("exact normal non-force push", async () => {
+    const fixture = createDisposableGitHarness();
+    const tracePath = join(dirname(fixture.rawRepository), "git-trace2.json");
+    const priorTrace = process.env.GIT_TRACE2_EVENT;
+    try {
+      write(fixture.repository, fixture.candidatePath, "candidate push work\n");
+      process.env.GIT_TRACE2_EVENT = tracePath;
+      const response = await requestPublication(publicationGateway(fixture, "push"), fixture);
+      expectFalse("normal push publication is not wrong_repository", response.message.includes("wrong_repository"));
+      const published = response.ok && response.phase === "executed";
+      expectPublicationSuccess("normal push publication", response);
+      if (published) {
+        const localHead = git(fixture.repository, ["rev-parse", "HEAD"]);
+        expect("remote contains exact created commit", git(fixture.remote, ["rev-parse", "refs/heads/frontend-rebuild"]), localHead);
+        expectTrue("successful publication emits Git trace", existsSync(tracePath));
+        const events = lines(readFileSync(tracePath, "utf8")).map((row) => JSON.parse(row) as { event?: string; argv?: string[] });
+        const pushes = events.filter((event) => event.event === "child_start" && event.argv?.includes("push"));
+        expect("one actual push start observed", pushes.length, 1);
+        const argv = pushes[0]!.argv!;
+        expectTrue("push targets intended branch/refspec", argv.includes("frontend-rebuild:frontend-rebuild"));
+        expectFalse("push is not forced", argv.some((arg) => arg === "--force" || arg === "-f" || arg.startsWith("--force-")));
+        expectFalse("push has no wildcard refspec", argv.some((arg) => arg.includes("*")));
+      }
+    } finally {
+      if (priorTrace === undefined) delete process.env.GIT_TRACE2_EVENT;
+      else process.env.GIT_TRACE2_EVENT = priorTrace;
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("protected dirty preservation", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      write(fixture.repository, fixture.candidatePath, "candidate protected-preservation work\n");
+      write(fixture.repository, fixture.protectedPath, "protected dirty bytes\n");
+      const protectedBytes = readFileSync(join(fixture.repository, fixture.protectedPath), "utf8");
+      const response = await requestPublication(publicationGateway(fixture, "protected"), fixture);
+      const published = response.ok && response.phase === "executed";
+      try {
+        expectFalse("protected preservation publication is not wrong_repository", response.message.includes("wrong_repository"));
+        expectPublicationSuccess("protected preservation publication", response);
+      } finally {
+        expect("protected bytes always remain unchanged", readFileSync(join(fixture.repository, fixture.protectedPath), "utf8"), protectedBytes);
+        expectTrue("protected path always remains dirty and unstaged", lines(git(fixture.repository, ["diff", "--name-only", "--", fixture.protectedPath])).includes(fixture.protectedPath));
+        expectFalse("protected path always remains unstaged", stagedPaths(fixture.repository).includes(fixture.protectedPath));
+      }
+      if (published) expectFalse("real publication commit excludes protected path", fixture.inspect().changedPaths.includes(fixture.protectedPath));
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("candidate-content drift refusal", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      write(fixture.repository, fixture.candidatePath, "accepted candidate bytes\n");
+      write(fixture.repository, fixture.unrelatedPath, "accepted unrelated staged bytes\n");
+      git(fixture.repository, ["add", fixture.unrelatedPath]);
+      const accepted = publicationBaseline(fixture);
+      introduceCandidateContentDrift(fixture, "candidate bytes changed after acceptance\n");
+      const arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "drift"), fixture);
+      const after = publicationBaseline(fixture);
+      expect("drift refusal preserves HEAD", after.head, arranged.head);
+      expect("drift refusal preserves remote", after.remote, arranged.remote);
+      expect("drift refusal preserves branch", after.branch, arranged.branch);
+      expect("drift refusal preserves upstream", after.upstream, arranged.upstream);
+      expect("drift refusal preserves protected bytes", after.protectedBytes, arranged.protectedBytes);
+      expect("drift refusal preserves staged unrelated work", after.stagedPaths, arranged.stagedPaths);
+      expect("accepted and arranged HEAD are identical", arranged.head, accepted.head);
+      expect("no publication commit exists", after.head, fixture.baselineTip);
+      expectFalse("drift refusal is not wrong_repository", response.message.includes("wrong_repository"));
+      expect("candidate-content drift is refused", response.phase, "refused");
+      expectTrue("drift refusal is specific", /candidate[_ -]?content[_ -]?drift|content[_ -]?drift/i.test(response.message));
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  if (failures.length) throw new Error(`publication-batch-1 semantic failures:\n${failures.join("\n")}`);
 }
