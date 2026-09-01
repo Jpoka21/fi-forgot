@@ -67,6 +67,7 @@ export const TEST_INTERRUPTION_DESCRIPTORS: readonly TestInterruptionDescriptor[
 ]);
 
 export type DisposableGitHarness = {
+  rawRepository: string;
   repository: string;
   remote: string;
   baselineTip: string;
@@ -101,13 +102,14 @@ export function introduceCandidateContentDrift(
 /** A real, isolated work repository plus bare origin used only by this test module. */
 export function createDisposableGitHarness(): DisposableGitHarness {
   const root = mkdtempSync(join(tmpdir(), "orchestra-gateway-fixture-"));
-  const repository = join(root, "work");
+  const rawRepository = join(root, "work");
   const remote = join(root, "origin.git");
-  mkdirSync(repository, { recursive: true });
+  mkdirSync(rawRepository, { recursive: true });
   mkdirSync(remote, { recursive: true });
-  write(repository, CANDIDATE_PATH, "tracked gateway scope\n");
-  write(repository, PROTECTED_PATH, "protected baseline\n");
-  git(repository, ["init", "-b", "frontend-rebuild"]);
+  write(rawRepository, CANDIDATE_PATH, "tracked gateway scope\n");
+  write(rawRepository, PROTECTED_PATH, "protected baseline\n");
+  git(rawRepository, ["init", "-b", "frontend-rebuild"]);
+  const repository = resolve(git(rawRepository, ["rev-parse", "--show-toplevel"]));
   git(repository, ["config", "user.email", "orchestra-gateway@example.invalid"]);
   git(repository, ["config", "user.name", "Orchestra Gateway Fixture"]);
   git(repository, ["add", CANDIDATE_PATH, PROTECTED_PATH]);
@@ -118,7 +120,8 @@ export function createDisposableGitHarness(): DisposableGitHarness {
   const baselineTip = git(repository, ["rev-parse", "HEAD"]);
 
   const fixture: DisposableGitHarness = {
-    repository: resolve(repository),
+    rawRepository,
+    repository,
     remote: resolve(remote),
     baselineTip,
     candidatePath: CANDIDATE_PATH,
@@ -277,11 +280,12 @@ function proveGitHarness(): void {
 }
 
 export async function runInteractiveCodexGatewayTests(): Promise<void> {
+  baselineRuns++;
   section("Interactive Codex Gateway governance");
   proveGitHarness();
   const fixture = createDisposableGitHarness();
   try {
-    const repository = resolve(git(fixture.repository, ["rev-parse", "--show-toplevel"]));
+    const repository = fixture.repository;
     const storeRoot = mkdtempSync(join(tmpdir(), "orchestra-gateway-"));
     let providersCreated = 0;
     const gateway = new InteractiveCodexGateway({ repository, storeRoot, providerFactory: () => {
@@ -328,20 +332,24 @@ export async function runInteractiveCodexGatewayTests(): Promise<void> {
   }
 }
 
-export type InteractiveCodexGatewayTestSelection = "baseline" | "publication-contract";
+export type InteractiveCodexGatewayTestSelection = "baseline" | "publication-contract" | "publication-batch-1";
 export type InteractiveCodexGatewayTestRunner = () => Promise<void>;
+
+let baselineRuns = 0;
+let publicationContractRuns = 0;
 
 /** Selects independently invokable test runners without coupling publication smoke to the baseline. */
 export function selectInteractiveCodexGatewayTestRunner(
   selection: InteractiveCodexGatewayTestSelection,
 ): InteractiveCodexGatewayTestRunner {
-  return selection === "baseline"
-    ? runInteractiveCodexGatewayTests
-    : runInteractiveCodexGatewayPublicationContractTests;
+  if (selection === "baseline") return runInteractiveCodexGatewayTests;
+  if (selection === "publication-contract") return runInteractiveCodexGatewayPublicationContractTests;
+  return runInteractiveCodexGatewayPublicationBatch1Tests;
 }
 
 /** Test-architecture smoke proof only; intentionally contains no publication behavior. */
 export async function runInteractiveCodexGatewayPublicationContractTests(): Promise<void> {
+  publicationContractRuns++;
   section("Interactive Codex Gateway publication-contract selection smoke");
   expect(
     "baseline selection remains independently invokable",
@@ -388,6 +396,52 @@ export async function runInteractiveCodexGatewayPublicationContractTests(): Prom
     expect("content drift leaves protected bytes unchanged", after.protectedBytes, before.protectedBytes);
     expect("content drift leaves staged paths unchanged", after.stagedPaths, before.stagedPaths);
     expect("unrelated staged state remains isolated", after.stagedPaths, [UNRELATED_PATH]);
+  } finally {
+    fixture.dispose();
+  }
+}
+
+/** Batch 1 selection smoke only; it deliberately exercises no publication contract. */
+export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promise<void> {
+  section("Interactive Codex Gateway publication-batch-1 selection smoke");
+  const baselineRunsBeforeSelection = baselineRuns;
+  const publicationContractRunsBeforeSelection = publicationContractRuns;
+  expect(
+    "publication Batch 1 selection routes independently",
+    selectInteractiveCodexGatewayTestRunner("publication-batch-1"),
+    runInteractiveCodexGatewayPublicationBatch1Tests,
+  );
+  expect(
+    "publication Batch 1 selection does not execute baseline automatically",
+    baselineRuns,
+    baselineRunsBeforeSelection,
+  );
+  expect(
+    "publication Batch 1 selection does not execute architecture automatically",
+    publicationContractRuns,
+    publicationContractRunsBeforeSelection,
+  );
+
+  const fixture = createDisposableGitHarness();
+  try {
+    const storeRoot = mkdtempSync(join(tmpdir(), "orchestra-gateway-batch-1-"));
+    const gateway = new InteractiveCodexGateway({
+      repository: fixture.repository,
+      storeRoot,
+      providerFactory: () => new MockExecutionProvider({ providerId: "codex" }),
+    });
+    expectTrue("disposable repository raw path captured", fixture.rawRepository.length > 0);
+    expect(
+      "disposable repository canonical root comes from Git",
+      fixture.repository,
+      resolve(git(fixture.rawRepository, ["rev-parse", "--show-toplevel"])),
+    );
+    expect("gateway receives canonical repository root", gateway.repository, fixture.repository);
+
+    const intendedRequest = `Exercise publication Batch 1 gateway smoke scaffolding in ${fixture.candidatePath}`;
+    const response = await gateway.converse(intendedRequest);
+    expect("intended smoke request completes without infrastructure exception", response.phase, "authority_required");
+    expectFalse("canonical repository request does not fail with wrong_repository", response.message.includes("wrong_repository"));
   } finally {
     fixture.dispose();
   }
