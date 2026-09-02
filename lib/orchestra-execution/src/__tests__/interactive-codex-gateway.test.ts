@@ -332,7 +332,11 @@ export async function runInteractiveCodexGatewayTests(): Promise<void> {
   }
 }
 
-export type InteractiveCodexGatewayTestSelection = "baseline" | "publication-contract" | "publication-batch-1";
+export type InteractiveCodexGatewayTestSelection =
+  | "baseline"
+  | "publication-contract"
+  | "publication-batch-1"
+  | "publication-batch-2";
 export type InteractiveCodexGatewayTestRunner = () => Promise<void>;
 
 let baselineRuns = 0;
@@ -344,7 +348,8 @@ export function selectInteractiveCodexGatewayTestRunner(
 ): InteractiveCodexGatewayTestRunner {
   if (selection === "baseline") return runInteractiveCodexGatewayTests;
   if (selection === "publication-contract") return runInteractiveCodexGatewayPublicationContractTests;
-  return runInteractiveCodexGatewayPublicationBatch1Tests;
+  if (selection === "publication-batch-1") return runInteractiveCodexGatewayPublicationBatch1Tests;
+  return runInteractiveCodexGatewayPublicationBatch2Tests;
 }
 
 /** Test-architecture smoke proof only; intentionally contains no publication behavior. */
@@ -582,4 +587,134 @@ export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promis
   }, failures);
 
   if (failures.length) throw new Error(`publication-batch-1 semantic failures:\n${failures.join("\n")}`);
+}
+
+function expectSemanticPublicationRefusal(
+  label: string,
+  response: Awaited<ReturnType<InteractiveCodexGateway["converse"]>>,
+  semanticReason: RegExp,
+): void {
+  expectFalse(`${label} is not wrong_repository`, response.message.includes("wrong_repository"));
+  expectFalse(`${label} is not an infrastructure exception`, response.message.includes("publication_infrastructure_exception"));
+  expect(`${label} is refused`, response.phase, "refused");
+  expectTrue(`${label} reports its semantic reason`, semanticReason.test(response.message));
+}
+
+/** Six independently isolated real-Git publication preflight refusal contracts. */
+export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promise<void> {
+  section("Interactive Codex Gateway publication-batch-2 refusal contracts");
+  const baselineRunsBeforeSelection = baselineRuns;
+  const publicationContractRunsBeforeSelection = publicationContractRuns;
+  expect(
+    "publication Batch 2 selection routes independently",
+    selectInteractiveCodexGatewayTestRunner("publication-batch-2"),
+    runInteractiveCodexGatewayPublicationBatch2Tests,
+  );
+  expect("publication Batch 2 selection does not execute baseline automatically", baselineRuns, baselineRunsBeforeSelection);
+  expect(
+    "publication Batch 2 selection does not execute architecture automatically",
+    publicationContractRuns,
+    publicationContractRunsBeforeSelection,
+  );
+  const failures: string[] = [];
+
+  await runPublicationScenario("protected-path drift refusal", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      write(fixture.repository, fixture.protectedPath, "protected bytes changed after acceptance\n");
+      const arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-protected-drift"), fixture);
+      const after = publicationBaseline(fixture);
+      expect("protected-path drift creates no commit", after.head, arranged.head);
+      expect("protected-path drift pushes no ref", after.remote, arranged.remote);
+      expect("protected-path drift preserves protected bytes", after.protectedBytes, arranged.protectedBytes);
+      expectSemanticPublicationRefusal("protected-path drift", response, /protected[_ -]?path[_ -]?drift/i);
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("staged contamination refusal", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      write(fixture.repository, fixture.unrelatedPath, "staged contamination\n");
+      git(fixture.repository, ["add", fixture.unrelatedPath]);
+      const arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-staged"), fixture);
+      const after = publicationBaseline(fixture);
+      expect("staged contamination creates no commit", after.head, arranged.head);
+      expect("staged contamination pushes no ref", after.remote, arranged.remote);
+      expect("staged contamination preserves the exact index", after.stagedPaths, arranged.stagedPaths);
+      expectSemanticPublicationRefusal("staged contamination", response, /staged[_ -]?contamination/i);
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("branch drift refusal", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      fixture.changeBranch("publication-branch-drift");
+      git(fixture.repository, ["branch", "--set-upstream-to", "origin/frontend-rebuild"]);
+      const arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-branch"), fixture);
+      const after = publicationBaseline(fixture);
+      expect("branch drift creates no commit", after.head, arranged.head);
+      expect("branch drift pushes no ref", after.remote, arranged.remote);
+      expect("branch drift does not switch branches", after.branch, arranged.branch);
+      expectSemanticPublicationRefusal("branch drift", response, /branch[_ -]?drift/i);
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("HEAD drift refusal", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      fixture.advanceLocalHead("fixture: HEAD changed after acceptance");
+      const arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-head"), fixture);
+      const after = publicationBaseline(fixture);
+      expect("HEAD drift creates no additional commit", after.head, arranged.head);
+      expect("HEAD drift pushes no ref", after.remote, arranged.remote);
+      expect("HEAD drift preserves upstream", after.upstream, arranged.upstream);
+      expectSemanticPublicationRefusal("HEAD drift", response, /head[_ -]?drift/i);
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("upstream mismatch refusal", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      fixture.reassignUpstream("publication-wrong-upstream");
+      const arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-upstream"), fixture);
+      const after = publicationBaseline(fixture);
+      expect("upstream mismatch creates no commit", after.head, arranged.head);
+      expect("upstream mismatch pushes no ref", after.remote, arranged.remote);
+      expect("upstream mismatch does not rewrite tracking", after.upstream, arranged.upstream);
+      expectSemanticPublicationRefusal("upstream mismatch", response, /upstream[_ -]?mismatch/i);
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("pre-commit remote divergence refusal", async () => {
+    const fixture = createDisposableGitHarness();
+    try {
+      fixture.advanceRemoteIndependently("fixture: remote changed before publication commit");
+      const arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-remote-divergence"), fixture);
+      const after = publicationBaseline(fixture);
+      expect("remote divergence creates no local commit", after.head, arranged.head);
+      expect("remote divergence pushes no replacement ref", after.remote, arranged.remote);
+      expect("remote divergence preserves branch", after.branch, arranged.branch);
+      expectSemanticPublicationRefusal("pre-commit remote divergence", response, /pre[_ -]?commit[_ -]?remote[_ -]?divergence/i);
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  if (failures.length) throw new Error(`publication-batch-2 semantic failures:\n${failures.join("\n")}`);
 }
