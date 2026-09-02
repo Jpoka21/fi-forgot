@@ -2,7 +2,6 @@ import type { ExecutionProvider } from "./provider-contract.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
-import { tmpdir } from "node:os";
 import { sortKeys } from "./assignment.js";
 import { sha256Utf8 } from "./engineering-store/atomic-write.js";
 import { ENGINEERING_STORE_SCHEMA_VERSION, type GovernedCandidateAcceptanceRecord,
@@ -169,9 +168,6 @@ export class InteractiveCodexGateway {
   private publishVerifiedCandidate(): GatewayResponse {
     const store = this.store();
     const repository = this.canonicalRepository();
-    const disposableRoot = realpathSync.native(resolve(tmpdir()));
-    const disposableRelative = relative(disposableRoot, repository);
-    if (disposableRelative.startsWith("..") || isAbsolute(disposableRelative)) throw new Error("publication_refused_not_disposable_repository");
     const selected = this.selectEligibleVerifiedCandidate(store, repository);
     const executor = store.loadFrozenAssignment(selected.decision.verifiedExecutorAssignmentId);
     const acceptanceId = `accept-${selected.decision.verificationDecisionId}`;

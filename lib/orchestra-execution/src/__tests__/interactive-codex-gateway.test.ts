@@ -105,8 +105,8 @@ export function introduceCandidateContentDrift(
 }
 
 /** A real, isolated work repository plus bare origin used only by this test module. */
-export function createDisposableGitHarness(): DisposableGitHarness {
-  const root = mkdtempSync(join(tmpdir(), "orchestra-gateway-fixture-"));
+export function createDisposableGitHarness(parentDirectory = tmpdir()): DisposableGitHarness {
+  const root = mkdtempSync(join(parentDirectory, ".orchestra-gateway-fixture-"));
   const rawRepository = join(root, "work");
   const remote = join(root, "origin.git");
   mkdirSync(rawRepository, { recursive: true });
@@ -509,7 +509,7 @@ async function runPublicationScenario(label: string, scenario: () => Promise<voi
   }
 }
 
-/** Four independently isolated real-Git publication contracts. */
+/** Five independently isolated real-Git publication contracts. */
 export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promise<void> {
   section("Interactive Codex Gateway publication-batch-1 contracts");
   const baselineRunsBeforeSelection = baselineRuns;
@@ -552,6 +552,19 @@ export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promis
         expectPublicationSuccess("repeated exact phrase", repeated);
         expect("repeated phrase creates no second commit", fixture.inspect().localTip, inspection.localTip);
       }
+    } finally {
+      fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("accepted non-system-temporary repository", async () => {
+    const fixture = createDisposableGitHarness(process.cwd());
+    try {
+      write(fixture.repository, fixture.candidatePath, "candidate non-temporary fixture work\n");
+      expect("non-temporary fixture is rooted in the test workspace", dirname(dirname(fixture.rawRepository)), resolve(process.cwd()));
+      const response = await requestPublication(publicationGateway(fixture, "non-temporary"), fixture);
+      expectPublicationSuccess("exactly bound non-temporary fixture publication", response);
+      expect("non-temporary fixture pushes its created commit", fixture.inspect().remoteTip, fixture.inspect().localTip);
     } finally {
       fixture.dispose();
     }
@@ -648,7 +661,7 @@ function expectSemanticPublicationRefusal(
   expectTrue(`${label} reports its semantic reason`, semanticReason.test(response.message));
 }
 
-/** Six independently isolated real-Git publication preflight refusal contracts. */
+/** Seven independently isolated real-Git publication preflight refusal contracts. */
 export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promise<void> {
   section("Interactive Codex Gateway publication-batch-2 refusal contracts");
   const baselineRunsBeforeSelection = baselineRuns;
@@ -765,6 +778,31 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
       expectSemanticPublicationRefusal("pre-commit remote divergence", response, /pre[_ -]?commit[_ -]?remote[_ -]?divergence/i);
     } finally {
       fixture.dispose();
+    }
+  }, failures);
+
+  await runPublicationScenario("accepted repository substitution refusal", async () => {
+    const acceptedFixture = createDisposableGitHarness();
+    const substitutedFixture = createDisposableGitHarness();
+    try {
+      write(acceptedFixture.repository, acceptedFixture.candidatePath, "accepted repository A work\n");
+      const acceptedBefore = publicationBaseline(acceptedFixture);
+      const substitutedBefore = publicationBaseline(substitutedFixture);
+      let gateway!: InteractiveCodexGateway;
+      gateway = publicationGateway(acceptedFixture, "batch2-repository-substitution", () => {
+        (gateway as unknown as { repository: string }).repository = substitutedFixture.repository;
+      });
+      const response = await requestPublication(gateway, acceptedFixture);
+      const acceptedAfter = publicationBaseline(acceptedFixture);
+      const substitutedAfter = publicationBaseline(substitutedFixture);
+      expect("repository substitution creates no commit in accepted repository A", acceptedAfter.head, acceptedBefore.head);
+      expect("repository substitution pushes no ref from accepted repository A", acceptedAfter.remote, acceptedBefore.remote);
+      expect("repository substitution creates no commit in substituted repository B", substitutedAfter.head, substitutedBefore.head);
+      expect("repository substitution pushes no ref from substituted repository B", substitutedAfter.remote, substitutedBefore.remote);
+      expectSemanticPublicationRefusal("accepted repository substitution", response, /repository[_ -]?drift/i);
+    } finally {
+      acceptedFixture.dispose();
+      substitutedFixture.dispose();
     }
   }, failures);
 
