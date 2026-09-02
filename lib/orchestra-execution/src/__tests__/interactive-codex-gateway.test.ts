@@ -309,6 +309,13 @@ export async function runInteractiveCodexGatewayTests(): Promise<void> {
     expect("frozen request has no execution evidence", store.loadExecutionEvidence(submission.assignmentId), []);
     expectTrue("protected paths retained", store.loadFrozenAssignment(submission.assignmentId).assignment.protectedPaths.length > 0);
 
+    const noVerifiedCandidate = await gateway.converse("Accept and publish");
+    expect("exact publication phrase fails closed without VERIFIED evidence", noVerifiedCandidate.phase, "refused");
+    expectTrue("missing candidate refusal is specific", noVerifiedCandidate.message.includes("no_eligible_verified_candidate"));
+    expect("publication refusal does not resolve a provider", providersCreated, 0);
+    expect("publication refusal creates no acceptance", store.loadGovernedCandidateAcceptances(), []);
+    expect("publication refusal creates no receipt", store.loadGovernedCandidatePublications(), []);
+
     const reconstructedStore = new FileEngineeringStore(storeRoot);
     const reconstructedGateway = new InteractiveCodexGateway({ repository, storeRoot,
       providerFactory: () => new MockExecutionProvider({ providerId: "codex" }) });
@@ -435,10 +442,10 @@ function publicationBaseline(fixture: DisposableGitHarness): PublicationBaseline
 
 async function requestPublication(
   gateway: InteractiveCodexGateway,
-  fixture: DisposableGitHarness,
+  _fixture: DisposableGitHarness,
 ): Promise<Awaited<ReturnType<InteractiveCodexGateway["converse"]>>> {
   try {
-    return await gateway.converse(`/publish ${fixture.baselineTip} ${fixture.candidatePath}`);
+    return await gateway.converse("Accept and publish");
   } catch (error) {
     return {
       ok: false,
@@ -453,11 +460,44 @@ function expectPublicationSuccess(label: string, response: Awaited<ReturnType<In
   expect(`${label} completes publication`, response.phase, "executed");
 }
 
-function publicationGateway(fixture: DisposableGitHarness, suffix: string): InteractiveCodexGateway {
+function persistEligibleVerifiedCandidate(fixture: DisposableGitHarness, storeRoot: string, suffix: string): void {
+  const store = new FileEngineeringStore(storeRoot);
+  const createdAt = "2026-09-02T12:00:00.000Z";
+  const executor = createAssignment({ assignmentId: `publication-${suffix}-executor`, projectId: `publication-${suffix}`,
+    role: "executor", repositoryPath: fixture.repository, branch: "frontend-rebuild", startingHead: fixture.baselineTip,
+    assignmentText: "Publish the bounded candidate.", allowedPaths: [fixture.candidatePath],
+    protectedPaths: [fixture.protectedPath], requireNoPush: true, commitAuthorization: false, pushAuthorization: false,
+    requiredEvidence: [], createdAt });
+  store.persistFrozenAssignment(executor);
+  const resultFor = (frozen: typeof executor, changedPaths: string[], run: string) => synthesizeExecutionResult({
+    frozen, providerId: "publication-fixture", providerSessionId: `${run}-session`, runId: run,
+    providerStatus: "finished", normalizedEvents: [{ type: "run_finished" as const, timestamp: createdAt }],
+    providerFinalResultText: "complete", preRunGitEvidence: null, postRunGitEvidence: null, policyDenials: [],
+    changedPaths, protectedPathMutationOccurred: false, branchChanged: false, headChanged: false,
+    commitOccurred: false, unexpectedChanges: [],
+  });
+  const executorEvidence = store.persistExecutionEvidence(buildExecutionEvidence({ frozen: executor,
+    result: resultFor(executor, [fixture.candidatePath], `${suffix}-executor-run`), providerStarted: true, recordedAt: createdAt }));
+  const verifier = createAssignment({ ...executor.assignment, assignmentId: `publication-${suffix}-verifier`, role: "verifier",
+    assignmentText: "Verify the exact candidate.", allowedPaths: [], requiredEvidence: ["executor_execution_evidence"] });
+  store.persistFrozenAssignment(verifier, { relationship: { verifiesAssignmentId: executor.assignment.assignmentId,
+    verifiesExecutionEvidenceId: executorEvidence.evidenceId } });
+  const verifierEvidence = store.persistExecutionEvidence(buildExecutionEvidence({ frozen: verifier,
+    result: resultFor(verifier, [], `${suffix}-verifier-run`), providerStarted: true, recordedAt: createdAt }));
+  store.persistVerificationDecision(buildVerificationDecisionRecord({ verifierAssignmentId: verifier.assignment.assignmentId,
+    verifierAssignmentHash: verifier.assignmentHash, verifierExecutionEvidenceId: verifierEvidence.evidenceId,
+    verifiedExecutorAssignmentId: executor.assignment.assignmentId, verifiedExecutorExecutionEvidenceId: executorEvidence.evidenceId,
+    decision: "VERIFIED", decisionReasonCodes: ["fixture_verified"], decidedAt: createdAt }));
+}
+
+function publicationGateway(fixture: DisposableGitHarness, suffix: string, publicationInterlock?: () => void): InteractiveCodexGateway {
+  const storeRoot = join(dirname(fixture.rawRepository), `store-${suffix}`);
+  persistEligibleVerifiedCandidate(fixture, storeRoot, suffix);
   return new InteractiveCodexGateway({
     repository: fixture.repository,
-    storeRoot: join(dirname(fixture.rawRepository), `store-${suffix}`),
+    storeRoot,
     providerFactory: () => new MockExecutionProvider({ providerId: "codex" }),
+    publicationInterlock,
   });
 }
 
@@ -495,7 +535,6 @@ export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promis
     const fixture = createDisposableGitHarness();
     try {
       fixture.addDirt();
-      fixture.stageContamination();
       const acceptedHead = git(fixture.repository, ["rev-parse", "HEAD"]);
       const response = await requestPublication(publicationGateway(fixture, "commit"), fixture);
       expectFalse("candidate-only publication is not wrong_repository", response.message.includes("wrong_repository"));
@@ -505,9 +544,13 @@ export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promis
         const inspection = fixture.inspect();
         expectFalse("candidate-only publication creates a real commit", inspection.localTip === acceptedHead);
         expect("publication commit has accepted HEAD parent", inspection.commitParent, acceptedHead);
+        expect("publication commit has exact accepted subject", inspection.commitSubject, "orchestra: publish publication-commit-executor");
         expect("publication commit contains exact candidate paths", inspection.changedPaths, [fixture.candidatePath]);
         expectFalse("publication commit excludes unrelated path", inspection.changedPaths.includes(fixture.unrelatedPath));
         expectFalse("publication commit excludes protected path", inspection.changedPaths.includes(fixture.protectedPath));
+        const repeated = await requestPublication(publicationGateway(fixture, "commit"), fixture);
+        expectPublicationSuccess("repeated exact phrase", repeated);
+        expect("repeated phrase creates no second commit", fixture.inspect().localTip, inspection.localTip);
       }
     } finally {
       fixture.dispose();
@@ -530,7 +573,7 @@ export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promis
         expect("remote contains exact created commit", git(fixture.remote, ["rev-parse", "refs/heads/frontend-rebuild"]), localHead);
         expectTrue("successful publication emits Git trace", existsSync(tracePath));
         const events = lines(readFileSync(tracePath, "utf8")).map((row) => JSON.parse(row) as { event?: string; argv?: string[] });
-        const pushes = events.filter((event) => event.event === "child_start" && event.argv?.includes("push"));
+        const pushes = events.filter((event) => event.event === "start" && event.argv?.includes("push"));
         expect("one actual push start observed", pushes.length, 1);
         const argv = pushes[0]!.argv!;
         expectTrue("push targets intended branch/refspec", argv.includes("frontend-rebuild:frontend-rebuild"));
@@ -570,19 +613,17 @@ export async function runInteractiveCodexGatewayPublicationBatch1Tests(): Promis
     const fixture = createDisposableGitHarness();
     try {
       write(fixture.repository, fixture.candidatePath, "accepted candidate bytes\n");
-      write(fixture.repository, fixture.unrelatedPath, "accepted unrelated staged bytes\n");
-      git(fixture.repository, ["add", fixture.unrelatedPath]);
       const accepted = publicationBaseline(fixture);
-      introduceCandidateContentDrift(fixture, "candidate bytes changed after acceptance\n");
       const arranged = publicationBaseline(fixture);
-      const response = await requestPublication(publicationGateway(fixture, "drift"), fixture);
+      const response = await requestPublication(publicationGateway(fixture, "drift", () =>
+        introduceCandidateContentDrift(fixture, "candidate bytes changed after acceptance\n")), fixture);
       const after = publicationBaseline(fixture);
       expect("drift refusal preserves HEAD", after.head, arranged.head);
       expect("drift refusal preserves remote", after.remote, arranged.remote);
       expect("drift refusal preserves branch", after.branch, arranged.branch);
       expect("drift refusal preserves upstream", after.upstream, arranged.upstream);
       expect("drift refusal preserves protected bytes", after.protectedBytes, arranged.protectedBytes);
-      expect("drift refusal preserves staged unrelated work", after.stagedPaths, arranged.stagedPaths);
+      expect("drift refusal preserves empty staged state", after.stagedPaths, arranged.stagedPaths);
       expect("accepted and arranged HEAD are identical", arranged.head, accepted.head);
       expect("no publication commit exists", after.head, fixture.baselineTip);
       expectFalse("drift refusal is not wrong_repository", response.message.includes("wrong_repository"));
@@ -628,9 +669,9 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
   await runPublicationScenario("protected-path drift refusal", async () => {
     const fixture = createDisposableGitHarness();
     try {
-      write(fixture.repository, fixture.protectedPath, "protected bytes changed after acceptance\n");
-      const arranged = publicationBaseline(fixture);
-      const response = await requestPublication(publicationGateway(fixture, "batch2-protected-drift"), fixture);
+      let arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-protected-drift", () =>
+        { write(fixture.repository, fixture.protectedPath, "protected bytes changed after acceptance\n"); arranged = publicationBaseline(fixture); }), fixture);
       const after = publicationBaseline(fixture);
       expect("protected-path drift creates no commit", after.head, arranged.head);
       expect("protected-path drift pushes no ref", after.remote, arranged.remote);
@@ -644,10 +685,12 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
   await runPublicationScenario("staged contamination refusal", async () => {
     const fixture = createDisposableGitHarness();
     try {
-      write(fixture.repository, fixture.unrelatedPath, "staged contamination\n");
-      git(fixture.repository, ["add", fixture.unrelatedPath]);
-      const arranged = publicationBaseline(fixture);
-      const response = await requestPublication(publicationGateway(fixture, "batch2-staged"), fixture);
+      let arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-staged", () => {
+        write(fixture.repository, fixture.unrelatedPath, "staged contamination\n");
+        git(fixture.repository, ["add", fixture.unrelatedPath]);
+        arranged = publicationBaseline(fixture);
+      }), fixture);
       const after = publicationBaseline(fixture);
       expect("staged contamination creates no commit", after.head, arranged.head);
       expect("staged contamination pushes no ref", after.remote, arranged.remote);
@@ -661,10 +704,12 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
   await runPublicationScenario("branch drift refusal", async () => {
     const fixture = createDisposableGitHarness();
     try {
-      fixture.changeBranch("publication-branch-drift");
-      git(fixture.repository, ["branch", "--set-upstream-to", "origin/frontend-rebuild"]);
-      const arranged = publicationBaseline(fixture);
-      const response = await requestPublication(publicationGateway(fixture, "batch2-branch"), fixture);
+      let arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-branch", () => {
+        fixture.changeBranch("publication-branch-drift");
+        git(fixture.repository, ["branch", "--set-upstream-to", "origin/frontend-rebuild"]);
+        arranged = publicationBaseline(fixture);
+      }), fixture);
       const after = publicationBaseline(fixture);
       expect("branch drift creates no commit", after.head, arranged.head);
       expect("branch drift pushes no ref", after.remote, arranged.remote);
@@ -678,9 +723,9 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
   await runPublicationScenario("HEAD drift refusal", async () => {
     const fixture = createDisposableGitHarness();
     try {
-      fixture.advanceLocalHead("fixture: HEAD changed after acceptance");
-      const arranged = publicationBaseline(fixture);
-      const response = await requestPublication(publicationGateway(fixture, "batch2-head"), fixture);
+      let arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-head", () =>
+        { fixture.advanceLocalHead("fixture: HEAD changed after acceptance"); arranged = publicationBaseline(fixture); }), fixture);
       const after = publicationBaseline(fixture);
       expect("HEAD drift creates no additional commit", after.head, arranged.head);
       expect("HEAD drift pushes no ref", after.remote, arranged.remote);
@@ -694,9 +739,9 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
   await runPublicationScenario("upstream mismatch refusal", async () => {
     const fixture = createDisposableGitHarness();
     try {
-      fixture.reassignUpstream("publication-wrong-upstream");
-      const arranged = publicationBaseline(fixture);
-      const response = await requestPublication(publicationGateway(fixture, "batch2-upstream"), fixture);
+      let arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-upstream", () =>
+        { fixture.reassignUpstream("publication-wrong-upstream"); arranged = publicationBaseline(fixture); }), fixture);
       const after = publicationBaseline(fixture);
       expect("upstream mismatch creates no commit", after.head, arranged.head);
       expect("upstream mismatch pushes no ref", after.remote, arranged.remote);
@@ -710,9 +755,9 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
   await runPublicationScenario("pre-commit remote divergence refusal", async () => {
     const fixture = createDisposableGitHarness();
     try {
-      fixture.advanceRemoteIndependently("fixture: remote changed before publication commit");
-      const arranged = publicationBaseline(fixture);
-      const response = await requestPublication(publicationGateway(fixture, "batch2-remote-divergence"), fixture);
+      let arranged = publicationBaseline(fixture);
+      const response = await requestPublication(publicationGateway(fixture, "batch2-remote-divergence", () =>
+        { fixture.advanceRemoteIndependently("fixture: remote changed before publication commit"); arranged = publicationBaseline(fixture); }), fixture);
       const after = publicationBaseline(fixture);
       expect("remote divergence creates no local commit", after.head, arranged.head);
       expect("remote divergence pushes no replacement ref", after.remote, arranged.remote);

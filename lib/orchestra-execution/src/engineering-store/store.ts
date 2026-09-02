@@ -1,9 +1,9 @@
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createAssignment, hashAssignment } from "../assignment-hash.js";
-import { deepFreeze, type FrozenAssignment, type OrchestraAssignment } from "../assignment.js";
+import { deepFreeze, sortKeys, type FrozenAssignment, type OrchestraAssignment } from "../assignment.js";
 import { isForgotIdentifierRepository } from "../hooks/project-hook.js";
-import { appendLineAtomic, writeFileExclusiveAtomic } from "./atomic-write.js";
+import { appendLineAtomic, sha256Utf8, writeFileExclusiveAtomic } from "./atomic-write.js";
 import {
   buildVerifierAuthorizationReceipt,
   validateVerifierAuthorizationReceipt,
@@ -46,6 +46,8 @@ import {
   type GovernedContinuationTargetLifecycleRecord,
   type GovernedContinuationTargetRecord,
   type GovernedContinuationTargetStatus,
+  type GovernedCandidateAcceptanceRecord,
+  type GovernedCandidatePublicationRecord,
   type PostDecisionActionRecord,
   type PostDecisionExecutionAuthorizationRecord,
   type StatusEvent,
@@ -265,6 +267,60 @@ export class FileEngineeringStore {
     return readdirSync(this.assignmentsDir())
       .filter((name) => existsSync(this.assignmentPath(name)))
       .sort();
+  }
+
+  persistGovernedCandidateAcceptance(record: GovernedCandidateAcceptanceRecord): GovernedCandidateAcceptanceRecord {
+    const { acceptanceHash, ...body } = record;
+    if (sha256Utf8(JSON.stringify(sortKeys(body))) !== acceptanceHash) throw new EngineeringStoreError("acceptance_hash_mismatch");
+    const decision = this.findVerificationDecisionById(record.verificationDecisionId);
+    if (!decision || decision.decision !== "VERIFIED" || decision.decisionHash !== record.decisionHash ||
+        decision.verifierAssignmentId !== record.verifierAssignmentId ||
+        decision.verifierExecutionEvidenceId !== record.verifierExecutionEvidenceId ||
+        decision.verifiedExecutorAssignmentId !== record.executorAssignmentId ||
+        decision.verifiedExecutorExecutionEvidenceId !== record.executorExecutionEvidenceId) {
+      throw new EngineeringStoreError("acceptance_verified_linkage_mismatch");
+    }
+    const executor = this.loadFrozenAssignment(record.executorAssignmentId);
+    const verifier = this.loadFrozenAssignment(record.verifierAssignmentId);
+    const executorEvidence = this.loadExecutionEvidenceById(record.executorAssignmentId, record.executorExecutionEvidenceId);
+    const verifierEvidence = this.loadExecutionEvidenceById(record.verifierAssignmentId, record.verifierExecutionEvidenceId);
+    if (executor.assignmentHash !== record.executorAssignmentHash || verifier.assignmentHash !== record.verifierAssignmentHash ||
+        executorEvidence.evidenceHash !== record.executorExecutionEvidenceHash || verifierEvidence.evidenceHash !== record.verifierExecutionEvidenceHash) {
+      throw new EngineeringStoreError("acceptance_evidence_binding_mismatch");
+    }
+    const existing = this.loadGovernedCandidateAcceptances().find((row) => row.acceptanceId === record.acceptanceId);
+    if (existing) {
+      if (existing.acceptanceHash !== record.acceptanceHash) throw new EngineeringStoreError("acceptance_id_conflict");
+      return existing;
+    }
+    appendLineAtomic(this.candidateAcceptancesPath(), JSON.stringify(record));
+    return record;
+  }
+
+  loadGovernedCandidateAcceptances(): GovernedCandidateAcceptanceRecord[] {
+    const path = this.candidateAcceptancesPath();
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8").split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line) as GovernedCandidateAcceptanceRecord);
+  }
+
+  persistGovernedCandidatePublication(record: GovernedCandidatePublicationRecord): GovernedCandidatePublicationRecord {
+    const { publicationHash, ...body } = record;
+    if (sha256Utf8(JSON.stringify(sortKeys(body))) !== publicationHash) throw new EngineeringStoreError("publication_hash_mismatch");
+    const acceptance = this.loadGovernedCandidateAcceptances().find((row) => row.acceptanceId === record.acceptanceId);
+    if (!acceptance || acceptance.acceptanceHash !== record.acceptanceHash) throw new EngineeringStoreError("publication_acceptance_binding_mismatch");
+    const existing = this.loadGovernedCandidatePublications().find((row) => row.acceptanceId === record.acceptanceId);
+    if (existing) {
+      if (existing.publicationHash !== record.publicationHash) throw new EngineeringStoreError("publication_id_conflict");
+      return existing;
+    }
+    appendLineAtomic(this.candidatePublicationsPath(), JSON.stringify(record));
+    return record;
+  }
+
+  loadGovernedCandidatePublications(): GovernedCandidatePublicationRecord[] {
+    const path = this.candidatePublicationsPath();
+    if (!existsSync(path)) return [];
+    return readFileSync(path, "utf8").split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line) as GovernedCandidatePublicationRecord);
   }
 
   persistVerifierAuthorizationReceipt(input: {
@@ -1355,6 +1411,9 @@ export class FileEngineeringStore {
   private crashPath(): string {
     return join(this.storeRoot, "crash-receipts.ndjson");
   }
+
+  private candidateAcceptancesPath(): string { return join(this.storeRoot, "candidate-acceptances.jsonl"); }
+  private candidatePublicationsPath(): string { return join(this.storeRoot, "candidate-publications.jsonl"); }
 
   private assignmentsDir(): string {
     return join(this.storeRoot, "assignments");

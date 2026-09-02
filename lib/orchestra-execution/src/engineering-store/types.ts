@@ -115,6 +115,50 @@ export interface VerificationDecisionRecord {
   decisionHash: string;
 }
 
+/** One-shot human acceptance of one VERIFIED working-tree candidate. */
+export interface GovernedCandidateAcceptanceRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "governed_candidate_acceptance";
+  acceptanceId: string;
+  repository: string;
+  branch: string;
+  startingHead: string;
+  upstream: string;
+  remoteName: string;
+  remoteUrl: string;
+  remoteBaseline: string;
+  verifierAssignmentId: string;
+  verifierAssignmentHash: string;
+  verifierExecutionEvidenceId: string;
+  verifierExecutionEvidenceHash: string;
+  verificationDecisionId: string;
+  decisionHash: string;
+  executorAssignmentId: string;
+  executorAssignmentHash: string;
+  executorExecutionEvidenceId: string;
+  executorExecutionEvidenceHash: string;
+  candidatePaths: string[];
+  candidateContentSha256: Record<string, string | null>;
+  protectedStateSha256: Record<string, string | null>;
+  expectedStagedPaths: [];
+  commitSubject: string;
+  publicationIntent: "commit_and_normal_push_exact_refspec";
+  acceptedPhrase: "Accept and publish";
+  acceptedAt: string;
+  acceptanceHash: string;
+}
+
+export interface GovernedCandidatePublicationRecord {
+  schemaVersion: typeof ENGINEERING_STORE_SCHEMA_VERSION;
+  recordKind: "governed_candidate_publication";
+  acceptanceId: string;
+  acceptanceHash: string;
+  commit: string;
+  refspec: string;
+  publishedAt: string;
+  publicationHash: string;
+}
+
 /**
  * Bounded post-decision action vocabulary (IMP 038).
  * Preparation only — never implies dispatch, commit, or push.
