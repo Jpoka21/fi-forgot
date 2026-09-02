@@ -3,8 +3,13 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { InteractiveCodexGateway } from "../interactive-codex-gateway.js";
+import { createAssignment } from "../assignment-hash.js";
+import { buildExecutionEvidence } from "../engineering-store/evidence.js";
 import { FileEngineeringStore } from "../engineering-store/store.js";
+import { buildVerificationDecisionRecord } from "../engineering-store/verification-decision-record.js";
 import { MockExecutionProvider } from "../providers/mock-provider.js";
+import { synthesizeExecutionResult } from "../result.js";
+import type { ExecutionEvidence, VerificationDecisionRecord } from "../engineering-store/types.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
 
 const CANDIDATE_PATH = "lib/orchestra-execution/gateway-fixture.txt";
@@ -336,7 +341,8 @@ export type InteractiveCodexGatewayTestSelection =
   | "baseline"
   | "publication-contract"
   | "publication-batch-1"
-  | "publication-batch-2";
+  | "publication-batch-2"
+  | "publication-batch-3-verification-fixture";
 export type InteractiveCodexGatewayTestRunner = () => Promise<void>;
 
 let baselineRuns = 0;
@@ -349,7 +355,8 @@ export function selectInteractiveCodexGatewayTestRunner(
   if (selection === "baseline") return runInteractiveCodexGatewayTests;
   if (selection === "publication-contract") return runInteractiveCodexGatewayPublicationContractTests;
   if (selection === "publication-batch-1") return runInteractiveCodexGatewayPublicationBatch1Tests;
-  return runInteractiveCodexGatewayPublicationBatch2Tests;
+  if (selection === "publication-batch-2") return runInteractiveCodexGatewayPublicationBatch2Tests;
+  return runInteractiveCodexGatewayPublicationBatch3VerificationFixtureTests;
 }
 
 /** Test-architecture smoke proof only; intentionally contains no publication behavior. */
@@ -717,4 +724,173 @@ export async function runInteractiveCodexGatewayPublicationBatch2Tests(): Promis
   }, failures);
 
   if (failures.length) throw new Error(`publication-batch-2 semantic failures:\n${failures.join("\n")}`);
+}
+
+export type VerifierExecutionEvidenceLocator = Pick<ExecutionEvidence, "assignmentId" | "evidenceId">;
+export type VerificationDecisionLocator = Pick<
+  VerificationDecisionRecord,
+  "verifierAssignmentId" | "verificationDecisionId"
+>;
+
+export function locateVerifierExecutionEvidence(evidence: ExecutionEvidence): VerifierExecutionEvidenceLocator {
+  return { assignmentId: evidence.assignmentId, evidenceId: evidence.evidenceId };
+}
+
+export function locateVerificationDecision(decision: VerificationDecisionRecord): VerificationDecisionLocator {
+  return {
+    verifierAssignmentId: decision.verifierAssignmentId,
+    verificationDecisionId: decision.verificationDecisionId,
+  };
+}
+
+/** One persistence-only publication fixture spanning executor evidence through verification decision. */
+export async function runInteractiveCodexGatewayPublicationBatch3VerificationFixtureTests(): Promise<void> {
+  section("Interactive Codex Gateway publication-batch-3 verification fixture");
+  expect(
+    "publication Batch 3 verification fixture selection routes independently",
+    selectInteractiveCodexGatewayTestRunner("publication-batch-3-verification-fixture"),
+    runInteractiveCodexGatewayPublicationBatch3VerificationFixtureTests,
+  );
+
+  const repositoryRoot = mkdtempSync(join(tmpdir(), "orchestra-publication-batch-3-repository-"));
+  const storeRoot = mkdtempSync(join(tmpdir(), "orchestra-publication-batch-3-store-"));
+  let failure: unknown;
+  try {
+    const store = new FileEngineeringStore(storeRoot);
+    const createdAt = "2026-09-02T12:00:00.000Z";
+    const providerId = "publication-batch-3-mock-provider";
+    const executor = createAssignment({
+      assignmentId: "publication-batch-3-executor",
+      projectId: "publication-batch-3-fixture",
+      role: "executor",
+      repositoryPath: repositoryRoot,
+      branch: "frontend-rebuild",
+      startingHead: "1111111111111111111111111111111111111111",
+      assignmentText: "Persist the bounded publication verification fixture.",
+      allowedPaths: [CANDIDATE_PATH],
+      protectedPaths: [PROTECTED_PATH],
+      requireNoPush: true,
+      commitAuthorization: false,
+      pushAuthorization: false,
+      requiredEvidence: [],
+      createdAt,
+    });
+    store.persistFrozenAssignment(executor);
+    const executorResult = synthesizeExecutionResult({
+      frozen: executor,
+      providerId,
+      providerSessionId: "publication-batch-3-executor-session",
+      runId: "publication-batch-3-executor-run",
+      providerStatus: "finished",
+      normalizedEvents: [{ type: "run_finished", timestamp: createdAt }],
+      providerFinalResultText: "mock executor completed",
+      preRunGitEvidence: null,
+      postRunGitEvidence: null,
+      policyDenials: [],
+      changedPaths: [CANDIDATE_PATH],
+      protectedPathMutationOccurred: false,
+      branchChanged: false,
+      headChanged: false,
+      commitOccurred: false,
+      unexpectedChanges: [],
+    });
+    const executorEvidence = store.persistExecutionEvidence(buildExecutionEvidence({
+      frozen: executor,
+      result: executorResult,
+      providerStarted: true,
+      recordedAt: "2026-09-02T12:01:00.000Z",
+    }));
+
+    const verifier = createAssignment({
+      ...executor.assignment,
+      assignmentId: "publication-batch-3-verifier",
+      role: "verifier",
+      assignmentText: "Verify the exact persisted executor assignment and execution evidence.",
+      allowedPaths: [],
+      requiredEvidence: ["executor_execution_evidence"],
+      createdAt: "2026-09-02T12:02:00.000Z",
+    });
+    store.persistFrozenAssignment(verifier, {
+      relationship: {
+        verifiesAssignmentId: executor.assignment.assignmentId,
+        verifiesExecutionEvidenceId: executorEvidence.evidenceId,
+      },
+    });
+    const verifierResult = synthesizeExecutionResult({
+      frozen: verifier,
+      providerId,
+      providerSessionId: "publication-batch-3-verifier-session",
+      runId: "publication-batch-3-verifier-run",
+      providerStatus: "finished",
+      normalizedEvents: [{ type: "run_finished", timestamp: "2026-09-02T12:03:00.000Z" }],
+      providerFinalResultText: "mock verifier completed",
+      preRunGitEvidence: null,
+      postRunGitEvidence: null,
+      policyDenials: [],
+      changedPaths: [],
+      protectedPathMutationOccurred: false,
+      branchChanged: false,
+      headChanged: false,
+      commitOccurred: false,
+      unexpectedChanges: [],
+    });
+    const verifierEvidence = store.persistExecutionEvidence(buildExecutionEvidence({
+      frozen: verifier,
+      result: verifierResult,
+      providerStarted: true,
+      recordedAt: "2026-09-02T12:03:00.000Z",
+    }));
+    const decision = store.persistVerificationDecision(buildVerificationDecisionRecord({
+      verifierAssignmentId: verifier.assignment.assignmentId,
+      verifierAssignmentHash: verifier.assignmentHash,
+      verifierExecutionEvidenceId: verifierEvidence.evidenceId,
+      verifiedExecutorAssignmentId: executor.assignment.assignmentId,
+      verifiedExecutorExecutionEvidenceId: executorEvidence.evidenceId,
+      decision: "VERIFIED",
+      decisionReasonCodes: ["publication_batch_3_fixture_complete"],
+      decidedAt: "2026-09-02T12:04:00.000Z",
+    }));
+
+    const verifierExecutionEvidenceLocator = locateVerifierExecutionEvidence(verifierEvidence);
+    const verificationDecisionLocator = locateVerificationDecision(decision);
+    const reloaded = new FileEngineeringStore(storeRoot);
+    expect("executor assignment reloads exactly", reloaded.loadFrozenAssignment(executor.assignment.assignmentId), executor);
+    expect("executor evidence reloads exactly", reloaded.loadExecutionEvidenceById(executor.assignment.assignmentId, executorEvidence.evidenceId), executorEvidence);
+    expect("verifier assignment reloads exactly", reloaded.loadFrozenAssignment(verifier.assignment.assignmentId), verifier);
+    expect(
+      "verifier relationship retains exact executor linkage",
+      reloaded.loadAssignmentRecord(verifier.assignment.assignmentId).relationship,
+      {
+        verifiesAssignmentId: executor.assignment.assignmentId,
+        verifiesExecutionEvidenceId: executorEvidence.evidenceId,
+      },
+    );
+    expect(
+      "typed verifier execution evidence locator reloads exactly",
+      reloaded.loadExecutionEvidenceById(
+        verifierExecutionEvidenceLocator.assignmentId,
+        verifierExecutionEvidenceLocator.evidenceId,
+      ),
+      verifierEvidence,
+    );
+    expect(
+      "typed verification decision locator reloads exactly",
+      reloaded.findVerificationDecisionById(verificationDecisionLocator.verificationDecisionId),
+      decision,
+    );
+    expect("decision locator retains exact verifier assignment", verificationDecisionLocator.verifierAssignmentId, verifier.assignment.assignmentId);
+    expect("decision links exact verifier evidence", decision.verifierExecutionEvidenceId, verifierEvidence.evidenceId);
+    expect("decision links exact executor assignment", decision.verifiedExecutorAssignmentId, executor.assignment.assignmentId);
+    expect("decision links exact executor evidence", decision.verifiedExecutorExecutionEvidenceId, executorEvidence.evidenceId);
+    expect("missing unrelated execution evidence remains absent", reloaded.loadExecutionEvidence("publication-batch-3-unrelated"), []);
+    expect("missing unrelated verification decision remains absent", reloaded.findVerificationDecisionById("vdec-publication-batch-3-unrelated"), null);
+  } catch (error) {
+    failure = error;
+  } finally {
+    rmSync(storeRoot, { recursive: true, force: true });
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+  expectFalse("publication Batch 3 store root cleanup succeeds", existsSync(storeRoot));
+  expectFalse("publication Batch 3 repository root cleanup succeeds", existsSync(repositoryRoot));
+  if (failure) throw failure;
 }
