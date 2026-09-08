@@ -100,7 +100,37 @@ export function resolveMachineRequirement(input: {
       return { outcome: "requirement_satisfied", reasonCode: "executor_evidence_linked", evidenceReferences: refs };
     }
     case "required_evidence": {
-      if (input.executorEvidence.requiredEvidenceMissing.length > 0) {
+      const missing = input.executorEvidence.requiredEvidenceMissing;
+      if (missing.length > 0) {
+        const deferredCommands = missing.map((item) => {
+          const separator = item.indexOf(":");
+          const key = item.toLowerCase();
+          if (key === "test") return "npm test";
+          if (!key.startsWith("test:") || separator < 0) return null;
+          return item.slice(separator + 1).trim() || null;
+        });
+        const verifierRequirements = input.verifierRecord?.frozen.assignment.verificationRequirements ?? [];
+        const commandRequirements = verifierRequirements.filter(
+          (row) => row.requirementKind === "required_tests" && row.commandRequirement,
+        );
+        const exactCorrespondence =
+          deferredCommands.every((command): command is string => command !== null) &&
+          commandRequirements.length === deferredCommands.length &&
+          deferredCommands.every((command) =>
+            commandRequirements.filter((row) => row.commandRequirement!.command === command).length === 1,
+          );
+        if (exactCorrespondence) {
+          const commandOutcomes = commandRequirements.map((requirement) =>
+            resolveMachineRequirement({ ...input, requirement }),
+          );
+          if (commandOutcomes.every((finding) => finding.outcome === "requirement_satisfied")) {
+            return {
+              outcome: "requirement_satisfied",
+              reasonCode: "required_evidence_present",
+              evidenceReferences: [...refs, ...new Set(commandOutcomes.flatMap((finding) => finding.evidenceReferences))],
+            };
+          }
+        }
         return {
           outcome: "evidence_insufficient",
           reasonCode: "required_evidence_missing",

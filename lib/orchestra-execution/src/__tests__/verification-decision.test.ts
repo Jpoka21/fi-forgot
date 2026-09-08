@@ -381,6 +381,17 @@ async function runFiveCommandRequirementTest(): Promise<void> {
   expect("five command requirements frozen", frozenChecks.length, 5);
   expect("stable ordered check ids", frozenChecks.map((row) => row.checkId), ["test-1", "test-2", "test-3", "test-4", "test-5"]);
   expect("exact commands frozen", frozenChecks.map((row) => row.command), commands);
+  const requiredEvidenceRequirement = (verifier.frozen.assignment.verificationRequirements ?? [])
+    .find((row) => row.requirementId === "req:required_evidence")!;
+  const beforeVerifierEvidence = resolveMachineRequirement({
+    requirement: requiredEvidenceRequirement,
+    executorRecord: executor.store.loadAssignmentRecord(assignmentId),
+    executorEvidence: executor.evidence,
+    verifierRecord: verifier,
+  });
+  expect("deferred tests retain req:required_evidence", requiredEvidenceRequirement.requirementId, "req:required_evidence");
+  expect("deferred tests preserve prior missing reason", beforeVerifierEvidence.reasonCode, "required_evidence_missing");
+  expectFalse("absent verifier commands do not satisfy required evidence", beforeVerifierEvidence.outcome === "requirement_satisfied");
   const events: NormalizedExecutionEvent[] = [];
   for (const check of frozenChecks) {
     for (const phase of ["started", "completed"] as const) {
@@ -408,8 +419,20 @@ async function runFiveCommandRequirementTest(): Promise<void> {
     verifierAssignmentId: verifier.frozen.assignment.assignmentId,
   });
   const commandFindings = adjudicated.authoritativeFindings.filter((row) => row.requirementId.startsWith("req:required_tests:"));
+  const requiredEvidenceFinding = adjudicated.authoritativeFindings.find((row) => row.requirementId === "req:required_evidence");
   expect("all five command findings published", commandFindings.length, 5);
   expectTrue("all five commands required and passed", commandFindings.every((row) => row.outcome === "requirement_satisfied"));
+  expect("five commands satisfy deferred required evidence", requiredEvidenceFinding?.outcome, "requirement_satisfied");
+  expect("satisfied deferred evidence has present reason", requiredEvidenceFinding?.reasonCode, "required_evidence_present");
+  const nonTestMissing = resolveMachineRequirement({
+    requirement: requiredEvidenceRequirement,
+    executorRecord: executor.store.loadAssignmentRecord(assignmentId),
+    executorEvidence: { ...executor.evidence, requiredEvidenceMissing: [...executor.evidence.requiredEvidenceMissing, "artifact"] },
+    verifierRecord: verifier,
+    verifierEvidence: executor.store.loadLatestExecutionEvidence(verifier.frozen.assignment.assignmentId)!,
+  });
+  expect("non-test missing evidence remains insufficient", nonTestMissing.outcome, "evidence_insufficient");
+  expect("non-test missing evidence retains missing reason", nonTestMissing.reasonCode, "required_evidence_missing");
   expect("all five passing commands permit VERIFIED", adjudicated.decision, "VERIFIED");
 }
 
@@ -480,6 +503,10 @@ async function runFiveCommandAdversarialContracts(): Promise<void> {
       verifierAssignmentId: verifier.frozen.assignment.assignmentId,
     });
     expectFalse(`${suffix}: malformed five-check evidence is not VERIFIED`, result.decision === "VERIFIED");
+    const requiredEvidenceFinding = result.authoritativeFindings.find((row) => row.requirementId === "req:required_evidence");
+    expectTrue(`${suffix}: req:required_evidence remains authoritative`, Boolean(requiredEvidenceFinding));
+    expect(`${suffix}: corrupt commands retain required_evidence_missing`, requiredEvidenceFinding?.reasonCode, "required_evidence_missing");
+    expectFalse(`${suffix}: corrupt commands do not satisfy required evidence`, requiredEvidenceFinding?.outcome === "requirement_satisfied");
     const finding = result.authoritativeFindings.find((row) => row.requirementId === `req:required_tests:${expectedCheckId}`);
     expectTrue(`${suffix}: finding remains tied to ${expectedCheckId}`, Boolean(finding));
     expectFalse(`${suffix}: ${expectedCheckId} is not satisfied`, finding?.outcome === "requirement_satisfied");
