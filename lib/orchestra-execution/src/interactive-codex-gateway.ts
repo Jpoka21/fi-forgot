@@ -2,7 +2,7 @@ import type { ExecutionProvider } from "./provider-contract.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
-import { sortKeys } from "./assignment.js";
+import { sortKeys, type OwnerVerifierCheckDefinition } from "./assignment.js";
 import { sha256Utf8 } from "./engineering-store/atomic-write.js";
 import { ENGINEERING_STORE_SCHEMA_VERSION, type GovernedCandidateAcceptanceRecord,
   type VerificationDecisionRecord } from "./engineering-store/types.js";
@@ -34,6 +34,10 @@ export interface InteractiveCodexGatewayOptions {
   /** Test-only interlock used to prove acceptance-to-mutation drift refusals. */
   publicationInterlock?: () => void;
 }
+export interface GatewayOwnerSubmissionInput {
+  ownerText: string;
+  ownerVerifierChecks?: readonly OwnerVerifierCheckDefinition[];
+}
 
 /** Conversational façade over Orchestra authority; deliberately Codex-only. */
 export class InteractiveCodexGateway {
@@ -49,7 +53,11 @@ export class InteractiveCodexGateway {
     this.providerFactory = options.providerFactory ?? (() => resolveActiveExecutionProvider());
     this.publicationInterlock = options.publicationInterlock;
   }
-  async converse(input: string): Promise<GatewayResponse> {
+  async converse(input: string | GatewayOwnerSubmissionInput): Promise<GatewayResponse> {
+    if (typeof input !== "string") {
+      try { return this.submit(input.ownerText, input.ownerVerifierChecks); }
+      catch (error) { return this.refuse(error instanceof Error ? error.message : String(error)); }
+    }
     const text = input.trim();
     if (!text) return this.refuse("A development request or gateway command is required.");
     if (text === "Accept and publish") {
@@ -78,9 +86,9 @@ export class InteractiveCodexGateway {
     }
     return provider;
   }
-  private submit(ownerText: string): GatewayResponse {
+  private submit(ownerText: string, ownerVerifierChecks?: readonly OwnerVerifierCheckDefinition[]): GatewayResponse {
     const result = submitOwnerRequest({ repository: this.repository, storeRoot: this.storeRoot,
-      ownerText, protectedPaths: this.protectedPaths });
+      ownerText, protectedPaths: this.protectedPaths, ownerVerifierChecks });
     return { ok: true, phase: "authority_required",
       message: `Frozen ${result.assignmentId}. To grant exact owner authority: /dispatch ${result.assignmentId} ${result.assignmentId}`,
       data: result };

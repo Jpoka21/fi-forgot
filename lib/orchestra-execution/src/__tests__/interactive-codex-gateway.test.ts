@@ -309,6 +309,17 @@ export async function runInteractiveCodexGatewayTests(): Promise<void> {
     expect("frozen request has no execution evidence", store.loadExecutionEvidence(submission.assignmentId), []);
     expectTrue("protected paths retained", store.loadFrozenAssignment(submission.assignmentId).assignment.protectedPaths.length > 0);
 
+    const governedChecks = [{ checkId: "gateway-test", command: "pnpm test", invocation: ["pnpm", "test"],
+      workingDirectory: "lib/orchestra-execution", expectedStatus: "completed" as const, expectedExitCode: 0 as const }];
+    const checkedPlan = await gateway.converse({ ownerText: "Test gateway behavior in lib/orchestra-execution", ownerVerifierChecks: governedChecks });
+    expect("structured gateway submission freezes checks", checkedPlan.phase, "authority_required");
+    const checkedSubmission = checkedPlan.data as any;
+    expect("gateway preserves exact structured invocation",
+      store.loadFrozenAssignment(checkedSubmission.assignmentId).assignment.ownerVerifierChecks, governedChecks);
+    const duplicateIds = await gateway.converse({ ownerText: "Test gateway behavior in lib/orchestra-execution", ownerVerifierChecks: [governedChecks[0]!, governedChecks[0]!] });
+    expect("gateway rejects duplicate check ids", duplicateIds.phase, "refused");
+    expect("gateway validation creates no provider", providersCreated, 0);
+
     const noVerifiedCandidate = await gateway.converse("Accept and publish");
     expect("exact publication phrase fails closed without VERIFIED evidence", noVerifiedCandidate.phase, "refused");
     expectTrue("missing candidate refusal is specific", noVerifiedCandidate.message.includes("no_eligible_verified_candidate"));

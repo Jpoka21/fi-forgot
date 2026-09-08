@@ -5,6 +5,16 @@
 
 import type { StructuredObligation, VerificationRequirementRef } from "./verification-requirements.js";
 
+export interface OwnerVerifierCheckDefinition {
+  checkId: string;
+  command: string;
+  invocation: string[];
+  /** Repository-relative directory; "." denotes the repository root. */
+  workingDirectory: string;
+  expectedStatus: "completed";
+  expectedExitCode: 0;
+}
+
 export const ASSIGNMENT_ROLES = ["executor", "verifier"] as const;
 export type AssignmentRole = (typeof ASSIGNMENT_ROLES)[number];
 
@@ -46,6 +56,8 @@ export interface OrchestraAssignment {
    * Verifier-only structured requirement catalog for semantic adjudication.
    */
   verificationRequirements?: VerificationRequirementRef[];
+  /** Ordered owner-defined checks frozen before executor dispatch. */
+  ownerVerifierChecks?: OwnerVerifierCheckDefinition[];
   createdAt: string;
 }
 
@@ -66,6 +78,7 @@ export interface AssignmentInput {
   requiredEvidence?: string[];
   structuredObligations?: StructuredObligation[];
   verificationRequirements?: VerificationRequirementRef[];
+  ownerVerifierChecks?: OwnerVerifierCheckDefinition[];
   createdAt?: string;
 }
 
@@ -94,6 +107,49 @@ function uniqueStrings(values: string[] | undefined): string[] {
     out.push(trimmed);
   }
   return out;
+}
+
+export function normalizeOwnerVerifierChecks(
+  checks: readonly OwnerVerifierCheckDefinition[] | undefined,
+): OwnerVerifierCheckDefinition[] {
+  if (checks === undefined) return [];
+  if (!Array.isArray(checks)) throw new Error("verifier_checks_invalid: expected an array");
+  const ids = new Set<string>();
+  return checks.map((check, index) => {
+    if (!check || typeof check !== "object" || Array.isArray(check)) {
+      throw new Error(`verifier_check_invalid: check ${index + 1} must be an object`);
+    }
+    const supportedFields = new Set(["checkId", "command", "invocation", "workingDirectory", "expectedStatus", "expectedExitCode"]);
+    const ambiguousFields = Object.keys(check).filter((field) => !supportedFields.has(field));
+    if (ambiguousFields.length) {
+      throw new Error(`verifier_check_ambiguous_fields: check ${index + 1}: ${ambiguousFields.sort().join(", ")}`);
+    }
+    const checkId = typeof check.checkId === "string" ? assertNonEmpty("checkId", check.checkId) : "";
+    if (!checkId || !/^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(checkId)) {
+      throw new Error(`verifier_check_unstable_id: ${checkId || index + 1}`);
+    }
+    if (ids.has(checkId)) throw new Error(`verifier_check_duplicate_id: ${checkId}`);
+    ids.add(checkId);
+    if (typeof check.command !== "string" || !check.command.trim()) {
+      throw new Error(`verifier_check_empty_command: ${checkId}`);
+    }
+    if (!Array.isArray(check.invocation) || check.invocation.length === 0 ||
+        check.invocation.some((part) => typeof part !== "string" || !part.trim())) {
+      throw new Error(`verifier_check_invalid_invocation: ${checkId}`);
+    }
+    if (check.expectedStatus !== "completed") throw new Error(`verifier_check_unsupported_status: ${checkId}`);
+    if (check.expectedExitCode !== 0) throw new Error(`verifier_check_unsupported_exit_code: ${checkId}`);
+    if (typeof check.workingDirectory !== "string") {
+      throw new Error(`verifier_check_invalid_working_directory: ${checkId}`);
+    }
+    const workingDirectory = check.workingDirectory.trim().replace(/\\/g, "/").replace(/^\.\//, "").replace(/\/$/, "") || ".";
+    if (workingDirectory.startsWith("/") || /^[A-Za-z]:\//.test(workingDirectory) ||
+        workingDirectory.split("/").some((part) => part === ".." || part === "") || workingDirectory.includes("\0")) {
+      throw new Error(`verifier_check_working_directory_escape: ${checkId}`);
+    }
+    return { checkId, command: check.command, invocation: [...check.invocation], workingDirectory,
+      expectedStatus: "completed", expectedExitCode: 0 };
+  });
 }
 
 export function isAssignmentRole(value: unknown): value is AssignmentRole {
@@ -151,6 +207,9 @@ export function normalizeAssignment(input: AssignmentInput): OrchestraAssignment
       : {}),
     ...(input.verificationRequirements && input.verificationRequirements.length > 0
       ? { verificationRequirements: input.verificationRequirements }
+      : {}),
+    ...(input.ownerVerifierChecks && input.ownerVerifierChecks.length > 0
+      ? { ownerVerifierChecks: normalizeOwnerVerifierChecks(input.ownerVerifierChecks) }
       : {}),
     createdAt: input.createdAt ?? new Date().toISOString(),
   };

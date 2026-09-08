@@ -14,6 +14,7 @@ import { dispatchInitialGovernedExecutorAssignment } from "./governed-executor-c
 import { loadInitialDispatchAuthorities, validateInitialDispatchAuthority } from "./engineering-store/initial-dispatch-authority.js";
 import { FileEngineeringStore } from "./engineering-store/store.js";
 import { defaultEngineeringStoreRoot, submitOwnerRequest, validateProjectBinding } from "./owner-submit.js";
+import type { OwnerVerifierCheckDefinition } from "./assignment.js";
 import type {
   AssignmentCurrentState,
   PostDecisionActionRecord,
@@ -40,7 +41,7 @@ export const OWNER_CLI_HELP = `Usage: orchestra <command> [options]
 
 Commands:
   status
-  submit "OWNER REQUEST"
+  submit "OWNER REQUEST" [--verifier-checks JSON]
   dispatch ASSIGNMENT_ID --confirm ASSIGNMENT_ID [--provider codex|cursor]
   authorize ACTION_ID --confirm ACTION_ID
   continue ACTION_ID --authorization AUTHORIZATION_ID [--provider codex|cursor]
@@ -65,6 +66,7 @@ interface ParsedArgs {
   confirmation: string | null;
   authorizationId: string | null;
   providerId: string | null;
+  verifierChecks: OwnerVerifierCheckDefinition[] | null;
 }
 
 interface GitSnapshot {
@@ -115,7 +117,7 @@ function inspectGit(repositoryPath: string): GitSnapshot {
 }
 
 function parseArgs(argv: string[], cwd: string): ParsedArgs {
-  const valueOptions = new Set(["--store", "--repository", "--confirm", "--authorization", "--provider"]);
+  const valueOptions = new Set(["--store", "--repository", "--confirm", "--authorization", "--provider", "--verifier-checks"]);
   const options = new Map<string, string>();
   const positionals: string[] = [];
   let help = false;
@@ -141,6 +143,13 @@ function parseArgs(argv: string[], cwd: string): ParsedArgs {
   }
   const repositoryPath = resolve(options.get("--repository") ?? cwd);
   const rawStore = options.get("--store") ?? process.env.ORCHESTRA_ENGINEERING_STORE ?? defaultEngineeringStoreRoot(repositoryPath);
+  let verifierChecks: OwnerVerifierCheckDefinition[] | null = null;
+  const rawChecks = options.get("--verifier-checks");
+  if (rawChecks !== undefined) {
+    const parsed = JSON.parse(rawChecks) as unknown;
+    if (!Array.isArray(parsed)) throw new Error("--verifier-checks must be a JSON array");
+    verifierChecks = parsed as OwnerVerifierCheckDefinition[];
+  }
   return {
     command: positionals.shift() ?? null,
     positionals,
@@ -151,6 +160,7 @@ function parseArgs(argv: string[], cwd: string): ParsedArgs {
     confirmation: options.get("--confirm") ?? null,
     authorizationId: options.get("--authorization") ?? null,
     providerId: options.get("--provider") ?? null,
+    verifierChecks,
   };
 }
 
@@ -321,13 +331,14 @@ export async function runOwnerCli(argv: string[], io: OwnerCliIo, cwd = process.
   }
   try {
     if (args.help || args.command === "help") {
-      if ((!args.help && args.positionals.length) || args.confirmation || args.authorizationId || args.providerId || args.json) {
+      if ((!args.help && args.positionals.length) || args.confirmation || args.authorizationId || args.providerId || args.json || args.verifierChecks !== null) {
         throw new Error("help accepts only --repository and --store");
       }
       io.out(OWNER_CLI_HELP);
       return { exitCode: OWNER_CLI_EXIT.ok };
     }
     if (!args.command) throw new Error("command_required: use help, status, submit, dispatch, authorize, continue, or resume");
+    if (args.command !== "submit" && args.verifierChecks !== null) throw new Error("--verifier-checks is accepted only by submit");
     if (args.command === "status") {
       if (args.positionals.length || args.confirmation || args.authorizationId || args.providerId) throw new Error("status accepts only --json, --store, and --repository");
       const payload = buildStatus(args);
@@ -336,11 +347,12 @@ export async function runOwnerCli(argv: string[], io: OwnerCliIo, cwd = process.
     }
     if (args.command === "submit") {
       if (args.confirmation || args.authorizationId || args.providerId) {
-        throw new Error("submit accepts only owner text, --json, --store, and --repository");
+        throw new Error("submit accepts only owner text, --verifier-checks, --json, --store, and --repository");
       }
       if (args.positionals.length !== 1) throw new Error("submit requires exactly one quoted OWNER REQUEST");
       const storeRoot = args.storeRoot ?? defaultEngineeringStoreRoot(args.repositoryPath);
-      const payload = submitOwnerRequest({ repository: args.repositoryPath, storeRoot, ownerText: args.positionals[0]!, protectedPaths: PROTECTED_WRITING_QUALITY_PATHS });
+      const payload = submitOwnerRequest({ repository: args.repositoryPath, storeRoot, ownerText: args.positionals[0]!, protectedPaths: PROTECTED_WRITING_QUALITY_PATHS,
+        ownerVerifierChecks: args.verifierChecks ?? undefined });
       if (args.json) output(payload, true, io);
       else io.out([`Frozen assignment ${payload.duplicate ? "already exists" : "created"}: ${payload.assignmentId}`, `Project: ${payload.project}`, `Scope: ${payload.allowedPaths.join(", ")}`, `Authorized: no`, `Executed: no`, `Commit / push: no / no`, `Next: ${payload.nextSafeOwnerAction}`].join("\n"));
       return { exitCode: 0, payload };

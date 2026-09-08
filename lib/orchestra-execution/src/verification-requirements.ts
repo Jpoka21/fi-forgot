@@ -1,4 +1,5 @@
 import type { OrchestraAssignment } from "./assignment.js";
+import { resolve } from "node:path";
 import type { ExecutionEvidence } from "./engineering-store/types.js";
 
 export const VERIFIER_REQUIREMENT_KINDS = [
@@ -134,18 +135,23 @@ export function deriveVerifierVerificationRequirements(
   const commands = configuredCommands.length > 0
     ? configuredCommands
     : requiresTests ? ["npm test"] : [];
-  for (const [index, command] of commands.entries()) {
-    const checkId = commands.length === 1 ? "test" : `test-${index + 1}`;
+  const checks = executor.ownerVerifierChecks ?? commands.map((command, index) => ({
+    checkId: commands.length === 1 ? "test" : `test-${index + 1}`,
+    command, invocation: [command], workingDirectory: ".", expectedStatus: "completed" as const,
+    expectedExitCode: 0 as const,
+  }));
+  for (const check of checks) {
+    const { checkId, command } = check;
     requirements.push({
-      requirementId: requiredTestRequirementId(checkId, commands.length),
+      requirementId: requiredTestRequirementId(checkId, checks.length),
       requirementKind: "required_tests",
       requirementClass: "MACHINE_RESOLVABLE",
       verificationMode: "MACHINE_EVIDENCE",
       commandRequirement: commandContext ? {
         checkId,
         command,
-        invocation: [command],
-        workingDirectory: executor.repositoryPath,
+        invocation: [...check.invocation],
+        workingDirectory: resolve(executor.repositoryPath, check.workingDirectory),
         expectedStatus: "completed",
         expectedExitCode: 0,
         verifierAssignmentId: commandContext.verifierAssignmentId,

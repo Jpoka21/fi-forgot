@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, isAbsolute, join, relative, resolve } from "node:path";
 import { createAssignment } from "./assignment-hash.js";
-import type { FrozenAssignment } from "./assignment.js";
+import { normalizeOwnerVerifierChecks, type FrozenAssignment, type OwnerVerifierCheckDefinition } from "./assignment.js";
 import { FileEngineeringStore } from "./engineering-store/store.js";
 import { persistOwnerSubmissionReceipt } from "./engineering-store/initial-dispatch-authority.js";
 
@@ -36,6 +36,7 @@ export interface OwnerSubmission {
   pushAuthorization: false;
   engineeringStore: string;
   nextSafeOwnerAction: string;
+  ownerVerifierChecks?: OwnerVerifierCheckDefinition[];
 }
 
 function git(repository: string, args: string[]): string {
@@ -165,9 +166,11 @@ export function submitOwnerRequest(input: {
   storeRoot: string;
   ownerText: string;
   protectedPaths: readonly string[];
+  ownerVerifierChecks?: readonly OwnerVerifierCheckDefinition[];
 }): OwnerSubmission {
   const ownerText = input.ownerText.trim();
   if (!ownerText) throw new Error("owner_text_required: describe the requested change and name its repository path(s)");
+  const ownerVerifierChecks = normalizeOwnerVerifierChecks(input.ownerVerifierChecks);
   const repository = resolve(input.repository);
   const root = resolve(git(repository, ["rev-parse", "--show-toplevel"]));
   if (root.toLowerCase() !== repository.toLowerCase()) throw new Error("wrong_repository: launcher repository is not the Git root");
@@ -189,7 +192,8 @@ export function submitOwnerRequest(input: {
   }
   const store = new FileEngineeringStore(input.storeRoot);
   ensureProjectBinding(input.storeRoot, repository);
-  const requestKey = digest(JSON.stringify({ repository: repository.toLowerCase(), branch, head, ownerText }));
+  const requestKey = digest(JSON.stringify({ repository: repository.toLowerCase(), branch, head, ownerText,
+    ...(ownerVerifierChecks.length ? { ownerVerifierChecks } : {}) }));
   const assignmentId = `owner-${requestKey.slice(0, 24)}`;
   const assignmentText = [
     "Governed owner request (planning only; not authorization):",
@@ -205,8 +209,10 @@ export function submitOwnerRequest(input: {
     protectedPaths: [...input.protectedPaths].sort(), requireNoPush: true,
     commitAuthorization: false, pushAuthorization: false,
     requiredEvidence: ["git_status", "git_diff", "test_results", "protected_path_audit"],
+    ...(ownerVerifierChecks.length ? { ownerVerifierChecks } : {}),
   });
-  if (existing && (frozen.assignment.assignmentText !== assignmentText || JSON.stringify(frozen.assignment.allowedPaths) !== JSON.stringify(allowedPaths))) {
+  if (existing && (frozen.assignment.assignmentText !== assignmentText || JSON.stringify(frozen.assignment.allowedPaths) !== JSON.stringify(allowedPaths) ||
+      JSON.stringify(frozen.assignment.ownerVerifierChecks ?? []) !== JSON.stringify(ownerVerifierChecks))) {
     throw new Error("duplicate_submit_collision: deterministic assignment id is bound to different content");
   }
   if (!existing) store.persistFrozenAssignment(frozen);
@@ -217,6 +223,7 @@ export function submitOwnerRequest(input: {
     branch, startingHead: head, assignmentText, allowedPaths, protectedPaths: [...input.protectedPaths].sort(),
     requireNoPush: true, commitAuthorization: false, pushAuthorization: false,
     engineeringStore: input.storeRoot,
+    ...(ownerVerifierChecks.length ? { ownerVerifierChecks: frozen.assignment.ownerVerifierChecks } : {}),
     nextSafeOwnerAction: `Run orchestra status, then orchestra dispatch ${assignmentId} --confirm ${assignmentId}.`,
   };
 }

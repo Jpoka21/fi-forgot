@@ -4,6 +4,7 @@ export type {
   FrozenAssignment,
   OrchestraAssignment,
   ProhibitedCommandClass,
+  OwnerVerifierCheckDefinition,
 } from "./assignment.js";
 export {
   ASSIGNMENT_ROLES,
@@ -12,6 +13,7 @@ export {
   deepFreeze,
   isAssignmentRole,
   normalizeAssignment,
+  normalizeOwnerVerifierChecks,
   sortKeys,
 } from "./assignment.js";
 export { assertAssignmentUnchanged, createAssignment, hashAssignment } from "./assignment-hash.js";
@@ -345,4 +347,4 @@ export {
 } from "./github-control-service.js";
 export type { GitHubControlServiceConfig } from "./github-control-service.js";
 export { InteractiveCodexGateway, HELP as INTERACTIVE_CODEX_GATEWAY_HELP } from "./interactive-codex-gateway.js";
-export type { GatewayResponse, InteractiveCodexGatewayOptions } from "./interactive-codex-gateway.js";
+export type { GatewayOwnerSubmissionInput, GatewayResponse, InteractiveCodexGatewayOptions } from "./interactive-codex-gateway.js";
