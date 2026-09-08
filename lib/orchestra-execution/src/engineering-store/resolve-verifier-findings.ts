@@ -139,6 +139,17 @@ export function resolveVerifierSemanticFindings(
   const requirementSet: VerificationRequirementRef[] =
     verifierRecords[0]?.frozen.assignment.verificationRequirements ??
     [];
+  const authoritativeVerifier = verifierRecords[0];
+  let authoritativeVerifierEvidence: ExecutionEvidence | undefined;
+  if (authoritativeVerifier) {
+    try {
+      authoritativeVerifierEvidence = input.store.loadLatestExecutionEvidence(
+        authoritativeVerifier.frozen.assignment.assignmentId,
+      ) ?? undefined;
+    } catch {
+      authoritativeVerifierEvidence = undefined;
+    }
+  }
 
   if (requirementSet.length === 0) {
     // Fall back to deriving from executor if no authorized verifier prepared yet.
@@ -156,6 +167,8 @@ export function resolveVerifierSemanticFindings(
         requirement,
         executorRecord,
         executorEvidence,
+        verifierRecord: authoritativeVerifier,
+        verifierEvidence: authoritativeVerifierEvidence,
       });
       findings.push(
         input.store.persistAuthoritativeSemanticFinding(

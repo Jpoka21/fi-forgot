@@ -57,6 +57,23 @@ export interface VerificationRequirementRef {
   obligationId?: string;
   acceptanceCheckId?: string;
   acceptanceCheck?: FrozenAcceptanceCheckSpec;
+  commandRequirement?: FrozenVerifierCommandRequirement;
+}
+
+export interface FrozenVerifierCommandRequirement {
+  checkId: string;
+  command: string;
+  invocation: string[];
+  workingDirectory: string;
+  expectedStatus: "completed";
+  expectedExitCode: 0;
+  verifierAssignmentId: string;
+  executorAssignmentId: string;
+  executorExecutionEvidenceId: string;
+  repositoryPath: string;
+  startingHead: string;
+  candidatePaths: string[];
+  candidateContentSha256: Record<string, string | null>;
 }
 
 export function standardRequirementId(kind: VerifierRequirementKind): string {
@@ -83,7 +100,8 @@ function modeToClass(mode: VerificationMode): VerifierRequirementClass {
 
 export function deriveVerifierVerificationRequirements(
   executor: OrchestraAssignment,
-  _evidence: ExecutionEvidence,
+  evidence: ExecutionEvidence,
+  commandContext?: { verifierAssignmentId: string; candidateContentSha256: Record<string, string | null> },
 ): VerificationRequirementRef[] {
   const machineKinds: VerifierRequirementKind[] = [
     "repository_identity",
@@ -100,13 +118,33 @@ export function deriveVerifierVerificationRequirements(
     verificationMode: "MACHINE_EVIDENCE",
   }));
   if (
-    executor.requiredEvidence.some((item) => item.toLowerCase() === "tests" || item.toLowerCase() === "test")
+    executor.requiredEvidence.some((item) => {
+      const key = item.toLowerCase();
+      return key === "tests" || key === "test" || key.startsWith("test:");
+    })
   ) {
+    const configured = executor.requiredEvidence.find((item) => item.toLowerCase().startsWith("test:"));
+    const command = configured?.slice(configured.indexOf(":") + 1).trim() || "npm test";
     requirements.push({
       requirementId: standardRequirementId("required_tests"),
       requirementKind: "required_tests",
       requirementClass: "MACHINE_RESOLVABLE",
       verificationMode: "MACHINE_EVIDENCE",
+      commandRequirement: commandContext ? {
+        checkId: "test",
+        command,
+        invocation: [command],
+        workingDirectory: executor.repositoryPath,
+        expectedStatus: "completed",
+        expectedExitCode: 0,
+        verifierAssignmentId: commandContext.verifierAssignmentId,
+        executorAssignmentId: executor.assignmentId,
+        executorExecutionEvidenceId: evidence.evidenceId,
+        repositoryPath: executor.repositoryPath,
+        startingHead: executor.startingHead,
+        candidatePaths: evidence.result.changedPaths.slice().sort(),
+        candidateContentSha256: commandContext.candidateContentSha256,
+      } : undefined,
     });
   }
   for (const obligation of executor.structuredObligations ?? []) {

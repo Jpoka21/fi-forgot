@@ -24,7 +24,7 @@ export type {
   ProviderTerminalReport,
 } from "./provider-contract.js";
 export { CODEX_PROVIDER_ID, CURSOR_PROVIDER_ID, renderAssignmentPrompt } from "./provider-contract.js";
-export type { NormalizedEventType, NormalizedExecutionEvent, ProviderCorrelation } from "./events.js";
+export type { CommandExecutionProvenance, NormalizedEventType, NormalizedExecutionEvent, ProviderCorrelation } from "./events.js";
 export { NORMALIZED_EVENT_TYPES, isNormalizedEventType } from "./events.js";
 export type { GitCommitIdentity, GitEvidence, GitEvidenceDelta } from "./git-evidence.js";
 export { collectGitEvidence, diffGitEvidence, parseStatusPorcelain } from "./git-evidence.js";
@@ -234,6 +234,7 @@ export type {
   VerificationMode,
   AcceptanceCheckKind,
   FrozenAcceptanceCheckSpec,
+  FrozenVerifierCommandRequirement,
 } from "./verification-requirements.js";
 export {
   buildVerifierAuthorizationReceipt,

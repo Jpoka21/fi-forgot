@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { FrozenAssignment } from "../../assignment.js";
 import { assertAssignmentUnchanged } from "../../assignment-hash.js";
 import type { NormalizedExecutionEvent } from "../../events.js";
@@ -36,6 +39,7 @@ interface InternalRun {
   terminal: ProviderTerminalReport | null;
   finalResponse: string | null;
   startedAt: number;
+  commandContext?: Partial<NonNullable<NormalizedExecutionEvent["commandExecution"]>>;
 }
 
 interface ThreadResponse {
@@ -185,6 +189,20 @@ export class CodexExecutionProvider implements ExecutionProvider {
       terminal: null,
       finalResponse: null,
       startedAt: Date.now(),
+      commandContext: (() => {
+        const requirement = frozen.assignment.verificationRequirements
+          ?.find((row) => row.commandRequirement)?.commandRequirement;
+        return requirement ? {
+          verifierAssignmentId: requirement.verifierAssignmentId,
+          executorAssignmentId: requirement.executorAssignmentId,
+          executorExecutionEvidenceId: requirement.executorExecutionEvidenceId,
+          repositoryPath: requirement.repositoryPath,
+          startingHead: requirement.startingHead,
+          candidatePaths: requirement.candidatePaths,
+          candidateContentSha256: requirement.candidateContentSha256,
+          requiredCheckIds: [requirement.checkId],
+        } : undefined;
+      })(),
     });
     for (const notification of this.pendingNotifications.get(run.runId) ?? []) {
       this.recordNotification(this.requireRun(run.runId), notification);
@@ -260,8 +278,22 @@ export class CodexExecutionProvider implements ExecutionProvider {
   private recordNotification(internal: InternalRun, notification: AppServerNotification): void {
     const text = finalAgentText(notification);
     if (text !== null) internal.finalResponse = text;
+    const commandContext = internal.commandContext ? { ...internal.commandContext } : undefined;
+    if (commandContext?.repositoryPath && commandContext.candidatePaths) {
+      commandContext.candidateContentSha256 = Object.fromEntries(commandContext.candidatePaths.map((path) => {
+        try {
+          return [path, createHash("sha256").update(readFileSync(join(commandContext.repositoryPath!, path))).digest("hex")];
+        } catch {
+          return [path, null];
+        }
+      }));
+    }
     internal.events.push(
-      normalizeCodexEvent(notification, { threadId: internal.run.sessionId, turnId: internal.run.runId }),
+      normalizeCodexEvent(notification, {
+        threadId: internal.run.sessionId,
+        turnId: internal.run.runId,
+        commandContext,
+      }),
     );
     const terminal = terminalReport(notification, internal);
     if (terminal) internal.terminal = terminal;

@@ -27,7 +27,6 @@ import type { NormalizedExecutionEvent } from "../events.js";
 import { expect, expectFalse, expectTrue, section } from "./harness.js";
 
 type FutureCommandProvenance = {
-  commandEvidence: {
     commandId: string;
     phase: "started" | "completed";
     command: string;
@@ -40,26 +39,52 @@ type FutureCommandProvenance = {
     requiredCheckIds: string[];
     status?: "completed" | "failed";
     exitCode?: number;
-    output?: string;
-    outputSha256?: string;
-  };
+    stdout?: string;
+    stderr?: string;
+    stdoutSha256?: string;
+    stderrSha256?: string;
 };
 
 const COMMAND_MATRIX_TIME = "2026-01-01T00:00:00.000Z";
-const COMMAND_MATRIX_COMMAND = "npm test -- verification-decision";
+const COMMAND_MATRIX_COMMAND = "npm test";
 
 function commandProvenanceEvent(
   phase: "started" | "completed",
-  values: Omit<FutureCommandProvenance["commandEvidence"], "phase">,
+  values: Omit<FutureCommandProvenance, "phase">,
 ): NormalizedExecutionEvent {
-  // These are deliberately raw, test-local future provenance fields. Provider
-  // payload is evidence input; only the production resolver may give it meaning.
   return {
     type: "tool_invocation",
     timestamp: COMMAND_MATRIX_TIME,
     toolName: "shell_command",
-    rawSummary: { commandEvidence: { ...values, phase } },
-  } as NormalizedExecutionEvent & { rawSummary: FutureCommandProvenance };
+    correlation: {
+      providerId: "codex",
+      sessionId: "mock-session",
+      runId: "mock-run",
+      toolUseId: values.commandId,
+      providerEventType: phase === "started" ? "item/started" : "item/completed",
+    },
+    commandExecution: {
+      commandId: values.commandId,
+      phase,
+      command: values.command,
+      invocation: [values.command],
+      workingDirectory: values.repositoryPath,
+      status: values.status,
+      exitCode: values.exitCode,
+      stdout: values.stdout,
+      stderr: values.stderr,
+      stdoutSha256: values.stdoutSha256,
+      stderrSha256: values.stderrSha256,
+      verifierAssignmentId: `vrf-${values.executorAssignmentId}-${values.executorExecutionEvidenceId}`,
+      executorAssignmentId: values.executorAssignmentId,
+      executorExecutionEvidenceId: values.executorExecutionEvidenceId,
+      repositoryPath: values.repositoryPath,
+      startingHead: values.head,
+      candidatePaths: values.candidatePaths,
+      candidateContentSha256: values.candidateContentSha256,
+      requiredCheckIds: values.requiredCheckIds,
+    },
+  };
 }
 
 function tempStore(): string {
@@ -165,7 +190,7 @@ async function prepareRoutedVerifier(
 
 type SemanticMatrixCase = {
   name: string;
-  events?: (rows: FutureCommandProvenance["commandEvidence"][]) => NormalizedExecutionEvent[];
+  events?: (rows: FutureCommandProvenance[]) => NormalizedExecutionEvent[];
   beforeRoute?: (context: SemanticMatrixContext) => void;
   afterRoute?: (context: SemanticMatrixContext) => void;
   adjudicatedVerifier?: (context: SemanticMatrixContext) => string;
@@ -193,6 +218,7 @@ function persistVerifierAssignmentContext(
   context: SemanticMatrixContext,
   patch: { repositoryPath?: string; startingHead?: string },
 ): void {
+  const existingEvidence = context.store.loadLatestExecutionEvidence(context.verifierId);
   const path = join(context.store.storeRoot, "assignments", context.verifierId, "assignment.json");
   const record = JSON.parse(readFileSync(path, "utf8")) as {
     frozen: ReturnType<typeof createAssignment>;
@@ -210,10 +236,17 @@ function persistVerifierAssignmentContext(
     executorAssignmentId: record.relationship.verifiesAssignmentId ?? "",
     executionEvidenceId: record.relationship.verifiesExecutionEvidenceId ?? "",
   });
+  if (existingEvidence) {
+    context.store.persistExecutionEvidence(buildExecutionEvidence({
+      frozen: record.frozen,
+      result: { ...existingEvidence.result, assignmentHash: record.frozen.assignmentHash },
+      providerStarted: true,
+    }));
+  }
 }
 
 function provenanceEvents(
-  rows: FutureCommandProvenance["commandEvidence"][],
+  rows: FutureCommandProvenance[],
 ): NormalizedExecutionEvent[] {
   return rows.map(({ phase, ...values }) => commandProvenanceEvent(phase, values));
 }
@@ -228,8 +261,8 @@ const semanticMatrixCases: SemanticMatrixCase[] = [
   { name: "07 wrong authoritative verifier assignment", adjudicatedVerifier: (context) => `${context.verifierId}-wrong`, expectedAdjudicationReason: "verifier_not_found" },
   { name: "08 wrong authoritative verifier-to-executor assignment relationship", beforeRoute: (context) => persistVerifierRelationship(context, { verifiesAssignmentId: "unrelated-executor", verifiesExecutionEvidenceId: context.evidence.evidenceId }), expectedAdjudicationReason: "relationship_mismatch" },
   { name: "09 wrong authoritative verifier-to-executor evidence relationship", beforeRoute: (context) => persistVerifierRelationship(context, { verifiesAssignmentId: context.assignment.assignment.assignmentId, verifiesExecutionEvidenceId: "ev-unrelated" }), expectedAdjudicationReason: "relationship_mismatch" },
-  { name: "10 authoritative repository identity mismatch", beforeRoute: (context) => persistVerifierAssignmentContext(context, { repositoryPath: `${context.assignment.assignment.repositoryPath}-other` }), expectedOutcome: "requirement_failed", expectedReason: "repository_identity_mismatch" },
-  { name: "11 authoritative starting HEAD mismatch", beforeRoute: (context) => persistVerifierAssignmentContext(context, { startingHead: "0000000000000000000000000000000000000000" }), expectedOutcome: "requirement_failed", expectedReason: "git_baseline_mismatch" },
+  { name: "10 authoritative repository identity mismatch", afterRoute: (context) => persistVerifierAssignmentContext(context, { repositoryPath: `${context.assignment.assignment.repositoryPath}-other` }), expectedOutcome: "requirement_failed", expectedReason: "repository_identity_mismatch" },
+  { name: "11 authoritative starting HEAD mismatch", afterRoute: (context) => persistVerifierAssignmentContext(context, { startingHead: "0000000000000000000000000000000000000000" }), expectedOutcome: "requirement_failed", expectedReason: "git_baseline_mismatch" },
   { name: "12 real candidate drift after executor evidence and before verifier execution", beforeRoute: (context) => appendFileSync(context.fixture.allowedPath, "DRIFT_BEFORE_VERIFIER\n", "utf8"), expectedOutcome: "requirement_failed", expectedReason: "candidate_drift_before_verifier_execution" },
   { name: "13 real candidate drift after verifier execution and before adjudication", afterRoute: (context) => appendFileSync(context.fixture.allowedPath, "DRIFT_BEFORE_ADJUDICATION\n", "utf8"), expectedOutcome: "requirement_failed", expectedReason: "candidate_drift_before_adjudication" },
   { name: "14 successful verifier attempt preserves executor evidence exactly", expectedOutcome: "requirement_satisfied", expectedReason: "trusted_test_command_evidence_satisfied", assertReloadEquality: true },
@@ -248,7 +281,7 @@ async function runSemanticMatrixCase(index: number, matrixCase: SemanticMatrixCa
     { requiredEvidence: ["events", "tests"], writeAllowedAdapterMarker: true },
   );
   const output = "1 test passed\n";
-  const common: Omit<FutureCommandProvenance["commandEvidence"], "phase"> = {
+  const common: Omit<FutureCommandProvenance, "phase"> = {
     commandId: "required-check:test",
     command: COMMAND_MATRIX_COMMAND,
     repositoryPath: executor.assignment.assignment.repositoryPath,
@@ -261,18 +294,19 @@ async function runSemanticMatrixCase(index: number, matrixCase: SemanticMatrixCa
     },
     requiredCheckIds: ["test"],
   };
-  const raw: FutureCommandProvenance["commandEvidence"][] = [
+  const raw: FutureCommandProvenance[] = [
     { ...common, phase: "started" },
     {
       ...common,
       phase: "completed",
       status: "completed" as const,
       exitCode: 0,
-      output,
-      outputSha256: createHash("sha256").update(output).digest("hex"),
+      stdout: output,
+      stderr: "",
+      stdoutSha256: createHash("sha256").update(output).digest("hex"),
+      stderrSha256: createHash("sha256").update("").digest("hex"),
     },
   ];
-  const events = matrixCase.events ? matrixCase.events(raw) : provenanceEvents(raw);
   const trustedSnapshot = structuredClone(executor.evidence);
   const authorized = authorizeAndFreezeVerifierAssignment({
     store: executor.store,
@@ -284,6 +318,9 @@ async function runSemanticMatrixCase(index: number, matrixCase: SemanticMatrixCa
   const requirements = authorized.persisted?.frozen.assignment.verificationRequirements ?? [];
   const context: SemanticMatrixContext = { ...executor, verifierId };
   matrixCase.beforeRoute?.(context);
+  const executionHash = createHash("sha256").update(readFileSync(executor.fixture.allowedPath)).digest("hex");
+  for (const row of raw) row.candidateContentSha256 = { "allowed.txt": executionHash };
+  const events = matrixCase.events ? matrixCase.events(raw) : provenanceEvents(raw);
   await routeGovernedVerifierAssignment({ store: executor.store, verifierAssignmentId: verifierId, provider: new CountingMock({ events }) });
   matrixCase.afterRoute?.(context);
   const adjudicatedVerifier = matrixCase.adjudicatedVerifier?.(context) ?? verifierId;

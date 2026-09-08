@@ -21,6 +21,33 @@ export interface ProviderCorrelation {
   providerEventType?: string;
 }
 
+/**
+ * Governed command evidence. Stream hashes are SHA-256 over the complete,
+ * redacted UTF-8 stream; excerpts are independently redacted and bounded.
+ * A stream is absent unless the provider supplied that stream independently.
+ */
+export interface CommandExecutionProvenance {
+  commandId: string;
+  phase: "started" | "completed";
+  command: string;
+  invocation: string[];
+  workingDirectory: string;
+  status?: string;
+  exitCode?: number;
+  stdout?: string;
+  stderr?: string;
+  stdoutSha256?: string;
+  stderrSha256?: string;
+  verifierAssignmentId?: string;
+  executorAssignmentId?: string;
+  executorExecutionEvidenceId?: string;
+  repositoryPath?: string;
+  startingHead?: string;
+  candidatePaths?: string[];
+  candidateContentSha256?: Record<string, string | null>;
+  requiredCheckIds?: string[];
+}
+
 export interface NormalizedExecutionEvent {
   type: NormalizedEventType;
   timestamp: string;
@@ -33,6 +60,7 @@ export interface NormalizedExecutionEvent {
     inputTokens?: number;
     outputTokens?: number;
   };
+  commandExecution?: CommandExecutionProvenance;
   correlation?: ProviderCorrelation;
   /**
    * Opaque provider payload summary for evidence only. Not Orchestra truth.

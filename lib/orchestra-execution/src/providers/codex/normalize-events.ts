@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { NormalizedExecutionEvent, NormalizedEventType } from "../../events.js";
 import { CODEX_PROVIDER_ID } from "../../provider-contract.js";
 import { redactCodexText, type AppServerNotification } from "./app-server-transport.js";
@@ -18,6 +19,22 @@ function numberField(record: Record<string, unknown> | null, key: string): numbe
   return typeof value === "number" ? value : undefined;
 }
 
+function stringArrayField(record: Record<string, unknown> | null, key: string): string[] | undefined {
+  const value = record?.[key];
+  return Array.isArray(value) && value.every((row) => typeof row === "string") ? value : undefined;
+}
+
+export const CODEX_COMMAND_STREAM_EXCERPT_MAX_CHARS = 8_192;
+
+function normalizedStream(value: string | undefined): { excerpt: string; sha256: string } | undefined {
+  if (value === undefined) return undefined;
+  const redacted = redactCodexText(value);
+  return {
+    excerpt: redacted.slice(0, CODEX_COMMAND_STREAM_EXCERPT_MAX_CHARS),
+    sha256: createHash("sha256").update(redacted, "utf8").digest("hex"),
+  };
+}
+
 export function codexNotificationTurnId(notification: AppServerNotification): string | undefined {
   const params = asRecord(notification.params);
   const turn = asRecord(params?.turn);
@@ -32,7 +49,11 @@ export function codexNotificationThreadId(notification: AppServerNotification): 
 
 export function normalizeCodexEvent(
   notification: AppServerNotification,
-  fallback: { threadId?: string; turnId?: string } = {},
+  fallback: {
+    threadId?: string;
+    turnId?: string;
+    commandContext?: Partial<NonNullable<NormalizedExecutionEvent["commandExecution"]>>;
+  } = {},
   now = new Date().toISOString(),
 ): NormalizedExecutionEvent {
   const params = asRecord(notification.params);
@@ -48,6 +69,7 @@ export function normalizeCodexEvent(
   let toolName: string | undefined;
   let targetPath: string | null | undefined;
   let usage: NormalizedExecutionEvent["usage"];
+  let commandExecution: NormalizedExecutionEvent["commandExecution"];
 
   if (providerType === "thread/started") {
     type = "session_started";
@@ -79,6 +101,30 @@ export function normalizeCodexEvent(
       toolName = itemType;
       targetPath = stringField(item, "path") ?? null;
       message = providerType;
+      if (itemType === "commandExecution" && itemId) {
+        const command = stringField(item, "command") ?? stringArrayField(item, "command")?.join(" ");
+        const invocation = stringArrayField(item, "command") ?? (command ? [command] : undefined);
+        const workingDirectory = stringField(item, "cwd") ?? stringField(item, "workingDirectory");
+        if (command && invocation && workingDirectory) {
+          // Never treat aggregate output as either stream: separation must come from the provider.
+          const stdout = providerType === "item/completed" ? normalizedStream(stringField(item, "stdout")) : undefined;
+          const stderr = providerType === "item/completed" ? normalizedStream(stringField(item, "stderr")) : undefined;
+          commandExecution = {
+            ...fallback.commandContext,
+            commandId: itemId,
+            phase: providerType === "item/started" ? "started" : "completed",
+            command,
+            invocation,
+            workingDirectory,
+            status: stringField(item, "status"),
+            exitCode: numberField(item, "exitCode") ?? numberField(item, "exit_code"),
+            stdout: stdout?.excerpt,
+            stderr: stderr?.excerpt,
+            stdoutSha256: stdout?.sha256,
+            stderrSha256: stderr?.sha256,
+          };
+        }
+      }
     } else if (itemType === "agentMessage") {
       type = "assistant_progress";
       message = stringField(item, "text") ?? providerType;
@@ -98,6 +144,7 @@ export function normalizeCodexEvent(
     toolName,
     targetPath,
     usage,
+    commandExecution,
     correlation: {
       providerId: CODEX_PROVIDER_ID,
       sessionId,

@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createAssignment } from "../assignment-hash.js";
 import type { FrozenAssignment } from "../assignment.js";
 import type { HookDecisionRecord } from "../hooks/policy-decision.js";
@@ -257,6 +260,15 @@ function buildCandidate(
     warnings.push(`policy denials present: ${summarizeDenials(evidence.result.policyDenials)}`);
   }
   const assignmentId = verifierAssignmentId(executor.assignment.assignmentId, evidence.evidenceId, verifierSlot);
+  const candidateContentSha256 = Object.fromEntries(
+    evidence.result.changedPaths.slice().sort().map((path) => {
+      try {
+        return [path, createHash("sha256").update(readFileSync(join(executor.assignment.repositoryPath, path))).digest("hex")];
+      } catch {
+        return [path, null];
+      }
+    }),
+  );
   const candidate = createAssignment({
     assignmentId,
     projectId: executor.assignment.projectId,
@@ -273,7 +285,10 @@ function buildCandidate(
     pushAuthorization: false,
     requiredEvidence: verifierRequiredEvidence(executor.assignment.requiredEvidence, evidence),
     structuredObligations: executor.assignment.structuredObligations,
-    verificationRequirements: deriveVerifierVerificationRequirements(executor.assignment, evidence),
+    verificationRequirements: deriveVerifierVerificationRequirements(executor.assignment, evidence, {
+      verifierAssignmentId: assignmentId,
+      candidateContentSha256,
+    }),
     createdAt: evidence.recordedAt,
   });
   return { candidate, warnings };

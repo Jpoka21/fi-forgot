@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { VerificationRequirementRef } from "../verification-requirements.js";
 import type { ExecutionEvidence, FrozenAssignmentRecord, VerifierRequirementOutcome } from "./types.js";
 
@@ -31,6 +34,8 @@ export function resolveMachineRequirement(input: {
   requirement: VerificationRequirementRef;
   executorRecord: FrozenAssignmentRecord;
   executorEvidence: ExecutionEvidence;
+  verifierRecord?: FrozenAssignmentRecord;
+  verifierEvidence?: ExecutionEvidence;
 }): { outcome: VerifierRequirementOutcome; reasonCode: string; evidenceReferences: string[] } {
   const assignment = input.executorRecord.frozen.assignment;
   const result = input.executorEvidence.result;
@@ -105,12 +110,78 @@ export function resolveMachineRequirement(input: {
       return { outcome: "requirement_satisfied", reasonCode: "required_evidence_present", evidenceReferences: refs };
     }
     case "required_tests": {
-      // No trusted machine test source in current evidence architecture.
-      return {
-        outcome: "evidence_insufficient",
-        reasonCode: "trusted_test_evidence_unavailable",
-        evidenceReferences: refs,
-      };
+      const expected = input.requirement.commandRequirement;
+      const verifier = input.verifierRecord;
+      const verifierEvidence = input.verifierEvidence;
+      if (!expected || !verifier || !verifierEvidence) {
+        return { outcome: "evidence_insufficient", reasonCode: "trusted_test_evidence_unavailable", evidenceReferences: refs };
+      }
+      if (
+        expected.verifierAssignmentId !== verifier.frozen.assignment.assignmentId ||
+        expected.executorAssignmentId !== assignment.assignmentId ||
+        expected.executorExecutionEvidenceId !== input.executorEvidence.evidenceId ||
+        verifier.relationship.verifiesAssignmentId !== assignment.assignmentId ||
+        verifier.relationship.verifiesExecutionEvidenceId !== input.executorEvidence.evidenceId
+      ) {
+        return { outcome: "requirement_failed", reasonCode: "test_command_relationship_mismatch", evidenceReferences: refs };
+      }
+      if (expected.repositoryPath !== assignment.repositoryPath || verifier.frozen.assignment.repositoryPath !== assignment.repositoryPath) {
+        return { outcome: "requirement_failed", reasonCode: "repository_identity_mismatch", evidenceReferences: refs };
+      }
+      if (expected.startingHead !== assignment.startingHead || verifier.frozen.assignment.startingHead !== expected.startingHead) {
+        return { outcome: "requirement_failed", reasonCode: "git_baseline_mismatch", evidenceReferences: refs };
+      }
+      const commandEvents = verifierEvidence.result.normalizedEvents.filter((event) => event.commandExecution);
+      if (commandEvents.length === 0) {
+        return { outcome: "evidence_insufficient", reasonCode: "trusted_test_evidence_unavailable", evidenceReferences: refs };
+      }
+      const relevant = commandEvents.filter((event) => {
+        const row = event.commandExecution!;
+        return row.requiredCheckIds?.includes(expected.checkId) && row.command === expected.command;
+      });
+      if (relevant.length === 0) {
+        return { outcome: "evidence_insufficient", reasonCode: "required_test_command_missing", evidenceReferences: refs };
+      }
+      if (commandEvents.some((event) => event.commandExecution!.phase === "completed") &&
+          !commandEvents.some((event) => event.commandExecution!.phase === "completed" && event.commandExecution!.requiredCheckIds?.includes(expected.checkId))) {
+        return { outcome: "evidence_insufficient", reasonCode: "required_test_command_missing", evidenceReferences: refs };
+      }
+      const starts = relevant.filter((event) => event.commandExecution!.phase === "started");
+      const completions = relevant.filter((event) => event.commandExecution!.phase === "completed");
+      if (starts.length === 0) return { outcome: "evidence_insufficient", reasonCode: "test_command_start_missing", evidenceReferences: refs };
+      if (completions.length === 0) return { outcome: "evidence_insufficient", reasonCode: "test_command_completion_missing", evidenceReferences: refs };
+      const start = starts[0]!;
+      const completion = completions.find((event) => event.commandExecution!.commandId === start.commandExecution!.commandId);
+      if (!completion || !start.correlation?.toolUseId || start.correlation.toolUseId !== completion.correlation?.toolUseId ||
+          start.correlation.runId !== completion.correlation?.runId || start.correlation.sessionId !== completion.correlation?.sessionId ||
+          start.correlation.runId !== verifierEvidence.result.runId || start.correlation.sessionId !== verifierEvidence.result.providerSessionId) {
+        return { outcome: "evidence_insufficient", reasonCode: "test_command_correlation_malformed", evidenceReferences: refs };
+      }
+      for (const event of [start, completion]) {
+        const row = event.commandExecution!;
+        if (row.verifierAssignmentId !== expected.verifierAssignmentId || row.executorAssignmentId !== expected.executorAssignmentId ||
+            row.executorExecutionEvidenceId !== expected.executorExecutionEvidenceId || row.repositoryPath !== expected.repositoryPath ||
+            row.startingHead !== expected.startingHead || row.workingDirectory !== expected.workingDirectory ||
+            JSON.stringify(row.invocation) !== JSON.stringify(expected.invocation)) {
+          return { outcome: "requirement_failed", reasonCode: "test_command_binding_mismatch", evidenceReferences: refs };
+        }
+        if (JSON.stringify(row.candidatePaths) !== JSON.stringify(expected.candidatePaths) ||
+            JSON.stringify(row.candidateContentSha256) !== JSON.stringify(expected.candidateContentSha256)) {
+          return { outcome: "requirement_failed", reasonCode: "candidate_drift_before_verifier_execution", evidenceReferences: refs };
+        }
+      }
+      const completed = completion.commandExecution!;
+      if (completed.status !== expected.expectedStatus || completed.exitCode !== expected.expectedExitCode) {
+        return { outcome: "requirement_failed", reasonCode: "test_command_exit_nonzero", evidenceReferences: refs };
+      }
+      for (const path of expected.candidatePaths) {
+        let actual: string | null = null;
+        try { actual = createHash("sha256").update(readFileSync(join(expected.repositoryPath, path))).digest("hex"); } catch { /* missing */ }
+        if (actual !== expected.candidateContentSha256[path]) {
+          return { outcome: "requirement_failed", reasonCode: "candidate_drift_before_adjudication", evidenceReferences: refs };
+        }
+      }
+      return { outcome: "requirement_satisfied", reasonCode: "trusted_test_command_evidence_satisfied", evidenceReferences: [...refs, `orchestra:verifier_evidence:${verifierEvidence.evidenceId}`] };
     }
     default:
       return { outcome: "requirement_not_evaluated", reasonCode: "not_machine_resolvable", evidenceReferences: refs };

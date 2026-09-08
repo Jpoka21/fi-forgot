@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { createAssignment } from "../assignment-hash.js";
 import type {
   AppServerNotification,
@@ -276,6 +277,29 @@ export async function runCodexProviderTests(): Promise<void> {
   );
   expectFalse("provider error is not semantic verification FAIL", failedResult.errorMessage === "FAIL");
   await failedProvider.closeSession(failedSession);
+
+  const startedCommand = normalizeCodexEvent({ method: "item/started", params: {
+    threadId: "t", turnId: "r", item: { id: "cmd-1", type: "commandExecution", command: ["npm", "test"], cwd: "C:/fixture" },
+  }});
+  const secret = "sk-abcdefgh12345678";
+  const longStdout = `${secret}:${"x".repeat(9_000)}`;
+  const rawStderr = "token=super-secret failure";
+  const completedCommand = normalizeCodexEvent({ method: "item/completed", params: {
+    threadId: "t", turnId: "r", item: { id: "cmd-1", type: "commandExecution", command: ["npm", "test"], cwd: "C:/fixture", status: "completed", exitCode: 0, stdout: longStdout, stderr: rawStderr, aggregatedOutput: "must not become a stream" },
+  }});
+  expect("command start provenance normalized", startedCommand.commandExecution?.phase, "started");
+  expect("command completion exit normalized", completedCommand.commandExecution?.exitCode, 0);
+  expect("command correlation durable", completedCommand.correlation?.toolUseId, "cmd-1");
+  expectFalse("stdout credential redacted", completedCommand.commandExecution?.stdout?.includes(secret) ?? true);
+  expect("stdout independently bounded", completedCommand.commandExecution?.stdout?.length, 8_192);
+  expect("stdout hashes complete redacted stream", completedCommand.commandExecution?.stdoutSha256, createHash("sha256").update(`[REDACTED]:${"x".repeat(9_000)}`).digest("hex"));
+  expect("stderr independently redacted", completedCommand.commandExecution?.stderr, "token=[REDACTED] failure");
+  expect("stderr independently hashed", completedCommand.commandExecution?.stderrSha256, createHash("sha256").update("token=[REDACTED] failure").digest("hex"));
+  const aggregateOnly = normalizeCodexEvent({ method: "item/completed", params: {
+    threadId: "t", turnId: "r", item: { id: "cmd-2", type: "commandExecution", command: "npm test", cwd: "C:/fixture", aggregatedOutput: "combined" },
+  }});
+  expect("aggregate output never invents stdout", aggregateOnly.commandExecution?.stdout, undefined);
+  expect("aggregate output never invents stderr", aggregateOnly.commandExecution?.stderr, undefined);
 
   expect(
     "raw Codex unknown event remains provider telemetry",
