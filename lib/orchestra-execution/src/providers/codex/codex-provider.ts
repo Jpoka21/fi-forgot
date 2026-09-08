@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FrozenAssignment } from "../../assignment.js";
+import type { FrozenVerifierCommandRequirement } from "../../verification-requirements.js";
 import { assertAssignmentUnchanged } from "../../assignment-hash.js";
 import type { NormalizedExecutionEvent } from "../../events.js";
 import {
@@ -39,7 +40,9 @@ interface InternalRun {
   terminal: ProviderTerminalReport | null;
   finalResponse: string | null;
   startedAt: number;
-  commandContext?: Partial<NonNullable<NormalizedExecutionEvent["commandExecution"]>>;
+  commandRequirements: FrozenVerifierCommandRequirement[];
+  commandRequirementById: Map<string, FrozenVerifierCommandRequirement>;
+  nextCommandRequirement: number;
 }
 
 interface ThreadResponse {
@@ -189,20 +192,10 @@ export class CodexExecutionProvider implements ExecutionProvider {
       terminal: null,
       finalResponse: null,
       startedAt: Date.now(),
-      commandContext: (() => {
-        const requirement = frozen.assignment.verificationRequirements
-          ?.find((row) => row.commandRequirement)?.commandRequirement;
-        return requirement ? {
-          verifierAssignmentId: requirement.verifierAssignmentId,
-          executorAssignmentId: requirement.executorAssignmentId,
-          executorExecutionEvidenceId: requirement.executorExecutionEvidenceId,
-          repositoryPath: requirement.repositoryPath,
-          startingHead: requirement.startingHead,
-          candidatePaths: requirement.candidatePaths,
-          candidateContentSha256: requirement.candidateContentSha256,
-          requiredCheckIds: [requirement.checkId],
-        } : undefined;
-      })(),
+      commandRequirements: (frozen.assignment.verificationRequirements ?? [])
+        .flatMap((row) => row.commandRequirement ? [row.commandRequirement] : []),
+      commandRequirementById: new Map(),
+      nextCommandRequirement: 0,
     });
     for (const notification of this.pendingNotifications.get(run.runId) ?? []) {
       this.recordNotification(this.requireRun(run.runId), notification);
@@ -278,7 +271,26 @@ export class CodexExecutionProvider implements ExecutionProvider {
   private recordNotification(internal: InternalRun, notification: AppServerNotification): void {
     const text = finalAgentText(notification);
     if (text !== null) internal.finalResponse = text;
-    const commandContext = internal.commandContext ? { ...internal.commandContext } : undefined;
+    const params = asRecord(notification.params);
+    const item = asRecord(params?.item);
+    const commandId = item?.type === "commandExecution" && typeof item.id === "string" ? item.id : undefined;
+    let requirement: FrozenVerifierCommandRequirement | undefined;
+    if (commandId && notification.method === "item/started") {
+      requirement = internal.commandRequirements[internal.nextCommandRequirement++];
+      if (requirement) internal.commandRequirementById.set(commandId, requirement);
+    } else if (commandId && notification.method === "item/completed") {
+      requirement = internal.commandRequirementById.get(commandId);
+    }
+    const commandContext: Partial<NonNullable<NormalizedExecutionEvent["commandExecution"]>> | undefined = requirement ? {
+      verifierAssignmentId: requirement.verifierAssignmentId,
+      executorAssignmentId: requirement.executorAssignmentId,
+      executorExecutionEvidenceId: requirement.executorExecutionEvidenceId,
+      repositoryPath: requirement.repositoryPath,
+      startingHead: requirement.startingHead,
+      candidatePaths: requirement.candidatePaths,
+      candidateContentSha256: requirement.candidateContentSha256,
+      requiredCheckIds: [requirement.checkId],
+    } : commandId ? { requiredCheckIds: [] } : undefined;
     if (commandContext?.repositoryPath && commandContext.candidatePaths) {
       commandContext.candidateContentSha256 = Object.fromEntries(commandContext.candidatePaths.map((path) => {
         try {

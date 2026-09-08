@@ -116,29 +116,38 @@ export function resolveMachineRequirement(input: {
       if (!expected || !verifier || !verifierEvidence) {
         return { outcome: "evidence_insufficient", reasonCode: "trusted_test_evidence_unavailable", evidenceReferences: refs };
       }
-      if (
-        expected.verifierAssignmentId !== verifier.frozen.assignment.assignmentId ||
-        expected.executorAssignmentId !== assignment.assignmentId ||
-        expected.executorExecutionEvidenceId !== input.executorEvidence.evidenceId ||
+      const expectedSet = (verifier.frozen.assignment.verificationRequirements ?? [])
+        .flatMap((row) => row.commandRequirement ? [row.commandRequirement] : []);
+      if (expectedSet.length === 0 || new Set(expectedSet.map((row) => row.checkId)).size !== expectedSet.length) {
+        return { outcome: "requirement_failed", reasonCode: "test_command_check_ids_invalid", evidenceReferences: refs };
+      }
+      if (expectedSet.some((row) =>
+        row.verifierAssignmentId !== verifier.frozen.assignment.assignmentId ||
+        row.executorAssignmentId !== assignment.assignmentId ||
+        row.executorExecutionEvidenceId !== input.executorEvidence.evidenceId) ||
         verifier.relationship.verifiesAssignmentId !== assignment.assignmentId ||
         verifier.relationship.verifiesExecutionEvidenceId !== input.executorEvidence.evidenceId
       ) {
         return { outcome: "requirement_failed", reasonCode: "test_command_relationship_mismatch", evidenceReferences: refs };
       }
-      if (expected.repositoryPath !== assignment.repositoryPath || verifier.frozen.assignment.repositoryPath !== assignment.repositoryPath) {
+      if (expectedSet.some((row) => row.repositoryPath !== assignment.repositoryPath) || verifier.frozen.assignment.repositoryPath !== assignment.repositoryPath) {
         return { outcome: "requirement_failed", reasonCode: "repository_identity_mismatch", evidenceReferences: refs };
       }
-      if (expected.startingHead !== assignment.startingHead || verifier.frozen.assignment.startingHead !== expected.startingHead) {
+      if (expectedSet.some((row) => row.startingHead !== assignment.startingHead || verifier.frozen.assignment.startingHead !== row.startingHead)) {
         return { outcome: "requirement_failed", reasonCode: "git_baseline_mismatch", evidenceReferences: refs };
       }
       const commandEvents = verifierEvidence.result.normalizedEvents.filter((event) => event.commandExecution);
       if (commandEvents.length === 0) {
         return { outcome: "evidence_insufficient", reasonCode: "trusted_test_evidence_unavailable", evidenceReferences: refs };
       }
-      const relevant = commandEvents.filter((event) => {
-        const row = event.commandExecution!;
-        return row.requiredCheckIds?.includes(expected.checkId) && row.command === expected.command;
-      });
+      const knownIds = new Set(expectedSet.map((row) => row.checkId));
+      if (expectedSet.length > 1 && commandEvents.some((event) => {
+        const ids = event.commandExecution!.requiredCheckIds;
+        return ids !== undefined && (ids.length !== 1 || !knownIds.has(ids[0]!));
+      })) {
+        return { outcome: "requirement_failed", reasonCode: "test_command_check_id_mismatch", evidenceReferences: refs };
+      }
+      const relevant = commandEvents.filter((event) => event.commandExecution!.requiredCheckIds?.[0] === expected.checkId);
       if (relevant.length === 0) {
         return { outcome: "evidence_insufficient", reasonCode: "required_test_command_missing", evidenceReferences: refs };
       }
@@ -150,6 +159,9 @@ export function resolveMachineRequirement(input: {
       const completions = relevant.filter((event) => event.commandExecution!.phase === "completed");
       if (starts.length === 0) return { outcome: "evidence_insufficient", reasonCode: "test_command_start_missing", evidenceReferences: refs };
       if (completions.length === 0) return { outcome: "evidence_insufficient", reasonCode: "test_command_completion_missing", evidenceReferences: refs };
+      if (starts.length !== 1 || completions.length !== 1) {
+        return { outcome: "requirement_failed", reasonCode: "test_command_duplicate_satisfaction", evidenceReferences: refs };
+      }
       const start = starts[0]!;
       const completion = completions.find((event) => event.commandExecution!.commandId === start.commandExecution!.commandId);
       if (!completion || !start.correlation?.toolUseId || start.correlation.toolUseId !== completion.correlation?.toolUseId ||
@@ -159,7 +171,8 @@ export function resolveMachineRequirement(input: {
       }
       for (const event of [start, completion]) {
         const row = event.commandExecution!;
-        if (row.verifierAssignmentId !== expected.verifierAssignmentId || row.executorAssignmentId !== expected.executorAssignmentId ||
+        if (row.requiredCheckIds?.length !== 1 || row.requiredCheckIds[0] !== expected.checkId ||
+            row.command !== expected.command || row.verifierAssignmentId !== expected.verifierAssignmentId || row.executorAssignmentId !== expected.executorAssignmentId ||
             row.executorExecutionEvidenceId !== expected.executorExecutionEvidenceId || row.repositoryPath !== expected.repositoryPath ||
             row.startingHead !== expected.startingHead || row.workingDirectory !== expected.workingDirectory ||
             JSON.stringify(row.invocation) !== JSON.stringify(expected.invocation)) {
@@ -179,6 +192,20 @@ export function resolveMachineRequirement(input: {
         try { actual = createHash("sha256").update(readFileSync(join(expected.repositoryPath, path))).digest("hex"); } catch { /* missing */ }
         if (actual !== expected.candidateContentSha256[path]) {
           return { outcome: "requirement_failed", reasonCode: "candidate_drift_before_adjudication", evidenceReferences: refs };
+        }
+      }
+      const startOrder = commandEvents
+        .filter((event) => event.commandExecution!.phase === "started" && event.commandExecution!.requiredCheckIds?.length === 1)
+        .map((event) => event.commandExecution!.requiredCheckIds![0]);
+      const expectedOrder = expectedSet.map((row) => row.checkId);
+      if (JSON.stringify(startOrder) !== JSON.stringify(expectedOrder)) {
+        return { outcome: "requirement_failed", reasonCode: "test_command_check_order_mismatch", evidenceReferences: refs };
+      }
+      for (const required of expectedSet) {
+        const events = commandEvents.filter((event) => event.commandExecution!.requiredCheckIds?.[0] === required.checkId);
+        if (events.filter((event) => event.commandExecution!.phase === "started").length !== 1 ||
+            events.filter((event) => event.commandExecution!.phase === "completed").length !== 1) {
+          return { outcome: "evidence_insufficient", reasonCode: "required_test_command_missing", evidenceReferences: refs };
         }
       }
       return { outcome: "requirement_satisfied", reasonCode: "trusted_test_command_evidence_satisfied", evidenceReferences: [...refs, `orchestra:verifier_evidence:${verifierEvidence.evidenceId}`] };

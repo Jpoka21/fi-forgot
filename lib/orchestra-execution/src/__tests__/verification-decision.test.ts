@@ -3,6 +3,7 @@ import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createAssignment } from "../assignment-hash.js";
+import { sortKeys } from "../assignment.js";
 import { createDisposableExecutionFixture } from "../fixture.js";
 import { collectGitEvidence } from "../git-evidence.js";
 import { adjudicateVerifierExecution } from "../engineering-store/adjudicate-verifier.js";
@@ -237,11 +238,19 @@ function persistVerifierAssignmentContext(
     executionEvidenceId: record.relationship.verifiesExecutionEvidenceId ?? "",
   });
   if (existingEvidence) {
-    context.store.persistExecutionEvidence(buildExecutionEvidence({
+    const replacement = buildExecutionEvidence({
       frozen: record.frozen,
       result: { ...existingEvidence.result, assignmentHash: record.frozen.assignmentHash },
       providerStarted: true,
-    }));
+    });
+    const { evidenceHash: _discardedHash, ...replacementBody } = {
+      ...replacement,
+      evidenceId: "ev-zzzz-authoritative-context",
+    };
+    context.store.persistExecutionEvidence({
+      ...replacementBody,
+      evidenceHash: createHash("sha256").update(JSON.stringify(sortKeys(replacementBody))).digest("hex"),
+    });
   }
 }
 
@@ -343,6 +352,164 @@ async function runSemanticMatrixCase(index: number, matrixCase: SemanticMatrixCa
   }
 }
 
+async function runFiveCommandRequirementTest(): Promise<void> {
+  section("037-E — five frozen verifier commands all correlate and pass");
+  const commands = ["check one", "check two", "check three", "check four", "check five"];
+  const assignmentId = "vdec-five-command";
+  const executor = await persistExecutorWithSyntheticResult(
+    assignmentId,
+    {
+      frozen: createDisposableExecutionFixture({ assignmentId }).assignment,
+      providerStatus: "finished",
+      changedPaths: ["allowed.txt"],
+      normalizedEvents: [{ type: "run_finished", timestamp: COMMAND_MATRIX_TIME }],
+    },
+    {
+      requiredEvidence: ["events", ...commands.map((command) => `test:${command}`)],
+      writeAllowedAdapterMarker: true,
+    },
+  );
+  const authorized = authorizeAndFreezeVerifierAssignment({
+    store: executor.store,
+    executorAssignmentId: assignmentId,
+    executionEvidenceId: executor.evidence.evidenceId,
+    humanAuthorized: true,
+  });
+  const verifier = authorized.persisted!;
+  const frozenChecks = (verifier.frozen.assignment.verificationRequirements ?? [])
+    .flatMap((row) => row.commandRequirement ? [row.commandRequirement] : []);
+  expect("five command requirements frozen", frozenChecks.length, 5);
+  expect("stable ordered check ids", frozenChecks.map((row) => row.checkId), ["test-1", "test-2", "test-3", "test-4", "test-5"]);
+  expect("exact commands frozen", frozenChecks.map((row) => row.command), commands);
+  const events: NormalizedExecutionEvent[] = [];
+  for (const check of frozenChecks) {
+    for (const phase of ["started", "completed"] as const) {
+      events.push(commandProvenanceEvent(phase, {
+        commandId: `required-check:${check.checkId}`,
+        command: check.command,
+        repositoryPath: check.repositoryPath,
+        head: check.startingHead,
+        executorAssignmentId: check.executorAssignmentId,
+        executorExecutionEvidenceId: check.executorExecutionEvidenceId,
+        candidatePaths: check.candidatePaths,
+        candidateContentSha256: Object.fromEntries(Object.entries(check.candidateContentSha256).filter((entry): entry is [string, string] => entry[1] !== null)),
+        requiredCheckIds: [check.checkId],
+        ...(phase === "completed" ? { status: "completed" as const, exitCode: 0 } : {}),
+      }));
+    }
+  }
+  await routeGovernedVerifierAssignment({
+    store: executor.store,
+    verifierAssignmentId: verifier.frozen.assignment.assignmentId,
+    provider: new CountingMock({ events }),
+  });
+  const adjudicated = adjudicateVerifierExecution({
+    store: executor.store,
+    verifierAssignmentId: verifier.frozen.assignment.assignmentId,
+  });
+  const commandFindings = adjudicated.authoritativeFindings.filter((row) => row.requirementId.startsWith("req:required_tests:"));
+  expect("all five command findings published", commandFindings.length, 5);
+  expectTrue("all five commands required and passed", commandFindings.every((row) => row.outcome === "requirement_satisfied"));
+  expect("all five passing commands permit VERIFIED", adjudicated.decision, "VERIFIED");
+}
+
+async function runFiveCommandAdversarialContracts(): Promise<void> {
+  section("037-E — five-command verifier adversarial contracts");
+  const commands = ["check one", "check two", "check three", "check four", "check five"];
+  type EventMutator = (events: NormalizedExecutionEvent[]) => NormalizedExecutionEvent[];
+  const runCase = async (
+    suffix: string,
+    mutate: EventMutator,
+    expectedCheckId: string,
+    expectedReason?: string,
+  ): Promise<void> => {
+    const assignmentId = `vdec-five-command-${suffix}`;
+    const executor = await persistExecutorWithSyntheticResult(
+      assignmentId,
+      {
+        frozen: createDisposableExecutionFixture({ assignmentId }).assignment,
+        providerStatus: "finished",
+        changedPaths: ["allowed.txt"],
+        normalizedEvents: [{ type: "run_finished", timestamp: COMMAND_MATRIX_TIME }],
+      },
+      { requiredEvidence: ["events", ...commands.map((command) => `test:${command}`)], writeAllowedAdapterMarker: true },
+    );
+    const trustedExecutorEvidence = structuredClone(executor.evidence);
+    const authorized = authorizeAndFreezeVerifierAssignment({
+      store: executor.store,
+      executorAssignmentId: assignmentId,
+      executionEvidenceId: executor.evidence.evidenceId,
+      humanAuthorized: true,
+    });
+    const verifier = authorized.persisted!;
+    const checks = (verifier.frozen.assignment.verificationRequirements ?? [])
+      .flatMap((row) => row.commandRequirement ? [row.commandRequirement] : []);
+    const events = checks.flatMap((check) => ([
+      commandProvenanceEvent("started", {
+        commandId: `required-check:${check.checkId}`,
+        command: check.command,
+        repositoryPath: check.repositoryPath,
+        head: check.startingHead,
+        executorAssignmentId: check.executorAssignmentId,
+        executorExecutionEvidenceId: check.executorExecutionEvidenceId,
+        candidatePaths: check.candidatePaths,
+        candidateContentSha256: Object.fromEntries(Object.entries(check.candidateContentSha256).filter((entry): entry is [string, string] => entry[1] !== null)),
+        requiredCheckIds: [check.checkId],
+      }),
+      commandProvenanceEvent("completed", {
+        commandId: `required-check:${check.checkId}`,
+        command: check.command,
+        repositoryPath: check.repositoryPath,
+        head: check.startingHead,
+        executorAssignmentId: check.executorAssignmentId,
+        executorExecutionEvidenceId: check.executorExecutionEvidenceId,
+        candidatePaths: check.candidatePaths,
+        candidateContentSha256: Object.fromEntries(Object.entries(check.candidateContentSha256).filter((entry): entry is [string, string] => entry[1] !== null)),
+        requiredCheckIds: [check.checkId],
+        status: "completed" as const,
+        exitCode: 0,
+      }),
+    ]));
+    await routeGovernedVerifierAssignment({
+      store: executor.store,
+      verifierAssignmentId: verifier.frozen.assignment.assignmentId,
+      provider: new CountingMock({ events: mutate(events) }),
+    });
+    const result = adjudicateVerifierExecution({
+      store: executor.store,
+      verifierAssignmentId: verifier.frozen.assignment.assignmentId,
+    });
+    expectFalse(`${suffix}: malformed five-check evidence is not VERIFIED`, result.decision === "VERIFIED");
+    const finding = result.authoritativeFindings.find((row) => row.requirementId === `req:required_tests:${expectedCheckId}`);
+    expectTrue(`${suffix}: finding remains tied to ${expectedCheckId}`, Boolean(finding));
+    expectFalse(`${suffix}: ${expectedCheckId} is not satisfied`, finding?.outcome === "requirement_satisfied");
+    if (expectedReason) expect(`${suffix}: specific reason`, finding?.reasonCode, expectedReason);
+    expect(`${suffix}: executor evidence remains immutable`, executor.store.loadExecutionEvidenceById(assignmentId, executor.evidence.evidenceId), trustedExecutorEvidence);
+  };
+
+  await runCase("missing-one", (events) => events.slice(0, 8), "test-5", "required_test_command_missing");
+  await runCase("one-nonzero", (events) => events.map((event) =>
+    event.commandExecution?.requiredCheckIds?.[0] === "test-3" && event.commandExecution.phase === "completed"
+      ? { ...event, commandExecution: { ...event.commandExecution, exitCode: 1 } }
+      : event), "test-3", "test_command_exit_nonzero");
+  await runCase("swapped-ids", (events) => events.map((event) => {
+    const id = event.commandExecution?.requiredCheckIds?.[0];
+    if (id !== "test-1" && id !== "test-2") return event;
+    return { ...event, commandExecution: { ...event.commandExecution!, requiredCheckIds: [id === "test-1" ? "test-2" : "test-1"] } };
+  }), "test-1", "test_command_binding_mismatch");
+  await runCase("one-execution-two-ids", (events) => events.slice(2).map((event, index) => index < 2
+    ? { ...event, commandExecution: { ...event.commandExecution!, requiredCheckIds: ["test-1", "test-2"] } }
+    : event), "test-1", "test_command_check_id_mismatch");
+  await runCase("unexpected-sixth", (events) => {
+    const retained = events.slice(0, 8);
+    const template = events[8]!.commandExecution!;
+    return [...retained,
+      { ...events[8]!, commandExecution: { ...template, commandId: "required-check:unexpected", command: "check six", invocation: ["check six"], requiredCheckIds: [] } },
+      { ...events[9]!, commandExecution: { ...events[9]!.commandExecution!, commandId: "required-check:unexpected", command: "check six", invocation: ["check six"], requiredCheckIds: [] } },
+    ];
+  }, "test-5", "test_command_check_id_mismatch");
+}
+
 /** Separately invokable forward contract for semantic command evidence. */
 export async function runVerifierSemanticCommandEvidenceMatrixTests(): Promise<void> {
   section("037-E — fourteen-case verifier semantic command-evidence matrix");
@@ -355,6 +522,8 @@ export async function runVerifierSemanticCommandEvidenceMatrixTests(): Promise<v
 }
 
 export async function runVerificationDecisionTests(): Promise<void> {
+  await runFiveCommandRequirementTest();
+  await runFiveCommandAdversarialContracts();
   await runVerifierSemanticCommandEvidenceMatrixTests();
   section("037-E — two lying verifiers remain INDETERMINATE or objective fail");
 

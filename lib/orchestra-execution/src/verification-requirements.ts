@@ -80,6 +80,12 @@ export function standardRequirementId(kind: VerifierRequirementKind): string {
   return `req:${kind}`;
 }
 
+function requiredTestRequirementId(checkId: string, commandCount: number): string {
+  return commandCount === 1
+    ? standardRequirementId("required_tests")
+    : `${standardRequirementId("required_tests")}:${checkId}`;
+}
+
 export function obligationRequirementId(obligationId: string): string {
   return `req:obligation:${obligationId}`;
 }
@@ -117,21 +123,26 @@ export function deriveVerifierVerificationRequirements(
     requirementClass: "MACHINE_RESOLVABLE",
     verificationMode: "MACHINE_EVIDENCE",
   }));
-  if (
-    executor.requiredEvidence.some((item) => {
-      const key = item.toLowerCase();
-      return key === "tests" || key === "test" || key.startsWith("test:");
-    })
-  ) {
-    const configured = executor.requiredEvidence.find((item) => item.toLowerCase().startsWith("test:"));
-    const command = configured?.slice(configured.indexOf(":") + 1).trim() || "npm test";
+  const configuredCommands = executor.requiredEvidence
+    .filter((item) => item.toLowerCase().startsWith("test:"))
+    .map((item) => item.slice(item.indexOf(":") + 1).trim())
+    .filter(Boolean);
+  const requiresTests = executor.requiredEvidence.some((item) => {
+    const key = item.toLowerCase();
+    return key === "tests" || key === "test" || key.startsWith("test:");
+  });
+  const commands = configuredCommands.length > 0
+    ? configuredCommands
+    : requiresTests ? ["npm test"] : [];
+  for (const [index, command] of commands.entries()) {
+    const checkId = commands.length === 1 ? "test" : `test-${index + 1}`;
     requirements.push({
-      requirementId: standardRequirementId("required_tests"),
+      requirementId: requiredTestRequirementId(checkId, commands.length),
       requirementKind: "required_tests",
       requirementClass: "MACHINE_RESOLVABLE",
       verificationMode: "MACHINE_EVIDENCE",
       commandRequirement: commandContext ? {
-        checkId: "test",
+        checkId,
         command,
         invocation: [command],
         workingDirectory: executor.repositoryPath,

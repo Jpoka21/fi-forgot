@@ -278,6 +278,53 @@ export async function runCodexProviderTests(): Promise<void> {
   expectFalse("provider error is not semantic verification FAIL", failedResult.errorMessage === "FAIL");
   await failedProvider.closeSession(failedSession);
 
+  section("Codex five-command verifier correlation");
+  const multiTransport = new FakeAppServerTransport();
+  const multiProvider = new CodexExecutionProvider({ transport: multiTransport, mode: "read-only" });
+  const commandNames = ["check one", "check two", "check three", "check four", "check five"];
+  const multiFrozen = readOnlyAssignment({
+    assignmentId: "codex-five-command-verifier",
+    verificationRequirements: commandNames.map((command, index) => ({
+      requirementId: `req:required_tests:test-${index + 1}`,
+      requirementKind: "required_tests" as const,
+      requirementClass: "MACHINE_RESOLVABLE" as const,
+      verificationMode: "MACHINE_EVIDENCE" as const,
+      commandRequirement: {
+        checkId: `test-${index + 1}`,
+        command,
+        invocation: [command],
+        workingDirectory: "C:/fixture",
+        expectedStatus: "completed" as const,
+        expectedExitCode: 0 as const,
+        verifierAssignmentId: "codex-five-command-verifier",
+        executorAssignmentId: "executor-five-command",
+        executorExecutionEvidenceId: "evidence-five-command",
+        repositoryPath: "C:/fixture",
+        startingHead: "a".repeat(40),
+        candidatePaths: [],
+        candidateContentSha256: {},
+      },
+    })),
+  });
+  const multiSession = await multiProvider.createSession({ repositoryPath: "C:/fixture", branch: "main", startingHead: "a".repeat(40) });
+  const multiRun = await multiProvider.submitAssignment(multiSession, multiFrozen);
+  for (const [index, command] of commandNames.entries()) {
+    const item = { id: `cmd-${index + 1}`, type: "commandExecution", command, cwd: "C:/fixture" };
+    multiTransport.emit("item/started", { threadId: multiSession.sessionId, turnId: multiRun.runId, item });
+    multiTransport.emit("item/completed", { threadId: multiSession.sessionId, turnId: multiRun.runId, item: { ...item, status: "completed", exitCode: 0 } });
+  }
+  multiTransport.emit("turn/completed", { threadId: multiSession.sessionId, turn: { id: multiRun.runId, status: "completed" } });
+  const multiEvents = [];
+  for await (const event of multiProvider.streamEvents(multiRun)) multiEvents.push(event);
+  const multiCommands = multiEvents.filter((event) => event.commandExecution).map((event) => event.commandExecution!);
+  expect("five commands produce ten correlated events", multiCommands.length, 10);
+  for (const [index, row] of multiCommands.entries()) {
+    const commandIndex = Math.floor(index / 2);
+    expect(`command event ${index + 1} has exactly its frozen check`, row.requiredCheckIds, [`test-${commandIndex + 1}`]);
+    expect(`command event ${index + 1} preserves exact command`, row.command, commandNames[commandIndex]);
+  }
+  await multiProvider.closeSession(multiSession);
+
   const startedCommand = normalizeCodexEvent({ method: "item/started", params: {
     threadId: "t", turnId: "r", item: { id: "cmd-1", type: "commandExecution", command: ["npm", "test"], cwd: "C:/fixture" },
   }});
