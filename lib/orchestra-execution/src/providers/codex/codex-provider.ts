@@ -41,8 +41,15 @@ interface InternalRun {
   finalResponse: string | null;
   startedAt: number;
   commandRequirements: FrozenVerifierCommandRequirement[];
-  commandRequirementById: Map<string, FrozenVerifierCommandRequirement>;
-  nextCommandRequirement: number;
+  commandRequirementById: Map<string, CommandRequirementBinding>;
+  usedCommandRequirementIds: Set<string>;
+  completedCommandIds: Set<string>;
+}
+
+interface CommandRequirementBinding {
+  requirement: FrozenVerifierCommandRequirement;
+  commandKey: string;
+  workingDirectory: string;
 }
 
 interface ThreadResponse {
@@ -94,6 +101,87 @@ function terminalReport(
     durationMs:
       typeof turn?.durationMs === "number" ? turn.durationMs : Math.max(0, Date.now() - run.startedAt),
   };
+}
+
+function commandKey(command: unknown): string | null {
+  if (typeof command === "string") return `string:${command}`;
+  if (Array.isArray(command) && command.every((part) => typeof part === "string")) {
+    return `argv:${JSON.stringify(command)}`;
+  }
+  return null;
+}
+
+function windowsPowerShellExecutable(value: string): boolean {
+  const normalized = value.replace(/\\/g, "/");
+  const basename = normalized.slice(normalized.lastIndexOf("/") + 1).toLowerCase();
+  if (basename !== "pwsh.exe" && basename !== "powershell.exe") return false;
+  return (!/[\\/]/.test(value)) || /^[A-Za-z]:[\\/]/.test(value);
+}
+
+/** Parse only the deliberately small App Server Windows PowerShell envelope grammar. */
+function splitQuotedEnvelope(value: string): string[] | null {
+  const tokens: string[] = [];
+  let index = 0;
+  while (index < value.length) {
+    while (value[index] === " " || value[index] === "\t") index++;
+    if (index === value.length) break;
+    let token = "";
+    const quote = value[index] === "'" || value[index] === '"' ? value[index++] : null;
+    let closed = quote === null;
+    while (index < value.length) {
+      const char = value[index]!;
+      if (quote) {
+        if (char === quote) { index++; closed = true; break; }
+        token += char;
+        index++;
+      } else {
+        if (char === " " || char === "\t") break;
+        if (char === "'" || char === '"') return null;
+        token += char;
+        index++;
+      }
+    }
+    if (!closed) return null;
+    if (!token || (index < value.length && value[index] !== " " && value[index] !== "\t")) return null;
+    tokens.push(token);
+  }
+  return tokens;
+}
+
+function extractedCommand(command: unknown): { command?: string; invocation?: string[] } | null {
+  if (typeof command === "string") {
+    const envelope = splitQuotedEnvelope(command);
+    if (envelope?.length === 3 && windowsPowerShellExecutable(envelope[0]!) &&
+        envelope[1]!.toLowerCase() === "-command") return { command: envelope[2] };
+    const hasCommandSwitch = /(?:^|[ \t])-command(?:[ \t]|$)/i.test(command);
+    const looksLikePowerShell = /(?:^|[\\/'"])(?:pwsh|powershell)\.exe(?:['"])?[ \t]/i.test(command);
+    if (hasCommandSwitch && (looksLikePowerShell || envelope === null ||
+        (envelope[0] && windowsPowerShellExecutable(envelope[0])))) return null;
+    return { command };
+  }
+  if (!Array.isArray(command) || !command.every((part) => typeof part === "string")) return null;
+  if (command.length === 3 && windowsPowerShellExecutable(command[0]!) &&
+      command[1]!.toLowerCase() === "-command") return { command: command[2] };
+  if (windowsPowerShellExecutable(command[0] ?? "") &&
+      command.some((part) => part.toLowerCase() === "-command")) return null;
+  return { invocation: command };
+}
+
+function matchingRequirement(
+  run: InternalRun,
+  command: unknown,
+  workingDirectory: unknown,
+): FrozenVerifierCommandRequirement | undefined {
+  if (typeof workingDirectory !== "string") return undefined;
+  const extracted = extractedCommand(command);
+  if (!extracted) return undefined;
+  const matches = run.commandRequirements.filter((requirement) =>
+    !run.usedCommandRequirementIds.has(requirement.checkId) &&
+    requirement.workingDirectory === workingDirectory &&
+    (extracted.command !== undefined
+      ? requirement.command === extracted.command
+      : JSON.stringify(requirement.invocation) === JSON.stringify(extracted.invocation)));
+  return matches.length === 1 ? matches[0] : undefined;
 }
 
 /** Official Codex App Server provider with explicit or assignment-derived execution mode. */
@@ -195,7 +283,8 @@ export class CodexExecutionProvider implements ExecutionProvider {
       commandRequirements: (frozen.assignment.verificationRequirements ?? [])
         .flatMap((row) => row.commandRequirement ? [row.commandRequirement] : []),
       commandRequirementById: new Map(),
-      nextCommandRequirement: 0,
+      usedCommandRequirementIds: new Set(),
+      completedCommandIds: new Set(),
     });
     for (const notification of this.pendingNotifications.get(run.runId) ?? []) {
       this.recordNotification(this.requireRun(run.runId), notification);
@@ -276,10 +365,33 @@ export class CodexExecutionProvider implements ExecutionProvider {
     const commandId = item?.type === "commandExecution" && typeof item.id === "string" ? item.id : undefined;
     let requirement: FrozenVerifierCommandRequirement | undefined;
     if (commandId && notification.method === "item/started") {
-      requirement = internal.commandRequirements[internal.nextCommandRequirement++];
-      if (requirement) internal.commandRequirementById.set(commandId, requirement);
+      if (internal.commandRequirementById.has(commandId) || internal.completedCommandIds.has(commandId)) {
+        internal.commandRequirementById.delete(commandId);
+      } else {
+        requirement = matchingRequirement(internal, item.command, item.cwd ?? item.workingDirectory);
+        const key = commandKey(item.command);
+        const cwd = item.cwd ?? item.workingDirectory;
+        if (requirement && key && typeof cwd === "string") {
+          internal.commandRequirementById.set(commandId, { requirement, commandKey: key, workingDirectory: cwd });
+          internal.usedCommandRequirementIds.add(requirement.checkId);
+        }
+      }
     } else if (commandId && notification.method === "item/completed") {
-      requirement = internal.commandRequirementById.get(commandId);
+      const binding = internal.commandRequirementById.get(commandId);
+      const cwd = item.cwd ?? item.workingDirectory;
+      if (binding && !internal.completedCommandIds.has(commandId) && commandKey(item.command) === binding.commandKey &&
+          cwd === binding.workingDirectory) {
+        requirement = binding.requirement;
+      } else if (!binding) {
+        const key = commandKey(item.command);
+        for (const [boundId, candidate] of internal.commandRequirementById) {
+          if (candidate.commandKey === key && candidate.workingDirectory === cwd) {
+            internal.commandRequirementById.delete(boundId);
+          }
+        }
+      }
+      internal.commandRequirementById.delete(commandId);
+      internal.completedCommandIds.add(commandId);
     }
     const commandContext: Partial<NonNullable<NormalizedExecutionEvent["commandExecution"]>> | undefined = requirement ? {
       verifierAssignmentId: requirement.verifierAssignmentId,
@@ -300,13 +412,17 @@ export class CodexExecutionProvider implements ExecutionProvider {
         }
       }));
     }
-    internal.events.push(
-      normalizeCodexEvent(notification, {
+    const normalized = normalizeCodexEvent(notification, {
         threadId: internal.run.sessionId,
         turnId: internal.run.runId,
         commandContext,
-      }),
-    );
+      });
+    if (requirement && normalized.commandExecution) {
+      normalized.commandExecution.command = requirement.command;
+      normalized.commandExecution.invocation = [...requirement.invocation];
+      normalized.commandExecution.workingDirectory = requirement.workingDirectory;
+    }
+    internal.events.push(normalized);
     const terminal = terminalReport(notification, internal);
     if (terminal) internal.terminal = terminal;
     const waiters = internal.waiters.splice(0);

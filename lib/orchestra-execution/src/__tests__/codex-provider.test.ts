@@ -325,6 +325,108 @@ export async function runCodexProviderTests(): Promise<void> {
   }
   await multiProvider.closeSession(multiSession);
 
+  section("Codex exact wrapped-command correlation");
+  const correlationCase = async (
+    label: string,
+    requirements: Array<{ checkId: string; command: string; invocation: string[]; workingDirectory?: string }>,
+    notifications: Array<{ method: "item/started" | "item/completed"; item: Record<string, unknown> }>,
+    expectedIds: string[][],
+  ): Promise<void> => {
+    const caseTransport = new FakeAppServerTransport();
+    const caseProvider = new CodexExecutionProvider({ transport: caseTransport, mode: "read-only" });
+    const caseFrozen = readOnlyAssignment({
+      assignmentId: `correlation-${label}`,
+      verificationRequirements: requirements.map((row, index) => ({
+        requirementId: `req:required_tests:${row.checkId}`,
+        requirementKind: "required_tests" as const,
+        requirementClass: "MACHINE_RESOLVABLE" as const,
+        verificationMode: "MACHINE_EVIDENCE" as const,
+        commandRequirement: {
+          ...row,
+          workingDirectory: row.workingDirectory ?? "C:/fixture",
+          expectedStatus: "completed" as const,
+          expectedExitCode: 0 as const,
+          verifierAssignmentId: `correlation-${label}`,
+          executorAssignmentId: "executor",
+          executorExecutionEvidenceId: "evidence",
+          repositoryPath: "C:/fixture",
+          startingHead: "a".repeat(40),
+          candidatePaths: [],
+          candidateContentSha256: {},
+        },
+      })),
+    });
+    const caseSession = await caseProvider.createSession({ repositoryPath: "C:/fixture", branch: "main", startingHead: "a".repeat(40) });
+    const caseRun = await caseProvider.submitAssignment(caseSession, caseFrozen);
+    for (const row of notifications) {
+      caseTransport.emit(row.method, { threadId: caseSession.sessionId, turnId: caseRun.runId, item: row.item });
+    }
+    caseTransport.emit("turn/completed", { threadId: caseSession.sessionId, turn: { id: caseRun.runId, status: "completed" } });
+    const caseEvents = [];
+    for await (const event of caseProvider.streamEvents(caseRun)) if (event.commandExecution) caseEvents.push(event.commandExecution);
+    expect(`${label} check ids`, caseEvents.map((event) => event.requiredCheckIds), expectedIds);
+    for (const [index, event] of caseEvents.entries()) {
+      const expected = requirements.find((row) => row.checkId === event.requiredCheckIds?.[0]);
+      if (!expected) continue;
+      expect(`${label} event ${index + 1} canonical command`, event.command, expected.command);
+      expect(`${label} event ${index + 1} canonical invocation`, event.invocation, expected.invocation);
+      expect(`${label} event ${index + 1} exact cwd`, event.workingDirectory, expected.workingDirectory ?? "C:/fixture");
+    }
+    await caseProvider.closeSession(caseSession);
+  };
+  const completed = { status: "completed", exitCode: 0 };
+  await correlationCase("absolute double quoted envelope", [{ checkId: "wrapped", command: "pnpm test -- --runInBand", invocation: ["pnpm", "test", "--", "--runInBand"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -Command \"pnpm test -- --runInBand\"", cwd: "C:/fixture" } },
+    { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command: "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -Command \"pnpm test -- --runInBand\"", cwd: "C:/fixture", ...completed } },
+  ], [["wrapped"], ["wrapped"]]);
+  await correlationCase("single quoted payload", [{ checkId: "single", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: "powershell.exe -Command 'pnpm test'", cwd: "C:/fixture" } },
+    { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command: "powershell.exe -Command 'pnpm test'", cwd: "C:/fixture", ...completed } },
+  ], [["single"], ["single"]]);
+  await correlationCase("wrapped argv", [{ checkId: "argv-envelope", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: ["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-Command", "pnpm test"], cwd: "C:/fixture" } },
+    { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command: ["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-Command", "pnpm test"], cwd: "C:/fixture", ...completed } },
+  ], [["argv-envelope"], ["argv-envelope"]]);
+  await correlationCase("raw argv preserved", [{ checkId: "raw-argv", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: ["pnpm", "test"], cwd: "C:/fixture" } },
+    { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command: ["pnpm", "test"], cwd: "C:/fixture", ...completed } },
+  ], [["raw-argv"], ["raw-argv"]]);
+  for (const [label, command, cwd] of [
+    ["wrong cwd", "pwsh.exe -Command 'pnpm test'", "C:/other"],
+    ["appended command", "pwsh.exe -Command 'pnpm test' ; Write-Host hacked", "C:/fixture"],
+    ["appended inner payload", "pwsh.exe -Command 'pnpm test; Write-Host hacked'", "C:/fixture"],
+    ["malformed envelope", "pwsh.exe -Command 'pnpm test", "C:/fixture"],
+    ["unsupported switch", "pwsh.exe -NoProfile -Command 'pnpm test'", "C:/fixture"],
+    ["relative executable path", ".\\pwsh.exe -Command 'pnpm test'", "C:/fixture"],
+    ["zero command match", "pwsh.exe -Command 'pnpm lint'", "C:/fixture"],
+  ] as const) {
+    await correlationCase(label, [{ checkId: "test", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+      { method: "item/started", item: { id: "tool-1", type: "commandExecution", command, cwd } },
+      { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command, cwd, ...completed } },
+    ], [[], []]);
+  }
+  await correlationCase("multiple frozen matches", [
+    { checkId: "duplicate-a", command: "pnpm test", invocation: ["pnpm", "test"] },
+    { checkId: "duplicate-b", command: "pnpm test", invocation: ["pnpm", "test"] },
+  ], [{ method: "item/started", item: { id: "tool-1", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture" } }], [[]]);
+  await correlationCase("duplicate check use", [{ checkId: "test", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture" } },
+    { method: "item/started", item: { id: "tool-2", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture" } },
+  ], [["test"], []]);
+  await correlationCase("duplicate completion", [{ checkId: "test", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture" } },
+    { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture", ...completed } },
+    { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture", ...completed } },
+  ], [["test"], ["test"], []]);
+  await correlationCase("completion tool use mismatch", [{ checkId: "test", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture" } },
+    { method: "item/completed", item: { id: "tool-other", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture", ...completed } },
+  ], [["test"], []]);
+  await correlationCase("completion payload mismatch", [{ checkId: "test", command: "pnpm test", invocation: ["pnpm", "test"] }], [
+    { method: "item/started", item: { id: "tool-1", type: "commandExecution", command: "pnpm test", cwd: "C:/fixture" } },
+    { method: "item/completed", item: { id: "tool-1", type: "commandExecution", command: "pnpm test; Write-Host hacked", cwd: "C:/fixture", ...completed } },
+  ], [["test"], []]);
+
   const startedCommand = normalizeCodexEvent({ method: "item/started", params: {
     threadId: "t", turnId: "r", item: { id: "cmd-1", type: "commandExecution", command: ["npm", "test"], cwd: "C:/fixture" },
   }});
