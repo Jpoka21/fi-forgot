@@ -12,7 +12,18 @@ const sectionLabels = {
 
 export function FiAiConciergePage() {
   const workspace = useAiConciergeWorkspace();
-  const conversation = useConciergeConversation();
+  const conversation = useConciergeConversation({
+    recommendations: workspace.recommendations.map((recommendation) => ({
+      id: recommendation.id,
+      title: recommendation.title,
+      body: recommendation.description,
+      actionLabel: recommendation.actionLabel,
+      href: recommendation.href,
+    })),
+    isLoading: workspace.isLoading,
+    error: workspace.error,
+    refresh: workspace.refresh,
+  });
 
   useEffect(() => {
     document.getElementById("concierge-main")?.focus();

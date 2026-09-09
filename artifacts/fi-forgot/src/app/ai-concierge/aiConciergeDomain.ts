@@ -23,6 +23,52 @@ export interface ConciergeMessage {
   actions?: ConciergeSuggestedAction[];
 }
 
+export interface ConciergeConversationRecommendation {
+  id: string;
+  title: string;
+  body: string;
+  actionLabel: string;
+  href: string;
+}
+
+export interface ConciergeConversationResponse {
+  content: string;
+  actions: ConciergeSuggestedAction[];
+  followUps: string[];
+}
+
+export const conciergeAttentionPrompt = "Who needs my attention right now?";
+
+export function isConciergeAttentionIntent(query: string): boolean {
+  const normalize = (value: string) => value.trim().toLowerCase().replace(/[?!.]+$/, "");
+  return normalize(query) === normalize(conciergeAttentionPrompt);
+}
+
+export function resolveBrainAttentionResponse(
+  recommendations: ConciergeConversationRecommendation[],
+): ConciergeConversationResponse {
+  if (recommendations.length === 0) {
+    return {
+      content: "Everything looks calm right now. There are no opportunities that need your attention.",
+      actions: [],
+      followUps: ["What cards are coming up?", "How can I personalize the next card?"],
+    };
+  }
+
+  return {
+    content: [
+      "Here's what looks most helpful right now:",
+      ...recommendations.flatMap((item) => [`\n${item.title}`, item.body]),
+    ].join("\n"),
+    actions: recommendations.map((item) => ({
+      id: `action-${item.id}`,
+      label: item.actionLabel,
+      href: item.href,
+    })),
+    followUps: ["What cards are coming up?", "How can I personalize the next card?"],
+  };
+}
+
 export interface ConciergeSuggestedConversation {
   id: string;
   label: string;

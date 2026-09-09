@@ -15,6 +15,10 @@ import { fetchConciergeWorkspace } from "../app/concierge-brain/fetchConciergeWo
 import type { ConciergeWorkspaceResponse } from "../app/concierge-brain/conciergeWorkspaceTypes.js";
 import type { ApiResult } from "../app/api/shared/types.js";
 import type { ConciergeRelationshipInsight } from "../app/ai-concierge/aiConciergeDomain.js";
+import {
+  isConciergeAttentionIntent,
+  resolveBrainAttentionResponse,
+} from "../app/ai-concierge/aiConciergeDomain.js";
 import type { FiAiRecommendation } from "../app/ai/aiDomain.js";
 
 let passed = 0;
@@ -255,6 +259,64 @@ section("workspace hook delegates to buildConciergeWorkspaceForDisplay");
   expectTrue("does not import buildRelationshipInsights", !source.includes("buildRelationshipInsights"));
   expectTrue("does not import relationship-health", !source.includes("relationship-health"));
   expectTrue("does not import conciergeSuggestionsEngine", !source.includes("conciergeSuggestionsEngine"));
+}
+
+section("Brain conversation attention intent");
+{
+  const recommendations = [
+    {
+      id: "first",
+      title: "First server title",
+      body: "First server body.",
+      actionLabel: "First server action",
+      href: "/server/first?from=brain",
+    },
+    {
+      id: "second",
+      title: "Second server title",
+      body: "Second server body.",
+      actionLabel: "Second server action",
+      href: "/server/second#detail",
+    },
+  ];
+  const response = resolveBrainAttentionResponse(recommendations);
+
+  expectTrue("canonical attention prompt matches", isConciergeAttentionIntent("Who needs my attention right now?"));
+  expectTrue("non-attention category stays on rollback path", !isConciergeAttentionIntent("How are my relationships doing?"));
+  expectTrue(
+    "server order is preserved",
+    response.content.indexOf(recommendations[0]!.title) < response.content.indexOf(recommendations[1]!.title),
+  );
+  expectTrue("server title is preserved", response.content.includes(recommendations[0]!.title));
+  expectTrue("server body is preserved", response.content.includes(recommendations[0]!.body));
+  expect("server URLs and action labels are preserved", response.actions, [
+    { id: "action-first", label: "First server action", href: "/server/first?from=brain" },
+    { id: "action-second", label: "Second server action", href: "/server/second#detail" },
+  ]);
+
+  const empty = resolveBrainAttentionResponse([]);
+  expect("empty attention response has no actions", empty.actions, []);
+  expectTrue("empty attention response is truthful", empty.content.includes("no opportunities"));
+}
+
+section("Brain conversation wiring and rollback contract");
+{
+  const pagePath = join(dirname(fileURLToPath(import.meta.url)), "../app/components/ai-concierge/FiAiConciergePage.tsx");
+  const hookPath = join(dirname(fileURLToPath(import.meta.url)), "../app/ai-concierge/hooks/useConciergeConversation.ts");
+  const configPath = join(dirname(fileURLToPath(import.meta.url)), "../app/concierge-brain/conciergeBrainConfig.ts");
+  const pageSource = readFileSync(pagePath, "utf8");
+  const hookSource = readFileSync(hookPath, "utf8");
+  const configSource = readFileSync(configPath, "utf8");
+
+  expectTrue("page reuses loaded workspace recommendations", pageSource.includes("recommendations: workspace.recommendations.map"));
+  expectTrue("page passes existing workspace retry", pageSource.includes("refresh: workspace.refresh"));
+  expectTrue("conversation makes no Brain API call", !hookSource.includes("fetchConciergeWorkspace"));
+  expectTrue("Brain attention path does not import legacy recommendation reasoning", !hookSource.includes("loadAiRecommendations"));
+  expectTrue("Brain attention path does not import relationship-health reasoning", !hookSource.includes("relationship-health"));
+  expectTrue("legacy resolver remains available for rollback", hookSource.includes(": resolveConciergeResponse(content, user?.email)"));
+  expectTrue("failure enters existing conversation error contract", hookSource.includes("workspace?.isLoading || workspace?.error"));
+  expectTrue("retry refreshes the existing workspace path", hookSource.includes("workspace?.refresh()"));
+  expectTrue("conversation flag requires workspace boundary", configSource.includes("isBrainConciergeEnabled()") && configSource.includes("VITE_BRAIN_CONCIERGE_CONVERSATION"));
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

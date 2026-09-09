@@ -5,8 +5,16 @@ import {
   streamConciergeText,
 } from "@/app/ai-concierge/aiConciergeEngine";
 import { trackConciergeEvent } from "@/app/ai-concierge/aiConciergeAnalytics";
-import type { ConciergeMessage } from "@/app/ai-concierge/aiConciergeDomain";
-import { aiConciergeDefaults } from "@/app/ai-concierge/aiConciergeDomain";
+import type {
+  ConciergeConversationRecommendation,
+  ConciergeMessage,
+} from "@/app/ai-concierge/aiConciergeDomain";
+import {
+  aiConciergeDefaults,
+  isConciergeAttentionIntent,
+  resolveBrainAttentionResponse,
+} from "@/app/ai-concierge/aiConciergeDomain";
+import { isBrainConciergeConversationEnabled } from "@/app/concierge-brain/conciergeBrainConfig";
 import {
   clearConversationHistory,
   loadConversationHistory,
@@ -24,7 +32,14 @@ function createMessage(role: ConciergeMessage["role"], content: string, partial?
   };
 }
 
-export function useConciergeConversation() {
+export interface ConciergeConversationWorkspace {
+  recommendations: ConciergeConversationRecommendation[];
+  isLoading: boolean;
+  error: string | null;
+  refresh: () => void;
+}
+
+export function useConciergeConversation(workspace?: ConciergeConversationWorkspace) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ConciergeMessage[]>(() => loadConversationHistory());
   const [draft, setDraft] = useState("");
@@ -63,7 +78,16 @@ export function useConciergeConversation() {
       trackConciergeEvent("concierge_message_sent", { messageId: userMessage.id });
 
       try {
-        const response = resolveConciergeResponse(content, user?.email);
+        const useBrainAttention = isBrainConciergeConversationEnabled()
+          && isConciergeAttentionIntent(content);
+
+        if (useBrainAttention && (workspace?.isLoading || workspace?.error)) {
+          throw new Error("Concierge workspace recommendations are unavailable");
+        }
+
+        const response = useBrainAttention
+          ? resolveBrainAttentionResponse(workspace?.recommendations ?? [])
+          : resolveConciergeResponse(content, user?.email);
         const assistantId = `msg-assistant-${Date.now()}`;
         const placeholder = createMessage("assistant", "", {
           id: assistantId,
@@ -105,15 +129,18 @@ export function useConciergeConversation() {
         setIsStreaming(false);
       }
     },
-    [isResponding, user?.email],
+    [isResponding, user?.email, workspace],
   );
 
   const retryLast = useCallback(() => {
     const lastUser = [...messages].reverse().find((message) => message.role === "user");
     if (!lastUser) return;
     setError(null);
+    if (isBrainConciergeConversationEnabled() && isConciergeAttentionIntent(lastUser.content)) {
+      workspace?.refresh();
+    }
     void sendMessage(lastUser.content);
-  }, [messages, sendMessage]);
+  }, [messages, sendMessage, workspace]);
 
   return {
     messages,
