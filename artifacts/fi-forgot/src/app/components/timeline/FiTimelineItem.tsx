@@ -33,6 +33,7 @@ export interface FiTimelineItemProps {
   onEdit?: (id: string) => void;
   onArchive?: (id: string) => void;
   onRestore?: (id: string) => void;
+  onInterpretationAction?: (id:string,action:"confirm"|"withdraw"|"reject"|"archive"|"restore")=>void;
   onSaveEdit?: (id: string, value: string) => Promise<void>;
   onCancelEdit?: () => void;
 }
@@ -44,6 +45,7 @@ export function FiTimelineItem({
   onEdit,
   onArchive,
   onRestore,
+  onInterpretationAction,
   onSaveEdit,
   onCancelEdit,
 }: FiTimelineItemProps) {
@@ -75,6 +77,10 @@ export function FiTimelineItem({
           ) : null}
         </div>
 
+        {item.uncertain ? <p className="fi-timeline-item__sub-label">User-authored interpretation - uncertain{item.confirmedAt && !item.endorsementWithdrawnAt ? " - endorsed by you" : ""}</p> : null}
+        {item.lifecycleState ? <p className="fi-timeline-item__sub-label">Status: {item.lifecycleState.replace(/_/g, " ")}</p> : null}
+        {item.dependencyVersionIds.length ? <p className="fi-timeline-item__sub-label">Based on exact observation {item.dependencyVersionIds.join(", ")}</p> : null}
+
         {isEditing ? (
           <FiTimelineInlineEdit
             initialValue={item.summary}
@@ -95,19 +101,24 @@ export function FiTimelineItem({
               </FiButton>
             ) : null}
             {item.canArchive ? (
-              <FiButton variant="ghost" size="sm" onClick={() => onArchive?.(item.id)}>
+              <FiButton variant="ghost" size="sm" onClick={() => item.type==="interpretation"?onInterpretationAction?.(item.id,"archive"):onArchive?.(item.id)}>
                 {timelineUiDefaults.archiveActionLabel}
               </FiButton>
             ) : null}
+            {item.type==="interpretation"&&!item.confirmedAt?<FiButton variant="ghost" size="sm" onClick={()=>onInterpretationAction?.(item.id,"confirm")}>Endorse interpretation</FiButton>:null}
+            {item.type==="interpretation"&&item.confirmedAt&&!item.endorsementWithdrawnAt?<FiButton variant="ghost" size="sm" onClick={()=>onInterpretationAction?.(item.id,"withdraw")}>Withdraw endorsement</FiButton>:null}
+            {item.type==="interpretation"?<FiButton variant="ghost" size="sm" onClick={()=>onInterpretationAction?.(item.id,"reject")}>Reject interpretation</FiButton>:null}
           </div>
         ) : null}
 
         {item.isArchived ? (
           <div className="fi-timeline-item__footer">
             <p>{timelineUiDefaults.archivedFooter}</p>
-            {item.canRestore ? <FiButton variant="ghost" size="sm" onClick={() => onRestore?.(item.id)}>Restore report</FiButton> : null}
+            {item.canRestore ? <FiButton variant="ghost" size="sm" onClick={() => item.type==="interpretation"?onInterpretationAction?.(item.id,"restore"):onRestore?.(item.id)}>Restore {item.type==="interpretation"?"interpretation":"report"}</FiButton> : null}
           </div>
         ) : null}
+        {item.history.length > 1 ? <details><summary>Version history ({item.history.length})</summary><ol>{item.history.map(version=><li key={version.id}>Version {version.version}: {version.text} ({version.lifecycleState})</li>)}</ol></details> : null}
+        {item.actionHistory.length ? <details><summary>Interpretation history ({item.actionHistory.length})</summary><ol>{item.actionHistory.map(action=><li key={action.operationId}>{action.action} by you at {action.actedAt} (revision {action.newRevision})</li>)}</ol></details>:null}
       </FiTimelineCard>
     </article>
   );

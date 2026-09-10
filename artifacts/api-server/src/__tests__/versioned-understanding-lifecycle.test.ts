@@ -1,0 +1,54 @@
+import assert from 'node:assert/strict';
+import { createVersionedUnderstandingHandlers } from '../services/versioned-understanding-repository';
+import { projectActiveUnderstanding } from '../services/versioned-understanding';
+import { UnderstandingPgFixture } from './understanding-pg-fixture';
+import {relationshipObservationVersionsTable,relationshipInterpretationsTable,relationshipInterpretationDependenciesTable} from '@workspace/db/schema';
+const pg=new UnderstandingPgFixture();
+pg.seed('recipients',[{id:'r',user_id:'u',birthday:null,anniversary:null}]);
+pg.seed('question_answers',[{id:'a',user_id:'u',recipient_id:'r',event_type:'Profile',event_year:2026,question_key:'story',question_text:'A story?',answer_text:'Original report',was_skipped:false,trigger_type:'profile_gap',archived_at:null,created_at:'2026-01-01T00:00:00Z'}]);
+const handlers=createVersionedUnderstandingHandlers(pg.db,(req,res)=>{const id=req.headers['x-user-id'];if(typeof id!=='string'){res.status(401).json({error:'unauthenticated'});return null;}return id;});
+let published=0;
+async function call(name:keyof typeof handlers,body:Record<string,unknown>={},params:Record<string,string>={},user='u'){
+ let status=200;let data:any;const res={status(value:number){status=value;return res;},json(value:unknown){published++;data=value;return res;}};
+ await handlers[name]({headers:user?{'x-user-id':user}:{},params:{id:'r',answerId:'a',...params},body} as any,res as any);return{status,data};
+}
+let timeline=await call('timeline');assert.equal(timeline.status,200);
+const initial=timeline.data.items.find((i:any)=>i.evidenceId==='a');assert.equal(initial.history.length,1);
+assert.equal(initial.observationAt,null);const v1=initial.history[0].id;
+const original=structuredClone(pg.tables.relationship_observation_versions[0]);
+let created=await call('createInterpretation',{text:'Maybe this matters',dependencyVersionIds:[v1],operationId:'create-1'});assert.equal(created.status,201);
+const id=created.data.id;
+assert.equal((await call('createInterpretation',{text:'bad',dependencyVersionIds:[v1],operationId:'bad',confidence:'certain'})).status,400);
+assert.equal((await call('changeInterpretation',{expectedRevision:1,operationId:'confirm-1'},{interpretationId:id,action:'confirm'})).status,200);
+assert.equal((await call('changeInterpretation',{expectedRevision:1,operationId:'stale'},{interpretationId:id,action:'confirm'})).status,409);
+assert.equal((await call('changeInterpretation',{expectedRevision:2,operationId:'withdraw-1'},{interpretationId:id,action:'withdraw'})).status,200);
+assert.equal((await call('changeInterpretation',{expectedRevision:3,operationId:'restore-1'},{interpretationId:id,action:'restore'})).status,200);
+assert.equal(pg.tables.relationship_interpretations[0].confirmed_at,null);
+assert.deepEqual(pg.tables.relationship_interpretation_actions.map(a=>a.action),['create','confirm','withdraw','restore']);
+for(const [action,rev] of [['reject',4],['restore',5],['archive',6],['restore',7]] as const)assert.equal((await call('changeInterpretation',{expectedRevision:rev,operationId:`${action}-${rev}`},{interpretationId:id,action})).status,200);
+for(const failOn of [/insert into "relationship_observation_versions"/,/update "relationship_observation_heads"/,/^commit$/]){
+ const before=structuredClone(pg.tables);const sent=published;pg.failOn=failOn;
+ await assert.rejects(()=>call('edit',{answerText:'Uncommitted',expectedVersionId:v1}),error=>(error as Error & {cause?:Error}).cause?.message==='injected database write failure');
+ assert.deepEqual(pg.tables,before,'source, version and head must roll back together');
+ assert.equal(published,sent,'a failed commit never publishes a success response');
+}
+let changed=await call('edit',{answerText:'Corrected report',expectedVersionId:v1});assert.equal(changed.status,200);
+timeline=await call('timeline');const corrected=timeline.data.items.find((i:any)=>i.evidenceId==='a');const v2=corrected.history.at(-1).id;
+const obsolete=timeline.data.items.find((i:any)=>i.id===id);assert.equal(obsolete.lifecycleState,'superseded');assert.equal(obsolete.actionHistory.length,8);assert.equal(obsolete.canRestore,false);
+assert.equal(corrected.history[0].lifecycleState,'superseded');assert.deepEqual(pg.tables.relationship_observation_versions[0],original);
+assert.equal((await call('edit',{answerText:'Stale',expectedVersionId:v1})).status,409);
+assert.equal((await call('changeInterpretation',{expectedRevision:8,operationId:'obsolete'},{interpretationId:id,action:'confirm'})).status,409);
+assert.equal((await call('archive',{expectedVersionId:v2})).status,200);
+timeline=await call('timeline');const archived=timeline.data.items.find((i:any)=>i.evidenceId==='a');assert.equal(archived.isArchived,true);
+assert.equal((await call('restore',{expectedVersionId:archived.history.at(-1).id})).status,200);
+timeline=await call('timeline');const restored=timeline.data.items.find((i:any)=>i.evidenceId==='a');assert.equal(restored.history.length,4);assert.equal(restored.version,4);
+const beforeDenial=structuredClone(pg.tables);
+assert.equal((await call('edit',{answerText:'Cross user',expectedVersionId:restored.history.at(-1).id},{},'other')).status,404);
+assert.equal((await call('edit',{answerText:'Cross recipient',expectedVersionId:restored.history.at(-1).id},{id:'other'})).status,404);
+assert.equal((await call('timeline',{},{} ,'')).status,401);assert.deepEqual(pg.tables,beforeDenial);
+const active=projectActiveUnderstanding(await pg.db.select().from(relationshipObservationVersionsTable),await pg.db.select().from(relationshipInterpretationsTable),await pg.db.select().from(relationshipInterpretationDependenciesTable),{userId:'u',recipientId:'r'});
+assert.equal(active.observations.length,1);assert.equal(active.interpretations.length,0,'old exact dependencies never silently retarget');
+assert.ok(pg.queries.some(q=>q.text.includes('serializable')));assert.ok(pg.queries.some(q=>q.text.startsWith('rollback')));
+assert.ok(pg.queries.some(q=>q.text.includes('update "question_answers"')&&q.text.includes('"user_id"')&&q.text.includes('"recipient_id"')));
+assert.ok(!pg.queries.some(q=>q.text.startsWith('update "relationship_observation_versions"')),'no historical revision updates');
+console.log('real Drizzle handler transactions, rollback, scope, immutable history, CAS and Brain projection passed');

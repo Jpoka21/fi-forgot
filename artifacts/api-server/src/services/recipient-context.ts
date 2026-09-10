@@ -1,3 +1,6 @@
+import { sql, inArray } from 'drizzle-orm';
+import { projectActiveUnderstanding } from './versioned-understanding';
+import { captureUnversionedAnswers, type UnderstandingDatabase } from './versioned-understanding-repository';
 /**
  * Recipient Context Assembly Service
  *
@@ -199,6 +202,7 @@ export interface RecipientContext {
   writingHistory: WritingHistoryInventory;
   relationshipTimeline: RelationshipTimelineInventory;
   relationshipEvidence?: RelationshipMemoryEvidence[];
+  activeUnderstanding?: ReturnType<typeof projectActiveUnderstanding>;
   briefingSummary: BriefingSummary;
   profileCompleteness: ProfileCompleteness;
   freshUpdates: FreshUpdate[];
@@ -580,19 +584,25 @@ export async function assembleRecipientContext(
     recipientProfileTable,
     questionAnswersTable,
     personalCardsTable,
+    relationshipObservationVersionsTable,
+    relationshipInterpretationsTable,
+    relationshipInterpretationDependenciesTable,
   } = await import("@workspace/db");
-  const [recipientRows, profileRows, answerRows, cardRows] = await Promise.all([
-    db
+  const [recipientRows, profileRows, answerRows, cardRows, observationRows, interpretationRows, dependencyRows] = await db.transaction(async tx=>{
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}),hashtext(${recipientId}))`);
+    await captureUnversionedAnswers(tx as unknown as UnderstandingDatabase,{userId,recipientId});
+    return Promise.all([
+    tx
       .select()
       .from(recipientsTable)
       .where(and(eq(recipientsTable.id, recipientId), eq(recipientsTable.userId, userId)))
       .limit(1),
-    db
+    tx
       .select()
       .from(recipientProfileTable)
       .where(eq(recipientProfileTable.id, recipientId))
       .limit(1),
-    db
+    tx
       .select()
       .from(questionAnswersTable)
       .where(
@@ -604,7 +614,7 @@ export async function assembleRecipientContext(
         ),
       )
       .orderBy(questionAnswersTable.createdAt),
-    db
+    tx
       .select()
       .from(personalCardsTable)
       .where(
@@ -614,8 +624,12 @@ export async function assembleRecipientContext(
         ),
       )
       .orderBy(personalCardsTable.createdAt),
+    tx.select().from(relationshipObservationVersionsTable).where(and(eq(relationshipObservationVersionsTable.userId,userId),eq(relationshipObservationVersionsTable.recipientId,recipientId))),
+    tx.select().from(relationshipInterpretationsTable).where(and(eq(relationshipInterpretationsTable.userId,userId),eq(relationshipInterpretationsTable.recipientId,recipientId),eq(relationshipInterpretationsTable.lifecycleState,"active"),isNull(relationshipInterpretationsTable.endorsementWithdrawnAt))),
+    tx.select().from(relationshipInterpretationDependenciesTable).where(inArray(relationshipInterpretationDependenciesTable.interpretationId,tx.select({id:relationshipInterpretationsTable.id}).from(relationshipInterpretationsTable).where(and(eq(relationshipInterpretationsTable.userId,userId),eq(relationshipInterpretationsTable.recipientId,recipientId))))),
   ]);
 
+  },{isolationLevel:'serializable'});
   const recipient = recipientRows[0] ?? null;
   // Gate profile on userId ownership. recipient_profile has no userId column,
   // so ownership is enforced through the parent recipients row. If the recipient
@@ -649,6 +663,7 @@ export async function assembleRecipientContext(
       { kind: "anniversary", value: recipient.anniversary },
     ] : [],
   });
+  const activeUnderstanding=recipient?projectActiveUnderstanding(observationRows,interpretationRows,dependencyRows,{userId,recipientId}):{observations:[],interpretations:[]};
   // Temporary Brain compatibility view; all semantics come from the canonical projection.
   const relationshipTimeline = buildRelationshipTimelineInventory(answerRows, cardRows);
   const briefingSummary = buildBriefingSummary(regularAnswerRows);
@@ -680,6 +695,7 @@ export async function assembleRecipientContext(
     writingHistory,
     relationshipTimeline,
     relationshipEvidence,
+    activeUnderstanding,
     briefingSummary,
     freshUpdates,
     followUpAnswers,

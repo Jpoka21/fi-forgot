@@ -10,6 +10,7 @@ export interface FiTimelineListProps {
   onEdit?: (id: string) => void;
   onArchive?: (id: string) => void;
   onRestore?: (id: string) => void;
+  onInterpretationAction?: (id:string,action:"confirm"|"withdraw"|"reject"|"archive"|"restore")=>void;
   onSaveEdit?: (id: string, value: string) => Promise<void>;
   onCancelEdit?: () => void;
 }
@@ -21,6 +22,7 @@ export function FiTimelineList({
   onEdit,
   onArchive,
   onRestore,
+  onInterpretationAction,
   onSaveEdit,
   onCancelEdit,
 }: FiTimelineListProps) {
@@ -37,6 +39,7 @@ export function FiTimelineList({
               onEdit={onEdit}
               onArchive={onArchive}
               onRestore={onRestore}
+              onInterpretationAction={onInterpretationAction}
               onSaveEdit={onSaveEdit}
               onCancelEdit={onCancelEdit}
             />

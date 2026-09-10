@@ -61,9 +61,9 @@ export function projectActiveRelationshipMemoryEvidence(input: Parameters<typeof
 }
 
 export type RelationshipAnswerMutation =
-  | { action: "edit"; answerText: string }
-  | { action: "archive" }
-  | { action: "restore" };
+  | { action: "edit"; answerText: string; expectedVersionId?:string; operationId?:string }
+  | { action: "archive"; expectedVersionId?:string; operationId?:string }
+  | { action: "restore"; expectedVersionId?:string; operationId?:string };
 export interface RelationshipAnswerRecord {
   id: string; userId: string; recipientId: string; triggerType: string;
   answerText: string; archivedAt: Date | null;

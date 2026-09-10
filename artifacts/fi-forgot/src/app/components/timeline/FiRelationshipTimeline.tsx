@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { FiButton } from "@/app/components/button/FiButton";
 import { FiTimelineEmptyState } from "@/app/components/empty-state/FiEmptyStatePresets";
@@ -28,15 +29,32 @@ export function FiRelationshipTimeline({
   onLogMemory,
 }: FiRelationshipTimelineProps) {
   const timeline = useRelationshipTimeline({ recipientId });
+  const [interpretationText,setInterpretationText]=useState("");
+  const [dependencyVersionId,setDependencyVersionId]=useState("");
 
-  return <FiRelationshipTimelineView timeline={timeline} onLogMemory={onLogMemory} className={className} />;
+  return <FiRelationshipTimelineView timeline={timeline} onLogMemory={onLogMemory} className={className} interpretationText={interpretationText} dependencyVersionId={dependencyVersionId} onInterpretationTextChange={setInterpretationText} onDependencyVersionChange={setDependencyVersionId} onInterpretationSaved={()=>setInterpretationText("")} />;
+}
+
+interface FiRelationshipTimelineViewProps extends Omit<FiRelationshipTimelineProps,"recipientId"> {
+  timeline:RelationshipTimelineController;
+  interpretationText?:string;
+  dependencyVersionId?:string;
+  onInterpretationTextChange?:(value:string)=>void;
+  onDependencyVersionChange?:(value:string)=>void;
+  onInterpretationSaved?:()=>void;
 }
 
 export function FiRelationshipTimelineView({
   timeline,
   className,
   onLogMemory,
-}: Omit<FiRelationshipTimelineProps, "recipientId"> & { timeline: RelationshipTimelineController }) {
+  interpretationText="",
+  dependencyVersionId="",
+  onInterpretationTextChange=()=>{},
+  onDependencyVersionChange=()=>{},
+  onInterpretationSaved=()=>{},
+}: FiRelationshipTimelineViewProps) {
+  const availableVersions=timeline.items.filter(item=>item.version&&item.lifecycleState==="active"&&item.type!=="interpretation");
 
   const statusMessage = timeline.isLoading
     ? "Loading timeline"
@@ -75,6 +93,7 @@ export function FiRelationshipTimelineView({
       </div>
 
       <FiTimelineFilters filter={timeline.filter} onFilterChange={timeline.setFilter} />
+      {availableVersions.length?<form onSubmit={event=>{event.preventDefault();if(interpretationText.trim()&&dependencyVersionId)void timeline.createInterpretation(interpretationText,[dependencyVersionId]).then(ok=>{if(ok)onInterpretationSaved();});}}><label>Uncertain interpretation<textarea aria-label="Uncertain interpretation" value={interpretationText} onChange={event=>onInterpretationTextChange(event.target.value)} /></label><label>Exact source observation<select aria-label="Exact source observation" value={dependencyVersionId} onChange={event=>onDependencyVersionChange(event.target.value)}><option value="">Choose an observation</option>{availableVersions.map(item=><option key={item.history.at(-1)?.id} value={item.history.at(-1)?.id}>{item.label} version {item.version}</option>)}</select></label><FiButton type="submit" variant="secondary">Save uncertain interpretation</FiButton></form>:null}
 
       <p className="fi-timeline__status" aria-live="polite">
         {statusMessage}
@@ -105,6 +124,7 @@ export function FiRelationshipTimelineView({
             onEdit={timeline.setEditingId}
             onArchive={timeline.setConfirmArchiveId}
             onRestore={(id) => void timeline.restoreItem(id)}
+            onInterpretationAction={(id,action)=>void timeline.changeInterpretation(id,action)}
             onSaveEdit={timeline.saveEdit}
             onCancelEdit={() => timeline.setEditingId(null)}
           />

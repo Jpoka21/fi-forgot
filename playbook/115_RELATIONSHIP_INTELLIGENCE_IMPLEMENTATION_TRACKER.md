@@ -1405,6 +1405,13 @@ Every future enhancement should reinforce these principles rather than weaken th
 
 # Source-backed relationship memory transition (implementation)
 
+## Durable versioned understanding transition (implementation complete; rollout outstanding)
+
+- Added immutable observation versions over compatibility answers, with honest capture time and nullable unknown observation, occurrence, relationship, provenance, and confidence fields.
+- Added uncertain user-authored interpretations pinned to exact same-scope active observation versions, revocable endorsement, withdrawal, rejection, archive, guarded reversal, and dependency invalidation.
+- Added authenticated timeline transport and controls, immutable history presentation, and active valid understanding projection for Brain and Concierge context.
+- Automated static, unit, controlled integration, regression, and build evidence is recorded by the outer controller. Live PostgreSQL rollout, deployment, and authenticated owner qualification remain outstanding.
+
 - Implemented one typed evidence projection shared by recipient context/Brain and the authenticated timeline route.
 - Preserved existing tables and active-answer Brain filtering; added truthful returned-row archive/restore state checks.
 - Transport now preserves source membership and uncertainty, unknown kinds stay unclassified, and the UI provides confirmed edit/archive/restore with visible failure.
@@ -1412,3 +1419,7 @@ Every future enhancement should reinforce these principles rather than weaken th
 - Brain's compatibility activity inventory excludes canonical unknown/profile-date evidence instead of coercing it to profile gaps; frontend mutations share one tested production outcome applicator.
 - Automated static, unit, integration, and build qualification is documented in `docs/relationship-memory-verification.md`.
 - Real authenticated owner-visible qualification remains outstanding and explicitly deferred; automation must not be represented as that evidence.
+
+### Versioned understanding production integration
+
+The timeline and Brain now share effective current-version semantics while retaining immutable observation revisions. Existing report mutations use version tokens, append successors, and update current pointers atomically. Uncertain user-authored interpretations retain exact dependencies, revocable endorsement, and action history; current state never promotes an interpretation to fact. Scoped handler transactions and production frontend operation helpers are exercised by the versioned-understanding tests. See `docs/versioned-understanding-verification.md` for schema rollout commands and the boundary between automated implementation evidence and outstanding live qualification. This does not implement automatic interpretation generation or Dave Studio.

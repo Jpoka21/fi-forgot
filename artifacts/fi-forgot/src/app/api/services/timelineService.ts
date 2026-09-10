@@ -32,24 +32,32 @@ export const timelineService = {
     };
   },
 
-  archiveAnswer(recipientId: string, itemId: string) {
+  archiveAnswer(recipientId: string, itemId: string, expectedVersionId:string, operationId?:string) {
     return apiFetch(API_ENDPOINTS.recipients.archiveAnswer(recipientId, itemId), {
       method: "PATCH",
+      json:{expectedVersionId,operationId},
       throwOnError: true,
     });
   },
 
-  editAnswer(recipientId: string, itemId: string, answerText: string) {
+  editAnswer(recipientId: string, itemId: string, answerText: string, expectedVersionId:string, operationId?:string) {
     return apiFetch(API_ENDPOINTS.recipients.editAnswer(recipientId, itemId), {
       method: "PATCH",
-      json: { answerText },
+      json: { answerText,expectedVersionId,operationId },
       throwOnError: true,
     });
   },
-  restoreAnswer(recipientId: string, itemId: string) {
+  restoreAnswer(recipientId: string, itemId: string, expectedVersionId:string, operationId?:string) {
     return apiFetch(API_ENDPOINTS.recipients.restoreAnswer(recipientId, itemId), {
       method: "PATCH",
+      json:{expectedVersionId,operationId},
       throwOnError: true,
     });
+  },
+  createInterpretation(recipientId:string, input:{text:string;dependencyVersionIds:string[];operationId:string}) {
+    return apiFetch(API_ENDPOINTS.recipients.interpretations(recipientId), {method:"POST",json:input,throwOnError:true});
+  },
+  changeInterpretation(recipientId:string, interpretationId:string, action:"confirm"|"withdraw"|"reject"|"archive"|"restore", expectedRevision:number, operationId:string) {
+    return apiFetch(API_ENDPOINTS.recipients.interpretationLifecycle(recipientId,interpretationId,action), {method:"PATCH",json:{expectedRevision,operationId},throwOnError:true});
   },
 };

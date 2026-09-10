@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
       `/api/v2/recipients/${recipientId}/answers/${itemId}/edit`,
     restoreAnswer: (recipientId: string, itemId: string) =>
       `/api/v2/recipients/${recipientId}/answers/${itemId}/restore`,
+    interpretations: (recipientId: string) => `/api/v2/recipients/${recipientId}/interpretations`,
+    interpretationLifecycle: (recipientId:string, interpretationId:string, action:string) => `/api/v2/recipients/${recipientId}/interpretations/${interpretationId}/${action}`,
     health: "/api/v2/recipient-health",
     brain: (id: string) => `/api/v2/recipients/${id}/brain`,
   },

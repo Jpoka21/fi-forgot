@@ -1,3 +1,4 @@
+import {createInterpretationOperation,changeInterpretationOperation,changeAnswerOperation} from '../understandingTimelineOperations';
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { timelineService } from "@/app/api/services/timelineService";
@@ -135,9 +136,9 @@ export function useRelationshipTimeline({
 
   const handleArchive = useCallback(
     async (itemId: string) => {
-      const evidenceId=items.find((item)=>item.id===itemId)?.evidenceId;
-      if(!evidenceId){setMutationError("This timeline item has no mutable source record.");return;}
-      const outcome=await runTimelineMutation(()=>timelineService.archiveAnswer(recipientId,evidenceId),()=>timelineService.getTimeline(recipientId),(value)=>value.items.some((item)=>item.evidenceId===evidenceId&&item.isArchived));
+      const current=items.find((item)=>item.id===itemId);const evidenceId=current?.evidenceId;const expectedVersionId=current?.history.at(-1)?.id;
+      if(!evidenceId||!expectedVersionId){setMutationError("This timeline item has no mutable current version.");return;}
+      const outcome=await changeAnswerOperation(recipientId,current!,'archive');
       applyTimelineMutationOutcome("archive",outcome,{setItems,setMutationError,onConfirmed:()=>{
         setConfirmArchiveId(null);
         trackTimelineEvent("timeline_item_archived", { recipientId, itemId });
@@ -148,9 +149,9 @@ export function useRelationshipTimeline({
 
   const handleEditSave = useCallback(
     async (itemId: string, answerText: string) => {
-      const evidenceId=items.find((item)=>item.id===itemId)?.evidenceId;
-      if(!evidenceId){setMutationError("This timeline item has no mutable source record.");return;}
-      const outcome=await runTimelineMutation(()=>timelineService.editAnswer(recipientId,evidenceId,answerText),()=>timelineService.getTimeline(recipientId),(value)=>value.items.some((item)=>item.evidenceId===evidenceId&&item.summary===answerText.trim()));
+      const current=items.find((item)=>item.id===itemId);const evidenceId=current?.evidenceId;const expectedVersionId=current?.history.at(-1)?.id;
+      if(!evidenceId||!expectedVersionId){setMutationError("This timeline item has no mutable current version.");return;}
+      const outcome=await changeAnswerOperation(recipientId,current!,'edit',answerText);
       applyTimelineMutationOutcome("edit",outcome,{setItems,setMutationError,onConfirmed:()=>{
         setEditingId(null);
         trackTimelineEvent("timeline_item_edited", { recipientId, itemId });
@@ -160,13 +161,23 @@ export function useRelationshipTimeline({
   );
 
   const handleRestore = useCallback(async (itemId: string) => {
-    const evidenceId=items.find((item)=>item.id===itemId)?.evidenceId;
-    if(!evidenceId){setMutationError("This timeline item has no mutable source record.");return;}
-    const outcome=await runTimelineMutation(()=>timelineService.restoreAnswer(recipientId,evidenceId),()=>timelineService.getTimeline(recipientId),(value)=>value.items.some((item)=>item.evidenceId===evidenceId&&!item.isArchived));
+    const current=items.find((item)=>item.id===itemId);const evidenceId=current?.evidenceId;const expectedVersionId=current?.history.at(-1)?.id;
+    if(!evidenceId||!expectedVersionId){setMutationError("This timeline item has no mutable current version.");return;}
+    const outcome=await changeAnswerOperation(recipientId,current!,'restore');
     applyTimelineMutationOutcome("restore",outcome,{setItems,setMutationError,onConfirmed:()=>{
       trackTimelineEvent("timeline_item_restored", { recipientId, itemId });
     }});
   }, [items, recipientId, refresh]);
+
+  const handleCreateInterpretation = useCallback(async (text:string, dependencyVersionIds:string[]) => {
+    const outcome=await createInterpretationOperation(recipientId,text,dependencyVersionIds);
+    return applyTimelineMutationOutcome("interpretation",outcome,{setItems,setMutationError,onConfirmed:()=>{}});
+  },[recipientId]);
+  const handleInterpretationAction=useCallback(async(itemId:string,action:"confirm"|"withdraw"|"reject"|"archive"|"restore")=>{
+    const current=items.find(item=>item.id===itemId);if(current?.revision==null){setMutationError("This interpretation has no current revision. Refresh before changing it.");return false;}const operationId=crypto.randomUUID();
+    const outcome=await changeInterpretationOperation(recipientId,current!,action);
+    return applyTimelineMutationOutcome("interpretation",outcome,{setItems,setMutationError,onConfirmed:()=>{}});
+  },[items,recipientId]);
 
   const showEmpty = !isLoading && !error && filteredItems.length === 0;
   const showResults = !isLoading && !error && filteredItems.length > 0;
@@ -197,6 +208,8 @@ export function useRelationshipTimeline({
     archiveItem: handleArchive,
     saveEdit: handleEditSave,
     restoreItem: handleRestore,
+    createInterpretation:handleCreateInterpretation,
+    changeInterpretation:handleInterpretationAction,
   };
 }
 

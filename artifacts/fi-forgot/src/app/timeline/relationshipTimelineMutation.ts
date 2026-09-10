@@ -16,7 +16,7 @@ export async function runTimelineMutation<T>(write:()=>Promise<unknown>, reload:
   catch { return {kind:"write_confirmed_reload_failed"}; }
 }
 
-export type TimelineMutationAction = "edit" | "archive" | "restore";
+export type TimelineMutationAction = "edit" | "archive" | "restore" | "interpretation";
 
 const mutationMessages: Record<TimelineMutationAction, { reloadFailed:string; requestFailed:string; unconfirmed:string }> = {
   edit: {
@@ -33,6 +33,11 @@ const mutationMessages: Record<TimelineMutationAction, { reloadFailed:string; re
     reloadFailed:"The report was restored, but its current state could not be reloaded. Refresh before making another change.",
     requestFailed:"The restore request failed; the current timeline was reloaded.",
     unconfirmed:"The restore outcome could not be confirmed. Refresh before making another change.",
+  },
+  interpretation: {
+    reloadFailed:"The understanding change was saved, but current history could not be reloaded. Refresh before another change.",
+    requestFailed:"The understanding request failed; the current timeline was reloaded.",
+    unconfirmed:"The understanding outcome could not be confirmed. Refresh before another change.",
   },
 };
 

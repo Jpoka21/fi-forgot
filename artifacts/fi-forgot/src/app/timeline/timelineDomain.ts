@@ -12,6 +12,8 @@ export const fiTimelineItemTypes = [
   "profile_date",
   "derived",
   "unknown",
+  "observation_version",
+  "interpretation",
 ] as const;
 
 export type FiTimelineItemType = (typeof fiTimelineItemTypes)[number];
@@ -46,6 +48,16 @@ export interface FiTimelineItem {
   occurrenceAt: string | null;
   observationAt: string | null;
   canRestore: boolean;
+  version: number | null;
+  lifecycleState: string | null;
+  history: Array<{ id:string; version:number; text:string; lifecycleState:string; recordedAt:string }>;
+  uncertain: boolean;
+  confirmedAt: string | null;
+  endorsementWithdrawnAt: string | null;
+  dependencyVersionIds: string[];
+  revision: number | null;
+  lastOperationId: string | null;
+  actionHistory: Array<{operationId:string;action:string;actorUserId:string;actedAt:string;expectedRevision:number;newRevision:number}>;
 }
 
 export interface FiTimelineMonthGroup {
@@ -68,6 +80,8 @@ export const timelineTypeLabels: Record<FiTimelineItemType, string> = {
   profile_date: "Profile date",
   derived: "Derived information",
   unknown: "Unclassified source",
+  observation_version: "Observation version",
+  interpretation: "Uncertain interpretation",
 };
 
 export const timelineInfluencesCardTypes = new Set<FiTimelineItemType>([
@@ -121,6 +135,16 @@ export function normalizeTimelineItem(value: unknown): FiTimelineItem | null {
     occurrenceAt: normalizeTimelineTimestamp(value.occurrenceAt),
     observationAt: normalizeTimelineTimestamp(value.observationAt),
     canRestore: Boolean(value.canRestore),
+    version: typeof value.version === "number" ? value.version : null,
+    lifecycleState: typeof value.lifecycleState === "string" ? value.lifecycleState : null,
+    history: Array.isArray(value.history) ? value.history.filter((entry): entry is {id:string;version:number;text:string;lifecycleState:string;recordedAt:string} => Boolean(entry)&&typeof entry==="object"&&typeof (entry as {id?:unknown}).id==="string"&&typeof (entry as {version?:unknown}).version==="number"&&typeof (entry as {text?:unknown}).text==="string"&&typeof (entry as {lifecycleState?:unknown}).lifecycleState==="string"&&typeof (entry as {recordedAt?:unknown}).recordedAt==="string") : [],
+    uncertain: Boolean(value.uncertain),
+    confirmedAt: normalizeTimelineTimestamp(value.confirmedAt),
+    endorsementWithdrawnAt: normalizeTimelineTimestamp(value.endorsementWithdrawnAt),
+    dependencyVersionIds: Array.isArray(value.dependencyVersionIds) ? value.dependencyVersionIds.filter((id):id is string=>typeof id==="string") : [],
+    revision: typeof value.revision==="number"?value.revision:null,
+    lastOperationId:typeof value.lastOperationId==="string"?value.lastOperationId:null,
+    actionHistory:Array.isArray(value.actionHistory)?value.actionHistory.filter((entry):entry is {operationId:string;action:string;actorUserId:string;actedAt:string;expectedRevision:number;newRevision:number}=>Boolean(entry)&&typeof entry==="object"&&typeof (entry as {operationId?:unknown}).operationId==="string"&&typeof (entry as {action?:unknown}).action==="string"&&typeof (entry as {actorUserId?:unknown}).actorUserId==="string"&&typeof (entry as {actedAt?:unknown}).actedAt==="string"&&typeof (entry as {expectedRevision?:unknown}).expectedRevision==="number"&&typeof (entry as {newRevision?:unknown}).newRevision==="number"):[],
   };
 }
 
