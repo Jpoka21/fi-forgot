@@ -48,6 +48,23 @@ assert.equal((await call('edit',{answerText:'Cross recipient',expectedVersionId:
 assert.equal((await call('timeline',{},{} ,'')).status,401);assert.deepEqual(pg.tables,beforeDenial);
 const active=projectActiveUnderstanding(await pg.db.select().from(relationshipObservationVersionsTable),await pg.db.select().from(relationshipInterpretationsTable),await pg.db.select().from(relationshipInterpretationDependenciesTable),{userId:'u',recipientId:'r'});
 assert.equal(active.observations.length,1);assert.equal(active.interpretations.length,0,'old exact dependencies never silently retarget');
+// An existing producer may change a source without going through the timeline editor.
+// The next scoped read appends exactly one honest snapshot and invalidates pinned meaning.
+const priorHistory=structuredClone(pg.tables.relationship_observation_versions);
+pg.tables.question_answers[0].answer_text='Producer refresh';
+timeline=await call('timeline');const refreshed=timeline.data.items.find((i:any)=>i.evidenceId==='a');
+assert.equal(refreshed.history.length,5);assert.equal(refreshed.history.at(-1).text,'Producer refresh');
+assert.equal(refreshed.history.at(-1).stateAtRevision,'active');assert.deepEqual(pg.tables.relationship_observation_versions.slice(0,4),priorHistory);
+const countAfterRefresh=pg.tables.relationship_observation_versions.length;await call('timeline');assert.equal(pg.tables.relationship_observation_versions.length,countAfterRefresh,'unchanged reads append nothing');
+const refreshedVersion=refreshed.history.at(-1).id;const refreshedMeaning=await call('createInterpretation',{text:'Maybe the refreshed report matters',dependencyVersionIds:[refreshedVersion],operationId:'create-refreshed'});assert.equal(refreshedMeaning.status,201);
+pg.tables.question_answers[0].was_skipped=true;timeline=await call('timeline');
+assert.equal(pg.tables.relationship_observation_versions.at(-1)?.lifecycle_state,'archived','skipped source is invalidated with an immutable successor');
+assert.equal(timeline.data.items.find((i:any)=>i.id===refreshedMeaning.data.id).lifecycleState,'superseded');
+// Grouped briefing display remains grouped while each genuine member has accessible history.
+pg.tables.question_answers.push({id:'b',user_id:'u',recipient_id:'r',event_type:'Wedding',event_year:2027,question_key:'role',question_text:'Role?',answer_text:'Guest',was_skipped:false,trigger_type:'event_briefing',archived_at:null,created_at:'2026-02-01T00:00:00Z'},{id:'c',user_id:'u',recipient_id:'r',event_type:'Wedding',event_year:2027,question_key:'gift',question_text:'Gift?',answer_text:'Unknown',was_skipped:false,trigger_type:'event_briefing',archived_at:null,created_at:'2026-02-01T00:00:00Z'});
+timeline=await call('timeline');const group=timeline.data.items.find((i:any)=>i.id.startsWith('briefing_'));
+assert.deepEqual(group.memberEvidenceIds.sort(),['b','c']);assert.equal(group.evidenceId,null);assert.equal(group.canEdit,false);
+for(const source of ['b','c']){const historyItem=timeline.data.items.find((i:any)=>i.type==='observation_version'&&i.evidenceId===source);assert.equal(historyItem.history.length,1);assert.equal(historyItem.canEdit,false);}
 assert.ok(pg.queries.some(q=>q.text.includes('serializable')));assert.ok(pg.queries.some(q=>q.text.startsWith('rollback')));
 assert.ok(pg.queries.some(q=>q.text.includes('update "question_answers"')&&q.text.includes('"user_id"')&&q.text.includes('"recipient_id"')));
 assert.ok(!pg.queries.some(q=>q.text.startsWith('update "relationship_observation_versions"')),'no historical revision updates');

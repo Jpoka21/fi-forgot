@@ -7,18 +7,26 @@ import { and, eq, desc, isNull, isNotNull, ne, inArray, sql } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto';
 import { projectRelationshipMemoryEvidence, executeRelationshipAnswerMutation, MUTABLE_ANSWER_TRIGGER_TYPES, type RelationshipAnswerRepository, type RelationshipAnswerScope, type RelationshipAnswerMutation } from './relationship-memory-evidence';
 export type UnderstandingDatabase = typeof productionDb;
-/** Capture only current source truth. Never reconstruct missing prior edits. */
+/** Reconcile only current source truth. Never reconstruct uncaptured prior edits. */
 export async function captureUnversionedAnswers(db: UnderstandingDatabase, scope: {userId:string;recipientId:string}) {
  const owned=await db.select({id:recipientsTable.id}).from(recipientsTable).where(and(eq(recipientsTable.id,scope.recipientId),eq(recipientsTable.userId,scope.userId))).limit(1);
  if(!owned.length)return false;
- const answers=await db.select().from(questionAnswersTable).where(and(eq(questionAnswersTable.userId,scope.userId),eq(questionAnswersTable.recipientId,scope.recipientId),eq(questionAnswersTable.wasSkipped,false)));
+ const answers=await db.select().from(questionAnswersTable).where(and(eq(questionAnswersTable.userId,scope.userId),eq(questionAnswersTable.recipientId,scope.recipientId)));
  const versions=await db.select().from(relationshipObservationVersionsTable).where(and(eq(relationshipObservationVersionsTable.userId,scope.userId),eq(relationshipObservationVersionsTable.recipientId,scope.recipientId)));
+ const heads=await db.select().from(relationshipObservationHeadsTable).where(and(eq(relationshipObservationHeadsTable.userId,scope.userId),eq(relationshipObservationHeadsTable.recipientId,scope.recipientId)));
  const current=new Map(currentObservationVersions(versions).map(v=>[v.sourceRecordId,v]));
  for(const answer of answers){
-  if(current.has(answer.id))continue;
+  const prior=current.get(answer.id);
+  const lifecycleState=answer.archivedAt||answer.wasSkipped?'archived':'active';
+  if(prior?.text===answer.answerText&&prior.lifecycleState===lifecycleState)continue;
+  const head=heads.find(value=>value.sourceRecordId===answer.id);
   const id=randomUUID();const capturedAt=new Date();
-  await db.insert(relationshipObservationVersionsTable).values({id,...scope,sourceRecordId:answer.id,sourceKind:'user_report',semanticClassification:'reported_information',sourceProvenance:{table:'question_answers',capture:'current_source_snapshot',sourceRecordedAt:answer.createdAt?.toISOString()??null},text:answer.answerText,version:1,lifecycleState:answer.archivedAt?'archived':'active',recordedAt:capturedAt,observedAt:null,occurredAt:null,confidence:null,relationshipId:null,actorUserId:answer.userId});
-  await db.insert(relationshipObservationHeadsTable).values({...scope,sourceRecordId:answer.id,currentVersionId:id,revision:1,updatedAt:capturedAt});
+  await db.insert(relationshipObservationVersionsTable).values({id,...scope,sourceRecordId:answer.id,sourceKind:'user_report',semanticClassification:'reported_information',sourceProvenance:{...((prior?.sourceProvenance as Record<string,unknown>|null)??{}),table:'question_answers',capture:prior?'current_source_reconciliation':'current_source_snapshot',sourceRecordedAt:answer.createdAt?.toISOString()??null},text:answer.answerText,version:(prior?.version??0)+1,lifecycleState,supersedesVersionId:prior?.id??null,recordedAt:capturedAt,observedAt:null,occurredAt:null,confidence:null,relationshipId:null,actorUserId:answer.userId});
+  if(head&&prior){
+   const changed=await db.update(relationshipObservationHeadsTable).set({currentVersionId:id,revision:head.revision+1,updatedAt:capturedAt}).where(and(eq(relationshipObservationHeadsTable.userId,scope.userId),eq(relationshipObservationHeadsTable.recipientId,scope.recipientId),eq(relationshipObservationHeadsTable.sourceRecordId,answer.id),eq(relationshipObservationHeadsTable.currentVersionId,prior.id),eq(relationshipObservationHeadsTable.revision,head.revision))).returning({id:relationshipObservationHeadsTable.currentVersionId});
+   if(!changed.length)throw new Error('STALE_OBSERVATION_VERSION');
+  } else if(!head&&!prior) await db.insert(relationshipObservationHeadsTable).values({...scope,sourceRecordId:answer.id,currentVersionId:id,revision:1,updatedAt:capturedAt});
+  else throw new Error('STALE_OBSERVATION_VERSION');
  }
  return true;
 }
@@ -398,6 +406,31 @@ const timeline = async (req: Request, res: Response) => {
         version: latest.version,
         lifecycleState: latest.lifecycleState,
         lastOperationId:latest.operationId,
+        history,
+      });
+    else if (latest)
+      items.push({
+        id: `observation_history_${sourceRecordId}`,
+        date: latest.recordedAt,
+        type: "observation_version",
+        label: "Reported answer history",
+        summary: latest.text,
+        source: "Reported by you",
+        sourceKind: "user_report",
+        semanticClassification: "reported_information",
+        canArchive: false,
+        canEdit: false,
+        canRestore: false,
+        isArchived: latest.lifecycleState !== "active",
+        evidenceId: sourceRecordId,
+        memberEvidenceIds: [sourceRecordId],
+        recordedAt: latest.recordedAt,
+        activityAt: null,
+        occurrenceAt: null,
+        observationAt: null,
+        version: latest.version,
+        lifecycleState: latest.lifecycleState,
+        lastOperationId: latest.operationId,
         history,
       });
   }

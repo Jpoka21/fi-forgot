@@ -10,7 +10,7 @@ An optional bulk capture uses only installed repository tooling:
 
 `node scripts/node_modules/tsx/dist/cli.mjs lib/db/src/schema/run-understanding-snapshot.ts --apply`
 
-The runner wraps `versioned-understanding-snapshot.sql` in a transaction. Invoking it without `--apply` accesses no database. Normal scoped timeline/Brain reads also capture previously unversioned current answers transactionally, so answers created by existing producers have an honest entry point. Capture time is recorded separately from unknown observation/occurrence time, and genuine source creation time remains in provenance. No earlier edits are reconstructed. Schema application, bulk capture, deployment, and live qualification remain outstanding.
+The runner wraps `versioned-understanding-snapshot.sql` in a transaction. Invoking it without `--apply` accesses no database. Normal scoped timeline/Brain reads reconcile current answers transactionally, so answers created or later changed by existing producers have an honest entry point. A changed source appends one immutable successor and atomically advances its scoped head; an unchanged read appends nothing. Capture time is recorded separately from unknown observation/occurrence time, and genuine source creation time remains in provenance. No uncaptured intermediate edits are reconstructed. Skipped or archived sources receive an archived successor and no longer validate pinned interpretations. Grouped event briefings remain non-editable groups, while each genuine member source has separately queryable version history. Schema application, bulk capture, deployment, and live qualification remain outstanding.
 
 ## Implemented semantics
 
