@@ -25,9 +25,13 @@ export function buildRelationshipOpportunity(
     relationshipId: string;
     provenance: { sourceType: string; sourceId: string | null };
   },
+  presentation?: {
+    recommendationEligible?: boolean;
+    insightEligible?: boolean;
+  },
 ): RelationshipOpportunity {
-  const recommendationEligible = !["wait", "do_nothing"].includes(decision.decision.outcome);
-  const restrained = !recommendationEligible;
+  const actionable = !["wait", "do_nothing"].includes(decision.decision.outcome);
+  const restrained = !actionable;
   const confidence = Number.isFinite(execution.decideResult.confidence)
     ? { status: "known" as const, value: execution.decideResult.confidence }
     : { status: "unknown" as const, value: null };
@@ -55,8 +59,8 @@ export function buildRelationshipOpportunity(
     },
     timing: { observedAt: null },
     presentation: {
-      recommendationEligible,
-      insightEligible: recommendationEligible,
+      recommendationEligible: actionable && (presentation?.recommendationEligible ?? true),
+      insightEligible: actionable && (presentation?.insightEligible ?? true),
     },
     restraint: {
       restrained,

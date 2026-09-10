@@ -1,4 +1,4 @@
-import { relationshipOpportunitiesToConversationRecommendations, resolveBrainAttentionResponse } from "../app/ai-concierge/aiConciergeDomain.js";
+import { relationshipOpportunitiesForRecommendationPresentation, relationshipOpportunitiesToConversationRecommendations, resolveBrainAttentionResponse } from "../app/ai-concierge/aiConciergeDomain.js";
 import type { RelationshipOpportunity } from "../app/concierge-brain/conciergeWorkspaceTypes.js";
 import { readFileSync } from "node:fs";
 
@@ -8,6 +8,9 @@ const recommendations = relationshipOpportunitiesToConversationRecommendations([
 const response = resolveBrainAttentionResponse(recommendations);
 if (recommendations.length !== 1 || response.actions.length !== 1 || response.actions[0]?.id !== "action-actionable") throw new Error("restrained opportunity produced action");
 if (response.content.includes(base.title)) throw new Error("restrained opportunity presented as recommendation");
+const capSuppressed = { ...actionable, id: "cap-suppressed", presentation: { ...actionable.presentation, recommendationEligible: false } };
+if (relationshipOpportunitiesForRecommendationPresentation([actionable, capSuppressed, base]).length !== 1) throw new Error("workspace presentation ignored server eligibility");
+if (relationshipOpportunitiesToConversationRecommendations([actionable, capSuppressed, base]).length !== 1) throw new Error("conversation presentation ignored server eligibility");
 const componentSource = readFileSync("artifacts/fi-forgot/src/app/components/ai-concierge/FiConciergeWorkspacePanel.tsx", "utf8");
 if (!componentSource.includes("opportunity.recommendation ?") || !componentSource.includes(": null")) throw new Error("component action is not guarded by recommendation presence");
 console.log("concierge opportunity conversation passed");

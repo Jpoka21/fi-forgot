@@ -35,7 +35,8 @@ export interface ConciergeConversationRecommendation {
 export function relationshipOpportunitiesToConversationRecommendations(
   opportunities: RelationshipOpportunity[],
 ): ConciergeConversationRecommendation[] {
-  return opportunities.flatMap((opportunity) => opportunity.recommendation
+  return opportunities.flatMap((opportunity) =>
+    opportunity.presentation.recommendationEligible && opportunity.recommendation
     ? [{
         id: opportunity.id,
         title: opportunity.title,
@@ -44,6 +45,14 @@ export function relationshipOpportunitiesToConversationRecommendations(
         href: opportunity.recommendation.href,
       }]
     : []);
+}
+
+export function relationshipOpportunitiesForRecommendationPresentation(
+  opportunities: RelationshipOpportunity[],
+): RelationshipOpportunity[] {
+  return opportunities.filter((opportunity) =>
+    opportunity.presentation.recommendationEligible && opportunity.recommendation !== null,
+  );
 }
 
 export interface ConciergeConversationResponse {

@@ -21,15 +21,16 @@ const payload = await buildConciergeWorkspace({
   userId: "user-1",
   generatedAt: "2026-08-03T00:00:00.000Z",
   recipients: [
-    { recipientId: "actionable", recipientName: "Avery" },
+    ...Array.from({ length: 7 }, (_, index) => ({ recipientId: index === 0 ? "actionable" : `actionable-${index + 1}`, recipientName: `Action ${index + 1}` })),
     { recipientId: "quiet", recipientName: "Quinn" },
   ],
   runBrain: async (recipientId) => execution(recipientId, recipientId === "quiet" ? "wait" : "recommend_action"),
 });
 
 const wire = JSON.parse(JSON.stringify(payload));
-if (wire.recommendations.length !== 1 || wire.insights.length !== 1) throw new Error("legacy projection membership changed");
+if (wire.recommendations.length !== 6 || wire.insights.length !== 6) throw new Error("legacy projection caps changed");
 if (wire.recommendations[0].id !== "actionable:inactivity" || wire.insights[0].id !== "actionable:inactivity:insight") throw new Error("legacy projection identity changed");
+if (wire.opportunities.filter((item: { presentation: { recommendationEligible: boolean } }) => item.presentation.recommendationEligible).length !== 3) throw new Error("server presentation policy did not retain exactly three recommendation slots");
 const actionable = wire.opportunities.find((item: { id: string }) => item.id === "actionable:inactivity");
 const restrained = wire.opportunities.find((item: { id: string }) => item.id === "quiet:wait");
 if (!actionable?.recommendation || actionable.confidence.status !== "known" || actionable.confidence.value !== 71) throw new Error("actionable Opportunity did not survive workspace serialization and mapping");

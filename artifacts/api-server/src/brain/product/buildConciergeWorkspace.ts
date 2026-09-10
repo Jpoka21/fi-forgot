@@ -8,6 +8,7 @@ import { projectConciergeInsight } from "./buildConciergeInsight";
 import { projectConciergeRecommendation } from "./buildConciergeRecommendation";
 import {
   CONCIERGE_INSIGHTS_MAX,
+  CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX,
   CONCIERGE_RECOMMENDATIONS_MAX,
   CONCIERGE_WORKSPACE_VERSION,
   type ConciergeWorkspaceResponse,
@@ -80,12 +81,15 @@ export async function buildConciergeWorkspace(
         Math.max(CONCIERGE_RECOMMENDATIONS_MAX, CONCIERGE_INSIGHTS_MAX),
       );
 
-      const visibleOpportunities = primaryOpportunityItems.map((item) => {
+      const visibleOpportunities = primaryOpportunityItems.map((item, index) => {
         const execution = executions.get(item.opportunity.recipientId);
         if (!execution) throw new Error("Missing Brain execution for Concierge opportunity");
         return buildRelationshipOpportunity(item.opportunity.decision, execution, {
           recipientId: item.opportunity.recipientId,
           recipientName: item.opportunity.recipientName,
+        }, undefined, {
+          recommendationEligible: index < CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX,
+          insightEligible: index < CONCIERGE_INSIGHTS_MAX,
         });
       });
 

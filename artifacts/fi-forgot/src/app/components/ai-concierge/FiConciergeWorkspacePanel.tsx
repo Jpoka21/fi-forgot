@@ -4,6 +4,7 @@ import { FiButton } from "@/app/components/button/FiButton";
 import { FiConciergeLearnSomeonePanel } from "@/app/components/concierge-questions";
 import { FiAiSuggestionList } from "@/app/components/ai/FiAiSuggestionList";
 import { trackConciergeEvent } from "@/app/ai-concierge/aiConciergeAnalytics";
+import { relationshipOpportunitiesForRecommendationPresentation } from "@/app/ai-concierge/aiConciergeDomain";
 import type { AiConciergeWorkspaceController } from "@/app/ai-concierge/hooks/useAiConciergeWorkspace";
 
 export function FiConciergeWorkspacePanel({
@@ -13,6 +14,7 @@ export function FiConciergeWorkspacePanel({
   workspace: AiConciergeWorkspaceController;
   onPromptSelect: (prompt: string) => void;
 }) {
+  const presentedOpportunities = relationshipOpportunitiesForRecommendationPresentation(workspace.opportunities);
   return (
     <div className="fi-ai-concierge-page__layout fi-ai-concierge-page__layout--workspace">
       <FiConciergeLearnSomeonePanel insights={workspace.insights} />
@@ -47,7 +49,7 @@ export function FiConciergeWorkspacePanel({
         </h2>
         {workspace.opportunities.length > 0 ? (
           <ul className="fi-ai-concierge-page__insight-list">
-            {workspace.opportunities.map((opportunity) => (
+            {presentedOpportunities.map((opportunity) => (
               <li key={opportunity.id} className="fi-ai-concierge-page__insight-item">
                 <strong>{opportunity.title}</strong>
                 <span>{opportunity.explanation}</span>

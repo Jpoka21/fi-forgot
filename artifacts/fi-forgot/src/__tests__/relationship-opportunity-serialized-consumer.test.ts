@@ -2,6 +2,7 @@ import { mapConciergeWorkspaceViewModel } from "../app/concierge-brain/mapConcie
 import type { ConciergeWorkspaceResponse } from "../app/concierge-brain/conciergeWorkspaceTypes.js";
 import {
   relationshipOpportunitiesToConversationRecommendations,
+  relationshipOpportunitiesForRecommendationPresentation,
   resolveBrainAttentionResponse,
 } from "../app/ai-concierge/aiConciergeDomain.js";
 
@@ -14,5 +15,7 @@ if (!actionable?.recommendation || actionable.confidence.status !== "known") thr
 if (!restrained?.restraint.restrained || restrained.recommendation !== null || restrained.relationshipId !== null) throw new Error("frontend mapper lost restraint or missing identity");
 const conversationInput = relationshipOpportunitiesToConversationRecommendations(mapped.opportunities);
 const response = resolveBrainAttentionResponse(conversationInput);
-if (response.actions.length !== 1 || response.actions[0]?.id !== "action-actionable:inactivity") throw new Error("frontend conversation exposed restrained action");
+const presented = relationshipOpportunitiesForRecommendationPresentation(mapped.opportunities);
+if (response.actions.length !== 3 || presented.length !== 3) throw new Error("frontend consumers did not honor the three-action presentation policy");
+if (response.actions.some((action) => action.id === "action-quiet:wait")) throw new Error("frontend conversation exposed restrained action");
 console.log("serialized Opportunity frontend mapper/conversation consumer passed");
