@@ -93,7 +93,7 @@ export const timelineDefaults = {
   debounceMs: 200,
   pageSize: 8,
   title: "Relationship history",
-  description: "Source-backed relationship history. Report dates show when you saved an answer, not when the described experience happened.",
+  description: "Source-backed relationship history. Answer report dates show when you saved an answer. Observation version dates show when a source snapshot was captured. Neither date says when the described experience happened.",
   errorLabel: "We could not load this timeline right now.",
   refreshLabel: "Refresh timeline",
   loadMoreLabel: "Load earlier moments",

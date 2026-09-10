@@ -5,7 +5,7 @@ import { UnderstandingPgFixture } from './understanding-pg-fixture';
 import {relationshipObservationVersionsTable,relationshipInterpretationsTable,relationshipInterpretationDependenciesTable} from '@workspace/db/schema';
 const pg=new UnderstandingPgFixture();
 pg.seed('recipients',[{id:'r',user_id:'u',birthday:null,anniversary:null}]);
-pg.seed('question_answers',[{id:'a',user_id:'u',recipient_id:'r',event_type:'Profile',event_year:2026,question_key:'story',question_text:'A story?',answer_text:'Original report',was_skipped:false,trigger_type:'profile_gap',archived_at:null,created_at:'2026-01-01T00:00:00Z'}]);
+pg.seed('question_answers',[{id:'a',user_id:'u',recipient_id:'r',event_type:'Profile',event_year:2026,question_key:'story',question_text:'A story?',answer_text:'Original report',was_skipped:false,trigger_type:'profile_gap',archived_at:null,created_at:'2026-01-01T00:00:00Z'},{id:'never-observed-skip',user_id:'u',recipient_id:'r',event_type:'Profile',event_year:2026,question_key:'empty',question_text:'Skipped?',answer_text:'',was_skipped:true,trigger_type:'profile_gap',archived_at:null,created_at:'2026-01-01T00:00:00Z'}]);
 const handlers=createVersionedUnderstandingHandlers(pg.db,(req,res)=>{const id=req.headers['x-user-id'];if(typeof id!=='string'){res.status(401).json({error:'unauthenticated'});return null;}return id;});
 let published=0;
 async function call(name:keyof typeof handlers,body:Record<string,unknown>={},params:Record<string,string>={},user='u'){
@@ -13,6 +13,8 @@ async function call(name:keyof typeof handlers,body:Record<string,unknown>={},pa
  await handlers[name]({headers:user?{'x-user-id':user}:{},params:{id:'r',answerId:'a',...params},body} as any,res as any);return{status,data};
 }
 let timeline=await call('timeline');assert.equal(timeline.status,200);
+assert.ok(!pg.tables.relationship_observation_versions.some(row=>row.source_record_id==='never-observed-skip'),'an initially skipped empty answer creates no observation');
+assert.ok(!timeline.data.items.some((item:any)=>item.evidenceId==='never-observed-skip'||item.memberEvidenceIds?.includes('never-observed-skip')),'an initially skipped empty answer creates no reported-history item');
 const initial=timeline.data.items.find((i:any)=>i.evidenceId==='a');assert.equal(initial.history.length,1);
 assert.equal(initial.observationAt,null);const v1=initial.history[0].id;
 const original=structuredClone(pg.tables.relationship_observation_versions[0]);

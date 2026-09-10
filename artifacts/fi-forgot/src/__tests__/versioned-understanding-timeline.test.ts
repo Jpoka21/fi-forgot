@@ -54,6 +54,9 @@ clickButtons(FiTimelineItem({item:{...base,confirmedAt:date},onInterpretationAct
 for(const action of ['confirm','withdraw','reject','archive','restore'])assert.ok(callbacks.includes(action),`reachable ${action} control`);
 const controller={items:[base,report],filteredItems:[base,report],visibleItems:[base,report],groupedItems:[{key:'month',label:'This month',items:[base,report]}],filter:'all',query:'',debouncedQuery:'',isLoading:false,isRefreshing:false,error:null,mutationError:error,hasMore:false,editingId:null,confirmArchiveId:null,showEmpty:false,showResults:true,setQuery(){},setFilter(){},setEditingId(){},setConfirmArchiveId(){},refresh:async()=>true,loadMore(){},archiveItem:async()=>{},saveEdit:async()=>{},restoreItem:async()=>{},createInterpretation:async()=>false,changeInterpretation:async()=>false} as unknown as RelationshipTimelineController;
 const html=renderToStaticMarkup(FiRelationshipTimelineView({timeline:controller,interpretationText:'Keep this draft',dependencyVersionId:'v1'}));
+assert.ok(html.includes('Answer report dates show when you saved an answer'));
+assert.ok(html.includes('Observation version dates show when a source snapshot was captured'));
+assert.ok(html.includes('Neither date says when the described experience happened'));
 assert.ok(html.includes('Save uncertain interpretation'));assert.ok(html.includes('Keep this draft'));assert.ok(html.includes(error!));assert.ok(html.includes('Endorse interpretation'));
 function findForm(node:any):any {if(!node||typeof node!=='object')return null;if(node.type==='form')return node;let found:any=null;React.Children.forEach(node.props?.children,child=>{found??=findForm(child);});return found;}
 let saved=0,submitted=0;

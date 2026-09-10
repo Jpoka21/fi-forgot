@@ -18,6 +18,10 @@ export async function captureUnversionedAnswers(db: UnderstandingDatabase, scope
  for(const answer of answers){
   const prior=current.get(answer.id);
   const lifecycleState=answer.archivedAt||answer.wasSkipped?'archived':'active';
+  // A skipped, never-answered source is not relationship evidence. Once a real
+  // report has been observed, however, a later skip is captured as an immutable
+  // archived successor so pinned interpretations become invalid.
+  if(!prior&&answer.wasSkipped)continue;
   if(prior?.text===answer.answerText&&prior.lifecycleState===lifecycleState)continue;
   const head=heads.find(value=>value.sourceRecordId===answer.id);
   const id=randomUUID();const capturedAt=new Date();
