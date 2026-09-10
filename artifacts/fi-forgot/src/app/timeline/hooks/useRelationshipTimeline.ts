@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { timelineService } from "@/app/api/services/timelineService";
 import { useDebouncedValue } from "@/app/search/hooks/useDebouncedValue";
 import { trackTimelineEvent } from "@/app/timeline/timelineAnalytics";
+import { applyTimelineMutationOutcome, runTimelineMutation } from "@/app/timeline/relationshipTimelineMutation";
 import {
   filterTimelineItems,
   groupTimelineByMonth,
@@ -32,6 +33,7 @@ export function useRelationshipTimeline({
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
 
@@ -39,7 +41,7 @@ export function useRelationshipTimeline({
 
   const refresh = useCallback(
     async (options: { silent?: boolean } = {}) => {
-      if (!enabled || !recipientId) return;
+      if (!enabled || !recipientId) return false;
 
       if (options.silent) {
         setIsRefreshing(true);
@@ -55,15 +57,22 @@ export function useRelationshipTimeline({
 
         setItems(normalized);
         setError(null);
+        setMutationError(null);
         trackTimelineEvent(options.silent ? "timeline_refreshed" : "timeline_loaded", {
           recipientId,
         });
+        return true;
       } catch (refreshError) {
-        setError(timelineDefaults.errorLabel);
+        if (options.silent) {
+          setMutationError("The current timeline could not be refreshed. Your existing view may be stale; try again.");
+        } else {
+          setError(timelineDefaults.errorLabel);
+        }
         trackTimelineEvent("timeline_error", { recipientId });
         if (import.meta.env.DEV) {
           console.error(refreshError);
         }
+        return false;
       } finally {
         setIsLoading(false);
         setIsRefreshing(false);
@@ -126,43 +135,38 @@ export function useRelationshipTimeline({
 
   const handleArchive = useCallback(
     async (itemId: string) => {
-      setItems((current) =>
-        current.map((item) => (item.id === itemId ? { ...item, isArchived: true } : item)),
-      );
-      setConfirmArchiveId(null);
-
-      try {
-        await timelineService.archiveAnswer(recipientId, itemId);
+      const evidenceId=items.find((item)=>item.id===itemId)?.evidenceId;
+      if(!evidenceId){setMutationError("This timeline item has no mutable source record.");return;}
+      const outcome=await runTimelineMutation(()=>timelineService.archiveAnswer(recipientId,evidenceId),()=>timelineService.getTimeline(recipientId),(value)=>value.items.some((item)=>item.evidenceId===evidenceId&&item.isArchived));
+      applyTimelineMutationOutcome("archive",outcome,{setItems,setMutationError,onConfirmed:()=>{
+        setConfirmArchiveId(null);
         trackTimelineEvent("timeline_item_archived", { recipientId, itemId });
-      } catch (archiveError) {
-        if (import.meta.env.DEV) {
-          console.error(archiveError);
-        }
-        await refresh({ silent: true });
-      }
+      }});
     },
-    [recipientId, refresh],
+    [items, recipientId, refresh],
   );
 
   const handleEditSave = useCallback(
     async (itemId: string, answerText: string) => {
-      setItems((current) =>
-        current.map((item) => (item.id === itemId ? { ...item, summary: answerText } : item)),
-      );
-      setEditingId(null);
-
-      try {
-        await timelineService.editAnswer(recipientId, itemId, answerText);
+      const evidenceId=items.find((item)=>item.id===itemId)?.evidenceId;
+      if(!evidenceId){setMutationError("This timeline item has no mutable source record.");return;}
+      const outcome=await runTimelineMutation(()=>timelineService.editAnswer(recipientId,evidenceId,answerText),()=>timelineService.getTimeline(recipientId),(value)=>value.items.some((item)=>item.evidenceId===evidenceId&&item.summary===answerText.trim()));
+      applyTimelineMutationOutcome("edit",outcome,{setItems,setMutationError,onConfirmed:()=>{
+        setEditingId(null);
         trackTimelineEvent("timeline_item_edited", { recipientId, itemId });
-      } catch (editError) {
-        if (import.meta.env.DEV) {
-          console.error(editError);
-        }
-        await refresh({ silent: true });
-      }
+      }});
     },
-    [recipientId, refresh],
+    [items, recipientId, refresh],
   );
+
+  const handleRestore = useCallback(async (itemId: string) => {
+    const evidenceId=items.find((item)=>item.id===itemId)?.evidenceId;
+    if(!evidenceId){setMutationError("This timeline item has no mutable source record.");return;}
+    const outcome=await runTimelineMutation(()=>timelineService.restoreAnswer(recipientId,evidenceId),()=>timelineService.getTimeline(recipientId),(value)=>value.items.some((item)=>item.evidenceId===evidenceId&&!item.isArchived));
+    applyTimelineMutationOutcome("restore",outcome,{setItems,setMutationError,onConfirmed:()=>{
+      trackTimelineEvent("timeline_item_restored", { recipientId, itemId });
+    }});
+  }, [items, recipientId, refresh]);
 
   const showEmpty = !isLoading && !error && filteredItems.length === 0;
   const showResults = !isLoading && !error && filteredItems.length > 0;
@@ -178,6 +182,7 @@ export function useRelationshipTimeline({
     isLoading,
     isRefreshing,
     error,
+    mutationError,
     hasMore,
     editingId,
     confirmArchiveId,
@@ -191,6 +196,7 @@ export function useRelationshipTimeline({
     loadMore: handleLoadMore,
     archiveItem: handleArchive,
     saveEdit: handleEditSave,
+    restoreItem: handleRestore,
   };
 }
 

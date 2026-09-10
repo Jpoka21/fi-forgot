@@ -14,6 +14,7 @@ import { buildTimelineRegionLabel } from "@/app/components/timeline/accessibilit
 import { getFiTimelineContainerClassName } from "@/app/components/timeline/timelineVariants";
 import { useRelationshipTimeline } from "@/app/timeline/hooks/useRelationshipTimeline";
 import { timelineDefaults } from "@/app/timeline/timelineDomain";
+import type { RelationshipTimelineController } from "@/app/timeline/hooks/useRelationshipTimeline";
 
 export interface FiRelationshipTimelineProps {
   recipientId: string;
@@ -27,6 +28,15 @@ export function FiRelationshipTimeline({
   onLogMemory,
 }: FiRelationshipTimelineProps) {
   const timeline = useRelationshipTimeline({ recipientId });
+
+  return <FiRelationshipTimelineView timeline={timeline} onLogMemory={onLogMemory} className={className} />;
+}
+
+export function FiRelationshipTimelineView({
+  timeline,
+  className,
+  onLogMemory,
+}: Omit<FiRelationshipTimelineProps, "recipientId"> & { timeline: RelationshipTimelineController }) {
 
   const statusMessage = timeline.isLoading
     ? "Loading timeline"
@@ -74,6 +84,10 @@ export function FiRelationshipTimeline({
         <FiTimelineErrorState onRetry={() => void timeline.refresh()} />
       ) : null}
 
+      {timeline.mutationError ? (
+        <p className="fi-timeline__mutation-error" role="alert">{timeline.mutationError}</p>
+      ) : null}
+
       {timeline.isLoading ? <FiTimelineSkeleton itemCount={4} /> : null}
 
       {timeline.showEmpty && !timeline.error && !timeline.debouncedQuery.trim() ? (
@@ -82,7 +96,7 @@ export function FiRelationshipTimeline({
 
       {showSearchEmpty && !timeline.error ? <FiTimelineSearchEmptyState /> : null}
 
-      {timeline.showResults && !timeline.error ? (
+      {timeline.showResults ? (
         <>
           <FiTimelineList
             groups={timeline.groupedItems}
@@ -90,6 +104,7 @@ export function FiRelationshipTimeline({
             editingId={timeline.editingId}
             onEdit={timeline.setEditingId}
             onArchive={timeline.setConfirmArchiveId}
+            onRestore={(id) => void timeline.restoreItem(id)}
             onSaveEdit={timeline.saveEdit}
             onCancelEdit={() => timeline.setEditingId(null)}
           />

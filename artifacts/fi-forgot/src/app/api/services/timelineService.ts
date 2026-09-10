@@ -17,9 +17,13 @@ export const timelineService = {
   async getTimeline(recipientId: string) {
     const result = await apiFetch<TimelineResponse>(
       API_ENDPOINTS.recipients.timeline(recipientId),
+      { throwOnError: true },
     );
 
-    const rawItems = result.data?.items ?? [];
+    if (!result.data || !Array.isArray(result.data.items)) {
+      throw new Error("Timeline response is missing an items array");
+    }
+    const rawItems = result.data.items;
 
     return {
       items: rawItems
@@ -31,6 +35,7 @@ export const timelineService = {
   archiveAnswer(recipientId: string, itemId: string) {
     return apiFetch(API_ENDPOINTS.recipients.archiveAnswer(recipientId, itemId), {
       method: "PATCH",
+      throwOnError: true,
     });
   },
 
@@ -38,6 +43,13 @@ export const timelineService = {
     return apiFetch(API_ENDPOINTS.recipients.editAnswer(recipientId, itemId), {
       method: "PATCH",
       json: { answerText },
+      throwOnError: true,
+    });
+  },
+  restoreAnswer(recipientId: string, itemId: string) {
+    return apiFetch(API_ENDPOINTS.recipients.restoreAnswer(recipientId, itemId), {
+      method: "PATCH",
+      throwOnError: true,
     });
   },
 };

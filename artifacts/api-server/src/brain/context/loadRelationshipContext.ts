@@ -16,12 +16,14 @@ import {
 export async function loadRelationshipContext(
   recipientId: string,
   userId: string,
+  assemble: typeof assembleRecipientContext = assembleRecipientContext,
 ): Promise<RelationshipContextLoadResult> {
-  const relationshipContext = await assembleRecipientContext(recipientId, userId);
+  const relationshipContext = await assemble(recipientId, userId);
 
   return {
     brainContextVersion: BRAIN_CONTEXT_VERSION,
-    relationshipId: recipientId,
+    recipientId,
+    relationshipId: null,
     userId,
     loadedAt: new Date().toISOString(),
     relationshipContext,

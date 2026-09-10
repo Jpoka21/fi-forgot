@@ -1403,3 +1403,12 @@ Every future enhancement should reinforce these principles rather than weaken th
 
 # End of Document
 
+# Source-backed relationship memory transition (implementation)
+
+- Implemented one typed evidence projection shared by recipient context/Brain and the authenticated timeline route.
+- Preserved existing tables and active-answer Brain filtering; added truthful returned-row archive/restore state checks.
+- Transport now preserves source membership and uncertainty, unknown kinds stay unclassified, and the UI provides confirmed edit/archive/restore with visible failure.
+- Card text preserves known user-edit provenance separately from generated text and unknown provenance; mutation errors retain the existing history controls/editor while initial-load errors remain distinct.
+- Brain's compatibility activity inventory excludes canonical unknown/profile-date evidence instead of coercing it to profile gaps; frontend mutations share one tested production outcome applicator.
+- Automated static, unit, integration, and build qualification is documented in `docs/relationship-memory-verification.md`.
+- Real authenticated owner-visible qualification remains outstanding and explicitly deferred; automation must not be represented as that evidence.

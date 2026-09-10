@@ -23,6 +23,7 @@ import {
   buildProfileCompleteness,
   CONTEXT_VERSION,
 } from "../services/recipient-context.js";
+import { projectRelationshipMemoryEvidence } from "../services/relationship-memory-evidence.js";
 import type { RecipientRow, RecipientProfileRow } from "@workspace/db";
 import type { QuestionAnswer } from "@workspace/db";
 import type { PersonalCard } from "@workspace/db";
@@ -413,6 +414,12 @@ section("buildRelationshipTimelineInventory — activity events only");
   const card = timeline.events.find((event) => event.type === "card");
   expect("card label", card?.label, "Birthday card");
   expect("card uses approvedAt when present", card?.occurredAt, "2024-05-02T12:00:00.000Z");
+
+  const unknownAnswer = { ...fresh, id: "unknown-answer", triggerType: "future_kind" };
+  const canonicalUnknown = projectRelationshipMemoryEvidence({ answers: [unknownAnswer] })[0];
+  expect("canonical unknown activity remains unknown", canonicalUnknown?.activityKind, "unknown");
+  const withUnknown = buildRelationshipTimelineInventory([unknownAnswer], [], referenceTime);
+  expect("unknown canonical evidence is not coerced to profile_gap", withUnknown.events.length, 0);
 }
 
 section("buildBriefingSummary — empty");

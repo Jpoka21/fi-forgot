@@ -9,6 +9,7 @@ export interface FiTimelineListProps {
   editingId?: string | null;
   onEdit?: (id: string) => void;
   onArchive?: (id: string) => void;
+  onRestore?: (id: string) => void;
   onSaveEdit?: (id: string, value: string) => Promise<void>;
   onCancelEdit?: () => void;
 }
@@ -19,6 +20,7 @@ export function FiTimelineList({
   editingId = null,
   onEdit,
   onArchive,
+  onRestore,
   onSaveEdit,
   onCancelEdit,
 }: FiTimelineListProps) {
@@ -34,6 +36,7 @@ export function FiTimelineList({
               isEditing={editingId === item.id}
               onEdit={onEdit}
               onArchive={onArchive}
+              onRestore={onRestore}
               onSaveEdit={onSaveEdit}
               onCancelEdit={onCancelEdit}
             />

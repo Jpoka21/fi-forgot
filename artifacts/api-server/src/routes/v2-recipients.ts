@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { db, usersTable, recipientsV2Table, recipientMemoryTable, recipientsTable, questionAnswersTable, personalCardsTable, followUpQuestionsTable } from "@workspace/db";
-import { eq, and, ilike, sql, desc, isNull, ne, inArray } from "drizzle-orm";
+import { eq, and, ilike, sql, desc, isNull, isNotNull, ne, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { assembleRecipientContext } from "../services/recipient-context";
+import { MUTABLE_ANSWER_TRIGGER_TYPES, executeRelationshipAnswerMutation, projectRelationshipMemoryEvidence, type RelationshipAnswerMutation, type RelationshipAnswerRepository, type RelationshipAnswerScope } from "../services/relationship-memory-evidence";
 import { getNextQuestion, getNextFreshUpdateQuestion } from "../services/question-engine";
 import { awardPoints } from "../services/brownie-points";
 import { scheduleFollowUp, getDueFollowUpQuestion, markFollowUpAnswered } from "../services/follow-up-questions";
@@ -487,43 +488,6 @@ router.post("/v2/recipients/:id/answer-question", async (req, res) => {
 // ── Relationship Timeline ─────────────────────────────────────────────────────
 // Aggregates all 5 knowledge sources for a recipient, sorted newest-first.
 
-const QUESTION_KEY_LABELS: Record<string, string> = {
-  things_to_avoid:      "Things to avoid",
-  interests:            "Interests",
-  favorite_memories:    "Favorite memories",
-  inside_jokes:         "Inside jokes",
-  personality_notes:    "Personality notes",
-  personality_traits:   "Personality traits",
-  preferred_tone:       "Preferred tone",
-  emotional_openness:   "Emotional openness",
-  always_include:       "Always include",
-  birthday:             "Birthday",
-  anniversary:          "Anniversary",
-  delivery_preference:  "Delivery preference",
-  briefing_answers:     "General notes",
-  recent_memory:        "Recent memory",
-  current_excitement:   "Current excitement",
-  current_challenge:    "Current challenge",
-  recent_accomplishment:"Recent accomplishment",
-  family_news:          "Family & home life",
-  new_hobby:            "New hobby or interest",
-  anything_to_remember: "Anything to remember",
-};
-
-type TimelineItemType = "profile_gap" | "fresh_update" | "event_briefing" | "card" | "important_date" | "follow_up";
-
-interface TimelineItem {
-  id:         string;
-  date:       string;
-  type:       TimelineItemType;
-  label:      string;
-  summary:    string;
-  source:     string;
-  canArchive: boolean;
-  canEdit:    boolean;
-  isArchived: boolean;
-}
-
 router.get("/v2/recipients/:id/timeline", async (req, res) => {
   const userId = requireUserId(req, res);
   if (!userId) return;
@@ -568,105 +532,53 @@ router.get("/v2/recipients/:id/timeline", async (req, res) => {
       .orderBy(desc(followUpQuestionsTable.createdAt)),
   ]);
 
-  const items: TimelineItem[] = [];
-
-  // Group event_briefing by (eventType, eventYear); individual for all others
-  const briefingGroups = new Map<string, typeof answers>();
-
-  for (const answer of answers) {
-    if (answer.triggerType === "event_briefing") {
-      // Skip archived briefing answers from groups (groups can't be archived via UI)
-      if (answer.archivedAt !== null) continue;
-      const key = `${answer.eventType}_${answer.eventYear}`;
-      if (!briefingGroups.has(key)) briefingGroups.set(key, []);
-      briefingGroups.get(key)!.push(answer);
-    } else {
-      const type: TimelineItemType = answer.triggerType === "fresh_update" ? "fresh_update" : "profile_gap";
-      items.push({
-        id:         answer.id,
-        date:       answer.createdAt.toISOString(),
-        type,
-        label:      QUESTION_KEY_LABELS[answer.questionKey] ?? answer.questionKey,
-        summary:    answer.answerText,
-        source:     type === "fresh_update" ? "Fresh update" : "Profile",
-        canArchive: true,
-        canEdit:    true,
-        isArchived: answer.archivedAt !== null,
-      });
-    }
-  }
-
-  for (const [groupKey, group] of briefingGroups) {
-    const first      = group[0]!;
-    const latestDate = group.reduce((max, r) => r.createdAt > max ? r.createdAt : max, group[0]!.createdAt);
-    const snippet    = first.answerText.slice(0, 60) + (first.answerText.length > 60 ? "…" : "");
-    const summary    = group.length === 1 ? first.answerText : `${group.length} answers — "${snippet}"`;
-    items.push({
-      id:         `briefing_${id}_${groupKey}`,
-      date:       latestDate.toISOString(),
-      type:       "event_briefing",
-      label:      `${first.eventType} ${first.eventYear}`,
-      summary,
-      source:     `${first.eventType} ${first.eventYear} briefing`,
-      canArchive: false,
-      canEdit:    false,
-      isArchived: false,
-    });
-  }
-
-  // Follow-up questions
-  for (const fu of followUps) {
-    const dateToUse = fu.answeredAt ?? fu.triggerDate;
-    const statusLabel =
-      fu.status === "answered" ? "Answered follow-up" :
-      fu.status === "expired"  ? "Follow-up expired" :
-      "Follow-up pending";
-    const summary = fu.status === "answered"
-      ? `Follow-up on: "${fu.originalAnswer.slice(0, 80)}${fu.originalAnswer.length > 80 ? "…" : ""}"`
-      : `"${fu.originalAnswer.slice(0, 80)}${fu.originalAnswer.length > 80 ? "…" : ""}"`;
-    items.push({
-      id:         `followup_${fu.id}`,
-      date:       dateToUse.toISOString(),
-      type:       "follow_up",
-      label:      "Follow Up",
-      summary,
-      source:     statusLabel,
-      canArchive: false,
-      canEdit:    false,
-      isArchived: false,
-    });
-  }
-
-  // Cards (non-draft)
-  for (const card of cards) {
-    const message   = card.messageFinal ?? card.messageOriginal ?? "";
-    const eventDate = card.mailedAt ?? card.approvedAt ?? card.createdAt;
-    items.push({
-      id:         `card_${card.id}`,
-      date:       eventDate.toISOString(),
-      type:       "card",
-      label:      `${card.eventType} card`,
-      summary:    message.length > 0 ? message.slice(0, 120) + (message.length > 120 ? "…" : "") : "",
-      source:     card.status === "mailed" ? "Card mailed" : "Card generated",
-      canArchive: false,
-      canEdit:    false,
-      isArchived: false,
-    });
-  }
-
-  // Important dates from recipient profile
-  if (row.birthday) {
-    items.push({ id: `birthday_${id}`,    date: row.birthday,    type: "important_date", label: "Birthday",    summary: row.birthday,    source: "Profile", canArchive: false, canEdit: false, isArchived: false });
-  }
-  if (row.anniversary) {
-    items.push({ id: `anniversary_${id}`, date: row.anniversary, type: "important_date", label: "Anniversary", summary: row.anniversary, source: "Profile", canArchive: false, canEdit: false, isArchived: false });
-  }
+  const items: any[] = projectRelationshipMemoryEvidence({
+    answers,
+    cards,
+    followUps,
+    profileDates: [
+      { kind: "birthday", value: row.birthday },
+      { kind: "anniversary", value: row.anniversary },
+    ],
+  }).map((evidence) => ({
+    ...evidence,
+    id: evidence.displayId,
+    date: evidence.activityAt ?? evidence.recordedAt ?? evidence.occurrenceAt,
+    type: evidence.sourceKind,
+    isArchived: evidence.archivedAt !== null,
+  }));
 
   // Sort newest first
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   res.json({ items });
 });
+
+const relationshipAnswerRepository: RelationshipAnswerRepository = {
+  async read(scope) {
+    const [row] = await db.select().from(questionAnswersTable).where(and(
+      eq(questionAnswersTable.id, scope.answerId), eq(questionAnswersTable.userId, scope.userId),
+      eq(questionAnswersTable.recipientId, scope.recipientId),
+    )).limit(1);
+    return row ?? null;
+  },
+  async write(scope, mutation, expectedArchived) {
+    const values = mutation.action === "edit" ? { answerText: mutation.answerText } : { archivedAt: mutation.action === "archive" ? new Date() : null };
+    const [row] = await db.update(questionAnswersTable).set(values).where(and(
+      eq(questionAnswersTable.id, scope.answerId), eq(questionAnswersTable.userId, scope.userId),
+      eq(questionAnswersTable.recipientId, scope.recipientId),
+      inArray(questionAnswersTable.triggerType, [...MUTABLE_ANSWER_TRIGGER_TYPES]),
+      expectedArchived ? isNotNull(questionAnswersTable.archivedAt) : isNull(questionAnswersTable.archivedAt),
+    )).returning();
+    return row ?? null;
+  },
+};
+
+async function respondToAnswerMutation(res: any, scope: RelationshipAnswerScope, mutation: RelationshipAnswerMutation) {
+  const result = await executeRelationshipAnswerMutation(relationshipAnswerRepository, scope, mutation);
+  if (!result.ok) { res.status(result.status).json({ error:result.error }); return; }
+  res.json({ ok:true });
+}
 
 // ── Edit a timeline answer ────────────────────────────────────────────────────
 
@@ -682,19 +594,7 @@ router.patch("/v2/recipients/:id/answers/:answerId/edit", async (req, res) => {
     return;
   }
 
-  const [updated] = await db
-    .update(questionAnswersTable)
-    .set({ answerText: answerText.trim() })
-    .where(and(
-      eq(questionAnswersTable.id, answerId),
-      eq(questionAnswersTable.userId, userId),
-      eq(questionAnswersTable.recipientId, id),
-    ))
-    .returning({ id: questionAnswersTable.id });
-
-  if (!updated) { res.status(404).json({ error: "Answer not found" }); return; }
-
-  res.json({ ok: true });
+  await respondToAnswerMutation(res, { userId, recipientId:id, answerId }, { action:"edit", answerText });
 });
 
 // ── Archive a timeline answer ─────────────────────────────────────────────────
@@ -705,17 +605,7 @@ router.patch("/v2/recipients/:id/answers/:answerId/archive", async (req, res) =>
 
   const { id, answerId } = req.params;
 
-  await db
-    .update(questionAnswersTable)
-    .set({ archivedAt: new Date() })
-    .where(and(
-      eq(questionAnswersTable.id, answerId),
-      eq(questionAnswersTable.userId, userId),
-      eq(questionAnswersTable.recipientId, id),
-      isNull(questionAnswersTable.archivedAt),
-    ));
-
-  res.json({ ok: true });
+  await respondToAnswerMutation(res, { userId, recipientId:id, answerId }, { action:"archive" });
 });
 
 // ── Restore an archived timeline answer ───────────────────────────────────────
@@ -727,16 +617,7 @@ router.patch("/v2/recipients/:id/answers/:answerId/restore", async (req, res) =>
 
   const { id, answerId } = req.params;
 
-  await db
-    .update(questionAnswersTable)
-    .set({ archivedAt: null })
-    .where(and(
-      eq(questionAnswersTable.id, answerId),
-      eq(questionAnswersTable.userId, userId),
-      eq(questionAnswersTable.recipientId, id),
-    ));
-
-  res.json({ ok: true });
+  await respondToAnswerMutation(res, { userId, recipientId:id, answerId }, { action:"restore" });
 });
 
 // ── Get all fresh updates for a recipient ─────────────────────────────────────

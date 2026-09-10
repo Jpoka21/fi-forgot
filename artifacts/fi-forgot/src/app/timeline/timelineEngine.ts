@@ -7,13 +7,15 @@ import {
   type FiTimelineMonthGroup,
 } from "@/app/timeline/timelineDomain";
 
-export function formatTimelineDate(iso: string): string {
+export function formatTimelineDate(iso: string | null): string {
+  if (!iso) return "Unknown date";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-function getMonthKey(iso: string): string {
+function getMonthKey(iso: string | null): string {
+  if (!iso) return "0000-00";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "0000-00";
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -72,7 +74,7 @@ export function searchTimelineItems(items: FiTimelineItem[], query: string): FiT
   if (!normalizedQuery) return items;
 
   return items.filter((item) => {
-    const haystack = [item.label, item.summary, item.source, item.type].join(" ").toLowerCase();
+    const haystack = [item.label, item.summary, item.source, item.sourceKind, item.semanticClassification, item.type].join(" ").toLowerCase();
     return haystack.includes(normalizedQuery);
   });
 }

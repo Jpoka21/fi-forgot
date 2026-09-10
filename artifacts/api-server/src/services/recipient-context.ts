@@ -15,13 +15,6 @@
  * so callers can detect stale cached contexts.
  */
 
-import {
-  db,
-  recipientsTable,
-  recipientProfileTable,
-  questionAnswersTable,
-  personalCardsTable,
-} from "@workspace/db";
 import { eq, and, isNull } from "drizzle-orm";
 import type { RecipientRow, RecipientProfileRow } from "@workspace/db";
 import type { QuestionAnswer } from "@workspace/db";
@@ -30,6 +23,7 @@ import {
   RELATIONSHIP_INACTIVITY_THRESHOLD_DAYS,
   RELATIONSHIP_RECENT_ACTIVITY_DAYS,
 } from "../brain/config/relationshipThresholds";
+import { projectActiveRelationshipMemoryEvidence, projectRelationshipMemoryEvidence, type RelationshipMemoryEvidence } from "./relationship-memory-evidence";
 
 export const CONTEXT_VERSION = 3 as const;
 
@@ -204,6 +198,7 @@ export interface RecipientContext {
   cardHistory: CardHistorySummary;
   writingHistory: WritingHistoryInventory;
   relationshipTimeline: RelationshipTimelineInventory;
+  relationshipEvidence?: RelationshipMemoryEvidence[];
   briefingSummary: BriefingSummary;
   profileCompleteness: ProfileCompleteness;
   freshUpdates: FreshUpdate[];
@@ -408,69 +403,22 @@ export function buildRelationshipTimelineInventory(
   referenceTime: Date = new Date(),
 ): RelationshipTimelineInventory {
   const referenceMs = referenceTime.getTime();
-  const events: RelationshipTimelineEvent[] = [];
-
-  const briefingGroups = new Map<string, QuestionAnswer[]>();
-
-  for (const answer of answers) {
-    if (answer.triggerType === "event_briefing") {
-      const key = `${answer.eventType}_${answer.eventYear}`;
-      if (!briefingGroups.has(key)) briefingGroups.set(key, []);
-      briefingGroups.get(key)!.push(answer);
-      continue;
-    }
-
-    const type: RelationshipTimelineEventType =
-      answer.triggerType === "fresh_update"
-        ? "fresh_update"
-        : answer.triggerType === "follow_up"
-          ? "follow_up_answer"
-          : "profile_gap";
-
-    const occurredAt = new Date(answer.createdAt);
-    events.push({
-      id: answer.id,
-      type,
-      occurredAt: occurredAt.toISOString(),
-      daysAgo: Math.floor((referenceMs - occurredAt.getTime()) / MS_PER_DAY),
-      label:
-        type === "follow_up_answer"
-          ? "Follow Up"
-          : (TIMELINE_QUESTION_KEY_LABELS[answer.questionKey] ?? answer.questionKey),
+  const evidence = projectRelationshipMemoryEvidence({ answers, cards });
+  const events: RelationshipTimelineEvent[] = evidence
+    .filter((item) => item.archivedAt === null)
+    .filter((item) => Boolean(item.activityAt ?? item.recordedAt ?? item.occurrenceAt))
+    .filter((item) => item.activityKind !== "unknown" && item.activityKind !== "important_date")
+    .filter((item, index, all) => item.activityKind !== "card" || all.findIndex((candidate) => candidate.evidenceId === item.evidenceId && candidate.activityKind === "card") === index)
+    .map((item) => {
+      const timestamp = item.activityAt ?? item.recordedAt ?? item.occurrenceAt;
+      return {
+        id: item.displayId,
+        type: item.activityKind as RelationshipTimelineEvent["type"],
+        occurredAt: timestamp ?? "",
+        daysAgo: Math.floor((referenceMs - Date.parse(timestamp!)) / MS_PER_DAY),
+        label: item.label,
+      };
     });
-  }
-
-  for (const [groupKey, group] of briefingGroups) {
-    const first = group[0]!;
-    const latestDate = group.reduce(
-      (max, row) => (row.createdAt > max ? row.createdAt : max),
-      group[0]!.createdAt,
-    );
-    const occurredAt = new Date(latestDate);
-    events.push({
-      id: `briefing_${groupKey}`,
-      type: "event_briefing",
-      occurredAt: occurredAt.toISOString(),
-      daysAgo: Math.floor((referenceMs - occurredAt.getTime()) / MS_PER_DAY),
-      label: `${first.eventType} ${first.eventYear}`,
-    });
-  }
-
-  for (const card of cards) {
-    if (card.status === "draft") continue;
-    const occurredAt = cardOccurredAt(card);
-    events.push({
-      id: `card_${card.id}`,
-      type: "card",
-      occurredAt: occurredAt.toISOString(),
-      daysAgo: Math.floor((referenceMs - occurredAt.getTime()) / MS_PER_DAY),
-      label: `${card.eventType} card`,
-    });
-  }
-
-  events.sort(
-    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
-  );
 
   return { events };
 }
@@ -624,6 +572,15 @@ export async function assembleRecipientContext(
   recipientId: string,
   userId: string,
 ): Promise<RecipientContext> {
+  // Keep pure projection helpers importable without provisioning a database.
+  // Runtime persistence is loaded only when context assembly is requested.
+  const {
+    db,
+    recipientsTable,
+    recipientProfileTable,
+    questionAnswersTable,
+    personalCardsTable,
+  } = await import("@workspace/db");
   const [recipientRows, profileRows, answerRows, cardRows] = await Promise.all([
     db
       .select()
@@ -684,6 +641,15 @@ export async function assembleRecipientContext(
   const delivery = buildDelivery(profile);
   const cardHistory = buildCardHistorySummary(cardRows);
   const writingHistory = buildWritingHistoryInventory(cardRows);
+  const relationshipEvidence = projectActiveRelationshipMemoryEvidence({
+    answers: answerRows,
+    cards: cardRows,
+    profileDates: recipient ? [
+      { kind: "birthday", value: recipient.birthday },
+      { kind: "anniversary", value: recipient.anniversary },
+    ] : [],
+  });
+  // Temporary Brain compatibility view; all semantics come from the canonical projection.
   const relationshipTimeline = buildRelationshipTimelineInventory(answerRows, cardRows);
   const briefingSummary = buildBriefingSummary(regularAnswerRows);
   const freshUpdates = buildFreshUpdates(freshAnswerRows);
@@ -713,6 +679,7 @@ export async function assembleRecipientContext(
     cardHistory,
     writingHistory,
     relationshipTimeline,
+    relationshipEvidence,
     briefingSummary,
     freshUpdates,
     followUpAnswers,

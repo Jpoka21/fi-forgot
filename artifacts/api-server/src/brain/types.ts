@@ -23,7 +23,8 @@ export type RelationshipContext = RecipientContext;
  */
 export interface RelationshipContextLoadResult {
   brainContextVersion: typeof BRAIN_CONTEXT_VERSION;
-  relationshipId: string;
+  recipientId?: string;
+  relationshipId: string | null;
   userId: string;
   loadedAt: string;
   relationshipContext: RelationshipContext;
@@ -53,7 +54,7 @@ export interface BrainDecision {
  * Full Brain response — produced by the orchestrator in a later commit.
  */
 export interface BrainResponse {
-  relationshipId: string;
+  relationshipId: string | null;
   relationshipContext: RelationshipContext;
   availableSignals: BrainSignal[];
   decision: BrainDecision;

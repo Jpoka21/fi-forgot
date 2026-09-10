@@ -5,6 +5,7 @@ export type FiTimelineAnalyticsEvent =
   | "timeline_filter_changed"
   | "timeline_search"
   | "timeline_item_edited"
+  | "timeline_item_restored"
   | "timeline_item_archived"
   | "timeline_load_more";
 

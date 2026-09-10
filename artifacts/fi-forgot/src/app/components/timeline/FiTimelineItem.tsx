@@ -32,6 +32,7 @@ export interface FiTimelineItemProps {
   isEditing?: boolean;
   onEdit?: (id: string) => void;
   onArchive?: (id: string) => void;
+  onRestore?: (id: string) => void;
   onSaveEdit?: (id: string, value: string) => Promise<void>;
   onCancelEdit?: () => void;
 }
@@ -42,6 +43,7 @@ export function FiTimelineItem({
   isEditing = false,
   onEdit,
   onArchive,
+  onRestore,
   onSaveEdit,
   onCancelEdit,
 }: FiTimelineItemProps) {
@@ -101,7 +103,10 @@ export function FiTimelineItem({
         ) : null}
 
         {item.isArchived ? (
-          <p className="fi-timeline-item__footer">{timelineUiDefaults.archivedFooter}</p>
+          <div className="fi-timeline-item__footer">
+            <p>{timelineUiDefaults.archivedFooter}</p>
+            {item.canRestore ? <FiButton variant="ghost" size="sm" onClick={() => onRestore?.(item.id)}>Restore report</FiButton> : null}
+          </div>
         ) : null}
       </FiTimelineCard>
     </article>

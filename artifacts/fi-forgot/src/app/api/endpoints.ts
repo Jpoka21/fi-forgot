@@ -19,6 +19,8 @@ export const API_ENDPOINTS = {
       `/api/v2/recipients/${recipientId}/answers/${itemId}/archive`,
     editAnswer: (recipientId: string, itemId: string) =>
       `/api/v2/recipients/${recipientId}/answers/${itemId}/edit`,
+    restoreAnswer: (recipientId: string, itemId: string) =>
+      `/api/v2/recipients/${recipientId}/answers/${itemId}/restore`,
     health: "/api/v2/recipient-health",
     brain: (id: string) => `/api/v2/recipients/${id}/brain`,
   },
