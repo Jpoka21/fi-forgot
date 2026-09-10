@@ -325,6 +325,7 @@ async function runAsyncTests(): Promise<void> {
     expect("generatedAt", result.generatedAt, "2026-07-09T12:00:00.000Z");
     expect("recommendations empty", result.recommendations, []);
     expect("insights empty", result.insights, []);
+    expect("opportunities empty", result.opportunities, []);
   }
 
   section("buildConciergeWorkspace with mocked brain runs");
@@ -420,7 +421,7 @@ async function runAsyncTests(): Promise<void> {
       expectTrue(`recommendation has no ${field}`, !(field in recommendation));
     }
     expectTrue("response has no notifications field", !("notifications" in result));
-    expectTrue("response has no opportunities field", !("opportunities" in result));
+    expectTrue("response exposes primary opportunities field", Array.isArray(result.opportunities));
   }
 }
 

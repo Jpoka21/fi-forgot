@@ -14,6 +14,7 @@ import {
   type ConciergeRelationshipInsight,
 } from "@/app/ai-concierge/aiConciergeDomain";
 import { buildConciergeWorkspaceForDisplay } from "@/app/concierge-brain/buildConciergeWorkspaceForDisplay";
+import type { RelationshipOpportunityViewModel } from "@/app/concierge-brain/conciergeViewModel";
 import { useAuth } from "@/lib/auth-context";
 
 export function useAiConciergeWorkspace() {
@@ -22,6 +23,7 @@ export function useAiConciergeWorkspace() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<FiAiRecommendation[]>([]);
+  const [opportunities, setOpportunities] = useState<RelationshipOpportunityViewModel[]>([]);
   const [insights, setInsights] = useState<ConciergeRelationshipInsight[]>([]);
   const refreshTimerRef = useRef<number | null>(null);
 
@@ -32,10 +34,12 @@ export function useAiConciergeWorkspace() {
     try {
       const workspace = await buildConciergeWorkspaceForDisplay({ userEmail: user?.email });
       setRecommendations(workspace.recommendations);
+      setOpportunities(workspace.opportunities);
       setInsights(workspace.insights);
       setError(null);
     } catch (loadError) {
       setRecommendations([]);
+      setOpportunities([]);
       setInsights([]);
       setError(aiDefaults.errorLabel);
       if (import.meta.env.DEV) {
@@ -84,6 +88,7 @@ export function useAiConciergeWorkspace() {
     section,
     setSection: handleSectionChange,
     recommendations,
+    opportunities,
     insights,
     memories,
     suggestedConversations,

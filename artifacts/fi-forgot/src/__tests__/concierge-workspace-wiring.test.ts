@@ -60,6 +60,7 @@ function section(name: string) {
 const WORKSPACE_RESPONSE: ConciergeWorkspaceResponse = {
   version: 1,
   generatedAt: "2026-07-09T12:00:00.000Z",
+  opportunities: [],
   recommendations: [
     {
       id: "alpha:birthday",
@@ -219,6 +220,7 @@ section("empty recommendations and insights");
         okResult({
           version: 1,
           generatedAt: "2026-07-09T12:00:00.000Z",
+          opportunities: [],
           recommendations: [],
           insights: [],
         }),
@@ -304,11 +306,15 @@ section("Brain conversation wiring and rollback contract");
   const pagePath = join(dirname(fileURLToPath(import.meta.url)), "../app/components/ai-concierge/FiAiConciergePage.tsx");
   const hookPath = join(dirname(fileURLToPath(import.meta.url)), "../app/ai-concierge/hooks/useConciergeConversation.ts");
   const configPath = join(dirname(fileURLToPath(import.meta.url)), "../app/concierge-brain/conciergeBrainConfig.ts");
+  const panelPath = join(dirname(fileURLToPath(import.meta.url)), "../app/components/ai-concierge/FiConciergeWorkspacePanel.tsx");
   const pageSource = readFileSync(pagePath, "utf8");
   const hookSource = readFileSync(hookPath, "utf8");
   const configSource = readFileSync(configPath, "utf8");
+  const panelSource = readFileSync(panelPath, "utf8");
 
-  expectTrue("page reuses loaded workspace recommendations", pageSource.includes("recommendations: workspace.recommendations.map"));
+  expectTrue("page consumes loaded workspace opportunities", pageSource.includes("relationshipOpportunitiesToConversationRecommendations(workspace.opportunities)"));
+  expectTrue("page preserves legacy recommendation rollback", pageSource.includes(": workspace.recommendations.map"));
+  expectTrue("workspace panel preserves legacy recommendation rollback", panelSource.includes("<FiAiSuggestionList suggestions={workspace.recommendations}"));
   expectTrue("page passes existing workspace retry", pageSource.includes("refresh: workspace.refresh"));
   expectTrue("conversation makes no Brain API call", !hookSource.includes("fetchConciergeWorkspace"));
   expectTrue("Brain attention path does not import legacy recommendation reasoning", !hookSource.includes("loadAiRecommendations"));

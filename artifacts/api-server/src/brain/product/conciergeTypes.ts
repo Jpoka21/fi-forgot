@@ -3,6 +3,7 @@
  */
 
 import type { ActionPriority } from "../action/actionPlanTypes";
+import type { RelationshipOpportunity } from "./relationshipOpportunityTypes";
 
 export const CONCIERGE_WORKSPACE_VERSION = 1 as const;
 
@@ -40,6 +41,7 @@ export interface ConciergeInsight {
 export interface ConciergeWorkspaceResponse {
   version: typeof CONCIERGE_WORKSPACE_VERSION;
   generatedAt: string;
+  opportunities: RelationshipOpportunity[];
   recommendations: ConciergeRecommendation[];
   insights: ConciergeInsight[];
 }

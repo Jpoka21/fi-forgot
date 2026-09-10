@@ -9,10 +9,12 @@ export {
 export {
   buildConciergeRecommendation,
   buildConciergeRecommendationId,
+  projectConciergeRecommendation,
 } from "./buildConciergeRecommendation";
 export {
   buildConciergeInsight,
   buildConciergeInsightId,
+  projectConciergeInsight,
 } from "./buildConciergeInsight";
 export {
   CONCIERGE_INSIGHTS_MAX,
@@ -25,6 +27,14 @@ export {
   type ConciergeWorkspaceResponse,
 } from "./conciergeTypes";
 export { shouldIncludeConciergeOpportunity } from "./shouldIncludeConciergeOpportunity";
+export { buildRelationshipOpportunity } from "./buildRelationshipOpportunity";
+export {
+  RELATIONSHIP_OPPORTUNITY_VERSION,
+  type OpportunityEvidenceClassification,
+  type RelationshipOpportunity,
+  type RelationshipOpportunityEvidence,
+  type RelationshipOpportunityRecommendation,
+} from "./relationshipOpportunityTypes";
 export {
   compareRankableRelationshipOpportunities,
   rankRelationshipOpportunities,

@@ -4,6 +4,9 @@
 
 import type { ActionPriority } from "@/app/product-brain/productBrainDecisionTypes";
 import type { ConciergeRecommendationKind } from "@/app/concierge-brain/conciergeWorkspaceTypes";
+import type { RelationshipOpportunity } from "@/app/concierge-brain/conciergeWorkspaceTypes";
+
+export type RelationshipOpportunityViewModel = RelationshipOpportunity;
 
 export interface ConciergeRecommendationViewModel {
   id: string;
@@ -27,6 +30,7 @@ export interface ConciergeInsightViewModel {
 }
 
 export interface ConciergeWorkspaceViewModel {
+  opportunities: RelationshipOpportunityViewModel[];
   recommendations: ConciergeRecommendationViewModel[];
   insights: ConciergeInsightViewModel[];
 }

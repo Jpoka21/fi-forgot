@@ -115,7 +115,7 @@ section("adaptConciergeRecommendationToFiAiRecommendation");
   const adapted = adaptConciergeRecommendationToFiAiRecommendation(viewModel);
   expect("description from body", adapted.description, RECOMMENDATION.body);
   expect("actionLabel verbatim", adapted.actionLabel, "Prepare for birthday");
-  expect("confidence from priority", adapted.confidence, "high");
+  expect("priority is not relabeled as confidence", adapted.confidence, undefined);
   expect("sourceType relationship", adapted.sourceType, "relationship");
   expectTrue("no sourceRuleId", !("sourceRuleId" in adapted));
 }
@@ -133,6 +133,7 @@ section("empty recommendations and insights");
   const emptyResponse: ConciergeWorkspaceResponse = {
     version: 1,
     generatedAt: "2026-07-09T12:00:00.000Z",
+    opportunities: [],
     recommendations: [],
     insights: [],
   };
@@ -146,6 +147,7 @@ section("server order preserved");
   const response: ConciergeWorkspaceResponse = {
     version: 1,
     generatedAt: "2026-07-09T12:00:00.000Z",
+    opportunities: [],
     recommendations: [
       { ...RECOMMENDATION, id: "alpha:birthday", recipientId: "alpha", title: "First" },
       { ...RECOMMENDATION, id: "beta:fresh_update", recipientId: "beta", title: "Second" },

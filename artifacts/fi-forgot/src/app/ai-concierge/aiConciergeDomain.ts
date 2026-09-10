@@ -1,4 +1,5 @@
 import { ROUTE_PATHS } from "@/app/routes/routePaths";
+import type { RelationshipOpportunity } from "@/app/concierge-brain/conciergeWorkspaceTypes";
 
 export const conciergePageSections = ["workspace", "conversation"] as const;
 
@@ -29,6 +30,20 @@ export interface ConciergeConversationRecommendation {
   body: string;
   actionLabel: string;
   href: string;
+}
+
+export function relationshipOpportunitiesToConversationRecommendations(
+  opportunities: RelationshipOpportunity[],
+): ConciergeConversationRecommendation[] {
+  return opportunities.flatMap((opportunity) => opportunity.recommendation
+    ? [{
+        id: opportunity.id,
+        title: opportunity.title,
+        body: opportunity.explanation,
+        actionLabel: opportunity.recommendation.label,
+        href: opportunity.recommendation.href,
+      }]
+    : []);
 }
 
 export interface ConciergeConversationResponse {

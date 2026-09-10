@@ -9,10 +9,30 @@ import {
   type ConciergeRecommendation,
 } from "./conciergeTypes";
 import type { ProductBrainDecision } from "./productBrainDecisionTypes";
+import type { RelationshipOpportunity } from "./relationshipOpportunityTypes";
 
 export interface ConciergeRecipientDisplay {
   recipientId: string;
   recipientName: string;
+}
+
+export function projectConciergeRecommendation(
+  opportunity: RelationshipOpportunity,
+): ConciergeRecommendation {
+  if (!opportunity.recommendation) {
+    throw new Error("Cannot project a recommendation from a restrained Opportunity");
+  }
+  return {
+    id: opportunity.id,
+    recipientId: opportunity.recipient.id,
+    recipientName: opportunity.recipient.name,
+    title: opportunity.title,
+    body: opportunity.explanation,
+    href: opportunity.recommendation.href,
+    actionLabel: opportunity.recommendation.label,
+    priority: opportunity.recommendation.priority,
+    kind: CONCIERGE_RECOMMENDATION_KIND_RELATIONSHIP,
+  };
 }
 
 export function buildConciergeRecommendationId(

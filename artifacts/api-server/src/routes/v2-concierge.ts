@@ -57,6 +57,7 @@ router.get("/v2/concierge", async (req, res) => {
     logger.info({
       userId,
       recipientCount: rows.length,
+      opportunityCount: payload.opportunities.length,
       recommendationCount: payload.recommendations.length,
       insightCount: payload.insights.length,
     }, "v2-concierge");

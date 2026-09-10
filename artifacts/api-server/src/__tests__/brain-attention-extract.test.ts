@@ -350,7 +350,7 @@ async function runAsyncTests(): Promise<void> {
     );
   }
 
-  section("reference pipeline parity — concierge");
+  section("reference pipeline parity - concierge");
   {
     const actual = await buildConciergeWorkspace(parityOptions);
     const decisions = await collectProductBrainDecisions(parityOptions);
@@ -379,10 +379,44 @@ async function runAsyncTests(): Promise<void> {
       insights,
     };
 
+    const { opportunities, ...legacyProjection } = actual;
     expect(
-      "concierge byte-for-byte parity",
-      JSON.stringify(actual),
+      "concierge legacy projection byte-for-byte parity",
+      JSON.stringify(legacyProjection),
       JSON.stringify(expected),
+    );
+    expect(
+      "concierge opportunity order preserves ranked recommendation order",
+      opportunities.filter((item) => item.recommendation !== null).map((item) => item.id),
+      recommendations.map((item) => item.id),
+    );
+    expectTrue(
+      "concierge retains excluded wait decision as restrained Opportunity",
+      opportunities.some((item) => item.id === "wait-recipient:wait" && item.recommendation === null),
+    );
+  }
+
+  section("concierge primary Opportunity coverage spans both compatibility caps");
+  {
+    const recipients = Array.from(
+      { length: Math.max(CONCIERGE_RECOMMENDATIONS_MAX, CONCIERGE_INSIGHTS_MAX) + 1 },
+      (_, index) => ({ recipientId: `cap-${index}`, recipientName: `Cap ${index}` }),
+    );
+    const actual = await buildConciergeWorkspace({
+      userId: "user-1",
+      recipients,
+      generatedAt: parityGeneratedAt,
+      runBrain: async (recipientId) => buildExecution({ freshness: "stale" }, {}, recipientId),
+    });
+    expect("legacy recommendation cap preserved", actual.recommendations.length, CONCIERGE_RECOMMENDATIONS_MAX);
+    expect("legacy insight cap preserved", actual.insights.length, CONCIERGE_INSIGHTS_MAX);
+    expectTrue(
+      "every compatibility projection has a primary Opportunity",
+      [...actual.recommendations, ...actual.insights].every((projection) =>
+        actual.opportunities.some((opportunity) =>
+          projection.id === opportunity.id || projection.id === `${opportunity.id}:insight`,
+        ),
+      ),
     );
   }
 }

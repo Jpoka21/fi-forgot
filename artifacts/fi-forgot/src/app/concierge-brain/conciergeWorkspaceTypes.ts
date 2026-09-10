@@ -31,9 +31,38 @@ export interface ConciergeInsight {
   href?: string;
 }
 
+export type OpportunityEvidenceClassification = "observation" | "direct_fact" | "inference";
+
+export interface RelationshipOpportunity {
+  version: 1;
+  id: string;
+  relationshipId: string | null;
+  relationshipIdentityProvenance: { sourceType: string; sourceId: string | null } | null;
+  recipient: { id: string; name: string };
+  title: string;
+  explanation: string;
+  confidence: { status: "known"; value: number } | { status: "unknown"; value: null };
+  provenance: {
+    sourceType: "brain_execution";
+    sourceId: string | null;
+    evidence: Array<{
+      evidenceId: string | null;
+      source: string;
+      label: string;
+      classification: OpportunityEvidenceClassification;
+      observedAt: string | null;
+    }>;
+  };
+  timing: { observedAt: string | null };
+  presentation: { recommendationEligible: boolean; insightEligible: boolean };
+  restraint: { restrained: boolean; reason: string | null };
+  recommendation: { label: string; href: string; priority: ActionPriority } | null;
+}
+
 export interface ConciergeWorkspaceResponse {
   version: typeof CONCIERGE_WORKSPACE_VERSION;
   generatedAt: string;
+  opportunities: RelationshipOpportunity[];
   recommendations: ConciergeRecommendation[];
   insights: ConciergeInsight[];
 }

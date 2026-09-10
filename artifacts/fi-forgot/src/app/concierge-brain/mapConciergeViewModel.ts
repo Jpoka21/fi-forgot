@@ -4,12 +4,35 @@ import type {
   ConciergeInsight,
   ConciergeRecommendation,
   ConciergeWorkspaceResponse,
+  RelationshipOpportunity,
 } from "@/app/concierge-brain/conciergeWorkspaceTypes";
 import type {
   ConciergeInsightViewModel,
   ConciergeRecommendationViewModel,
   ConciergeWorkspaceViewModel,
+  RelationshipOpportunityViewModel,
 } from "@/app/concierge-brain/conciergeViewModel";
+
+export function mapRelationshipOpportunityViewModel(
+  opportunity: RelationshipOpportunity,
+): RelationshipOpportunityViewModel {
+  return {
+    ...opportunity,
+    recipient: { ...opportunity.recipient },
+    relationshipIdentityProvenance: opportunity.relationshipIdentityProvenance
+      ? { ...opportunity.relationshipIdentityProvenance }
+      : null,
+    confidence: { ...opportunity.confidence },
+    provenance: {
+      ...opportunity.provenance,
+      evidence: opportunity.provenance.evidence.map((item) => ({ ...item })),
+    },
+    timing: { ...opportunity.timing },
+    presentation: { ...opportunity.presentation },
+    restraint: { ...opportunity.restraint },
+    recommendation: opportunity.recommendation ? { ...opportunity.recommendation } : null,
+  };
+}
 
 export function mapConciergeRecommendationViewModel(
   recommendation: ConciergeRecommendation,
@@ -42,6 +65,7 @@ export function mapConciergeWorkspaceViewModel(
   response: ConciergeWorkspaceResponse,
 ): ConciergeWorkspaceViewModel {
   return {
+    opportunities: response.opportunities.map(mapRelationshipOpportunityViewModel),
     recommendations: response.recommendations.map(mapConciergeRecommendationViewModel),
     insights: response.insights.map(mapConciergeInsightViewModel),
   };
@@ -56,7 +80,9 @@ export function adaptConciergeRecommendationToFiAiRecommendation(
     description: viewModel.body,
     href: viewModel.href,
     actionLabel: viewModel.actionLabel,
-    confidence: viewModel.priority,
+    // Compatibility projection cannot express numeric/unknown Brain confidence.
+    // Never relabel action priority as confidence.
+    confidence: undefined as never,
     recipientName: viewModel.recipientName,
     sourceType: viewModel.kind,
   };
@@ -77,10 +103,12 @@ export function adaptConciergeInsightToRelationshipInsight(
 export function adaptConciergeWorkspaceViewModel(
   viewModel: ConciergeWorkspaceViewModel,
 ): {
+  opportunities: RelationshipOpportunityViewModel[];
   recommendations: FiAiRecommendation[];
   insights: ConciergeRelationshipInsight[];
 } {
   return {
+    opportunities: viewModel.opportunities,
     recommendations: viewModel.recommendations.map(adaptConciergeRecommendationToFiAiRecommendation),
     insights: viewModel.insights.map(adaptConciergeInsightToRelationshipInsight),
   };

@@ -45,7 +45,23 @@ export function FiConciergeWorkspacePanel({
         <h2 id="concierge-recommendations-title" className="fi-ai-concierge-page__section-title">
           {workspace.defaults.recommendationsTitle}
         </h2>
-        {workspace.recommendations.length > 0 ? (
+        {workspace.opportunities.length > 0 ? (
+          <ul className="fi-ai-concierge-page__insight-list">
+            {workspace.opportunities.map((opportunity) => (
+              <li key={opportunity.id} className="fi-ai-concierge-page__insight-item">
+                <strong>{opportunity.title}</strong>
+                <span>{opportunity.explanation}</span>
+                {opportunity.recommendation ? (
+                  <Link href={opportunity.recommendation.href}>
+                    <FiButton variant="secondary" size="sm">
+                      {opportunity.recommendation.label}
+                    </FiButton>
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : workspace.recommendations.length > 0 ? (
           <FiAiSuggestionList suggestions={workspace.recommendations} />
         ) : (
           <p className="fi-ai-concierge-page__section-copy">{workspace.aiDefaults.emptyDescription}</p>

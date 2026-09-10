@@ -15,6 +15,7 @@ export {
   mapConciergeInsightViewModel,
   mapConciergeRecommendationViewModel,
   mapConciergeWorkspaceViewModel,
+  mapRelationshipOpportunityViewModel,
 } from "@/app/concierge-brain/mapConciergeViewModel";
 export type {
   ConciergeInsightViewModel,
@@ -28,4 +29,5 @@ export {
   type ConciergeRecommendation,
   type ConciergeRecommendationKind,
   type ConciergeWorkspaceResponse,
+  type RelationshipOpportunity,
 } from "@/app/concierge-brain/conciergeWorkspaceTypes";

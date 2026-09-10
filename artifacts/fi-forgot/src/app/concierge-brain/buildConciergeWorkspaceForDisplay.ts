@@ -10,10 +10,12 @@ import {
   mapConciergeWorkspaceViewModel,
 } from "@/app/concierge-brain/mapConciergeViewModel";
 import type { ConciergeWorkspaceResponse } from "@/app/concierge-brain/conciergeWorkspaceTypes";
+import type { RelationshipOpportunityViewModel } from "@/app/concierge-brain/conciergeViewModel";
 
 export type FetchConciergeWorkspace = () => Promise<ApiResult<ConciergeWorkspaceResponse>>;
 
 export interface ConciergeWorkspaceDisplayModel {
+  opportunities: RelationshipOpportunityViewModel[];
   recommendations: FiAiRecommendation[];
   insights: ConciergeRelationshipInsight[];
 }
@@ -36,6 +38,7 @@ export function loadLegacyConciergeWorkspace(
   userEmail?: string,
 ): ConciergeWorkspaceDisplayModel {
   return {
+    opportunities: [],
     recommendations: loadAiRecommendations(userEmail),
     insights: buildRelationshipInsights(),
   };
@@ -55,7 +58,7 @@ export async function buildConciergeWorkspaceForDisplay(
       if (import.meta.env?.DEV) {
         console.error(error);
       }
-      return { recommendations: [], insights: [] };
+      return { opportunities: [], recommendations: [], insights: [] };
     }
   }
 
@@ -67,7 +70,7 @@ export async function buildConciergeWorkspaceForDisplay(
       if (import.meta.env?.DEV) {
         console.error("Failed to load Concierge workspace", result.error);
       }
-      return { recommendations: [], insights: [] };
+      return { opportunities: [], recommendations: [], insights: [] };
     }
 
     const viewModel = mapConciergeWorkspaceViewModel(result.data);
@@ -76,6 +79,6 @@ export async function buildConciergeWorkspaceForDisplay(
     if (import.meta.env?.DEV) {
       console.error(error);
     }
-    return { recommendations: [], insights: [] };
+    return { opportunities: [], recommendations: [], insights: [] };
   }
 }

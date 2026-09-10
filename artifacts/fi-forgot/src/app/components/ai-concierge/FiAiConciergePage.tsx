@@ -4,6 +4,7 @@ import { FiConciergeConversationPanel } from "@/app/components/ai-concierge/FiCo
 import { FiConciergeWorkspacePanel } from "@/app/components/ai-concierge/FiConciergeWorkspacePanel";
 import { useAiConciergeWorkspace } from "@/app/ai-concierge/hooks/useAiConciergeWorkspace";
 import { useConciergeConversation } from "@/app/ai-concierge/hooks/useConciergeConversation";
+import { relationshipOpportunitiesToConversationRecommendations } from "@/app/ai-concierge/aiConciergeDomain";
 
 const sectionLabels = {
   workspace: "Workspace",
@@ -12,14 +13,17 @@ const sectionLabels = {
 
 export function FiAiConciergePage() {
   const workspace = useAiConciergeWorkspace();
+  const conversationRecommendations = workspace.opportunities.length > 0
+    ? relationshipOpportunitiesToConversationRecommendations(workspace.opportunities)
+    : workspace.recommendations.map((recommendation) => ({
+        id: recommendation.id,
+        title: recommendation.title,
+        body: recommendation.description,
+        actionLabel: recommendation.actionLabel,
+        href: recommendation.href,
+      }));
   const conversation = useConciergeConversation({
-    recommendations: workspace.recommendations.map((recommendation) => ({
-      id: recommendation.id,
-      title: recommendation.title,
-      body: recommendation.description,
-      actionLabel: recommendation.actionLabel,
-      href: recommendation.href,
-    })),
+    recommendations: conversationRecommendations,
     isLoading: workspace.isLoading,
     error: workspace.error,
     refresh: workspace.refresh,
