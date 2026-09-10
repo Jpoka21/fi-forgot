@@ -11,7 +11,7 @@ export const CONCIERGE_WORKSPACE_VERSION = 1 as const;
 export const CONCIERGE_RECOMMENDATIONS_MAX = 6 as const;
 
 /** Maximum insights derived from ranked relationship opportunities. */
-export const CONCIERGE_INSIGHTS_MAX = 6 as const;
+export const CONCIERGE_INSIGHTS_MAX = 4 as const;
 
 /** Maximum Opportunity actions presented in the Concierge workspace/conversation. */
 export const CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX = 3 as const;

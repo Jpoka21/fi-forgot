@@ -32,27 +32,34 @@ export interface ConciergeConversationRecommendation {
   href: string;
 }
 
+/** Final client-side guard for the established Concierge recommendation display cap. */
+export const CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX = 3 as const;
+
 export function relationshipOpportunitiesToConversationRecommendations(
   opportunities: RelationshipOpportunity[],
 ): ConciergeConversationRecommendation[] {
-  return opportunities.flatMap((opportunity) =>
-    opportunity.presentation.recommendationEligible && opportunity.recommendation
-    ? [{
+  return opportunities
+    .filter((opportunity) =>
+      opportunity.presentation.recommendationEligible && opportunity.recommendation !== null,
+    )
+    .slice(0, CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX)
+    .map((opportunity) => ({
         id: opportunity.id,
         title: opportunity.title,
         body: opportunity.explanation,
-        actionLabel: opportunity.recommendation.label,
-        href: opportunity.recommendation.href,
-      }]
-    : []);
+        actionLabel: opportunity.recommendation!.label,
+        href: opportunity.recommendation!.href,
+      }));
 }
 
 export function relationshipOpportunitiesForRecommendationPresentation(
   opportunities: RelationshipOpportunity[],
 ): RelationshipOpportunity[] {
-  return opportunities.filter((opportunity) =>
-    opportunity.presentation.recommendationEligible && opportunity.recommendation !== null,
-  );
+  return opportunities
+    .filter((opportunity) =>
+      opportunity.presentation.recommendationEligible && opportunity.recommendation !== null,
+    )
+    .slice(0, CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX);
 }
 
 export interface ConciergeConversationResponse {

@@ -11,6 +11,12 @@ if (response.content.includes(base.title)) throw new Error("restrained opportuni
 const capSuppressed = { ...actionable, id: "cap-suppressed", presentation: { ...actionable.presentation, recommendationEligible: false } };
 if (relationshipOpportunitiesForRecommendationPresentation([actionable, capSuppressed, base]).length !== 1) throw new Error("workspace presentation ignored server eligibility");
 if (relationshipOpportunitiesToConversationRecommendations([actionable, capSuppressed, base]).length !== 1) throw new Error("conversation presentation ignored server eligibility");
+const allEligible = Array.from({ length: 6 }, (_, index) => ({ ...actionable, id: `eligible-${index + 1}` }));
+const cappedPresentation = relationshipOpportunitiesForRecommendationPresentation([...allEligible, base]);
+const cappedConversation = relationshipOpportunitiesToConversationRecommendations([...allEligible, base]);
+if (cappedPresentation.length !== 3 || cappedConversation.length !== 3) throw new Error("frontend presentation exceeded the three-recommendation cap");
+if (cappedPresentation.map((item) => item.id).join(",") !== "eligible-1,eligible-2,eligible-3") throw new Error("workspace presentation did not preserve ranked input order");
+if (cappedConversation.map((item) => item.id).join(",") !== "eligible-1,eligible-2,eligible-3") throw new Error("conversation presentation did not preserve ranked input order");
 const componentSource = readFileSync("artifacts/fi-forgot/src/app/components/ai-concierge/FiConciergeWorkspacePanel.tsx", "utf8");
 if (!componentSource.includes("opportunity.recommendation ?") || !componentSource.includes(": null")) throw new Error("component action is not guarded by recommendation presence");
 console.log("concierge opportunity conversation passed");

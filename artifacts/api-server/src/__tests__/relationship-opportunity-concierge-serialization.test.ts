@@ -28,7 +28,7 @@ const payload = await buildConciergeWorkspace({
 });
 
 const wire = JSON.parse(JSON.stringify(payload));
-if (wire.recommendations.length !== 6 || wire.insights.length !== 6) throw new Error("legacy projection caps changed");
+if (wire.recommendations.length !== 6 || wire.insights.length !== 4) throw new Error("legacy projection caps changed from six recommendations and four insights");
 if (wire.recommendations[0].id !== "actionable:inactivity" || wire.insights[0].id !== "actionable:inactivity:insight") throw new Error("legacy projection identity changed");
 if (wire.opportunities.filter((item: { presentation: { recommendationEligible: boolean } }) => item.presentation.recommendationEligible).length !== 3) throw new Error("server presentation policy did not retain exactly three recommendation slots");
 const actionable = wire.opportunities.find((item: { id: string }) => item.id === "actionable:inactivity");
