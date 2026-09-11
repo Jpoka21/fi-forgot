@@ -26,6 +26,13 @@ assert.equal((await call('changeInterpretation',{expectedRevision:1,operationId:
 assert.equal((await call('changeInterpretation',{expectedRevision:2,operationId:'withdraw-1'},{interpretationId:id,action:'withdraw'})).status,200);
 assert.equal((await call('changeInterpretation',{expectedRevision:3,operationId:'restore-1'},{interpretationId:id,action:'restore'})).status,200);
 assert.equal(pg.tables.relationship_interpretations[0].confirmed_at,null);
+const restoredSnapshot=pg.tables.relationship_interpretation_revisions.find(row=>row.interpretation_id===id&&row.revision===4)!;
+assert.equal(restoredSnapshot.confirmed_at,null,'immutable restore revision must preserve explicit removal of endorsement');
+assert.equal(restoredSnapshot.confirmed_by_user_id,null);
+assert.equal(restoredSnapshot.endorsement_withdrawn_at,null,'restore clears withdrawal without restoring confirmation');
+const confirmedSnapshot=pg.tables.relationship_interpretation_revisions.find(row=>row.interpretation_id===id&&row.revision===2)!;
+assert.ok(confirmedSnapshot.confirmed_at,'historical confirmation remains recorded');
+
 assert.deepEqual(pg.tables.relationship_interpretation_actions.map(a=>a.action),['create','confirm','withdraw','restore']);
 for(const [action,rev] of [['reject',4],['restore',5],['archive',6],['restore',7]] as const)assert.equal((await call('changeInterpretation',{expectedRevision:rev,operationId:`${action}-${rev}`},{interpretationId:id,action})).status,200);
 for(const failOn of [/insert into "relationship_observation_versions"/,/update "relationship_observation_heads"/,/^commit$/]){

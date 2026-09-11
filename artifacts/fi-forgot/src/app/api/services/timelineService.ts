@@ -60,4 +60,5 @@ export const timelineService = {
   changeInterpretation(recipientId:string, interpretationId:string, action:"confirm"|"withdraw"|"reject"|"archive"|"restore", expectedRevision:number, operationId:string) {
     return apiFetch(API_ENDPOINTS.recipients.interpretationLifecycle(recipientId,interpretationId,action), {method:"PATCH",json:{expectedRevision,operationId},throwOnError:true});
   },
+  changeHypothesis(recipientId:string,hypothesisId:string,action:"confirm"|"disagree"|"withdraw"|"reverse",expectedRevision:number,operationId:string){return apiFetch(API_ENDPOINTS.recipients.hypothesisLifecycle(recipientId,hypothesisId,action),{method:"PATCH",json:{expectedRevision,operationId},throwOnError:true});},
 };

@@ -2,10 +2,11 @@ import { currentObservationVersions, observationHistory, exactDependenciesValid 
 import type { Request as ExpressRequest, Response } from 'express';
 type Request = ExpressRequest<Record<string,string>>;
 import type { db as productionDb } from '@workspace/db';
-import { recipientsTable, questionAnswersTable, personalCardsTable, followUpQuestionsTable, relationshipObservationVersionsTable, relationshipObservationHeadsTable, relationshipInterpretationsTable, relationshipInterpretationDependenciesTable, relationshipInterpretationActionsTable } from '@workspace/db/schema';
+import { recipientsTable, questionAnswersTable, personalCardsTable, followUpQuestionsTable, relationshipObservationVersionsTable, relationshipObservationHeadsTable, relationshipInterpretationsTable, relationshipInterpretationDependenciesTable, relationshipInterpretationActionsTable, relationshipInterpretationRevisionsTable, relationshipHypothesesTable, relationshipHypothesisVersionsTable, relationshipHypothesisHeadsTable, relationshipHypothesisEvidenceTable, relationshipHypothesisActionsTable } from '@workspace/db/schema';
 import { and, eq, desc, isNull, isNotNull, ne, inArray, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { projectRelationshipMemoryEvidence, executeRelationshipAnswerMutation, MUTABLE_ANSWER_TRIGGER_TYPES, type RelationshipAnswerRepository, type RelationshipAnswerScope, type RelationshipAnswerMutation } from './relationship-memory-evidence';
+import { recomputeEvolvingUnderstanding,changeHypothesis } from './evolving-understanding-repository';
 export type UnderstandingDatabase = typeof productionDb;
 /** Reconcile only current source truth. Never reconstruct uncaptured prior edits. */
 export async function captureUnversionedAnswers(db: UnderstandingDatabase, scope: {userId:string;recipientId:string}) {
@@ -31,6 +32,12 @@ export async function captureUnversionedAnswers(db: UnderstandingDatabase, scope
    if(!changed.length)throw new Error('STALE_OBSERVATION_VERSION');
   } else if(!head&&!prior) await db.insert(relationshipObservationHeadsTable).values({...scope,sourceRecordId:answer.id,currentVersionId:id,revision:1,updatedAt:capturedAt});
   else throw new Error('STALE_OBSERVATION_VERSION');
+ }
+ const interpretations=await db.select().from(relationshipInterpretationsTable).where(and(eq(relationshipInterpretationsTable.userId,scope.userId),eq(relationshipInterpretationsTable.recipientId,scope.recipientId)));
+ const revisions=await db.select().from(relationshipInterpretationRevisionsTable).where(and(eq(relationshipInterpretationRevisionsTable.userId,scope.userId),eq(relationshipInterpretationRevisionsTable.recipientId,scope.recipientId)));
+ for(const item of interpretations){if(revisions.some(revision=>revision.interpretationId===item.id&&revision.revision===item.revision))continue;
+  // Capture only the actual current revision; missing earlier versions stay missing.
+  await db.insert(relationshipInterpretationRevisionsTable).values({id:randomUUID(),interpretationId:item.id,...scope,revision:item.revision,text:item.text,lifecycleState:item.lifecycleState,uncertaintyAcknowledged:item.uncertaintyAcknowledged,confidence:item.confidence,confirmedByUserId:item.confirmedByUserId,confirmedAt:item.confirmedAt,endorsementWithdrawnAt:item.endorsementWithdrawnAt,recordedAt:new Date()});
  }
  return true;
 }
@@ -388,6 +395,18 @@ const timeline = async (req: Request, res: Response) => {
       dependencyVersionIds: pinned,
     });
   }
+  const hypotheses=await db.select().from(relationshipHypothesesTable).where(and(eq(relationshipHypothesesTable.userId,userId),eq(relationshipHypothesesTable.recipientId,id)));
+  const hypothesisHeads=await db.select().from(relationshipHypothesisHeadsTable).where(and(eq(relationshipHypothesisHeadsTable.userId,userId),eq(relationshipHypothesisHeadsTable.recipientId,id)));
+  const hypothesisVersions=hypotheses.length?await db.select().from(relationshipHypothesisVersionsTable).where(inArray(relationshipHypothesisVersionsTable.hypothesisId,hypotheses.map(h=>h.id))):[];
+  const hypothesisEvidence=hypothesisVersions.length?await db.select().from(relationshipHypothesisEvidenceTable).where(inArray(relationshipHypothesisEvidenceTable.hypothesisVersionId,hypothesisVersions.map(v=>v.id))):[];
+  const hypothesisActions=hypotheses.length?await db.select().from(relationshipHypothesisActionsTable).where(and(eq(relationshipHypothesisActionsTable.userId,userId),eq(relationshipHypothesisActionsTable.recipientId,id))):[];
+  for(const hypothesis of hypotheses){const head=hypothesisHeads.find(h=>h.hypothesisId===hypothesis.id);const current=hypothesisVersions.find(v=>v.id===head?.currentVersionId);if(!head||!current)continue;const history=hypothesisVersions.filter(v=>v.hypothesisId===hypothesis.id).sort((a,b)=>a.version-b.version);const links=hypothesisEvidence.filter(e=>e.hypothesisVersionId===current.id);const actions=hypothesisActions.filter(a=>a.hypothesisId===hypothesis.id).sort((a,b)=>b.newRevision-a.newRevision),latest=actions[0],responseState=latest?.hypothesisVersionId===current.id?latest.responseState:['disagreed','withdrawn'].includes(latest?.responseState??'')?latest!.responseState:'none';items.push({id:hypothesis.id,date:current.generatedAt.toISOString(),type:'hypothesis',label:'Brain hypothesis: communication preference',summary:current.rationale,source:'Server-owned Brain',sourceKind:'brain_hypothesis',semanticClassification:'uncertain_hypothesis',canArchive:false,canEdit:false,canRestore:false,isArchived:current.lifecycleState!=='active',evidenceId:null,memberEvidenceIds:links.map(e=>e.observationVersionId).filter(Boolean),recordedAt:current.generatedAt.toISOString(),activityAt:null,occurrenceAt:null,observationAt:null,version:current.version,revision:head.revision,lifecycleState:current.lifecycleState,uncertain:true,confidence:current.confidence,evidenceState:current.evidenceState,explanation:current.explanation,uncertainty:current.uncertainty,responseState,support:links.filter(e=>e.polarity==='support'),conflict:links.filter(e=>e.polarity==='conflict'),history:history.map(v=>({id:v.id,version:v.version,text:v.rationale,lifecycleState:v.lifecycleState,recordedAt:v.generatedAt.toISOString()})),actionHistory:actions.map(a=>({operationId:a.operationId,action:a.action,actorUserId:a.actorUserId,actedAt:a.actedAt.toISOString(),expectedRevision:a.expectedRevision,newRevision:a.newRevision,hypothesisVersionId:a.hypothesisVersionId,responseState:a.responseState})),lastOperationId:latest?.hypothesisVersionId===current.id?latest.operationId:null,dependencyVersionIds:links.map(e=>e.observationVersionId).filter((v):v is string=>Boolean(v))});}
+  for(const item of items.filter(value=>value.type==='hypothesis')){
+    const allLinks=[...item.support,...item.conflict];
+    item.evidenceLinks=allLinks;
+    item.support=[...new Map(item.support.map((link:any)=>[link.observationVersionId,link])).values()];
+    item.conflict=[...new Map(item.conflict.map((link:any)=>[link.observationVersionId,link])).values()];
+  }
   for (const sourceRecordId of new Set(
     observationVersions
       .map((v) => v.sourceRecordId)
@@ -544,6 +563,7 @@ const createInterpretation = async (req: Request, res: Response) => {
         uncertaintyAcknowledged: true,
         revision: 1,
       });
+      await tx.insert(relationshipInterpretationRevisionsTable).values({id:randomUUID(),interpretationId,userId,recipientId:id,revision:1,text:text.trim(),lifecycleState:'active',uncertaintyAcknowledged:true,confidence:null,recordedAt:new Date()});
       await tx.insert(relationshipInterpretationDependenciesTable).values(
         [...requested].map((observationVersionId) => ({
           interpretationId,
@@ -683,7 +703,7 @@ const changeInterpretation = async (req: Request, res: Response) => {
               eq(relationshipInterpretationsTable.revision, item.revision),
             ),
           )
-          .returning({ revision: relationshipInterpretationsTable.revision });
+          .returning();
         if (!updated[0]) throw new Error("STALE");
         await tx.insert(relationshipInterpretationActionsTable).values({
           id: randomUUID(),
@@ -699,6 +719,7 @@ const changeInterpretation = async (req: Request, res: Response) => {
           expectedRevision: item.revision,
           newRevision: updated[0].revision,
         });
+        await tx.insert(relationshipInterpretationRevisionsTable).values({id:randomUUID(),interpretationId,userId,recipientId:id,revision:updated[0].revision,text:item.text,lifecycleState:lifecycle,uncertaintyAcknowledged:item.uncertaintyAcknowledged,confidence:item.confidence,confirmedByUserId:updated[0].confirmedByUserId,confirmedAt:updated[0].confirmedAt,endorsementWithdrawnAt:updated[0].endorsementWithdrawnAt,recordedAt:new Date()});
         return updated[0];
       });
       res.json({
@@ -726,14 +747,15 @@ const changeInterpretation = async (req: Request, res: Response) => {
       throw error;
     }
   };
-return { timeline, edit, archive, restore, createInterpretation, changeInterpretation };
+const changeHypothesisLifecycle=async(req:Request,res:Response)=>{const userId=requireUserId(req,res);if(!userId)return;const {id,hypothesisId,action}=req.params;const {expectedRevision,operationId}=req.body as {expectedRevision?:number;operationId?:string};if(!Number.isInteger(expectedRevision)||typeof operationId!=='string'||!operationId.trim()){res.status(400).json({error:'expectedRevision and operationId are required'});return;}try{const result=await changeHypothesis(db,{userId,recipientId:id},hypothesisId,action,expectedRevision!,operationId.trim());res.json({ok:true,operationId:result.operationId,revision:result.newRevision});}catch(error){const code=(error as Error).message;if(['NOT_FOUND','STALE','UNSUPPORTED','INVALID_EVIDENCE','OPERATION_MISMATCH'].includes(code)){res.status(code==='NOT_FOUND'?404:409).json({error:code});return;}throw error;}};
+return { timeline, edit, archive, restore, createInterpretation, changeInterpretation,changeHypothesisLifecycle };
 }
 
 /** Real route handlers share one scoped, serializable transaction. A response is
  * published only after commit; failed commits can never report a successful write.
  * Dependency decisions and writes serialize with source mutations in this scope. */
 export function createVersionedUnderstandingHandlers(database: UnderstandingDatabase, authenticate: Authenticate) {
- const names = ['timeline','edit','archive','restore','createInterpretation','changeInterpretation'] as const;
+ const names = ['timeline','edit','archive','restore','createInterpretation','changeInterpretation','changeHypothesisLifecycle'] as const;
  const handlers = {} as ReturnType<typeof buildHandlers>;
  for (const name of names) handlers[name] = async (req: Request, res: Response) => {
   const userId=authenticate(req,res); if(!userId)return;
@@ -743,12 +765,15 @@ export function createVersionedUnderstandingHandlers(database: UnderstandingData
    await database.transaction(async tx=>{
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}),hashtext(${req.params.id}))`);
     if(!await captureUnversionedAnswers(tx as unknown as UnderstandingDatabase,{userId,recipientId:req.params.id})){buffered.status(404).json({error:'Recipient not found'});return;}
+    await recomputeEvolvingUnderstanding(tx as unknown as UnderstandingDatabase,{userId,recipientId:req.params.id});
     await buildHandlers(tx as unknown as UnderstandingDatabase,authenticate)[name](req,buffered);
+    if(name!=='timeline'&&status<400)await recomputeEvolvingUnderstanding(tx as unknown as UnderstandingDatabase,{userId,recipientId:req.params.id});
    },{isolationLevel:'serializable'});
    res.status(status).json(body);
   } catch(error) {
    const code=(error as {code?:string;cause?:{code?:string}}).code??(error as {cause?:{code?:string}}).cause?.code;
    if(code==='40001'||code==='23505'||(error as Error).message==='STALE_OBSERVATION_VERSION') {res.status(409).json({error:'Understanding changed. Reload before trying again.'});return;}
+   if(name==='changeHypothesisLifecycle'){res.status(500).json({error:'Understanding transaction failed; no change was committed.'});return;}
    throw error;
   }
  };

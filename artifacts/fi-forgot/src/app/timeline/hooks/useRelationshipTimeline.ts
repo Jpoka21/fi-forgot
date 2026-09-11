@@ -1,4 +1,4 @@
-import {createInterpretationOperation,changeInterpretationOperation,changeAnswerOperation} from '../understandingTimelineOperations';
+import {createInterpretationOperation,changeInterpretationOperation,changeHypothesisOperation,changeAnswerOperation} from '../understandingTimelineOperations';
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { timelineService } from "@/app/api/services/timelineService";
@@ -178,6 +178,7 @@ export function useRelationshipTimeline({
     const outcome=await changeInterpretationOperation(recipientId,current!,action);
     return applyTimelineMutationOutcome("interpretation",outcome,{setItems,setMutationError,onConfirmed:()=>{}});
   },[items,recipientId]);
+  const handleHypothesisAction=useCallback(async(itemId:string,action:"confirm"|"disagree"|"withdraw"|"reverse")=>{const current=items.find(item=>item.id===itemId);if(current?.revision==null){setMutationError("This hypothesis has no current revision. Refresh before changing it.");return false;}const outcome=await changeHypothesisOperation(recipientId,current,action);return applyTimelineMutationOutcome("interpretation",outcome,{setItems,setMutationError,onConfirmed:()=>{}});},[items,recipientId]);
 
   const showEmpty = !isLoading && !error && filteredItems.length === 0;
   const showResults = !isLoading && !error && filteredItems.length > 0;
@@ -210,6 +211,7 @@ export function useRelationshipTimeline({
     restoreItem: handleRestore,
     createInterpretation:handleCreateInterpretation,
     changeInterpretation:handleInterpretationAction,
+    changeHypothesis:handleHypothesisAction,
   };
 }
 

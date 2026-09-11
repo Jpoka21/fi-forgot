@@ -726,6 +726,7 @@ router.patch("/v2/recipients/:id/answers/:answerId/restore", understanding.resto
 router.post("/v2/recipients/:id/interpretations", understanding.createInterpretation);
 
 router.patch("/v2/recipients/:id/interpretations/:interpretationId/:action", understanding.changeInterpretation);
+router.patch("/v2/recipients/:id/hypotheses/:hypothesisId/:action", understanding.changeHypothesisLifecycle);
 
 // ── Get all fresh updates for a recipient ─────────────────────────────────────
 // Returns answered fresh updates (newest first) + per-category skip stats.

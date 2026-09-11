@@ -125,6 +125,7 @@ export function FiRelationshipTimelineView({
             onArchive={timeline.setConfirmArchiveId}
             onRestore={(id) => void timeline.restoreItem(id)}
             onInterpretationAction={(id,action)=>void timeline.changeInterpretation(id,action)}
+            onHypothesisAction={(id,action)=>void timeline.changeHypothesis(id,action)}
             onSaveEdit={timeline.saveEdit}
             onCancelEdit={() => timeline.setEditingId(null)}
           />

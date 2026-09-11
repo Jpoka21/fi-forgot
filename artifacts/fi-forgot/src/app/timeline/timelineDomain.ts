@@ -14,6 +14,7 @@ export const fiTimelineItemTypes = [
   "unknown",
   "observation_version",
   "interpretation",
+  "hypothesis",
 ] as const;
 
 export type FiTimelineItemType = (typeof fiTimelineItemTypes)[number];
@@ -58,6 +59,14 @@ export interface FiTimelineItem {
   revision: number | null;
   lastOperationId: string | null;
   actionHistory: Array<{operationId:string;action:string;actorUserId:string;actedAt:string;expectedRevision:number;newRevision:number}>;
+  evidenceState: string | null;
+  explanation: string | null;
+  uncertainty: string | null;
+  confidence: string | null;
+  support: Array<{observationVersionId:string|null;interpretationId:string|null;interpretationRevision:number|null}>;
+  conflict: Array<{observationVersionId:string|null;interpretationId:string|null;interpretationRevision:number|null}>;
+  evidenceLinks: Array<{observationVersionId:string|null;interpretationId:string|null;interpretationRevision:number|null;polarity:string}>;
+  responseState: "none"|"confirmed"|"disagreed"|"withdrawn";
 }
 
 export interface FiTimelineMonthGroup {
@@ -82,6 +91,7 @@ export const timelineTypeLabels: Record<FiTimelineItemType, string> = {
   unknown: "Unclassified source",
   observation_version: "Observation version",
   interpretation: "Uncertain interpretation",
+  hypothesis: "Brain hypothesis",
 };
 
 export const timelineInfluencesCardTypes = new Set<FiTimelineItemType>([
@@ -145,6 +155,14 @@ export function normalizeTimelineItem(value: unknown): FiTimelineItem | null {
     revision: typeof value.revision==="number"?value.revision:null,
     lastOperationId:typeof value.lastOperationId==="string"?value.lastOperationId:null,
     actionHistory:Array.isArray(value.actionHistory)?value.actionHistory.filter((entry):entry is {operationId:string;action:string;actorUserId:string;actedAt:string;expectedRevision:number;newRevision:number}=>Boolean(entry)&&typeof entry==="object"&&typeof (entry as {operationId?:unknown}).operationId==="string"&&typeof (entry as {action?:unknown}).action==="string"&&typeof (entry as {actorUserId?:unknown}).actorUserId==="string"&&typeof (entry as {actedAt?:unknown}).actedAt==="string"&&typeof (entry as {expectedRevision?:unknown}).expectedRevision==="number"&&typeof (entry as {newRevision?:unknown}).newRevision==="number"):[],
+    evidenceState:typeof value.evidenceState==='string'?value.evidenceState:null,
+    explanation:typeof value.explanation==='string'?value.explanation:null,
+    uncertainty:typeof value.uncertainty==='string'?value.uncertainty:null,
+    confidence:typeof value.confidence==='string'?value.confidence:null,
+    support:Array.isArray(value.support)?value.support as FiTimelineItem['support']:[],
+    conflict:Array.isArray(value.conflict)?value.conflict as FiTimelineItem['conflict']:[],
+    evidenceLinks:Array.isArray(value.evidenceLinks)?value.evidenceLinks as FiTimelineItem['evidenceLinks']:[],
+    responseState:value.responseState==='confirmed'||value.responseState==='disagreed'||value.responseState==='withdrawn'?value.responseState:'none',
   };
 }
 

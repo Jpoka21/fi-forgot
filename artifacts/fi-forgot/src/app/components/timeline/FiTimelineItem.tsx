@@ -34,6 +34,7 @@ export interface FiTimelineItemProps {
   onArchive?: (id: string) => void;
   onRestore?: (id: string) => void;
   onInterpretationAction?: (id:string,action:"confirm"|"withdraw"|"reject"|"archive"|"restore")=>void;
+  onHypothesisAction?: (id:string,action:"confirm"|"disagree"|"withdraw"|"reverse")=>void;
   onSaveEdit?: (id: string, value: string) => Promise<void>;
   onCancelEdit?: () => void;
 }
@@ -46,6 +47,7 @@ export function FiTimelineItem({
   onArchive,
   onRestore,
   onInterpretationAction,
+  onHypothesisAction,
   onSaveEdit,
   onCancelEdit,
 }: FiTimelineItemProps) {
@@ -77,9 +79,11 @@ export function FiTimelineItem({
           ) : null}
         </div>
 
-        {item.uncertain ? <p className="fi-timeline-item__sub-label">User-authored interpretation - uncertain{item.confirmedAt && !item.endorsementWithdrawnAt ? " - endorsed by you" : ""}</p> : null}
+        {item.type==="interpretation" ? <p className="fi-timeline-item__sub-label">User-authored interpretation - uncertain{item.confirmedAt && !item.endorsementWithdrawnAt ? " - endorsed by you" : ""}</p> : null}
+        {item.type==="hypothesis" ? <p className="fi-timeline-item__sub-label">Server-owned Brain hypothesis - uncertain - your response: {item.responseState}</p> : null}
         {item.lifecycleState ? <p className="fi-timeline-item__sub-label">Status: {item.lifecycleState.replace(/_/g, " ")}</p> : null}
         {item.dependencyVersionIds.length ? <p className="fi-timeline-item__sub-label">Based on exact observation {item.dependencyVersionIds.join(", ")}</p> : null}
+        {item.type==="hypothesis"?<div><p>{item.explanation}</p><p>Uncertainty: {item.uncertainty}</p><p>Evidence: {item.evidenceState}; independent support {item.support.length}; conflict {item.conflict.length}; confidence {item.confidence??"unknown"}.</p>{item.evidenceLinks.some(link=>link.interpretationId)?<p>Exact interpretation revisions: {item.evidenceLinks.filter(link=>link.interpretationId).map(link=>`${link.interpretationId}@${link.interpretationRevision}`).join(", ")}</p>:null}</div>:null}
 
         {isEditing ? (
           <FiTimelineInlineEdit
@@ -108,6 +112,10 @@ export function FiTimelineItem({
             {item.type==="interpretation"&&!item.confirmedAt?<FiButton variant="ghost" size="sm" onClick={()=>onInterpretationAction?.(item.id,"confirm")}>Endorse interpretation</FiButton>:null}
             {item.type==="interpretation"&&item.confirmedAt&&!item.endorsementWithdrawnAt?<FiButton variant="ghost" size="sm" onClick={()=>onInterpretationAction?.(item.id,"withdraw")}>Withdraw endorsement</FiButton>:null}
             {item.type==="interpretation"?<FiButton variant="ghost" size="sm" onClick={()=>onInterpretationAction?.(item.id,"reject")}>Reject interpretation</FiButton>:null}
+            {item.type==="hypothesis"&&item.responseState==="none"?<><FiButton variant="ghost" size="sm" onClick={()=>onHypothesisAction?.(item.id,"confirm")}>Confirm as helpful</FiButton><FiButton variant="ghost" size="sm" onClick={()=>onHypothesisAction?.(item.id,"disagree")}>Disagree</FiButton></>:null}
+            {item.type==="hypothesis"&&item.responseState==="confirmed"?<FiButton variant="ghost" size="sm" onClick={()=>onHypothesisAction?.(item.id,"withdraw")}>Withdraw response</FiButton>:null}
+            {item.type==="hypothesis"&&item.responseState==="disagreed"?<><FiButton variant="ghost" size="sm" onClick={()=>onHypothesisAction?.(item.id,"withdraw")}>Withdraw response</FiButton>{item.evidenceState!=="unknown"?<FiButton variant="ghost" size="sm" onClick={()=>onHypothesisAction?.(item.id,"reverse")}>Deliberately reverse</FiButton>:null}</>:null}
+            {item.type==="hypothesis"&&item.responseState==="withdrawn"&&item.evidenceState!=="unknown"?<FiButton variant="ghost" size="sm" onClick={()=>onHypothesisAction?.(item.id,"reverse")}>Deliberately reverse withdrawal</FiButton>:null}
           </div>
         ) : null}
 

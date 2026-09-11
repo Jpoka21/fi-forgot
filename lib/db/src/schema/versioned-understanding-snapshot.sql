@@ -10,3 +10,6 @@ user_id,recipient_id,source_record_id,id,version FROM relationship_observation_v
 WHERE source_record_id IS NOT NULL
 ORDER BY user_id,recipient_id,source_record_id,version DESC
 ON CONFLICT (user_id,recipient_id,source_record_id) DO NOTHING;
+
+-- No interpretation revisions or hypotheses are backfilled. Deploy the new
+-- tables empty; production capture begins only after the migration is active.

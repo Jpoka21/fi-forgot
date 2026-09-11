@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {deriveCommunicationPreferenceHypothesis,EVOLVING_UNDERSTANDING_POLICY_VERSION} from '../brain/evolving-understanding';
+const report={sourceKind:'user_report',semanticClassification:'reported_information'};const support={observationVersionId:'v1',text:'They prefer a phone call.',...report};
+const interpretation={observationVersionId:'v1',interpretationId:'i1',interpretationRevision:2,text:'Phone works best.'};
+let result=deriveCommunicationPreferenceHypothesis([support,interpretation])!;
+assert.equal(result.support.length,1,'shared observation is one independent support');
+assert.equal(result.evidenceLinks.length,2,'interpretation provenance is retained without adding corroboration');assert.equal(result.evidenceLinks.find(link=>link.interpretationId==='i1')?.interpretationRevision,2);
+assert.equal(result.confidence,null);assert.equal(result.evidenceState,'support');
+const stronger=deriveCommunicationPreferenceHypothesis([support,{observationVersionId:'v2',text:'They prefer email too.',...report}])!;
+assert.equal(stronger.support.length,2);assert.notEqual(stronger.fingerprint,result.fingerprint);
+result=deriveCommunicationPreferenceHypothesis([support,{observationVersionId:'v3',text:'They do not like phone calls.',...report}])!;
+assert.equal(result.evidenceState,'conflict');assert.equal(result.conflict.length,1);
+assert.equal(deriveCommunicationPreferenceHypothesis([{observationVersionId:'v4',text:'Enjoys gardening.',...report}]),null);
+for(const text of ['I lost my phone yesterday.','Maybe we could call someone.','My coworker prefers email.','The book says "I prefer phone calls".'])assert.equal(deriveCommunicationPreferenceHypothesis([{observationVersionId:'abstain',text,...report}]),null,text);
+assert.equal(deriveCommunicationPreferenceHypothesis([{observationVersionId:'generated',text:'They prefer email.',sourceKind:'generated_card_text',semanticClassification:'generated_content'}]),null);
+assert.equal(EVOLVING_UNDERSTANDING_POLICY_VERSION,'3');
+console.log('evolving understanding Brain judgment passed');
+
+for(const text of ['The book says "they prefer phone calls".','If they prefer email, we could try it.','They prefer gardening, not phone calls.','They use phone calls.','They prefer phone calls if they feel well.','Their friend says they prefer email.'])assert.equal(deriveCommunicationPreferenceHypothesis([{observationVersionId:'abstain-complex',text,...report}]),null,text);
+const mixed=deriveCommunicationPreferenceHypothesis([{observationVersionId:'mixed',text:'They prefer texts. They do not like phone calls.',...report}])!;assert.equal(mixed.evidenceState,'conflict');assert.equal(mixed.evidenceLinks.length,2);assert.equal(mixed.confidence,null);

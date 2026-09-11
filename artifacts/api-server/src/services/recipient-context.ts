@@ -1,5 +1,6 @@
 import { sql, inArray } from 'drizzle-orm';
 import { projectActiveUnderstanding } from './versioned-understanding';
+import {loadActiveHypotheses,recomputeEvolvingUnderstanding} from './evolving-understanding-repository';
 import { captureUnversionedAnswers, type UnderstandingDatabase } from './versioned-understanding-repository';
 /**
  * Recipient Context Assembly Service
@@ -202,7 +203,7 @@ export interface RecipientContext {
   writingHistory: WritingHistoryInventory;
   relationshipTimeline: RelationshipTimelineInventory;
   relationshipEvidence?: RelationshipMemoryEvidence[];
-  activeUnderstanding?: ReturnType<typeof projectActiveUnderstanding>;
+  activeUnderstanding?: ReturnType<typeof projectActiveUnderstanding>&{hypotheses:Awaited<ReturnType<typeof loadActiveHypotheses>>};
   briefingSummary: BriefingSummary;
   profileCompleteness: ProfileCompleteness;
   freshUpdates: FreshUpdate[];
@@ -588,9 +589,11 @@ export async function assembleRecipientContext(
     relationshipInterpretationsTable,
     relationshipInterpretationDependenciesTable,
   } = await import("@workspace/db");
-  const [recipientRows, profileRows, answerRows, cardRows, observationRows, interpretationRows, dependencyRows] = await db.transaction(async tx=>{
+  const [recipientRows, profileRows, answerRows, cardRows, observationRows, interpretationRows, dependencyRows,hypothesisRows] = await db.transaction(async tx=>{
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}),hashtext(${recipientId}))`);
     await captureUnversionedAnswers(tx as unknown as UnderstandingDatabase,{userId,recipientId});
+    await recomputeEvolvingUnderstanding(tx as unknown as UnderstandingDatabase,{userId,recipientId});
+    const hypotheses=await loadActiveHypotheses(tx as unknown as UnderstandingDatabase,{userId,recipientId});
     return Promise.all([
     tx
       .select()
@@ -627,6 +630,7 @@ export async function assembleRecipientContext(
     tx.select().from(relationshipObservationVersionsTable).where(and(eq(relationshipObservationVersionsTable.userId,userId),eq(relationshipObservationVersionsTable.recipientId,recipientId))),
     tx.select().from(relationshipInterpretationsTable).where(and(eq(relationshipInterpretationsTable.userId,userId),eq(relationshipInterpretationsTable.recipientId,recipientId),eq(relationshipInterpretationsTable.lifecycleState,"active"),isNull(relationshipInterpretationsTable.endorsementWithdrawnAt))),
     tx.select().from(relationshipInterpretationDependenciesTable).where(inArray(relationshipInterpretationDependenciesTable.interpretationId,tx.select({id:relationshipInterpretationsTable.id}).from(relationshipInterpretationsTable).where(and(eq(relationshipInterpretationsTable.userId,userId),eq(relationshipInterpretationsTable.recipientId,recipientId))))),
+    hypotheses,
   ]);
 
   },{isolationLevel:'serializable'});
@@ -663,7 +667,7 @@ export async function assembleRecipientContext(
       { kind: "anniversary", value: recipient.anniversary },
     ] : [],
   });
-  const activeUnderstanding=recipient?projectActiveUnderstanding(observationRows,interpretationRows,dependencyRows,{userId,recipientId}):{observations:[],interpretations:[]};
+  const activeUnderstanding=recipient?{...projectActiveUnderstanding(observationRows,interpretationRows,dependencyRows,{userId,recipientId}),hypotheses:hypothesisRows}:{observations:[],interpretations:[],hypotheses:[]};
   // Temporary Brain compatibility view; all semantics come from the canonical projection.
   const relationshipTimeline = buildRelationshipTimelineInventory(answerRows, cardRows);
   const briefingSummary = buildBriefingSummary(regularAnswerRows);
