@@ -128,5 +128,6 @@ export function buildRelationshipOpportunity(
           href: resolveProductBrainActionHref(decision, recipient.recipientId),
           priority: decision.actionPlan.priority,
         },
+    feedback: { history: [], active: [], available: true },
   };
 }

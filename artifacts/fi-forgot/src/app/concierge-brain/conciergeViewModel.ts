@@ -33,4 +33,6 @@ export interface ConciergeWorkspaceViewModel {
   opportunities: RelationshipOpportunityViewModel[];
   recommendations: ConciergeRecommendationViewModel[];
   insights: ConciergeInsightViewModel[];
+  feedbackHistory: import("./conciergeWorkspaceTypes").OpportunityFeedbackEvent[];
+  feedbackAvailable: boolean;
 }

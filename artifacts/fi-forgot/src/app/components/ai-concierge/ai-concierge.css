@@ -252,6 +252,10 @@
   flex-wrap: wrap;
 }
 
+.fi-ai-concierge-page__feedback { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.fi-ai-concierge-page__feedback button { border: 1px solid var(--fi-color-border, #e8e0d8); border-radius: 999px; background: white; padding: 0.3rem 0.6rem; cursor: pointer; }
+.fi-ai-concierge-page__feedback label { display: flex; gap: 0.35rem; align-items: center; font-size: 0.8rem; }
+
 @media (prefers-reduced-motion: reduce) {
   .fi-ai-concierge-page__tab,
   .fi-ai-concierge-page__prompt,

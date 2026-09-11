@@ -41,6 +41,7 @@ export function mapRelationshipOpportunityViewModel(
     presentation: { ...opportunity.presentation },
     restraint: { ...opportunity.restraint },
     recommendation: opportunity.recommendation ? { ...opportunity.recommendation } : null,
+    feedback: opportunity.feedback ? { history: opportunity.feedback.history.map(item => ({ ...item })), active: opportunity.feedback.active.map(item => ({ ...item })), available: opportunity.feedback.available } : { history: [], active: [], available: true },
   };
 }
 
@@ -78,6 +79,8 @@ export function mapConciergeWorkspaceViewModel(
     opportunities: response.opportunities.map(mapRelationshipOpportunityViewModel),
     recommendations: response.recommendations.map(mapConciergeRecommendationViewModel),
     insights: response.insights.map(mapConciergeInsightViewModel),
+    feedbackHistory: response.opportunities.flatMap(item => item.feedback?.history ?? []).filter((item, index, all) => all.findIndex(candidate => candidate.id === item.id) === index).map(item => ({ ...item })),
+    feedbackAvailable: response.opportunities.every(item => item.feedback?.available ?? true),
   };
 }
 
@@ -116,10 +119,14 @@ export function adaptConciergeWorkspaceViewModel(
   opportunities: RelationshipOpportunityViewModel[];
   recommendations: FiAiRecommendation[];
   insights: ConciergeRelationshipInsight[];
+  feedbackHistory: import("./conciergeWorkspaceTypes").OpportunityFeedbackEvent[];
+  feedbackAvailable: boolean;
 } {
   return {
     opportunities: viewModel.opportunities,
     recommendations: viewModel.recommendations.map(adaptConciergeRecommendationToFiAiRecommendation),
     insights: viewModel.insights.map(adaptConciergeInsightToRelationshipInsight),
+    feedbackHistory: viewModel.feedbackHistory,
+    feedbackAvailable: viewModel.feedbackAvailable,
   };
 }

@@ -22,6 +22,7 @@ import {
   type OpportunityTemporalHistoryRepository,
 } from "../temporal";
 import { logger } from "../../lib/logger";
+import { activeFeedback, type OpportunityFeedbackEvent, type OpportunityFeedbackRepository } from "../feedback";
 
 export interface ConciergeRecipientInput {
   recipientId: string;
@@ -39,6 +40,23 @@ export interface BuildConciergeWorkspaceOptions {
   runBrain: RunBrainForRecipient;
   generatedAt?: string;
   temporalHistoryRepository?: OpportunityTemporalHistoryRepository;
+  feedbackRepository?: OpportunityFeedbackRepository;
+}
+
+function applyFeedback(opportunity: ReturnType<typeof buildRelationshipOpportunity>, history: OpportunityFeedbackEvent[], available: boolean, generatedAt: string) {
+  const applies = (event: OpportunityFeedbackEvent) => event.recipientId === opportunity.recipient.id && (event.scope === "recipient_family"
+    ? event.family === opportunity.provenance.sourceId
+    : event.opportunityId === opportunity.id && event.occurrenceCycleId === (opportunity.timing.temporal?.occurrenceCycleId ?? null));
+  opportunity.feedback = { history, active: available ? activeFeedback(history).filter(applies) : [], available };
+  const restraining = opportunity.feedback.active.find(event => {
+    if (event.type === "not_now" || event.type === "too_early") return !event.notBefore || event.notBefore > generatedAt.slice(0, 10);
+    return ["not_helpful", "too_late", "already_handled", "do_not_remind", "less_often"].includes(event.type);
+  });
+  if (!available || restraining) {
+    opportunity.presentation = { recommendationEligible: false, insightEligible: false };
+    opportunity.restraint = { restrained: true, reason: available ? `explicit_feedback_${restraining!.type}` : "feedback_history_unavailable" };
+    opportunity.recommendation = null;
+  }
 }
 
 function dedupeDeliveredConciergeOpportunities(
@@ -60,6 +78,9 @@ function dedupeDeliveredConciergeOpportunities(
 
 export async function buildConciergeWorkspace(options: BuildConciergeWorkspaceOptions): Promise<ConciergeWorkspaceResponse> {
   const { userId, recipients, runBrain, generatedAt = new Date().toISOString(), temporalHistoryRepository = createPgOpportunityTemporalHistoryRepository() } = options;
+  // Persistence is explicit at the production boundary. Pure builder fixtures remain
+  // database-neutral; the owned route always supplies PostgreSQL and therefore fails closed.
+  const feedbackRepository = options.feedbackRepository ?? { list: async () => [], append: async () => { throw new Error("Feedback repository not configured"); } } as OpportunityFeedbackRepository;
   const executions = new Map<string, BrainExecutionResult>();
   const decisions = await collectProductBrainDecisions({ userId, recipients, runBrain: async (id, owner) => { const result = await runBrain(id, owner); executions.set(id, result); return result; } });
   let retainedRecords: Awaited<ReturnType<OpportunityTemporalHistoryRepository['listRetained']>> = [];
@@ -89,7 +110,7 @@ export async function buildConciergeWorkspace(options: BuildConciergeWorkspaceOp
     const identity = execution.loadResult.relationshipContext.identity;
     const continuing = execution.extraction.availableSignals.some(signal => signal.source === prior?.evidence.source && signal.label === prior?.evidence.dateLabel && signal.value === prior?.evidence.dateValue);
     const temporal = evaluateOpportunityTemporal({ family: prior?.effectiveDate ? 'one_time' : 'unsupported', dateValue: prior?.evidence.dateValue ?? null, dateLabel: prior?.evidence.dateLabel ?? null, evaluatedAt: generatedAt, evidence: prior?.evidence ?? retained.opportunity.timing.temporal!.evidence, previousHistory: retained.history, evidenceStatus: identity?.archived ? 'archived' : identity?.active === false ? 'invalidated' : continuing ? undefined : 'withdrawn', fixedOccurrenceCycleId: prior?.occurrenceCycleId ?? undefined, fixedOccurrenceDate: prior?.effectiveDate ?? undefined });
-    evaluated.set(retained.opportunity.id, { ...retained.opportunity, timing: { observedAt: retained.opportunity.timing.observedAt, temporal }, presentation: { recommendationEligible: false, insightEligible: false }, restraint: { restrained: true, reason: temporal.restraintReason ?? 'not_current_brain_decision' }, recommendation: null });
+    evaluated.set(retained.opportunity.id, { ...retained.opportunity, timing: { observedAt: retained.opportunity.timing.observedAt, temporal }, presentation: { recommendationEligible: false, insightEligible: false }, restraint: { restrained: true, reason: temporal.restraintReason ?? 'not_current_brain_decision' }, recommendation: null, feedback: retained.opportunity.feedback ?? { history: [], active: [], available: true } });
   }
   const suppressForPersistence = (opportunity: ReturnType<typeof buildRelationshipOpportunity>, status: 'unavailable' | 'failed') => {
     const temporal = opportunity.timing.temporal;
@@ -112,6 +133,10 @@ export async function buildConciergeWorkspace(options: BuildConciergeWorkspaceOp
     try { await temporalHistoryRepository.appendChange({ userId, opportunityId: id, change: latest, evidence: temporal.evidence, opportunity }); }
     catch (error) { suppressForPersistence(opportunity, 'failed'); logger.warn({ err: error, userId, opportunityId: id }, 'Opportunity history append failed'); }
   }));
+  let feedbackHistory: OpportunityFeedbackEvent[] = [], feedbackAvailable = true;
+  try { feedbackHistory = await feedbackRepository.list({ ownerId: userId, recipientIds: recipients.map(r => r.recipientId) }); }
+  catch (error) { feedbackAvailable = false; logger.warn({ err: error, userId }, "Opportunity feedback listing unavailable"); }
+  for (const opportunity of evaluated.values()) applyFeedback(opportunity, feedbackHistory.filter(event => event.ownerId === userId && event.recipientId === opportunity.recipient.id), feedbackAvailable, generatedAt);
   return orchestrateProductBrainFatigue({ userId, generatedAt, decisions, recipients, buildFromVisible: (visible, buildGeneratedAt) => {
     const recommendationsInput = visible.slice(0, CONCIERGE_RECOMMENDATIONS_MAX);
     const insightsInput = visible.slice(0, CONCIERGE_INSIGHTS_MAX);

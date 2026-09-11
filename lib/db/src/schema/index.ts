@@ -42,3 +42,4 @@ export * from "./brain-opportunity-exposure-events";
 export * from "./brain-outcome-events";
 export * from "./relationship-understanding";
 export * from "./opportunity-temporal";
+export * from "./opportunity-feedback";

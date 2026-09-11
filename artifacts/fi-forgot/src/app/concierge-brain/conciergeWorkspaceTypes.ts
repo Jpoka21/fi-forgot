@@ -34,6 +34,14 @@ export interface ConciergeInsight {
 export type OpportunityEvidenceClassification = "observation" | "direct_fact" | "inference";
 export type OpportunityTimingState = "valid_now" | "premature" | "approaching_relevance" | "stale" | "expired" | "unknown";
 export type OpportunityDecay = "none" | "watch" | "diminished" | "exhausted" | "unknown";
+export type OpportunityFeedbackType = "helpful" | "not_helpful" | "not_now" | "too_early" | "too_late" | "already_handled" | "do_not_remind" | "more_often" | "less_often";
+export interface OpportunityFeedbackEvent {
+  id: string; lineageId: string; version: number; ownerId: string; recipientId: string; opportunityId: string;
+  occurrenceCycleId: string | null; relationshipId: string | null; family: string; action: "set" | "withdraw";
+  type: OpportunityFeedbackType; scope: "occurrence" | "recipient_family"; notBefore: string | null;
+  timingProvenance: "qualitative" | "user_not_before"; provenance: "explicit_owner_feedback"; receivedAt: string;
+  supersedesId: string | null; withdrawnEventId: string | null; idempotencyKey: string; active: boolean;
+}
 
 export interface OpportunityTemporalState {
   persistence: "available" | "unavailable" | "failed";
@@ -77,6 +85,7 @@ export interface RelationshipOpportunity {
   presentation: { recommendationEligible: boolean; insightEligible: boolean };
   restraint: { restrained: boolean; reason: string | null };
   recommendation: { label: string; href: string; priority: ActionPriority } | null;
+  feedback?: { history: OpportunityFeedbackEvent[]; active: OpportunityFeedbackEvent[]; available: boolean };
 }
 
 export interface ConciergeWorkspaceResponse {

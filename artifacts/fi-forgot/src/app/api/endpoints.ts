@@ -68,6 +68,7 @@ export const API_ENDPOINTS = {
   },
   concierge: {
     workspace: "/api/v2/concierge",
+    opportunityFeedback: "/api/v2/concierge/opportunity-feedback",
     sampleCardMessage: "/api/sample-card-message",
     sampleCards: "/api/sample-cards",
     demoPreview: (id: string) => `/api/demo-preview/${id}`,

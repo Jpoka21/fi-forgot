@@ -18,6 +18,8 @@ export interface ConciergeWorkspaceDisplayModel {
   opportunities: RelationshipOpportunityViewModel[];
   recommendations: FiAiRecommendation[];
   insights: ConciergeRelationshipInsight[];
+  feedbackHistory: import("./conciergeWorkspaceTypes").OpportunityFeedbackEvent[];
+  feedbackAvailable: boolean;
 }
 
 export type LoadLegacyConciergeWorkspace = (
@@ -40,7 +42,7 @@ export function loadLegacyConciergeWorkspace(
   return {
     opportunities: [],
     recommendations: loadAiRecommendations(userEmail),
-    insights: buildRelationshipInsights(),
+    insights: buildRelationshipInsights(), feedbackHistory: [], feedbackAvailable: false,
   };
 }
 
@@ -58,7 +60,7 @@ export async function buildConciergeWorkspaceForDisplay(
       if (import.meta.env?.DEV) {
         console.error(error);
       }
-      return { opportunities: [], recommendations: [], insights: [] };
+      return { opportunities: [], recommendations: [], insights: [], feedbackHistory: [], feedbackAvailable: false };
     }
   }
 
@@ -70,7 +72,7 @@ export async function buildConciergeWorkspaceForDisplay(
       if (import.meta.env?.DEV) {
         console.error("Failed to load Concierge workspace", result.error);
       }
-      return { opportunities: [], recommendations: [], insights: [] };
+      throw result.error ?? new Error("Failed to load Concierge workspace");
     }
 
     const viewModel = mapConciergeWorkspaceViewModel(result.data);
@@ -79,6 +81,6 @@ export async function buildConciergeWorkspaceForDisplay(
     if (import.meta.env?.DEV) {
       console.error(error);
     }
-    return { opportunities: [], recommendations: [], insights: [] };
+    throw error;
   }
 }

@@ -1,5 +1,6 @@
 import type { ActionPriority } from "../action/actionPlanTypes";
 import type { OpportunityTemporalState } from "../temporal";
+import type { OpportunityFeedbackEvent } from "../feedback";
 
 export const RELATIONSHIP_OPPORTUNITY_VERSION = 1 as const;
 
@@ -48,4 +49,5 @@ export interface RelationshipOpportunity {
   };
   restraint: { restrained: boolean; reason: string | null };
   recommendation: RelationshipOpportunityRecommendation | null;
+  feedback: { history: OpportunityFeedbackEvent[]; active: OpportunityFeedbackEvent[]; available: boolean };
 }
