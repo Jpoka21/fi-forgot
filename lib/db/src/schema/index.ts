@@ -44,3 +44,4 @@ export * from "./relationship-understanding";
 export * from "./opportunity-temporal";
 export * from "./opportunity-feedback";
 export * from "./opportunity-follow-through";
+export * from "../qualification/manifest";

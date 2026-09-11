@@ -7,7 +7,7 @@ CREATE TABLE relationship_hypothesis_versions (id text PRIMARY KEY,hypothesis_id
 CREATE UNIQUE INDEX relationship_hypothesis_version_uq ON relationship_hypothesis_versions(hypothesis_id,version);
 CREATE TABLE relationship_hypothesis_heads (hypothesis_id text PRIMARY KEY,user_id text NOT NULL,recipient_id text NOT NULL,current_version_id text NOT NULL,revision integer NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE relationship_hypothesis_evidence (hypothesis_version_id text NOT NULL,observation_version_id text,interpretation_id text,interpretation_revision integer,polarity text NOT NULL);
-CREATE UNIQUE INDEX relationship_hypothesis_evidence_uq ON relationship_hypothesis_evidence(hypothesis_version_id,observation_version_id,interpretation_id,interpretation_revision,polarity) NULLS NOT DISTINCT;
+ALTER TABLE relationship_hypothesis_evidence ADD CONSTRAINT relationship_hypothesis_evidence_uq UNIQUE NULLS NOT DISTINCT (hypothesis_version_id,observation_version_id,interpretation_id,interpretation_revision,polarity);
 CREATE TABLE relationship_hypothesis_actions (id text PRIMARY KEY,hypothesis_id text NOT NULL,hypothesis_version_id text NOT NULL,user_id text NOT NULL,recipient_id text NOT NULL,action text NOT NULL,response_state text NOT NULL,operation_id text NOT NULL,expected_revision integer NOT NULL,new_revision integer NOT NULL,acted_at timestamptz NOT NULL DEFAULT now(),actor_user_id text NOT NULL);
 CREATE UNIQUE INDEX relationship_hypothesis_operation_uq ON relationship_hypothesis_actions(user_id,recipient_id,operation_id);
 COMMIT;

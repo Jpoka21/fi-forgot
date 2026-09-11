@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import{spawnSync}from"node:child_process";import{resolve}from"node:path";
+const modeUrl=new URL("../../../artifacts/api-server/src/qualification/mode.ts",import.meta.url).href;
+const {assertQualificationApiEnvironment,blockedQualificationAdapter,denyExternalUrl,isBrainQualificationMode,installQualificationContainment}=await import(modeUrl);
+assert.equal(isBrainQualificationMode({}),false);
+assert.throws(()=>assertQualificationApiEnvironment({BRAIN_QUALIFICATION_MODE:"true",HOST:"127.0.0.1",PORT:"8080"}),/reviewed OS boundary/);
+assert.doesNotThrow(()=>assertQualificationApiEnvironment({BRAIN_QUALIFICATION_MODE:"true",HOST:"127.0.0.1",PORT:"8080",BRAIN_QUALIFICATION_OS_NETWORK_BOUNDARY:"reviewed-loopback-only"}));
+assert.throws(()=>denyExternalUrl("https://example.com"),/denied outbound/);assert.throws(()=>blockedQualificationAdapter.connect(),/raw sockets/);assert.throws(()=>blockedQualificationAdapter.spawn(),/subprocesses/);await assert.rejects(blockedQualificationAdapter.fetch("http://127.0.0.1:8080"),/real fetch/);
+let installedFetch:any,httpGuard:any,socketGuard:any,subprocessGuard:any;installQualificationContainment({setFetch:(x:any)=>installedFetch=x,setHttpGuard:(x:any)=>httpGuard=x,setSocketGuard:(x:any)=>socketGuard=x,setSubprocessGuard:(x:any)=>subprocessGuard=x},{BRAIN_QUALIFICATION_MODE:"true"});
+assert.equal(typeof installedFetch,"function");assert.throws(()=>httpGuard("https://example.com"),/denied/);assert.doesNotThrow(()=>socketGuard("127.0.0.1",55432));assert.throws(()=>socketGuard("8.8.8.8",443),/socket denied/);assert.throws(()=>subprocessGuard(),/subprocess denied/);
+const child=spawnSync(process.execPath,["--experimental-strip-types",resolve(import.meta.dirname,"test-installed-containment-child.ts")],{encoding:"utf8",env:{...process.env,DATABASE_URL:""},shell:false});assert.equal(child.status,0,child.stderr);assert.match(child.stdout,/installed Node transports denied/);
+console.log("qualification containment integration test: PASS (installed controlled transports; no connection attempted)");

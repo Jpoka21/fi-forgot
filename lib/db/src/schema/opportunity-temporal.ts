@@ -23,6 +23,7 @@ export const opportunityTemporalHistoryTable = pgTable("opportunity_temporal_his
 }, (table) => ({
   immutableChange: uniqueIndex("opportunity_temporal_history_change_uq").on(table.id),
   opportunityTimeline: index("opportunity_temporal_history_timeline_idx").on(table.userId, table.opportunityId, table.evaluatedAt),
+  recipientTimeline: index("opportunity_temporal_history_recipient_idx").on(table.userId, table.recipientId, table.evaluatedAt),
 }));
 
 export type OpportunityTemporalHistoryRow = typeof opportunityTemporalHistoryTable.$inferSelect;

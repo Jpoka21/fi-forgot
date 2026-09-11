@@ -1,0 +1,27 @@
+/** Offline serialization comparison, never SQL execution or pool initialization. */
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+const root=resolve(import.meta.dirname,'../../..');
+const schema=await import(new URL('../../../lib/db/src/schema/index.ts',import.meta.url).href);
+const requireLocal=createRequire(resolve(root,'lib/db/package.json'));
+const {generateDrizzleJson,generateMigration}=requireLocal('drizzle-kit/api');
+const empty=generateDrizzleJson({});empty.id='00000000-0000-0000-0000-000000000000';
+const actual=generateDrizzleJson(schema,empty.id);actual.id='00000000-0000-0000-0000-000000000001';actual.prevId=empty.id;
+const directory=resolve(root,'docs/brain-qualification-preparation/bootstrap');
+assert.deepEqual(JSON.parse(JSON.stringify(actual)),JSON.parse(readFileSync(resolve(directory,'schema-snapshot.json'),'utf8')),'Committed snapshot must match the complete current exported schema');
+const statements:string[]=await generateMigration(empty,actual);
+const expected='-- Offline full-current PostgreSQL 16 bootstrap; NEVER applied during preparation.\n-- Fresh empty qualification database only; do not follow with duplicate incrementals.\nBEGIN;\n'+statements.join('\n')+'\nCOMMIT;\n';
+assert.equal(readFileSync(resolve(directory,'0000-current.sql'),'utf8').replaceAll('\r\n','\n'),expected,'Baseline must reproduce all current schema objects');
+const evidence=actual.tables['public.relationship_hypothesis_evidence'];
+assert.deepEqual(evidence.uniqueConstraints.relationship_hypothesis_evidence_uq,{name:'relationship_hypothesis_evidence_uq',nullsNotDistinct:true,columns:['hypothesis_version_id','observation_version_id','interpretation_id','interpretation_revision','polarity']});
+for(const name of ['observation_version_id','interpretation_id','interpretation_revision'])assert.equal(evidence.columns[name].notNull,false);
+const follow=actual.tables['public.opportunity_follow_through_events'];
+assert.equal(Object.keys(follow.checkConstraints).length,5);
+const normalize=(value:string)=>value.replaceAll('"','').replaceAll('opportunity_follow_through_events.','').replace(/\s+/g,'').toLowerCase();
+const followSql=normalize(readFileSync(resolve(root,'lib/db/src/schema/opportunity-follow-through-migration.sql'),'utf8'));
+for(const check of Object.values(follow.checkConstraints) as {name:string;value:string}[])assert.ok(followSql.includes(`constraint${check.name}check(${normalize(check.value)})`),`Loose SQL CHECK must match ${check.name}`);
+const temporal=actual.tables['public.opportunity_temporal_history'];
+assert.deepEqual(temporal.indexes.opportunity_temporal_history_recipient_idx.columns.map((c:{expression:string})=>c.expression),['user_id','recipient_id','evaluated_at']);
+console.log(`Offline schema parity PASS: ${Object.keys(actual.tables).length} tables, ${statements.length} statements; no SQL executed`);

@@ -1,0 +1,172 @@
+{
+  "fixtureVersion": 2,
+  "clock": "2031-04-05T12:00:00Z",
+  "qualificationTiming": {
+    "runDateEnvironment": "BRAIN_QUALIFICATION_SYNTHETIC_RUN_DATE",
+    "birthdayOffsetsDays": {
+      "brain-qual-a-r1": 7,
+      "brain-qual-a-r2": 9,
+      "brain-qual-a-r3": 11,
+      "brain-qual-a-r4": 13,
+      "brain-qual-b-r1": 8
+    },
+    "sourceObservationTimesRemainNull": true
+  },
+  "owners": [
+    {
+      "id": "brain-qual-owner-a",
+      "email": "owner-a@qualification.invalid",
+      "name": "Synthetic Owner A",
+      "recipientIds": [
+        "brain-qual-a-r1",
+        "brain-qual-a-r2",
+        "brain-qual-a-r3",
+        "brain-qual-a-r4",
+        "brain-qual-a-r5"
+      ]
+    },
+    {
+      "id": "brain-qual-owner-b",
+      "email": "owner-b@qualification.invalid",
+      "name": "Synthetic Owner B",
+      "recipientIds": [
+        "brain-qual-b-r1",
+        "brain-qual-b-r2"
+      ]
+    }
+  ],
+  "recipients": [
+    {
+      "id": "brain-qual-a-r1",
+      "userId": "brain-qual-owner-a",
+      "firstName": "Synthetic A1",
+      "relationshipType": "friend",
+      "birthday": "2031-04-12",
+      "anniversary": null
+    },
+    {
+      "id": "brain-qual-a-r2",
+      "userId": "brain-qual-owner-a",
+      "firstName": "Synthetic A2",
+      "relationshipType": "sibling",
+      "birthday": "2031-04-14",
+      "anniversary": null
+    },
+    {
+      "id": "brain-qual-a-r3",
+      "userId": "brain-qual-owner-a",
+      "firstName": "Synthetic A3",
+      "relationshipType": "friend",
+      "birthday": "2031-04-16",
+      "anniversary": null
+    },
+    {
+      "id": "brain-qual-a-r4",
+      "userId": "brain-qual-owner-a",
+      "firstName": "Synthetic A4",
+      "relationshipType": "parent",
+      "birthday": "2031-04-18",
+      "anniversary": null
+    },
+    {
+      "id": "brain-qual-a-r5",
+      "userId": "brain-qual-owner-a",
+      "firstName": "Synthetic A5",
+      "relationshipType": "friend",
+      "birthday": null,
+      "anniversary": null
+    },
+    {
+      "id": "brain-qual-b-r1",
+      "userId": "brain-qual-owner-b",
+      "firstName": "Synthetic B1",
+      "relationshipType": "friend",
+      "birthday": "2031-04-13",
+      "anniversary": null
+    },
+    {
+      "id": "brain-qual-b-r2",
+      "userId": "brain-qual-owner-b",
+      "firstName": "Synthetic B2",
+      "relationshipType": "sibling",
+      "birthday": null,
+      "anniversary": null
+    }
+  ],
+  "questionAnswers": [
+    {
+      "id": "qa-a-active",
+      "userId": "brain-qual-owner-a",
+      "recipientId": "brain-qual-a-r1",
+      "eventType": "birthday",
+      "eventYear": 2031,
+      "questionKey": "communication",
+      "questionText": "How do they prefer to communicate?",
+      "answerText": "They prefer a phone call",
+      "wasSkipped": false,
+      "triggerType": "profile_gap",
+      "importanceScore": null,
+      "archivedAt": null
+    },
+    {
+      "id": "qa-a-archived",
+      "userId": "brain-qual-owner-a",
+      "recipientId": "brain-qual-a-r1",
+      "eventType": "birthday",
+      "eventYear": 2031,
+      "questionKey": "memory",
+      "questionText": "A memory?",
+      "answerText": "Synthetic archived evidence",
+      "wasSkipped": false,
+      "triggerType": "event_briefing",
+      "importanceScore": "minor",
+      "archivedAt": "2031-03-02T00:00:00Z"
+    },
+    {
+      "id": "qa-a-skipped",
+      "userId": "brain-qual-owner-a",
+      "recipientId": "brain-qual-a-r5",
+      "eventType": "birthday",
+      "eventYear": 2031,
+      "questionKey": "unknown",
+      "questionText": "Unknown detail?",
+      "answerText": "",
+      "wasSkipped": true,
+      "triggerType": "event_briefing",
+      "importanceScore": null,
+      "archivedAt": null
+    },
+    {
+      "id": "qa-b-active",
+      "userId": "brain-qual-owner-b",
+      "recipientId": "brain-qual-b-r1",
+      "eventType": "birthday",
+      "eventYear": 2031,
+      "questionKey": "preference",
+      "questionText": "What do they prefer?",
+      "answerText": "Handwritten notes",
+      "wasSkipped": false,
+      "triggerType": "event_briefing",
+      "importanceScore": "major",
+      "archivedAt": null
+    }
+  ],
+  "operations": {
+    "observation": "op-observation-a-1",
+    "interpretation": "op-interpretation-a-1",
+    "hypothesis": "op-hypothesis-a-1",
+    "feedback": "op-feedback-a-1",
+    "followThroughAction": "op-action-a-1",
+    "outcome": "op-outcome-a-1",
+    "correction": "op-correction-a-1"
+  },
+  "expected": {
+    "maximumOriginalEligibleSlots": 3,
+    "backfill": false,
+    "minimumDerivedEligibleCandidates": 4,
+    "restrainedRecipientId": "brain-qual-a-r5",
+    "knownIdImpersonationBlocked": false,
+    "authenticatedIsolationQualified": false,
+    "standaloneOpportunityPersistenceClaimed": false
+  }
+}

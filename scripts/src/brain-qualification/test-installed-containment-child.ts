@@ -1,0 +1,10 @@
+process.env.BRAIN_QUALIFICATION_MODE="true";
+const {installRuntimeContainment}=await import(new URL("../../../artifacts/api-server/src/qualification/runtime-containment.ts",import.meta.url).href);
+installRuntimeContainment();
+const req=await import("node:http"),https=await import("node:https"),net=await import("node:net"),tls=await import("node:tls"),dns=await import("node:dns"),dgram=await import("node:dgram"),child=await import("node:child_process");
+const denied=(fn:()=>unknown,label:string)=>{try{fn();throw new Error(`${label} bypassed containment`)}catch(error){if(/bypassed/.test(String(error)))throw error;}};
+await fetch("https://example.com").then(()=>{throw new Error("fetch bypassed containment")},()=>{});
+denied(()=>req.get("http://example.com"),"http.get");denied(()=>https.request("https://example.com"),"https.request");
+denied(()=>net.createConnection(443,"example.com"),"net.createConnection");denied(()=>new net.Socket().connect(443,"example.com"),"Socket.connect");denied(()=>tls.connect(443,"example.com"),"tls.connect");
+denied(()=>(dns as any).lookup("example.com",()=>{}),"dns.lookup");denied(()=>(dgram as any).createSocket("udp4"),"dgram.createSocket");denied(()=>(child as any).spawn("ignored",[]),"spawn");denied(()=>(child as any).execFile("ignored",[]),"execFile");
+console.log("installed Node transports denied without connection");

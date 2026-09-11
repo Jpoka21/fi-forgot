@@ -1,0 +1,331 @@
+{
+  "mode": "plan-only",
+  "target": {
+    "postgresMajor": 16,
+    "host": "127.0.0.1",
+    "port": 55432,
+    "database": "fi_forgot_brain_qualification",
+    "role": "fi_forgot_brain_qualifier",
+    "adminRole": "fi_forgot_brain_cluster_admin",
+    "pgdata": "C:/Users/James.Massaro/Projects/fi-forgot/.orchestra/qualification/fi-forgot-brain-qualification-pgdata",
+    "apiPort": 8080,
+    "frontendPort": 25460
+  },
+  "sql": [
+    {
+      "file": "evolving-understanding-migration.sql",
+      "sha256": "98ed583de6caaaa6b166c24aca291a2a47872bcfa9c49db21d253f2f3a3a7fc2"
+    },
+    {
+      "file": "opportunity-temporal-migration.sql",
+      "sha256": "de161698e9492263d66447756ba75c0140137270a09d0bf2beecb1a41795fe99"
+    },
+    {
+      "file": "opportunity-feedback-migration.sql",
+      "sha256": "27b2e68f79b22789a577cd7ccf1d8cf8b5696441db9a008ff67641102826aa4a"
+    },
+    {
+      "file": "opportunity-follow-through-migration.sql",
+      "sha256": "8bba8e138e6ec56da73d4d24b9ce19087aa70b7aebdd5184c328c649069b462a"
+    },
+    {
+      "file": "versioned-understanding-snapshot.sql",
+      "sha256": "73dd5725dfc23acc8ce870ca0dd3c3a81a852241365b105e2e4f685dcae82bfd"
+    }
+  ],
+  "commands": [
+    {
+      "phase": "initialize-cluster",
+      "program": "@qualification/initialize-cluster",
+      "args": [
+        "C:/Users/James.Massaro/Projects/fi-forgot/.orchestra/qualification/fi-forgot-brain-qualification-pgdata",
+        "fi_forgot_brain_cluster_admin"
+      ],
+      "mutates": true
+    },
+    {
+      "phase": "mark-owned-cluster",
+      "program": "@qualification/mark-owned-cluster",
+      "args": [
+        "C:/Users/James.Massaro/Projects/fi-forgot/.orchestra/qualification/fi-forgot-brain-qualification-pgdata"
+      ],
+      "mutates": true
+    },
+    {
+      "phase": "start-postgres",
+      "program": "pg_ctl",
+      "args": [
+        "--pgdata",
+        "C:/Users/James.Massaro/Projects/fi-forgot/.orchestra/qualification/fi-forgot-brain-qualification-pgdata",
+        "--options",
+        "-h 127.0.0.1 -p 55432",
+        "start"
+      ],
+      "mutates": true
+    },
+    {
+      "phase": "create-role",
+      "program": "@qualification/create-role",
+      "args": [
+        "fi_forgot_brain_qualifier"
+      ],
+      "mutates": true
+    },
+    {
+      "phase": "create-database",
+      "program": "createdb",
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "55432",
+        "--username",
+        "fi_forgot_brain_cluster_admin",
+        "--owner",
+        "fi_forgot_brain_qualifier",
+        "fi_forgot_brain_qualification"
+      ],
+      "mutates": true
+    },
+    {
+      "phase": "identity",
+      "program": "psql",
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "55432",
+        "--username",
+        "fi_forgot_brain_qualifier",
+        "--dbname",
+        "fi_forgot_brain_qualification",
+        "--no-psqlrc",
+        "--tuples-only",
+        "--command",
+        "select current_database(),current_user,current_setting('server_version_num')"
+      ],
+      "mutates": false
+    },
+    {
+      "phase": "fresh-baseline",
+      "program": "psql",
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "55432",
+        "--username",
+        "fi_forgot_brain_qualifier",
+        "--dbname",
+        "fi_forgot_brain_qualification",
+        "--no-psqlrc",
+        "--set",
+        "ON_ERROR_STOP=1",
+        "--file",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\docs\\brain-qualification-preparation\\bootstrap\\0000-current.sql"
+      ],
+      "mutates": true
+    },
+    {
+      "phase": "fixtures",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\node_modules\\tsx\\dist\\cli.mjs",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\src\\brain-qualification\\future-workflow.ts",
+        "load",
+        "--fixture",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\docs\\brain-qualification-preparation\\synthetic-fixtures.json"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json"
+      },
+      "mutates": true
+    },
+    {
+      "phase": "start-api",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--enable-source-maps",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\artifacts\\api-server\\dist\\index.mjs"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json",
+        "BRAIN_QUALIFICATION_MODE": "true",
+        "HOST": "127.0.0.1",
+        "PORT": "8080"
+      },
+      "mutates": true,
+      "process": "capture"
+    },
+    {
+      "phase": "wait-api",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\node_modules\\tsx\\dist\\cli.mjs",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\src\\brain-qualification\\wait-api.ts"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json"
+      },
+      "mutates": false
+    },
+    {
+      "phase": "assert",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\node_modules\\tsx\\dist\\cli.mjs",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\src\\brain-qualification\\future-workflow.ts",
+        "assert"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json"
+      },
+      "mutates": true
+    },
+    {
+      "phase": "stop-api",
+      "program": "@captured-api",
+      "args": [],
+      "mutates": true,
+      "process": "stop-captured"
+    },
+    {
+      "phase": "restart-api",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--enable-source-maps",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\artifacts\\api-server\\dist\\index.mjs"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json",
+        "BRAIN_QUALIFICATION_MODE": "true",
+        "HOST": "127.0.0.1",
+        "PORT": "8080"
+      },
+      "mutates": true,
+      "process": "capture"
+    },
+    {
+      "phase": "wait-api-after-restart",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\node_modules\\tsx\\dist\\cli.mjs",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\src\\brain-qualification\\wait-api.ts"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json"
+      },
+      "mutates": false
+    },
+    {
+      "phase": "assert-after-restart",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\node_modules\\tsx\\dist\\cli.mjs",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\src\\brain-qualification\\future-workflow.ts",
+        "assert",
+        "--after-restart"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json"
+      },
+      "mutates": false
+    },
+    {
+      "phase": "stop-api-final",
+      "program": "@captured-api",
+      "args": [],
+      "mutates": true,
+      "process": "stop-captured"
+    },
+    {
+      "phase": "stop-postgres",
+      "program": "pg_ctl",
+      "args": [
+        "--pgdata",
+        "C:/Users/James.Massaro/Projects/fi-forgot/.orchestra/qualification/fi-forgot-brain-qualification-pgdata",
+        "stop"
+      ],
+      "mutates": true
+    }
+  ],
+  "executionRequirements": {
+    "authorization": "OWNER-AUTHORIZES-BRAIN-QUALIFICATION-EXECUTION",
+    "host": "127.0.0.1",
+    "port": 55432,
+    "database": "fi_forgot_brain_qualification",
+    "role": "fi_forgot_brain_qualifier",
+    "pgdata": "C:/Users/James.Massaro/Projects/fi-forgot/.orchestra/qualification/fi-forgot-brain-qualification-pgdata",
+    "postgresMajor": 16,
+    "disposable": true,
+    "catalogApproved": true,
+    "hashesApproved": true,
+    "credentialEnv": "PGPASSWORD",
+    "osBoundary": "reviewed-loopback-only"
+  },
+  "syntheticDateRequirement": "An explicit valid YYYY-MM-DD synthetic run date is required and recorded in restart evidence.",
+  "limitations": [
+    "Preparation only: PostgreSQL creation, migration and fixture execution require separate owner authorization.",
+    "Fresh baseline only; existing-schema upgrade requires actual predecessor and catalog evidence.",
+    "OS containment and process-only credentials must be independently established before execution.",
+    "Caller-supplied identifiers do not establish authenticated isolation.",
+    "Offline substitutes do not prove PostgreSQL persistence, recovery, browser behavior or external delivery.",
+    "Recovery may remove only the independently verified disposable target; no reviewed down migration exists."
+  ]
+}

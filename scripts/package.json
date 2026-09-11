@@ -5,8 +5,16 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
-    "seed-products": "tsx ./src/seed-products.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "seed-products": "tsx ./src/brain-qualification/seed-guard.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "brain:qualification:plan": "node --experimental-strip-types ./src/brain-qualification/runner.ts",
+    "brain:qualification:verify:no-db": "node --experimental-strip-types ./src/brain-qualification/verify-no-db.ts",
+    "brain-qualification:plan": "node --experimental-strip-types ./src/brain-qualification/runner.ts",
+    "brain-qualification:verify-static": "node --experimental-strip-types ./src/brain-qualification/verify-static.ts && node --experimental-strip-types ./src/brain-qualification/run-typescript.ts ./src/brain-qualification/verify-schema-parity.ts && node --experimental-strip-types ./src/brain-qualification/verify-plan-documentation.ts",
+    "brain-qualification:test": "node --experimental-strip-types ./src/brain-qualification/test-containment.ts && node --experimental-strip-types ./src/brain-qualification/test-execution.ts && node --experimental-strip-types ./src/brain-qualification/run-regressions.ts integration && node --experimental-strip-types ./src/brain-qualification/test-installed-containment.ts && node --experimental-strip-types ./src/brain-qualification/test-provider-graph.ts && node --experimental-strip-types ./src/brain-qualification/test-target-verification.ts && node --experimental-strip-types ./src/brain-qualification/run-typescript.ts ./src/brain-qualification/test-lifecycle-assertions.ts && node --experimental-strip-types ./src/brain-qualification/test-process-lifecycle.ts && node --experimental-strip-types ./src/brain-qualification/test-native-runtime.ts",
+    "brain-qualification:verify-fixtures": "node --experimental-strip-types ./src/brain-qualification/verify-fixtures.ts",
+    "brain-qualification:verify-no-db": "node --experimental-strip-types ./src/brain-qualification/verify-no-db.ts",
+    "brain-qualification:regression": "node --experimental-strip-types ./src/brain-qualification/run-regressions.ts regression"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { createRequire } from "node:module";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { QUALIFICATION_BROWSER_HEADERS } from "./src/qualification/browser-policy";
 
 const require = createRequire(import.meta.url);
 
@@ -29,7 +30,7 @@ function resolveRollupAlias(): Record<string, string> {
   return { rollup: "@rollup/wasm-node" };
 }
 
-const rawPort = process.env.PORT;
+const rawPort = process.env.PORT ?? (process.env.npm_lifecycle_event === "build" ? "25460" : undefined);
 
 if (!rawPort) {
   throw new Error(
@@ -52,6 +53,8 @@ if (!basePath) {
 }
 
 const apiProxyTarget = process.env.API_PROXY_TARGET?.trim();
+const qualificationMode=process.env.BRAIN_QUALIFICATION_MODE==="true";
+if(qualificationMode&&(port!==25460||apiProxyTarget!=="http://127.0.0.1:8080"))throw new Error("FAIL_CLOSED: qualification frontend requires port 25460 and the fixed loopback API target");
 
 const devApiProxy =
   apiProxyTarget && apiProxyTarget.length > 0
@@ -68,8 +71,8 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
+    ...(!qualificationMode ? [runtimeErrorOverlay()] : []),
+    ...(!qualificationMode && process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
           await import("@replit/vite-plugin-cartographer").then((m) =>
@@ -97,18 +100,20 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    ...(qualificationMode ? { headers: QUALIFICATION_BROWSER_HEADERS } : {}),
     port,
     strictPort: true,
-    host: "0.0.0.0",
-    allowedHosts: true,
+    host: qualificationMode?"127.0.0.1":"0.0.0.0",
+    allowedHosts: qualificationMode?["127.0.0.1","localhost"]:true,
     fs: {
       strict: true,
     },
     ...(devApiProxy ? { proxy: devApiProxy } : {}),
   },
   preview: {
+    ...(qualificationMode ? { headers: QUALIFICATION_BROWSER_HEADERS } : {}),
     port,
-    host: "0.0.0.0",
-    allowedHosts: true,
+    host: qualificationMode?"127.0.0.1":"0.0.0.0",
+    allowedHosts: qualificationMode?["127.0.0.1","localhost"]:true,
   },
 });

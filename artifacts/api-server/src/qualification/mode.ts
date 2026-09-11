@@ -1,0 +1,14 @@
+export const QUALIFICATION_MODE_ENV="BRAIN_QUALIFICATION_MODE";
+export const QUALIFICATION_API_ORIGIN="http://127.0.0.1:8080";
+export const QUALIFICATION_FRONTEND_ORIGIN="http://127.0.0.1:25460";
+export const QUALIFICATION_EXECUTION_AUTHORIZATION="OWNER-AUTHORIZES-BRAIN-QUALIFICATION-EXECUTION";
+export function isBrainQualificationMode(env:NodeJS.ProcessEnv=process.env){return env[QUALIFICATION_MODE_ENV]==="true";}
+export function assertQualificationApiEnvironment(env:NodeJS.ProcessEnv=process.env){
+  if(!isBrainQualificationMode(env)) return;
+  const admitted=env.BRAIN_QUALIFICATION_EXECUTION_ADMITTED!=="true"||(env.BRAIN_QUALIFICATION_OWNER_AUTHORIZATION===QUALIFICATION_EXECUTION_AUTHORIZATION&&env.BRAIN_QUALIFICATION_HOST==="127.0.0.1"&&env.BRAIN_QUALIFICATION_PORT==="55432"&&env.BRAIN_QUALIFICATION_DATABASE==="fi_forgot_brain_qualification"&&env.BRAIN_QUALIFICATION_ROLE==="fi_forgot_brain_qualifier"&&env.BRAIN_QUALIFICATION_HASHES_VERIFIED==="true"&&env.BRAIN_QUALIFICATION_CATALOG_VERIFIED==="true"&&env.BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED==="true");
+  if(env.PORT!=="8080"||env.HOST!=="127.0.0.1"||env.BRAIN_QUALIFICATION_ALLOW_PROVIDERS==="true"||env.BRAIN_QUALIFICATION_OS_NETWORK_BOUNDARY!=="reviewed-loopback-only"||!admitted) throw new Error("FAIL_CLOSED: qualification API requires fixed loopback, exact execution evidence, providers disabled, and a reviewed OS boundary");
+}
+export function denyExternalUrl(raw:string){const url=new URL(raw);if(url.protocol!=="http:"||url.hostname!=="127.0.0.1"||!['8080','25460'].includes(url.port))throw new Error(`QUALIFICATION_CONTAINMENT: denied outbound URL ${url.origin}`);return url;}
+export const blockedQualificationAdapter=Object.freeze({fetch:async(raw:string)=>{denyExternalUrl(raw);throw new Error("QUALIFICATION_CONTAINMENT: real fetch is disabled; inject a controlled fake")},connect:()=>{throw new Error("QUALIFICATION_CONTAINMENT: raw sockets are disabled")},spawn:()=>{throw new Error("QUALIFICATION_CONTAINMENT: subprocesses are disabled")},redirect:(raw:string)=>denyExternalUrl(raw).toString()});
+export type RuntimeTransports={setFetch(fn:typeof globalThis.fetch):void;setHttpGuard(fn:(url:string)=>void):void;setSocketGuard(fn:(host:string,port:number)=>void):void;setSubprocessGuard(fn:()=>never):void};
+export function installQualificationContainment(transports:RuntimeTransports,env:NodeJS.ProcessEnv=process.env){if(!isBrainQualificationMode(env))return;transports.setFetch(blockedQualificationAdapter.fetch as typeof globalThis.fetch);transports.setHttpGuard(raw=>{denyExternalUrl(raw)});transports.setSocketGuard((host,port)=>{if(host!=="127.0.0.1"||![55432,8080,25460].includes(port))throw new Error("QUALIFICATION_CONTAINMENT: socket denied")});transports.setSubprocessGuard(()=>{throw new Error("QUALIFICATION_CONTAINMENT: subprocess denied")});}

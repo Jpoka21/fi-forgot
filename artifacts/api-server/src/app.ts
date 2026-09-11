@@ -1,9 +1,12 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
-import router from "./routes";
-import { logger } from "./lib/logger";
-import { WebhookHandlers } from "./webhookHandlers";
+import { assertQualificationApiEnvironment, isBrainQualificationMode } from "./qualification/mode";
+
+// Validate opt-in containment before importing any route or database graph.
+assertQualificationApiEnvironment();
+const {installRuntimeContainment}=await import("./qualification/runtime-containment");installRuntimeContainment();
+const { logger } = await import("./lib/logger");
 
 const app: Express = express();
 
@@ -26,9 +29,12 @@ app.use(
     },
   }),
 );
-app.use(cors());
+const qualificationMode=isBrainQualificationMode();
+app.use(cors(qualificationMode?{origin:"http://127.0.0.1:25460"}:undefined));
 
 // Stripe webhook MUST receive raw body — register BEFORE express.json()
+if(!qualificationMode){
+const { WebhookHandlers }=await import("./webhookHandlers");
 app.post(
   "/stripe/webhook",
   express.raw({ type: "application/json" }),
@@ -47,10 +53,12 @@ app.post(
     }
   },
 );
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router);
+const router=qualificationMode?(await import("./qualification/router")).qualificationRouter:(await import("./routes")).default;
+app.use("/api",router);
 
 export default app;

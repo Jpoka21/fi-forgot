@@ -1,0 +1,22 @@
+/** Offline artifact generation only. Does not import @workspace/db pool or execute SQL. */
+import { createRequire } from "node:module";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { createHash } from "node:crypto";
+const root = resolve(import.meta.dirname, "../../..");
+const schemaPath = new URL("../../../lib/db/src/schema/index.ts", import.meta.url).href;
+const schema = await import(schemaPath);
+const localRequire = createRequire(resolve(root, "lib/db/package.json"));
+const {generateDrizzleJson, generateMigration} = localRequire("drizzle-kit/api");
+const empty = generateDrizzleJson({});
+empty.id = "00000000-0000-0000-0000-000000000000";
+const current = generateDrizzleJson(schema, empty.id);
+current.id = "00000000-0000-0000-0000-000000000001";
+current.prevId = empty.id;
+const statements: string[] = await generateMigration(empty, current);
+const sql = "-- Offline full-current PostgreSQL 16 bootstrap; NEVER applied during preparation.\n-- Fresh empty qualification database only; do not follow with duplicate incrementals.\nBEGIN;\n" + statements.join("\n") + "\nCOMMIT;\n";
+const out = resolve(root,"docs/brain-qualification-preparation/bootstrap");
+mkdirSync(out,{recursive:true});
+writeFileSync(resolve(out,"0000-current.sql"),sql);
+writeFileSync(resolve(out,"schema-snapshot.json"),JSON.stringify(current,null,2)+"\n");
+console.log(JSON.stringify({mode:"offline-generation",tables:Object.keys(current.tables).length,statements:statements.length,sha256:createHash("sha256").update(sql).digest("hex"),databaseConnected:false}));

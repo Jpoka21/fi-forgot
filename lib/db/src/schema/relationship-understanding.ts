@@ -1,4 +1,4 @@
-import { boolean, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgTable, text, timestamp, unique, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const relationshipObservationVersionsTable = pgTable("relationship_observation_versions", {
   id: text("id").primaryKey(),
@@ -91,7 +91,7 @@ export const relationshipHypothesisHeadsTable = pgTable("relationship_hypothesis
 });
 export const relationshipHypothesisEvidenceTable = pgTable("relationship_hypothesis_evidence", {
   hypothesisVersionId:text("hypothesis_version_id").notNull(), observationVersionId:text("observation_version_id"), interpretationId:text("interpretation_id"), interpretationRevision:integer("interpretation_revision"), polarity:text("polarity").notNull(),
-},table=>({link:uniqueIndex("relationship_hypothesis_evidence_uq").on(table.hypothesisVersionId,table.observationVersionId,table.interpretationId,table.interpretationRevision,table.polarity)}));
+},table=>({link:unique("relationship_hypothesis_evidence_uq").on(table.hypothesisVersionId,table.observationVersionId,table.interpretationId,table.interpretationRevision,table.polarity).nullsNotDistinct()}));
 export const relationshipHypothesisActionsTable = pgTable("relationship_hypothesis_actions", {
   id:text("id").primaryKey(), hypothesisId:text("hypothesis_id").notNull(), hypothesisVersionId:text("hypothesis_version_id").notNull(), userId:text("user_id").notNull(), recipientId:text("recipient_id").notNull(), action:text("action").notNull(), responseState:text("response_state").notNull(), operationId:text("operation_id").notNull(), expectedRevision:integer("expected_revision").notNull(), newRevision:integer("new_revision").notNull(), actedAt:timestamp("acted_at",{withTimezone:true}).notNull().defaultNow(), actorUserId:text("actor_user_id").notNull(),
 },table=>({operation:uniqueIndex("relationship_hypothesis_operation_uq").on(table.userId,table.recipientId,table.operationId)}));

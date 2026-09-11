@@ -1,4 +1,4 @@
-import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
 
 export const opportunityFeedbackTable = pgTable("opportunity_feedback_events", {
   id: text("id").primaryKey(), lineageId: text("lineage_id").notNull(), version: integer("version").notNull(),
@@ -9,8 +9,8 @@ export const opportunityFeedbackTable = pgTable("opportunity_feedback_events", {
   receivedAt: timestamp("received_at", { withTimezone: true }).notNull(), supersedesId: text("supersedes_id"),
   withdrawnEventId: text("withdrawn_event_id"), idempotencyKey: text("idempotency_key").notNull(), active: boolean("active").notNull(),
 }, table => ({
-  lineageVersion: uniqueIndex("opportunity_feedback_lineage_version_uq").on(table.lineageId, table.version),
-  ownerIdempotency: uniqueIndex("opportunity_feedback_owner_idempotency_uq").on(table.ownerId, table.idempotencyKey),
+  lineageVersion: unique("opportunity_feedback_lineage_version_uq").on(table.lineageId, table.version),
+  ownerIdempotency: unique("opportunity_feedback_owner_idempotency_uq").on(table.ownerId, table.idempotencyKey),
   ownerRecipient: index("opportunity_feedback_owner_recipient_idx").on(table.ownerId, table.recipientId, table.receivedAt),
 }));
 
@@ -20,4 +20,4 @@ export const opportunityFeedbackReceiptTable = pgTable("opportunity_feedback_rec
   id: text("id").primaryKey(), ownerId: text("owner_id").notNull(), idempotencyKey: text("idempotency_key").notNull(),
   requestFingerprint: text("request_fingerprint").notNull(), response: jsonb("response").notNull(),
   receivedAt: timestamp("received_at", { withTimezone: true }).defaultNow().notNull(),
-}, table => ({ ownerKey: uniqueIndex("opportunity_feedback_receipt_owner_key_uq").on(table.ownerId, table.idempotencyKey) }));
+}, table => ({ ownerKey: unique("opportunity_feedback_receipt_owner_key_uq").on(table.ownerId, table.idempotencyKey) }));
