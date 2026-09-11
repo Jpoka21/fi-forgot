@@ -12,6 +12,7 @@ import { buildConciergeWorkspace } from "../brain/product/buildConciergeWorkspac
 import { executeBrain } from "../brain/orchestrator";
 import { logger } from "../lib/logger";
 import { createPgOpportunityFeedbackRepository, listOpportunityFeedbackService, mutateOpportunityFeedbackService } from "../brain/feedback";
+import { createPgOpportunityFollowThroughRepository, listOpportunityFollowThroughService, mutateOpportunityFollowThroughService } from "../brain/follow-through";
 
 const router = Router();
 
@@ -54,6 +55,7 @@ router.get("/v2/concierge", async (req, res) => {
       })),
       runBrain: executeBrain,
       feedbackRepository: createPgOpportunityFeedbackRepository(),
+      followThroughRepository: createPgOpportunityFollowThroughRepository(),
     });
 
     logger.info({
@@ -92,11 +94,27 @@ router.post("/v2/concierge/opportunity-feedback", async (req, res) => {
     resolveOpportunity: async (ownerId, recipientId, opportunityId) => {
       const rows = await db.select({ id: recipientsTable.id, firstName: recipientsTable.firstName, lastName: recipientsTable.lastName, nickname: recipientsTable.nickname }).from(recipientsTable).where(and(eq(recipientsTable.id, recipientId), eq(recipientsTable.userId, ownerId), isNull(recipientsTable.archivedAt)));
       if (!rows[0]) return null;
-      const workspace = await buildConciergeWorkspace({ userId: ownerId, recipients: [{ recipientId, recipientName: formatRecipientName(rows[0]) }], runBrain: executeBrain, feedbackRepository: repository });
+      const workspace = await buildConciergeWorkspace({ userId: ownerId, recipients: [{ recipientId, recipientName: formatRecipientName(rows[0]) }], runBrain: executeBrain, feedbackRepository: repository, followThroughRepository: createPgOpportunityFollowThroughRepository() });
       return workspace.opportunities.find(item => item.id === opportunityId) ?? null;
     },
   });
   res.status(result.status).json(result.body);
+});
+
+router.get("/v2/concierge/opportunity-follow-through", async (req,res)=>{
+  const userId=requireUserId(req,res); if(!userId)return;
+  const recipientId=typeof req.query.recipientId==="string"?req.query.recipientId:null;
+  const result=await listOpportunityFollowThroughService(userId,recipientId,{repository:createPgOpportunityFollowThroughRepository(),listOwnedRecipientIds:async(ownerId,selectedId)=>(await db.select({id:recipientsTable.id}).from(recipientsTable).where(selectedId?and(eq(recipientsTable.id,selectedId),eq(recipientsTable.userId,ownerId),isNull(recipientsTable.archivedAt)):and(eq(recipientsTable.userId,ownerId),isNull(recipientsTable.archivedAt)))).map(row=>row.id)});
+  res.status(result.status).json(result.body);
+});
+
+router.post("/v2/concierge/opportunity-follow-through",async(req,res)=>{
+  const userId=requireUserId(req,res);if(!userId)return;const repository=createPgOpportunityFollowThroughRepository();
+  const result=await mutateOpportunityFollowThroughService(userId,req.body,{repository,ownsRecipient:async(ownerId,recipientId)=>Boolean((await db.select({id:recipientsTable.id}).from(recipientsTable).where(and(eq(recipientsTable.id,recipientId),eq(recipientsTable.userId,ownerId),isNull(recipientsTable.archivedAt))))[0]),resolveOpportunity:async(ownerId,recipientId,opportunityId)=>{
+    const rows=await db.select({id:recipientsTable.id,firstName:recipientsTable.firstName,lastName:recipientsTable.lastName,nickname:recipientsTable.nickname}).from(recipientsTable).where(and(eq(recipientsTable.id,recipientId),eq(recipientsTable.userId,ownerId),isNull(recipientsTable.archivedAt)));if(!rows[0])return null;
+    const workspace=await buildConciergeWorkspace({userId:ownerId,recipients:[{recipientId,recipientName:formatRecipientName(rows[0])}],runBrain:executeBrain,feedbackRepository:createPgOpportunityFeedbackRepository(),followThroughRepository:repository});
+    return workspace.opportunities.find(item=>item.id===opportunityId)??null;
+  }});res.status(result.status).json(result.body);
 });
 
 export default router;

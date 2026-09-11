@@ -4,6 +4,7 @@
 
 import type { ActionPriority } from "../action/actionPlanTypes";
 import type { RelationshipOpportunity } from "./relationshipOpportunityTypes";
+import type { OpportunityFollowThroughProjection } from "../follow-through";
 
 export const CONCIERGE_WORKSPACE_VERSION = 1 as const;
 
@@ -44,7 +45,7 @@ export interface ConciergeInsight {
 export interface ConciergeWorkspaceResponse {
   version: typeof CONCIERGE_WORKSPACE_VERSION;
   generatedAt: string;
-  opportunities: RelationshipOpportunity[];
+  opportunities: Array<RelationshipOpportunity & { followThrough?: OpportunityFollowThroughProjection & { linkedAlreadyHandledFeedback?: unknown } }>;
   recommendations: ConciergeRecommendation[];
   insights: ConciergeInsight[];
 }

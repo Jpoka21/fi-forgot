@@ -23,6 +23,7 @@ import {
 } from "../temporal";
 import { logger } from "../../lib/logger";
 import { activeFeedback, type OpportunityFeedbackEvent, type OpportunityFeedbackRepository } from "../feedback";
+import { currentProjection, type OpportunityFollowThroughEvent, type OpportunityFollowThroughRepository } from "../follow-through";
 
 export interface ConciergeRecipientInput {
   recipientId: string;
@@ -41,6 +42,23 @@ export interface BuildConciergeWorkspaceOptions {
   generatedAt?: string;
   temporalHistoryRepository?: OpportunityTemporalHistoryRepository;
   feedbackRepository?: OpportunityFeedbackRepository;
+  followThroughRepository?: OpportunityFollowThroughRepository;
+}
+
+function applyFollowThrough(opportunity: ConciergeWorkspaceResponse["opportunities"][number], history: OpportunityFollowThroughEvent[], available: boolean, ownerId: string) {
+  const exact = history.filter(event => event.ownerId === ownerId && event.recipientId === opportunity.recipient.id && event.relationshipId === opportunity.relationshipId && event.family === opportunity.provenance.sourceId && event.sourceId === opportunity.provenance.sourceId && event.sourceType === opportunity.provenance.sourceType && event.opportunityId === opportunity.id && event.occurrenceCycleId === (opportunity.timing.temporal?.occurrenceCycleId ?? null));
+  const current = available ? currentProjection(exact) : [];
+  const action = current.find(event => event.dimension === "action") ?? null;
+  const outcome = current.find(event => event.dimension === "outcome") ?? null;
+  const alreadyHandled = opportunity.feedback.active.find(event => event.type === "already_handled" && event.scope === "occurrence") ?? null;
+  opportunity.followThrough = { history: exact, action, outcome, available, linkedAlreadyHandledFeedback: alreadyHandled };
+  // Only an exact current completion/no-longer-relevant owner report restrains future presentation.
+  // Outcomes, planning, dismissal, noncompletion, and passive product behavior have no such meaning.
+  if (!available || action?.value === "user_reported_completed" || action?.value === "no_longer_relevant" || alreadyHandled) {
+    opportunity.presentation = { recommendationEligible: false, insightEligible: false };
+    opportunity.restraint = { restrained: true, reason: !available ? "follow_through_history_unavailable" : alreadyHandled ? "explicit_feedback_already_handled" : `explicit_follow_through_${action!.value}` };
+    opportunity.recommendation = null;
+  }
 }
 
 function applyFeedback(opportunity: ReturnType<typeof buildRelationshipOpportunity>, history: OpportunityFeedbackEvent[], available: boolean, generatedAt: string) {
@@ -81,6 +99,7 @@ export async function buildConciergeWorkspace(options: BuildConciergeWorkspaceOp
   // Persistence is explicit at the production boundary. Pure builder fixtures remain
   // database-neutral; the owned route always supplies PostgreSQL and therefore fails closed.
   const feedbackRepository = options.feedbackRepository ?? { list: async () => [], append: async () => { throw new Error("Feedback repository not configured"); } } as OpportunityFeedbackRepository;
+  const followThroughRepository = options.followThroughRepository ?? { list: async () => [], append: async () => { throw new Error("Follow-through repository not configured"); } } as OpportunityFollowThroughRepository;
   const executions = new Map<string, BrainExecutionResult>();
   const decisions = await collectProductBrainDecisions({ userId, recipients, runBrain: async (id, owner) => { const result = await runBrain(id, owner); executions.set(id, result); return result; } });
   let retainedRecords: Awaited<ReturnType<OpportunityTemporalHistoryRepository['listRetained']>> = [];
@@ -137,6 +156,10 @@ export async function buildConciergeWorkspace(options: BuildConciergeWorkspaceOp
   try { feedbackHistory = await feedbackRepository.list({ ownerId: userId, recipientIds: recipients.map(r => r.recipientId) }); }
   catch (error) { feedbackAvailable = false; logger.warn({ err: error, userId }, "Opportunity feedback listing unavailable"); }
   for (const opportunity of evaluated.values()) applyFeedback(opportunity, feedbackHistory.filter(event => event.ownerId === userId && event.recipientId === opportunity.recipient.id), feedbackAvailable, generatedAt);
+  let followThroughHistory: OpportunityFollowThroughEvent[] = [], followThroughAvailable = true;
+  try { followThroughHistory = await followThroughRepository.list({ ownerId: userId, recipientIds: recipients.map(r => r.recipientId) }); }
+  catch (error) { followThroughAvailable = false; logger.warn({ err: error, userId }, "Opportunity follow-through listing unavailable"); }
+  for (const opportunity of evaluated.values()) applyFollowThrough(opportunity, followThroughHistory, followThroughAvailable, userId);
   return orchestrateProductBrainFatigue({ userId, generatedAt, decisions, recipients, buildFromVisible: (visible, buildGeneratedAt) => {
     const recommendationsInput = visible.slice(0, CONCIERGE_RECOMMENDATIONS_MAX);
     const insightsInput = visible.slice(0, CONCIERGE_INSIGHTS_MAX);

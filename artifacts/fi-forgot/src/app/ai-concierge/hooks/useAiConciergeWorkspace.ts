@@ -1,3 +1,4 @@
+import { reserveFollowThroughRequest, performFollowThroughMutation } from '@/app/concierge-brain/followThroughMutation';
 import { reserveFeedbackRequest, settleFeedbackRequest } from '@/app/concierge-brain/feedbackRequestRetry';
 import type { OpportunityFeedbackRequest } from '@/app/concierge-brain/mutateOpportunityFeedback';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -21,6 +22,9 @@ import { useAuth } from "@/lib/auth-context";
 import { mutateOpportunityFeedback } from "@/app/concierge-brain/mutateOpportunityFeedback";
 import type { OpportunityFeedbackEvent, OpportunityFeedbackType } from "@/app/concierge-brain/conciergeWorkspaceTypes";
 import { fetchOpportunityFeedback } from "@/app/concierge-brain/fetchOpportunityFeedback";
+import { fetchOpportunityFollowThrough } from "@/app/concierge-brain/fetchOpportunityFollowThrough";
+import { type OpportunityFollowThroughRequest } from "@/app/concierge-brain/mutateOpportunityFollowThrough";
+import type { OpportunityActionState, OpportunityFollowThroughEvent, RelationshipOutcomeState } from "@/app/concierge-brain/conciergeWorkspaceTypes";
 
 export function useAiConciergeWorkspace() {
   const { user } = useAuth();
@@ -35,26 +39,33 @@ export function useAiConciergeWorkspace() {
   const [feedbackStatus, setFeedbackStatus] = useState<string | null>(null);
   const refreshTimerRef = useRef<number | null>(null);
   const retryKeysRef = useRef(new Map<string, OpportunityFeedbackRequest>());
+  const followThroughRetryRef = useRef(new Map<string, OpportunityFollowThroughRequest>());
+  const [followThroughHistory,setFollowThroughHistory]=useState<OpportunityFollowThroughEvent[]>([]);
+  const [followThroughPending,setFollowThroughPending]=useState<string|null>(null);
+  const [followThroughStatus,setFollowThroughStatus]=useState<string|null>(null);
 
-  useEffect(() => { retryKeysRef.current.clear(); }, [user?.email]);
+  useEffect(() => { retryKeysRef.current.clear(); followThroughRetryRef.current.clear(); }, [user?.email]);
 
   const memories = useMemo(() => buildMemorySnippets(), []);
   const suggestedConversations = useMemo(() => getSuggestedConversations(), []);
 
   const loadWorkspace = useCallback(async () => {
     try {
-      const [workspace, feedback] = await Promise.all([buildConciergeWorkspaceForDisplay({ userEmail: user?.email }), fetchOpportunityFeedback()]);
+      const [workspace, feedback,followThrough] = await Promise.all([buildConciergeWorkspaceForDisplay({ userEmail: user?.email }), fetchOpportunityFeedback(),fetchOpportunityFollowThrough()]);
       if (!feedback.ok || !feedback.data) throw feedback.error ?? new Error("Feedback history unavailable");
+      if(!followThrough.ok||!followThrough.data)throw followThrough.error??new Error("Follow-through history unavailable");
       setRecommendations(workspace.recommendations);
       setOpportunities(workspace.opportunities);
       setInsights(workspace.insights);
       setFeedbackHistory(feedback.data.history);
+      setFollowThroughHistory(followThrough.data.history);
       setError(null);
     } catch (loadError) {
       setRecommendations([]);
       setOpportunities([]);
       setInsights([]);
       setFeedbackHistory([]);
+      setFollowThroughHistory([]);
       setError(aiDefaults.errorLabel);
       if (import.meta.env.DEV) {
         console.error(loadError);
@@ -122,6 +133,15 @@ export function useAiConciergeWorkspace() {
     } finally { setFeedbackPending(null); }
   }, [feedbackHistory, loadWorkspace]);
 
+  const submitFollowThrough=useCallback(async(input:{opportunity?:RelationshipOpportunityViewModel;dimension?:"action"|"outcome";value?:OpportunityActionState|RelationshipOutcomeState;withdrawEvent?:OpportunityFollowThroughEvent;anchorEvent?:OpportunityFollowThroughEvent})=>{
+    const stored=input.withdrawEvent??input.anchorEvent;if(!input.opportunity&&!stored)return;const recipientId=stored?.recipientId??input.opportunity!.recipient.id;
+    const dimension=input.withdrawEvent?.dimension??input.dimension!;const relevant=followThroughHistory.filter(e=>e.recipientId===recipientId&&e.dimension===dimension&&(stored?e.opportunityId===stored.opportunityId&&e.occurrenceCycleId===stored.occurrenceCycleId&&e.relationshipId===stored.relationshipId&&e.family===stored.family&&e.sourceType===stored.sourceType&&e.sourceId===stored.sourceId:e.opportunityId===input.opportunity!.id&&e.occurrenceCycleId===(input.opportunity!.timing.temporal?.occurrenceCycleId??null)));
+    const expectedVersion=Math.max(0,...relevant.map(e=>e.version));
+    const intent:Omit<OpportunityFollowThroughRequest,'idempotencyKey'>=input.withdrawEvent?{recipientId,followThroughEventId:input.withdrawEvent.id,expectedVersion,withdraw:true}:input.anchorEvent?{recipientId,followThroughEventId:input.anchorEvent.id,dimension,value:input.value,expectedVersion}:{recipientId,opportunityId:input.opportunity!.id,occurrenceCycleId:input.opportunity!.timing.temporal?.occurrenceCycleId??null,dimension,value:input.value,expectedVersion};
+    const {reservation,request}=reserveFollowThroughRequest(followThroughRetryRef.current,intent);
+    await performFollowThroughMutation({reservation,request,cache:followThroughRetryRef.current,setPending:setFollowThroughPending,setStatus:setFollowThroughStatus,reload:loadWorkspace});
+  },[followThroughHistory,loadWorkspace]);
+
   return {
     defaults: aiConciergeDefaults,
     sections: conciergePageSections,
@@ -134,6 +154,7 @@ export function useAiConciergeWorkspace() {
     feedbackPending,
     feedbackStatus,
     submitFeedback,
+    followThroughHistory,followThroughPending,followThroughStatus,submitFollowThrough,
     memories,
     suggestedConversations,
     isLoading,

@@ -42,6 +42,14 @@ export interface OpportunityFeedbackEvent {
   timingProvenance: "qualitative" | "user_not_before"; provenance: "explicit_owner_feedback"; receivedAt: string;
   supersedesId: string | null; withdrawnEventId: string | null; idempotencyKey: string; active: boolean;
 }
+export type OpportunityActionState = "unknown" | "planned" | "user_reported_completed" | "not_completed" | "dismissed" | "no_longer_relevant";
+export type RelationshipOutcomeState = "unknown" | "went_well" | "went_poorly" | "appreciated" | "unnecessary";
+export interface OpportunityFollowThroughEvent {
+  id:string;lineageId:string;version:number;ownerId:string;recipientId:string;opportunityId:string;occurrenceCycleId:string|null;
+  relationshipId:string|null;family:string;sourceType:"brain_execution";sourceId:string;dimension:"action"|"outcome";
+  value:OpportunityActionState|RelationshipOutcomeState;action:"set"|"withdraw";provenance:"explicit_owner_report";verification:"user_reported";
+  receivedAt:string;supersedesId:string|null;withdrawnEventId:string|null;idempotencyKey:string;active:boolean;
+}
 
 export interface OpportunityTemporalState {
   persistence: "available" | "unavailable" | "failed";
@@ -86,6 +94,7 @@ export interface RelationshipOpportunity {
   restraint: { restrained: boolean; reason: string | null };
   recommendation: { label: string; href: string; priority: ActionPriority } | null;
   feedback?: { history: OpportunityFeedbackEvent[]; active: OpportunityFeedbackEvent[]; available: boolean };
+  followThrough?: {history:OpportunityFollowThroughEvent[];action:OpportunityFollowThroughEvent|null;outcome:OpportunityFollowThroughEvent|null;available:boolean;linkedAlreadyHandledFeedback?:OpportunityFeedbackEvent|null};
 }
 
 export interface ConciergeWorkspaceResponse {

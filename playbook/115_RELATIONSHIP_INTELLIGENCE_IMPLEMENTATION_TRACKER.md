@@ -1444,3 +1444,12 @@ Correction completed: the production repository enumerates retained Opportunitie
 - Applied fail-closed preferences before Concierge delivery/exposure; preserved retained Opportunity, evidence, confidence, temporal history, ranking gates, restraint, and maximum-three behavior.
 - Connected ownership-checked history/mutation handlers, client transport, stable uncertain retries, reload/error state, a modest nine-choice menu, optional user not-before date, and retained withdrawal access after source disappearance.
 - Live migration, deployment, database qualification, and authenticated owner workflow remain deferred; automated fixtures are not real-workflow evidence.
+
+# Opportunity follow-through and outcome slice (implementation complete; rollout deferred)
+
+- Added source-backed, exact-occurrence, append-only owner reports for action follow-through and independent relationship outcomes.
+- Action vocabulary distinguishes planned, user-reported completion, noncompletion, dismissal, no-longer-relevant, and unknown. Outcome vocabulary distinguishes went well, went poorly, appreciated, unnecessary, and unknown.
+- Corrections and withdrawals append versions; strict stored-event anchors permit same-scope correction and independent later outcomes after suppression or source disappearance without rebinding to a current cycle. Fingerprinted receipts, per-dimension optimistic concurrency, and atomic Drizzle transactions preserve auditability and safe retry.
+- Concierge suppression is conservative: only the matching current completed/no-longer-relevant report or compatible active `already_handled` feedback restrains that occurrence. Outcomes and passive product behavior never prove completion.
+- Added production routes/adapter, fail-closed builder projection, restrained accessible controls, retained history, and focused unit/integration/frontend verification.
+- The SQL migration remains unapplied. Deployment, live PostgreSQL persistence/concurrency, authenticated ownership, and real owner-workflow qualification remain deferred and unproven.
