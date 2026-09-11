@@ -1,4 +1,5 @@
 import type { ActionPriority } from "../action/actionPlanTypes";
+import type { OpportunityTemporalState } from "../temporal";
 
 export const RELATIONSHIP_OPPORTUNITY_VERSION = 1 as const;
 
@@ -13,6 +14,7 @@ export interface RelationshipOpportunityEvidence {
   label: string;
   classification: OpportunityEvidenceClassification;
   observedAt: string | null;
+  sourceVersion?: string | null;
 }
 
 export interface RelationshipOpportunityRecommendation {
@@ -39,7 +41,7 @@ export interface RelationshipOpportunity {
     sourceId: string | null;
     evidence: RelationshipOpportunityEvidence[];
   };
-  timing: { observedAt: string | null };
+  timing: { observedAt: string | null; temporal?: OpportunityTemporalState };
   presentation: {
     recommendationEligible: boolean;
     insightEligible: boolean;

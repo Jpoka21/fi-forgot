@@ -5,6 +5,7 @@
  */
 
 export { runBrain } from "./orchestrator";
+export * from "./temporal";
 
 export {
   BRAIN_CONTEXT_VERSION,

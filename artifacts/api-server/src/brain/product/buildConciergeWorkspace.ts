@@ -16,7 +16,12 @@ import {
 import { orchestrateProductBrainFatigue } from "./orchestrateProductBrainFatigue";
 import type { FatigueOpportunity } from "../fatigue/fatigueTypes";
 import { buildRelationshipOpportunity } from "./buildRelationshipOpportunity";
-import { shouldIncludeConciergeOpportunity } from "./shouldIncludeConciergeOpportunity";
+import {
+  createPgOpportunityTemporalHistoryRepository,
+  evaluateOpportunityTemporal,
+  type OpportunityTemporalHistoryRepository,
+} from "../temporal";
+import { logger } from "../../lib/logger";
 
 export interface ConciergeRecipientInput {
   recipientId: string;
@@ -33,6 +38,7 @@ export interface BuildConciergeWorkspaceOptions {
   recipients: ConciergeRecipientInput[];
   runBrain: RunBrainForRecipient;
   generatedAt?: string;
+  temporalHistoryRepository?: OpportunityTemporalHistoryRepository;
 }
 
 function dedupeDeliveredConciergeOpportunities(
@@ -52,82 +58,81 @@ function dedupeDeliveredConciergeOpportunities(
   return delivered;
 }
 
-export async function buildConciergeWorkspace(
-  options: BuildConciergeWorkspaceOptions,
-): Promise<ConciergeWorkspaceResponse> {
-  const { userId, recipients, runBrain, generatedAt = new Date().toISOString() } = options;
-
+export async function buildConciergeWorkspace(options: BuildConciergeWorkspaceOptions): Promise<ConciergeWorkspaceResponse> {
+  const { userId, recipients, runBrain, generatedAt = new Date().toISOString(), temporalHistoryRepository = createPgOpportunityTemporalHistoryRepository() } = options;
   const executions = new Map<string, BrainExecutionResult>();
-  const decisions = await collectProductBrainDecisions({
-    userId,
-    recipients,
-    runBrain: async (recipientId, ownerId) => {
-      const execution = await runBrain(recipientId, ownerId);
-      executions.set(recipientId, execution);
-      return execution;
-    },
-  });
-
-  return orchestrateProductBrainFatigue({
-    userId,
-    generatedAt,
-    decisions,
-    recipients,
-    buildFromVisible: (visibleFatigueOpportunities, buildGeneratedAt) => {
-      const recommendationItems = visibleFatigueOpportunities.slice(0, CONCIERGE_RECOMMENDATIONS_MAX);
-      const insightItems = visibleFatigueOpportunities.slice(0, CONCIERGE_INSIGHTS_MAX);
-      const primaryOpportunityItems = visibleFatigueOpportunities.slice(
-        0,
-        Math.max(CONCIERGE_RECOMMENDATIONS_MAX, CONCIERGE_INSIGHTS_MAX),
-      );
-
-      const visibleOpportunities = primaryOpportunityItems.map((item, index) => {
-        const execution = executions.get(item.opportunity.recipientId);
-        if (!execution) throw new Error("Missing Brain execution for Concierge opportunity");
-        return buildRelationshipOpportunity(item.opportunity.decision, execution, {
-          recipientId: item.opportunity.recipientId,
-          recipientName: item.opportunity.recipientName,
-        }, undefined, {
-          recommendationEligible: index < CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX,
-          insightEligible: index < CONCIERGE_INSIGHTS_MAX,
-        });
-      });
-
-      const restrainedOpportunities = decisions
-        .filter((decision) => !shouldIncludeConciergeOpportunity(decision))
-        .map((decision) => {
-          const execution = executions.get(decision.recipientId);
-          const recipient = recipients.find((item) => item.recipientId === decision.recipientId);
-          if (!execution || !recipient) throw new Error("Missing Brain input for restrained Concierge Opportunity");
-          return buildRelationshipOpportunity(decision, execution, recipient);
-        });
-      const opportunities = [...visibleOpportunities, ...restrainedOpportunities];
-
-      // Compatibility projection: preserve the pre-Opportunity DTO membership and shape.
-      // Primary frontend behavior consumes `opportunities`, including restraint.
-      const recommendations = visibleOpportunities
-        .slice(0, CONCIERGE_RECOMMENDATIONS_MAX)
-        .map(projectConciergeRecommendation);
-      const visibleById = new Map(visibleOpportunities.map((item) => [item.id, item]));
-      const insights = insightItems.map((item) => {
-        const opportunity = visibleById.get(item.opportunity.opportunityKey);
-        if (!opportunity) throw new Error("Missing primary Opportunity for Concierge insight projection");
-        return projectConciergeInsight(opportunity);
-      });
-
-      return {
-        product: {
-          version: CONCIERGE_WORKSPACE_VERSION,
-          generatedAt: buildGeneratedAt,
-          opportunities,
-          recommendations,
-          insights,
-        },
-        deliveredFatigueOpportunities: dedupeDeliveredConciergeOpportunities(
-          recommendationItems,
-          insightItems,
-        ),
-      };
-    },
-  });
+  const decisions = await collectProductBrainDecisions({ userId, recipients, runBrain: async (id, owner) => { const result = await runBrain(id, owner); executions.set(id, result); return result; } });
+  let retainedRecords: Awaited<ReturnType<OpportunityTemporalHistoryRepository['listRetained']>> = [];
+  let listingFailed = false;
+  try { retainedRecords = await temporalHistoryRepository.listRetained({ userId, recipientIds: recipients.map(r => r.recipientId) }); }
+  catch (error) { listingFailed = true; logger.warn({ err: error, userId }, 'Opportunity history listing unavailable'); }
+  const histories = new Map(retainedRecords.map(r => [r.opportunity.id, r.history]));
+  const failedLoads = new Set<string>();
+  await Promise.all(decisions.map(async decision => {
+    const id = decision.recipientId + ':' + decision.sourceRuleId;
+    if (histories.has(id)) return;
+    try { histories.set(id, await temporalHistoryRepository.loadHistory({ userId, opportunityId: id })); }
+    catch (error) { failedLoads.add(id); logger.warn({ err: error, userId, opportunityId: id }, 'Opportunity history unavailable'); }
+  }));
+  const evaluated = new Map<string, ReturnType<typeof buildRelationshipOpportunity>>();
+  for (const decision of decisions) {
+    const execution = executions.get(decision.recipientId)!;
+    const recipient = recipients.find(r => r.recipientId === decision.recipientId)!;
+    const id = decision.recipientId + ':' + decision.sourceRuleId;
+    evaluated.set(id, buildRelationshipOpportunity(decision, execution, recipient, undefined, undefined, { evaluatedAt: generatedAt, previousHistory: histories.get(id) ?? [] }));
+  }
+  for (const retained of retainedRecords) {
+    if (evaluated.has(retained.opportunity.id)) continue;
+    const prior = retained.history.at(-1);
+    const execution = executions.get(retained.opportunity.recipient.id);
+    if (!execution) continue; // The caller's authorized recipient set bounds retained access.
+    const identity = execution.loadResult.relationshipContext.identity;
+    const continuing = execution.extraction.availableSignals.some(signal => signal.source === prior?.evidence.source && signal.label === prior?.evidence.dateLabel && signal.value === prior?.evidence.dateValue);
+    const temporal = evaluateOpportunityTemporal({ family: prior?.effectiveDate ? 'one_time' : 'unsupported', dateValue: prior?.evidence.dateValue ?? null, dateLabel: prior?.evidence.dateLabel ?? null, evaluatedAt: generatedAt, evidence: prior?.evidence ?? retained.opportunity.timing.temporal!.evidence, previousHistory: retained.history, evidenceStatus: identity?.archived ? 'archived' : identity?.active === false ? 'invalidated' : continuing ? undefined : 'withdrawn', fixedOccurrenceCycleId: prior?.occurrenceCycleId ?? undefined, fixedOccurrenceDate: prior?.effectiveDate ?? undefined });
+    evaluated.set(retained.opportunity.id, { ...retained.opportunity, timing: { observedAt: retained.opportunity.timing.observedAt, temporal }, presentation: { recommendationEligible: false, insightEligible: false }, restraint: { restrained: true, reason: temporal.restraintReason ?? 'not_current_brain_decision' }, recommendation: null });
+  }
+  const suppressForPersistence = (opportunity: ReturnType<typeof buildRelationshipOpportunity>, status: 'unavailable' | 'failed') => {
+    const temporal = opportunity.timing.temporal;
+    if (!temporal) return;
+    temporal.persistence = status;
+    if (temporal.family !== 'unsupported') {
+      opportunity.presentation = { recommendationEligible: false, insightEligible: false };
+      opportunity.restraint = { restrained: true, reason: 'temporal_history_' + status };
+      opportunity.recommendation = null;
+    }
+  };
+  // Persist all retained Brain Opportunities before any presentation/exposure accounting.
+  // Unknown continuity never becomes an empty successful baseline.
+  await Promise.all([...evaluated].map(async ([id, opportunity]) => {
+    const temporal = opportunity.timing.temporal;
+    if (!temporal) return;
+    if (listingFailed || failedLoads.has(id)) { suppressForPersistence(opportunity, 'unavailable'); return; }
+    const latest = temporal.history.at(-1), prior = histories.get(id)?.at(-1);
+    if (!latest || latest.changeId === prior?.changeId) return;
+    try { await temporalHistoryRepository.appendChange({ userId, opportunityId: id, change: latest, evidence: temporal.evidence, opportunity }); }
+    catch (error) { suppressForPersistence(opportunity, 'failed'); logger.warn({ err: error, userId, opportunityId: id }, 'Opportunity history append failed'); }
+  }));
+  return orchestrateProductBrainFatigue({ userId, generatedAt, decisions, recipients, buildFromVisible: (visible, buildGeneratedAt) => {
+    const recommendationsInput = visible.slice(0, CONCIERGE_RECOMMENDATIONS_MAX);
+    const insightsInput = visible.slice(0, CONCIERGE_INSIGHTS_MAX);
+    const primaryInput = visible.slice(0, Math.max(CONCIERGE_RECOMMENDATIONS_MAX, CONCIERGE_INSIGHTS_MAX));
+    const eligibility = new Map([...evaluated].map(([id, opportunity]) => [id, { ...opportunity.presentation }]));
+    for (const opportunity of evaluated.values()) opportunity.presentation = { recommendationEligible: false, insightEligible: false };
+    const primary = primaryInput.map((item, index) => {
+      const id = item.opportunity.opportunityKey;
+      const sourceDecision = item.opportunity.decision;
+      const recipientId = item.opportunity.recipientId;
+      const recipientName = item.opportunity.recipientName;
+      const opportunity = evaluated.get(id);
+      if (!opportunity || !sourceDecision || opportunity.recipient.id !== recipientId || opportunity.recipient.name !== recipientName) {
+        throw new Error("Fatigue Opportunity did not match its evaluated Relationship Opportunity");
+      }
+      const eligible = eligibility.get(id)!;
+      opportunity.presentation = { recommendationEligible: eligible.recommendationEligible && index < CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX, insightEligible: eligible.insightEligible && index < CONCIERGE_INSIGHTS_MAX };
+      return opportunity;
+    });
+    const recommendations = primary.slice(0, CONCIERGE_RECOMMENDATIONS_MAX).filter(o => o.recommendation !== null).map(projectConciergeRecommendation);
+    const insights = insightsInput.flatMap(item => { const o = evaluated.get(item.opportunity.opportunityKey)!; return o.presentation.insightEligible ? [projectConciergeInsight(o)] : []; });
+    return { product: { version: CONCIERGE_WORKSPACE_VERSION, generatedAt: buildGeneratedAt, opportunities: [...evaluated.values()], recommendations, insights }, deliveredFatigueOpportunities: dedupeDeliveredConciergeOpportunities(recommendationsInput, insightsInput).filter(item => evaluated.get(item.opportunity.opportunityKey)?.recommendation !== null) };
+  } });
 }

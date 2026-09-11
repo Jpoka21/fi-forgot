@@ -1,0 +1,1 @@
+{"code":"const RELATIONSHIP_OPPORTUNITY_VERSION=1;export{RELATIONSHIP_OPPORTUNITY_VERSION};\n","warnings":[],"map":{"version":3,"mappings":"AAGO,MAAM,iCAAmC","names":[],"ignoreList":[],"sources":["C:\\Users\\James.Massaro\\Projects\\fi-forgot\\artifacts\\api-server\\src\\brain\\product\\relationshipOpportunityTypes.ts"],"sourcesContent":[null]}}

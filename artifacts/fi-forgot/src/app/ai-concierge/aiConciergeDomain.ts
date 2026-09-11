@@ -40,7 +40,9 @@ export function relationshipOpportunitiesToConversationRecommendations(
 ): ConciergeConversationRecommendation[] {
   return opportunities
     .filter((opportunity) =>
-      opportunity.presentation.recommendationEligible && opportunity.recommendation !== null,
+      opportunity.presentation.recommendationEligible &&
+      opportunity.recommendation !== null &&
+      (opportunity.timing.temporal?.recommendationEligible ?? true),
     )
     .slice(0, CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX)
     .map((opportunity) => ({
@@ -57,7 +59,9 @@ export function relationshipOpportunitiesForRecommendationPresentation(
 ): RelationshipOpportunity[] {
   return opportunities
     .filter((opportunity) =>
-      opportunity.presentation.recommendationEligible && opportunity.recommendation !== null,
+      opportunity.presentation.recommendationEligible &&
+      opportunity.recommendation !== null &&
+      (opportunity.timing.temporal?.recommendationEligible ?? true),
     )
     .slice(0, CONCIERGE_PRESENTED_RECOMMENDATIONS_MAX);
 }

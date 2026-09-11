@@ -27,7 +27,17 @@ export function mapRelationshipOpportunityViewModel(
       ...opportunity.provenance,
       evidence: opportunity.provenance.evidence.map((item) => ({ ...item })),
     },
-    timing: { ...opportunity.timing },
+    timing: {
+      ...opportunity.timing,
+      ...(opportunity.timing.temporal ? {
+        temporal: {
+          ...opportunity.timing.temporal,
+          evidence: { ...opportunity.timing.temporal.evidence },
+          preparationWindow: opportunity.timing.temporal.preparationWindow ? { ...opportunity.timing.temporal.preparationWindow } : null,
+          history: opportunity.timing.temporal.history.map((item) => ({ ...item, evidence: { ...item.evidence } })),
+        },
+      } : {}),
+    },
     presentation: { ...opportunity.presentation },
     restraint: { ...opportunity.restraint },
     recommendation: opportunity.recommendation ? { ...opportunity.recommendation } : null,

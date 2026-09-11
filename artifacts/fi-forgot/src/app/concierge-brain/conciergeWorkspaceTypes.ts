@@ -32,6 +32,25 @@ export interface ConciergeInsight {
 }
 
 export type OpportunityEvidenceClassification = "observation" | "direct_fact" | "inference";
+export type OpportunityTimingState = "valid_now" | "premature" | "approaching_relevance" | "stale" | "expired" | "unknown";
+export type OpportunityDecay = "none" | "watch" | "diminished" | "exhausted" | "unknown";
+
+export interface OpportunityTemporalState {
+  persistence: "available" | "unavailable" | "failed";
+  support: "supported" | "withdrawn" | "archived" | "invalid" | "unknown";
+  state: OpportunityTimingState;
+  family: "one_time" | "annual_recurring" | "unsupported";
+  effectiveDate: string | null;
+  occurrenceCycleId: string | null;
+  activatesAt: string | null;
+  expiresAt: string | null;
+  preparationWindow: { source: "policy"; days: number; approachingLeadDays?: number; staleRetentionDays?: number } | null;
+  decay: OpportunityDecay;
+  recommendationEligible: boolean;
+  restraintReason: string | null;
+  evidence: { source: string; sourceId: string | null; sourceVersion: string | null; evidenceId: string | null; dateLabel: string | null; dateValue: string | null };
+  history: Array<{ changeId: string; evaluatedAt: string; state: OpportunityTimingState; occurrenceCycleId: string | null; effectiveDate: string | null; reason: string; family: "one_time" | "annual_recurring" | "unsupported"; evidence: OpportunityTemporalState["evidence"] }>;
+}
 
 export interface RelationshipOpportunity {
   version: 1;
@@ -51,9 +70,10 @@ export interface RelationshipOpportunity {
       label: string;
       classification: OpportunityEvidenceClassification;
       observedAt: string | null;
+      sourceVersion?: string | null;
     }>;
   };
-  timing: { observedAt: string | null };
+  timing: { observedAt: string | null; temporal?: OpportunityTemporalState };
   presentation: { recommendationEligible: boolean; insightEligible: boolean };
   restraint: { restrained: boolean; reason: string | null };
   recommendation: { label: string; href: string; priority: ActionPriority } | null;
