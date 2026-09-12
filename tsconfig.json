@@ -14,9 +14,6 @@
     },
     {
       "path": "./lib/events"
-    },
-    {
-      "path": "./lib/orchestra-execution"
     }
   ]
 }

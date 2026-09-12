@@ -18,9 +18,12 @@ export function buildPlan(root=resolve(import.meta.dirname,"../../..")):PlannedC
 {phase:"wait-api",program:process.execPath,args:[tsx,resolve(root,"scripts/src/brain-qualification/wait-api.ts")],env:evidenceEnv,mutates:false},
 {phase:"assert",program:process.execPath,args:[tsx,runner,"assert"],env:evidenceEnv,mutates:true},
 {phase:"stop-api",program:"@captured-api",args:[],mutates:true,process:"stop-captured"},
+{phase:"restart-postgres",program:"@qualification/restart-postgres",args:[TARGET.pgdata,String(TARGET.port)],mutates:true},
 {phase:"restart-api",program:process.execPath,args:["--enable-source-maps",resolve(root,"artifacts/api-server/dist/index.mjs")],env:apiEnv,mutates:true,process:"capture"},
 {phase:"wait-api-after-restart",program:process.execPath,args:[tsx,resolve(root,"scripts/src/brain-qualification/wait-api.ts")],env:evidenceEnv,mutates:false},
-{phase:"assert-after-restart",program:process.execPath,args:[tsx,runner,"assert","--after-restart"],env:evidenceEnv,mutates:false},
+{phase:"assert-after-restart",program:process.execPath,args:[tsx,runner,"assert","--after-restart"],env:evidenceEnv,mutates:true},
+{phase:"record-postgres-restart-proof",program:"@qualification/record-postgres-restart-proof",args:[],mutates:false},
+{phase:"browser-workflow",program:process.execPath,args:["--experimental-strip-types",resolve(root,"scripts/src/brain-qualification/browser/entry.mjs")],env:evidenceEnv,mutates:true},
 {phase:"stop-api-final",program:"@captured-api",args:[],mutates:true,process:"stop-captured"},
 {phase:"stop-postgres",program:"pg_ctl",args:["--pgdata",TARGET.pgdata,"stop"],mutates:true},
 ];}

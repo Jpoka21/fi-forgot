@@ -3,6 +3,7 @@
   "clock": "2031-04-05T12:00:00Z",
   "qualificationTiming": {
     "runDateEnvironment": "BRAIN_QUALIFICATION_SYNTHETIC_RUN_DATE",
+    "previewDays": 14,
     "birthdayOffsetsDays": {
       "brain-qual-a-r1": 7,
       "brain-qual-a-r2": 9,
@@ -168,5 +169,11 @@
     "knownIdImpersonationBlocked": false,
     "authenticatedIsolationQualified": false,
     "standaloneOpportunityPersistenceClaimed": false
+  },
+  "personalRecipientDefaults": {
+    "customDates": [],
+    "selectedEvents": [],
+    "favoriteMemories": "",
+    "insideJokes": ""
   }
 }

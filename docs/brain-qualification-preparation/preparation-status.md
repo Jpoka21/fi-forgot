@@ -12,7 +12,7 @@ Status updated 2026-09-11. This is a no-database preparation result, not proof o
 
 5. **Containment limits.** Process-level hooks are defense in depth, not an OS firewall. A later execution requires independently observed loopback-only OS containment; the planner does not self-attest that evidence. Native code, a compromised runtime, browser internals, and processes outside the guarded tree remain outside this preparation proof.
 
-6. **Synthetic fixtures.** Deterministic fixtures cover two owners, seven distinct recipients, provenance, nullable evidence, source/version/cycle identity, confidence, observation timing, corrections, immutable history, action reports, outcomes, and external verification. Approved fixture SHA-256 is `0e0df18b78c6e14c126d7f392eb9e101e4f9228f3f89173e646b2f1d0270fac8`.
+6. **Synthetic fixtures.** Deterministic fixtures cover two owners, seven distinct recipients, provenance, nullable evidence, source/version/cycle identity, confidence, observation timing, corrections, immutable history, action reports, outcomes, and external verification. Approved fixture SHA-256 is `1591c1c7e2adeab1d5f253a3d0de00ee1a1c2cea07ad1acff316eb9c9e843e62`.
 
 7. **Production-path assertions.** Controlled no-DB tests exercise actual Brain derivation and repository contracts, owner/recipient filtering, serialization, lifecycle operations, restraint, and at-most-three original eligible presentation slots without backfill. Synthetic timing is resolved only from an explicit qualification run date. These tests do not claim persisted Opportunities.
 

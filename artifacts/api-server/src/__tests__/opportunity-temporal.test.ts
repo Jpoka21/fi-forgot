@@ -36,3 +36,26 @@ if (withdrawn.history.length !== 3 || withdrawn.history.at(-1)?.reason !== "sour
 if (archived.history.length !== 4 || archived.history.at(-1)?.reason !== "source_archived" || archived.support !== "archived") throw new Error("archive transition was not appended");
 if (invalidated.history.length !== 5 || invalidated.history.at(-1)?.reason !== "source_invalidated" || invalidated.support !== "invalid") throw new Error("invalidation transition was not appended");
 console.log("opportunity temporal lifecycle unit tests passed");
+// PostgreSQL JSONB does not preserve source object key ordering. Repeated reads
+// must retain the original entry, including its original evaluation time and ID.
+const reorder = (value: any): any => Array.isArray(value) ? value.map(reorder) : value && typeof value === 'object'
+  ? Object.fromEntries(Object.keys(value).sort().reverse().map(key => [key, reorder(value[key])])) : value;
+for (const family of ['one_time', 'unsupported'] as const) {
+  const input = {family,dateValue:family==='one_time'?'2026-01-15':null,dateLabel:'occasion',evaluatedAt:'2026-01-01T12:00:00.000Z',evidence:{...evidence,sourceVersion:null,evidenceId:null}};
+  const initial=evaluateOpportunityTemporal(input),persisted=reorder(initial.history);
+  let history=persisted;
+  for(let i=2;i<=5;i++){
+    const reread=evaluateOpportunityTemporal({...input,evaluatedAt:`2026-01-0${i}T12:00:00.000Z`,previousHistory:history});
+    if(reread.history.length!==1||reread.history[0]!.changeId!==initial.history[0]!.changeId||reread.history[0]!.evaluatedAt!==input.evaluatedAt)throw Error('JSONB key order appended duplicate '+family+' history');
+    history=reorder(reread.history);
+  }
+  for(const field of ['source','sourceId','sourceVersion','evidenceId','dateLabel','dateValue'] as const){
+    const changedInput:any={...input,previousHistory:persisted,evaluatedAt:'2026-01-02T12:00:00.000Z',evidence:{...input.evidence}};
+    if(field==='dateLabel')changedInput.dateLabel='changed label';else if(field==='dateValue')changedInput.dateValue='2026-01-16';else changedInput.evidence[field]='changed evidence';
+    const changedEvidence=evaluateOpportunityTemporal(changedInput);
+    if(changedEvidence.history.length!==2||changedEvidence.history[0]!.changeId!==initial.history[0]!.changeId)throw Error('Genuine evidence change lost: '+family+'/'+field);
+  }
+  const absentVersion:any={...input.evidence};delete absentVersion.sourceVersion;
+  if(evaluateOpportunityTemporal({...input,evidence:absentVersion,previousHistory:persisted}).history.length!==2)throw Error('Absent evidence version silently equated with explicit unknown');
+}
+console.log('JSONB reordered known/unknown history stable; all six evidence-field changes and null/undefined distinctions retained');

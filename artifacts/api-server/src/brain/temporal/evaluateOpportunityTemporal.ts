@@ -1,6 +1,7 @@
 import type {
   EvaluateOpportunityTemporalInput,
   OpportunityDecay,
+  OpportunityTemporalEvidence,
   OpportunityTemporalState,
   OpportunityTimingChange,
   OpportunityTimingState,
@@ -8,6 +9,14 @@ import type {
 } from "./opportunityTemporalTypes";
 
 const DAY_MS = 86_400_000;
+
+/** JSONB may reorder object keys. Only changes to declared evidence fields count;
+ * comparison must not turn a persistence serialization detail into new history. */
+function sameEvidence(a: OpportunityTemporalEvidence, b: OpportunityTemporalEvidence): boolean {
+  return a.source === b.source && a.sourceId === b.sourceId &&
+    a.sourceVersion === b.sourceVersion && a.evidenceId === b.evidenceId &&
+    a.dateLabel === b.dateLabel && a.dateValue === b.dateValue;
+}
 export const OPPORTUNITY_PREPARATION_WINDOW_DAYS = 30 as const;
 
 function parseIsoDate(value: unknown): { year: number; month: number; day: number; iso: string } | null {
@@ -75,7 +84,7 @@ function unknown(
   const priorOccurrence = [...previous].reverse().find((item) => item.occurrenceCycleId !== null);
   const evidence = { ...input.evidence, dateLabel: input.dateLabel ?? null, dateValue: typeof input.dateValue === "string" ? input.dateValue : null };
   const prior = previous.at(-1);
-  if (prior?.state === "unknown" && prior.reason === reason && JSON.stringify(prior.evidence) === JSON.stringify(evidence)) {
+  if (prior?.state === "unknown" && prior.reason === reason && sameEvidence(prior.evidence, evidence)) {
     return { persistence: "available", support, state: "unknown", family: input.family, effectiveDate: null, occurrenceCycleId: null, activatesAt: null, expiresAt: null, preparationWindow: null, decay: "unknown", recommendationEligible: false, restraintReason: reason, evidence, history: [...previous] };
   }
   const change: OpportunityTimingChange | null = parseEvaluation(input.evaluatedAt)
@@ -153,7 +162,7 @@ export function evaluateOpportunityTemporal(input: EvaluateOpportunityTemporalIn
   const evidence = { ...input.evidence, dateLabel: input.dateLabel ?? null, dateValue: input.dateValue as string };
   const previous = input.previousHistory ?? [];
   const prior = previous.at(-1);
-  if (prior?.state === state && prior.effectiveDate === effectiveDate && prior.reason === reason && JSON.stringify(prior.evidence) === JSON.stringify(evidence)) {
+  if (prior?.state === state && prior.effectiveDate === effectiveDate && prior.reason === reason && sameEvidence(prior.evidence, evidence)) {
     return { persistence: "available", support: "supported", state, family: input.family, effectiveDate, occurrenceCycleId: cycleId, activatesAt, expiresAt, preparationWindow: { source: "policy", days: windowDays, approachingLeadDays: 14, staleRetentionDays: 30 }, decay: decayFor(state), recommendationEligible, restraintReason: recommendationEligible ? null : reason, evidence, history: [...previous] };
   }
   const change: OpportunityTimingChange = {

@@ -19,3 +19,13 @@ export async function waitForReadiness(probe:()=>Promise<boolean>,pause:()=>Prom
   }
   throw new Error('FAIL_CLOSED: qualified API readiness timed out');
 }
+import type {ChildProcess} from 'node:child_process';
+/** Install immediately after spawn so a late IPC error cannot escape recovery. */
+export function observeManagedChild(child:ChildProcess){child.on('error',()=>{});}
+export function requestManagedChildStop(child:ChildProcess){
+  const alive=()=>child.exitCode==null&&child.signalCode==null;
+  const terminate=()=>{if(alive())try{child.kill('SIGTERM');}catch{/* wait/port proof still required */}};
+  if(!alive())return;
+  if(child.connected)try{child.send('brain-qualification-stop',error=>{if(error)terminate();});}catch{terminate();}
+  else terminate();
+}

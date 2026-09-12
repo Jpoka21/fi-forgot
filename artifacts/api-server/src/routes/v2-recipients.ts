@@ -1,3 +1,4 @@
+import {createRecipientQuestionRouter} from "./recipient-question-reads";
 import { createVersionedUnderstandingHandlers } from '../services/versioned-understanding-repository';
 import { Router } from "express";
 import {
@@ -39,15 +40,12 @@ import {
 } from "../services/relationship-memory-evidence";
 import {
   getNextQuestion,
-  getNextFreshUpdateQuestion,
 } from "../services/question-engine";
 import { awardPoints } from "../services/brownie-points";
 import {
   scheduleFollowUp,
-  getDueFollowUpQuestion,
   markFollowUpAnswered,
 } from "../services/follow-up-questions";
-import type { FreshUpdateRecord } from "../services/question-engine";
 import { executeBrain } from "../brain/orchestrator";
 import { buildProductBrainDecision } from "../brain/product";
 import { recordQuestionAnsweredBrainOutcomeForProduction } from "../brain/outcomes/producers/recordQuestionAnsweredBrainOutcomeForProduction";
@@ -298,85 +296,6 @@ router.delete("/v2/recipients/:id", async (req, res) => {
 });
 
 // ── Get next profile gap question ─────────────────────────────────────────────
-
-router.get("/v2/recipients/:id/next-question", async (req, res) => {
-  const userId = requireUserId(req, res);
-  if (!userId) return;
-
-  const { id } = req.params;
-
-  const [row] = await db
-    .select({ id: recipientsTable.id })
-    .from(recipientsTable)
-    .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)))
-    .limit(1);
-
-  if (!row) {
-    res.status(404).json({ error: "Recipient not found" });
-    return;
-  }
-
-  try {
-    const context = await assembleRecipientContext(id, userId);
-    const profileQuestion = getNextQuestion(context);
-    const profileComplete = profileQuestion === null;
-
-    let nextQuestion;
-    if (!profileComplete) {
-      nextQuestion = profileQuestion;
-    } else {
-      // Priority: follow-up questions (due) → fresh updates
-      const dueFollowUp = await getDueFollowUpQuestion(userId, id);
-      if (dueFollowUp) {
-        nextQuestion = {
-          fieldKey: "follow_up_answer",
-          fieldLabel: "Follow Up",
-          category: "update" as const,
-          priority: "high" as const,
-          question: dueFollowUp.question,
-          reason: "You mentioned this previously. Any updates?",
-          mode: "follow_up" as const,
-          followUp: {
-            id: dueFollowUp.id,
-            originalAnswer: dueFollowUp.originalAnswer,
-            category: dueFollowUp.category,
-          },
-        };
-      } else {
-        const freshUpdateHistory: FreshUpdateRecord[] =
-          context.freshUpdates.map((u) => ({
-            questionKey: u.questionKey,
-            createdAt: new Date(u.createdAt),
-          }));
-        nextQuestion = getNextFreshUpdateQuestion(context, freshUpdateHistory);
-      }
-    }
-
-    logger.info(
-      {
-        recipientId: id,
-        profileScore: context.profileCompleteness.score,
-        profileComplete,
-        nextMode: nextQuestion?.mode ?? null,
-        nextPriority: nextQuestion?.priority ?? null,
-        nextFieldKey: nextQuestion?.fieldKey ?? null,
-      },
-      "v2-recipients: next-question",
-    );
-
-    res.json({
-      nextQuestion,
-      profileComplete,
-      profileScore: context.profileCompleteness.score,
-    });
-  } catch (err) {
-    logger.error(
-      { err, recipientId: id },
-      "v2-recipients: next-question failed",
-    );
-    res.status(500).json({ error: "Failed to determine next question" });
-  }
-});
 
 // ── Product Brain decision ────────────────────────────────────────────────────
 
@@ -731,100 +650,6 @@ router.patch("/v2/recipients/:id/hypotheses/:hypothesisId/:action", understandin
 // ── Get all fresh updates for a recipient ─────────────────────────────────────
 // Returns answered fresh updates (newest first) + per-category skip stats.
 
-router.get("/v2/recipients/:id/fresh-updates", async (req, res) => {
-  const userId = requireUserId(req, res);
-  if (!userId) return;
-
-  const { id } = req.params;
-
-  const [row] = await db
-    .select({ id: recipientsTable.id })
-    .from(recipientsTable)
-    .where(and(eq(recipientsTable.id, id), eq(recipientsTable.userId, userId)))
-    .limit(1);
-
-  if (!row) {
-    res.status(404).json({ error: "Recipient not found" });
-    return;
-  }
-
-  // All answered fresh updates, newest first
-  const answered = await db
-    .select()
-    .from(questionAnswersTable)
-    .where(
-      and(
-        eq(questionAnswersTable.recipientId, id),
-        eq(questionAnswersTable.triggerType, "fresh_update"),
-        eq(questionAnswersTable.wasSkipped, false),
-      ),
-    )
-    .orderBy(desc(questionAnswersTable.createdAt));
-
-  // Skipped fresh updates — for skip stats tracking only
-  const skippedRows = await db
-    .select({ questionKey: questionAnswersTable.questionKey })
-    .from(questionAnswersTable)
-    .where(
-      and(
-        eq(questionAnswersTable.recipientId, id),
-        eq(questionAnswersTable.triggerType, "fresh_update"),
-        eq(questionAnswersTable.wasSkipped, true),
-      ),
-    );
-
-  const now = Date.now();
-
-  // Initialise skip stats for all known bank keys
-  const FRESH_UPDATE_FIELD_KEYS = [
-    "recent_memory",
-    "current_excitement",
-    "current_challenge",
-    "recent_accomplishment",
-    "family_news",
-    "new_hobby",
-    "anything_to_remember",
-  ] as const;
-
-  const skipStats: Record<
-    string,
-    { timesAnswered: number; timesSkipped: number; timesAsked: number }
-  > = {};
-  for (const key of FRESH_UPDATE_FIELD_KEYS) {
-    skipStats[key] = { timesAnswered: 0, timesSkipped: 0, timesAsked: 0 };
-  }
-  for (const r of answered) {
-    if (skipStats[r.questionKey]) {
-      skipStats[r.questionKey]!.timesAnswered++;
-      skipStats[r.questionKey]!.timesAsked++;
-    }
-  }
-  for (const r of skippedRows) {
-    if (skipStats[r.questionKey]) {
-      skipStats[r.questionKey]!.timesSkipped++;
-      skipStats[r.questionKey]!.timesAsked++;
-    }
-  }
-
-  const freshUpdates = answered.map((r) => {
-    const daysAgo = Math.floor(
-      (now - new Date(r.createdAt).getTime()) / 86400000,
-    );
-    const ageCategory: "recent" | "mid" | "older" =
-      daysAgo < 90 ? "recent" : daysAgo < 180 ? "mid" : "older";
-    return {
-      id: r.id,
-      questionKey: r.questionKey,
-      questionText: r.questionText,
-      answerText: r.answerText,
-      importanceScore: r.importanceScore ?? null,
-      createdAt: r.createdAt,
-      daysAgo,
-      ageCategory,
-    };
-  });
-
-  res.json({ freshUpdates, skipStats });
-});
+router.use(createRecipientQuestionRouter(db));
 
 export default router;

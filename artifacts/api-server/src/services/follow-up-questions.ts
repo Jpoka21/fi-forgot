@@ -13,7 +13,7 @@
  */
 
 import { db, followUpQuestionsTable } from "@workspace/db";
-import { eq, and, lte, lt, or } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { openai, hasAI } from "../lib/openai";
 import { logger } from "../lib/logger";
@@ -31,7 +31,7 @@ const CATEGORY_DELAY_DAYS: Record<FollowUpCategory, number> = {
   GENERAL:        90,
 };
 
-const EXPIRY_DAYS = 180;
+
 
 // ─── Classification + question generation ─────────────────────────────────────
 
@@ -142,62 +142,7 @@ export async function scheduleFollowUp(
 
 // ─── Retrieve a due follow-up ─────────────────────────────────────────────────
 
-export interface DueFollowUp {
-  id:             string;
-  category:       FollowUpCategory;
-  question:       string;
-  originalAnswer: string;
-}
-
-/**
- * Returns the oldest pending follow-up question that is due for this recipient.
- * Also expires overdue questions as a side effect (non-fatal).
- * Returns null if nothing is due.
- */
-export async function getDueFollowUpQuestion(
-  userId: string,
-  recipientId: string,
-): Promise<DueFollowUp | null> {
-  const now = new Date();
-
-  // Expire overdue records (180 days past triggerDate) — best effort
-  const expiryThreshold = new Date();
-  expiryThreshold.setDate(expiryThreshold.getDate() - EXPIRY_DAYS);
-  try {
-    await db
-      .update(followUpQuestionsTable)
-      .set({ status: "expired" })
-      .where(and(
-        eq(followUpQuestionsTable.userId, userId),
-        eq(followUpQuestionsTable.recipientId, recipientId),
-        eq(followUpQuestionsTable.status, "pending"),
-        lt(followUpQuestionsTable.triggerDate, expiryThreshold),
-      ));
-  } catch { /* non-fatal */ }
-
-  // Fetch the oldest due pending follow-up
-  const rows = await db
-    .select()
-    .from(followUpQuestionsTable)
-    .where(and(
-      eq(followUpQuestionsTable.userId, userId),
-      eq(followUpQuestionsTable.recipientId, recipientId),
-      eq(followUpQuestionsTable.status, "pending"),
-      lte(followUpQuestionsTable.triggerDate, now),
-    ))
-    .orderBy(followUpQuestionsTable.triggerDate)
-    .limit(1);
-
-  const row = rows[0];
-  if (!row) return null;
-
-  return {
-    id:             row.id,
-    category:       row.category,
-    question:       row.question,
-    originalAnswer: row.originalAnswer,
-  };
-}
+export { getDueFollowUpQuestion, type DueFollowUp } from "./due-follow-up-questions";
 
 // ─── Mark answered ────────────────────────────────────────────────────────────
 

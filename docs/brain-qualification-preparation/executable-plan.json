@@ -222,6 +222,15 @@
       "process": "stop-captured"
     },
     {
+      "phase": "restart-postgres",
+      "program": "@qualification/restart-postgres",
+      "args": [
+        "C:/Users/James.Massaro/Projects/fi-forgot/.orchestra/qualification/fi-forgot-brain-qualification-pgdata",
+        "55432"
+      ],
+      "mutates": true
+    },
+    {
       "phase": "restart-api",
       "program": "C:\\Program Files\\nodejs\\node.exe",
       "args": [
@@ -285,7 +294,33 @@
         "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
         "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json"
       },
+      "mutates": true
+    },
+    {
+      "phase": "record-postgres-restart-proof",
+      "program": "@qualification/record-postgres-restart-proof",
+      "args": [],
       "mutates": false
+    },
+    {
+      "phase": "browser-workflow",
+      "program": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--experimental-strip-types",
+        "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\scripts\\src\\brain-qualification\\browser\\entry.mjs"
+      ],
+      "env": {
+        "BRAIN_QUALIFICATION_EXECUTION_ADMITTED": "true",
+        "BRAIN_QUALIFICATION_HOST": "127.0.0.1",
+        "BRAIN_QUALIFICATION_PORT": "55432",
+        "BRAIN_QUALIFICATION_DATABASE": "fi_forgot_brain_qualification",
+        "BRAIN_QUALIFICATION_ROLE": "fi_forgot_brain_qualifier",
+        "BRAIN_QUALIFICATION_HASHES_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_CATALOG_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DISPOSABLE_MARKER_VERIFIED": "true",
+        "BRAIN_QUALIFICATION_DURABLE_EVIDENCE_PATH": "C:\\Users\\James.Massaro\\Projects\\fi-forgot\\.orchestra\\qualification\\brain-qualification-durable-evidence.json"
+      },
+      "mutates": true
     },
     {
       "phase": "stop-api-final",

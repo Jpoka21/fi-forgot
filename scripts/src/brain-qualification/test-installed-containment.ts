@@ -26,6 +26,16 @@ runtime.assertPostgresSocket([55432, '127.0.0.1']);
 runtime.assertPostgresSocket([{ port: '55432', host: '127.0.0.1' }]);
 for (const args of [[55432], [55432,'localhost'], [443,'127.0.0.1'], [{host:'127.0.0.1',port:55432,path:'socket'}], [{host:'127.0.0.1',port:55432,lookup(){}}]]) assert.throws(()=>runtime.assertPostgresSocket(args), /CONTAINMENT/);
 runtime.installRuntimeContainment({ BRAIN_QUALIFICATION_MODE: 'true' });
+// Native positive: Node's real listen path must work with no DNS resolver call.
+const listener=net.createServer();
+await new Promise<void>((resolve,reject)=>{listener.once('error',reject);listener.listen(8080,'127.0.0.1',resolve);});
+assert.deepEqual(listener.address(),{address:'127.0.0.1',family:'IPv4',port:8080});
+await new Promise<void>((resolve,reject)=>listener.close((error:Error|undefined)=>error?reject(error):resolve()));
+for(const options of [{port:8080,host:'localhost'},{port:8080,host:'0.0.0.0'},{port:8081,host:'127.0.0.1'},{port:8080,host:'127.0.0.1',fd:1},{port:8080,host:'127.0.0.1',handle:{}},{port:8080,host:'127.0.0.1',_handle:{}},{path:'pipe'}])assert.throws(()=>net.createServer().listen(options),/CONTAINMENT/);
+assert.throws(()=>dns.lookup('localhost',()=>{}),/CONTAINMENT/);
+assert.throws(()=>dns.lookup('127.0.0.1',{family:6},()=>{}),/CONTAINMENT/);
+await new Promise<void>((resolve,reject)=>dns.lookup('127.0.0.1',{all:true},(error:Error,result:unknown)=>{try{assert.equal(error,null);assert.deepEqual(result,[{address:'127.0.0.1',family:4}]);resolve();}catch(e){reject(e);}}));
+await assert.rejects(dns.promises.lookup('127.0.0.1'),/CONTAINMENT/);
 const attempts: Array<[string,()=>unknown]> = [
   ['HTTP request',()=>http.request('http://example.invalid')], ['HTTP get',()=>http.get('http://example.invalid')],
   ['ESM HTTP get',()=>esmHttpGet('http://example.invalid')],
