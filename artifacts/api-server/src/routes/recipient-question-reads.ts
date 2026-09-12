@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {recipientsTable,questionAnswersTable} from "@workspace/db/schema";
-import {eq,and,desc} from "drizzle-orm";
+import {eq,and,desc,isNull} from "drizzle-orm";
 import {logger} from "../lib/logger";
 import {assembleRecipientContext} from "../services/recipient-context";
 import {getNextQuestion,getNextFreshUpdateQuestion,type FreshUpdateRecord} from "../services/question-engine";
@@ -123,8 +123,10 @@ router.get("/v2/recipients/:id/fresh-updates", async (req, res) => {
     .where(
       and(
         eq(questionAnswersTable.recipientId, id),
+        eq(questionAnswersTable.userId, userId),
         eq(questionAnswersTable.triggerType, "fresh_update"),
         eq(questionAnswersTable.wasSkipped, false),
+        isNull(questionAnswersTable.archivedAt),
       ),
     )
     .orderBy(desc(questionAnswersTable.createdAt));
@@ -136,8 +138,10 @@ router.get("/v2/recipients/:id/fresh-updates", async (req, res) => {
     .where(
       and(
         eq(questionAnswersTable.recipientId, id),
+        eq(questionAnswersTable.userId, userId),
         eq(questionAnswersTable.triggerType, "fresh_update"),
         eq(questionAnswersTable.wasSkipped, true),
+        isNull(questionAnswersTable.archivedAt),
       ),
     );
 

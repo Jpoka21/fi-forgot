@@ -1,5 +1,9 @@
 # Brain qualification preparation (no database)
 
+The active-source and exact-recipient R1/R2 extension is specified in [Brain question input verification](../brain-question-input-verification.md). Fresh evidence must include its mandatory session-bound question-input-integrity section; the historical eleventh receipt remains preserved but is not admissible for this newer transition.
+
+Its archive lifecycle uses one declared, separately hashed supplemental synthetic `fresh_update` row inserted by the admitted loader with collision failure. The base fixture remains unchanged, production creates the observation history, and only supported read/archive/restore/restart behavior is qualified. Answer POST creation, provider behavior, points, and outcomes remain outside this proof.
+
 This package is preparation evidence only. It does not prove PostgreSQL persistence, an authenticated boundary, browser workflow, provider delivery, elapsed time, deployment, or production behavior. The preserved historical assessment is `docs/brain-integration-readiness.md`; its bytes must remain identical to the saved source and it says the migrations are unapplied.
 
 ## Reviewed inputs and target

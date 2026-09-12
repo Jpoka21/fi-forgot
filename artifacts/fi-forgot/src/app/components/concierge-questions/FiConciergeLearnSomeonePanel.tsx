@@ -1,27 +1,18 @@
-import { useMemo } from "react";
-
 import { FiConciergeQuestionExperience } from "@/app/components/concierge-questions";
-import type { ConciergeRelationshipInsight } from "@/app/ai-concierge/aiConciergeDomain";
+import { selectConciergeInsightRecipientId, type ConciergeRelationshipInsight } from "@/app/ai-concierge/aiConciergeDomain";
 import { useRecipientConciergeQuestion } from "@/app/question-intelligence/hooks/useRecipientConciergeQuestion";
-import { getRecipients } from "@/lib/data";
 
 export function FiConciergeLearnSomeonePanel({
   insights,
 }: {
   insights: ConciergeRelationshipInsight[];
 }) {
-  const recipientId = useMemo(() => {
-    const namedInsight = insights.find((insight) => insight.recipientName);
-    if (!namedInsight?.recipientName) return null;
-    const match = getRecipients().find(
-      (recipient) => recipient.name.trim().toLowerCase() === namedInsight.recipientName!.trim().toLowerCase(),
-    );
-    return match?.id ?? getRecipients()[0]?.id ?? null;
-  }, [insights]);
+  const recipientId = selectConciergeInsightRecipientId(insights);
 
   const question = useRecipientConciergeQuestion(recipientId);
 
-  if (!recipientId || !question.recipient || !question.nextQuestion || question.questionSkipped) {
+  const recipient = question.recipient;
+  if (!recipientId || !recipient || String(recipient.id) !== String(recipientId) || !question.nextQuestion || question.questionSkipped) {
     return null;
   }
 
@@ -34,7 +25,7 @@ export function FiConciergeLearnSomeonePanel({
         A calm check-in — only when it helps future cards feel more personal.
       </p>
       <FiConciergeQuestionExperience
-        recipient={question.recipient}
+        recipient={recipient}
         serverQuestion={question.nextQuestion}
         freshUpdates={question.freshUpdates}
         healthScore={question.healthScore}

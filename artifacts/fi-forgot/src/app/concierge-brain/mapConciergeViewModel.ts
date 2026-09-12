@@ -106,6 +106,7 @@ export function adaptConciergeInsightToRelationshipInsight(
 ): ConciergeRelationshipInsight {
   return {
     id: viewModel.id,
+    recipientId: viewModel.recipientId,
     title: viewModel.title,
     description: viewModel.body,
     href: viewModel.href,

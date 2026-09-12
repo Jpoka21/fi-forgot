@@ -8,6 +8,7 @@ import {
   type TrackedEventData,
 } from "@/app/relationship-profile/relationshipProfileDomain";
 import { buildTrackedEventData } from "@/app/relationship-profile/relationshipProfileEngine";
+import { isCurrentQuestionInputRequest } from "@/app/question-intelligence/questionInputState";
 import {
   getApiHeaders,
   getCards,
@@ -30,13 +31,40 @@ export function useRecipientConciergeQuestion(recipientId: string | null) {
   const [answerSaved, setAnswerSaved] = useState(false);
   const [questionSkipped, setQuestionSkipped] = useState(false);
   const fetchGenerationRef = useRef(0);
+  const selectedRecipientRef = useRef<string | null>(recipientId);
+  const [loadedRecipientId, setLoadedRecipientId] = useState<string | null>(null);
+  const saveTimerRef = useRef<number | null>(null);
+  const renderGeneration = fetchGenerationRef.current;
+
+  selectedRecipientRef.current = recipientId;
+
+  const resetState = useCallback(() => {
+    setRecipient(undefined);
+    setCards([]);
+    setFreshUpdates([]);
+    setNextQuestion(null);
+    setProfileComplete(false);
+    setProfileScore(0);
+    setHealthScore(null);
+    setAnswerText("");
+    setSavingAnswer(false);
+    setAnswerSaved(false);
+    setQuestionSkipped(false);
+    setLoadedRecipientId(null);
+    if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = null;
+  }, []);
 
   const loadAll = useCallback(() => {
-    if (!recipientId) return;
     const generation = ++fetchGenerationRef.current;
+    resetState();
+    if (!recipientId) return;
+    const request = { recipientId, generation };
     const headers = getApiHeaders() as Record<string, string>;
     const loadedRecipient = getRecipient(recipientId);
+    if (!loadedRecipient || String(loadedRecipient.id) !== String(recipientId)) return;
     setRecipient(loadedRecipient);
+    setLoadedRecipientId(recipientId);
 
     const serverUserId = getServerUserId();
     const allCards = getCards().filter(
@@ -51,18 +79,18 @@ export function useRecipientConciergeQuestion(recipientId: string | null) {
     fetch(`/api/v2/recipients/${recipientId}/fresh-updates`, { headers })
       .then((response) => (response.ok ? response.json() : Promise.reject(response)))
       .then((data: { freshUpdates: FreshUpdate[] }) => {
-        if (generation !== fetchGenerationRef.current) return;
+        if (!isCurrentQuestionInputRequest(request, selectedRecipientRef.current, fetchGenerationRef.current)) return;
         setFreshUpdates(data.freshUpdates ?? []);
       })
       .catch(() => {
-        if (generation !== fetchGenerationRef.current) return;
+        if (!isCurrentQuestionInputRequest(request, selectedRecipientRef.current, fetchGenerationRef.current)) return;
         setFreshUpdates([]);
       });
 
     fetch(`/api/v2/recipients/${recipientId}/next-question`, { headers })
       .then((response) => (response.ok ? response.json() : Promise.reject(response)))
       .then((data: { nextQuestion: NextQuestion | null; profileComplete: boolean; profileScore?: number }) => {
-        if (generation !== fetchGenerationRef.current) return;
+        if (!isCurrentQuestionInputRequest(request, selectedRecipientRef.current, fetchGenerationRef.current)) return;
         setNextQuestion(data.nextQuestion ?? null);
         setProfileComplete(data.profileComplete ?? false);
         setProfileScore(data.profileScore ?? 0);
@@ -73,18 +101,22 @@ export function useRecipientConciergeQuestion(recipientId: string | null) {
       fetch("/api/v2/recipient-health", { headers })
         .then((response) => (response.ok ? response.json() : Promise.reject(response)))
         .then((data: { scores: HealthScore[] }) => {
-          if (generation !== fetchGenerationRef.current) return;
-          const match = data.scores.find(
-            (score) => score.name.trim().toLowerCase() === loadedRecipient.name.trim().toLowerCase(),
-          );
+        if (!isCurrentQuestionInputRequest(request, selectedRecipientRef.current, fetchGenerationRef.current)) return;
+          const match = data.scores.find((score) => String(score.recipientId) === String(recipientId));
           setHealthScore(match ?? null);
         })
-        .catch(() => undefined);
+        .catch(() => {
+          if (isCurrentQuestionInputRequest(request, selectedRecipientRef.current, fetchGenerationRef.current)) setHealthScore(null);
+        });
     }
-  }, [recipientId]);
+  }, [recipientId, resetState]);
 
   useEffect(() => {
     loadAll();
+    return () => {
+      ++fetchGenerationRef.current;
+      if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
+    };
   }, [loadAll]);
 
   const upcomingEvents = useMemo((): TrackedEventData[] => {
@@ -95,13 +127,20 @@ export function useRecipientConciergeQuestion(recipientId: string | null) {
     );
   }, [recipient]);
 
+  const current = loadedRecipientId !== null && loadedRecipientId === recipientId;
+  const renderRequest = recipientId ? { recipientId, generation: renderGeneration } : null;
+
   const handleSaveAnswer = useCallback(async (questionPayload: {
     fieldKey: string;
     question: string;
     mode: NextQuestion["mode"];
     followUp?: NextQuestion["followUp"];
   }) => {
-    if (!answerText.trim() || !recipientId) return;
+    if (!answerText.trim() || !recipientId || loadedRecipientId !== recipientId || !nextQuestion || !renderRequest) return;
+    if (!isCurrentQuestionInputRequest(renderRequest, selectedRecipientRef.current, fetchGenerationRef.current)) return;
+    const saveRecipientId = recipientId;
+    const saveRequest = renderRequest;
+    const capturedAnswer = answerText.trim();
     const headers = getApiHeaders() as Record<string, string>;
     if (!headers["x-user-id"]) return;
 
@@ -110,50 +149,62 @@ export function useRecipientConciergeQuestion(recipientId: string | null) {
       const body: Record<string, string> = {
         fieldKey: questionPayload.fieldKey,
         questionText: questionPayload.question,
-        answerText: answerText.trim(),
+        answerText: capturedAnswer,
         triggerType: questionPayload.mode === "follow_up" ? "follow_up" : questionPayload.mode,
       };
       if (questionPayload.mode === "follow_up" && questionPayload.followUp?.id) {
         body.followUpId = questionPayload.followUp.id;
       }
 
-      const response = await fetch(`/api/v2/recipients/${recipientId}/answer-question`, {
+      const response = await fetch(`/api/v2/recipients/${saveRecipientId}/answer-question`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
-      if (response.ok) {
+      if (response.ok && isCurrentQuestionInputRequest(saveRequest, selectedRecipientRef.current, fetchGenerationRef.current)) {
         setAnswerSaved(true);
-        window.setTimeout(() => {
+        saveTimerRef.current = window.setTimeout(() => {
+          if (!isCurrentQuestionInputRequest(saveRequest, selectedRecipientRef.current, fetchGenerationRef.current)) return;
           setAnswerText("");
           setAnswerSaved(false);
           setQuestionSkipped(false);
           loadAll();
           window.dispatchEvent(new Event("recipient-answer-saved"));
+          saveTimerRef.current = null;
         }, 1400);
       }
     } finally {
-      setSavingAnswer(false);
+      if (isCurrentQuestionInputRequest(saveRequest, selectedRecipientRef.current, fetchGenerationRef.current)) setSavingAnswer(false);
     }
-  }, [answerText, loadAll, recipientId]);
+  }, [answerText, loadAll, loadedRecipientId, nextQuestion, recipientId, renderGeneration]);
+
+  const setBoundAnswerText = useCallback((value: string) => {
+    if (renderRequest && isCurrentQuestionInputRequest(renderRequest, selectedRecipientRef.current, fetchGenerationRef.current)) setAnswerText(value);
+  }, [recipientId, renderGeneration]);
+  const setBoundQuestionSkipped = useCallback((value: boolean) => {
+    if (renderRequest && isCurrentQuestionInputRequest(renderRequest, selectedRecipientRef.current, fetchGenerationRef.current)) setQuestionSkipped(value);
+  }, [recipientId, renderGeneration]);
+  const reload = useCallback(() => {
+    if (renderRequest && isCurrentQuestionInputRequest(renderRequest, selectedRecipientRef.current, fetchGenerationRef.current)) loadAll();
+  }, [loadAll, recipientId, renderGeneration]);
 
   return {
-    recipient,
-    cards,
-    freshUpdates,
-    nextQuestion,
-    profileComplete,
-    profileScore,
-    healthScore,
-    upcomingEvents,
-    answerText,
-    savingAnswer,
-    answerSaved,
-    questionSkipped,
-    setAnswerText,
-    setQuestionSkipped,
+    recipient: current ? recipient : undefined,
+    cards: current ? cards : [],
+    freshUpdates: current ? freshUpdates : [],
+    nextQuestion: current ? nextQuestion : null,
+    profileComplete: current ? profileComplete : false,
+    profileScore: current ? profileScore : 0,
+    healthScore: current ? healthScore : null,
+    upcomingEvents: current ? upcomingEvents : [],
+    answerText: current ? answerText : "",
+    savingAnswer: current ? savingAnswer : false,
+    answerSaved: current ? answerSaved : false,
+    questionSkipped: current ? questionSkipped : false,
+    setAnswerText: setBoundAnswerText,
+    setQuestionSkipped: setBoundQuestionSkipped,
     handleSaveAnswer,
-    reload: loadAll,
+    reload,
   };
 }

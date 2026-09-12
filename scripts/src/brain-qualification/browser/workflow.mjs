@@ -1,9 +1,10 @@
 import {questionProjection} from './question-evidence.mjs';
+import {runQuestionInputHookProbe} from './question-input-hook-probe.mjs';
 import {awaitResponsesForTrigger,prepareConciergeNavigation,captureFailureDiagnostics,finishBrowserReceipt,cleanupOwner,errorKind} from './workflow-lifecycle.mjs';
 import {responseEvidence} from './response-evidence.mjs';
 import assert from 'node:assert/strict';
 import {writeFileSync,mkdirSync,readFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {dirname,join} from 'node:path';
 import {startFrontend,hash} from './server.mjs';
 import {origin,admittedApi,staticPath,presented,current,deniedRequest,questionRequestKind} from './policy.mjs';
 /** Draft integration contract: all paths/runtime/build hashes admitted by the guest wrapper.
@@ -28,9 +29,13 @@ export async function qualifyBrowser({chromium,chrome,dist,manifest,owners,outpu
   browser=await chromium.launch({executablePath:chrome,headless:true,chromiumSandbox:true,env,args:['--disable-background-networking','--disable-component-update','--no-first-run']});
   receipt.processProof=await verifyProcess();
   assert.ok(receipt.processProof.mainProcesses===1&&receipt.processProof.pipeObserved===true&&receipt.processProof.noSandboxSwitchAbsent===true&&receipt.processProof.privateProfileObserved===true&&receipt.processProof.exactExecutableObserved===true);
+  receipt.phase='mounted-question-input';
+  const qualificationDirectory=join(dirname(dist),'qualification'),questionInputBundle=readFileSync(join(qualificationDirectory,'question-input-hook.js')),questionInputManifest=JSON.parse(readFileSync(join(qualificationDirectory,'question-input-hook.manifest.json'),'utf8'));assert.equal(hash(questionInputBundle),questionInputManifest.bundleHash);
+  const syntheticContext=await browser.newContext();
+  try{const syntheticPage=await syntheticContext.newPage();receipt.questionInputIntegrity={kind:'BRAIN-QUESTION-INPUT-INTEGRITY',nonce,sessionId,sourceHash:questionInputManifest.hookHash,snapshotHash:hash(readFileSync(durablePath)),archiveRestore:null,browserTransport:null,mountedHook:await runQuestionInputHookProbe(syntheticPage,questionInputBundle,questionInputManifest),fixtureManifest:questionInputManifest};}finally{await syntheticContext.close();}
   for(const owner of owners){
    receipt.phase=`owner-${receipt.owners.length+1}`;
-   const denied=[],pageErrors=[],stem=`owner-${receipt.owners.length+1}`,assertions=[];
+   const denied=[],pageErrors=[],stem=`owner-${receipt.owners.length+1}`,assertions=[],observedInsightRecipientIds=new Set();
    const evidence=responseEvidence(output,stem,pageErrors,owner);
    receipt.activeOwner={id:owner.id,denied,pageErrors,responses:evidence.records,assertions};
    stop=await startFrontend({dist,manifest,owner,denied});
@@ -85,7 +90,7 @@ export async function qualifyBrowser({chromium,chrome,dist,manifest,owners,outpu
      const list=page.locator(`section[aria-labelledby="${title}"] > ul > li`);assert.equal(await list.count(),events.length);
      for(let i=0;i<events.length;i++){const event=events[i],row=list.nth(i);assert.equal(await row.locator(':scope > strong').innerText(),followThrough?(event.dimension==='action'?'Action report':'Relationship outcome'):event.type.replaceAll('_',' '));if(followThrough){assert.ok((await row.locator(':scope > span').innerText()).includes(event.value.replaceAll('_',' ')+' (reported by you)'));}}
     }
-    assert.ok(question);const questionPanel=page.locator('section[aria-labelledby="concierge-learn-title"]');
+    assert.ok(question);for(const recipientId of question.insightRecipientIds)observedInsightRecipientIds.add(recipientId);const questionPanel=page.locator('section[aria-labelledby="concierge-learn-title"]');
     let questionDom;if(question.nextQuestion===null){await page.waitForFunction(()=>!document.querySelector('section[aria-labelledby="concierge-learn-title"]'));questionDom={claim:'panel-presence-only',state:'absent',recipientId:question.recipientId};}else{await questionPanel.waitFor({state:'visible'});const heading=questionPanel.locator('#fi-concierge-question-title');await heading.waitFor({state:'visible'});const title=await heading.innerText();assert.ok(title.length>0&&title.length<=4096);const answer=questionPanel.getByRole('textbox',{name:'Your answer about '+question.recipientName,exact:true});const inputCount=await answer.count();assert.ok(inputCount===0||inputCount===1);if(inputCount){await answer.waitFor({state:'visible'});assert.equal(await answer.inputValue(),'');}else assert.equal(title,'I already know enough for now');questionDom={claim:'panel-presence-only',state:inputCount?'answer-control':'no-answer-control',recipientId:question.recipientId,title,answerEmpty:inputCount?true:null};}
     const projection={transition,responseRecords,question,questionDom,presented:expected.map(({id,title,explanation,recommendation})=>({id,title,explanation,recommendation})),feedback:current(feedback.history),followThrough:current(follow.history)};
     const file=stem+'-'+transition+'-assertions.json',bytes=JSON.stringify(projection)+'\n';writeFileSync(join(output,file),bytes,{flag:'wx'});assertions.push({file,sha256:hash(bytes)});
@@ -112,13 +117,14 @@ export async function qualifyBrowser({chromium,chrome,dist,manifest,owners,outpu
     // drain a growing queue rather than a snapshot of pending promises.
     await context.close();await evidence.drain();await stop();stop=undefined;
     assert.deepEqual(pageErrors,[]);assert.deepEqual(denied,[]);
-    receipt.owners.push({id:owner.id,observedOpportunityCount:finalCycle.workspace.opportunities.length,presentedIds:presented(finalCycle.workspace.opportunities).map(x=>x.id),feedbackCount:current(finalCycle.feedback.history).length,followThroughCount:current(finalCycle.follow.history).length,responses:evidence.records,assertions,screenshotHash:hash(readFileSync(screen)),accessibilityHash:hash(readFileSync(ax)),denied,pageErrors});
+    receipt.owners.push({id:owner.id,questionTransport:{questionRecipientId:finalCycle.question.recipientId,healthRecipientIds:finalCycle.question.healthRecipientIds,selectedInsightRecipientId:finalCycle.question.selectedInsightRecipientId,insightRecipientIds:[...observedInsightRecipientIds].sort()},observedOpportunityCount:finalCycle.workspace.opportunities.length,presentedIds:presented(finalCycle.workspace.opportunities).map(x=>x.id),feedbackCount:current(finalCycle.feedback.history).length,followThroughCount:current(finalCycle.follow.history).length,responses:evidence.records,assertions,screenshotHash:hash(readFileSync(screen)),accessibilityHash:hash(readFileSync(ax)),denied,pageErrors});
 
    }catch(error){ownerError=error;receipt.failure=await captureFailureDiagnostics({page,output,stem,phase:receipt.phase,error});throw error;}finally{
     const cleanupFailures=await cleanupOwner(ownerError,[()=>context.close(),()=>evidence.drain(),async()=>{if(stop)await stop();stop=undefined;}]);
     if(cleanupFailures.length)receipt.ownerCleanupFailures=cleanupFailures;
    }
   }
+  const durable=JSON.parse(readFileSync(durablePath,'utf8'));receipt.questionInputIntegrity.archiveRestore=durable.questionInputIntegrity;receipt.questionInputIntegrity.browserTransport={exactRecipientIds:true,owners:receipt.owners.map(observed=>{const owner=owners.find(candidate=>candidate.id===observed.id);return{ownerId:owner.id,recipientIds:[...owner.recipientIds],questionRecipientIds:[observed.questionTransport.questionRecipientId],healthRecipientIds:observed.questionTransport.healthRecipientIds,selectedInsightRecipientId:observed.questionTransport.selectedInsightRecipientId,insightRecipientIds:observed.questionTransport.insightRecipientIds};})};
   await browser.close();browser=undefined;receipt.phase='snapshot-reassert';await reassertSnapshot();assert.equal(hash(readFileSync(durablePath)),before);receipt.durableEvidenceHash=before;
   receipt.teardown=await verifyTeardown();assert.ok(receipt.teardown.chromeProcesses===0&&receipt.teardown.frontendPortReleased===true);
   receipt.success=true;delete receipt.activeOwner;receipt.phase='complete';

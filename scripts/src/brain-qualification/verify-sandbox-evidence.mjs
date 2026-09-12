@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import {verifyBrowserEvidence} from './verify-browser-evidence.mjs';
 import {verifySemanticEvidence} from './verify-semantic-evidence.mjs';
 import {verifyQuestionState} from './question-state.mjs';
+import {assertSupplementalQuestionInputApiRow,assertSupplementalQuestionInputDatabaseRow,effectiveSupplementalQuestionInputSeed,supplementalQuestionInputSeedHash} from './question-input-assertions.ts';
 
 const ROOT = 'C:/Users/James.Massaro/Projects/fi-forgot';
 const PGDATA = `${ROOT}/.orchestra/qualification/fi-forgot-brain-qualification-pgdata`;
@@ -152,9 +153,12 @@ export function verifySandboxEvidence() {
   need(equalHash(hash(path.join(ROOT, 'docs/brain-qualification-preparation/bootstrap/0000-current.sql')), BASELINE), 'baseline drift');
   need(equalHash(hash(path.join(ROOT, 'docs/brain-qualification-preparation/synthetic-fixtures.json')), FIXTURE), 'fixture drift');
   const durable = json(paths.durable), fixture = json(path.join(ROOT, 'docs/brain-qualification-preparation/synthetic-fixtures.json'));
+  const expectedSeed=effectiveSupplementalQuestionInputSeed(bundle.request.syntheticDate);
+  need(JSON.stringify(durable.questionInputIntegrity?.seed?.descriptor)===JSON.stringify(expectedSeed)&&durable.questionInputIntegrity.seed.hash===supplementalQuestionInputSeedHash(bundle.request.syntheticDate)&&durable.questionInputIntegrity.seed.baseFixtureHash===FIXTURE&&durable.questionInputIntegrity.origin==='synthetic_fixture_loader','supplemental question input provenance mismatch');
   need(durable.fixtureHash === FIXTURE && durable.syntheticRunDate === bundle.request.syntheticDate && Array.isArray(durable.snapshots), 'invalid durable snapshot');
   need(durable.snapshots.length === fixture.owners.length && fixture.owners.every(owner => durable.snapshots.some(s => s.owner === owner.id && JSON.stringify([...s.ids].sort()) === JSON.stringify([...owner.recipientIds].sort()) && Array.isArray(s.timelines) && s.timelines.length === owner.recipientIds.length)), 'durable ownership inventory mismatch');
   const log = fs.readFileSync(paths.log, 'utf8');
+  const restartLines=[...log.matchAll(/^QUESTION_INPUT_RESTART_OBSERVATION (\{.*\})$/gm)];need(restartLines.length===1,'question input restart observation absent or ambiguous');const restart=JSON.parse(restartLines[0][1]);const restartDb=assertSupplementalQuestionInputDatabaseRow(restart.database,expectedSeed,false),restartApi=assertSupplementalQuestionInputApiRow(restart.api,expectedSeed,restartDb.createdAt);need(JSON.stringify(restartDb)===JSON.stringify(durable.questionInputIntegrity.seed.database.restored)&&JSON.stringify(restartApi)===JSON.stringify(durable.questionInputIntegrity.seed.api.restored)&&JSON.stringify(restart.observation)===JSON.stringify(durable.questionInputIntegrity.restored.observation),'question input restart observation drift');
   const semantics = verifySemanticEvidence(durable, fixture);
   const questions = verifyQuestionState(durable.questionState, fixture);
   need(log.includes('Lifecycle mutations and pre-restart evidence captured') && log.includes('Persisted lifecycle/history and ownership reads match pre-restart evidence'), 'lifecycle/restart completion absent');
@@ -163,7 +167,13 @@ export function verifySandboxEvidence() {
   need(fs.readFileSync(path.join(PGDATA, '.fi-forgot-brain-qualification-owned'), 'utf8') === MARKER && fs.readFileSync(path.join(PGDATA, 'PG_VERSION'), 'utf8').trim() === '16' && !fs.existsSync(path.join(PGDATA, 'postmaster.pid')), 'host mapped target state mismatch');
   const browserDirectory=path.join(output,'browser');noLinks(browserDirectory);
   for(const entry of fs.readdirSync(browserDirectory,{withFileTypes:true})){need(entry.isFile()&&!entry.isSymbolicLink(),'browser artifact must be a regular file');noLinks(path.join(browserDirectory,entry.name));}
-  const browser=verifyBrowserEvidence({directory:browserDirectory,bundle,fixture,pins});
+  const questionManifest=json(path.join(stage,'artifacts/fi-forgot/dist/qualification/question-input-hook.manifest.json')),questionBundleHash=hash(path.join(stage,'artifacts/fi-forgot/dist/qualification/question-input-hook.js'));
+  const rebuiltManifest=JSON.parse(execFileSync(process.execPath,[path.join(ROOT,'scripts/src/brain-qualification/browser/build-question-input-hook-fixture.mjs'),'--json'],{cwd:ROOT,encoding:'utf8',windowsHide:true}));
+  need(JSON.stringify(questionManifest)===JSON.stringify(rebuiltManifest),'question input fixture incomplete or non-deterministic');
+  need(questionManifest.kind==='QUESTION-INPUT-HOOK-FIXTURE'&&equalHash(questionManifest.bundleHash,questionBundleHash)&&equalHash(questionManifest.lockHash,hash(path.join(ROOT,'pnpm-lock.yaml'))),'question input fixture manifest binding');
+  need(equalHash(questionManifest.builderHash,hash(path.join(ROOT,'scripts/src/brain-qualification/browser/build-question-input-hook-fixture.mjs')))&&equalHash(questionManifest.fixtureHash,hash(path.join(ROOT,'scripts/src/brain-qualification/browser/question-input-hook-fixture.tsx')))&&equalHash(questionManifest.hookHash,hash(path.join(ROOT,'artifacts/fi-forgot/src/app/question-intelligence/hooks/useRecipientConciergeQuestion.ts'))),'question input fixture source binding');
+  for(const input of questionManifest.inputs??[]){need(typeof input.path==='string'&&equalHash(input.hash,input.hash),'invalid question fixture input');if(input.path==='fixture:data-adapter')continue;const source=safe(ROOT,input.path);noLinks(source);need(equalHash(hash(source),input.hash),'question fixture dependency drift');}
+  const browser=verifyBrowserEvidence({directory:browserDirectory,bundle,fixture,pins,currentQuestionHookHash:hash(path.join(ROOT,'artifacts/fi-forgot/src/app/question-intelligence/hooks/useRecipientConciergeQuestion.ts')),trustedQuestionInputManifest:questionManifest,trustedQuestionInputBundleHash:questionBundleHash,durableQuestionInput:durable.questionInputIntegrity,durableQuestionState:durable.questionState,durableSnapshots:durable.snapshots,trustedBaseFixtureHash:FIXTURE});
   return { passed: true, nonce: bundle.request.nonce, sessionId: bundle.owned.id, evidence: 'actual PostgreSQL, API, Concierge, browser and API/PostgreSQL restart persistence', ...browser, ...semantics, ...questions, postgresRestartQualified: true };
 }
 

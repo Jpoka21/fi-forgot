@@ -17,6 +17,7 @@ import {
   mapConciergeRecommendationViewModel,
   mapConciergeWorkspaceViewModel,
 } from "../app/concierge-brain/mapConciergeViewModel.js";
+import { selectConciergeInsightRecipientId } from "../app/ai-concierge/aiConciergeDomain.js";
 
 let passed = 0;
 let failed = 0;
@@ -125,7 +126,14 @@ section("adaptConciergeInsightToRelationshipInsight");
   const viewModel = mapConciergeInsightViewModel(INSIGHT);
   const adapted = adaptConciergeInsightToRelationshipInsight(viewModel);
   expect("description from body", adapted.description, INSIGHT.body);
+  expect("authoritative recipientId", adapted.recipientId, "recipient-42");
   expect("recipientName", adapted.recipientName, "Alice Example");
+}
+
+section("exact insight recipient selection");
+{
+  expect("legacy named insight abstains", selectConciergeInsightRecipientId([{ id: "legacy", recipientName: "Same Name", title: "Legacy", description: "No ID" }]), null);
+  expect("duplicate name cannot redirect exact ID", selectConciergeInsightRecipientId([{ id: "a", recipientId: "recipient-b", recipientName: "Same Name", title: "Exact", description: "ID wins" }, { id: "b", recipientId: "recipient-a", recipientName: "Same Name", title: "Other", description: "Same name" }]), "recipient-b");
 }
 
 section("empty recommendations and insights");

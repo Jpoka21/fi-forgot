@@ -113,10 +113,15 @@ export interface ConciergeSuggestedConversation {
 
 export interface ConciergeRelationshipInsight {
   id: string;
+  recipientId?: string;
   title: string;
   description: string;
   href?: string;
   recipientName?: string;
+}
+
+export function selectConciergeInsightRecipientId(insights: ConciergeRelationshipInsight[]): string | null {
+  return insights.find((insight) => typeof insight.recipientId === "string" && insight.recipientId.length > 0)?.recipientId ?? null;
 }
 
 export interface ConciergeMemorySnippet {
